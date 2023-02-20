@@ -1,0 +1,18 @@
+# To run with uniform points
+
+python3 make_points_r.py --R0 1e-5 --R 1 32 r.txt
+python3 make_t.py 32 t.txt
+sh  tmp.sh
+python3 plot.py
+
+# To run with non-uniform points
+
+python3 make_points_r.py --R0 1e-5 --R 1 32 r.txt
+python3 make_t.py 32 t.txt --non_uniform
+sh  tmp.sh
+python3 plot.py
+
+
+# Speedup
+
+If code is slow use pyccel to accelerate rho_triangularity_logical.py

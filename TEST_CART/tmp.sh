@@ -1,0 +1,1 @@
+../build_gnu/main -n 4 -a 1 --mod_pk 2 --DirBC_Interior 0 --divideBy2 1 -r 1e-5  --smoother 3 --verbose 2 --debug 0 --extrapolation 1 --optimized 1 --openmp 2 --v1 1 --v2 1 -R 1.0 --prob 7  --maxiter 300 --alpha_coeff 2 --beta_coeff 1 --res_norm 3 --f_grid_r "r.txt" --f_grid_theta "t.txt" --rel_red_conv 1e-11 --f_sol_out sol_out.txt
