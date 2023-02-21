@@ -38,9 +38,9 @@ echo "#!/bin/bash" > run_gmgpolar_sbatch.sh
 # create a short name for your job
 echo "#SBATCH --job-name=gmgpolar" >> run_gmgpolar_sbatch.sh
 # stdout file %A=job id
-echo "#SBATCH --output=slurm-%A-p$prob-r$nr_exp-mpk$mod_pk-s$smoother-e$extrapolation_N$nodes-R$ranks-maxC$cores.out" >> run_gmgpolar_sbatch.sh
+echo "#SBATCH --output=slurm-%A-p$prob-r$nr_exp-mpk$mod_pk-s$smoother-e$extrapolation--N$nodes-R$ranks-maxC$cores.out" >> run_gmgpolar_sbatch.sh
 # stderr file
-echo "#SBATCH --error=slurm-%A-p$prob-r$nr_exp-mpk$mod_pk-s$smoother-e$extrapolation_N$nodes-R$ranks-maxC$cores.err" >> run_gmgpolar_sbatch.sh
+echo "#SBATCH --error=slurm-%A-p$prob-r$nr_exp-mpk$mod_pk-s$smoother-e$extrapolation--N$nodes-R$ranks-maxC$cores.err" >> run_gmgpolar_sbatch.sh
 
 echo "#SBATCH -N $nodes" >> run_gmgpolar_sbatch.sh
 echo "#SBATCH -n $ranks" >> run_gmgpolar_sbatch.sh

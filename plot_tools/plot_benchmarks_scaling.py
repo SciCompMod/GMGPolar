@@ -69,7 +69,7 @@ def main():
     maxCores = 14
 
     fname = 'p' + str(problem) + '-r' + str(nr_exp) + '-mpk' + str(mod_pk) + '-s' + str(
-        smoother) + '-e' + str(extrapolation) + '_N' + str(nodes) + '-R' + str(ranks) + '-maxC' + str(maxCores)   
+        smoother) + '-e' + str(extrapolation) + '--N' + str(nodes) + '-R' + str(ranks) + '-maxC' + str(maxCores)   
     path_to_files = 'plot_tools/'
 
     df = pd.read_csv(
