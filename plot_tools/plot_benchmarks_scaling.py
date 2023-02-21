@@ -60,9 +60,9 @@ def main():
 
     problem = 5
     nr_exp = 4
-    mod_pk = 0
+    mod_pk = 1
     smoother = 3
-    extrapolation = 0
+    extrapolation = 1
 
     nodes = 1
     ranks = 1
