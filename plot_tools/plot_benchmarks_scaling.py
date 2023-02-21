@@ -68,6 +68,9 @@ def main():
     ranks = 1
     maxCores = 14
 
+    ## saturation_limit is node specific and needs to be adapted.
+    saturation_limit = 80
+
     fname = 'p' + str(problem) + '-r' + str(nr_exp) + '-mpk' + str(mod_pk) + '-s' + str(
         smoother) + '-e' + str(extrapolation) + '--N' + str(nodes) + '-R' + str(ranks) + '-maxC' + str(maxCores)   
     path_to_files = 'plot_tools/'
@@ -100,7 +103,7 @@ def main():
             if len(cores_used) != len(df_subframe['Cores']):
                 sys.exit('Error: Multiple times computed with the same number of threads.')
 
-            plot_perf_per_core(path_to_files, fname, df_subframe, bench, saturation_limit=80)
+            plot_perf_per_core(path_to_files, fname, df_subframe, bench, saturation_limit=saturation_limit)
 
             # TODO: Plot particular timings from table
             # ...
