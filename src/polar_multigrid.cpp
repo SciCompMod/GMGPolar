@@ -183,7 +183,7 @@ void gmgpolar::polar_multigrid()
             std::cout << "\nt_setup: " << t_setup << ", t_build: " << t_build << ", t_facto_Ac: " << t_facto_Ac
                       << ", t_build_P: " << t_build_P << ", t_build_Asc: " << t_build_Asc
                       << ", t_facto_Asc: " << t_facto_Asc << "\n";
-            std::cout << "t_total (fine): " << t_total << ", t_smoothing: " << t_smoothing
+            std::cout << "t_total_(fine): " << t_total << ", t_smoothing: " << t_smoothing
                       << ", t_residual: " << t_residual << ", t_restriction: " << t_restriction << ", t_Ac: " << t_Ac
                       << ", t_prolongation: " << t_prolongation << ", t_fine_residual: " << t_fine_residual
                       << ", t_error: " << t_error << "\n";

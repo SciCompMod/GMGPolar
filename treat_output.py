@@ -99,7 +99,7 @@ for line in lines:
         latex.write(error_norm_inf)
         latex.write(" & ")
 
-    time = line.find('Total execution time:')
+    time = line.find('Total_execution_time:')
     if (time != -1):
         #print(f'{line}')
         #execution time is found at: time+22, until the end

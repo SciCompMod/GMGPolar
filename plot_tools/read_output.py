@@ -6,16 +6,16 @@ import sys
 
 def main():
 
-    jobid = '5846'
+    jobid = '12409'
     problem = 5
     nr_exp = 4
-    mod_pk = 0
+    mod_pk = 1
     smoother = 3
     extrapolation = 0
 
     nodes = 1
     ranks = 1
-    maxCores = 14
+    maxCores = 2
     cores_used = []
 
     path_to_perf_files = 'plot_tools/'
@@ -44,7 +44,7 @@ def main():
         {col: 'double' for col in cols_convergence + cols_time + cols_benchmark})
 
     filename_input = 'p' + str(problem) + '-r' + str(nr_exp) + '-mpk' + str(mod_pk) + '-s' + str(
-        smoother) + '-e' + str(extrapolation) + '_N' + str(nodes) + '-R' + str(ranks) + '-maxC' + str(maxCores)
+        smoother) + '-e' + str(extrapolation) + '-N' + str(nodes) + '-R' + str(ranks) + '-maxC' + str(maxCores)
 
     err = 0
     with open(os.path.join(path_to_perf_files, 'slurm-' + str(jobid) + '-' + filename_input + '.err')) as f:

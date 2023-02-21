@@ -226,7 +226,7 @@ int main(int argc, char* argv[])
             error = 1;
         }
         // if (gyro::icntl[Param::verbose] > 0)
-        std::cout << "Total execution time: " << TOC
+        std::cout << "Total_execution_time: " << TOC
                   << "\n---------------------------------------------------------------------------\n";
     }
 
@@ -304,7 +304,7 @@ int main(int argc, char* argv[])
             error = 1;
         }
         if (gyro::icntl[Param::verbose] > 0)
-            std::cout << "Total execution time: " << TOC << "\n";
+            std::cout << "Total_execution_time: " << TOC << "\n";
 
         std::cout << "\n\n\n\n\n";
 
@@ -374,7 +374,7 @@ int main(int argc, char* argv[])
                     error = 1;
                 }
                 if (gyro::icntl[Param::verbose] > 0)
-                    std::cout << "Total execution time: " << TOC << "\n";
+                    std::cout << "Total_execution_time: " << TOC << "\n";
             }
             // }
         }
@@ -453,7 +453,7 @@ int main(int argc, char* argv[])
                                 error = 1;
                             }
                             if (gyro::icntl[Param::verbose] > 0)
-                                std::cout << "Total execution time: " << TOC << "\n";
+                                std::cout << "Total_execution_time: " << TOC << "\n";
                         }
                     }
                 }

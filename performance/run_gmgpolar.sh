@@ -14,23 +14,25 @@ smoother=3		    # smoother (3,13)
 # can be implemented on the most inner circle
 DirBC_Interior=1	#  DirBC_Interior (0/1)
 # Generalized radius of most inner circle. Defines if origin will be a particular node.
-R0=0.1		        # r (1e-8/1e-5/1e-2)
+R0=1e-5		        # r (1e-8/1e-5/1e-2)
 # Generalized radius of maximum outer circle.
 R=1.3			    # R
 # Anisotropy in radial direction.
 fac_ani=3		    # a
-# 
+# TODO: which nr_exp and divideby2 do we want to consider?
 nr_exp=4		    # n
 
 #changing variables
 mod_pk=1		    # mod_pk (0/1)
 prob=5			    # prob
+# set to something other than 0 here? iteration over 0, 1, 2, 3, ... in another benchmark?
 divideBy2=0		    # divideBy2 (3/4/5/6)
-extrapolation=0		# E
+# set to on
+extrapolation=1		# E
 
 nodes=1
 ranks=1     # number of MPI Ranks
-cores=2    # set OpenMP Num Threads to maximum number of cores requested
+cores=14    # set OpenMP Num Threads to maximum number of cores requested
 
 echo "#!/bin/bash" > run_gmgpolar_sbatch.sh
 # create a short name for your job
