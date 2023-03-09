@@ -1,0 +1,5 @@
+if(EXISTS "/home/kuhn_aa/GMGPOLARGITHUB/GMGPolar/build/tests/simpletest[1]_tests.cmake")
+  include("/home/kuhn_aa/GMGPOLARGITHUB/GMGPolar/build/tests/simpletest[1]_tests.cmake")
+else()
+  add_test(simpletest_NOT_BUILT simpletest_NOT_BUILT)
+endif()

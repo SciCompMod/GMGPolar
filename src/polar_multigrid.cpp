@@ -30,6 +30,7 @@
 #include <random>
 #include <algorithm>
 #include <functional>
+#include "../olderruns/writetofile.h"
 
 template <typename Generator>
 void getrands(std::vector<double>& x, Generator& gen, unsigned num)
@@ -152,6 +153,20 @@ void gmgpolar::polar_multigrid()
                   << ", extrapolation=" << gyro::icntl[Param::extrapolation]
                   << ", mod_pk=" << gyro::icntl[Param::mod_pk] << ", DirBC=" << gyro::icntl[Param::DirBC_Interior]
                   << ", divide=" << gyro::icntl[Param::divideBy2] << " *****\n";
+
+        if(gyro::icntl[Param::writeToFile]==1){
+            ouin::wtf(Param::filename, std::to_string(gyro::icntl[Param::prob]));
+            ouin::wtf(Param::filename, std::to_string(gyro::icntl[Param::alpha_coeff]));
+            ouin::wtf(Param::filename, std::to_string(gyro::icntl[Param::beta_coeff]));
+            ouin::wtf(Param::filename, std::to_string(gyro::icntl[Param::nr_exp]));
+            ouin::wtf(Param::filename, std::to_string(gyro::icntl[Param::ntheta_exp]));
+            ouin::wtf(Param::filename, std::to_string(gyro::icntl[Param::mod_pk]));
+            ouin::wtf(Param::filename, "");
+            ouin::wtf(Param::filename, std::to_string(m));
+            ouin::wtf(Param::filename, std::to_string(v_level[0]->nr));
+            ouin::wtf(Param::filename, std::to_string(v_level[0]->ntheta));
+            ouin::wtf(Param::filename, std::to_string(levels));
+        }
 
         double scaling = 1.0;
         if (gyro::icntl[Param::compute_rho])

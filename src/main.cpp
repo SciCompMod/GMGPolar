@@ -39,6 +39,7 @@
 #include <time.h>
 #include "cmdline.h"
 #include "gmgpolar.h"
+#include "../olderruns/writetofile.h"
 
 #define ICPU sched_getcpu()
 #define NOMP omp_get_num_threads()
@@ -98,10 +99,15 @@ int main(int argc, char* argv[])
     a.add<std::string>("f_sol_in", '\0', "", false, "");
     a.add<std::string>("f_sol_out", '\0', "", false, "");
 
+    a.add<int>("writeToFile",'\0', "",false,0);
+
     a.parse_check(argc, argv);
 
     //std::cout << "Initializing parameters...\n";
     gyro::init_params();
+    gyro::icntl[Param::writeToFile] = a.get<int>("writeToFile");
+
+
     gyro::icntl[Param::verbose]     = a.get<int>("verbose");
     gyro::icntl[Param::openmp]      = a.get<int>("openmp");
     gyro::icntl[Param::optimized]   = a.get<int>("optimized");
