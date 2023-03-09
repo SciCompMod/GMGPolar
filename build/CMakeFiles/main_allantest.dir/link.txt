@@ -1,1 +1,0 @@
-/usr/bin/c++    -O2 -Wall -MMD -MP -Wwrite-strings -fopenmp CMakeFiles/main_allantest.dir/src/main.cpp.o  -o main_allantest  libforuse.a 

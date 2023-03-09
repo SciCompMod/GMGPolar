@@ -4,7 +4,7 @@
 namespace ouin
 {
 
-inline void wtf(const std::string& filename , const::std::string& in){
+inline void wtofile(const std::string& filename , const::std::string& in){
     std::fstream outfile;
     outfile.open(filename, std::fstream::in |std::fstream::out | std::fstream::app);
     if(!outfile){

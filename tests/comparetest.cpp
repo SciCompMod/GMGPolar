@@ -15,8 +15,8 @@ class SimpleTest: public ::testing::Test{
                 input.push_back(line);
             }
         }
-        initparam = 6;
-        int initarr[initparam]= {Param::prob, Param::alpha_coeff, Param::beta_coeff, Param::nr_exp, Param::ntheta_exp, Param::mod_pk};
+        initparam = 9;
+        int initarr[initparam]= {Param::prob, Param::alpha_coeff, Param::beta_coeff, Param::nr_exp, Param::ntheta_exp, Param::fac_ani,Param::mod_pk,Param::DirBC_Interior, Param::divideBy2};
         data.resize(initparam);
         std::copy(initarr,initarr+initparam , data.begin());
 

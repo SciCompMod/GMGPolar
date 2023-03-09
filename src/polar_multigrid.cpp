@@ -155,17 +155,20 @@ void gmgpolar::polar_multigrid()
                   << ", divide=" << gyro::icntl[Param::divideBy2] << " *****\n";
 
         if(gyro::icntl[Param::writeToFile]==1){
-            ouin::wtf(Param::filename, std::to_string(gyro::icntl[Param::prob]));
-            ouin::wtf(Param::filename, std::to_string(gyro::icntl[Param::alpha_coeff]));
-            ouin::wtf(Param::filename, std::to_string(gyro::icntl[Param::beta_coeff]));
-            ouin::wtf(Param::filename, std::to_string(gyro::icntl[Param::nr_exp]));
-            ouin::wtf(Param::filename, std::to_string(gyro::icntl[Param::ntheta_exp]));
-            ouin::wtf(Param::filename, std::to_string(gyro::icntl[Param::mod_pk]));
-            ouin::wtf(Param::filename, "");
-            ouin::wtf(Param::filename, std::to_string(m));
-            ouin::wtf(Param::filename, std::to_string(v_level[0]->nr));
-            ouin::wtf(Param::filename, std::to_string(v_level[0]->ntheta));
-            ouin::wtf(Param::filename, std::to_string(levels));
+            ouin::wtofile(Param::filename, std::to_string(gyro::icntl[Param::prob]));
+            ouin::wtofile(Param::filename, std::to_string(gyro::icntl[Param::alpha_coeff]));
+            ouin::wtofile(Param::filename, std::to_string(gyro::icntl[Param::beta_coeff]));
+            ouin::wtofile(Param::filename, std::to_string(gyro::icntl[Param::nr_exp]));
+            ouin::wtofile(Param::filename, std::to_string(gyro::icntl[Param::ntheta_exp]));
+            ouin::wtofile(Param::filename, std::to_string(gyro::icntl[Param::fac_ani]));
+            ouin::wtofile(Param::filename, std::to_string(gyro::icntl[Param::mod_pk]));
+            ouin::wtofile(Param::filename, std::to_string(gyro::icntl[Param::DirBC_Interior]));
+            ouin::wtofile(Param::filename,std::to_string(gyro::icntl[Param::divideBy2]));
+            ouin::wtofile(Param::filename, "");
+            ouin::wtofile(Param::filename, std::to_string(m));
+            ouin::wtofile(Param::filename, std::to_string(v_level[0]->nr));
+            ouin::wtofile(Param::filename, std::to_string(v_level[0]->ntheta));
+            ouin::wtofile(Param::filename, std::to_string(levels));
         }
 
         double scaling = 1.0;

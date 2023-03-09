@@ -194,15 +194,15 @@ void gmgpolar::multigrid_iter()
         std::cout << "Multigrid reached maxiter=" << gyro::icntl[Param::maxiter] << "\n";
 
         if(gyro::icntl[Param::writeToFile]==1){
-            ouin::wtf(Param::filename,"");
-            ouin::wtf(Param::filename,std::to_string(it));
+            ouin::wtofile(Param::filename,"");
+            ouin::wtofile(Param::filename,std::to_string(it));
         }
     }
     else{
         std::cout << "Convergence after iteration " << it << std::endl;
         if(gyro::icntl[Param::writeToFile]==1){
-            ouin::wtf(Param::filename,"");
-            ouin::wtf(Param::filename,std::to_string(it));
+            ouin::wtofile(Param::filename,"");
+            ouin::wtofile(Param::filename,std::to_string(it));
         }
     }
     // }

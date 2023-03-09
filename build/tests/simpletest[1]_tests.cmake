@@ -1,7 +1,0 @@
-add_test( SimpleTest.Initialize /home/kuhn_aa/GMGPOLARGITHUB/GMGPolar/build/tests/simpletest [==[--gtest_filter=SimpleTest.Initialize]==] --gtest_also_run_disabled_tests)
-set_tests_properties( SimpleTest.Initialize PROPERTIES WORKING_DIRECTORY /home/kuhn_aa/GMGPOLARGITHUB/GMGPolar/build/tests)
-add_test( SimpleTest.finestgrid /home/kuhn_aa/GMGPOLARGITHUB/GMGPolar/build/tests/simpletest [==[--gtest_filter=SimpleTest.finestgrid]==] --gtest_also_run_disabled_tests)
-set_tests_properties( SimpleTest.finestgrid PROPERTIES WORKING_DIRECTORY /home/kuhn_aa/GMGPOLARGITHUB/GMGPolar/build/tests)
-add_test( SimpleTest.Multigrid /home/kuhn_aa/GMGPOLARGITHUB/GMGPolar/build/tests/simpletest [==[--gtest_filter=SimpleTest.Multigrid]==] --gtest_also_run_disabled_tests)
-set_tests_properties( SimpleTest.Multigrid PROPERTIES WORKING_DIRECTORY /home/kuhn_aa/GMGPOLARGITHUB/GMGPolar/build/tests)
-set( simpletest_TESTS SimpleTest.Initialize SimpleTest.finestgrid SimpleTest.Multigrid)
