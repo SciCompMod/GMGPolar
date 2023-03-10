@@ -29,7 +29,7 @@
 
 #include "gmgpolar.h"
 #include <unistd.h>
-#include "../olderruns/writetofile.h"
+#include "writetofile.h"
 
 /*!
  *  \brief The multigrid cycle iterations
@@ -190,19 +190,19 @@ void gmgpolar::multigrid_iter()
         TIC;
     }
     // if (gyro::icntl[Param::verbose] > 0) {
-    if (it == gyro::icntl[Param::maxiter]){
+    if (it == gyro::icntl[Param::maxiter]) {
         std::cout << "Multigrid reached maxiter=" << gyro::icntl[Param::maxiter] << "\n";
 
-        if(gyro::icntl[Param::writeToFile]==1){
-            ouin::wtofile(Param::filename,"");
-            ouin::wtofile(Param::filename,std::to_string(it));
+        if (gyro::icntl[Param::writeToFile] == 1) {
+            ouin::wtofile(Param::filename, "");
+            ouin::wtofile(Param::filename, std::to_string(it));
         }
     }
-    else{
+    else {
         std::cout << "Convergence after iteration " << it << std::endl;
-        if(gyro::icntl[Param::writeToFile]==1){
-            ouin::wtofile(Param::filename,"");
-            ouin::wtofile(Param::filename,std::to_string(it));
+        if (gyro::icntl[Param::writeToFile] == 1) {
+            ouin::wtofile(Param::filename, "");
+            ouin::wtofile(Param::filename, std::to_string(it));
         }
     }
     // }

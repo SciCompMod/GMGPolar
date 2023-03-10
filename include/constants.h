@@ -20,7 +20,6 @@
 * limitations under the License.
 */
 
-
 /*!
  * \file constants.h
  * \brief Header defining constants and enumerations of Controls/Info
@@ -35,7 +34,7 @@
 /// Defines the control parameters indices in a safe way
 namespace Param
 {
-     const std::string filename ="./olderruns/testfile.txt";
+const std::string filename = "./tests/data/gmgpolar_data.txt";
 //! To be used with the gyro::icntl vector.
 enum icontrols
 {
@@ -337,10 +336,10 @@ enum alpha_val
 
 enum problem_type
 {
-    FLAT         = 1,
+    FLAT           = 1,
     REFINED_RADIUS = 4,
-    CARTESIAN_R2 = 5,
-    POLAR_R6     = 6,
-    CARTESIAN_R6 = 7,
+    CARTESIAN_R2   = 5,
+    POLAR_R6       = 6,
+    CARTESIAN_R6   = 7,
 };
 #endif // CONSTANTS_HXX
