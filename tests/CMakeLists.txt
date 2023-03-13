@@ -3,15 +3,15 @@ enable_testing()
 set(TESTSOURCES comparetest.cpp)
 
 add_executable(
-  test_parameters
+  gmgpolar_tests
   ${TESTSOURCES}
 )
 target_link_libraries(
-  test_parameters
+  gmgpolar_tests
   GTest::gtest_main
-  GMGPolarlib
+  GMGPolar
 )
 
-target_include_directories(test_parameters PRIVATE ../include ../include/test_cases)
+target_include_directories(gmgpolar_tests PRIVATE ../include ../include/test_cases)
 include(GoogleTest)
-gtest_discover_tests(test_parameters)
+gtest_discover_tests(gmgpolar_tests)

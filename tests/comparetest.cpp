@@ -10,13 +10,9 @@ class Test_Parameters : public ::testing::Test
 protected:
     void SetUp() override
     {
-        std::ifstream resource(Param::filename);
-        std::string line;
-        if (resource.is_open()) {
-            while (getline(resource, line)) {
-                input.push_back(line);
-            }
-        }
+        //Results of the run with default parameters. 
+        input.assign({5,0,0,4,4,3,0,1,0,3136,49,64,4,12}) ; 
+
         initparam              = 9;
         int initarr[initparam] = {Param::prob,   Param::alpha_coeff,    Param::beta_coeff,
                                   Param::nr_exp, Param::ntheta_exp,     Param::fac_ani,
@@ -44,35 +40,36 @@ protected:
     }
 
     int initparam;
-    std::vector<std::string> input;
+    std::vector<int> input;
     std::vector<int> data;
 };
 
-TEST_F(Test_Parameters, Initialize)
+TEST_F(Test_Parameters, Initialize_Parameters)
 {
     for (int z = 0; z < initparam; z++) {
-        ASSERT_EQ(gyro::icntl[data[z]], std::stoi(input[z])) << "No use testing if initial data is different";
+        ASSERT_EQ(gyro::icntl[data[z]], input[z]) << "Initial data is not assigned properly";
     }
 }
 
-TEST_F(Test_Parameters, finestgrid)
+TEST_F(Test_Parameters, DOF_on_finest_grid)
 {
     gmgpolar gmgtest;
     gmgtest.create_grid_polar(); //only the finest grid is now created
     int finest_nodes = gmgtest.v_level[0]->nr * gmgtest.v_level[0]->ntheta;
     EXPECT_EQ(gmgtest.v_level.size(), 1);
-    EXPECT_EQ(finest_nodes, std::stoi(input[initparam + 1]));
-    EXPECT_EQ(gmgtest.v_level[0]->nr, std::stoi(input[initparam + 2])); 
+    EXPECT_EQ(finest_nodes, input[initparam]);
+    EXPECT_EQ(gmgtest.v_level[0]->nr, input[initparam + 1]); 
+    EXPECT_EQ(gmgtest.v_level[0]->ntheta, input[initparam + 2]);
 }
 
-TEST_F(Test_Parameters, Multigrid)
+TEST_F(Test_Parameters, Test_multigrid_Iterations)
 {
     gmgpolar gmgtest2;
     gmgtest2.create_grid_polar();
     gmgtest2.polar_multigrid();
 
-    EXPECT_EQ(gmgtest2.levels, std::stoi(input[initparam + 4]));
+    EXPECT_EQ(gmgtest2.levels, input[initparam + 3]);
     int iterations =
         gyro::icntl[Param::extrapolation] < 2 ? gmgtest2.nrm_2_res.size() - 1 : gmgtest2.nrm_2_err.size() - 1;
-    EXPECT_EQ(iterations, std::stoi(input[input.size() - 1])) << "Multigrid iterations do not match";
+    EXPECT_EQ(iterations, input[input.size() - 1]) << "Multigrid iterations do not match";
 }

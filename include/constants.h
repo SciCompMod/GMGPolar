@@ -34,7 +34,6 @@
 /// Defines the control parameters indices in a safe way
 namespace Param
 {
-const std::string filename = "./tests/data/gmgpolar_data.txt";
 //! To be used with the gyro::icntl vector.
 enum icontrols
 {
@@ -239,8 +238,6 @@ enum icontrols
          * 1: check. If the parameter "sol_in" is given, the error is computed w.r.t. a solution read from a file.
          */
     check_error,
-
-    writeToFile,
 };
 //! To be used with the gyro::dcntl vector.
 enum dcontrols

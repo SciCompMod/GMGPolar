@@ -30,7 +30,6 @@
 #include <random>
 #include <algorithm>
 #include <functional>
-#include "writetofile.h"
 
 template <typename Generator>
 void getrands(std::vector<double>& x, Generator& gen, unsigned num)
@@ -154,22 +153,6 @@ void gmgpolar::polar_multigrid()
                   << ", mod_pk=" << gyro::icntl[Param::mod_pk] << ", DirBC=" << gyro::icntl[Param::DirBC_Interior]
                   << ", divide=" << gyro::icntl[Param::divideBy2] << " *****\n";
 
-        if (gyro::icntl[Param::writeToFile] == 1) {
-            ouin::wtofile(Param::filename, std::to_string(gyro::icntl[Param::prob]));
-            ouin::wtofile(Param::filename, std::to_string(gyro::icntl[Param::alpha_coeff]));
-            ouin::wtofile(Param::filename, std::to_string(gyro::icntl[Param::beta_coeff]));
-            ouin::wtofile(Param::filename, std::to_string(gyro::icntl[Param::nr_exp]));
-            ouin::wtofile(Param::filename, std::to_string(gyro::icntl[Param::ntheta_exp]));
-            ouin::wtofile(Param::filename, std::to_string(gyro::icntl[Param::fac_ani]));
-            ouin::wtofile(Param::filename, std::to_string(gyro::icntl[Param::mod_pk]));
-            ouin::wtofile(Param::filename, std::to_string(gyro::icntl[Param::DirBC_Interior]));
-            ouin::wtofile(Param::filename, std::to_string(gyro::icntl[Param::divideBy2]));
-            ouin::wtofile(Param::filename, "");
-            ouin::wtofile(Param::filename, std::to_string(m));
-            ouin::wtofile(Param::filename, std::to_string(v_level[0]->nr));
-            ouin::wtofile(Param::filename, std::to_string(v_level[0]->ntheta));
-            ouin::wtofile(Param::filename, std::to_string(levels));
-        }
 
         double scaling = 1.0;
         if (gyro::icntl[Param::compute_rho])
