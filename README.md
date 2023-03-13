@@ -91,7 +91,10 @@ Release Notes
 1) Working multigrid cycle
 2) In-house solver and possibility to link with MUMPS for the smoothing and coarse grid solution
 3) Extrapolation strategies:
-    a. No extrapolation (--extrapolation 0)
-    b. Implicit extrapolation with smoothing of fine nodes only (--extrapolation 1)
-    c. Extrapolation with smoothing of all nodes (--extrapolation 2)
+
+	a. No extrapolation (--extrapolation 0)
+	
+	b. Default implicit extrapolation (--extrapolation 1)
+	
+	c. Non-default implicit extrapolation with smoothing of all nodes on the finest level [experimental, use with care, convergence cannot be observed with residual] (--extrapolation 2)
 4) Optimization of apply_A / build_rhs / apply_prolongation / build_Asc / apply_Asc_ortho
