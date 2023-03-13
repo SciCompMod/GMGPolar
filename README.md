@@ -1,8 +1,7 @@
-==============================================
-GmgPolar
-==============================================
+GMGPolar
+=======
 
-**Note:** Check https://gitlab.com/mknaranja/gmgpolar to ask for access.
+GMGPolar is a performant geometric multigrid solver using implicit extrapolation to raise the convergence order. It is based on meshes in tensor- or product-format. GMGPolar's focus applications are geometries that can be described by polar or curvilinear coordinates for which suited smoothing procedures have been developed.
 
 Tested plateforms
 -----------------
@@ -26,9 +25,9 @@ It is possible to link the code with the sparse direct solver ``MUMPS``.
 The installation can be done by typing the following commands in your terminal
 
     # download the latest stable version
-    # it will create a directory named gmgpolar
+    # it will create a directory named GMGPolar
 
-    git clone https://gitlab.com/mknaranja/gmgpolar.git
+    git clone https://github.com/mknaranja/GMGPolar
 
 Now that everything is ready, we can compile the solver.
 Edit the file ``Makefile.in`` so that it reflects your configuration (path to libraries, file 
@@ -39,10 +38,6 @@ Building the library
 --------------------
           
 The build process is done using ``make``:
-
-
-    # go to the C code directory
-    cd iexmg_c
 
     # run make
     make
@@ -83,7 +78,7 @@ Issue tracker
 -------------
 If you find any bug, didn't understand a step in the documentation, or if you
 have a feature request, submit your issue on our
-`Issue Tracker <https://gitlab.com/mknaranja/gmgpolar/-/issues>`
+`Issue Tracker <https://github.com/mknaranja/GMGPolar/issues>`
 by giving:
 
 - reproducible parameters
@@ -92,11 +87,11 @@ by giving:
 
 Release Notes
 -------------
-* GmgPolar 1.0
+* GmgPolar 0.9
 1) Working multigrid cycle
 2) In-house solver and possibility to link with MUMPS for the smoothing and coarse grid solution
 3) Extrapolation strategies:
-    a. Full extrapolation (--extrapolation 0)
+    a. No extrapolation (--extrapolation 0)
     b. Implicit extrapolation with smoothing of fine nodes only (--extrapolation 1)
     c. Extrapolation with smoothing of all nodes (--extrapolation 2)
 4) Optimization of apply_A / build_rhs / apply_prolongation / build_Asc / apply_Asc_ortho
