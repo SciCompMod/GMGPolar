@@ -1,0 +1,9 @@
+#name: "LinuxBuild"
+#description: "Building C++ library with Linux"
+#inputs:
+#  version:
+#    description: "min or latest Version of the compiler to use"
+#    required: true
+#    default: "latest"
+#runs:
+#  steps:

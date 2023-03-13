@@ -61,10 +61,10 @@ TEST_F(Test_Parameters, finestgrid)
     gmgtest.create_grid_polar(); //only the finest grid is now created
     int finest_nodes = gmgtest.v_level[0]->nr * gmgtest.v_level[0]->ntheta;
     EXPECT_EQ(gmgtest.v_level.size(), 1);
-    //std::cout<<std::stoi(input[initparam+1])<<std::endl ;
     EXPECT_EQ(finest_nodes, std::stoi(input[initparam + 1]));
-    //EXPECT_EQ(gmgtest.v_level[0]->nr, std::stoi(input[initparam + 2])); //Segmentation fault ???
+    EXPECT_EQ(gmgtest.v_level[0]->nr, std::stoi(input[initparam + 2])); 
 }
+
 TEST_F(Test_Parameters, Multigrid)
 {
     gmgpolar gmgtest2;
