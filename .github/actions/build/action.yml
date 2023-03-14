@@ -1,0 +1,17 @@
+name: "Build Repository on Linux"
+runs:
+  using: "composite"
+  steps:
+    - name: Install dependencies
+      shell: bash
+      run: |
+        sudo apt-get -qq update
+        sudo apt-get -qq install gcc-11
+        sudo apt-get -qq -y install g++-11
+    - name: Build
+      shell: bash
+      run: |
+        mkdir build
+        cmake -S . -B ./build/
+        cd build
+        make
