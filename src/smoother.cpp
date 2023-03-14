@@ -111,95 +111,95 @@ void level::multigrid_smoothing(int smoother, int v, std::vector<double>& f_Asc_
         apply_Asc_ortho(f_Asc_u, u, smoother, v, c, dep_Asc_cur, dep_Asc_prev, dep_Asc1, dep_Asc_ortho_cur);
     }
     else {
-/*        if (gyro::icntl[Param::openmp] == 1) {
+        /*        if (gyro::icntl[Param::openmp] == 1) {
             for (auto k = 0; k < A_Zebra_Mix_r[smoother].size(); k++) {
                 f_Asc_u[A_Zebra_Mix_r[smoother][k]] -= A_Zebra_Mix_v[smoother][k] * u[A_Zebra_Mix_c[smoother][k]];
             }
         }
         else {
 */
-            if (smoother < 2) {
-                int start_j = 0;
-                if (gyro::icntl[Param::DirBC_Interior])
-                    start_j = 1;
+        if (smoother < 2) {
+            int start_j = 0;
+            if (gyro::icntl[Param::DirBC_Interior])
+                start_j = 1;
 
-                int start;
-                if (smoother == 0)
-                    start = (gyro::icntl[Param::DirBC_Interior]) ? 2 : 0;
-                else if (smoother == 1)
-                    start = 1;
-                int shift = 2;
-                for (int j = start; j < delete_circles; j += shift) {
-                    int odd_j = j % 2;
+            int start;
+            if (smoother == 0)
+                start = (gyro::icntl[Param::DirBC_Interior]) ? 2 : 0;
+            else if (smoother == 1)
+                start = 1;
+            int shift = 2;
+            for (int j = start; j < delete_circles; j += shift) {
+                int odd_j = j % 2;
 #pragma omp task shared(u, f_Asc_u) firstprivate(smoother, j, odd_j) depend(in                                         \
                                                                             : dep_Asc_prev[j - odd_j]),                \
     depend(in                                                                                                          \
            : dep_Asc_prev[j + odd_j]),                                                                                 \
     depend(out                                                                                                         \
            : dep_Asc_ortho_cur[j])
-                    {
-                        int smoother_tmp          = get_smoother(0, j);
-                        std::vector<int> ptr_vect = get_ptr_sc(j, smoother_tmp, 1);
-                        int ptr_start             = ptr_vect[0];
-                        int ptr_end               = ptr_start + (ptr_vect[2] - ptr_vect[0]) * ntheta_int / 2;
-                        for (int k = ptr_start; k < ptr_end; k++) {
-                            f_Asc_u[A_Zebra_Mix_r[smoother][k]] -=
-                                A_Zebra_Mix_v[smoother][k] * u[A_Zebra_Mix_c[smoother][k]];
-                        }
-                        dep_Asc_ortho_cur[j] = 1;
+                {
+                    int smoother_tmp          = get_smoother(0, j);
+                    std::vector<int> ptr_vect = get_ptr_sc(j, smoother_tmp, 1);
+                    int ptr_start             = ptr_vect[0];
+                    int ptr_end               = ptr_start + (ptr_vect[2] - ptr_vect[0]) * ntheta_int / 2;
+                    for (int k = ptr_start; k < ptr_end; k++) {
+                        f_Asc_u[A_Zebra_Mix_r[smoother][k]] -=
+                            A_Zebra_Mix_v[smoother][k] * u[A_Zebra_Mix_c[smoother][k]];
                     }
+                    dep_Asc_ortho_cur[j] = 1;
                 }
             }
+        }
+        else {
+            std::vector<int> shift_vect, ptr_vect;
+            if (smoother == 2) {
+                ptr_vect   = ptr_vect_s2;
+                shift_vect = shift_vect_s2;
+            }
             else {
-                std::vector<int> shift_vect, ptr_vect;
-                if (smoother == 2) {
-                    ptr_vect   = ptr_vect_s2;
-                    shift_vect = shift_vect_s2;
+                ptr_vect   = ptr_vect_s3;
+                shift_vect = shift_vect_s3;
+            }
+            for (int i = smoother - 2; i < ntheta_int; i += 2) {
+                int im        = imoins(i, ntheta_int);
+                int ip        = iplus(i, ntheta_int);
+                int odd_d     = delete_circles % 2;
+                int ind_m_odd = i, ind_p_odd = i;
+                int odd_i = i % 2;
+                if (odd_i) {
+                    ind_m_odd = im;
+                    ind_p_odd = ip;
                 }
-                else {
-                    ptr_vect   = ptr_vect_s3;
-                    shift_vect = shift_vect_s3;
-                }
-                for (int i = smoother - 2; i < ntheta_int; i += 2) {
-                    int im        = imoins(i, ntheta_int);
-                    int ip        = iplus(i, ntheta_int);
-                    int odd_d     = delete_circles % 2;
-                    int ind_m_odd = i, ind_p_odd = i;
-                    int odd_i = i % 2;
-                    if (odd_i) {
-                        ind_m_odd = im;
-                        ind_p_odd = ip;
-                    }
 #pragma omp task shared(u, f_Asc_u) firstprivate(smoother, i, odd_d, ind_m_odd, ind_p_odd)                             \
     depend(in                                                                                                          \
            : dep_Asc_prev[ind_m_odd]) depend(in                                                                        \
                                              : dep_Asc_prev[ind_p_odd], dep_Asc1[delete_circles - 1 - odd_d])          \
         depend(out                                                                                                     \
                : dep_Asc_ortho_cur[i])
-                    {
-                        int start_s2_extr = (smoother == 2 && extrapol && delete_circles % 2 == 0) ? 1 : 0;
-                        int shift_s2_extr = (smoother == 2 && extrapol) ? 2 : 1;
-                        for (int j = delete_circles + start_s2_extr; j < nr_int; j += shift_s2_extr) {
-                            for (int k = ptr_vect[j - delete_circles] +
-                                         (i - smoother + 2) / 2 * shift_vect[j - delete_circles];
-                                 k < ptr_vect[j - delete_circles] +
-                                         ((i - smoother + 2) / 2 + 1) * shift_vect[j - delete_circles];
-                                 k++) {
-                                f_Asc_u[A_Zebra_Mix_r[smoother][k]] -=
-                                    A_Zebra_Mix_v[smoother][k] * u[A_Zebra_Mix_c[smoother][k]];
-                            }
+                {
+                    int start_s2_extr = (smoother == 2 && extrapol && delete_circles % 2 == 0) ? 1 : 0;
+                    int shift_s2_extr = (smoother == 2 && extrapol) ? 2 : 1;
+                    for (int j = delete_circles + start_s2_extr; j < nr_int; j += shift_s2_extr) {
+                        for (int k =
+                                 ptr_vect[j - delete_circles] + (i - smoother + 2) / 2 * shift_vect[j - delete_circles];
+                             k < ptr_vect[j - delete_circles] +
+                                     ((i - smoother + 2) / 2 + 1) * shift_vect[j - delete_circles];
+                             k++) {
+                            f_Asc_u[A_Zebra_Mix_r[smoother][k]] -=
+                                A_Zebra_Mix_v[smoother][k] * u[A_Zebra_Mix_c[smoother][k]];
                         }
-                        dep_Asc_ortho_cur[i] = 1;
                     }
+                    dep_Asc_ortho_cur[i] = 1;
                 }
             }
-//        }
+        }
+        //        }
     }
 
     t_Asc_ortho += TOC;
     TIC;
 
-/*    if (gyro::icntl[Param::openmp] == 1) {
+    /*    if (gyro::icntl[Param::openmp] == 1) {
         for (int k = 0; k < nblocks; k++) {
             int ij_glob = k * 2 + smoother % 2;
             int ind = ij_glob, indm = ij_glob - 1, indp = ij_glob + 1;
@@ -270,83 +270,83 @@ void level::multigrid_smoothing(int smoother, int v, std::vector<double>& f_Asc_
     }
     else {
 */
-        for (int k = 0; k < nblocks; k++) {
-            int ij_glob = k * 2 + smoother % 2;
-            int ind = ij_glob, indm = ij_glob - 1, indp = ij_glob + 1;
-            if (smoother > 1 && gyro::icntl[Param::matrix_free] == 1) {
-                indm = imoins(ij_glob, ntheta_int);
-                indp = iplus(ij_glob, ntheta_int);
-            }
+    for (int k = 0; k < nblocks; k++) {
+        int ij_glob = k * 2 + smoother % 2;
+        int ind = ij_glob, indm = ij_glob - 1, indp = ij_glob + 1;
+        if (smoother > 1 && gyro::icntl[Param::matrix_free] == 1) {
+            indm = imoins(ij_glob, ntheta_int);
+            indp = iplus(ij_glob, ntheta_int);
+        }
 #pragma omp task firstprivate(k, ij_glob, ind, indm, indp, t) shared(f_Asc_u)                                          \
     depend(in                                                                                                          \
            : dep_Asc_ortho_cur[indm], dep_Asc_ortho_cur[ind], dep_Asc_ortho_cur[indp]) depend(out                      \
                                                                                               : dep_Asc_cur[ind])
-            {
-                TIC;
-                // create u_sc, f_sc
-                std::vector<double> u_sc;
-                std::vector<double> f_sc(m_sc[smoother]);
-                std::vector<double> f_total(m_sc[smoother]), f_total2(m_sc[smoother]);
+        {
+            TIC;
+            // create u_sc, f_sc
+            std::vector<double> u_sc;
+            std::vector<double> f_sc(m_sc[smoother]);
+            std::vector<double> f_total(m_sc[smoother]), f_total2(m_sc[smoother]);
 
-                std::vector<double>::const_iterator first = f_Asc_u.begin() + k * m_sc[smoother];
-                std::vector<double>::const_iterator last  = f_Asc_u.begin() + (k + 1) * m_sc[smoother];
-                f_total                                   = std::vector<double>(first, last);
-                for (int i = 0; i < m_sc[smoother]; i++)
-                    f_Asc_u[k * m_sc[smoother] + i] = 0;
+            std::vector<double>::const_iterator first = f_Asc_u.begin() + k * m_sc[smoother];
+            std::vector<double>::const_iterator last  = f_Asc_u.begin() + (k + 1) * m_sc[smoother];
+            f_total                                   = std::vector<double>(first, last);
+            for (int i = 0; i < m_sc[smoother]; i++)
+                f_Asc_u[k * m_sc[smoother] + i] = 0;
 
-                //compute f_total = f_sc - A_sc_ortho * u
-                build_fsc(f_sc, fVec, smoother, 0, k * m_sc[smoother], (k + 1) * m_sc[smoother]);
-                for (int i = 0; i < m_sc[smoother]; i++) {
-                    f_sc[i] += f_total[i];
-                }
-
-                // #pragma omp atomic
-                t_f_sc += TOC;
-                TIC;
-
-                // Dirichlet or size of system is 1 (diagonal solve)
-                if ((smoother == 0 && k == 0 && gyro::icntl[Param::DirBC_Interior]) || m_sc[smoother] == 1 ||
-                    (gyro::icntl[Param::extrapolation] && l == 0 && smoother % 2 == 0 &&
-                     !(smoother == 0 && !gyro::icntl[Param::DirBC_Interior] && k == 0))) {
-                    u_sc = solve_diag(A_Zebra_v_LU_row[smoother][k], f_sc);
-                }
-                // Circle (not across)
-                else if (smoother < 2 && !(smoother == 0 && !gyro::icntl[Param::DirBC_Interior] && k == 0)) {
-                    u_sc = solve_circle(A_Zebra_r_LU_row[smoother][k], A_Zebra_c_LU_row[smoother][k],
-                                        A_Zebra_v_LU_row[smoother][k], f_sc);
-                }
-                // Radial (not across)
-                else if (smoother > 1) {
-                    u_sc = solve_radial(A_Zebra_r_LU_row[smoother][k], A_Zebra_c_LU_row[smoother][k],
-                                        A_Zebra_v_LU_row[smoother][k], f_sc);
-                }
-                // Across (direct solver)
-                else {
-#ifdef USE_MUMPS
-                    if (gyro::icntl[Param::optimized] == 0) {
-#endif
-                        u_sc = solve_gaussian_elimination(A_Zebra_r_LU_row[smoother][k], A_Zebra_c_LU_row[smoother][k],
-                                                          A_Zebra_v_LU_row[smoother][k], f_sc);
-#ifdef USE_MUMPS
-                    }
-                    else
-                        u_sc = solve_mumps(mumps_across, f_sc);
-#endif
-                }
-
-#pragma omp atomic
-                t_Asc += TOC;
-                TIC;
-
-                build_fsc(u_sc, u, smoother, 1, k * m_sc[smoother], (k + 1) * m_sc[smoother]);
-
-#pragma omp atomic
-                t_f_sc += TOC;
-                TIC;
-
-                dep_Asc_cur[ind] = 1;
+            //compute f_total = f_sc - A_sc_ortho * u
+            build_fsc(f_sc, fVec, smoother, 0, k * m_sc[smoother], (k + 1) * m_sc[smoother]);
+            for (int i = 0; i < m_sc[smoother]; i++) {
+                f_sc[i] += f_total[i];
             }
-//        }
+
+            // #pragma omp atomic
+            t_f_sc += TOC;
+            TIC;
+
+            // Dirichlet or size of system is 1 (diagonal solve)
+            if ((smoother == 0 && k == 0 && gyro::icntl[Param::DirBC_Interior]) || m_sc[smoother] == 1 ||
+                (gyro::icntl[Param::extrapolation] && l == 0 && smoother % 2 == 0 &&
+                 !(smoother == 0 && !gyro::icntl[Param::DirBC_Interior] && k == 0))) {
+                u_sc = solve_diag(A_Zebra_v_LU_row[smoother][k], f_sc);
+            }
+            // Circle (not across)
+            else if (smoother < 2 && !(smoother == 0 && !gyro::icntl[Param::DirBC_Interior] && k == 0)) {
+                u_sc = solve_circle(A_Zebra_r_LU_row[smoother][k], A_Zebra_c_LU_row[smoother][k],
+                                    A_Zebra_v_LU_row[smoother][k], f_sc);
+            }
+            // Radial (not across)
+            else if (smoother > 1) {
+                u_sc = solve_radial(A_Zebra_r_LU_row[smoother][k], A_Zebra_c_LU_row[smoother][k],
+                                    A_Zebra_v_LU_row[smoother][k], f_sc);
+            }
+            // Across (direct solver)
+            else {
+#ifdef USE_MUMPS
+                if (gyro::icntl[Param::optimized] == 0) {
+#endif
+                    u_sc = solve_gaussian_elimination(A_Zebra_r_LU_row[smoother][k], A_Zebra_c_LU_row[smoother][k],
+                                                      A_Zebra_v_LU_row[smoother][k], f_sc);
+#ifdef USE_MUMPS
+                }
+                else
+                    u_sc = solve_mumps(mumps_across, f_sc);
+#endif
+            }
+
+#pragma omp atomic
+            t_Asc += TOC;
+            TIC;
+
+            build_fsc(u_sc, u, smoother, 1, k * m_sc[smoother], (k + 1) * m_sc[smoother]);
+
+#pragma omp atomic
+            t_f_sc += TOC;
+            TIC;
+
+            dep_Asc_cur[ind] = 1;
+        }
+        //        }
     }
 
     t = t_smoothing_tmp;

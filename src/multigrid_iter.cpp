@@ -189,10 +189,12 @@ void gmgpolar::multigrid_iter()
         TIC;
     }
     // if (gyro::icntl[Param::verbose] > 0) {
-    if (it == gyro::icntl[Param::maxiter])
+    if (it == gyro::icntl[Param::maxiter]) {
         std::cout << "Multigrid reached maxiter=" << gyro::icntl[Param::maxiter] << "\n";
-    else
+    }
+    else {
         std::cout << "Convergence after iteration " << it << std::endl;
+    }
     // }
     //----------------------------------------------------------------------------------------------------------
     //!compute mean residual reduction factor rho
