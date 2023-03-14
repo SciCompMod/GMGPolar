@@ -153,7 +153,6 @@ void gmgpolar::polar_multigrid()
                   << ", mod_pk=" << gyro::icntl[Param::mod_pk] << ", DirBC=" << gyro::icntl[Param::DirBC_Interior]
                   << ", divide=" << gyro::icntl[Param::divideBy2] << " *****\n";
 
-
         double scaling = 1.0;
         if (gyro::icntl[Param::compute_rho])
             scaling = scaling / (sqrt(m));

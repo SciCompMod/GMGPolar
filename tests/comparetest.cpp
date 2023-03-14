@@ -10,8 +10,8 @@ class Test_Parameters : public ::testing::Test
 protected:
     void SetUp() override
     {
-        //Results of the run with default parameters. 
-        input.assign({5,0,0,4,4,3,0,1,0,3136,49,64,4,12}) ; 
+        //Results of the run with default parameters.
+        input.assign({5, 0, 0, 4, 4, 3, 0, 1, 0, 3136, 49, 64, 4, 12});
 
         initparam              = 9;
         int initarr[initparam] = {Param::prob,   Param::alpha_coeff,    Param::beta_coeff,
@@ -58,7 +58,7 @@ TEST_F(Test_Parameters, DOF_on_finest_grid)
     int finest_nodes = gmgtest.v_level[0]->nr * gmgtest.v_level[0]->ntheta;
     EXPECT_EQ(gmgtest.v_level.size(), 1);
     EXPECT_EQ(finest_nodes, input[initparam]);
-    EXPECT_EQ(gmgtest.v_level[0]->nr, input[initparam + 1]); 
+    EXPECT_EQ(gmgtest.v_level[0]->nr, input[initparam + 1]);
     EXPECT_EQ(gmgtest.v_level[0]->ntheta, input[initparam + 2]);
 }
 
