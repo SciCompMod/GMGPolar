@@ -11,7 +11,7 @@ protected:
     void SetUp() override
     {
         //Results of the run with default parameters.
-        input.assign({5, 0, 0, 4, 4, 3, 0, 1, 0, 3136, 49, 64, 4, 12});
+        input.assign({5, 0, 0, 4, 4, 3, 0, 1, 0, 3136, 49, 64, 4, 11});
 
         initparam              = 9;
         int initarr[initparam] = {Param::prob,   Param::alpha_coeff,    Param::beta_coeff,
