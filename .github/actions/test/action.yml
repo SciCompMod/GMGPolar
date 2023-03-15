@@ -21,11 +21,15 @@ runs:
       run: |
         cd build/tests
         sudo chmod a+x gmgpolar_tests
-        ./gmgpolar_tests --gtest_output="xml:report.xml"
+        ./gmgpolar_tests --gtest_output="xml:testreport.xml"
     - name: Upload test report
       uses: actions/upload-artifact@v3
       with:
         name: test-report
-        path: build/tests/report.xml
+        path: build/tests/testreport.xml
         if-no-files-found: error
-        retention-days: 1
+        retention-days:
+    - name: clean-up
+      uses: geekyeggo/delete-artifact@v1
+      with:
+        name: ${{ inputs.build-artifact }} 
