@@ -8,3 +8,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/build
+  run-unit-test:
+    needs: install-and-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/test
+        with:
+          build-artifact: build-cpp-linux-gmgpolar

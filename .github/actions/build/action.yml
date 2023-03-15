@@ -15,4 +15,13 @@ runs:
         cmake -S . -B ./build/
         cd build
         make
-        ./tests/gmgpolar_tests
+    - name: create build dir archive
+      shell: bash
+      run: |
+        tar -czf build.tar.gz build
+    - name: Upload build dir archive
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-cpp-linux-gmgpolar
+        path: build.tar.gz
+        retention-days: 1
