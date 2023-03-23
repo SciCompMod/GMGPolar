@@ -113,3 +113,6 @@ TEST_F(Level_test, Test_Nonzeros)
 
     EXPECT_EQ(nz_test, test_level.nz);
 }
+
+//TODO: working on testing if the matrix is build correctly. Need to understand how the values are stored.
+//Especially if we discretize across the origin I am confused how we jump somehow 5*index. For tomorrow
