@@ -146,11 +146,14 @@ void level::build_bound()
         }
     }
 
-    if (gyro::icntl[Param::verbose] > 3)
-        for (int j = 0; j < nr; j++)
-            for (int i = 0; i < ntheta_int; i++)
-                std::cout << "DISTBOUNDARY (" << r[j] << ", " << theta[j] << "): " << is_bound[j * ntheta_int + i]
+    if (gyro::icntl[Param::verbose] > 3) {
+        for (int j = 0; j < nr; j++) {
+            for (int i = 0; i < ntheta_int; i++) {
+                std::cout << "DISTBOUNDARY (" << r[j] << ", " << theta[i] << "): " << is_bound[j * ntheta_int + i]
                           << "\n";
+            }
+        }
+    }
 } /* ----- end of gyro::build_bound ----- */
 
 /*!
