@@ -28,8 +28,4 @@ runs:
         name: test-report
         path: build/tests/testreport.xml
         if-no-files-found: error
-        retention-days:
-    - name: clean-up
-      uses: geekyeggo/delete-artifact@v1
-      with:
-        name: ${{ inputs.build-artifact }} 
+        retention-days: 3
