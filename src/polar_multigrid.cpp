@@ -37,6 +37,9 @@ void getrands(std::vector<double>& x, Generator& gen, unsigned num)
     generate_n(std::back_inserter(x), num, ref(gen));
 }
 
+
+
+#ifndef CUDA
 /*!
  *  \brief Solves the problem gyro with multigrid on levels
  *
@@ -199,6 +202,8 @@ void gmgpolar::polar_multigrid()
         }
     }
 } /* ----- end of gmgpolar::polar_multigrid ----- */
+#endif
+
 
 /*!
  *  \brief Check the geometry construction

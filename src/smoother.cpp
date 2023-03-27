@@ -86,6 +86,9 @@ void level::define_line_splitting()
         std::cout << "Shifting from circle to radial at radius " << delete_circles << "\n";
 } /* ----- end of destructor level::define_line_splitting ----- */
 
+
+
+#ifndef CUDA
 /*! \brief Applies smoothing
  *
  * For all lines of the smoother s and the colour c.
@@ -352,6 +355,8 @@ void level::multigrid_smoothing(int smoother, int v, std::vector<double>& f_Asc_
     t = t_smoothing_tmp;
     t_smoothing += TOC;
 } /* ----- end of level::multigrid_smoothing ----- */
+#endif
+
 
 /*! \brief Create the RHS part corresponding to Asc_ortho for a smoother (on level l)
  *

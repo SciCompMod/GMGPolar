@@ -56,6 +56,8 @@ level::level(int l_)
 #endif
 } /* ----- end of constructor level:level ----- */
 
+
+#ifndef CUDA
 /*!
  *  \brief Default Destructor of level class
  *
@@ -83,6 +85,8 @@ level::~level()
         // delete[] dep_u;
     }
 } /* ----- end of destructor level::~level ----- */
+#endif
+
 
 /*!
  *  \brief Sets execution times to 0
@@ -1456,3 +1460,16 @@ void level::write_sol()
     }
     f.close();
 } /* ----- end of level::read_grid ----- */
+
+
+
+
+
+#ifndef CUDA
+void level::alloc_cuda(){
+    //don't do anything
+}
+#endif
+
+
+
