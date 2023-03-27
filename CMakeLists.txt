@@ -13,6 +13,7 @@ target_link_libraries(iexmg PUBLIC OpenMP::OpenMP_CXX)
 target_include_directories(
   iexmg PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/test_cases>
   $<INSTALL_INTERFACE:include>)
 
 if (CUDA)
