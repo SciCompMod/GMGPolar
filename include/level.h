@@ -175,9 +175,24 @@ public:
     std::vector<double> u_previous_r;
     std::vector<double> res; // residual
 
+    /*! Cuda */
+    double* dev_fsc[4];
+    double *dev_fVec, *dev_f_total, *dev_u, *dev_r, *dev_hplus, *dev_theta, *dev_thetaplus;
+    int *dev_coarse_nodes_list_r, *dev_coarse_nodes_list_theta;
+    double *dev_Au, *dev_res, *dev_error, *dev_sin_theta, *dev_cos_theta, *dev_error_fine, *dev_error_coarse;
+    int *dev_coarse_nodes_list_type_shift, *dev_coarse_nodes_list_type_start;
+    int *dev_coarse_nodes_list_type0, *dev_coarse_nodes_list_i0, *dev_coarse_nodes_list_j0;
+    int *dev_coarse_nodes_list_type1, *dev_coarse_nodes_list_i1, *dev_coarse_nodes_list_j1;
+    int *dev_coarse_nodes_list_type2, *dev_coarse_nodes_list_i2, *dev_coarse_nodes_list_j2;
+    int *dev_coarse_nodes_list_type3, *dev_coarse_nodes_list_i3, *dev_coarse_nodes_list_j3;
+    int *dev_coarse_nodes_list_type4, *dev_coarse_nodes_list_i4, *dev_coarse_nodes_list_j4;
+    int *dev_coarse_nodes_list_type5, *dev_coarse_nodes_list_i5, *dev_coarse_nodes_list_j5;
+    int *dev_coarse_nodes_list_type6, *dev_coarse_nodes_list_i6, *dev_coarse_nodes_list_j6;
+    int *dev_coarse_nodes_list_type7, *dev_coarse_nodes_list_i7, *dev_coarse_nodes_list_j7;
+
     /*******************************************************************************
- * Methods
- ******************************************************************************/
+    * Methods
+    ******************************************************************************/
     level(int l_);
     ~level();
     void reset_timers();
@@ -306,14 +321,8 @@ public:
     std::vector<double> solve_radial(std::vector<int> A_row_indices, std::vector<int> A_col_indices,
                                      std::vector<double> A_vals, std::vector<double> f);
 
-private:
-    /*******************************************************************************
- * Attributes
- ******************************************************************************/
-
-    /*******************************************************************************
- * Methods
- ******************************************************************************/
+    void alloc_cuda();
+    void copy_cuda();
 };
 
 #endif // LEVEL_HXX
