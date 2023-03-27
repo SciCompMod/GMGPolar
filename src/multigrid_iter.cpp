@@ -243,6 +243,7 @@ void gmgpolar::multigrid_iter()
  * \param l: the level (0=finest)
  *
  */
+#ifndef CUDA
 void gmgpolar::multigrid_cycle_extrapol(int l)
 {
     //l = current level we are on (from class level)
@@ -827,6 +828,7 @@ std::vector<double> gmgpolar::compute_error()
 
     return error;
 } /* ----- end of gmgpolar::compute_error ----- */
+#endif
 
 /*!
  *  \brief Compute the backward error on level 0
