@@ -20,6 +20,9 @@
 * limitations under the License.
 */
 
+
+#ifndef CUDA
+
 /*!
  * \file debug.cpp
  * \brief Comparison of function results with the matlab code (A, f, P, smoothers)
@@ -574,3 +577,6 @@ void gmgpolar::debug()
     fname << ss.str() << "0/error_rand.txt";
     unit_test(fname, v_level[0]->m, error, "error", 1);
 } /* ----- end of gmgpolar::debug ----- */
+
+
+#endif
