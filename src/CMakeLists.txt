@@ -1,0 +1,22 @@
+
+target_sources(iexmg PRIVATE ${CMAKE_CURRENT_LIST_DIR}/build_fd9star_anisotr_scaled.cpp)
+target_sources(iexmg PRIVATE ${CMAKE_CURRENT_LIST_DIR}/build_rhs_apply_op.cpp)
+target_sources(iexmg PRIVATE ${CMAKE_CURRENT_LIST_DIR}/create_grid_polar.cpp)
+target_sources(iexmg PRIVATE ${CMAKE_CURRENT_LIST_DIR}/debug.cpp)
+target_sources(iexmg PRIVATE ${CMAKE_CURRENT_LIST_DIR}/define_coarse_nodes.cpp)
+target_sources(iexmg PRIVATE ${CMAKE_CURRENT_LIST_DIR}/direct_solve.cpp)
+target_sources(iexmg PRIVATE ${CMAKE_CURRENT_LIST_DIR}/gmgpolar.cpp)
+target_sources(iexmg PRIVATE ${CMAKE_CURRENT_LIST_DIR}/gyro.cpp)
+target_sources(iexmg PRIVATE ${CMAKE_CURRENT_LIST_DIR}/level.cpp)
+target_sources(iexmg PRIVATE ${CMAKE_CURRENT_LIST_DIR}/multigrid_iter.cpp)
+target_sources(iexmg PRIVATE ${CMAKE_CURRENT_LIST_DIR}/polar_multigrid.cpp)
+target_sources(iexmg PRIVATE ${CMAKE_CURRENT_LIST_DIR}/prolongation.cpp)
+target_sources(iexmg PRIVATE ${CMAKE_CURRENT_LIST_DIR}/RHS.cpp)
+target_sources(iexmg PRIVATE ${CMAKE_CURRENT_LIST_DIR}/smoother0.cpp)
+target_sources(iexmg PRIVATE ${CMAKE_CURRENT_LIST_DIR}/smoother.cpp)
+target_sources(iexmg PRIVATE ${CMAKE_CURRENT_LIST_DIR}/cuda.cu)
+target_sources(iexmg PRIVATE ${CMAKE_CURRENT_LIST_DIR}/debug.cu)
+
+
+add_executable(main main.cpp)
+target_link_libraries(main PUBLIC iexmg)
