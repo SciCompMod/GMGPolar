@@ -40,7 +40,7 @@ enum icontrols
     /*! \brief (WIP) Optimized code
          *
          * 0: old working version
-         * 1: new version (WIP)
+         * 1: new version (WIP) (we always use this)
          */
     optimized,
     /*! \brief Verbose level
@@ -71,32 +71,48 @@ enum icontrols
          * Defines the number of nodes in each direction:
          * - nr = 2^(nr_exp-1)
          * - ntheta = 2^(ceil(log2(nr))-1)
+         *
+         * More detailed:
+         *
+         * First, the number of nodes in r-direction is computed as follows: 
+         * without any ansisotropy (fac_ani=0), we have nr=2^(nr_exp - 1) equally distributed nodes;
+         * with anisotropy: we fisrt create nr=2^(nr_exp) - 1^(fac_ani) equally distributed nodes, and then, the grid is refined fac_ani-times;
+         * Lastly, regardless of using any anisotropy or not, we refine again by splitting all intervals at the midpoint 
+         * (to obtain a uniform grid refinement between the two finest levels for a successful extrapolation).
+         *
+         * Second, the number of nodes in theta-direction is computed as follows: 
+         * ntheta= 2^(ceil(log_2(nr)))
+         *
          */
     nr_exp,
+    /*! \brief Not used
+         */
     ntheta_exp,
     /*! \brief Anisotropic discretization in 'edge' region for r
          *
-         * Defines if we use anisotropic discretization
-         * - r (fac_ani): in 'edge' region
-         * - theta (theta_aniso)
+         * Defines if we use anisotropic discretization in r-direction
          *
          * Possible values are:
          * - -1: input list of r and theta coordinates
          * - 0: no anisotropy
-         * - >0: anisotropy (automatic)
+         * - >0: anisotropy (automatic) (number of refinements)
+         *
          */
     fac_ani,
+    /*! \brief Not used
+         * (we never have an ansisotropy in theta-direction, so the value is always 0/false)
+         */
     theta_aniso,
     /*! \brief Smoothing steps
          *
-         * Number of pre- and post-smoothing steps
+         * Number of pre- (v1) and post- (v2) -smoothing steps
          */
     v1,
     v2,
     /*! \brief Type of MG cycle
          *
          * Type of multigrid cycle:
-         * - 1: V-cycle
+         * - 1: V-cycle (we always use this)
          * - 2: W-cycle
          */
     cycle,
@@ -104,8 +120,8 @@ enum icontrols
          *
          * Defines the shape of the geometry:
          * - 0: kappa_eps = delta_e = 0 (circular geometry)
-         * - 1: kappa_eps=0.3, delta_e=0.2 (stretched)
-         * - 2: kappa_eps=0.3, delta_e=1.4 (stretched)
+         * - 1: kappa_eps=0.3, delta_e=0.2 (stretched, Shafranov geometry)
+         * - 2: kappa_eps=0.3, delta_e=1.4 (stretched, Czarny geometry)
          */
     mod_pk,
     /*! \brief Compute rho
@@ -153,8 +169,8 @@ enum icontrols
          * - 0: PointRB (not implemented)
          * - 1: CircZGS (not implemented)
          * - 2: RadZGS (not implemented)
-         * - 3: AltZGS
-         * - 13: AltZGS corrected (C-R: BJ, W-B: GS)
+         * - 3: AltZGS (coupled circle-radial version) (we always use this!)
+         * - 13: AltZGS corrected (C-R: BJ, W-B: GS) (decoupled circle-radial version)
          * - 4: optimizedAltZGS (not implemented)
          * - 5: MixZGS (not implemented)
          */
@@ -175,7 +191,7 @@ enum icontrols
          *
          * 0: no extrapolation
          * 1: extrapolation + smoothing
-         * 2: extrapolation only
+         * 2: extrapolation only (implicit extrapolation with full grid smoothing)
          * 3: extrap_integer (FE only)
          * 4: no_extrap_integr (FE only)
          */
@@ -194,12 +210,13 @@ enum icontrols
     /*! \brief Divide the intervals of the grid by 2^(divideBy2)
          *
          * Divides the intervals of the grid by 2^(divideBy2)
+         * (defines how often to split the intervals of the grid at the midpoint)
          */
     divideBy2,
     /*! \brief Problem to solve
          *
          * Defines the problem to solve
-         * - 5: the classical problem (Zoni2019, aligned with the cartesian grid)
+         * - 5: the classical problem (Zoni2019, aligned with the cartesian grid) (we always use this)
          * - 6: more realistic problem (Emily & Virginie, aligned with the polar grid)
          */
     prob,
@@ -244,7 +261,7 @@ enum dcontrols
 {
     /*! \brief Radius of the disk
          *
-         * Interior and exterior radius of the disk-like shape
+         * Interior (R0) and exterior (R) radius of the disk-like shape
          */
     r0_DB,
     R0,
@@ -261,9 +278,9 @@ enum dcontrols
          * - mod_pk = kappa_eps = delta_e = 0: circular geometry [x=r.cos(theta), y=r.sin(theta)]
          * - else: stretched circular geometry
          *   [x=(1-kappa_eps)r.cos(theta)-delta_e.r^2, y=(1+kappa_eps)r.sin(theta)] with
-         *     - kappa_eps: Elongation
+         *     - kappa_eps: Elongation (Parameter kappa for the Shafranov geometry, parameters epsilon for the Czarny geometry, is set automatically depending on the geometry)
          *     - delta_e: Shafranov shift (outward radial
-         *       displacement of the centre of flux)
+         *       displacement of the centre of flux) (Parameter delta for the Shafranov geometry, parameters e for the Czarny geometry, is set automatically depending on the geometry)
          */
     kappa_eps,
     delta_e,
