@@ -23,20 +23,14 @@ TEST(Test_prolongation, Test_bilinear_prolongation)
         u_test[z] = 1 - z + pow(PI, -z * z);
     }
 
-    std::vector<double> sol;
-    if (gyro::icntl[Param::optimized] == 0) {
-        sol = p_level.apply_prolongation_bi0(u_test, p_level.mc, p_level.m, p_level.coarse_nodes_list_r,
-                                             p_level.coarse_nodes_list_theta, 0);
-    }
-    else {
-        p_level.define_nz_P();
-        p_level.ri_prol = std::vector<int>(p_level.nz_P);
-        p_level.ci_prol = std::vector<int>(p_level.nz_P);
-        p_level.v_prol  = std::vector<double>(p_level.nz_P);
-        p_level.build_prolongation_bi();
+    p_level.define_nz_P();
+    p_level.ri_prol = std::vector<int>(p_level.nz_P);
+    p_level.ci_prol = std::vector<int>(p_level.nz_P);
+    p_level.v_prol  = std::vector<double>(p_level.nz_P);
+    //p_level.build_prolongation_bi();
 
-        sol = p_level.apply_prolongation_bi(u_test);
-    }
+    std::vector<double> sol = p_level.apply_prolongation_bi(u_test);
+
     for (int j = 0; j < p_level.nr_int + 1; j++) {
         for (int i = 0; i < p_level.ntheta_int; i++) {
             if (j % 2 == 0 && i % 2 == 0) {
@@ -267,4 +261,122 @@ TEST(Test_prolongation, Test_extrapolation_prolongation)
     }
 }
 
-//TODO:  Test restriction operator. Maybe fix interior dirichlet boundary ?
+TEST(Test_prolongation, Test_bilinear_restriction)
+{
+    gyro::icntl[Param::optimized] = 1;
+
+    gmgpolar test_p;
+    test_p.create_grid_polar();
+    test_p.check_geom();
+    test_p.define_coarse_nodes();
+
+    level& p_level = *(test_p.v_level[0]);
+    int ctheta_int = test_p.v_level[1]->ntheta_int;
+    int cr_int     = test_p.v_level[1]->nr_int;
+
+    p_level.m  = test_p.v_level[0]->nr * test_p.v_level[0]->ntheta;
+    p_level.mc = test_p.v_level[1]->nr * test_p.v_level[1]->ntheta;
+
+    std::vector<double> u_test(p_level.m);
+    for (int z = 0; z < p_level.m; z++) {
+        u_test[z] = 1 - z;
+    }
+
+    p_level.define_nz_P();
+    p_level.ri_prol = std::vector<int>(p_level.nz_P);
+    p_level.ci_prol = std::vector<int>(p_level.nz_P);
+    p_level.v_prol  = std::vector<double>(p_level.nz_P);
+    p_level.build_prolongation_bi();
+
+    std::vector<double> sol = p_level.apply_restriction_bi(u_test);
+
+    /*
+     * The restriction operator accumulates the values in the direct vicinity and stores them in the corresponding node.
+     * We hence calculate 8 values for every coarse node. These 8 values are the fine nodes in the vicinity that are to be accumulated
+     * in the coarse node
+     *
+     * we treat values in r as the x-axis. values in theta as the y-axis. Hence the vector 'adjacent' stores the values in the order:
+
+     * **bottom_left, left, top_left, bottom, top, bottom_right, right, top_right;**
+     */
+
+    for (int j = 0; j < cr_int + 1; j++) {
+        for (int i = 0; i < ctheta_int; i++) {
+            std::vector<double> adjacent(8, -1.0);
+            if (j == 0) { //interior circle
+                adjacent[0] = 0.0;
+                adjacent[1] = 0.0;
+                adjacent[2] = 0.0;
+            }
+            if (j == cr_int) { //exterior circle
+                adjacent[5] = 0.0;
+                adjacent[6] = 0.0;
+                adjacent[7] = 0.0;
+            }
+
+            int k = 0;
+            std::vector<std::tuple<double, double>> h_p(8, {-1, -1});
+            std::vector<std::tuple<double, double>> k_q(8, {-1, -1});
+
+            for (int z = -1; z < 2; z++) {
+                for (int y = -1; y < 2; y++) {
+                    if (z != 0 || y != 0) {
+                        if (adjacent[k] != 0.0) {
+
+                            adjacent[k] = u_test[(2 * j + z) * p_level.ntheta_int +
+                                                 ((i != 0 || y > -1) ? (2 * i + y) : p_level.ntheta_int - 1)];
+
+                            h_p[k] = {p_level.r[2 * j + z + 1] - p_level.r[2 * j + z],
+                                      p_level.r[2 * j + z] - p_level.r[2 * j + z - 1]};
+
+                            if (i > 0) {
+                                double val =
+                                    (2 * i + y < p_level.ntheta_int - 1) ? p_level.theta[2 * i + y + 1] : 2 * PI;
+
+                                k_q[k] = {val - p_level.theta[2 * i + y],
+                                          p_level.theta[2 * i + y] - p_level.theta[2 * i + y - 1]};
+                            }
+                            else {
+                                switch (y) {
+                                case 1:
+                                    k_q[k] = {p_level.theta[y + 1] - p_level.theta[y],
+                                              p_level.theta[y] - p_level.theta[y - 1]};
+                                case 0:
+                                    k_q[k] = {p_level.theta[y + 1] - p_level.theta[y],
+                                              2 * PI - p_level.theta[p_level.ntheta_int - 1]};
+                                default:
+                                    k_q[k] = {2 * PI - p_level.theta[p_level.ntheta_int - 1],
+                                              p_level.theta[p_level.ntheta_int - 1] -
+                                                  p_level.theta[p_level.ntheta_int - 2]};
+                                }
+                            }
+                        }
+                        k += 1;
+                    }
+                }
+            }
+
+            std::vector<double> vals{
+                std::get<1>(h_p[0]) * std::get<1>(k_q[0]) /
+                    ((std::get<0>(h_p[0]) + std::get<1>(h_p[0])) * (std::get<0>(k_q[0]) + std::get<1>(k_q[0]))),
+                std::get<1>(h_p[1]) / (std::get<0>(h_p[1]) + std::get<1>(h_p[1])),
+                std::get<1>(h_p[2]) * std::get<0>(k_q[2]) /
+                    ((std::get<0>(h_p[2]) + std::get<1>(h_p[2])) * (std::get<0>(k_q[2]) + std::get<1>(k_q[2]))),
+                std::get<1>(k_q[3]) / (std::get<0>(k_q[3]) + std::get<1>(k_q[3])),
+                std::get<0>(k_q[4]) / (std::get<0>(k_q[4]) + std::get<1>(k_q[4])),
+                std::get<0>(h_p[5]) * std::get<1>(k_q[5]) /
+                    ((std::get<0>(h_p[5]) + std::get<1>(h_p[5])) * (std::get<0>(k_q[5]) + std::get<1>(k_q[5]))),
+                std::get<0>(h_p[6]) / (std::get<0>(h_p[6]) + std::get<1>(h_p[6])),
+                std::get<0>(h_p[7]) * std::get<0>(k_q[7]) /
+                    ((std::get<0>(h_p[7]) + std::get<1>(h_p[7])) * (std::get<0>(k_q[7]) + std::get<1>(k_q[7])))};
+
+            double finval = u_test[(2 * j) * p_level.ntheta_int + (2 * i)];
+            for (int z = 0; z < 8; z++) {
+                finval += vals[z] * adjacent[z];
+            }
+
+            EXPECT_NEAR(finval, sol[j * ctheta_int + i], 1e-6)
+                << "The test fails at Index for (r,theta): (" + std::to_string(j) + "," + std::to_string(i) + ")";
+        }
+    }
+}
