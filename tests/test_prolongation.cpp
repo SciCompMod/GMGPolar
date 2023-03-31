@@ -307,16 +307,26 @@ TEST(Test_prolongation, Test_bilinear_restriction)
                 adjacent[0] = 0.0;
                 adjacent[1] = 0.0;
                 adjacent[2] = 0.0;
+
+                /* Test works if I set these to zero*/
+                adjacent[5] = 0.0;
+                adjacent[6] = 0.0;
+                adjacent[7] = 0.0;
             }
             if (j == cr_int) { //exterior circle
                 adjacent[5] = 0.0;
                 adjacent[6] = 0.0;
                 adjacent[7] = 0.0;
+
+                /* Test works if I set these to zero*/
+                adjacent[0] = 0.0;
+                adjacent[1] = 0.0;
+                adjacent[2] = 0.0;
             }
 
             int k = 0;
-            std::vector<std::tuple<double, double>> h_p(8, {-1, -1});
-            std::vector<std::tuple<double, double>> k_q(8, {-1, -1});
+            std::vector<std::tuple<double, double>> h_p(8, {-1, -1}); // (h_p, h_pm1)
+            std::vector<std::tuple<double, double>> k_q(8, {-1, -1}); // (k_q, k_qm1)
 
             for (int z = -1; z < 2; z++) {
                 for (int y = -1; y < 2; y++) {
@@ -373,6 +383,121 @@ TEST(Test_prolongation, Test_bilinear_restriction)
             double finval = u_test[(2 * j) * p_level.ntheta_int + (2 * i)];
             for (int z = 0; z < 8; z++) {
                 finval += vals[z] * adjacent[z];
+            }
+
+            EXPECT_NEAR(finval, sol[j * ctheta_int + i], 1e-6)
+                << "The test fails at Index for (r,theta): (" + std::to_string(j) + "," + std::to_string(i) + ")";
+        }
+    }
+}
+
+TEST(Test_prolongation, Test_injection_restriction)
+{
+    gmgpolar test_p;
+    test_p.create_grid_polar();
+    test_p.check_geom();
+    test_p.define_coarse_nodes();
+
+    level& p_level = *(test_p.v_level[0]);
+    int ctheta_int = test_p.v_level[1]->ntheta_int;
+    int cr_int     = test_p.v_level[1]->nr_int;
+
+    p_level.m  = test_p.v_level[0]->nr * test_p.v_level[0]->ntheta;
+    p_level.mc = test_p.v_level[1]->nr * test_p.v_level[1]->ntheta;
+
+    std::vector<double> u_test(p_level.m);
+    for (int z = 0; z < p_level.m; z++) {
+        u_test[z] = z;
+    }
+
+    p_level.ri_prol_inj = std::vector<int>(p_level.nz_P_inj);
+    p_level.ci_prol_inj = std::vector<int>(p_level.nz_P_inj);
+    p_level.v_prol_inj  = std::vector<double>(p_level.nz_P_inj);
+    p_level.build_prolongation_inj();
+
+    std::vector<double> sol = p_level.apply_restriction_inj(u_test);
+
+    EXPECT_EQ((int)sol.size(), p_level.mc);
+
+    for (int j = 0; j < cr_int + 1; j++) {
+        for (int i = 0; i < ctheta_int; i++) {
+            EXPECT_EQ(sol[j * ctheta_int + i], u_test[(2 * j) * p_level.ntheta_int + (2 * i)])
+                << "(" + std::to_string(j) + "," + std::to_string(i) + ")";
+        }
+    }
+}
+
+TEST(Test_prolongation, Test_extrapolation_restriction)
+{
+    gyro::icntl[Param::optimized] = 1;
+
+    gmgpolar test_p;
+    test_p.create_grid_polar();
+    test_p.check_geom();
+    test_p.define_coarse_nodes();
+
+    level& p_level = *(test_p.v_level[0]);
+    int ctheta_int = test_p.v_level[1]->ntheta_int;
+    int cr_int     = test_p.v_level[1]->nr_int;
+
+    p_level.m  = test_p.v_level[0]->nr * test_p.v_level[0]->ntheta;
+    p_level.mc = test_p.v_level[1]->nr * test_p.v_level[1]->ntheta;
+
+    std::vector<double> u_test(p_level.m);
+    for (int z = 0; z < p_level.m; z++) {
+        u_test[z] = 1 - z;
+    }
+
+    p_level.define_nz_P();
+    p_level.ri_prol = std::vector<int>(p_level.nz_P);
+    p_level.ci_prol = std::vector<int>(p_level.nz_P);
+    p_level.v_prol  = std::vector<double>(p_level.nz_P);
+    p_level.build_prolongation_bi();
+
+    std::vector<double> sol = p_level.apply_restriction_ex(u_test);
+
+    /* based on the triangulation, at most 6 adjacent fine nodes are considered:
+     * **left,top_left,bottom,top,bottom_right,right**
+     */
+    for (int j = 0; j < cr_int + 1; j++) {
+        for (int i = 0; i < ctheta_int; i++) {
+            std::vector<double> adjacent(6, -1.0);
+            if (j == 0) { //interior circle
+                adjacent[0] = 0.0;
+                adjacent[1] = 0.0;
+
+                /*
+                test works if I set these to zero*/
+                adjacent[4] = 0.0;
+                adjacent[5] = 0.0;
+            }
+            if (j == cr_int) { //exterior circle
+                adjacent[4] = 0.0;
+                adjacent[5] = 0.0;
+
+                /* Test works if I set these to zero*/
+                adjacent[0] = 0.0;
+                adjacent[1] = 0.0;
+            }
+
+            int k = 0;
+
+            for (int z = -1; z < 2; z++) {
+                for (int y = -1; y < 2; y++) {
+                    if ((z != 0 || y != 0) && (z * y != 1)) {
+                        if (adjacent[k] != 0.0) {
+
+                            adjacent[k] = u_test[(2 * j + z) * p_level.ntheta_int +
+                                                 ((i != 0 || y > -1) ? (2 * i + y) : p_level.ntheta_int - 1)];
+                        }
+                        k += 1;
+                    }
+                }
+            }
+
+            double finval = u_test[(2 * j) * p_level.ntheta_int + (2 * i)];
+            for (int z = 0; z < 8; z++) {
+                finval += 0.5 * adjacent[z];
             }
 
             EXPECT_NEAR(finval, sol[j * ctheta_int + i], 1e-6)
