@@ -48,18 +48,31 @@ TEST(Test_prolongation, Test_bilinear_prolongation)
 
                 double val = (k_q * u_test[i1] + k_qm1 * u_test[i2]);
 
-                EXPECT_NEAR(val, (k_q + k_qm1) * sol[j * p_level.ntheta_int + i], 1e-8);
+                EXPECT_NEAR(val, (k_q + k_qm1) * sol[j * p_level.ntheta_int + i], 1e-8)
+                    << "Bilinear Prolongation fails for Index (r,theta) : (" + std::to_string(j) + "," +
+                           std::to_string(i) + ")";
+                ;
             }
             else if (i % 2 == 0) { // r_j fine node, theta_i coarse
                 double h_pm1 = p_level.r[j] - p_level.r[j - 1];
                 double h_p   = p_level.r[j + 1] - p_level.r[j];
 
-                double v1 = (j > 1) ? u_test[(j - 1) / 2 * ctheta_int + (i / 2)] : 0; //Dirichlet BC
-                double v2 = (j < p_level.nr_int - 1) ? u_test[(j + 1) / 2 * ctheta_int + (i / 2)] : 0;
+                //double v1 = (j > 1) ? u_test[(j - 1) / 2 * ctheta_int + (i / 2)] : 0; //Dirichlet BC
+                //double v2 = (j < p_level.nr_int - 1) ? u_test[(j + 1) / 2 * ctheta_int + (i / 2)] : 0;
+
+                /*I dont think that we need to differentiate if we are next to the boundary (j==1 || j==nr_int-1)
+                  if we prolongate a solution with specific boundary data then the information should be stored 
+                  in the solution and not neccessarily in the Operator*/
+
+                double v1 = u_test[(j - 1) / 2 * ctheta_int + (i / 2)];
+                double v2 = u_test[(j + 1) / 2 * ctheta_int + (i / 2)];
 
                 double val = (h_p * v1 + h_pm1 * v2);
 
-                EXPECT_NEAR(val, (h_p + h_pm1) * sol[j * p_level.ntheta_int + i], 1e-8);
+                EXPECT_NEAR(val, (h_p + h_pm1) * sol[j * p_level.ntheta_int + i], 1e-8)
+                    << "Bilinear Prolongation fails for Index (r,theta) : (" + std::to_string(j) + "," +
+                           std::to_string(i) + ")";
+                ;
             }
             else // both are fine nodes
             {
@@ -76,7 +89,7 @@ TEST(Test_prolongation, Test_bilinear_prolongation)
                 double bottom_right;
                 double top_right;
                 ASSERT_NE(p_level.nr_int - 1, 1);
-                int boundary_terms = (j == 1) * ((i == p_level.ntheta_int - 1) + 2 * (i < p_level.ntheta_int - 1)) +
+                /*int boundary_terms = (j == 1) * ((i == p_level.ntheta_int - 1) + 2 * (i < p_level.ntheta_int - 1)) +
                                      (j == p_level.nr_int - 1) * (3 + (i == p_level.ntheta_int - 1)) +
                                      (j > 1 && j < p_level.nr_int - 1) * (i == p_level.ntheta_int - 1) * 5;
 
@@ -118,11 +131,31 @@ TEST(Test_prolongation, Test_bilinear_prolongation)
                     top_right    = u_test[((j + 1) / 2) * ctheta_int];
                     break;
                 }
+                */
+
+                /*I dont think that we need to differentiate if we are next to the boundary (j==1 || j==nr_int-1)
+                  if we prolongate a solution with specific boundary data then the information should be stored 
+                  in the solution and not neccessarily in the Operator*/
+
+                if (i < p_level.ntheta - 1) {
+                    bottom_left  = u_test[((j - 1) / 2) * ctheta_int + (i - 1) / 2];
+                    top_left     = u_test[((j - 1) / 2) * ctheta_int + (i + 1) / 2];
+                    bottom_right = u_test[((j + 1) / 2) * ctheta_int + (i - 1) / 2];
+                    top_right    = u_test[((j + 1) / 2) * ctheta_int + (i + 1) / 2];
+                }
+                else {
+                    bottom_left  = u_test[((j - 1) / 2) * ctheta_int + (i - 1) / 2];
+                    top_left     = u_test[((j - 1) / 2) * ctheta_int];
+                    bottom_right = u_test[((j + 1) / 2) * ctheta_int + (i - 1) / 2];
+                    top_right    = u_test[((j + 1) / 2) * ctheta_int];
+                }
 
                 double val = ((h_p * k_q * bottom_left) + (h_p * k_qm1 * top_left) + (h_pm1 * k_q * bottom_right) +
                               (h_pm1 * k_qm1 * top_right));
 
-                EXPECT_NEAR(val, (h_p + h_pm1) * (k_q + k_qm1) * sol[j * p_level.ntheta_int + i], 1e-8);
+                EXPECT_NEAR(val, (h_p + h_pm1) * (k_q + k_qm1) * sol[j * p_level.ntheta_int + i], 1e-8)
+                    << "Bilinear Prolongation fails for Index (r,theta) : (" + std::to_string(j) + "," +
+                           std::to_string(i) + ")";
             }
         }
     }
@@ -159,7 +192,8 @@ TEST(Test_prolongation, Test_injection_prolongation)
         for (int i = 0; i < p_level.ntheta_int; i++) {
             if (j % 2 == 0 && i % 2 == 0) {
                 EXPECT_EQ(u_test[(j / 2) * ctheta_int + (i / 2)], sol[j * p_level.ntheta_int + i])
-                    << "the injection value is wrong at j=" + std::to_string(j) + " and i=" + std::to_string(i);
+                    << "The Injection value fails at Index (r,theta): ()" + std::to_string(j) + "," +
+                           std::to_string(i) + ")";
             }
             else {
                 EXPECT_EQ(sol[j * p_level.ntheta_int + i], 0);
@@ -207,16 +241,23 @@ TEST(Test_prolongation, Test_extrapolation_prolongation)
 
                 double val = 0.5 * (u_test[i1] + u_test[i2]);
 
-                EXPECT_NEAR(val, sol[j * p_level.ntheta_int + i], 1e-8);
+                EXPECT_NEAR(val, sol[j * p_level.ntheta_int + i], 1e-8)
+                    << "Extrapolated Prolongation fails for Index (r,theta): (" + std::to_string(j) + "," +
+                           std::to_string(i) + ")";
             }
             else if (i % 2 == 0) { // r_j fine node, theta_i coarse. lower edge of the triangle
 
-                double v1 = (j > 1) ? u_test[(j - 1) / 2 * ctheta_int + (i / 2)] : 0; //zero Dirichlet BC
-                double v2 = (j < p_level.nr_int - 1) ? u_test[(j + 1) / 2 * ctheta_int + (i / 2)] : 0;
+                //double v1 = (j > 1) ? u_test[(j - 1) / 2 * ctheta_int + (i / 2)] : 0; //zero Dirichlet BC
+                //double v2 = (j < p_level.nr_int - 1) ? u_test[(j + 1) / 2 * ctheta_int + (i / 2)] : 0;
+
+                double v1 = u_test[(j - 1) / 2 * ctheta_int + (i / 2)];
+                double v2 = u_test[(j + 1) / 2 * ctheta_int + (i / 2)];
 
                 double val = 0.5 * (v1 + v2);
 
-                EXPECT_NEAR(val, sol[j * p_level.ntheta_int + i], 1e-8);
+                EXPECT_NEAR(val, sol[j * p_level.ntheta_int + i], 1e-8)
+                    << "Extrapolated Prolongation fails for Index (r,theta): (" + std::to_string(j) + "," +
+                           std::to_string(i) + ")";
             }
             else // both are fine nodes
             {
@@ -227,7 +268,7 @@ TEST(Test_prolongation, Test_extrapolation_prolongation)
                 double bottom_right;
 
                 ASSERT_NE(p_level.nr_int - 1, 1);
-                int boundary_terms = (j == 1) + (j == p_level.nr_int - 1) * (2 + (i == p_level.ntheta_int - 1)) +
+                /*int boundary_terms = (j == 1) + (j == p_level.nr_int - 1) * (2 + (i == p_level.ntheta_int - 1)) +
                                      (j > 1 && j < p_level.nr_int - 1) * (i == p_level.ntheta_int - 1) * 4;
 
                 switch (boundary_terms) {
@@ -251,11 +292,23 @@ TEST(Test_prolongation, Test_extrapolation_prolongation)
                     top_left     = u_test[((j - 1) / 2) * ctheta_int];
                     bottom_right = u_test[((j + 1) / 2) * ctheta_int + (i - 1) / 2];
                     break;
+                }*/
+
+                if (i < p_level.ntheta_int - 1) {
+                    top_left     = u_test[((j - 1) / 2) * ctheta_int + (i + 1) / 2];
+                    bottom_right = u_test[((j + 1) / 2) * ctheta_int + (i - 1) / 2];
+                }
+                else {
+                    top_left     = u_test[((j - 1) / 2) * ctheta_int];
+                    bottom_right = u_test[((j + 1) / 2) * ctheta_int + (i - 1) / 2];
                 }
 
                 double val = 0.5 * (top_left + bottom_right);
 
-                EXPECT_NEAR(val, sol[j * p_level.ntheta_int + i], 1e-8);
+                EXPECT_NEAR(val, sol[j * p_level.ntheta_int + i], 1e-8)
+                    << "Extrapolated Prolongation fails for Index (r,theta): (" + std::to_string(j) + "," +
+                           std::to_string(i) + ")";
+                ;
             }
         }
     }
@@ -307,21 +360,11 @@ TEST(Test_prolongation, Test_bilinear_restriction)
                 adjacent[0] = 0.0;
                 adjacent[1] = 0.0;
                 adjacent[2] = 0.0;
-
-                /* Test works if I set these to zero*/
-                adjacent[5] = 0.0;
-                adjacent[6] = 0.0;
-                adjacent[7] = 0.0;
             }
             if (j == cr_int) { //exterior circle
                 adjacent[5] = 0.0;
                 adjacent[6] = 0.0;
                 adjacent[7] = 0.0;
-
-                /* Test works if I set these to zero*/
-                adjacent[0] = 0.0;
-                adjacent[1] = 0.0;
-                adjacent[2] = 0.0;
             }
 
             int k = 0;
@@ -422,7 +465,8 @@ TEST(Test_prolongation, Test_injection_restriction)
     for (int j = 0; j < cr_int + 1; j++) {
         for (int i = 0; i < ctheta_int; i++) {
             EXPECT_EQ(sol[j * ctheta_int + i], u_test[(2 * j) * p_level.ntheta_int + (2 * i)])
-                << "(" + std::to_string(j) + "," + std::to_string(i) + ")";
+                << "The injection restriction fails at Index (r,theta): (" + std::to_string(j) + "," +
+                       std::to_string(i) + ")";
         }
     }
 }
@@ -465,19 +509,10 @@ TEST(Test_prolongation, Test_extrapolation_restriction)
             if (j == 0) { //interior circle
                 adjacent[0] = 0.0;
                 adjacent[1] = 0.0;
-
-                /*
-                test works if I set these to zero*/
-                adjacent[4] = 0.0;
-                adjacent[5] = 0.0;
             }
             if (j == cr_int) { //exterior circle
                 adjacent[4] = 0.0;
                 adjacent[5] = 0.0;
-
-                /* Test works if I set these to zero*/
-                adjacent[0] = 0.0;
-                adjacent[1] = 0.0;
             }
 
             int k = 0;
