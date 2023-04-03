@@ -89,49 +89,6 @@ TEST(Test_prolongation, Test_bilinear_prolongation)
                 double bottom_right;
                 double top_right;
                 ASSERT_NE(p_level.nr_int - 1, 1);
-                /*int boundary_terms = (j == 1) * ((i == p_level.ntheta_int - 1) + 2 * (i < p_level.ntheta_int - 1)) +
-                                     (j == p_level.nr_int - 1) * (3 + (i == p_level.ntheta_int - 1)) +
-                                     (j > 1 && j < p_level.nr_int - 1) * (i == p_level.ntheta_int - 1) * 5;
-
-                switch (boundary_terms) {
-                default: //(j>1 && j<nr_int-1 && i<ntheta_int-1)
-                    bottom_left  = u_test[((j - 1) / 2) * ctheta_int + (i - 1) / 2];
-                    top_left     = u_test[((j - 1) / 2) * ctheta_int + (i + 1) / 2];
-                    bottom_right = u_test[((j + 1) / 2) * ctheta_int + (i - 1) / 2];
-                    top_right    = u_test[((j + 1) / 2) * ctheta_int + (i + 1) / 2];
-                    break;
-                case 1: // (j==1 && i==ntheta_int-1)
-                    bottom_left  = 0;
-                    top_left     = 0;
-                    bottom_right = u_test[((j + 1) / 2) * ctheta_int + (i - 1) / 2];
-                    top_right    = u_test[((j + 1) / 2) * ctheta_int];
-                    break;
-                case 2: //(j==1 && i<ntheta_int -1)
-                    bottom_left  = 0;
-                    top_left     = 0;
-                    bottom_right = u_test[((j + 1) / 2) * ctheta_int + (i - 1) / 2];
-                    top_right    = u_test[((j + 1) / 2) * ctheta_int + (i + 1) / 2];
-                    break;
-                case 3: //(j==nr_int-1 && i<ntheta_int-1)
-                    bottom_left  = u_test[((j - 1) / 2) * ctheta_int + (i - 1) / 2];
-                    top_left     = u_test[((j - 1) / 2) * ctheta_int + (i + 1) / 2];
-                    bottom_right = 0;
-                    top_right    = 0;
-                    break;
-                case 4: //(j==nr_int-1 && i== ntheta_int-1)
-                    bottom_left  = u_test[((j - 1) / 2) * ctheta_int + (i - 1) / 2];
-                    top_left     = u_test[((j - 1) / 2) * ctheta_int];
-                    bottom_right = 0;
-                    top_right    = 0;
-                    break;
-                case 5: //(j interior, i==ntheta_int-1)
-                    bottom_left  = u_test[((j - 1) / 2) * ctheta_int + (i - 1) / 2];
-                    top_left     = u_test[((j - 1) / 2) * ctheta_int];
-                    bottom_right = u_test[((j + 1) / 2) * ctheta_int + (i - 1) / 2];
-                    top_right    = u_test[((j + 1) / 2) * ctheta_int];
-                    break;
-                }
-                */
 
                 /*I dont think that we need to differentiate if we are next to the boundary (j==1 || j==nr_int-1)
                   if we prolongate a solution with specific boundary data then the information should be stored 
@@ -192,8 +149,8 @@ TEST(Test_prolongation, Test_injection_prolongation)
         for (int i = 0; i < p_level.ntheta_int; i++) {
             if (j % 2 == 0 && i % 2 == 0) {
                 EXPECT_EQ(u_test[(j / 2) * ctheta_int + (i / 2)], sol[j * p_level.ntheta_int + i])
-                    << "The Injection value fails at Index (r,theta): ()" + std::to_string(j) + "," +
-                           std::to_string(i) + ")";
+                    << "The Injection value fails at Index (r,theta): (" + std::to_string(j) + "," + std::to_string(i) +
+                           ")";
             }
             else {
                 EXPECT_EQ(sol[j * p_level.ntheta_int + i], 0);
@@ -266,33 +223,6 @@ TEST(Test_prolongation, Test_extrapolation_prolongation)
 
                 double top_left;
                 double bottom_right;
-
-                ASSERT_NE(p_level.nr_int - 1, 1);
-                /*int boundary_terms = (j == 1) + (j == p_level.nr_int - 1) * (2 + (i == p_level.ntheta_int - 1)) +
-                                     (j > 1 && j < p_level.nr_int - 1) * (i == p_level.ntheta_int - 1) * 4;
-
-                switch (boundary_terms) {
-                default: //(j>1 && j<nr_int-1 && i<ntheta_int-1)
-                    top_left     = u_test[((j - 1) / 2) * ctheta_int + (i + 1) / 2];
-                    bottom_right = u_test[((j + 1) / 2) * ctheta_int + (i - 1) / 2];
-                    break;
-                case 1: // (j==1)
-                    top_left     = 0;
-                    bottom_right = u_test[((j + 1) / 2) * ctheta_int + (i - 1) / 2];
-                    break;
-                case 2: //(j==nr_int-1 && i<ntheta_int-1)
-                    top_left     = u_test[((j - 1) / 2) * ctheta_int + (i + 1) / 2];
-                    bottom_right = 0;
-                    break;
-                case 3: //(j==nr_int-1 && i== ntheta_int-1)
-                    top_left     = u_test[((j - 1) / 2) * ctheta_int];
-                    bottom_right = 0;
-                    break;
-                case 4: //(j interior, i==ntheta_int-1)
-                    top_left     = u_test[((j - 1) / 2) * ctheta_int];
-                    bottom_right = u_test[((j + 1) / 2) * ctheta_int + (i - 1) / 2];
-                    break;
-                }*/
 
                 if (i < p_level.ntheta_int - 1) {
                     top_left     = u_test[((j - 1) / 2) * ctheta_int + (i + 1) / 2];
@@ -392,10 +322,9 @@ TEST(Test_prolongation, Test_bilinear_restriction)
                             else {
                                 switch (y) {
                                 case 1:
-                                    k_q[k] = {p_level.theta[y + 1] - p_level.theta[y],
-                                              p_level.theta[y] - p_level.theta[y - 1]};
+                                    k_q[k] = {p_level.theta[2] - p_level.theta[1], p_level.theta[1] - p_level.theta[0]};
                                 case 0:
-                                    k_q[k] = {p_level.theta[y + 1] - p_level.theta[y],
+                                    k_q[k] = {p_level.theta[1] - p_level.theta[0],
                                               2 * PI - p_level.theta[p_level.ntheta_int - 1]};
                                 default:
                                     k_q[k] = {2 * PI - p_level.theta[p_level.ntheta_int - 1],
