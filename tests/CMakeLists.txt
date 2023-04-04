@@ -1,6 +1,6 @@
 enable_testing()
 
-set(TESTSOURCES comparetest.cpp level_test.cpp test_prolongation.cpp)
+set(TESTSOURCES comparetest.cpp level_test.cpp test_prolongation.cpp test_restriction.cpp)
 
 add_executable(
   gmgpolar_tests
