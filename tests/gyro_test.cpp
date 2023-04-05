@@ -27,15 +27,3 @@ TEST(Test_Gyro, sign)
     EXPECT_EQ(gyro::sign(-45), -1);
     EXPECT_EQ(gyro::sign(642), 1);
 }
-
-/*TEST(Test_Gyro, select_functions_class)
-{
-    gyro::select_functions_class(0,0,0,5); //circular geometry
-    gyro::functions ->
-}
-
-
-TEST_F(Test_Gyro, eval_sol){
-    gyro::select_functions_class(0,0,0,5); //polar coord
-    gyro::functions -> 
-}*/

@@ -19,11 +19,16 @@ protected:
 TEST_F(Level_test, Nodes_Build_r)
 {
 
-    gyro::icntl[Param::fac_ani] = 0;
-    test_level.build_r();
-    EXPECT_EQ(pow(2, gyro::icntl[Param::nr_exp]) + 1, test_level.r.size());
-    gyro::icntl[Param::fac_ani] = 2;
-    EXPECT_EQ(pow(2, gyro::icntl[Param::nr_exp]) + 1, test_level.r.size());
+    int& nr_exp = gyro::icntl[Param::nr_exp];
+
+    for (nr_exp = 3; nr_exp < 6; nr_exp++) {
+        gyro::icntl[Param::fac_ani] = 0;
+        test_level.build_r();
+        EXPECT_EQ(pow(2, nr_exp) + 1, test_level.r.size());
+        gyro::icntl[Param::fac_ani] = 2;
+        test_level.build_r();
+        EXPECT_EQ(pow(2, nr_exp + 1) + 1, test_level.r.size());
+    }
 }
 
 TEST_F(Level_test, Anisotropy_r)
@@ -47,22 +52,24 @@ TEST_F(Level_test, Anisotropy_r)
 
 TEST_F(Level_test, Nodes_Build_theta) //first learn implementation and how anisotropy is included
 {
+    int& ntheta_exp = gyro::icntl[Param::ntheta_exp];
+    for (ntheta_exp = 3; ntheta_exp < 6; ntheta_exp++) {
+        gyro::icntl[Param::periodic] = 0;
+        test_level.build_r();
+        test_level.build_theta();
+        int ntheta = pow(2, ceil(log2(test_level.nr))) + 1;
+        EXPECT_EQ(ntheta, test_level.ntheta);
 
-    gyro::icntl[Param::periodic] = 0;
-    test_level.build_r();
-    test_level.build_theta();
-    int ntheta = pow(2, ceil(log2(test_level.nr))) + 1;
-    EXPECT_EQ(ntheta, test_level.ntheta);
+        gyro::icntl[Param::periodic] = 1;
+        test_level.build_r();
+        test_level.build_theta();
 
-    gyro::icntl[Param::periodic] = 1;
-    test_level.build_r();
-    test_level.build_theta();
-
-    ntheta = pow(2, ceil(log2(test_level.nr)));
-    EXPECT_EQ(ntheta, test_level.ntheta);
+        ntheta = pow(2, ceil(log2(test_level.nr)));
+        EXPECT_EQ(ntheta, test_level.ntheta);
+    }
 }
-
-TEST_F(Level_test, Anisotropy_theta)
+//todo
+TEST_F(Level_test, Anisotropy_theta) //unfinished
 {
 
     gyro::icntl[Param::theta_aniso] = 1;
@@ -123,7 +130,6 @@ TEST_F(Level_test, Test_Nonzero_size)
 
 TEST_F(Level_test, Test_get_ptr)
 {
-    int& geom    = gyro::icntl[Param::mod_pk];
     int& dir_int = gyro::icntl[Param::DirBC_Interior];
 
     dir_int = 1;
@@ -131,7 +137,6 @@ TEST_F(Level_test, Test_get_ptr)
     test_level.build_r();
     test_level.build_theta();
     test_level.store_theta_n_co();
-    int m = test_level.nr * test_level.ntheta;
 
     //z = r*ntheta_int + theta
     EXPECT_EQ(0, test_level.get_ptr(0, 0));
@@ -142,7 +147,7 @@ TEST_F(Level_test, Test_get_ptr)
     }
 }
 
-TEST_F(Level_test, Test_get_stencil)
+TEST_F(Level_test, Test_get_stencil) //unfinished
 {
     test_level.build_r();
     int& geom = gyro::icntl[Param::mod_pk];
