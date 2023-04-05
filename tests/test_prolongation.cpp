@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include "gmgpolar.h"
-class Test_prolongation : public ::testing::Test
+class Test_prolongation : public ::testing::TestWithParam<int>
 {
 protected:
     void SetUp() override
@@ -25,11 +25,18 @@ protected:
     }
 };
 
-TEST_F(Test_prolongation, Test_bilinear_prolongation)
+TEST_P(Test_prolongation, Test_bilinear_prolongation)
 {
+    const int& val_size            = GetParam();
+    gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
+    gyro::icntl[Param::ntheta_exp] = (val_size % 3) + 3;
+
+    if (gyro::icntl[Param::nr_exp] == 3)
+        gyro::icntl[Param::fac_ani] = 2;
 
     gmgpolar test_p;
     test_p.create_grid_polar();
+    std::cout << "4" << std::endl;
     test_p.check_geom();
     test_p.define_coarse_nodes();
 
@@ -72,9 +79,6 @@ TEST_F(Test_prolongation, Test_bilinear_prolongation)
                 double h_pm1 = p_level.r[j] - p_level.r[j - 1];
                 double h_p   = p_level.r[j + 1] - p_level.r[j];
 
-                //double v1 = (j > 1) ? u_test[(j - 1) / 2 * ctheta_int + (i / 2)] : 0; //Dirichlet BC
-                //double v2 = (j < p_level.nr_int - 1) ? u_test[(j + 1) / 2 * ctheta_int + (i / 2)] : 0;
-
                 /*I dont think that we need to differentiate if we are next to the boundary (j==1 || j==nr_int-1)
                   if we prolongate a solution with specific boundary data then the information should be stored 
                   in the solution and not neccessarily in the Operator*/
@@ -105,10 +109,6 @@ TEST_F(Test_prolongation, Test_bilinear_prolongation)
                 double top_right;
                 ASSERT_NE(p_level.nr_int - 1, 1);
 
-                /*I dont think that we need to differentiate if we are next to the boundary (j==1 || j==nr_int-1)
-                  if we prolongate a solution with specific boundary data then the information should be stored 
-                  in the solution and not neccessarily in the Operator*/
-
                 if (i < p_level.ntheta - 1) {
                     bottom_left  = u_test[((j - 1) / 2) * ctheta_int + (i - 1) / 2];
                     top_left     = u_test[((j - 1) / 2) * ctheta_int + (i + 1) / 2];
@@ -133,8 +133,15 @@ TEST_F(Test_prolongation, Test_bilinear_prolongation)
     }
 }
 
-TEST_F(Test_prolongation, Test_injection_prolongation)
+TEST_P(Test_prolongation, Test_injection_prolongation)
 {
+    const int& val_size            = GetParam();
+    gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
+    gyro::icntl[Param::ntheta_exp] = (val_size % 3) + 3;
+
+    if (gyro::icntl[Param::nr_exp] == 3)
+        gyro::icntl[Param::fac_ani] = 2;
+
     gmgpolar test_p;
     test_p.create_grid_polar();
     test_p.check_geom();
@@ -169,8 +176,15 @@ TEST_F(Test_prolongation, Test_injection_prolongation)
     }
 }
 
-TEST_F(Test_prolongation, Test_extrapolation_prolongation)
+TEST_P(Test_prolongation, Test_extrapolation_prolongation)
 {
+    const int& val_size            = GetParam();
+    gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
+    gyro::icntl[Param::ntheta_exp] = (val_size % 3) + 3;
+
+    if (gyro::icntl[Param::nr_exp] == 3)
+        gyro::icntl[Param::fac_ani] = 2;
+
     gmgpolar test_p;
     test_p.create_grid_polar();
     test_p.check_geom();
@@ -186,12 +200,6 @@ TEST_F(Test_prolongation, Test_extrapolation_prolongation)
     for (int z = 0; z < p_level.mc; z++) {
         u_test[z] = z;
     }
-
-    p_level.define_nz_P();
-    p_level.ri_prol_ex = std::vector<int>(p_level.nz_P_ex);
-    p_level.ci_prol_ex = std::vector<int>(p_level.nz_P_ex);
-    p_level.v_prol_ex  = std::vector<double>(p_level.nz_P_ex);
-    p_level.build_prolongation_ex();
 
     std::vector<double> sol = p_level.apply_prolongation_ex(u_test);
 
@@ -213,9 +221,6 @@ TEST_F(Test_prolongation, Test_extrapolation_prolongation)
                            std::to_string(i) + ")";
             }
             else if (i % 2 == 0) { // r_j fine node, theta_i coarse. lower edge of the triangle
-
-                //double v1 = (j > 1) ? u_test[(j - 1) / 2 * ctheta_int + (i / 2)] : 0; //zero Dirichlet BC
-                //double v2 = (j < p_level.nr_int - 1) ? u_test[(j + 1) / 2 * ctheta_int + (i / 2)] : 0;
 
                 double v1 = u_test[(j - 1) / 2 * ctheta_int + (i / 2)];
                 double v2 = u_test[(j + 1) / 2 * ctheta_int + (i / 2)];
@@ -253,3 +258,5 @@ TEST_F(Test_prolongation, Test_extrapolation_prolongation)
         }
     }
 }
+
+INSTANTIATE_TEST_SUITE_P(Prolongation_size, Test_prolongation, ::testing::Values(0, 1, 2, 3, 4, 5, 6, 7, 8));

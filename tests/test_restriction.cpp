@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include "gmgpolar.h"
-class Test_restriction : public ::testing::Test
+class Test_restriction : public ::testing::TestWithParam<int>
 {
 protected:
     void SetUp() override
@@ -25,9 +25,14 @@ protected:
     }
 };
 
-TEST_F(Test_restriction, Test_bilinear_restriction)
+TEST_P(Test_restriction, Test_bilinear_restriction)
 {
-    gyro::icntl[Param::optimized] = 1;
+    const int& val_size            = GetParam();
+    gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
+    gyro::icntl[Param::ntheta_exp] = (val_size % 3) + 3;
+
+    if (gyro::icntl[Param::nr_exp] == 3)
+        gyro::icntl[Param::fac_ani] = 2;
 
     gmgpolar test_p;
     test_p.create_grid_polar();
@@ -45,12 +50,6 @@ TEST_F(Test_restriction, Test_bilinear_restriction)
     for (int z = 0; z < p_level.m; z++) {
         u_test[z] = 1 - z;
     }
-
-    p_level.define_nz_P();
-    p_level.ri_prol = std::vector<int>(p_level.nz_P);
-    p_level.ci_prol = std::vector<int>(p_level.nz_P);
-    p_level.v_prol  = std::vector<double>(p_level.nz_P);
-    p_level.build_prolongation_bi();
 
     std::vector<double> sol = p_level.apply_restriction_bi(u_test);
 
@@ -144,8 +143,15 @@ TEST_F(Test_restriction, Test_bilinear_restriction)
     }
 }
 
-TEST_F(Test_restriction, Test_injection_restriction)
+TEST_P(Test_restriction, Test_injection_restriction)
 {
+    const int& val_size            = GetParam();
+    gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
+    gyro::icntl[Param::ntheta_exp] = (val_size % 3) + 3;
+
+    if (gyro::icntl[Param::nr_exp] == 3)
+        gyro::icntl[Param::fac_ani] = 2;
+
     gmgpolar test_p;
     test_p.create_grid_polar();
     test_p.check_geom();
@@ -163,11 +169,6 @@ TEST_F(Test_restriction, Test_injection_restriction)
         u_test[z] = z;
     }
 
-    p_level.ri_prol_inj = std::vector<int>(p_level.nz_P_inj);
-    p_level.ci_prol_inj = std::vector<int>(p_level.nz_P_inj);
-    p_level.v_prol_inj  = std::vector<double>(p_level.nz_P_inj);
-    p_level.build_prolongation_inj();
-
     std::vector<double> sol = p_level.apply_restriction_inj(u_test);
 
     EXPECT_EQ((int)sol.size(), p_level.mc);
@@ -181,9 +182,14 @@ TEST_F(Test_restriction, Test_injection_restriction)
     }
 }
 
-TEST_F(Test_restriction, Test_extrapolation_restriction)
+TEST_P(Test_restriction, Test_extrapolation_restriction)
 {
-    gyro::icntl[Param::optimized] = 1;
+    const int& val_size            = GetParam();
+    gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
+    gyro::icntl[Param::ntheta_exp] = (val_size % 3) + 3;
+
+    if (gyro::icntl[Param::nr_exp] == 3)
+        gyro::icntl[Param::fac_ani] = 2;
 
     gmgpolar test_p;
     test_p.create_grid_polar();
@@ -201,12 +207,6 @@ TEST_F(Test_restriction, Test_extrapolation_restriction)
     for (int z = 0; z < p_level.m; z++) {
         u_test[z] = 1 - z;
     }
-
-    p_level.define_nz_P();
-    p_level.ri_prol = std::vector<int>(p_level.nz_P);
-    p_level.ci_prol = std::vector<int>(p_level.nz_P);
-    p_level.v_prol  = std::vector<double>(p_level.nz_P);
-    p_level.build_prolongation_bi();
 
     std::vector<double> sol = p_level.apply_restriction_ex(u_test);
 
@@ -250,3 +250,5 @@ TEST_F(Test_restriction, Test_extrapolation_restriction)
         }
     }
 }
+
+INSTANTIATE_TEST_SUITE_P(Restriction_size, Test_restriction, ::testing::Values(0, 1, 2, 3, 4, 5, 6, 7, 8));
