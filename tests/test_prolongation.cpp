@@ -36,7 +36,6 @@ TEST_P(Test_prolongation, Test_bilinear_prolongation)
 
     gmgpolar test_p;
     test_p.create_grid_polar();
-    std::cout << "4" << std::endl;
     test_p.check_geom();
     test_p.define_coarse_nodes();
 
