@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16.3)
 
-project(GMGPolar VERSION 0.9.0)
+project(GMGPolar VERSION 1.0.0)
 
 
 file(GLOB sources_src "./src/*.cpp" "./src/test_cases/*.cpp")

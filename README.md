@@ -91,7 +91,7 @@ by giving:
 
 Release Notes
 -------------
-* GmgPolar 0.9
+* GmgPolar 1.0
 1) Working multigrid cycle
 2) In-house solver and possibility to link with MUMPS for the smoothing and coarse grid solution
 3) Extrapolation strategies:
