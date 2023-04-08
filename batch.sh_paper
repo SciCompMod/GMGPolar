@@ -4,7 +4,7 @@
 #SBATCH --error=slurm-%A.err  # stderr file
 #SBATCH -N 1
 #SBATCH -n 1
-#SBATCH -c 56
+#SBATCH -c 4
 #SBATCH -t 6000
 #SBATCH --exclusive
 
