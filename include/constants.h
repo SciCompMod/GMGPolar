@@ -39,8 +39,8 @@ enum icontrols
 {
     /*! \brief (WIP) Optimized code
          *
-         * 0: old working version
-         * 1: new version (WIP) (we always use this)
+         * 0: old version (non-optimized version for validation in the beginning, not maintained for some time; do not use)
+         * 1: new version (default)
          */
     optimized,
     /*! \brief Verbose level
@@ -85,7 +85,7 @@ enum icontrols
          *
          */
     nr_exp,
-    /*! \brief Not used
+    /*! \brief The parameter ntheta_exp is not used in our simulations. We generally define the number of theta intervals similar to the number of intervals in r.
          */
     ntheta_exp,
     /*! \brief Anisotropic discretization in 'edge' region for r
@@ -112,16 +112,22 @@ enum icontrols
     /*! \brief Type of MG cycle
          *
          * Type of multigrid cycle:
-         * - 1: V-cycle (we always use this)
+         * - 1: V-cycle (default setting)
          * - 2: W-cycle
          */
     cycle,
-    /*! \brief Circular or stretched geometry
+    /*! \brief Defines the form of the considered cross-section: Circular or stretched geometry. If `mod_pk=0`, we consider a circular geometry. If `mod_pk>1`, it always goes with a particular choice of `kappa_eps` and `delta_e` to describe realistic Tokamak cross sections. 
+    
+    For more details, we refer to:
+    - Bouzat, N., Bressan, C., Grandgirard, V., Latu, G., Mehrenberger, M.: Targeting Realistic Geometry in Tokamak Code Gysela. (2018)
+    - Zoni, E., Güçlü, Y.: Solving hyperbolic-elliptic problems on singular mapped disk-like
+domains with the method of characteristics and spline finite elements.  (2019)
+    - Bourne et al.: Solver comparison for Poisson-like equations on tokamak geometries. (2023)
          *
          * Defines the shape of the geometry:
          * - 0: kappa_eps = delta_e = 0 (circular geometry)
-         * - 1: kappa_eps=0.3, delta_e=0.2 (stretched, Shafranov geometry)
-         * - 2: kappa_eps=0.3, delta_e=1.4 (stretched, Czarny geometry)
+         * - 1: kappa_eps=0.3, delta_e=0.2 (stretched and deformed circle, also denoted Shafranov geometry)
+         * - 2: kappa_eps=0.3, delta_e=1.4 (stretched and deformed circle, also denoted Czarny geometry)
          */
     mod_pk,
     /*! \brief Compute rho
@@ -169,8 +175,8 @@ enum icontrols
          * - 0: PointRB (not implemented)
          * - 1: CircZGS (not implemented)
          * - 2: RadZGS (not implemented)
-         * - 3: AltZGS (coupled circle-radial version) (we always use this!)
-         * - 13: AltZGS corrected (C-R: BJ, W-B: GS) (decoupled circle-radial version)
+         * - 3: AltZGS (coupled circle-radial version) (default setting)
+         * - 13: Decoupled AltZGS (C-R: BJ, W-B: GS) (faster to execute but leads to more iterations)
          * - 4: optimizedAltZGS (not implemented)
          * - 5: MixZGS (not implemented)
          */
@@ -190,8 +196,8 @@ enum icontrols
     /*! \brief Extrapolation
          *
          * 0: no extrapolation
-         * 1: extrapolation + smoothing
-         * 2: extrapolation only (implicit extrapolation with full grid smoothing)
+         * 1: implicit extrapolation with adapted smoothing on finest grid (default setting)
+         * 2: experimental version of implicit extrapolation with full grid smoothing (residual stopping criterion not functional, use with care)
          * 3: extrap_integer (FE only)
          * 4: no_extrap_integr (FE only)
          */
@@ -216,7 +222,7 @@ enum icontrols
     /*! \brief Problem to solve
          *
          * Defines the problem to solve
-         * - 5: the classical problem (Zoni2019, aligned with the cartesian grid) (we always use this)
+         * - 5: the classical problem (Zoni2019, aligned with the cartesian grid)
          * - 6: more realistic problem (Emily & Virginie, aligned with the polar grid)
          */
     prob,
@@ -275,12 +281,17 @@ enum dcontrols
     /*! \brief Parameters of the grid
          *
          * Defines the shape of the geometry:
-         * - mod_pk = kappa_eps = delta_e = 0: circular geometry [x=r.cos(theta), y=r.sin(theta)]
-         * - else: stretched circular geometry
-         *   [x=(1-kappa_eps)r.cos(theta)-delta_e.r^2, y=(1+kappa_eps)r.sin(theta)] with
-         *     - kappa_eps: Elongation (Parameter kappa for the Shafranov geometry, parameters epsilon for the Czarny geometry, is set automatically depending on the geometry)
+         * - if mod_pk = 0: circular geometry
+         *       [x=r.cos(theta), y=r.sin(theta)]
+         * - elif mod_pk=1: stretched circular geometry (Shafranov geometry)
+         *       [x=(1-kappa_eps)r*cos(theta)-delta_e*r^2, y=(1+kappa_eps)r*sin(theta)]
+         * - elif mod_pk=2: stretched circular geometry (Czarny geometry)
+         *       [x=1/kappa_eps ( 1 - sqrt{1 + kappa_eps ( kappa_eps + 2r*cos(theta) )} ), y=y_0 + (delta_e \xi r sin(theta)) / (1 + kappa_eps x(r, theta))]
+         * [For more details, we refer to Bourne et al. (2023).]
+         * with
+         *     - kappa_eps: Elongation (For the Shafranov geometry, the parameter is denoted kappa, for the Czarny geometry, it is epsilon.
          *     - delta_e: Shafranov shift (outward radial
-         *       displacement of the centre of flux) (Parameter delta for the Shafranov geometry, parameters e for the Czarny geometry, is set automatically depending on the geometry)
+         *       displacement of the centre of flux) (For the Shafranov geometry, this parameter is denoted delta, for the Czarny geometry, it is e.)
          */
     kappa_eps,
     delta_e,
