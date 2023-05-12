@@ -1,0 +1,71 @@
+title: GMGPolar
+version: 1.0.0
+date-released: "2023-04-14"
+repository-code: "https://github.com/mknaranja/GMGPolar"
+url: "https://github.com/mknaranja/GMGPolar"
+doi: "10.5281/zenodo.7827802"
+license: Apache-2.0
+type: software
+authors:
+  #Authors
+  - given-names: Philippe
+    family-names: Leleux
+    affiliation: "Inserm"     
+    orcid: "https://orcid.org/0000-0002-3760-4698"
+  - given-names: Martin J.
+    family-names: Kühn
+    affiliation: "German Aerospace Center (DLR)"     
+    orcid: "https://orcid.org/0000-0002-0906-6984"
+  - given-names: Schwarz
+    family-names: Christina
+    affiliation: "Universität Bayreuth"     
+  - given-names: Carola
+    family-names: Kruse
+    affiliation: "CERFACS"     
+    orcid: "https://orcid.org/0000-0002-4142-7356"
+  - given-names: Ulrich
+    family-names: Rüde
+    affiliation: "FAU Erlangen"     
+    orcid: "https://orcid.org/0000-0001-8796-8599"
+  - given-names: Allan
+    family-names: Kuhn
+    affiliation: "German Aerospace Center (DLR)"               
+#Contributors
+cff-version: 1.0.0
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+keywords:
+  - Geometric Multigrid
+  - Parallel-Computing
+  - Extrapolation
+  - Curvilinear coordinates
+  - Plasma fusion
+abstract: >-
+  GMGPolar is a performant geometric multigrid solver using
+  implicit extrapolation to raise the convergence order. 
+  It is based on meshes in tensor- or product-format. 
+  GMGPolar's focus applications are geometries that can be
+  described by polar or curvilinear coordinates for which
+  suited smoothing procedures have been developed.
+contact:
+  - affiliation: "German Aerospace Center (DLR)"
+    email: Martin.Kuehn@dlr.de
+    family-names: Kühn
+    given-names: Martin J.
+  - affiliation: "CERFACS"
+    email: Carola.Kruse@CERFACS.fr
+    family-names: Kruse
+    given-names: Carola    
+references:
+  - title: "Implicitly extrapolated geometric multigrid on disk-like domains for the gyrokinetic Poisson equation from fusion plasma applications"
+    authors:
+      - family-names: Kühn
+        given-names: Martin J.
+      - family-names: Kruse
+        given-names: Carola
+      - family-names: Rüde
+        given-names: Ulrich             
+    type: article
+    doi: 10.1007/s10915-022-01802-1
+    url: "https://link.springer.com/article/10.1007/s10915-022-01802-1"
