@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "gmgpolar.h"
 
-class Level_test : public ::testing::Test
+class Level_test : public ::testing::TestWithParam<int>
 {
 protected:
     Level_test()
@@ -11,27 +11,58 @@ protected:
     void SetUp() override
     {
         gyro::init_params();
+        gyro::icntl[Param::verbose]        = 0;
+        gyro::icntl[Param::debug]          = 0;
+        gyro::icntl[Param::extrapolation]  = 0;
+        gyro::icntl[Param::DirBC_Interior] = 1;
+        gyro::icntl[Param::check_error]    = 1;
+        gyro::dcntl[Param::R0]             = 1e-5;
+        gyro::f_grid_r                     = "";
+        gyro::f_grid_theta                 = "";
+        gyro::f_sol_in                     = "";
+        gyro::f_sol_out                    = "";
+        gyro::icntl[Param::nr_exp]         = 4;
+        gyro::icntl[Param::ntheta_exp]     = 4;
+        gyro::icntl[Param::fac_ani]        = 3;
+        gyro::select_functions_class(gyro::icntl[Param::alpha_coeff], gyro::icntl[Param::beta_coeff],
+                                     gyro::icntl[Param::mod_pk], gyro::icntl[Param::prob]);
+
+        for (int smoother = 0; smoother < 4; smoother++) { //so that the constructor ~level() works;
+            int *array_temp, *array_temp2;
+            array_temp     = new int[1];
+            array_temp[0]  = 0;
+            array_temp2    = new int[1];
+            array_temp2[0] = 0;
+            test_level.dep_Asc_ortho.push_back(array_temp);
+            test_level.dep_Asc.push_back(array_temp2);
+            test_level.size_Asc_ortho.push_back(1);
+            test_level.size_Asc.push_back(1);
+        }
     }
 
     level test_level;
 };
 
-TEST_F(Level_test, Nodes_Build_r)
+TEST_P(Level_test, Nodes_Build_r)
 {
+    const int& val_size            = GetParam();
+    gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
+    gyro::icntl[Param::ntheta_exp] = (val_size % 3) + 3;
+
+    if (gyro::icntl[Param::nr_exp] == 3)
+        gyro::icntl[Param::fac_ani] = 2;
 
     int& nr_exp = gyro::icntl[Param::nr_exp];
 
-    for (nr_exp = 3; nr_exp < 6; nr_exp++) {
-        gyro::icntl[Param::fac_ani] = 0;
-        test_level.build_r();
-        EXPECT_EQ(pow(2, nr_exp) + 1, test_level.r.size());
-        gyro::icntl[Param::fac_ani] = 2;
-        test_level.build_r();
-        EXPECT_EQ(pow(2, nr_exp + 1) + 1, test_level.r.size());
-    }
+    gyro::icntl[Param::fac_ani] = 0;
+    test_level.build_r();
+    EXPECT_EQ(pow(2, nr_exp) + 1, test_level.r.size());
+    gyro::icntl[Param::fac_ani] = 2;
+    test_level.build_r();
+    EXPECT_EQ(pow(2, nr_exp + 1) + 1, test_level.r.size());
 }
 
-TEST_F(Level_test, Anisotropy_r)
+TEST_P(Level_test, Anisotropy_r)
 {
     //testing anisotropy. refinement around 2/3 r
     ASSERT_NE(gyro::icntl[Param::alpha_coeff], 1);
@@ -50,86 +81,86 @@ TEST_F(Level_test, Anisotropy_r)
     }
 }
 
-TEST_F(Level_test, Nodes_Build_theta) //first learn implementation and how anisotropy is included
+TEST_P(Level_test, Nodes_Build_theta) //first learn implementation and how anisotropy is included
 {
-    int& ntheta_exp = gyro::icntl[Param::ntheta_exp];
-    for (ntheta_exp = 3; ntheta_exp < 6; ntheta_exp++) {
-        gyro::icntl[Param::periodic] = 0;
-        test_level.build_r();
-        test_level.build_theta();
-        int ntheta = pow(2, ceil(log2(test_level.nr))) + 1;
-        EXPECT_EQ(ntheta, test_level.ntheta);
+    const int& val_size            = GetParam();
+    gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
+    gyro::icntl[Param::ntheta_exp] = (val_size % 3) + 3;
 
-        gyro::icntl[Param::periodic] = 1;
-        test_level.build_r();
-        test_level.build_theta();
+    if (gyro::icntl[Param::nr_exp] == 3)
+        gyro::icntl[Param::fac_ani] = 2;
 
-        ntheta = pow(2, ceil(log2(test_level.nr)));
-        EXPECT_EQ(ntheta, test_level.ntheta);
-    }
-}
-//todo
-TEST_F(Level_test, Anisotropy_theta) //unfinished
-{
+    gyro::icntl[Param::periodic] = 0;
+    test_level.build_r();
+    test_level.build_theta();
+    int ntheta = pow(2, ceil(log2(test_level.nr))) + 1;
+    EXPECT_EQ(ntheta, test_level.ntheta);
 
-    gyro::icntl[Param::theta_aniso] = 1;
+    gyro::icntl[Param::periodic] = 1;
     test_level.build_r();
     test_level.build_theta();
 
-    double h_fine   = test_level.theta[14] - test_level.theta[13]; //based on the construction.
-    double h_coarse = test_level.theta[1] - test_level.theta[0];
-
-    EXPECT_LT(h_fine, h_coarse);
+    ntheta = pow(2, ceil(log2(test_level.nr)));
+    EXPECT_EQ(ntheta, test_level.ntheta);
 }
 
 //build bound function is unfinished
 
-TEST_F(Level_test, Test_Nonzero_size)
+TEST_P(Level_test, Test_Nonzero_size)
 {
+    const int& val_size            = GetParam();
+    gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
+    gyro::icntl[Param::ntheta_exp] = (val_size % 3) + 3;
+
+    if (gyro::icntl[Param::nr_exp] == 3)
+        gyro::icntl[Param::fac_ani] = 2;
 
     gyro::icntl[Param::periodic] = 1;
 
     int& geom    = gyro::icntl[Param::mod_pk];
     int& dir_int = gyro::icntl[Param::DirBC_Interior];
-    for (int z = 0; z < 16; z++) { //test for different mesh sizes
-        gyro::icntl[Param::nr_exp]     = (int)(z / 4) + 3;
-        gyro::icntl[Param::ntheta_exp] = z % 4 + 3;
 
-        geom = 0; //5-point stencil
+    geom = 0; //5-point stencil
 
-        int dof = 0;
-        for (dir_int = 0; dir_int < 2; dir_int++) {
+    int dof = 0;
+    for (dir_int = 0; dir_int < 2; dir_int++) {
 
-            test_level.define_nz();
+        test_level.define_nz();
 
-            int bd = dir_int + 1;
-            dof    = (test_level.nr - bd) * test_level.ntheta_int;
-            EXPECT_EQ(5 * dof, test_level.nz);
+        int bd = dir_int + 1;
+        dof    = (test_level.nr - bd) * test_level.ntheta_int;
+        EXPECT_EQ(5 * dof, test_level.nz);
 
-            /*Every dof is found five times in the entry.
+        /*Every dof is found five times in the entry.
              boundary nodes once and neighbors to DB nodes 4 times*/
-        }
+    }
 
-        geom = 1; //9 point stencil
+    geom = 1; //9 point stencil
 
-        for (dir_int = 0; dir_int < 2; dir_int++) {
+    for (dir_int = 0; dir_int < 2; dir_int++) {
 
-            test_level.define_nz();
+        test_level.define_nz();
 
-            int bd      = dir_int + 1;
-            dof         = (test_level.nr - bd) * test_level.ntheta_int;
-            int entries = 9 * dof - 2 * (bd + (1 - dir_int)) * test_level.ntheta_int;
+        int bd      = dir_int + 1;
+        dof         = (test_level.nr - bd) * test_level.ntheta_int;
+        int entries = 9 * dof - 2 * (bd + (1 - dir_int)) * test_level.ntheta_int;
 
-            EXPECT_EQ(entries, test_level.nz);
+        EXPECT_EQ(entries, test_level.nz);
 
-            /*DB_boundary neighbors 6 stencil points +1 for Db nodes. and 7 point stencil for disc across 
+        /*DB_boundary neighbors 6 stencil points +1 for Db nodes. and 7 point stencil for disc across 
                 the interior*/
-        }
     }
 }
 
-TEST_F(Level_test, Test_get_ptr)
+TEST_P(Level_test, Test_get_ptr)
 {
+    const int& val_size            = GetParam();
+    gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
+    gyro::icntl[Param::ntheta_exp] = (val_size % 3) + 3;
+
+    if (gyro::icntl[Param::nr_exp] == 3)
+        gyro::icntl[Param::fac_ani] = 2;
+
     int& dir_int = gyro::icntl[Param::DirBC_Interior];
 
     dir_int = 1;
@@ -147,7 +178,7 @@ TEST_F(Level_test, Test_get_ptr)
     }
 }
 
-TEST_F(Level_test, Test_get_stencil) //unfinished
+TEST_P(Level_test, Test_get_stencil) //unfinished
 {
     test_level.build_r();
     int& geom = gyro::icntl[Param::mod_pk];
@@ -160,3 +191,155 @@ TEST_F(Level_test, Test_get_stencil) //unfinished
         }
     }
 }
+
+TEST_P(Level_test, mapping_usc_to_u_extrapol)
+{
+
+    const int& val_size            = GetParam();
+    gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
+    gyro::icntl[Param::ntheta_exp] = (val_size % 3) + 3;
+
+    if (gyro::icntl[Param::nr_exp] == 3)
+        gyro::icntl[Param::fac_ani] = 2;
+
+    int& extrap   = gyro::icntl[Param::extrapolation];
+    extrap        = 1;
+    int& periodic = gyro::icntl[Param::periodic];
+    periodic      = 1;
+
+    test_level.build_r();
+    test_level.build_theta();
+    test_level.store_theta_n_co();
+
+    EXPECT_EQ(test_level.nr % 2 == 1, 1);
+    //test for circle smoother first
+
+    test_level.define_line_splitting();
+
+    std::vector<int> nblocks(4);
+    nblocks[0] = ceil(test_level.delete_circles * 0.5);
+    nblocks[1] = floor(test_level.delete_circles * 0.5);
+    nblocks[2] = test_level.ntheta_int * 0.5;
+    nblocks[3] = nblocks[2];
+
+    for (int smoother = 0; smoother < 4; ++smoother) {
+        int ntheta_smoothed;
+        int only_fine = extrap && smoother == 0;
+        if (only_fine) {
+            ntheta_smoothed = test_level.ntheta_int / 2;
+        }
+        else {
+            ntheta_smoothed = test_level.ntheta_int;
+        }
+
+        for (int k = 0; k < nblocks[smoother] * ntheta_smoothed; k++) {
+            if (smoother < 2) {
+                int glob_row = 2 * (k / ntheta_smoothed) + (smoother == 1); //white cirle uneven lines
+                int glob_col = only_fine ? (2 * (k % ntheta_smoothed) + 1) : k % ntheta_smoothed;
+
+                int glob_ind = glob_row * test_level.ntheta_int + glob_col;
+
+                EXPECT_EQ(test_level.mapping_usc_to_u(k, smoother), glob_ind)
+                    << "fails for smoother " + std::to_string(smoother) + " index " + std::to_string(k) +
+                           " ntheta_int" + std::to_string(test_level.ntheta_int);
+            }
+            else {
+                int nr_smoothed =
+                    (extrap && smoother == 2)
+                        ? (test_level.nr - test_level.delete_circles + (test_level.delete_circles % 2 == 0)) / 2
+                        : test_level.nr - test_level.delete_circles;
+                int glob_row = (extrap && smoother == 2)
+                                   ? (2 * (k % nr_smoothed) + (test_level.delete_circles % 2 == 0))
+                                   : k % nr_smoothed;
+                int glob_col = 2 * (k / nr_smoothed) + (smoother == 3);
+
+                int glob_ind = (glob_row + test_level.delete_circles) * test_level.ntheta_int + glob_col;
+
+                EXPECT_EQ(test_level.mapping_usc_to_u(k, smoother), glob_ind)
+                    << "fails for smoother " + std::to_string(smoother) + " index " + std::to_string(k) +
+                           " ntheta_int " + std::to_string(test_level.ntheta_int) + "delete_circ " +
+                           std::to_string(test_level.delete_circles);
+            }
+        }
+        //TODO: This test just rewrites the function.. maybe test some szenarios better
+    }
+}
+
+TEST_P(Level_test, mapping_usc_to_u_noextrapol)
+{
+
+    const int& val_size            = GetParam();
+    gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
+    gyro::icntl[Param::ntheta_exp] = (val_size % 3) + 3;
+
+    if (gyro::icntl[Param::nr_exp] == 3)
+        gyro::icntl[Param::fac_ani] = 2;
+
+    int& extrap   = gyro::icntl[Param::extrapolation];
+    extrap        = 0;
+    int& periodic = gyro::icntl[Param::periodic];
+    periodic      = 1;
+
+    test_level.build_r();
+    test_level.build_theta();
+    test_level.store_theta_n_co();
+
+    EXPECT_EQ(test_level.nr % 2 == 1, 1);
+    //test for circle smoother first
+
+    test_level.define_line_splitting();
+
+    std::vector<int> nblocks(4);
+    nblocks[0] = ceil(test_level.delete_circles * 0.5);
+    nblocks[1] = floor(test_level.delete_circles * 0.5);
+    nblocks[2] = test_level.ntheta_int * 0.5;
+    nblocks[3] = nblocks[2];
+
+    for (int smoother = 0; smoother < 4; ++smoother) {
+        int ntheta_smoothed;
+        int only_fine = extrap && smoother == 0;
+        if (only_fine) {
+            ntheta_smoothed = test_level.ntheta_int / 2;
+        }
+        else {
+            ntheta_smoothed = test_level.ntheta_int;
+        }
+
+        for (int k = 0; k < nblocks[smoother] * ntheta_smoothed; k++) {
+            if (smoother < 2) {
+                int glob_row = 2 * (k / ntheta_smoothed) + (smoother == 1); //white cirle uneven lines
+                int glob_col = only_fine ? (2 * (k % ntheta_smoothed) + 1) : k % ntheta_smoothed;
+
+                int glob_ind = glob_row * test_level.ntheta_int + glob_col;
+
+                EXPECT_EQ(test_level.mapping_usc_to_u(k, smoother), glob_ind)
+                    << "fails for smoother " + std::to_string(smoother) + " index " + std::to_string(k) +
+                           " ntheta_int" + std::to_string(test_level.ntheta_int);
+            }
+            else {
+                int nr_smoothed =
+                    (extrap && smoother == 2)
+                        ? (test_level.nr - test_level.delete_circles + (test_level.delete_circles % 2 == 0)) / 2
+                        : test_level.nr - test_level.delete_circles;
+                int glob_row = (extrap && smoother == 2)
+                                   ? (2 * (k % nr_smoothed) + (test_level.delete_circles % 2 == 0))
+                                   : k % nr_smoothed;
+                int glob_col = 2 * (k / nr_smoothed) + (smoother == 3);
+
+                int glob_ind = (glob_row + test_level.delete_circles) * test_level.ntheta_int + glob_col;
+
+                EXPECT_EQ(test_level.mapping_usc_to_u(k, smoother), glob_ind)
+                    << "fails for smoother " + std::to_string(smoother) + " index " + std::to_string(k) +
+                           " ntheta_int " + std::to_string(test_level.ntheta_int) + "delete_circ " +
+                           std::to_string(test_level.delete_circles);
+            }
+        }
+        //TODO: This test just rewrites the function.. maybe test some szenarios better
+    }
+}
+
+TEST_P(Level_test, mapping_usc_to_u_array)
+{
+}
+
+INSTANTIATE_TEST_SUITE_P(Level_size, Level_test, ::testing::Values(0, 1, 2, 3, 4, 5, 6, 7, 8));

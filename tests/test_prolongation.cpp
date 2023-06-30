@@ -23,6 +23,7 @@ protected:
         gyro::select_functions_class(gyro::icntl[Param::alpha_coeff], gyro::icntl[Param::beta_coeff],
                                      gyro::icntl[Param::mod_pk], gyro::icntl[Param::prob]);
     }
+
 };
 
 TEST_P(Test_prolongation, Test_bilinear_prolongation)

@@ -81,8 +81,31 @@ TEST_P(Test_smoother, Test_line_splitting){
     
 }
 
-TEST_F(Test_smoother, quest){
+TEST_F(Test_smoother,get_row)
+{
+    test_level.build_r();
+    test_level.build_theta();
 
+    test_level.store_theta_n_co();
+
+    test_level.define_line_splitting();
+
+    test_level.nblocks = std::vector<int>(4);
+    test_level.nblocks[0] = ceil(test_level.delete_circles*0.5);
+    test_level.nblocks[1]= floor(test_level.delete_circles*0.5);
+    test_level.nblocks[2]= test_level.ntheta_int* 0.5;
+    test_level.nblocks[3]= test_level.nblocks[2] ;
+
+    for(int smoother=0 ; smoother <4; smoother++)
+    {
+        for(int j=0 ; j<test_level.nblocks[smoother]; j++){
+            std::vector<int> row = test_level.get_row(j,smoother, 1, 1,1 ); //extrapol, local, col_wise
+
+            if(smoother <2){
+                
+            }
+        }
+    }
 }
 /*
 TEST_F(Test_smoother, Test_build_Asc)
