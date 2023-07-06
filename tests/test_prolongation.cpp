@@ -25,7 +25,7 @@ protected:
     }
 };
 
-TEST_P(test_prolongation, Test_bilinear_prolongation)
+TEST_P(test_prolongation, test_bilinear_prolongation)
 {
     const int& val_size            = GetParam();
     gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
@@ -128,7 +128,7 @@ TEST_P(test_prolongation, Test_bilinear_prolongation)
     }
 }
 
-TEST_P(test_prolongation, Test_injection_prolongation)
+TEST_P(test_prolongation, test_injection_prolongation)
 {
     const int& val_size            = GetParam();
     gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
@@ -171,7 +171,7 @@ TEST_P(test_prolongation, Test_injection_prolongation)
     }
 }
 
-TEST_P(test_prolongation, Test_extrapolation_prolongation)
+TEST_P(test_prolongation, test_extrapolation_prolongation)
 {
     const int& val_size            = GetParam();
     gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
