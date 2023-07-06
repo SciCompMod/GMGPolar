@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include "gmgpolar.h"
-class Test_prolongation : public ::testing::TestWithParam<int>
+class test_prolongation : public ::testing::TestWithParam<int>
 {
 protected:
     void SetUp() override
@@ -25,7 +25,7 @@ protected:
     }
 };
 
-TEST_P(Test_prolongation, Test_bilinear_prolongation)
+TEST_P(test_prolongation, Test_bilinear_prolongation)
 {
     const int& val_size            = GetParam();
     gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
@@ -78,10 +78,6 @@ TEST_P(Test_prolongation, Test_bilinear_prolongation)
                 double h_pm1 = p_level.r[j] - p_level.r[j - 1];
                 double h_p   = p_level.r[j + 1] - p_level.r[j];
 
-                /*I dont think that we need to differentiate if we are next to the boundary (j==1 || j==nr_int-1)
-                  if we prolongate a solution with specific boundary data then the information should be stored 
-                  in the solution and not neccessarily in the Operator*/
-
                 double v1 = u_test[(j - 1) / 2 * ctheta_int + (i / 2)];
                 double v2 = u_test[(j + 1) / 2 * ctheta_int + (i / 2)];
 
@@ -132,7 +128,7 @@ TEST_P(Test_prolongation, Test_bilinear_prolongation)
     }
 }
 
-TEST_P(Test_prolongation, Test_injection_prolongation)
+TEST_P(test_prolongation, Test_injection_prolongation)
 {
     const int& val_size            = GetParam();
     gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
@@ -175,7 +171,7 @@ TEST_P(Test_prolongation, Test_injection_prolongation)
     }
 }
 
-TEST_P(Test_prolongation, Test_extrapolation_prolongation)
+TEST_P(test_prolongation, Test_extrapolation_prolongation)
 {
     const int& val_size            = GetParam();
     gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
@@ -258,4 +254,4 @@ TEST_P(Test_prolongation, Test_extrapolation_prolongation)
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(Prolongation_size, Test_prolongation, ::testing::Values(0, 1, 2, 3, 4, 5, 6, 7, 8));
+INSTANTIATE_TEST_SUITE_P(Prolongation_size, test_prolongation, ::testing::Values(0, 1, 2, 3, 4, 5, 6, 7, 8));

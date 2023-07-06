@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include "gmgpolar.h"
-class Test_restriction : public ::testing::TestWithParam<int>
+class test_restriction : public ::testing::TestWithParam<int>
 {
 protected:
     void SetUp() override
@@ -25,7 +25,7 @@ protected:
     }
 };
 
-TEST_P(Test_restriction, Test_bilinear_restriction)
+TEST_P(test_restriction, test_bilinear_restriction)
 {
     const int& val_size            = GetParam();
     gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
@@ -145,7 +145,7 @@ TEST_P(Test_restriction, Test_bilinear_restriction)
     }
 }
 
-TEST_P(Test_restriction, Test_injection_restriction)
+TEST_P(test_restriction, test_injection_restriction)
 {
     const int& val_size            = GetParam();
     gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
@@ -184,7 +184,7 @@ TEST_P(Test_restriction, Test_injection_restriction)
     }
 }
 
-TEST_P(Test_restriction, Test_extrapolation_restriction)
+TEST_P(test_restriction, test_extrapolation_restriction)
 {
     const int& val_size            = GetParam();
     gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
@@ -253,4 +253,4 @@ TEST_P(Test_restriction, Test_extrapolation_restriction)
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(Restriction_size, Test_restriction, ::testing::Values(0, 1, 2, 3, 4, 5, 6, 7, 8));
+INSTANTIATE_TEST_SUITE_P(Restriction_size, test_restriction, ::testing::Values(0, 1, 2, 3, 4, 5, 6, 7, 8));
