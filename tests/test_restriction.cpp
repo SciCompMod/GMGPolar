@@ -66,12 +66,12 @@ TEST_P(Test_restriction, Test_bilinear_restriction)
     for (int j = 0; j < cr_int + 1; j++) {
         for (int i = 0; i < ctheta_int; i++) {
             std::vector<double> adjacent(8, -1.0);
-            if (j == 0) { //interior circle
+            if (j == 0) { //interior circle- nodes to the left disappear
                 adjacent[0] = 0.0;
                 adjacent[1] = 0.0;
                 adjacent[2] = 0.0;
             }
-            if (j == cr_int) { //exterior circle
+            if (j == cr_int) { //exterior circle- nodes to the right disappear
                 adjacent[5] = 0.0;
                 adjacent[6] = 0.0;
                 adjacent[7] = 0.0;
@@ -86,17 +86,19 @@ TEST_P(Test_restriction, Test_bilinear_restriction)
                     if (z != 0 || y != 0) {
                         if (adjacent[k] != 0.0) {
 
-                            adjacent[k] = u_test[(2 * j + z) * p_level.ntheta_int +
-                                                 ((i != 0 || y > -1) ? (2 * i + y) : p_level.ntheta_int - 1)];
+                            adjacent[k] =
+                                u_test[(2 * j + z) * p_level.ntheta_int +
+                                       ((i != 0 || y > -1) ? (2 * i + y) : p_level.ntheta_int - 1)]; //adjacent value
 
                             h_p[k] = {p_level.r[2 * j + z + 1] - p_level.r[2 * j + z],
-                                      p_level.r[2 * j + z] - p_level.r[2 * j + z - 1]};
+                                      p_level.r[2 * j + z] -
+                                          p_level.r[2 * j + z - 1]}; //distance in r coordinate for the adjacent node
 
                             if (i > 0) {
-                                double val =
+                                double indx =
                                     (2 * i + y < p_level.ntheta_int - 1) ? p_level.theta[2 * i + y + 1] : 2 * PI;
 
-                                k_q[k] = {val - p_level.theta[2 * i + y],
+                                k_q[k] = {indx - p_level.theta[2 * i + y],
                                           p_level.theta[2 * i + y] - p_level.theta[2 * i + y - 1]};
                             }
                             else {
@@ -117,7 +119,7 @@ TEST_P(Test_restriction, Test_bilinear_restriction)
                     }
                 }
             }
-
+            //values given by the operator
             std::vector<double> vals{
                 std::get<1>(h_p[0]) * std::get<1>(k_q[0]) /
                     ((std::get<0>(h_p[0]) + std::get<1>(h_p[0])) * (std::get<0>(k_q[0]) + std::get<1>(k_q[0]))),
