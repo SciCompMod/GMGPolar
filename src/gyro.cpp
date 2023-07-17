@@ -1019,56 +1019,6 @@ void gyro::trafo(double r_i, std::vector<double> theta, std::vector<double> sin_
     //     }
 } /* ----- end of gyro::trafo ----- */
 
-/***************************************************************************
-     * Display arrays or vectors
-     **************************************************************************/
-/*!
- *  \brief Display arrays of int or double
- *
- *  Display arrays of int or double
- * 
- * \param na: size of the array
- * \param a: the array
- * \param s_a: name of the array (for display)
- *
- */
-void gyro::disp(int na, double* a, const std::string& s_a)
-{
-    std::cout << s_a << "(" << na << "): ";
-    for (int i = 0; i < na; i++)
-        std::cout << a[i] << " ";
-    std::cout << "\n";
-} /* ----- end of gyro::disp ----- */
-void gyro::disp(int na, int* a, const std::string& s_a)
-{
-    std::cout << s_a << "(" << na << "): ";
-    for (int i = 0; i < na; i++)
-        std::cout << a[i] << " ";
-    std::cout << "\n";
-} /* ----- end of gyro::disp ----- */
-/*!
- *  \brief Display vectors of int or double
- *
- *  Display vectors of int or double
- * 
- * \param a: the vector
- * \param s_a: name of the vector (for display)
- *
- */
-void gyro::disp(std::vector<double> a, const std::string& s_a)
-{
-    std::cout << s_a << "(" << a.size() << "): ";
-    for (std::size_t i = 0; i < a.size(); i++)
-        std::cout << a[i] << " ";
-    std::cout << "\n";
-} /* ----- end of gyro::disp ----- */
-void gyro::disp(std::vector<int> a, const std::string& s_a)
-{
-    std::cout << s_a << "(" << a.size() << "): ";
-    for (std::size_t i = 0; i < a.size(); i++)
-        std::cout << a[i] << " ";
-    std::cout << "\n";
-} /* ----- end of gyro::disp ----- */
 
 /*!
  *  \brief Sparse matrix-vector product

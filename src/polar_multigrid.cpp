@@ -163,39 +163,42 @@ void gmgpolar::polar_multigrid()
             debug();
         }
         else if (gyro::icntl[Param::write_radii_angles] == 0) {
-            if (gyro::icntl[Param::verbose] > 1)
-                std::cout << "Multigrid iteration....!\n\n";
+            if (gyro::icntl[Param::verbose] > 0)
+                std::cout << "Executing multigrid iteration....\n\n";
             multigrid_iter();
 
-            //        if (gyro::icntl[Param::verbose] > 1)
-            for (int l = 0; l < levels; l++) {
-                std::cout << "LEVEL " << l << "\n";
-                std::cout << "\nt_smoothing: " << v_level[l]->t_smoothing << ", t_f_sc: " << v_level[l]->t_f_sc
-                          << ", t_Asc_ortho: " << v_level[l]->t_Asc_ortho << ", t_Asc: " << v_level[l]->t_Asc << "\n";
-                std::cout << "\nt_get_ptr: " << v_level[l]->t_get_ptr
-                          << ", t_get_stencil: " << v_level[l]->t_get_stencil
-                          << ", t_get_smoother: " << v_level[l]->t_get_smoother
-                          << ", t_get_row: " << v_level[l]->t_get_row << "\n";
-                std::cout << "\n";
+            if (gyro::icntl[Param::verbose] > 0) {
+                for (int l = 0; l < levels; l++) {
+                    std::cout << "LEVEL " << l << "\n";
+                    std::cout << "\nt_smoothing: " << v_level[l]->t_smoothing << ", t_f_sc: " << v_level[l]->t_f_sc
+                              << ", t_Asc_ortho: " << v_level[l]->t_Asc_ortho << ", t_Asc: " << v_level[l]->t_Asc
+                              << "\n";
+                    std::cout << "\nt_get_ptr: " << v_level[l]->t_get_ptr
+                              << ", t_get_stencil: " << v_level[l]->t_get_stencil
+                              << ", t_get_smoother: " << v_level[l]->t_get_smoother
+                              << ", t_get_row: " << v_level[l]->t_get_row << "\n";
+                    std::cout << "\n";
+                }
             }
 
-            //        if (gyro::icntl[Param::verbose] > 0) {
-            std::cout << "\nt_setup: " << t_setup << ", t_build: " << t_build << ", t_facto_Ac: " << t_facto_Ac
-                      << ", t_build_P: " << t_build_P << ", t_build_Asc: " << t_build_Asc
-                      << ", t_facto_Asc: " << t_facto_Asc << "\n";
-            std::cout << "t_total (fine): " << t_total << ", t_smoothing: " << t_smoothing
-                      << ", t_residual: " << t_residual << ", t_restriction: " << t_restriction << ", t_Ac: " << t_Ac
-                      << ", t_prolongation: " << t_prolongation << ", t_fine_residual: " << t_fine_residual
-                      << ", t_error: " << t_error << "\n";
-            std::cout << "t_applyA: " << t_applyA << std::endl;
-            //        }
+            if (gyro::icntl[Param::verbose] > 0) {
+                std::cout << "\nt_setup: " << t_setup << ", t_build: " << t_build << ", t_facto_Ac: " << t_facto_Ac
+                          << ", t_build_P: " << t_build_P << ", t_build_Asc: " << t_build_Asc
+                          << ", t_facto_Asc: " << t_facto_Asc << "\n";
+                std::cout << "t_total (fine): " << t_total << ", t_smoothing: " << t_smoothing
+                          << ", t_residual: " << t_residual << ", t_restriction: " << t_restriction
+                          << ", t_Ac: " << t_Ac << ", t_prolongation: " << t_prolongation
+                          << ", t_fine_residual: " << t_fine_residual << ", t_error: " << t_error << "\n";
+                std::cout << "t_applyA: " << t_applyA << std::endl;
+            }
 
-            //        if (gyro::icntl[Param::verbose] > 0) {
-            std::cout << "\nt_coeff: " << gyro::dcntl[Param::t_coeff]
-                      << ", t_arr_art_att: " << gyro::dcntl[Param::t_arr_art_att]
-                      << ", t_sol: " << gyro::dcntl[Param::t_sol] << ", t_detDFinv: " << gyro::dcntl[Param::t_detDFinv]
-                      << ", t_trafo: " << gyro::dcntl[Param::t_trafo] << "\n";
-            //        }
+            if (gyro::icntl[Param::verbose] > 0) {
+                std::cout << "\nt_coeff: " << gyro::dcntl[Param::t_coeff]
+                          << ", t_arr_art_att: " << gyro::dcntl[Param::t_arr_art_att]
+                          << ", t_sol: " << gyro::dcntl[Param::t_sol]
+                          << ", t_detDFinv: " << gyro::dcntl[Param::t_detDFinv]
+                          << ", t_trafo: " << gyro::dcntl[Param::t_trafo] << "\n";
+            }
         }
     }
 } /* ----- end of gmgpolar::polar_multigrid ----- */
