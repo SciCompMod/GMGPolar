@@ -72,12 +72,16 @@ the library, a binary is created called ``./build/gmgpolar_simulation``, it take
     export OMP_NUM_THREADS=4
   
 
-Building an example (to call ABCD from C++ or C)
+Execution an example
 -------------------------------------------------
 
-Once the library is built, you can run the debug examples (either C++ or C):
+Once the library is built, you can run the examples:
 
-    # the option --debug 1 turns on debugging and compares the results of the C++ code 
+    # the verbose option defines the extent of the output
+
+    ./build/gmgpolar_simulation --verbose 2
+
+    # the option --debug 1 turns on internal debugging and compares the results of the C++ code 
     # with the results from the previous matlab implementation.
    
     ./build/gmgpolar_simulation --debug 1
@@ -100,10 +104,10 @@ Release Notes
 1) Working multigrid cycle
 2) In-house solver and possibility to link with MUMPS for the smoothing and coarse grid solution
 3) Extrapolation strategies:
-
+   
 	a. No extrapolation (--extrapolation 0)
-	
+
 	b. Default implicit extrapolation (--extrapolation 1)
-	
+
 	c. Non-default implicit extrapolation with smoothing of all nodes on the finest level [experimental, use with care, convergence cannot be observed with residual] (--extrapolation 2)
-4) Optimization of apply_A / build_rhs / apply_prolongation / build_Asc / apply_Asc_ortho
+6) Optimization of apply_A / build_rhs / apply_prolongation / build_Asc / apply_Asc_ortho
