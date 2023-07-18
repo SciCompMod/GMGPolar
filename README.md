@@ -72,7 +72,7 @@ the library, a binary is created called ``./build/gmgpolar_simulation``, it take
     export OMP_NUM_THREADS=4
   
 
-Execution an example
+Executing an example
 -------------------------------------------------
 
 Once the library is built, you can run the examples:
