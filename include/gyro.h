@@ -181,7 +181,7 @@ void trafo(double r_i, std::vector<double> theta, std::vector<double> sin_theta,
  * \param s_a: Name of the array (to be printed).
  *
  */
- template <typename T>
+template <typename T>
 void disp(int na, T* a, const std::string& s_a)
 {
     std::cout << s_a << "(" << na << "): ";

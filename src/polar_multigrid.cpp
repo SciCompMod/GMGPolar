@@ -45,8 +45,8 @@ void getrands(std::vector<double>& x, Generator& gen, unsigned num)
  */
 void gmgpolar::polar_multigrid()
 {
-    if (gyro::icntl[Param::verbose] > 1)
-        std::cout << "Define the coarse grids...\n";
+    if (gyro::icntl[Param::verbose] > 3)
+        std::cout << "Define the coarse grid nodes...\n";
     check_geom();
     define_coarse_nodes();
 
@@ -131,7 +131,7 @@ void gmgpolar::polar_multigrid()
         std::cout << "t_applyA: " << t_applyA << std::endl;
     }
     else {
-        if (gyro::icntl[Param::verbose] > 1)
+        if (gyro::icntl[Param::verbose] > 3)
             std::cout
                 << "Building discretized system, restriction and interpolation operators, and defining splittings...\n";
         prepare_op_levels();
@@ -143,15 +143,17 @@ void gmgpolar::polar_multigrid()
             cycle_str = "V";
         else if (gyro::icntl[Param::cycle] == 2)
             cycle_str = "W";
-        // if (gyro::icntl[Param::verbose] > 1)
-        std::cout << "\nProb: " << gyro::icntl[Param::prob] << ", alpha_coeff: " << gyro::icntl[Param::alpha_coeff]
-                  << ", beta_coeff: " << gyro::icntl[Param::beta_coeff] << " ***** Problem size " << m << " ("
-                  << v_level[0]->nr << ", " << v_level[0]->ntheta << "), " << levels
-                  << " grids, nr_exp=" << gyro::icntl[Param::nr_exp] << ", aniso=" << gyro::icntl[Param::fac_ani]
-                  << " ***** smoother=" << gyro::icntl[Param::smoother] << ", r0=" << gyro::dcntl[Param::R0]
-                  << ", extrapolation=" << gyro::icntl[Param::extrapolation]
-                  << ", mod_pk=" << gyro::icntl[Param::mod_pk] << ", DirBC=" << gyro::icntl[Param::DirBC_Interior]
-                  << ", divide=" << gyro::icntl[Param::divideBy2] << " *****\n";
+        if (gyro::icntl[Param::verbose] > 2)
+        {
+            std::cout << "\nProb: " << gyro::icntl[Param::prob] << ", alpha_coeff: " << gyro::icntl[Param::alpha_coeff]
+                      << ", beta_coeff: " << gyro::icntl[Param::beta_coeff] << " ***** Problem size " << m << " ("
+                      << v_level[0]->nr << ", " << v_level[0]->ntheta << "), " << levels
+                      << " grids, nr_exp=" << gyro::icntl[Param::nr_exp] << ", aniso=" << gyro::icntl[Param::fac_ani]
+                      << " ***** smoother=" << gyro::icntl[Param::smoother] << ", r0=" << gyro::dcntl[Param::R0]
+                      << ", extrapolation=" << gyro::icntl[Param::extrapolation]
+                      << ", mod_pk=" << gyro::icntl[Param::mod_pk] << ", DirBC=" << gyro::icntl[Param::DirBC_Interior]
+                      << ", divide=" << gyro::icntl[Param::divideBy2] << " *****\n";
+        }
 
         double scaling = 1.0;
         if (gyro::icntl[Param::compute_rho])
@@ -163,11 +165,11 @@ void gmgpolar::polar_multigrid()
             debug();
         }
         else if (gyro::icntl[Param::write_radii_angles] == 0) {
-            if (gyro::icntl[Param::verbose] > 0)
+            if (gyro::icntl[Param::verbose] > 3)
                 std::cout << "Executing multigrid iteration....\n\n";
             multigrid_iter();
 
-            if (gyro::icntl[Param::verbose] > 0) {
+            if (gyro::icntl[Param::verbose] > 1) {
                 for (int l = 0; l < levels; l++) {
                     std::cout << "LEVEL " << l << "\n";
                     std::cout << "\nt_smoothing: " << v_level[l]->t_smoothing << ", t_f_sc: " << v_level[l]->t_f_sc
@@ -181,7 +183,7 @@ void gmgpolar::polar_multigrid()
                 }
             }
 
-            if (gyro::icntl[Param::verbose] > 0) {
+            if (gyro::icntl[Param::verbose] > 1) {
                 std::cout << "\nt_setup: " << t_setup << ", t_build: " << t_build << ", t_facto_Ac: " << t_facto_Ac
                           << ", t_build_P: " << t_build_P << ", t_build_Asc: " << t_build_Asc
                           << ", t_facto_Asc: " << t_facto_Asc << "\n";
@@ -192,7 +194,7 @@ void gmgpolar::polar_multigrid()
                 std::cout << "t_applyA: " << t_applyA << std::endl;
             }
 
-            if (gyro::icntl[Param::verbose] > 0) {
+            if (gyro::icntl[Param::verbose] > 1) {
                 std::cout << "\nt_coeff: " << gyro::dcntl[Param::t_coeff]
                           << ", t_arr_art_att: " << gyro::dcntl[Param::t_arr_art_att]
                           << ", t_sol: " << gyro::dcntl[Param::t_sol]
@@ -263,7 +265,7 @@ void gmgpolar::prepare_op_levels()
 
         if (l < levels - 1)
             v_level[l]->mc = v_level[l + 1]->m;
-        if (gyro::icntl[Param::verbose] > 2)
+        if (gyro::icntl[Param::verbose] > 3)
             std::cout << "Create boundary array\n";
         v_level[l]->build_bound();
 
@@ -271,7 +273,7 @@ void gmgpolar::prepare_op_levels()
             v_level[0]->read_sol();
         }
 
-        if (gyro::icntl[Param::verbose] > 1)
+        if (gyro::icntl[Param::verbose] > 3)
             std::cout << "Create operator on level " << l << "\n";
         if (l == levels - 1 || gyro::icntl[Param::matrix_free] == 0) {
             TIC;
@@ -295,7 +297,7 @@ void gmgpolar::prepare_op_levels()
             TIC;
 
             if (l == levels - 1) {
-                if (gyro::icntl[Param::verbose] > 1)
+                if (gyro::icntl[Param::verbose] > 3)
                     std::cout << "Factorizing coarse operator...\n";
                 TIC;
 #ifdef USE_MUMPS
@@ -339,7 +341,7 @@ void gmgpolar::prepare_op_levels()
         // Prolongation defined on all except the coarsest level
         if (l < levels - 1) {
             v_level[l]->define_line_splitting();
-            if (gyro::icntl[Param::verbose] > 1)
+            if (gyro::icntl[Param::verbose] > 3)
                 std::cout << "delete_circles: " << v_level[l]->delete_circles << "\n";
 
             // Number of blocks per smoother
@@ -375,7 +377,7 @@ void gmgpolar::prepare_op_levels()
             // Smoother matrices Asc
             TIC;
             //build matrices A_sc
-            if (gyro::icntl[Param::verbose] > 1)
+            if (gyro::icntl[Param::verbose] > 3)
                 std::cout << "build Asc on level " << l << ", m: " << v_level[l]->m << ", mc: " << v_level[l]->mc
                           << "\n";
             v_level[l]->define_m_nz_Asc();
@@ -451,7 +453,7 @@ void gmgpolar::prepare_op_levels()
                         v_level[l]->A_Zebra_r[smoother].shrink_to_fit();
                         v_level[l]->A_Zebra_c[smoother].shrink_to_fit();
                         v_level[l]->A_Zebra_v[smoother].shrink_to_fit();
-                        if (gyro::icntl[Param::verbose] > 1)
+                        if (gyro::icntl[Param::verbose] > 3)
                             std::cout << "Factorizing smoother " << smoother << "...\n";
                         v_level[l]->facto_gaussian_elimination(
                             v_level[l]->A_Zebra_r_LU[smoother], v_level[l]->A_Zebra_c_LU[smoother],
@@ -491,7 +493,7 @@ void gmgpolar::prepare_op_levels()
                             v_level[l]->m_sc[smoother] == 1 ||
                             (gyro::icntl[Param::extrapolation] && l == 0 && smoother % 2 == 0 &&
                              !(smoother == 0 && !gyro::icntl[Param::DirBC_Interior] && ij == 0))) {
-                            if (gyro::icntl[Param::verbose] > 2)
+                            if (gyro::icntl[Param::verbose] > 3)
                                 std::cout << "No diagonal factorization\n";
                             v_level[l]->A_Zebra_v_LU_row[smoother][ij] =
                                 std::vector<double>(v_level[l]->A_Zebra_v_row[smoother][ij]);
@@ -501,7 +503,7 @@ void gmgpolar::prepare_op_levels()
                         // - and not across
                         else if (smoother < 2 && !(smoother == 0 && !gyro::icntl[Param::DirBC_Interior] && ij == 0)) {
                             TIC;
-                            if (gyro::icntl[Param::verbose] > 2)
+                            if (gyro::icntl[Param::verbose] > 3)
                                 std::cout << "Circle factorization\n";
                             // Initialize the LU factors
                             v_level[l]->fill_in_circle(ij, smoother);
@@ -522,7 +524,7 @@ void gmgpolar::prepare_op_levels()
                                 std::vector<int>(v_level[l]->A_Zebra_c_row[smoother][ij]);
                             v_level[l]->A_Zebra_v_LU_row[smoother][ij] =
                                 std::vector<double>(v_level[l]->A_Zebra_v_row[smoother][ij]);
-                            if (gyro::icntl[Param::verbose] > 2)
+                            if (gyro::icntl[Param::verbose] > 3)
                                 std::cout << "Radial factorization\n";
                             // Factorization
                             v_level[l]->facto_radial(
@@ -540,12 +542,12 @@ void gmgpolar::prepare_op_levels()
                                 std::vector<int>(v_level[l]->A_Zebra_c_row[smoother][ij]);
                             v_level[l]->A_Zebra_v_LU_row[smoother][ij] =
                                 std::vector<double>(v_level[l]->A_Zebra_v_row[smoother][ij]);
-                            if (gyro::icntl[Param::verbose] > 2)
+                            if (gyro::icntl[Param::verbose] > 3)
                                 std::cout << "Across factorization...";
 #ifdef USE_MUMPS
                             if (gyro::icntl[Param::optimized] == 0) {
 #endif
-                                if (gyro::icntl[Param::verbose] > 2)
+                                if (gyro::icntl[Param::verbose] > 3)
                                     std::cout << "using in-house direct solver.\n";
                                 // Factorization
                                 v_level[l]->facto_gaussian_elimination(v_level[l]->A_Zebra_r_LU_row[smoother][ij],
@@ -589,7 +591,7 @@ void gmgpolar::prepare_op_levels()
                 v_level[l]->define_nz_P();
 
                 // // Number of nonzeros in the matrix
-                if (gyro::icntl[Param::verbose] > 2)
+                if (gyro::icntl[Param::verbose] > 3)
                     std::cout << "nz_P: " << v_level[l]->nz_P << "\n";
                 v_level[l]->ri_prol = std::vector<int>(v_level[l]->nz_P);
                 v_level[l]->ci_prol = std::vector<int>(v_level[l]->nz_P);
@@ -597,7 +599,7 @@ void gmgpolar::prepare_op_levels()
                 v_level[l]->build_prolongation_bi();
 
                 // // Number of nonzeros in the matrix
-                if (gyro::icntl[Param::verbose] > 2)
+                if (gyro::icntl[Param::verbose] > 3)
                     std::cout << "nz_P_inj: " << v_level[l]->nz_P_inj << "\n";
                 v_level[l]->ri_prol_inj = std::vector<int>(v_level[l]->nz_P_inj);
                 v_level[l]->ci_prol_inj = std::vector<int>(v_level[l]->nz_P_inj);
@@ -605,7 +607,7 @@ void gmgpolar::prepare_op_levels()
                 v_level[l]->build_prolongation_inj();
 
                 // // Number of nonzeros in the matrix
-                if (gyro::icntl[Param::verbose] > 2)
+                if (gyro::icntl[Param::verbose] > 3)
                     std::cout << "nz_P_ex: " << v_level[l]->nz_P_ex << "\n";
                 v_level[l]->ri_prol_ex = std::vector<int>(v_level[l]->nz_P_ex);
                 v_level[l]->ci_prol_ex = std::vector<int>(v_level[l]->nz_P_ex);
@@ -618,7 +620,7 @@ void gmgpolar::prepare_op_levels()
         }
     }
 
-    if (gyro::icntl[Param::verbose] > 2)
+    if (gyro::icntl[Param::verbose] > 3)
         std::cout << "Operators created.\n";
 
     t       = t_setup;

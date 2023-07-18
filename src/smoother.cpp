@@ -82,7 +82,7 @@ void level::define_line_splitting()
     }
     delete_circles = i; // delete_circles = delete_circles(end);
 
-    if (gyro::icntl[Param::verbose] > 1)
+    if (gyro::icntl[Param::verbose] > 2)
         std::cout << "Shifting from circle to radial at radius " << delete_circles << "\n";
 } /* ----- end of destructor level::define_line_splitting ----- */
 

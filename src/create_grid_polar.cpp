@@ -37,8 +37,8 @@
  */
 void gmgpolar::create_grid_polar()
 {
-    if (gyro::icntl[Param::verbose] > 2)
-        std::cout << "Setup for the problem...\n";
+    if (gyro::icntl[Param::verbose] > 3)
+        std::cout << "Creating polar grid...\n";
 
     level* new_level = new level(0);
     v_level.push_back(new_level);
@@ -73,7 +73,7 @@ void gmgpolar::create_grid_polar()
         std::cout << "on the coordinates (r x theta): (" << gyro::dcntl[Param::R0] << ", " << gyro::dcntl[Param::R]
                   << ") x (" << gyro::dcntl[Param::THETA0] << ", " << gyro::dcntl[Param::THETA] << ")\n";
     }
-    if (gyro::icntl[Param::verbose] > 3) {
+    if (gyro::icntl[Param::verbose] > 5) {
         v_level[0]->display_r();
         v_level[0]->display_theta();
         std::cout << "\n";
@@ -280,8 +280,8 @@ void level::build_theta()
  */
 void gmgpolar::create_grid_polar_divide()
 {
-    if (gyro::icntl[Param::verbose] > 2)
-        std::cout << "dividing a coarser grid...\n";
+    if (gyro::icntl[Param::verbose] > 3)
+        std::cout << "Dividing a coarser grid...\n";
 
     int divide = gyro::icntl[Param::divideBy2];
     std::vector<double> r_tmp;

@@ -45,7 +45,14 @@ enum icontrols
     optimized,
     /*! \brief Verbose level
          *
-         * Defines the level of verbose outputs.
+         * Defines the level of verbose outputs. For higher levels all output from lower levels is always given.
+         * 0: No output
+         * 1: Minimal convergence output.
+         * 2: Iteration output and timings.
+         * 3: Print all parameters and problem setting.
+         * 4: Information on called functions.
+         * 5: Prints information on multigrid levels.
+         * 6: Print out all kind of variable values.
          */
     verbose,
     /*! \brief openmp paralellization
