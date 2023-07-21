@@ -8,9 +8,9 @@ protected:
         //initialize default parameters.
         gyro::init_params();
         gyro::icntl[Param::verbose]        = 0;
-        gyro::icntl[Param::debug]          = 0;
+        gyro::icntl[Param::debug]          = 0; //do i
         gyro::icntl[Param::extrapolation]  = 0;
-        gyro::icntl[Param::DirBC_Interior] = 1;
+        gyro::icntl[Param::DirBC_Interior] = 0;
         gyro::icntl[Param::check_error]    = 1;
         gyro::dcntl[Param::R0]             = 1e-5;
         gyro::f_grid_r                     = "";
@@ -27,34 +27,36 @@ protected:
 
 TEST_P(test_prolongation, test_bilinear_prolongation)
 {
+    //we vary the grid size to guarantee that the problem works for all sizes
     const int& val_size            = GetParam();
     gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
     gyro::icntl[Param::ntheta_exp] = (val_size % 3) + 3;
 
     if (gyro::icntl[Param::nr_exp] == 3)
-        gyro::icntl[Param::fac_ani] = 2;
+        gyro::icntl[Param::fac_ani] = 2; //anisotropy should not exceed grid size
 
     gmgpolar test_p;
-    test_p.create_grid_polar();
+    test_p.create_grid_polar(); //create the grid. first on finest level
     test_p.check_geom();
-    test_p.define_coarse_nodes();
+    test_p.define_coarse_nodes(); // create coarser levels (numbers defined in constants)
 
     level& p_level = *(test_p.v_level[0]);
-    int ctheta_int = test_p.v_level[1]->ntheta_int;
+    int ctheta_int = test_p.v_level[1]->ntheta_int; //number of coarse nodes
 
     p_level.m  = test_p.v_level[0]->nr * test_p.v_level[0]->ntheta;
     p_level.mc = test_p.v_level[1]->nr * test_p.v_level[1]->ntheta;
 
     std::vector<double> u_test(p_level.mc);
     for (int z = 0; z < p_level.mc; z++) {
-        u_test[z] = 1 - z + pow(PI, -z * z);
+        u_test[z] =
+            1 - z + pow(PI, -z * z); //constructing arbitrary grid-function to test our prolongation operator with.
     }
 
     std::vector<double> sol = p_level.apply_prolongation_bi(u_test);
 
     for (int j = 0; j < p_level.nr_int + 1; j++) {
         for (int i = 0; i < p_level.ntheta_int; i++) {
-            if (j % 2 == 0 && i % 2 == 0) {
+            if (j % 2 == 0 && i % 2 == 0) { //testing coarse node injection
                 EXPECT_EQ(u_test[(j / 2) * ctheta_int + (i / 2)], sol[j * p_level.ntheta_int + i])
                     << "coarse node injection is failing";
             }
@@ -98,6 +100,7 @@ TEST_P(test_prolongation, test_bilinear_prolongation)
                     (i < p_level.ntheta_int - 1) ? p_level.theta[i + 1] - p_level.theta[i] : 2 * PI - p_level.theta[i];
 
                 /*the stencil-corners corresponding to the values (r_j,theta_i)*/
+                /*bottom corresponds to lower indices in theta direction. left to lower indices in radius direction*/
                 double bottom_left;
                 double top_left;
                 double bottom_right;
@@ -130,7 +133,7 @@ TEST_P(test_prolongation, test_bilinear_prolongation)
 
 TEST_P(test_prolongation, test_injection_prolongation)
 {
-    const int& val_size            = GetParam();
+    const int& val_size            = GetParam(); //use parameterized tests for different grid sizes
     gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
     gyro::icntl[Param::ntheta_exp] = (val_size % 3) + 3;
 
@@ -138,9 +141,9 @@ TEST_P(test_prolongation, test_injection_prolongation)
         gyro::icntl[Param::fac_ani] = 2;
 
     gmgpolar test_p;
-    test_p.create_grid_polar();
+    test_p.create_grid_polar(); //create finest grid
     test_p.check_geom();
-    test_p.define_coarse_nodes();
+    test_p.define_coarse_nodes(); // define coarser nodes. number of levels defined in constants
 
     level& p_level = *(test_p.v_level[0]);
     int ctheta_int = test_p.v_level[1]->ntheta_int;
@@ -150,13 +153,13 @@ TEST_P(test_prolongation, test_injection_prolongation)
 
     std::vector<double> u_test(p_level.mc);
     for (int z = 0; z < p_level.mc; z++) {
-        u_test[z] = z;
+        u_test[z] = z; //arbitrary grid-function that we prolongate defined on the coarse nodes
     }
 
     std::vector<double> sol = p_level.apply_prolongation_inj(u_test);
 
     EXPECT_EQ((int)sol.size(), p_level.m);
-
+    //testing the embedding. since we embed the coarse gird function, the values of the fine node should be zero
     for (int j = 0; j < p_level.nr_int + 1; j++) {
         for (int i = 0; i < p_level.ntheta_int; i++) {
             if (j % 2 == 0 && i % 2 == 0) {
@@ -165,7 +168,7 @@ TEST_P(test_prolongation, test_injection_prolongation)
                            ")";
             }
             else {
-                EXPECT_EQ(sol[j * p_level.ntheta_int + i], 0);
+                EXPECT_EQ(sol[j * p_level.ntheta_int + i], 0); //fine nodes set to zero.
             }
         }
     }
@@ -173,7 +176,7 @@ TEST_P(test_prolongation, test_injection_prolongation)
 
 TEST_P(test_prolongation, test_extrapolation_prolongation)
 {
-    const int& val_size            = GetParam();
+    const int& val_size            = GetParam(); //different grid sizes
     gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
     gyro::icntl[Param::ntheta_exp] = (val_size % 3) + 3;
 
@@ -181,9 +184,9 @@ TEST_P(test_prolongation, test_extrapolation_prolongation)
         gyro::icntl[Param::fac_ani] = 2;
 
     gmgpolar test_p;
-    test_p.create_grid_polar();
+    test_p.create_grid_polar(); //define nodes on finest level
     test_p.check_geom();
-    test_p.define_coarse_nodes();
+    test_p.define_coarse_nodes(); //created coarser level
 
     level& p_level = *(test_p.v_level[0]);
     int ctheta_int = test_p.v_level[1]->ntheta_int;
@@ -193,14 +196,14 @@ TEST_P(test_prolongation, test_extrapolation_prolongation)
 
     std::vector<double> u_test(p_level.mc);
     for (int z = 0; z < p_level.mc; z++) {
-        u_test[z] = z;
+        u_test[z] = z; //arbitrary grid-function to test the prolongation
     }
 
     std::vector<double> sol = p_level.apply_prolongation_ex(u_test);
 
     for (int j = 0; j < p_level.nr_int + 1; j++) {
         for (int i = 0; i < p_level.ntheta_int; i++) {
-            if (j % 2 == 0 && i % 2 == 0) {
+            if (j % 2 == 0 && i % 2 == 0) { //coarse node injection
                 EXPECT_EQ(u_test[(j / 2) * ctheta_int + (i / 2)], sol[j * p_level.ntheta_int + i])
                     << "coarse node injection is failing";
             }
@@ -229,7 +232,8 @@ TEST_P(test_prolongation, test_extrapolation_prolongation)
             else // both are fine nodes
             {
 
-                /*in the triangulation we now consider that the fine node is on the hypothenuse of the triangle*/
+                /*in the triangulation we now consider that the fine node is on the hypothenuse of the triangle.
+                 The corresponding coarse nodes are located on the triangles nodes that span the hypothenuse */
 
                 double top_left;
                 double bottom_right;
