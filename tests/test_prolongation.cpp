@@ -1,58 +1,65 @@
 #include <gtest/gtest.h>
+#include <tuple>
 #include "gmgpolar.h"
-class test_prolongation : public ::testing::TestWithParam<int>
+class test_prolongation
+    : public ::testing::TestWithParam<
+          std::tuple<int, bool>> //tuple includes data on grid size and Dirichlet boundary conditions
 {
 protected:
     void SetUp() override
     {
         //initialize default parameters.
         gyro::init_params();
-        gyro::icntl[Param::verbose]        = 0;
-        gyro::icntl[Param::debug]          = 0; //do i
-        gyro::icntl[Param::extrapolation]  = 0;
-        gyro::icntl[Param::DirBC_Interior] = 0;
-        gyro::icntl[Param::check_error]    = 1;
-        gyro::dcntl[Param::R0]             = 1e-5;
-        gyro::f_grid_r                     = "";
-        gyro::f_grid_theta                 = "";
-        gyro::f_sol_in                     = "";
-        gyro::f_sol_out                    = "";
-        gyro::icntl[Param::nr_exp]         = 4;
-        gyro::icntl[Param::ntheta_exp]     = 4;
-        gyro::icntl[Param::fac_ani]        = 3;
+        gyro::icntl[Param::verbose] = 0;
+        gyro::dcntl[Param::R0]      = 1e-5;
+        gyro::f_grid_r              = "";
+        gyro::f_grid_theta          = "";
+        gyro::f_sol_in              = "";
+        gyro::f_sol_out             = "";
+        gyro::icntl[Param::fac_ani] = 3;
         gyro::select_functions_class(gyro::icntl[Param::alpha_coeff], gyro::icntl[Param::beta_coeff],
                                      gyro::icntl[Param::mod_pk], gyro::icntl[Param::prob]);
     }
 };
+/*!
+ *  \brief Test the bilinear prolongation operator used in the multigrid cycle coarse-grid correction. 
+ *  
+ *  The Test creates an arbitrary grid-function on the coarser level and prolongates it. 
+ *  On the fine level we iterate over all nodes and test the result based on whether the node is fine in theta, r or in both.
+ *
+ *  Parametrized tests are used to test for different grid sizes and with or without Dirichlet boundary conditions.
+ */
 
 TEST_P(test_prolongation, test_bilinear_prolongation)
 {
     //we vary the grid size to guarantee that the problem works for all sizes
-    const int& val_size            = GetParam();
-    gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
-    gyro::icntl[Param::ntheta_exp] = (val_size % 3) + 3;
-
+    gyro::icntl[Param::nr_exp]         = (int)(std::get<0>(GetParam()) / 3) + 3;
+    gyro::icntl[Param::ntheta_exp]     = (std::get<0>(GetParam()) % 3) + 3;
+    gyro::icntl[Param::DirBC_Interior] = std::get<1>(GetParam());
     if (gyro::icntl[Param::nr_exp] == 3)
         gyro::icntl[Param::fac_ani] = 2; //anisotropy should not exceed grid size
 
     gmgpolar test_p;
     test_p.create_grid_polar(); //create the grid. first on finest level
     test_p.check_geom();
-    test_p.define_coarse_nodes(); // create coarser levels (numbers defined in constants)
+    test_p.define_coarse_nodes(); // create coarser levels (number of levels defined in constants.h)
 
     level& p_level = *(test_p.v_level[0]);
-    int ctheta_int = test_p.v_level[1]->ntheta_int; //number of coarse nodes
+    int ctheta_int = test_p.v_level[1]->ntheta_int; //number of coarse nodes in theta direction
 
-    p_level.m  = test_p.v_level[0]->nr * test_p.v_level[0]->ntheta;
-    p_level.mc = test_p.v_level[1]->nr * test_p.v_level[1]->ntheta;
+    p_level.m  = test_p.v_level[0]->nr * test_p.v_level[0]->ntheta; //fine grid size
+    p_level.mc = test_p.v_level[1]->nr * test_p.v_level[1]->ntheta; //coarser grid size
 
     std::vector<double> u_test(p_level.mc);
     for (int z = 0; z < p_level.mc; z++) {
         u_test[z] =
-            1 - z + pow(PI, -z * z); //constructing arbitrary grid-function to test our prolongation operator with.
+            1 - z +
+            pow(PI,
+                -z * z); //constructing arbitrary grid-function on coarse level to test our prolongation operator with.
     }
 
-    std::vector<double> sol = p_level.apply_prolongation_bi(u_test);
+    std::vector<double> sol =
+        p_level.apply_prolongation_bi(u_test); //apply prolongation operator on arbitrary grid-function
 
     for (int j = 0; j < p_level.nr_int + 1; j++) {
         for (int i = 0; i < p_level.ntheta_int; i++) {
@@ -62,30 +69,30 @@ TEST_P(test_prolongation, test_bilinear_prolongation)
             }
             else if (i % 2 != 0 && j % 2 == 0) { // theta_i is fine node
 
-                double k_qm1 = p_level.theta[i] - p_level.theta[i - 1];
-                double k_q =
-                    (i < p_level.ntheta_int - 1) ? p_level.theta[i + 1] - p_level.theta[i] : 2 * PI - p_level.theta[i];
+                double k_qm1 = p_level.theta[i] - p_level.theta[i - 1]; //calculate k_{q-1}
+                double k_q   = (i < p_level.ntheta_int - 1) ? p_level.theta[i + 1] - p_level.theta[i]
+                                                          : 2 * PI - p_level.theta[i]; //k_q
 
-                int i1 = (j / 2) * ctheta_int + (i - 1) / 2;
-                int i2 = (i < p_level.ntheta_int - 1) ? i1 + 1 : (j / 2) * ctheta_int; //cyclic coordinates
+                int i1 = (j / 2) * ctheta_int + (i - 1) / 2; //bottom coarse node in theta
+                int i2 = (i < p_level.ntheta_int - 1) ? i1 + 1 : (j / 2) * ctheta_int; //top coarse node in theta
 
                 double val = (k_q * u_test[i1] + k_qm1 * u_test[i2]);
 
-                EXPECT_NEAR(val, (k_q + k_qm1) * sol[j * p_level.ntheta_int + i], 1e-8)
+                EXPECT_NEAR(val, (k_q + k_qm1) * sol[j * p_level.ntheta_int + i], 1e-8) //compare values as in the paper
                     << "Bilinear Prolongation fails for Index (r,theta) : (" + std::to_string(j) + "," +
                            std::to_string(i) + ")";
                 ;
             }
             else if (i % 2 == 0) { // r_j fine node, theta_i coarse
-                double h_pm1 = p_level.r[j] - p_level.r[j - 1];
-                double h_p   = p_level.r[j + 1] - p_level.r[j];
+                double h_pm1 = p_level.r[j] - p_level.r[j - 1]; //h_{p-1}
+                double h_p   = p_level.r[j + 1] - p_level.r[j]; //h_p
 
-                double v1 = u_test[(j - 1) / 2 * ctheta_int + (i / 2)];
-                double v2 = u_test[(j + 1) / 2 * ctheta_int + (i / 2)];
+                double v1 = u_test[(j - 1) / 2 * ctheta_int + (i / 2)]; // left coarse node in r
+                double v2 = u_test[(j + 1) / 2 * ctheta_int + (i / 2)]; // right coarse node in r
 
                 double val = (h_p * v1 + h_pm1 * v2);
 
-                EXPECT_NEAR(val, (h_p + h_pm1) * sol[j * p_level.ntheta_int + i], 1e-8)
+                EXPECT_NEAR(val, (h_p + h_pm1) * sol[j * p_level.ntheta_int + i], 1e-8) //compare values
                     << "Bilinear Prolongation fails for Index (r,theta) : (" + std::to_string(j) + "," +
                            std::to_string(i) + ")";
                 ;
@@ -101,6 +108,7 @@ TEST_P(test_prolongation, test_bilinear_prolongation)
 
                 /*the stencil-corners corresponding to the values (r_j,theta_i)*/
                 /*bottom corresponds to lower indices in theta direction. left to lower indices in radius direction*/
+
                 double bottom_left;
                 double top_left;
                 double bottom_right;
@@ -121,7 +129,7 @@ TEST_P(test_prolongation, test_bilinear_prolongation)
                 }
 
                 double val = ((h_p * k_q * bottom_left) + (h_p * k_qm1 * top_left) + (h_pm1 * k_q * bottom_right) +
-                              (h_pm1 * k_qm1 * top_right));
+                              (h_pm1 * k_qm1 * top_right)); //calculate value as in the paper
 
                 EXPECT_NEAR(val, (h_p + h_pm1) * (k_q + k_qm1) * sol[j * p_level.ntheta_int + i], 1e-8)
                     << "Bilinear Prolongation fails for Index (r,theta) : (" + std::to_string(j) + "," +
@@ -131,11 +139,21 @@ TEST_P(test_prolongation, test_bilinear_prolongation)
     }
 }
 
+/*!
+ *  \brief Test the injection prolongation operator used in the implicit extrapolation step of the multigrid-cycle. 
+ *  
+ *  The Test creates an arbitrary grid-function on the coarser level and injects it. 
+ *  On the fine level we iterate over all nodes and test the result based on whether the node is fine or not.
+ *
+ *  Parametrized tests are used to test for different grid sizes and with or without Dirichlet boundary conditions.
+
+ */
+
 TEST_P(test_prolongation, test_injection_prolongation)
 {
-    const int& val_size            = GetParam(); //use parameterized tests for different grid sizes
-    gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
-    gyro::icntl[Param::ntheta_exp] = (val_size % 3) + 3;
+    gyro::icntl[Param::nr_exp]         = (int)(std::get<0>(GetParam()) / 3) + 3;
+    gyro::icntl[Param::ntheta_exp]     = (std::get<0>(GetParam()) % 3) + 3;
+    gyro::icntl[Param::DirBC_Interior] = std::get<1>(GetParam());
 
     if (gyro::icntl[Param::nr_exp] == 3)
         gyro::icntl[Param::fac_ani] = 2;
@@ -173,12 +191,21 @@ TEST_P(test_prolongation, test_injection_prolongation)
         }
     }
 }
+/*!
+ *  \brief Test the extrapolation prolongation operator used in the implicit extrapolation step of the multigrid-cycle. 
+ *  
+ *  The Test creates an arbitrary grid-function on the coarser level and prolongates it. 
+ *  On the fine level we iterate over all nodes and test the result based on whether the node is fine in theta, r or in both.
+ *  The value is determined by a Triangulation of the grid on the coarser level.
+ *  
+ *  Parametrized tests are used to test for different grid sizes and with or without Dirichlet boundary conditions.
+ */
 
 TEST_P(test_prolongation, test_extrapolation_prolongation)
 {
-    const int& val_size            = GetParam(); //different grid sizes
-    gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
-    gyro::icntl[Param::ntheta_exp] = (val_size % 3) + 3;
+    gyro::icntl[Param::nr_exp]         = (int)(std::get<0>(GetParam()) / 3) + 3;
+    gyro::icntl[Param::ntheta_exp]     = (std::get<0>(GetParam()) % 3) + 3;
+    gyro::icntl[Param::DirBC_Interior] = std::get<1>(GetParam());
 
     if (gyro::icntl[Param::nr_exp] == 3)
         gyro::icntl[Param::fac_ani] = 2;
@@ -258,4 +285,12 @@ TEST_P(test_prolongation, test_extrapolation_prolongation)
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(Prolongation_size, test_prolongation, ::testing::Values(0, 1, 2, 3, 4, 5, 6, 7, 8));
+INSTANTIATE_TEST_SUITE_P(Prolongation_size, test_prolongation,
+                         ::testing::Values(std::make_tuple(0, false), std::make_tuple(1, false),
+                                           std::make_tuple(2, false), std::make_tuple(3, false),
+                                           std::make_tuple(4, false), std::make_tuple(5, false),
+                                           std::make_tuple(6, false), std::make_tuple(7, false),
+                                           std::make_tuple(8, false), std::make_tuple(0, true),
+                                           std::make_tuple(1, true), std::make_tuple(2, true), std::make_tuple(3, true),
+                                           std::make_tuple(4, true), std::make_tuple(5, true), std::make_tuple(6, true),
+                                           std::make_tuple(7, true), std::make_tuple(8, true)));
