@@ -8,6 +8,7 @@ runs:
         sudo apt-get -qq update
         sudo apt-get -qq install gcc-11
         sudo apt-get -qq -y install g++-11
+        sudo apt-get -qq -y install lcov        
     - name: Build
       shell: 
       # ensure that the installed compiler version is used
