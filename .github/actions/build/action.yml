@@ -17,7 +17,6 @@ runs:
         export CXX=/usr/bin/g++-11
         mkdir build && cd build
         cmake -DGMGPOLAR_TEST_COVERAGE=ON ..
-        cd build
         make -j4
     - name: create build dir archive
       shell: bash
