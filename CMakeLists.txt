@@ -2,9 +2,10 @@ cmake_minimum_required(VERSION 3.16.3)
 
 project(GMGPolar VERSION 1.0.0)
 
+option(GMGPOLAR_BUILD_TESTS "Build GMGPolar unit tests." ON)
+option(GMGPOLAR_TEST_COVERAGE "Create GMGPolar code coverage." OFF)
 
 file(GLOB sources_src "./src/*.cpp" "./src/test_cases/*.cpp")
-
 
 # code coverage analysis
 # Note: this only works under linux and with make
