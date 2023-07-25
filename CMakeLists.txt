@@ -17,15 +17,17 @@ file(GLOB sources_src "./src/*.cpp" "./src/test_cases/*.cpp")
 option(GMGPOLAR_TEST_COVERAGE "Enable GCov coverage analysis (adds a 'coverage' target)" OFF)
 mark_as_advanced(GMGPOLAR_TEST_COVERAGE)
 
-if(GMGPOLAR_TEST_COVERAGE)
-    message(STATUS "Coverage enabled")
-    include(CodeCoverage)
-    append_coverage_compiler_flags()
-    setup_target_for_coverage_lcov(
-        NAME coverage
-        EXECUTABLE gmgpolar_tests
-        EXCLUDE "${CMAKE_SOURCE_DIR}/tests*" "${CMAKE_SOURCE_DIR}/src/test_cases*" "${CMAKE_BINARY_DIR}/*" "/usr*"
-    )
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "DEBUG")
+    if(GMGPOLAR_TEST_COVERAGE)
+        message(STATUS "Coverage enabled")
+        include(CodeCoverage)
+        append_coverage_compiler_flags()
+        setup_target_for_coverage_lcov(
+            NAME coverage
+            EXECUTABLE tests/gmgpolar_tests
+            EXCLUDE "${CMAKE_SOURCE_DIR}/tests*" "${CMAKE_SOURCE_DIR}/src/test_cases*" "${CMAKE_BINARY_DIR}/*" "/usr*"
+        )
+    endif()
 endif()
 
 
