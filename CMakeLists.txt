@@ -5,6 +5,9 @@ project(GMGPolar VERSION 1.0.0)
 option(GMGPOLAR_BUILD_TESTS "Build GMGPolar unit tests." ON)
 option(GMGPOLAR_TEST_COVERAGE "Create GMGPolar code coverage." OFF)
 
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 file(GLOB sources_src "./src/*.cpp" "./src/test_cases/*.cpp")
 
 # code coverage analysis
