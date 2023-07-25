@@ -188,14 +188,14 @@ void gmgpolar::multigrid_iter()
         t_fine_residual += TOC;
         TIC;
     }
-    // if (gyro::icntl[Param::verbose] > 0) {
-    if (it == gyro::icntl[Param::maxiter]) {
-        std::cout << "Multigrid reached maxiter=" << gyro::icntl[Param::maxiter] << "\n";
+    if (gyro::icntl[Param::verbose] > 0) {
+        if (it == gyro::icntl[Param::maxiter]) {
+            std::cout << "Multigrid reached maxiter=" << gyro::icntl[Param::maxiter] << "\n";
+        }
+        else {
+            std::cout << "Convergence after iteration " << it << std::endl;
+        }
     }
-    else {
-        std::cout << "Convergence after iteration " << it << std::endl;
-    }
-    // }
     //----------------------------------------------------------------------------------------------------------
     //!compute mean residual reduction factor rho
     if (extrapol < 2) {
@@ -221,8 +221,10 @@ void gmgpolar::multigrid_iter()
         }
         nrm_2 = sqrt(nrm_2) / sqrt(v_level[0]->m); //scaling by 1/sqrt(m)
 
-        std::cout << "2-norm of error = " << nrm_2 << std::endl;
-        std::cout << "inf-norm of error = " << nrm_inf_err << std::endl;
+        if (gyro::icntl[Param::verbose] > 0) {
+            std::cout << "2-norm of error = " << nrm_2 << std::endl;
+            std::cout << "inf-norm of error = " << nrm_inf_err << std::endl;
+        }
 
         if (gyro::icntl[Param::verbose] > 5)
             gyro::disp(error, "error");
