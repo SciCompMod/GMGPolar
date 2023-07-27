@@ -35,7 +35,7 @@ runs:
       # compute code coverage
       run: |
         cd build
-        cmake --build . --target coverage/fast
+        cmake --build ./tests --target coverage/fast
     - name: Upload test report
       uses: actions/upload-artifact@v3
       with:
@@ -48,7 +48,7 @@ runs:
       with:
         name: test-coverage-reports
         path: |
-          build/coverage.info
-          build/coverage
+          build/tests/coverage.info
+          build/tests/coverage
         if-no-files-found: error
         retention-days: 1       
