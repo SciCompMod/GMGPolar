@@ -35,7 +35,7 @@ runs:
       # compute code coverage
       run: |
         cd build
-        cmake --build ./tests --target coverage/fast
+        cmake --build . --target coverage/fast
     - name: Upload test report
       uses: actions/upload-artifact@v3
       with:
