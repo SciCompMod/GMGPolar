@@ -43,8 +43,8 @@ find_package(OpenMP)
 #currently works on GNU compiler
 if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 7))
 
-    set(CMAKE_CXX_FLAGS "-O2 -Wall -MMD -MP -Wwrite-strings")
-    set(CMAKE_LINKER_FLAGS "-O2 -Wall -MMD -MP -Wwrite-strings")
+    string(APPEND CMAKE_CXX_FLAGS " -O2 -Wall -MMD -MP -Wwrite-strings")
+    string(APPEND CMAKE_LINKER_FLAGS " -O2 -Wall -MMD -MP -Wwrite-strings")
 
     if(OPENMP_FOUND)
         string(APPEND CMAKE_CXX_FLAGS " -fopenmp")
