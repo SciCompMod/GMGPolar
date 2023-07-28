@@ -6,7 +6,7 @@ import sys
 
 def main():
 
-    jobid = '12425'
+    jobid = '1256' # provide correct slurm job id
     problem = 5
     nr_exp = 4
     mod_pk = 1
@@ -16,9 +16,10 @@ def main():
     nodes = 1
     ranks = 1
     maxCores = 14
-    cores_used = []
+    cores_used = [] # will be filled automatically
 
-    path_to_perf_files = 'plot_tools/'
+    path_to_perf_files_rel = '' # relative from read_output call
+    path_to_perf_files = os.path.join(os.path.dirname(__file__), os.path.join(path_to_perf_files_rel))
 
     cols_problem = ['Problem', 'rExp', 'ModPK', 'Extrapolation']
 
