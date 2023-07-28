@@ -8,6 +8,9 @@ option(GMGPOLAR_TEST_COVERAGE "Create GMGPolar code coverage." OFF)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+set(CMAKE_CXX_FLAGS "")
+set(CMAKE_LINKER_FLAGS "")
+
 file(GLOB sources_src "./src/*.cpp" "./src/test_cases/*.cpp")
 
 # code coverage analysis
