@@ -52,7 +52,7 @@ echo "#SBATCH --exclusive" >> run_gmgpolar_sbatch.sh
 echo "module purge" >> run_gmgpolar_sbatch.sh
 
 # CARO
-echo "module load rev/23.05" >> run_gmgpolar_sbatch.sh
+#echo "module load rev/23.05" >> run_gmgpolar_sbatch.sh
 echo "module load mumps/5.5.1" >> run_gmgpolar_sbatch.sh
 # Local machine
 # echo "module load PrgEnv/gcc10-openmpi" >> run_gmgpolar_sbatch.sh
