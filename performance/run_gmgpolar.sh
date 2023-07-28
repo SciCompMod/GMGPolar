@@ -20,15 +20,23 @@ R=1.3			    # R
 # Anisotropy in radial direction.
 fac_ani=3		    # a
 # TODO: which nr_exp and divideby2 do we want to consider?
-nr_exp=9		    # n
+nr_exp=4		    # n
 
 #changing variables
 mod_pk=1		    # mod_pk (0/1)
 prob=5			    # prob
-# set to something other than 0 here? iteration over 0, 1, 2, 3, ... in another benchmark?
-divideBy2=0		    # divideBy2 (3/4/5/6)
+alpha_coeff=2		# Zoni shifted
+beta_coeff=1
+
 # set to on
 extrapolation=1		# E
+
+debug=0
+v1=1
+v2=1
+maxiter=300
+res_norm=3
+rel_red_conv=1e-11
 
 nodes=1
 ranks=1     # number of MPI Ranks
@@ -60,13 +68,39 @@ echo "module load mumps/5.5.1" >> run_gmgpolar_sbatch.sh
 echo "cd .." >> run_gmgpolar_sbatch.sh
 # echo "make -j16" >> run_gmgpolar_sbatch.sh
 
+####################################
+## create grids                   ##
+####################################
+mod_pk=0 # mod_pk has no effect on the creation of grids as the set of (r,theta) is
+		 # the same for all geometries, only the mapping F(r,theta) -> (x,y) changes.
+
+mkdir -p angles_files/Rmax"$R"/aniso"$fac_ani"/
+mkdir -p radii_files/Rmax"$R"/aniso"$fac_ani"/
+
+echo $prob $alpha_coeff $beta_coeff $fac_ani $extrapolation $mod_pk
+for divideBy2 in 0 1 2 3 4 5 6          # create different grid sizes
+do
+	## ATTENTION / REMARK: 
+	## Please note that these calls will abort/segfault as creation of grids and computation in one step
+	## is not yet supported by GMGPolar. We will make this functionality available in a future commit.
+	## Please ignore abort/segfault for the calls in this loop.
+	./build/gmgpolar_simulation -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 $divideBy2 -r $R0  --smoother $smoother --verbose 2 --debug $debug --extrapolation $extrapolation --optimized 1 --openmp $openmp --v1 $v1 --v2 $v2 -R $R --prob $prob  --maxiter $maxiter --alpha_coeff $alpha_coeff --beta_coeff $beta_coeff --res_norm $res_norm --write_radii_angles 1 --f_grid_r "radii_files/Rmax"$R"/aniso"$fac_ani"/divide"$divideBy2".txt" --f_grid_theta "angles_files/Rmax"$R"/aniso"$fac_ani"/divide"$divideBy2".txt"
+done
+
+# to be defined for use case
+divideBy2=4		    # divideBy2 (3/4/5/6)
+
+####################################
+## solve system                   ##
+####################################
+
 # reduce cores as cores count from 0
 max_threads=$((cores))
 echo "let m=1" >> run_gmgpolar_sbatch.sh
 # FLOPS-DP counter from 1 to cores many threads
 echo "while [ \$m -le $max_threads ]; do" >> run_gmgpolar_sbatch.sh
 echo "let mminus1=m-1" >> run_gmgpolar_sbatch.sh
-echo "likwid-perfctr -C 0-\$mminus1 -g FLOPS_DP ./build/gmgpolar_simulation --openmp \$m --matrix_free 1 -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 $divideBy2 -r $R0 --smoother $smoother -E $extrapolation" >> run_gmgpolar_sbatch.sh
+echo "likwid-perfctr -C 0-\$mminus1 -g FLOPS_DP ./build/gmgpolar_simulation --openmp \$m --matrix_free 1 -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 $divideBy2 -r $R0 --smoother $smoother -E $extrapolation --verbose 2 --debug $debug --optimized 1 --v1 $v1 --v2 $v2 -R $R --prob $prob --maxiter $maxiter --alpha_coeff $alpha_coeff --beta_coeff $beta_coeff --res_norm $res_norm --f_grid_r "radii_files/Rmax"$R"/aniso"$fac_ani"/divide"$divideBy2".txt" --f_grid_theta "angles_files/Rmax"$R"/aniso"$fac_ani"/divide"$divideBy2".txt" --rel_red_conv $rel_red_conv" >> run_gmgpolar_sbatch.sh
 echo "let m=m*2" >> run_gmgpolar_sbatch.sh
 echo "done;" >> run_gmgpolar_sbatch.sh
 
@@ -74,7 +108,7 @@ echo "done;" >> run_gmgpolar_sbatch.sh
 echo "let m=1" >> run_gmgpolar_sbatch.sh
 echo "while [ \$m -le $max_threads ]; do" >> run_gmgpolar_sbatch.sh
 echo "let mminus1=m-1" >> run_gmgpolar_sbatch.sh
-echo "likwid-perfctr -C 0-\$mminus1 -g CACHES ./build/gmgpolar_simulation --openmp \$m --matrix_free 1 -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 $divideBy2 -r $R0 --smoother $smoother -E $extrapolation" >> run_gmgpolar_sbatch.sh
+echo "likwid-perfctr -C 0-\$mminus1 -g CACHES ./build/gmgpolar_simulation --openmp \$m --matrix_free 1 -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 $divideBy2 -r $R0 --smoother $smoother -E $extrapolation --verbose 2 --debug $debug --optimized 1 --v1 $v1 --v2 $v2 -R $R --prob $prob --maxiter $maxiter --alpha_coeff $alpha_coeff --beta_coeff $beta_coeff --res_norm $res_norm --f_grid_r "radii_files/Rmax"$R"/aniso"$fac_ani"/divide"$divideBy2".txt" --f_grid_theta "angles_files/Rmax"$R"/aniso"$fac_ani"/divide"$divideBy2".txt" --rel_red_conv $rel_red_conv" >> run_gmgpolar_sbatch.sh
 echo "let m=m*2" >> run_gmgpolar_sbatch.sh
 echo "done;" >> run_gmgpolar_sbatch.sh
 

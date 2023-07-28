@@ -16,15 +16,8 @@
 debug=0
 v1=1
 v2=1
-cycle=1
-compute_rho=0
-level=-1
 maxiter=300
-periodic=1
-theta_aniso=0
-discr=1
 nr_exp=4
-ntheta_exp=4
 res_norm=3
 R0=1e-6
 DirBC_Interior=0
