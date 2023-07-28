@@ -20,7 +20,7 @@ R=1.3			    # R
 # Anisotropy in radial direction.
 fac_ani=3		    # a
 # TODO: which nr_exp and divideby2 do we want to consider?
-nr_exp=7		    # n
+nr_exp=9		    # n
 
 #changing variables
 mod_pk=1		    # mod_pk (0/1)
@@ -58,7 +58,7 @@ echo "module load mumps/5.5.1" >> run_gmgpolar_sbatch.sh
 # echo "module load PrgEnv/gcc10-openmpi" >> run_gmgpolar_sbatch.sh
 
 echo "cd .." >> run_gmgpolar_sbatch.sh
-echo "make -j16" >> run_gmgpolar_sbatch.sh
+# echo "make -j16" >> run_gmgpolar_sbatch.sh
 
 # reduce cores as cores count from 0
 max_threads=$((cores))
