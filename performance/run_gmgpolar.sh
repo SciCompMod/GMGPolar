@@ -1,4 +1,11 @@
 #!/bin/bash
+#SBATCH --job-name=gmgpolar-setup
+#SBATCH --output=slurm-%A-setup.out
+#SBATCH --error=slurm-%A-setup.err
+#SBATCH -N 1
+#SBATCH -n 1
+#SBATCH -c 1
+#SBATCH -t 600
 
 #fixed variables
 # If Origin is chosen, the node can be set as coarse or fine. Default: Coarse.
@@ -42,6 +49,25 @@ nodes=1
 ranks=1     # number of MPI Ranks
 cores=64    # set OpenMP Num Threads to maximum number of cores requested
 
+####################################
+## create grids                   ##
+####################################
+mod_pk=0 # mod_pk has no effect on the creation of grids as the set of (r,theta) is
+		 # the same for all geometries, only the mapping F(r,theta) -> (x,y) changes.
+
+mkdir -p angles_files/Rmax"$R"/aniso"$fac_ani"/
+mkdir -p radii_files/Rmax"$R"/aniso"$fac_ani"/
+
+echo $prob $alpha_coeff $beta_coeff $fac_ani $extrapolation $mod_pk
+for divideBy2 in 0 1 2 3 4 5 6 7         # create different grid sizes
+do
+	## ATTENTION / REMARK: 
+	## Please note that these calls will abort/segfault as creation of grids and computation in one step
+	## is not yet supported by GMGPolar. We will make this functionality available in a future commit.
+	## Please ignore abort/segfault for the calls in this loop.
+	./build/gmgpolar_simulation -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 $divideBy2 -r $R0  --smoother $smoother --verbose 2 --debug $debug --extrapolation $extrapolation --optimized 1 --openmp $openmp --v1 $v1 --v2 $v2 -R $R --prob $prob  --maxiter $maxiter --alpha_coeff $alpha_coeff --beta_coeff $beta_coeff --res_norm $res_norm --write_radii_angles 1 --f_grid_r "radii_files/Rmax"$R"/aniso"$fac_ani"/divide"$divideBy2".txt" --f_grid_theta "angles_files/Rmax"$R"/aniso"$fac_ani"/divide"$divideBy2".txt"
+done
+
 echo "#!/bin/bash" > run_gmgpolar_sbatch.sh
 # create a short name for your job
 echo "#SBATCH --job-name=gmgpolar" >> run_gmgpolar_sbatch.sh
@@ -62,33 +88,15 @@ echo "module purge" >> run_gmgpolar_sbatch.sh
 # CARO
 #echo "module load rev/23.05" >> run_gmgpolar_sbatch.sh
 echo "module load mumps/5.5.1" >> run_gmgpolar_sbatch.sh
+echo "module load likwid/5.2.2" >> run_gmgpolar_sbatch.sh
 # Local machine
 # echo "module load PrgEnv/gcc10-openmpi" >> run_gmgpolar_sbatch.sh
 
 echo "cd .." >> run_gmgpolar_sbatch.sh
 # echo "make -j16" >> run_gmgpolar_sbatch.sh
 
-####################################
-## create grids                   ##
-####################################
-mod_pk=0 # mod_pk has no effect on the creation of grids as the set of (r,theta) is
-		 # the same for all geometries, only the mapping F(r,theta) -> (x,y) changes.
-
-mkdir -p angles_files/Rmax"$R"/aniso"$fac_ani"/
-mkdir -p radii_files/Rmax"$R"/aniso"$fac_ani"/
-
-echo $prob $alpha_coeff $beta_coeff $fac_ani $extrapolation $mod_pk
-for divideBy2 in 0 1 2 3 4 5 6          # create different grid sizes
-do
-	## ATTENTION / REMARK: 
-	## Please note that these calls will abort/segfault as creation of grids and computation in one step
-	## is not yet supported by GMGPolar. We will make this functionality available in a future commit.
-	## Please ignore abort/segfault for the calls in this loop.
-	./build/gmgpolar_simulation -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 $divideBy2 -r $R0  --smoother $smoother --verbose 2 --debug $debug --extrapolation $extrapolation --optimized 1 --openmp $openmp --v1 $v1 --v2 $v2 -R $R --prob $prob  --maxiter $maxiter --alpha_coeff $alpha_coeff --beta_coeff $beta_coeff --res_norm $res_norm --write_radii_angles 1 --f_grid_r "radii_files/Rmax"$R"/aniso"$fac_ani"/divide"$divideBy2".txt" --f_grid_theta "angles_files/Rmax"$R"/aniso"$fac_ani"/divide"$divideBy2".txt"
-done
-
-# to be defined for use case
-divideBy2=4		    # divideBy2 (3/4/5/6)
+# to be defined for use case (3/4/5/6)
+echo "divideBy2=4" >> run_gmgpolar_sbatch.sh
 
 ####################################
 ## solve system                   ##

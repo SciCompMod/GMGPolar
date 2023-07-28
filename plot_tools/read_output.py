@@ -30,7 +30,7 @@ def main():
     cols_time = []
     cols_time += ['t_setup', 't_build', 't_facto_Ac',
                   't_build_P', 't_build_Asc', 't_facto_Asc']
-    cols_time += ['t_total(fine)', 't_smoothing', 't_residual',
+    cols_time += ['t_total_(fine)', 't_smoothing', 't_residual',
                   't_restriction', 't_Ac', 't_prolongation', 't_fine_residual',
                   't_error']
     cols_time += ['t_applyA']
