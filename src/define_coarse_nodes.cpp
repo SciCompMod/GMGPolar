@@ -166,7 +166,7 @@ void level::store_theta_n_co()
     if (fabs(theta[ntheta - 1] - 2 * PI) < 1e-10) // check if end is 2*Pi (for periodic boundary conditions)
         ntheta_int--;
     if (ntheta_int % 2)
-        std::cout << "ACHTUNG.... theta has an odd size\n";
+        std::cout << "WARNING: The number of thetas is odd. Please use even numbers only.\n";
 
     // To take first/last theta into account without conditions:
     // - theta_per = [theta_last, theta, 2PI]

@@ -243,7 +243,9 @@ void level::build_theta()
             theta[i] = fac * i;
     }
     else {
-        std::cout << "Anisotropy chosen in theta.\n";
+        if (gyro::icntl[Param::verbose] > 2) {
+            std::cout << "Anisotropy chosen in theta.\n";
+        }
         ntheta     = pow(2, ceil(log2(nr)) - 1);
         double fac = 2 * PI / ntheta;
 

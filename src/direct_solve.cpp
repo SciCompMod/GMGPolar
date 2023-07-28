@@ -288,7 +288,9 @@ std::vector<double> level::solve_gaussian_elimination(std::vector<int> A_row_ind
 {
     // int m_solution = f.size();
 
-    // std::cout << "Forward substitution \n";
+    if (gyro::icntl[Param::verbose] > 3) {
+        std::cout << "Starting Gaussian elimination forward substitution \n";
+    }
     // Solve Ly = b for y (Forward Substitution)
     // (assumes rows in increasing order)
     int row = A_row_indices[0];
@@ -299,7 +301,9 @@ std::vector<double> level::solve_gaussian_elimination(std::vector<int> A_row_ind
         y[A_row_indices[j]] -= y[A_col_indices[j]] * A_vals[j];
     }
 
-    // std::cout << "Backward substitution \n";
+    if (gyro::icntl[Param::verbose] > 3) {
+        std::cout << "Starting Gaussian elimination backward substitution \n";
+    }
     //Solve Ux = y for x (Backward Substitution)
     row = A_row_indices[A_row_indices.size() - 1];
     int jind;
@@ -748,8 +752,6 @@ void level::fill_in_circle(int ij, int smoother)
     int ind, ind2;
     int msc     = m_sc[smoother];
     int size_LU = 3 * msc + 2 * (msc - 3);
-    // std::cout << "ij: " << ij << ", smoother: " << smoother << ", m_sc: " << msc << ", size_LU: " << size_LU << "\n";
-    // std::cout << "A_Zebra_r_row[smoother][ij].size(): " << A_Zebra_r_row[smoother][ij].size() << "\n";
     // first line
     A_Zebra_r_LU_row[smoother][ij]    = std::vector<int>(size_LU);
     A_Zebra_c_LU_row[smoother][ij]    = std::vector<int>(size_LU);
@@ -767,9 +769,7 @@ void level::fill_in_circle(int ij, int smoother)
     for (int i = 0; i < msc - 2; i++) {
         ind  = 3 * i + 3;
         ind2 = 4 * i + 3;
-        // std::cout << "ind: " << ind << ", ind2: " << ind2 << ", ij: " << ij << "\n";
-        // std::cout << "A_Zebra_r_row[smoother][ij][ind]: " << A_Zebra_r_row[smoother][ij][ind] << "\n";
-        // std::cout << "A_Zebra_r_LU_row[smoother][ij][ind2]: " << A_Zebra_r_LU_row[smoother][ij][ind2] << "\n";
+
         A_Zebra_r_LU_row[smoother][ij][ind2]     = A_Zebra_r_row[smoother][ij][ind];
         A_Zebra_r_LU_row[smoother][ij][ind2 + 1] = A_Zebra_r_row[smoother][ij][ind + 1];
         A_Zebra_r_LU_row[smoother][ij][ind2 + 2] = A_Zebra_r_row[smoother][ij][ind + 2];

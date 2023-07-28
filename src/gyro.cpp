@@ -243,7 +243,7 @@ void gyro::show_params()
  *
  * Computes the distance of a node (x, y) to the Dirichlet boundary, using 
  * tolerance of 1e-10 to define boundary.
- * Highly dependent on dcntl[Param::r0_DB] which is 1e6 is icntl[Param::DirBC_Interior]=0.
+ * Highly dependent on dcntl[Param::r0_DB] which should be very small if icntl[Param::DirBC_Interior]=0.
  * 
  * \param x: the x coordinate of the node
  * \param y: the  coordinate of the node
@@ -440,10 +440,10 @@ std::vector<double> gyro::coeff(std::vector<double> r, int verbose)
 
     dcntl[Param::t_coeff] += TOC;
 
-    // if (verbose) {
-    //     disp(r, "r");
-    //     disp(coeff, "coeff");
-    // }
+    if (gyro::icntl[Param::verbose] > 5) {
+        disp(r, "r");
+        disp(coeff, "coeff");
+    }
     return coeff_a;
 } /* ----- end of level::coeff ----- */
 
@@ -649,11 +649,11 @@ std::vector<double> gyro::detDFinv(double r, std::vector<double> theta, std::vec
 
     dcntl[Param::t_detDFinv] += TOC;
 
-    // if (verbose) {
-    //     disp(theta, "theta");
-    //     disp(cos_theta, "cos_theta");
-    //     disp(detDFinv_r, "detDFinv_r");
-    // }
+    if (gyro::icntl[Param::verbose] > 5) {
+        disp(theta, "theta");
+        disp(cos_theta, "cos_theta");
+        disp(detDFinv_r, "detDFinv_r");
+    }
     return detDFinv_r;
 } /* ----- end of level::detDFinv ----- */
 
@@ -699,10 +699,10 @@ std::vector<double> gyro::detDFinv(std::vector<double> r, double theta, int verb
 
     dcntl[Param::t_detDFinv] += TOC;
 
-    // if (verbose) {
-    //     disp(r, "r");
-    //     disp(detDFinv_r, "detDFinv_r");
-    // }
+    if (gyro::icntl[Param::verbose] > 5) {
+        disp(r, "r");
+        disp(detDFinv_r, "detDFinv_r");
+    }
     return detDFinv_r;
 } /* ----- end of level::detDFinv ----- */
 
@@ -730,12 +730,12 @@ std::vector<double> gyro::arr(double r, std::vector<double> theta, std::vector<d
 
     dcntl[Param::t_arr_art_att] += TOC;
 
-    // if (verbose) {
-    //     disp(theta, "theta");
-    //     disp(sin_theta, "sin_theta");
-    //     disp(cos_theta, "cos_theta");
-    //     disp(arr_r, "arr_r");
-    // }
+    if (gyro::icntl[Param::verbose] > 5) {
+        disp(theta, "theta");
+        disp(sin_theta, "sin_theta");
+        disp(cos_theta, "cos_theta");
+        disp(arr_r, "arr_r");
+    }
     return arr_r;
 } /* ----- end of level::arr ----- */
 std::vector<double> gyro::art(double r, std::vector<double> theta, std::vector<double> sin_theta,
@@ -766,14 +766,12 @@ std::vector<double> gyro::art(double r, std::vector<double> theta, std::vector<d
 
     dcntl[Param::t_arr_art_att] += TOC;
 
-    // if (verbose) {
-    //     std::cout << "ART (" << r << "\n";
-    //     disp(theta, "theta");
-    //     disp(sin_theta, "sin_theta");
-    //     disp(cos_theta, "cos_theta");
-    //     disp(art_r, "art_r");
-    //     std::cout << ")\n";
-    // }
+    if (gyro::icntl[Param::verbose] > 5) {
+        disp(theta, "theta");
+        disp(sin_theta, "sin_theta");
+        disp(cos_theta, "cos_theta");
+        disp(art_r, "art_r");
+    }
     return art_r;
 } /* ----- end of level::art ----- */
 std::vector<double> gyro::att(double r, std::vector<double> theta, std::vector<double> sin_theta,
@@ -802,12 +800,12 @@ std::vector<double> gyro::att(double r, std::vector<double> theta, std::vector<d
 
     dcntl[Param::t_arr_art_att] += TOC;
 
-    // if (verbose) {
-    //     disp(theta, "theta");
-    //     disp(sin_theta, "sin_theta");
-    //     disp(cos_theta, "cos_theta");
-    //     disp(att_r, "att_r");
-    // }
+    if (gyro::icntl[Param::verbose] > 5) {
+        disp(theta, "theta");
+        disp(sin_theta, "sin_theta");
+        disp(cos_theta, "cos_theta");
+        disp(att_r, "att_r");
+    }
     return att_r;
 } /* ----- end of level::att ----- */
 void gyro::arr_att_art(double r, std::vector<double> theta, std::vector<double> sin_theta,
@@ -843,14 +841,14 @@ void gyro::arr_att_art(double r, std::vector<double> theta, std::vector<double> 
 
     dcntl[Param::t_arr_art_att] += TOC;
 
-    // if (verbose) {
-    //     disp(theta, "theta");
-    //     disp(sin_theta, "sin_theta");
-    //     disp(cos_theta, "cos_theta");
-    //     disp(arr, "arr");
-    //     disp(att, "att");
-    //     disp(art, "art");
-    // }
+    if (gyro::icntl[Param::verbose] > 5) {
+        disp(theta, "theta");
+        disp(sin_theta, "sin_theta");
+        disp(cos_theta, "cos_theta");
+        disp(arr, "arr");
+        disp(att, "att");
+        disp(art, "art");
+    }
 } /* ----- end of level::arr_att_art ----- */
 void gyro::arr_att_art(std::vector<double> r, double theta, std::vector<double>& arr_r, std::vector<double>& att_r,
                        std::vector<double>& art_r, int verbose)
@@ -885,14 +883,14 @@ void gyro::arr_att_art(std::vector<double> r, double theta, std::vector<double>&
 
     dcntl[Param::t_arr_art_att] += TOC;
 
-    // if (verbose) {
-    //     disp(r, "r");
-    //     disp(detDFinv_r, "detDFinv_r");
-    //     disp(coeff_r, "coeff_r");
-    //     disp(arr_r, "arr_r");
-    //     disp(att_r, "att_r");
-    //     disp(art_r, "art_r");
-    // }
+    if (gyro::icntl[Param::verbose] > 5) {
+        disp(r, "r");
+        disp(detDFinv_r, "detDFinv_r");
+        disp(coeff_r, "coeff_r");
+        disp(arr_r, "arr_r");
+        disp(att_r, "att_r");
+        disp(art_r, "art_r");
+    }
 } /* ----- end of level::arr_att_art ----- */
 
 /***************************************************************************
