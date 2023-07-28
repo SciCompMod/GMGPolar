@@ -61,13 +61,16 @@ echo "module load likwid/5.2.2" >> run_gmgpolar_sbatch.sh
 echo "cd .." >> run_gmgpolar_sbatch.sh
 # echo "make -j16" >> run_gmgpolar_sbatch.sh
 
+# heatup
+echo "./build/gmgpolar_simulation --openmp $max_threads --verbose 0 --matrix_free 1 -n 6 -a 3 --mod_pk 1 --DirBC_Interior 1 --divideBy2 0 -r 1e-8 --smoother 3 -E 1" >> run_gmgpolar_sbatch.sh
+
 # reduce cores as cores count from 0
 max_threads=$((cores))
 echo "let m=1" >> run_gmgpolar_sbatch.sh
 # FLOPS-DP counter from 1 to cores many threads
 echo "while [ \$m -le $max_threads ]; do" >> run_gmgpolar_sbatch.sh
 echo "let mminus1=m-1" >> run_gmgpolar_sbatch.sh
-echo "likwid-perfctr -C 0-\$mminus1 -g FLOPS_DP ./build/gmgpolar_simulation --openmp \$m --matrix_free 1 -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 $divideBy2 -r $R0 --smoother $smoother -E $extrapolation" >> run_gmgpolar_sbatch.sh
+echo "likwid-perfctr -C 0-\$mminus1 -g FLOPS_DP ./build/gmgpolar_simulation --openmp \$m --verbose 2 --matrix_free 1 -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 $divideBy2 -r $R0 --smoother $smoother -E $extrapolation" >> run_gmgpolar_sbatch.sh
 echo "let m=m*2" >> run_gmgpolar_sbatch.sh
 echo "done;" >> run_gmgpolar_sbatch.sh
 
@@ -75,7 +78,7 @@ echo "done;" >> run_gmgpolar_sbatch.sh
 echo "let m=1" >> run_gmgpolar_sbatch.sh
 echo "while [ \$m -le $max_threads ]; do" >> run_gmgpolar_sbatch.sh
 echo "let mminus1=m-1" >> run_gmgpolar_sbatch.sh
-echo "likwid-perfctr -C 0-\$mminus1 -g CACHES ./build/gmgpolar_simulation --openmp \$m --matrix_free 1 -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 $divideBy2 -r $R0 --smoother $smoother -E $extrapolation" >> run_gmgpolar_sbatch.sh
+echo "likwid-perfctr -C 0-\$mminus1 -g CACHES ./build/gmgpolar_simulation --openmp \$m --verbose 2 --matrix_free 1 -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 $divideBy2 -r $R0 --smoother $smoother -E $extrapolation" >> run_gmgpolar_sbatch.sh
 echo "let m=m*2" >> run_gmgpolar_sbatch.sh
 echo "done;" >> run_gmgpolar_sbatch.sh
 
