@@ -35,9 +35,9 @@
  */
 double gyro::eval_def_rhs(double r, double theta, int verbose)
 {
-    double kappa_eps   = dcntl[Param::kappa_eps];
-    double delta_e     = dcntl[Param::delta_e];
-    double Rmax = dcntl[Param::R];
+    double kappa_eps = dcntl[Param::kappa_eps];
+    double delta_e   = dcntl[Param::delta_e];
+    double Rmax      = dcntl[Param::R];
 
     double rhs_val = 0;
     if (r > 0) {
@@ -60,9 +60,9 @@ double gyro::eval_def_rhs(double r, double theta, int verbose)
 std::vector<double> gyro::eval_def_rhs(double r, std::vector<double> theta, std::vector<double> sin_theta,
                                        std::vector<double> cos_theta, int ntheta, int verbose)
 {
-    double kappa_eps   = dcntl[Param::kappa_eps];
-    double delta_e     = dcntl[Param::delta_e];
-    double Rmax = dcntl[Param::R];
+    double kappa_eps = dcntl[Param::kappa_eps];
+    double delta_e   = dcntl[Param::delta_e];
+    double Rmax      = dcntl[Param::R];
 
     std::vector<double> rhs_val(ntheta);
     if (r > 0) {

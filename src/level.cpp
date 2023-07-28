@@ -376,9 +376,18 @@ std::vector<int> level::get_stencil(int j)
  */
 void level::define_nz_P()
 {
-    nz_P     = 9 * ntheta_int * (nr_int / 2 - 1) / 2 + 3 * ntheta_int;
+    // nz_P     = 9 * ntheta_int * (nr_int / 2 - 1) / 2 + 3 * ntheta_int;
+    nz_P = (nr_int / 2 + 1) * (ntheta_int / 2) // coarse nodes
+           + 2 * (nr_int / 2 + 1) * ntheta_int / 2 // same theta
+           + 2 * (nr_int / 2) * ntheta_int / 2 // same r
+           + 4 * (nr_int / 2) * ntheta_int / 2; // diagonal relations
+
     nz_P_inj = mc;
-    nz_P_ex  = 7 * ntheta_int * (nr_int / 2 - 1) / 2 + 3 * ntheta_int;
+    // nz_P_ex  = 7 * ntheta_int * (nr_int / 2 - 1) / 2 + 3 * ntheta_int;
+    nz_P_ex = (nr_int / 2 + 1) * (ntheta_int / 2) // coarse nodes
+              + 2 * (nr_int / 2 + 1) * ntheta_int / 2 // same theta
+              + 2 * (nr_int / 2) * ntheta_int / 2 // same r
+              + 2 * (nr_int / 2) * ntheta_int / 2; // diagonal relations
 
     // 9 * ntheta_int * nr_int / 4
     // - 9 * ntheta_int / 2

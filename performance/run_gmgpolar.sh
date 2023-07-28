@@ -14,13 +14,13 @@ smoother=3		    # smoother (3,13)
 # can be implemented on the most inner circle
 DirBC_Interior=1	#  DirBC_Interior (0/1)
 # Generalized radius of most inner circle. Defines if origin will be a particular node.
-R0=1e-5		        # r (1e-8/1e-5/1e-2)
+R0=1e-8		        # r (1e-8/1e-5/1e-2)
 # Generalized radius of maximum outer circle.
 R=1.3			    # R
 # Anisotropy in radial direction.
 fac_ani=3		    # a
 # TODO: which nr_exp and divideby2 do we want to consider?
-nr_exp=4		    # n
+nr_exp=8		    # n
 
 #changing variables
 mod_pk=1		    # mod_pk (0/1)
@@ -32,7 +32,7 @@ extrapolation=1		# E
 
 nodes=1
 ranks=1     # number of MPI Ranks
-cores=14    # set OpenMP Num Threads to maximum number of cores requested
+cores=64    # set OpenMP Num Threads to maximum number of cores requested
 
 echo "#!/bin/bash" > run_gmgpolar_sbatch.sh
 # create a short name for your job
@@ -45,28 +45,38 @@ echo "#SBATCH --error=slurm-%A-p$prob-r$nr_exp-mpk$mod_pk-s$smoother-e$extrapola
 echo "#SBATCH -N $nodes" >> run_gmgpolar_sbatch.sh
 echo "#SBATCH -n $ranks" >> run_gmgpolar_sbatch.sh
 echo "#SBATCH -c $cores" >> run_gmgpolar_sbatch.sh
-echo "#SBATCH -t 6000" >> run_gmgpolar_sbatch.sh
-# echo "#SBATCH --exclusive" >> run_gmgpolar_sbatch.sh
+echo "#SBATCH -t 600" >> run_gmgpolar_sbatch.sh
+echo "#SBATCH --exclusive" >> run_gmgpolar_sbatch.sh
  
 # remove potentially loaded and conflicting modules
 echo "module purge" >> run_gmgpolar_sbatch.sh
 
-# gcc10
-echo "module load PrgEnv/gcc10-openmpi" >> run_gmgpolar_sbatch.sh
+# CARO
+#echo "module load rev/23.05" >> run_gmgpolar_sbatch.sh
+echo "module load mumps/5.5.1" >> run_gmgpolar_sbatch.sh
+echo "module load likwid/5.2.2" >> run_gmgpolar_sbatch.sh
+# Local machine
+# echo "module load PrgEnv/gcc10-openmpi" >> run_gmgpolar_sbatch.sh
 
 echo "cd .." >> run_gmgpolar_sbatch.sh
-echo "make -j16" >> run_gmgpolar_sbatch.sh
+# echo "make -j16" >> run_gmgpolar_sbatch.sh
 
 # reduce cores as cores count from 0
-max_threads=$((cores-1))
+max_threads=$((cores))
+echo "let m=1" >> run_gmgpolar_sbatch.sh
 # FLOPS-DP counter from 1 to cores many threads
-echo "for m in {0..$max_threads}; do" >> run_gmgpolar_sbatch.sh
-echo "likwid-perfctr -C 0-\$m -g FLOPS_DP ./build_gnu/main --openmp \$((m+1)) --matrix_free 1 -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 $divideBy2 -r $R0 --smoother $smoother -E $extrapolation" >> run_gmgpolar_sbatch.sh
+echo "while [ \$m -le $max_threads ]; do" >> run_gmgpolar_sbatch.sh
+echo "let mminus1=m-1" >> run_gmgpolar_sbatch.sh
+echo "likwid-perfctr -C 0-\$mminus1 -g FLOPS_DP ./build/gmgpolar_simulation --openmp \$m --matrix_free 1 -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 $divideBy2 -r $R0 --smoother $smoother -E $extrapolation" >> run_gmgpolar_sbatch.sh
+echo "let m=m*2" >> run_gmgpolar_sbatch.sh
 echo "done;" >> run_gmgpolar_sbatch.sh
 
 # # Memory (saturation) benchmarks
-echo "for m in {0..$max_threads}; do" >> run_gmgpolar_sbatch.sh
-echo "likwid-perfctr -C 0-\$m -g CACHES ./build_gnu/main --openmp \$((m+1)) --matrix_free 1 -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 $divideBy2 -r $R0 --smoother $smoother -E $extrapolation" >> run_gmgpolar_sbatch.sh
+echo "let m=1" >> run_gmgpolar_sbatch.sh
+echo "while [ \$m -le $max_threads ]; do" >> run_gmgpolar_sbatch.sh
+echo "let mminus1=m-1" >> run_gmgpolar_sbatch.sh
+echo "likwid-perfctr -C 0-\$mminus1 -g CACHES ./build/gmgpolar_simulation --openmp \$m --matrix_free 1 -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 $divideBy2 -r $R0 --smoother $smoother -E $extrapolation" >> run_gmgpolar_sbatch.sh
+echo "let m=m*2" >> run_gmgpolar_sbatch.sh
 echo "done;" >> run_gmgpolar_sbatch.sh
 
 #submit the job

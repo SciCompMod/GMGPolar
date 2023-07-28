@@ -95,43 +95,8 @@ void level::build_prolongation_bi()
         }
     }
     // Coarse nodes in same theta (2i+1, 2j)
-    // - j = 1
-    // => nb_nodes = ntheta_int / 2;
-    int j = 1;
-    for (int i = 0; i < ntheta_int; i += 2) {
-        row    = j * ntheta_int + i;
-        h_prev = hplus[j - 1];
-        h_next = hplus[j];
-        denum  = 1 / (h_prev + h_next);
-
-        // Next coarse node (top)
-        col            = (j + 1) * ntheta_int / 4 + i / 2;
-        val            = h_prev * denum; // 1/2
-        ri_prol[index] = row;
-        ci_prol[index] = col;
-        v_prol[index]  = val;
-        index++;
-    }
-    // - j = nr_int - 1
-    // => nb_nodes = ntheta_int / 2;
-    j = nr_int - 1;
-    for (int i = 0; i < ntheta_int; i += 2) {
-        row    = j * ntheta_int + i;
-        h_prev = hplus[j - 1];
-        h_next = hplus[j];
-        denum  = 1 / (h_prev + h_next);
-
-        // Previous coarse node (bottom)
-        col            = (j - 1) * ntheta_int / 4 + i / 2;
-        val            = h_next * denum; // 1/2
-        ri_prol[index] = row;
-        ci_prol[index] = col;
-        v_prol[index]  = val;
-        index++;
-    }
-    // - interior
-    // => nb_nodes = ntheta_int * (nr_int / 2 - 2) / 2;
-    for (int j = 3; j < nr_int - 1; j += 2) {
+    // => nb_nodes = ntheta_int * (nr_int / 2 - 2) / 2; (TODO correct comment)
+    for (int j = 1; j <= nr_int - 1; j += 2) {
         for (int i = 0; i < ntheta_int; i += 2) {
             row    = j * ntheta_int + i;
             h_prev = hplus[j - 1];
@@ -156,61 +121,8 @@ void level::build_prolongation_bi()
         }
     }
     // Coarse nodes in diagonals (2i+1, 2j+1)
-    // - j = 1
-    // => nb_nodes = ntheta_int / 2;
-    j = 1;
-    for (int i = 1; i < ntheta_int; i += 2) {
-        row    = j * ntheta_int + i;
-        k_prev = thetaplus[i - 1];
-        k_next = thetaplus[i];
-        h_prev = hplus[j - 1];
-        h_next = hplus[j];
-        denum  = 1 / ((k_prev + k_next) * (h_prev + h_next));
-
-        // top_right
-        col            = (j + 1) * ntheta_int / 4 + iplus_vect[i] / 2;
-        val            = h_prev * k_prev * denum; // isotrop: 1/4
-        ri_prol[index] = row;
-        ci_prol[index] = col;
-        v_prol[index]  = val;
-        index++;
-        // top_left
-        col            = (j + 1) * ntheta_int / 4 + (i - 1) / 2;
-        val            = h_prev * k_next * denum; // isotrop: 1/4
-        ri_prol[index] = row;
-        ci_prol[index] = col;
-        v_prol[index]  = val;
-        index++;
-    }
-    // - j == nr_int - 1
-    // => nb_nodes = ntheta_int / 2;
-    j = nr_int - 1;
-    for (int i = 1; i < ntheta_int; i += 2) {
-        row    = j * ntheta_int + i;
-        k_prev = thetaplus[i - 1];
-        k_next = thetaplus[i];
-        h_prev = hplus[j - 1];
-        h_next = hplus[j];
-        denum  = 1 / ((k_prev + k_next) * (h_prev + h_next));
-
-        // bottom_right
-        col            = (j - 1) * ntheta_int / 4 + iplus_vect[i] / 2;
-        val            = h_next * k_prev * denum; // isotrop: 1/4
-        ri_prol[index] = row;
-        ci_prol[index] = col;
-        v_prol[index]  = val;
-        index++;
-        // bottom_left
-        col            = (j - 1) * ntheta_int / 4 + (i - 1) / 2;
-        val            = h_next * k_next * denum; // isotrop: 1/4
-        ri_prol[index] = row;
-        ci_prol[index] = col;
-        v_prol[index]  = val;
-        index++;
-    }
-    // - interior
-    // => nb_nodes = ntheta_int * (nr_int / 2 - 2) / 2;
-    for (int j = 3; j < nr_int - 1; j += 2) {
+    // => nb_nodes = ntheta_int * (nr_int / 2 - 2) / 2; (TODO correct comment)
+    for (int j = 1; j <= nr_int - 1; j += 2) {
         for (int i = 1; i < ntheta_int; i += 2) {
             row    = j * ntheta_int + i;
             k_prev = thetaplus[i - 1];
@@ -323,47 +235,8 @@ std::vector<double> level::apply_prolongation_bi(std::vector<double> u)
                 } //end of task
             }
             // Coarse nodes in same theta (2i+1, 2j)
-            // - j = 1
-            // => nb_nodes = ntheta_int / 2;
-#pragma omp task shared(iplus_vect, Pu)
-            {
-                int j = 1;
-                int row, col;
-                double h_prev, h_next, denum, val;
-                for (int i = 0; i < ntheta_int; i += 2) {
-                    row    = j * ntheta_int + i;
-                    h_prev = hplus[j - 1];
-                    h_next = hplus[j];
-                    denum  = 1 / (h_prev + h_next);
-
-                    // Next coarse node (top)
-                    col = (j + 1) * ntheta_int / 4 + i / 2;
-                    val = h_prev * denum; // 1/2
-                    Pu[row] += val * u[col];
-                }
-            } //end of task
-            // - j = nr_int - 1
-            // => nb_nodes = ntheta_int / 2;
-#pragma omp task shared(iplus_vect, Pu)
-            {
-                int j = nr_int - 1;
-                int row, col;
-                double h_prev, h_next, denum, val;
-                for (int i = 0; i < ntheta_int; i += 2) {
-                    row    = j * ntheta_int + i;
-                    h_prev = hplus[j - 1];
-                    h_next = hplus[j];
-                    denum  = 1 / (h_prev + h_next);
-
-                    // Previous coarse node (bottom)
-                    col = (j - 1) * ntheta_int / 4 + i / 2;
-                    val = h_next * denum; // 1/2
-                    Pu[row] += val * u[col];
-                }
-            } //end of task
-            // - interior
-            // => nb_nodes = ntheta_int * (nr_int / 2 - 2) / 2;
-            for (int j = 3; j < nr_int - 1; j += 2) {
+            // => nb_nodes = ntheta_int * (nr_int / 2 - 2) / 2; (TODO: correct comment)
+            for (int j = 1; j <= nr_int - 1; j += 2) {
 #pragma omp task firstprivate(j) shared(iplus_vect, Pu)
                 {
                     int row, col;
@@ -387,59 +260,8 @@ std::vector<double> level::apply_prolongation_bi(std::vector<double> u)
                 } //end of task
             }
             // Coarse nodes in diagonals (2i+1, 2j+1)
-            // - j = 1
-            // => nb_nodes = ntheta_int / 2;
-#pragma omp task shared(iplus_vect, Pu)
-            {
-                int j = 1;
-                int row, col;
-                double k_prev, k_next, h_prev, h_next, denum, val;
-                for (int i = 1; i < ntheta_int; i += 2) {
-                    row    = j * ntheta_int + i;
-                    k_prev = thetaplus[i - 1];
-                    k_next = thetaplus[i];
-                    h_prev = hplus[j - 1];
-                    h_next = hplus[j];
-                    denum  = 1 / ((k_prev + k_next) * (h_prev + h_next));
-
-                    // top_right
-                    col = (j + 1) * ntheta_int / 4 + iplus_vect[i] / 2;
-                    val = h_prev * k_prev * denum; // isotrop: 1/4
-                    Pu[row] += val * u[col];
-                    // top_left
-                    col = (j + 1) * ntheta_int / 4 + (i - 1) / 2;
-                    val = h_prev * k_next * denum; // isotrop: 1/4
-                    Pu[row] += val * u[col];
-                }
-            } //end of task
-            // - j == nr_int - 1
-            // => nb_nodes = ntheta_int / 2;
-#pragma omp task shared(iplus_vect, Pu)
-            {
-                int j = nr_int - 1;
-                int row, col;
-                double k_prev, k_next, h_prev, h_next, denum, val;
-                for (int i = 1; i < ntheta_int; i += 2) {
-                    row    = j * ntheta_int + i;
-                    k_prev = thetaplus[i - 1];
-                    k_next = thetaplus[i];
-                    h_prev = hplus[j - 1];
-                    h_next = hplus[j];
-                    denum  = 1 / ((k_prev + k_next) * (h_prev + h_next));
-
-                    // bottom_right
-                    col = (j - 1) * ntheta_int / 4 + iplus_vect[i] / 2;
-                    val = h_next * k_prev * denum; // isotrop: 1/4
-                    Pu[row] += val * u[col];
-                    // bottom_left
-                    col = (j - 1) * ntheta_int / 4 + (i - 1) / 2;
-                    val = h_next * k_next * denum; // isotrop: 1/4
-                    Pu[row] += val * u[col];
-                }
-            } //end of task
-            // - interior
-            // => nb_nodes = ntheta_int * (nr_int / 2 - 2) / 2;
-            for (int j = 3; j < nr_int - 1; j += 2) {
+            // => nb_nodes = ntheta_int * (nr_int / 2 - 2) / 2; (TODO: correct comment)
+            for (int j = 1; j <= nr_int - 1; j += 2) {
 #pragma omp task firstprivate(j) shared(iplus_vect, Pu)
                 {
                     int row, col;
@@ -515,50 +337,154 @@ std::vector<double> level::apply_restriction_bi(std::vector<double> u)
             // // Loop through all coarse nodes
             // First and last radius
             // => nb_nodes = ntheta_int;
-            std::vector<int> jcs{0, nr_int / 2};
-            for (std::size_t k = 0; k < jcs.size(); k++) {
-                int jc = jcs[k];
+            int jc = 0;
 #pragma omp task firstprivate(jc) shared(iplus_vect, imoins_vect, Pu)
-                {
-                    int row, col, i, j, ic, i_f, j_f;
-                    // int shift;
-                    double k_prev, k_next, denum, val;
-                    for (ic = 0; ic < ntheta_int / 2; ic++) {
-                        col = jc * ntheta_int / 2 + ic;
-                        i_f = ic * 2;
-                        j_f = jc * 2;
+            {
+                int row, col, i, j, ic, i_f, j_f;
+                double k_prev, k_next, h_prev, h_next, denum, val;
+                for (ic = 0; ic < ntheta_int / 2; ic++) {
+                    col = jc * ntheta_int / 2 + ic;
+                    i_f = ic * 2;
+                    j_f = jc * 2;
 
-                        // // Coarse nodes
-                        i   = i_f;
-                        j   = j_f;
-                        row = j * ntheta_int + i;
-                        val = 1.0;
-                        Pu[col] += val * u[row];
+                    // // Coarse nodes
+                    i   = i_f;
+                    j   = j_f;
+                    row = j * ntheta_int + i;
+                    val = 1.0;
+                    Pu[col] += val * u[row];
 
-                        // // Fine nodes in same r (2i, 2j+1)
-                        // Next fine node (right)
-                        i      = iplus_vect[i_f];
-                        j      = j_f;
-                        row    = j * ntheta_int + i;
-                        k_prev = thetaplus[imoins_vect[i]];
-                        k_next = thetaplus[i];
-                        denum  = 1 / (k_prev + k_next);
-                        val    = k_next * denum; // 1/2
-                        Pu[col] += val * u[row];
-                        // Previous fine node (left)
-                        i      = imoins_vect[i_f];
-                        j      = j_f;
-                        row    = j * ntheta_int + i;
-                        k_prev = thetaplus[imoins_vect[i]];
-                        k_next = thetaplus[i];
-                        denum  = 1 / (k_prev + k_next);
-                        val    = k_prev * denum; // 1/2
-                        Pu[col] += val * u[row];
-                    }
-                } //end of task
-            }
+                    // // Fine nodes in same r (2i, 2j+1)
+                    // Next fine node (right)
+                    i      = iplus_vect[i_f];
+                    j      = j_f;
+                    row    = j * ntheta_int + i;
+                    k_prev = thetaplus[imoins_vect[i]];
+                    k_next = thetaplus[i];
+                    denum  = 1 / (k_prev + k_next);
+                    val    = k_next * denum; // 1/2
+                    Pu[col] += val * u[row];
+                    // Previous fine node (left)
+                    i      = imoins_vect[i_f];
+                    j      = j_f;
+                    row    = j * ntheta_int + i;
+                    k_prev = thetaplus[imoins_vect[i]];
+                    k_next = thetaplus[i];
+                    denum  = 1 / (k_prev + k_next);
+                    val    = k_prev * denum; // 1/2
+                    Pu[col] += val * u[row];
+
+                    // // Fine nodes in same theta (2i+1, 2j)
+                    // Next fine node (top)
+                    i      = i_f;
+                    j      = j_f + 1;
+                    row    = j * ntheta_int + i;
+                    h_prev = hplus[j - 1];
+                    h_next = hplus[j];
+                    denum  = 1 / (h_prev + h_next);
+                    val    = h_next * denum; // 1/2
+                    Pu[col] += val * u[row];
+
+                    // // Fine nodes in diagonals (2i+1, 2j+1)
+                    // top_left
+                    i      = imoins_vect[i_f];
+                    j      = j_f + 1;
+                    row    = j * ntheta_int + i;
+                    k_prev = thetaplus[imoins_vect[i]];
+                    k_next = thetaplus[i];
+                    h_prev = hplus[j - 1];
+                    h_next = hplus[j];
+                    denum  = 1 / ((k_prev + k_next) * (h_prev + h_next));
+                    val    = h_next * k_prev * denum; // isotrop: 1/4
+                    Pu[col] += val * u[row];
+                    // top_right
+                    i      = iplus_vect[i_f];
+                    j      = j_f + 1;
+                    row    = j * ntheta_int + i;
+                    k_prev = thetaplus[imoins_vect[i]];
+                    k_next = thetaplus[i];
+                    h_prev = hplus[j - 1];
+                    h_next = hplus[j];
+                    denum  = 1 / ((k_prev + k_next) * (h_prev + h_next));
+                    val    = h_next * k_next * denum; // isotrop: 1/4
+                    Pu[col] += val * u[row];
+                }
+            } //end of task
+            jc = nr_int / 2;
+#pragma omp task firstprivate(jc) shared(iplus_vect, imoins_vect, Pu)
+            {
+                int row, col, i, j, ic, i_f, j_f;
+                double k_prev, k_next, h_prev, h_next, denum, val;
+                for (ic = 0; ic < ntheta_int / 2; ic++) {
+                    col = jc * ntheta_int / 2 + ic;
+                    i_f = ic * 2;
+                    j_f = jc * 2;
+
+                    // // Coarse nodes
+                    i   = i_f;
+                    j   = j_f;
+                    row = j * ntheta_int + i;
+                    val = 1.0;
+                    Pu[col] += val * u[row];
+
+                    // // Fine nodes in same r (2i, 2j+1)
+                    // Next fine node (right)
+                    i      = iplus_vect[i_f];
+                    j      = j_f;
+                    row    = j * ntheta_int + i;
+                    k_prev = thetaplus[imoins_vect[i]];
+                    k_next = thetaplus[i];
+                    denum  = 1 / (k_prev + k_next);
+                    val    = k_next * denum; // 1/2
+                    Pu[col] += val * u[row];
+                    // Previous fine node (left)
+                    i      = imoins_vect[i_f];
+                    j      = j_f;
+                    row    = j * ntheta_int + i;
+                    k_prev = thetaplus[imoins_vect[i]];
+                    k_next = thetaplus[i];
+                    denum  = 1 / (k_prev + k_next);
+                    val    = k_prev * denum; // 1/2
+                    Pu[col] += val * u[row];
+
+                    // // Fine nodes in same theta (2i+1, 2j)
+                    // Previous fine node (bottom)
+                    i      = i_f;
+                    j      = j_f - 1;
+                    row    = j * ntheta_int + i;
+                    h_prev = hplus[j - 1];
+                    h_next = hplus[j];
+                    denum  = 1 / (h_prev + h_next);
+                    val    = h_prev * denum; // 1/2
+                    Pu[col] += val * u[row];
+
+                    // // Fine nodes in diagonals (2i+1, 2j+1)
+                    // bottom_left
+                    i      = imoins_vect[i_f];
+                    j      = j_f - 1;
+                    row    = j * ntheta_int + i;
+                    k_prev = thetaplus[imoins_vect[i]];
+                    k_next = thetaplus[i];
+                    h_prev = hplus[j - 1];
+                    h_next = hplus[j];
+                    denum  = 1 / ((k_prev + k_next) * (h_prev + h_next));
+                    val    = h_prev * k_prev * denum; // isotrop: 1/4
+                    Pu[col] += val * u[row];
+                    // bottom_right
+                    i      = iplus_vect[i_f];
+                    j      = j_f - 1;
+                    row    = j * ntheta_int + i;
+                    k_prev = thetaplus[imoins_vect[i]];
+                    k_next = thetaplus[i];
+                    h_prev = hplus[j - 1];
+                    h_next = hplus[j];
+                    denum  = 1 / ((k_prev + k_next) * (h_prev + h_next));
+                    val    = h_prev * k_next * denum; // isotrop: 1/4
+                    Pu[col] += val * u[row];
+                }
+            } //end of task
             // Interior
-            // => nb_nodes = ntheta_int * (nr_int / 2 + 1) / 2;
+            // => nb_nodes = ntheta_int * (nr_int / 2 + 1) / 2; TODO: Correct comment
             for (int jc = 1; jc < nr_int / 2; jc++) {
 #pragma omp task firstprivate(jc) shared(iplus_vect, imoins_vect, Pu)
                 {
@@ -849,39 +775,10 @@ void level::build_prolongation_ex()
         }
     }
     // Coarse nodes in same theta (2i+1, 2j)
-    // - j = 1
-    // => nb_nodes = ntheta_int / 2;
-    int j = 1;
+    // => nb_nodes = ntheta_int * (nr_int / 2 - 2) / 2; TODO: Correct comment
     int row, col;
     double val;
-    for (int i = 0; i < ntheta_int; i += 2) {
-        row = j * ntheta_int + i;
-
-        // Next coarse node (top)
-        col               = (j + 1) * ntheta_int / 4 + i / 2;
-        val               = 0.5; // 1/2
-        ri_prol_ex[index] = row;
-        ci_prol_ex[index] = col;
-        v_prol_ex[index]  = val;
-        index++;
-    }
-    // - j = nr_int - 1
-    // => nb_nodes = ntheta_int / 2;
-    j = nr_int - 1;
-    for (int i = 0; i < ntheta_int; i += 2) {
-        row = j * ntheta_int + i;
-
-        // Previous coarse node (bottom)
-        col               = (j - 1) * ntheta_int / 4 + i / 2;
-        val               = 0.5; // 1/2
-        ri_prol_ex[index] = row;
-        ci_prol_ex[index] = col;
-        v_prol_ex[index]  = val;
-        index++;
-    }
-    // - interior
-    // => nb_nodes = ntheta_int * (nr_int / 2 - 2) / 2;
-    for (int j = 3; j < nr_int - 1; j += 2) {
+    for (int j = 1; j <= nr_int - 1; j += 2) {
         for (int i = 0; i < ntheta_int; i += 2) {
             row = j * ntheta_int + i;
 
@@ -903,39 +800,8 @@ void level::build_prolongation_ex()
         }
     }
     // Coarse nodes in diagonals (2i+1, 2j+1)
-    // - j = 1
-    // => nb_nodes = ntheta_int / 2;
-    j = 1;
-    for (int i = 1; i < ntheta_int; i += 2) {
-        row = j * ntheta_int + i;
-
-        // no top_right
-        // top_left
-        col               = (j + 1) * ntheta_int / 4 + (i - 1) / 2;
-        val               = 0.5; // 1/2
-        ri_prol_ex[index] = row;
-        ci_prol_ex[index] = col;
-        v_prol_ex[index]  = val;
-        index++;
-    }
-    // - j == nr_int - 1
-    // => nb_nodes = ntheta_int / 2;
-    j = nr_int - 1;
-    for (int i = 1; i < ntheta_int; i += 2) {
-        row = j * ntheta_int + i;
-
-        // bottom_right
-        col               = (j - 1) * ntheta_int / 4 + iplus_vect[i] / 2;
-        val               = 0.5; // 1/2
-        ri_prol_ex[index] = row;
-        ci_prol_ex[index] = col;
-        v_prol_ex[index]  = val;
-        index++;
-        // no bottom_left
-    }
-    // - interior
-    // => nb_nodes = ntheta_int * (nr_int / 2 - 2) / 2;
-    for (int j = 3; j < nr_int - 1; j += 2) {
+    // => nb_nodes = ntheta_int * (nr_int / 2 - 2) / 2; TODO: Correct comment
+    for (int j = 1; j <= nr_int - 1; j += 2) {
         for (int i = 1; i < ntheta_int; i += 2) {
             row = j * ntheta_int + i;
 
@@ -1022,41 +888,8 @@ std::vector<double> level::apply_prolongation_ex(std::vector<double> u)
                 } //end of task
             }
             // Coarse nodes in same theta (2i+1, 2j)
-            // - j = 1
-            // => nb_nodes = ntheta_int / 2;
-#pragma omp task shared(iplus_vect, Pu)
-            {
-                int j = 1;
-                int row, col;
-                double val;
-                for (int i = 0; i < ntheta_int; i += 2) {
-                    row = j * ntheta_int + i;
-
-                    // Next coarse node (top)
-                    col = (j + 1) * ntheta_int / 4 + i / 2;
-                    val = 0.5; // 1/2
-                    Pu[row] += val * u[col];
-                }
-            } //end of task
-            // - j = nr_int - 1
-            // => nb_nodes = ntheta_int / 2;
-#pragma omp task shared(iplus_vect, Pu)
-            {
-                int j = nr_int - 1;
-                int row, col;
-                double val;
-                for (int i = 0; i < ntheta_int; i += 2) {
-                    row = j * ntheta_int + i;
-
-                    // Previous coarse node (bottom)
-                    col = (j - 1) * ntheta_int / 4 + i / 2;
-                    val = 0.5; // 1/2
-                    Pu[row] += val * u[col];
-                }
-            } //end of task
-            // - interior
-            // => nb_nodes = ntheta_int * (nr_int / 2 - 2) / 2;
-            for (int j = 3; j < nr_int - 1; j += 2) {
+            // => nb_nodes = ntheta_int * (nr_int / 2 - 2) / 2; TODO: Correct comment
+            for (int j = 1; j <= nr_int - 1; j += 2) {
 #pragma omp task firstprivate(j) shared(iplus_vect, Pu)
                 {
                     int row, col;
@@ -1077,43 +910,8 @@ std::vector<double> level::apply_prolongation_ex(std::vector<double> u)
                 } //end of task
             }
             // Coarse nodes in diagonals (2i+1, 2j+1)
-            // - j = 1
-            // => nb_nodes = ntheta_int / 2;
-#pragma omp task shared(iplus_vect, Pu)
-            {
-                int j = 1;
-                int row, col;
-                double val;
-                for (int i = 1; i < ntheta_int; i += 2) {
-                    row = j * ntheta_int + i;
-
-                    // no top_right
-                    // top_left
-                    col = (j + 1) * ntheta_int / 4 + (i - 1) / 2;
-                    val = 0.5; // isotrop: 1/4
-                    Pu[row] += val * u[col];
-                }
-            } //end of task
-            // - j == nr_int - 1
-            // => nb_nodes = ntheta_int / 2;
-#pragma omp task shared(iplus_vect, Pu)
-            {
-                int j = nr_int - 1;
-                int row, col;
-                double val;
-                for (int i = 1; i < ntheta_int; i += 2) {
-                    row = j * ntheta_int + i;
-
-                    // bottom_right
-                    col = (j - 1) * ntheta_int / 4 + iplus_vect[i] / 2;
-                    val = 0.5; // isotrop: 1/4
-                    Pu[row] += val * u[col];
-                    // no bottom_left
-                }
-            } //end of task
-            // - interior
-            // => nb_nodes = ntheta_int * (nr_int / 2 - 2) / 2;
-            for (int j = 3; j < nr_int - 1; j += 2) {
+            // => nb_nodes = ntheta_int * (nr_int / 2 - 2) / 2; TODO: Correct comment
+            for (int j = 1; j <= nr_int - 1; j += 2) {
 #pragma omp task firstprivate(j) shared(iplus_vect, Pu)
                 {
                     int row, col;
@@ -1170,45 +968,109 @@ std::vector<double> level::apply_restriction_ex(std::vector<double> u)
 #pragma omp single
         {
             // // Loop through all coarse nodes
-            // First and last radius
-            // => nb_nodes = ntheta_int;
-            std::vector<int> jcs{0, nr_int / 2};
-            for (std::size_t k = 0; k < jcs.size(); k++) {
-                int jc = jcs[k];
+            int jc = 0;
 #pragma omp task firstprivate(jc) shared(iplus_vect, imoins_vect, Pu)
-                {
-                    int row, col, i, j, i_f, j_f;
-                    double val;
-                    for (int ic = 0; ic < ntheta_int / 2; ic++) {
-                        col = jc * ntheta_int / 2 + ic;
-                        i_f = ic * 2;
-                        j_f = jc * 2;
+            {
+                int row, col, i, j, i_f, j_f;
+                double val;
+                for (int ic = 0; ic < ntheta_int / 2; ic++) {
+                    col = jc * ntheta_int / 2 + ic;
+                    i_f = ic * 2;
+                    j_f = jc * 2;
 
-                        // // Coarse nodes
-                        i   = i_f;
-                        j   = j_f;
-                        row = j * ntheta_int + i;
-                        val = 1.0;
-                        Pu[col] += val * u[row];
+                    // // Coarse nodes
+                    i   = i_f;
+                    j   = j_f;
+                    row = j * ntheta_int + i;
+                    val = 1.0;
+                    Pu[col] += val * u[row];
 
-                        // // Fine nodes in same r (2i, 2j+1)
-                        // Next fine node (right)
-                        i   = iplus_vect[i_f];
-                        j   = j_f;
-                        row = j * ntheta_int + i;
-                        val = 0.5; // 1/2
-                        Pu[col] += val * u[row];
-                        // Previous fine node (left)
-                        i   = imoins_vect[i_f];
-                        j   = j_f;
-                        row = j * ntheta_int + i;
-                        val = 0.5; // 1/2
-                        Pu[col] += val * u[row];
-                    }
-                } //end of task
-            }
-            // Interior
-            // => nb_nodes = ntheta_int * (nr_int / 2 + 1) / 2;
+                    // // Fine nodes in same r (2i, 2j+1)
+                    // Next fine node (right)
+                    i   = iplus_vect[i_f];
+                    j   = j_f;
+                    row = j * ntheta_int + i;
+                    val = 0.5; // 1/2
+                    Pu[col] += val * u[row];
+                    // Previous fine node (left)
+                    i   = imoins_vect[i_f];
+                    j   = j_f;
+                    row = j * ntheta_int + i;
+                    val = 0.5; // 1/2
+                    Pu[col] += val * u[row];
+
+                    // // Fine nodes in same theta (2i+1, 2j)
+                    // Next fine node (top)
+                    i   = i_f;
+                    j   = j_f + 1;
+                    row = j * ntheta_int + i;
+                    val = 0.5; // 1/2
+                    Pu[col] += val * u[row];
+
+                    // // Fine nodes in diagonals (2i+1, 2j+1)
+                    // no bottom_left
+                    // no bottom_right
+                    // top_left
+                    i   = imoins_vect[i_f];
+                    j   = j_f + 1;
+                    row = j * ntheta_int + i;
+                    val = 0.5; // isotrop: 1/4
+                    Pu[col] += val * u[row];
+                    // no top_right
+                }
+            } //end of task
+            jc = nr_int / 2;
+#pragma omp task firstprivate(jc) shared(iplus_vect, imoins_vect, Pu)
+            {
+                int row, col, i, j, i_f, j_f;
+                double val;
+                for (int ic = 0; ic < ntheta_int / 2; ic++) {
+                    col = jc * ntheta_int / 2 + ic;
+                    i_f = ic * 2;
+                    j_f = jc * 2;
+
+                    // // Coarse nodes
+                    i   = i_f;
+                    j   = j_f;
+                    row = j * ntheta_int + i;
+                    val = 1.0;
+                    Pu[col] += val * u[row];
+
+                    // // Fine nodes in same r (2i, 2j+1)
+                    // Next fine node (right)
+                    i   = iplus_vect[i_f];
+                    j   = j_f;
+                    row = j * ntheta_int + i;
+                    val = 0.5; // 1/2
+                    Pu[col] += val * u[row];
+                    // Previous fine node (left)
+                    i   = imoins_vect[i_f];
+                    j   = j_f;
+                    row = j * ntheta_int + i;
+                    val = 0.5; // 1/2
+                    Pu[col] += val * u[row];
+
+                    // // Fine nodes in same theta (2i+1, 2j)
+                    // Previous fine node (bottom)
+                    i   = i_f;
+                    j   = j_f - 1;
+                    row = j * ntheta_int + i;
+                    val = 0.5; // 1/2
+                    Pu[col] += val * u[row];
+
+                    // // Fine nodes in diagonals (2i+1, 2j+1)
+                    // no bottom_left
+                    // bottom_right
+                    i   = iplus_vect[i_f];
+                    j   = j_f - 1;
+                    row = j * ntheta_int + i;
+                    val = 0.5; // isotrop: 1/4
+                    Pu[col] += val * u[row];
+                    // no top_left
+                    // no top_right
+                }
+            } //end of task
+            // => nb_nodes = ntheta_int * (nr_int / 2 + 1) / 2; TODO: Correct comment
             for (int jc = 1; jc < nr_int / 2; jc++) {
 #pragma omp task firstprivate(jc) shared(iplus_vect, imoins_vect, Pu)
                 {
@@ -1240,7 +1102,7 @@ std::vector<double> level::apply_restriction_ex(std::vector<double> u)
                         val = 0.5; // 1/2
                         Pu[col] += val * u[row];
 
-                        // // Coarse nodes in same theta (2i+1, 2j)
+                        // // Fine nodes in same theta (2i+1, 2j)
                         // Next fine node (top)
                         i   = i_f;
                         j   = j_f + 1;
@@ -1254,7 +1116,7 @@ std::vector<double> level::apply_restriction_ex(std::vector<double> u)
                         val = 0.5; // 1/2
                         Pu[col] += val * u[row];
 
-                        // // Coarse nodes in diagonals (2i+1, 2j+1)
+                        // // Fine nodes in diagonals (2i+1, 2j+1)
                         // no bottom_left
                         // bottom_right
                         i   = iplus_vect[i_f];
