@@ -66,7 +66,7 @@ echo "let m=1" >> run_gmgpolar_sbatch.sh
 # FLOPS-DP counter from 1 to cores many threads
 echo "while [ \$m -le $max_threads ]; do" >> run_gmgpolar_sbatch.sh
 echo "let mminus1=m-1" >> run_gmgpolar_sbatch.sh
-echo "likwid-perfctr -C 0-\$mminus1 -g FLOPS_DP ./build_gnu/main --openmp \$m --matrix_free 1 -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 $divideBy2 -r $R0 --smoother $smoother -E $extrapolation" >> run_gmgpolar_sbatch.sh
+echo "likwid-perfctr -C 0-\$mminus1 -g FLOPS_DP ./build/gmgpolar_simulation --openmp \$m --matrix_free 1 -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 $divideBy2 -r $R0 --smoother $smoother -E $extrapolation" >> run_gmgpolar_sbatch.sh
 echo "let m=m*2" >> run_gmgpolar_sbatch.sh
 echo "done;" >> run_gmgpolar_sbatch.sh
 
@@ -74,7 +74,7 @@ echo "done;" >> run_gmgpolar_sbatch.sh
 echo "let m=1" >> run_gmgpolar_sbatch.sh
 echo "while [ \$m -le $max_threads ]; do" >> run_gmgpolar_sbatch.sh
 echo "let mminus1=m-1" >> run_gmgpolar_sbatch.sh
-echo "likwid-perfctr -C 0-\$mminus1 -g CACHES ./build_gnu/main --openmp \$m --matrix_free 1 -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 $divideBy2 -r $R0 --smoother $smoother -E $extrapolation" >> run_gmgpolar_sbatch.sh
+echo "likwid-perfctr -C 0-\$mminus1 -g CACHES ./build/gmgpolar_simulation --openmp \$m --matrix_free 1 -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 $divideBy2 -r $R0 --smoother $smoother -E $extrapolation" >> run_gmgpolar_sbatch.sh
 echo "let m=m*2" >> run_gmgpolar_sbatch.sh
 echo "done;" >> run_gmgpolar_sbatch.sh
 
