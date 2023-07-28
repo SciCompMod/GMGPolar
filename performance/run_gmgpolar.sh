@@ -20,7 +20,7 @@ R=1.3			    # R
 # Anisotropy in radial direction.
 fac_ani=3		    # a
 # TODO: which nr_exp and divideby2 do we want to consider?
-nr_exp=9		    # n
+nr_exp=8		    # n
 
 #changing variables
 mod_pk=1		    # mod_pk (0/1)
@@ -54,6 +54,7 @@ echo "module purge" >> run_gmgpolar_sbatch.sh
 # CARO
 #echo "module load rev/23.05" >> run_gmgpolar_sbatch.sh
 echo "module load mumps/5.5.1" >> run_gmgpolar_sbatch.sh
+echo "module load likwid/5.2.2" >> run_gmgpolar_sbatch.sh
 # Local machine
 # echo "module load PrgEnv/gcc10-openmpi" >> run_gmgpolar_sbatch.sh
 
