@@ -147,9 +147,10 @@ void level::build_bound()
     }
 
     if (gyro::icntl[Param::verbose] > 5)
+        std::cout << "Printing for (r, theta) if the node is on the boundary.\n";
         for (int j = 0; j < nr; j++)
             for (int i = 0; i < ntheta_int; i++)
-                std::cout << "DISTBOUNDARY (" << r[j] << ", " << theta[j] << "): " << is_bound[j * ntheta_int + i]
+                std::cout << "(" << r[j] << ", " << theta[j] << "): " << is_bound[j * ntheta_int + i]
                           << "\n";
 } /* ----- end of gyro::build_bound ----- */
 
