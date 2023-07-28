@@ -11,7 +11,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_FLAGS "")
 set(CMAKE_LINKER_FLAGS "")
 
-file(GLOB sources_src "./src/*.cpp" "./src/test_cases/*.cpp")
+add_subdirectory(src)
 
 # code coverage analysis
 # Note: this only works under linux and with make
@@ -34,7 +34,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "DEBUG")
 endif()
 
 
-add_library(GMGPolar ${sources_src})
+add_library(GMGPolar ${SOURCES_SRC})
 
 add_executable(gmgpolar_simulation ./src/main.cpp)
 
