@@ -6,7 +6,7 @@ import sys
 
 def main():
 
-    jobid = '12425'
+    jobid = '1256' # provide correct slurm job id
     problem = 5
     nr_exp = 4
     mod_pk = 1
@@ -16,9 +16,10 @@ def main():
     nodes = 1
     ranks = 1
     maxCores = 14
-    cores_used = []
+    cores_used = [] # will be filled automatically
 
-    path_to_perf_files = 'plot_tools/'
+    path_to_perf_files_rel = '' # relative from read_output call
+    path_to_perf_files = os.path.join(os.path.dirname(__file__), os.path.join(path_to_perf_files_rel))
 
     cols_problem = ['Problem', 'rExp', 'ModPK', 'Extrapolation']
 
@@ -47,7 +48,7 @@ def main():
         smoother) + '-e' + str(extrapolation) + '--N' + str(nodes) + '-R' + str(ranks) + '-maxC' + str(maxCores)
 
     err = 0
-    with open(os.path.join(path_to_perf_files, 'slurm-' + str(jobid) + '-' + filename_input + '.err')) as f:
+    with open(os.path.join(os.path.dirname(__file__), os.path.join(path_to_perf_files, 'slurm-' + str(jobid) + '-' + filename_input + '.err'))) as f:
         line = f.readline()
         while line and err == 0:
             line = f.readline()
@@ -58,7 +59,7 @@ def main():
 
     if err == 0:
 
-        with open(os.path.join(path_to_perf_files, 'slurm-' + str(jobid) + '-' + filename_input + '.out')) as f:
+        with open(os.path.join(os.path.dirname(__file__), os.path.join(path_to_perf_files, 'slurm-' + str(jobid) + '-' + filename_input + '.out'))) as f:
 
             # create empty data frame from column set
             perf_results_df = pd.DataFrame(columns=cols)

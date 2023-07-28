@@ -5,7 +5,7 @@ import sys
 # import matplotlib
 # matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from os.path import join, exists
+from os.path import join, exists, dirname
 from os import makedirs
 
 ### Plots scaling of FLOPS and Caches (saturation) scaling from 0 to n Cores
@@ -73,7 +73,8 @@ def main():
 
     fname = 'p' + str(problem) + '-r' + str(nr_exp) + '-mpk' + str(mod_pk) + '-s' + str(
         smoother) + '-e' + str(extrapolation) + '--N' + str(nodes) + '-R' + str(ranks) + '-maxC' + str(maxCores)   
-    path_to_files = 'plot_tools/'
+    path_to_files_rel = '' # relative to plot script
+    path_to_files = join(dirname(__file__), join(path_to_files_rel))    
 
     df = pd.read_csv(
         join(path_to_files, fname + '_benchmarks.csv'),
