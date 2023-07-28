@@ -102,6 +102,7 @@ int main(int argc, char* argv[])
 
     //std::cout << "Initializing parameters...\n";
     gyro::init_params();
+
     gyro::icntl[Param::verbose]     = a.get<int>("verbose");
     gyro::icntl[Param::openmp]      = a.get<int>("openmp");
     gyro::icntl[Param::optimized]   = a.get<int>("optimized");
