@@ -263,9 +263,10 @@ double gyro::distBoundary(double r_i, double theta_j, int verbose)
     double boundDefDim1 = fabs(r_i - dcntl[Param::r0_DB]) * fabs(r_i - dcntl[Param::R]);
     double boundDefDim2 = 1;
 
-    // if (verbose)
-    //     std::cout << "DISTBOUNDARY (" << x << ", " << y << "): " << boundDefDim1 * boundDefDim2
-    //               << " (boundDefDim1: " << boundDefDim1 << ", boundDefDim2: " << boundDefDim2 << ")\n";
+    if (verbose > 5) {
+        std::cout << "DISTBOUNDARY (" << x << ", " << y << "): " << boundDefDim1 * boundDefDim2
+                  << " (boundDefDim1: " << boundDefDim1 << ", boundDefDim2: " << boundDefDim2 << ")\n";
+    }
     return boundDefDim1 * boundDefDim2;
 } /* ----- end of gyro::distBoundary ----- */
 
@@ -309,8 +310,9 @@ double gyro::def_solution_rt(double r_i, double theta_j, int verbose)
 
     dcntl[Param::t_sol] += TOC;
 
-    // if (verbose)
-    //     std::cout << "SOL (" << x << ", " << y << "): " << sol << "\n";
+    if (verbose > 5) {
+        std::cout << "SOL (" << x << ", " << y << "): " << sol << "\n";
+    }
     return sol;
 } /* ----- end of gyro::eval_def_solution_vec ----- */
 
@@ -347,9 +349,10 @@ std::vector<double> gyro::def_solution_rt(double r_i, std::vector<double> theta,
 
     dcntl[Param::t_sol] += TOC;
 
-    // if (verbose)
-    //     for (int i = 0; i < ntheta; i++)
-    //         std::cout << "SOL (" << r_i << ", " << theta[i] << "): " << sol[i] << "\n";
+    if (verbose > 5) {
+        for (int i = 0; i < ntheta; i++)
+            std::cout << "SOL (" << r_i << ", " << theta[i] << "): " << sol[i] << "\n";
+    }
     return sol;
 } /* ----- end of gyro::eval_def_solution_vec ----- */
 
@@ -383,8 +386,9 @@ double gyro::coeff(double r, int verbose)
 
     dcntl[Param::t_coeff] += TOC;
 
-    // if (verbose)
-    //     std::cout << "COEFF (" << r << "): " << coeff << "\n";
+    if (verbose > 5) {
+        std::cout << "COEFF (" << r << "): " << coeff << "\n";
+    }
     return coeff_a;
 } /* ----- end of level::coeff ----- */
 
@@ -1027,7 +1031,6 @@ void gyro::trafo(double r_i, std::vector<double> theta, std::vector<double> sin_
     //         std::cout << "TRAFO (" << r_i << ", " << theta[i] << "): (" << x[i] << ", " << y[i] << ")\n";
     //     }
 } /* ----- end of gyro::trafo ----- */
-
 
 /*!
  *  \brief Sparse matrix-vector product
