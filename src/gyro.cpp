@@ -239,14 +239,19 @@ void gyro::show_params()
  * Single
  ************************/
 /*!
- *  \brief Computes the distance of a node (x, y) to the Dirichlet boundary
+ *  \brief Computes the distance of a node (r, theta) to the Dirichlet boundary.
+ * The function assumes a boundary given by r_0=Param::r0_DB and R=Param::R.
  *
- * Computes the distance of a node (x, y) to the Dirichlet boundary, using 
- * tolerance of 1e-10 to define boundary.
- * Highly dependent on dcntl[Param::r0_DB] which is 1e6 is icntl[Param::DirBC_Interior]=0.
+ * Attention: As we compute (r-r_0)*(r-R), the output of this function is highly dependent on r_0.
+ * If r_0 is set "very close" to zero, roundoff errors can appear for function values on the innermost circles.
+ * However, as dcntl[Param::r0_DB] is advised to be chosen small if icntl[Param::DirBC_Interior]=0 is set,
+ * this function should be handled with care. Modestly small values like 1e-5 or 1e-8 should not create a problem.
  * 
- * \param x: the x coordinate of the node
- * \param y: the  coordinate of the node
+ * For more details on the Across-The-Origin heuristic, which is implemented with icntl[Param::DirBC_Interior]=0,
+ * see Kühn, Kruse, Rüde, Journal of Scientific Computing, 91 (28), (2022).
+ * 
+ * \param r_i: the r coordinate of the node
+ * \param theta_j: the theta coordinate of the node
  * \param verbose: verbose level for debug
  *
  * \return the distance
@@ -263,9 +268,10 @@ double gyro::distBoundary(double r_i, double theta_j, int verbose)
     double boundDefDim1 = fabs(r_i - dcntl[Param::r0_DB]) * fabs(r_i - dcntl[Param::R]);
     double boundDefDim2 = 1;
 
-    // if (verbose)
-    //     std::cout << "DISTBOUNDARY (" << x << ", " << y << "): " << boundDefDim1 * boundDefDim2
-    //               << " (boundDefDim1: " << boundDefDim1 << ", boundDefDim2: " << boundDefDim2 << ")\n";
+    if (verbose > 5) {
+        std::cout << "DISTBOUNDARY (" << r_i << ", " << theta_j << "): " << boundDefDim1 * boundDefDim2
+                  << " (boundDefDim1: " << boundDefDim1 << ", boundDefDim2: " << boundDefDim2 << ")\n";
+    }
     return boundDefDim1 * boundDefDim2;
 } /* ----- end of gyro::distBoundary ----- */
 
@@ -309,8 +315,9 @@ double gyro::def_solution_rt(double r_i, double theta_j, int verbose)
 
     dcntl[Param::t_sol] += TOC;
 
-    // if (verbose)
-    //     std::cout << "SOL (" << x << ", " << y << "): " << sol << "\n";
+    if (verbose > 5) {
+        std::cout << "SOL (" << r_i << ", " << theta_j << "): " << sol << "\n";
+    }
     return sol;
 } /* ----- end of gyro::eval_def_solution_vec ----- */
 
@@ -347,9 +354,10 @@ std::vector<double> gyro::def_solution_rt(double r_i, std::vector<double> theta,
 
     dcntl[Param::t_sol] += TOC;
 
-    // if (verbose)
-    //     for (int i = 0; i < ntheta; i++)
-    //         std::cout << "SOL (" << r_i << ", " << theta[i] << "): " << sol[i] << "\n";
+    if (verbose > 5) {
+        for (int i = 0; i < ntheta; i++)
+            std::cout << "SOL (" << r_i << ", " << theta[i] << "): " << sol[i] << "\n";
+    }
     return sol;
 } /* ----- end of gyro::eval_def_solution_vec ----- */
 
@@ -383,8 +391,9 @@ double gyro::coeff(double r, int verbose)
 
     dcntl[Param::t_coeff] += TOC;
 
-    // if (verbose)
-    //     std::cout << "COEFF (" << r << "): " << coeff << "\n";
+    if (verbose > 5) {
+        std::cout << "COEFF_A (" << r << "): " << coeff_a << "\n";
+    }
     return coeff_a;
 } /* ----- end of level::coeff ----- */
 
@@ -412,6 +421,9 @@ double gyro::coeff_beta(double r, int verbose)
 
     dcntl[Param::t_coeff] += TOC;
 
+    if (verbose > 5) {
+        std::cout << "COEFF_B (" << r << "): " << coeff_b << "\n";
+    }
     return coeff_b;
 } /* ----- end of level::coeff ----- */
 
@@ -440,10 +452,10 @@ std::vector<double> gyro::coeff(std::vector<double> r, int verbose)
 
     dcntl[Param::t_coeff] += TOC;
 
-    // if (verbose) {
-    //     disp(r, "r");
-    //     disp(coeff, "coeff");
-    // }
+    if (gyro::icntl[Param::verbose] > 5) {
+        disp(r, "r");
+        disp(coeff_a, "coeff_a");
+    }
     return coeff_a;
 } /* ----- end of level::coeff ----- */
 
@@ -471,7 +483,10 @@ std::vector<double> gyro::coeff_beta(std::vector<double> r, int verbose)
     functions->coeffs2(r, Rmax, coeff_b);
 
     dcntl[Param::t_coeff] += TOC;
-
+    if (gyro::icntl[Param::verbose] > 5) {
+        disp(r, "r");
+        disp(coeff_b, "coeff_b");
+    }
     return coeff_b;
 } /* ----- end of level::coeff_beta ----- */
 
@@ -509,8 +524,9 @@ double gyro::detDFinv(double r, double theta, int verbose)
 
     dcntl[Param::t_detDFinv] += TOC;
 
-    // if (verbose)
-    //     std::cout << "dETDFINV (" << r << ", " << theta << "): " << detDFinv_r << "\n";
+    if (gyro::icntl[Param::verbose] > 5) {
+        std::cout << "Value of detDFinv (" << r << ", " << theta << "): " << detDFinv_r << "\n";
+    }
     return detDFinv_r;
 } /* ----- end of level::detDFinv ----- */
 double gyro::arr(double r, double theta, int verbose)
@@ -530,8 +546,9 @@ double gyro::arr(double r, double theta, int verbose)
 
     dcntl[Param::t_arr_art_att] += TOC;
 
-    // if (verbose)
-    //     std::cout << "ARR (" << r << ", " << theta << "): " << arr_r << "\n";
+    if (gyro::icntl[Param::verbose] > 5) {
+        std::cout << "Value of arr (" << r << ", " << theta << "): " << arr_r << "\n";
+    }
     return arr_r;
 } /* ----- end of level::arr ----- */
 double gyro::art(double r, double theta, int verbose)
@@ -553,8 +570,9 @@ double gyro::art(double r, double theta, int verbose)
 
     dcntl[Param::t_arr_art_att] += TOC;
 
-    // if (verbose)
-    //     std::cout << "ART (" << r << ", " << theta << "): " << art_r << "\n";
+    if (gyro::icntl[Param::verbose] > 5) {
+        std::cout << "Value of art (" << r << ", " << theta << "): " << art_r << "\n";
+    }
     return art_r;
 } /* ----- end of level::art ----- */
 double gyro::att(double r, double theta, int verbose)
@@ -574,8 +592,9 @@ double gyro::att(double r, double theta, int verbose)
 
     dcntl[Param::t_arr_art_att] += TOC;
 
-    // if (verbose)
-    //     std::cout << "ATT (" << r << ", " << theta << "): " << att_r << "\n";
+    if (gyro::icntl[Param::verbose] > 5) {
+        std::cout << "Value of att (" << r << ", " << theta << "): " << att_r << "\n";
+    }
     return att_r;
 } /* ----- end of level::att ----- */
 void gyro::arr_att_art(double r, double theta, double& arr, double& att, double& art, int verbose)
@@ -600,11 +619,11 @@ void gyro::arr_att_art(double r, double theta, double& arr, double& att, double&
 
     dcntl[Param::t_arr_art_att] += TOC;
 
-    // if (verbose) {
-    //     std::cout << "ARR (" << r << ", " << theta << "): " << arr << "\n";
-    //     std::cout << "ATT (" << r << ", " << theta << "): " << att << "\n";
-    //     std::cout << "ART (" << r << ", " << theta << "): " << art << "\n";
-    // }
+    if (gyro::icntl[Param::verbose] > 5) {
+        std::cout << "Value of arr (" << r << ", " << theta << "): " << arr << "\n";
+        std::cout << "Value of att (" << r << ", " << theta << "): " << att << "\n";
+        std::cout << "Value of art (" << r << ", " << theta << "): " << art << "\n";
+    }
 } /* ----- end of level::arr_att_art ----- */
 
 /*!
@@ -649,11 +668,11 @@ std::vector<double> gyro::detDFinv(double r, std::vector<double> theta, std::vec
 
     dcntl[Param::t_detDFinv] += TOC;
 
-    // if (verbose) {
-    //     disp(theta, "theta");
-    //     disp(cos_theta, "cos_theta");
-    //     disp(detDFinv_r, "detDFinv_r");
-    // }
+    if (gyro::icntl[Param::verbose] > 5) {
+        disp(theta, "theta");
+        disp(cos_theta, "cos_theta");
+        disp(detDFinv_r, "detDFinv_r");
+    }
     return detDFinv_r;
 } /* ----- end of level::detDFinv ----- */
 
@@ -699,10 +718,10 @@ std::vector<double> gyro::detDFinv(std::vector<double> r, double theta, int verb
 
     dcntl[Param::t_detDFinv] += TOC;
 
-    // if (verbose) {
-    //     disp(r, "r");
-    //     disp(detDFinv_r, "detDFinv_r");
-    // }
+    if (gyro::icntl[Param::verbose] > 5) {
+        disp(r, "r");
+        disp(detDFinv_r, "detDFinv_r");
+    }
     return detDFinv_r;
 } /* ----- end of level::detDFinv ----- */
 
@@ -730,12 +749,12 @@ std::vector<double> gyro::arr(double r, std::vector<double> theta, std::vector<d
 
     dcntl[Param::t_arr_art_att] += TOC;
 
-    // if (verbose) {
-    //     disp(theta, "theta");
-    //     disp(sin_theta, "sin_theta");
-    //     disp(cos_theta, "cos_theta");
-    //     disp(arr_r, "arr_r");
-    // }
+    if (gyro::icntl[Param::verbose] > 5) {
+        disp(theta, "theta");
+        disp(sin_theta, "sin_theta");
+        disp(cos_theta, "cos_theta");
+        disp(arr_r, "arr_r");
+    }
     return arr_r;
 } /* ----- end of level::arr ----- */
 std::vector<double> gyro::art(double r, std::vector<double> theta, std::vector<double> sin_theta,
@@ -766,14 +785,12 @@ std::vector<double> gyro::art(double r, std::vector<double> theta, std::vector<d
 
     dcntl[Param::t_arr_art_att] += TOC;
 
-    // if (verbose) {
-    //     std::cout << "ART (" << r << "\n";
-    //     disp(theta, "theta");
-    //     disp(sin_theta, "sin_theta");
-    //     disp(cos_theta, "cos_theta");
-    //     disp(art_r, "art_r");
-    //     std::cout << ")\n";
-    // }
+    if (gyro::icntl[Param::verbose] > 5) {
+        disp(theta, "theta");
+        disp(sin_theta, "sin_theta");
+        disp(cos_theta, "cos_theta");
+        disp(art_r, "art_r");
+    }
     return art_r;
 } /* ----- end of level::art ----- */
 std::vector<double> gyro::att(double r, std::vector<double> theta, std::vector<double> sin_theta,
@@ -802,12 +819,12 @@ std::vector<double> gyro::att(double r, std::vector<double> theta, std::vector<d
 
     dcntl[Param::t_arr_art_att] += TOC;
 
-    // if (verbose) {
-    //     disp(theta, "theta");
-    //     disp(sin_theta, "sin_theta");
-    //     disp(cos_theta, "cos_theta");
-    //     disp(att_r, "att_r");
-    // }
+    if (gyro::icntl[Param::verbose] > 5) {
+        disp(theta, "theta");
+        disp(sin_theta, "sin_theta");
+        disp(cos_theta, "cos_theta");
+        disp(att_r, "att_r");
+    }
     return att_r;
 } /* ----- end of level::att ----- */
 void gyro::arr_att_art(double r, std::vector<double> theta, std::vector<double> sin_theta,
@@ -843,14 +860,14 @@ void gyro::arr_att_art(double r, std::vector<double> theta, std::vector<double> 
 
     dcntl[Param::t_arr_art_att] += TOC;
 
-    // if (verbose) {
-    //     disp(theta, "theta");
-    //     disp(sin_theta, "sin_theta");
-    //     disp(cos_theta, "cos_theta");
-    //     disp(arr, "arr");
-    //     disp(att, "att");
-    //     disp(art, "art");
-    // }
+    if (gyro::icntl[Param::verbose] > 5) {
+        disp(theta, "theta");
+        disp(sin_theta, "sin_theta");
+        disp(cos_theta, "cos_theta");
+        disp(arr, "arr");
+        disp(att, "att");
+        disp(art, "art");
+    }
 } /* ----- end of level::arr_att_art ----- */
 void gyro::arr_att_art(std::vector<double> r, double theta, std::vector<double>& arr_r, std::vector<double>& att_r,
                        std::vector<double>& art_r, int verbose)
@@ -885,14 +902,14 @@ void gyro::arr_att_art(std::vector<double> r, double theta, std::vector<double>&
 
     dcntl[Param::t_arr_art_att] += TOC;
 
-    // if (verbose) {
-    //     disp(r, "r");
-    //     disp(detDFinv_r, "detDFinv_r");
-    //     disp(coeff_r, "coeff_r");
-    //     disp(arr_r, "arr_r");
-    //     disp(att_r, "att_r");
-    //     disp(art_r, "art_r");
-    // }
+    if (gyro::icntl[Param::verbose] > 5) {
+        disp(r, "r");
+        disp(detDFinv_r, "detDFinv_r");
+        disp(coeff_r, "coeff_r");
+        disp(arr_r, "arr_r");
+        disp(att_r, "att_r");
+        disp(art_r, "art_r");
+    }
 } /* ----- end of level::arr_att_art ----- */
 
 /***************************************************************************
@@ -934,6 +951,10 @@ void gyro::trafo(double& r_i, double& theta_j, double& x, double& y, int verbose
 /*!
  *  \brief Transform from polar to cartesian
  *
+ *  TODO: This function could be reimplemented and used for simple geometries
+ *        For more general geometries, the inverse mapping is not available 
+ *        and a check on the geometry would be needed.
+ *         
  *  Transform one couple r_i,theta_j from cartesian to polar
  * 
  * \param r_i: the r coordinate of the node (out)
@@ -1018,57 +1039,6 @@ void gyro::trafo(double r_i, std::vector<double> theta, std::vector<double> sin_
     //         std::cout << "TRAFO (" << r_i << ", " << theta[i] << "): (" << x[i] << ", " << y[i] << ")\n";
     //     }
 } /* ----- end of gyro::trafo ----- */
-
-/***************************************************************************
-     * Display arrays or vectors
-     **************************************************************************/
-/*!
- *  \brief Display arrays of int or double
- *
- *  Display arrays of int or double
- * 
- * \param na: size of the array
- * \param a: the array
- * \param s_a: name of the array (for display)
- *
- */
-void gyro::disp(int na, double* a, const std::string& s_a)
-{
-    std::cout << s_a << "(" << na << "): ";
-    for (int i = 0; i < na; i++)
-        std::cout << a[i] << " ";
-    std::cout << "\n";
-} /* ----- end of gyro::disp ----- */
-void gyro::disp(int na, int* a, const std::string& s_a)
-{
-    std::cout << s_a << "(" << na << "): ";
-    for (int i = 0; i < na; i++)
-        std::cout << a[i] << " ";
-    std::cout << "\n";
-} /* ----- end of gyro::disp ----- */
-/*!
- *  \brief Display vectors of int or double
- *
- *  Display vectors of int or double
- * 
- * \param a: the vector
- * \param s_a: name of the vector (for display)
- *
- */
-void gyro::disp(std::vector<double> a, const std::string& s_a)
-{
-    std::cout << s_a << "(" << a.size() << "): ";
-    for (std::size_t i = 0; i < a.size(); i++)
-        std::cout << a[i] << " ";
-    std::cout << "\n";
-} /* ----- end of gyro::disp ----- */
-void gyro::disp(std::vector<int> a, const std::string& s_a)
-{
-    std::cout << s_a << "(" << a.size() << "): ";
-    for (std::size_t i = 0; i < a.size(); i++)
-        std::cout << a[i] << " ";
-    std::cout << "\n";
-} /* ----- end of gyro::disp ----- */
 
 /*!
  *  \brief Sparse matrix-vector product

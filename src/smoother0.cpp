@@ -81,7 +81,7 @@ void level::multigrid_smoothing0(int smoother)
         u_sc = solve_mumps(mumps_A_Zebra[smoother], f_total);
 #endif
 
-    if (gyro::icntl[Param::verbose] > 3)
+    if (gyro::icntl[Param::verbose] > 5)
         gyro::disp(u_sc, "u_sc");
 
     t_Asc += TOC;

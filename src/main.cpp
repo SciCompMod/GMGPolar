@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
     //Set number of threads for the openmp parallelization
     omp_set_num_threads(gyro::icntl[Param::openmp]);
 
-    if (gyro::icntl[Param::verbose] > 0) {
+    if (gyro::icntl[Param::verbose] > 1) {
 #pragma omp parallel
         {
 #pragma omp master
@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
             }
         }
     }
-    if (gyro::icntl[Param::verbose] > 0) {
+    if (gyro::icntl[Param::verbose] > 1) {
 
 #pragma omp parallel
         {
@@ -198,7 +198,7 @@ int main(int argc, char* argv[])
         if (gyro::dcntl[Param::kappa_eps] == 42 && gyro::dcntl[Param::delta_e] == 42) {
             gyro::get_geometry_coeffs(geom);
         }
-        if (gyro::icntl[Param::verbose] > 1)
+        if (gyro::icntl[Param::verbose] > 2)
             gyro::show_params();
         gyro::select_functions_class(gyro::icntl[Param::alpha_coeff], gyro::icntl[Param::beta_coeff],
                                      gyro::icntl[Param::mod_pk], gyro::icntl[Param::prob]);
@@ -277,7 +277,7 @@ int main(int argc, char* argv[])
                      "#######\n";
         geom = (geometry_type)gyro::icntl[Param::mod_pk];
         gyro::get_geometry_coeffs(geom);
-        if (gyro::icntl[Param::verbose] > 1)
+        if (gyro::icntl[Param::verbose] > 2)
             gyro::show_params();
         gyro::select_functions_class(gyro::icntl[Param::alpha_coeff], gyro::icntl[Param::beta_coeff],
                                      gyro::icntl[Param::mod_pk], gyro::icntl[Param::prob]);
@@ -341,7 +341,7 @@ int main(int argc, char* argv[])
 
                 geom = (geometry_type)gyro::icntl[Param::mod_pk];
                 gyro::get_geometry_coeffs(geom);
-                if (gyro::icntl[Param::verbose] > 1)
+                if (gyro::icntl[Param::verbose] > 2)
                     gyro::show_params();
                 gyro::select_functions_class(gyro::icntl[Param::alpha_coeff], gyro::icntl[Param::beta_coeff],
                                              gyro::icntl[Param::mod_pk], gyro::icntl[Param::prob]);
@@ -419,7 +419,7 @@ int main(int argc, char* argv[])
 
                             geom = (geometry_type)gyro::icntl[Param::mod_pk];
                             gyro::get_geometry_coeffs(geom);
-                            if (gyro::icntl[Param::verbose] > 1)
+                            if (gyro::icntl[Param::verbose] > 2)
                                 gyro::show_params();
                             gyro::select_functions_class(gyro::icntl[Param::alpha_coeff],
                                                          gyro::icntl[Param::beta_coeff], gyro::icntl[Param::mod_pk],

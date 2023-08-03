@@ -48,9 +48,9 @@ void gmgpolar::multigrid_iter()
         v_level[1]->fVec_initial = v_level[1]->fVec; //Extrapolation: store the initial fVec on level 1
     if (gyro::icntl[Param::verbose] > 0) {
         if (extrapol == 1)
-            std::cout << "WITH IMPLICIT EXTRAPOLATION!!!\n";
+            std::cout << "with implicit extrapolation.\n";
         else if (extrapol == 2)
-            std::cout << "WITH ALTERNATIVE EXTRAPOLATION!!!\n";
+            std::cout << "with alternative extrapolation.\n WARNING: Alternative extrapolation option is a pure test or research setting.\n";
     }
 
     int it = 0;
@@ -111,7 +111,7 @@ void gmgpolar::multigrid_iter()
         //call the multigrid_cycle on level 0 (the finest level)
         multigrid_cycle_extrapol(0);
 
-        if (gyro::icntl[Param::verbose] > 3)
+        if (gyro::icntl[Param::verbose] > 5)
             gyro::disp(v_level[0]->u, "u");
 
         TIC;
@@ -121,7 +121,7 @@ void gmgpolar::multigrid_iter()
         if (extrapol < 2) {
             gmgpolar::compute_residual(0, extrapol); //compute residual on level 0
 
-            if (gyro::icntl[Param::verbose] > 3)
+            if (gyro::icntl[Param::verbose] > 5)
                 gyro::disp(v_level[0]->res, "res");
 
             nrm_2_res.push_back(0);
@@ -156,7 +156,7 @@ void gmgpolar::multigrid_iter()
                 convergence_criterium = nrm_inf_res[it];
             }
 
-            if (gyro::icntl[Param::verbose] > 0)
+            if (gyro::icntl[Param::verbose] > 1)
                 std::cout << "--> Iteration " << it << ": residual norm = " << nrm_2_res[it]
                           << ", relative residual = " << convergence_criterium << std::endl;
         }
@@ -169,7 +169,7 @@ void gmgpolar::multigrid_iter()
 
             std::vector<double> error = compute_error();
 
-            if (gyro::icntl[Param::verbose] > 3)
+            if (gyro::icntl[Param::verbose] > 5)
                 gyro::disp(error, "error");
 
             nrm_2_err.push_back(0);
@@ -181,21 +181,21 @@ void gmgpolar::multigrid_iter()
             double error_difference = fabs(nrm_2_err[it] - nrm_2_err[it - 1]);
             convergence_criterium   = error_difference / nrm_2_err[0];
 
-            if (gyro::icntl[Param::verbose] > 0)
+            if (gyro::icntl[Param::verbose] > 1)
                 std::cout << "--> Iteration " << it << ": error norm = " << nrm_2_err[it]
                           << ", relative error = " << convergence_criterium << std::endl;
         }
         t_fine_residual += TOC;
         TIC;
     }
-    // if (gyro::icntl[Param::verbose] > 0) {
-    if (it == gyro::icntl[Param::maxiter]) {
-        std::cout << "Multigrid reached maxiter=" << gyro::icntl[Param::maxiter] << "\n";
+    if (gyro::icntl[Param::verbose] > 0) {
+        if (it == gyro::icntl[Param::maxiter]) {
+            std::cout << "Multigrid reached maxiter=" << gyro::icntl[Param::maxiter] << "\n";
+        }
+        else {
+            std::cout << "Convergence after iteration " << it << std::endl;
+        }
     }
-    else {
-        std::cout << "Convergence after iteration " << it << std::endl;
-    }
-    // }
     //----------------------------------------------------------------------------------------------------------
     //!compute mean residual reduction factor rho
     if (extrapol < 2) {
@@ -221,17 +221,19 @@ void gmgpolar::multigrid_iter()
         }
         nrm_2 = sqrt(nrm_2) / sqrt(v_level[0]->m); //scaling by 1/sqrt(m)
 
-        std::cout << "2-norm of error = " << nrm_2 << std::endl;
-        std::cout << "inf-norm of error = " << nrm_inf_err << std::endl;
+        if (gyro::icntl[Param::verbose] > 0) {
+            std::cout << "2-norm of error = " << nrm_2 << std::endl;
+            std::cout << "inf-norm of error = " << nrm_inf_err << std::endl;
+        }
 
-        if (gyro::icntl[Param::verbose] > 3)
+        if (gyro::icntl[Param::verbose] > 5)
             gyro::disp(error, "error");
     }
 
     t_error += TOC;
     TIC;
 
-    if (gyro::icntl[Param::verbose] > 3)
+    if (gyro::icntl[Param::verbose] > 5)
         gyro::disp(v_level[0]->u, "u");
 } /* ----- end of gmgpolar::multigrid_iter ----- */
 
@@ -246,7 +248,7 @@ void gmgpolar::multigrid_iter()
 void gmgpolar::multigrid_cycle_extrapol(int l)
 {
     //l = current level we are on (from class level)
-    if (gyro::icntl[Param::verbose] > 2) {
+    if (gyro::icntl[Param::verbose] > 4) {
         std::cout << "********************************************" << std::endl;
         std::cout << "MULTIGRID ON LEVEL " << l << std::endl;
         std::cout << "nr = " << v_level[l]->nr << ", ntheta = " << v_level[l]->ntheta << std::endl;
@@ -292,7 +294,7 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
                 //call the smooothing function, the result is u_sc which is directly inserted into u
                 v_level[l]->multigrid_smoothing0(smoother);
 
-                if (gyro::icntl[Param::verbose] > 2)
+                if (gyro::icntl[Param::verbose] > 4)
                     std::cout << "SMOOTHER: " << smoother << " = " << TOC << "\n";
             }
         }
@@ -317,7 +319,7 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
                                 v_level[l]->dep_Asc[smoother], v_level[l]->dep_Asc[sm], v_level[l]->dep_Asc[1],
                                 v_level[l]->dep_Asc_ortho[smoother]);
 
-                            if (gyro::icntl[Param::verbose] > 2)
+                            if (gyro::icntl[Param::verbose] > 4)
                                 std::cout << "SMOOTHER: " << smoother << " = " << TOC << "\n";
                         }
                     }
@@ -339,7 +341,7 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
     }
     //std::cout << "pre-smoothing done \n";
 
-    if (gyro::icntl[Param::verbose] > 3)
+    if (gyro::icntl[Param::verbose] > 5)
         gyro::disp(v_level[l]->u, "u");
 
     t = t_smoothing_tmp;
@@ -350,7 +352,7 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
     //even if we have extrapolation, compute just normal residual (extrapolation-restriction follows in the next step)
     gmgpolar::compute_residual(l, 0);
 
-    if (gyro::icntl[Param::verbose] > 3)
+    if (gyro::icntl[Param::verbose] > 5)
         gyro::disp(v_level[l]->res, "res");
 
     t_residual += TOC;
@@ -379,7 +381,7 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
             }
         }
 
-        if (gyro::icntl[Param::verbose] > 3)
+        if (gyro::icntl[Param::verbose] > 5)
             gyro::disp(res_1, "res_1");
 
         //Au_coarse = A(l+1) * u_coarse = A(l+1) * P_inj^T * u(l)
@@ -404,7 +406,7 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
             }
         }
 
-        if (gyro::icntl[Param::verbose] > 3)
+        if (gyro::icntl[Param::verbose] > 5)
             gyro::disp(u_coarse, "u_coarse");
 
         if (gyro::icntl[Param::matrix_free] == 1) {
@@ -435,7 +437,7 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
             }
         }
 
-        if (gyro::icntl[Param::verbose] > 3)
+        if (gyro::icntl[Param::verbose] > 5)
             gyro::disp(Au_coarse, "Au_coarse");
 
         // f(l+1) = 4/3 * res_1 - 1/3 * (f(l+1) - Au_coarse)
@@ -443,7 +445,7 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
             v_level[l + 1]->fVec[i] = 4. / 3. * res_1[i] - 1. / 3. * (v_level[l + 1]->fVec_initial[i] - Au_coarse[i]);
         }
 
-        if (gyro::icntl[Param::verbose] > 3)
+        if (gyro::icntl[Param::verbose] > 5)
             gyro::disp(v_level[l + 1]->fVec, "fVec");
     }
     else { //no extrapolation
@@ -494,13 +496,13 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
         TIC;
     }
 
-    if (gyro::icntl[Param::verbose] > 2) {
+    if (gyro::icntl[Param::verbose] > 4) {
         std::cout << "********************************************" << std::endl;
         std::cout << "BACK ON LEVEL " << l << std::endl;
         std::cout << "********************************************" << std::endl;
     }
 
-    if (gyro::icntl[Param::verbose] > 3)
+    if (gyro::icntl[Param::verbose] > 5)
         gyro::disp(error_coarse, "error_coarse");
 
     TIC;
@@ -544,7 +546,7 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
     }
     //std::cout << "error prolongated \n";
 
-    if (gyro::icntl[Param::verbose] > 3)
+    if (gyro::icntl[Param::verbose] > 5)
         gyro::disp(error_fine, "error_fine");
 
     //! correction of solution (on level l)
@@ -585,7 +587,7 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
                 //call the smooothing function, the result is u_sc which is directly inserted into u
                 v_level[l]->multigrid_smoothing0(smoother);
 
-                if (gyro::icntl[Param::verbose] > 2)
+                if (gyro::icntl[Param::verbose] > 4)
                     std::cout << "SMOOTHER: " << smoother << " = " << TOC << "\n";
             }
         }
@@ -610,7 +612,7 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
                                 v_level[l]->dep_Asc[smoother], v_level[l]->dep_Asc[sm], v_level[l]->dep_Asc[1],
                                 v_level[l]->dep_Asc_ortho[smoother]);
 
-                            if (gyro::icntl[Param::verbose] > 2)
+                            if (gyro::icntl[Param::verbose] > 4)
                                 std::cout << "SMOOTHER: " << smoother << " = " << TOC << "\n";
                         }
                     }
@@ -626,7 +628,7 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
     t = t_total_tmp;
     t_total += TOC;
 
-    if (gyro::icntl[Param::verbose] > 3)
+    if (gyro::icntl[Param::verbose] > 5)
         gyro::disp(v_level[l]->u, "u");
 } /* ----- end of gmgpolar::multigrid_cycle_extrapol ----- */
 
