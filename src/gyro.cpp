@@ -392,7 +392,7 @@ double gyro::coeff(double r, int verbose)
     dcntl[Param::t_coeff] += TOC;
 
     if (verbose > 5) {
-        std::cout << "COEFF (" << r << "): " << coeff << "\n";
+        std::cout << "COEFF_A (" << r << "): " << coeff_a << "\n";
     }
     return coeff_a;
 } /* ----- end of level::coeff ----- */
@@ -421,6 +421,9 @@ double gyro::coeff_beta(double r, int verbose)
 
     dcntl[Param::t_coeff] += TOC;
 
+    if (verbose > 5) {
+        std::cout << "COEFF_B (" << r << "): " << coeff_b << "\n";
+    }
     return coeff_b;
 } /* ----- end of level::coeff ----- */
 
