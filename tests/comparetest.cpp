@@ -55,13 +55,17 @@ TEST_F(Test_Parameters, DOF_on_finest_grid)
 {
     gmgpolar gmgtest;
     gmgtest.create_grid_polar(); //only the finest grid is now created
-    int nodes_r      = gmgtest.v_level[0]->nr;
-    int nodes_theta  = gmgtest.v_level[0]->ntheta;
-    int finest_nodes = nodes_r * nodes_theta;
     EXPECT_EQ(gmgtest.v_level.size(), 1);
+    int nodes_r     = gmgtest.v_level[0]->nr;
+    int nodes_theta = gmgtest.v_level[0]->ntheta;
+    std::cout << "nr ntheta no prob" << std::endl;
+    int finest_nodes = nodes_r * nodes_theta;
     EXPECT_EQ(finest_nodes, input[initparam]);
+    std::cout << "input not assigned properly" << std::endl;
     EXPECT_EQ(nodes_r, input[initparam + 1]);
+    std::cout << "initparam+1" << std::endl;
     EXPECT_EQ(nodes_theta, input[initparam + 2]);
+    std::cout << "initparam+2" << std::endl;
 }
 
 TEST_F(Test_Parameters, Test_multigrid_Iterations)
