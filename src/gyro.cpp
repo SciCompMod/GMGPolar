@@ -239,14 +239,19 @@ void gyro::show_params()
  * Single
  ************************/
 /*!
- *  \brief Computes the distance of a node (x, y) to the Dirichlet boundary
+ *  \brief Computes the distance of a node (r, theta) to the Dirichlet boundary.
+ * The function assumes a boundary given by r_0=Param::r0_DB and R=Param::R.
  *
- * Computes the distance of a node (x, y) to the Dirichlet boundary, using 
- * tolerance of 1e-10 to define boundary.
- * Highly dependent on dcntl[Param::r0_DB] which should be very small if icntl[Param::DirBC_Interior]=0.
+ * Attention: As we compute (r-r_0)*(r-R), the output of this function is highly dependent on r_0.
+ * If r_0 is set "very close" to zero, roundoff errors can appear for function values on the innermost circles.
+ * However, as dcntl[Param::r0_DB] is advised to be chosen small if icntl[Param::DirBC_Interior]=0 is set,
+ * this function should be handled with care. Modestly small values like 1e-5 or 1e-8 should not create a problem.
  * 
- * \param x: the x coordinate of the node
- * \param y: the  coordinate of the node
+ * For more details on the Across-The-Origin heuristic, which is implemented with icntl[Param::DirBC_Interior]=0,
+ * see Kühn, Kruse, Rüde, Journal of Scientific Computing, 91 (28), (2022).
+ * 
+ * \param r_i: the r coordinate of the node
+ * \param theta_j: the theta coordinate of the node
  * \param verbose: verbose level for debug
  *
  * \return the distance
@@ -264,7 +269,7 @@ double gyro::distBoundary(double r_i, double theta_j, int verbose)
     double boundDefDim2 = 1;
 
     if (verbose > 5) {
-        std::cout << "DISTBOUNDARY (" << x << ", " << y << "): " << boundDefDim1 * boundDefDim2
+        std::cout << "DISTBOUNDARY (" << r_i << ", " << theta_j << "): " << boundDefDim1 * boundDefDim2
                   << " (boundDefDim1: " << boundDefDim1 << ", boundDefDim2: " << boundDefDim2 << ")\n";
     }
     return boundDefDim1 * boundDefDim2;
@@ -311,7 +316,7 @@ double gyro::def_solution_rt(double r_i, double theta_j, int verbose)
     dcntl[Param::t_sol] += TOC;
 
     if (verbose > 5) {
-        std::cout << "SOL (" << x << ", " << y << "): " << sol << "\n";
+        std::cout << "SOL (" << r_i << ", " << theta_j << "): " << sol << "\n";
     }
     return sol;
 } /* ----- end of gyro::eval_def_solution_vec ----- */
