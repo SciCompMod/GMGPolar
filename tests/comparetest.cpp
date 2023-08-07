@@ -54,8 +54,8 @@ TEST_F(Test_Parameters, Initialize_Parameters)
 TEST_F(Test_Parameters, DOF_on_finest_grid)
 {
     gmgpolar gmgtest;
-    gmgtest.levels_orig = 1;
-    gmgtest.create_grid_polar(); //only the finest grid is now created
+    gmgtest.levels_orig = 1; // set levels_orig to prevent segfaulting in deconstructor. See issue #46.
+    gmgtest.create_grid_polar(); // only the finest grid is now created
     EXPECT_EQ(gmgtest.v_level.size(), 1);
     int nodes_r      = gmgtest.v_level[0]->nr;
     int nodes_theta  = gmgtest.v_level[0]->ntheta;
