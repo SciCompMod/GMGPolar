@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.16.3)
 project(GMGPolar VERSION 1.0.0)
 
 option(GMGPOLAR_BUILD_TESTS "Build GMGPolar unit tests." ON)
-option(GMGPOLAR_TEST_COVERAGE "Create GMGPolar code coverage." OFF)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -18,7 +17,6 @@ add_subdirectory(src)
 # Ninja creates different directory names which do not work together with this scrupt
 # as STREQUAL is case-sensitive https://github.com/TriBITSPub/TriBITS/issues/131, also allow DEBUG as accepted input
 option(GMGPOLAR_TEST_COVERAGE "Enable GCov coverage analysis (adds a 'coverage' target)" OFF)
-mark_as_advanced(GMGPOLAR_TEST_COVERAGE)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "DEBUG")
     if(GMGPOLAR_TEST_COVERAGE)
