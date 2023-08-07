@@ -627,8 +627,6 @@ std::vector<double> level::apply_prolongation_inj0(std::vector<double> u, int mc
         }
     }
 
-    //std::cout << "end of applyP_inj \n";
-
     return Pu;
 } /* ----- end of level::apply_prolongation_inj0 ----- */
 
