@@ -8,6 +8,12 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Install Dependencies
+      shell: bash
+      run: |
+        sudo apt-get -qq update
+        sudo apt-get -qq -y install lcov
+        sudo apt-get -qq update  
     - name: Download build test directory
       uses: actions/download-artifact@v3
       with:
@@ -16,12 +22,20 @@ runs:
       shell: bash
       run: |
         tar -xzf build.tar.gz
-    - name: run unit test
+    - name: Run unit tests
       shell: bash
+      # always run tests as cmake target coverage
+      # does not return an error if a test fails
       run: |
         cd build/tests
         sudo chmod a+x gmgpolar_tests
-        ./gmgpolar_tests --gtest_output="xml:testreport.xml"
+        ./gmgpolar_tests  --gtest_output="xml:testreport.xml"
+    - name: Compute code coverage
+      shell: bash
+      # compute code coverage
+      run: |
+        cd build
+        cmake --build . --target coverage/fast
     - name: Upload test report
       uses: actions/upload-artifact@v3
       with:
@@ -29,3 +43,12 @@ runs:
         path: build/tests/testreport.xml
         if-no-files-found: error
         retention-days: 3
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-coverage-reports
+        path: |
+          build/coverage.info
+          build/coverage
+        if-no-files-found: error
+        retention-days: 1       
