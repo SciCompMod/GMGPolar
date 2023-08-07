@@ -18,73 +18,73 @@ set(SRC_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/smoother0.cpp)
 
 set(SRC_TEST_CASES_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2GyroSonnendruckerCircular.cpp    
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2ZoniShiftedCircular.cpp		
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6SonnendruckerShafranov.cpp	
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2GyroSonnendruckerCircular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2GyroSonnendruckerShafranov.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2GyroSonnendruckerTriangular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2GyroZoniCircular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2GyroZoniShafranov.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2GyroZoniShiftedCircular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2GyroZoniShiftedShafranov.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2GyroZoniShiftedTriangular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2GyroZoniTriangular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2PoissonCircular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2PoissonShafranov.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2PoissonTriangular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2SonnendruckerCircular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2SonnendruckerShafranov.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2SonnendruckerTriangular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2ZoniCircular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2ZoniShafranov.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2ZoniShiftedCircular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2ZoniShiftedShafranov.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2ZoniShiftedTriangular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2ZoniTriangular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6GyroSonnendruckerCircular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6GyroSonnendruckerShafranov.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6GyroSonnendruckerTriangular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6GyroZoniCircular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6GyroZoniShafranov.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6GyroZoniShiftedCircular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6GyroZoniShiftedShafranov.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6GyroZoniShiftedTriangular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6GyroZoniTriangular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6PoissonCircular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6PoissonShafranov.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6PoissonTriangular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6SonnendruckerCircular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6SonnendruckerShafranov.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6SonnendruckerTriangular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6ZoniCircular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6ZoniShafranov.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6ZoniShiftedCircular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6ZoniShiftedShafranov.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6ZoniShiftedTriangular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6ZoniTriangular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6GyroSonnendruckerCircular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6GyroSonnendruckerShafranov.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6GyroSonnendruckerTriangular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6GyroZoniCircular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6GyroZoniShafranov.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6GyroZoniShiftedCircular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6GyroZoniShiftedCulham.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6GyroZoniShiftedShafranov.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6GyroZoniShiftedTriangular.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6GyroZoniTriangular.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2GyroSonnendruckerShafranov.cpp   
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2ZoniShiftedShafranov.cpp		
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6SonnendruckerTriangular.cpp	
     ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6PoissonCircular.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2GyroSonnendruckerTriangular.cpp  
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2ZoniShiftedTriangular.cpp	
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6ZoniCircular.cpp		
     ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6PoissonShafranov.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2GyroZoniCircular.cpp		    
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2ZoniTriangular.cpp		
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6ZoniShafranov.cpp		
     ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6PoissonTriangular.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2GyroZoniShafranov.cpp	    
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6GyroSonnendruckerCircular.cpp	
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6ZoniShiftedCircular.cpp	
     ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6SonnendruckerCircular.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2GyroZoniShiftedCircular.cpp	    
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6GyroSonnendruckerShafranov.cpp	
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6ZoniShiftedShafranov.cpp	
     ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6SonnendruckerShafranov.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2GyroZoniShiftedShafranov.cpp     
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6GyroSonnendruckerTriangular.cpp	
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6ZoniShiftedTriangular.cpp	
     ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6SonnendruckerTriangular.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2GyroZoniShiftedTriangular.cpp    
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6GyroZoniCircular.cpp		
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6ZoniTriangular.cpp		
     ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6ZoniCircular.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2GyroZoniTriangular.cpp	    
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6GyroZoniShafranov.cpp		
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6GyroSonnendruckerCircular.cpp	
     ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6ZoniShafranov.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2PoissonCircular.cpp		    
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6GyroZoniShiftedCircular.cpp	
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6GyroSonnendruckerShafranov.cpp	
     ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6ZoniShiftedCircular.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2PoissonShafranov.cpp		    
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6GyroZoniShiftedShafranov.cpp	
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6GyroSonnendruckerTriangular.cpp	
     ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6ZoniShiftedShafranov.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2PoissonTriangular.cpp	    
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6GyroZoniShiftedTriangular.cpp	
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6GyroZoniCircular.cpp		
     ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6ZoniShiftedTriangular.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2SonnendruckerCircular.cpp	    
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6GyroZoniTriangular.cpp		
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6GyroZoniShafranov.cpp		
     ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6ZoniTriangular.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2SonnendruckerShafranov.cpp	    
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6PoissonCircular.cpp		
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6GyroZoniShiftedCircular.cpp	
     ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/RefinedGyroZoniShiftedCircular.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2SonnendruckerTriangular.cpp	    
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6PoissonShafranov.cpp		
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6GyroZoniShiftedCulham.cpp	
     ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/RefinedGyroZoniShiftedCulham.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2ZoniCircular.cpp		    
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6PoissonTriangular.cpp		
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6GyroZoniShiftedShafranov.cpp	
     ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/RefinedGyroZoniShiftedShafranov.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR2ZoniShafranov.cpp		    
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/CartesianR6SonnendruckerCircular.cpp	
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/PolarR6GyroZoniShiftedTriangular.cpp	
     ${CMAKE_CURRENT_SOURCE_DIR}/test_cases/RefinedGyroZoniShiftedTriangular.cpp
 )
 
