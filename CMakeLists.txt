@@ -41,6 +41,8 @@ add_library(GMGPolar ${SOURCES_SRC})
 
 add_executable(gmgpolar_simulation ./src/main.cpp)
 
+configure_file(${CMAKE_SOURCE_DIR}/include/config_internal.h.in ${CMAKE_SOURCE_DIR}/include/config_internal.h)
+
 target_include_directories(gmgpolar_simulation PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/test_cases )
 target_include_directories(GMGPolar PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/test_cases )
 
@@ -48,13 +50,16 @@ if(GMGPOLAR_USE_MUMPS)
 
     find_package(MPI REQUIRED COMPONENTS CXX)
 
-    target_compile_definitions(gmgpolar_simulation PUBLIC GMGPOLAR_USE_MUMPS)
-    target_compile_definitions(GMGPolar PUBLIC GMGPOLAR_USE_MUMPS)
+    # target_compile_definitions(gmgpolar_simulation PUBLIC GMGPOLAR_USE_MUMPS)
+    # target_compile_definitions(GMGPolar PUBLIC GMGPOLAR_USE_MUMPS)
 
     set(INC_DIRS
         /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/mumps-5.5.1-uzthsd/include
         /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/metis-5.1.0-akhgsf/include
         /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/parmetis-4.0.3-jffyui/include
+    )
+    include_directories(
+        ${INC_DIRS}
     )
     set(LIB_DIRS
         /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/mumps-5.5.1-uzthsd/lib
@@ -72,7 +77,9 @@ if(GMGPOLAR_USE_MUMPS)
     )
     target_link_libraries(
         GMGPolar
+        PUBLIC
         ${LIBS}
+        MPI::MPI_CXX
     ) 
 endif()
 
@@ -96,13 +103,9 @@ else()
     message(FATAL_ERROR "Please use GNU compiler or change CMakeLists manually")
 endif()
 
-if(GMGPOLAR_USE_MUMPS)
-    # target_link_libraries(gmgpolar_simulation PUBLIC ${LIBS})
-    target_link_libraries(gmgpolar_simulation PUBLIC MPI::MPI_CXX ${LIBS})
-    target_link_libraries(gmgpolar_simulation PRIVATE GMGPolar)
-else()
-    target_link_libraries(gmgpolar_simulation PRIVATE GMGPolar)
-endif()
+
+target_link_libraries(gmgpolar_simulation PRIVATE GMGPolar)
+
 
 # include(thirdparty/CMakeLists.txt)
 # add_subdirectory(tests)

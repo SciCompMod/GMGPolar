@@ -44,6 +44,8 @@
 #include <fstream>
 #include <iomanip>
 #include <sys/stat.h>
+
+#include "config.h"
 #include "gyro.h"
 
 #ifdef GMGPOLAR_USE_MUMPS

@@ -53,6 +53,9 @@
  */
 int main(int argc, char* argv[])
 {
+#ifdef GMGPOLAR_USE_MUMPS
+    MPI_Init(nullptr, nullptr);
+#endif
     int error = 0;
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -461,5 +464,8 @@ int main(int argc, char* argv[])
             }
         }
     }
+#ifdef GMGPOLAR_USE_MUMPS
+    MPI_Finalize();
+#endif    
     return error;
 } /* ----- end of main ----- */

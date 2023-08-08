@@ -22,7 +22,7 @@ The GmgPolar Solver does not require any external libraries.
 It is possible to link the code with the sparse direct solver ``MUMPS``.
 
 * ``MUMPS`` is optional. However, it is absolutely recommended if large grids are considered.
-  Otherwise, the non-optiomal built-in solver will be used for factorization of the matrices and 
+  Otherwise, the nonoptimal backup solver will be used for factorization of the matrices and will
   slow down the setup phase significantly. To use it, compile the code with option -DGMGPOLAR_USE_MUMPS. 
   It is recommended to use the latest version (currently 5.4.1) but any version ulterior 
   to 5.1.0 should be okay. MUMPS is available freely on demand on the MUMPS consortium 
