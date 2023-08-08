@@ -43,7 +43,7 @@ level::level(int l_)
     reset_timers();
     delete_circles = 0;
 
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
     init_mumps(mumps_Ac);
     if (gyro::icntl[Param::optimized] == 0) {
         for (int i = 0; i < 4; i++) {
@@ -64,7 +64,7 @@ level::level(int l_)
  */
 level::~level()
 {
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
     finalize_mumps(mumps_Ac);
     if (gyro::icntl[Param::optimized] == 0) {
         for (int i = 0; i < 4; i++) {

@@ -3,9 +3,14 @@ cmake_minimum_required(VERSION 3.16.3)
 project(GMGPolar VERSION 1.0.0)
 
 option(GMGPOLAR_BUILD_TESTS "Build GMGPolar unit tests." ON)
+option(GMGPOLAR_USE_MUMPS "Use MUMPS to compute matrix factorizations." ON)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# set(CMAKE_CXX_COMPILER mpicpp)
+# set(CMAKE_C_COMPILER mpicc)
+# set(CMAKE_FC_COMPILER mpifort)
 
 set(CMAKE_CXX_FLAGS "")
 set(CMAKE_LINKER_FLAGS "")
@@ -39,6 +44,39 @@ add_executable(gmgpolar_simulation ./src/main.cpp)
 target_include_directories(gmgpolar_simulation PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/test_cases )
 target_include_directories(GMGPolar PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/test_cases )
 
+if(GMGPOLAR_USE_MUMPS)
+
+    find_package(MPI REQUIRED COMPONENTS CXX)
+
+    target_compile_definitions(gmgpolar_simulation PUBLIC GMGPOLAR_USE_MUMPS)
+    target_compile_definitions(GMGPolar PUBLIC GMGPOLAR_USE_MUMPS)
+
+    set(INC_DIRS
+        /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/mumps-5.5.1-uzthsd/include
+        /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/metis-5.1.0-akhgsf/include
+        /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/parmetis-4.0.3-jffyui/include
+    )
+    set(LIB_DIRS
+        /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/mumps-5.5.1-uzthsd/lib
+        /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/metis-5.1.0-akhgsf/lib
+        /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/parmetis-4.0.3-jffyui/lib
+    )
+    link_directories(
+        ${LIB_DIRS}
+    )
+    set(LIBS
+        dmumps
+        mumps_common
+        metis
+        parmetis
+    )
+    target_link_libraries(
+        GMGPolar
+        ${LIBS}
+    ) 
+endif()
+
+
 find_package(OpenMP)
 
 #currently works on GNU compiler
@@ -58,8 +96,14 @@ else()
     message(FATAL_ERROR "Please use GNU compiler or change CMakeLists manually")
 endif()
 
-target_link_libraries(gmgpolar_simulation PRIVATE GMGPolar)
+if(GMGPOLAR_USE_MUMPS)
+    # target_link_libraries(gmgpolar_simulation PUBLIC ${LIBS})
+    target_link_libraries(gmgpolar_simulation PUBLIC MPI::MPI_CXX ${LIBS})
+    target_link_libraries(gmgpolar_simulation PRIVATE GMGPolar)
+else()
+    target_link_libraries(gmgpolar_simulation PRIVATE GMGPolar)
+endif()
 
-include(thirdparty/CMakeLists.txt)
-add_subdirectory(tests)
+# include(thirdparty/CMakeLists.txt)
+# add_subdirectory(tests)
 

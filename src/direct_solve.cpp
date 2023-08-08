@@ -28,7 +28,7 @@
  */
 #include "level.h"
 
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
 /*!
  *  \brief Initialization of a MUMPS structure
  *
