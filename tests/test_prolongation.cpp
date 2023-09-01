@@ -10,13 +10,14 @@ protected:
     {
         //initialize default parameters.
         gyro::init_params();
-        gyro::icntl[Param::verbose] = 0;
-        gyro::dcntl[Param::R0]      = 1e-5;
-        gyro::f_grid_r              = "";
-        gyro::f_grid_theta          = "";
-        gyro::f_sol_in              = "";
-        gyro::f_sol_out             = "";
-        gyro::icntl[Param::fac_ani] = 3;
+        gyro::icntl[Param::verbose]  = 0;
+        gyro::dcntl[Param::R0]       = 1e-5;
+        gyro::icntl[Param::periodic] = 1;
+        gyro::f_grid_r               = "";
+        gyro::f_grid_theta           = "";
+        gyro::f_sol_in               = "";
+        gyro::f_sol_out              = "";
+        gyro::icntl[Param::fac_ani]  = 3;
         gyro::select_functions_class(gyro::icntl[Param::alpha_coeff], gyro::icntl[Param::beta_coeff],
                                      gyro::icntl[Param::mod_pk], gyro::icntl[Param::prob]);
     }
@@ -40,9 +41,52 @@ TEST_P(test_prolongation, test_bilinear_prolongation)
         gyro::icntl[Param::fac_ani] = 2; //anisotropy should not exceed grid size
 
     gmgpolar test_p;
-    test_p.create_grid_polar(); //create the grid. first on finest level
-    test_p.check_geom();
-    test_p.define_coarse_nodes(); // create coarser levels (number of levels defined in constants.h)
+    //MOCK grid-creating functions//
+
+    level* new_level = new level(0);
+    new_level->nr    = pow(2, gyro::icntl[Param::nr_exp]);
+    new_level->r     = std::vector<double>(new_level->nr + 1);
+    for (int i = 0; i < new_level->nr; i++) {
+        new_level->r[i] = gyro::dcntl[Param::R0] +
+                          i * (gyro::dcntl[Param::R] - gyro::dcntl[Param::R0]) / new_level->nr; //uniform grid
+    }
+
+    new_level->r[new_level->nr] = gyro::dcntl[Param::R];
+    new_level->nr++;
+    int ntmp          = pow(2, ceil(log2(new_level->nr)));
+    new_level->ntheta = gyro::icntl[Param::periodic] ? ntmp : ntmp + 1;
+
+    new_level->theta = std::vector<double>(new_level->ntheta);
+
+    for (int i = 0; i < new_level->ntheta; i++) {
+        new_level->theta[i] = 2 * PI * i / ntmp;
+    }
+
+    new_level->ntheta_int = gyro::icntl[Param::periodic] ? new_level->ntheta : new_level->ntheta - 1;
+    new_level->nr_int     = new_level->nr - 1;
+
+    new_level->thetaplus = std::vector<double>(new_level->ntheta_int);
+    for (int k = 0; k < new_level->ntheta_int - 1; k++) {
+        new_level->thetaplus[k] = new_level->theta[k + 1] - new_level->theta[k];
+    }
+    new_level->thetaplus[new_level->ntheta_int - 1] = 2 * PI - new_level->theta[new_level->ntheta_int - 1];
+
+    new_level->hplus = std::vector<double>(new_level->nr_int);
+    for (int k = 0; k < new_level->nr_int; k++) {
+        new_level->hplus[k] = new_level->r[k + 1] - new_level->r[k];
+    }
+
+    level* coarser_level  = new level(1);
+    coarser_level->nr     = pow(2, gyro::icntl[Param::nr_exp] - 1) + 1;
+    ntmp                  = pow(2, ceil(log2(coarser_level->nr)));
+    coarser_level->ntheta = gyro::icntl[Param::periodic] ? ntmp : ntmp + 1;
+
+    coarser_level->ntheta_int = gyro::icntl[Param::periodic] ? coarser_level->ntheta : coarser_level->ntheta - 1;
+
+    test_p.v_level.push_back(new_level);
+    test_p.v_level.push_back(coarser_level);
+    test_p.levels_orig = 2;
+    // END of Mocking grid-creating functions //
 
     level& p_level = *(test_p.v_level[0]);
     int ctheta_int = test_p.v_level[1]->ntheta_int; //number of coarse nodes in theta direction
@@ -159,9 +203,53 @@ TEST_P(test_prolongation, test_injection_prolongation)
         gyro::icntl[Param::fac_ani] = 2;
 
     gmgpolar test_p;
-    test_p.create_grid_polar(); //create finest grid
-    test_p.check_geom();
-    test_p.define_coarse_nodes(); // define coarser nodes. number of levels defined in constants
+
+    //MOCK grid-creating functions//
+
+    level* new_level = new level(0);
+    new_level->nr    = pow(2, gyro::icntl[Param::nr_exp]);
+    new_level->r     = std::vector<double>(new_level->nr + 1);
+    for (int i = 0; i < new_level->nr; i++) {
+        new_level->r[i] = gyro::dcntl[Param::R0] +
+                          i * (gyro::dcntl[Param::R] - gyro::dcntl[Param::R0]) / new_level->nr; //uniform grid
+    }
+
+    new_level->r[new_level->nr] = gyro::dcntl[Param::R];
+    new_level->nr++;
+    int ntmp          = pow(2, ceil(log2(new_level->nr)));
+    new_level->ntheta = gyro::icntl[Param::periodic] ? ntmp : ntmp + 1;
+
+    new_level->theta = std::vector<double>(new_level->ntheta);
+
+    for (int i = 0; i < new_level->ntheta; i++) {
+        new_level->theta[i] = 2 * PI * i / ntmp;
+    }
+
+    new_level->ntheta_int = gyro::icntl[Param::periodic] ? new_level->ntheta : new_level->ntheta - 1;
+    new_level->nr_int     = new_level->nr - 1;
+
+    new_level->thetaplus = std::vector<double>(new_level->ntheta_int);
+    for (int k = 0; k < new_level->ntheta_int - 1; k++) {
+        new_level->thetaplus[k] = new_level->theta[k + 1] - new_level->theta[k];
+    }
+    new_level->thetaplus[new_level->ntheta_int - 1] = 2 * PI - new_level->theta[new_level->ntheta_int - 1];
+
+    new_level->hplus = std::vector<double>(new_level->nr_int);
+    for (int k = 0; k < new_level->nr_int; k++) {
+        new_level->hplus[k] = new_level->r[k + 1] - new_level->r[k];
+    }
+
+    level* coarser_level  = new level(1);
+    coarser_level->nr     = pow(2, gyro::icntl[Param::nr_exp] - 1) + 1;
+    ntmp                  = pow(2, ceil(log2(coarser_level->nr)));
+    coarser_level->ntheta = gyro::icntl[Param::periodic] ? ntmp : ntmp + 1;
+
+    coarser_level->ntheta_int = gyro::icntl[Param::periodic] ? coarser_level->ntheta : coarser_level->ntheta - 1;
+
+    test_p.v_level.push_back(new_level);
+    test_p.v_level.push_back(coarser_level);
+    test_p.levels_orig = 2;
+    // END of Mocking grid-creating functions //
 
     level& p_level = *(test_p.v_level[0]);
     int ctheta_int = test_p.v_level[1]->ntheta_int;
@@ -211,9 +299,53 @@ TEST_P(test_prolongation, test_extrapolation_prolongation)
         gyro::icntl[Param::fac_ani] = 2;
 
     gmgpolar test_p;
-    test_p.create_grid_polar(); //define nodes on finest level
-    test_p.check_geom();
-    test_p.define_coarse_nodes(); //created coarser level
+
+    //MOCK grid-creating functions//
+
+    level* new_level = new level(0);
+    new_level->nr    = pow(2, gyro::icntl[Param::nr_exp]);
+    new_level->r     = std::vector<double>(new_level->nr + 1);
+    for (int i = 0; i < new_level->nr; i++) {
+        new_level->r[i] = gyro::dcntl[Param::R0] +
+                          i * (gyro::dcntl[Param::R] - gyro::dcntl[Param::R0]) / new_level->nr; //uniform grid
+    }
+
+    new_level->r[new_level->nr] = gyro::dcntl[Param::R];
+    new_level->nr++;
+    int ntmp          = pow(2, ceil(log2(new_level->nr)));
+    new_level->ntheta = gyro::icntl[Param::periodic] ? ntmp : ntmp + 1;
+
+    new_level->theta = std::vector<double>(new_level->ntheta);
+
+    for (int i = 0; i < new_level->ntheta; i++) {
+        new_level->theta[i] = 2 * PI * i / ntmp;
+    }
+
+    new_level->ntheta_int = gyro::icntl[Param::periodic] ? new_level->ntheta : new_level->ntheta - 1;
+    new_level->nr_int     = new_level->nr - 1;
+
+    new_level->thetaplus = std::vector<double>(new_level->ntheta_int);
+    for (int k = 0; k < new_level->ntheta_int - 1; k++) {
+        new_level->thetaplus[k] = new_level->theta[k + 1] - new_level->theta[k];
+    }
+    new_level->thetaplus[new_level->ntheta_int - 1] = 2 * PI - new_level->theta[new_level->ntheta_int - 1];
+
+    new_level->hplus = std::vector<double>(new_level->nr_int);
+    for (int k = 0; k < new_level->nr_int; k++) {
+        new_level->hplus[k] = new_level->r[k + 1] - new_level->r[k];
+    }
+
+    level* coarser_level  = new level(1);
+    coarser_level->nr     = pow(2, gyro::icntl[Param::nr_exp] - 1) + 1;
+    ntmp                  = pow(2, ceil(log2(coarser_level->nr)));
+    coarser_level->ntheta = gyro::icntl[Param::periodic] ? ntmp : ntmp + 1;
+
+    coarser_level->ntheta_int = gyro::icntl[Param::periodic] ? coarser_level->ntheta : coarser_level->ntheta - 1;
+
+    test_p.v_level.push_back(new_level);
+    test_p.v_level.push_back(coarser_level);
+    test_p.levels_orig = 2;
+    // END of Mocking grid-creating functions //
 
     level& p_level = *(test_p.v_level[0]);
     int ctheta_int = test_p.v_level[1]->ntheta_int;
@@ -225,7 +357,6 @@ TEST_P(test_prolongation, test_extrapolation_prolongation)
     for (int z = 0; z < p_level.mc; z++) {
         u_test[z] = z; //arbitrary grid-function to test the prolongation
     }
-
     std::vector<double> sol = p_level.apply_prolongation_ex(u_test);
 
     for (int j = 0; j < p_level.nr_int + 1; j++) {
