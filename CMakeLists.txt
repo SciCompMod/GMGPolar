@@ -48,7 +48,7 @@ target_include_directories(GMGPolar PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_
 
 if(GMGPOLAR_USE_MUMPS)
 
-    find_package(MPI REQUIRED COMPONENTS CXX)
+    # find_package(MPI REQUIRED COMPONENTS CXX)
 
     # target_compile_definitions(gmgpolar_simulation PUBLIC GMGPOLAR_USE_MUMPS)
     # target_compile_definitions(GMGPolar PUBLIC GMGPOLAR_USE_MUMPS)
@@ -79,7 +79,7 @@ if(GMGPOLAR_USE_MUMPS)
         GMGPolar
         PUBLIC
         ${LIBS}
-        MPI::MPI_CXX
+        # MPI::MPI_CXX
     ) 
 endif()
 
