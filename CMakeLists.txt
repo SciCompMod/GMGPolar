@@ -8,10 +8,6 @@ option(GMGPOLAR_USE_MUMPS "Use MUMPS to compute matrix factorizations." ON)
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# set(CMAKE_CXX_COMPILER mpicpp)
-# set(CMAKE_C_COMPILER mpicc)
-# set(CMAKE_FC_COMPILER mpifort)
-
 set(CMAKE_CXX_FLAGS "")
 set(CMAKE_LINKER_FLAGS "")
 
@@ -48,42 +44,37 @@ target_include_directories(GMGPolar PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_
 
 if(GMGPOLAR_USE_MUMPS)
 
-    # find_package(MPI REQUIRED COMPONENTS CXX)
-
-    # target_compile_definitions(gmgpolar_simulation PUBLIC GMGPOLAR_USE_MUMPS)
-    # target_compile_definitions(GMGPolar PUBLIC GMGPOLAR_USE_MUMPS)
-
     set(INC_DIRS
-        # /home/kueh_mj/.spack/rev.23.05/install/linux-rocky8-zen2/gcc-10.4.0/mumps-5.4.1-oi5zv7/include
         /home/kueh_mj/.spack/rev.23.05/install/linux-rocky8-zen2/gcc-10.4.0/mumps-5.4.1-fftqkl/include
-        # /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/mumps-5.5.1-uzthsd/include
         /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/metis-5.1.0-akhgsf/include
-        # /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/parmetis-4.0.3-jffyui/include
     )
+
+    set(LIB_DIRS
+        /home/kueh_mj/.spack/rev.23.05/install/linux-rocky8-zen2/gcc-10.4.0/mumps-5.4.1-fftqkl/lib
+        /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/metis-5.1.0-akhgsf/lib
+    )
+
     include_directories(
         ${INC_DIRS}
     )
-    set(LIB_DIRS
-        # /home/kueh_mj/.spack/rev.23.05/install/linux-rocky8-zen2/gcc-10.4.0/mumps-5.4.1-oi5zv7/lib
-        /home/kueh_mj/.spack/rev.23.05/install/linux-rocky8-zen2/gcc-10.4.0/mumps-5.4.1-fftqkl/lib
-        # /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/mumps-5.5.1-uzthsd/lib
-        /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/metis-5.1.0-akhgsf/lib
-        # /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/parmetis-4.0.3-jffyui/lib
-    )
-    link_directories(
+
+    target_link_directories(
+        GMGPolar
+        PUBLIC
         ${LIB_DIRS}
     )
+
     set(LIBS
         mpiseq
         dmumps
         mumps_common
         metis
     )
+
     target_link_libraries(
         GMGPolar
         PUBLIC
         ${LIBS}
-        # MPI::MPI_CXX
     ) 
 endif()
 
@@ -111,6 +102,6 @@ endif()
 target_link_libraries(gmgpolar_simulation PRIVATE GMGPolar)
 
 
-# include(thirdparty/CMakeLists.txt)
-# add_subdirectory(tests)
+include(thirdparty/CMakeLists.txt)
+add_subdirectory(tests)
 
