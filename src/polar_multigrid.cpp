@@ -143,8 +143,7 @@ void gmgpolar::polar_multigrid()
             cycle_str = "V";
         else if (gyro::icntl[Param::cycle] == 2)
             cycle_str = "W";
-        if (gyro::icntl[Param::verbose] > 2)
-        {
+        if (gyro::icntl[Param::verbose] > 2) {
             std::cout << "\nProb: " << gyro::icntl[Param::prob] << ", alpha_coeff: " << gyro::icntl[Param::alpha_coeff]
                       << ", beta_coeff: " << gyro::icntl[Param::beta_coeff] << " ***** Problem size " << m << " ("
                       << v_level[0]->nr << ", " << v_level[0]->ntheta << "), " << levels
@@ -265,9 +264,6 @@ void gmgpolar::prepare_op_levels()
 
         if (l < levels - 1)
             v_level[l]->mc = v_level[l + 1]->m;
-        if (gyro::icntl[Param::verbose] > 3)
-            std::cout << "Create boundary array\n";
-        v_level[l]->build_bound();
 
         if (l == 0 && !gyro::f_sol_in.empty()) {
             v_level[0]->read_sol();
@@ -301,10 +297,10 @@ void gmgpolar::prepare_op_levels()
                     std::cout << "Factorizing coarse operator...\n";
                 TIC;
 #ifdef GMGPOLAR_USE_MUMPS
-    std::cout << "\n\n\n\n....USING mumps...\n\n";
+                std::cout << "\n Using GMGPolar with MUMPS\n";
                 if (gyro::icntl[Param::optimized] == 0) {
 #else
-    std::cout << "\n\n\n\n....NOT (!!!!) using mumps...\n\n";
+                std::cout << "\n Attention: Using GMGPolar without MUMPS (Coarse solve is very slow)\n";
 #endif
                     v_level[l]->row_Ac_LU  = std::vector<int>(v_level[l]->row_indices);
                     v_level[l]->col_Ac_LU  = std::vector<int>(v_level[l]->col_indices);

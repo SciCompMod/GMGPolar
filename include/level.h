@@ -198,7 +198,6 @@ public:
     /***************************************************************************
      * gmgpolar
      **************************************************************************/
-    void build_bound();
     void define_coarse_nodes_onelevel(level* finer);
     void store_theta_n_co();
     // void define_colors();

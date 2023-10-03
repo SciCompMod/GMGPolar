@@ -72,7 +72,7 @@ std::vector<double> gyro::eval_def_rhs(double r, std::vector<double> theta, std:
     else {
         functions->rho_pole(r, theta, kappa_eps, delta_e, Rmax, rhs_val, sin_theta, cos_theta);
     }
-    if (verbose){
+    if (verbose) {
         for (int i = 0; i < ntheta; i++)
             std::cout << "RHS(" << r << ", " << theta[i] << "): " << rhs_val[i] << "\n";
     }
