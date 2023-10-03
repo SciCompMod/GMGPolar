@@ -54,26 +54,30 @@ if(GMGPOLAR_USE_MUMPS)
     # target_compile_definitions(GMGPolar PUBLIC GMGPOLAR_USE_MUMPS)
 
     set(INC_DIRS
-        /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/mumps-5.5.1-uzthsd/include
+        # /home/kueh_mj/.spack/rev.23.05/install/linux-rocky8-zen2/gcc-10.4.0/mumps-5.4.1-oi5zv7/include
+        /home/kueh_mj/.spack/rev.23.05/install/linux-rocky8-zen2/gcc-10.4.0/mumps-5.4.1-fftqkl/include
+        # /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/mumps-5.5.1-uzthsd/include
         /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/metis-5.1.0-akhgsf/include
-        /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/parmetis-4.0.3-jffyui/include
+        # /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/parmetis-4.0.3-jffyui/include
     )
     include_directories(
         ${INC_DIRS}
     )
     set(LIB_DIRS
-        /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/mumps-5.5.1-uzthsd/lib
+        # /home/kueh_mj/.spack/rev.23.05/install/linux-rocky8-zen2/gcc-10.4.0/mumps-5.4.1-oi5zv7/lib
+        /home/kueh_mj/.spack/rev.23.05/install/linux-rocky8-zen2/gcc-10.4.0/mumps-5.4.1-fftqkl/lib
+        # /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/mumps-5.5.1-uzthsd/lib
         /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/metis-5.1.0-akhgsf/lib
-        /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/parmetis-4.0.3-jffyui/lib
+        # /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/parmetis-4.0.3-jffyui/lib
     )
     link_directories(
         ${LIB_DIRS}
     )
     set(LIBS
+        mpiseq
         dmumps
         mumps_common
         metis
-        parmetis
     )
     target_link_libraries(
         GMGPolar
