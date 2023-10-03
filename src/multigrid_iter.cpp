@@ -477,12 +477,12 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
     if (l == levels - 2) {
 //solve exactly on the coarsest level for the error (A * error = res) (use whole A from coarsest level)
 // check for the second coarsest level (levels-2), because we have no smoothing on the coarsest level (and thus no Asc and no Asc_ortho)
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
         if (gyro::icntl[Param::optimized] == 0) {
 #endif
             error_coarse = v_level[l + 1]->solve_gaussian_elimination(
                 v_level[l + 1]->row_Ac_LU, v_level[l + 1]->col_Ac_LU, v_level[l + 1]->vals_Ac_LU, v_level[l + 1]->fVec);
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
         }
         else
             error_coarse = v_level[l + 1]->solve_mumps(v_level[l + 1]->mumps_Ac, v_level[l + 1]->fVec);

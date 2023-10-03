@@ -143,8 +143,7 @@ void gmgpolar::polar_multigrid()
             cycle_str = "V";
         else if (gyro::icntl[Param::cycle] == 2)
             cycle_str = "W";
-        if (gyro::icntl[Param::verbose] > 2)
-        {
+        if (gyro::icntl[Param::verbose] > 2) {
             std::cout << "\nProb: " << gyro::icntl[Param::prob] << ", alpha_coeff: " << gyro::icntl[Param::alpha_coeff]
                       << ", beta_coeff: " << gyro::icntl[Param::beta_coeff] << " ***** Problem size " << m << " ("
                       << v_level[0]->nr << ", " << v_level[0]->ntheta << "), " << levels
@@ -265,9 +264,6 @@ void gmgpolar::prepare_op_levels()
 
         if (l < levels - 1)
             v_level[l]->mc = v_level[l + 1]->m;
-        if (gyro::icntl[Param::verbose] > 3)
-            std::cout << "Create boundary array\n";
-        v_level[l]->build_bound();
 
         if (l == 0 && !gyro::f_sol_in.empty()) {
             v_level[0]->read_sol();
@@ -300,8 +296,11 @@ void gmgpolar::prepare_op_levels()
                 if (gyro::icntl[Param::verbose] > 3)
                     std::cout << "Factorizing coarse operator...\n";
                 TIC;
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
+                std::cout << "\n Using GMGPolar with MUMPS\n";
                 if (gyro::icntl[Param::optimized] == 0) {
+#else
+                std::cout << "\n Attention: Using GMGPolar without MUMPS (Coarse solve is very slow)\n";
 #endif
                     v_level[l]->row_Ac_LU  = std::vector<int>(v_level[l]->row_indices);
                     v_level[l]->col_Ac_LU  = std::vector<int>(v_level[l]->col_indices);
@@ -314,7 +313,7 @@ void gmgpolar::prepare_op_levels()
                     v_level[l]->vals.shrink_to_fit();
                     v_level[l]->facto_gaussian_elimination(v_level[l]->row_Ac_LU, v_level[l]->col_Ac_LU,
                                                            v_level[l]->vals_Ac_LU, v_level[l]->m);
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
                 }
                 else
                     v_level[l]->facto_mumps(v_level[l]->mumps_Ac, v_level[l]->row_indices, v_level[l]->col_indices,
@@ -437,7 +436,7 @@ void gmgpolar::prepare_op_levels()
             TIC;
 
             if (gyro::icntl[Param::optimized] == 0) {
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
                 if (gyro::icntl[Param::optimized] == 0) {
 #endif
                     v_level[l]->A_Zebra_r_LU.assign(4, std::vector<int>());
@@ -465,7 +464,7 @@ void gmgpolar::prepare_op_levels()
                     v_level[l]->A_Zebra_r.shrink_to_fit();
                     v_level[l]->A_Zebra_c.shrink_to_fit();
                     v_level[l]->A_Zebra_v.shrink_to_fit();
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
                 }
                 else
                     for (int smoother = 0; smoother < 4; smoother++)
@@ -544,7 +543,7 @@ void gmgpolar::prepare_op_levels()
                                 std::vector<double>(v_level[l]->A_Zebra_v_row[smoother][ij]);
                             if (gyro::icntl[Param::verbose] > 3)
                                 std::cout << "Across factorization...";
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
                             if (gyro::icntl[Param::optimized] == 0) {
 #endif
                                 if (gyro::icntl[Param::verbose] > 3)
@@ -554,7 +553,7 @@ void gmgpolar::prepare_op_levels()
                                                                        v_level[l]->A_Zebra_c_LU_row[smoother][ij],
                                                                        v_level[l]->A_Zebra_v_LU_row[smoother][ij],
                                                                        v_level[l]->m_sc[smoother]);
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
                             }
                             else {
                                 if (gyro::icntl[Param::verbose] > 2)

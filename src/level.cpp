@@ -43,7 +43,7 @@ level::level(int l_)
     reset_timers();
     delete_circles = 0;
 
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
     init_mumps(mumps_Ac);
     if (gyro::icntl[Param::optimized] == 0) {
         for (int i = 0; i < 4; i++) {
@@ -64,7 +64,7 @@ level::level(int l_)
  */
 level::~level()
 {
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
     finalize_mumps(mumps_Ac);
     if (gyro::icntl[Param::optimized] == 0) {
         for (int i = 0; i < 4; i++) {
@@ -123,36 +123,6 @@ void level::display_theta()
 {
     gyro::disp(theta, "Coordinates theta");
 } /* ----- end of level::display_theta ----- */
-
-/*!
- *  \brief Defines which nodes are on the boundary
- *
- *  returns ndistance to Dirichlet boundary in binary (0: o boundary, >0: not on boundary)
- *  uses tolerance of 1e-10 to define boundary
- *
- */
-void level::build_bound()
-{
-    double tol_bound_check = gyro::dcntl[Param::tol_bound_check];
-    double r0_DB           = gyro::dcntl[Param::r0_DB];
-    double R               = gyro::dcntl[Param::R];
-
-    is_bound = std::vector<int>(m);
-
-    for (int j = 0; j < nr; j++) {
-        int is_DB = fabs((r[j] - r0_DB) * (r[j] - R)) < tol_bound_check;
-        for (int i = 0; i < ntheta_int; i++) {
-            is_bound[j * ntheta_int + i] = is_DB;
-        }
-    }
-
-    if (gyro::icntl[Param::verbose] > 5)
-        std::cout << "Printing for (r, theta) if the node is on the boundary.\n";
-        for (int j = 0; j < nr; j++)
-            for (int i = 0; i < ntheta_int; i++)
-                std::cout << "(" << r[j] << ", " << theta[j] << "): " << is_bound[j * ntheta_int + i]
-                          << "\n";
-} /* ----- end of gyro::build_bound ----- */
 
 /*!
  *  \brief Defines the number of entries in A
