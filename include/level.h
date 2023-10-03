@@ -44,9 +44,11 @@
 #include <fstream>
 #include <iomanip>
 #include <sys/stat.h>
+
+#include "config.h"
 #include "gyro.h"
 
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
     #include "mpi.h"
     #include "dmumps_c.h"
 
@@ -91,12 +93,11 @@ public:
     // - using in-house solver
     std::vector<int> row_Ac_LU, col_Ac_LU;
     std::vector<double> vals_Ac_LU;
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
     // - using MUMPS
     DMUMPS_STRUC_C mumps_Ac;
     DMUMPS_STRUC_C mumps_across;
 #endif
-
     /*! Beta coefficient update */
     std::vector<double> betaVec;
 
@@ -154,7 +155,7 @@ public:
     std::vector<std::vector<int>> A_Zebra_r_LU_row[4];
     std::vector<std::vector<int>> A_Zebra_c_LU_row[4];
     std::vector<std::vector<double>> A_Zebra_v_LU_row[4];
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
     // - using MUMPS
     DMUMPS_STRUC_C mumps_A_Zebra[4];
 
@@ -197,7 +198,6 @@ public:
     /***************************************************************************
      * gmgpolar
      **************************************************************************/
-    void build_bound();
     void define_coarse_nodes_onelevel(level* finer);
     void store_theta_n_co();
     // void define_colors();
@@ -287,7 +287,7 @@ public:
                                     std::vector<double>& A_vals, int m_solution);
     std::vector<double> solve_gaussian_elimination(std::vector<int> A_row_indices, std::vector<int> A_col_indices,
                                                    std::vector<double> A_vals, std::vector<double> f);
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
     void init_mumps(DMUMPS_STRUC_C& mumps);
     void facto_mumps(DMUMPS_STRUC_C& mumps, std::vector<int> A_row_indices, std::vector<int> A_col_indices,
                      std::vector<double> A_vals, int m_solution);

@@ -70,18 +70,18 @@ void level::multigrid_smoothing0(int smoother)
     t_Asc_ortho += TOC;
     TIC;
 
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
     if (gyro::icntl[Param::optimized] == 0) {
 #endif
         u_sc =
             solve_gaussian_elimination(A_Zebra_r_LU[smoother], A_Zebra_c_LU[smoother], A_Zebra_v_LU[smoother], f_total);
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
     }
     else
         u_sc = solve_mumps(mumps_A_Zebra[smoother], f_total);
 #endif
 
-    if (gyro::icntl[Param::verbose] > 3)
+    if (gyro::icntl[Param::verbose] > 5)
         gyro::disp(u_sc, "u_sc");
 
     t_Asc += TOC;

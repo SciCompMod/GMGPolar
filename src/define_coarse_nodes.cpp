@@ -51,13 +51,13 @@ void gmgpolar::define_coarse_nodes()
     }
     levels_orig = levels;
     for (int i = 0; i < levels; i++) {
-        if (gyro::icntl[Param::verbose] > 1)
+        if (gyro::icntl[Param::verbose] > 3)
             std::cout << "=> Defining coarse nodes on level " << i << "\n";
         v_level[i]->store_theta_n_co();
         if (i < levels - 1) {
             v_level[i]->define_coarse_nodes_onelevel(v_level[i + 1]);
         }
-        if (gyro::icntl[Param::verbose] > 1) {
+        if (gyro::icntl[Param::verbose] > 3) {
             std::cout << "level: " << i;
             if (i != levels - 1)
                 std::cout << ", coarse_nodes: " << v_level[i]->coarse_nodes;
@@ -66,7 +66,7 @@ void gmgpolar::define_coarse_nodes()
         }
         if (i != levels - 1 &&
             (v_level[i]->nr % 2 != 1 || v_level[i]->nr < 5 || v_level[i]->ntheta % 2 != 0 || v_level[i]->ntheta < 8)) {
-            std::cout << "ACHTUNG: Cannot reach the desired number of levels (" << levels << "). Replacing it with "
+            std::cout << "WARNING: Cannot reach the desired number of levels (" << levels << "). Replacing it with "
                       << i + 1 << "...\n";
             ;
             levels = i + 1;
@@ -139,7 +139,7 @@ void level::define_coarse_nodes_onelevel(level* coarser)
         itr_theta++;
     }
 
-    if (gyro::icntl[Param::verbose] > 3) {
+    if (gyro::icntl[Param::verbose] > 5) {
         display_r();
         display_theta();
         std::cout << "Coarse grid: \n";
@@ -166,7 +166,7 @@ void level::store_theta_n_co()
     if (fabs(theta[ntheta - 1] - 2 * PI) < 1e-10) // check if end is 2*Pi (for periodic boundary conditions)
         ntheta_int--;
     if (ntheta_int % 2)
-        std::cout << "ACHTUNG.... theta has an odd size\n";
+        std::cout << "WARNING: The number of thetas is odd. Please use even numbers only.\n";
 
     // To take first/last theta into account without conditions:
     // - theta_per = [theta_last, theta, 2PI]
@@ -227,7 +227,7 @@ void level::store_theta_n_co()
     for (int i = 0; i < nr_int; i++)
         hplus[i] = r[i + 1] - r[i];
 
-    if (gyro::icntl[Param::verbose] > 3) {
+    if (gyro::icntl[Param::verbose] > 5) {
         gyro::disp(theta_per, "theta_per");
         gyro::disp(cos_theta, "cos_theta");
         gyro::disp(sin_theta, "sin_theta");

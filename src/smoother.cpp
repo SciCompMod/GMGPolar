@@ -82,7 +82,7 @@ void level::define_line_splitting()
     }
     delete_circles = i; // delete_circles = delete_circles(end);
 
-    if (gyro::icntl[Param::verbose] > 1)
+    if (gyro::icntl[Param::verbose] > 2)
         std::cout << "Shifting from circle to radial at radius " << delete_circles << "\n";
 } /* ----- end of destructor level::define_line_splitting ----- */
 
@@ -247,12 +247,12 @@ void level::multigrid_smoothing(int smoother, int v, std::vector<double>& f_Asc_
             }
             // Across (direct solver)
             else {
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
                 if (gyro::icntl[Param::optimized] == 0) {
 #endif
                     u_sc = solve_gaussian_elimination(A_Zebra_r_LU_row[smoother][k], A_Zebra_c_LU_row[smoother][k],
                                                       A_Zebra_v_LU_row[smoother][k], f_sc);
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
                 }
                 else
                     u_sc = solve_mumps(mumps_across, f_sc);
@@ -322,12 +322,12 @@ void level::multigrid_smoothing(int smoother, int v, std::vector<double>& f_Asc_
             }
             // Across (direct solver)
             else {
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
                 if (gyro::icntl[Param::optimized] == 0) {
 #endif
                     u_sc = solve_gaussian_elimination(A_Zebra_r_LU_row[smoother][k], A_Zebra_c_LU_row[smoother][k],
                                                       A_Zebra_v_LU_row[smoother][k], f_sc);
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
                 }
                 else
                     u_sc = solve_mumps(mumps_across, f_sc);
