@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16.3)
 project(GMGPolar VERSION 1.0.0)
 
 option(GMGPOLAR_BUILD_TESTS "Build GMGPolar unit tests." ON)
-option(GMGPOLAR_USE_MUMPS "Use MUMPS to compute matrix factorizations." ON)
+option(GMGPOLAR_USE_MUMPS "Use MUMPS to compute matrix factorizations." OFF)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
