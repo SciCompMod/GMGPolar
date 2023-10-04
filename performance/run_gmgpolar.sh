@@ -30,9 +30,9 @@ fac_ani=3		    # a
 nr_exp=4		    # n
 
 #changing variables
-mod_pk=1		    # mod_pk
-prob=5			    # prob
-# TODO: which alpha and beta to simulate?
+mod_pk=1		    # mod_pk=1: Shafranov geometry
+prob=7			    # Prob=7: Simulate solution (23) of Bourne et al.
+# TODO: which alpha and beta to simulate? Alpha aligned with anisotropy?
 alpha_coeff=2
 beta_coeff=1
 
@@ -48,12 +48,12 @@ rel_red_conv=1e-11
 
 nodes=1
 ranks=1     # number of MPI Ranks
-cores=14    # set OpenMP Num Threads to maximum number of cores requested
+cores=128    # set OpenMP Num Threads to maximum number of cores requested
 
 ####################################
 ## create grids                   ##
 ####################################
-create_grid=1
+create_grid=0
 if [ $create_grid ]
 then
 cd ..
@@ -83,6 +83,10 @@ echo "#SBATCH --error=slurm-%A-p$prob-r$nr_exp-mpk$mod_pk-s$smoother-e$extrapola
 echo "#SBATCH -N $nodes" >> run_gmgpolar_sbatch.sh
 echo "#SBATCH -n $ranks" >> run_gmgpolar_sbatch.sh
 echo "#SBATCH -c $cores" >> run_gmgpolar_sbatch.sh
+# fix to one thread per core
+echo "#SBATCH --threads-per-core=1" >> run_gmgpolar_sbatch.sh
+# fix CPU frequency to 1.8 Mhz
+echo "#SBATCH --cpu-freq=1800000" >> run_gmgpolar_sbatch.sh
 echo "#SBATCH -t 600" >> run_gmgpolar_sbatch.sh
 echo "#SBATCH --exclusive" >> run_gmgpolar_sbatch.sh
  
@@ -91,7 +95,7 @@ echo "module purge" >> run_gmgpolar_sbatch.sh
 
 # CARO
 #echo "module load rev/23.05" >> run_gmgpolar_sbatch.sh
-echo "module load mumps/5.5.1" >> run_gmgpolar_sbatch.sh
+# spack install mumps@XXX+metis~mpi
 echo "module load likwid/5.2.2" >> run_gmgpolar_sbatch.sh
 # Local machine
 # echo "module load PrgEnv/gcc10-openmpi" >> run_gmgpolar_sbatch.sh
@@ -101,7 +105,7 @@ echo "module load likwid/5.2.2" >> run_gmgpolar_sbatch.sh
 
 # to be defined for use case (3/4/5/6)
 # Attention: divideBy is used as a dummy variable to access folders as grids are read in
-echo "divideBy2=4" >> run_gmgpolar_sbatch.sh
+echo "let divideBy2=4" >> run_gmgpolar_sbatch.sh
 
 ####################################
 ## solve system                   ##
@@ -113,7 +117,7 @@ echo "let m=1" >> run_gmgpolar_sbatch.sh
 # FLOPS-DP counter from 1 to cores many threads
 echo "while [ \$m -le $max_threads ]; do" >> run_gmgpolar_sbatch.sh
 echo "let mminus1=m-1" >> run_gmgpolar_sbatch.sh
-echo "likwid-perfctr -C 0-\$mminus1 -g FLOPS_DP ./build/gmgpolar_simulation --openmp \$m --matrix_free 1 -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 0 -r $R0 --smoother $smoother -E $extrapolation --verbose 2 --debug $debug --optimized 1 --v1 $v1 --v2 $v2 -R $R --prob $prob --maxiter $maxiter --alpha_coeff $alpha_coeff --beta_coeff $beta_coeff --res_norm $res_norm --f_grid_r "radii_files/Rmax"$R"/aniso"$fac_ani"/divide"$divideBy2".txt" --f_grid_theta "angles_files/Rmax"$R"/aniso"$fac_ani"/divide"$divideBy2".txt" --rel_red_conv $rel_red_conv" >> run_gmgpolar_sbatch.sh
+echo "srun --cpus-per-task=\$m likwid-perfctr -f -C 0-\$mminus1 -g FLOPS_DP ./build/gmgpolar_simulation --openmp \$m --matrix_free 1 -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 0 -r $R0 --smoother $smoother -E $extrapolation --verbose 2 --debug $debug --optimized 1 --v1 $v1 --v2 $v2 -R $R --prob $prob --maxiter $maxiter --alpha_coeff $alpha_coeff --beta_coeff $beta_coeff --res_norm $res_norm --f_grid_r "radii_files/Rmax"$R"/aniso"$fac_ani"/divide"\$divideBy2".txt" --f_grid_theta "angles_files/Rmax"$R"/aniso"$fac_ani"/divide"\$divideBy2".txt" --rel_red_conv $rel_red_conv" >> run_gmgpolar_sbatch.sh
 echo "let m=m*2" >> run_gmgpolar_sbatch.sh
 echo "done;" >> run_gmgpolar_sbatch.sh
 
@@ -121,7 +125,7 @@ echo "done;" >> run_gmgpolar_sbatch.sh
 echo "let m=1" >> run_gmgpolar_sbatch.sh
 echo "while [ \$m -le $max_threads ]; do" >> run_gmgpolar_sbatch.sh
 echo "let mminus1=m-1" >> run_gmgpolar_sbatch.sh
-echo "likwid-perfctr -C 0-\$mminus1 -g CACHES ./build/gmgpolar_simulation --openmp \$m --matrix_free 1 -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 0 -r $R0 --smoother $smoother -E $extrapolation --verbose 2 --debug $debug --optimized 1 --v1 $v1 --v2 $v2 -R $R --prob $prob --maxiter $maxiter --alpha_coeff $alpha_coeff --beta_coeff $beta_coeff --res_norm $res_norm --f_grid_r "radii_files/Rmax"$R"/aniso"$fac_ani"/divide"$divideBy2".txt" --f_grid_theta "angles_files/Rmax"$R"/aniso"$fac_ani"/divide"$divideBy2".txt" --rel_red_conv $rel_red_conv" >> run_gmgpolar_sbatch.sh
+echo "srun --cpus-per-task=\$m likwid-perfctr -f -C 0-\$mminus1 -g CACHE ./build/gmgpolar_simulation --openmp \$m --matrix_free 1 -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 0 -r $R0 --smoother $smoother -E $extrapolation --verbose 2 --debug $debug --optimized 1 --v1 $v1 --v2 $v2 -R $R --prob $prob --maxiter $maxiter --alpha_coeff $alpha_coeff --beta_coeff $beta_coeff --res_norm $res_norm --f_grid_r "radii_files/Rmax"$R"/aniso"$fac_ani"/divide"\$divideBy2".txt" --f_grid_theta "angles_files/Rmax"$R"/aniso"$fac_ani"/divide"\$divideBy2".txt" --rel_red_conv $rel_red_conv" >> run_gmgpolar_sbatch.sh
 echo "let m=m*2" >> run_gmgpolar_sbatch.sh
 echo "done;" >> run_gmgpolar_sbatch.sh
 

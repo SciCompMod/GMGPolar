@@ -1,3 +1,4 @@
+// PolarR6 simulates solution (22) of Bourne et al. https://doi.org/10.1016/j.jcp.2023.112249
 #include "PolarR6GyroZoniShiftedCulham.h"
 #include <stdlib.h>
 #include <array>

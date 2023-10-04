@@ -73,11 +73,11 @@ done
 mkdir -p outputs
 
 echo "prob alpha_coeff beta_coeff fac_ani extrapolation mod_pk"
-# Triangular-Shafranov
-for mod_pk in 2 1
+# 1) Triangular/Czarny 2) Shafranov
+for mod_pk in 2 1 # 2=Triangular/Czarny, 1=Shafranov
 do
 	# Cartesian + beta 0 + ani 0
-	prob=7
+	prob=7 # Solution (23) of Bourne et al.
 		echo $prob $alpha_coeff $beta_coeff $fac_ani $extrapolation $mod_pk
 		for extrapolation in 1
 		do
@@ -90,7 +90,7 @@ do
 		done
 
 	# Polar + beta 0-1 + ani 0-1
-	prob=6
+	prob=6 # Solution (22) of Bourne et al.
 		echo $prob $alpha_coeff $beta_coeff $fac_ani $extrapolation $mod_pk
 		for extrapolation in 1
 		do
