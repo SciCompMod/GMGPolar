@@ -5,7 +5,7 @@
 #SBATCH -N 1
 #SBATCH -n 1
 #SBATCH -c 1
-#SBATCH -t 600
+#SBATCH -t 5
 
 #fixed variables
 # If Origin is chosen, the node can be set as coarse or fine. Default: Coarse.
