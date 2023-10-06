@@ -6,8 +6,8 @@ import sys
 
 def main():
 
-    jobid = '1256' # provide correct slurm job id
-    problem = 5
+    jobid = '1344692' # provide correct slurm job id
+    problem = 7
     nr_exp = 4
     mod_pk = 1
     smoother = 3
@@ -15,7 +15,7 @@ def main():
 
     nodes = 1
     ranks = 1
-    maxCores = 14
+    maxCores = 128
     cores_used = [] # will be filled automatically
 
     path_to_perf_files_rel = '' # relative from read_output call
@@ -28,16 +28,16 @@ def main():
     cols_convergence = ['its', '2-norm of error', 'inf-norm of error']
 
     cols_time = []
-    cols_time += ['t_setup', 't_build', 't_facto_Ac',
-                  't_build_P', 't_build_Asc', 't_facto_Asc']
-    cols_time += ['t_total_(fine)', 't_smoothing', 't_residual',
+    cols_time += ['Setup', 'Building A and RHS', 'Factorization of coarse operator Ac',
+                  'Building intergrid operators (e.g. projections)', 'Building smoothing operators A_sc', 'Factorizing smoothing operators A_sc']
+    cols_time += ['Multigrid cycle', 'Smoothing', 't_residual',
                   't_restriction', 't_Ac', 't_prolongation', 't_fine_residual',
                   't_error']
     cols_time += ['t_applyA']
     cols_time += ['t_coeff', 't_arr_art_att', 't_sol', 't_detDFinv', 't_trafo']
     cols_time += ['Total_execution_time']
 
-    cols_benchmark = ['FLOPS_DP', 'CACHES']
+    cols_benchmark = ['FLOPS_DP']#, 'CACHE']
 
     cols = cols_problem + cols_cluster + cols_convergence + cols_time + cols_benchmark
     cols_dtypes = {col: 'int' for col in cols_problem + cols_cluster}
@@ -97,7 +97,7 @@ def main():
                     else:
                         sys.exit('Error. Inf-Norm information not available.')
 
-                    while 't_setup' not in lines[i]:
+                    while 'Total setup time' not in lines[i]:
                         i = i+1
                         if i > len(lines)-1:
                             sys.exit(
@@ -105,7 +105,7 @@ def main():
                     # global time print out, split line by line of information and add to dataframe
                     time_dict = dict()
                     while 'Total_execution_time' not in lines[i-1]:
-                        timings = lines[i].split()
+                        timings = lines[i].split() # here we split the timers based on empty spaces
                         for j in range(0, len(timings), 2):
                             # remove last char (':') from string and convert timing to floating point
                             time_dict[timings[j][:-1]

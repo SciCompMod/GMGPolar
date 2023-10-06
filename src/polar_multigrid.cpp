@@ -171,22 +171,22 @@ void gmgpolar::polar_multigrid()
             if (gyro::icntl[Param::verbose] > 1) {
                 for (int l = 0; l < levels; l++) {
                     std::cout << "LEVEL " << l << "\n";
-                    std::cout << "\nt_smoothing: " << v_level[l]->t_smoothing << ", t_f_sc: " << v_level[l]->t_f_sc
+                    std::cout << "\tSmoothing: " << v_level[l]->t_smoothing << ", t_f_sc: " << v_level[l]->t_f_sc
                               << ", t_Asc_ortho: " << v_level[l]->t_Asc_ortho << ", t_Asc: " << v_level[l]->t_Asc
                               << "\n";
-                    std::cout << "\nt_get_ptr: " << v_level[l]->t_get_ptr
+                    std::cout << "\tt_get_ptr: " << v_level[l]->t_get_ptr
                               << ", t_get_stencil: " << v_level[l]->t_get_stencil
                               << ", t_get_smoother: " << v_level[l]->t_get_smoother
-                              << ", t_get_row: " << v_level[l]->t_get_row << "\n";
+                              << ", t_get_row: " << v_level[l]->t_get_row;
                     std::cout << "\n";
                 }
             }
 
             if (gyro::icntl[Param::verbose] > 1) {
-                std::cout << "\nt_setup: " << t_setup << ", t_build: " << t_build << ", t_facto_Ac: " << t_facto_Ac
-                          << ", t_build_P: " << t_build_P << ", t_build_Asc: " << t_build_Asc
-                          << ", t_facto_Asc: " << t_facto_Asc << "\n";
-                std::cout << "t_total_(fine): " << t_total << ", t_smoothing: " << t_smoothing
+                std::cout << "\nTotal setup: " << t_setup << "\n\tBuilding system matrix A and RHS: " << t_build
+                          << "\n\tFactorization of coarse operator Ac: " << t_facto_Ac << "\n\tBuilding intergrid operators (e.g. projections): " << t_build_P
+                          << "\n\tBuilding smoothing operators A_sc: " << t_build_Asc << "\n\tFactorizing smoothing operators A_sc: " << t_facto_Asc << "\n";
+                std::cout << "Total multigrid cycle: " << t_total << "\n\tSmoothing: " << t_smoothing
                           << ", t_residual: " << t_residual << ", t_restriction: " << t_restriction
                           << ", t_Ac: " << t_Ac << ", t_prolongation: " << t_prolongation
                           << ", t_fine_residual: " << t_fine_residual << ", t_error: " << t_error << "\n";
