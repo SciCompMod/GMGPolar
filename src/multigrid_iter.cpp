@@ -415,9 +415,14 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
 
         if (gyro::icntl[Param::matrix_free] == 1) {
             if (gyro::icntl[Param::optimized] == 0)
+            {
                 v_level[l + 1]->apply_A0(u_coarse, Au_coarse);
-            else
+            }else{
+                double start = omp_get_wtime();
                 v_level[l + 1]->apply_A(u_coarse, Au_coarse);
+                double end = omp_get_wtime();
+                t_applyA += (end - start);                
+            }
         }
         else {
             if (gyro::icntl[Param::openmp] == 1) {
@@ -658,7 +663,6 @@ void gmgpolar::compute_residual(int l, int extrapol)
         else {
             double start = omp_get_wtime();
             v_level[l]->apply_A(v_level[l]->u, Au);
-
             double end = omp_get_wtime();
             t_applyA += (end - start);
         }
@@ -733,7 +737,10 @@ void gmgpolar::compute_residual(int l, int extrapol)
             if (gyro::icntl[Param::optimized] == 0)
                 v_level[l + 1]->apply_A0(Pu, APu); //APu = A(l+1) * Pu
             else
+                double start = omp_get_wtime();            
                 v_level[l + 1]->apply_A(Pu, APu); //APu = A(l+1) * Pu
+                double end = omp_get_wtime();
+                t_applyA += (end - start);
         }
         else {
             if (gyro::icntl[Param::openmp] == 1) {

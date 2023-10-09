@@ -66,8 +66,8 @@ namespace gyro
  * Attributes
  ******************************************************************************/
 /***************************************************************************
-     * Controls and Informations
-     **************************************************************************/
+* Controls and Informations
+**************************************************************************/
 /*! The integer control array, see Controls::icontrols for the
      *  possible values
      */
@@ -99,16 +99,16 @@ extern std::string f_sol_in, f_sol_out;
  * Methods
  ******************************************************************************/
 /***************************************************************************
-     * Parameters
-     **************************************************************************/
+* Parameters
+**************************************************************************/
 void init_params();
 void show_params();
 void get_geometry_coeffs(geometry_type geom);
 void select_functions_class(int alpha_coeff, int beta_coeff, int geom, int prob);
 
 /***************************************************************************
-     * Boundary and solution
-     **************************************************************************/
+* Boundary and solution
+**************************************************************************/
 /************************
  * Single
  ************************/
@@ -125,12 +125,12 @@ std::vector<double> def_solution_rt(double r_i, std::vector<double> theta, std::
                                     std::vector<double> cos_theta, int ntheta, int verbose);
 
 /***************************************************************************
-     * Diffusivity and operator
-     **************************************************************************/
+* Diffusivity and operator
+**************************************************************************/
 /************************
  * Single
  ************************/
-double coeff(double r, int verbose);
+double coeff_alpha(double r, int verbose);
 double coeff_beta(double r, int verbose);
 double detDFinv(double r, double theta, int verbose);
 double arr(double r, double theta, int verbose);
@@ -140,7 +140,7 @@ void arr_att_art(double r, double theta, double& arr, double& att, double& art, 
 /************************
  * Vector
  ************************/
-std::vector<double> coeff(std::vector<double> r, int verbose);
+std::vector<double> coeff_alpha(std::vector<double> r, int verbose);
 std::vector<double> coeff_beta(std::vector<double> r, int verbose);
 std::vector<double> detDFinv(double r, std::vector<double> theta, std::vector<double> sin_theta,
                              std::vector<double> cos_theta, int ntheta, int verbose);
@@ -157,8 +157,8 @@ void arr_att_art(std::vector<double> r, double theta, std::vector<double>& arr, 
                  std::vector<double>& art, int verbose);
 
 /***************************************************************************
-     * Polar to cartesian and back
-     **************************************************************************/
+* Polar to cartesian and back
+**************************************************************************/
 /************************
  * Single
  ************************/
@@ -207,8 +207,8 @@ void disp(std::vector<T> a, const std::string& s_a)
 } 
 
 /***************************************************************************
-     * Matrix operations
-     **************************************************************************/
+* Matrix operations
+**************************************************************************/
 void sp_dgemv(int trans, int m, int n, double alpha, std::vector<int> row_indices, std::vector<int> col_indices,
               std::vector<double> vals, int lda, std::vector<double> x, int incx, double beta, std::vector<double>& y,
               int incy);

@@ -362,11 +362,8 @@ std::vector<double> gyro::def_solution_rt(double r_i, std::vector<double> theta,
 } /* ----- end of gyro::eval_def_solution_vec ----- */
 
 /***************************************************************************
-     * Diffusivity and operator
-     **************************************************************************/
-/************************
- * Single
- ************************/
+* Diffusivity and operator
+**************************************************************************/
 /*!
  *  \brief Diffusivity coefficient
  *
@@ -380,7 +377,7 @@ std::vector<double> gyro::def_solution_rt(double r_i, std::vector<double> theta,
  * \return the coefficient
  *
  */
-double gyro::coeff(double r, int verbose)
+double gyro::coeff_alpha(double r, int verbose)
 {
     double t;
     TIC;
@@ -398,11 +395,7 @@ double gyro::coeff(double r, int verbose)
 } /* ----- end of level::coeff ----- */
 
 /*!
- *  \brief Diffusivity coefficient
- *
- * Computes the diffusivity coefficient depending on the radius r
- * - for prob 3 or 5: alpha(r)=(2.0/(2.6+3.14)) * (1.3 + atan((1-1.3*r/Rmax) / 0.09))
- * - else: 1
+ *  \brief Beta coefficient
  * 
  * \param r: the r coordinate
  * \param verbose: verbose level for debug
@@ -440,7 +433,7 @@ double gyro::coeff_beta(double r, int verbose)
  * \return the coefficient
  *
  */
-std::vector<double> gyro::coeff(std::vector<double> r, int verbose)
+std::vector<double> gyro::coeff_alpha(std::vector<double> r, int verbose)
 {
     double t;
     TIC;
@@ -460,11 +453,7 @@ std::vector<double> gyro::coeff(std::vector<double> r, int verbose)
 } /* ----- end of level::coeff ----- */
 
 /*!
- *  \brief Diffusivity coefficient
- *
- * Computes the diffusivity coefficient depending on the radius r
- * - for prob 3 or 5: alpha(r)=(2.0/(2.6+3.14)) * (1.3 + atan((1-1.3*r/Rmax) / 0.09))
- * - else: 1
+ *  \brief Beta coefficient
  * 
  * \param r: the r coordinate
  * \param verbose: verbose level for debug
@@ -529,6 +518,7 @@ double gyro::detDFinv(double r, double theta, int verbose)
     }
     return detDFinv_r;
 } /* ----- end of level::detDFinv ----- */
+
 double gyro::arr(double r, double theta, int verbose)
 {
     double t;
@@ -539,7 +529,7 @@ double gyro::arr(double r, double theta, int verbose)
     double Rmax      = dcntl[Param::R];
 
     double detDFinv_r = detDFinv(r, theta, verbose);
-    double coeff_r    = coeff(r, verbose);
+    double coeff_r    = coeff_alpha(r, verbose);
     double Jrt        = functions->J_rt(r, theta, kappa_eps, delta_e, Rmax);
     double Jtt        = functions->J_tt(r, theta, kappa_eps, delta_e, Rmax);
     double arr_r      = 0.5 * (Jtt * Jtt + Jrt * Jrt) * coeff_r / fabs(detDFinv_r);
@@ -551,6 +541,7 @@ double gyro::arr(double r, double theta, int verbose)
     }
     return arr_r;
 } /* ----- end of level::arr ----- */
+
 double gyro::art(double r, double theta, int verbose)
 {
     double t;
@@ -561,7 +552,7 @@ double gyro::art(double r, double theta, int verbose)
     double Rmax      = dcntl[Param::R];
 
     double detDFinv_r = detDFinv(r, theta, verbose);
-    double coeff_r    = coeff(r, verbose);
+    double coeff_r    = coeff_alpha(r, verbose);
     double Jrr        = functions->J_rr(r, theta, kappa_eps, delta_e, Rmax);
     double Jrt        = functions->J_rt(r, theta, kappa_eps, delta_e, Rmax);
     double Jtr        = functions->J_tr(r, theta, kappa_eps, delta_e, Rmax);
@@ -575,6 +566,7 @@ double gyro::art(double r, double theta, int verbose)
     }
     return art_r;
 } /* ----- end of level::art ----- */
+
 double gyro::att(double r, double theta, int verbose)
 {
     double t;
@@ -585,7 +577,7 @@ double gyro::att(double r, double theta, int verbose)
     double Rmax      = dcntl[Param::R];
 
     double detDFinv_r = detDFinv(r, theta, verbose);
-    double coeff_r    = coeff(r, verbose);
+    double coeff_r    = coeff_alpha(r, verbose);
     double Jrr        = functions->J_rr(r, theta, kappa_eps, delta_e, Rmax);
     double Jtr        = functions->J_tr(r, theta, kappa_eps, delta_e, Rmax);
     double att_r      = 0.5 * (Jtr * Jtr + Jrr * Jrr) * coeff_r / fabs(detDFinv_r);
@@ -597,6 +589,7 @@ double gyro::att(double r, double theta, int verbose)
     }
     return att_r;
 } /* ----- end of level::att ----- */
+
 void gyro::arr_att_art(double r, double theta, double& arr, double& att, double& art, int verbose)
 {
     double t;
@@ -607,7 +600,7 @@ void gyro::arr_att_art(double r, double theta, double& arr, double& att, double&
     double Rmax      = dcntl[Param::R];
 
     double detDFinv_r = detDFinv(r, theta, verbose);
-    double coeff_r    = coeff(r, verbose);
+    double coeff_r    = coeff_alpha(r, verbose);
     double Jrr        = functions->J_rr(r, theta, kappa_eps, delta_e, Rmax);
     double Jrt        = functions->J_rt(r, theta, kappa_eps, delta_e, Rmax);
     double Jtr        = functions->J_tr(r, theta, kappa_eps, delta_e, Rmax);
@@ -741,7 +734,7 @@ std::vector<double> gyro::arr(double r, std::vector<double> theta, std::vector<d
     std::vector<double> Jtt(ntheta);
     functions->J_rt(r, theta, kappa_eps, delta_e, Rmax, Jrt, sin_theta, cos_theta);
     functions->J_tt(r, theta, kappa_eps, delta_e, Rmax, Jtt, sin_theta, cos_theta);
-    double coeff_r = coeff(r, verbose);
+    double coeff_r = coeff_alpha(r, verbose);
     ;
     for (int i = 0; i < ntheta; i++) {
         arr_r[i] = 0.5 * (Jtt[i] * Jtt[i] + Jrt[i] * Jrt[i]) * coeff_r / fabs(detDFinv_r[i]);
@@ -777,7 +770,7 @@ std::vector<double> gyro::art(double r, std::vector<double> theta, std::vector<d
     functions->J_rt(r, theta, kappa_eps, delta_e, Rmax, Jrt, sin_theta, cos_theta);
     functions->J_tr(r, theta, kappa_eps, delta_e, Rmax, Jtr, sin_theta, cos_theta);
     functions->J_tt(r, theta, kappa_eps, delta_e, Rmax, Jtt, sin_theta, cos_theta);
-    double coeff_r = coeff(r, verbose);
+    double coeff_r = coeff_alpha(r, verbose);
     ;
     for (int i = 0; i < ntheta; i++) {
         art_r[i] = -0.25 * (Jtt[i] * Jtr[i] + Jrt[i] * Jrr[i]) * coeff_r / fabs(detDFinv_r[i]);
@@ -811,7 +804,7 @@ std::vector<double> gyro::att(double r, std::vector<double> theta, std::vector<d
     std::vector<double> Jtt(ntheta);
     functions->J_rr(r, theta, kappa_eps, delta_e, Rmax, Jrr, sin_theta, cos_theta);
     functions->J_tr(r, theta, kappa_eps, delta_e, Rmax, Jtr, sin_theta, cos_theta);
-    double coeff_r = coeff(r, verbose);
+    double coeff_r = coeff_alpha(r, verbose);
     ;
     for (int i = 0; i < ntheta; i++) {
         att_r[i] = 0.5 * (Jtr[i] * Jtr[i] + Jrr[i] * Jrr[i]) * coeff_r / fabs(detDFinv_r[i]);
@@ -850,7 +843,7 @@ void gyro::arr_att_art(double r, std::vector<double> theta, std::vector<double> 
     functions->J_rt(r, theta, kappa_eps, delta_e, Rmax, Jrt, sin_theta, cos_theta);
     functions->J_tr(r, theta, kappa_eps, delta_e, Rmax, Jtr, sin_theta, cos_theta);
     functions->J_tt(r, theta, kappa_eps, delta_e, Rmax, Jtt, sin_theta, cos_theta);
-    double coeff_r = coeff(r, verbose);
+    double coeff_r = coeff_alpha(r, verbose);
     for (int i = 0; i < ntheta; i++) {
         double coeff = coeff_r / fabs(detDFinv_r[i]);
         arr[i]       = 0.5 * (Jtt[i] * Jtt[i] + Jrt[i] * Jrt[i]) * coeff;
@@ -888,7 +881,7 @@ void gyro::arr_att_art(std::vector<double> r, double theta, std::vector<double>&
     std::vector<double> Jrt(size);
     std::vector<double> Jtr(size);
     std::vector<double> Jtt(size);
-    std::vector<double> coeff_r = coeff(r, verbose);
+    std::vector<double> coeff_r = coeff_alpha(r, verbose);
     functions->J_rr(r, theta, kappa_eps, delta_e, Rmax, Jrr);
     functions->J_rt(r, theta, kappa_eps, delta_e, Rmax, Jrt);
     functions->J_tr(r, theta, kappa_eps, delta_e, Rmax, Jtr);

@@ -141,8 +141,15 @@ void level::build_r()
 
         // edge
         int se;
-        if (gyro::icntl[Param::alpha_coeff] == 0 || gyro::icntl[Param::alpha_coeff] == 2) {
+        if (gyro::icntl[Param::alpha_coeff] == 0) {
             se = floor(nr * 0.66) - n_elems_refined / 2;
+        }
+        else if (gyro::icntl[Param::alpha_coeff] == 2) {
+            // Choose center point of descent.
+            // a) - ln(0.5 * (alpha(0) - alpha(Rmax))): 
+            //    - ln(0.5 * (np.exp(-np.tanh(-14)) - np.exp(-np.tanh(6)))) = 0.16143743821247852
+            // b) r_center = Rmax * (np.arctanh(0.16143743821247852) + 14) / 20 = 0.7081431124450334 Rmax
+            se = floor(nr * 0.7081) - n_elems_refined / 2;
         }
         else {
             se = floor(nr * 0.5) - n_elems_refined / 2;

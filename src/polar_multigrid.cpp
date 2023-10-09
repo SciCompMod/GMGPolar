@@ -186,19 +186,26 @@ void gmgpolar::polar_multigrid()
                 std::cout << "\nTotal setup: " << t_setup << "\n\tBuilding system matrix A and RHS: " << t_build
                           << "\n\tFactorization of coarse operator Ac: " << t_facto_Ac << "\n\tBuilding intergrid operators (e.g. projections): " << t_build_P
                           << "\n\tBuilding smoothing operators A_sc: " << t_build_Asc << "\n\tFactorizing smoothing operators A_sc: " << t_facto_Asc << "\n";
-                std::cout << "Total multigrid cycle: " << t_total << "\n\tSmoothing: " << t_smoothing
-                          << ", t_residual: " << t_residual << ", t_restriction: " << t_restriction
-                          << ", t_Ac: " << t_Ac << ", t_prolongation: " << t_prolongation
-                          << ", t_fine_residual: " << t_fine_residual << ", t_error: " << t_error << "\n";
-                std::cout << "t_applyA: " << t_applyA << std::endl;
+                std::cout << "Total multigrid cycle: " << t_total << "\n\tComplete smoothing: " << t_smoothing
+                          << "\n\tComputing residual: " << t_residual << "\n\tApplying restriction: " << t_restriction
+                          << "\n\tSolve coarse system: " << t_Ac << "\n\tApplying prolongation (+ coarse grid correction): " << t_prolongation
+                          << "\nComputing residual on finest level: " << t_fine_residual;
+                if (gyro::icntl[Param::check_error] == 1) {
+                           std::cout << "\nComputing final error: " << t_error
+                }
+                std::cout << "Total application of A: " << t_applyA;
+                std::cout << "\n";
             }
 
             if (gyro::icntl[Param::verbose] > 1) {
-                std::cout << "\nt_coeff: " << gyro::dcntl[Param::t_coeff]
-                          << ", t_arr_art_att: " << gyro::dcntl[Param::t_arr_art_att]
-                          << ", t_sol: " << gyro::dcntl[Param::t_sol]
-                          << ", t_detDFinv: " << gyro::dcntl[Param::t_detDFinv]
-                          << ", t_trafo: " << gyro::dcntl[Param::t_trafo] << "\n";
+                std::cout << "\nEvaluation of a^{rr}, a^{rt}, and a^{tt}: " << gyro::dcntl[Param::t_arr_art_att]
+                          << "\n\tEvaluation of alpha and beta: " << gyro::dcntl[Param::t_coeff]
+                          << "\n\tComputing determinant of Jacobian of inverse mapping: " << gyro::dcntl[Param::t_detDFinv];
+                    if (gyro::icntl[Param::check_error] == 1) {
+                          std::cout <<  "\nComputing exact solution: " << gyro::dcntl[Param::t_sol];
+                    }
+                          
+                std::cout << "\n";
             }
         }
     }

@@ -48,12 +48,14 @@ def plot_perf_per_core(path_out, fname, df, benchname, saturation_limit=0, color
     if not exists(path_out):
         makedirs(path_out)
     plt.savefig(join(path_out, fname + '_' + benchname[0].lower()), bbox_inches='tight')
+    # plt.show()
     plt.close()   
 
 
 def main():
 
-    problem = 5
+    jobid = '1344692' # provide correct slurm job id
+    problem = 7
     nr_exp = 4
     mod_pk = 1
     smoother = 3
@@ -61,7 +63,7 @@ def main():
 
     nodes = 1
     ranks = 1
-    maxCores = 14
+    maxCores = 128
 
     ## saturation_limit is node specific and needs to be adapted.
     saturation_limit = 80
@@ -78,9 +80,9 @@ def main():
                 'Cores': int, 'its': int})
 
     # Likwid benchmark columns, more benchmarks are in timings.
-    likwid_benchmarks = {'FLOPS_DP': ['Flop performance in Multi-Threading', 'Flops (GFlops/s)'], 'CACHES': [
-        'Memory bandwidth saturation', 'Memory bandwidth (GBytes/s)']}  # benchmark : [plot title, plot y-label]
-    timing_benchmarks = {'Total_execution_time' : ['Total execution time in Multi-Threading', 'Execution time']}
+    likwid_benchmarks = {'FLOPS_DP': ['Flop performance in Multi-Threading', 'Flops (GFlops/s)']}#, 'CACHES': [
+        # 'Memory bandwidth saturation', 'Memory bandwidth (GBytes/s)']}  # benchmark : [plot title, plot y-label]
+    timing_benchmarks = {'Total execution time' : ['Total execution time in Multi-Threading', 'Execution time']}
     # Problem setting columns
     setting_cols = ['Problem', 'rExp', 'ModPK', 'Extrapolation', 'Nodes', 'Ranks']
 

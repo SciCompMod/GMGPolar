@@ -29,13 +29,14 @@ def main():
 
     cols_time = []
     cols_time += ['Setup', 'Building A and RHS', 'Factorization of coarse operator Ac',
-                  'Building intergrid operators (e.g. projections)', 'Building smoothing operators A_sc', 'Factorizing smoothing operators A_sc']
-    cols_time += ['Multigrid cycle', 'Smoothing', 't_residual',
-                  't_restriction', 't_Ac', 't_prolongation', 't_fine_residual',
-                  't_error']
-    cols_time += ['t_applyA']
-    cols_time += ['t_coeff', 't_arr_art_att', 't_sol', 't_detDFinv', 't_trafo']
-    cols_time += ['Total_execution_time']
+                  'Building intergrid operators (e.g. projections)', 'Building smoothing operators A_sc', 
+                  'Factorizing smoothing operators A_sc']
+    cols_time += ['Total multigrid cycle', 'Complete smoothing', 'Computing residual',
+                  'Applying restriction', 'Solve coarse system', 'Applying prolongation (+ coarse grid correction)']
+    cols_time += ['Computing residual on finest level', 'Computing final error', 'Total application of A']
+    cols_time += ['Evaluation of a^\{rr\}, a^\{rt\}, and a^\{tt\}', 'Evaluation of alpha and beta', 'Computing determinant of Jacobian of inverse mapping',
+                  'Computing exact solution']
+    cols_time += ['Total execution time']
 
     cols_benchmark = ['FLOPS_DP']#, 'CACHE']
 
@@ -104,7 +105,7 @@ def main():
                                 'End of file reached without finding output.')
                     # global time print out, split line by line of information and add to dataframe
                     time_dict = dict()
-                    while 'Total_execution_time' not in lines[i-1]:
+                    while 'Total execution time' not in lines[i-1]:
                         timings = lines[i].split() # here we split the timers based on empty spaces
                         for j in range(0, len(timings), 2):
                             # remove last char (':') from string and convert timing to floating point

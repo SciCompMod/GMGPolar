@@ -316,8 +316,8 @@ enum dcontrols
     rel_red_conv,
     /*! \brief Timings
          */
-    t_coeff,
-    t_arr_art_att,
+    t_arr_art_att, // Evaluation of a^{rr}, a^{rt}, and a^{tt}
+    t_coeff, // Evaluation of alpha and beta (subcounter of t_arr_art_att)    
     t_sol,
     t_detDFinv,
     t_trafo,
