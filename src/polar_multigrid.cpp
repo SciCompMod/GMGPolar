@@ -191,7 +191,7 @@ void gmgpolar::polar_multigrid()
                           << "\n\tSolve coarse system: " << t_Ac << "\n\tApplying prolongation (+ coarse grid correction): " << t_prolongation
                           << "\nComputing residual on finest level: " << t_fine_residual;
                 if (gyro::icntl[Param::check_error] == 1) {
-                           std::cout << "\nComputing final error: " << t_error
+                           std::cout << "\nComputing final error: " << t_error;
                 }
                 std::cout << "Total application of A: " << t_applyA;
                 std::cout << "\n";
