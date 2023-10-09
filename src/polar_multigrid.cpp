@@ -186,7 +186,7 @@ void gmgpolar::polar_multigrid()
                 std::cout << "\nTotal setup: " << t_setup << "\n\tBuilding system matrix A and RHS: " << t_build
                           << "\n\tFactorization of coarse operator Ac: " << t_facto_Ac << "\n\tBuilding intergrid operators (e.g. projections): " << t_build_P
                           << "\n\tBuilding smoothing operators A_sc: " << t_build_Asc << "\n\tFactorizing smoothing operators A_sc: " << t_facto_Asc << "\n";
-                std::cout << "Total multigrid cycle: " << t_total << "\n\tComplete smoothing: " << t_smoothing
+                std::cout << "Total multigrid cycle: " << t_total_mgcycle << "\n\tComplete smoothing: " << t_smoothing
                           << "\n\tComputing residual: " << t_residual << "\n\tApplying restriction: " << t_restriction
                           << "\n\tSolve coarse system: " << t_Ac << "\n\tApplying prolongation (+ coarse grid correction): " << t_prolongation
                           << "\nComputing residual on finest level: " << t_fine_residual;

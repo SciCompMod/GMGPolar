@@ -734,13 +734,15 @@ void gmgpolar::compute_residual(int l, int extrapol)
         //apply A(l+1) to Pu
         std::vector<double> APu(v_level[l + 1]->m, 0);
         if (gyro::icntl[Param::matrix_free] == 1) {
-            if (gyro::icntl[Param::optimized] == 0)
+            if (gyro::icntl[Param::optimized] == 0) {
                 v_level[l + 1]->apply_A0(Pu, APu); //APu = A(l+1) * Pu
-            else
-                double start = omp_get_wtime();            
+            }
+            else {
+                double start = omp_get_wtime();
                 v_level[l + 1]->apply_A(Pu, APu); //APu = A(l+1) * Pu
                 double end = omp_get_wtime();
                 t_applyA += (end - start);
+            }
         }
         else {
             if (gyro::icntl[Param::openmp] == 1) {
