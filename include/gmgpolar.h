@@ -45,6 +45,9 @@
 #include "constants.h"
 #include "level.h"
 #include "gyro.h"
+#ifdef GMGPOLAR_USE_LIKWID
+#include <likwid-marker.h>
+#endif
 
 class gmgpolar
 {

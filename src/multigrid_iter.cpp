@@ -104,6 +104,12 @@ void gmgpolar::multigrid_iter()
     t_fine_residual += TOC;
     TIC;
 
+#ifdef GMGPOLAR_USE_LIKWID
+#pragma omp parallel
+{
+    LIKWID_MARKER_START("Iteration");
+}
+#endif
     //! Start the Multigrid-Iteration
     while (it < gyro::icntl[Param::maxiter] && convergence_criterium > rel_red_conv) {
         it++;
@@ -187,7 +193,13 @@ void gmgpolar::multigrid_iter()
         }
         t_fine_residual += TOC;
         TIC;
-    }
+    }    
+#ifdef GMGPOLAR_USE_LIKWID
+#pragma omp parallel
+{
+    LIKWID_MARKER_STOP("Iteration");
+}    
+#endif
     if (gyro::icntl[Param::verbose] > 0) {
         if (it == gyro::icntl[Param::maxiter]) {
             std::cout << "Multigrid reached maxiter=" << gyro::icntl[Param::maxiter] << "\n";

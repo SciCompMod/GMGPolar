@@ -131,10 +131,23 @@ void gmgpolar::polar_multigrid()
         std::cout << "t_applyA: " << t_applyA << std::endl;
     }
     else {
-        if (gyro::icntl[Param::verbose] > 3)
+        if (gyro::icntl[Param::verbose] > 3){
             std::cout
                 << "Building discretized system, restriction and interpolation operators, and defining splittings...\n";
+        }
+#ifdef GMGPOLAR_USE_LIKWID        
+#pragma omp parallel
+{
+    LIKWID_MARKER_START("Setup");
+}        
+#endif
         prepare_op_levels();
+#ifdef GMGPOLAR_USE_LIKWID        
+#pragma omp parallel
+{
+    LIKWID_MARKER_STOP("Setup");
+}        
+#endif
 
         int m = v_level[0]->m;
 

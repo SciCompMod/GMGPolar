@@ -4,6 +4,8 @@ project(GMGPolar VERSION 1.0.0)
 
 option(GMGPOLAR_BUILD_TESTS "Build GMGPolar unit tests." ON)
 option(GMGPOLAR_USE_MUMPS "Use MUMPS to compute matrix factorizations." OFF)
+option(GMGPOLAR_USE_LIKWID "Use LIKWID to measure code (regions)." OFF)
+
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -41,6 +43,18 @@ configure_file(${CMAKE_SOURCE_DIR}/include/config_internal.h.in ${CMAKE_SOURCE_D
 
 target_include_directories(gmgpolar_simulation PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/test_cases )
 target_include_directories(GMGPolar PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/test_cases )
+
+if(GMGPOLAR_USE_LIKWID)
+
+    find_package(LIKWID REQUIRED)
+
+    target_include_directories(GMGPolar PUBLIC ${LIKWID_INCLUDE_DIRS})
+    target_link_libraries(GMGPolar PUBLIC ${LIKWID_LIBRARIES})
+    target_compile_definitions(GMGPolar PUBLIC "-DLIKWID_PERFMON")
+
+endif()
+
+
 
 if(GMGPOLAR_USE_MUMPS)
 
