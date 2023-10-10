@@ -193,7 +193,7 @@ void gmgpolar::polar_multigrid()
                 if (gyro::icntl[Param::check_error] == 1) {
                            std::cout << "\nComputing final error: " << t_error;
                 }
-                std::cout << "Total application of A: " << t_applyA;
+                std::cout << "\nTotal application of A: " << t_applyA;
                 std::cout << "\n";
             }
 
