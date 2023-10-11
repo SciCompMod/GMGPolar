@@ -131,8 +131,8 @@ def main():
                     search_term_likwid = ''
                     if benchmark == 'FLOPS_DP':
                         search_term_likwid = 'DP [MFLOP/s]'
-                    elif benchmark == 'CACHES':
-                        search_term_likwid = 'Memory bandwidth [MBytes/s]'
+                    elif benchmark == 'MEM_DP':
+                        search_term_likwid = 'Memory bandwidth [MBytes/s] STAT'
                     else:
                         sys.exit('Error. Benchmark type not supported.')
 
@@ -175,7 +175,7 @@ def main():
                     elif row_setting_avail.values.sum() > 1:  # error
                         sys.exit(
                             'Error. More than two lines corresponds to criterion.'
-                            ' We can only have one line for each benchmark: FLOPS_DP and CACHES.')
+                            ' We can only have one line for each benchmark: FLOPS_DP and MEM_DP.')
 
                 i += 1
             # end while
