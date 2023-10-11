@@ -105,7 +105,7 @@ echo "module load likwid/5.2.2" >> run_gmgpolar_sbatch.sh
 # echo "make -j16" >> run_gmgpolar_sbatch.sh
 
 echo "# potentially run benchmark on machine"
-echo "# srun --cpus-per-task=$m likwid-bench -i 1000 -t stream_avx_fma -w S0:500MB:64"
+echo "# srun --cpus-per-task=$((cores)) likwid-bench -i 1000 -t stream_avx_fma -w S0:500MB:64"
 
 # to be defined for use case (3/4/5/6)
 # Attention: divideBy is used as a dummy variable to access folders as grids are read in
@@ -123,7 +123,7 @@ echo "while [ \$m -le $max_threads ]; do" >> run_gmgpolar_sbatch.sh
 echo "let mminus1=m-1" >> run_gmgpolar_sbatch.sh
 
 echo "# for testing that pin works correctly, potentially use likwid-pin beforehand"
-echo "# srun --cpus-per-task=$m likwid-pin -c N:0-$mminus1 ./build/gmgpolar_simulation --openmp \$m --matrix_free 1 -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 0 -r $R0 --smoother $smoother -E $extrapolation --verbose 2 --debug $debug --optimized 1 --v1 $v1 --v2 $v2 -R $R --prob $prob --maxiter $maxiter --alpha_coeff $alpha_coeff --beta_coeff $beta_coeff --res_norm $res_norm --f_grid_r "radii_files/Rmax"$R"/aniso"$fac_ani"/divide"\$divideBy2".txt" --f_grid_theta "angles_files/Rmax"$R"/aniso"$fac_ani"/divide"\$divideBy2".txt" --rel_red_conv $rel_red_conv" >> run_gmgpolar_sbatch.sh
+echo "# srun --cpus-per-task=\$m likwid-pin -c N:0-\$mminus1 ./build/gmgpolar_simulation --openmp \$m --matrix_free 1 -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 0 -r $R0 --smoother $smoother -E $extrapolation --verbose 2 --debug $debug --optimized 1 --v1 $v1 --v2 $v2 -R $R --prob $prob --maxiter $maxiter --alpha_coeff $alpha_coeff --beta_coeff $beta_coeff --res_norm $res_norm --f_grid_r "radii_files/Rmax"$R"/aniso"$fac_ani"/divide"\$divideBy2".txt" --f_grid_theta "angles_files/Rmax"$R"/aniso"$fac_ani"/divide"\$divideBy2".txt" --rel_red_conv $rel_red_conv" >> run_gmgpolar_sbatch.sh
 
 echo "srun --cpus-per-task=\$m likwid-perfctr -f -m -C 0-\$mminus1 -g FLOPS_DP ./build/gmgpolar_simulation --openmp \$m --matrix_free 1 -n $nr_exp -a $fac_ani --mod_pk $mod_pk --DirBC_Interior $DirBC_Interior --divideBy2 0 -r $R0 --smoother $smoother -E $extrapolation --verbose 2 --debug $debug --optimized 1 --v1 $v1 --v2 $v2 -R $R --prob $prob --maxiter $maxiter --alpha_coeff $alpha_coeff --beta_coeff $beta_coeff --res_norm $res_norm --f_grid_r "radii_files/Rmax"$R"/aniso"$fac_ani"/divide"\$divideBy2".txt" --f_grid_theta "angles_files/Rmax"$R"/aniso"$fac_ani"/divide"\$divideBy2".txt" --rel_red_conv $rel_red_conv" >> run_gmgpolar_sbatch.sh
 echo "let m=m*2" >> run_gmgpolar_sbatch.sh
