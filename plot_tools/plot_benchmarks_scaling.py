@@ -54,7 +54,10 @@ def plot_perf_per_core(path_out, fname, df, benchname, saturation_limit=0, color
 
 def main():
 
-    jobid = '1344692' # provide correct slurm job id
+    file_prefix = 'caro_likwid-perctr-flopsdp-compare-perfctr-withoutlikwid' # provide correct slurm job id
+    file_postfix = 'zones'
+    problem = 7
+    divideBy2 = 7 # steps of division of initial grid
     problem = 7
     nr_exp = 4
     mod_pk = 1
@@ -68,14 +71,14 @@ def main():
     ## saturation_limit is node specific and needs to be adapted.
     saturation_limit = 80
 
-    fname = 'p' + str(problem) + '-r' + str(nr_exp) + '-mpk' + str(mod_pk) + '-s' + str(
-        smoother) + '-e' + str(extrapolation) + '--N' + str(nodes) + '-R' + str(ranks) + '-maxC' + str(maxCores)   
+    fname = file_prefix + '-p' + str(problem) + '-r' + str(nr_exp) + '-dbt' + str(divideBy2) + '-mpk' + str(mod_pk) + '-s' + str(
+        smoother) + '-e' + str(extrapolation) + '--N' + str(nodes) + '-R' + str(ranks) + '-maxC' + str(maxCores)  + '-' + file_postfix
     path_to_files_rel = '' # relative to plot script
     path_to_files = join(dirname(__file__), join(path_to_files_rel))    
 
     df = pd.read_csv(
         join(path_to_files, fname + '_benchmarks.csv'),
-        dtype={'Problem': int, 'rExp': int, 'ModPK': int,
+        dtype={'Problem': int, 'rExp': int, 'divB2': int, 'ModPK': int,
                 'Extrapolation': int, 'Nodes': int, 'Ranks': int,
                 'Cores': int, 'its': int})
 
