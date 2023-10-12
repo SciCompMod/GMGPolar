@@ -6,9 +6,6 @@ import sys
 
 def main():
 
-    # file_prefix = 'caro_likwid-perctr-flopsdp-compare-perfctr-withoutlikwid' # provide correct slurm job id
-    # file_postfix = 'zones copy'
-    # problem = 7
     file_prefix = 'example' # provide correct slurm job id
     if file_prefix != '':
         file_prefix = file_prefix + '-'
@@ -27,7 +24,7 @@ def main():
     maxCores = 128
     cores_used = [] # will be filled automatically
 
-    path_to_perf_files_rel = os.path.join('..', os.path.join('..', 'output_scripts')) # relative from read_output call
+    path_to_perf_files_rel = os.path.join('..', os.path.join('..', 'scaling_output')) # relative from read_output call
     path_to_perf_files = os.path.join(os.path.dirname(__file__), os.path.join(path_to_perf_files_rel))
 
     cols_problem = ['Problem', 'rExp', 'divB2', 'ModPK', 'Extrapolation']
