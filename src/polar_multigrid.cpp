@@ -211,7 +211,7 @@ void gmgpolar::polar_multigrid()
             }
 
             if (gyro::icntl[Param::verbose] > 1) {
-                std::cout << "\nEvaluation of a^{rr}, a^{rt}, and a^{tt}: " << gyro::dcntl[Param::t_arr_art_att]
+                std::cout << "\nEvaluation of arr, art, and att: " << gyro::dcntl[Param::t_arr_art_att]
                           << "\n\tEvaluation of alpha and beta: " << gyro::dcntl[Param::t_coeff]
                           << "\n\tComputing determinant of Jacobian of inverse mapping: " << gyro::dcntl[Param::t_detDFinv];
                     if (gyro::icntl[Param::check_error] == 1) {

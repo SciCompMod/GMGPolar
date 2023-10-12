@@ -26,30 +26,40 @@ colors  =   [
             [0.85,  0.15,  0.85],
             [0.75,  0.75,  0.75]];  
 
-def plot_scaling(path_out, fname, df, benchname, saturation_limit=0, colors=colors):  
+def plot_scaling(path_out, fname, benchname, df, title, ylabel, saturation_limit=0, colors=colors):
+    '''
+    Plot different timings or other benchmarks against the number of cores used.
+    @param path_out Path to output files.
+    @param fname First part of filename.
+    @param benchname Benchmark name and postfix for filename.
+    @param df Data frame with results per core scaling.
+    @param title Plot title.
+    @param ylabel Y-axis label.
+    @param saturation_limit Saturation limit to be plotted for MEM_DP scaling.
+    '''
     fontsize = 16
 
     fig = plt.figure(figsize=(10, 10))
     ax = fig.add_subplot()
     plt.plot(df['Cores'], df[benchname[0]])
 
-    if benchname[0] == 'MEM_DP':
+    if benchname == 'MEM_DP':
         if saturation_limit > 0:
             plt.plot(df['Cores'], saturation_limit * np.ones(len(df['Cores'])), linestyle='dotted', linewidth=3, color=[0, 0, 0]) 
             ax.text(1, saturation_limit + 3, 'Memory bandwith (AXPY) (' + str(saturation_limit) + ' GBytes/s)', fontsize=14)
             ax.set_ylim(0, saturation_limit + 10)
 
 
-    ax.set_title(benchname[1][0], fontsize=fontsize+6)
-    ax.set_ylabel(benchname[1][0], fontsize=fontsize)
+    ax.set_title(title, fontsize=fontsize+6)
+    ax.set_ylabel(ylabel, fontsize=fontsize)
 
-    ax.set_xlabel('Number of cores used', fontsize=fontsize)
+    ax.set_xlabel('Number of cores', fontsize=fontsize)
 
 
     path_out = join(path_out, 'figures')
     if not exists(path_out):
         makedirs(path_out)
-    plt.savefig(join(path_out, fname + '_' + benchname[0].lower()), bbox_inches='tight')
+    plt.savefig(join(path_out, fname + '_' + benchname.lower()), bbox_inches='tight')
     # plt.show()
     plt.close()   
 
@@ -76,7 +86,7 @@ def main(benchmarks=['FLOPS_DP']):
 
     maxCoresPlot = 128 # maxCores to plot
     plot_counter = {} # dict on which counter to plot
-    plot_counter['Total setup'] = 1
+    plot_counter['Total setup'] = 0
     plot_counter['Building system matrix A and RHS'] = 1
     plot_counter['Factorization of coarse operator Ac'] = 1
     plot_counter['Building intergrid operators (e.g. projections)'] = 1
@@ -91,7 +101,7 @@ def main(benchmarks=['FLOPS_DP']):
     plot_counter['Computing residual on finest level'] = 1
     plot_counter['Computing final error'] = 1
     plot_counter['Total application of A'] = 1
-    plot_counter['Evaluation of a^{rr} a^{rt} and a^{tt}'] = 1
+    plot_counter['Evaluation of arr, art, and att'] = 1
     plot_counter['Evaluation of alpha and beta'] = 1
     plot_counter['Computing determinant of Jacobian of inverse mapping'] = 1
     plot_counter['Computing exact solution'] = 1
@@ -128,16 +138,13 @@ def main(benchmarks=['FLOPS_DP']):
             sys.exit('Error: Multiple times computed with the same number of cores.')                 
 
     # check content
-    for bench in benchmarks:
-        bench_rows = np.where(df[bench[0]].isnull()!=True)[0]
+    for i in range(len(df)):
+        x=14
 
-        plot_scaling(path_to_files, fname, df_subframe, bench, saturation_limit=saturation_limit)
+        plot_scaling(path_to_files, fname, 'Timings', df[i][[k for k, v in plot_counter.items() if v==1]], 'Strong scaling of GMGPolar')
 
-        # Plot particular timings from table for first benchmark. Timings should be similar for FLOPS_DP and CACHES.
-        if bench[0] == list(likwid_benchmarks.keys())[0]:
-            for timing_benchmark in timing_benchmarks.items():
-                plot_perf_per_core(path_to_files, fname, df_subframe, timing_benchmark)
-
+ # TODO
+        plot_scaling(path_to_files, fname, benchmarks[i], df[i][col for col in df[i].columns if benchmarks[i] in col], 'Strong scaling of GMGPolar')
 
 
 if __name__ == '__main__':

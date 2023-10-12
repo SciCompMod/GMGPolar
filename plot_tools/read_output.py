@@ -40,7 +40,7 @@ def main():
     cols_time += ['Total multigrid cycle', 'Complete smoothing', 'Computing residual',
                   'Applying restriction', 'Solve coarse system', 'Applying prolongation (+ coarse grid correction)']
     cols_time += ['Computing residual on finest level', 'Computing final error', 'Total application of A']
-    cols_time += ['Evaluation of a^{rr}, a^{rt}, and a^{tt}', 'Evaluation of alpha and beta', 'Computing determinant of Jacobian of inverse mapping',
+    cols_time += ['Evaluation of arr, art, and att', 'Evaluation of alpha and beta', 'Computing determinant of Jacobian of inverse mapping',
                   'Computing exact solution']
     cols_time += ['Total execution time']
 
