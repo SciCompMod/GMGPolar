@@ -6,10 +6,17 @@ import sys
 
 def main():
 
-    file_prefix = 'caro_likwid-perctr-flopsdp-compare-perfctr-withoutlikwid' # provide correct slurm job id
-    file_postfix = 'zones copy'
-    problem = 7
-    divideBy2 = 5 # steps of division of initial grid
+    # file_prefix = 'caro_likwid-perctr-flopsdp-compare-perfctr-withoutlikwid' # provide correct slurm job id
+    # file_postfix = 'zones copy'
+    # problem = 7
+    file_prefix = 'example' # provide correct slurm job id
+    if file_prefix != '':
+        file_prefix = file_prefix + '-'
+    file_postfix = ''
+    if file_postfix != '':
+        file_postfix = '-' + file_postfix
+    problem = 6    
+    divideBy2 = 7 # steps of division of initial grid
     nr_exp = 4
     mod_pk = 1
     smoother = 3
@@ -17,7 +24,7 @@ def main():
 
     nodes = 1
     ranks = 1
-    maxCores = 64
+    maxCores = 128
     cores_used = [] # will be filled automatically
 
     path_to_perf_files_rel = os.path.join('..', os.path.join('..', 'output_scripts')) # relative from read_output call
@@ -30,34 +37,33 @@ def main():
     cols_convergence = ['its', '2-norm of error', 'inf-norm of error']
 
     cols_time = []
-    cols_time += ['Setup', 'Building A and RHS', 'Factorization of coarse operator Ac',
+    cols_time += ['Total setup', 'Building system matrix A and RHS', 'Factorization of coarse operator Ac',
                   'Building intergrid operators (e.g. projections)', 'Building smoothing operators A_sc', 
                   'Factorizing smoothing operators A_sc']
     cols_time += ['Total multigrid cycle', 'Complete smoothing', 'Computing residual',
                   'Applying restriction', 'Solve coarse system', 'Applying prolongation (+ coarse grid correction)']
     cols_time += ['Computing residual on finest level', 'Computing final error', 'Total application of A']
-    cols_time += ['Evaluation of a^\{rr\}, a^\{rt\}, and a^\{tt\}', 'Evaluation of alpha and beta', 'Computing determinant of Jacobian of inverse mapping',
+    cols_time += ['Evaluation of a^{rr}, a^{rt}, and a^{tt}', 'Evaluation of alpha and beta', 'Computing determinant of Jacobian of inverse mapping',
                   'Computing exact solution']
     cols_time += ['Total execution time']
 
-    cols = cols_problem + cols_cluster + cols_convergence + cols_time + ['Benchmark']
+    cols = cols_problem + cols_cluster + cols_convergence + cols_time
     cols_dtypes = {col: 'int' for col in cols_problem + cols_cluster}
     cols_dtypes.update(
-        {col: 'double' for col in cols_convergence + cols_time + ['Benchmark']})
+        {col: 'double' for col in cols_convergence + cols_time})
 
     filename_input = 'p' + str(problem) + '-r' + str(nr_exp) + '-dbt' + str(divideBy2) + '-mpk' + str(mod_pk) + '-s' + str(
         smoother) + '-e' + str(extrapolation) + '--N' + str(nodes) + '-R' + str(ranks) + '-maxC' + str(maxCores)
 
     err = 0
-    multi_region_run = True
-    regions = []
+    regions = {} # Attention: We assume all benchmarks in one file to be run with the same regions (output)!
     search_terms_likwid = {}
     search_terms_likwid['FLOPS_DP'] = 'DP [MFLOP/s]'
     search_terms_likwid['MEM_DP'] = 'Memory bandwidth [MBytes/s]'    
     benchmarks = []
 
     try: # allow deletion of empty error files
-        with open(os.path.join(path_to_perf_files, file_prefix + '-' + filename_input + '-' + file_postfix + '.err')) as f:
+        with open(os.path.join(path_to_perf_files, file_prefix + filename_input + file_postfix + '.err')) as f:
             line = f.readline()
             while line and err == 0:
                 line = f.readline()
@@ -69,7 +75,7 @@ def main():
         err = 0 # no error file = no error
 
     if err == 0:
-        with open(os.path.join(path_to_perf_files, file_prefix + '-' + filename_input + '-' + file_postfix + '.out')) as f:
+        with open(os.path.join(path_to_perf_files, file_prefix + filename_input + file_postfix + '.out')) as f:
 
             lines = f.readlines()
             i = 0
@@ -118,29 +124,33 @@ def main():
                             sys.exit(
                                 'End of file reached without finding output.')
 
+                    multi_region_run = True
                     while multi_region_run: # iterate over potentially multiple LIKWID regions
-
-                        x=15 # TODO: check if all regions treated then set false
                     
                         while 'Group 1: ' not in lines[i]: # iterate until LIKWID output
                             i = i+1
-                            if i > len(lines)-1:
+                            if 'Number of OpenMP threads:' in lines[i] or (i == len(lines)-1):
+                                multi_region_run = False
+                                break
+                            elif i > len(lines)-1:
                                 sys.exit(
                                     'End of file reached without finding output.')
+                        if not multi_region_run:
+                            break
                         benchmark_line = lines[i].split()
                         if 'Region' in lines[i]:
-                            regions.append(benchmark_line[1].replace(',', ''))
+                            rg = benchmark_line[1].replace(',', '')
+                            regions[rg] = 0
                         else:   
                             multi_region_run = False
                         benchmark = benchmark_line[-1]
 
-                        # create save dataframe for previous benchmark and create new one
+                        # save dataframe for previous benchmark (if there was) and create dataframe for current (new) benchmark
                         if benchmark not in benchmarks:
-                            x=15 #TODO
                             if len(benchmarks) > 0:
                                 perf_results_df.to_csv(
                                     os.path.join(path_to_perf_files, 
-                                                 file_prefix + '-' + filename_input + '-' + file_postfix + '_' + benchmarks[-1] + '.csv'),
+                                                 file_prefix + filename_input + file_postfix + '_' + benchmarks[-1] + '.csv'),
                                     index=False)
 
                             benchmarks.append(benchmark)
@@ -165,42 +175,48 @@ def main():
                                 sys.exit(
                                     'End of file reached without finding output.')
 
-                        benchmark_result = float(lines[i].split('|')[2].split()[0])
+                        # extract benchmark result
+                        regions[rg] = float(lines[i].split('|')[2].split()[0])
 
-                        # with the number of used cores determined, check if
-                        # line for this result is already present
-                        row_setting_avail = (
-                            perf_results_df[cols_problem[0]] == problem) & (
-                            perf_results_df[cols_problem[1]] == nr_exp) & (
-                            perf_results_df[cols_problem[2]] == divideBy2) & (
-                            perf_results_df[cols_problem[3]] == mod_pk) & (
-                            perf_results_df[cols_cluster[0]] == nodes) & (
-                            perf_results_df[cols_cluster[1]] == ranks) & (
-                            perf_results_df[cols_cluster[2]] == cores)
+                    # with the number of used cores determined, check if
+                    # line for this result is already present
+                    row_setting_avail = (
+                        perf_results_df[cols_problem[0]] == problem) & (
+                        perf_results_df[cols_problem[1]] == nr_exp) & (
+                        perf_results_df[cols_problem[2]] == divideBy2) & (
+                        perf_results_df[cols_problem[3]] == mod_pk) & (
+                        perf_results_df[cols_cluster[0]] == nodes) & (
+                        perf_results_df[cols_cluster[1]] == ranks) & (
+                        perf_results_df[cols_cluster[2]] == cores)
 
-                        if row_setting_avail.values.sum() <= 1:  # add new line
-                            # add to all rows fix identifiers for:
-                            #   problem, exponent in r, modified coordinates, extrapolation
-                            #   number of nodes and ranks of the job
-                            # as well as variable numbers for other columns
-                            perf_results_df.loc[len(perf_results_df.index),
-                                                cols_problem + cols_cluster +
-                                                cols_convergence + 'Benchmark'] = [
-                                problem, nr_exp, mod_pk, extrapolation,
-                                nodes, ranks, cores, its, norm2, norminf,
-                                benchmark_result]
-                            # add timings
-                            for time_col, time_val in time_dict.items():
-                                perf_results_df.loc[len(
-                                    perf_results_df.index)-1, time_col] = time_val
-                        elif row_setting_avail.values.sum() > 1:  # error
-                            sys.exit(
-                                'Error. More than two lines corresponds to criterion.'
-                                ' We can only have one line for each benchmark: FLOPS_DP and MEM_DP.')
+                    if row_setting_avail.values.sum() <= 1:  # add new line
+                        # add to all rows fix identifiers for:
+                        #   problem, exponent in r, modified coordinates, extrapolation
+                        #   number of nodes and ranks of the job
+                        # as well as variable numbers for other columns
+                        benchmark_unit = search_terms_likwid[benchmarks[-1]].split('[')[1][:-1]
+                        perf_results_df.loc[len(perf_results_df.index),
+                                            cols_problem + cols_cluster +
+                                            cols_convergence + [reg + ' (' + benchmark_unit + ')' for reg in regions.keys()]] = [
+                            problem, nr_exp, divideBy2, mod_pk, extrapolation,
+                            nodes, ranks, cores, its, norm2, norminf] + list(regions.values())
+                        # add timings
+                        for time_col, time_val in time_dict.items():
+                            perf_results_df.loc[len(
+                                perf_results_df.index)-1, time_col] = time_val
+                    elif row_setting_avail.values.sum() > 1:  # error
+                        sys.exit(
+                            'Error. More than two lines corresponds to criterion.'
+                            '\n\tTwo benchmarks for the exact same setting in output. Please check output file.')
 
                 i += 1
             # end while
 
+            # save file of last benchmark
+            perf_results_df.to_csv(
+                os.path.join(path_to_perf_files, 
+                                file_prefix + filename_input + file_postfix + '_' + benchmarks[-1] + '.csv'),
+                index=False)
         # close file
 
 
