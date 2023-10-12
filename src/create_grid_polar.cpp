@@ -142,17 +142,22 @@ void level::build_r()
         // edge
         int se;
 
+        // allow refining of the grid at r_jump, the center point of the 
+        // drop of the diffusion coefficient alpha.
         double r_jump;
         if (gyro::icntl[Param::alpha_coeff] == SONNENDRUCKER) {
-            r_jump = 11.1111111111111 / 14.4444444444444;
+            // The center of the coefficient jump lies at 0.6888697651782026
+            // for backward stability with previous runs and the Matlab code, 
+            // we use 0.66 though.
+            r_jump = 0.66;
         } else if (gyro::icntl[Param::alpha_coeff] == ZONI) {
-            r_jump = 5.0 / 10.0;
+            r_jump = 0.4837;
         } else if (gyro::icntl[Param::alpha_coeff] == ZONI_SHIFTED) {
             // Choose center point of descent.
             // a) - ln(0.5 * (alpha(0) - alpha(Rmax))):
             //    - ln(0.5 * (np.exp(-np.tanh(-14)) - np.exp(-np.tanh(6)))) = 0.16143743821247852
             // b) r_center = Rmax * (np.arctanh(0.16143743821247852) + 14) / 20 = 0.7081431124450334 Rmax
-            r_jump = 0.7081431124450334;
+            r_jump = 0.7081;
         } else if (gyro::icntl[Param::alpha_coeff] == POISSON) {
             r_jump = 0.5; // There is no jump for Poisson so this is an arbitrary choice
         } else {
