@@ -1,4 +1,4 @@
-/* 
+/*
 * Copyright (C) 2019-2023 The GMGPolar Development Team
 *
 * Authors: Philippe Leleux, Christina Schwarz, Martin J. Kühn, Carola Kruse, Ulrich Rüde
@@ -141,19 +141,24 @@ void level::build_r()
 
         // edge
         int se;
-        if (gyro::icntl[Param::alpha_coeff] == 0) {
-            se = floor(nr * 0.66) - n_elems_refined / 2;
-        }
-        else if (gyro::icntl[Param::alpha_coeff] == 2) {
+
+        double r_jump;
+        if (gyro::icntl[Param::alpha_coeff] == SONNENDRUCKER) {
+            r_jump = 11.1111111111111 / 14.4444444444444;
+        } else if (gyro::icntl[Param::alpha_coeff] == ZONI) {
+            r_jump = 5.0 / 10.0;
+        } else if (gyro::icntl[Param::alpha_coeff] == ZONI_SHIFTED) {
             // Choose center point of descent.
-            // a) - ln(0.5 * (alpha(0) - alpha(Rmax))): 
+            // a) - ln(0.5 * (alpha(0) - alpha(Rmax))):
             //    - ln(0.5 * (np.exp(-np.tanh(-14)) - np.exp(-np.tanh(6)))) = 0.16143743821247852
             // b) r_center = Rmax * (np.arctanh(0.16143743821247852) + 14) / 20 = 0.7081431124450334 Rmax
-            se = floor(nr * 0.7081) - n_elems_refined / 2;
+            r_jump = 0.7081431124450334;
+        } else if (gyro::icntl[Param::alpha_coeff] == POISSON) {
+            r_jump = 0.5; // There is no jump for Poisson so this is an arbitrary choice
+        } else {
+            throw std::runtime_error("Unknown alpha coeff");
         }
-        else {
-            se = floor(nr * 0.5) - n_elems_refined / 2;
-        }
+        se = floor(nr * r_jump) - n_elems_refined / 2;
         int ee = se + n_elems_refined;
         // takeout
         int st = ceil((double)n_elems_refined / 4.0 + 1) - 1;
