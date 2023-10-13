@@ -3,19 +3,17 @@ import numpy as np
 import os
 import sys
 
+# This file has been written and used to read the results for
+# Leleux, Schwarz, Kühn, Kruse, Rüde - Complexity analysis and scalability of a matrix-free extrapolated geometric multigrid (2023)
+def main(problem=6, divideBy2=7, mod_pk=1):
 
-def main():
-
-    file_prefix = 'example' # provide correct slurm job id
+    file_prefix = 'caro-paper' # provide correct slurm job id
     if file_prefix != '':
         file_prefix = file_prefix + '-'
     file_postfix = ''
     if file_postfix != '':
         file_postfix = '-' + file_postfix
-    problem = 6    
-    divideBy2 = 7 # steps of division of initial grid
     nr_exp = 4
-    mod_pk = 1
     smoother = 3
     extrapolation = 1
 
@@ -218,4 +216,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(problem=6, divideBy2=7, mod_pk=1)
+    main(problem=6, divideBy2=7, mod_pk=2)
+    main(problem=7, divideBy2=7, mod_pk=1)
+    main(problem=7, divideBy2=7, mod_pk=2)

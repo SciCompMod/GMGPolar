@@ -44,7 +44,7 @@ def plot_scaling(path_out, fname, benchname, df, title, ylabel, saturation_limit
     @param ylabel Y-axis label.
     @param saturation_limit Saturation limit to be plotted for MEM_DP scaling.
     '''
-    fontsize = 20
+    fontsize = 24
 
     fig = plt.figure(figsize=(12, 10))
     # fig.subplots_adjust(bottom=0.3) # use for interactive plotting, for savefig, legend+figure is adjusted with bbox_inches='tight'
@@ -55,12 +55,18 @@ def plot_scaling(path_out, fname, benchname, df, title, ylabel, saturation_limit
         if benchname == 'Timings':
             plt.loglog(df['Cores'], optimal_line, linewidth=2, linestyle='dashed', color='black', label='Optimal')
         for i in range(len(df.iloc[:,1:].columns)):
-            plt.loglog(df['Cores'], df.iloc[:,i+1], linewidth=2, label=df.columns[i+1], color=colors[i]) # Cores is assumed to be in first column
+            col_label = df.columns[i+1]
+            col_label = col_label.replace('Computing residual on finest level', 'Computing residual (finest)')
+            col_label = col_label.replace('Applying prolongation (+ coarse grid correction)', 'Applying prolongation (+ CGC)')
+            plt.loglog(df['Cores'], df.iloc[:,i+1], linewidth=2, label=col_label, color=colors[i]) # Cores is assumed to be in first column
     else:
         if benchname == 'Timings':
             plt.plot(df['Cores'], optimal_line, linewidth=2, linestyle='dashed', color='black', label='Optimal')
         for i in range(len(df.iloc[:,1:].columns)):
-            plt.plot(df['Cores'], df.iloc[:,i+1], linewidth=2, label=df.columns[i+1], color=colors[i]) # Cores is assumed to be in first column
+            col_label = df.columns[i+1]
+            col_label = col_label.replace('Computing residual on finest level', 'Computing residual (finest)')
+            col_label = col_label.replace('Applying prolongation (+ coarse grid correction)', 'Applying prolongation (+ CGC)')            
+            plt.plot(df['Cores'], df.iloc[:,i+1], linewidth=2, label=col_label, color=colors[i]) # Cores is assumed to be in first column
 
     if benchname == 'MEM_DP':
         if saturation_limit > 0:
@@ -68,12 +74,15 @@ def plot_scaling(path_out, fname, benchname, df, title, ylabel, saturation_limit
             ax.text(1, saturation_limit + 3, 'Memory bandwith (AXPY) (' + str(saturation_limit) + ' GBytes/s)', fontsize=14)
             ax.set_ylim(0, saturation_limit + 10)
 
-    ax.legend(bbox_to_anchor=(0, 0, 1, -0.1), mode="expand", ncols=2)
-    ax.set_title(title, fontsize=fontsize+6)
+    ax.legend(bbox_to_anchor=(0, 0, 1, -0.1), mode="expand", ncols=2,  fontsize=fontsize-6)
+    # ax.set_title(title, fontsize=fontsize+6)
     ax.set_ylabel(ylabel, fontsize=fontsize)
     ax.set_xlabel('Number of cores', fontsize=fontsize)
     ax.set_xticks(df['Cores'])
     ax.set_xticklabels(df['Cores'])
+
+    plt.rcParams['xtick.labelsize']=fontsize-6
+    plt.rcParams['ytick.labelsize']=fontsize-6
 
     path_out = join(path_out, 'figures')
     if not exists(path_out):
@@ -83,18 +92,15 @@ def plot_scaling(path_out, fname, benchname, df, title, ylabel, saturation_limit
     plt.close()   
 
 
-def main(benchmarks=['FLOPS_DP']):
+def main(benchmarks=['FLOPS_DP'], problem=6, divideBy2=7, mod_pk=1):
 
-    file_prefix = 'example' # provide correct slurm job id
+    file_prefix = 'caro-paper' # provide correct slurm job id
     if file_prefix != '':
         file_prefix = file_prefix + '-'
     file_postfix = ''
     if file_postfix != '':
         file_postfix = '-' + file_postfix
-    problem = 6
-    divideBy2 = 7 # steps of division of initial grid
     nr_exp = 4
-    mod_pk = 1
     smoother = 3
     extrapolation = 1
 
@@ -102,14 +108,14 @@ def main(benchmarks=['FLOPS_DP']):
     ranks = 1
     maxCores = 128 # maxCores simulated in scaling
 
-    maxCoresPlot = 128 # maxCores to plot
+    maxCoresPlot = 64 # maxCores to plot
     plot_counter = {} # dict on which counter to plot
     plot_counter['Total setup'] = 0
-    plot_counter['Building system matrix A and RHS'] = 1
-    plot_counter['Factorization of coarse operator Ac'] = 1
-    plot_counter['Building intergrid operators (e.g. projections)'] = 1
-    plot_counter['Building smoothing operators A_sc'] = 1
-    plot_counter['Factorizing smoothing operators A_sc'] = 1
+    plot_counter['Building system matrix A and RHS'] = 0
+    plot_counter['Factorization of coarse operator Ac'] = 0
+    plot_counter['Building intergrid operators (e.g. projections)'] = 0
+    plot_counter['Building smoothing operators A_sc'] = 0
+    plot_counter['Factorizing smoothing operators A_sc'] = 0
     plot_counter['Total multigrid cycle'] = 1
     plot_counter['Complete smoothing'] = 1
     plot_counter['Computing residual'] = 1
@@ -117,13 +123,13 @@ def main(benchmarks=['FLOPS_DP']):
     plot_counter['Solve coarse system'] = 1
     plot_counter['Applying prolongation (+ coarse grid correction)'] = 1
     plot_counter['Computing residual on finest level'] = 1
-    plot_counter['Computing final error'] = 1
+    plot_counter['Computing final error'] = 0
     plot_counter['Total application of A'] = 1
-    plot_counter['Evaluation of arr, art, and att'] = 1
-    plot_counter['Evaluation of alpha and beta'] = 1
-    plot_counter['Computing determinant of Jacobian of inverse mapping'] = 1
-    plot_counter['Computing exact solution'] = 1
-    plot_counter['Total execution time'] = 1
+    plot_counter['Evaluation of arr, art, and att'] = 0
+    plot_counter['Evaluation of alpha and beta'] = 0
+    plot_counter['Computing determinant of Jacobian of inverse mapping'] = 0
+    plot_counter['Computing exact solution'] = 0
+    plot_counter['Total execution time'] = 0
 
     plot_regions = {} # dict on which likwid region to plot
     plot_regions['Setup'] = 1
@@ -172,5 +178,8 @@ def main(benchmarks=['FLOPS_DP']):
 
 
 if __name__ == '__main__':
-    main(benchmarks=['FLOPS_DP'])
+    main(benchmarks=['FLOPS_DP', 'MEM_DP'], problem=6, divideBy2=7, mod_pk=1)
+    main(benchmarks=['FLOPS_DP', 'MEM_DP'], problem=6, divideBy2=7, mod_pk=2)
+    main(benchmarks=['FLOPS_DP', 'MEM_DP'], problem=7, divideBy2=7, mod_pk=1)
+    main(benchmarks=['FLOPS_DP', 'MEM_DP'], problem=7, divideBy2=7, mod_pk=2)
     
