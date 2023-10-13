@@ -245,7 +245,7 @@ domains with the method of characteristics and spline finite elements.  (2019)
          *
          * Defines the coefficient
          * 0: beta = 0
-         * 1: beta = (1 / alpha)
+         * 1: beta: 1/alpha for some cases, different in others (see coeffs in test_cases)
          */
     beta_coeff,
     /*! \brief Norm for stopping criterion
