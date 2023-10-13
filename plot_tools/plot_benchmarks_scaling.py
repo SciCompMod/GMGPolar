@@ -26,7 +26,7 @@ colors  =   [
             [0.85,  0.15,  0.85],
             [0.75,  0.75,  0.75]];  
 
-def plot_scaling(path_out, fname, benchname, df, title, ylabel, saturation_limit=0, colors=colors):
+def plot_scaling(path_out, fname, benchname, df, title, ylabel, saturation_limit=0, logplot = True, colors=colors):
     '''
     Plot different timings or other benchmarks against the number of cores used.
     @param path_out Path to output files.
@@ -39,9 +39,17 @@ def plot_scaling(path_out, fname, benchname, df, title, ylabel, saturation_limit
     '''
     fontsize = 16
 
-    fig = plt.figure(figsize=(10, 10))
-    ax = fig.add_subplot()
-    plt.plot(df['Cores'], df[benchname[0]])
+    fig = plt.figure(figsize=(12, 10))
+    # fig.subplots_adjust(bottom=0.3) # use for interactive plotting, for savefig, legend+figure is adjusted with bbox_inches='tight'
+    ax = fig.add_subplot() 
+    start_optimal_line = df.loc[0,[timer for timer in df.iloc[:,1:].columns if 'Total' in timer]].max()
+    optimal_line = 1.0/df['Cores'].values * start_optimal_line
+    if logplot:
+        plt.loglog(df['Cores'], optimal_line, linewidth=2, linestyle='dashed', color='black', label='Optimal')
+        plt.loglog(df['Cores'], df.iloc[:,1:], linewidth=2, label=list(df.iloc[:,1:].columns)) # Cores is assumed to be in first column
+    else:
+        plt.plot(df['Cores'], optimal_line, linewidth=2, linestyle='dashed', color='black', label='Optimal')
+        plt.plot(df['Cores'], df.iloc[:,1:], linewidth=2, label=list(df.iloc[:,1:].columns)) # Cores is assumed to be in first column
 
     if benchname == 'MEM_DP':
         if saturation_limit > 0:
@@ -49,17 +57,17 @@ def plot_scaling(path_out, fname, benchname, df, title, ylabel, saturation_limit
             ax.text(1, saturation_limit + 3, 'Memory bandwith (AXPY) (' + str(saturation_limit) + ' GBytes/s)', fontsize=14)
             ax.set_ylim(0, saturation_limit + 10)
 
-
+    ax.legend(bbox_to_anchor=(0, 0, 1, -0.1), mode="expand", ncols=2)
     ax.set_title(title, fontsize=fontsize+6)
     ax.set_ylabel(ylabel, fontsize=fontsize)
-
     ax.set_xlabel('Number of cores', fontsize=fontsize)
-
+    ax.set_xticks(df['Cores'])
+    ax.set_xticklabels(df['Cores'])
 
     path_out = join(path_out, 'figures')
     if not exists(path_out):
         makedirs(path_out)
-    plt.savefig(join(path_out, fname + '_' + benchname.lower()), bbox_inches='tight')
+    plt.savefig(join(path_out, fname + '_' + benchname.lower()), dpi=300, bbox_inches='tight')
     # plt.show()
     plt.close()   
 
@@ -83,7 +91,6 @@ def main(benchmarks=['FLOPS_DP']):
     ranks = 1
     maxCores = 128 # maxCores simulated in scaling
 
-
     maxCoresPlot = 128 # maxCores to plot
     plot_counter = {} # dict on which counter to plot
     plot_counter['Total setup'] = 0
@@ -106,6 +113,14 @@ def main(benchmarks=['FLOPS_DP']):
     plot_counter['Computing determinant of Jacobian of inverse mapping'] = 1
     plot_counter['Computing exact solution'] = 1
     plot_counter['Total execution time'] = 1
+
+    plot_regions = {} # dict on which likwid region to plot
+    plot_regions['Setup'] = 1
+    plot_regions['Iteration'] = 1
+
+    bench_to_unit = {}
+    bench_to_unit['FLOPS_DP'] = 'MFLOP/s'
+    bench_to_unit['MEM_DP'] = 'MBytes/s'   
 
     ## saturation_limit for MEM_DP scaling (node specific and needs to be adapted).
     saturation_limit = 80
@@ -139,12 +154,10 @@ def main(benchmarks=['FLOPS_DP']):
 
     # check content
     for i in range(len(df)):
-        x=14
-
-        plot_scaling(path_to_files, fname, 'Timings', df[i][[k for k, v in plot_counter.items() if v==1]], 'Strong scaling of GMGPolar')
-
- # TODO
-        plot_scaling(path_to_files, fname, benchmarks[i], df[i][col for col in df[i].columns if benchmarks[i] in col], 'Strong scaling of GMGPolar')
+        # plot timings
+        plot_scaling(path_to_files, fname, 'Timings', df[i].loc[df[i]['Cores']<=maxCoresPlot, ['Cores'] + [k for k, v in plot_counter.items() if v==1]], 'Strong scaling of GMGPolar', 'Time (sec)')
+        # plot likwid benchmark
+        plot_scaling(path_to_files, fname, benchmarks[i], df[i].loc[df[i]['Cores']<=maxCoresPlot, ['Cores'] + [col for col in df[i].columns if bench_to_unit[benchmarks[i]] in col]], 'Strong scaling of GMGPolar', bench_to_unit[benchmarks[i]])
 
 
 if __name__ == '__main__':
