@@ -24,7 +24,14 @@ colors  =   [
             [0.66,  0.85,  0.06],                
             [0.06,  0.85,  0.85],
             [0.85,  0.15,  0.85],
-            [0.75,  0.75,  0.75]];  
+            [0.75,  0.75,  0.75],
+            [0.80,  0.67,  0.00],
+            [0.30,  0.65,  1.00],
+            [0.40,  0.07,  0.00],
+            [1.00, 0.80, 0.87],
+            [1.00, 0.87, 0.20],
+            [1.00, 0.80, 0.70],
+            [0.80, 0.87, 1.00]];  
 
 def plot_scaling(path_out, fname, benchname, df, title, ylabel, saturation_limit=0, logplot = True, colors=colors):
     '''
@@ -37,7 +44,7 @@ def plot_scaling(path_out, fname, benchname, df, title, ylabel, saturation_limit
     @param ylabel Y-axis label.
     @param saturation_limit Saturation limit to be plotted for MEM_DP scaling.
     '''
-    fontsize = 16
+    fontsize = 20
 
     fig = plt.figure(figsize=(12, 10))
     # fig.subplots_adjust(bottom=0.3) # use for interactive plotting, for savefig, legend+figure is adjusted with bbox_inches='tight'
@@ -45,11 +52,15 @@ def plot_scaling(path_out, fname, benchname, df, title, ylabel, saturation_limit
     start_optimal_line = df.loc[0,[timer for timer in df.iloc[:,1:].columns if 'Total' in timer]].max()
     optimal_line = 1.0/df['Cores'].values * start_optimal_line
     if logplot:
-        plt.loglog(df['Cores'], optimal_line, linewidth=2, linestyle='dashed', color='black', label='Optimal')
-        plt.loglog(df['Cores'], df.iloc[:,1:], linewidth=2, label=list(df.iloc[:,1:].columns)) # Cores is assumed to be in first column
+        if benchname == 'Timings':
+            plt.loglog(df['Cores'], optimal_line, linewidth=2, linestyle='dashed', color='black', label='Optimal')
+        for i in range(len(df.iloc[:,1:].columns)):
+            plt.loglog(df['Cores'], df.iloc[:,i+1], linewidth=2, label=df.columns[i+1], color=colors[i]) # Cores is assumed to be in first column
     else:
-        plt.plot(df['Cores'], optimal_line, linewidth=2, linestyle='dashed', color='black', label='Optimal')
-        plt.plot(df['Cores'], df.iloc[:,1:], linewidth=2, label=list(df.iloc[:,1:].columns)) # Cores is assumed to be in first column
+        if benchname == 'Timings':
+            plt.plot(df['Cores'], optimal_line, linewidth=2, linestyle='dashed', color='black', label='Optimal')
+        for i in range(len(df.iloc[:,1:].columns)):
+            plt.plot(df['Cores'], df.iloc[:,i+1], linewidth=2, label=df.columns[i+1], color=colors[i]) # Cores is assumed to be in first column
 
     if benchname == 'MEM_DP':
         if saturation_limit > 0:
