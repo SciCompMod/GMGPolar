@@ -22,19 +22,6 @@ protected:
         gyro::icntl[Param::fac_ani]  = 3;
         gyro::select_functions_class(gyro::icntl[Param::alpha_coeff], gyro::icntl[Param::beta_coeff],
                                      gyro::icntl[Param::mod_pk], gyro::icntl[Param::prob]);
-
-        /*
-        for (int smoother = 0; smoother < 4; smoother++) { //so that the constructor ~level() works;
-            int *array_temp, *array_temp2;
-            array_temp     = new int[1];
-            array_temp[0]  = 0;
-            array_temp2    = new int[1];
-            array_temp2[0] = 0;
-            test_level.dep_Asc_ortho.push_back(array_temp);
-            test_level.dep_Asc.push_back(array_temp2);
-            test_level.size_Asc_ortho.push_back(1);
-            test_level.size_Asc.push_back(1);
-        }*/
     }
 
     level test_level;
@@ -54,6 +41,7 @@ TEST_P(test_grid, Nodes_Build_r)
     gyro::icntl[Param::fac_ani] = 0; //uniform grid
     test_level.build_r();
     EXPECT_EQ(pow(2, nr_exp) + 1, test_level.r.size());
+    EXPECT_EQ(pow(2, nr_exp) + 1, test_level.nr);
     for (int i = 0; i < test_level.nr; i++) {
         EXPECT_NEAR(gyro::dcntl[Param::R0] + i * (gyro::dcntl[Param::R] - gyro::dcntl[Param::R0]) / (test_level.nr - 1),
                     test_level.r[i], 1e6); //uniform grid
@@ -61,6 +49,36 @@ TEST_P(test_grid, Nodes_Build_r)
     gyro::icntl[Param::fac_ani] = 2;
     test_level.build_r();
     EXPECT_EQ(pow(2, nr_exp + 1) + 1, test_level.r.size());
+    EXPECT_EQ(pow(2, nr_exp + 1) + 1, test_level.nr);
+}
+
+TEST_P(test_grid, Nodes_Build_theta)
+{
+    const int& val_size            = GetParam();
+    gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
+    gyro::icntl[Param::ntheta_exp] = (val_size % 3) + 3;
+
+    int& per                    = gyro::icntl[Param::periodic];
+    per                         = val_size % 2;
+    gyro::icntl[Param::fac_ani] = 0;
+    test_level.nr               = pow(2, gyro::icntl[Param::nr_exp]) + 1;
+    test_level.build_theta();
+    EXPECT_LE(test_level.nr, test_level.ntheta);
+    if (per == 1) {
+        EXPECT_EQ(test_level.ntheta % 2, 0) << "periodic boundary conditions imply even number of nodes";
+    }
+    else {
+        EXPECT_EQ(test_level.ntheta % 2, 1);
+    }
+    for (int k = 0; k < test_level.ntheta; k++) {
+        EXPECT_EQ(test_level.theta[k], (2 * PI / (double)(test_level.ntheta + per - 1)) * k)
+            << "k: " + std::to_string(k) + " periodic: " + std::to_string(per) +
+                   " divided by :" + std::to_string(test_level.ntheta + per - 1);
+    }
+}
+
+TEST_P(test_gri, Anisotropy_theta)
+{
 }
 
 TEST_P(test_grid, Anisotropy_r)
