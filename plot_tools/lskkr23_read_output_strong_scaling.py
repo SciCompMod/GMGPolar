@@ -19,7 +19,7 @@ def main(problem=6, divideBy2=7, mod_pk=1):
 
     nodes = 1
     ranks = 1
-    maxCores = 128
+    maxCores = 64# 128
     cores_used = [] # will be filled automatically
 
     path_to_perf_files_rel = os.path.join('..', os.path.join('..', 'scaling_output')) # relative from read_output call
@@ -216,7 +216,10 @@ def main(problem=6, divideBy2=7, mod_pk=1):
 
 
 if __name__ == "__main__":
+    # strong scaling
     main(problem=6, divideBy2=7, mod_pk=1)
     main(problem=6, divideBy2=7, mod_pk=2)
     main(problem=7, divideBy2=7, mod_pk=1)
     main(problem=7, divideBy2=7, mod_pk=2)
+    # large case strong scaling 
+    main(problem=7, divideBy2=8, mod_pk=1)

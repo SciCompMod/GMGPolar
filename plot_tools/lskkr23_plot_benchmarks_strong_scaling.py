@@ -106,7 +106,7 @@ def main(benchmarks=['FLOPS_DP'], problem=6, divideBy2=7, mod_pk=1):
 
     nodes = 1
     ranks = 1
-    maxCores = 128 # maxCores simulated in scaling
+    maxCores = 64#128 # maxCores simulated in scaling
 
     maxCoresPlot = 64 # maxCores to plot
     plot_counter = {} # dict on which counter to plot
@@ -178,8 +178,11 @@ def main(benchmarks=['FLOPS_DP'], problem=6, divideBy2=7, mod_pk=1):
 
 
 if __name__ == '__main__':
+    # strong scaling
     main(benchmarks=['FLOPS_DP', 'MEM_DP'], problem=6, divideBy2=7, mod_pk=1)
     main(benchmarks=['FLOPS_DP', 'MEM_DP'], problem=6, divideBy2=7, mod_pk=2)
     main(benchmarks=['FLOPS_DP', 'MEM_DP'], problem=7, divideBy2=7, mod_pk=1)
     main(benchmarks=['FLOPS_DP', 'MEM_DP'], problem=7, divideBy2=7, mod_pk=2)
+    # large case strong scaling
+    main(benchmarks=['FLOPS_DP'], problem=7, divideBy2=8, mod_pk=1) 
     
