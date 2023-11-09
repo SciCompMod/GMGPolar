@@ -7,7 +7,7 @@ import sys
 # Leleux, Schwarz, Kühn, Kruse, Rüde - Complexity analysis and scalability of a matrix-free extrapolated geometric multigrid (2023)
 def main(problem=6, divideBy2=7, mod_pk=1):
 
-    file_prefix = 'caro-paper' # provide correct slurm job id
+    file_prefix = 'caro-paper' 
     if file_prefix != '':
         file_prefix = file_prefix + '-'
     file_postfix = ''
