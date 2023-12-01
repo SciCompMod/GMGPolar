@@ -92,7 +92,8 @@ def plot_scaling(path_out, fname, benchname, df, title, ylabel, saturation_limit
     plt.close()   
 
 
-def main(benchmarks=['FLOPS_DP'], problem=6, divideBy2=7, mod_pk=1):
+def main(benchmarks=['FLOPS_DP'], problem=6, divideBy2=7, mod_pk=1, maxCores=128):
+    # maxCores simulated in scaling
 
     file_prefix = 'caro-paper' # provide correct slurm job id
     if file_prefix != '':
@@ -106,7 +107,6 @@ def main(benchmarks=['FLOPS_DP'], problem=6, divideBy2=7, mod_pk=1):
 
     nodes = 1
     ranks = 1
-    maxCores = 64#128 # maxCores simulated in scaling
 
     maxCoresPlot = 64 # maxCores to plot
     plot_counter = {} # dict on which counter to plot
@@ -184,5 +184,5 @@ if __name__ == '__main__':
     main(benchmarks=['FLOPS_DP', 'MEM_DP'], problem=7, divideBy2=7, mod_pk=1)
     main(benchmarks=['FLOPS_DP', 'MEM_DP'], problem=7, divideBy2=7, mod_pk=2)
     # large case strong scaling
-    main(benchmarks=['FLOPS_DP'], problem=7, divideBy2=8, mod_pk=1) 
+    main(benchmarks=['FLOPS_DP'], problem=7, divideBy2=8, mod_pk=1, maxCores=64) 
     
