@@ -1,6 +1,6 @@
 enable_testing()
 
-set(TESTSOURCES comparetest.cpp mockgrid.cpp test_smoother.cpp)
+set(TESTSOURCES comparetest.cpp mockgrid.cpp test_smoother.cpp test_operator.cpp)
 
 add_executable(
   gmgpolar_tests
