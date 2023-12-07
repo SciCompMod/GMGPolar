@@ -88,10 +88,10 @@ def plot_weak_scaling(path_out, fname, df, ylabel, logplot = True, colors=colors
 
 def main(problem=7, divideBy2=[4, 5, 6, 7], mod_pk=1):
 
-    file_prefix = 'caro-paper-weak-scaling' 
+    file_prefix = 'caro-paper-weakscaling' 
     if file_prefix != '':
         file_prefix = file_prefix + '-'
-    file_postfix = 'C1toC64_FLOPS_DP'
+    file_postfix = 'C1toC64_FLOPSDP'
     if file_postfix != '':
         file_postfix = '-' + file_postfix
     nr_exp = 4
@@ -116,4 +116,4 @@ def main(problem=7, divideBy2=[4, 5, 6, 7], mod_pk=1):
 
 if __name__ == "__main__":
     # weak scaling
-    main(problem=7, divideBy2=[4,5,6,7], mod_pk=1)
+    main(problem=7, divideBy2=[4,5,6,7], mod_pk=2)
