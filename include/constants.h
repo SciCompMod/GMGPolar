@@ -245,7 +245,7 @@ domains with the method of characteristics and spline finite elements.  (2019)
          *
          * Defines the coefficient
          * 0: beta = 0
-         * 1: beta = (1 / alpha)
+         * 1: beta: 1/alpha for some cases, different in others (see coeffs in test_cases)
          */
     beta_coeff,
     /*! \brief Norm for stopping criterion
@@ -316,8 +316,8 @@ enum dcontrols
     rel_red_conv,
     /*! \brief Timings
          */
-    t_coeff,
-    t_arr_art_att,
+    t_arr_art_att, // Evaluation of arr, art, and att
+    t_coeff, // Evaluation of alpha and beta (subcounter of t_arr_art_att)    
     t_sol,
     t_detDFinv,
     t_trafo,

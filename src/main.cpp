@@ -53,6 +53,10 @@
  */
 int main(int argc, char* argv[])
 {
+#ifdef GMGPOLAR_USE_LIKWID
+    LIKWID_MARKER_INIT;
+#endif
+
     int error = 0;
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -227,7 +231,7 @@ int main(int argc, char* argv[])
             error = 1;
         }
         // if (gyro::icntl[Param::verbose] > 0)
-        std::cout << "Total_execution_time: " << TOC
+        std::cout << "Total execution time: " << TOC
                   << "\n---------------------------------------------------------------------------\n";
     }
 
@@ -287,9 +291,20 @@ int main(int argc, char* argv[])
         TIC;
         gmgpolar gmg;
         try {
+#ifdef GMGPOLAR_USE_LIKWID            
+#pragma omp parallel
+{
+    LIKWID_MARKER_START("create_grid_polar");
+}
+#endif
             // Create polar grids
             gmg.create_grid_polar();
-
+#ifdef GMGPOLAR_USE_LIKWID            
+#pragma omp parallel
+{
+    LIKWID_MARKER_STOP("create_grid_polar");
+}
+#endif
             // Solve using multigrid
             gmg.polar_multigrid();
         }
@@ -305,7 +320,7 @@ int main(int argc, char* argv[])
             error = 1;
         }
         if (gyro::icntl[Param::verbose] > 0)
-            std::cout << "Total_execution_time: " << TOC << "\n";
+            std::cout << "Total execution time: " << TOC << "\n";
 
         std::cout << "\n\n\n\n\n";
 
@@ -375,7 +390,7 @@ int main(int argc, char* argv[])
                     error = 1;
                 }
                 if (gyro::icntl[Param::verbose] > 0)
-                    std::cout << "Total_execution_time: " << TOC << "\n";
+                    std::cout << "Total execution time: " << TOC << "\n";
             }
             // }
         }
@@ -454,13 +469,17 @@ int main(int argc, char* argv[])
                                 error = 1;
                             }
                             if (gyro::icntl[Param::verbose] > 0)
-                                std::cout << "Total_execution_time: " << TOC << "\n";
+                                std::cout << "Total execution time: " << TOC << "\n";
                         }
                     }
                 }
             }
         }
     }
-  
+
+#ifdef GMGPOLAR_USE_LIKWID
+    LIKWID_MARKER_CLOSE;
+#endif
+
     return error;
 } /* ----- end of main ----- */

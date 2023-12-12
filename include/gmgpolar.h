@@ -45,13 +45,16 @@
 #include "constants.h"
 #include "level.h"
 #include "gyro.h"
+#ifdef GMGPOLAR_USE_LIKWID
+#include <likwid-marker.h>
+#endif
 
 class gmgpolar
 {
 public:
-/*******************************************************************************
- * Attributes
- ******************************************************************************/
+   /*******************************************************************************
+   * Attributes
+   ******************************************************************************/
     /***************************************************************************
      * Grid levels
      **************************************************************************/
@@ -67,25 +70,30 @@ public:
     std::vector<double> nrm_inf_res;
 
     /* execution times */
+    // Setup
     double t_setup; // prepare_op_levels
+    // Subcounters of Setup
     double t_build; // build A and RHS
     double t_facto_Ac; // factorization of coarse operator
     double t_build_P; // build coarse nodes, line splitting and P
     double t_build_Asc; // build Asc and Asc_ortho
     double t_facto_Asc; // factorization of Asc
-    double t_total; // multigrid_cycle_extrapol
+    // Multigrid cycle
+    double t_total_mgcycle; // multigrid_cycle_extrapol
+    // Subcounter of Multigrid cycle
     double t_smoothing; // pre- and post-smoothing (including solve Asc)
-    double t_residual; // factorization of Asc
+    double t_residual; // computation of the residual
     double t_restriction; // restriction
     double t_Ac; // solve coarse operator
     double t_prolongation; // prolongation and coarse grid correction
+
     double t_fine_residual; // computation of residual on level 0 (init and after iteration)
     double t_error; // computation of final error
-    double t_applyA; // apply the operator A,  method apply_A
+    double t_applyA; // apply the operator A, method apply_A
 
-    /*******************************************************************************
- * Methods
- ******************************************************************************/
+   /*******************************************************************************
+   * Methods
+   ******************************************************************************/
     gmgpolar();
     ~gmgpolar();
 
@@ -104,13 +112,13 @@ public:
     double compute_backwarderror();
 
 private:
-    /*******************************************************************************
- * Attributes
- ******************************************************************************/
+/*******************************************************************************
+* Attributes
+******************************************************************************/
 
-    /*******************************************************************************
- * Methods
- ******************************************************************************/
+/*******************************************************************************
+* Methods
+******************************************************************************/
 };
 
 #endif // GMGPOLAR_HXX

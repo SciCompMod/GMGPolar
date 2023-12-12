@@ -67,7 +67,7 @@ void gmgpolar::reset_timers()
     t_build_P       = 0;
     t_build_Asc     = 0;
     t_facto_Asc     = 0;
-    t_total         = 0;
+    t_total_mgcycle         = 0;
     t_smoothing     = 0;
     t_residual      = 0;
     t_restriction   = 0;

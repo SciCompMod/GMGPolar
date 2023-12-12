@@ -131,10 +131,23 @@ void gmgpolar::polar_multigrid()
         std::cout << "t_applyA: " << t_applyA << std::endl;
     }
     else {
-        if (gyro::icntl[Param::verbose] > 3)
+        if (gyro::icntl[Param::verbose] > 3){
             std::cout
                 << "Building discretized system, restriction and interpolation operators, and defining splittings...\n";
+        }
+#ifdef GMGPOLAR_USE_LIKWID        
+#pragma omp parallel
+{
+    LIKWID_MARKER_START("Setup");
+}        
+#endif
         prepare_op_levels();
+#ifdef GMGPOLAR_USE_LIKWID        
+#pragma omp parallel
+{
+    LIKWID_MARKER_STOP("Setup");
+}        
+#endif
 
         int m = v_level[0]->m;
 
@@ -171,34 +184,41 @@ void gmgpolar::polar_multigrid()
             if (gyro::icntl[Param::verbose] > 1) {
                 for (int l = 0; l < levels; l++) {
                     std::cout << "LEVEL " << l << "\n";
-                    std::cout << "\nt_smoothing: " << v_level[l]->t_smoothing << ", t_f_sc: " << v_level[l]->t_f_sc
+                    std::cout << "\tSmoothing: " << v_level[l]->t_smoothing << ", t_f_sc: " << v_level[l]->t_f_sc
                               << ", t_Asc_ortho: " << v_level[l]->t_Asc_ortho << ", t_Asc: " << v_level[l]->t_Asc
                               << "\n";
-                    std::cout << "\nt_get_ptr: " << v_level[l]->t_get_ptr
+                    std::cout << "\tt_get_ptr: " << v_level[l]->t_get_ptr
                               << ", t_get_stencil: " << v_level[l]->t_get_stencil
                               << ", t_get_smoother: " << v_level[l]->t_get_smoother
-                              << ", t_get_row: " << v_level[l]->t_get_row << "\n";
+                              << ", t_get_row: " << v_level[l]->t_get_row;
                     std::cout << "\n";
                 }
             }
 
             if (gyro::icntl[Param::verbose] > 1) {
-                std::cout << "\nt_setup: " << t_setup << ", t_build: " << t_build << ", t_facto_Ac: " << t_facto_Ac
-                          << ", t_build_P: " << t_build_P << ", t_build_Asc: " << t_build_Asc
-                          << ", t_facto_Asc: " << t_facto_Asc << "\n";
-                std::cout << "t_total_(fine): " << t_total << ", t_smoothing: " << t_smoothing
-                          << ", t_residual: " << t_residual << ", t_restriction: " << t_restriction
-                          << ", t_Ac: " << t_Ac << ", t_prolongation: " << t_prolongation
-                          << ", t_fine_residual: " << t_fine_residual << ", t_error: " << t_error << "\n";
-                std::cout << "t_applyA: " << t_applyA << std::endl;
+                std::cout << "\nTotal setup: " << t_setup << "\n\tBuilding system matrix A and RHS: " << t_build
+                          << "\n\tFactorization of coarse operator Ac: " << t_facto_Ac << "\n\tBuilding intergrid operators (e.g. projections): " << t_build_P
+                          << "\n\tBuilding smoothing operators A_sc: " << t_build_Asc << "\n\tFactorizing smoothing operators A_sc: " << t_facto_Asc << "\n";
+                std::cout << "Total multigrid cycle: " << t_total_mgcycle << "\n\tComplete smoothing: " << t_smoothing
+                          << "\n\tComputing residual: " << t_residual << "\n\tApplying restriction: " << t_restriction
+                          << "\n\tSolve coarse system: " << t_Ac << "\n\tApplying prolongation (+ coarse grid correction): " << t_prolongation
+                          << "\nComputing residual on finest level: " << t_fine_residual;
+                if (gyro::icntl[Param::check_error] == 1) {
+                           std::cout << "\nComputing final error: " << t_error;
+                }
+                std::cout << "\nTotal application of A: " << t_applyA;
+                std::cout << "\n";
             }
 
             if (gyro::icntl[Param::verbose] > 1) {
-                std::cout << "\nt_coeff: " << gyro::dcntl[Param::t_coeff]
-                          << ", t_arr_art_att: " << gyro::dcntl[Param::t_arr_art_att]
-                          << ", t_sol: " << gyro::dcntl[Param::t_sol]
-                          << ", t_detDFinv: " << gyro::dcntl[Param::t_detDFinv]
-                          << ", t_trafo: " << gyro::dcntl[Param::t_trafo] << "\n";
+                std::cout << "\nEvaluation of arr, art, and att: " << gyro::dcntl[Param::t_arr_art_att]
+                          << "\n\tEvaluation of alpha and beta: " << gyro::dcntl[Param::t_coeff]
+                          << "\n\tComputing determinant of Jacobian of inverse mapping: " << gyro::dcntl[Param::t_detDFinv];
+                    if (gyro::icntl[Param::check_error] == 1) {
+                          std::cout <<  "\nComputing exact solution: " << gyro::dcntl[Param::t_sol];
+                    }
+                          
+                std::cout << "\n";
             }
         }
     }
