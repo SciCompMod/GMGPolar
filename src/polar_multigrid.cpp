@@ -419,35 +419,37 @@ void gmgpolar::prepare_op_levels()
                 // define Asc blocks
                 v_level[l]->build_Asc();
 
-                // 1 block matrix per row (column) for the circle (radial) smoother
-                v_level[l]->A_Zebra_Mix_r.assign(4, std::vector<int>());
-                v_level[l]->A_Zebra_Mix_c.assign(4, std::vector<int>());
-                v_level[l]->A_Zebra_Mix_v.assign(4, std::vector<double>());
-                for (int smoother = 0; smoother < 4; smoother++) {
-                    int nsc                             = v_level[l]->nz_sc_ortho[smoother];
-                    v_level[l]->A_Zebra_Mix_r[smoother] = std::vector<int>(nsc);
-                    v_level[l]->A_Zebra_Mix_c[smoother] = std::vector<int>(nsc);
-                    v_level[l]->A_Zebra_Mix_v[smoother] = std::vector<double>(nsc, 0);
+                if (gyro::icntl[Param::matrix_free] == 0) {
+                    // 1 block matrix per row (column) for the circle (radial) smoother
+                    v_level[l]->A_Zebra_Mix_r.assign(4, std::vector<int>());
+                    v_level[l]->A_Zebra_Mix_c.assign(4, std::vector<int>());
+                    v_level[l]->A_Zebra_Mix_v.assign(4, std::vector<double>());
+                    for (int smoother = 0; smoother < 4; smoother++) {
+                        int nsc                             = v_level[l]->nz_sc_ortho[smoother];
+                        v_level[l]->A_Zebra_Mix_r[smoother] = std::vector<int>(nsc);
+                        v_level[l]->A_Zebra_Mix_c[smoother] = std::vector<int>(nsc);
+                        v_level[l]->A_Zebra_Mix_v[smoother] = std::vector<double>(nsc, 0);
 
-                    // define Asc_ortho block
-                    v_level[l]->build_Asc_ortho(smoother);
+                        // define Asc_ortho block
+                        v_level[l]->build_Asc_ortho(smoother);
 
-                    // Build vectors necessary for the parallel application of Asc_ortho:
-                    // - ptr contains the nz entry for the points in the first radial line
-                    // - shift contains the number of entries per node
-                    int size_radial_line = v_level[l]->nr_int - v_level[l]->delete_circles;
-                    v_level[l]->shift_vect_s2 =
-                        std::vector<int>(size_radial_line); // shift between 2 radial lines for smoother 2
-                    v_level[l]->shift_vect_s3 = std::vector<int>(size_radial_line); // idem for smoother 3
-                    v_level[l]->ptr_vect_s2 = std::vector<int>(size_radial_line); // ptr to a radial line for smoother 2
-                    v_level[l]->ptr_vect_s3 = std::vector<int>(size_radial_line); // idem for smoother 3
-                    std::vector<int> ptr_vect;
-                    for (int j = v_level[l]->delete_circles; j < v_level[l]->nr_int; j++) {
-                        ptr_vect                                                  = v_level[l]->get_ptr_sc(j, 2, 1);
-                        v_level[l]->ptr_vect_s2[j - v_level[l]->delete_circles]   = ptr_vect[0];
-                        v_level[l]->ptr_vect_s3[j - v_level[l]->delete_circles]   = ptr_vect[1];
-                        v_level[l]->shift_vect_s2[j - v_level[l]->delete_circles] = ptr_vect[2] - ptr_vect[0];
-                        v_level[l]->shift_vect_s3[j - v_level[l]->delete_circles] = ptr_vect[3] - ptr_vect[1];
+                        // Build vectors necessary for the parallel application of Asc_ortho:
+                        // - ptr contains the nz entry for the points in the first radial line
+                        // - shift contains the number of entries per node
+                        int size_radial_line = v_level[l]->nr_int - v_level[l]->delete_circles;
+                        v_level[l]->shift_vect_s2 =
+                            std::vector<int>(size_radial_line); // shift between 2 radial lines for smoother 2
+                        v_level[l]->shift_vect_s3 = std::vector<int>(size_radial_line); // idem for smoother 3
+                        v_level[l]->ptr_vect_s2 = std::vector<int>(size_radial_line); // ptr to a radial line for smoother 2
+                        v_level[l]->ptr_vect_s3 = std::vector<int>(size_radial_line); // idem for smoother 3
+                        std::vector<int> ptr_vect;
+                        for (int j = v_level[l]->delete_circles; j < v_level[l]->nr_int; j++) {
+                            ptr_vect                                                  = v_level[l]->get_ptr_sc(j, 2, 1);
+                            v_level[l]->ptr_vect_s2[j - v_level[l]->delete_circles]   = ptr_vect[0];
+                            v_level[l]->ptr_vect_s3[j - v_level[l]->delete_circles]   = ptr_vect[1];
+                            v_level[l]->shift_vect_s2[j - v_level[l]->delete_circles] = ptr_vect[2] - ptr_vect[0];
+                            v_level[l]->shift_vect_s3[j - v_level[l]->delete_circles] = ptr_vect[3] - ptr_vect[1];
+                        }
                     }
                 }
             }
