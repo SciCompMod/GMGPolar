@@ -1,3 +1,4 @@
+// PolarR6 simulates solution (22) of Bourne et al. https://doi.org/10.1016/j.jcp.2023.112249
 #include "PolarR6SonnendruckerCircular.h"
 #include <stdlib.h>
 #include <math.h>
@@ -257,12 +258,12 @@ void PolarR6SonnendruckerCircular::rho_pole(double r, std::vector<double> const&
 }
 /*........................................*/
 double PolarR6SonnendruckerCircular::coeffs1(double r, double Rmax) const
-{
+{ // see Kuehn et al. https://doi.org/10.1007/s10915-022-01802-1, Eq. (2.3) with Rmax=1.3
     return 0.452961672473868 - 0.348432055749129 * atan(14.4444444444444 * (r/Rmax) - 11.1111111111111);
 }
 /*........................................*/
 void PolarR6SonnendruckerCircular::coeffs1(std::vector<double> const& r, double Rmax, std::vector<double>& sol) const
-{
+{ // see Kuehn et al. https://doi.org/10.1007/s10915-022-01802-1, Eq. (2.3) with Rmax=1.3
     for (std::size_t i=0; i < sol.size(); ++i)
     {
         sol[i] = 0.452961672473868 - 0.348432055749129 * atan(14.4444444444444 * (r[i]/Rmax) - 11.1111111111111);

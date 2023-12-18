@@ -245,7 +245,7 @@ domains with the method of characteristics and spline finite elements.  (2019)
          *
          * Defines the coefficient
          * 0: beta = 0
-         * 1: beta = (1 / alpha)
+         * 1: beta: 1/alpha for some cases, different in others (see coeffs in test_cases)
          */
     beta_coeff,
     /*! \brief Norm for stopping criterion
@@ -316,8 +316,8 @@ enum dcontrols
     rel_red_conv,
     /*! \brief Timings
          */
-    t_coeff,
-    t_arr_art_att,
+    t_arr_art_att, // Evaluation of arr, art, and att
+    t_coeff, // Evaluation of alpha and beta (subcounter of t_arr_art_att)    
     t_sol,
     t_detDFinv,
     t_trafo,
@@ -350,12 +350,14 @@ enum stencil
 //const double PI = 3.141592653589793238463;
 const double PI = M_PI;
 
+// See Bourne et al. https://doi.org/10.1016/j.jcp.2023.112249
+// used as Param::mod_pk ("modified polar coordinates") in GMGPolar
 enum geometry_type
 {
-    CIRCULAR   = 0,
-    SHAFRANOV  = 1,
-    TRIANGULAR = 2,
-    CULHAM     = 3
+    CIRCULAR   = 0, // simple circular domain
+    SHAFRANOV  = 1, // Fig. 6a
+    TRIANGULAR = 2, // Fig. 6b (also denoted Czarny)
+    CULHAM     = 3 // Fig. 18
 };
 
 enum alpha_val
@@ -366,12 +368,15 @@ enum alpha_val
     POISSON       = 3,
 };
 
+// Defines the manufactured solution to compare the computed error against.
+// see Kuehn et al. https://doi.org/10.1007/s10915-022-01802-1
+// or Bourne et al. https://doi.org/10.1016/j.jcp.2023.112249
 enum problem_type
 {
     FLAT           = 1,
     REFINED_RADIUS = 4,
-    CARTESIAN_R2   = 5,
-    POLAR_R6       = 6,
-    CARTESIAN_R6   = 7,
+    CARTESIAN_R2   = 5, // 
+    POLAR_R6       = 6, // Bourne et al., Eq. (22)
+    CARTESIAN_R6   = 7, // Bourne et al., Eq. (23)
 };
 #endif // CONSTANTS_HXX

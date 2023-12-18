@@ -1,3 +1,4 @@
+// PolarR6 simulates solution (22) of Bourne et al. https://doi.org/10.1016/j.jcp.2023.112249
 #include "PolarR6GyroZoniShiftedShafranov.h"
 #include <stdlib.h>
 #include <math.h>
@@ -257,12 +258,12 @@ void PolarR6GyroZoniShiftedShafranov::rho_pole(double r, std::vector<double> con
 }
 /*........................................*/
 double PolarR6GyroZoniShiftedShafranov::coeffs1(double r, double Rmax) const
-{
+{ // With Rmax=1, equals alpha(r) from equation (18) of Bourne et al. https://doi.org/10.1016/j.jcp.2023.112249
     return exp(-tanh(20.0 * (r/Rmax) - 14.0));
 }
 /*........................................*/
 void PolarR6GyroZoniShiftedShafranov::coeffs1(std::vector<double> const& r, double Rmax, std::vector<double>& sol) const
-{
+{ // With Rmax=1, equals alpha(r) from equation (18) of Bourne et al. https://doi.org/10.1016/j.jcp.2023.112249
     for (std::size_t i=0; i < sol.size(); ++i)
     {
         sol[i] = exp(-tanh(20.0 * (r[i]/Rmax) - 14.0));

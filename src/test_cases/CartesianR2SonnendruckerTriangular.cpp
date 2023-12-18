@@ -257,12 +257,12 @@ void CartesianR2SonnendruckerTriangular::rho_pole(double r, std::vector<double> 
 }
 /*........................................*/
 double CartesianR2SonnendruckerTriangular::coeffs1(double r, double Rmax) const
-{
+{ // see Kuehn et al. https://doi.org/10.1007/s10915-022-01802-1, Eq. (2.3) with Rmax=1.3
     return 0.452961672473868 - 0.348432055749129 * atan(14.4444444444444 * (r/Rmax) - 11.1111111111111);
 }
 /*........................................*/
 void CartesianR2SonnendruckerTriangular::coeffs1(std::vector<double> const& r, double Rmax, std::vector<double>& sol) const
-{
+{ // see Kuehn et al. https://doi.org/10.1007/s10915-022-01802-1, Eq. (2.3) with Rmax=1.3
     for (std::size_t i=0; i < sol.size(); ++i)
     {
         sol[i] = 0.452961672473868 - 0.348432055749129 * atan(14.4444444444444 * (r[i]/Rmax) - 11.1111111111111);

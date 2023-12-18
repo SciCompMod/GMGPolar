@@ -104,6 +104,12 @@ void gmgpolar::multigrid_iter()
     t_fine_residual += TOC;
     TIC;
 
+#ifdef GMGPOLAR_USE_LIKWID
+#pragma omp parallel
+{
+    LIKWID_MARKER_START("Iteration");
+}
+#endif
     //! Start the Multigrid-Iteration
     while (it < gyro::icntl[Param::maxiter] && convergence_criterium > rel_red_conv) {
         it++;
@@ -187,7 +193,13 @@ void gmgpolar::multigrid_iter()
         }
         t_fine_residual += TOC;
         TIC;
-    }
+    }    
+#ifdef GMGPOLAR_USE_LIKWID
+#pragma omp parallel
+{
+    LIKWID_MARKER_STOP("Iteration");
+}    
+#endif
     if (gyro::icntl[Param::verbose] > 0) {
         if (it == gyro::icntl[Param::maxiter]) {
             std::cout << "Multigrid reached maxiter=" << gyro::icntl[Param::maxiter] << "\n";
@@ -295,7 +307,7 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
                 v_level[l]->multigrid_smoothing0(smoother);
 
                 if (gyro::icntl[Param::verbose] > 4)
-                    std::cout << "SMOOTHER: " << smoother << " = " << TOC << "\n";
+                    std::cout << "Finishing running of pre-smoother:  " << smoother << " (" << TOC << " s)\n";
             }
         }
         else {
@@ -320,7 +332,7 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
                                 v_level[l]->dep_Asc_ortho[smoother]);
 
                             if (gyro::icntl[Param::verbose] > 4)
-                                std::cout << "SMOOTHER: " << smoother << " = " << TOC << "\n";
+                                std::cout << "Finishing running of pre-smoother: " << smoother << " (" << TOC << " s)\n";
                         }
                     }
                 } // omp single
@@ -341,21 +353,25 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
     }
     //std::cout << "pre-smoothing done \n";
 
-    if (gyro::icntl[Param::verbose] > 5)
-        gyro::disp(v_level[l]->u, "u");
-
     t = t_smoothing_tmp;
     t_smoothing += TOC;
+    
+    if (gyro::icntl[Param::verbose] > 5){ // no timing of large output
+        gyro::disp(v_level[l]->u, "u");
+    }
+
     TIC;
 
     //! compute residual (of level l)
     //even if we have extrapolation, compute just normal residual (extrapolation-restriction follows in the next step)
     gmgpolar::compute_residual(l, 0);
 
-    if (gyro::icntl[Param::verbose] > 5)
-        gyro::disp(v_level[l]->res, "res");
-
     t_residual += TOC;
+
+    if (gyro::icntl[Param::verbose] > 5){ // no timing of large output
+        gyro::disp(v_level[l]->res, "res");
+    }
+
     TIC;
 
     //! Restriction of residual (coarsening)
@@ -411,9 +427,14 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
 
         if (gyro::icntl[Param::matrix_free] == 1) {
             if (gyro::icntl[Param::optimized] == 0)
+            {
                 v_level[l + 1]->apply_A0(u_coarse, Au_coarse);
-            else
+            }else{
+                double start = omp_get_wtime();
                 v_level[l + 1]->apply_A(u_coarse, Au_coarse);
+                double end = omp_get_wtime();
+                t_applyA += (end - start);                
+            }
         }
         else {
             if (gyro::icntl[Param::openmp] == 1) {
@@ -471,18 +492,19 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
     t_restriction += TOC;
     TIC;
 
-    //! iterative call of multigrid_cycle_extrapol
-    v_level[l + 1]->u.assign(v_level[l + 1]->m, 0); //zero u in every iteration
+    //! recursive call of multigrid_cycle_extrapol
+    v_level[l + 1]->u.assign(v_level[l + 1]->m, 0); // zero u in every iteration
     std::vector<double> error_coarse;
     if (l == levels - 2) {
-//solve exactly on the coarsest level for the error (A * error = res) (use whole A from coarsest level)
-// check for the second coarsest level (levels-2), because we have no smoothing on the coarsest level (and thus no Asc and no Asc_ortho)
-#ifdef USE_MUMPS
+    // exact solve on the coarsest level for the error (A * error = res) (use whole A from coarsest level)
+    // check for the second to coarsest level (levels-2), as no smoothing on the coarsest level exists
+    // (and thus no Asc and no Asc_ortho)
+#ifdef GMGPOLAR_USE_MUMPS
         if (gyro::icntl[Param::optimized] == 0) {
 #endif
             error_coarse = v_level[l + 1]->solve_gaussian_elimination(
                 v_level[l + 1]->row_Ac_LU, v_level[l + 1]->col_Ac_LU, v_level[l + 1]->vals_Ac_LU, v_level[l + 1]->fVec);
-#ifdef USE_MUMPS
+#ifdef GMGPOLAR_USE_MUMPS
         }
         else
             error_coarse = v_level[l + 1]->solve_mumps(v_level[l + 1]->mumps_Ac, v_level[l + 1]->fVec);
@@ -492,7 +514,7 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
     }
     else {
         multigrid_cycle_extrapol(l + 1);
-        error_coarse = v_level[l + 1]->u; //the coarse_error on level l is u on level l+1
+        error_coarse = v_level[l + 1]->u; // the coarse_error on level l is u on level l+1
         TIC;
     }
 
@@ -588,7 +610,7 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
                 v_level[l]->multigrid_smoothing0(smoother);
 
                 if (gyro::icntl[Param::verbose] > 4)
-                    std::cout << "SMOOTHER: " << smoother << " = " << TOC << "\n";
+                    std::cout << "Finishing running of post-smoother: " << smoother << " (" << TOC << " s)\n";
             }
         }
         else {
@@ -613,7 +635,7 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
                                 v_level[l]->dep_Asc_ortho[smoother]);
 
                             if (gyro::icntl[Param::verbose] > 4)
-                                std::cout << "SMOOTHER: " << smoother << " = " << TOC << "\n";
+                                std::cout << "Finishing running of post-smoother: " << smoother << " ( " << TOC << " s)\n";
                         }
                     }
                 } // omp single
@@ -626,7 +648,7 @@ void gmgpolar::multigrid_cycle_extrapol(int l)
     TIC;
 
     t = t_total_tmp;
-    t_total += TOC;
+    t_total_mgcycle += TOC;
 
     if (gyro::icntl[Param::verbose] > 5)
         gyro::disp(v_level[l]->u, "u");
@@ -653,7 +675,6 @@ void gmgpolar::compute_residual(int l, int extrapol)
         else {
             double start = omp_get_wtime();
             v_level[l]->apply_A(v_level[l]->u, Au);
-
             double end = omp_get_wtime();
             t_applyA += (end - start);
         }
@@ -725,10 +746,15 @@ void gmgpolar::compute_residual(int l, int extrapol)
         //apply A(l+1) to Pu
         std::vector<double> APu(v_level[l + 1]->m, 0);
         if (gyro::icntl[Param::matrix_free] == 1) {
-            if (gyro::icntl[Param::optimized] == 0)
+            if (gyro::icntl[Param::optimized] == 0) {
                 v_level[l + 1]->apply_A0(Pu, APu); //APu = A(l+1) * Pu
-            else
+            }
+            else {
+                double start = omp_get_wtime();
                 v_level[l + 1]->apply_A(Pu, APu); //APu = A(l+1) * Pu
+                double end = omp_get_wtime();
+                t_applyA += (end - start);
+            }
         }
         else {
             if (gyro::icntl[Param::openmp] == 1) {
