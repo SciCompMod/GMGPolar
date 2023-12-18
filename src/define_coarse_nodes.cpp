@@ -95,22 +95,16 @@ void level::define_coarse_nodes_onelevel(level* coarser)
     std::set<int> indices_r;
     std::set<int> indices_theta;
     coarse_nodes            = (nr_int + 1) * ntheta_int;
-    coarse_nodes_list_r     = std::vector<int>(coarse_nodes);
-    coarse_nodes_list_theta = std::vector<int>(coarse_nodes);
-    for (int j = 0; j < nr_int + 1; j++) {
-        for (int i = 0; i < ntheta_int; i++) {
+    coarse_nodes_list_r     = std::vector<int>(coarse_nodes, -1);
+    coarse_nodes_list_theta = std::vector<int>(coarse_nodes, -1);
+    for (int j = 0; j < nr_int + 1; j += 2) {
+        for (int i = 0; i < ntheta_int; i += 2) {
 
-            if (i % 2 == 0 && j % 2 == 0) {
-                coarse_nodes_list_r[j * ntheta_int + i]     = j;
-                coarse_nodes_list_theta[j * ntheta_int + i] = i;
+            coarse_nodes_list_r[j * ntheta_int + i]     = j;
+            coarse_nodes_list_theta[j * ntheta_int + i] = i;
 
-                indices_r.insert(j);
-                indices_theta.insert(i);
-            }
-            else {
-                coarse_nodes_list_r[j * ntheta_int + i]     = -1;
-                coarse_nodes_list_theta[j * ntheta_int + i] = -1;
-            }
+            indices_r.insert(j);
+            indices_theta.insert(i);
         }
     }
 
