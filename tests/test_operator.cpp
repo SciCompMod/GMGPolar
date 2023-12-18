@@ -12,6 +12,7 @@ protected:
     void SetUp() override
     {
         gyro::init_params();
+        gyro::icntl[Param::nr_exp]   = 7;
         gyro::icntl[Param::verbose]  = 0;
         gyro::dcntl[Param::R0]       = 1e-5;
         gyro::icntl[Param::periodic] = 1;
@@ -40,24 +41,48 @@ protected:
     level test_level;
 };
 
-int set_nonzero(int mod_pk, int dirichlet, int nr, int ntheta_int)
+int set_nonzero(int mod_pk, int nr, int ntheta_int)
 {
     int nz             = 0;
     int stencil_points = mod_pk == 0 ? 5 : 9;
     //todo: differentiate between dirichlet, discretization across interior, no dirichlet
-
-    if (gyro::icntl[Param::DirBC_INterior]) {
-        nz += 2 * ntheta_int;
+    int dirichlets = (gyro::icntl[Param::DirBC_Interior]) ? 2 : 1;
+    nz += dirichlets * ntheta_int;
+    if ((dirichlets == 2 && nr >= 4) || (dirichlets == 1 && nr >= 3)) {
+        int linked_nodes = 2 * (mod_pk != 0) + 1; //1 in case circular, 3 else
+        nz += (stencil_points - linked_nodes) * ntheta_int * dirichlets; //nodes linked to dirichlet
     }
+    else {
+        if ((dirichlets == 2 && nr == 3)) {
+            nz += 3 * ntheta_int;
+        }
+    }
+    int interior_unlinked_inr = std::max(nr - (2 * dirichlets), 0);
+    nz += interior_unlinked_inr * ntheta_int * stencil_points;
+
+    return nz;
+    //if(!gyro::icntl[Param::DirBC_Interior])
 }
+
+TEST_F(test_operator, test_nonzero)
+{
+
+    gyro::icntl[Param::DirBC_Interior] = 1;
+    int& ntheta_int                    = test_level.ntheta_int;
+
+    test_level.define_nz();
+
+    EXPECT_EQ(test_level.nz, set_nonzero(gyro::icntl[Param::mod_pk], test_level.nr, ntheta_int));
+}
+
 TEST_F(test_operator, build_A)
 {
     gyro::icntl[Param::DirBC_Interior] = 1;
     int& ntheta_int                    = test_level.ntheta_int;
     int& nr_int                        = test_level.nr_int;
-
+    int nz                             = set_nonzero(gyro::icntl[Param::mod_pk], test_level.nr, ntheta_int);
     test_level.build_A();
-    std::cout << "=" << std::endl;
+
     int size = test_level.vals.size();
     std::cout << size << std::endl;
     std::cout << test_level.row_indices.size() << std::endl;
@@ -69,9 +94,9 @@ TEST_F(test_operator, build_A)
             EXPECT_EQ(test_level.col_indices[k], k);
             EXPECT_EQ(test_level.vals[k], 1.0);
 
-            EXPECT_EQ(test_level.vals[size - (k + 1)], 1.0);
-            EXPECT_EQ(test_level.row_indices[size - (k + 1)], gridp - (k + 1));
-            EXPECT_EQ(test_level.col_indices[size - (k + 1)], gridp - (k + 1));
+            EXPECT_EQ(test_level.vals[nz - (k + 1)], 1.0);
+            EXPECT_EQ(test_level.row_indices[nz - (k + 1)], nz - (k + 1));
+            EXPECT_EQ(test_level.col_indices[nz - (k + 1)], nz - (k + 1));
         }
     }
     for (int j = 0; j < nr_int + 1; ++j) {
