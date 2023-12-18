@@ -56,10 +56,10 @@ TEST_P(test_grid, Nodes_Build_theta)
 {
     const int& val_size            = GetParam();
     gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
-    gyro::icntl[Param::ntheta_exp] = (val_size % 3) + 3;
+    gyro::icntl[Param::ntheta_exp] = (val_size % 3) + 3; //TODO: ntheta_exp has no effect on the grid size
 
     int& per                    = gyro::icntl[Param::periodic];
-    per                         = val_size % 2;
+    per                         = val_size % 2; //test for periodic and non-periodic grids
     gyro::icntl[Param::fac_ani] = 0;
     test_level.nr               = pow(2, gyro::icntl[Param::nr_exp]) + 1;
     test_level.build_theta();
@@ -93,7 +93,7 @@ TEST_P(test_grid, Anisotropy_r)
         double h_fine   = test_level.r[i_fine + 1] - test_level.r[i_fine];
         double h_coarse = test_level.r[1] - test_level.r[0];
 
-        EXPECT_NEAR(pow(2, ani_r) * h_fine, h_coarse, h_fine / 10); //relative error
+        EXPECT_NEAR(pow(2, ani_r) * h_fine, h_coarse, 1e-6);
         std::cout << "fine mesh size " + std::to_string(h_fine) + " coarse mesh size " + std::to_string(h_coarse)
                   << std::endl;
         ani_r++;
@@ -130,7 +130,7 @@ TEST_P(test_grid, coarse_grid_one_level)
             EXPECT_EQ(coarse.r[j / 2], fine.r[j]);
         }
         for (int i = 0; i < fine.ntheta_int; i++) {
-            if (i % 2 == 0) {
+            if (i % 2 == 0 && j == 0) {
                 EXPECT_EQ(coarse.theta[i / 2], fine.theta[i]);
             }
             if (j % 2 == 0 && i % 2 == 0) {
@@ -157,7 +157,7 @@ TEST_P(test_grid, define_coarse_nodes)
 
     if (gyro::icntl[Param::nr_exp] < coarse_test.levels_orig) { //can not reach desired number of levels
         EXPECT_EQ(coarse_test.levels, gyro::icntl[Param::nr_exp]);
-        EXPECT_EQ(coarse_test.v_level.size(), coarse_test.levels_orig);
+        EXPECT_EQ(coarse_test.v_level.size(), coarse_test.levels_orig); // more memory reserved than we have
     }
     else {
         EXPECT_EQ(coarse_test.v_level.size(), coarse_test.levels);
@@ -172,6 +172,7 @@ TEST_P(test_grid, define_coarse_nodes)
 TEST_P(test_grid, store_theta_n_co)
 {
 
+    //TODO: More to test
     gyro::icntl[Param::periodic] = 0;
 
     gmgpolar reference;
