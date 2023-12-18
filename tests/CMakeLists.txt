@@ -1,7 +1,8 @@
 enable_testing()
 
-set(TESTSOURCES comparetest.cpp)
+# set(TESTSOURCES comparetest.cpp level_test.cpp test_prolongation.cpp test_restriction.cpp smoother_test.cpp)
 
+set(TESTSOURCES comparetest.cpp test_grid.cpp mockgrid.cpp)
 add_executable(
   gmgpolar_tests
   ${TESTSOURCES}
@@ -11,6 +12,7 @@ target_link_libraries(
   GTest::gtest_main
   GMGPolar
 )
+
 
 target_include_directories(gmgpolar_tests PRIVATE ../include ../include/test_cases)
 include(GoogleTest)
