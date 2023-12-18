@@ -95,10 +95,11 @@ void level::define_coarse_nodes_onelevel(level* coarser)
     std::set<int> indices_r;
     std::set<int> indices_theta;
     coarse_nodes            = (nr_int + 1) * ntheta_int;
-    coarse_nodes_list_r     = std::vector<int>(coarse_nodes);
-    coarse_nodes_list_theta = std::vector<int>(coarse_nodes);
+    coarse_nodes_list_r     = std::vector<int>(coarse_nodes, -1);
+    coarse_nodes_list_theta = std::vector<int>(coarse_nodes, -1);
     for (int j = 0; j < nr_int + 1; j += 2) {
         for (int i = 0; i < ntheta_int; i += 2) {
+
             coarse_nodes_list_r[j * ntheta_int + i]     = j;
             coarse_nodes_list_theta[j * ntheta_int + i] = i;
 
@@ -106,35 +107,22 @@ void level::define_coarse_nodes_onelevel(level* coarser)
             indices_theta.insert(i);
         }
     }
-    for (int j = 0; j < nr_int + 1; j++) {
-        for (int i = 0; i < ntheta_int; i++) {
-            if (j % 2 == 0) {
-                if (i % 2 == 1) {
-                    coarse_nodes_list_r[j * ntheta_int + i]     = -1;
-                    coarse_nodes_list_theta[j * ntheta_int + i] = -1;
-                }
-            }
-            else {
-                coarse_nodes_list_r[j * ntheta_int + i]     = -1;
-                coarse_nodes_list_theta[j * ntheta_int + i] = -1;
-            }
-        }
-    }
 
     std::set<int, std::greater<int>>::iterator itr_r, itr_theta;
 
     coarser->nr     = (int)indices_r.size();
-    coarser->r      = std::vector<double>(nr);
+    coarser->r      = std::vector<double>(coarser->nr);
     coarser->ntheta = (int)indices_theta.size();
-    coarser->theta  = std::vector<double>(ntheta);
+    coarser->theta  = std::vector<double>(coarser->ntheta);
 
     itr_r = indices_r.begin();
-    for (int i = 0; i < nr; i++) {
+    for (int i = 0; i < coarser->nr; i++) {
         coarser->r[i] = r[*itr_r];
         itr_r++;
     }
+
     itr_theta = indices_theta.begin();
-    for (int i = 0; i < ntheta; i++) {
+    for (int i = 0; i < coarser->ntheta; i++) {
         coarser->theta[i] = theta[*itr_theta];
         itr_theta++;
     }
