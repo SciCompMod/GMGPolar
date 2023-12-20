@@ -392,20 +392,10 @@ void level::build_fsc(std::vector<double>& f_sc, std::vector<double>& f, int smo
  * thus it is not of size m, but smaller (number of points corresponding to the smoother s/c),
  * so we need to treat the indices (!)
 */
-void level::build_Asc()
+void level::build_Asc(int* dep_Asc)
 {
-    int extrapol = gyro::icntl[Param::extrapolation] == 1 && l == 0;
-    int shift_ij = extrapol ? 1 : 0;
-    int smoother_prev, smoother_cur, smoother_next, smoother;
-    int start_j, start_loop, shift_loop, ip, im, ptr, row, col;
-    double coeff, coeff2, coeff3, kt, ktmin1, hs, hsmin1, beta_val;
-
+    int start_j, j;
     std::vector<int> smoother23(ntheta_int);
-    std::vector<int> row_vect_prev, row_vect, row_vect_next;
-    std::vector<int> ptr_vect_prev, ptr_vect, ptr_vect_next;
-    std::vector<int> stencil_prev, stencil_cur, stencil_next, stencil;
-    std::vector<double> arr_vect, arr_vect2, att_vect, art_vect;
-    std::vector<std::vector<int>> stencil23_prev(2), stencil23_cur(2), stencil23_next(2);
     for (int i = 0; i < ntheta_int; i += 2) {
         smoother23[i]     = 2;
         smoother23[i + 1] = 3;
@@ -416,30 +406,271 @@ void level::build_Asc()
      * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
      */
     // Take boundary condition into account: Dirichlet-RB
-    smoother = 0;
+    int smoother = 0;
     if (gyro::icntl[Param::DirBC_Interior]) { // (r[0],0) is on Dirichlet boundary
-        for (int i = 0; i < ntheta_int / (shift_ij + 1); i++) {
-            A_Zebra_r_row[smoother][0][i] = i;
-            A_Zebra_c_row[smoother][0][i] = i;
-            A_Zebra_v_row[smoother][0][i] = 1.0;
-        }
         start_j = 1;
     }
     else { // (r[0],0) is not on Dirichlet boundary
         start_j = 0;
     }
 
-    for (int j = start_j; j < delete_circles; j++) {
+    /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    * !!!!!!!!!!! Link Radial-Circle (circle) !!!!!!!!!!
+    * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    */
+    j     = delete_circles;
+
+#pragma omp task shared(A_Zebra_r_row, A_Zebra_c_row, A_Zebra_v_row) firstprivate(start_j, smoother, j)  depend(out: dep_Asc[delete_circles])
+    {
+        int extrapol = gyro::icntl[Param::extrapolation] == 1 && l == 0;
+        int shift_ij = extrapol ? 1 : 0;
+        int smoother_prev, smoother_cur, smoother_next;
+        int start_loop, shift_loop, ip, im, ptr, row, col;
+        double coeff, coeff2, coeff3, kt, ktmin1, hs, hsmin1, beta_val;
+
+        std::vector<int> row_vect_prev, row_vect, row_vect_next;
+        std::vector<int> ptr_vect_prev, ptr_vect, ptr_vect_next;
+        std::vector<int> stencil_prev, stencil_cur, stencil_next, stencil;
+        std::vector<double> arr_vect, arr_vect2, att_vect, art_vect;
+        std::vector<std::vector<int>> stencil23_prev(2), stencil23_cur(2), stencil23_next(2);
+
+        /* Initialize moother, row_vect, ptr, and stencil */
+        smoother_prev = get_smoother(0, j - 1);
+        stencil_prev  = get_stencil_sc(j - 1, smoother_prev, 0);
+        row_vect_prev = get_row(j - 1, smoother_prev, extrapol, 1, 1);
+        ptr_vect_prev = get_ptr_sc(j - 1, smoother_prev, 0);
+        row_vect         = get_row(j, 2, extrapol, 1, 1);
+        ptr_vect         = get_ptr_sc(j, 2, 0);
+        stencil23_cur[0] = get_stencil_sc(j, 2, 0);
+        stencil23_cur[1] = get_stencil_sc(j, 3, 0);
+        if (j < nr_int - 1) {
+            row_vect_next     = get_row(j + 1, 2, extrapol, 1, 1);
+            ptr_vect_next     = get_ptr_sc(j + 1, 2, 0);
+            stencil23_next[0] = get_stencil_sc(j + 1, 2, 0);
+            stencil23_next[1] = get_stencil_sc(j + 1, 3, 0);
+        }
+        hs     = hplus[j];
+        hsmin1 = hplus[j - 1];
+        gyro::arr_att_art(r[j], theta, sin_theta, cos_theta, ntheta_int, arr_vect, att_vect, art_vect, 0);
+        if (j == nr_int - 1)
+            arr_vect2 = gyro::arr(r[j + 1], theta, sin_theta, cos_theta, ntheta_int, 0);
+        /* Update (j-1, i) */
+        smoother = smoother_prev;
+        stencil  = stencil_prev;
+        if (extrapol && smoother == 0) {
+            start_loop = 1;
+            shift_loop = 2;
+        }
+        else {
+            start_loop = 0;
+            shift_loop = 1;
+        }
+        for (int i = start_loop; i < ntheta_int; i += shift_loop) {
+            kt     = thetaplus_per[i + 1];
+            ktmin1 = thetaplus_per[i];
+
+            ptr   = ptr_vect_prev[i];
+            coeff = 0.5 * (kt + ktmin1) * arr_vect[i] / hsmin1;
+            row   = row_vect_prev[i];
+
+            A_Zebra_v_row[smoother][(j - 1) / 2][ptr + stencil[Param::middle]] += coeff;
+        }
+
+        /* Update (j, x) */
+        if (extrapol) {
+            start_loop = 1;
+            shift_loop = 2;
+        }
+        else {
+            start_loop = 0;
+            shift_loop = 1;
+        }
+        for (int i = start_loop; i < ntheta_int; i += shift_loop) {
+            kt       = thetaplus_per[i + 1];
+            ktmin1   = thetaplus_per[i];
+            smoother = smoother23[i];
+            // Update (j, i)
+            ptr                                                          = ptr_vect[i];
+            stencil                                                      = stencil23_cur[smoother - 2];
+            coeff                                                        = 0.5 * (kt + ktmin1) * arr_vect[i];
+            coeff2                                                       = 0.5 * (hs + hsmin1) * att_vect[i];
+            row                                                          = row_vect[i];
+            A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+            A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+            col                                                          = row_vect_prev[i];
+
+            A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::top]] += -coeff / hs;
+
+            A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
+                coeff / hs + coeff / hsmin1 + coeff2 / ktmin1 + coeff2 / kt;
+
+            // Beta coefficient
+            beta_val = betaVec[j * ntheta_int + i];
+
+            A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
+        }
+        start_loop = 0;
+        shift_loop = 2;
+        if (extrapol && j % 2 == 1) {
+            if (j == nr_int - 1) {
+                for (int i = start_loop; i < ntheta_int; i += shift_loop) {
+                    kt     = thetaplus_per[i + 1];
+                    ktmin1 = thetaplus_per[i];
+
+                    // Update (j, i)
+                    smoother = smoother23[i];
+                    stencil  = stencil23_cur[smoother - 2];
+                    ptr      = ptr_vect[i];
+                    coeff    = 0.5 * (kt + ktmin1) * arr_vect[i];
+                    // Contribution to middle (top) from DB
+                    coeff3 = 0.5 * (kt + ktmin1) * arr_vect2[i] / hs;
+                    coeff2 = 0.5 * (hs + hsmin1) * att_vect[i];
+                    row    = row_vect[i];
+                    A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                    A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+
+                    A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
+                        coeff / hsmin1 + coeff / hs + coeff3 + coeff2 / ktmin1 + coeff2 / kt;
+
+                    // Beta coefficient
+                    beta_val = betaVec[j * ntheta_int + i];
+
+                    A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
+                }
+            }
+            else {
+                for (int i = start_loop; i < ntheta_int; i += shift_loop) {
+                    kt     = thetaplus_per[i + 1];
+                    ktmin1 = thetaplus_per[i];
+
+                    // Update (j, i)
+                    smoother                                                     = smoother23[i];
+                    stencil                                                      = stencil23_cur[smoother - 2];
+                    ptr                                                          = ptr_vect[i];
+                    coeff                                                        = 0.5 * (kt + ktmin1) * arr_vect[i];
+                    coeff2                                                       = 0.5 * (hs + hsmin1) * att_vect[i];
+                    row                                                          = row_vect[i];
+                    A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                    A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+
+                    A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
+                        coeff / hs + coeff / hsmin1 + coeff2 / ktmin1 + coeff2 / kt;
+
+                    // Beta coefficient
+                    beta_val = betaVec[j * ntheta_int + i];
+
+                    A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
+                }
+            }
+        }
+        if (extrapol && j % 2 == 0) {
+            start_loop = 0;
+            shift_loop = 2;
+        }
+        else {
+            start_loop = 0;
+            shift_loop = 1;
+        }
+        for (int i = start_loop; i < ntheta_int; i += shift_loop) {
+            kt       = thetaplus_per[i + 1];
+            ktmin1   = thetaplus_per[i];
+            ip       = iplus(i, ntheta_int);
+            im       = imoins(i, ntheta_int);
+            smoother = smoother23[ip];
+            stencil  = stencil23_cur[smoother - 2];
+
+            // Update (j, i+1)
+            ptr   = ptr_vect[ip];
+            coeff = 0.5 * (hs + hsmin1) * att_vect[i] / kt;
+            row   = row_vect[ip];
+
+            A_Zebra_v_row[smoother][ip / 2][ptr + stencil[Param::middle]] += coeff;
+
+            // Update (j, i-1)
+            smoother = smoother23[im];
+            ptr      = ptr_vect[im];
+            coeff    = 0.5 * (hs + hsmin1) * att_vect[i] / ktmin1;
+            row      = row_vect[im];
+
+            A_Zebra_v_row[smoother][im / 2][ptr + stencil[Param::middle]] += coeff;
+        }
+
+        /* Update (j+1, i) */
+        if (j < nr_int - 1) {
+            if (extrapol) {
+                start_loop = 1;
+                shift_loop = 2;
+            }
+            else {
+                start_loop = 0;
+                shift_loop = 1;
+            }
+            for (int i = start_loop; i < ntheta_int; i += shift_loop) {
+                kt       = thetaplus_per[i + 1];
+                ktmin1   = thetaplus_per[i];
+                smoother = smoother23[i];
+
+                ptr                                                          = ptr_vect_next[i];
+                stencil                                                      = stencil23_next[smoother - 2];
+                coeff                                                        = 0.5 * (kt + ktmin1) * arr_vect[i] / hs;
+                row                                                          = row_vect_next[i];
+                col                                                          = row_vect[i];
+                A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::bottom]] = row;
+                A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::bottom]] = col;
+
+                A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::bottom]] += -coeff;
+
+                A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += coeff;
+            }
+            start_loop = 0;
+            shift_loop = 2;
+            if (extrapol && j % 2 == 0) {
+                for (int i = start_loop; i < ntheta_int; i += shift_loop) {
+                    kt       = thetaplus_per[i + 1];
+                    ktmin1   = thetaplus_per[i];
+                    smoother = smoother23[i];
+
+                    ptr     = ptr_vect_next[i];
+                    stencil = stencil23_next[smoother - 2];
+                    coeff   = 0.5 * (kt + ktmin1) * arr_vect[i] / hs;
+                    row     = row_vect_next[i];
+
+                    A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += coeff;
+                }
+            }
+        }
+    } // end task
+
+    /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    * !!!!!!!!!!! Link Circle-Radial !!!!!!!!!!
+    * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    */
+    j     = delete_circles - 1;
+
+#pragma omp task shared(A_Zebra_r_row, A_Zebra_c_row, A_Zebra_v_row) firstprivate(start_j, smoother, j)  depend(in: dep_Asc[delete_circles])  depend(out: dep_Asc[delete_circles-1])
+    {
+        int extrapol = gyro::icntl[Param::extrapolation] == 1 && l == 0;
+        int shift_ij = extrapol ? 1 : 0;
+        int smoother_prev, smoother_cur, smoother_next;
+        int start_loop, shift_loop, ip, im, ptr, row, col;
+        double coeff, coeff2, coeff3, kt, ktmin1, hs, hsmin1, beta_val;
+
+        std::vector<int> row_vect_prev, row_vect, row_vect_next;
+        std::vector<int> ptr_vect_prev, ptr_vect, ptr_vect_next;
+        std::vector<int> stencil_prev, stencil_cur, stencil_next, stencil;
+        std::vector<double> arr_vect, arr_vect2, att_vect, art_vect;
+        std::vector<std::vector<int>> stencil23_prev(2), stencil23_cur(2), stencil23_next(2);
+
         /* Initialize moother, row_vect, ptr, and stencil */
         if (j > start_j) {
-            smoother_prev = smoother_cur;
-            smoother_cur  = smoother_next;
-            row_vect_prev = row_vect;
-            row_vect      = row_vect_next;
-            ptr_vect_prev = ptr_vect;
-            ptr_vect      = ptr_vect_next;
-            stencil_prev  = stencil_cur;
-            stencil_cur   = stencil_next;
+            smoother_prev = get_smoother(0, j - 1);
+            smoother_cur  = get_smoother(0, j);
+            row_vect_prev = get_row(j-1, smoother_prev, extrapol, 1, 1);
+            row_vect      = get_row(j, smoother_cur, extrapol, 1, 1);
+            ptr_vect_prev = get_ptr_sc(j-1, smoother_prev, 0);
+            ptr_vect      = get_ptr_sc(j, smoother_cur, 0);
+            stencil_prev  = get_stencil_sc(j, smoother_prev, 0);
+            stencil_cur   = get_stencil_sc(j, smoother_cur, 0);
         }
         else {
             smoother_cur = j;
@@ -447,18 +678,11 @@ void level::build_Asc()
             ptr_vect     = get_ptr_sc(j, smoother_cur, 0);
             stencil_cur  = get_stencil_sc(j, smoother_cur, 0);
         }
-        if (j < delete_circles - 1)
-            smoother_next = get_smoother(0, j + 1);
-        else
-            smoother_next = 2;
+        smoother_next = 2;
         row_vect_next = get_row(j + 1, smoother_next, extrapol, 1, 1);
         ptr_vect_next = get_ptr_sc(j + 1, smoother_next, 0);
-        if (j < delete_circles - 1)
-            stencil_next = get_stencil_sc(j + 1, smoother_next, 0);
-        else {
-            stencil23_next[0] = get_stencil_sc(j + 1, 2, 0);
-            stencil23_next[1] = get_stencil_sc(j + 1, 3, 0);
-        }
+        stencil23_next[0] = get_stencil_sc(j + 1, 2, 0);
+        stencil23_next[1] = get_stencil_sc(j + 1, 3, 0);
         hs = hplus[j];
         gyro::arr_att_art(r[j], theta, sin_theta, cos_theta, ntheta_int, arr_vect, att_vect, art_vect, 0);
 
@@ -635,7 +859,245 @@ void level::build_Asc()
         }
 
         /* Update (j+1, i) */
-        if (j < delete_circles - 1) {
+        if (extrapol && (j + 1) % 2 == 0) {
+            start_loop = 1;
+            shift_loop = 2;
+        }
+        else {
+            start_loop = 0;
+            shift_loop = 1;
+        }
+        for (int i = start_loop; i < ntheta_int; i += shift_loop) {
+            kt     = thetaplus_per[i + 1];
+            ktmin1 = thetaplus_per[i];
+
+            ptr      = ptr_vect_next[i];
+            smoother = smoother23[i];
+            stencil  = stencil23_next[smoother - 2];
+            coeff    = 0.5 * (kt + ktmin1) * arr_vect[i] / hs;
+            row      = row_vect_next[i];
+
+            A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += coeff;
+        }
+    } // end task
+
+/* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+* !!!!!!!!!!!!!!!!!!!!!!!      Circle Smoother     !!!!!!!!!!!!!!!!!!!!!!!
+* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*/
+    // for (int j = start_j; j < delete_circles; j++) {
+    for (j = delete_circles - 4; j >= start_j; j-=3) {
+#pragma omp task shared(A_Zebra_r_row, A_Zebra_c_row, A_Zebra_v_row) firstprivate(start_j, smoother, j) depend(out: dep_Asc[j])
+        {
+            int extrapol = gyro::icntl[Param::extrapolation] == 1 && l == 0;
+            int shift_ij = extrapol ? 1 : 0;
+            int smoother_prev, smoother_cur, smoother_next;
+            int start_loop, shift_loop, ip, im, ptr, row, col;
+            double coeff, coeff2, coeff3, kt, ktmin1, hs, hsmin1, beta_val;
+
+            std::vector<int> row_vect_prev, row_vect, row_vect_next;
+            std::vector<int> ptr_vect_prev, ptr_vect, ptr_vect_next;
+            std::vector<int> stencil_prev, stencil_cur, stencil_next, stencil;
+            std::vector<double> arr_vect, arr_vect2, att_vect, art_vect;
+            std::vector<std::vector<int>> stencil23_prev(2), stencil23_cur(2), stencil23_next(2);
+
+            /* Initialize moother, row_vect, ptr, and stencil */
+            if (j > start_j) {
+                smoother_prev = get_smoother(0, j - 1);
+                smoother_cur  = get_smoother(0, j);
+                row_vect_prev = get_row(j-1, smoother_prev, extrapol, 1, 1);
+                row_vect      = get_row(j, smoother_cur, extrapol, 1, 1);
+                ptr_vect_prev = get_ptr_sc(j-1, smoother_prev, 0);
+                ptr_vect      = get_ptr_sc(j, smoother_cur, 0);
+                stencil_prev  = get_stencil_sc(j, smoother_prev, 0);
+                stencil_cur   = get_stencil_sc(j, smoother_cur, 0);
+            }
+            else {
+                smoother_cur = j;
+                row_vect     = get_row(j, smoother_cur, extrapol, 1, 1);
+                ptr_vect     = get_ptr_sc(j, smoother_cur, 0);
+                stencil_cur  = get_stencil_sc(j, smoother_cur, 0);
+            }
+            smoother_next = get_smoother(0, j + 1);
+            row_vect_next = get_row(j + 1, smoother_next, extrapol, 1, 1);
+            ptr_vect_next = get_ptr_sc(j + 1, smoother_next, 0);
+            stencil_next = get_stencil_sc(j + 1, smoother_next, 0);
+            hs = hplus[j];
+            gyro::arr_att_art(r[j], theta, sin_theta, cos_theta, ntheta_int, arr_vect, att_vect, art_vect, 0);
+
+            /* Update (j-1, i) */
+            if (j > start_j) {
+                hsmin1   = hplus[j - 1];
+                smoother = smoother_prev;
+                if (extrapol && smoother == 0) {
+                    start_loop = 1;
+                    shift_loop = 2;
+                }
+                else {
+                    start_loop = 0;
+                    shift_loop = 1;
+                }
+                for (int i = start_loop; i < ntheta_int; i += shift_loop) {
+                    kt     = thetaplus_per[i + 1];
+                    ktmin1 = thetaplus_per[i];
+
+                    // Update (j-1, i)
+                    ptr     = ptr_vect_prev[i];
+                    stencil = stencil_prev;
+                    coeff   = 0.5 * (kt + ktmin1) * arr_vect[i] / hsmin1;
+                    col     = row_vect_prev[i];
+
+                    A_Zebra_v_row[smoother][(j - 1) / 2][ptr + stencil[Param::middle]] += coeff;
+                }
+            }
+            else {
+                smoother = smoother_cur;
+                stencil  = stencil_cur;
+                // Across: bottom update
+                if (!gyro::icntl[Param::DirBC_Interior]) {
+                    hsmin1    = 2 * r[0];
+                    arr_vect2 = gyro::arr(r[j], theta_PI, sin_theta_PI, cos_theta_PI, ntheta_int, 0);
+                    for (int i = shift_ij; i < ntheta_int; i += shift_ij + 1) {
+                        kt     = thetaplus_per[i + 1];
+                        ktmin1 = thetaplus_per[i];
+
+                        ptr = ptr_vect[i];
+                        row = row_vect[i];
+                        col = row_vect[(i + ntheta_int / 2) % ntheta_int];
+                        A_Zebra_r_row[smoother][j / 2][ptr + stencil[Param::bottom]] = row;
+                        A_Zebra_c_row[smoother][j / 2][ptr + stencil[Param::bottom]] = col;
+
+                        coeff  = 0.5 * (kt + ktmin1) * arr_vect2[i] / hsmin1;
+                        coeff2 = 0.5 * (kt + ktmin1) * arr_vect[i] / hsmin1;
+
+                        A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::bottom]] += -coeff - coeff2;
+
+                        A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += coeff;
+                    }
+                }
+                // Dirichlet
+                else {
+                    hsmin1 = hplus[j - 1];
+                    // DB contribution arr (r(0))
+                    arr_vect2 = gyro::arr(r[j - 1], theta, sin_theta, cos_theta, ntheta_int, 0);
+
+                    for (int i = 0; i < ntheta_int; i++) {
+                        kt     = thetaplus_per[i + 1];
+                        ktmin1 = thetaplus_per[i];
+
+                        ptr   = ptr_vect[i];
+                        row   = row_vect[i];
+                        coeff = 0.5 * (kt + ktmin1) * arr_vect2[i] / hsmin1;
+
+                        A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += coeff;
+                    }
+                }
+            }
+
+            /* Update (j, x) */
+            smoother = smoother_cur;
+            if (!extrapol || smoother == 1) {
+                for (int i = 0; i < ntheta_int; i++) {
+                    kt      = thetaplus_per[i + 1];
+                    ktmin1  = thetaplus_per[i];
+                    stencil = stencil_cur;
+                    ip      = iplus(i, ntheta_int);
+                    im      = imoins(i, ntheta_int);
+
+                    // Update (j, i)
+                    ptr                                                          = ptr_vect[i];
+                    row                                                          = row_vect[i];
+                    A_Zebra_r_row[smoother][j / 2][ptr + stencil[Param::middle]] = row;
+                    A_Zebra_c_row[smoother][j / 2][ptr + stencil[Param::middle]] = row;
+
+                    coeff  = 0.5 * (kt + ktmin1) * arr_vect[i];
+                    coeff2 = 0.5 * (hs + hsmin1) * att_vect[i];
+                    col    = row_vect[im];
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::left]] += -coeff2 / ktmin1;
+                    col = row_vect[ip];
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::right]] += -coeff2 / kt;
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] +=
+                        coeff / hs + coeff / hsmin1 + coeff2 / ktmin1 + coeff2 / kt;
+
+                    // Beta coefficient
+                    beta_val = betaVec[j * ntheta_int + i];
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += beta_val;
+
+                    // Update (j, i+1)
+                    ptr                                                        = ptr_vect[ip];
+                    row                                                        = row_vect[ip];
+                    col                                                        = row_vect[i];
+                    coeff                                                      = 0.5 * (hs + hsmin1) * att_vect[i] / kt;
+                    A_Zebra_r_row[smoother][j / 2][ptr + stencil[Param::left]] = row;
+                    A_Zebra_c_row[smoother][j / 2][ptr + stencil[Param::left]] = col;
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::left]] += -coeff;
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += coeff;
+
+                    // Update (j, i-1)
+                    ptr   = ptr_vect[im];
+                    row   = row_vect[im];
+                    col   = row_vect[i];
+                    coeff = 0.5 * (hs + hsmin1) * att_vect[i] / ktmin1;
+                    A_Zebra_r_row[smoother][j / 2][ptr + stencil[Param::right]] = row;
+                    A_Zebra_c_row[smoother][j / 2][ptr + stencil[Param::right]] = col;
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::right]] += -coeff;
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += coeff;
+                }
+            }
+            if (extrapol && smoother == 0) {
+                start_loop = 0;
+                shift_loop = 2;
+                for (int i = start_loop; i < ntheta_int; i += shift_loop) {
+                    kt      = thetaplus_per[i + 1];
+                    ktmin1  = thetaplus_per[i];
+                    stencil = stencil_cur;
+                    ip      = iplus(i, ntheta_int);
+                    im      = imoins(i, ntheta_int);
+                    col     = row_vect[i];
+
+                    // Update (j, i+1)
+                    ptr   = ptr_vect[iplus(i, ntheta_int)];
+                    coeff = 0.5 * (hs + hsmin1) * att_vect[i] / kt;
+                    row   = row_vect[ip];
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += coeff;
+
+                    // Update (j, i-1)
+                    ptr   = ptr_vect[imoins(i, ntheta_int)];
+                    coeff = 0.5 * (hs + hsmin1) * att_vect[i] / ktmin1;
+                    row   = row_vect[im];
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += coeff;
+
+                    // Update (j, i) [for i+1]
+                    kt                                                           = thetaplus_per[i + 2];
+                    ktmin1                                                       = thetaplus_per[i + 1];
+                    ptr                                                          = ptr_vect[i + 1];
+                    coeff                                                        = 0.5 * (kt + ktmin1) * arr_vect[i + 1];
+                    coeff2                                                       = 0.5 * (hs + hsmin1) * att_vect[i + 1];
+                    row                                                          = row_vect[i + 1];
+                    A_Zebra_r_row[smoother][j / 2][ptr + stencil[Param::middle]] = row;
+                    A_Zebra_c_row[smoother][j / 2][ptr + stencil[Param::middle]] = row;
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] +=
+                        coeff / hs + coeff / hsmin1 + coeff2 / ktmin1 + coeff2 / kt;
+
+                    // Beta coefficient
+                    beta_val = betaVec[j * ntheta_int + ip];
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += beta_val;
+                }
+            }
+
+            /* Update (j+1, i) */
             smoother = smoother_next;
             if (extrapol && smoother == 0) {
                 start_loop = 1;
@@ -656,68 +1118,225 @@ void level::build_Asc()
 
                 A_Zebra_v_row[smoother][(j + 1) / 2][ptr + stencil[Param::middle]] += coeff;
             }
-        }
-        else if (j == delete_circles - 1) {
-            if (extrapol && (j + 1) % 2 == 0) {
-                start_loop = 1;
-                shift_loop = 2;
-            }
-            else {
-                start_loop = 0;
-                shift_loop = 1;
-            }
-            for (int i = start_loop; i < ntheta_int; i += shift_loop) {
-                kt     = thetaplus_per[i + 1];
-                ktmin1 = thetaplus_per[i];
-
-                ptr      = ptr_vect_next[i];
-                smoother = smoother23[i];
-                stencil  = stencil23_next[smoother - 2];
-                coeff    = 0.5 * (kt + ktmin1) * arr_vect[i] / hs;
-                row      = row_vect_next[i];
-
-                A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += coeff;
-            }
-        }
+        } // end task
     }
 
-    /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-     * !!!!!!!!!!!!!!!!!!!!!!!      Radial Smoother     !!!!!!!!!!!!!!!!!!!!!!!
-     * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-     */
-    for (int j = delete_circles; j < nr_int; j++) {
-        /* Initialize moother, row_vect, ptr, and stencil */
-        if (j == delete_circles) {
-            smoother_prev = get_smoother(0, j - 1);
-            stencil_prev  = get_stencil_sc(j - 1, smoother_prev, 0);
-            row_vect_prev = get_row(j - 1, smoother_prev, extrapol, 1, 1);
-            ptr_vect_prev = get_ptr_sc(j - 1, smoother_prev, 0);
-        }
-        else {
-            stencil23_prev[0] = get_stencil_sc(j - 1, 2, 0);
-            stencil23_prev[1] = get_stencil_sc(j - 1, 3, 0);
-            row_vect_prev     = get_row(j - 1, 2, extrapol, 1, 1);
-            ptr_vect_prev     = get_ptr_sc(j - 1, 2, 0);
-        }
-        row_vect         = row_vect_next;
-        ptr_vect         = ptr_vect_next;
-        stencil23_cur[0] = get_stencil_sc(j, 2, 0);
-        stencil23_cur[1] = get_stencil_sc(j, 3, 0);
-        if (j < nr_int - 1) {
-            row_vect_next     = get_row(j + 1, 2, extrapol, 1, 1);
-            ptr_vect_next     = get_ptr_sc(j + 1, 2, 0);
-            stencil23_next[0] = get_stencil_sc(j + 1, 2, 0);
-            stencil23_next[1] = get_stencil_sc(j + 1, 3, 0);
-        }
-        hs     = hplus[j];
-        hsmin1 = hplus[j - 1];
-        gyro::arr_att_art(r[j], theta, sin_theta, cos_theta, ntheta_int, arr_vect, att_vect, art_vect, 0);
-        if (j == nr_int - 1)
-            arr_vect2 = gyro::arr(r[j + 1], theta, sin_theta, cos_theta, ntheta_int, 0);
-        /* Update (j-1, i) */
-        if (j == delete_circles) {
-            smoother = smoother_prev;
-            stencil  = stencil_prev;
+    for (j = delete_circles - 2; j >= start_j; j-=3) {
+#pragma omp task shared(A_Zebra_r_row, A_Zebra_c_row, A_Zebra_v_row) firstprivate(start_j, smoother, j) depend(in: dep_Asc[delete_circles]) depend(in: dep_Asc[delete_circles-1]) depend(in                                                        \
+                                                        : dep_Asc[j + 1]) depend(in                                   \
+                                                                            : dep_Asc[j - 2]) depend(out             \
+                                                                                                : dep_Asc[j])
+        {
+            int extrapol = gyro::icntl[Param::extrapolation] == 1 && l == 0;
+            int shift_ij = extrapol ? 1 : 0;
+            int smoother_prev, smoother_cur, smoother_next;
+            int start_loop, shift_loop, ip, im, ptr, row, col;
+            double coeff, coeff2, coeff3, kt, ktmin1, hs, hsmin1, beta_val;
+
+            std::vector<int> row_vect_prev, row_vect, row_vect_next;
+            std::vector<int> ptr_vect_prev, ptr_vect, ptr_vect_next;
+            std::vector<int> stencil_prev, stencil_cur, stencil_next, stencil;
+            std::vector<double> arr_vect, arr_vect2, att_vect, art_vect;
+            std::vector<std::vector<int>> stencil23_prev(2), stencil23_cur(2), stencil23_next(2);
+
+            /* Initialize moother, row_vect, ptr, and stencil */
+            if (j > start_j) {
+                smoother_prev = get_smoother(0, j - 1);
+                smoother_cur  = get_smoother(0, j);
+                row_vect_prev = get_row(j-1, smoother_prev, extrapol, 1, 1);
+                row_vect      = get_row(j, smoother_cur, extrapol, 1, 1);
+                ptr_vect_prev = get_ptr_sc(j-1, smoother_prev, 0);
+                ptr_vect      = get_ptr_sc(j, smoother_cur, 0);
+                stencil_prev  = get_stencil_sc(j, smoother_prev, 0);
+                stencil_cur   = get_stencil_sc(j, smoother_cur, 0);
+            }
+            else {
+                smoother_cur = j;
+                row_vect     = get_row(j, smoother_cur, extrapol, 1, 1);
+                ptr_vect     = get_ptr_sc(j, smoother_cur, 0);
+                stencil_cur  = get_stencil_sc(j, smoother_cur, 0);
+            }
+            smoother_next = get_smoother(0, j + 1);
+            row_vect_next = get_row(j + 1, smoother_next, extrapol, 1, 1);
+            ptr_vect_next = get_ptr_sc(j + 1, smoother_next, 0);
+            stencil_next = get_stencil_sc(j + 1, smoother_next, 0);
+            hs = hplus[j];
+            gyro::arr_att_art(r[j], theta, sin_theta, cos_theta, ntheta_int, arr_vect, att_vect, art_vect, 0);
+
+            /* Update (j-1, i) */
+            if (j > start_j) {
+                hsmin1   = hplus[j - 1];
+                smoother = smoother_prev;
+                if (extrapol && smoother == 0) {
+                    start_loop = 1;
+                    shift_loop = 2;
+                }
+                else {
+                    start_loop = 0;
+                    shift_loop = 1;
+                }
+                for (int i = start_loop; i < ntheta_int; i += shift_loop) {
+                    kt     = thetaplus_per[i + 1];
+                    ktmin1 = thetaplus_per[i];
+
+                    // Update (j-1, i)
+                    ptr     = ptr_vect_prev[i];
+                    stencil = stencil_prev;
+                    coeff   = 0.5 * (kt + ktmin1) * arr_vect[i] / hsmin1;
+                    col     = row_vect_prev[i];
+
+                    A_Zebra_v_row[smoother][(j - 1) / 2][ptr + stencil[Param::middle]] += coeff;
+                }
+            }
+            else {
+                smoother = smoother_cur;
+                stencil  = stencil_cur;
+                // Across: bottom update
+                if (!gyro::icntl[Param::DirBC_Interior]) {
+                    hsmin1    = 2 * r[0];
+                    arr_vect2 = gyro::arr(r[j], theta_PI, sin_theta_PI, cos_theta_PI, ntheta_int, 0);
+                    for (int i = shift_ij; i < ntheta_int; i += shift_ij + 1) {
+                        kt     = thetaplus_per[i + 1];
+                        ktmin1 = thetaplus_per[i];
+
+                        ptr = ptr_vect[i];
+                        row = row_vect[i];
+                        col = row_vect[(i + ntheta_int / 2) % ntheta_int];
+                        A_Zebra_r_row[smoother][j / 2][ptr + stencil[Param::bottom]] = row;
+                        A_Zebra_c_row[smoother][j / 2][ptr + stencil[Param::bottom]] = col;
+
+                        coeff  = 0.5 * (kt + ktmin1) * arr_vect2[i] / hsmin1;
+                        coeff2 = 0.5 * (kt + ktmin1) * arr_vect[i] / hsmin1;
+
+                        A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::bottom]] += -coeff - coeff2;
+
+                        A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += coeff;
+                    }
+                }
+                // Dirichlet
+                else {
+                    hsmin1 = hplus[j - 1];
+                    // DB contribution arr (r(0))
+                    arr_vect2 = gyro::arr(r[j - 1], theta, sin_theta, cos_theta, ntheta_int, 0);
+
+                    for (int i = 0; i < ntheta_int; i++) {
+                        kt     = thetaplus_per[i + 1];
+                        ktmin1 = thetaplus_per[i];
+
+                        ptr   = ptr_vect[i];
+                        row   = row_vect[i];
+                        coeff = 0.5 * (kt + ktmin1) * arr_vect2[i] / hsmin1;
+
+                        A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += coeff;
+                    }
+                }
+            }
+
+            /* Update (j, x) */
+            smoother = smoother_cur;
+            if (!extrapol || smoother == 1) {
+                for (int i = 0; i < ntheta_int; i++) {
+                    kt      = thetaplus_per[i + 1];
+                    ktmin1  = thetaplus_per[i];
+                    stencil = stencil_cur;
+                    ip      = iplus(i, ntheta_int);
+                    im      = imoins(i, ntheta_int);
+
+                    // Update (j, i)
+                    ptr                                                          = ptr_vect[i];
+                    row                                                          = row_vect[i];
+                    A_Zebra_r_row[smoother][j / 2][ptr + stencil[Param::middle]] = row;
+                    A_Zebra_c_row[smoother][j / 2][ptr + stencil[Param::middle]] = row;
+
+                    coeff  = 0.5 * (kt + ktmin1) * arr_vect[i];
+                    coeff2 = 0.5 * (hs + hsmin1) * att_vect[i];
+                    col    = row_vect[im];
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::left]] += -coeff2 / ktmin1;
+                    col = row_vect[ip];
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::right]] += -coeff2 / kt;
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] +=
+                        coeff / hs + coeff / hsmin1 + coeff2 / ktmin1 + coeff2 / kt;
+
+                    // Beta coefficient
+                    beta_val = betaVec[j * ntheta_int + i];
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += beta_val;
+
+                    // Update (j, i+1)
+                    ptr                                                        = ptr_vect[ip];
+                    row                                                        = row_vect[ip];
+                    col                                                        = row_vect[i];
+                    coeff                                                      = 0.5 * (hs + hsmin1) * att_vect[i] / kt;
+                    A_Zebra_r_row[smoother][j / 2][ptr + stencil[Param::left]] = row;
+                    A_Zebra_c_row[smoother][j / 2][ptr + stencil[Param::left]] = col;
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::left]] += -coeff;
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += coeff;
+
+                    // Update (j, i-1)
+                    ptr   = ptr_vect[im];
+                    row   = row_vect[im];
+                    col   = row_vect[i];
+                    coeff = 0.5 * (hs + hsmin1) * att_vect[i] / ktmin1;
+                    A_Zebra_r_row[smoother][j / 2][ptr + stencil[Param::right]] = row;
+                    A_Zebra_c_row[smoother][j / 2][ptr + stencil[Param::right]] = col;
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::right]] += -coeff;
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += coeff;
+                }
+            }
+            if (extrapol && smoother == 0) {
+                start_loop = 0;
+                shift_loop = 2;
+                for (int i = start_loop; i < ntheta_int; i += shift_loop) {
+                    kt      = thetaplus_per[i + 1];
+                    ktmin1  = thetaplus_per[i];
+                    stencil = stencil_cur;
+                    ip      = iplus(i, ntheta_int);
+                    im      = imoins(i, ntheta_int);
+                    col     = row_vect[i];
+
+                    // Update (j, i+1)
+                    ptr   = ptr_vect[iplus(i, ntheta_int)];
+                    coeff = 0.5 * (hs + hsmin1) * att_vect[i] / kt;
+                    row   = row_vect[ip];
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += coeff;
+
+                    // Update (j, i-1)
+                    ptr   = ptr_vect[imoins(i, ntheta_int)];
+                    coeff = 0.5 * (hs + hsmin1) * att_vect[i] / ktmin1;
+                    row   = row_vect[im];
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += coeff;
+
+                    // Update (j, i) [for i+1]
+                    kt                                                           = thetaplus_per[i + 2];
+                    ktmin1                                                       = thetaplus_per[i + 1];
+                    ptr                                                          = ptr_vect[i + 1];
+                    coeff                                                        = 0.5 * (kt + ktmin1) * arr_vect[i + 1];
+                    coeff2                                                       = 0.5 * (hs + hsmin1) * att_vect[i + 1];
+                    row                                                          = row_vect[i + 1];
+                    A_Zebra_r_row[smoother][j / 2][ptr + stencil[Param::middle]] = row;
+                    A_Zebra_c_row[smoother][j / 2][ptr + stencil[Param::middle]] = row;
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] +=
+                        coeff / hs + coeff / hsmin1 + coeff2 / ktmin1 + coeff2 / kt;
+
+                    // Beta coefficient
+                    beta_val = betaVec[j * ntheta_int + ip];
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += beta_val;
+                }
+            }
+
+            /* Update (j+1, i) */
+            smoother = smoother_next;
             if (extrapol && smoother == 0) {
                 start_loop = 1;
                 shift_loop = 2;
@@ -730,240 +1349,233 @@ void level::build_Asc()
                 kt     = thetaplus_per[i + 1];
                 ktmin1 = thetaplus_per[i];
 
-                ptr   = ptr_vect_prev[i];
-                coeff = 0.5 * (kt + ktmin1) * arr_vect[i] / hsmin1;
-                row   = row_vect_prev[i];
+                ptr     = ptr_vect_next[i];
+                stencil = stencil_next;
+                coeff   = 0.5 * (kt + ktmin1) * arr_vect[i] / hs;
+                row     = row_vect_next[i];
 
-                A_Zebra_v_row[smoother][(j - 1) / 2][ptr + stencil[Param::middle]] += coeff;
+                A_Zebra_v_row[smoother][(j + 1) / 2][ptr + stencil[Param::middle]] += coeff;
             }
-        }
-        else {
-            if (extrapol) {
-                start_loop = 1;
-                shift_loop = 2;
+        } // end task
+    }
+
+    for (j = delete_circles - 3; j >= start_j; j-=3) {
+#pragma omp task shared(A_Zebra_r_row, A_Zebra_c_row, A_Zebra_v_row) firstprivate(start_j, smoother, j) depend(in: dep_Asc[delete_circles]) depend(in: dep_Asc[delete_circles-1]) depend(in                                                        \
+                                                        : dep_Asc[j + 1]) depend(in                                   \
+                                                                            : dep_Asc[j - 2]) depend(out             \
+                                                                                                : dep_Asc[j])
+        {
+            int extrapol = gyro::icntl[Param::extrapolation] == 1 && l == 0;
+            int shift_ij = extrapol ? 1 : 0;
+            int smoother_prev, smoother_cur, smoother_next;
+            int start_loop, shift_loop, ip, im, ptr, row, col;
+            double coeff, coeff2, coeff3, kt, ktmin1, hs, hsmin1, beta_val;
+
+            std::vector<int> row_vect_prev, row_vect, row_vect_next;
+            std::vector<int> ptr_vect_prev, ptr_vect, ptr_vect_next;
+            std::vector<int> stencil_prev, stencil_cur, stencil_next, stencil;
+            std::vector<double> arr_vect, arr_vect2, att_vect, art_vect;
+            std::vector<std::vector<int>> stencil23_prev(2), stencil23_cur(2), stencil23_next(2);
+
+            /* Initialize moother, row_vect, ptr, and stencil */
+            if (j > start_j) {
+                smoother_prev = get_smoother(0, j - 1);
+                smoother_cur  = get_smoother(0, j);
+                row_vect_prev = get_row(j-1, smoother_prev, extrapol, 1, 1);
+                row_vect      = get_row(j, smoother_cur, extrapol, 1, 1);
+                ptr_vect_prev = get_ptr_sc(j-1, smoother_prev, 0);
+                ptr_vect      = get_ptr_sc(j, smoother_cur, 0);
+                stencil_prev  = get_stencil_sc(j, smoother_prev, 0);
+                stencil_cur   = get_stencil_sc(j, smoother_cur, 0);
             }
             else {
-                start_loop = 0;
-                shift_loop = 1;
+                smoother_cur = j;
+                row_vect     = get_row(j, smoother_cur, extrapol, 1, 1);
+                ptr_vect     = get_ptr_sc(j, smoother_cur, 0);
+                stencil_cur  = get_stencil_sc(j, smoother_cur, 0);
             }
-            for (int i = start_loop; i < ntheta_int; i += shift_loop) {
-                kt       = thetaplus_per[i + 1];
-                ktmin1   = thetaplus_per[i];
-                smoother = smoother23[i];
+            smoother_next = get_smoother(0, j + 1);
+            row_vect_next = get_row(j + 1, smoother_next, extrapol, 1, 1);
+            ptr_vect_next = get_ptr_sc(j + 1, smoother_next, 0);
+            stencil_next = get_stencil_sc(j + 1, smoother_next, 0);
+            hs = hplus[j];
+            gyro::arr_att_art(r[j], theta, sin_theta, cos_theta, ntheta_int, arr_vect, att_vect, art_vect, 0);
 
-                ptr                                                       = ptr_vect_prev[i];
-                stencil                                                   = stencil23_prev[smoother - 2];
-                coeff                                                     = 0.5 * (kt + ktmin1) * arr_vect[i] / hsmin1;
-                row                                                       = row_vect_prev[i];
-                col                                                       = row_vect[i];
-                A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::top]] = row;
-                A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::top]] = col;
-
-                A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::top]] += -coeff;
-
-                A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += coeff;
-            }
-            start_loop = 0;
-            shift_loop = 2;
-            if (extrapol && j % 2 == 0) {
+            /* Update (j-1, i) */
+            if (j > start_j) {
+                hsmin1   = hplus[j - 1];
+                smoother = smoother_prev;
+                if (extrapol && smoother == 0) {
+                    start_loop = 1;
+                    shift_loop = 2;
+                }
+                else {
+                    start_loop = 0;
+                    shift_loop = 1;
+                }
                 for (int i = start_loop; i < ntheta_int; i += shift_loop) {
-                    kt       = thetaplus_per[i + 1];
-                    ktmin1   = thetaplus_per[i];
-                    smoother = smoother23[i];
+                    kt     = thetaplus_per[i + 1];
+                    ktmin1 = thetaplus_per[i];
 
+                    // Update (j-1, i)
                     ptr     = ptr_vect_prev[i];
-                    stencil = stencil23_prev[smoother - 2];
+                    stencil = stencil_prev;
                     coeff   = 0.5 * (kt + ktmin1) * arr_vect[i] / hsmin1;
-                    row     = row_vect_prev[i];
+                    col     = row_vect_prev[i];
 
-                    A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += coeff;
-                }
-            }
-        }
-
-        /* Update (j, x) */
-        if (extrapol) {
-            start_loop = 1;
-            shift_loop = 2;
-        }
-        else {
-            start_loop = 0;
-            shift_loop = 1;
-        }
-        if (j == delete_circles) {
-            for (int i = start_loop; i < ntheta_int; i += shift_loop) {
-                kt       = thetaplus_per[i + 1];
-                ktmin1   = thetaplus_per[i];
-                smoother = smoother23[i];
-                // Update (j, i)
-                ptr                                                          = ptr_vect[i];
-                stencil                                                      = stencil23_cur[smoother - 2];
-                coeff                                                        = 0.5 * (kt + ktmin1) * arr_vect[i];
-                coeff2                                                       = 0.5 * (hs + hsmin1) * att_vect[i];
-                row                                                          = row_vect[i];
-                A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
-                A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
-                col                                                          = row_vect_prev[i];
-
-                A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::top]] += -coeff / hs;
-
-                A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
-                    coeff / hs + coeff / hsmin1 + coeff2 / ktmin1 + coeff2 / kt;
-
-                // Beta coefficient
-                beta_val = betaVec[j * ntheta_int + i];
-
-                A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
-            }
-        }
-        else if (j == nr_int - 1) {
-            for (int i = start_loop; i < ntheta_int; i += shift_loop) {
-                kt       = thetaplus_per[i + 1];
-                ktmin1   = thetaplus_per[i];
-                smoother = smoother23[i];
-
-                // Update (j, i)
-                ptr     = ptr_vect[i];
-                stencil = stencil23_cur[smoother - 2];
-                coeff   = 0.5 * (kt + ktmin1) * arr_vect[i];
-                // Contribution to middle (top) from DB
-                coeff3                                                       = 0.5 * (kt + ktmin1) * arr_vect2[i] / hs;
-                coeff2                                                       = 0.5 * (hs + hsmin1) * att_vect[i];
-                row                                                          = row_vect[i];
-                A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
-                A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
-                col                                                          = row_vect_next[i];
-
-                A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::bottom]] += -coeff / hsmin1;
-
-                A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
-                    coeff / hsmin1 + coeff / hs + coeff3 + coeff2 / ktmin1 + coeff2 / kt;
-
-                // Beta coefficient
-                beta_val = betaVec[j * ntheta_int + i];
-
-                A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
-            }
-        }
-        else {
-            for (int i = start_loop; i < ntheta_int; i += shift_loop) {
-                kt       = thetaplus_per[i + 1];
-                ktmin1   = thetaplus_per[i];
-                smoother = smoother23[i];
-
-                // Update (j, i)
-                ptr                                                          = ptr_vect[i];
-                stencil                                                      = stencil23_cur[smoother - 2];
-                coeff                                                        = 0.5 * (kt + ktmin1) * arr_vect[i];
-                coeff2                                                       = 0.5 * (hs + hsmin1) * att_vect[i];
-                row                                                          = row_vect[i];
-                A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
-                A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
-                col                                                          = row_vect_next[i];
-
-                A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::top]] += -coeff / hs;
-
-                A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
-                    coeff / hs + coeff / hsmin1 + coeff2 / ktmin1 + coeff2 / kt;
-                col = row_vect_prev[i];
-
-                A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::bottom]] += -coeff / hsmin1;
-
-                // Beta coefficient
-                beta_val = betaVec[j * ntheta_int + i];
-
-                A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
-            }
-        }
-        start_loop = 0;
-        shift_loop = 2;
-        if (extrapol && j % 2 == 1) {
-            if (j == nr_int - 1) {
-                for (int i = start_loop; i < ntheta_int; i += shift_loop) {
-                    kt     = thetaplus_per[i + 1];
-                    ktmin1 = thetaplus_per[i];
-
-                    // Update (j, i)
-                    smoother = smoother23[i];
-                    stencil  = stencil23_cur[smoother - 2];
-                    ptr      = ptr_vect[i];
-                    coeff    = 0.5 * (kt + ktmin1) * arr_vect[i];
-                    // Contribution to middle (top) from DB
-                    coeff3 = 0.5 * (kt + ktmin1) * arr_vect2[i] / hs;
-                    coeff2 = 0.5 * (hs + hsmin1) * att_vect[i];
-                    row    = row_vect[i];
-                    A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
-                    A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
-
-                    A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
-                        coeff / hsmin1 + coeff / hs + coeff3 + coeff2 / ktmin1 + coeff2 / kt;
-
-                    // Beta coefficient
-                    beta_val = betaVec[j * ntheta_int + i];
-
-                    A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
+                    A_Zebra_v_row[smoother][(j - 1) / 2][ptr + stencil[Param::middle]] += coeff;
                 }
             }
             else {
-                for (int i = start_loop; i < ntheta_int; i += shift_loop) {
-                    kt     = thetaplus_per[i + 1];
-                    ktmin1 = thetaplus_per[i];
+                smoother = smoother_cur;
+                stencil  = stencil_cur;
+                // Across: bottom update
+                if (!gyro::icntl[Param::DirBC_Interior]) {
+                    hsmin1    = 2 * r[0];
+                    arr_vect2 = gyro::arr(r[j], theta_PI, sin_theta_PI, cos_theta_PI, ntheta_int, 0);
+                    for (int i = shift_ij; i < ntheta_int; i += shift_ij + 1) {
+                        kt     = thetaplus_per[i + 1];
+                        ktmin1 = thetaplus_per[i];
+
+                        ptr = ptr_vect[i];
+                        row = row_vect[i];
+                        col = row_vect[(i + ntheta_int / 2) % ntheta_int];
+                        A_Zebra_r_row[smoother][j / 2][ptr + stencil[Param::bottom]] = row;
+                        A_Zebra_c_row[smoother][j / 2][ptr + stencil[Param::bottom]] = col;
+
+                        coeff  = 0.5 * (kt + ktmin1) * arr_vect2[i] / hsmin1;
+                        coeff2 = 0.5 * (kt + ktmin1) * arr_vect[i] / hsmin1;
+
+                        A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::bottom]] += -coeff - coeff2;
+
+                        A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += coeff;
+                    }
+                }
+                // Dirichlet
+                else {
+                    hsmin1 = hplus[j - 1];
+                    // DB contribution arr (r(0))
+                    arr_vect2 = gyro::arr(r[j - 1], theta, sin_theta, cos_theta, ntheta_int, 0);
+
+                    for (int i = 0; i < ntheta_int; i++) {
+                        kt     = thetaplus_per[i + 1];
+                        ktmin1 = thetaplus_per[i];
+
+                        ptr   = ptr_vect[i];
+                        row   = row_vect[i];
+                        coeff = 0.5 * (kt + ktmin1) * arr_vect2[i] / hsmin1;
+
+                        A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += coeff;
+                    }
+                }
+            }
+
+            /* Update (j, x) */
+            smoother = smoother_cur;
+            if (!extrapol || smoother == 1) {
+                for (int i = 0; i < ntheta_int; i++) {
+                    kt      = thetaplus_per[i + 1];
+                    ktmin1  = thetaplus_per[i];
+                    stencil = stencil_cur;
+                    ip      = iplus(i, ntheta_int);
+                    im      = imoins(i, ntheta_int);
 
                     // Update (j, i)
-                    smoother                                                     = smoother23[i];
-                    stencil                                                      = stencil23_cur[smoother - 2];
                     ptr                                                          = ptr_vect[i];
-                    coeff                                                        = 0.5 * (kt + ktmin1) * arr_vect[i];
-                    coeff2                                                       = 0.5 * (hs + hsmin1) * att_vect[i];
                     row                                                          = row_vect[i];
-                    A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
-                    A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                    A_Zebra_r_row[smoother][j / 2][ptr + stencil[Param::middle]] = row;
+                    A_Zebra_c_row[smoother][j / 2][ptr + stencil[Param::middle]] = row;
 
-                    A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
+                    coeff  = 0.5 * (kt + ktmin1) * arr_vect[i];
+                    coeff2 = 0.5 * (hs + hsmin1) * att_vect[i];
+                    col    = row_vect[im];
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::left]] += -coeff2 / ktmin1;
+                    col = row_vect[ip];
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::right]] += -coeff2 / kt;
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] +=
                         coeff / hs + coeff / hsmin1 + coeff2 / ktmin1 + coeff2 / kt;
 
                     // Beta coefficient
                     beta_val = betaVec[j * ntheta_int + i];
 
-                    A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += beta_val;
+
+                    // Update (j, i+1)
+                    ptr                                                        = ptr_vect[ip];
+                    row                                                        = row_vect[ip];
+                    col                                                        = row_vect[i];
+                    coeff                                                      = 0.5 * (hs + hsmin1) * att_vect[i] / kt;
+                    A_Zebra_r_row[smoother][j / 2][ptr + stencil[Param::left]] = row;
+                    A_Zebra_c_row[smoother][j / 2][ptr + stencil[Param::left]] = col;
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::left]] += -coeff;
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += coeff;
+
+                    // Update (j, i-1)
+                    ptr   = ptr_vect[im];
+                    row   = row_vect[im];
+                    col   = row_vect[i];
+                    coeff = 0.5 * (hs + hsmin1) * att_vect[i] / ktmin1;
+                    A_Zebra_r_row[smoother][j / 2][ptr + stencil[Param::right]] = row;
+                    A_Zebra_c_row[smoother][j / 2][ptr + stencil[Param::right]] = col;
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::right]] += -coeff;
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += coeff;
                 }
             }
-        }
-        if (extrapol && j % 2 == 0) {
-            start_loop = 0;
-            shift_loop = 2;
-        }
-        else {
-            start_loop = 0;
-            shift_loop = 1;
-        }
-        for (int i = start_loop; i < ntheta_int; i += shift_loop) {
-            kt       = thetaplus_per[i + 1];
-            ktmin1   = thetaplus_per[i];
-            ip       = iplus(i, ntheta_int);
-            im       = imoins(i, ntheta_int);
-            smoother = smoother23[ip];
-            stencil  = stencil23_cur[smoother - 2];
+            if (extrapol && smoother == 0) {
+                start_loop = 0;
+                shift_loop = 2;
+                for (int i = start_loop; i < ntheta_int; i += shift_loop) {
+                    kt      = thetaplus_per[i + 1];
+                    ktmin1  = thetaplus_per[i];
+                    stencil = stencil_cur;
+                    ip      = iplus(i, ntheta_int);
+                    im      = imoins(i, ntheta_int);
+                    col     = row_vect[i];
 
-            // Update (j, i+1)
-            ptr   = ptr_vect[ip];
-            coeff = 0.5 * (hs + hsmin1) * att_vect[i] / kt;
-            row   = row_vect[ip];
+                    // Update (j, i+1)
+                    ptr   = ptr_vect[iplus(i, ntheta_int)];
+                    coeff = 0.5 * (hs + hsmin1) * att_vect[i] / kt;
+                    row   = row_vect[ip];
 
-            A_Zebra_v_row[smoother][ip / 2][ptr + stencil[Param::middle]] += coeff;
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += coeff;
 
-            // Update (j, i-1)
-            smoother = smoother23[im];
-            ptr      = ptr_vect[im];
-            coeff    = 0.5 * (hs + hsmin1) * att_vect[i] / ktmin1;
-            row      = row_vect[im];
+                    // Update (j, i-1)
+                    ptr   = ptr_vect[imoins(i, ntheta_int)];
+                    coeff = 0.5 * (hs + hsmin1) * att_vect[i] / ktmin1;
+                    row   = row_vect[im];
 
-            A_Zebra_v_row[smoother][im / 2][ptr + stencil[Param::middle]] += coeff;
-        }
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += coeff;
 
-        /* Update (j+1, i) */
-        if (j < nr_int - 1) {
-            if (extrapol) {
+                    // Update (j, i) [for i+1]
+                    kt                                                           = thetaplus_per[i + 2];
+                    ktmin1                                                       = thetaplus_per[i + 1];
+                    ptr                                                          = ptr_vect[i + 1];
+                    coeff                                                        = 0.5 * (kt + ktmin1) * arr_vect[i + 1];
+                    coeff2                                                       = 0.5 * (hs + hsmin1) * att_vect[i + 1];
+                    row                                                          = row_vect[i + 1];
+                    A_Zebra_r_row[smoother][j / 2][ptr + stencil[Param::middle]] = row;
+                    A_Zebra_c_row[smoother][j / 2][ptr + stencil[Param::middle]] = row;
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] +=
+                        coeff / hs + coeff / hsmin1 + coeff2 / ktmin1 + coeff2 / kt;
+
+                    // Beta coefficient
+                    beta_val = betaVec[j * ntheta_int + ip];
+
+                    A_Zebra_v_row[smoother][j / 2][ptr + stencil[Param::middle]] += beta_val;
+                }
+            }
+
+            /* Update (j+1, i) */
+            smoother = smoother_next;
+            if (extrapol && smoother == 0) {
                 start_loop = 1;
                 shift_loop = 2;
             }
@@ -972,54 +1584,981 @@ void level::build_Asc()
                 shift_loop = 1;
             }
             for (int i = start_loop; i < ntheta_int; i += shift_loop) {
-                kt       = thetaplus_per[i + 1];
-                ktmin1   = thetaplus_per[i];
-                smoother = smoother23[i];
+                kt     = thetaplus_per[i + 1];
+                ktmin1 = thetaplus_per[i];
 
-                ptr                                                          = ptr_vect_next[i];
-                stencil                                                      = stencil23_next[smoother - 2];
-                coeff                                                        = 0.5 * (kt + ktmin1) * arr_vect[i] / hs;
-                row                                                          = row_vect_next[i];
-                col                                                          = row_vect[i];
-                A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::bottom]] = row;
-                A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::bottom]] = col;
+                ptr     = ptr_vect_next[i];
+                stencil = stencil_next;
+                coeff   = 0.5 * (kt + ktmin1) * arr_vect[i] / hs;
+                row     = row_vect_next[i];
 
-                A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::bottom]] += -coeff;
-
-                A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += coeff;
+                A_Zebra_v_row[smoother][(j + 1) / 2][ptr + stencil[Param::middle]] += coeff;
             }
-            start_loop = 0;
-            shift_loop = 2;
-            if (extrapol && j % 2 == 0) {
-                for (int i = start_loop; i < ntheta_int; i += shift_loop) {
-                    kt       = thetaplus_per[i + 1];
-                    ktmin1   = thetaplus_per[i];
-                    smoother = smoother23[i];
+        } // end task
+    }
 
-                    ptr     = ptr_vect_next[i];
-                    stencil = stencil23_next[smoother - 2];
-                    coeff   = 0.5 * (kt + ktmin1) * arr_vect[i] / hs;
-                    row     = row_vect_next[i];
+    /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    * !!!!!!!!!!!!!!!!!!!!!!!      Radial Smoother     !!!!!!!!!!!!!!!!!!!!!!!
+    * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    */
+    int diff  = ntheta_int % 3;
+
+    // for (int i = 0; i < ntheta_int; i++) {
+    for (int i = 0; i < diff; i++) {
+        int im        = imoins(i, ntheta_int);
+        int ip        = iplus(i, ntheta_int);
+        int im2       = imoins(im, ntheta_int);
+        int ip2       = iplus(ip, ntheta_int);
+    #pragma omp task shared(A_Zebra_r_row, A_Zebra_c_row, A_Zebra_v_row) firstprivate(start_j, smoother, im, i, ip, im2, ip2)                               \
+    depend(in: dep_Asc[delete_circles]) depend(in: dep_Asc[delete_circles-1]) \
+    depend(in: dep_Asc[delete_circles+i]) \
+    depend(out: dep_Asc[delete_circles+i+1])
+        {
+            int extrapol = gyro::icntl[Param::extrapolation] == 1 && l == 0;
+            int start_loop, shift_loop;
+            if (extrapol) {
+                start_loop = 1;
+                shift_loop = 2;
+            }
+            else {
+                start_loop = 0;
+                shift_loop = 1;
+            }
+
+            int s_cur     = (i % 2) + 2;
+            int s_next    = ((i + 1) % 2) + 2;
+            int smoother_prev, smoother_cur, smoother_next;
+            smoother_cur  = s_cur;
+            smoother_prev = s_next;
+            smoother_next = s_next;
+            
+            int shift_ij = extrapol ? 1 : 0;
+            int ptr, row, col;
+            double coeff, coeff2, coeff3, kt, ktmin1, hs, hsmin1, beta_val;
+
+            std::vector<double> arr_vect, arr_vect2, att_vect, art_vect;
+            std::vector<int> row_vect_prev, row_vect, row_vect_next;
+            std::vector<int> ptr_vect_prev, ptr_vect, ptr_vect_next;
+            std::vector<int> stencil_prev, stencil_cur, stencil_next, stencil;
+            std::vector<std::vector<int>> stencil23_prev(2), stencil23_cur(2), stencil23_next(2);
+
+            row_vect_prev = get_row_i_glob(nr, im, smoother_prev, extrapol);
+            row_vect      = get_row_i_glob(nr, i, smoother_cur, extrapol);
+            row_vect_next = get_row_i_glob(nr, ip, smoother_next, extrapol);
+            gyro::arr_att_art(r, theta[i], arr_vect, att_vect, art_vect, 0);
+
+            /* Update (j-1, i) */
+            kt       = thetaplus_per[i + 1];
+            ktmin1   = thetaplus_per[i];
+            smoother = smoother_cur;
+
+            for (int j = delete_circles+1; j < nr_int; j++) {
+                /* Initialize moother, row_vect, ptr, and stencil */
+                ptr_vect_prev     = get_ptr_sc(j - 1, 2, 0);
+                ptr_vect         = get_ptr_sc(j, 2, 0);
+                stencil23_prev[0] = get_stencil_sc(j - 1, 2, 0);
+                stencil23_prev[1] = get_stencil_sc(j - 1, 3, 0);
+                stencil23_cur[0] = get_stencil_sc(j, 2, 0);
+                stencil23_cur[1] = get_stencil_sc(j, 3, 0);
+                if (j < nr_int - 1) {
+                    ptr_vect_next     = get_ptr_sc(j + 1, 2, 0);
+                    stencil23_next[0] = get_stencil_sc(j + 1, 2, 0);
+                    stencil23_next[1] = get_stencil_sc(j + 1, 3, 0);
+                }
+                hs     = hplus[j];
+                hsmin1 = hplus[j - 1];
+
+                if (!extrapol || extrapol && i%2 == 1) {
+
+                    ptr                                                       = ptr_vect_prev[i];
+                    stencil                                                   = stencil23_prev[smoother - 2];
+                    coeff                                                     = 0.5 * (kt + ktmin1) * arr_vect[j] / hsmin1;
+                    row                                                       = row_vect[j-1];
+                    col                                                       = row_vect[j];
+                    A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::top]] = row;
+                    A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::top]] = col;
+
+                    A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::top]] += -coeff;
 
                     A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += coeff;
                 }
+
+                if (extrapol && j % 2 == 0 && i % 2 == 0) {
+                    ptr     = ptr_vect_prev[i];
+                    stencil = stencil23_prev[smoother - 2];
+                    coeff   = 0.5 * (kt + ktmin1) * arr_vect[j] / hsmin1;
+                    row     = row_vect[j-1];
+
+                    A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += coeff;
+                }
+
+                if (!extrapol || extrapol && i%2 == 1) {
+                    if (j == nr_int - 1) {
+                        // Update (j, i)
+                        ptr     = ptr_vect[i];
+                        stencil = stencil23_cur[smoother - 2];
+                        coeff   = 0.5 * (kt + ktmin1) * arr_vect[j];
+                        // Contribution to middle (top) from DB
+                        coeff3                                                       = 0.5 * (kt + ktmin1) * arr_vect[j+1] / hs;
+                        coeff2                                                       = 0.5 * (hs + hsmin1) * att_vect[j];
+                        row                                                          = row_vect[j];
+                        A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        col                                                          = row_vect[j+1];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::bottom]] += -coeff / hsmin1;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
+                            coeff / hsmin1 + coeff / hs + coeff3 + coeff2 / ktmin1 + coeff2 / kt;
+
+                        // Beta coefficient
+                        beta_val = betaVec[j * ntheta_int + i];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
+                    }
+                    else {
+                        // Update (j, i)
+                        ptr                                                          = ptr_vect[i];
+                        stencil                                                      = stencil23_cur[smoother - 2];
+                        coeff                                                        = 0.5 * (kt + ktmin1) * arr_vect[j];
+                        coeff2                                                       = 0.5 * (hs + hsmin1) * att_vect[j];
+                        row                                                          = row_vect[j];
+                        A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        col                                                          = row_vect[j+1];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::top]] += -coeff / hs;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
+                            coeff / hs + coeff / hsmin1 + coeff2 / ktmin1 + coeff2 / kt;
+                        col = row_vect[j-1];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::bottom]] += -coeff / hsmin1;
+
+                        // Beta coefficient
+                        beta_val = betaVec[j * ntheta_int + i];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
+                    }
+                }
+
+                if (extrapol && j % 2 == 1 && i%2==0) {
+                    if (j == nr_int - 1) {
+                        // Update (j, i)
+                        stencil  = stencil23_cur[smoother - 2];
+                        ptr      = ptr_vect[i];
+                        coeff    = 0.5 * (kt + ktmin1) * arr_vect[j];
+                        // Contribution to middle (top) from DB
+                        coeff3 = 0.5 * (kt + ktmin1) * arr_vect[j+1] / hs;
+                        coeff2 = 0.5 * (hs + hsmin1) * att_vect[j];
+                        row    = row_vect[j];
+                        A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
+                            coeff / hsmin1 + coeff / hs + coeff3 + coeff2 / ktmin1 + coeff2 / kt;
+
+                        // Beta coefficient
+                        beta_val = betaVec[j * ntheta_int + i];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
+                    }
+                    else {
+                        // Update (j, i)
+                        stencil                                                      = stencil23_cur[smoother - 2];
+                        ptr                                                          = ptr_vect[i];
+                        coeff                                                        = 0.5 * (kt + ktmin1) * arr_vect[j];
+                        coeff2                                                       = 0.5 * (hs + hsmin1) * att_vect[j];
+                        row                                                          = row_vect[j];
+                        A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
+                            coeff / hs + coeff / hsmin1 + coeff2 / ktmin1 + coeff2 / kt;
+
+                        // Beta coefficient
+                        beta_val = betaVec[j * ntheta_int + i];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
+                    }
+                }
+
+                if (!(extrapol && j%2==0) || (extrapol && j%2==0 && i%2 == 0)) {
+                    stencil  = stencil23_cur[smoother_next - 2];
+
+                    // Update (j, i+1)
+                    ptr   = ptr_vect[ip];
+                    coeff = 0.5 * (hs + hsmin1) * att_vect[j] / kt;
+                    row   = row_vect_next[j];
+
+                    A_Zebra_v_row[smoother_next][ip / 2][ptr + stencil[Param::middle]] += coeff;
+
+                    // Update (j, i-1)
+                    ptr      = ptr_vect[im];
+                    coeff    = 0.5 * (hs + hsmin1) * att_vect[j] / ktmin1;
+                    row      = row_vect_prev[j];
+
+                    A_Zebra_v_row[smoother_prev][im / 2][ptr + stencil[Param::middle]] += coeff;
+                }
+
+
+                /* Update (j+1, i) */
+                if (j < nr_int - 1) {
+                    if (!extrapol || extrapol && i%2==1) {
+                        ptr                                                          = ptr_vect_next[i];
+                        stencil                                                      = stencil23_next[smoother - 2];
+                        coeff                                                        = 0.5 * (kt + ktmin1) * arr_vect[j] / hs;
+                        row                                                          = row_vect[j+1];
+                        col                                                          = row_vect[j];
+                        A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::bottom]] = row;
+                        A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::bottom]] = col;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::bottom]] += -coeff;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += coeff;
+                    }
+                    if (extrapol && j % 2 == 0 && i%2==0) {
+                        kt       = thetaplus_per[i + 1];
+                        ktmin1   = thetaplus_per[i];
+
+                        ptr     = ptr_vect_next[i];
+                        stencil = stencil23_next[smoother - 2];
+                        coeff   = 0.5 * (kt + ktmin1) * arr_vect[j] / hs;
+                        row     = row_vect[j+1];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += coeff;
+                    }
+                }
             }
-        }
+        } //end task
+    }
+
+    for (int i = diff+2; i < ntheta_int; i += 3) {
+        int im        = imoins(i, ntheta_int);
+        int ip        = iplus(i, ntheta_int);
+        int im2       = imoins(im, ntheta_int);
+        int ip2       = iplus(ip, ntheta_int);
+    // depend(in: dep_Asc[delete_circles+diff-2]) depend(in: dep_Asc[delete_circles+diff-1]) depend(in: dep_Asc[delete_circles+diff])
+    #pragma omp task shared(A_Zebra_r_row, A_Zebra_c_row, A_Zebra_v_row) firstprivate(start_j, smoother, im, i, ip, im2, ip2) \
+    depend(out: dep_Asc[delete_circles+i+1])
+        {
+            int extrapol = gyro::icntl[Param::extrapolation] == 1 && l == 0;
+            int start_loop, shift_loop;
+            if (extrapol) {
+                start_loop = 1;
+                shift_loop = 2;
+            }
+            else {
+                start_loop = 0;
+                shift_loop = 1;
+            }
+
+            int s_cur     = (i % 2) + 2;
+            int s_next    = ((i + 1) % 2) + 2;
+            int smoother_prev, smoother_cur, smoother_next;
+            smoother_cur  = s_cur;
+            smoother_prev = s_next;
+            smoother_next = s_next;
+            
+            int shift_ij = extrapol ? 1 : 0;
+            int ptr, row, col;
+            double coeff, coeff2, coeff3, kt, ktmin1, hs, hsmin1, beta_val;
+
+            std::vector<double> arr_vect, arr_vect2, att_vect, art_vect;
+            std::vector<int> row_vect_prev, row_vect, row_vect_next;
+            std::vector<int> ptr_vect_prev, ptr_vect, ptr_vect_next;
+            std::vector<int> stencil_prev, stencil_cur, stencil_next, stencil;
+            std::vector<std::vector<int>> stencil23_prev(2), stencil23_cur(2), stencil23_next(2);
+
+            row_vect_prev = get_row_i_glob(nr, im, smoother_prev, extrapol);
+            row_vect      = get_row_i_glob(nr, i, smoother_cur, extrapol);
+            row_vect_next = get_row_i_glob(nr, ip, smoother_next, extrapol);
+            gyro::arr_att_art(r, theta[i], arr_vect, att_vect, art_vect, 0);
+
+            /* Update (j-1, i) */
+            kt       = thetaplus_per[i + 1];
+            ktmin1   = thetaplus_per[i];
+            smoother = smoother_cur;
+
+            for (int j = delete_circles+1; j < nr_int; j++) {
+                /* Initialize moother, row_vect, ptr, and stencil */
+                ptr_vect_prev     = get_ptr_sc(j - 1, 2, 0);
+                ptr_vect         = get_ptr_sc(j, 2, 0);
+                stencil23_prev[0] = get_stencil_sc(j - 1, 2, 0);
+                stencil23_prev[1] = get_stencil_sc(j - 1, 3, 0);
+                stencil23_cur[0] = get_stencil_sc(j, 2, 0);
+                stencil23_cur[1] = get_stencil_sc(j, 3, 0);
+                if (j < nr_int - 1) {
+                    ptr_vect_next     = get_ptr_sc(j + 1, 2, 0);
+                    stencil23_next[0] = get_stencil_sc(j + 1, 2, 0);
+                    stencil23_next[1] = get_stencil_sc(j + 1, 3, 0);
+                }
+                hs     = hplus[j];
+                hsmin1 = hplus[j - 1];
+
+                if (!extrapol || extrapol && i%2 == 1) {
+
+                    ptr                                                       = ptr_vect_prev[i];
+                    stencil                                                   = stencil23_prev[smoother - 2];
+                    coeff                                                     = 0.5 * (kt + ktmin1) * arr_vect[j] / hsmin1;
+                    row                                                       = row_vect[j-1];
+                    col                                                       = row_vect[j];
+                    A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::top]] = row;
+                    A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::top]] = col;
+
+                    A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::top]] += -coeff;
+
+                    A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += coeff;
+                }
+
+                if (extrapol && j % 2 == 0 && i % 2 == 0) {
+                    ptr     = ptr_vect_prev[i];
+                    stencil = stencil23_prev[smoother - 2];
+                    coeff   = 0.5 * (kt + ktmin1) * arr_vect[j] / hsmin1;
+                    row     = row_vect[j-1];
+
+                    A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += coeff;
+                }
+
+                if (!extrapol || extrapol && i%2 == 1) {
+                    if (j == nr_int - 1) {
+                        // Update (j, i)
+                        ptr     = ptr_vect[i];
+                        stencil = stencil23_cur[smoother - 2];
+                        coeff   = 0.5 * (kt + ktmin1) * arr_vect[j];
+                        // Contribution to middle (top) from DB
+                        coeff3                                                       = 0.5 * (kt + ktmin1) * arr_vect[j+1] / hs;
+                        coeff2                                                       = 0.5 * (hs + hsmin1) * att_vect[j];
+                        row                                                          = row_vect[j];
+                        A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        col                                                          = row_vect[j+1];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::bottom]] += -coeff / hsmin1;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
+                            coeff / hsmin1 + coeff / hs + coeff3 + coeff2 / ktmin1 + coeff2 / kt;
+
+                        // Beta coefficient
+                        beta_val = betaVec[j * ntheta_int + i];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
+                    }
+                    else {
+                        // Update (j, i)
+                        ptr                                                          = ptr_vect[i];
+                        stencil                                                      = stencil23_cur[smoother - 2];
+                        coeff                                                        = 0.5 * (kt + ktmin1) * arr_vect[j];
+                        coeff2                                                       = 0.5 * (hs + hsmin1) * att_vect[j];
+                        row                                                          = row_vect[j];
+                        A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        col                                                          = row_vect[j+1];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::top]] += -coeff / hs;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
+                            coeff / hs + coeff / hsmin1 + coeff2 / ktmin1 + coeff2 / kt;
+                        col = row_vect[j-1];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::bottom]] += -coeff / hsmin1;
+
+                        // Beta coefficient
+                        beta_val = betaVec[j * ntheta_int + i];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
+                    }
+                }
+
+                if (extrapol && j % 2 == 1 && i%2==0) {
+                    if (j == nr_int - 1) {
+                        // Update (j, i)
+                        stencil  = stencil23_cur[smoother - 2];
+                        ptr      = ptr_vect[i];
+                        coeff    = 0.5 * (kt + ktmin1) * arr_vect[j];
+                        // Contribution to middle (top) from DB
+                        coeff3 = 0.5 * (kt + ktmin1) * arr_vect[j+1] / hs;
+                        coeff2 = 0.5 * (hs + hsmin1) * att_vect[j];
+                        row    = row_vect[j];
+                        A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
+                            coeff / hsmin1 + coeff / hs + coeff3 + coeff2 / ktmin1 + coeff2 / kt;
+
+                        // Beta coefficient
+                        beta_val = betaVec[j * ntheta_int + i];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
+                    }
+                    else {
+                        // Update (j, i)
+                        stencil                                                      = stencil23_cur[smoother - 2];
+                        ptr                                                          = ptr_vect[i];
+                        coeff                                                        = 0.5 * (kt + ktmin1) * arr_vect[j];
+                        coeff2                                                       = 0.5 * (hs + hsmin1) * att_vect[j];
+                        row                                                          = row_vect[j];
+                        A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
+                            coeff / hs + coeff / hsmin1 + coeff2 / ktmin1 + coeff2 / kt;
+
+                        // Beta coefficient
+                        beta_val = betaVec[j * ntheta_int + i];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
+                    }
+                }
+
+                if (!(extrapol && j%2==0) || (extrapol && j%2==0 && i%2 == 0)) {
+                    stencil  = stencil23_cur[smoother_next - 2];
+
+                    // Update (j, i+1)
+                    ptr   = ptr_vect[ip];
+                    coeff = 0.5 * (hs + hsmin1) * att_vect[j] / kt;
+                    row   = row_vect_next[j];
+
+                    A_Zebra_v_row[smoother_next][ip / 2][ptr + stencil[Param::middle]] += coeff;
+
+                    // Update (j, i-1)
+                    ptr      = ptr_vect[im];
+                    coeff    = 0.5 * (hs + hsmin1) * att_vect[j] / ktmin1;
+                    row      = row_vect_prev[j];
+
+                    A_Zebra_v_row[smoother_prev][im / 2][ptr + stencil[Param::middle]] += coeff;
+                }
+
+
+                /* Update (j+1, i) */
+                if (j < nr_int - 1) {
+                    if (!extrapol || extrapol && i%2==1) {
+                        ptr                                                          = ptr_vect_next[i];
+                        stencil                                                      = stencil23_next[smoother - 2];
+                        coeff                                                        = 0.5 * (kt + ktmin1) * arr_vect[j] / hs;
+                        row                                                          = row_vect[j+1];
+                        col                                                          = row_vect[j];
+                        A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::bottom]] = row;
+                        A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::bottom]] = col;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::bottom]] += -coeff;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += coeff;
+                    }
+                    if (extrapol && j % 2 == 0 && i%2==0) {
+                        kt       = thetaplus_per[i + 1];
+                        ktmin1   = thetaplus_per[i];
+
+                        ptr     = ptr_vect_next[i];
+                        stencil = stencil23_next[smoother - 2];
+                        coeff   = 0.5 * (kt + ktmin1) * arr_vect[j] / hs;
+                        row     = row_vect[j+1];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += coeff;
+                    }
+                }
+            }
+        } //end task
+    }
+
+    for (int i = diff; i < ntheta_int; i += 3) {
+        int im        = imoins(i, ntheta_int);
+        int ip        = iplus(i, ntheta_int);
+        int im2       = imoins(im, ntheta_int);
+        int ip2       = iplus(ip, ntheta_int);
+    #pragma omp task shared(A_Zebra_r_row, A_Zebra_c_row, A_Zebra_v_row) firstprivate(start_j, smoother, im, i, ip, im2, ip2)                               \
+    depend(in: dep_Asc[delete_circles+im+1]) depend(in: dep_Asc[delete_circles+ip2+1]) \
+    depend(out: dep_Asc[delete_circles+i+1])
+        {
+            int extrapol = gyro::icntl[Param::extrapolation] == 1 && l == 0;
+            int start_loop, shift_loop;
+            if (extrapol) {
+                start_loop = 1;
+                shift_loop = 2;
+            }
+            else {
+                start_loop = 0;
+                shift_loop = 1;
+            }
+
+            int s_cur     = (i % 2) + 2;
+            int s_next    = ((i + 1) % 2) + 2;
+            int smoother_prev, smoother_cur, smoother_next;
+            smoother_cur  = s_cur;
+            smoother_prev = s_next;
+            smoother_next = s_next;
+            
+            int shift_ij = extrapol ? 1 : 0;
+            int ptr, row, col;
+            double coeff, coeff2, coeff3, kt, ktmin1, hs, hsmin1, beta_val;
+
+            std::vector<double> arr_vect, arr_vect2, att_vect, art_vect;
+            std::vector<int> row_vect_prev, row_vect, row_vect_next;
+            std::vector<int> ptr_vect_prev, ptr_vect, ptr_vect_next;
+            std::vector<int> stencil_prev, stencil_cur, stencil_next, stencil;
+            std::vector<std::vector<int>> stencil23_prev(2), stencil23_cur(2), stencil23_next(2);
+
+            row_vect_prev = get_row_i_glob(nr, im, smoother_prev, extrapol);
+            row_vect      = get_row_i_glob(nr, i, smoother_cur, extrapol);
+            row_vect_next = get_row_i_glob(nr, ip, smoother_next, extrapol);
+            gyro::arr_att_art(r, theta[i], arr_vect, att_vect, art_vect, 0);
+
+            /* Update (j-1, i) */
+            kt       = thetaplus_per[i + 1];
+            ktmin1   = thetaplus_per[i];
+            smoother = smoother_cur;
+
+            for (int j = delete_circles+1; j < nr_int; j++) {
+                /* Initialize moother, row_vect, ptr, and stencil */
+                ptr_vect_prev     = get_ptr_sc(j - 1, 2, 0);
+                ptr_vect         = get_ptr_sc(j, 2, 0);
+                stencil23_prev[0] = get_stencil_sc(j - 1, 2, 0);
+                stencil23_prev[1] = get_stencil_sc(j - 1, 3, 0);
+                stencil23_cur[0] = get_stencil_sc(j, 2, 0);
+                stencil23_cur[1] = get_stencil_sc(j, 3, 0);
+                if (j < nr_int - 1) {
+                    ptr_vect_next     = get_ptr_sc(j + 1, 2, 0);
+                    stencil23_next[0] = get_stencil_sc(j + 1, 2, 0);
+                    stencil23_next[1] = get_stencil_sc(j + 1, 3, 0);
+                }
+                hs     = hplus[j];
+                hsmin1 = hplus[j - 1];
+
+                if (!extrapol || extrapol && i%2 == 1) {
+
+                    ptr                                                       = ptr_vect_prev[i];
+                    stencil                                                   = stencil23_prev[smoother - 2];
+                    coeff                                                     = 0.5 * (kt + ktmin1) * arr_vect[j] / hsmin1;
+                    row                                                       = row_vect[j-1];
+                    col                                                       = row_vect[j];
+                    A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::top]] = row;
+                    A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::top]] = col;
+
+                    A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::top]] += -coeff;
+
+                    A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += coeff;
+                }
+
+                if (extrapol && j % 2 == 0 && i % 2 == 0) {
+                    ptr     = ptr_vect_prev[i];
+                    stencil = stencil23_prev[smoother - 2];
+                    coeff   = 0.5 * (kt + ktmin1) * arr_vect[j] / hsmin1;
+                    row     = row_vect[j-1];
+
+                    A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += coeff;
+                }
+
+                if (!extrapol || extrapol && i%2 == 1) {
+                    if (j == nr_int - 1) {
+                        // Update (j, i)
+                        ptr     = ptr_vect[i];
+                        stencil = stencil23_cur[smoother - 2];
+                        coeff   = 0.5 * (kt + ktmin1) * arr_vect[j];
+                        // Contribution to middle (top) from DB
+                        coeff3                                                       = 0.5 * (kt + ktmin1) * arr_vect[j+1] / hs;
+                        coeff2                                                       = 0.5 * (hs + hsmin1) * att_vect[j];
+                        row                                                          = row_vect[j];
+                        A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        col                                                          = row_vect[j+1];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::bottom]] += -coeff / hsmin1;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
+                            coeff / hsmin1 + coeff / hs + coeff3 + coeff2 / ktmin1 + coeff2 / kt;
+
+                        // Beta coefficient
+                        beta_val = betaVec[j * ntheta_int + i];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
+                    }
+                    else {
+                        // Update (j, i)
+                        ptr                                                          = ptr_vect[i];
+                        stencil                                                      = stencil23_cur[smoother - 2];
+                        coeff                                                        = 0.5 * (kt + ktmin1) * arr_vect[j];
+                        coeff2                                                       = 0.5 * (hs + hsmin1) * att_vect[j];
+                        row                                                          = row_vect[j];
+                        A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        col                                                          = row_vect[j+1];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::top]] += -coeff / hs;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
+                            coeff / hs + coeff / hsmin1 + coeff2 / ktmin1 + coeff2 / kt;
+                        col = row_vect[j-1];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::bottom]] += -coeff / hsmin1;
+
+                        // Beta coefficient
+                        beta_val = betaVec[j * ntheta_int + i];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
+                    }
+                }
+
+                if (extrapol && j % 2 == 1 && i%2==0) {
+                    if (j == nr_int - 1) {
+                        // Update (j, i)
+                        stencil  = stencil23_cur[smoother - 2];
+                        ptr      = ptr_vect[i];
+                        coeff    = 0.5 * (kt + ktmin1) * arr_vect[j];
+                        // Contribution to middle (top) from DB
+                        coeff3 = 0.5 * (kt + ktmin1) * arr_vect[j+1] / hs;
+                        coeff2 = 0.5 * (hs + hsmin1) * att_vect[j];
+                        row    = row_vect[j];
+                        A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
+                            coeff / hsmin1 + coeff / hs + coeff3 + coeff2 / ktmin1 + coeff2 / kt;
+
+                        // Beta coefficient
+                        beta_val = betaVec[j * ntheta_int + i];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
+                    }
+                    else {
+                        // Update (j, i)
+                        stencil                                                      = stencil23_cur[smoother - 2];
+                        ptr                                                          = ptr_vect[i];
+                        coeff                                                        = 0.5 * (kt + ktmin1) * arr_vect[j];
+                        coeff2                                                       = 0.5 * (hs + hsmin1) * att_vect[j];
+                        row                                                          = row_vect[j];
+                        A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
+                            coeff / hs + coeff / hsmin1 + coeff2 / ktmin1 + coeff2 / kt;
+
+                        // Beta coefficient
+                        beta_val = betaVec[j * ntheta_int + i];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
+                    }
+                }
+
+                if (!(extrapol && j%2==0) || (extrapol && j%2==0 && i%2 == 0)) {
+                    stencil  = stencil23_cur[smoother_next - 2];
+
+                    // Update (j, i+1)
+                    ptr   = ptr_vect[ip];
+                    coeff = 0.5 * (hs + hsmin1) * att_vect[j] / kt;
+                    row   = row_vect_next[j];
+
+                    A_Zebra_v_row[smoother_next][ip / 2][ptr + stencil[Param::middle]] += coeff;
+
+                    // Update (j, i-1)
+                    ptr      = ptr_vect[im];
+                    coeff    = 0.5 * (hs + hsmin1) * att_vect[j] / ktmin1;
+                    row      = row_vect_prev[j];
+
+                    A_Zebra_v_row[smoother_prev][im / 2][ptr + stencil[Param::middle]] += coeff;
+                }
+
+
+                /* Update (j+1, i) */
+                if (j < nr_int - 1) {
+                    if (!extrapol || extrapol && i%2==1) {
+                        ptr                                                          = ptr_vect_next[i];
+                        stencil                                                      = stencil23_next[smoother - 2];
+                        coeff                                                        = 0.5 * (kt + ktmin1) * arr_vect[j] / hs;
+                        row                                                          = row_vect[j+1];
+                        col                                                          = row_vect[j];
+                        A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::bottom]] = row;
+                        A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::bottom]] = col;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::bottom]] += -coeff;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += coeff;
+                    }
+                    if (extrapol && j % 2 == 0 && i%2==0) {
+                        kt       = thetaplus_per[i + 1];
+                        ktmin1   = thetaplus_per[i];
+
+                        ptr     = ptr_vect_next[i];
+                        stencil = stencil23_next[smoother - 2];
+                        coeff   = 0.5 * (kt + ktmin1) * arr_vect[j] / hs;
+                        row     = row_vect[j+1];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += coeff;
+                    }
+                }
+            }
+        } //end task
+    }
+
+    for (int i = diff + 1; i < ntheta_int; i += 3) {
+        int im        = imoins(i, ntheta_int);
+        int ip        = iplus(i, ntheta_int);
+        int im2       = imoins(im, ntheta_int);
+        int ip2       = iplus(ip, ntheta_int);
+    #pragma omp task shared(A_Zebra_r_row, A_Zebra_c_row, A_Zebra_v_row) firstprivate(start_j, smoother, im, i, ip, im2, ip2)                               \
+    depend(in: dep_Asc[delete_circles+im+1]) depend(in: dep_Asc[delete_circles+ip2+1]) \
+    depend(out: dep_Asc[delete_circles+i+1])
+        {
+            int extrapol = gyro::icntl[Param::extrapolation] == 1 && l == 0;
+            int start_loop, shift_loop;
+            if (extrapol) {
+                start_loop = 1;
+                shift_loop = 2;
+            }
+            else {
+                start_loop = 0;
+                shift_loop = 1;
+            }
+
+            int s_cur     = (i % 2) + 2;
+            int s_next    = ((i + 1) % 2) + 2;
+            int smoother_prev, smoother_cur, smoother_next;
+            smoother_cur  = s_cur;
+            smoother_prev = s_next;
+            smoother_next = s_next;
+            
+            int shift_ij = extrapol ? 1 : 0;
+            int ptr, row, col;
+            double coeff, coeff2, coeff3, kt, ktmin1, hs, hsmin1, beta_val;
+
+            std::vector<double> arr_vect, arr_vect2, att_vect, art_vect;
+            std::vector<int> row_vect_prev, row_vect, row_vect_next;
+            std::vector<int> ptr_vect_prev, ptr_vect, ptr_vect_next;
+            std::vector<int> stencil_prev, stencil_cur, stencil_next, stencil;
+            std::vector<std::vector<int>> stencil23_prev(2), stencil23_cur(2), stencil23_next(2);
+
+            row_vect_prev = get_row_i_glob(nr, im, smoother_prev, extrapol);
+            row_vect      = get_row_i_glob(nr, i, smoother_cur, extrapol);
+            row_vect_next = get_row_i_glob(nr, ip, smoother_next, extrapol);
+            gyro::arr_att_art(r, theta[i], arr_vect, att_vect, art_vect, 0);
+
+            /* Update (j-1, i) */
+            kt       = thetaplus_per[i + 1];
+            ktmin1   = thetaplus_per[i];
+            smoother = smoother_cur;
+
+            for (int j = delete_circles+1; j < nr_int; j++) {
+                /* Initialize moother, row_vect, ptr, and stencil */
+                ptr_vect_prev     = get_ptr_sc(j - 1, 2, 0);
+                ptr_vect         = get_ptr_sc(j, 2, 0);
+                stencil23_prev[0] = get_stencil_sc(j - 1, 2, 0);
+                stencil23_prev[1] = get_stencil_sc(j - 1, 3, 0);
+                stencil23_cur[0] = get_stencil_sc(j, 2, 0);
+                stencil23_cur[1] = get_stencil_sc(j, 3, 0);
+                if (j < nr_int - 1) {
+                    ptr_vect_next     = get_ptr_sc(j + 1, 2, 0);
+                    stencil23_next[0] = get_stencil_sc(j + 1, 2, 0);
+                    stencil23_next[1] = get_stencil_sc(j + 1, 3, 0);
+                }
+                hs     = hplus[j];
+                hsmin1 = hplus[j - 1];
+
+                if (!extrapol || extrapol && i%2 == 1) {
+
+                    ptr                                                       = ptr_vect_prev[i];
+                    stencil                                                   = stencil23_prev[smoother - 2];
+                    coeff                                                     = 0.5 * (kt + ktmin1) * arr_vect[j] / hsmin1;
+                    row                                                       = row_vect[j-1];
+                    col                                                       = row_vect[j];
+                    A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::top]] = row;
+                    A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::top]] = col;
+
+                    A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::top]] += -coeff;
+
+                    A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += coeff;
+                }
+
+                if (extrapol && j % 2 == 0 && i % 2 == 0) {
+                    ptr     = ptr_vect_prev[i];
+                    stencil = stencil23_prev[smoother - 2];
+                    coeff   = 0.5 * (kt + ktmin1) * arr_vect[j] / hsmin1;
+                    row     = row_vect[j-1];
+
+                    A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += coeff;
+                }
+
+                if (!extrapol || extrapol && i%2 == 1) {
+                    if (j == nr_int - 1) {
+                        // Update (j, i)
+                        ptr     = ptr_vect[i];
+                        stencil = stencil23_cur[smoother - 2];
+                        coeff   = 0.5 * (kt + ktmin1) * arr_vect[j];
+                        // Contribution to middle (top) from DB
+                        coeff3                                                       = 0.5 * (kt + ktmin1) * arr_vect[j+1] / hs;
+                        coeff2                                                       = 0.5 * (hs + hsmin1) * att_vect[j];
+                        row                                                          = row_vect[j];
+                        A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        col                                                          = row_vect[j+1];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::bottom]] += -coeff / hsmin1;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
+                            coeff / hsmin1 + coeff / hs + coeff3 + coeff2 / ktmin1 + coeff2 / kt;
+
+                        // Beta coefficient
+                        beta_val = betaVec[j * ntheta_int + i];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
+                    }
+                    else {
+                        // Update (j, i)
+                        ptr                                                          = ptr_vect[i];
+                        stencil                                                      = stencil23_cur[smoother - 2];
+                        coeff                                                        = 0.5 * (kt + ktmin1) * arr_vect[j];
+                        coeff2                                                       = 0.5 * (hs + hsmin1) * att_vect[j];
+                        row                                                          = row_vect[j];
+                        A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        col                                                          = row_vect[j+1];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::top]] += -coeff / hs;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
+                            coeff / hs + coeff / hsmin1 + coeff2 / ktmin1 + coeff2 / kt;
+                        col = row_vect[j-1];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::bottom]] += -coeff / hsmin1;
+
+                        // Beta coefficient
+                        beta_val = betaVec[j * ntheta_int + i];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
+                    }
+                }
+
+                if (extrapol && j % 2 == 1 && i%2==0) {
+                    if (j == nr_int - 1) {
+                        // Update (j, i)
+                        stencil  = stencil23_cur[smoother - 2];
+                        ptr      = ptr_vect[i];
+                        coeff    = 0.5 * (kt + ktmin1) * arr_vect[j];
+                        // Contribution to middle (top) from DB
+                        coeff3 = 0.5 * (kt + ktmin1) * arr_vect[j+1] / hs;
+                        coeff2 = 0.5 * (hs + hsmin1) * att_vect[j];
+                        row    = row_vect[j];
+                        A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
+                            coeff / hsmin1 + coeff / hs + coeff3 + coeff2 / ktmin1 + coeff2 / kt;
+
+                        // Beta coefficient
+                        beta_val = betaVec[j * ntheta_int + i];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
+                    }
+                    else {
+                        // Update (j, i)
+                        stencil                                                      = stencil23_cur[smoother - 2];
+                        ptr                                                          = ptr_vect[i];
+                        coeff                                                        = 0.5 * (kt + ktmin1) * arr_vect[j];
+                        coeff2                                                       = 0.5 * (hs + hsmin1) * att_vect[j];
+                        row                                                          = row_vect[j];
+                        A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+                        A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::middle]] = row;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] +=
+                            coeff / hs + coeff / hsmin1 + coeff2 / ktmin1 + coeff2 / kt;
+
+                        // Beta coefficient
+                        beta_val = betaVec[j * ntheta_int + i];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += beta_val;
+                    }
+                }
+
+                if (!(extrapol && j%2==0) || (extrapol && j%2==0 && i%2 == 0)) {
+                    stencil  = stencil23_cur[smoother_next - 2];
+
+                    // Update (j, i+1)
+                    ptr   = ptr_vect[ip];
+                    coeff = 0.5 * (hs + hsmin1) * att_vect[j] / kt;
+                    row   = row_vect_next[j];
+
+                    A_Zebra_v_row[smoother_next][ip / 2][ptr + stencil[Param::middle]] += coeff;
+
+                    // Update (j, i-1)
+                    ptr      = ptr_vect[im];
+                    coeff    = 0.5 * (hs + hsmin1) * att_vect[j] / ktmin1;
+                    row      = row_vect_prev[j];
+
+                    A_Zebra_v_row[smoother_prev][im / 2][ptr + stencil[Param::middle]] += coeff;
+                }
+
+
+                /* Update (j+1, i) */
+                if (j < nr_int - 1) {
+                    if (!extrapol || extrapol && i%2==1) {
+                        ptr                                                          = ptr_vect_next[i];
+                        stencil                                                      = stencil23_next[smoother - 2];
+                        coeff                                                        = 0.5 * (kt + ktmin1) * arr_vect[j] / hs;
+                        row                                                          = row_vect[j+1];
+                        col                                                          = row_vect[j];
+                        A_Zebra_r_row[smoother][i / 2][ptr + stencil[Param::bottom]] = row;
+                        A_Zebra_c_row[smoother][i / 2][ptr + stencil[Param::bottom]] = col;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::bottom]] += -coeff;
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += coeff;
+                    }
+                    if (extrapol && j % 2 == 0 && i%2==0) {
+                        kt       = thetaplus_per[i + 1];
+                        ktmin1   = thetaplus_per[i];
+
+                        ptr     = ptr_vect_next[i];
+                        stencil = stencil23_next[smoother - 2];
+                        coeff   = 0.5 * (kt + ktmin1) * arr_vect[j] / hs;
+                        row     = row_vect[j+1];
+
+                        A_Zebra_v_row[smoother][i / 2][ptr + stencil[Param::middle]] += coeff;
+                    }
+                }
+            }
+        } //end task
     }
 
     // Take boundary condition into account: Dirichlet-RB
-    int j    = nr_int;
-    ptr_vect = get_ptr_sc(j, 2, 0);
-    row_vect = get_row(j, 2, extrapol, 1, 1);
-    for (int i = shift_ij; i < ntheta_int; i += shift_ij + 1) {
-        ptr      = ptr_vect[i];
-        smoother = smoother23[i];
-        // row                      = get_row_radial(i, nr_int, smoother, extrapol, ntheta_int, delete_circles);
-        row                                 = row_vect[i];
-        A_Zebra_r_row[smoother][i / 2][ptr] = row;
-        A_Zebra_c_row[smoother][i / 2][ptr] = row;
-        A_Zebra_v_row[smoother][i / 2][ptr] += 1.0;
+    if (gyro::icntl[Param::DirBC_Interior]) { // (r[0],0) is on Dirichlet boundary
+// // #pragma omp task shared(dep_Asc, start_j) depend(in: dep_Asc[1]) depend(in: dep_Asc[2]) depend(out: dep_Asc[0])
+// #pragma omp task shared(A_Zebra_r_row, A_Zebra_c_row, A_Zebra_v_row) depend(in: dep_Asc[1]) depend(in: dep_Asc[2]) depend(out: dep_Asc[0])
+#pragma omp task shared(A_Zebra_r_row, A_Zebra_c_row, A_Zebra_v_row) firstprivate(smoother) depend(out: dep_Asc[0])
+        {
+            smoother = 0;
+            int extrapol = gyro::icntl[Param::extrapolation] == 1 && l == 0;
+            int shift_ij = extrapol ? 1 : 0;
+
+            for (int i = 0; i < ntheta_int / (shift_ij + 1); i++) {
+                A_Zebra_r_row[smoother][0][i] = i;
+                A_Zebra_c_row[smoother][0][i] = i;
+                A_Zebra_v_row[smoother][0][i] = 1.0;
+            }
+        } // end task
     }
+
+// #pragma omp task shared(dep_Asc, start_j) depend(in: dep_Asc[nr_int - 1]) depend(in: dep_Asc[nr_int - 2]) depend(out: dep_Asc[nr_int])
+#pragma omp task shared(A_Zebra_r_row, A_Zebra_c_row, A_Zebra_v_row) firstprivate(smoother, j) depend(in: dep_Asc[nr_int - 1]) depend(in: dep_Asc[nr_int - 2]) depend(out: dep_Asc[nr_int])
+    {
+        std::vector<int> row_vect;
+        std::vector<int> ptr_vect;
+
+        int extrapol = gyro::icntl[Param::extrapolation] == 1 && l == 0;
+        int shift_ij = extrapol ? 1 : 0;
+        int ptr, row;
+
+        // Take boundary condition into account: Dirichlet-RB
+        j    = nr_int;
+        ptr_vect = get_ptr_sc(j, 2, 0);
+        row_vect = get_row(j, 2, extrapol, 1, 1);
+        for (int i = shift_ij; i < ntheta_int; i += shift_ij + 1) {
+            ptr      = ptr_vect[i];
+            smoother = smoother23[i];
+            // row                      = get_row_radial(i, nr_int, smoother, extrapol, ntheta_int, delete_circles);
+            row                                 = row_vect[i];
+            A_Zebra_r_row[smoother][i / 2][ptr] = row;
+            A_Zebra_c_row[smoother][i / 2][ptr] = row;
+            A_Zebra_v_row[smoother][i / 2][ptr] += 1.0;
+        }
+    } // end task
 } /* ----- end of level::build_Asc ----- */
 
 /*! \brief Applies the matrix A_sc_ortho for a smoother explicitely on the level l

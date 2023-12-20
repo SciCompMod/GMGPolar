@@ -266,7 +266,7 @@ public:
     std::vector<int> get_row(int j, int smoother, int extrapol, int local, int col_wise);
     std::vector<int> get_row_i(int i, int size, int smoother, int extrapol);
     std::vector<int> get_row_i_glob(int i, int size, int smoother, int extrapol);
-    void build_Asc();
+    void build_Asc(int* dep_Asc);
     void build_Asc_ortho(int smoother);
     void apply_Asc_ortho(std::vector<double>& Au, std::vector<double>& u, int smoother, int v, int c, int* dep_Asc_cur,
                          int* dep_Asc_prev, int* dep_Asc1, int* dep_Asc_ortho_cur);

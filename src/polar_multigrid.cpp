@@ -276,6 +276,8 @@ void gmgpolar::prepare_op_levels()
     t_setup = t;
 
     for (int l = levels - 1; l >= 0; l--) { //define m on the coarsest level
+        // std::cout<<"LEVEL: "<< l << std::endl;
+
         v_level[l]->m = v_level[l]->nr * v_level[l]->ntheta;
         v_level[l]->define_nz();
 
@@ -402,62 +404,10 @@ void gmgpolar::prepare_op_levels()
             v_level[l]->define_m_nz_Asc();
             if (gyro::icntl[Param::optimized] == 0) {
                 v_level[l]->build_Asc0();
-            }
-            else {
-                // 1 block matrix per row (column) for the circle (radial) smoother
-                for (int smoother = 0; smoother < 4; smoother++) {
-                    v_level[l]->A_Zebra_r_row[smoother].assign(v_level[l]->nblocks[smoother], std::vector<int>());
-                    v_level[l]->A_Zebra_c_row[smoother].assign(v_level[l]->nblocks[smoother], std::vector<int>());
-                    v_level[l]->A_Zebra_v_row[smoother].assign(v_level[l]->nblocks[smoother], std::vector<double>());
-                    for (int ij = 0; ij < v_level[l]->nblocks[smoother]; ij++) {
-                        int nsc                                 = v_level[l]->define_nz_Asc_ij(smoother, ij, 0);
-                        v_level[l]->A_Zebra_r_row[smoother][ij] = std::vector<int>(nsc);
-                        v_level[l]->A_Zebra_c_row[smoother][ij] = std::vector<int>(nsc);
-                        v_level[l]->A_Zebra_v_row[smoother][ij] = std::vector<double>(nsc, 0);
-                    }
-                }
-                // define Asc blocks
-                v_level[l]->build_Asc();
 
-                if (gyro::icntl[Param::matrix_free] == 0) {
-                    // 1 block matrix per row (column) for the circle (radial) smoother
-                    v_level[l]->A_Zebra_Mix_r.assign(4, std::vector<int>());
-                    v_level[l]->A_Zebra_Mix_c.assign(4, std::vector<int>());
-                    v_level[l]->A_Zebra_Mix_v.assign(4, std::vector<double>());
-                    for (int smoother = 0; smoother < 4; smoother++) {
-                        int nsc                             = v_level[l]->nz_sc_ortho[smoother];
-                        v_level[l]->A_Zebra_Mix_r[smoother] = std::vector<int>(nsc);
-                        v_level[l]->A_Zebra_Mix_c[smoother] = std::vector<int>(nsc);
-                        v_level[l]->A_Zebra_Mix_v[smoother] = std::vector<double>(nsc, 0);
+                t_build_Asc += TOC;
+                TIC;
 
-                        // define Asc_ortho block
-                        v_level[l]->build_Asc_ortho(smoother);
-
-                        // Build vectors necessary for the parallel application of Asc_ortho:
-                        // - ptr contains the nz entry for the points in the first radial line
-                        // - shift contains the number of entries per node
-                        int size_radial_line = v_level[l]->nr_int - v_level[l]->delete_circles;
-                        v_level[l]->shift_vect_s2 =
-                            std::vector<int>(size_radial_line); // shift between 2 radial lines for smoother 2
-                        v_level[l]->shift_vect_s3 = std::vector<int>(size_radial_line); // idem for smoother 3
-                        v_level[l]->ptr_vect_s2 = std::vector<int>(size_radial_line); // ptr to a radial line for smoother 2
-                        v_level[l]->ptr_vect_s3 = std::vector<int>(size_radial_line); // idem for smoother 3
-                        std::vector<int> ptr_vect;
-                        for (int j = v_level[l]->delete_circles; j < v_level[l]->nr_int; j++) {
-                            ptr_vect                                                  = v_level[l]->get_ptr_sc(j, 2, 1);
-                            v_level[l]->ptr_vect_s2[j - v_level[l]->delete_circles]   = ptr_vect[0];
-                            v_level[l]->ptr_vect_s3[j - v_level[l]->delete_circles]   = ptr_vect[1];
-                            v_level[l]->shift_vect_s2[j - v_level[l]->delete_circles] = ptr_vect[2] - ptr_vect[0];
-                            v_level[l]->shift_vect_s3[j - v_level[l]->delete_circles] = ptr_vect[3] - ptr_vect[1];
-                        }
-                    }
-                }
-            }
-
-            t_build_Asc += TOC;
-            TIC;
-
-            if (gyro::icntl[Param::optimized] == 0) {
 #ifdef GMGPOLAR_USE_MUMPS
                 if (gyro::icntl[Param::optimized] == 0) {
 #endif
@@ -498,98 +448,172 @@ void gmgpolar::prepare_op_levels()
                 TIC;
             }
             else {
+                // 1 block matrix per row (column) for the circle (radial) smoother
                 for (int smoother = 0; smoother < 4; smoother++) {
-                    TIC;
-                    v_level[l]->A_Zebra_r_LU_row[smoother].assign(v_level[l]->nblocks[smoother], std::vector<int>());
-                    v_level[l]->A_Zebra_c_LU_row[smoother].assign(v_level[l]->nblocks[smoother], std::vector<int>());
-                    v_level[l]->A_Zebra_v_LU_row[smoother].assign(v_level[l]->nblocks[smoother], std::vector<double>());
-                    t_facto_Asc += TOC;
-                    TIC;
+                    v_level[l]->A_Zebra_r_row[smoother].assign(v_level[l]->nblocks[smoother], std::vector<int>());
+                    v_level[l]->A_Zebra_c_row[smoother].assign(v_level[l]->nblocks[smoother], std::vector<int>());
+                    v_level[l]->A_Zebra_v_row[smoother].assign(v_level[l]->nblocks[smoother], std::vector<double>());
                     for (int ij = 0; ij < v_level[l]->nblocks[smoother]; ij++) {
-                        // Diagonal smoother if:
-                        // - DB and first radius
-                        // - only 1 element (should not happen)
-                        // - extrapolation on level 0 for smoothers 0 and 2 (except across the origin stencil)
-                        if ((smoother == 0 && ij == 0 && gyro::icntl[Param::DirBC_Interior]) ||
-                            v_level[l]->m_sc[smoother] == 1 ||
-                            (gyro::icntl[Param::extrapolation] && l == 0 && smoother % 2 == 0 &&
-                             !(smoother == 0 && !gyro::icntl[Param::DirBC_Interior] && ij == 0))) {
-                            if (gyro::icntl[Param::verbose] > 3)
-                                std::cout << "No diagonal factorization\n";
-                            v_level[l]->A_Zebra_v_LU_row[smoother][ij] =
-                                std::vector<double>(v_level[l]->A_Zebra_v_row[smoother][ij]);
+                        int nsc                                 = v_level[l]->define_nz_Asc_ij(smoother, ij, 0);
+                        v_level[l]->A_Zebra_r_row[smoother][ij] = std::vector<int>(nsc);
+                        v_level[l]->A_Zebra_c_row[smoother][ij] = std::vector<int>(nsc);
+                        v_level[l]->A_Zebra_v_row[smoother][ij] = std::vector<double>(nsc, 0);
+                    }
+                }
+
+                if (gyro::icntl[Param::matrix_free] == 0) {
+                    // 1 block matrix per row (column) for the circle (radial) smoother
+                    v_level[l]->A_Zebra_Mix_r.assign(4, std::vector<int>());
+                    v_level[l]->A_Zebra_Mix_c.assign(4, std::vector<int>());
+                    v_level[l]->A_Zebra_Mix_v.assign(4, std::vector<double>());
+                    for (int smoother = 0; smoother < 4; smoother++) {
+                        int nsc                             = v_level[l]->nz_sc_ortho[smoother];
+                        v_level[l]->A_Zebra_Mix_r[smoother] = std::vector<int>(nsc);
+                        v_level[l]->A_Zebra_Mix_c[smoother] = std::vector<int>(nsc);
+                        v_level[l]->A_Zebra_Mix_v[smoother] = std::vector<double>(nsc, 0);
+
+                        // define Asc_ortho block
+                        v_level[l]->build_Asc_ortho(smoother);
+
+                        // Build vectors necessary for the parallel application of Asc_ortho:
+                        // - ptr contains the nz entry for the points in the first radial line
+                        // - shift contains the number of entries per node
+                        int size_radial_line = v_level[l]->nr_int - v_level[l]->delete_circles;
+                        v_level[l]->shift_vect_s2 =
+                            std::vector<int>(size_radial_line); // shift between 2 radial lines for smoother 2
+                        v_level[l]->shift_vect_s3 = std::vector<int>(size_radial_line); // idem for smoother 3
+                        v_level[l]->ptr_vect_s2 = std::vector<int>(size_radial_line); // ptr to a radial line for smoother 2
+                        v_level[l]->ptr_vect_s3 = std::vector<int>(size_radial_line); // idem for smoother 3
+                        std::vector<int> ptr_vect;
+                        for (int j = v_level[l]->delete_circles; j < v_level[l]->nr_int; j++) {
+                            ptr_vect                                                  = v_level[l]->get_ptr_sc(j, 2, 1);
+                            v_level[l]->ptr_vect_s2[j - v_level[l]->delete_circles]   = ptr_vect[0];
+                            v_level[l]->ptr_vect_s3[j - v_level[l]->delete_circles]   = ptr_vect[1];
+                            v_level[l]->shift_vect_s2[j - v_level[l]->delete_circles] = ptr_vect[2] - ptr_vect[0];
+                            v_level[l]->shift_vect_s3[j - v_level[l]->delete_circles] = ptr_vect[3] - ptr_vect[1];
                         }
-                        // Circle smoother if:
-                        // - smoother 0 or 1
-                        // - and not across
-                        else if (smoother < 2 && !(smoother == 0 && !gyro::icntl[Param::DirBC_Interior] && ij == 0)) {
+                    }
+                }
+
+                // define Asc blocks
+                int* dep_Asc = new int[v_level[l]->delete_circles+v_level[l]->ntheta_int+1];
+#pragma omp parallel shared(dep_Asc)
+                {
+#pragma omp single
+                    {
+                        v_level[l]->build_Asc(dep_Asc);
+                    }
+                }
+
+                        #pragma omp atomic
+                        t_build_Asc += TOC;
+                        TIC;
+
+#pragma omp parallel
+                {
+#pragma omp single
+                    {
+                        for (int smoother = 0; smoother < 4; smoother++) {
                             TIC;
-                            if (gyro::icntl[Param::verbose] > 3)
-                                std::cout << "Circle factorization\n";
-                            // Initialize the LU factors
-                            v_level[l]->fill_in_circle(ij, smoother);
-                            // Factorization
-                            v_level[l]->facto_circle(
-                                v_level[l]->A_Zebra_r_LU_row[smoother][ij], v_level[l]->A_Zebra_c_LU_row[smoother][ij],
-                                v_level[l]->A_Zebra_v_LU_row[smoother][ij], v_level[l]->m_sc[smoother]);
-#pragma omp atomic
+                            v_level[l]->A_Zebra_r_LU_row[smoother].assign(v_level[l]->nblocks[smoother], std::vector<int>());
+                            v_level[l]->A_Zebra_c_LU_row[smoother].assign(v_level[l]->nblocks[smoother], std::vector<int>());
+                            v_level[l]->A_Zebra_v_LU_row[smoother].assign(v_level[l]->nblocks[smoother], std::vector<double>());
                             t_facto_Asc += TOC;
                             TIC;
-                        }
-                        else if (smoother > 1) {
-                            TIC;
-                            // Initialize the LU factors
-                            v_level[l]->A_Zebra_r_LU_row[smoother][ij] =
-                                std::vector<int>(v_level[l]->A_Zebra_r_row[smoother][ij]);
-                            v_level[l]->A_Zebra_c_LU_row[smoother][ij] =
-                                std::vector<int>(v_level[l]->A_Zebra_c_row[smoother][ij]);
-                            v_level[l]->A_Zebra_v_LU_row[smoother][ij] =
-                                std::vector<double>(v_level[l]->A_Zebra_v_row[smoother][ij]);
-                            if (gyro::icntl[Param::verbose] > 3)
-                                std::cout << "Radial factorization\n";
-                            // Factorization
-                            v_level[l]->facto_radial(
-                                v_level[l]->A_Zebra_r_LU_row[smoother][ij], v_level[l]->A_Zebra_c_LU_row[smoother][ij],
-                                v_level[l]->A_Zebra_v_LU_row[smoother][ij], v_level[l]->m_sc[smoother]);
+                            for (int ij = 0; ij < v_level[l]->nblocks[smoother]; ij++) {
+                                int line = (smoother%2)+ij*2 + (smoother>1)*(v_level[l]->delete_circles+1);
+                                // std::cout<<"smoother: "<<smoother<<", ij: "<<ij<<", del: "<<v_level[l]->delete_circles<<", line:"<<line<<"\n";
+#pragma omp task firstprivate(smoother, ij, line) depend(in: dep_Asc[line-1]) depend(in: dep_Asc[line]) depend(in: dep_Asc[line+1])
+                                {
+                                    // Diagonal smoother if:
+                                    // - DB and first radius
+                                    // - only 1 element (should not happen)
+                                    // - extrapolation on level 0 for smoothers 0 and 2 (except across the origin stencil)
+                                    if ((smoother == 0 && ij == 0 && gyro::icntl[Param::DirBC_Interior]) ||
+                                        v_level[l]->m_sc[smoother] == 1 ||
+                                        (gyro::icntl[Param::extrapolation] && l == 0 && smoother % 2 == 0 &&
+                                        !(smoother == 0 && !gyro::icntl[Param::DirBC_Interior] && ij == 0))) {
+                                        if (gyro::icntl[Param::verbose] > 3)
+                                            std::cout << "No diagonal factorization\n";
+                                        v_level[l]->A_Zebra_v_LU_row[smoother][ij] =
+                                            std::vector<double>(v_level[l]->A_Zebra_v_row[smoother][ij]);
+                                    }
+                                    // Circle smoother if:
+                                    // - smoother 0 or 1
+                                    // - and not across
+                                    else if (smoother < 2 && !(smoother == 0 && !gyro::icntl[Param::DirBC_Interior] && ij == 0)) {
+                                        TIC;
+                                        if (gyro::icntl[Param::verbose] > 3)
+                                            std::cout << "Circle factorization\n";
+                                        // Initialize the LU factors
+                                        v_level[l]->fill_in_circle(ij, smoother);
+                                        // Factorization
+                                        v_level[l]->facto_circle(
+                                            v_level[l]->A_Zebra_r_LU_row[smoother][ij], v_level[l]->A_Zebra_c_LU_row[smoother][ij],
+                                            v_level[l]->A_Zebra_v_LU_row[smoother][ij], v_level[l]->m_sc[smoother]);
+                                    }
+                                    else if (smoother > 1) {
+                                        TIC;
+                                        // Initialize the LU factors
+                                        v_level[l]->A_Zebra_r_LU_row[smoother][ij] =
+                                            std::vector<int>(v_level[l]->A_Zebra_r_row[smoother][ij]);
+                                        v_level[l]->A_Zebra_c_LU_row[smoother][ij] =
+                                            std::vector<int>(v_level[l]->A_Zebra_c_row[smoother][ij]);
+                                        v_level[l]->A_Zebra_v_LU_row[smoother][ij] =
+                                            std::vector<double>(v_level[l]->A_Zebra_v_row[smoother][ij]);
+                                        if (gyro::icntl[Param::verbose] > 3)
+                                            std::cout << "Radial factorization\n";
+                                        // Factorization
+                                        v_level[l]->facto_radial(
+                                            v_level[l]->A_Zebra_r_LU_row[smoother][ij], v_level[l]->A_Zebra_c_LU_row[smoother][ij],
+                                            v_level[l]->A_Zebra_v_LU_row[smoother][ij], v_level[l]->m_sc[smoother]);
+                                    }
+                                    if (smoother == 0 && !gyro::icntl[Param::DirBC_Interior] && ij == 0) {
+                                        TIC;
+                                        v_level[l]->A_Zebra_r_LU_row[smoother][ij] =
+                                            std::vector<int>(v_level[l]->A_Zebra_r_row[smoother][ij]);
+                                        v_level[l]->A_Zebra_c_LU_row[smoother][ij] =
+                                            std::vector<int>(v_level[l]->A_Zebra_c_row[smoother][ij]);
+                                        v_level[l]->A_Zebra_v_LU_row[smoother][ij] =
+                                            std::vector<double>(v_level[l]->A_Zebra_v_row[smoother][ij]);
+                                        if (gyro::icntl[Param::verbose] > 3)
+                                            std::cout << "Across factorization...";
+    #ifdef GMGPOLAR_USE_MUMPS
+                                        if (gyro::icntl[Param::optimized] == 0) {
+    #endif
+                                            if (gyro::icntl[Param::verbose] > 3)
+                                                std::cout << "using in-house direct solver.\n";
+                                            // Factorization
+                                            v_level[l]->facto_gaussian_elimination(v_level[l]->A_Zebra_r_LU_row[smoother][ij],
+                                                                                v_level[l]->A_Zebra_c_LU_row[smoother][ij],
+                                                                                v_level[l]->A_Zebra_v_LU_row[smoother][ij],
+                                                                                v_level[l]->m_sc[smoother]);
+    #ifdef GMGPOLAR_USE_MUMPS
+                                        }
+                                        else {
+                                            if (gyro::icntl[Param::verbose] > 2)
+                                                std::cout << "using MUMPS.\n";
+                                            v_level[l]->facto_mumps(
+                                                v_level[l]->mumps_across, v_level[l]->A_Zebra_r_row[smoother][ij],
+                                                v_level[l]->A_Zebra_c_row[smoother][ij], v_level[l]->A_Zebra_v_row[smoother][ij],
+                                                v_level[l]->m_sc[smoother]);
+                                        }
+    #endif
+                                    }
+
 #pragma omp atomic
-                            t_facto_Asc += TOC;
-                            TIC;
-                        }
-                        if (smoother == 0 && !gyro::icntl[Param::DirBC_Interior] && ij == 0) {
-                            TIC;
-                            v_level[l]->A_Zebra_r_LU_row[smoother][ij] =
-                                std::vector<int>(v_level[l]->A_Zebra_r_row[smoother][ij]);
-                            v_level[l]->A_Zebra_c_LU_row[smoother][ij] =
-                                std::vector<int>(v_level[l]->A_Zebra_c_row[smoother][ij]);
-                            v_level[l]->A_Zebra_v_LU_row[smoother][ij] =
-                                std::vector<double>(v_level[l]->A_Zebra_v_row[smoother][ij]);
-                            if (gyro::icntl[Param::verbose] > 3)
-                                std::cout << "Across factorization...";
-#ifdef GMGPOLAR_USE_MUMPS
-                            if (gyro::icntl[Param::optimized] == 0) {
-#endif
-                                if (gyro::icntl[Param::verbose] > 3)
-                                    std::cout << "using in-house direct solver.\n";
-                                // Factorization
-                                v_level[l]->facto_gaussian_elimination(v_level[l]->A_Zebra_r_LU_row[smoother][ij],
-                                                                       v_level[l]->A_Zebra_c_LU_row[smoother][ij],
-                                                                       v_level[l]->A_Zebra_v_LU_row[smoother][ij],
-                                                                       v_level[l]->m_sc[smoother]);
-#ifdef GMGPOLAR_USE_MUMPS
-                            }
-                            else {
-                                if (gyro::icntl[Param::verbose] > 2)
-                                    std::cout << "using MUMPS.\n";
-                                v_level[l]->facto_mumps(
-                                    v_level[l]->mumps_across, v_level[l]->A_Zebra_r_row[smoother][ij],
-                                    v_level[l]->A_Zebra_c_row[smoother][ij], v_level[l]->A_Zebra_v_row[smoother][ij],
-                                    v_level[l]->m_sc[smoother]);
-                            }
-#endif
-#pragma omp atomic
-                            t_facto_Asc += TOC;
-                            TIC;
-                        }
+                                    t_facto_Asc += TOC;
+                                    TIC;
+                                } // omp task
+                            } // for ij
+                        } // for smoother
+                    } // end single
+                } // omp parallel
+
+                delete[] dep_Asc;
+                
+                for (int smoother = 0; smoother < 4; smoother++) {
+                    for (int ij = 0; ij < v_level[l]->nblocks[smoother]; ij++) {
                         v_level[l]->A_Zebra_r_row[smoother][ij].clear();
                         v_level[l]->A_Zebra_c_row[smoother][ij].clear();
                         v_level[l]->A_Zebra_v_row[smoother][ij].clear();
