@@ -196,7 +196,6 @@ int level::get_ptr(int i, int j)
     }
     if (gyro::icntl[Param::DirBC_Interior] && j == 1)
         return ptr;
-
     // Interior nodes
     index_theta = (j < nr_int - 1) ? i : 0;
     ptr += 5 * (ntheta_int * nr_left + index_theta);

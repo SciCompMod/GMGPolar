@@ -167,7 +167,6 @@ void level::store_theta_n_co()
         ntheta_int--;
     if (ntheta_int % 2)
         std::cout << "WARNING: The number of thetas is odd. Please use even numbers only.\n";
-
     // To take first/last theta into account without conditions:
     // - theta_per = [theta_last, theta, 2PI]
     theta_per    = std::vector<double>(ntheta_int + 2);
@@ -182,7 +181,6 @@ void level::store_theta_n_co()
         cos_theta_per[i] = cos(theta_per[i]);
         sin_theta_per[i] = sin(theta_per[i]);
     }
-
     // Store cosines/sines (expensive)
     cos_theta = std::vector<double>(ntheta);
     for (int i = 0; i < ntheta; i++) {
@@ -206,7 +204,6 @@ void level::store_theta_n_co()
     for (int i = 0; i < ntheta; i++) {
         sin_theta_PI[i] = sin(theta_PI[i]);
     }
-
     // Size of intervals in theta
     // thetaplus = [k_last, thetaplus, k_last]
     thetaplus = std::vector<double>(ntheta_int);
@@ -221,7 +218,6 @@ void level::store_theta_n_co()
         thetaplus_per[i] = theta_per[i + 1] - theta_per[i];
     thetaplus_per[ntheta_int] = 2 * PI - theta_per[ntheta_int];
     thetaplus_per[0]          = thetaplus_per[ntheta_int];
-
     // Size of intervals in r
     hplus = std::vector<double>(nr_int);
     for (int i = 0; i < nr_int; i++)

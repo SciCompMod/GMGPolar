@@ -68,12 +68,14 @@ void level::build_A()
             if (gyro::icntl[Param::DirBC_Interior]) { // (r[0],0) is on Dirichlet boundary
 #pragma omp task shared(dep, start_j) depend(out : dep[0])
                 {
+                    std::cout << "test" << std::endl;
                     for (int i = 0; i < ntheta_int; i++) {
                         row_indices[i] = i;
                         col_indices[i] = i;
 
                         vals[i] += 1.0;
                     }
+                    std::cout << "test2" << std::endl;
                 } //end of task and parallel
             }
 
@@ -81,6 +83,7 @@ void level::build_A()
             {
                 // int ptr, row; // To be removed ?
                 // Take boundary condition into account: Dirichlet-RB
+                std::cout << "test3" << std::endl;
                 for (int i = 0; i < ntheta_int; i++) {
                     // row                              = m - ntheta_int + i;
                     // ptr                              = nz - ntheta_int + i;
@@ -89,6 +92,7 @@ void level::build_A()
 
                     vals[nz - ntheta_int + i] += 1.0;
                 }
+                std::cout << "test4" << std::endl;
             } //end of task and parallel
 
 #pragma omp task shared(dep, start_j) depend(out : dep[start_j])
@@ -1255,14 +1259,17 @@ void level::build_betaVec()
                     // - in r
                     hs = hplus[j];
                     for (i = 0; i < ntheta_int; i++) {
+                        if (fabs(fabs(det[i]) - r[j]) > 1e-6) {
+                            //std::cout << r[j] / fabs(det[i]) << std::endl; //1.69
+                            //std::cout << gyro::dcntl[Param::R] * gyro::dcntl[Param::R] << std::endl;
+                        }
                         row = j * ntheta_int + i;
                         // - in theta
                         kt             = thetaplus_per[i + 1];
                         ktmin1         = thetaplus_per[i];
                         double coeff_b = gyro::coeff_beta(r[j], 0);
-
-                        double fac_hk = 0.25 * (kt + ktmin1) * (hs + hsmin1);
-                        betaVec[row]  = fac_hk * coeff_b * fabs(det[i]);
+                        double fac_hk  = 0.25 * (kt + ktmin1) * (hs + hsmin1);
+                        betaVec[row]   = fac_hk * coeff_b * fabs(det[i]);
                     }
                     hsmin1 = hs;
                 }
