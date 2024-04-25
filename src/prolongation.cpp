@@ -355,7 +355,7 @@ std::vector<double> level::apply_restriction_bi(std::vector<double> u)
                     Pu[col] += val * u[row];
 
                     // // Fine nodes in same r (2i, 2j+1)
-                    // Next fine node (right)66
+                    // Next fine node (right)
                     i      = iplus_vect[i_f];
                     j      = j_f;
                     row    = j * ntheta_int + i;
