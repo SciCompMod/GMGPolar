@@ -142,28 +142,36 @@ void level::build_r()
         // edge
         int se;
 
-        // allow refining of the grid at r_jump, the center point of the 
+        // allow refining of the grid at r_jump, the center point of the
         // drop of the diffusion coefficient alpha.
         double r_jump;
         if (gyro::icntl[Param::alpha_coeff] == SONNENDRUCKER) {
             // The center of the coefficient jump lies at 0.6888697651782026
-            // for backward stability with previous runs and the Matlab code, 
+            // for backward stability with previous runs and the Matlab code,
             // we use 0.66 though.
             r_jump = 0.66;
-        } else if (gyro::icntl[Param::alpha_coeff] == ZONI) {
+        }
+        else if (gyro::icntl[Param::alpha_coeff] == ZONI) {
             r_jump = 0.4837;
-        } else if (gyro::icntl[Param::alpha_coeff] == ZONI_SHIFTED) {
+        }
+        else if (gyro::icntl[Param::alpha_coeff] == ZONI_SHIFTED) {
             // Choose center point of descent.
             // a) - ln(0.5 * (alpha(0) - alpha(Rmax))):
             //    - ln(0.5 * (np.exp(-np.tanh(-14)) - np.exp(-np.tanh(6)))) = 0.16143743821247852
             // b) r_center = Rmax * (np.arctanh(0.16143743821247852) + 14) / 20 = 0.7081431124450334 Rmax
             r_jump = 0.7081;
-        } else if (gyro::icntl[Param::alpha_coeff] == POISSON) {
+        }
+        else if (gyro::icntl[Param::alpha_coeff] == POISSON) {
             r_jump = 0.5; // There is no jump for Poisson so this is an arbitrary choice
-        } else {
+        }
+        else {
             throw std::runtime_error("Unknown alpha coeff");
         }
-        se = floor(nr * r_jump) - n_elems_refined / 2;
+        if (floor(nr * r_jump) > nr - (n_elems_refined / 2)) {
+            int new_aniso   = log2(nr - floor(nr * r_jump)) + 1;
+            n_elems_refined = pow(2, new_aniso);
+        }
+        se     = floor(nr * r_jump) - n_elems_refined / 2;
         int ee = se + n_elems_refined;
         // takeout
         int st = ceil((double)n_elems_refined / 4.0 + 1) - 1;
@@ -194,7 +202,6 @@ void level::build_r()
             r_set_p1 = r_set_p1_tmp;
             half *= 0.5;
         }
-
         // such that the total size is 8*x+1 (or we do not refine)
         nr        = nr + r_set.size();
         int shift = 0;
@@ -204,7 +211,6 @@ void level::build_r()
         r_set.erase(r_set.begin(), itr);
         for (int i = 0; i < n_elems_refined; i++)
             r_set.insert(r_tmp2[se + i]);
-
         // group all in r_tmp
         nr = n_elems_equi - n_elems_refined + r_set.size() + 1;
 
@@ -229,6 +235,7 @@ void level::build_r()
         else
             r[i] = 0.5 * (r_tmp[(i - 1) / 2] + r_tmp[(i + 1) / 2]);
     }
+    std::cout << "new nr " + std::to_string(nr) << std::endl;
 } /* ----- end of level::build_r ----- */
 
 /*!
