@@ -168,8 +168,8 @@ void level::build_r()
             throw std::runtime_error("Unknown alpha coeff");
         }
         if (floor(nr * r_jump) > nr - (n_elems_refined / 2)) {
-            int new_aniso   = log2(nr - floor(nr * r_jump)) + 1;
-            n_elems_refined = pow(2, new_aniso);
+            int new_n_elems_exp = log2(nr - floor(nr * r_jump)) + 1;
+            n_elems_refined     = pow(2, new_n_elems_exp);
         }
         se     = floor(nr * r_jump) - n_elems_refined / 2;
         int ee = se + n_elems_refined;
@@ -235,7 +235,9 @@ void level::build_r()
         else
             r[i] = 0.5 * (r_tmp[(i - 1) / 2] + r_tmp[(i + 1) / 2]);
     }
-    std::cout << "new nr " + std::to_string(nr) << std::endl;
+    if (gyro::icntl[Param::verbose] > 1) {
+        std::cout << "Parameter nr equals " + std::to_string(nr) << "." << std::endl;
+    }
 } /* ----- end of level::build_r ----- */
 
 /*!
