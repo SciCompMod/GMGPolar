@@ -105,6 +105,53 @@ double calculate_detDF(int mod_pk, double r_j, double theta_i)
     return res;
 }
 
+int emulate_get_ptr(int i, int j, level& test_level)
+{
+    int index = j * test_level.ntheta_int + i;
+
+    if (j == 0) {
+        if (gyro::icntl[Param::DirBC_Interior]) {
+            return i;
+        }
+        else {
+            int res = (5 + 2 * (gyro::icntl[Param::mod_pk] > 0)) * i;
+            return res;
+        }
+    }
+    if (j == 1 && gyro::icntl[Param::DirBC_Interior]) { //nodes linked to dirichlet-bc
+        int res = test_level.ntheta_int + (4 + 2 * (gyro::icntl[Param::mod_pk] > 0)) * i;
+        return res;
+    }
+    if (j > gyro::icntl[Param::DirBC_Interior]) {
+
+        int ptr = (5 + 2 * (gyro::icntl[Param::mod_pk] > 0) +
+                   (std::min(j, test_level.nr_int - 1) - (gyro::icntl[Param::DirBC_Interior] + 1)) *
+                       (5 + 4 * (gyro::icntl[Param::mod_pk] > 0))) *
+                  test_level.ntheta_int;
+
+        /*
+                    in dirichlet case (1+4+2*(mod_pk>0))*ntheta_int. 1 for Dirichlet nodes, 4+2*(mod_pk>0) for linked to
+                    Dirichlets. In this case the interior nodes get counted from j>1 upwards until j<test_level.nr_int-1 
+                    
+                    in across the origin case we have (5+2*(mod_pk))*ntheta_int nodes which are discretized across the origin
+                    and the interior nodes get counted from j>0 upwards until j<test_level.nr_int-1
+                */
+
+        if (j < test_level.nr_int - 1) {
+            ptr += i * (5 + 4 * (gyro::icntl[Param::mod_pk] > 0));
+            return ptr;
+        }
+        if (j == test_level.nr_int - 1) { //nodes linked to outer dirichlet BC
+            ptr += i * (4 + 2 * (gyro::icntl[Param::mod_pk] > 0));
+            return ptr;
+        }
+        if (j == test_level.nr_int) {
+            ptr += (4 + 2 * (gyro::icntl[Param::mod_pk] > 0)) * test_level.ntheta_int + i;
+            return ptr;
+        }
+    }
+}
+
 TEST_P(test_operator, test_nonzero)
 {
 
@@ -148,47 +195,7 @@ TEST_P(test_operator, get_ptr)
         for (int j = 0; j < test_level.nr; ++j) {
             int index = j * test_level.ntheta_int + i;
 
-            if (j == 0) {
-                if (gyro::icntl[Param::DirBC_Interior]) {
-                    EXPECT_EQ(test_level.get_ptr(i, j), i); //test dirichlet-nodes
-                }
-                else {
-                    int res = (5 + 2 * (gyro::icntl[Param::mod_pk] > 0)) * i;
-                    EXPECT_EQ(test_level.get_ptr(i, j), res);
-                }
-            }
-            if (j == 1 && gyro::icntl[Param::DirBC_Interior]) { //nodes linked to dirichlet-bc
-                int res = test_level.ntheta_int + (4 + 2 * (gyro::icntl[Param::mod_pk] > 0)) * i;
-                EXPECT_EQ(test_level.get_ptr(i, j), res);
-            }
-            if (j > gyro::icntl[Param::DirBC_Interior]) {
-
-                int ptr = (5 + 2 * (gyro::icntl[Param::mod_pk] > 0) +
-                           (std::min(j, test_level.nr_int - 1) - (gyro::icntl[Param::DirBC_Interior] + 1)) *
-                               (5 + 4 * (gyro::icntl[Param::mod_pk] > 0))) *
-                          test_level.ntheta_int;
-
-                /*
-                    in dirichlet case (1+4+2*(mod_pk>0))*ntheta_int. 1 for Dirichlet nodes, 4+2*(mod_pk>0) for linked to
-                    Dirichlets. In this case the interior nodes get counted from j>1 upwards until j<test_level.nr_int-1 
-                    
-                    in across the origin case we have (5+2*(mod_pk))*ntheta_int nodes which are discretized across the origin
-                    and the interior nodes get counted from j>0 upwards until j<test_level.nr_int-1
-                */
-
-                if (j < test_level.nr_int - 1) {
-                    ptr += i * (5 + 4 * (gyro::icntl[Param::mod_pk] > 0));
-                    EXPECT_EQ(test_level.get_ptr(i, j), ptr) << "(" + std::to_string(i) + "," + std::to_string(j) + ")";
-                }
-                if (j == test_level.nr_int - 1) { //nodes linked to outer dirichlet BC
-                    ptr += i * (4 + 2 * (gyro::icntl[Param::mod_pk] > 0));
-                    EXPECT_EQ(test_level.get_ptr(i, j), ptr) << "(" + std::to_string(i) + "," + std::to_string(j) + ")";
-                }
-                if (j == test_level.nr_int) {
-                    ptr += (4 + 2 * (gyro::icntl[Param::mod_pk] > 0)) * test_level.ntheta_int + i;
-                    EXPECT_EQ(test_level.get_ptr(i, j), ptr) << "(" + std::to_string(i) + "," + std::to_string(j) + ")";
-                }
-            }
+            EXPECT_EQ(test_level.get_ptr(i, j), emulate_get_ptr(i, j, test_level));
         }
     }
 }
