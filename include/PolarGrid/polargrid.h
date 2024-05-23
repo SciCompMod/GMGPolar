@@ -53,7 +53,7 @@ public:
     //          the center point of the drop of the diffusion coefficient alpha.
     //   divideBy2: Number of times to divide both radial and angular divisions by 2.
     PolarGrid(
-        const scalar_t R0, const scalar_t R, const int nr_exp, const int ntheta_exp, 
+        const scalar_t R0, const scalar_t R, const int nr_exp, const int ntheta_exp, const double r_jump,
         const int anisotropic_factor, const alpha_coeff alpha, const int divideBy2, 
         std::optional<scalar_t> splitting_radius = std::nullopt
     );
@@ -132,6 +132,11 @@ public:
     // Get the number of nodes in radial smoother.
     int numberRadialSmootherNodes() const;
 
+    int numberBlackSmootherCircles() const;
+    int numberWhiteSmootherCircles() const;
+    int numberBlackSmootherRadials() const;
+    int numberWhiteSmootherRadials() const;
+    
     // Implementation in src/PolarGrid/load_write_grid.cpp
     // Write the grid data to files specified for radii and angles with given precision.
     void writeToFile(
@@ -170,8 +175,10 @@ private:
     int numberCircularSmootherNodes_; // Number of nodes in the circular smoother
     int numberRadialSmootherNodes_; // Number of nodes in the radial smoother
 
-    int num_BC_;
-    int num_BR_;
+    int numberBlackSmootherCircles_;
+    int numberWhiteSmootherCircles_;
+    int numberBlackSmootherRadials_;
+    int numberWhiteSmootherRadials_;
 
     // Relationship constraints:
     // radius(numberSmootherCircles) <= smoother_splitting_radius < radius(numberSmootherCircles + 1)
@@ -203,7 +210,7 @@ private:
     //   alpha: Allow refining of the grid at r_jump, 
     //          the center point of the drop of the diffusion coefficient alpha.
     void constructRadialDivisions(
-        const scalar_t R0, const scalar_t R, const int nr_exp,
+        const scalar_t R0, const scalar_t R, const int nr_exp, const double r_jump,
         const int anisotropic_factor, const alpha_coeff alpha);
 
     // Construct angular divisions for grid generation.
@@ -222,7 +229,7 @@ private:
     // Help constrcut radii_ when an anisotropic radial division is requested
     // Implementation in src/PolarGrid/anisotropic_division.cpp
     void RadialAnisotropicDivision(std::vector<scalar_t>& r_temp, 
-        const scalar_t R0, const scalar_t R, const int nr_exp, 
+        const scalar_t R0, const scalar_t R, const int nr_exp, const double r_jump,
         const int anisotropic_factor, const alpha_coeff alpha
     ) const;
 

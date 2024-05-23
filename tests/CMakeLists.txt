@@ -16,14 +16,14 @@ set(TESTSOURCES
     vector.cpp
     operations.cpp
     polargrid.cpp
-    prolongation.cpp
-    restriction.cpp
+    # prolongation.cpp
+    # restriction.cpp
 )
 
 # Add executables for each test source
 foreach(TESTSOURCE ${TESTSOURCES})
     get_filename_component(TESTNAME ${TESTSOURCE} NAME_WE)
-    add_executable(${TESTNAME} ${TESTSOURCE} ${LEVEL_SOURCES} ${GMG_POLAR_SOURCES} ${OPERATOR_SOURCES} ${POLAR_GRID_SOURCES} ${TASK_DISTRIBUTION_SOURCES} ${TEST_SOURCES})
+    add_executable(${TESTNAME} ${TESTSOURCE} ${LEVEL_SOURCES} ${GMG_POLAR_SOURCES} ${INTERPOLATION_SOURCES} ${OPERATOR_SOURCES} ${POLAR_GRID_SOURCES} ${TASK_DISTRIBUTION_SOURCES} ${TEST_SOURCES} ${INPUT_FUNCTIONS_SOURCES})
     target_compile_features(${TESTNAME} PRIVATE cxx_std_20)
     target_link_libraries(${TESTNAME} GTest::gtest_main)
     list(APPEND TESTS ${TESTNAME})

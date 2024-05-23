@@ -6,6 +6,8 @@ class GMGPolar;
 #include <vector>
 #include <cassert>
 #include <cmath>
+#include <thread>
+#include <mutex>
 
 #include <omp.h>
 
@@ -17,6 +19,10 @@ class GMGPolar;
 #include "../include/linear_algebra/operations.h"
 #include "../include/GMGPolar/gmgpolar.h"
 #include "../include/ExactFunctions/exactfunctions.h"
+#include "../include/InputFunctions/domain_geometry.h"
+
+#include "../include/InputFunctions/domain_geometry.h"
+#include "../include/InputFunctions/system_parameters.h"
 
 class Operator {
 public:    
@@ -26,8 +32,14 @@ public:
     void applyATake(const Level& onLevel, Vector<scalar_t>& result, const Vector<scalar_t>& x) const;
     void applyAGive(const Level& onLevel, Vector<scalar_t>& result, const Vector<scalar_t>& x) const;
     void applyAGiveTasks(const Level& onLevel, Vector<scalar_t>& result, const Vector<scalar_t>& x) const;
+    void applyAGiveMutex(Level& onLevel, Vector<scalar_t>& result, const Vector<scalar_t>& x);
 
-    void arr_att_art(const ExactFunctions& exactFuncs, double r, double theta, int i_theta, double coeff_alpha, double& arr, double& att, double& art, double& detDFinv) const;
+    void arr_att_art(
+        const double& r, const double& theta, 
+        const double& sin_theta, const double& cos_theta, 
+        const double& coeff_alpha, 
+        double& arr, double& att, double& art, double& detDFinv
+    ) const;
 
     // void applyA_orthogonal_Give(const Level& onLevel, Vector<scalar_t>& result, const Vector<scalar_t>& x, const int smoother) const;
 
@@ -38,6 +50,62 @@ private:
     geometry_type geometry_;
     std::vector<scalar_t> sin_theta_;
     std::vector<scalar_t> cos_theta_;
+
+    std::shared_ptr<dFx_dr_Functor> dFx_dr_;
+    std::shared_ptr<dFy_dr_Functor> dFy_dr_;
+    std::shared_ptr<dFx_dt_Functor> dFx_dt_;
+    std::shared_ptr<dFy_dt_Functor> dFy_dt_;
+
+    std::shared_ptr<alpha_Functor> alpha_;
+    std::shared_ptr<beta_Functor> beta_;
+
+    // Directed graph dependencies for applyAGiveMutex
+
+    int numberMod0Circles;
+    int numberMod1Circles;
+    int numberMod2Circles;
+
+    int numberDiv3Radials;
+
+    int additional_circle_task;
+    int additional_radial_task;
+
+    std::vector<std::mutex> Mod1CircleMutexes;
+    std::vector<int> Mod1CircleDepCounter;
+
+    std::vector<std::mutex> Mod2CircleMutexes;
+    std::vector<int> Mod2CircleDepCounter;
+
+    std::vector<std::mutex> Mod1RadialMutexes;
+    std::vector<int> Mod1RadialDepCounter;
+
+    std::vector<std::mutex> Mod2RadialMutexes;
+    std::vector<int> Mod2RadialDepCounter;
+
+
+//     int Circles = 300;
+//     int BlackCircles = 150;
+//     int WhiteCircles = 150;
+//     // BlackCirclesTaskIndex [8,6,4,2,0]
+//     // WhiteCircleTaskIndex [9,7,5,3,1]
+
+//     int Radials = 200;
+//     int BlackRadials = 100;
+//     int WhiteRadials = 100;
+//     // BlackRadialTaskIndex [10,12,14,16,18]
+//     // WhiteRadialTaskIndex [11,13,15,17,19]
+
+//     assert(BlackCircles == WhiteCircles || BlackCircles == WhiteCircles + 1);
+//     std::vector<std::mutex> WhiteCircleMutexes(WhiteCircles);
+//     std::vector<int> WhiteCircleDepCounter(WhiteCircles, 2);
+//     if(BlackCircles == WhiteCircles) WhiteCircleDepCounter.back() = 1;
+
+
+//     assert(BlackRadials == WhiteRadials);
+//     std::vector<std::mutex> WhiteRadialMutexes(WhiteRadials);
+//     std::vector<int> WhiteRadialDepCounter(WhiteRadials, 2);
+
+
 };
 
-
+#include "operator.inl"

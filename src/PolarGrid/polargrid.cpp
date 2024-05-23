@@ -49,14 +49,14 @@ PolarGrid::PolarGrid(
 // Constructor to initialize grid using parameters from GMGPolar.
 PolarGrid::PolarGrid(
     const scalar_t R0, const scalar_t R, 
-    const int nr_exp, const int ntheta_exp, 
+    const int nr_exp, const int ntheta_exp, const double r_jump,
     const int anisotropic_factor, const alpha_coeff alpha, 
     const int divideBy2, 
     std::optional<scalar_t> splitting_radius) 
 {
     assert(R0 > 0.0 && R > R0 && !equals(R0,R));
     // Construct radii_ and angles_
-    constructRadialDivisions(R0, R, nr_exp, anisotropic_factor, alpha);
+    constructRadialDivisions(R0, R, nr_exp, r_jump, anisotropic_factor, alpha);
     constructAngularDivisions(ntheta_exp, nr_);
     refineGrid(divideBy2);
     // Check parameter validity
@@ -75,7 +75,7 @@ PolarGrid::PolarGrid(
 // Construct radial divisions for grid generation.
 void PolarGrid::constructRadialDivisions(
     const scalar_t R0, const scalar_t R, 
-    const int nr_exp, 
+    const int nr_exp, const double r_jump,
     const int anisotropic_factor, const alpha_coeff alpha)
 {
     // r_temp contains the values before we refine one last time for extrapolation.
@@ -93,7 +93,7 @@ void PolarGrid::constructRadialDivisions(
         r_temp[nr - 1] = R;
     } else {
         // Implementation in src/PolarGrid/anisotropic_division.cpp
-        RadialAnisotropicDivision(r_temp, R0, R, nr_exp, anisotropic_factor, alpha);
+        RadialAnisotropicDivision(r_temp, R0, R, nr_exp, r_jump, anisotropic_factor, alpha);
     }
     // Refine division in the middle for extrapolation
     nr_ = 2 * r_temp.size() - 1;
@@ -221,8 +221,10 @@ void PolarGrid::initializeLineSplitting(std::optional<scalar_t> splitting_radius
     numberCircularSmootherNodes_ = numberSmootherCircles_ * ntheta();
     numberRadialSmootherNodes_ = lengthSmootherRadial_ * ntheta();
 
-    num_BC_ =  (numberSmootherCircles() - (numberSmootherCircles() / 2)) * ntheta();
-    num_BR_ =  (ntheta() - (ntheta() / 2)) * lengthSmootherRadial();
+    numberBlackSmootherCircles_ = numberSmootherCircles() - (numberSmootherCircles() / 2);
+    numberWhiteSmootherCircles_ = numberSmootherCircles() - numberBlackSmootherCircles_;
+    numberBlackSmootherRadials_ = (ntheta() - (ntheta() / 2));
+    numberWhiteSmootherRadials_ = ntheta() - numberBlackSmootherRadials_;
 
     assert(numberSmootherCircles() + lengthSmootherRadial() == nr());
     assert(numberCircularSmootherNodes() + numberRadialSmootherNodes() == number_of_nodes());

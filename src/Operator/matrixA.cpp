@@ -1,24 +1,6 @@
 #include "../../include/Operator/operator.h"
 
-void Operator::arr_att_art(const ExactFunctions& exactFuncs, double r, double theta, int i_theta, double coeff_alpha, double& arr, double& att, double& art, double& detDFinv) const{
-    // With precomputed sinus and cosin values
-    double Jrr = exactFuncs.J_rr(r, theta, kappa_eps_, delta_e_, Rmax_, sin_theta_[i_theta], cos_theta_[i_theta]);
-    double Jrt = exactFuncs.J_rt(r, theta, kappa_eps_, delta_e_, Rmax_, sin_theta_[i_theta], cos_theta_[i_theta]);
-    double Jtr = exactFuncs.J_tr(r, theta, kappa_eps_, delta_e_, Rmax_, sin_theta_[i_theta], cos_theta_[i_theta]);
-    double Jtt = exactFuncs.J_tt(r, theta, kappa_eps_, delta_e_, Rmax_, sin_theta_[i_theta], cos_theta_[i_theta]);
-
-    // Evaluate sinus and cosin values as needed
-    // double Jrr = exactFuncs.J_rr(r, theta, kappa_eps_, delta_e_, Rmax_);
-    // double Jrt = exactFuncs.J_rt(r, theta, kappa_eps_, delta_e_, Rmax_);
-    // double Jtr = exactFuncs.J_tr(r, theta, kappa_eps_, delta_e_, Rmax_);
-    // double Jtt = exactFuncs.J_tt(r, theta, kappa_eps_, delta_e_, Rmax_);
-    
-    detDFinv = Jrr * Jtt - Jrt * Jtr;
-    arr = 0.5 * (Jtt * Jtt + Jrt * Jrt) * coeff_alpha / fabs(detDFinv);
-    art = -0.25 * (Jtt * Jtr + Jrt * Jrr) * coeff_alpha / fabs(detDFinv);
-    att = 0.5 * (Jtr * Jtr + Jrr * Jrr) * coeff_alpha / fabs(detDFinv);
-}
-
+#include "../../include/common/constants.h"
 
 void Operator::applyATake0(const Level& onLevel, Vector<scalar_t>& result, const Vector<scalar_t>& x) const{
     const PolarGrid& grid = onLevel.grid();
@@ -27,22 +9,25 @@ void Operator::applyATake0(const Level& onLevel, Vector<scalar_t>& result, const
     assert(x.size() == grid.number_of_nodes());
     assert(result.size() == grid.number_of_nodes());
 
-    double arr, arr_left, arr_right, arr_bottom, arr_top;
-    double att, att_left, att_right, att_bottom, att_top;
-    double art, art_left, art_right, art_bottom, art_top;
-    double detDFinv, detDFinv_left, detDFinv_right, detDFinv_bottom, detDFinv_top;
-
-    double coeff_alpha, coeff_beta;
-
     #pragma omp parallel for
     for(int index = 0; index < grid.number_of_nodes(); index ++){
+        double arr, arr_left, arr_right, arr_bottom, arr_top;
+        double att, att_left, att_right, att_bottom, att_top;
+        double art, art_left, art_right, art_bottom, art_top;
+        double detDFinv, detDFinv_left, detDFinv_right, detDFinv_bottom, detDFinv_top;
+
+        double coeff_alpha, coeff_beta;
+        double sin_theta, cos_theta;
+
         MultiIndex node = grid.multiindex(index);
         Point coords = grid.polar_coordinates(node);
 
-        coeff_alpha = exactFuncs.coeffs1(coords[0], Rmax_);
-        coeff_beta = exactFuncs.coeffs2(coords[0], Rmax_);
+        coeff_alpha = (*alpha_)(coords[0]);
+        coeff_beta = (*beta_)(coords[0]);
 
-        arr_att_art(exactFuncs, coords[0], coords[1], node[1], coeff_alpha, arr, att, art, detDFinv);
+        sin_theta = sin(coords[1]); cos_theta = cos(coords[1]);
+
+        arr_att_art(coords[0], coords[1], sin_theta, cos_theta, coeff_alpha, arr, att, art, detDFinv);
 
         std::array<std::pair<scalar_t,scalar_t>, space_dimension> neighbor_distance;
         grid.adjacent_neighbor_distances(node, neighbor_distance);
@@ -59,16 +44,15 @@ void Operator::applyATake0(const Level& onLevel, Vector<scalar_t>& result, const
             if(neighbors[0].first != -1){
                 MultiIndex left_node = grid.multiindex(neighbors[0].first);
                 Point left_coords = grid.polar_coordinates(left_node); 
-                double coeff_alpha_left = exactFuncs.coeffs1(left_coords[0], Rmax_);
-                arr_att_art(exactFuncs, left_coords[0], left_coords[1], left_node[1], coeff_alpha_left, arr_left, att_left, art_left, detDFinv_left);     
+                double coeff_alpha_left = (*alpha_)(left_coords[0]);
+                sin_theta = sin(left_coords[1]); cos_theta = cos(left_coords[1]);
+                arr_att_art(left_coords[0], left_coords[1], sin_theta, cos_theta, coeff_alpha_left, arr_left, att_left, art_left, detDFinv_left);     
             }else{
                 MultiIndex across_origin_node(0, (node[1] + grid.ntheta() / 2) % grid.ntheta());
                 Point across_origin_coords = grid.polar_coordinates(across_origin_node); 
-
-                std::cout<<across_origin_coords[0]<<", "<<across_origin_coords[1]<<std::endl;
-
-                scalar_t coeff_alpha_left = exactFuncs.coeffs1(across_origin_coords[0], Rmax_);
-                arr_att_art(exactFuncs, across_origin_coords[0], across_origin_coords[1], across_origin_node[1], coeff_alpha_left, arr_left, att_left, art_left, detDFinv_left);  
+                scalar_t coeff_alpha_left = (*alpha_)(across_origin_coords[0]);
+                sin_theta = sin(across_origin_coords[1]); cos_theta = cos(across_origin_coords[1]);
+                arr_att_art(across_origin_coords[0], across_origin_coords[1], sin_theta, cos_theta, coeff_alpha_left, arr_left, att_left, art_left, detDFinv_left);  
             }
 
             // Right
@@ -76,21 +60,24 @@ void Operator::applyATake0(const Level& onLevel, Vector<scalar_t>& result, const
                 MultiIndex right_node = grid.multiindex(neighbors[0].second);
                 Point right_coords = grid.polar_coordinates(right_node); 
                 scalar_t coeff_alpha_right = exactFuncs.coeffs1(right_coords[0], Rmax_);
-                arr_att_art(exactFuncs, right_coords[0], right_coords[1], right_node[1], coeff_alpha_right, arr_right, att_right, art_right, detDFinv_right);     
+                sin_theta = sin(right_coords[1]); cos_theta = cos(right_coords[1]);
+                arr_att_art(right_coords[0], right_coords[1], sin_theta, cos_theta, coeff_alpha_right, arr_right, att_right, art_right, detDFinv_right);     
             }
             // Bottom
             if(neighbors[1].first != -1){
                 MultiIndex bottom_node = grid.multiindex(neighbors[1].first);
                 Point bottom_coords = grid.polar_coordinates(bottom_node); 
-                scalar_t coeff_alpha_bottom = exactFuncs.coeffs1(bottom_coords[0], Rmax_);
-                arr_att_art(exactFuncs, bottom_coords[0], bottom_coords[1], bottom_node[1], coeff_alpha_bottom, arr_bottom, att_bottom, art_bottom, detDFinv_bottom);   
+                scalar_t coeff_alpha_bottom = (*alpha_)(bottom_coords[0]);
+                sin_theta = sin(bottom_coords[1]); cos_theta = cos(bottom_coords[1]);
+                arr_att_art(bottom_coords[0], bottom_coords[1], sin_theta, cos_theta, coeff_alpha_bottom, arr_bottom, att_bottom, art_bottom, detDFinv_bottom);   
             }
             // Top
             if(neighbors[1].second != -1){
                 MultiIndex top_node = grid.multiindex(neighbors[1].second);
                 Point top_coords = grid.polar_coordinates(top_node); 
-                scalar_t coeff_alpha_top = exactFuncs.coeffs1(top_coords[0], Rmax_);
-                arr_att_art(exactFuncs, top_coords[0], top_coords[1], top_node[1], coeff_alpha_top, arr_top, att_top, art_top, detDFinv_top);   
+                scalar_t coeff_alpha_top = (*alpha_)(top_coords[0]);
+                sin_theta = sin(top_coords[1]); cos_theta = cos(top_coords[1]);
+                arr_att_art(top_coords[0], top_coords[1], sin_theta, cos_theta, coeff_alpha_top, arr_top, att_top, art_top, detDFinv_top);   
             }
 
             scalar_t h1 = neighbor_distance[0].first;
@@ -172,10 +159,6 @@ void Operator::applyATake0(const Level& onLevel, Vector<scalar_t>& result, const
         }
     }
 }
-
-
-
-
 
 
 
@@ -299,7 +282,7 @@ do { \
             + coeff1 * arr * x[grid.index(i_r-1,i_theta)] /* Center: (Right) */ \
             - 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Right */ \
             + 0.25 * art * x[grid.index(i_r,i_theta-1)]; /* Bottom Right */ \
-        /* Don't give to the dirichlet boundary part! */ \
+        /* Don't give to the dirichlet boundary! */ \
         /* Fill result(i+1,j) */ \
         /* result[grid.index(i_r+1,i_theta)] += */ \
         /*     - coeff2 * arr * x[grid.index(i_r,i_theta)] // Left */ \
@@ -323,7 +306,7 @@ do { \
     } else if (i_r == grid.nr() - 1) { \
         /* Dirichlet boundary */ \
         result[grid.index(i_r,i_theta)] = x[grid.index(i_r,i_theta)]; \
-        /* Give values to the interior nodes! */ \
+        /* Give value to the interior nodes! */ \
         scalar_t h1 = grid.r_dist(i_r-1); \
         scalar_t k1 = grid.theta_dist(i_theta-1); \
         scalar_t k2 = grid.theta_dist(i_theta); \
@@ -367,13 +350,14 @@ void Operator::applyAGive(const Level& onLevel, Vector<scalar_t>& result, const 
     #pragma omp parallel num_threads(numThreads)
     {   
         double r, theta;
+        double sin_theta, cos_theta;
         double arr, att, art;
         double coeff_alpha, coeff_beta;
         double detDFinv;
 
         const int threadID = omp_get_thread_num();
         // ---------------------------------------------------------- //
-        // Take care of the speration strips of the circular smoother //
+        // Take care of the separation strips of the circular smoother //
         // ---------------------------------------------------------- //
         const int i_r_start = CircleSmootherTasks.getStart(threadID);
         const int i_r_end = CircleSmootherTasks.getEnd(threadID);
@@ -382,11 +366,13 @@ void Operator::applyAGive(const Level& onLevel, Vector<scalar_t>& result, const 
         // For loop matches circular access pattern
         for (int i_r = i_r_end - i_r_separate; i_r < i_r_end; i_r++){
             r = grid.radius(i_r);
-            coeff_alpha = exactFuncs.coeffs1(r, Rmax_);
-            coeff_beta = exactFuncs.coeffs2(r, Rmax_);
+            coeff_alpha = (*alpha_)(r);
+            coeff_beta = (*beta_)(r);
             for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++){
                 theta = grid.theta(i_theta);
-                arr_att_art(exactFuncs, r, theta, i_theta, coeff_alpha, arr, att, art, detDFinv);
+                sin_theta = sin_theta_[i_theta];
+                cos_theta = cos_theta_[i_theta];
+                arr_att_art(r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDFinv);
                 NODE_APPLY_A_GIVE(i_r, i_theta, grid, result, x, arr, att, art, coeff_beta, detDFinv);
             }
         }
@@ -394,7 +380,7 @@ void Operator::applyAGive(const Level& onLevel, Vector<scalar_t>& result, const 
         #pragma omp barrier
 
         // -------------------------------------------------------- //
-        // Take care of the speration strips of the radial smoother //
+        // Take care of the separation strips of the radial smoother //
         // -------------------------------------------------------- //
         const int i_theta_start = RadialSmootherTasks.getStart(threadID);
         const int i_theta_end = RadialSmootherTasks.getEnd(threadID);
@@ -403,11 +389,13 @@ void Operator::applyAGive(const Level& onLevel, Vector<scalar_t>& result, const 
         // For loop matches radial access pattern
         for (int i_theta = i_theta_start; i_theta < i_theta_start + i_theta_seperate; i_theta++){
             theta = grid.theta(i_theta);
+            sin_theta = sin_theta_[i_theta];
+            cos_theta = cos_theta_[i_theta];
             for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++){
                 r = grid.radius(i_r);
-                coeff_alpha = exactFuncs.coeffs1(r, Rmax_);
-                coeff_beta = exactFuncs.coeffs2(r, Rmax_);
-                arr_att_art(exactFuncs, r, theta, i_theta, coeff_alpha, arr, att, art, detDFinv);
+                coeff_alpha = (*alpha_)(r);
+                coeff_beta = (*beta_)(r);
+                arr_att_art(r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDFinv);
                 NODE_APPLY_A_GIVE(i_r, i_theta, grid, result, x, arr, att, art, coeff_beta, detDFinv);
             }
         }
@@ -420,199 +408,13 @@ void Operator::applyAGive(const Level& onLevel, Vector<scalar_t>& result, const 
         // For loop matches circular access pattern
         for (int i_r = i_r_start; i_r < i_r_end - i_r_separate; i_r++){
             r = grid.radius(i_r);
-            coeff_alpha = exactFuncs.coeffs1(r, Rmax_);
-            coeff_beta = exactFuncs.coeffs2(r, Rmax_);
+            coeff_alpha = (*alpha_)(r);
+            coeff_beta = (*beta_)(r);
             for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++){
                 theta = grid.theta(i_theta);
-                arr_att_art(exactFuncs, r, theta, i_theta, coeff_alpha, arr, att, art, detDFinv);
-
-
-                // if (i_r > 0 && i_r < grid.nr() - 2) {
-                //     // scalar_t h1 = grid.r_dist(i_r-1); 
-                //     // scalar_t h2 = grid.r_dist(i_r);
-                //     // scalar_t k1 = grid.theta_dist(i_theta-1);
-                //     // scalar_t k2 = grid.theta_dist(i_theta);
-
-                //     // double coeff1 = 0.5*(k1+k2)/h1;
-                //     // double coeff2 = 0.5*(k1+k2)/h2;
-                //     // double coeff3 = 0.5*(h1+h2)/k1;
-                //     // double coeff4 = 0.5*(h1+h2)/k2;
-
-                //     // if(i_r == 4 && i_theta ==4){
-                //     //     std::cout<<"START: "<<std::endl;
-                //     //     std::cout<<" Beta: "<<0.25*(h1+h2)*(k1+k2) * coeff_beta * fabs(detDFinv) * x[grid.index(i_r,i_theta)]<<
-                //     //         "\n Left "<< - coeff1 * arr * x[grid.index(i_r-1,i_theta)]<<", "<<- coeff2 * arr * x[grid.index(i_r+1,i_theta)]<<
-                //     //         "\n Right "<< - coeff2 * arr * x[grid.index(i_r+1,i_theta)]<<
-                //     //         "\n Bottom "<< - coeff3 * att * x[grid.index(i_r,i_theta-1)]<<
-                //     //         "\n Top "<< - coeff4 * att * x[grid.index(i_r,i_theta+1)]<<
-                //     //         "\n Center (all) " << ((coeff1 + 0) * arr + (0 + 0) * att) * x[grid.index(i_r,i_theta)]<<
-                //     //         ", "<<((0 + coeff2) * arr + (0 + 0) * att) * x[grid.index(i_r,i_theta)]<<
-                //     //         ", "<<((0 + 0) * arr + (coeff3 + 0) * att) * x[grid.index(i_r,i_theta)]<<
-                //     //         ", "<<((0 + 0) * arr + (0 + coeff4) * att) * x[grid.index(i_r,i_theta)]<<  std::endl;
-                //     // }
-                
-                //     // result[grid.index(i_r,i_theta)] += 
-                //     //     0.25*(h1+h2)*(k1+k2) * coeff_beta * fabs(detDFinv) * x[grid.index(i_r,i_theta)] // beta_{i,j}
-                //     //     - coeff1 * arr * x[grid.index(i_r-1,i_theta)] // Left
-                //     //     - coeff2 * arr * x[grid.index(i_r+1,i_theta)] // Right
-                //     //     - coeff3 * att * x[grid.index(i_r,i_theta-1)] // Bottom
-                //     //     - coeff4 * att * x[grid.index(i_r,i_theta+1)] // Top
-                //     //     + ((coeff1 + coeff2) * arr + (coeff3 + coeff4) * att) * x[grid.index(i_r,i_theta)]; // Center: (Left, Right, Bottom, Top)
-
-
-                //     // if(i_r == 5 && i_theta ==4){
-                //     //         std::cout<<"\n Right "<<  - coeff2 * arr * x[grid.index(i_r,i_theta)] <<
-                //     //         "\n Center: (Right) "<< coeff2 * arr * x[grid.index(i_r-1,i_theta)] <<
-                //     //         "\n Top Right "<<- 0.25 * art * x[grid.index(i_r,i_theta+1)] <<
-                //     //         "\n Bottom Right " <<0.25 * art * x[grid.index(i_r,i_theta-1)]<<std::endl;
-                //     // }
-
-                //     // result[grid.index(i_r-1,i_theta)] += 
-                //     //     - coeff2 * arr * x[grid.index(i_r,i_theta)] // Right
-                //     //     + coeff2 * arr * x[grid.index(i_r-1,i_theta)] // Center: (Right)
-                //     //     - 0.25 * art * x[grid.index(i_r,i_theta+1)] // Top Right
-                //     //     + 0.25 * art * x[grid.index(i_r,i_theta-1)]; // Bottom Right
-
-                //     // if(i_r == 3 && i_theta ==4){
-                //     //         std::cout<<"\n Left "<< - coeff1 * arr * x[grid.index(i_r,i_theta)] <<
-                //     //         "\n Center: (Left) "<<coeff1 * arr * x[grid.index(i_r+1,i_theta)]<<
-                //     //         "\n Top Left "<< 0.25 * art * x[grid.index(i_r,i_theta+1)] <<
-                //     //         "\n Bottom Left " << - 0.25 * art * x[grid.index(i_r,i_theta-1)]<<std::endl;
-                //     // }
-
-                //     // result[grid.index(i_r+1,i_theta)] +=
-                //     //     - coeff1 * arr * x[grid.index(i_r,i_theta)] // Left
-                //     //     + coeff1 * arr * x[grid.index(i_r+1,i_theta)] // Center: (Left)
-                //     //     + 0.25 * art * x[grid.index(i_r,i_theta+1)] // Top Left
-                //     //     - 0.25 * art * x[grid.index(i_r,i_theta-1)]; // Bottom Left
-
-                //     // if(i_r == 4 && i_theta ==5){
-                //     //         std::cout<<"\n Top "<<  - coeff4 * att * x[grid.index(i_r,i_theta)] <<
-                //     //         "\n Center: (Top) "<< + coeff4 * att * x[grid.index(i_r,i_theta-1)] <<
-                //     //         "\n Top Right "<<- 0.25 * art * x[grid.index(i_r+1,i_theta)] <<
-                //     //         "\n Top Left " <<0.25 * art * x[grid.index(i_r-1,i_theta)]<<std::endl;
-                //     // }
-
-                //     // result[grid.index(i_r,i_theta-1)] +=
-                //     //     - coeff4 * att * x[grid.index(i_r,i_theta)] // Top
-                //     //     + coeff4 * att * x[grid.index(i_r,i_theta-1)] // Center: (Top)
-                //     //     - 0.25 * art * x[grid.index(i_r+1,i_theta)] // Top Right
-                //     //     + 0.25 * art * x[grid.index(i_r-1,i_theta)]; // Top Left
-
-                //     // if(i_r == 4 && i_theta ==3){
-                //     //         std::cout<<"\n Bottom "<<  - coeff3 * att * x[grid.index(i_r,i_theta)] <<
-                //     //         "\n Center: (Bottom) "<< coeff3 * att * x[grid.index(i_r,i_theta+1)] <<
-                //     //         "\n Bottom Right "<<0.25 * art * x[grid.index(i_r+1,i_theta)]  <<
-                //     //         "\n Bottom Left " << - 0.25 * art * x[grid.index(i_r-1,i_theta)]<<std::endl;
-                //     // }
-
-                //     // result[grid.index(i_r,i_theta+1)] +=
-                //     //     - coeff3 * att * x[grid.index(i_r,i_theta)] // Bottom
-                //     //     + coeff3 * att * x[grid.index(i_r,i_theta+1)] // Center: (Bottom)
-                //     //     + 0.25 * art * x[grid.index(i_r+1,i_theta)] // Bottom Right
-                //     //     - 0.25 * art * x[grid.index(i_r-1,i_theta)]; // Bottom Left 
-
-                       
-
-                // } else if (i_r == 0) {
-                //     // // h1 gets replaced with 2 * R0 and
-                //     // // (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()>>1))
-                //     // scalar_t h1 = 2 * grid.radius(0); 
-                //     // scalar_t h2 = grid.r_dist(i_r);
-                //     // scalar_t k1 = grid.theta_dist(i_theta-1);
-                //     // scalar_t k2 = grid.theta_dist(i_theta);
-
-                //     // double coeff1 = 0.5*(k1+k2)/h1;
-                //     // double coeff2 = 0.5*(k1+k2)/h2;
-                //     // double coeff3 = 0.5*(h1+h2)/k1;
-                //     // double coeff4 = 0.5*(h1+h2)/k2;
-
-                //     // result[grid.index(i_r,i_theta)] += 
-                //     //     (h1+h2)*(k1+k2) * coeff_beta * fabs(detDFinv) / 4 // f_{i,j}
-                //     //     - coeff1 * arr * x[grid.index(i_r,i_theta+(grid.ntheta()>>1))] // Left
-                //     //     - coeff2 * arr * x[grid.index(i_r+1,i_theta)] // Right
-                //     //     - coeff3 * att * x[grid.index(i_r,i_theta-1)] // Bottom
-                //     //     - coeff4 * att * x[grid.index(i_r,i_theta+1)] // Top
-                //     //     + ((coeff1 + coeff2) * arr + (coeff3 + coeff4) * att) * x[grid.index(i_r,i_theta)]; // Center: (Left, Right, Bottom, Top)
-
-                //     // result[grid.index(i_r,i_theta+(grid.ntheta()>>1))] += 
-                //     //     - coeff2 * arr * x[grid.index(i_r,i_theta)] // Right
-                //     //     + coeff2 * arr * x[grid.index(i_r,i_theta+(grid.ntheta()>>1))] // Center: (Right)
-                //     //     - art * x[grid.index(i_r,i_theta+1)] / 4 // Top Right
-                //     //     + art * x[grid.index(i_r,i_theta-1)] / 4; // Bottom Right
-
-                //     // result[grid.index(i_r+1,i_theta)] +=
-                //     //     - coeff1 * arr * x[grid.index(i_r,i_theta)] // Left
-                //     //     + coeff1 * arr * x[grid.index(i_r+1,i_theta)] // Center: (Left)
-                //     //     + art * x[grid.index(i_r,i_theta+1)] / 4 // Top Left
-                //     //     - art * x[grid.index(i_r,i_theta-1)] / 4; // Bottom Left
-
-                //     // result[grid.index(i_r,i_theta-1)] +=
-                //     //     - coeff4 * att * x[grid.index(i_r,i_theta)] // Top
-                //     //     + coeff4 * att * x[grid.index(i_r,i_theta-1)] // Center: (Top)
-                //     //     - art * x[grid.index(i_r+1,i_theta)] / 4 // Top Right
-                //     //     + art * x[grid.index(i_r,i_theta+(grid.ntheta()>>1))] / 4; // Top Left
-
-                //     // result[grid.index(i_r,i_theta+1)] +=
-                //     //     - coeff3 * att * x[grid.index(i_r,i_theta)] // Bottom
-                //     //     + coeff3 * att * x[grid.index(i_r,i_theta+1)] // Center: (Bottom)
-                //     //     + art * x[grid.index(i_r+1,i_theta)] / 4 // Bottom Right
-                //     //     - art * x[grid.index(i_r,i_theta+(grid.ntheta()>>1))] / 4; // Bottom Left    
-
-                // } else if (i_r == grid.nr() - 2) {
-                //     // scalar_t h1 = grid.r_dist(i_r-1); 
-                //     // scalar_t h2 = grid.r_dist(i_r);
-                //     // scalar_t k1 = grid.theta_dist(i_theta-1);
-                //     // scalar_t k2 = grid.theta_dist(i_theta);
-
-                //     // double coeff1 = 0.5*(k1+k2)/h1;
-                //     // double coeff2 = 0.5*(k1+k2)/h2;
-                //     // double coeff3 = 0.5*(h1+h2)/k1;
-                //     // double coeff4 = 0.5*(h1+h2)/k2;
-                
-                //     // result[grid.index(i_r,i_theta)] += 
-                //     //     (h1+h2)*(k1+k2) * coeff_beta * fabs(detDFinv) / 4 // f_{i,j}
-                //     //     - coeff1 * arr * x[grid.index(i_r-1,i_theta)] // Left
-                //     //     - coeff2 * arr * x[grid.index(i_r+1,i_theta)] // Right
-                //     //     - coeff3 * att * x[grid.index(i_r,i_theta-1)] // Bottom
-                //     //     - coeff4 * att * x[grid.index(i_r,i_theta+1)] // Top
-                //     //     + ((coeff1 + coeff2) * arr + (coeff3 + coeff4) * att) * x[grid.index(i_r,i_theta)]; // Center: (Left, Right, Bottom, Top)
-
-                //     // result[grid.index(i_r-1,i_theta)] += 
-                //     //     - coeff2 * arr * x[grid.index(i_r,i_theta)] // Right
-                //     //     + coeff2 * arr * x[grid.index(i_r-1,i_theta)] // Center: (Right)
-                //     //     - art * x[grid.index(i_r,i_theta+1)] / 4 // Top Right
-                //     //     + art * x[grid.index(i_r,i_theta-1)] / 4; // Bottom Right
-
-                //     // /* Don't write to the dirichlet boundary part! */
-                //     // // result[grid.index(i_r+1,i_theta)] +=
-                //     // //     - coeff1 * arr * x[grid.index(i_r,i_theta)] // Left
-                //     // //     + coeff1 * arr * x[grid.index(i_r+1,i_theta)] // Center: (Left)
-                //     // //     + art * x[grid.index(i_r,i_theta+1)] / 4 // Top Left
-                //     // //     - art * x[grid.index(i_r,i_theta-1)] / 4; // Bottom Left
-
-                //     // result[grid.index(i_r,i_theta-1)] +=
-                //     //     - coeff4 * att * x[grid.index(i_r,i_theta)] // Top
-                //     //     + coeff4 * att * x[grid.index(i_r,i_theta-1)] // Center: (Top)
-                //     //     - art * x[grid.index(i_r+1,i_theta)] / 4 // Top Right
-                //     //     + art * x[grid.index(i_r-1,i_theta)] / 4; // Top Left
-
-                //     // result[grid.index(i_r,i_theta+1)] +=
-                //     //     - coeff3 * att * x[grid.index(i_r,i_theta)] // Bottom
-                //     //     + coeff3 * att * x[grid.index(i_r,i_theta+1)] // Center: (Bottom)
-                //     //     + art * x[grid.index(i_r+1,i_theta)] / 4 // Bottom Right
-                //     //     - art * x[grid.index(i_r-1,i_theta)] / 4; // Bottom Left 
-                // } else if (i_r == grid.nr() - 1) {
-                //     // Dirichlet boundary
-                //     // result[grid.index(i_r,i_theta)] = x[grid.index(i_r,i_theta)];
-                // }
-
-
-
-
-
-
-
+                sin_theta = sin_theta_[i_theta];
+                cos_theta = cos_theta_[i_theta];
+                arr_att_art(r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDFinv);
                 NODE_APPLY_A_GIVE(i_r, i_theta, grid, result, x, arr, att, art, coeff_beta, detDFinv);
             }
         }
@@ -623,11 +425,13 @@ void Operator::applyAGive(const Level& onLevel, Vector<scalar_t>& result, const 
         // For loop matches radial access pattern
         for (int i_theta = i_theta_start + i_theta_seperate; i_theta < i_theta_end; i_theta++){
             theta = grid.theta(i_theta);
+            sin_theta = sin_theta_[i_theta];
+            cos_theta = cos_theta_[i_theta];
             for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++){
                 r = grid.radius(i_r);
-                coeff_alpha = exactFuncs.coeffs1(r, Rmax_);
-                coeff_beta = exactFuncs.coeffs2(r, Rmax_);
-                arr_att_art(exactFuncs, r, theta, i_theta, coeff_alpha, arr, att, art, detDFinv);
+                coeff_alpha = (*alpha_)(r);
+                coeff_beta = (*beta_)(r);
+                arr_att_art(r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDFinv);
                 NODE_APPLY_A_GIVE(i_r, i_theta, grid, result, x, arr, att, art, coeff_beta, detDFinv);
             }
         }
@@ -639,10 +443,557 @@ void Operator::applyAGive(const Level& onLevel, Vector<scalar_t>& result, const 
 
 
 
+#define GIVE_CIRCLE(i_r) \
+do { \
+    r = grid.radius(i_r); \
+    coeff_alpha = (*alpha_)(r); \
+    coeff_beta = (*beta_)(r); \
+    for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++){ \
+        theta = grid.theta(i_theta); \
+        sin_theta = sin_theta_[i_theta]; \
+        cos_theta = cos_theta_[i_theta]; \
+        arr_att_art(r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDFinv); \
+        NODE_APPLY_A_GIVE(i_r, i_theta, grid, result, x, arr, att, art, coeff_beta, detDFinv); \
+    } \
+} while(0)
+
+
+#define GIVE_RADIAL(i_theta) \
+do { \
+    theta = grid.theta(i_theta); \
+    sin_theta = sin_theta_[i_theta]; \
+    cos_theta = cos_theta_[i_theta]; \
+    for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++){ \
+        r = grid.radius(i_r); \
+        coeff_alpha = (*alpha_)(r); \
+        coeff_beta = (*beta_)(r); \
+        arr_att_art(r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDFinv); \
+        NODE_APPLY_A_GIVE(i_r, i_theta, grid, result, x, arr, att, art, coeff_beta, detDFinv); \
+    } \
+} while(0)
+
+
+
+void Operator::applyAGiveMutex(Level& onLevel, Vector<scalar_t>& result, const Vector<scalar_t>& x) {
+    const PolarGrid& grid = onLevel.grid();
+    const ExactFunctions& exactFuncs = onLevel.exactFunctions();
+
+    assert(x.size() == grid.number_of_nodes());
+    assert(result.size() == grid.number_of_nodes());
+
+    assign(result, 0.0);
+
+    auto start_time = std::chrono::high_resolution_clock::now();
+
+    #pragma omp parallel
+    {
+        #pragma omp for nowait
+        for(int i = 0; i < numberMod1Circles; i++){
+            Mod1CircleDepCounter[i] = 2;
+        }
+        #pragma omp for nowait
+        for(int i = 0; i < numberMod2Circles; i++){
+            Mod2CircleDepCounter[i] = 2;
+        }
+        #pragma omp for nowait
+        for(int i = 0; i < numberDiv3Radials; i++){
+            Mod1RadialDepCounter[i] = 2;
+        }
+        #pragma omp for
+        for(int i = 0; i < numberDiv3Radials; i++){
+            Mod2RadialDepCounter[i] = 2;
+        }
+    }
+
+    if(additional_circle_task == 1){}
+    else if(additional_circle_task == 2){
+        Mod1CircleDepCounter.back() = 1;
+    }
+    else if(additional_circle_task == 0){
+        Mod1CircleDepCounter.back() = 1;
+        Mod2CircleDepCounter.back() = 1;
+    }
+
+    int circle_index;
+
+    double r, theta;
+    double sin_theta, cos_theta;
+    double arr, att, art;
+    double coeff_alpha, coeff_beta;
+    double detDFinv;
+
+    std::cout<<numberMod0Circles<<std::endl;
+
+    int threads_used = std::min(numberMod0Circles + numberDiv3Radials, omp_get_max_threads());
+
+    #pragma omp parallel num_threads(threads_used) private(circle_index, r, theta, sin_theta, cos_theta, arr, att, art, coeff_alpha, coeff_beta, detDFinv)
+    #pragma omp single
+    {
+        for (int localMod0CircleIndex = 0; localMod0CircleIndex < numberMod0Circles; localMod0CircleIndex++){
+            // Mod 0 Circles
+            #pragma omp task
+            {
+                // std::cout<<"Start: Mod 0 Circle "<<localMod0CircleIndex<< ".\n";
+                circle_index = 3 * localMod0CircleIndex;
+                GIVE_CIRCLE(circle_index);
+                // std::this_thread::sleep_for(std::chrono::milliseconds(200*localMod0CircleIndex));
+                // // Work finished
+                // std::cout<<circle_index<< " Finished: Mod 0 Circle "<<localMod0CircleIndex<< ".\n";
+
+                // Update left Mod 1 dependency 
+                int leftlocalMod1CircleIndex = -1;
+                if(additional_circle_task != 1 || localMod0CircleIndex < numberMod0Circles-1) leftlocalMod1CircleIndex = localMod0CircleIndex;
+                if(leftlocalMod1CircleIndex != -1){
+                    Mod1CircleMutexes[leftlocalMod1CircleIndex].lock();
+                    Mod1CircleDepCounter[leftlocalMod1CircleIndex] --;
+                    int leftlocalMod1Circle_resolved = Mod1CircleDepCounter[leftlocalMod1CircleIndex];
+                    Mod1CircleMutexes[leftlocalMod1CircleIndex].unlock();
+                    if(leftlocalMod1Circle_resolved == 0){
+                        // Mod 1 Circles
+                        #pragma omp task
+                        {
+                            // std::cout<<"Start: Mod 1 Circle "<<leftlocalMod1CircleIndex<< ".\n";
+                            circle_index = 3 * (leftlocalMod1CircleIndex) + 1;
+                            GIVE_CIRCLE(circle_index);
+                            // std::this_thread::sleep_for(std::chrono::milliseconds(100*leftlocalMod1CircleIndex));
+                            // // // Work finished
+                            // std::cout<<circle_index << " Finished: Mod 1 Circle "<<leftlocalMod1CircleIndex<< ".\n";
+
+                            if(leftlocalMod1CircleIndex == 0){
+                                std::cout<<"Start Radials!"<<std::endl;
+
+                                for (int localMod0RadialIndex = 0; localMod0RadialIndex < numberDiv3Radials; localMod0RadialIndex++){
+                                    // Mod 0 Radials
+                                    #pragma omp task
+                                    {
+                                        if(localMod0RadialIndex == 0){
+                                            GIVE_RADIAL(0);
+                                            if(additional_radial_task >= 1){
+                                                GIVE_RADIAL(1);
+                                            }
+                                        }
+                                        else{
+                                            int radial_index = 3 * localMod0RadialIndex + additional_radial_task;
+                                            GIVE_RADIAL(radial_index);
+                                        }
+
+                                        int leftlocalMod1RadialIndex = (localMod0RadialIndex + 2) % numberDiv3Radials;
+                                        Mod1RadialMutexes[leftlocalMod1RadialIndex].lock();
+                                        Mod1RadialDepCounter[leftlocalMod1RadialIndex] --;
+                                        int leftlocalMod1Radial_resolved = Mod1RadialDepCounter[leftlocalMod1RadialIndex];
+                                        Mod1RadialMutexes[leftlocalMod1RadialIndex].unlock();
+
+                                        if(leftlocalMod1Radial_resolved == 0){
+                                            // Mod 1 Radials
+                                            #pragma omp task
+                                            {
+                                                if(leftlocalMod1RadialIndex == 0){
+                                                    if(additional_radial_task == 0){
+                                                        GIVE_RADIAL(1);
+                                                    }
+                                                    else if(additional_radial_task == 1){
+                                                        GIVE_RADIAL(2);
+                                                    }
+                                                    else if(additional_radial_task == 2){
+                                                        GIVE_RADIAL(2);
+                                                        GIVE_RADIAL(3);
+                                                    }
+                                                }
+                                                else{
+                                                    int radial_index = 3 * leftlocalMod1RadialIndex + additional_radial_task + 1;
+                                                    GIVE_RADIAL(radial_index);
+                                                }
+
+                                                int leftlocalMod2RadialIndex = (leftlocalMod1RadialIndex + 2) % numberDiv3Radials;
+                                                Mod2RadialMutexes[leftlocalMod2RadialIndex].lock();
+                                                Mod2RadialDepCounter[leftlocalMod2RadialIndex] --;
+                                                int leftlocalMod2Radial_resolved = Mod2RadialDepCounter[leftlocalMod2RadialIndex];
+                                                Mod2RadialMutexes[leftlocalMod2RadialIndex].unlock();
+
+                                                if(leftlocalMod2Radial_resolved == 0){
+                                                    // Mod 2 Radials
+                                                    #pragma omp task
+                                                    {
+                                                        int radial_index = 3 * leftlocalMod2RadialIndex + additional_radial_task + 2;
+                                                        GIVE_RADIAL(radial_index);
+                                                    }
+                                                }
+
+                                                int rightlocalMod2RadialIndex = (leftlocalMod1RadialIndex + 2) % numberDiv3Radials;
+                                                Mod2RadialMutexes[rightlocalMod2RadialIndex].lock();
+                                                Mod2RadialDepCounter[rightlocalMod2RadialIndex] --;
+                                                int rightlocalMod2Radial_resolved = Mod2RadialDepCounter[rightlocalMod2RadialIndex];
+                                                
+                                                Mod2RadialMutexes[rightlocalMod2RadialIndex].unlock();
+
+                                                if(rightlocalMod2Radial_resolved == 0){
+                                                    // Mod 2 Radials
+                                                    #pragma omp task
+                                                    {
+                                                        int radial_index = 3 * rightlocalMod2RadialIndex + additional_radial_task + 2;
+                                                        GIVE_RADIAL(radial_index);
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        int rightlocalMod1RadialIndex = localMod0RadialIndex;
+                                        Mod1RadialMutexes[rightlocalMod1RadialIndex].lock();
+                                        Mod1RadialDepCounter[rightlocalMod1RadialIndex] --;
+                                        int rightlocalMod1Radial_resolved = Mod1RadialDepCounter[rightlocalMod1RadialIndex];
+                                        
+                                        Mod1RadialMutexes[rightlocalMod1RadialIndex].unlock();
+
+                                        if(rightlocalMod1Radial_resolved == 0){
+                                        // Mod 1 Radials
+                                            #pragma omp task
+                                            {
+                                                if(rightlocalMod1RadialIndex == 0){
+                                                    if(additional_radial_task == 0){
+                                                        GIVE_RADIAL(1);
+                                                    }
+                                                    else if(additional_radial_task == 1){
+                                                        GIVE_RADIAL(2);
+                                                    }
+                                                    else if(additional_radial_task == 2){
+                                                        GIVE_RADIAL(2);
+                                                        GIVE_RADIAL(3);
+                                                    }
+                                                }
+                                                else{
+                                                    int radial_index = 3 * rightlocalMod1RadialIndex + additional_radial_task + 1;
+                                                    GIVE_RADIAL(radial_index);
+                                                }   
+
+                                                int leftlocalMod2RadialIndex = (rightlocalMod1RadialIndex + 2) % numberDiv3Radials;
+                                                Mod2RadialMutexes[leftlocalMod2RadialIndex].lock();
+                                                Mod2RadialDepCounter[leftlocalMod2RadialIndex] --;
+                                                int leftlocalMod2Radial_resolved = Mod2RadialDepCounter[leftlocalMod2RadialIndex];
+                                                
+                                                Mod2RadialMutexes[leftlocalMod2RadialIndex].unlock();
+
+                                                if(leftlocalMod2Radial_resolved == 0){
+                                                    // Mod 2 Radials
+                                                    #pragma omp task
+                                                    {
+                                                        int radial_index = 3 * leftlocalMod2RadialIndex + additional_radial_task + 2;
+                                                        GIVE_RADIAL(radial_index);
+                                                    }
+                                                }
+
+                                                int rightlocalMod2RadialIndex = (rightlocalMod1RadialIndex + 2) % numberDiv3Radials;
+                                                Mod2RadialMutexes[rightlocalMod2RadialIndex].lock();
+                                                Mod2RadialDepCounter[rightlocalMod2RadialIndex] --;
+                                                int rightlocalMod2Radial_resolved = Mod2RadialDepCounter[rightlocalMod2RadialIndex];
+                                                
+                                                Mod2RadialMutexes[rightlocalMod2RadialIndex == 0].unlock();
+
+                                                if(rightlocalMod2Radial_resolved){
+                                                    // Mod 2 Radials
+                                                    #pragma omp task
+                                                    {
+                                                        int radial_index = 3 * rightlocalMod2RadialIndex + additional_radial_task + 2;
+                                                        GIVE_RADIAL(radial_index);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            } // END RADIALS
+
+                            // Update left Mod 2 dependency 
+                            int leftlocalMod2CircleIndex = -1;
+                            if(additional_circle_task == 0 || leftlocalMod1CircleIndex < numberMod1Circles-1) leftlocalMod2CircleIndex = leftlocalMod1CircleIndex;
+                            if(leftlocalMod2CircleIndex != -1){
+                                //std::cout<< "T "<<additional_circle_task<< ", " << leftlocalMod1CircleIndex << ", "<<numberMod1Circles<<std::endl;
+                                // std::cout<<"S1: "<<leftlocalMod2CircleIndex<<std::endl;
+                                Mod2CircleMutexes[leftlocalMod2CircleIndex].lock();
+                                Mod2CircleDepCounter[leftlocalMod2CircleIndex] --;
+                                int leftlocalMod2Circle_resolved = Mod2CircleDepCounter[leftlocalMod2CircleIndex];
+                                
+                                Mod2CircleMutexes[leftlocalMod2CircleIndex].unlock();
+                                if(leftlocalMod2Circle_resolved == 0){
+                                    // Mod 2 Circle Task
+                                    #pragma omp task
+                                    {
+                                        // std::cout<<"Start: Mod 2 Circle "<<leftlocalMod2CircleIndex<< ".\n";
+                                        circle_index = 3 * (leftlocalMod2CircleIndex)+2;
+                                        GIVE_CIRCLE(circle_index);
+                                        // std::this_thread::sleep_for(std::chrono::milliseconds(10*leftlocalMod2CircleIndex));
+                                        // // // Work finished
+                                        //std::cout<<circle_index<< " Finished: Mod 2 Circle "<<leftlocalMod2CircleIndex<< ".\n";
+                                        // std::cout<<3 * (leftlocalMod2CircleIndex)+2<<std::endl;
+
+                                    }
+                                }
+                            }
+                            // Update right Mod 2 dependency 
+                            int rightlocalMod2CircleIndex = -1;
+                            if(leftlocalMod1CircleIndex > 0) rightlocalMod2CircleIndex = leftlocalMod1CircleIndex-1;
+                            if(rightlocalMod2CircleIndex != -1){
+                                // std::cout<<"S2 "<<rightlocalMod2CircleIndex<<std::endl;
+                                Mod2CircleMutexes[rightlocalMod2CircleIndex].lock();
+                                Mod2CircleDepCounter[rightlocalMod2CircleIndex]--;
+                                int rightlocalMod2Circle_resolved = Mod2CircleDepCounter[rightlocalMod2CircleIndex];
+                                
+                                Mod2CircleMutexes[rightlocalMod2CircleIndex].unlock();
+                                if(rightlocalMod2Circle_resolved == 0){
+                                    // Mod 1 Circle Task
+                                    #pragma omp task
+                                    {
+                                        // std::cout<<"Start: Mod 2 Circle "<<rightlocalMod2CircleIndex<< ".\n";
+                                        circle_index = 3 * (rightlocalMod2CircleIndex) + 2;
+                                        GIVE_CIRCLE(circle_index);
+                                        // std::this_thread::sleep_for(std::chrono::milliseconds(10*rightlocalMod2CircleIndex));
+                                        // // // Work finished
+                                        //std::cout<<circle_index<<" Finished: Mod 2 Circle "<<rightlocalMod2CircleIndex<< ".\n";
+
+                                        // std::cout<<3 * (rightlocalMod2CircleIndex)+2<<std::endl;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                // Update right Mod 1 dependency 
+                int rightlocalMod1CircleIndex = -1;
+                if(localMod0CircleIndex > 0) rightlocalMod1CircleIndex = localMod0CircleIndex-1;
+                if(rightlocalMod1CircleIndex != -1){
+                    Mod1CircleMutexes[rightlocalMod1CircleIndex].lock();
+                    Mod1CircleDepCounter[rightlocalMod1CircleIndex] --;
+                    int rightlocalMod1Circle_resolved = Mod1CircleDepCounter[rightlocalMod1CircleIndex];
+                    
+                    Mod1CircleMutexes[rightlocalMod1CircleIndex].unlock();
+                    if(rightlocalMod1Circle_resolved == 0){
+                        // Mod 1 Circle Task
+                        #pragma omp task
+                        {
+                            // std::cout<<"Start: Mod 1 Circle "<<rightlocalMod1CircleIndex<< ".\n";
+                            circle_index = 3 * (rightlocalMod1CircleIndex)+1;
+                            GIVE_CIRCLE(circle_index);
+                            // std::this_thread::sleep_for(std::chrono::milliseconds(100 * rightlocalMod1CircleIndex));
+                            // // // Work finished
+                            //std::cout<<circle_index<<" Finished: Mod 1 Circle "<<rightlocalMod1CircleIndex<< ".\n";
+
+                            // std::cout<<3 * (rightlocalMod1CircleIndex)+1<<std::endl;
+                            
+                            if(rightlocalMod1CircleIndex == 0){
+                                std::cout<<"Start Radials!"<<std::endl;
+
+                                for (int localMod0RadialIndex = 0; localMod0RadialIndex < numberDiv3Radials; localMod0RadialIndex++){
+                                    // Mod 0 Radials
+                                    #pragma omp task
+                                    {
+                                        if(localMod0RadialIndex == 0){
+                                            GIVE_RADIAL(0);
+                                            if(additional_radial_task >= 1){
+                                                GIVE_RADIAL(1);
+                                            }
+                                        }
+                                        else{
+                                            int radial_index = 3 * localMod0RadialIndex + additional_radial_task;
+                                            GIVE_RADIAL(radial_index);
+                                        }
+
+                                        int leftlocalMod1RadialIndex = (localMod0RadialIndex + 2) % numberDiv3Radials;
+                                        Mod1RadialMutexes[leftlocalMod1RadialIndex].lock();
+                                        Mod1RadialDepCounter[leftlocalMod1RadialIndex]--;
+                                        int leftlocalMod1Radial_resolved = Mod1RadialDepCounter[leftlocalMod1RadialIndex];
+                                        
+                                        Mod1RadialMutexes[leftlocalMod1RadialIndex].unlock();
+
+                                        if(leftlocalMod1Radial_resolved == 0){
+                                            // Mod 1 Radials
+                                            #pragma omp task
+                                            {
+                                                if(leftlocalMod1RadialIndex == 0){
+                                                    if(additional_radial_task == 0){
+                                                        GIVE_RADIAL(1);
+                                                    }
+                                                    else if(additional_radial_task == 1){
+                                                        GIVE_RADIAL(2);
+                                                    }
+                                                    else if(additional_radial_task == 2){
+                                                        GIVE_RADIAL(2);
+                                                        GIVE_RADIAL(3);
+                                                    }
+                                                }
+                                                else{
+                                                    int radial_index = 3 * leftlocalMod1RadialIndex + additional_radial_task + 1;
+                                                    GIVE_RADIAL(radial_index);
+                                                }
+
+                                                int leftlocalMod2RadialIndex = (leftlocalMod1RadialIndex + 2) % numberDiv3Radials;
+                                                Mod2RadialMutexes[leftlocalMod2RadialIndex].lock();
+                                                Mod2RadialDepCounter[leftlocalMod2RadialIndex]--;
+                                                int leftlocalMod2Radial_resolved = Mod2RadialDepCounter[leftlocalMod2RadialIndex];
+                                                
+                                                Mod2RadialMutexes[leftlocalMod2RadialIndex].unlock();
+
+                                                if(leftlocalMod2Radial_resolved == 0){
+                                                    // Mod 2 Radials
+                                                    #pragma omp task
+                                                    {
+                                                        int radial_index = 3 * leftlocalMod2RadialIndex + additional_radial_task + 2;
+                                                        GIVE_RADIAL(radial_index);
+                                                    }
+                                                }
+
+                                                int rightlocalMod2RadialIndex = (leftlocalMod1RadialIndex + 2) % numberDiv3Radials;
+                                                Mod2RadialMutexes[rightlocalMod2RadialIndex].lock();
+                                                Mod2RadialDepCounter[rightlocalMod2RadialIndex] --;
+                                                int rightlocalMod2Radial_resolved = Mod2RadialDepCounter[rightlocalMod2RadialIndex];
+                                                
+                                                Mod2RadialMutexes[rightlocalMod2RadialIndex].unlock();
+
+                                                if(rightlocalMod2Radial_resolved == 0){
+                                                    // Mod 2 Radials
+                                                    #pragma omp task
+                                                    {
+                                                        int radial_index = 3 * rightlocalMod2RadialIndex + additional_radial_task + 2;
+                                                        GIVE_RADIAL(radial_index);
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        int rightlocalMod1RadialIndex = localMod0RadialIndex;
+                                        Mod1RadialMutexes[rightlocalMod1RadialIndex].lock();
+                                        Mod1RadialDepCounter[rightlocalMod1RadialIndex] --;
+                                        int rightlocalMod1Radial_resolved = Mod1RadialDepCounter[rightlocalMod1RadialIndex];
+                                        
+                                        Mod1RadialMutexes[rightlocalMod1RadialIndex].unlock();
+
+                                        if(rightlocalMod1Radial_resolved == 0){
+                                        // Mod 1 Radials
+                                            #pragma omp task
+                                            {
+                                                if(rightlocalMod1RadialIndex == 0){
+                                                    if(additional_radial_task == 0){
+                                                        GIVE_RADIAL(1);
+                                                    }
+                                                    else if(additional_radial_task == 1){
+                                                        GIVE_RADIAL(2);
+                                                    }
+                                                    else if(additional_radial_task == 2){
+                                                        GIVE_RADIAL(2);
+                                                        GIVE_RADIAL(3);
+                                                    }
+                                                }
+                                                else{
+                                                    int radial_index = 3 * rightlocalMod1RadialIndex + additional_radial_task + 1;
+                                                    GIVE_RADIAL(radial_index);
+                                                }   
+
+                                                int leftlocalMod2RadialIndex = (rightlocalMod1RadialIndex + 2) % numberDiv3Radials;
+                                                Mod2RadialMutexes[leftlocalMod2RadialIndex].lock();
+                                                Mod2RadialDepCounter[leftlocalMod2RadialIndex]--;
+                                                int leftlocalMod2Radial_resolved = Mod2RadialDepCounter[leftlocalMod2RadialIndex];
+                                                
+                                                Mod2RadialMutexes[leftlocalMod2RadialIndex].unlock();
+
+                                                if(leftlocalMod2Radial_resolved == 0){
+                                                    // Mod 2 Radials
+                                                    #pragma omp task
+                                                    {
+                                                        int radial_index = 3 * leftlocalMod2RadialIndex + additional_radial_task + 2;
+                                                        GIVE_RADIAL(radial_index);
+                                                    }
+                                                }
+
+                                                int rightlocalMod2RadialIndex = (rightlocalMod1RadialIndex + 2) % numberDiv3Radials;
+                                                Mod2RadialMutexes[rightlocalMod2RadialIndex].lock();
+                                                Mod2RadialDepCounter[rightlocalMod2RadialIndex]--;
+                                                int rightlocalMod2Radial_resolved = Mod2RadialDepCounter[rightlocalMod2RadialIndex];
+                                                
+                                                Mod2RadialMutexes[rightlocalMod2RadialIndex].unlock();
+
+                                                if(rightlocalMod2Radial_resolved == 0){
+                                                    // Mod 2 Radials
+                                                    #pragma omp task
+                                                    {
+                                                        int radial_index = 3 * rightlocalMod2RadialIndex + additional_radial_task + 2;
+                                                        GIVE_RADIAL(radial_index);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            } // END RADIALS
+
+                            // Update left Mod 2 dependency 
+                            int leftlocalMod2CircleIndex = -1;
+                            if(additional_circle_task == 0 || rightlocalMod1CircleIndex < numberMod1Circles-1) leftlocalMod2CircleIndex = rightlocalMod1CircleIndex;
+                            if(leftlocalMod2CircleIndex != -1){
+                                Mod2CircleMutexes[leftlocalMod2CircleIndex].lock();
+                                Mod2CircleDepCounter[leftlocalMod2CircleIndex]--;
+                                int leftlocalMod2Circle_resolved = Mod2CircleDepCounter[leftlocalMod2CircleIndex];
+                                
+                                Mod2CircleMutexes[leftlocalMod2CircleIndex].unlock();
+                                if(leftlocalMod2Circle_resolved == 0){
+                                    // Mod 2 Circle Task
+                                    #pragma omp task
+                                    {
+                                        // std::cout<<"Start: Mod 2 Circle "<<leftlocalMod2CircleIndex<< ".\n";
+
+                                        circle_index = 3 * (leftlocalMod2CircleIndex)+2;
+                                        GIVE_CIRCLE(circle_index);
+                                        // std::this_thread::sleep_for(std::chrono::milliseconds(10 * leftlocalMod2CircleIndex));
+                                        // // // Work finished
+                                        //std::cout<<circle_index<<" Finished: Mod 2 Circle "<<leftlocalMod2CircleIndex<< ".\n";
+
+                                        // std::cout<<3 * (leftlocalMod2CircleIndex)+2<<std::endl;
+
+                            
+                                    }
+                                }
+                            }
+                            // Update right Mod 2 dependency 
+                            int rightlocalMod2CircleIndex = -1;
+                            if(rightlocalMod1CircleIndex > 0) rightlocalMod2CircleIndex = rightlocalMod1CircleIndex-1;
+                            if(rightlocalMod2CircleIndex != -1){
+                                Mod2CircleMutexes[rightlocalMod2CircleIndex].lock();
+                                Mod2CircleDepCounter[rightlocalMod2CircleIndex]--;
+                                int rightlocalMod2Circle_resolved = Mod2CircleDepCounter[rightlocalMod2CircleIndex];
+                                
+                                Mod2CircleMutexes[rightlocalMod2CircleIndex].unlock();
+                                if(rightlocalMod2Circle_resolved == 0){
+                                    // Mod 1 Circle Task
+                                    #pragma omp task
+                                    {
+                                        // std::cout<<"Start: Mod 2 Circle "<<rightlocalMod2CircleIndex<< ".\n";
+                                        circle_index = 3 * (rightlocalMod2CircleIndex) + 2;
+                                        GIVE_CIRCLE(circle_index);
+                                        // std::this_thread::sleep_for(std::chrono::milliseconds(10 * rightlocalMod2CircleIndex));
+                                        // // // Work finished
+                                        //std::cout<<circle_index<<" Finished: Mod 2 Circle "<<rightlocalMod2CircleIndex<< ".\n";
+
+                                        // std::cout<<3 * (rightlocalMod2CircleIndex)+2<<std::endl;
+                                    
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    auto end_time = std::chrono::high_resolution_clock::now();
+
+    auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+    std::cout << "Mutex time: " << duration_ms.count() << " milliseconds" << std::endl;
+}
+
+
+
+
 
 
 void Operator::applyAGiveTasks(const Level& onLevel, Vector<scalar_t>& result, const Vector<scalar_t>& x) const{
-
     const PolarGrid& grid = onLevel.grid();
     const ExactFunctions& exactFuncs = onLevel.exactFunctions();
 
@@ -666,9 +1017,10 @@ void Operator::applyAGiveTasks(const Level& onLevel, Vector<scalar_t>& result, c
     const int S2_wait = S2 % 3;
     const int S2_start = std::max(S1-2, 0);
 
-    #pragma omp parallel shared(dep)
+    #pragma omp parallel shared(dep) num_threads(numThreads)
     {
         double r, theta;
+        double sin_theta, cos_theta;
         double arr, att, art;
         double coeff_alpha, coeff_beta;
         double detDFinv;
@@ -678,11 +1030,13 @@ void Operator::applyAGiveTasks(const Level& onLevel, Vector<scalar_t>& result, c
                 #pragma omp task shared(dep) firstprivate(i_r) depend(out: dep[i_r])
                 {
                     r = grid.radius(i_r);
-                    coeff_alpha = exactFuncs.coeffs1(r, Rmax_);
-                    coeff_beta = exactFuncs.coeffs2(r, Rmax_);
+                    coeff_alpha = (*alpha_)(r);
+                    coeff_beta = (*beta_)(r);
                     for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++){
                         theta = grid.theta(i_theta);
-                        arr_att_art(exactFuncs, r, theta, i_theta, coeff_alpha, arr, att, art, detDFinv);
+                        sin_theta = sin_theta_[i_theta];
+                        cos_theta = cos_theta_[i_theta];
+                        arr_att_art(r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDFinv);
                         NODE_APPLY_A_GIVE(i_r, i_theta, grid, result, x, arr, att, art, coeff_beta, detDFinv);
                     }
                 }
@@ -692,11 +1046,13 @@ void Operator::applyAGiveTasks(const Level& onLevel, Vector<scalar_t>& result, c
                 #pragma omp task shared(dep) firstprivate(i_r) depend(in: dep[i_r-2], dep[i_r+1]) depend(out: dep[i_r])
                 {
                     r = grid.radius(i_r);
-                    coeff_alpha = exactFuncs.coeffs1(r, Rmax_);
-                    coeff_beta = exactFuncs.coeffs2(r, Rmax_);
+                    coeff_alpha = (*alpha_)(r);
+                    coeff_beta = (*beta_)(r);
                     for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++){
                         theta = grid.theta(i_theta);
-                        arr_att_art(exactFuncs, r, theta, i_theta, coeff_alpha, arr, att, art, detDFinv);
+                        sin_theta = sin_theta_[i_theta];
+                        cos_theta = cos_theta_[i_theta];
+                        arr_att_art(r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDFinv);
                         NODE_APPLY_A_GIVE(i_r, i_theta, grid, result, x, arr, att, art, coeff_beta, detDFinv);
                     }
                 }
@@ -706,11 +1062,13 @@ void Operator::applyAGiveTasks(const Level& onLevel, Vector<scalar_t>& result, c
                 #pragma omp task shared(dep) firstprivate(i_r) depend(in: dep[i_r-2], dep[i_r+1]) depend(out: dep[i_r])
                 {
                     r = grid.radius(i_r);
-                    coeff_alpha = exactFuncs.coeffs1(r, Rmax_);
-                    coeff_beta = exactFuncs.coeffs2(r, Rmax_);
+                    coeff_alpha = (*alpha_)(r);
+                    coeff_beta = (*beta_)(r);
                     for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++){
                         theta = grid.theta(i_theta);
-                        arr_att_art(exactFuncs, r, theta, i_theta, coeff_alpha, arr, att, art, detDFinv);
+                        sin_theta = sin_theta_[i_theta];
+                        cos_theta = cos_theta_[i_theta];
+                        arr_att_art(r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDFinv);
                         NODE_APPLY_A_GIVE(i_r, i_theta, grid, result, x, arr, att, art, coeff_beta, detDFinv);
                     }
                 }
@@ -720,11 +1078,13 @@ void Operator::applyAGiveTasks(const Level& onLevel, Vector<scalar_t>& result, c
                 #pragma omp task shared(dep) firstprivate(i_theta) depend(out: dep[S1+i_theta]) depend(in: dep[S2_start])
                 {
                     theta = grid.theta(i_theta);
+                    sin_theta = sin_theta_[i_theta];
+                    cos_theta = cos_theta_[i_theta];
                     for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++){
                         r = grid.radius(i_r);
-                        coeff_alpha = exactFuncs.coeffs1(r, Rmax_);
-                        coeff_beta = exactFuncs.coeffs2(r, Rmax_);
-                        arr_att_art(exactFuncs, r, theta, i_theta, coeff_alpha, arr, att, art, detDFinv);
+                        coeff_alpha = (*alpha_)(r);
+                        coeff_beta = (*beta_)(r);
+                        arr_att_art(r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDFinv);
                         NODE_APPLY_A_GIVE(i_r, i_theta, grid, result, x, arr, att, art, coeff_beta, detDFinv);
                     }
                 }
@@ -734,11 +1094,13 @@ void Operator::applyAGiveTasks(const Level& onLevel, Vector<scalar_t>& result, c
                 #pragma omp task firstprivate(i_theta) depend(out: dep[S1+i_theta]) depend(in: dep[S2_start], dep[S1+i_theta-1], dep[S1+i_theta+2])
                 {
                     theta = grid.theta(i_theta);
+                    sin_theta = sin_theta_[i_theta];
+                    cos_theta = cos_theta_[i_theta];
                     for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++){
                         r = grid.radius(i_r);
-                        coeff_alpha = exactFuncs.coeffs1(r, Rmax_);
-                        coeff_beta = exactFuncs.coeffs2(r, Rmax_);
-                        arr_att_art(exactFuncs, r, theta, i_theta, coeff_alpha, arr, att, art, detDFinv);
+                        coeff_alpha = (*alpha_)(r);
+                        coeff_beta = (*beta_)(r);
+                        arr_att_art(r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDFinv);
                         NODE_APPLY_A_GIVE(i_r, i_theta, grid, result, x, arr, att, art, coeff_beta, detDFinv);
                     }
                 }
@@ -748,11 +1110,13 @@ void Operator::applyAGiveTasks(const Level& onLevel, Vector<scalar_t>& result, c
                 #pragma omp task shared(dep) firstprivate(i_theta) depend(out: dep[S1+i_theta]) depend(in: dep[S2_start], dep[S1+i_theta-1], dep[S1+i_theta+2])
                 {
                     theta = grid.theta(i_theta);
+                    sin_theta = sin_theta_[i_theta];
+                    cos_theta = cos_theta_[i_theta];
                     for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++){
                         r = grid.radius(i_r);
-                        coeff_alpha = exactFuncs.coeffs1(r, Rmax_);
-                        coeff_beta = exactFuncs.coeffs2(r, Rmax_);
-                        arr_att_art(exactFuncs, r, theta, i_theta, coeff_alpha, arr, att, art, detDFinv);
+                        coeff_alpha = (*alpha_)(r);
+                        coeff_beta = (*beta_)(r);
+                        arr_att_art(r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDFinv);
                         NODE_APPLY_A_GIVE(i_r, i_theta, grid, result, x, arr, att, art, coeff_beta, detDFinv);
                     }
                 }
@@ -763,26 +1127,30 @@ void Operator::applyAGiveTasks(const Level& onLevel, Vector<scalar_t>& result, c
                 #pragma omp task shared(dep) firstprivate(i_theta) depend(out: dep[S1+i_theta]) depend(in: dep[S2_start],  dep[S1+i_theta-1])
                 {
                     theta = grid.theta(i_theta);
+                    sin_theta = sin_theta_[i_theta];
+                    cos_theta = cos_theta_[i_theta];
                     for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++){
                         r = grid.radius(i_r);
-                        coeff_alpha = exactFuncs.coeffs1(r, Rmax_);
-                        coeff_beta = exactFuncs.coeffs2(r, Rmax_);
-                        arr_att_art(exactFuncs, r, theta, i_theta, coeff_alpha, arr, att, art, detDFinv);
+                        coeff_alpha = (*alpha_)(r);
+                        coeff_beta = (*beta_)(r);
+                        arr_att_art(r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDFinv);
                         NODE_APPLY_A_GIVE(i_r, i_theta, grid, result, x, arr, att, art, coeff_beta, detDFinv);
                     }
                 }
             }
 
-            if( S2_wait >= 2 ){
+            if(S2_wait >= 2){
                 int i_theta = S2 - S2_wait + 1;
                 #pragma omp task shared(dep) firstprivate(i_theta) depend(out: dep[S1+i_theta]) depend(in: dep[S2_start],  dep[S1+i_theta-1])
                 {
                     theta = grid.theta(i_theta);
+                    sin_theta = sin_theta_[i_theta];
+                    cos_theta = cos_theta_[i_theta];
                     for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++){
                         r = grid.radius(i_r);
-                        coeff_alpha = exactFuncs.coeffs1(r, Rmax_);
-                        coeff_beta = exactFuncs.coeffs2(r, Rmax_);
-                        arr_att_art(exactFuncs, r, theta, i_theta, coeff_alpha, arr, att, art, detDFinv);
+                        coeff_alpha = (*alpha_)(r);
+                        coeff_beta = (*beta_)(r);
+                        arr_att_art(r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDFinv);
                         NODE_APPLY_A_GIVE(i_r, i_theta, grid, result, x, arr, att, art, coeff_beta, detDFinv);
                     }
                 }

@@ -21,6 +21,10 @@ class Operator;
 #include "../Level/level.h"
 #include "../Interpolation/interpolation.h"
 
+#include "../InputFunctions/domain_geometry.h"
+#include "../InputFunctions/system_parameters.h"
+#include "../InputFunctions/exact_solution.h"
+
 #include "../ExactFunctions/exactfunctions.h"
 
 #include "../../include/test_cases/CartesianR2GyroSonnendruckerCircular.h"
@@ -95,12 +99,45 @@ class Operator;
 #include <random>
 #include <chrono>
 
+#include <functional>
+
+
 class GMGPolar {
 public:
-    GMGPolar();
+    explicit GMGPolar();
+
+    void setRadialRefinement(double r_jump);
+
+    void setGeometry(
+        const dFx_dr_Functor& dFx_dr, 
+        const dFy_dr_Functor& dFy_dr, 
+        const dFx_dt_Functor& dFx_dt, 
+        const dFy_dt_Functor& dFy_dt
+    );
+    void setParameters(
+        const alpha_Functor& alpha, 
+        const beta_Functor& beta, 
+        const rhs_f_Functor& rhs_f, 
+        const u_D_Functor& u_D
+    );
+    void setSystemParameters(const exact_solution_Functor& exact_solution);
+
     void setParameters(int argc, char* argv[]);
     void setup();
     void solve();
+
+    std::shared_ptr<dFx_dr_Functor> dFx_dr_;
+    std::shared_ptr<dFy_dr_Functor> dFy_dr_;
+    std::shared_ptr<dFx_dt_Functor> dFx_dt_;
+    std::shared_ptr<dFy_dt_Functor> dFy_dt_;
+
+    std::shared_ptr<alpha_Functor> alpha_;
+    std::shared_ptr<beta_Functor> beta_;
+    std::shared_ptr<rhs_f_Functor> rhs_f_;
+    std::shared_ptr<u_D_Functor> u_D_;
+
+    std::shared_ptr<exact_solution_Functor> exact_solution_;
+
 
     // Grid Parameters
     scalar_t R0;
@@ -113,13 +150,14 @@ public:
     bool load_grid_file;
     std::string file_grid_r;
     std::string file_grid_theta;
+    double r_jump_;
     // Geometry Parameters
-    alpha_coeff alpha;
-    beta_coeff beta;
-    problem_type problem;
-    geometry_type geometry;
-    scalar_t kappa_eps;
-    scalar_t delta_e;
+    alpha_coeff alpha; // UNUSED
+    beta_coeff beta; // UNUSED
+    problem_type problem; // UNUSED
+    geometry_type geometry; // UNUSED
+    scalar_t kappa_eps; // UNUSED
+    scalar_t delta_e; // UNUSED
     // Multigrid Parameters
     int extrapolation;
     int maxLevels;
@@ -129,6 +167,8 @@ public:
     // Control Parameters
     int verbose;
 private:
+
+
     // GMGPolar Parameters
     cmdline::parser parser_;
 

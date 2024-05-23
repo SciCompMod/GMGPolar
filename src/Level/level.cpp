@@ -20,7 +20,7 @@ int Level::level() const {
 }
 
 void Level::setOperator(const GMGPolar& gmgpolar) {
-    operator_ = std::make_unique<const Operator>(gmgpolar, *grid_);
+    operator_ = std::make_unique<Operator>(gmgpolar, *grid_);
 }
 
 void Level::applyA(Vector<scalar_t> &result, const Vector<scalar_t> &x) const{
@@ -33,4 +33,8 @@ void Level::applyATasks(Vector<scalar_t> &result, const Vector<scalar_t> &x) con
 
 void Level::applyATake0(Vector<scalar_t> &result, const Vector<scalar_t> &x) const{
     operator_->applyATake0(*this, result, x);
+}
+
+void Level::applyAMutex(Vector<scalar_t> &result, const Vector<scalar_t> &x){
+    operator_->applyAGiveMutex(*this, result, x);
 }

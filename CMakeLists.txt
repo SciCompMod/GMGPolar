@@ -25,6 +25,7 @@ file(GLOB_RECURSE OPERATOR_SOURCES "src/Operator/*.cpp")
 file(GLOB_RECURSE POLAR_GRID_SOURCES "src/PolarGrid/*.cpp")
 file(GLOB_RECURSE TASK_DISTRIBUTION_SOURCES "src/TaskDistribution/*.cpp")
 file(GLOB_RECURSE TEST_SOURCES "src/test_cases/*.cpp")
+file(GLOB_RECURSE INPUT_FUNCTIONS_SOURCES "src/InputFunctions/*.cpp")
 
 # Add main.cpp to the list of source files
 set(MAIN_SOURCE "src/main.cpp")
@@ -39,6 +40,7 @@ add_executable(gmgpolar
     ${POLAR_GRID_SOURCES}
     ${TASK_DISTRIBUTION_SOURCES}
     ${TEST_SOURCES}
+    ${INPUT_FUNCTIONS_SOURCES}
 )
 
 # Add OpenMP flags if available

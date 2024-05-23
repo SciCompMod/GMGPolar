@@ -1,7 +1,14 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <thread>
 #include <omp.h>
+#include <mutex>
+
+#include "../include/InputFunctions/domain_geometry.h"
+#include "../include/InputFunctions/system_parameters.h"
+#include "../include/InputFunctions/exact_solution.h"
+#include "../include/common/constants.h"
 
 #include "../include/GMGPolar/gmgpolar.h"
 
@@ -12,12 +19,14 @@
 // #include "../include/linear_algebra/operations.h"
 // #include <chrono>
 
-// #include <iostream>
-// #include <vector>
-// #include <omp.h>
-// #include <thread>
-// #include <chrono>
-// #include <random>
+#include <iostream>
+#include <vector>
+#include <omp.h>
+#include <thread>
+#include <chrono>
+#include <random>
+#include <memory>
+
 
 int main(int argc, char* argv[]){
     #ifdef NDEBUG
@@ -26,20 +35,576 @@ int main(int argc, char* argv[]){
         std::cout << "Build Type: Debug\n";
     #endif
 
-    // int numTasks = 2;
-    // int minChunkSize = 3;
-    // int numThreads = 4;
-    // TaskDistribution(numTasks,minChunkSize,numThreads);
+    // allow refining of the grid at r_jump, the center point of the 
+    // drop of the diffusion coefficient alpha.
+    double r_jump = 0.5;
+    alpha_coeff alpha_name = SONNENDRUCKER;
+    if (alpha_name == SONNENDRUCKER) {
+        // The center of the coefficient jump lies at 0.6888697651782026
+        // for backward stability with previous runs and the Matlab code, 
+        // we use 0.66 though.
+        r_jump = 0.66;
+    } else if (alpha_name == ZONI) {
+        r_jump = 0.4837;
+    } else if (alpha_name == ZONI_SHIFTED) {
+        // Choose center point of descent.
+        // a) - ln(0.5 * (alpha(0) - alpha(Rmax))):
+        //    - ln(0.5 * (np.exp(-np.tanh(-14)) - np.exp(-np.tanh(6)))) = 0.16143743821247852
+        // b) r_center = Rmax * (np.arctanh(0.16143743821247852) + 14) / 20 = 0.7081431124450334 Rmax
+        r_jump = 0.7081;
+    } else if (alpha_name == POISSON) {
+        r_jump = 0.5; // There is no jump for Poisson so this is an arbitrary choice
+    } else {
+        throw std::runtime_error("Unknown alpha coeff");
+    }
+
+    std::shared_ptr<TransformationHelper> trafo = std::make_shared<TransformationHelper>();
+
+    Fx_Functor Fx(trafo);
+    Fy_Functor Fy(trafo);
+    dFx_dr_Functor dFx_dr(trafo);
+    dFy_dr_Functor dFy_dr(trafo);
+    dFx_dt_Functor dFx_dt(trafo);
+    dFy_dt_Functor dFy_dt(trafo);
+
+    alpha_Functor alpha;
+    beta_Functor beta;
+    rhs_f_Functor rhs_f;
+    u_D_Functor u_D;
+
+    exact_solution_Functor exact_solution;
 
     GMGPolar solver;
+    solver.setRadialRefinement(r_jump);
+    solver.setGeometry(dFx_dr, dFy_dr, dFx_dt, dFy_dt);
+    solver.setParameters(alpha, beta, rhs_f, u_D);
+    solver.setSystemParameters(exact_solution);
     solver.setParameters(argc, argv);
-    solver.setup();
-    solver.solve();
-
-    // std::unique_ptr<ExactFunctions> functions = std::make_unique<CartesianR2GyroSonnendruckerCircular>();
-
-    return 0;
+    solver.setup(); 
+    solver.solve(); 
 }
+
+
+
+
+
+
+
+// int main(int argc, char* argv[]){
+//     #ifdef NDEBUG
+//         std::cout << "Build Type: Release\n";
+//     #else
+//         std::cout << "Build Type: Debug\n";
+//     #endif
+
+//     GMGPolar solver;
+//     solver.setParameters(argc, argv);
+//     solver.setup();
+//     solver.solve();
+
+//     // ./compile Release
+//     // ./build/gmgpolar --nr_exp 3 --ntheta_exp 4 --openmp 15
+
+//     // Smoother Tasking //
+
+//     int Circles = 300;
+//     int BlackCircles = 150;
+//     int WhiteCircles = 150;
+//     // BlackCirclesTaskIndex [8,6,4,2,0]
+//     // WhiteCircleTaskIndex [9,7,5,3,1]
+
+//     int Radials = 200;
+//     int BlackRadials = 100;
+//     int WhiteRadials = 100;
+//     // BlackRadialTaskIndex [10,12,14,16,18]
+//     // WhiteRadialTaskIndex [11,13,15,17,19]
+
+//     assert(BlackCircles == WhiteCircles || BlackCircles == WhiteCircles + 1);
+//     std::vector<std::mutex> WhiteCircleMutexes(WhiteCircles);
+//     std::vector<int> WhiteCircleDepCounter(WhiteCircles, 2);
+//     if(BlackCircles == WhiteCircles) WhiteCircleDepCounter.back() = 1;
+
+
+//     assert(BlackRadials == WhiteRadials);
+//     std::vector<std::mutex> WhiteRadialMutexes(WhiteRadials);
+//     std::vector<int> WhiteRadialDepCounter(WhiteRadials, 2);
+
+    
+//     auto start_time = std::chrono::high_resolution_clock::now();
+
+//     #pragma omp parallel
+//     #pragma omp single
+//     {
+//         // Black Circle Task 0
+//         #pragma omp task
+//         {
+//             int localBlackCircleIndex = 0;
+//             // std::cout<<"Start: Black Circle 0.\n";
+//             // // Do some work...
+//             std::this_thread::sleep_for(std::chrono::milliseconds(2));
+//             // // Work finished
+//             // std::cout<<"Finished: Black Circle 0.\n";
+
+//             int localLeftWhiteCircleIndex = -1;
+//             if(BlackCircles == WhiteCircles || localBlackCircleIndex < BlackCircles - 1){
+//                 localLeftWhiteCircleIndex = ((localBlackCircleIndex) + WhiteCircles) % WhiteCircles;
+//             }
+//             if(localLeftWhiteCircleIndex != -1){
+//                 WhiteCircleMutexes[localLeftWhiteCircleIndex].lock();
+//                 WhiteCircleDepCounter[localLeftWhiteCircleIndex]--;
+//                 bool leftWhiteCircle_resolved = WhiteCircleDepCounter[localLeftWhiteCircleIndex] == 0;
+//                 WhiteCircleMutexes[localLeftWhiteCircleIndex].unlock();
+
+//                 if(leftWhiteCircle_resolved){
+//                     // White Circle Task
+//                     #pragma omp task
+//                     {
+//                         // std::cout<<"Start: White Circle "<<localLeftWhiteCircleIndex<< ".\n";
+//                         // // Do some work...
+//                         std::this_thread::sleep_for(std::chrono::milliseconds(2));
+//                         // // Work finished
+//                         // std::cout<<"Finished: White Circle "<<localLeftWhiteCircleIndex<< ".\n";
+//                     }
+//                 }
+//             }
+
+//             int localRightWhiteCircleIndex = -1;
+//             if(localBlackCircleIndex != 0){
+//                 localRightWhiteCircleIndex = ((localBlackCircleIndex-1) + WhiteCircles) % WhiteCircles;
+//             }
+//             if(localRightWhiteCircleIndex != -1){
+//                 WhiteCircleMutexes[localRightWhiteCircleIndex].lock();
+//                 WhiteCircleDepCounter[localRightWhiteCircleIndex]--;
+//                 bool rightWhiteCircle_resolved = WhiteCircleDepCounter[localRightWhiteCircleIndex] == 0;
+//                 WhiteCircleMutexes[localRightWhiteCircleIndex].unlock();
+
+//                 if(rightWhiteCircle_resolved){
+//                     // White Circle Task
+//                     #pragma omp task
+//                     {
+//                         // std::cout<<"Start: White Circle "<<localRightWhiteCircleIndex<< ".\n";
+//                         // // Do some work...
+//                         std::this_thread::sleep_for(std::chrono::milliseconds(2));
+//                         // // Work finished
+//                         // std::cout<<"Finished: White Circle "<<localRightWhiteCircleIndex<< ".\n";
+//                     }
+//                 }
+//             }
+
+
+
+//             for (int localBlackRadialIndex = 0; localBlackRadialIndex < BlackRadials; localBlackRadialIndex++)
+//             {
+//                 // Black Radial Task
+//                 #pragma omp task
+//                 {
+//                     // std::cout<<"Start: Black Radial "<<localBlackRadialIndex<< ".\n";
+//                     // // Do some work...
+//                     std::this_thread::sleep_for(std::chrono::milliseconds(2));
+//                     // // Work finished
+//                     // std::cout<<"Finished: Black Radial "<<localBlackRadialIndex<< ".\n";
+
+//                     int localLeftWhiteRadialIndex = ((localBlackRadialIndex-1) + WhiteRadials) % WhiteRadials;
+//                     WhiteRadialMutexes[localLeftWhiteRadialIndex].lock();
+//                     WhiteRadialDepCounter[localLeftWhiteRadialIndex]--;
+//                     bool leftWhiteRadial_resolved = WhiteRadialDepCounter[localLeftWhiteRadialIndex] == 0;
+//                     WhiteRadialMutexes[localLeftWhiteRadialIndex].unlock();
+
+//                     if(leftWhiteRadial_resolved){
+//                         // White Radial Task
+//                         #pragma omp task
+//                         {
+//                             // std::cout<<"Start: White Radial "<<localLeftWhiteRadialIndex<< ".\n";
+//                             // // Do some work...
+//                             std::this_thread::sleep_for(std::chrono::milliseconds(2));
+//                             // // Work finished
+//                             // std::cout<<"Finished: White Radial "<<localLeftWhiteRadialIndex<< ".\n";
+//                         }
+//                     }
+
+//                     int localRightWhiteRadialIndex = ((localBlackRadialIndex) + WhiteRadials) % WhiteRadials;
+//                     WhiteRadialMutexes[localRightWhiteRadialIndex].lock();
+//                     WhiteRadialDepCounter[localRightWhiteRadialIndex]--;
+//                     bool rightWhiteRadial_resolved = WhiteRadialDepCounter[localRightWhiteRadialIndex] == 0;
+//                     WhiteRadialMutexes[localRightWhiteRadialIndex].unlock();
+
+//                     if(rightWhiteRadial_resolved){
+//                         // White Radial Task
+//                         #pragma omp task
+//                         {
+//                             // std::cout<<"Start: White Radial "<<localRightWhiteRadialIndex<< ".\n";
+//                             // // Do some work...
+//                             std::this_thread::sleep_for(std::chrono::milliseconds(2));
+//                             // // Work finished
+//                             // std::cout<<"Finished: White Radial "<<localRightWhiteRadialIndex<< ".\n";
+//                         }
+//                     }
+
+//                 }
+//             }
+//         } // END OF BLACK CIRCLE 0
+
+//         for (int localBlackCircleIndex = 1; localBlackCircleIndex < BlackCircles; localBlackCircleIndex++)
+//         {
+//             // Black Circle Task
+//             #pragma omp task
+//             {
+//                 // std::cout<<"Start: Black Circle "<<localBlackCircleIndex<< ".\n";
+//                 // // Do some work...
+//                 std::this_thread::sleep_for(std::chrono::milliseconds(2));
+//                 // // Work finished
+//                 // std::cout<<"Finished: Black Circle "<<localBlackCircleIndex<< ".\n";
+
+//                 int localLeftWhiteCircleIndex = -1;
+//                 if(BlackCircles == WhiteCircles || localBlackCircleIndex < BlackCircles - 1){
+//                     localLeftWhiteCircleIndex = ((localBlackCircleIndex) + WhiteCircles) % WhiteCircles;
+//                 }
+//                 if(localLeftWhiteCircleIndex != -1){
+//                     WhiteCircleMutexes[localLeftWhiteCircleIndex].lock();
+//                     WhiteCircleDepCounter[localLeftWhiteCircleIndex]--;
+//                     bool leftWhiteCircle_resolved = WhiteCircleDepCounter[localLeftWhiteCircleIndex] == 0;
+//                     WhiteCircleMutexes[localLeftWhiteCircleIndex].unlock();
+
+//                     if(leftWhiteCircle_resolved){
+//                         // White Circle Task
+//                         #pragma omp task
+//                         {
+//                             // std::cout<<"Start: White Circle "<<localLeftWhiteCircleIndex<< ".\n";
+//                             // // Do some work...
+//                             std::this_thread::sleep_for(std::chrono::milliseconds(2));
+//                             // // Work finished
+//                             // std::cout<<"Finished: White Circle "<<localLeftWhiteCircleIndex<< ".\n";
+//                         }
+//                     }
+//                 }
+
+//                 int localRightWhiteCircleIndex = -1;
+//                 if(localBlackCircleIndex != 0){
+//                     localRightWhiteCircleIndex = ((localBlackCircleIndex-1) + WhiteCircles) % WhiteCircles;
+//                 }
+//                 if(localRightWhiteCircleIndex != -1){
+//                     WhiteCircleMutexes[localRightWhiteCircleIndex].lock();
+//                     WhiteCircleDepCounter[localRightWhiteCircleIndex]--;
+//                     bool rightWhiteCircle_resolved = WhiteCircleDepCounter[localRightWhiteCircleIndex] == 0;
+//                     WhiteCircleMutexes[localRightWhiteCircleIndex].unlock();
+
+//                     if(rightWhiteCircle_resolved){
+//                         // White Circle Task
+//                         #pragma omp task
+//                         {
+//                             // std::cout<<"Start: White Circle "<<localRightWhiteCircleIndex<< ".\n";
+//                             // // Do some work...
+//                             std::this_thread::sleep_for(std::chrono::milliseconds(2));
+//                             // // Work finished
+//                             // std::cout<<"Finished: White Circle "<<localRightWhiteCircleIndex<< ".\n";
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
+    
+//     std::cout<<"\nWhiteCircleDepCounter: ";
+//     for (int i = 0; i < WhiteCircleDepCounter.size(); i++)
+//     {
+//         std::cout<<WhiteCircleDepCounter[i]<<", ";
+//     }
+    
+//     std::cout<<"\nWhiteRadialDepCounter: ";
+//     for (int i = 0; i < WhiteRadialDepCounter.size(); i++)
+//     {
+//         std::cout<<WhiteRadialDepCounter[i]<<", ";
+//     }
+    
+
+//     auto end_time = std::chrono::high_resolution_clock::now();
+
+//     auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+//     std::cout << "Execution time: " << duration_ms.count() << " milliseconds" << std::endl;
+
+//     return 0;
+// }
+
+
+
+
+
+// int main(int argc, char* argv[]){
+//     #ifdef NDEBUG
+//         std::cout << "Build Type: Release\n";
+//     #else
+//         std::cout << "Build Type: Debug\n";
+//     #endif
+
+//     GMGPolar solver;
+//     solver.setParameters(argc, argv);
+//     solver.setup();
+//     solver.solve();
+
+//     // ./compile Release
+//     // ./build/gmgpolar --nr_exp 3 --ntheta_exp 4 --openmp 15
+
+//     // Smoother Tasking //
+
+//     int Circles = 11;
+//     int BlackCircles = 6;
+//     int WhiteCircles = 5;
+//     // BlackCirclesTaskIndex [8,6,4,2,0]
+//     // WhiteCircleTaskIndex [9,7,5,3,1]
+
+//     int Radials = 20;
+//     int BlackRadials = 10;
+//     int WhiteRadials = 10;
+//     // BlackRadialTaskIndex [10,12,14,16,18]
+//     // WhiteRadialTaskIndex [11,13,15,17,19]
+
+//     assert(BlackCircles == WhiteCircles || BlackCircles == WhiteCircles + 1);
+//     std::vector<std::mutex> WhiteCircleMutexes(WhiteCircles);
+//     std::vector<int> WhiteCircleDepCounter(WhiteCircles, 2);
+//     if(BlackCircles == WhiteCircles) WhiteCircleDepCounter.back() = 1;
+
+
+//     assert(BlackRadials == WhiteRadials);
+//     std::vector<std::mutex> WhiteRadialMutexes(WhiteRadials);
+//     std::vector<int> WhiteRadialDepCounter(WhiteRadials, 2);
+
+    
+//     auto start_time = std::chrono::high_resolution_clock::now();
+
+//     #pragma omp parallel
+//     #pragma omp single
+//     {
+//         // Black Circle Task 0
+//         #pragma omp task
+//         {
+//             int localBlackCircleIndex = 0;
+//             std::cout<<"Start: Black Circle 0.\n";
+//             // Do some work...
+//             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+//             // Work finished
+//             std::cout<<"Finished: Black Circle 0.\n";
+
+//             int localLeftWhiteCircleIndex = -1;
+//             if(BlackCircles == WhiteCircles || localBlackCircleIndex < BlackCircles - 1){
+//                 localLeftWhiteCircleIndex = ((localBlackCircleIndex) + WhiteCircles) % WhiteCircles;
+//             }
+//             if(localLeftWhiteCircleIndex != -1){
+//                 WhiteCircleMutexes[localLeftWhiteCircleIndex].lock();
+//                 WhiteCircleDepCounter[localLeftWhiteCircleIndex]--;
+//                 bool leftWhiteCircle_resolved = WhiteCircleDepCounter[localLeftWhiteCircleIndex] == 0;
+//                 WhiteCircleMutexes[localLeftWhiteCircleIndex].unlock();
+
+//                 if(leftWhiteCircle_resolved){
+//                     // White Circle Task
+//                     #pragma omp task
+//                     {
+//                         std::cout<<"Start: White Circle "<<localLeftWhiteCircleIndex<< ".\n";
+//                         // Do some work...
+//                         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+//                         // Work finished
+//                         std::cout<<"Finished: White Circle "<<localLeftWhiteCircleIndex<< ".\n";
+//                     }
+//                 }
+//             }
+
+//             int localRightWhiteCircleIndex = -1;
+//             if(localBlackCircleIndex != 0){
+//                 localRightWhiteCircleIndex = ((localBlackCircleIndex-1) + WhiteCircles) % WhiteCircles;
+//             }
+//             if(localRightWhiteCircleIndex != -1){
+//                 WhiteCircleMutexes[localRightWhiteCircleIndex].lock();
+//                 WhiteCircleDepCounter[localRightWhiteCircleIndex]--;
+//                 bool rightWhiteCircle_resolved = WhiteCircleDepCounter[localRightWhiteCircleIndex] == 0;
+//                 WhiteCircleMutexes[localRightWhiteCircleIndex].unlock();
+
+//                 if(rightWhiteCircle_resolved){
+//                     // White Circle Task
+//                     #pragma omp task
+//                     {
+//                         std::cout<<"Start: White Circle "<<localRightWhiteCircleIndex<< ".\n";
+//                         // Do some work...
+//                         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+//                         // Work finished
+//                         std::cout<<"Finished: White Circle "<<localRightWhiteCircleIndex<< ".\n";
+//                     }
+//                 }
+//             }
+
+
+
+//             for (int localBlackRadialIndex = 0; localBlackRadialIndex < BlackRadials; localBlackRadialIndex++)
+//             {
+//                 // Black Radial Task
+//                 #pragma omp task
+//                 {
+//                     std::cout<<"Start: Black Radial "<<localBlackRadialIndex<< ".\n";
+//                     // Do some work...
+//                     std::this_thread::sleep_for(std::chrono::milliseconds(500));
+//                     // Work finished
+//                     std::cout<<"Finished: Black Radial "<<localBlackRadialIndex<< ".\n";
+
+//                     int localLeftWhiteRadialIndex = ((localBlackRadialIndex-1) + WhiteRadials) % WhiteRadials;
+//                     WhiteRadialMutexes[localLeftWhiteRadialIndex].lock();
+//                     WhiteRadialDepCounter[localLeftWhiteRadialIndex]--;
+//                     bool leftWhiteRadial_resolved = WhiteRadialDepCounter[localLeftWhiteRadialIndex] == 0;
+//                     WhiteRadialMutexes[localLeftWhiteRadialIndex].unlock();
+
+//                     if(leftWhiteRadial_resolved){
+//                         // White Radial Task
+//                         #pragma omp task
+//                         {
+//                             std::cout<<"Start: White Radial "<<localLeftWhiteRadialIndex<< ".\n";
+//                             // Do some work...
+//                             std::this_thread::sleep_for(std::chrono::milliseconds(500));
+//                             // Work finished
+//                             std::cout<<"Finished: White Radial "<<localLeftWhiteRadialIndex<< ".\n";
+//                         }
+//                     }
+
+//                     int localRightWhiteRadialIndex = ((localBlackRadialIndex) + WhiteRadials) % WhiteRadials;
+//                     WhiteRadialMutexes[localRightWhiteRadialIndex].lock();
+//                     WhiteRadialDepCounter[localRightWhiteRadialIndex]--;
+//                     bool rightWhiteRadial_resolved = WhiteRadialDepCounter[localRightWhiteRadialIndex] == 0;
+//                     WhiteRadialMutexes[localRightWhiteRadialIndex].unlock();
+
+//                     if(rightWhiteRadial_resolved){
+//                         // White Radial Task
+//                         #pragma omp task
+//                         {
+//                             std::cout<<"Start: White Radial "<<localRightWhiteRadialIndex<< ".\n";
+//                             // Do some work...
+//                             std::this_thread::sleep_for(std::chrono::milliseconds(500));
+//                             // Work finished
+//                             std::cout<<"Finished: White Radial "<<localRightWhiteRadialIndex<< ".\n";
+//                         }
+//                     }
+
+//                 }
+//             }
+//         } // END OF BLACK CIRCLE 0
+
+//         for (int localBlackCircleIndex = 1; localBlackCircleIndex < BlackCircles; localBlackCircleIndex++)
+//         {
+//             // Black Circle Task
+//             #pragma omp task
+//             {
+//                 std::cout<<"Start: Black Circle "<<localBlackCircleIndex<< ".\n";
+//                 // Do some work...
+//                 std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+//                 // Work finished
+//                 std::cout<<"Finished: Black Circle "<<localBlackCircleIndex<< ".\n";
+
+//                 int localLeftWhiteCircleIndex = -1;
+//                 if(BlackCircles == WhiteCircles || localBlackCircleIndex < BlackCircles - 1){
+//                     localLeftWhiteCircleIndex = ((localBlackCircleIndex) + WhiteCircles) % WhiteCircles;
+//                 }
+//                 if(localLeftWhiteCircleIndex != -1){
+//                     WhiteCircleMutexes[localLeftWhiteCircleIndex].lock();
+//                     WhiteCircleDepCounter[localLeftWhiteCircleIndex]--;
+//                     bool leftWhiteCircle_resolved = WhiteCircleDepCounter[localLeftWhiteCircleIndex] == 0;
+//                     WhiteCircleMutexes[localLeftWhiteCircleIndex].unlock();
+
+//                     if(leftWhiteCircle_resolved){
+//                         // White Circle Task
+//                         #pragma omp task
+//                         {
+//                             std::cout<<"Start: White Circle "<<localLeftWhiteCircleIndex<< ".\n";
+//                             // Do some work...
+//                             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+//                             // Work finished
+//                             std::cout<<"Finished: White Circle "<<localLeftWhiteCircleIndex<< ".\n";
+//                         }
+//                     }
+//                 }
+
+//                 int localRightWhiteCircleIndex = -1;
+//                 if(localBlackCircleIndex != 0){
+//                     localRightWhiteCircleIndex = ((localBlackCircleIndex-1) + WhiteCircles) % WhiteCircles;
+//                 }
+//                 if(localRightWhiteCircleIndex != -1){
+//                     WhiteCircleMutexes[localRightWhiteCircleIndex].lock();
+//                     WhiteCircleDepCounter[localRightWhiteCircleIndex]--;
+//                     bool rightWhiteCircle_resolved = WhiteCircleDepCounter[localRightWhiteCircleIndex] == 0;
+//                     WhiteCircleMutexes[localRightWhiteCircleIndex].unlock();
+
+//                     if(rightWhiteCircle_resolved){
+//                         // White Circle Task
+//                         #pragma omp task
+//                         {
+//                             std::cout<<"Start: White Circle "<<localRightWhiteCircleIndex<< ".\n";
+//                             // Do some work...
+//                             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+//                             // Work finished
+//                             std::cout<<"Finished: White Circle "<<localRightWhiteCircleIndex<< ".\n";
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
+    
+//     std::cout<<"\nWhiteCircleDepCounter: ";
+//     for (int i = 0; i < WhiteCircleDepCounter.size(); i++)
+//     {
+//         std::cout<<WhiteCircleDepCounter[i]<<", ";
+//     }
+    
+//     std::cout<<"\nWhiteRadialDepCounter: ";
+//     for (int i = 0; i < WhiteRadialDepCounter.size(); i++)
+//     {
+//         std::cout<<WhiteRadialDepCounter[i]<<", ";
+//     }
+    
+
+//     auto end_time = std::chrono::high_resolution_clock::now();
+
+//     auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+//     std::cout << "Execution time: " << duration_ms.count() << " milliseconds" << std::endl;
+
+//     return 0;
+// }
+
+
+
+
+
+
+        //     for (int localBlackCircleIndex = 0; localBlackCircleIndex < WhiteCircles; localBlackCircleIndex++)
+        //     {
+        //         // BlackCircle Task localBlackCircleIndex
+        //         #pragma omp task
+        //         {
+        //             std::cout<<"Start: Black Circle "<<localBlackCircleIndex<< ".\n";
+        //             // Do some work...
+        //             std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+        //             // Work finished
+        //             std::cout<<"Finished: Black Circle "<<localBlackCircleIndex<< ".\n";
+
+        //             WhiteCircleMutexes[0].lock();
+
+        //             WhiteCircleDepCounter[0]--;
+        //             bool resolved = WhiteCircleDepCounter[0] == 0;
+
+        //             WhiteCircleMutexes[0].unlock();
+
+        //             if(resolved){
+
+        //                 // WhiteCircle Task localWhiteCircleIndex
+        //                 int localWhiteCircleIndex = 
+        //                 #pragma omp task
+        //                 {
+        //                     std::cout<<"Start: Black Circle "<<localWhiteCircleIndex<< ".\n";
+        //                     // Do some work...
+        //                     std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+        //                     // Work finished
+        //                     std::cout<<"Finished: Black Circle "<<localWhiteCircleIndex<< ".\n";
+
+        //                     }
+
+
+        //         }
+        //     }
+        // }
 
 
 

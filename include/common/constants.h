@@ -29,3 +29,38 @@ enum problem_type
     CARTESIAN_R6   = 2,
     REFINED_RADIUS = 3
 };
+
+
+
+// constexpr inline double Rmax = 1.3; 
+
+// inline double F_x(const double& r, const double& theta, const double& sin_theta, const double& cos_theta)
+// {
+//     return (r/Rmax) * cos_theta;
+// }
+
+// inline double F_y(const double& r, const double& theta, const double& sin_theta, const double& cos_theta)
+// {
+//     return (r/Rmax) * sin_theta;
+// }
+
+//  double dFx_dr(const double& r, const double& theta, const double& sin_theta, const double& cos_theta)
+// {
+//     return (cos_theta)/Rmax;
+// }
+
+//  double dFy_dr(const double& r, const double& theta, const double& sin_theta, const double& cos_theta)
+// {
+//     return (sin_theta)/Rmax;
+// }
+
+//  double dFx_dt(const double& r, const double& theta, const double& sin_theta, const double& cos_theta)
+// {
+//     return (-(r/Rmax)) * sin_theta;
+// }
+
+//  double dFy_dt(const double& r, const double& theta, const double& sin_theta, const double& cos_theta)
+// {
+//     return (r/Rmax) * cos_theta;
+// }
+

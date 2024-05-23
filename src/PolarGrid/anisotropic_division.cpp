@@ -1,7 +1,7 @@
 #include "../../include/PolarGrid/polargrid.h"
 
 void PolarGrid::RadialAnisotropicDivision(std::vector<double>& r_temp, 
-    const double R0, const double R, const int nr_exp, 
+    const double R0, const double R, const int nr_exp, const double r_jump,
     const int anisotropic_factor, const alpha_coeff alpha) const 
 {
     // 1) uniform division with nr=2^dummy_lognr - 2^aniso
@@ -30,28 +30,6 @@ void PolarGrid::RadialAnisotropicDivision(std::vector<double>& r_temp,
 
     // edge
     int se;
-
-    // allow refining of the grid at r_jump, the center point of the 
-    // drop of the diffusion coefficient alpha.
-    double r_jump;
-    if (alpha == SONNENDRUCKER) {
-        // The center of the coefficient jump lies at 0.6888697651782026
-        // for backward stability with previous runs and the Matlab code, 
-        // we use 0.66 though.
-        r_jump = 0.66;
-    } else if (alpha == ZONI) {
-        r_jump = 0.4837;
-    } else if (alpha == ZONI_SHIFTED) {
-        // Choose center point of descent.
-        // a) - ln(0.5 * (alpha(0) - alpha(Rmax))):
-        //    - ln(0.5 * (np.exp(-np.tanh(-14)) - np.exp(-np.tanh(6)))) = 0.16143743821247852
-        // b) r_center = Rmax * (np.arctanh(0.16143743821247852) + 14) / 20 = 0.7081431124450334 Rmax
-        r_jump = 0.7081;
-    } else if (alpha == POISSON) {
-        r_jump = 0.5; // There is no jump for Poisson so this is an arbitrary choice
-    } else {
-        throw std::runtime_error("Unknown alpha coeff");
-    }
 
     // Added by Allan Kuhn to fix a memory error
     if (floor(nr * r_jump) > nr - (n_elems_refined / 2)) {

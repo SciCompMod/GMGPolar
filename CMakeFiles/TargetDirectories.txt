@@ -1,0 +1,3 @@
+/localdata1/litz_ju/Dokumente/GMGPolarJulian/CMakeFiles/gmgpolar.dir
+/localdata1/litz_ju/Dokumente/GMGPolarJulian/CMakeFiles/edit_cache.dir
+/localdata1/litz_ju/Dokumente/GMGPolarJulian/CMakeFiles/rebuild_cache.dir

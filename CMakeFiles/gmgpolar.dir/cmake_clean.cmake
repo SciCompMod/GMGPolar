@@ -1,0 +1,41 @@
+file(REMOVE_RECURSE
+  "CMakeFiles/gmgpolar.dir/src/GMGPolar/gmgpolar.cpp.o"
+  "CMakeFiles/gmgpolar.dir/src/GMGPolar/gmgpolar.cpp.o.d"
+  "CMakeFiles/gmgpolar.dir/src/GMGPolar/gmgpolar_initializeLevels.cpp.o"
+  "CMakeFiles/gmgpolar.dir/src/GMGPolar/gmgpolar_initializeLevels.cpp.o.d"
+  "CMakeFiles/gmgpolar.dir/src/GMGPolar/gmgpolar_parser.cpp.o"
+  "CMakeFiles/gmgpolar.dir/src/GMGPolar/gmgpolar_parser.cpp.o.d"
+  "CMakeFiles/gmgpolar.dir/src/GMGPolar/select_exact_function_class.cpp.o"
+  "CMakeFiles/gmgpolar.dir/src/GMGPolar/select_exact_function_class.cpp.o.d"
+  "CMakeFiles/gmgpolar.dir/src/Interpolation/prolongation.cpp.o"
+  "CMakeFiles/gmgpolar.dir/src/Interpolation/prolongation.cpp.o.d"
+  "CMakeFiles/gmgpolar.dir/src/Interpolation/restrictionGive.cpp.o"
+  "CMakeFiles/gmgpolar.dir/src/Interpolation/restrictionGive.cpp.o.d"
+  "CMakeFiles/gmgpolar.dir/src/Interpolation/restrictionTake.cpp.o"
+  "CMakeFiles/gmgpolar.dir/src/Interpolation/restrictionTake.cpp.o.d"
+  "CMakeFiles/gmgpolar.dir/src/Level/level.cpp.o"
+  "CMakeFiles/gmgpolar.dir/src/Level/level.cpp.o.d"
+  "CMakeFiles/gmgpolar.dir/src/Operator/matrixA.cpp.o"
+  "CMakeFiles/gmgpolar.dir/src/Operator/matrixA.cpp.o.d"
+  "CMakeFiles/gmgpolar.dir/src/PolarGrid/anisotropic_division.cpp.o"
+  "CMakeFiles/gmgpolar.dir/src/PolarGrid/anisotropic_division.cpp.o.d"
+  "CMakeFiles/gmgpolar.dir/src/PolarGrid/load_write_grid.cpp.o"
+  "CMakeFiles/gmgpolar.dir/src/PolarGrid/load_write_grid.cpp.o.d"
+  "CMakeFiles/gmgpolar.dir/src/PolarGrid/multiindex.cpp.o"
+  "CMakeFiles/gmgpolar.dir/src/PolarGrid/multiindex.cpp.o.d"
+  "CMakeFiles/gmgpolar.dir/src/PolarGrid/point.cpp.o"
+  "CMakeFiles/gmgpolar.dir/src/PolarGrid/point.cpp.o.d"
+  "CMakeFiles/gmgpolar.dir/src/PolarGrid/polargrid.cpp.o"
+  "CMakeFiles/gmgpolar.dir/src/PolarGrid/polargrid.cpp.o.d"
+  "CMakeFiles/gmgpolar.dir/src/TaskDistribution/TaskDistribution.cpp.o"
+  "CMakeFiles/gmgpolar.dir/src/TaskDistribution/TaskDistribution.cpp.o.d"
+  "CMakeFiles/gmgpolar.dir/src/main.cpp.o"
+  "CMakeFiles/gmgpolar.dir/src/main.cpp.o.d"
+  "gmgpolar"
+  "gmgpolar.pdb"
+)
+
+# Per-language clean rules from dependency scanning.
+foreach(lang CXX)
+  include(CMakeFiles/gmgpolar.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

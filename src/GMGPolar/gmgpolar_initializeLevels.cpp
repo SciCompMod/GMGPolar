@@ -6,7 +6,7 @@ PolarGrid GMGPolar::createFinestGrid() {
         assert(!file_grid_r.empty() && !file_grid_theta.empty());
         finest_grid = PolarGrid(file_grid_r, file_grid_theta);
     } else {
-        finest_grid = PolarGrid(R0, Rmax, nr_exp, ntheta_exp, anisotropic_factor, alpha, divideBy2, 1000);
+        finest_grid = PolarGrid(R0, Rmax, nr_exp, ntheta_exp, r_jump_, anisotropic_factor, alpha, divideBy2);
     }
     if(write_grid_file) {
         const int precision = 18;

@@ -24,10 +24,11 @@ public:
 
     void applyA(Vector<scalar_t> &result, const Vector<scalar_t> &x) const;
     void applyATasks(Vector<scalar_t> &result, const Vector<scalar_t> &x) const;
+    void applyAMutex(Vector<scalar_t> &result, const Vector<scalar_t> &x);
     void applyATake0(Vector<scalar_t> &result, const Vector<scalar_t> &x) const;
 private:
     const int level_;
     std::unique_ptr<const PolarGrid> grid_;
     std::shared_ptr<const ExactFunctions> exactFunctions_;
-    std::unique_ptr<const Operator> operator_;
+    std::unique_ptr<Operator> operator_;
 };

@@ -50,6 +50,20 @@ inline int PolarGrid::numberRadialSmootherNodes() const{
     return numberRadialSmootherNodes_;
 }
 
+
+inline int PolarGrid::numberBlackSmootherCircles() const{
+    return numberBlackSmootherCircles_;
+}
+inline int PolarGrid::numberWhiteSmootherCircles() const{
+    return numberWhiteSmootherCircles_;
+}
+inline int PolarGrid::numberBlackSmootherRadials() const{
+    return numberBlackSmootherRadials_;
+}
+inline int PolarGrid::numberWhiteSmootherRadials() const{
+    return numberWhiteSmootherRadials_;
+}
+
 inline const scalar_t& PolarGrid::r_dist(const int r_index) const{ 
     assert(r_index >= 0 && static_cast<size_t>(r_index) < r_dist_.size());
     return r_dist_[r_index];

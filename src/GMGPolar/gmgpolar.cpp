@@ -1,5 +1,37 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
+void GMGPolar::setRadialRefinement(double r_jump){
+    r_jump_ = r_jump;
+}
+
+void GMGPolar::setGeometry(
+    const dFx_dr_Functor& dFx_dr, 
+    const dFy_dr_Functor& dFy_dr, 
+    const dFx_dt_Functor& dFx_dt, 
+    const dFy_dt_Functor& dFy_dt
+) {
+    dFx_dr_ = std::make_shared<dFx_dr_Functor>(dFx_dr);
+    dFy_dr_ = std::make_shared<dFy_dr_Functor>(dFy_dr);
+    dFx_dt_ = std::make_shared<dFx_dt_Functor>(dFx_dt);
+    dFy_dt_ = std::make_shared<dFy_dt_Functor>(dFy_dt);
+}
+
+void GMGPolar::setParameters(
+    const alpha_Functor& alpha, 
+    const beta_Functor& beta, 
+    const rhs_f_Functor& rhs_f, 
+    const u_D_Functor& u_D
+) {
+    alpha_ = std::make_shared<alpha_Functor>(alpha);
+    beta_ = std::make_shared<beta_Functor>(beta);
+    rhs_f_ = std::make_shared<rhs_f_Functor>(rhs_f);
+    u_D_ = std::make_shared<u_D_Functor>(u_D);
+}
+
+void GMGPolar::setSystemParameters(const exact_solution_Functor& exact_solution) {
+    exact_solution_ = std::make_shared<exact_solution_Functor>(exact_solution);
+}
+
 GMGPolar::GMGPolar() : parser_() {
     initializeGrid(); initializeGeometry();
     initializeMultigrid(); initializeGeneral();
@@ -36,68 +68,222 @@ void GMGPolar::setup() {
 }
 
 
+
 void GMGPolar::solve() {
 
 
-// Vector<scalar_t> result1(getLevel(0).grid().number_of_nodes());
-// Vector<scalar_t> result2(getLevel(0).grid().number_of_nodes());
-//     {
-//         const int current_level = 0;
-//         Vector<scalar_t> x(getLevel(current_level).grid().number_of_nodes());
 
-//         for (int i = 0; i < x.size(); i++)
-//         {
-//             x[i] = 4 * i;
-//         }
+    {
+    const int numThreads = omp_get_max_threads();
 
-//         auto start_time = std::chrono::high_resolution_clock::now();
+    const int NUM_LEVELS = 6;
+    const int NUM_REPEATS = 5;
+
+    // Store timings for each level
+    std::vector<std::vector<int>> all_timings(NUM_LEVELS);
+
+    for (int current_level = 0; current_level < NUM_LEVELS; ++current_level) {
+        std::vector<int> timings;
+
+        Vector<scalar_t> result(getLevel(current_level).grid().number_of_nodes());
+        Vector<scalar_t> x(getLevel(current_level).grid().number_of_nodes());
+
+        #pragma omp parallel for
+        for (int i = 0; i < x.size(); i++) { 
+            x[i] = 4 * i;
+        }
+
+        for (int i = 1; i <= numThreads; i += 1) {
+            omp_set_num_threads(i);
+
+            std::vector<int> duration_repeats(NUM_REPEATS);
+
+            for (int j = 0; j < NUM_REPEATS; ++j) {
+                auto start_time = std::chrono::high_resolution_clock::now();
+                
+                levels_[current_level].applyATasks(result, x);
+
+                auto end_time = std::chrono::high_resolution_clock::now();
+
+                int duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
+                duration_repeats[j] = duration;
+            }
+
+            // Compute average duration
+            int avg_duration = std::accumulate(duration_repeats.begin(), duration_repeats.end(), 0) / NUM_REPEATS;
+            timings.push_back(avg_duration);
+
+            // Print timings to console
+            std::cout << "Level: " << current_level << " Threads: " << i << " Average Duration: " << avg_duration << " microseconds" << std::endl;
+        }
+
+        all_timings[current_level] = timings;
+    }
+
+    // Save timings to a file
+    std::ofstream timings_file("timings2.txt");
+    for (int level = 0; level < NUM_LEVELS; ++level) {
+        timings_file << "Level " << level << "\n";
+        for (const auto& timing : all_timings[level]) {
+            timings_file << timing << "\n";
+        }
+        timings_file << "\n";  // Separate levels by a blank line
+    }
+    timings_file.close();
+
+  
+    }
+
+
+
+    // Vector<scalar_t> result2(getLevel(0).grid().number_of_nodes());
+    // Vector<scalar_t> result3(getLevel(0).grid().number_of_nodes());
+    // Vector<scalar_t> result4(getLevel(0).grid().number_of_nodes());
+
+    // {
+    //     const int current_level = 0;
+    //     Vector<scalar_t> x(getLevel(current_level).grid().number_of_nodes());
+
+    //     for (int i = 0; i < x.size(); i++)
+    //     {
+    //         x[i] = 4 * i;
+    //     }
+
+    //     auto start_time = std::chrono::high_resolution_clock::now();
         
-//         levels_[current_level].applyATake0(result1, x);
+    //     levels_[current_level].applyATake0(result1, x);
 
-//         auto end_time = std::chrono::high_resolution_clock::now();
+    //     auto end_time = std::chrono::high_resolution_clock::now();
 
-//         // Compute duration in milliseconds
-//         auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+    //     // Compute duration in milliseconds
+    //     auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
 
-//         // Output the duration
-//         std::cout << "Execution time: " << duration_ms.count() << " milliseconds" << std::endl;
+    //     // Output the duration
+    //     std::cout << "Execution time: " << duration_ms.count() << " milliseconds" << std::endl;
 
-//         // std::cout<<"Input: \n"<<x<<std::endl;
-//         // std::cout<<"Result: \n"<<result<<std::endl;
-//     }
+    //     // std::cout<<"Input: \n"<<x<<std::endl;
+    //     // std::cout<<"Result: \n"<<result<<std::endl;
+    // }
 
 
+    // {
+    //     const int current_level = 0;
+    //     Vector<scalar_t> x(getLevel(current_level).grid().number_of_nodes());
 
-//     {
-//         const int current_level = 0;
-//         Vector<scalar_t> x(getLevel(current_level).grid().number_of_nodes());
-//         Vector<scalar_t> result(getLevel(current_level).grid().number_of_nodes());
+    //     for (int i = 0; i < x.size(); i++)
+    //     {
+    //         x[i] = 4 * i;
+    //     }
 
-//         for (int i = 0; i < x.size(); i++)
-//         {
-//             x[i] = 4 * i;
-//         }
-
-//         auto start_time = std::chrono::high_resolution_clock::now();
+    //     auto start_time = std::chrono::high_resolution_clock::now();
         
-//         levels_[current_level].applyA(result2, x);
+    //     levels_[current_level].applyATasks(result3, x);
 
-//         auto end_time = std::chrono::high_resolution_clock::now();
+    //     auto end_time = std::chrono::high_resolution_clock::now();
 
-//         // Compute duration in milliseconds
-//         auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+    //     // Compute duration in milliseconds
+    //     auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
 
-//         // Output the duration
-//         std::cout << "Execution time: " << duration_ms.count() << " milliseconds" << std::endl;
+    //     // Output the duration
+    //     std::cout << "Execution time: " << duration_ms.count() << " milliseconds" << std::endl;
 
-//         // std::cout<<"Input: \n"<<x<<std::endl;
-//         std::cout<<"Result: \n"<<result<<std::endl;
-//     }
+    //     // std::cout<<"Input: \n"<<x<<std::endl;
+    //     // std::cout<<"Result: \n"<<result<<std::endl;
+    // }
 
-//     for (int i = 0; i < result1.size(); i++)
-//     {
-//         std::cout<<result1[i]<<", "<<result2[i]<<std::endl;
-//     }
+
+
+
+
+    // {
+    //     const int current_level = 0;
+    //     Vector<scalar_t> x(getLevel(current_level).grid().number_of_nodes());
+    //     // Vector<scalar_t> result(getLevel(current_level).grid().number_of_nodes());
+
+    //     for (int i = 0; i < x.size(); i++)
+    //     {
+    //         x[i] = 4 * i;
+    //     }
+
+
+    //     // for(int i = 0; i < getLevel(current_level).grid().number_of_inner_boundary_nodes(); i++){
+    //     //     // x[i] = 0.0;
+    //     //     x[x.size()-1 - i] = 0.0;
+    //     // }
+
+    //     auto start_time = std::chrono::high_resolution_clock::now();
+        
+    //     levels_[current_level].applyA(result2, x);
+
+    //     auto end_time = std::chrono::high_resolution_clock::now();
+
+    //     // Compute duration in milliseconds
+    //     auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+
+    //     // Output the duration
+    //     std::cout << "Execution time: " << duration_ms.count() << " milliseconds" << std::endl;
+
+    //     // std::cout<<"Input: \n"<<x<<std::endl;
+    //     // std::cout<<"Result: \n"<<result2<<std::endl;
+    // }
+
+
+    // {
+    //     const int current_level = 0;
+    //     Vector<scalar_t> x(getLevel(current_level).grid().number_of_nodes());
+
+    //     for (int i = 0; i < x.size(); i++)
+    //     {
+    //         x[i] = 4 * i;
+    //     }
+
+    //     auto start_time = std::chrono::high_resolution_clock::now();
+        
+    //     levels_[current_level].applyATasks(result3, x);
+
+    //     auto end_time = std::chrono::high_resolution_clock::now();
+
+    //     // Compute duration in milliseconds
+    //     auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+
+    //     // Output the duration
+    //     std::cout << "Execution time: " << duration_ms.count() << " milliseconds" << std::endl;
+
+    //     // std::cout<<"Input: \n"<<x<<std::endl;
+    //     // std::cout<<"Result: \n"<<result<<std::endl;
+    // }
+
+
+    // {
+    //     const int current_level = 0;
+    //     Vector<scalar_t> x(getLevel(current_level).grid().number_of_nodes());
+
+    //     for (int i = 0; i < x.size(); i++)
+    //     {
+    //         x[i] = 4 * i;
+    //     }
+
+    //     auto start_time = std::chrono::high_resolution_clock::now();
+        
+    //     levels_[current_level].applyAMutex(result4, x);
+
+    //     auto end_time = std::chrono::high_resolution_clock::now();
+
+    //     // Compute duration in milliseconds
+    //     auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+
+    //     // Output the duration
+    //     std::cout << "Execution time: " << duration_ms.count() << " milliseconds" << std::endl;
+
+    //     // std::cout<<"Input: \n"<<x<<std::endl;
+    //     // std::cout<<"Result: \n"<<result<<std::endl;
+    // }
+
+
+    // for (int i = 0; i < result1.size(); i++)
+    // {
+    //     std::cout<<result2[i]<<", "<<result3[i]<<", "<<result4[i]<<std::endl;
+    // }
     
 
 }
