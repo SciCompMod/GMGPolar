@@ -74,68 +74,95 @@ void GMGPolar::solve() {
 
 
     {
-    const int numThreads = omp_get_max_threads();
+        const int current_level = 0;
 
-    const int NUM_LEVELS = 6;
-    const int NUM_REPEATS = 5;
+        auto start_time = std::chrono::high_resolution_clock::now();
 
-    // Store timings for each level
-    std::vector<std::vector<int>> all_timings(NUM_LEVELS);
+        const auto [matrixA, rhs] = levels_[current_level].build_system();
 
-    for (int current_level = 0; current_level < NUM_LEVELS; ++current_level) {
-        std::vector<int> timings;
+        auto end_time = std::chrono::high_resolution_clock::now();
 
-        Vector<scalar_t> result(getLevel(current_level).grid().number_of_nodes());
-        Vector<scalar_t> x(getLevel(current_level).grid().number_of_nodes());
+        // Compute duration in milliseconds
+        auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
 
-        #pragma omp parallel for
-        for (int i = 0; i < x.size(); i++) { 
-            x[i] = 4 * i;
-        }
+        // Output the duration
+        std::cout << "Execution time: " << duration_ms.count() << " milliseconds" << std::endl;
 
-        for (int i = 1; i <= numThreads; i += 1) {
-            omp_set_num_threads(i);
+        // std::cout<<"Input: \n"<<x<<std::endl;
+        // std::cout<<"Result: \n"<<result<<std::endl;
+    }
 
-            std::vector<int> duration_repeats(NUM_REPEATS);
 
-            for (int j = 0; j < NUM_REPEATS; ++j) {
-                auto start_time = std::chrono::high_resolution_clock::now();
+
+    // {
+    // const int numThreads = omp_get_max_threads();
+
+    // const int NUM_LEVELS = 1;
+    // const int NUM_REPEATS = 1;
+
+    // // Store timings for each level
+    // std::vector<std::vector<int>> all_timings(NUM_LEVELS);
+
+    // for (int current_level = 0; current_level < NUM_LEVELS; ++current_level) {
+    //     std::vector<int> timings;
+
+    //     Vector<scalar_t> result(getLevel(current_level).grid().number_of_nodes());
+    //     Vector<scalar_t> x(getLevel(current_level).grid().number_of_nodes());
+
+    //     #pragma omp parallel for
+    //     for (int i = 0; i < x.size(); i++) { 
+    //         x[i] = 4 * i;
+    //     }
+
+    //     for (int i = numThreads; i <= numThreads; i += 1) {
+    //         omp_set_num_threads(i);
+
+    //         assign(result, 0.0);
+
+    //         std::vector<int> duration_repeats(NUM_REPEATS);
+
+    //         for (int j = 0; j < NUM_REPEATS; ++j) {
                 
-                levels_[current_level].applyATasks(result, x);
+    //             auto start_time = std::chrono::high_resolution_clock::now();
+                
+    //             levels_[current_level].applyA(result, x, 1.0);
+    //             // levels_[current_level].applyATasks(result, x, 1.0);
+    //             // levels_[current_level].applyAMutex(result, x, 1.0);
+    //             // levels_[current_level].applyATake0(result, x, 1.0);
 
-                auto end_time = std::chrono::high_resolution_clock::now();
+    //             auto end_time = std::chrono::high_resolution_clock::now();
 
-                int duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
-                duration_repeats[j] = duration;
-            }
+    //             int duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
+    //             duration_repeats[j] = duration;
+    //         }
 
-            // Compute average duration
-            int avg_duration = std::accumulate(duration_repeats.begin(), duration_repeats.end(), 0) / NUM_REPEATS;
-            timings.push_back(avg_duration);
+    //         // Compute average duration
+    //         int avg_duration = std::accumulate(duration_repeats.begin(), duration_repeats.end(), 0) / NUM_REPEATS;
+    //         timings.push_back(avg_duration);
 
-            // Print timings to console
-            std::cout << "Level: " << current_level << " Threads: " << i << " Average Duration: " << avg_duration << " microseconds" << std::endl;
-        }
+    //         // Print timings to console
+    //         std::cout << "Level: " << current_level << " Threads: " << i << " Average Duration: " << avg_duration << " microseconds" << std::endl;
+    //     }
 
-        all_timings[current_level] = timings;
-    }
+    //     all_timings[current_level] = timings;
+    // }
 
-    // Save timings to a file
-    std::ofstream timings_file("timings2.txt");
-    for (int level = 0; level < NUM_LEVELS; ++level) {
-        timings_file << "Level " << level << "\n";
-        for (const auto& timing : all_timings[level]) {
-            timings_file << timing << "\n";
-        }
-        timings_file << "\n";  // Separate levels by a blank line
-    }
-    timings_file.close();
+    // // Save timings to a file
+    // std::ofstream timings_file("GiveMutexTasking2.txt");
+    // for (int level = 0; level < NUM_LEVELS; ++level) {
+    //     timings_file << "Level " << level << "\n";
+    //     for (const auto& timing : all_timings[level]) {
+    //         timings_file << timing << "\n";
+    //     }
+    //     timings_file << "\n";  // Separate levels by a blank line
+    // }
+    // timings_file.close();
 
   
-    }
+    // }
 
 
-
+    // Vector<scalar_t> result1(getLevel(0).grid().number_of_nodes());
     // Vector<scalar_t> result2(getLevel(0).grid().number_of_nodes());
     // Vector<scalar_t> result3(getLevel(0).grid().number_of_nodes());
     // Vector<scalar_t> result4(getLevel(0).grid().number_of_nodes());
@@ -150,34 +177,11 @@ void GMGPolar::solve() {
     //     }
 
     //     auto start_time = std::chrono::high_resolution_clock::now();
+
+    //     assign(result1, 0.0);
+    //     double factor = 1.0;
         
-    //     levels_[current_level].applyATake0(result1, x);
-
-    //     auto end_time = std::chrono::high_resolution_clock::now();
-
-    //     // Compute duration in milliseconds
-    //     auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-
-    //     // Output the duration
-    //     std::cout << "Execution time: " << duration_ms.count() << " milliseconds" << std::endl;
-
-    //     // std::cout<<"Input: \n"<<x<<std::endl;
-    //     // std::cout<<"Result: \n"<<result<<std::endl;
-    // }
-
-
-    // {
-    //     const int current_level = 0;
-    //     Vector<scalar_t> x(getLevel(current_level).grid().number_of_nodes());
-
-    //     for (int i = 0; i < x.size(); i++)
-    //     {
-    //         x[i] = 4 * i;
-    //     }
-
-    //     auto start_time = std::chrono::high_resolution_clock::now();
-        
-    //     levels_[current_level].applyATasks(result3, x);
+    //     levels_[current_level].applyATake0(result1, x, factor);
 
     //     auto end_time = std::chrono::high_resolution_clock::now();
 
@@ -205,15 +209,13 @@ void GMGPolar::solve() {
     //         x[i] = 4 * i;
     //     }
 
-
-    //     // for(int i = 0; i < getLevel(current_level).grid().number_of_inner_boundary_nodes(); i++){
-    //     //     // x[i] = 0.0;
-    //     //     x[x.size()-1 - i] = 0.0;
-    //     // }
-
     //     auto start_time = std::chrono::high_resolution_clock::now();
+
+    //     assign(result2, 0.0);
+
+    //     double factor = 1.0;
         
-    //     levels_[current_level].applyA(result2, x);
+    //     levels_[current_level].applyA(result2, x, factor);
 
     //     auto end_time = std::chrono::high_resolution_clock::now();
 
@@ -237,9 +239,13 @@ void GMGPolar::solve() {
     //         x[i] = 4 * i;
     //     }
 
+    //     assign(result3, 0.0);
+
+    //     double factor = 1.0;
+
     //     auto start_time = std::chrono::high_resolution_clock::now();
         
-    //     levels_[current_level].applyATasks(result3, x);
+    //     levels_[current_level].applyATasks(result3, x, factor);
 
     //     auto end_time = std::chrono::high_resolution_clock::now();
 
@@ -263,9 +269,14 @@ void GMGPolar::solve() {
     //         x[i] = 4 * i;
     //     }
 
+    //     assign(result4, 0.0);
+
+    //     double factor = 1.0;
+        
+
     //     auto start_time = std::chrono::high_resolution_clock::now();
         
-    //     levels_[current_level].applyAMutex(result4, x);
+    //     levels_[current_level].applyAMutex(result4, x, factor);
 
     //     auto end_time = std::chrono::high_resolution_clock::now();
 
@@ -280,9 +291,10 @@ void GMGPolar::solve() {
     // }
 
 
-    // for (int i = 0; i < result1.size(); i++)
+    // for (int i = 0; i < result2.size(); i++)
     // {
-    //     std::cout<<result2[i]<<", "<<result3[i]<<", "<<result4[i]<<std::endl;
+    //    //  std::cout<<result1[i]<<", "<<result2[i]<<", "<<result4[i]<<std::endl;
+    //     std::cout<<result1[i]<<", "<<result2[i]<<", "<<result3[i]<<", "<<result4[i]<<std::endl;
     // }
     
 

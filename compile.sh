@@ -1,5 +1,16 @@
 #!/bin/bash
 
+. /scratch/spack-23.2/share/spack/setup-env.sh
+
+# 5.5.1
+
+# spack info mumps
+
+# export MODULEPATH=/scratch/spack-23.2/share/spack/modules/linux-ubuntu20.04-x86_64_v3:/tools/modulesystem/modulefiles
+# module load mumps
+# module load likwid
+# module load PrgEnv
+
 # Function to display usage information
 usage() {
     echo "Usage: $0 [Debug|Release]"
@@ -50,7 +61,7 @@ fi
 
 if [ -n "$build_type" ]; then
     echo "Configuring with $build_type build type..."
-    cmake -S ${PWD} -B ${PWD}/build -DCMAKE_BUILD_TYPE="$build_type" || { echo "CMake configuration failed"; exit 1; }
+    cmake -S ${PWD} -B ${PWD}/build -DCMAKE_BUILD_TYPE="$build_type" -DCMAKE_PREFIX_PATH="/scratch/spack-23.2/opt/spack/linux-ubuntu20.04-x86_64_v3/gcc-12.3.0/mumps-5.5.1-afnceqpp75o4zmfmqpbvr4whi2li2r4i" .. || { echo "CMake configuration failed"; exit 1; }
 fi
 
 cmake --build ${PWD}/build -j 16

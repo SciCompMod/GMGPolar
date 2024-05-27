@@ -85,7 +85,10 @@ inline int PolarGrid::index(const int r_index, const int unwrapped_theta_index) 
     // If ntheta = 2^k we can use the optimization idx & (ntheta-1)
     assert(r_index >= 0 && r_index < nr());
     const int theta_index = is_ntheta_PowerOfTwo_ ? unwrapped_theta_index & (ntheta() - 1) : (unwrapped_theta_index % ntheta() + ntheta()) % ntheta();
-    return r_index < numberSmootherCircles() ? theta_index + ntheta() * r_index : numberCircularSmootherNodes() + (r_index-numberSmootherCircles() + lengthSmootherRadial() * theta_index);
+    return r_index < numberSmootherCircles() ? 
+        theta_index + ntheta() * r_index : 
+        numberCircularSmootherNodes() + 
+        r_index - numberSmootherCircles() + lengthSmootherRadial() * theta_index;
 }
 
 

@@ -15,9 +15,10 @@
 // #include "../include/TaskDistribution/TaskDistribution.h"
 
 
-// #include "../include/linear_algebra/vector.h"
-// #include "../include/linear_algebra/operations.h"
-// #include <chrono>
+#include "../include/linear_algebra/vector.h"
+#include "../include/linear_algebra/matrix.h"
+#include "../include/linear_algebra/operations.h"
+#include <chrono>
 
 #include <iostream>
 #include <vector>
@@ -28,12 +29,176 @@
 #include <memory>
 
 
+
+
+
+
+#include <stdio.h>
+
+
+  
+
+#include "mpi.h" 
+#include "dmumps_c.h"   
+#include <likwid.h>
+
+
+
+
+
+// int main(int argc, char** argv) {
+
+//     LIKWID_MARKER_INIT;
+
+//     LIKWID_MARKER_START("create_grid_polar");
+
+    // Perform matrix multiplication
+    
+    // JOB (integer) must be initialized by the user on all processors before a call to MUMPS. 
+    // It controls the main actions taken by MUMPS. It is not altered by MUMPS. 
+    // Possible values of JOB are:
+    // • JOB= –1 initializes an instance of the package.
+    // • JOB= –2 terminates an instance of the package.
+    // • JOB= –3 save / restore feature: removes data saved to disk.
+    // • JOB= –4 after factorization or solve phases, frees all MUMPS internal data structures except the ones from analysis.
+    // • JOB= 1 performs the analysis phase.
+    // • JOB= 2 performs the factorization phase.
+    // • JOB= 3 computes the solution.
+    // • JOB= 4 combines the actions of JOB= 1 with those of JOB= 2.
+    // • JOB= 5 combines the actions of JOB= 2 and JOB= 3.
+    // • JOB= 6 combines the actions of calls with JOB= 1, JOB= 2, and JOB= 3.
+    // • JOB= 7 save / restore feature: saves MUMPS internal data to disk.
+    // • JOB= 8 save / restore feature: restores MUMPS internal data from disk.
+    // • JOB= 9 computes before the solution phase a possible distribution for the right-hand sides.
+
+
+//     // MUMPS_INT n = 3; // Size of the matrix
+//     // MUMPS_INT nz = 4; // Number of non-zero elements
+//     // MUMPS_INT irn[4] = {1, 2, 3, 1}; // Row indices of non-zero elements
+//     // MUMPS_INT jcn[4] = {1, 2, 3, 3}; // Column indices of non-zero elements
+//     // double a[4] = {1.0, 1.0, 1.0, 6.0}; // Values of non-zero elements
+//     // MUMPS_INT nz_rhs = 3; // Number of right-hand sides
+//     // double rhs[3] = {1.0, 2.0, 3.0}; // Right-hand side vector
+//     // MUMPS_INT lrhs = 3; // Leading dimension of rhs (should be >= nz_rhs)
+//     // MUMPS_INT ierr;
+
+//     // DMUMPS_STRUC_C mumps;
+//     // mumps.job = -1; // Initialize MUMPS
+//     // mumps.par = 1; // Sequential execution
+//     // mumps.sym = 1; // General matrix
+//     // mumps.comm_fortran = -987654; // Dummy MPI communicator
+
+//     // dmumps_c(&mumps);
+
+//     // mumps.job = 4; // Solve Ax = b
+//     // mumps.n = n;
+//     // mumps.nz = nz;
+//     // mumps.irn = irn;
+//     // mumps.jcn = jcn;
+//     // mumps.a = a;
+//     // mumps.nz_rhs = nz_rhs;
+//     // mumps.rhs = rhs;
+//     // mumps.lrhs = lrhs;
+
+//     // dmumps_c(&mumps);
+
+//     // mumps.job = 3;
+//     // dmumps_c(&mumps);
+
+//     // if (mumps.info[0] != 0) {
+//     //     std::cerr << "Error solving the system: " << mumps.info[0] << std::endl;
+//     //     return 1;
+//     // }
+
+//     // std::cout << "Solution:" << std::endl;
+//     // for (int i = 0; i < n; ++i) {
+//     //     std::cout << mumps.rhs[i] << std::endl;
+//     // }
+
+
+
+
+
+//     int n = 3;
+//     std::vector<std::tuple<int, int, double>> entries = {
+//         {1, 1, 1.0}, {2, 2, 1.0}, {3, 3, 1.0}, {1, 3, 6.0}
+//     };
+//     SparseMatrix matrix(n, n, entries);
+//     matrix.is_symmetric(true);
+
+//     DMUMPS_STRUC_C mumps;
+//     mumps.job = -1;
+//     mumps.par = 1;
+//     mumps.sym = (matrix.is_symmetric() ? 1 : 0);
+//     mumps.comm_fortran = -987654;
+//     dmumps_c(&mumps);
+
+//     mumps.job = 4; 
+//     assert(matrix.rows() == matrix.cols());
+//     mumps.n = matrix.rows();
+//     mumps.nz = matrix.non_zero_size();
+//     mumps.irn = matrix.row_indices_data();
+//     mumps.jcn = matrix.column_indices_data();
+//     mumps.a = matrix.values_data();
+//     dmumps_c(&mumps);
+
+//     int nz_rhs = 7; 
+//     int nrhs = 2;
+//     double rhs[6] = {1.0, 2.0, 3.0, 1.0, 2.0, 3.0}; 
+//     int lrhs = 3; 
+    
+//     mumps.job = 3; 
+//     mumps.nrhs = nrhs;
+//     mumps.nz_rhs = nz_rhs;
+//     mumps.rhs = rhs;
+//     mumps.lrhs = lrhs;
+
+//     dmumps_c(&mumps);
+
+//     if (mumps.info[0] != 0) {
+//         std::cerr << "Error solving the system: " << mumps.info[0] << std::endl;
+//         return 1;
+//     }
+
+//     std::cout << "Solution:" << std::endl;
+//     for (int i = 0; i < 2*n; ++i) {
+//         std::cout << mumps.rhs[i] << std::endl;
+//     }
+
+
+//     return 0;
+// }
+
+
+//     id.job = -1; // Initialize MUMPS
+//     dmumps_c(&id);
+    
+//     // Check if MUMPS initialization was successful
+//     if (id.ICNTL(1) < 0) {
+//         printf("MUMPS initialization failed with error code %d\n", id.ICNTL(1));
+//         return 1;
+//     }
+    
+//     printf("MUMPS initialization successful!\n");
+
+//     // Finalize MUMPS
+//     id.job = -2; // Terminate MUMPS
+//     dmumps_c(&id);
+
+//     return 0;
+// }
+
+// #include <thread>
+
 int main(int argc, char* argv[]){
     #ifdef NDEBUG
         std::cout << "Build Type: Release\n";
     #else
         std::cout << "Build Type: Debug\n";
     #endif
+
+    // unsigned int numCores = std::thread::hardware_concurrency();
+    // std::cout << "Number of cores available: " << numCores << std::endl;
 
     // allow refining of the grid at r_jump, the center point of the 
     // drop of the diffusion coefficient alpha.

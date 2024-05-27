@@ -10,8 +10,8 @@
 #include <iostream>
 #include <iomanip>
 #include <memory>
-#include <optional>
 #include <algorithm>
+#include <optional>
 
 #include <omp.h>
 

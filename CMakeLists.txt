@@ -14,6 +14,29 @@ endif()
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -pedantic")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 
+
+set(METIS_PREFIX_PATH "~/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/metis-5.1.0-bgoncx22w55soviybggl5ydjakvkm34v")
+include_directories(${METIS_PREFIX_PATH}/include)
+link_directories(${METIS_PREFIX_PATH}/lib)
+
+set(MUMPS_PREFIX_PATH "~/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/mumps-5.6.2-m4xrhc4mshzrxmgptzbpult3nbf6qrzk")
+include_directories(${MUMPS_PREFIX_PATH}/include)
+link_directories(${MUMPS_PREFIX_PATH}/lib)
+
+set(LIKWID_PREFIX_PATH "~/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/likwid-5.3.0-6mvx2snsqnamuyhaqspd6gxkfuaso36g")
+include_directories(${LIKWID_PREFIX_PATH}/include)
+link_directories(${LIKWID_PREFIX_PATH}/lib)
+
+set(MUMPS_LIBRARIES
+    mumps_common
+    smumps
+    dmumps
+    mpiseq
+    metis
+)
+
+# find_package(LIKWID REQUIRED)
+
 # Include directories
 include_directories(include)
 
@@ -48,7 +71,7 @@ find_package(OpenMP REQUIRED)
 if(OpenMP_CXX_FOUND)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
-target_link_libraries(gmgpolar PUBLIC OpenMP::OpenMP_CXX)
+target_link_libraries(gmgpolar PUBLIC ${MUMPS_LIBRARIES} OpenMP::OpenMP_CXX)
 
 # enable_testing()
 # add_subdirectory(third-party)

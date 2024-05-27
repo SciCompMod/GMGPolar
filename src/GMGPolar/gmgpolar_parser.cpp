@@ -14,6 +14,8 @@ void GMGPolar::parseGrid() {
 }
 
 void GMGPolar::parseGeometry() {
+    DirBC_Interior = parser_.get<int>("DirBC_Interior") != 0;
+
     const int alphaValue = parser_.get<int>("alpha_coeff");
     if (alphaValue == SONNENDRUCKER || alphaValue == ZONI || alphaValue == ZONI_SHIFTED || alphaValue == POISSON)
         alpha = static_cast<alpha_coeff>(alphaValue);
@@ -47,10 +49,12 @@ void GMGPolar::parseMultigrid() {
 }
 
 void GMGPolar::parseGeneral() {
-    omp_set_num_threads(parser_.get<int>("openmp"));
+    maxOpenMPThreads = parser_.get<int>("maxOpenMPThreads");
+    finestLevelThreads = parser_.get<int>("finestLevelThreads");
+    threadReductionFactor = parser_.get<scalar_t>("threadReductionFactor");
+    omp_set_num_threads(maxOpenMPThreads);
     verbose = parser_.get<int>("verbose");
 }
-
 
 void GMGPolar::initializeGrid() {
     // Disk Shape Parameters
@@ -127,6 +131,12 @@ void GMGPolar::initializeGrid() {
 }
 
 void GMGPolar::initializeGeometry() {
+
+    parser_.add<int>(
+        "DirBC_Interior", '\0', "Defines the boundary condition on the interior circle. Across-origin(0), Dirichlet-boundary(1).",
+        OPTIONAL, 0, cmdline::oneof(0,1)
+    );
+
     // Defines the coefficient alpha
     // 0: arctan coeff (Sonnendrucker2019, private communication)
     // 1: tanh coeff (Zoni2019)
@@ -246,10 +256,21 @@ void GMGPolar::initializeMultigrid() {
 void GMGPolar::initializeGeneral() {
     // OpenMP paralellization
     parser_.add<int>(
-        "openmp", '\0', 
-        "Defines the number of OpenMP threads used.", 
-        OPTIONAL, 1
+        "maxOpenMPThreads", '\0', 
+        "Defines the maximum number of OpenMP threads used.", 
+        REQUIRED, 1
     );
+    parser_.add<int>(
+        "finestLevelThreads", '\0', 
+        "Optimal number of OpenMP threads for the finest level, can exceed maxOpenMPThreads.", 
+        REQUIRED, 1
+    );
+    parser_.add<scalar_t>(
+        "threadReductionFactor", '\0', 
+        "Thread reduction factor to coarser levels.", 
+        OPTIONAL, 1.0
+    );
+
     // Defines the level of verbose outputs.
     // For higher levels all output from lower levels is always given.
     // 0: No output

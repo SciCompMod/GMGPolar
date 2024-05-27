@@ -152,6 +152,7 @@ public:
     std::string file_grid_theta;
     double r_jump_;
     // Geometry Parameters
+    bool DirBC_Interior;
     alpha_coeff alpha; // UNUSED
     beta_coeff beta; // UNUSED
     problem_type problem; // UNUSED
@@ -165,6 +166,9 @@ public:
     int v2;
     int cycle;
     // Control Parameters
+    int maxOpenMPThreads;
+    int finestLevelThreads;
+    scalar_t threadReductionFactor;
     int verbose;
 private:
 

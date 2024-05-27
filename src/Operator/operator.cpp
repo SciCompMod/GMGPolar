@@ -13,6 +13,7 @@ Operator::Operator(const GMGPolar& gmgpolar, const PolarGrid& grid) :
     dFy_dt_(gmgpolar.dFy_dt_),
     alpha_(gmgpolar.alpha_),
     beta_(gmgpolar.beta_),
+    DirBC_Interior_(gmgpolar.DirBC_Interior),
 
     numberMod0Circles((grid.numberSmootherCircles() + 2) / 3),
     numberMod1Circles((grid.numberSmootherCircles() + 1) / 3),

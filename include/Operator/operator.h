@@ -16,6 +16,7 @@ class GMGPolar;
 #include "../common/scalar.h"
 #include "../include/TaskDistribution/TaskDistribution.h"
 #include "../include/linear_algebra/vector.h"
+#include "../include/linear_algebra/matrix.h"
 #include "../include/linear_algebra/operations.h"
 #include "../include/GMGPolar/gmgpolar.h"
 #include "../include/ExactFunctions/exactfunctions.h"
@@ -28,22 +29,25 @@ class Operator {
 public:    
     Operator(const GMGPolar& gmgpolar, const PolarGrid& grid);
 
-    void applyATake0(const Level& onLevel, Vector<scalar_t>& result, const Vector<scalar_t>& x) const;
-    void applyATake(const Level& onLevel, Vector<scalar_t>& result, const Vector<scalar_t>& x) const;
-    void applyAGive(const Level& onLevel, Vector<scalar_t>& result, const Vector<scalar_t>& x) const;
-    void applyAGiveTasks(const Level& onLevel, Vector<scalar_t>& result, const Vector<scalar_t>& x) const;
-    void applyAGiveMutex(Level& onLevel, Vector<scalar_t>& result, const Vector<scalar_t>& x);
+    void applyATake0(const Level& onLevel, Vector<scalar_t>& result, const Vector<scalar_t>& x, const scalar_t& scaleAx) const;
+
+    void applyAGive(const Level& onLevel, Vector<scalar_t>& result, const Vector<scalar_t>& x, const scalar_t& scaleAx) const;
+    void applyAGiveTasks(const Level& onLevel, Vector<scalar_t>& result, const Vector<scalar_t>& x, const scalar_t& scaleAx) const;
+    void applyAGiveMutex(Level& onLevel, Vector<scalar_t>& result, const Vector<scalar_t>& x, const scalar_t& scaleAx);
 
     void arr_att_art(
         const double& r, const double& theta, 
         const double& sin_theta, const double& cos_theta, 
         const double& coeff_alpha, 
-        double& arr, double& att, double& art, double& detDFinv
+        double& arr, double& att, double& art, double& detDF
     ) const;
 
-    // void applyA_orthogonal_Give(const Level& onLevel, Vector<scalar_t>& result, const Vector<scalar_t>& x, const int smoother) const;
+    void applySmoothing(const Level& onLevel, Vector<scalar_t>& result, const Vector<scalar_t>& x) const;
+
+    std::pair<SparseMatrix<scalar_t>, Vector<scalar_t>> build_system(const Level& onLevel) const;
 
 private:
+    bool DirBC_Interior_;
     double kappa_eps_;
     double delta_e_;
     double Rmax_;
