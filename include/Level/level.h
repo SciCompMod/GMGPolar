@@ -31,6 +31,7 @@ public:
     void applySmoothing(Vector<scalar_t> &result, const Vector<scalar_t> &x) const;
 
     std::pair<SparseMatrix<scalar_t>, Vector<scalar_t>> build_system() const;
+    std::pair<SparseMatrix<scalar_t>, Vector<scalar_t>> build_symmetric_system() const;
 
 private:
     const int level_;

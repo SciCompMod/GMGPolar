@@ -4,7 +4,7 @@
 #SBATCH --error=Output/slurm-%A-p6-r4-dbt7-mpk2-s3-e1--N1-R1-maxC128.err
 #SBATCH -N 1
 #SBATCH -n 1
-#SBATCH -c 64
+#SBATCH -c 60
 #SBATCH --threads-per-core=1
 #SBATCH -t 28800
 #SBATCH --exclusive
@@ -13,8 +13,8 @@
 # module purge
 # module load likwid/likwid-5.2.1/likwid-5.2.1-gcc-9.4.0-szi3i3h
 
-m=64
-srun ./build/gmgpolar --nr_exp 16 --ntheta_exp 16 --maxOpenMPThreads $m --finestLevelThreads $m --problem 0 --geometry 0 --alpha_coeff 0 --beta_coeff 1 --DirBC_Interior 0
+m=60
+srun ./build/gmgpolar --nr_exp 10 --ntheta_exp 10 --maxOpenMPThreads $m --finestLevelThreads $m --problem 0 --geometry 0 --alpha_coeff 0 --beta_coeff 1 --DirBC_Interior 0
 
 # mminus1=55
 # srun --cpus-per-task=$m likwid-perfctr -f -m -C 0-$mminus1 -g FLOPS_DP ./build/gmgpolar --nr_exp 10 --ntheta_exp 10 --maxOpenMPThreads $m --finestLevelThreads $m --problem 0 --geometry 0 --alpha_coeff 0 --beta_coeff 1

@@ -8,6 +8,10 @@ class GMGPolar;
 #include <cmath>
 #include <thread>
 #include <mutex>
+#include <array>
+#include <stdexcept>
+#include <initializer_list>
+#include <algorithm>
 
 #include <omp.h>
 
@@ -24,6 +28,9 @@ class GMGPolar;
 
 #include "../include/InputFunctions/domain_geometry.h"
 #include "../include/InputFunctions/system_parameters.h"
+
+#include "../../include/common/constants.h"
+#include "../../include/Operator/stencil.h"
 
 class Operator {
 public:    
@@ -45,6 +52,7 @@ public:
     void applySmoothing(const Level& onLevel, Vector<scalar_t>& result, const Vector<scalar_t>& x) const;
 
     std::pair<SparseMatrix<scalar_t>, Vector<scalar_t>> build_system(const Level& onLevel) const;
+    std::pair<SparseMatrix<scalar_t>, Vector<scalar_t>> build_symmetric_system(const Level& onLevel) const;
 
 private:
     bool DirBC_Interior_;
@@ -62,6 +70,10 @@ private:
 
     std::shared_ptr<alpha_Functor> alpha_;
     std::shared_ptr<beta_Functor> beta_;
+
+    std::shared_ptr<rhs_f_Functor> rhs_f_;
+    std::shared_ptr<u_D_Functor> u_D_;
+    std::shared_ptr<u_D_Interior_Functor> u_D_Interior_;
 
     // Directed graph dependencies for applyAGiveMutex
 

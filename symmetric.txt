@@ -1,0 +1,935 @@
+#include "../../include/Operator/operator.h"
+
+using namespace symmetric_matrixA_Stencil;
+
+#define NODE_BUILD_SYMMETRIC_A_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, \
+    grid, DirBC_Interior, \
+    matrixA, rhs, nz_index, \
+    center_nz_index, left_nz_index, right_nz_index, bottom_nz_index, top_nz_index, \
+    center_index, left_index, right_index, bottom_index, top_index, \
+    arr, att, art, coeff_beta, detDF) \
+do { \
+    /* -------------------- */ \
+    /* Node in the interior */ \
+    /* -------------------- */ \
+    if (i_r > 1 && i_r < grid.nr() - 2) { \
+        scalar_t h1 = grid.r_dist(i_r-1); \
+        scalar_t h2 = grid.r_dist(i_r); \
+        scalar_t k1 = grid.theta_dist(i_theta-1); \
+        scalar_t k2 = grid.theta_dist(i_theta); \
+        scalar_t coeff1 = 0.5*(k1+k2)/h1; \
+        scalar_t coeff2 = 0.5*(k1+k2)/h2; \
+        scalar_t coeff3 = 0.5*(h1+h2)/k1; \
+        scalar_t coeff4 = 0.5*(h1+h2)/k2; \
+        \
+        center_nz_index = ptr_nz_index_matrixA(grid, i_r, i_theta, DirBC_Interior); \
+        left_nz_index = ptr_nz_index_matrixA(grid, i_r-1, i_theta, DirBC_Interior); \
+        right_nz_index = ptr_nz_index_matrixA(grid, i_r+1, i_theta, DirBC_Interior); \
+        bottom_nz_index = ptr_nz_index_matrixA(grid, i_r, ((i_theta-1) + grid.ntheta()) % grid.ntheta(), DirBC_Interior); \
+        top_nz_index = ptr_nz_index_matrixA(grid, i_r, ((i_theta+1) + grid.ntheta()) % grid.ntheta(), DirBC_Interior); \
+        \
+        center_index = grid.index(i_r,i_theta); \
+        left_index = grid.index(i_r-1,i_theta); \
+        right_index = grid.index(i_r+1,i_theta); \
+        bottom_index = grid.index(i_r,i_theta-1); \
+        top_index = grid.index(i_r,i_theta+1); \
+        \
+        /* Fill rhs of (i,j) */ \
+        rhs[center_index] = 0.25 * (h1+h2)*(k1+k2) * (*rhs_f_)(r, theta, sin_theta, cos_theta) * fabs(detDF); \
+        \
+        /* Fill matrix row of (i,j) */ \
+        const Stencil& CenterStencil = get_stencil(grid, i_r, DirBC_Interior); \
+        \
+        nz_index = center_nz_index + CenterStencil[StencilType::Center]; \
+        matrixA.row_index(nz_index) = center_index + 1; \
+        matrixA.col_index(nz_index) = center_index + 1; \
+        matrixA.value(nz_index) += 0.25 * (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF); /* beta_{i,j} */ \
+        \
+        nz_index = center_nz_index + CenterStencil[StencilType::Left]; \
+        matrixA.row_index(nz_index) = center_index + 1; \
+        matrixA.col_index(nz_index) = left_index + 1; \
+        matrixA.value(nz_index) += - coeff1 * arr; /* Left */ \
+        \
+        nz_index = center_nz_index + CenterStencil[StencilType::Right]; \
+        matrixA.row_index(nz_index) = center_index + 1; \
+        matrixA.col_index(nz_index) = right_index + 1; \
+        matrixA.value(nz_index) += - coeff2 * arr; /* Right */ \
+        \
+        nz_index = center_nz_index + CenterStencil[StencilType::Bottom]; \
+        matrixA.row_index(nz_index) = center_index + 1; \
+        matrixA.col_index(nz_index) = bottom_index + 1; \
+        matrixA.value(nz_index) += - coeff3 * att; /* Bottom */ \
+        \
+        nz_index = center_nz_index + CenterStencil[StencilType::Top]; \
+        matrixA.row_index(nz_index) = center_index + 1; \
+        matrixA.col_index(nz_index) = top_index + 1; \
+        matrixA.value(nz_index) += - coeff4 * att; /* Top */ \
+        \
+        nz_index = center_nz_index + CenterStencil[StencilType::Center]; \
+        matrixA.row_index(nz_index) = center_index + 1; \
+        matrixA.col_index(nz_index) = center_index + 1; \
+        /* Center: (Left, Right, Bottom, Top) */ \
+        matrixA.value(nz_index) += (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; \
+        \
+        /* Fill matrix row of (i-1,j) */ \
+        const Stencil& LeftStencil = get_stencil(grid, i_r-1, DirBC_Interior); \
+        \
+        nz_index = left_nz_index + LeftStencil[StencilType::Right]; \
+        matrixA.row_index(nz_index) = left_index + 1; \
+        matrixA.col_index(nz_index) = center_index + 1; \
+        matrixA.value(nz_index) += - coeff1 * arr; /* Right */ \
+        \
+        nz_index = left_nz_index + LeftStencil[StencilType::Center]; \
+        matrixA.row_index(nz_index) = left_index + 1; \
+        matrixA.col_index(nz_index) = left_index + 1; \
+        matrixA.value(nz_index) += coeff1 * arr; /* Center: (Right) */ \
+        \
+        nz_index = left_nz_index + LeftStencil[StencilType::TopRight]; \
+        matrixA.row_index(nz_index) = left_index + 1; \
+        matrixA.col_index(nz_index) = top_index + 1; \
+        matrixA.value(nz_index) += - 0.25 * art; /* Top Right */ \
+        \
+        nz_index = left_nz_index + LeftStencil[StencilType::BottomRight]; \
+        matrixA.row_index(nz_index) = left_index + 1; \
+        matrixA.col_index(nz_index) = bottom_index + 1; \
+        matrixA.value(nz_index) += 0.25 * art; /* Bottom Right */ \
+        \
+        /* Fill matrix row of (i+1,j) */ \
+        const Stencil& RightStencil = get_stencil(grid, i_r+1, DirBC_Interior); \
+        \
+        nz_index = right_nz_index + RightStencil[StencilType::Left]; \
+        matrixA.row_index(nz_index) = right_index + 1; \
+        matrixA.col_index(nz_index) = center_index + 1; \
+        matrixA.value(nz_index) += - coeff2 * arr; /* Left */ \
+        \
+        nz_index = right_nz_index + RightStencil[StencilType::Center]; \
+        matrixA.row_index(nz_index) = right_index + 1; \
+        matrixA.col_index(nz_index) = right_index + 1; \
+        matrixA.value(nz_index) += coeff2 * arr; /* Center: (Left) */ \
+        \
+        nz_index = right_nz_index + RightStencil[StencilType::TopLeft]; \
+        matrixA.row_index(nz_index) = right_index + 1; \
+        matrixA.col_index(nz_index) = top_index + 1; \
+        matrixA.value(nz_index) += 0.25 * art; /* Top Left */ \
+        \
+        nz_index = right_nz_index + RightStencil[StencilType::BottomLeft]; \
+        matrixA.row_index(nz_index) = right_index + 1; \
+        matrixA.col_index(nz_index) = bottom_index + 1; \
+        matrixA.value(nz_index) += - 0.25 * art; /* Bottom Left */ \
+        \
+        /* Fill matrix row of (i,j-1) */ \
+        const Stencil& BottomStencil = CenterStencil; \
+        \
+        nz_index = bottom_nz_index + BottomStencil[StencilType::Top]; \
+        matrixA.row_index(nz_index) = bottom_index + 1; \
+        matrixA.col_index(nz_index) = center_index + 1; \
+        matrixA.value(nz_index) += - coeff3 * att; /* Top */ \
+        \
+        nz_index = bottom_nz_index + BottomStencil[StencilType::Center]; \
+        matrixA.row_index(nz_index) = bottom_index + 1; \
+        matrixA.col_index(nz_index) = bottom_index + 1; \
+        matrixA.value(nz_index) += coeff3 * att; /* Center: (Top) */ \
+        \
+        nz_index = bottom_nz_index + BottomStencil[StencilType::TopRight]; \
+        matrixA.row_index(nz_index) = bottom_index + 1; \
+        matrixA.col_index(nz_index) = right_index + 1; \
+        matrixA.value(nz_index) += - 0.25 * art; /* Top Right */ \
+        \
+        nz_index = bottom_nz_index + BottomStencil[StencilType::TopLeft]; \
+        matrixA.row_index(nz_index) = bottom_index + 1; \
+        matrixA.col_index(nz_index) = left_index + 1; \
+        matrixA.value(nz_index) += 0.25 * art; /* Top Left */ \
+        \
+        /* Fill matrix row of (i,j+1) */ \
+        const Stencil& TopStencil = CenterStencil; \
+        \
+        nz_index = top_nz_index + TopStencil[StencilType::Bottom]; \
+        matrixA.row_index(nz_index) = top_index + 1; \
+        matrixA.col_index(nz_index) = center_index + 1; \
+        matrixA.value(nz_index) += - coeff4 * att; /* Bottom */ \
+        \
+        nz_index = top_nz_index + TopStencil[StencilType::Center]; \
+        matrixA.row_index(nz_index) = top_index + 1; \
+        matrixA.col_index(nz_index) = top_index + 1; \
+        matrixA.value(nz_index) += coeff4 * att; /* Center: (Bottom) */ \
+        \
+        nz_index = top_nz_index + TopStencil[StencilType::BottomRight]; \
+        matrixA.row_index(nz_index) = top_index + 1; \
+        matrixA.col_index(nz_index) = right_index + 1; \
+        matrixA.value(nz_index) += 0.25 * art; /* Bottom Right */ \
+        \
+        nz_index = top_nz_index + TopStencil[StencilType::BottomLeft]; \
+        matrixA.row_index(nz_index) = top_index + 1; \
+        matrixA.col_index(nz_index) = left_index + 1; \
+        matrixA.value(nz_index) += - 0.25 * art; /* Bottom Left */ \
+        \
+    /* ------------------------ */ \
+    /* Node in the inner circle */ \
+    /* ------------------------ */ \
+    } else if (i_r == 0) { \
+        /* Case 1: Dirichlet boundary on the interior ring */ \
+        if(DirBC_Interior){ \
+            /* Don't fill rhs of (i,j) here since we have done this at the start. */ \
+            /* rhs[center_index] = (*u_D_Interior_)(r, theta, sin_theta, cos_theta); */ \
+            /* Fill result(i,j) */ \
+            scalar_t h2 = grid.r_dist(i_r); \
+            scalar_t k1 = grid.theta_dist(i_theta-1); \
+            scalar_t k2 = grid.theta_dist(i_theta); \
+            scalar_t coeff2 = 0.5*(k1+k2)/h2; \
+            \
+            center_nz_index = ptr_nz_index_matrixA(grid, i_r, i_theta, DirBC_Interior); \
+            right_nz_index = ptr_nz_index_matrixA(grid, i_r+1, i_theta, DirBC_Interior); \
+            \
+            center_index = grid.index(i_r,i_theta); \
+            right_index = grid.index(i_r+1,i_theta); \
+            bottom_index = grid.index(i_r,i_theta-1); \
+            top_index = grid.index(i_r,i_theta+1); \
+            \
+            /* Fill matrix row of (i,j) */ \
+            const Stencil& CenterStencil = get_stencil(grid, i_r, DirBC_Interior); \
+            \
+            nz_index = center_nz_index + CenterStencil[StencilType::Center]; \
+            matrixA.row_index(nz_index) = center_index + 1; \
+            matrixA.col_index(nz_index) = center_index + 1; \
+            matrixA.value(nz_index) += 1.0; \
+            \
+            /* Don't give all values to the interior nodes of matrixA of row (i+1,j)! */ \
+            /* Since we want to keep a symmetric matrix we remove */ \
+            /* Left, Top Left and Bottom Left, but still keep Center(Left). */ \
+            /* Instead shift these values to the rhs vector. */ \
+            \
+            /* Left, Top Left, Bottom Left */ \
+            rhs[right_index] -= \
+                - coeff2 * arr * rhs[center_index] + 0.25 * art * rhs[top_index] - 0.25 * art * rhs[bottom_index]; \
+            \
+            const Stencil& RightStencil = get_stencil(grid, i_r+1, DirBC_Interior); \
+            \
+            /* nz_index = right_nz_index + RightStencil[StencilType::Left]; */ \
+            /* matrixA.row_index(nz_index) = right_index + 1; */ \
+            /* matrixA.col_index(nz_index) = center_index + 1; */ \
+            /* matrixA.value(nz_index) += - coeff2 * arr; // Left */ \
+            \
+            nz_index = right_nz_index + RightStencil[StencilType::Center]; \
+            matrixA.row_index(nz_index) = right_index + 1; \
+            matrixA.col_index(nz_index) = right_index + 1; \
+            matrixA.value(nz_index) += coeff2 * arr; /* Center: (Left) */ \
+            \
+            /* nz_index = right_nz_index + RightStencil[StencilType::TopLeft]; */ \
+            /* matrixA.row_index(nz_index) = right_index + 1; */ \
+            /* matrixA.col_index(nz_index) = top_index + 1; */ \
+            /* matrixA.value(nz_index) += 0.25 * art; // Top Left */ \
+            \
+            /* nz_index = right_nz_index + RightStencil[StencilType::BottomLeft]; */ \
+            /* matrixA.row_index(nz_index) = right_index + 1; */ \
+            /* matrixA.col_index(nz_index) = bottom_index + 1; */ \
+            /* matrixA.value(nz_index) += - 0.25 * art; // Bottom Left */ \
+            \
+        /* Case 2: Across origin discretization */ \
+        } else{ \
+            /* h1 gets replaced with 2 * R0. */ \
+            /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()>>1)). */ \
+            /* Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil. */ \
+            scalar_t h1 = 2 * grid.radius(0); \
+            scalar_t h2 = grid.r_dist(i_r); \
+            scalar_t k1 = grid.theta_dist(i_theta-1); \
+            scalar_t k2 = grid.theta_dist(i_theta); \
+            scalar_t coeff1 = 0.5*(k1+k2)/h1; \
+            scalar_t coeff2 = 0.5*(k1+k2)/h2; \
+            scalar_t coeff3 = 0.5*(h1+h2)/k1; \
+            scalar_t coeff4 = 0.5*(h1+h2)/k2; \
+            \
+            center_nz_index = ptr_nz_index_matrixA(grid, i_r, i_theta, DirBC_Interior); \
+            left_nz_index = ptr_nz_index_matrixA(grid, i_r, (i_theta + (grid.ntheta()>>1)) % grid.ntheta(), DirBC_Interior); \
+            right_nz_index = ptr_nz_index_matrixA(grid, i_r+1, i_theta, DirBC_Interior); \
+            bottom_nz_index = ptr_nz_index_matrixA(grid, i_r, ((i_theta-1) + grid.ntheta()) % grid.ntheta(), DirBC_Interior); \
+            top_nz_index = ptr_nz_index_matrixA(grid, i_r, ((i_theta+1) + grid.ntheta()) % grid.ntheta(), DirBC_Interior); \
+            \
+            center_index = grid.index(i_r,i_theta); \
+            left_index = grid.index(i_r, i_theta + (grid.ntheta()>>1)); \
+            right_index = grid.index(i_r+1,i_theta); \
+            bottom_index = grid.index(i_r,i_theta-1); \
+            top_index = grid.index(i_r,i_theta+1); \
+            \
+            /* Fill rhs of (i,j) */ \
+            rhs[center_index] += 0.25 * (h1+h2)*(k1+k2) * (*rhs_f_)(r, theta, sin_theta, cos_theta) * fabs(detDF); \
+            \
+            /* Fill matrix row of (i,j) */ \
+            const Stencil& CenterStencil = get_stencil(grid, i_r, DirBC_Interior); \
+            \
+            nz_index = center_nz_index + CenterStencil[StencilType::Center]; \
+            matrixA.row_index(nz_index) = center_index + 1; \
+            matrixA.col_index(nz_index) = center_index + 1; \
+            matrixA.value(nz_index) += 0.25 * (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF); /* beta_{i,j} */ \
+            \
+            nz_index = center_nz_index + CenterStencil[StencilType::Left]; \
+            matrixA.row_index(nz_index) = center_index + 1; \
+            matrixA.col_index(nz_index) = left_index + 1; \
+            matrixA.value(nz_index) += - coeff1 * arr; /* Left */ \
+            \
+            nz_index = center_nz_index + CenterStencil[StencilType::Right]; \
+            matrixA.row_index(nz_index) = center_index + 1; \
+            matrixA.col_index(nz_index) = right_index + 1; \
+            matrixA.value(nz_index) += - coeff2 * arr; /* Right */ \
+            \
+            nz_index = center_nz_index + CenterStencil[StencilType::Bottom]; \
+            matrixA.row_index(nz_index) = center_index + 1; \
+            matrixA.col_index(nz_index) = bottom_index + 1; \
+            matrixA.value(nz_index) += - coeff3 * att; /* Bottom */ \
+            \
+            nz_index = center_nz_index + CenterStencil[StencilType::Top]; \
+            matrixA.row_index(nz_index) = center_index + 1; \
+            matrixA.col_index(nz_index) = top_index + 1; \
+            matrixA.value(nz_index) += - coeff4 * att; /* Top */ \
+            \
+            nz_index = center_nz_index + CenterStencil[StencilType::Center]; \
+            matrixA.row_index(nz_index) = center_index + 1; \
+            matrixA.col_index(nz_index) = center_index + 1; \
+            /* Center: (Left, Right, Bottom, Top) */ \
+            matrixA.value(nz_index) += (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; \
+            \
+            /* Fill matrix row of (i-1,j) */ \
+            /* From view the view of the across origin node, the directions are roatated by 180 degrees in the stencil! */ \
+            const Stencil& LeftStencil = CenterStencil; \
+            \
+            nz_index = left_nz_index + LeftStencil[StencilType::Left]; \
+            matrixA.row_index(nz_index) = left_index + 1; \
+            matrixA.col_index(nz_index) = center_index + 1; \
+            matrixA.value(nz_index) += - coeff1 * arr; /* Right -> Left*/ \
+            \
+            nz_index = left_nz_index + LeftStencil[StencilType::Center]; \
+            matrixA.row_index(nz_index) = left_index + 1; \
+            matrixA.col_index(nz_index) = left_index + 1; \
+            matrixA.value(nz_index) += coeff1 * arr; /* Center: (Right) -> Center: (Left) */ \
+            \
+            /* Top Right -> Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */ \
+            /* nz_index = left_nz_index + LeftStencil[StencilType::BottomLeft]; */  \
+            /* matrixA.row_index(nz_index) = left_index; */  \
+            /* matrixA.col_index(nz_index) = top_index; */  \
+            /* matrixA.value(nz_index) += - 0.25 * art; // Top Right -> Bottom Left*/ \
+            \
+            /* Bottom Right -> Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */ \
+            /* nz_index = left_nz_index + LeftStencil[StencilType::TopLeft]; */ \
+            /* matrixA.row_index(nz_index) = left_index; */  \
+            /* matrixA.col_index(nz_index) = bottom_index; */  \
+            /* matrixA.value(nz_index) += 0.25 * art; // Bottom Right -> Top Left */ \
+            \
+            /* Fill matrix row of (i+1,j) */ \
+            const Stencil& RightStencil = get_stencil(grid, i_r+1, DirBC_Interior); \
+            \
+            nz_index = right_nz_index + RightStencil[StencilType::Left]; \
+            matrixA.row_index(nz_index) = right_index + 1; \
+            matrixA.col_index(nz_index) = center_index + 1; \
+            matrixA.value(nz_index) += - coeff2 * arr; /* Left */ \
+            \
+            nz_index = right_nz_index + RightStencil[StencilType::Center]; \
+            matrixA.row_index(nz_index) = right_index + 1; \
+            matrixA.col_index(nz_index) = right_index + 1; \
+            matrixA.value(nz_index) += coeff2 * arr; /* Center: (Left) */ \
+            \
+            nz_index = right_nz_index + RightStencil[StencilType::TopLeft]; \
+            matrixA.row_index(nz_index) = right_index + 1; \
+            matrixA.col_index(nz_index) = top_index + 1; \
+            matrixA.value(nz_index) += 0.25 * art; /* Top Left */ \
+            \
+            nz_index = right_nz_index + RightStencil[StencilType::BottomLeft]; \
+            matrixA.row_index(nz_index) = right_index + 1; \
+            matrixA.col_index(nz_index) = bottom_index + 1; \
+            matrixA.value(nz_index) += - 0.25 * art; /* Bottom Left */ \
+            \
+            /* Fill matrix row of (i,j-1) */ \
+            const Stencil& BottomStencil = CenterStencil; \
+            \
+            nz_index = bottom_nz_index + BottomStencil[StencilType::Top]; \
+            matrixA.row_index(nz_index) = bottom_index + 1; \
+            matrixA.col_index(nz_index) = center_index + 1; \
+            matrixA.value(nz_index) += - coeff3 * att; /* Top */ \
+            \
+            nz_index = bottom_nz_index + BottomStencil[StencilType::Center]; \
+            matrixA.row_index(nz_index) = bottom_index + 1; \
+            matrixA.col_index(nz_index) = bottom_index + 1; \
+            matrixA.value(nz_index) += coeff3 * att; /* Center: (Top) */ \
+            \
+            nz_index = bottom_nz_index + BottomStencil[StencilType::TopRight]; \
+            matrixA.row_index(nz_index) = bottom_index + 1; \
+            matrixA.col_index(nz_index) = right_index + 1; \
+            matrixA.value(nz_index) += - 0.25 * art; /* Top Right */ \
+            \
+            /* REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */ \
+            /* /* nz_index = bottom_nz_index + BottomStencil[StencilType::TopLeft]; */ \
+            /* matrixA.row_index(nz_index) = bottom_index + 1; */ \
+            /* matrixA.col_index(nz_index) = left_index + 1; */ \
+            /* matrixA.value(nz_index) += 0.25 * art; /() Top Left */ \
+            \
+            /* Fill matrix row of (i,j+1) */ \
+            const Stencil& TopStencil = CenterStencil; \
+            \
+            nz_index = top_nz_index + TopStencil[StencilType::Bottom]; \
+            matrixA.row_index(nz_index) = top_index + 1; \
+            matrixA.col_index(nz_index) = center_index + 1; \
+            matrixA.value(nz_index) += - coeff4 * att; /* Bottom */ \
+            \
+            nz_index = top_nz_index + TopStencil[StencilType::Center]; \
+            matrixA.row_index(nz_index) = top_index + 1; \
+            matrixA.col_index(nz_index) = top_index + 1; \
+            matrixA.value(nz_index) += coeff4 * att; /* Center: (Bottom) */ \
+            \
+            nz_index = top_nz_index + TopStencil[StencilType::BottomRight]; \
+            matrixA.row_index(nz_index) = top_index + 1; \
+            matrixA.col_index(nz_index) = right_index + 1; \
+            matrixA.value(nz_index) += 0.25 * art; /* Bottom Right */ \
+            \
+            /* REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */ \
+            /* nz_index = top_nz_index + TopStencil[StencilType::BottomLeft]; */ \
+            /* matrixA.row_index(nz_index) = top_index + 1; */ \
+            /* matrixA.col_index(nz_index) = left_index + 1; */ \
+            /* matrixA.value(nz_index) += - 0.25 * art; // Bottom Left */ \
+            \
+        } \
+    /* ---------------------------- */ \
+    /* Node in the 2nd inner circle */ \
+    /* ---------------------------- */ \
+    } else if (i_r == 1) { \
+        scalar_t h1 = grid.r_dist(i_r-1); \
+        scalar_t h2 = grid.r_dist(i_r); \
+        scalar_t k1 = grid.theta_dist(i_theta-1); \
+        scalar_t k2 = grid.theta_dist(i_theta); \
+        scalar_t coeff1 = 0.5*(k1+k2)/h1; \
+        scalar_t coeff2 = 0.5*(k1+k2)/h2; \
+        scalar_t coeff3 = 0.5*(h1+h2)/k1; \
+        scalar_t coeff4 = 0.5*(h1+h2)/k2; \
+        \
+        center_nz_index = ptr_nz_index_matrixA(grid, i_r, i_theta, DirBC_Interior); \
+        left_nz_index = ptr_nz_index_matrixA(grid, i_r-1, i_theta, DirBC_Interior); \
+        right_nz_index = ptr_nz_index_matrixA(grid, i_r+1, i_theta, DirBC_Interior); \
+        bottom_nz_index = ptr_nz_index_matrixA(grid, i_r, ((i_theta-1) + grid.ntheta()) % grid.ntheta(), DirBC_Interior); \
+        top_nz_index = ptr_nz_index_matrixA(grid, i_r, ((i_theta+1) + grid.ntheta()) % grid.ntheta(), DirBC_Interior); \
+        \
+        center_index = grid.index(i_r,i_theta); \
+        left_index = grid.index(i_r-1,i_theta); \
+        right_index = grid.index(i_r+1,i_theta); \
+        bottom_index = grid.index(i_r,i_theta-1); \
+        top_index = grid.index(i_r,i_theta+1); \
+        \
+        /* Fill rhs of (i,j) */ \
+        rhs[center_index] += 0.25 * (h1+h2)*(k1+k2) * (*rhs_f_)(r, theta, sin_theta, cos_theta) * fabs(detDF); \
+        \
+        /* Fill matrix row of (i,j) */ \
+        const Stencil& CenterStencil = get_stencil(grid, i_r, DirBC_Interior); \
+        \
+        nz_index = center_nz_index + CenterStencil[StencilType::Center]; \
+        matrixA.row_index(nz_index) = center_index + 1; \
+        matrixA.col_index(nz_index) = center_index + 1; \
+        matrixA.value(nz_index) += 0.25 * (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF); /* beta_{i,j} */ \
+        \
+        nz_index = center_nz_index + CenterStencil[StencilType::Left]; \
+        matrixA.row_index(nz_index) = center_index + 1; \
+        matrixA.col_index(nz_index) = left_index + 1; \
+        matrixA.value(nz_index) += - coeff1 * arr; /* Left */ \
+        \
+        nz_index = center_nz_index + CenterStencil[StencilType::Right]; \
+        matrixA.row_index(nz_index) = center_index + 1; \
+        matrixA.col_index(nz_index) = right_index + 1; \
+        matrixA.value(nz_index) += - coeff2 * arr; /* Right */ \
+        \
+        nz_index = center_nz_index + CenterStencil[StencilType::Bottom]; \
+        matrixA.row_index(nz_index) = center_index + 1; \
+        matrixA.col_index(nz_index) = bottom_index + 1; \
+        matrixA.value(nz_index) += - coeff3 * att; /* Bottom */ \
+        \
+        nz_index = center_nz_index + CenterStencil[StencilType::Top]; \
+        matrixA.row_index(nz_index) = center_index + 1; \
+        matrixA.col_index(nz_index) = top_index + 1; \
+        matrixA.value(nz_index) += - coeff4 * att; /* Top */ \
+        \
+        nz_index = center_nz_index + CenterStencil[StencilType::Center]; \
+        matrixA.row_index(nz_index) = center_index + 1; \
+        matrixA.col_index(nz_index) = center_index + 1; \
+        /* Center: (Left, Right, Bottom, Top) */ \
+        matrixA.value(nz_index) += (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; \
+        \
+        if(!DirBC_Interior){ /* Don't give to the inner dirichlet boundary! */ \
+            /* Fill matrix row of (i-1,j) */ \
+            const Stencil& LeftStencil = get_stencil(grid, i_r-1, DirBC_Interior); \
+            \
+            nz_index = left_nz_index + LeftStencil[StencilType::Right]; \
+            matrixA.row_index(nz_index) = left_index + 1; \
+            matrixA.col_index(nz_index) = center_index + 1; \
+            matrixA.value(nz_index) += - coeff1 * arr; /* Right */ \
+            \
+            nz_index = left_nz_index + LeftStencil[StencilType::Center]; \
+            matrixA.row_index(nz_index) = left_index + 1; \
+            matrixA.col_index(nz_index) = left_index + 1; \
+            matrixA.value(nz_index) += coeff1 * arr; /* Center: (Right) */ \
+            \
+            nz_index = left_nz_index + LeftStencil[StencilType::TopRight]; \
+            matrixA.row_index(nz_index) = left_index + 1; \
+            matrixA.col_index(nz_index) = top_index + 1; \
+            matrixA.value(nz_index) += - 0.25 * art; /* Top Right */ \
+            \
+            nz_index = left_nz_index + LeftStencil[StencilType::BottomRight]; \
+            matrixA.row_index(nz_index) = left_index + 1; \
+            matrixA.col_index(nz_index) = bottom_index + 1; \
+            matrixA.value(nz_index) += 0.25 * art; /* Bottom Right */ \
+            \
+        } \
+        /* Fill matrix row of (i+1,j) */ \
+        const Stencil& RightStencil = get_stencil(grid, i_r+1, DirBC_Interior); \
+        \
+        nz_index = right_nz_index + RightStencil[StencilType::Left]; \
+        matrixA.row_index(nz_index) = right_index + 1; \
+        matrixA.col_index(nz_index) = center_index + 1; \
+        matrixA.value(nz_index) += - coeff2 * arr; /* Left */ \
+        \
+        nz_index = right_nz_index + RightStencil[StencilType::Center]; \
+        matrixA.row_index(nz_index) = right_index + 1; \
+        matrixA.col_index(nz_index) = right_index + 1; \
+        matrixA.value(nz_index) += coeff2 * arr; /* Center: (Left) */ \
+        \
+        nz_index = right_nz_index + RightStencil[StencilType::TopLeft]; \
+        matrixA.row_index(nz_index) = right_index + 1; \
+        matrixA.col_index(nz_index) = top_index + 1; \
+        matrixA.value(nz_index) += 0.25 * art; /* Top Left */ \
+        \
+        nz_index = right_nz_index + RightStencil[StencilType::BottomLeft]; \
+        matrixA.row_index(nz_index) = right_index + 1; \
+        matrixA.col_index(nz_index) = bottom_index + 1; \
+        matrixA.value(nz_index) += - 0.25 * art; /* Bottom Left */ \
+        \
+        /* Fill matrix row of (i,j-1) */ \
+        const Stencil& BottomStencil = CenterStencil; \
+        \
+        nz_index = bottom_nz_index + BottomStencil[StencilType::Top]; \
+        matrixA.row_index(nz_index) = bottom_index + 1; \
+        matrixA.col_index(nz_index) = center_index + 1; \
+        matrixA.value(nz_index) += - coeff3 * att; /* Top */ \
+        \
+        nz_index = bottom_nz_index + BottomStencil[StencilType::Center]; \
+        matrixA.row_index(nz_index) = bottom_index + 1; \
+        matrixA.col_index(nz_index) = bottom_index + 1; \
+        matrixA.value(nz_index) += coeff3 * att; /* Center: (Top) */ \
+        \
+        nz_index = bottom_nz_index + BottomStencil[StencilType::TopRight]; \
+        matrixA.row_index(nz_index) = bottom_index + 1; \
+        matrixA.col_index(nz_index) = right_index + 1; \
+        matrixA.value(nz_index) += - 0.25 * art; /* Top Right */ \
+        \
+        nz_index = bottom_nz_index + BottomStencil[StencilType::TopLeft]; \
+        matrixA.row_index(nz_index) = bottom_index + 1; \
+        matrixA.col_index(nz_index) = left_index + 1; \
+        matrixA.value(nz_index) += 0.25 * art; /* Top Left */ \
+        \
+        /* Fill matrix row of (i,j+1) */ \
+        const Stencil& TopStencil = CenterStencil; \
+        \
+        nz_index = top_nz_index + TopStencil[StencilType::Bottom]; \
+        matrixA.row_index(nz_index) = top_index + 1; \
+        matrixA.col_index(nz_index) = center_index + 1; \
+        matrixA.value(nz_index) += - coeff4 * att; /* Bottom */ \
+        \
+        nz_index = top_nz_index + TopStencil[StencilType::Center]; \
+        matrixA.row_index(nz_index) = top_index + 1; \
+        matrixA.col_index(nz_index) = top_index + 1; \
+        matrixA.value(nz_index) += coeff4 * att; /* Center: (Bottom) */ \
+        \
+        nz_index = top_nz_index + TopStencil[StencilType::BottomRight]; \
+        matrixA.row_index(nz_index) = top_index + 1; \
+        matrixA.col_index(nz_index) = right_index + 1; \
+        matrixA.value(nz_index) += 0.25 * art; /* Bottom Right */ \
+        \
+        nz_index = top_nz_index + TopStencil[StencilType::BottomLeft]; \
+        matrixA.row_index(nz_index) = top_index + 1; \
+        matrixA.col_index(nz_index) = left_index + 1; \
+        matrixA.value(nz_index) += - 0.25 * art; /* Bottom Left */ \
+        \
+    /* ---------------------------- */ \
+    /* Node in the 2nd outer circle */ \
+    /* ---------------------------- */ \
+    } else if (i_r == grid.nr() - 2) { \
+        scalar_t h1 = grid.r_dist(i_r-1); \
+        scalar_t h2 = grid.r_dist(i_r); \
+        scalar_t k1 = grid.theta_dist(i_theta-1); \
+        scalar_t k2 = grid.theta_dist(i_theta); \
+        scalar_t coeff1 = 0.5*(k1+k2)/h1; \
+        scalar_t coeff2 = 0.5*(k1+k2)/h2; \
+        scalar_t coeff3 = 0.5*(h1+h2)/k1; \
+        scalar_t coeff4 = 0.5*(h1+h2)/k2; \
+        \
+        center_nz_index = ptr_nz_index_matrixA(grid, i_r, i_theta, DirBC_Interior); \
+        left_nz_index = ptr_nz_index_matrixA(grid, i_r-1, i_theta, DirBC_Interior); \
+        right_nz_index = ptr_nz_index_matrixA(grid, i_r+1, i_theta, DirBC_Interior); \
+        bottom_nz_index = ptr_nz_index_matrixA(grid, i_r, ((i_theta-1) + grid.ntheta()) % grid.ntheta(), DirBC_Interior); \
+        top_nz_index = ptr_nz_index_matrixA(grid, i_r, ((i_theta+1) + grid.ntheta()) % grid.ntheta(), DirBC_Interior); \
+        \
+        center_index = grid.index(i_r,i_theta); \
+        left_index = grid.index(i_r-1,i_theta); \
+        right_index = grid.index(i_r+1,i_theta); \
+        bottom_index = grid.index(i_r,i_theta-1); \
+        top_index = grid.index(i_r,i_theta+1); \
+        \
+        /* Fill rhs of (i,j) */ \
+        rhs[center_index] += 0.25 * (h1+h2)*(k1+k2) * (*rhs_f_)(r, theta, sin_theta, cos_theta) * fabs(detDF); \
+        \
+        /* Fill matrix row of (i,j) */ \
+        const Stencil& CenterStencil = get_stencil(grid, i_r, DirBC_Interior); \
+        \
+        nz_index = center_nz_index + CenterStencil[StencilType::Center]; \
+        matrixA.row_index(nz_index) = center_index + 1; \
+        matrixA.col_index(nz_index) = center_index + 1; \
+        matrixA.value(nz_index) += 0.25 * (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF); /* beta_{i,j} */ \
+        \
+        nz_index = center_nz_index + CenterStencil[StencilType::Left]; \
+        matrixA.row_index(nz_index) = center_index + 1; \
+        matrixA.col_index(nz_index) = left_index + 1; \
+        matrixA.value(nz_index) += - coeff1 * arr; /* Left */ \
+        \
+        nz_index = center_nz_index + CenterStencil[StencilType::Right]; \
+        matrixA.row_index(nz_index) = center_index + 1; \
+        matrixA.col_index(nz_index) = right_index + 1; \
+        matrixA.value(nz_index) += - coeff2 * arr; /* Right */ \
+        \
+        nz_index = center_nz_index + CenterStencil[StencilType::Bottom]; \
+        matrixA.row_index(nz_index) = center_index + 1; \
+        matrixA.col_index(nz_index) = bottom_index + 1; \
+        matrixA.value(nz_index) += - coeff3 * att; /* Bottom */ \
+        \
+        nz_index = center_nz_index + CenterStencil[StencilType::Top]; \
+        matrixA.row_index(nz_index) = center_index + 1; \
+        matrixA.col_index(nz_index) = top_index + 1; \
+        matrixA.value(nz_index) += - coeff4 * att; /* Top */ \
+        \
+        nz_index = center_nz_index + CenterStencil[StencilType::Center]; \
+        matrixA.row_index(nz_index) = center_index + 1; \
+        matrixA.col_index(nz_index) = center_index + 1; \
+        /* Center: (Left, Right, Bottom, Top) */ \
+        matrixA.value(nz_index) += (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; \
+        \
+        /* Fill matrix row of (i-1,j) */ \
+        const Stencil& LeftStencil = get_stencil(grid, i_r-1, DirBC_Interior); \
+        \
+        nz_index = left_nz_index + LeftStencil[StencilType::Right]; \
+        matrixA.row_index(nz_index) = left_index + 1; \
+        matrixA.col_index(nz_index) = center_index + 1; \
+        matrixA.value(nz_index) += - coeff1 * arr; /* Right */ \
+        \
+        nz_index = left_nz_index + LeftStencil[StencilType::Center]; \
+        matrixA.row_index(nz_index) = left_index + 1; \
+        matrixA.col_index(nz_index) = left_index + 1; \
+        matrixA.value(nz_index) += coeff1 * arr; /* Center: (Right) */ \
+        \
+        nz_index = left_nz_index + LeftStencil[StencilType::TopRight]; \
+        matrixA.row_index(nz_index) = left_index + 1; \
+        matrixA.col_index(nz_index) = top_index + 1; \
+        matrixA.value(nz_index) += - 0.25 * art; /* Top Right */ \
+        \
+        nz_index = left_nz_index + LeftStencil[StencilType::BottomRight]; \
+        matrixA.row_index(nz_index) = left_index + 1; \
+        matrixA.col_index(nz_index) = bottom_index + 1; \
+        matrixA.value(nz_index) += 0.25 * art; /* Bottom Right */ \
+        \
+        /* Don't give to the outer dirichlet boundary! */ \
+        /* Fill matrix row of (i+1,j) */ \
+        /* const Stencil& RightStencil = get_stencil(grid, i_r+1, DirBC_Interior); */ \
+        /* nz_index = right_nz_index + RightStencil[StencilType::Left]; */ \
+        /* matrixA.row_index(nz_index) = right_index + 1; */ \
+        /* matrixA.col_index(nz_index) = center_index + 1; */ \
+        /* matrixA.value(nz_index) += - coeff2 * arr; // Left */ \
+        /* nz_index = right_nz_index + RightStencil[StencilType::Center]; */ \
+        /* matrixA.row_index(nz_index) = right_index + 1; */ \
+        /* matrixA.col_index(nz_index) = right_index + 1; */ \
+        /* matrixA.value(nz_index) += coeff2 * arr; // Center: (Left) */ \
+        /* nz_index = right_nz_index + RightStencil[StencilType::TopLeft]; */ \
+        /* matrixA.row_index(nz_index) = right_index + 1; */ \
+        /* matrixA.col_index(nz_index) = top_index + 1; */ \
+        /* matrixA.value(nz_index) += 0.25 * art; // Top Left */ \
+        /* nz_index = right_nz_index + RightStencil[StencilType::BottomLeft]; */ \
+        /* matrixA.row_index(nz_index) = right_index + 1; */ \
+        /* matrixA.col_index(nz_index) = bottom_index + 1; */ \
+        /* matrixA.value(nz_index) += - 0.25 * art; // Bottom Left */ \
+        \
+        /* Fill matrix row of (i,j-1) */ \
+        const Stencil& BottomStencil = CenterStencil; \
+        \
+        nz_index = bottom_nz_index + BottomStencil[StencilType::Top]; \
+        matrixA.row_index(nz_index) = bottom_index + 1; \
+        matrixA.col_index(nz_index) = center_index + 1; \
+        matrixA.value(nz_index) += - coeff3 * att; /* Top */ \
+        \
+        nz_index = bottom_nz_index + BottomStencil[StencilType::Center]; \
+        matrixA.row_index(nz_index) = bottom_index + 1; \
+        matrixA.col_index(nz_index) = bottom_index + 1; \
+        matrixA.value(nz_index) += coeff3 * att; /* Center: (Top) */ \
+        \
+        nz_index = bottom_nz_index + BottomStencil[StencilType::TopRight]; \
+        matrixA.row_index(nz_index) = bottom_index + 1; \
+        matrixA.col_index(nz_index) = right_index + 1; \
+        matrixA.value(nz_index) += - 0.25 * art; /* Top Right */ \
+        \
+        nz_index = bottom_nz_index + BottomStencil[StencilType::TopLeft]; \
+        matrixA.row_index(nz_index) = bottom_index + 1; \
+        matrixA.col_index(nz_index) = left_index + 1; \
+        matrixA.value(nz_index) += 0.25 * art; /* Top Left */ \
+        \
+        /* Fill matrix row of (i,j+1) */ \
+        const Stencil& TopStencil = CenterStencil; \
+        \
+        nz_index = top_nz_index + TopStencil[StencilType::Bottom]; \
+        matrixA.row_index(nz_index) = top_index + 1; \
+        matrixA.col_index(nz_index) = center_index + 1; \
+        matrixA.value(nz_index) += - coeff4 * att; /* Bottom */ \
+        \
+        nz_index = top_nz_index + TopStencil[StencilType::Center]; \
+        matrixA.row_index(nz_index) = top_index + 1; \
+        matrixA.col_index(nz_index) = top_index + 1; \
+        matrixA.value(nz_index) += coeff4 * att; /* Center: (Bottom) */ \
+        \
+        nz_index = top_nz_index + TopStencil[StencilType::BottomRight]; \
+        matrixA.row_index(nz_index) = top_index + 1; \
+        matrixA.col_index(nz_index) = right_index + 1; \
+        matrixA.value(nz_index) += 0.25 * art; /* Bottom Right */ \
+        \
+        nz_index = top_nz_index + TopStencil[StencilType::BottomLeft]; \
+        matrixA.row_index(nz_index) = top_index + 1; \
+        matrixA.col_index(nz_index) = left_index + 1; \
+        matrixA.value(nz_index) += - 0.25 * art; /* Bottom Left */ \
+        \
+    /* ------------------------ */ \
+    /* Node in the outer circle */ \
+    /* ------------------------ */ \
+    } else if (i_r == grid.nr() - 1) { \
+        /* Dirichlet boundary */ \
+        scalar_t h1 = grid.r_dist(i_r-1); \
+        scalar_t k1 = grid.theta_dist(i_theta-1); \
+        scalar_t k2 = grid.theta_dist(i_theta); \
+        scalar_t coeff1 = 0.5*(k1+k2)/h1; \
+        \
+        center_nz_index = ptr_nz_index_matrixA(grid, i_r, i_theta, DirBC_Interior); \
+        left_nz_index = ptr_nz_index_matrixA(grid, i_r-1, i_theta, DirBC_Interior); \
+        \
+        center_index = grid.index(i_r,i_theta); \
+        left_index = grid.index(i_r-1,i_theta); \
+        bottom_index = grid.index(i_r,i_theta-1); \
+        top_index = grid.index(i_r,i_theta+1); \
+        \
+        /* Fill rhs of (i,j) */ \
+        /* Don't fill rhs of (i,j) here since we have done this at the start. */ \
+        /* rhs[center_index] = (*u_D_)(r, theta, sin_theta, cos_theta); */ \
+        \
+        /* Fill matrix row of (i,j) */ \
+        const Stencil& CenterStencil = get_stencil(grid, i_r, DirBC_Interior); \
+        \
+        nz_index = center_nz_index + CenterStencil[StencilType::Center]; \
+        matrixA.row_index(nz_index) = center_index + 1; \
+        matrixA.col_index(nz_index) = center_index + 1; \
+        matrixA.value(nz_index) += 1.0; \
+        \
+        /* Don't give all values to the interior nodes of matrixA of row (i-1,j)! */ \
+        /* Since we want to keep a symmetric matrix we remove */ \
+        /* Right, Top Right and Bottom Right, but still keep Center(Right). */ \
+        /* Instead shift these values to the rhs vector. */ \
+        \
+        /* Right, Top Right, Bottom Right */ \
+        rhs[left_index] -= \
+            - coeff1 * arr * rhs[center_index] - 0.25 * art * rhs[top_index] + 0.25 * art * rhs[bottom_index]; \
+        \
+        const Stencil& LeftStencil = get_stencil(grid, i_r-1, DirBC_Interior); \
+        \
+        /* nz_index = left_nz_index + LeftStencil[StencilType::Right]; \
+        /* matrixA.row_index(nz_index) = left_index + 1; \
+        /* matrixA.col_index(nz_index) = center_index + 1; \
+        /* matrixA.value(nz_index) += - coeff1 * arr; /* Right */ \
+        \
+        nz_index = left_nz_index + LeftStencil[StencilType::Center]; \
+        matrixA.row_index(nz_index) = left_index + 1; \
+        matrixA.col_index(nz_index) = left_index + 1; \
+        matrixA.value(nz_index) += coeff1 * arr; /* Center: (Right) */ \
+        \
+        /* nz_index = left_nz_index + LeftStencil[StencilType::TopRight]; */ \
+        /* matrixA.row_index(nz_index) = left_index + 1; */ \
+        /* matrixA.col_index(nz_index) = top_index + 1; */ \
+        /* matrixA.value(nz_index) += - 0.25 * art; // Top Right */ \
+        \
+        /* nz_index = left_nz_index + LeftStencil[StencilType::BottomRight]; */ \
+        /* matrixA.row_index(nz_index) = left_index + 1; */ \
+        /* matrixA.col_index(nz_index) = bottom_index + 1; */ \
+        /* matrixA.value(nz_index) += 0.25 * art; // Bottom Right */ \
+        \
+    } \
+} while(0)
+
+
+
+std::pair<SparseMatrix<scalar_t>, Vector<scalar_t>> Operator::build_symmetric_system(const Level& onLevel) const{
+    const PolarGrid& grid = onLevel.grid();
+
+    const int n = grid.number_of_nodes();
+    const int matrixA_nnz = nnz_matrixA(grid, DirBC_Interior_);
+
+    SparseMatrix<scalar_t> matrixA(n, n, matrixA_nnz);
+    Vector<scalar_t> rhs(n);
+
+    #pragma omp parallel
+    {
+        #pragma omp for nowait
+        for (int non_zero_index = 0; non_zero_index < matrixA_nnz; non_zero_index++){
+            matrixA.value(non_zero_index) = 0.0;
+        }
+        assign(rhs, 0.0);
+        #pragma omp for
+        for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++){
+            const scalar_t sin_theta = sin_theta_[i_theta];
+            const scalar_t cos_theta = cos_theta_[i_theta];
+            const scalar_t theta = grid.theta(i_theta);
+            rhs[grid.index(0, i_theta)] = DirBC_Interior_? (*u_D_Interior_)(grid.radius(0), theta, sin_theta, cos_theta) : 0.0;
+            rhs[grid.index(1, i_theta)] = 0.0;
+            rhs[grid.index(grid.nr()-2, i_theta)] = 0.0;
+            rhs[grid.index(grid.nr()-1, i_theta)] = (*u_D_)(grid.radii().back(), theta, sin_theta, cos_theta);
+        }
+    }
+
+    // std::cout<<"nnz: "<<matrixA_nnz<<std::endl;
+    // for (int i = 0; i < grid.number_of_nodes(); i++)
+    // {
+    //     MultiIndex node = grid.multiindex(i);
+    //     std::cout<< ptr_nz_index_matrixA(grid, node[0], node[1], DirBC_Interior_)<<std::endl;
+    // }
+    
+
+    // ---------------------- //
+    // OpenMP Parallelization //
+    // ---------------------- //
+    const int numThreads = omp_get_max_threads();
+    omp_set_num_threads(numThreads);
+    const int minimalChunkSize = 4;
+    const int zone = 2;
+
+    // Distribute Tasks to each thread
+    TaskDistribution CircleSmootherTasks(grid.numberSmootherCircles(), minimalChunkSize, numThreads);
+    TaskDistribution RadialSmootherTasks(grid.ntheta(), minimalChunkSize, numThreads);
+
+    // The acroos origin neighbor nodes need to be in the same TaskDistribution to prevent race condition.
+    assert(grid.numberSmootherCircles() >= 1);
+
+    #pragma omp parallel num_threads(numThreads)
+    {   
+        double r, theta;
+        double sin_theta, cos_theta;
+        double arr, att, art;
+        double coeff_alpha, coeff_beta;
+        double detDF;
+
+        int center_nz_index;
+        int left_nz_index, right_nz_index;
+        int bottom_nz_index, top_nz_index;
+
+        int center_index;
+        int left_index, right_index;
+        int bottom_index, top_index;
+
+        int nz_index;
+
+        const int threadID = omp_get_thread_num();
+        // ---------------------------------------------------------- //
+        // Take care of the separation strips of the circular smoother //
+        // ---------------------------------------------------------- //
+        const int i_r_start = CircleSmootherTasks.getStart(threadID);
+        const int i_r_end = CircleSmootherTasks.getEnd(threadID);
+        const int i_r_separate = std::min(i_r_end - i_r_start, zone);
+
+        // For loop matches circular access pattern
+        for (int i_r = i_r_end - i_r_separate; i_r < i_r_end; i_r++){
+            r = grid.radius(i_r);
+            coeff_alpha = (*alpha_)(r);
+            coeff_beta = (*beta_)(r);
+            for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++){
+                theta = grid.theta(i_theta);
+                sin_theta = sin_theta_[i_theta];
+                cos_theta = cos_theta_[i_theta];
+                arr_att_art(r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDF);
+                NODE_BUILD_SYMMETRIC_A_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta,
+                    grid, DirBC_Interior_,
+                    matrixA, rhs, nz_index,
+                    center_nz_index, left_nz_index, right_nz_index, bottom_nz_index, top_nz_index,
+                    center_index, left_index, right_index, bottom_index, top_index,
+                    arr, att, art, coeff_beta, detDF);
+            }
+        }
+        
+        #pragma omp barrier
+
+        // -------------------------------------------------------- //
+        // Take care of the separation strips of the radial smoother //
+        // -------------------------------------------------------- //
+        const int i_theta_start = RadialSmootherTasks.getStart(threadID);
+        const int i_theta_end = RadialSmootherTasks.getEnd(threadID);
+        const int i_theta_seperate = std::min(i_theta_end-i_theta_start, zone);
+
+        // For loop matches radial access pattern
+        for (int i_theta = i_theta_start; i_theta < i_theta_start + i_theta_seperate; i_theta++){
+            theta = grid.theta(i_theta);
+            sin_theta = sin_theta_[i_theta];
+            cos_theta = cos_theta_[i_theta];
+            for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++){
+                r = grid.radius(i_r);
+                coeff_alpha = (*alpha_)(r);
+                coeff_beta = (*beta_)(r);
+                arr_att_art(r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDF);
+                NODE_BUILD_SYMMETRIC_A_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta,
+                    grid, DirBC_Interior_,
+                    matrixA, rhs, nz_index,
+                    center_nz_index, left_nz_index, right_nz_index, bottom_nz_index, top_nz_index,
+                    center_index, left_index, right_index, bottom_index, top_index,
+                    arr, att, art, coeff_beta, detDF);
+            }
+        }
+
+        #pragma omp barrier
+
+        // ------------------------------------------ //
+        // Take care of the circular smoother section //
+        // ------------------------------------------ //
+        // For loop matches circular access pattern
+        for (int i_r = i_r_start; i_r < i_r_end - i_r_separate; i_r++){
+            r = grid.radius(i_r);
+            coeff_alpha = (*alpha_)(r);
+            coeff_beta = (*beta_)(r);
+            for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++){
+                theta = grid.theta(i_theta);
+                sin_theta = sin_theta_[i_theta];
+                cos_theta = cos_theta_[i_theta];
+                arr_att_art(r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDF);
+                NODE_BUILD_SYMMETRIC_A_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta,
+                    grid, DirBC_Interior_,
+                    matrixA, rhs, nz_index,
+                    center_nz_index, left_nz_index, right_nz_index, bottom_nz_index, top_nz_index,
+                    center_index, left_index, right_index, bottom_index, top_index,
+                    arr, att, art, coeff_beta, detDF);
+            }
+        }
+
+        // ---------------------------------------- //
+        // Take care of the radial smoother section //
+        // ---------------------------------------- //
+        // For loop matches radial access pattern
+        for (int i_theta = i_theta_start + i_theta_seperate; i_theta < i_theta_end; i_theta++){
+            theta = grid.theta(i_theta);
+            sin_theta = sin_theta_[i_theta];
+            cos_theta = cos_theta_[i_theta];
+            for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++){
+                r = grid.radius(i_r);
+                coeff_alpha = (*alpha_)(r);
+                coeff_beta = (*beta_)(r);
+                arr_att_art(r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDF);
+                NODE_BUILD_SYMMETRIC_A_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta,
+                    grid, DirBC_Interior_,
+                    matrixA, rhs, nz_index,
+                    center_nz_index, left_nz_index, right_nz_index, bottom_nz_index, top_nz_index,
+                    center_index, left_index, right_index, bottom_index, top_index,
+                    arr, att, art, coeff_beta, detDF);
+            }
+        }
+    }
+
+    matrixA.write_to_file("matrixA.txt");
+
+    return std::make_pair(std::move(matrixA), std::move(rhs));
+}

@@ -118,7 +118,6 @@ inline double Fy_Functor::operator()(const double& r, const double& theta, const
     return map2_e * (r/Rmax) * sin_theta / (sqrt(1.0 - 1.0 / 4.0 * (map2_epsilon * map2_epsilon)) * (2.0 - sqrt(map2_epsilon * (map2_epsilon + 2.0 * (r/Rmax) * cos_theta) + 1.0)));
 }
 
-
 // In earlier versions denoted by 'Jrr'
 inline double dFx_dr_Functor::operator()(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
     static constexpr double Rmax = 1.3;

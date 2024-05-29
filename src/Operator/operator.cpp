@@ -5,14 +5,22 @@ Operator::Operator(const GMGPolar& gmgpolar, const PolarGrid& grid) :
     delta_e_(gmgpolar.delta_e),
     Rmax_(gmgpolar.Rmax),
     geometry_(gmgpolar.geometry),
+
     sin_theta_(grid.ntheta()), 
     cos_theta_(grid.ntheta()),
+
     dFx_dr_(gmgpolar.dFx_dr_),
     dFy_dr_(gmgpolar.dFy_dr_),
     dFx_dt_(gmgpolar.dFx_dt_),
     dFy_dt_(gmgpolar.dFy_dt_),
+
     alpha_(gmgpolar.alpha_),
     beta_(gmgpolar.beta_),
+
+    rhs_f_(gmgpolar.rhs_f_),
+    u_D_(gmgpolar.u_D_),
+    u_D_Interior_(gmgpolar.u_D_Interior_),
+
     DirBC_Interior_(gmgpolar.DirBC_Interior),
 
     numberMod0Circles((grid.numberSmootherCircles() + 2) / 3),

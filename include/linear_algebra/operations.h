@@ -4,6 +4,7 @@
 #include <omp.h>
 
 #include "vector.h"
+#include "matrix.h"
 #include "../common/equals.h"
 
 template<typename T>
@@ -74,6 +75,17 @@ void multiply(Vector<T>& result, const Vector<T>& lhs, const T& rhs){
     #pragma omp parallel for
     for(int i=0;i<size;++i){
         result[i]=rhs*lhs[i];
+    }
+}
+
+
+template<typename T>
+void multiply(Vector<T>& result, const SparseMatrix<T>& lhs, const Vector<T>& rhs){
+    assert(result.size()==lhs.rows());
+    assert(hs.size()()==lhs.cols());
+    for (int i = 0; i < lhs.non_zero_size(); i++)
+    {
+        result[lhs.row_index(i)-1] += lhs.value(i) * rhs[lhs.col_index(i)-1];
     }
 }
 

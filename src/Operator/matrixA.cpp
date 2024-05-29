@@ -271,12 +271,13 @@ do { \
                 + ((coeff1 + coeff2) * arr + (coeff3 + coeff4) * att) * x[grid.index(i_r,i_theta)] ); \
             } \
             /* Fill result(i-1,j) */ \
+            /* From view the view of the across origin node, the directions are roatated by 180 degrees in the stencil! */ \
             if(GiveToLeft){ \
             result[grid.index(i_r, i_theta + (grid.ntheta()>>1))] += factor * ( \
-                - coeff1 * arr * x[grid.index(i_r,i_theta)] /* Right */ \
-                + coeff1 * arr * x[grid.index(i_r, i_theta + (grid.ntheta()>>1))] ); /* Center: (Right) */ \
-            /*  + 0.25 * art * x[grid.index(i_r,i_theta+1)]; // Top Right: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */ \
-            /*  - 0.25 * art * x[grid.index(i_r,i_theta-1)]; // Bottom Right: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */ \
+                - coeff1 * arr * x[grid.index(i_r,i_theta)] /* Right -> Left */ \
+                + coeff1 * arr * x[grid.index(i_r, i_theta + (grid.ntheta()>>1))] ); /* Center: (Right) -> Center: (Left)*/ \
+            /*  + 0.25 * art * x[grid.index(i_r,i_theta+1)]; // Top Right -> Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */ \
+            /*  - 0.25 * art * x[grid.index(i_r,i_theta-1)]; // Bottom Right -> Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */ \
             } \
             /* Fill result(i+1,j) */ \
             if(GiveToRight) { \

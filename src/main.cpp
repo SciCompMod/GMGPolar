@@ -236,13 +236,14 @@ int main(int argc, char* argv[]){
     beta_Functor beta;
     rhs_f_Functor rhs_f;
     u_D_Functor u_D;
+    u_D_Interior_Functor u_D_Interior;
 
     exact_solution_Functor exact_solution;
 
     GMGPolar solver;
     solver.setRadialRefinement(r_jump);
     solver.setGeometry(dFx_dr, dFy_dr, dFx_dt, dFy_dt);
-    solver.setParameters(alpha, beta, rhs_f, u_D);
+    solver.setParameters(alpha, beta, rhs_f, u_D, u_D_Interior);
     solver.setSystemParameters(exact_solution);
     solver.setParameters(argc, argv);
     solver.setup(); 

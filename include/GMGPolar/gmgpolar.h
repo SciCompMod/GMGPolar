@@ -102,6 +102,11 @@ class Operator;
 #include <functional>
 
 
+#include "mpi.h" 
+#include "dmumps_c.h"   
+#include <likwid.h>
+
+
 class GMGPolar {
 public:
     explicit GMGPolar();
@@ -118,7 +123,8 @@ public:
         const alpha_Functor& alpha, 
         const beta_Functor& beta, 
         const rhs_f_Functor& rhs_f, 
-        const u_D_Functor& u_D
+        const u_D_Functor& u_D,
+        const u_D_Interior_Functor& u_D_Interior
     );
     void setSystemParameters(const exact_solution_Functor& exact_solution);
 
@@ -135,6 +141,7 @@ public:
     std::shared_ptr<beta_Functor> beta_;
     std::shared_ptr<rhs_f_Functor> rhs_f_;
     std::shared_ptr<u_D_Functor> u_D_;
+    std::shared_ptr<u_D_Interior_Functor> u_D_Interior_;
 
     std::shared_ptr<exact_solution_Functor> exact_solution_;
 

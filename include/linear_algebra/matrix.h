@@ -12,6 +12,9 @@
 #include <unistd.h>
 #include <omp.h>
 
+#include <fstream>
+#include <iostream>
+
 template<typename T>
 class SparseMatrix
 {
@@ -64,6 +67,23 @@ public:
         return stream;
     }
     
+    void write_to_file(const std::string& filename) const {
+        std::ofstream file(filename);
+        if (!file.is_open()) {
+            throw std::runtime_error("Unable to open file");
+        }
+        file << "SparseMatrix: " << rows_ << " x " << columns_ << "\n";
+        file << "Number of non-zeros (nnz): " << nnz_ << "\n";
+        if (is_symmetric_) {
+            file << "Matrix is symmetric.\n";
+        }
+        file << "Non-zero elements (row, column, value):\n";
+        for (int i = 0; i < nnz_; ++i) {
+            file << "(" << row_indices_[i] << ", " << column_indices_[i] << ", " << values_[i] << ")\n";
+        }
+        file.close();
+    }
+
 private:
     int rows_;
     int columns_;

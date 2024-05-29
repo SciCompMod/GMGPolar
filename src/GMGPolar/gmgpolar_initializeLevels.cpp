@@ -6,7 +6,7 @@ PolarGrid GMGPolar::createFinestGrid() {
         assert(!file_grid_r.empty() && !file_grid_theta.empty());
         finest_grid = PolarGrid(file_grid_r, file_grid_theta);
     } else {
-        finest_grid = PolarGrid(R0, Rmax, nr_exp, ntheta_exp, r_jump_, anisotropic_factor, alpha, divideBy2);
+        finest_grid = PolarGrid(R0, Rmax, nr_exp, ntheta_exp, r_jump_, anisotropic_factor, alpha, divideBy2, 1.3/2.0);
     }
     if(write_grid_file) {
         const int precision = 18;
@@ -18,6 +18,7 @@ PolarGrid GMGPolar::createFinestGrid() {
 
 int GMGPolar::numberOfLevels(const PolarGrid& finestGrid) {
     // Minimum number of radial nodes and angular divisions
+    std::cout<<"WARNING: Change minRadialNodes to 4 in the future!"<<std::endl;
     const int minRadialNodes = 3;
     const int minAngularDivisions = 4;
 
