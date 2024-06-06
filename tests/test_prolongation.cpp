@@ -68,7 +68,9 @@ TEST_P(test_prolongation, test_bilinear_prolongation)
                 EXPECT_EQ(u_test[(j / 2) * ctheta_int + (i / 2)], sol[j * p_level.ntheta_int + i])
                     << "coarse node injection is failing";
             }
-            else if (i % 2 != 0 && j % 2 == 0) { // theta_i is fine node
+            else if (i % 2 != 0 && j % 2 == 0) {
+            // as numbering in angle (theta_i) is odd, we have a fine node with
+            // coarse neighbors at (r_j, theta_i - k_{i-1}) and (r_j, theta_i + k_i)
 
                 double k_qm1 = p_level.theta[i] - p_level.theta[i - 1]; //calculate k_{q-1}
                 double k_q   = (i < p_level.ntheta_int - 1) ? p_level.theta[i + 1] - p_level.theta[i]

@@ -5,12 +5,10 @@ void create_grid(gmgpolar& test_p)
     level* new_level = new level(0);
     new_level->nr    = pow(2, gyro::icntl[Param::nr_exp]);
     new_level->r     = std::vector<double>(new_level->nr + 1);
-    for (int i = 0; i < new_level->nr; i++) {
+    for (int i = 0; i <= new_level->nr; i++) {
         new_level->r[i] = gyro::dcntl[Param::R0] +
-                          i * (gyro::dcntl[Param::R] - gyro::dcntl[Param::R0]) / new_level->nr; //uniform grid
+                          static_cast<double>(i) * (gyro::dcntl[Param::R] - gyro::dcntl[Param::R0]) / static_cast<double>(new_level->nr); //uniform grid
     }
-
-    new_level->r[new_level->nr] = gyro::dcntl[Param::R];
     new_level->nr++;
     int ntmp          = pow(2, ceil(log2(new_level->nr)));
     new_level->ntheta = gyro::icntl[Param::periodic] ? ntmp : ntmp + 1;
@@ -18,7 +16,7 @@ void create_grid(gmgpolar& test_p)
     new_level->theta = std::vector<double>(new_level->ntheta);
 
     for (int i = 0; i < new_level->ntheta; i++) {
-        new_level->theta[i] = 2 * PI * i / ntmp; //uniform in theta
+        new_level->theta[i] = 2. * PI * static_cast<double>(i) / ntmp; //uniform in theta
     }
 
     new_level->ntheta_int = gyro::icntl[Param::periodic] ? new_level->ntheta : new_level->ntheta - 1;
