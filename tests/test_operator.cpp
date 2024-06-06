@@ -199,8 +199,76 @@ TEST_P(test_operator, get_ptr)
         }
     }
 }
+
+void calculate_coeff(double& arr, double& art, double& att, double r, double theta, int mod_pk)
+{
+    std::vector<double> df(4);
+    gyro::select_functions_class(gyro::icntl[Param::alpha_coeff], gyro::icntl[Param::beta_coeff], mod_pk,
+                                 gyro::icntl[Param::prob]);
+    double R = gyro::dcntl[Param::R];
+    switch (mod_pk) {
+    case 0:
+        std::cout << "here" << std::endl;
+        df = {cos(theta) / R, -r * sin(theta) / R, sin(theta) / R, r * cos(theta) / R};
+        break;
+    case 1:
+        df = {(0.7 * cos(theta) - 0.4 * r / R) / R, -0.7 * r / R * sin(theta), 1.3 * sin(theta) / R,
+              1.3 * r * cos(theta) / R};
+        break;
+    case 2:
+        double a  = -(cos(theta)) / sqrt(((3 * (2 * cos(theta) * (r / R) + 0.3)) / 10) + 1);
+        double b  = (r / R * sin(theta)) / sqrt(((3 * (2 * cos(theta) * r / R + 0.3)) / 10) + 1);
+        double c1 = 7 * sin(theta) *
+                    (200 * sqrt(((3 * (2 * cos(theta) * (r / R) + 0.3)) / 10) + 1) - 30 * cos(theta) * (r / R) - 109);
+        double c2 = 25 * sqrt(391) * sqrt(((3 * (2 * cos(theta) * (r / R) + 0.3)) / 10) + 1) *
+                    pow(sqrt(((3 * (2 * cos(theta) * (r / R) + 0.3)) / 10) + 1) - 2, 2);
+        double d1 = (r / R) * (-0.424806 * (r / R) * pow(sin(theta), 2) - 0.849613 * (r / R) * pow(cos(theta), 2) +
+                               cos(theta) * (2.83204 * sqrt(0.6 * (r / R) * cos(theta) + 1.09) - 1.54346));
+        double d2 = sqrt(0.6 * (r / R) * cos(theta) + 1.09) * pow(sqrt(0.6 * (r / R) * cos(theta) + 1.09) - 2, 2);
+        df        = {a / R, b, c1 / R * c2, d1 / d2};
+        break;
+    }
+    double det = df[0] * df[3] - df[1] * df[2];
+    arr        = 0.5 * gyro::functions->coeffs1(r, R) * (pow(df[1], 2) + pow(df[3], 2)) / std::abs(det);
+    art        = gyro::functions->coeffs1(r, R) * (1 / fabs(det)) * (-df[2] * df[3] - df[1] * df[0]);
+    att        = 0.5 * gyro::functions->coeffs1(r, R) * (1 / fabs(det)) * (pow(df[0], 2) + pow(df[2], 2));
+}
+
+TEST_P(test_operator, arr_art_att)
+{
+    gyro::icntl[Param::mod_pk] = (std::get<0>(GetParam()) == 2) ? 1 : std::get<0>(GetParam());
+    //gyro::icntl[Param::mod_pk] = 0;
+    int& ntheta_int = test_level.ntheta_int;
+    gyro::select_functions_class(gyro::icntl[Param::alpha_coeff], gyro::icntl[Param::beta_coeff],
+                                 gyro::icntl[Param::mod_pk], gyro::icntl[Param::prob]);
+    switch (gyro::icntl[Param::mod_pk]) {
+    case 1:
+        gyro::dcntl[Param::kappa_eps] = 0.3;
+        gyro::dcntl[Param::delta_e]   = 0.2;
+        break;
+    case 2:
+        gyro::dcntl[Param::kappa_eps] = 0.3;
+        gyro::dcntl[Param::delta_e]   = 1.4;
+        break;
+    }
+
+    double arr;
+    double art;
+    double att;
+    for (int j = 0; j < test_level.nr; ++j) {
+        for (int i = 0; i < test_level.ntheta_int; ++i) {
+            calculate_coeff(arr, art, att, test_level.r[j], test_level.theta[i], gyro::icntl[Param::mod_pk]);
+            EXPECT_NEAR(gyro::arr(test_level.r[j], test_level.theta[i], 0), arr, 1e-6)
+                << std::to_string(j) + " " + std::to_string(i);
+            EXPECT_NEAR(gyro::art(test_level.r[j], test_level.theta[i], 0), art, 1e-6) //1/4 considered in apply_A
+                << std::to_string(j) + " " + std::to_string(i);
+            EXPECT_NEAR(gyro::att(test_level.r[j], test_level.theta[i], 0), att, 1e-6)
+                << std::to_string(j) + " " + std::to_string(i);
+        }
+    }
+}
 /*
-TEST_F(test_operator, build_A)
+TEST_F(test_operator, apply_A)
 {
     int& ntheta_int = test_level.ntheta_int;
     int& nr_int     = test_level.nr_int;
@@ -231,10 +299,8 @@ TEST_F(test_operator, build_A)
             EXPECT_EQ(test_level.vals[nz - (k + 1)], 1.0);
             EXPECT_EQ(test_level.row_indices[nz - (k + 1)], gridp - (k + 1));
             EXPECT_EQ(test_level.col_indices[nz - (k + 1)], gridp - (k + 1));
-
             //Linked Nodes 5p stencil
             int idx = ntheta_int + k;
-            test_level.row_indices[]
         }
     }
 }
