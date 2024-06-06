@@ -86,7 +86,9 @@ TEST_P(test_prolongation, test_bilinear_prolongation)
                            std::to_string(i) + ")";
                 ;
             }
-            else if (i % 2 == 0) { // r_j fine node, theta_i coarse
+            else if (i % 2 == 0 && j % 2 != 0) {
+            // as numbering in radius (r_j) is odd, we have a fine node with
+            // coarse neighbors at (r_j - h_{j-1}, theta_i) and (r_j+h_j, theta_i )
                 double h_pm1 = p_level.r[j] - p_level.r[j - 1]; //h_{p-1}
                 double h_p   = p_level.r[j + 1] - p_level.r[j]; //h_p
 
