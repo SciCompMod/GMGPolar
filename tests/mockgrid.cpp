@@ -1,9 +1,12 @@
 #include "mockgrid.h"
 void create_grid(gmgpolar& test_p)
 {
-    std::default_random_engine gen(time(0));
+    time_t seed = 5000;
+    std::default_random_engine gen(seed); //deterministic seed to reproduce
     std::uniform_real_distribution<double> dis(gyro::dcntl[Param::R0], gyro::dcntl[Param::R]);
     std::uniform_real_distribution<double> theta_distribution(0, 2 * PI);
+
+    std::cout << "creating randomized grid with std::default_random_engine seed " + std::to_string(seed) << std::endl;
     level* new_level = new level(0);
     new_level->nr    = pow(2, gyro::icntl[Param::nr_exp]);
     new_level->r     = std::vector<double>(new_level->nr + 1);
