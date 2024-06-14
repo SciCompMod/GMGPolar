@@ -18,7 +18,6 @@ protected:
         gyro::f_grid_theta           = "";
         gyro::f_sol_in               = "";
         gyro::f_sol_out              = "";
-        gyro::icntl[Param::fac_ani]  = 3;
         gyro::select_functions_class(gyro::icntl[Param::alpha_coeff], gyro::icntl[Param::beta_coeff],
                                      gyro::icntl[Param::mod_pk], gyro::icntl[Param::prob]);
     }
@@ -39,8 +38,6 @@ TEST_P(test_prolongation, test_bilinear_prolongation)
     gyro::icntl[Param::nr_exp]         = (int)(std::get<0>(GetParam()) / 3) + 3;
     gyro::icntl[Param::ntheta_exp]     = (std::get<0>(GetParam()) % 3) + 3;
     gyro::icntl[Param::DirBC_Interior] = std::get<1>(GetParam());
-    if (gyro::icntl[Param::nr_exp] == 3)
-        gyro::icntl[Param::fac_ani] = 2; //anisotropy should not exceed grid size
 
     gmgpolar test_p;
     create_grid(test_p);
@@ -69,8 +66,8 @@ TEST_P(test_prolongation, test_bilinear_prolongation)
                     << "coarse node injection is failing";
             }
             else if (i % 2 != 0 && j % 2 == 0) {
-            // as numbering in angle (theta_i) is odd, we have a fine node with
-            // coarse neighbors at (r_j, theta_i - k_{i-1}) and (r_j, theta_i + k_i)
+                // as numbering in angle (theta_i) is odd, we have a fine node with
+                // coarse neighbors at (r_j, theta_i - k_{i-1}) and (r_j, theta_i + k_i)
 
                 double k_qm1 = p_level.theta[i] - p_level.theta[i - 1]; //calculate k_{q-1}
                 double k_q   = (i < p_level.ntheta_int - 1) ? p_level.theta[i + 1] - p_level.theta[i]
@@ -87,8 +84,8 @@ TEST_P(test_prolongation, test_bilinear_prolongation)
                 ;
             }
             else if (i % 2 == 0 && j % 2 != 0) {
-            // as numbering in radius (r_j) is odd, we have a fine node with
-            // coarse neighbors at (r_j - h_{j-1}, theta_i) and (r_j+h_j, theta_i )
+                // as numbering in radius (r_j) is odd, we have a fine node with
+                // coarse neighbors at (r_j - h_{j-1}, theta_i) and (r_j+h_j, theta_i )
                 double h_pm1 = p_level.r[j] - p_level.r[j - 1]; //h_{p-1}
                 double h_p   = p_level.r[j + 1] - p_level.r[j]; //h_p
 
@@ -159,9 +156,6 @@ TEST_P(test_prolongation, test_injection_prolongation)
     gyro::icntl[Param::ntheta_exp]     = (std::get<0>(GetParam()) % 3) + 3;
     gyro::icntl[Param::DirBC_Interior] = std::get<1>(GetParam());
 
-    if (gyro::icntl[Param::nr_exp] == 3)
-        gyro::icntl[Param::fac_ani] = 2;
-
     gmgpolar test_p;
 
     create_grid(test_p);
@@ -209,9 +203,6 @@ TEST_P(test_prolongation, test_extrapolation_prolongation)
     gyro::icntl[Param::nr_exp]         = (int)(std::get<0>(GetParam()) / 3) + 3;
     gyro::icntl[Param::ntheta_exp]     = (std::get<0>(GetParam()) % 3) + 3;
     gyro::icntl[Param::DirBC_Interior] = std::get<1>(GetParam());
-
-    if (gyro::icntl[Param::nr_exp] == 3)
-        gyro::icntl[Param::fac_ani] = 2;
 
     gmgpolar test_p;
 

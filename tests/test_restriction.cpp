@@ -14,7 +14,6 @@ protected:
         gyro::f_grid_theta          = "";
         gyro::f_sol_in              = "";
         gyro::f_sol_out             = "";
-        gyro::icntl[Param::fac_ani] = 3;
         gyro::select_functions_class(gyro::icntl[Param::alpha_coeff], gyro::icntl[Param::beta_coeff],
                                      gyro::icntl[Param::mod_pk], gyro::icntl[Param::prob]);
     }
@@ -34,8 +33,6 @@ TEST_P(test_restriction, test_bilinear_restriction)
     gyro::icntl[Param::nr_exp]         = (int)(std::get<0>(GetParam()) / 3) + 3;
     gyro::icntl[Param::ntheta_exp]     = (std::get<0>(GetParam()) % 3) + 3;
     gyro::icntl[Param::DirBC_Interior] = std::get<1>(GetParam());
-    if (gyro::icntl[Param::nr_exp] == 3)
-        gyro::icntl[Param::fac_ani] = 2; //anisotropy should not exceed grid size
 
     gmgpolar test_p;
 
@@ -168,8 +165,6 @@ TEST_P(test_restriction, test_injection_restriction)
     gyro::icntl[Param::nr_exp]         = (int)(std::get<0>(GetParam()) / 3) + 3;
     gyro::icntl[Param::ntheta_exp]     = (std::get<0>(GetParam()) % 3) + 3;
     gyro::icntl[Param::DirBC_Interior] = std::get<1>(GetParam());
-    if (gyro::icntl[Param::nr_exp] == 3)
-        gyro::icntl[Param::fac_ani] = 2; //anisotropy should not exceed grid size
 
     gmgpolar test_p;
 
@@ -216,8 +211,6 @@ TEST_P(test_restriction, test_extrapolation_restriction)
     gyro::icntl[Param::nr_exp]         = (int)(std::get<0>(GetParam()) / 3) + 3;
     gyro::icntl[Param::ntheta_exp]     = (std::get<0>(GetParam()) % 3) + 3;
     gyro::icntl[Param::DirBC_Interior] = std::get<1>(GetParam());
-    if (gyro::icntl[Param::nr_exp] == 3)
-        gyro::icntl[Param::fac_ani] = 2; //anisotropy should not exceed grid size
 
     gmgpolar test_p;
 
