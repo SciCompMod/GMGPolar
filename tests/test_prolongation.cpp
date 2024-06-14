@@ -78,7 +78,8 @@ TEST_P(test_prolongation, test_bilinear_prolongation)
 
                 double val = (k_q * u_test[i1] + k_qm1 * u_test[i2]);
 
-                EXPECT_NEAR(val, (k_q + k_qm1) * sol[j * p_level.ntheta_int + i], 1e-8) //compare values as in the paper
+                EXPECT_NEAR(val, (k_q + k_qm1) * sol[j * p_level.ntheta_int + i],
+                            1e-12) //compare values as in the paper
                     << "Bilinear Prolongation fails for Index (r,theta) : (" + std::to_string(j) + "," +
                            std::to_string(i) + ")";
                 ;
@@ -94,7 +95,7 @@ TEST_P(test_prolongation, test_bilinear_prolongation)
 
                 double val = (h_p * v1 + h_pm1 * v2);
 
-                EXPECT_NEAR(val, (h_p + h_pm1) * sol[j * p_level.ntheta_int + i], 1e-8) //compare values
+                EXPECT_NEAR(val, (h_p + h_pm1) * sol[j * p_level.ntheta_int + i], 1e-12) //compare values
                     << "Bilinear Prolongation fails for Index (r,theta) : (" + std::to_string(j) + "," +
                            std::to_string(i) + ")";
                 ;
@@ -133,7 +134,7 @@ TEST_P(test_prolongation, test_bilinear_prolongation)
                 double val = ((h_p * k_q * bottom_left) + (h_p * k_qm1 * top_left) + (h_pm1 * k_q * bottom_right) +
                               (h_pm1 * k_qm1 * top_right)); //calculate value as in the paper
 
-                EXPECT_NEAR(val, (h_p + h_pm1) * (k_q + k_qm1) * sol[j * p_level.ntheta_int + i], 1e-8)
+                EXPECT_NEAR(val, (h_p + h_pm1) * (k_q + k_qm1) * sol[j * p_level.ntheta_int + i], 1e-12)
                     << "Bilinear Prolongation fails for Index (r,theta) : (" + std::to_string(j) + "," +
                            std::to_string(i) + ")";
             }
@@ -233,7 +234,7 @@ TEST_P(test_prolongation, test_extrapolation_prolongation)
 
                 double val = 0.5 * (u_test[i1] + u_test[i2]);
 
-                EXPECT_NEAR(val, sol[j * p_level.ntheta_int + i], 1e-8)
+                EXPECT_NEAR(val, sol[j * p_level.ntheta_int + i], 1e-12)
                     << "Extrapolated Prolongation fails for Index (r,theta): (" + std::to_string(j) + "," +
                            std::to_string(i) + ")";
             }
@@ -244,7 +245,7 @@ TEST_P(test_prolongation, test_extrapolation_prolongation)
 
                 double val = 0.5 * (v1 + v2);
 
-                EXPECT_NEAR(val, sol[j * p_level.ntheta_int + i], 1e-8)
+                EXPECT_NEAR(val, sol[j * p_level.ntheta_int + i], 1e-12)
                     << "Extrapolated Prolongation fails for Index (r,theta): (" + std::to_string(j) + "," +
                            std::to_string(i) + ")";
             }
@@ -268,7 +269,7 @@ TEST_P(test_prolongation, test_extrapolation_prolongation)
 
                 double val = 0.5 * (top_left + bottom_right);
 
-                EXPECT_NEAR(val, sol[j * p_level.ntheta_int + i], 1e-8)
+                EXPECT_NEAR(val, sol[j * p_level.ntheta_int + i], 1e-12)
                     << "Extrapolated Prolongation fails for Index (r,theta): (" + std::to_string(j) + "," +
                            std::to_string(i) + ")";
                 ;

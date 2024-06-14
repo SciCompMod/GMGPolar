@@ -145,7 +145,7 @@ TEST_P(test_restriction, test_bilinear_restriction)
             for (int z = 0; z < 8; z++) {
                 finval += vals[z] * adjacent[z]; //accumulate all values in the coarse node
             }
-            EXPECT_NEAR(finval, sol[j * ctheta_int + i], 1e-6)
+            EXPECT_NEAR(finval, sol[j * ctheta_int + i], 1e-12)
                 << "The test fails at Index for (r,theta): (" + std::to_string(j) + "," + std::to_string(i) + ")";
         }
     }
@@ -267,7 +267,7 @@ TEST_P(test_restriction, test_extrapolation_restriction)
                     adjacent[z]; //accumulate the values. the vector "vals" reduces to 1/2 for every adjacent fine node
             }
 
-            EXPECT_NEAR(finval, sol[j * ctheta_int + i], 1e-6)
+            EXPECT_NEAR(finval, sol[j * ctheta_int + i], 1e-12)
                 << "The test fails at Index for (r,theta): (" + std::to_string(j) + "," + std::to_string(i) + ")";
         }
     }
