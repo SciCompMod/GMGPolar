@@ -111,13 +111,16 @@ TEST_P(test_restriction, test_bilinear_restriction)
                                     y) { //based on the value of y and periodic boundary conditions we get different values for {k_q,k_{q-1}}
                                 case 1:
                                     k_q[k] = {p_level.theta[2] - p_level.theta[1], p_level.theta[1] - p_level.theta[0]};
+                                    break;
                                 case 0:
                                     k_q[k] = {p_level.theta[1] - p_level.theta[0],
                                               2 * PI - p_level.theta[p_level.ntheta_int - 1]};
+                                    break;
                                 default:
                                     k_q[k] = {2 * PI - p_level.theta[p_level.ntheta_int - 1],
                                               p_level.theta[p_level.ntheta_int - 1] -
                                                   p_level.theta[p_level.ntheta_int - 2]};
+                                    break;
                                 }
                             }
                         }
@@ -265,7 +268,7 @@ TEST_P(test_restriction, test_extrapolation_restriction)
             }
 
             double finval = u_test[(2 * j) * p_level.ntheta_int + (2 * i)];
-            for (int z = 0; z < 8; z++) {
+            for (int z = 0; z < 6; z++) {
                 finval +=
                     0.5 *
                     adjacent[z]; //accumulate the values. the vector "vals" reduces to 1/2 for every adjacent fine node

@@ -1,14 +1,25 @@
 #include "mockgrid.h"
-
+#include <random>
+#include <stdlib.h>
+#include <algorithm>
 void create_grid(gmgpolar& test_p)
 {
+    std::default_random_engine gen(time(0));
+    std::uniform_real_distribution<double> dis(gyro::dcntl[Param::R0], gyro::dcntl[Param::R]);
     level* new_level = new level(0);
     new_level->nr    = pow(2, gyro::icntl[Param::nr_exp]);
     new_level->r     = std::vector<double>(new_level->nr + 1);
-    for (int i = 0; i <= new_level->nr; i++) {
-        new_level->r[i] = gyro::dcntl[Param::R0] +
-                          static_cast<double>(i) * (gyro::dcntl[Param::R] - gyro::dcntl[Param::R0]) / static_cast<double>(new_level->nr); //uniform grid
+
+    std::vector<double> rands(new_level->nr - 1);
+    for (int j = 0; j < new_level->nr - 1; ++j) {
+        rands[j] = dis(gen);
     }
+    std::sort(rands.begin(), rands.end());
+    new_level->r[0] = gyro::dcntl[Param::R0];
+    for (int i = 1; i < new_level->nr; i++) {
+        new_level->r[i] = rands[i - 1]; //random grid on coarser level
+    }
+    new_level->r[new_level->nr] = gyro::dcntl[Param::R];
     new_level->nr++;
     int ntmp          = pow(2, ceil(log2(new_level->nr)));
     new_level->ntheta = gyro::icntl[Param::periodic] ? ntmp : ntmp + 1;
