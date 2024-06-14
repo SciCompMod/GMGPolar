@@ -104,20 +104,18 @@ TEST_P(test_restriction, test_bilinear_restriction)
                                           p_level.theta[2 * i + y] - p_level.theta[2 * i + y - 1]};
                             }
                             else {
-                                switch (
-                                    y) { //based on the value of y and periodic boundary conditions we get different values for {k_q,k_{q-1}}
-                                case 1:
+                                if (y ==
+                                    1) { //based on the value of y and periodic boundary conditions we get different values for {k_q,k_{q-1}}
                                     k_q[k] = {p_level.theta[2] - p_level.theta[1], p_level.theta[1] - p_level.theta[0]};
-                                    break;
-                                case 0:
+                                }
+                                else if (y == 0) {
                                     k_q[k] = {p_level.theta[1] - p_level.theta[0],
                                               2 * PI - p_level.theta[p_level.ntheta_int - 1]};
-                                    break;
-                                default:
+                                }
+                                else {
                                     k_q[k] = {2 * PI - p_level.theta[p_level.ntheta_int - 1],
                                               p_level.theta[p_level.ntheta_int - 1] -
                                                   p_level.theta[p_level.ntheta_int - 2]};
-                                    break;
                                 }
                             }
                         }
