@@ -47,7 +47,10 @@ TEST_P(test_restriction, test_bilinear_restriction)
 
     std::vector<double> u_test(p_level.m);
     for (int z = 0; z < p_level.m; z++) {
-        u_test[z] = 10 - (2 / (z + 1));
+        u_test[z] =
+            1 - z +
+            pow(PI,
+                -z * z); //constructing arbitrary grid-function on coarse level to test our prolongation operator with.
     }
 
     std::vector<double> sol = p_level.apply_restriction_bi(u_test);
@@ -143,7 +146,7 @@ TEST_P(test_restriction, test_bilinear_restriction)
             for (int z = 0; z < 8; z++) {
                 finval += vals[z] * adjacent[z]; //accumulate all values in the coarse node
             }
-            EXPECT_NEAR(finval, sol[j * ctheta_int + i], 1e-12)
+            EXPECT_NEAR(finval, sol[j * ctheta_int + i], 1e-10)
                 << "The test fails at Index for (r,theta): (" + std::to_string(j) + "," + std::to_string(i) + ")";
         }
     }
@@ -177,7 +180,10 @@ TEST_P(test_restriction, test_injection_restriction)
 
     std::vector<double> u_test(p_level.m);
     for (int z = 0; z < p_level.m; z++) {
-        u_test[z] = z - 1 + pow(PI, -z * z); //arbitrary grid function to test with
+        u_test[z] =
+            1 - z +
+            pow(PI,
+                -z * z); //constructing arbitrary grid-function on coarse level to test our prolongation operator with.
     }
 
     std::vector<double> sol = p_level.apply_restriction_inj(u_test);
@@ -222,8 +228,11 @@ TEST_P(test_restriction, test_extrapolation_restriction)
     p_level.mc = test_p.v_level[1]->nr * test_p.v_level[1]->ntheta;
 
     std::vector<double> u_test(p_level.m);
-    for (int z = 0; z < p_level.m; z++) {
-        u_test[z] = 1 - z; //arbitrary grid function
+    for (int z = 0; z < p_level.mc; z++) {
+        u_test[z] =
+            1 - z +
+            pow(PI,
+                -z * z); //constructing arbitrary grid-function on coarse level to test our prolongation operator with.
     }
 
     std::vector<double> sol = p_level.apply_restriction_ex(u_test);

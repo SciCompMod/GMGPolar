@@ -169,7 +169,10 @@ TEST_P(test_prolongation, test_injection_prolongation)
 
     std::vector<double> u_test(p_level.mc);
     for (int z = 0; z < p_level.mc; z++) {
-        u_test[z] = z; //arbitrary grid-function that we prolongate defined on the coarse nodes
+        u_test[z] =
+            1 - z +
+            pow(PI,
+                -z * z); //constructing arbitrary grid-function on coarse level to test our prolongation operator with.
     }
 
     std::vector<double> sol = p_level.apply_prolongation_inj(u_test);
@@ -217,7 +220,10 @@ TEST_P(test_prolongation, test_extrapolation_prolongation)
 
     std::vector<double> u_test(p_level.mc);
     for (int z = 0; z < p_level.mc; z++) {
-        u_test[z] = z; //arbitrary grid-function to test the prolongation
+        u_test[z] =
+            1 - z +
+            pow(PI,
+                -z * z); //constructing arbitrary grid-function on coarse level to test our prolongation operator with.
     }
     std::vector<double> sol = p_level.apply_prolongation_ex(u_test);
 
