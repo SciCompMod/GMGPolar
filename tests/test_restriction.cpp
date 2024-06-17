@@ -21,7 +21,7 @@ protected:
 /*!
  *  \brief Test the bilinear restriction operator used in the multigrid cycle coarse-grid correction. 
  *  
- *  The Test creates an arbitrary grid-function on the finer level and restricts it. 
+ *  The test creates an arbitrary grid-function on the finer level and restricts it to the coarser level. 
  *  On the coarse level we iterate over all nodes and accumulate the adjacent fine node values.
  *  This is matrix-free but it corresponds to applying the transposed prolongation matrix
  *
@@ -39,11 +39,11 @@ TEST_P(test_restriction, test_bilinear_restriction)
     create_grid(test_p); //Mocking create_grid_polar, check_geom and define_coarse_nodes
 
     level& p_level = *(test_p.v_level[0]);
-    int ctheta_int = test_p.v_level[1]->ntheta_int;
+    int ctheta_int = test_p.v_level[1]->ntheta_int; // number of coarse nodes in theta direction
     int cr_int     = test_p.v_level[1]->nr_int;
 
-    p_level.m  = test_p.v_level[0]->nr * test_p.v_level[0]->ntheta;
-    p_level.mc = test_p.v_level[1]->nr * test_p.v_level[1]->ntheta;
+    p_level.m  = test_p.v_level[0]->nr * test_p.v_level[0]->ntheta; //fine grid size
+    p_level.mc = test_p.v_level[1]->nr * test_p.v_level[1]->ntheta; //coarser grid size
 
     std::vector<double> u_test(p_level.m);
     for (int z = 0; z < p_level.m; z++) {
@@ -57,22 +57,21 @@ TEST_P(test_restriction, test_bilinear_restriction)
 
     /*
      * The restriction operator accumulates the values in the direct vicinity and stores them in the corresponding node.
-     * We hence calculate 8 values for every coarse node. These 8 values are the fine nodes in the vicinity that are to be accumulated
-     * in the coarse node
+     * These values are the eight fine nodes' value in the vicinity that are to be accumulated in the coarse node.
      *
-     * we treat values in r as the x-axis. values in theta as the y-axis. Hence the vector 'adjacent' stores the values in the order:
-     * **bottom_left, left, top_left, bottom, top, bottom_right, right, top_right;**
+     * We treat values in r as the x-axis. values in theta as the y-axis. Hence the vector 'adjacent' stores the values in the order:
+     * bottom_left, left, top_left, bottom, top, bottom_right, right, top_right.
      */
 
     for (int j = 0; j < cr_int + 1; j++) {
         for (int i = 0; i < ctheta_int; i++) {
             std::vector<double> adjacent(8, -1.0);
-            if (j == 0) { //interior-most circle- nodes to the left (lower in radii indices) disappear
+            if (j == 0) { // innermost circle: nodes to the left (lower in radii indices) disappear
                 adjacent[0] = 0.0;
                 adjacent[1] = 0.0;
                 adjacent[2] = 0.0;
             }
-            if (j == cr_int) { //exterior-most circle- nodes to the right disappear
+            if (j == cr_int) { // outermost circle: nodes to the right disappear
                 adjacent[5] = 0.0;
                 adjacent[6] = 0.0;
                 adjacent[7] = 0.0;
@@ -243,11 +242,11 @@ TEST_P(test_restriction, test_extrapolation_restriction)
     for (int j = 0; j < cr_int + 1; j++) {
         for (int i = 0; i < ctheta_int; i++) {
             std::vector<double> adjacent(6, -1.0);
-            if (j == 0) { //interior circle
+            if (j == 0) { // innermost circle
                 adjacent[0] = 0.0;
                 adjacent[1] = 0.0;
             }
-            if (j == cr_int) { //exterior circle
+            if (j == cr_int) { // outermost circle
                 adjacent[4] = 0.0;
                 adjacent[5] = 0.0;
             }

@@ -162,10 +162,10 @@ TEST_P(test_prolongation, test_injection_prolongation)
     create_grid(test_p);
 
     level& p_level = *(test_p.v_level[0]);
-    int ctheta_int = test_p.v_level[1]->ntheta_int;
+    int ctheta_int = test_p.v_level[1]->ntheta_int; // number of coarse nodes in theta direction
 
-    p_level.m  = test_p.v_level[0]->nr * test_p.v_level[0]->ntheta;
-    p_level.mc = test_p.v_level[1]->nr * test_p.v_level[1]->ntheta;
+    p_level.m  = test_p.v_level[0]->nr * test_p.v_level[0]->ntheta; // fine grid size
+    p_level.mc = test_p.v_level[1]->nr * test_p.v_level[1]->ntheta; // coarser grid size
 
     std::vector<double> u_test(p_level.mc);
     for (int z = 0; z < p_level.mc; z++) {
@@ -233,10 +233,12 @@ TEST_P(test_prolongation, test_extrapolation_prolongation)
                 EXPECT_EQ(u_test[(j / 2) * ctheta_int + (i / 2)], sol[j * p_level.ntheta_int + i])
                     << "coarse node injection is failing";
             }
-            else if (i % 2 != 0 && j % 2 == 0) { // theta_i is fine node. upper edge of the triangle
+            else if (i % 2 != 0 && j % 2 == 0) {
+            // as numbering in angle (theta_i) is odd, we have a fine node with
+            // coarse neighbors at (r_j, theta_i - k_{i-1}) and (r_j, theta_i + k_i)
 
-                int i1 = (j / 2) * ctheta_int + (i - 1) / 2;
-                int i2 = (i < p_level.ntheta_int - 1) ? i1 + 1 : (j / 2) * ctheta_int; //cyclic coordinates
+                int i1 = (j / 2) * ctheta_int + (i - 1) / 2; // bottom coarse node in theta
+                int i2 = (i < p_level.ntheta_int - 1) ? i1 + 1 : (j / 2) * ctheta_int; // top coarse node in theta
 
                 double val = 0.5 * (u_test[i1] + u_test[i2]);
 
@@ -244,10 +246,12 @@ TEST_P(test_prolongation, test_extrapolation_prolongation)
                     << "Extrapolated Prolongation fails for Index (r,theta): (" + std::to_string(j) + "," +
                            std::to_string(i) + ")";
             }
-            else if (i % 2 == 0) { // r_j fine node, theta_i coarse. lower edge of the triangle
+            else if (i % 2 == 0 && j % 2 != 0) {
+            // as numbering in radius (r_j) is odd, we have a fine node with
+            // coarse neighbors at (r_j - h_{j-1}, theta_i) and (r_j+h_j, theta_i )
 
-                double v1 = u_test[(j - 1) / 2 * ctheta_int + (i / 2)];
-                double v2 = u_test[(j + 1) / 2 * ctheta_int + (i / 2)];
+                double v1 = u_test[(j - 1) / 2 * ctheta_int + (i / 2)]; // left coarse node in r
+                double v2 = u_test[(j + 1) / 2 * ctheta_int + (i / 2)]; // right coarse node in r
 
                 double val = 0.5 * (v1 + v2);
 
