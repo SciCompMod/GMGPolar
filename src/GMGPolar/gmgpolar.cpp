@@ -1,5 +1,7 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
+/* Dies ist ein Test */
+
 GMGPolar::GMGPolar(const DomainGeometry& domain_geometry, const SystemParameters& system_parameters) : 
     domain_geometry_(domain_geometry),
     system_parameters_(system_parameters),
