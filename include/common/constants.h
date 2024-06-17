@@ -1,0 +1,24 @@
+#pragma once
+
+/* Mumps macro s.t. indices match documentation */
+#define ICNTL(I) icntl[(I)-1]
+#define CNTL(I) cntl[(I)-1]
+
+#define USE_COMM_WORLD -987654
+
+#define JOB_INIT -1
+#define JOB_END -2
+#define JOB_REMOVE_SAVED_DATA -3
+#define JOB_FREE_INTERNAL_DATA -4
+#define JOB_SUPPRESS_OOC_FILES -200
+
+#define JOB_ANALYSIS_PHASE 1
+#define JOB_FACTORIZATION_PHASE 2
+#define JOB_COMPUTE_SOLUTION 3
+#define JOB_ANALYSIS_AND_FACTORIZATION 4
+#define JOB_FACTORIZATION_AND_SOLUTION 5
+#define JOB_ANALYSIS_FACTORIZATION_SOLUTION 6
+#define JOB_SAVE_INTERNAL_DATA 7
+#define JOB_RESTORE_INTERNAL_DATA 8
+#define JOB_DISTRIBUTE_RHS 9
+
