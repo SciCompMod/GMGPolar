@@ -2,7 +2,7 @@
 
 ./build/gmgpolar \
 \
---maxOpenMPThreads 30 \
+--maxOpenMPThreads 1 \
 --finestLevelThreads -1 \
 --threadReductionFactor 1.0 \
 \

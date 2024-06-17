@@ -80,21 +80,25 @@ do { \
         /* Fill matrix row of (i,j) */ \
         const Stencil& CenterStencil = get_stencil(i_r); \
         \
+        assert(CenterStencil[StencilType::Center] != -1); \
         nz_index = center_nz_index + CenterStencil[StencilType::Center]; \
         center_Asc_matrix.row_index(nz_index) = center_index + 1; \
         center_Asc_matrix.col_index(nz_index) = center_index + 1; \
         center_Asc_matrix.value(nz_index) += 0.25 * (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF); /* beta_{i,j} */ \
         \
+        assert(CenterStencil[StencilType::Bottom] != -1); \
         nz_index = center_nz_index + CenterStencil[StencilType::Bottom]; \
         center_Asc_matrix.row_index(nz_index) = center_index + 1; \
         center_Asc_matrix.col_index(nz_index) = bottom_index + 1; \
         center_Asc_matrix.value(nz_index) += - coeff3 * att; /* Bottom */ \
         \
+        assert(CenterStencil[StencilType::Top] != -1); \
         nz_index = center_nz_index + CenterStencil[StencilType::Top]; \
         center_Asc_matrix.row_index(nz_index) = center_index + 1; \
         center_Asc_matrix.col_index(nz_index) = top_index + 1; \
         center_Asc_matrix.value(nz_index) += - coeff4 * att; /* Top */ \
         \
+        assert(CenterStencil[StencilType::Center] != -1); \
         nz_index = center_nz_index + CenterStencil[StencilType::Center]; \
         center_Asc_matrix.row_index(nz_index) = center_index + 1; \
         center_Asc_matrix.col_index(nz_index) = center_index + 1; \
@@ -104,14 +108,18 @@ do { \
         /* Fill matrix row of (i-1,j) */ \
         const Stencil& LeftStencil = get_stencil(i_r-1); \
         \
-        nz_index = left_nz_index + LeftStencil[StencilType::Center]; \
-        left_Asc_matrix.row_index(nz_index) = left_index + 1; \
-        left_Asc_matrix.col_index(nz_index) = left_index + 1; \
-        left_Asc_matrix.value(nz_index) += coeff1 * arr; /* Center: (Right) */ \
+        if(!DirBC_Interior || i_r > 1) { \
+            assert(LeftStencil[StencilType::Center] != -1); \
+            nz_index = left_nz_index + LeftStencil[StencilType::Center]; \
+            left_Asc_matrix.row_index(nz_index) = left_index + 1; \
+            left_Asc_matrix.col_index(nz_index) = left_index + 1; \
+            left_Asc_matrix.value(nz_index) += coeff1 * arr; /* Center: (Right) */ \
+        } \
         \
         /* Fill matrix row of (i+1,j) */ \
         const Stencil& RightStencil = get_stencil(i_r+1); \
         \
+        assert(RightStencil[StencilType::Center] != -1); \
         nz_index = right_nz_index + RightStencil[StencilType::Center]; \
         right_Asc_matrix.row_index(nz_index) = right_index + 1; \
         right_Asc_matrix.col_index(nz_index) = right_index + 1; \
@@ -120,11 +128,13 @@ do { \
         /* Fill matrix row of (i,j-1) */ \
         const Stencil& BottomStencil = CenterStencil; \
         \
+        assert(BottomStencil[StencilType::Top] != -1); \
         nz_index = bottom_nz_index + BottomStencil[StencilType::Top]; \
         center_Asc_matrix.row_index(nz_index) = bottom_index + 1; \
         center_Asc_matrix.col_index(nz_index) = center_index + 1; \
         center_Asc_matrix.value(nz_index) += - coeff3 * att; /* Top */ \
         \
+        assert(BottomStencil[StencilType::Center] != -1); \
         nz_index = bottom_nz_index + BottomStencil[StencilType::Center]; \
         center_Asc_matrix.row_index(nz_index) = bottom_index + 1; \
         center_Asc_matrix.col_index(nz_index) = bottom_index + 1; \
@@ -133,11 +143,13 @@ do { \
         /* Fill matrix row of (i,j+1) */ \
         const Stencil& TopStencil = CenterStencil; \
         \
+        assert(TopStencil[StencilType::Bottom] != -1); \
         nz_index = top_nz_index + TopStencil[StencilType::Bottom]; \
         center_Asc_matrix.row_index(nz_index) = top_index + 1; \
         center_Asc_matrix.col_index(nz_index) = center_index + 1; \
         center_Asc_matrix.value(nz_index) += - coeff4 * att; /* Bottom */ \
         \
+        assert(TopStencil[StencilType::Center] != -1); \
         nz_index = top_nz_index + TopStencil[StencilType::Center]; \
         center_Asc_matrix.row_index(nz_index) = top_index + 1; \
         center_Asc_matrix.col_index(nz_index) = top_index + 1; \
@@ -175,21 +187,25 @@ do { \
         /* Fill matrix row of (i,j) */ \
         const Stencil& CenterStencil = get_stencil(i_r); \
         \
+        assert(CenterStencil[StencilType::Center] != -1); \
         nz_index = center_nz_index + CenterStencil[StencilType::Center]; \
         center_Asc_matrix.row_index(nz_index) = center_index + 1; \
         center_Asc_matrix.col_index(nz_index) = center_index + 1; \
         center_Asc_matrix.value(nz_index) += 0.25 * (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF); /* beta_{i,j} */ \
         \
+        assert(CenterStencil[StencilType::Left] != -1); \
         nz_index = center_nz_index + CenterStencil[StencilType::Left]; \
         center_Asc_matrix.row_index(nz_index) = center_index + 1; \
         center_Asc_matrix.col_index(nz_index) = left_index + 1; \
         center_Asc_matrix.value(nz_index) += - coeff1 * arr; /* Left */ \
         \
+        assert(CenterStencil[StencilType::Right] != -1); \
         nz_index = center_nz_index + CenterStencil[StencilType::Right]; \
         center_Asc_matrix.row_index(nz_index) = center_index + 1; \
         center_Asc_matrix.col_index(nz_index) = right_index + 1; \
         center_Asc_matrix.value(nz_index) += - coeff2 * arr; /* Right */ \
         \
+        assert(CenterStencil[StencilType::Center] != -1); \
         nz_index = center_nz_index + CenterStencil[StencilType::Center]; \
         center_Asc_matrix.row_index(nz_index) = center_index + 1; \
         center_Asc_matrix.col_index(nz_index) = center_index + 1; \
@@ -199,11 +215,13 @@ do { \
         /* Fill matrix row of (i-1,j) */ \
         const Stencil& LeftStencil = get_stencil(i_r-1); \
         \
+        assert(LeftStencil[StencilType::Right] != -1); \
         nz_index = left_nz_index + LeftStencil[StencilType::Right]; \
         center_Asc_matrix.row_index(nz_index) = left_index + 1; \
         center_Asc_matrix.col_index(nz_index) = center_index + 1; \
         center_Asc_matrix.value(nz_index) += - coeff1 * arr; /* Right */ \
         \
+        assert(LeftStencil[StencilType::Center] != -1); \
         nz_index = left_nz_index + LeftStencil[StencilType::Center]; \
         center_Asc_matrix.row_index(nz_index) = left_index + 1; \
         center_Asc_matrix.col_index(nz_index) = left_index + 1; \
@@ -212,11 +230,13 @@ do { \
         /* Fill matrix row of (i+1,j) */ \
         const Stencil& RightStencil = get_stencil(i_r+1); \
         \
+        assert(RightStencil[StencilType::Left] != -1); \
         nz_index = right_nz_index + RightStencil[StencilType::Left]; \
         center_Asc_matrix.row_index(nz_index) = right_index + 1; \
         center_Asc_matrix.col_index(nz_index) = center_index + 1; \
         center_Asc_matrix.value(nz_index) += - coeff2 * arr; /* Left */ \
         \
+        assert(RightStencil[StencilType::Center] != -1); \
         nz_index = right_nz_index + RightStencil[StencilType::Center]; \
         center_Asc_matrix.row_index(nz_index) = right_index + 1; \
         center_Asc_matrix.col_index(nz_index) = right_index + 1; \
@@ -225,6 +245,7 @@ do { \
         /* Fill matrix row of (i,j-1) */ \
         const Stencil& BottomStencil = CenterStencil; \
         \
+        assert(BottomStencil[StencilType::Center] != -1); \
         nz_index = bottom_nz_index + BottomStencil[StencilType::Center]; \
         bottom_Asc_matrix.row_index(nz_index) = bottom_index + 1; \
         bottom_Asc_matrix.col_index(nz_index) = bottom_index + 1; \
@@ -233,6 +254,7 @@ do { \
         /* Fill matrix row of (i,j+1) */ \
         const Stencil& TopStencil = CenterStencil; \
         \
+        assert(TopStencil[StencilType::Center] != -1); \
         nz_index = top_nz_index + TopStencil[StencilType::Center]; \
         top_Asc_matrix.row_index(nz_index) = top_index + 1; \
         top_Asc_matrix.col_index(nz_index) = top_index + 1; \
@@ -266,6 +288,7 @@ do { \
             /* Fill matrix row of (i,j) */ \
             const Stencil& CenterStencil = get_stencil(i_r); \
             \
+            assert(CenterStencil[StencilType::Center] != -1); \
             nz_index = center_nz_index + CenterStencil[StencilType::Center]; \
             center_Asc_matrix.row_index(nz_index) = center_index + 1; \
             center_Asc_matrix.col_index(nz_index) = center_index + 1; \
@@ -275,6 +298,7 @@ do { \
             /* Fill matrix row of (i+1,j) */ \
             const Stencil& RightStencil = get_stencil(i_r+1); \
             \
+            assert(RightStencil[StencilType::Center] != -1); \
             nz_index = right_nz_index + RightStencil[StencilType::Center]; \
             right_Asc_matrix.row_index(nz_index) = right_index + 1; \
             right_Asc_matrix.col_index(nz_index) = right_index + 1; \
@@ -314,26 +338,31 @@ do { \
             /* Fill matrix row of (i,j) */ \
             const Stencil& CenterStencil = get_stencil(i_r); \
             \
+            assert(CenterStencil[StencilType::Center] != -1); \
             nz_index = center_nz_index + CenterStencil[StencilType::Center]; \
             center_Asc_matrix.row_index(nz_index) = center_index + 1; \
             center_Asc_matrix.col_index(nz_index) = center_index + 1; \
             center_Asc_matrix.value(nz_index) += 0.25 * (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF); /* beta_{i,j} */ \
             \
+            assert(CenterStencil[StencilType::Left] != -1); \
             nz_index = center_nz_index + CenterStencil[StencilType::Left]; \
             center_Asc_matrix.row_index(nz_index) = center_index + 1; \
             center_Asc_matrix.col_index(nz_index) = left_index + 1; \
             center_Asc_matrix.value(nz_index) += - coeff1 * arr; /* Left */ \
             \
+            assert(CenterStencil[StencilType::Bottom] != -1); \
             nz_index = center_nz_index + CenterStencil[StencilType::Bottom]; \
             center_Asc_matrix.row_index(nz_index) = center_index + 1; \
             center_Asc_matrix.col_index(nz_index) = bottom_index + 1; \
             center_Asc_matrix.value(nz_index) += - coeff3 * att; /* Bottom */ \
             \
+            assert(CenterStencil[StencilType::Top] != -1); \
             nz_index = center_nz_index + CenterStencil[StencilType::Top]; \
             center_Asc_matrix.row_index(nz_index) = center_index + 1; \
             center_Asc_matrix.col_index(nz_index) = top_index + 1; \
             center_Asc_matrix.value(nz_index) += - coeff4 * att; /* Top */ \
             \
+            assert(CenterStencil[StencilType::Center] != -1); \
             nz_index = center_nz_index + CenterStencil[StencilType::Center]; \
             center_Asc_matrix.row_index(nz_index) = center_index + 1; \
             center_Asc_matrix.col_index(nz_index) = center_index + 1; \
@@ -344,22 +373,26 @@ do { \
             /* From view the view of the across origin node, the directions are roatated by 180 degrees in the stencil! */ \
             const Stencil& LeftStencil = CenterStencil; \
             \
+            assert(LeftStencil[StencilType::Left] != -1); \
             nz_index = left_nz_index + LeftStencil[StencilType::Left]; \
             left_Asc_matrix.row_index(nz_index) = left_index + 1; \
             left_Asc_matrix.col_index(nz_index) = center_index + 1; \
             left_Asc_matrix.value(nz_index) += - coeff1 * arr; /* Right -> Left*/ \
             \
+            assert(LeftStencil[StencilType::Center] != -1); \
             nz_index = left_nz_index + LeftStencil[StencilType::Center]; \
             left_Asc_matrix.row_index(nz_index) = left_index + 1; \
             left_Asc_matrix.col_index(nz_index) = left_index + 1; \
             left_Asc_matrix.value(nz_index) += coeff1 * arr; /* Center: (Right) -> Center: (Left) */ \
             \
+            assert(LeftStencil[StencilType::BottomLeft] == -1); \
             /* Top Right -> Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */ \
             /* nz_index = left_nz_index + LeftStencil[StencilType::BottomLeft]; */  \
             /* left_Asc_matrix.row_index(nz_index) = left_index; */  \
             /* left_Asc_matrix.col_index(nz_index) = top_index; */  \
             /* left_Asc_matrix.value(nz_index) += - 0.25 * art; // Top Right -> Bottom Left*/ \
             \
+            assert(LeftStencil[StencilType::TopLeft] == -1); \
             /* Bottom Right -> Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */ \
             /* nz_index = left_nz_index + LeftStencil[StencilType::TopLeft]; */ \
             /* left_Asc_matrix.row_index(nz_index) = left_index; */  \
@@ -369,6 +402,7 @@ do { \
             /* Fill matrix row of (i+1,j) */ \
             const Stencil& RightStencil = get_stencil(i_r+1); \
             \
+            assert(RightStencil[StencilType::Center] != -1); \
             nz_index = right_nz_index + RightStencil[StencilType::Center]; \
             right_Asc_matrix.row_index(nz_index) = right_index + 1; \
             right_Asc_matrix.col_index(nz_index) = right_index + 1; \
@@ -377,16 +411,19 @@ do { \
             /* Fill matrix row of (i,j-1) */ \
             const Stencil& BottomStencil = CenterStencil; \
             \
+            assert(BottomStencil[StencilType::Top] != -1); \
             nz_index = bottom_nz_index + BottomStencil[StencilType::Top]; \
             center_Asc_matrix.row_index(nz_index) = bottom_index + 1; \
             center_Asc_matrix.col_index(nz_index) = center_index + 1; \
             center_Asc_matrix.value(nz_index) += - coeff3 * att; /* Top */ \
             \
+            assert(BottomStencil[StencilType::Center] != -1); \
             nz_index = bottom_nz_index + BottomStencil[StencilType::Center]; \
             center_Asc_matrix.row_index(nz_index) = bottom_index + 1; \
             center_Asc_matrix.col_index(nz_index) = bottom_index + 1; \
             center_Asc_matrix.value(nz_index) += coeff3 * att; /* Center: (Top) */ \
             \
+            assert(BottomStencil[StencilType::TopLeft] == -1); \
             /* REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */ \
             /* nz_index = bottom_nz_index + BottomStencil[StencilType::TopLeft]; */ \
             /* center_Asc_matrix.row_index(nz_index) = bottom_index + 1; */ \
@@ -396,16 +433,19 @@ do { \
             /* Fill matrix row of (i,j+1) */ \
             const Stencil& TopStencil = CenterStencil; \
             \
+            assert(TopStencil[StencilType::Bottom] != -1); \
             nz_index = top_nz_index + TopStencil[StencilType::Bottom]; \
             center_Asc_matrix.row_index(nz_index) = top_index + 1; \
             center_Asc_matrix.col_index(nz_index) = center_index + 1; \
             center_Asc_matrix.value(nz_index) += - coeff4 * att; /* Bottom */ \
             \
+            assert(TopStencil[StencilType::Center] != -1); \
             nz_index = top_nz_index + TopStencil[StencilType::Center]; \
             center_Asc_matrix.row_index(nz_index) = top_index + 1; \
             center_Asc_matrix.col_index(nz_index) = top_index + 1; \
             center_Asc_matrix.value(nz_index) += coeff4 * att; /* Center: (Bottom) */ \
             \
+            assert(TopStencil[StencilType::BottomLeft] == -1); \
             /* REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */ \
             /* nz_index = top_nz_index + TopStencil[StencilType::BottomLeft]; */ \
             /* center_Asc_matrix.row_index(nz_index) = top_index + 1; */ \
@@ -447,16 +487,19 @@ do { \
         /* Fill matrix row of (i,j) */ \
         const Stencil& CenterStencil = get_stencil(i_r); \
         \
+        assert(CenterStencil[StencilType::Center] != -1); \
         nz_index = center_nz_index + CenterStencil[StencilType::Center]; \
         center_Asc_matrix.row_index(nz_index) = center_index + 1; \
         center_Asc_matrix.col_index(nz_index) = center_index + 1; \
         center_Asc_matrix.value(nz_index) += 0.25 * (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF); /* beta_{i,j} */ \
         \
+        assert(CenterStencil[StencilType::Right] != -1); \
         nz_index = center_nz_index + CenterStencil[StencilType::Right]; \
         center_Asc_matrix.row_index(nz_index) = center_index + 1; \
         center_Asc_matrix.col_index(nz_index) = right_index + 1; \
         center_Asc_matrix.value(nz_index) += - coeff2 * arr; /* Right */ \
         \
+        assert(CenterStencil[StencilType::Center] != -1); \
         nz_index = center_nz_index + CenterStencil[StencilType::Center]; \
         center_Asc_matrix.row_index(nz_index) = center_index + 1; \
         center_Asc_matrix.col_index(nz_index) = center_index + 1; \
@@ -466,6 +509,7 @@ do { \
         /* Fill matrix row of (i-1,j) */ \
         const Stencil& LeftStencil = get_stencil(i_r-1); \
         \
+        assert(LeftStencil[StencilType::Center] != -1); \
         nz_index = left_nz_index + LeftStencil[StencilType::Center]; \
         left_Asc_matrix.row_index(nz_index) = left_index + 1; \
         left_Asc_matrix.col_index(nz_index) = left_index + 1; \
@@ -474,11 +518,13 @@ do { \
         /* Fill matrix row of (i+1,j) */ \
         const Stencil& RightStencil = get_stencil(i_r+1); \
         \
+        assert(RightStencil[StencilType::Left] != -1); \
         nz_index = right_nz_index + RightStencil[StencilType::Left]; \
         center_Asc_matrix.row_index(nz_index) = right_index + 1; \
         center_Asc_matrix.col_index(nz_index) = center_index + 1; \
         center_Asc_matrix.value(nz_index) += - coeff2 * arr; /* Left */ \
         \
+        assert(RightStencil[StencilType::Center] != -1); \
         nz_index = right_nz_index + RightStencil[StencilType::Center]; \
         center_Asc_matrix.row_index(nz_index) = right_index + 1; \
         center_Asc_matrix.col_index(nz_index) = right_index + 1; \
@@ -487,6 +533,7 @@ do { \
         /* Fill matrix row of (i,j-1) */ \
         const Stencil& BottomStencil = CenterStencil; \
         \
+        assert(BottomStencil[StencilType::Center] != -1); \
         nz_index = bottom_nz_index + BottomStencil[StencilType::Center]; \
         bottom_Asc_matrix.row_index(nz_index) = bottom_index + 1; \
         bottom_Asc_matrix.col_index(nz_index) = bottom_index + 1; \
@@ -495,6 +542,7 @@ do { \
         /* Fill matrix row of (i,j+1) */ \
         const Stencil& TopStencil = CenterStencil; \
         \
+        assert(TopStencil[StencilType::Center] != -1); \
         nz_index = top_nz_index + TopStencil[StencilType::Center]; \
         top_Asc_matrix.row_index(nz_index) = top_index + 1; \
         top_Asc_matrix.col_index(nz_index) = top_index + 1; \
@@ -532,21 +580,26 @@ do { \
         /* Fill matrix row of (i,j) */ \
         const Stencil& CenterStencil = get_stencil(i_r); \
         \
+        assert(CenterStencil[StencilType::Center] != -1); \
         nz_index = center_nz_index + CenterStencil[StencilType::Center]; \
         center_Asc_matrix.row_index(nz_index) = center_index + 1; \
         center_Asc_matrix.col_index(nz_index) = center_index + 1; \
         center_Asc_matrix.value(nz_index) += 0.25 * (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF); /* beta_{i,j} */ \
         \
+        assert(CenterStencil[StencilType::Left] != -1); \
         nz_index = center_nz_index + CenterStencil[StencilType::Left]; \
         center_Asc_matrix.row_index(nz_index) = center_index + 1; \
         center_Asc_matrix.col_index(nz_index) = left_index + 1; \
         center_Asc_matrix.value(nz_index) += - coeff1 * arr; /* Left */ \
         \
-        nz_index = center_nz_index + CenterStencil[StencilType::Right]; \
-        center_Asc_matrix.row_index(nz_index) = center_index + 1; \
-        center_Asc_matrix.col_index(nz_index) = right_index + 1; \
-        center_Asc_matrix.value(nz_index) += - coeff2 * arr; /* Right */ \
+        assert(CenterStencil[StencilType::Right] == -1); \
+        /* Removed to make matrix symmetric */ \
+        /* nz_index = center_nz_index + CenterStencil[StencilType::Right]; */ \
+        /* center_Asc_matrix.row_index(nz_index) = center_index + 1; */ \
+        /* center_Asc_matrix.col_index(nz_index) = right_index + 1; */ \
+        /* center_Asc_matrix.value(nz_index) += - coeff2 * arr; // Right */ \
         \
+        assert(CenterStencil[StencilType::Center] != -1); \
         nz_index = center_nz_index + CenterStencil[StencilType::Center]; \
         center_Asc_matrix.row_index(nz_index) = center_index + 1; \
         center_Asc_matrix.col_index(nz_index) = center_index + 1; \
@@ -556,11 +609,13 @@ do { \
         /* Fill matrix row of (i-1,j) */ \
         const Stencil& LeftStencil = get_stencil(i_r-1); \
         \
+        assert(LeftStencil[StencilType::Right] != -1); \
         nz_index = left_nz_index + LeftStencil[StencilType::Right]; \
         center_Asc_matrix.row_index(nz_index) = left_index + 1; \
         center_Asc_matrix.col_index(nz_index) = center_index + 1; \
         center_Asc_matrix.value(nz_index) += - coeff1 * arr; /* Right */ \
         \
+        assert(LeftStencil[StencilType::Center] != -1); \
         nz_index = left_nz_index + LeftStencil[StencilType::Center]; \
         center_Asc_matrix.row_index(nz_index) = left_index + 1; \
         center_Asc_matrix.col_index(nz_index) = left_index + 1; \
@@ -569,6 +624,7 @@ do { \
         /* Fill matrix row of (i,j-1) */ \
         const Stencil& BottomStencil = CenterStencil; \
         \
+        assert(BottomStencil[StencilType::Center] != -1); \
         nz_index = bottom_nz_index + BottomStencil[StencilType::Center]; \
         bottom_Asc_matrix.row_index(nz_index) = bottom_index + 1; \
         bottom_Asc_matrix.col_index(nz_index) = bottom_index + 1; \
@@ -577,6 +633,7 @@ do { \
         /* Fill matrix row of (i,j+1) */ \
         const Stencil& TopStencil = CenterStencil; \
         \
+        assert(TopStencil[StencilType::Center] != -1); \
         nz_index = top_nz_index + TopStencil[StencilType::Center]; \
         bottom_Asc_matrix.row_index(nz_index) = top_index + 1; \
         bottom_Asc_matrix.col_index(nz_index) = top_index + 1; \
@@ -602,6 +659,7 @@ do { \
         /* Fill matrix row of (i,j) */ \
         const Stencil& CenterStencil = get_stencil(i_r); \
         \
+        assert(CenterStencil[StencilType::Center] != -1); \
         nz_index = center_nz_index + CenterStencil[StencilType::Center]; \
         center_Asc_matrix.row_index(nz_index) = center_index + 1; \
         center_Asc_matrix.col_index(nz_index) = center_index + 1; \
@@ -611,6 +669,7 @@ do { \
         /* Fill matrix row of (i-1,j) */ \
         const Stencil& LeftStencil = get_stencil(i_r-1); \
         \
+        assert(LeftStencil[StencilType::Center] != -1); \
         nz_index = left_nz_index + LeftStencil[StencilType::Center]; \
         center_Asc_matrix.row_index(nz_index) = left_index + 1; \
         center_Asc_matrix.col_index(nz_index) = left_index + 1; \
@@ -825,47 +884,50 @@ void Smoother::build_Asc_matrices(
     omp_set_num_threads(maxOpenMPThreads_);
     delete[] dep;
 
-    symmetric_circle_Asc_matrix.resize(grid_.numberSmootherCircles());
-    #pragma omp parallel for
-    for (int circle_Asc_index = 0; circle_Asc_index < grid_.numberSmootherCircles(); circle_Asc_index++){
-        SparseMatrix<double>& Asc_matrix = circle_Asc_matrix[circle_Asc_index];
-        const int circle_Asc_matrix_nnz = Asc_matrix.non_zero_size();
-        const int symmetric_circle_Asc_matrix_nnz = circle_Asc_matrix_nnz - (circle_Asc_matrix_nnz - circle_n) / 2;
-        symmetric_circle_Asc_matrix[circle_Asc_index] = SparseMatrix<double> (Asc_matrix.rows(), Asc_matrix.columns(), symmetric_circle_Asc_matrix_nnz);
-        SparseMatrix<double>& symmetric_Asc_matrix = symmetric_circle_Asc_matrix[circle_Asc_index];
-        symmetric_Asc_matrix.is_symmetric(true);
-        int current_nz = 0;
-        for (int nz_index = 0; nz_index < Asc_matrix.non_zero_size(); nz_index++) {
-            int current_row = Asc_matrix.row_index(nz_index);
-            int current_col = Asc_matrix.col_index(nz_index);
-            if (current_row <= current_col) {
-                symmetric_Asc_matrix.row_index(current_nz) = current_row;
-                symmetric_Asc_matrix.col_index(current_nz) = current_col;
-                symmetric_Asc_matrix.value(current_nz) = std::move(Asc_matrix.value(nz_index));
-                current_nz++;
-            }
-        }
-    }
+    symmetric_circle_Asc_matrix = std::move(circle_Asc_matrix);
+    symmetric_radial_Asc_matrix = std::move(radial_Asc_matrix);
 
-    symmetric_radial_Asc_matrix.resize(grid_.ntheta());
-    #pragma omp parallel for
-    for (int radial_Asc_index = 0; radial_Asc_index < grid_.ntheta(); radial_Asc_index++){
-        SparseMatrix<double>& Asc_matrix = radial_Asc_matrix[radial_Asc_index];
-        const int radial_Asc_matrix_nnz = Asc_matrix.non_zero_size();
-        const int symmetric_radial_Asc_matrix_nnz = radial_Asc_matrix_nnz - (radial_Asc_matrix_nnz - radial_n) / 2;
-        symmetric_radial_Asc_matrix[radial_Asc_index] = SparseMatrix<double> (radial_n, radial_n, symmetric_radial_Asc_matrix_nnz);
-        SparseMatrix<double>& symmetric_Asc_matrix = symmetric_radial_Asc_matrix[radial_Asc_index];
-        symmetric_Asc_matrix.is_symmetric(true);
-        int current_nz = 0;
-        for (int nz_index = 0; nz_index < Asc_matrix.non_zero_size(); nz_index++) {
-            int current_row = Asc_matrix.row_index(nz_index);
-            int current_col = Asc_matrix.col_index(nz_index);
-            if (current_row <= current_col) {
-                symmetric_Asc_matrix.row_index(current_nz) = current_row;
-                symmetric_Asc_matrix.col_index(current_nz) = current_col;
-                symmetric_Asc_matrix.value(current_nz) = std::move(Asc_matrix.value(nz_index));
-                current_nz++;
-            }
-        }
-    }    
+    // symmetric_circle_Asc_matrix.resize(grid_.numberSmootherCircles());
+    // #pragma omp parallel for
+    // for (int circle_Asc_index = 0; circle_Asc_index < grid_.numberSmootherCircles(); circle_Asc_index++){
+    //     SparseMatrix<double>& Asc_matrix = circle_Asc_matrix[circle_Asc_index];
+    //     const int circle_Asc_matrix_nnz = Asc_matrix.non_zero_size();
+    //     const int symmetric_circle_Asc_matrix_nnz = circle_Asc_matrix_nnz - (circle_Asc_matrix_nnz - circle_n) / 2;
+    //     symmetric_circle_Asc_matrix[circle_Asc_index] = SparseMatrix<double> (Asc_matrix.rows(), Asc_matrix.columns(), symmetric_circle_Asc_matrix_nnz);
+    //     SparseMatrix<double>& symmetric_Asc_matrix = symmetric_circle_Asc_matrix[circle_Asc_index];
+    //     symmetric_Asc_matrix.is_symmetric(true);
+    //     int current_nz = 0;
+    //     for (int nz_index = 0; nz_index < Asc_matrix.non_zero_size(); nz_index++) {
+    //         int current_row = Asc_matrix.row_index(nz_index);
+    //         int current_col = Asc_matrix.col_index(nz_index);
+    //         if (current_row <= current_col) {
+    //             symmetric_Asc_matrix.row_index(current_nz) = current_row;
+    //             symmetric_Asc_matrix.col_index(current_nz) = current_col;
+    //             symmetric_Asc_matrix.value(current_nz) = std::move(Asc_matrix.value(nz_index));
+    //             current_nz++;
+    //         }
+    //     }
+    // }
+
+    // symmetric_radial_Asc_matrix.resize(grid_.ntheta());
+    // #pragma omp parallel for
+    // for (int radial_Asc_index = 0; radial_Asc_index < grid_.ntheta(); radial_Asc_index++){
+    //     SparseMatrix<double>& Asc_matrix = radial_Asc_matrix[radial_Asc_index];
+    //     const int radial_Asc_matrix_nnz = Asc_matrix.non_zero_size();
+    //     const int symmetric_radial_Asc_matrix_nnz = radial_Asc_matrix_nnz - (radial_Asc_matrix_nnz - radial_n) / 2;
+    //     symmetric_radial_Asc_matrix[radial_Asc_index] = SparseMatrix<double> (radial_n, radial_n, symmetric_radial_Asc_matrix_nnz);
+    //     SparseMatrix<double>& symmetric_Asc_matrix = symmetric_radial_Asc_matrix[radial_Asc_index];
+    //     symmetric_Asc_matrix.is_symmetric(true);
+    //     int current_nz = 0;
+    //     for (int nz_index = 0; nz_index < Asc_matrix.non_zero_size(); nz_index++) {
+    //         int current_row = Asc_matrix.row_index(nz_index);
+    //         int current_col = Asc_matrix.col_index(nz_index);
+    //         if (current_row <= current_col) {
+    //             symmetric_Asc_matrix.row_index(current_nz) = current_row;
+    //             symmetric_Asc_matrix.col_index(current_nz) = current_col;
+    //             symmetric_Asc_matrix.value(current_nz) = std::move(Asc_matrix.value(nz_index));
+    //             current_nz++;
+    //         }
+    //     }
+    // }    
 }

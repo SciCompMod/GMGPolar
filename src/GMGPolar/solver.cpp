@@ -3,31 +3,6 @@
 void GMGPolar::solve() {
 
 
-    // int current_level = 0;
-
-    // const auto& grid = levels_[current_level].grid();
-    // const int n = grid.number_of_nodes();
-
-    // Vector<double> v1(n);
-    // assign(v1, 0.0);
-    // Vector<double> v2(n);
-
-    // levels_[current_level].smoothingInPlace(v1,v2);
-    // levels_[current_level].smoothingInPlace(v1,v2);
-    // levels_[current_level].smoothingInPlace(v1,v2);
-    // levels_[current_level].smoothingInPlace(v1,v2);
-    // levels_[current_level].smoothingInPlace(v1,v2);
-    // levels_[current_level].smoothingInPlace(v1,v2);
-    // levels_[current_level].smoothingInPlace(v1,v2);
-    // levels_[current_level].smoothingInPlace(v1,v2);
-    // levels_[current_level].smoothingInPlace(v1,v2);
-    // levels_[current_level].smoothingInPlace(v1,v2);
-
-    // std::cout<<v1<<std::endl;
-
-
-
-    std::cout<<"Start" <<std::endl;
 
 
 
@@ -49,18 +24,21 @@ void GMGPolar::solve() {
 
     Vector<double> y(n);
     assign(y, 0.0);
-    y = solution;
+    
+    // y = solution;
+
     Vector<double> temp(n);
 
     Vector<double> error(n);
 
-    for (int i = 0; i < 1; i++)
+    for (int i = 0; i < 300; i++)
     {
         levels_[current_level].smoothingInPlace(y,temp);
         #pragma omp for
         for (size_t i = 0; i < n; i++) error[i] = std::abs(solution[i] - y[i]);
         std::cout<<dot_product(error,error)<<std::endl;
     }
+
 
     // std::cout<< error<<std::endl;
 
@@ -70,7 +48,7 @@ void GMGPolar::solve() {
     {
         for (int j = 0; j < grid.nr(); j++)
         {
-            std::cout<< error[grid.index(i,j)]<<std::endl;
+            // std::cout<< error[grid.index(i,j)]<<std::endl;
         }
     }
 
@@ -80,7 +58,7 @@ void GMGPolar::solve() {
     {
         for (int j = 0; j < grid.nr(); j++)
         {
-            std::cout<< error[grid.index(i,j)]<<std::endl;
+            // std::cout<< error[grid.index(i,j)]<<std::endl;
         }
     }
     
