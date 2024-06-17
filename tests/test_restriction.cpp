@@ -60,7 +60,11 @@ TEST_P(test_restriction, test_bilinear_restriction)
      * These values are the eight fine nodes' value in the vicinity that are to be accumulated in the coarse node.
      *
      * We treat values in r as the x-axis. values in theta as the y-axis. Hence the vector 'adjacent' stores the values in the order:
-     * bottom_left, left, top_left, bottom, top, bottom_right, right, top_right.
+     * bottom_left, left, top_left, bottom, top, bottom_right, right, top_right, i.e.
+     *   ^     --- 2 --- 4 --- 7
+     *   |     --- 1 --- x --- 6
+     *  theta  --- 0 --- 3 --- 5
+     *   |     ------- r ------>
      */
 
     for (int j = 0; j < cr_int + 1; j++) {
@@ -78,6 +82,7 @@ TEST_P(test_restriction, test_bilinear_restriction)
             }
 
             int k = 0;
+            // Store h_j,h_j-1 and k_i, k_i-1 for all adjacent nodes in the order as given above
             std::vector<std::tuple<double, double>> h_p(8, {-1, -1}); // (h_p, h_{p-1}) relative grid sizes
             std::vector<std::tuple<double, double>> k_q(8, {-1, -1}); // (k_q, k_{q-1})
             // z and y represent relative positions to the coarse node. e.g. if (z,y)=(-1,1) then we consider the fine node to the top-left
@@ -127,7 +132,7 @@ TEST_P(test_restriction, test_bilinear_restriction)
             }
             /*values given by the operator. We multiply this with the grid-function value of the corresponding adjacent node*/
 
-            std::vector<double> vals{
+            std::vector<double> coeffs_hk{
                 std::get<1>(h_p[0]) * std::get<1>(k_q[0]) /
                     ((std::get<0>(h_p[0]) + std::get<1>(h_p[0])) * (std::get<0>(k_q[0]) + std::get<1>(k_q[0]))),
                 std::get<1>(h_p[1]) / (std::get<0>(h_p[1]) + std::get<1>(h_p[1])),
@@ -143,7 +148,7 @@ TEST_P(test_restriction, test_bilinear_restriction)
 
             double finval = u_test[(2 * j) * p_level.ntheta_int + (2 * i)];
             for (int z = 0; z < 8; z++) {
-                finval += vals[z] * adjacent[z]; //accumulate all values in the coarse node
+                finval += coeffs_hk[z] * adjacent[z]; //accumulate all values in the coarse node
             }
             EXPECT_NEAR(finval, sol[j * ctheta_int + i], 1e-10)
                 << "The test fails at Index for (r,theta): (" + std::to_string(j) + "," + std::to_string(i) + ")";
@@ -223,8 +228,8 @@ TEST_P(test_restriction, test_extrapolation_restriction)
     int ctheta_int = test_p.v_level[1]->ntheta_int;
     int cr_int     = test_p.v_level[1]->nr_int;
 
-    p_level.m  = test_p.v_level[0]->nr * test_p.v_level[0]->ntheta;
-    p_level.mc = test_p.v_level[1]->nr * test_p.v_level[1]->ntheta;
+    p_level.m  = test_p.v_level[0]->nr * test_p.v_level[0]->ntheta; //number of nodes on fine level
+    p_level.mc = test_p.v_level[1]->nr * test_p.v_level[1]->ntheta; //number of nodes on coarse level
 
     std::vector<double> u_test(p_level.m);
     for (int z = 0; z < p_level.mc; z++) {
@@ -270,7 +275,7 @@ TEST_P(test_restriction, test_extrapolation_restriction)
             for (int z = 0; z < 6; z++) {
                 finval +=
                     0.5 *
-                    adjacent[z]; //accumulate the values. the vector "vals" reduces to 1/2 for every adjacent fine node
+                    adjacent[z]; // accumulate the values. the vector "coeffs_hk" reduces to 1/2 for every adjacent fine node
             }
 
             EXPECT_NEAR(finval, sol[j * ctheta_int + i], 1e-12)

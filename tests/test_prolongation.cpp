@@ -213,10 +213,10 @@ TEST_P(test_prolongation, test_extrapolation_prolongation)
     create_grid(test_p);
 
     level& p_level = *(test_p.v_level[0]);
-    int ctheta_int = test_p.v_level[1]->ntheta_int;
+    int ctheta_int = test_p.v_level[1]->ntheta_int; // number of coarse nodes in theta direction
 
-    p_level.m  = test_p.v_level[0]->nr * test_p.v_level[0]->ntheta;
-    p_level.mc = test_p.v_level[1]->nr * test_p.v_level[1]->ntheta;
+    p_level.m  = test_p.v_level[0]->nr * test_p.v_level[0]->ntheta; // number of nodes on fine level
+    p_level.mc = test_p.v_level[1]->nr * test_p.v_level[1]->ntheta; // number of nodes on coarse level
 
     std::vector<double> u_test(p_level.mc);
     for (int z = 0; z < p_level.mc; z++) {
