@@ -886,57 +886,58 @@ void Smoother::build_Asc_matrices(
     delete[] dep;
 
 
-    int i_r = 0;
-    auto& Asc_matrix = circle_Asc_matrix[i_r];
-    auto& symmetric_Asc_matrix = symmetric_inner_boundary_circle_Asc_matrix;
-    const int circle_Asc_matrix_nnz = Asc_matrix.non_zero_size();
-
-    const int symmetric_circle_Asc_matrix_nnz = circle_Asc_matrix_nnz - (circle_Asc_matrix_nnz - circle_n) / 2;
-    symmetric_Asc_matrix = SparseMatrix<double> (Asc_matrix.rows(), Asc_matrix.columns(), symmetric_circle_Asc_matrix_nnz);
-    symmetric_Asc_matrix.is_symmetric(true);
-
-    int current_nz = 0;
-    for (int nz_index = 0; nz_index < Asc_matrix.non_zero_size(); nz_index++) {
-        int current_row = Asc_matrix.row_index(nz_index);
-        int current_col = Asc_matrix.col_index(nz_index);
-        if (current_row <= current_col) {
-            symmetric_Asc_matrix.row_index(current_nz) = current_row;
-            symmetric_Asc_matrix.col_index(current_nz) = current_col;
-            symmetric_Asc_matrix.value(current_nz) = std::move(Asc_matrix.value(nz_index));
-            current_nz++;
-        }
-    }
-    
-
     circle_symmetric_cyclic_tridiagonal_solver.resize(grid_.numberSmootherCircles());
     #pragma omp parallel for
-    for (int circle_Asc_index = 1; circle_Asc_index < grid_.numberSmootherCircles(); circle_Asc_index++){
+    for (int circle_Asc_index = 0; circle_Asc_index < grid_.numberSmootherCircles(); circle_Asc_index++){
         auto& Asc_matrix = circle_Asc_matrix[circle_Asc_index];
-        auto& solverMatrix = circle_symmetric_cyclic_tridiagonal_solver[circle_Asc_index];
 
-        solverMatrix = SymmetricTridiagonalSolver<double>(Asc_matrix.rows());
-        solverMatrix.is_cyclic(true);
+        if(circle_Asc_index == 0){
+            auto& symmetric_Asc_matrix = symmetric_inner_boundary_circle_Asc_matrix;
+            const int circle_Asc_matrix_nnz = Asc_matrix.non_zero_size();
 
-        for (int i = 0; i < solverMatrix.rows()-1; i++){
-            solverMatrix.main_diagonal(i) = 0.0;
-            solverMatrix.sub_diagonal(i) = 0.0;
+            const int symmetric_circle_Asc_matrix_nnz = circle_Asc_matrix_nnz - (circle_Asc_matrix_nnz - circle_n) / 2;
+            symmetric_Asc_matrix = SparseMatrix<double> (Asc_matrix.rows(), Asc_matrix.columns(), symmetric_circle_Asc_matrix_nnz);
+            symmetric_Asc_matrix.is_symmetric(true);
+
+            int current_nz = 0;
+            for (int nz_index = 0; nz_index < Asc_matrix.non_zero_size(); nz_index++) {
+                int current_row = Asc_matrix.row_index(nz_index);
+                int current_col = Asc_matrix.col_index(nz_index);
+                if (current_row <= current_col) {
+                    symmetric_Asc_matrix.row_index(current_nz) = current_row;
+                    symmetric_Asc_matrix.col_index(current_nz) = current_col;
+                    symmetric_Asc_matrix.value(current_nz) = std::move(Asc_matrix.value(nz_index));
+                    current_nz++;
+                }
+            }
         }
-        solverMatrix.main_diagonal(solverMatrix.rows()-1) = 0.0;
+        else{
+            auto& solverMatrix = circle_symmetric_cyclic_tridiagonal_solver[circle_Asc_index];
 
-        int current_nz = 0;
-        for (int nz_index = 0; nz_index < Asc_matrix.non_zero_size(); nz_index++) {
-            int current_row = Asc_matrix.row_index(nz_index);
-            int current_col = Asc_matrix.col_index(nz_index);
-            if (current_row == current_col) {
-                solverMatrix.main_diagonal(current_row-1) = std::move(Asc_matrix.value(nz_index));
+            solverMatrix = SymmetricTridiagonalSolver<double>(Asc_matrix.rows());
+            solverMatrix.is_cyclic(true);
+
+            for (int i = 0; i < solverMatrix.rows()-1; i++){
+                solverMatrix.main_diagonal(i) = 0.0;
+                solverMatrix.sub_diagonal(i) = 0.0;
             }
-            else if(current_row == current_col - 1){
-                solverMatrix.sub_diagonal(current_row-1) = std::move(Asc_matrix.value(nz_index));
+            solverMatrix.main_diagonal(solverMatrix.rows()-1) = 0.0;
+
+            int current_nz = 0;
+            for (int nz_index = 0; nz_index < Asc_matrix.non_zero_size(); nz_index++) {
+                int current_row = Asc_matrix.row_index(nz_index);
+                int current_col = Asc_matrix.col_index(nz_index);
+                if (current_row == current_col) {
+                    solverMatrix.main_diagonal(current_row-1) = std::move(Asc_matrix.value(nz_index));
+                }
+                else if(current_row == current_col - 1){
+                    solverMatrix.sub_diagonal(current_row-1) = std::move(Asc_matrix.value(nz_index));
+                }
+                else if(current_row == 1 && current_col == Asc_matrix.columns()){
+                    solverMatrix.cyclic_corner_element() = std::move(Asc_matrix.value(nz_index));
+                }
+                current_nz++;
             }
-            else if(current_row == 1 && current_col == Asc_matrix.columns()){
-                solverMatrix.cyclic_corner_element() = std::move(Asc_matrix.value(nz_index));
-            }
-            current_nz++;
         }
     }
 
@@ -968,8 +969,4 @@ void Smoother::build_Asc_matrices(
             current_nz++;
         }
     }
-
-
-    
-
 }

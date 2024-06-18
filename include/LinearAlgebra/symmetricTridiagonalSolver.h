@@ -206,7 +206,7 @@ void SymmetricTridiagonalSolver<T>::solveInPlace(T* sol_rhs, T* temp1, T* temp2)
 /* Algorithm based on: https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm */
 template<typename T>
 void SymmetricTridiagonalSolver<T>::solve_symmetricTridiagonal(T* x, T* scratch){
-    
+
     scratch[0] = sub_diagonal(0) / main_diagonal(0);
     x[0] /= main_diagonal(0);
 
@@ -237,7 +237,7 @@ void SymmetricTridiagonalSolver<T>::solve_symmetricCyclicTridiagonal(T* x, T* u,
     /* you can take a look at the unoptimized version below         */
     /* ------------------------------------------------------------ */
     /* When we increase the precision, then the adjusted radial smoothing matrices */
-    /* will get closer to be diagonally dominant, */
+    /* will get closer to beeing diagonally dominant, */
     /* thus increasing the stability of the cyclic thomas algorithm. */
     const double precision = 1.0e15;
     const double gamma = -precision * main_diagonal(0);

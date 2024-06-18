@@ -10,7 +10,7 @@
 --Rmax 1.3 \
 --nr_exp 10 \
 --ntheta_exp 10 \
---anisotropic_factor 0 \
+--anisotropic_factor 5 \
 --divideBy2 0 \
 --write_grid_file 0 \
 --load_grid_file 0 \
