@@ -7,6 +7,8 @@
 
 #include "../include/GMGPolar/gmgpolar.h"
 
+#include "../include/LinearAlgebra/symmetricTridiagonalSolver.h"
+
 int main(int argc, char* argv[]){
     #ifdef NDEBUG
         std::cout << "Build Type: Release\n";
@@ -54,6 +56,6 @@ int main(int argc, char* argv[]){
     std::cout << "Setup time: " << setupDuration.count() << " ms" << std::endl;
     std::cout << "Solve time: " << solveDuration.count() << " ms" << std::endl;
     std::cout << "Total time: " << totalDuration.count() << " ms" << std::endl;
-    
+
     return 0;
 }

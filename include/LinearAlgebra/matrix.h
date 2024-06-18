@@ -234,7 +234,8 @@ int SparseMatrix<T>::columns() const {
 }
 template<typename T>
 int SparseMatrix<T>::non_zero_size() const {
-    assert(this->nnz_ >= 0); assert(this->nnz_ <= (this->rows_) * (this->columns_));
+    assert(this->nnz_ >= 0);
+    assert(static_cast<size_t>(this->nnz_) <= static_cast<size_t>(this->rows_) * static_cast<size_t>(this->columns_));
     return this->nnz_;
 }
 

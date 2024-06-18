@@ -539,8 +539,6 @@ void Smoother::smoothing(Vector<double>& x, Vector<double>& temp_rhs){
     int* smoother_circle_dep = new int[numCircleTasks + 2*shift];
     int* smoother_radial_dep = new int[numRadialTasks + 2*shift];
 
-    std::cout<<"Circles: "<< numCircleTasks << " Radials: "<< numRadialTasks << std::endl;
-
     omp_set_num_threads(openMPTaskThreads_);
     #pragma omp parallel num_threads(openMPTaskThreads_) /* Outside variable are shared by default */
     {
@@ -550,6 +548,8 @@ void Smoother::smoothing(Vector<double>& x, Vector<double>& temp_rhs){
         double arr, att, art;
         double coeff_alpha, coeff_beta;
         double detDF;
+
+        // double* solver_storage = new double[std::max(2*grid_.ntheta(), grid_.lengthSmootherRadial())];
 
         #pragma omp single
         {

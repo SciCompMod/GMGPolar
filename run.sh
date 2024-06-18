@@ -2,14 +2,14 @@
 
 ./build/gmgpolar \
 \
---maxOpenMPThreads 1 \
+--maxOpenMPThreads 40 \
 --finestLevelThreads -1 \
 --threadReductionFactor 1.0 \
 \
 --R0 1e-5 \
 --Rmax 1.3 \
---nr_exp 5 \
---ntheta_exp 5 \
+--nr_exp 6 \
+--ntheta_exp 6 \
 --anisotropic_factor 0 \
 --divideBy2 0 \
 --write_grid_file 0 \

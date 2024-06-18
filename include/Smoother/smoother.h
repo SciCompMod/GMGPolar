@@ -11,6 +11,7 @@ class Level;
 #include "../LinearAlgebra/vector.h"
 #include "../LinearAlgebra/matrix.h"
 #include "../LinearAlgebra/operations.h"
+#include "../LinearAlgebra/symmetricTridiagonalSolver.h"
 
 #include "../common/constants.h"
 
@@ -52,6 +53,9 @@ private:
 
     std::vector<DMUMPS_STRUC_C> circle_Asc_mumps_;
     std::vector<DMUMPS_STRUC_C> radial_Asc_mumps_;
+
+    std::vector<SymmetricTridiagonalSolver<double>> circle_symmetric_cyclic_tridiagonal_solver_;
+    std::vector<SymmetricTridiagonalSolver<double>> radial_symmetric_tridiagonal_solver_;
 
     std::vector<double> rhs_;
 

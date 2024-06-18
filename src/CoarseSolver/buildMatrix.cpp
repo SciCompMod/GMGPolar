@@ -968,19 +968,21 @@ void CoarseSolver::buildMatrixA(SparseMatrix<double>& symetric_matrixA)
     omp_set_num_threads(maxOpenMPThreads_);
     delete[] dep;
 
-    const int symmetric_matrixA_nnz = matrixA_nnz - (matrixA_nnz - n) / 2;
-    symetric_matrixA = SparseMatrix<double> (n, n, symmetric_matrixA_nnz);
-    symetric_matrixA.is_symmetric(true);
+    symetric_matrixA = std::move(matrixA);
 
-    int current_nz = 0;
-    for (int nz_index = 0; nz_index < matrixA.non_zero_size(); nz_index++) {
-        int current_matrixA_row = matrixA.row_index(nz_index);
-        int current_matrixA_col = matrixA.col_index(nz_index);
-        if (current_matrixA_row <= current_matrixA_col) {
-            symetric_matrixA.row_index(current_nz) = current_matrixA_row;
-            symetric_matrixA.col_index(current_nz) = current_matrixA_col;
-            symetric_matrixA.value(current_nz) = std::move(matrixA.value(nz_index));
-            current_nz++;
-        }
-    }
+    // const int symmetric_matrixA_nnz = matrixA_nnz - (matrixA_nnz - n) / 2;
+    // symetric_matrixA = SparseMatrix<double> (n, n, symmetric_matrixA_nnz);
+    // symetric_matrixA.is_symmetric(true);
+
+    // int current_nz = 0;
+    // for (int nz_index = 0; nz_index < matrixA.non_zero_size(); nz_index++) {
+    //     int current_matrixA_row = matrixA.row_index(nz_index);
+    //     int current_matrixA_col = matrixA.col_index(nz_index);
+    //     if (current_matrixA_row <= current_matrixA_col) {
+    //         // symetric_matrixA.row_index(current_nz) = current_matrixA_row;
+    //         // symetric_matrixA.col_index(current_nz) = current_matrixA_col;
+    //         // symetric_matrixA.value(current_nz) = std::move(matrixA.value(nz_index));
+    //         current_nz++;
+    //     }
+    // }
 }
