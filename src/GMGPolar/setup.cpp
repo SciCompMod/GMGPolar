@@ -51,9 +51,9 @@ void GMGPolar::setup() {
             levels_[current_level].initializeResidual(domain_geometry_, system_parameters_, DirBC_Interior, 
                 maxOpenMPThreads, taskingThreads[current_level]
             );
-            levels_[current_level].initializeCoarseSolver(domain_geometry_, system_parameters_, DirBC_Interior, 
-                maxOpenMPThreads, taskingThreads[current_level]
-            );
+            // levels_[current_level].initializeCoarseSolver(domain_geometry_, system_parameters_, DirBC_Interior, 
+            //     maxOpenMPThreads, taskingThreads[current_level]
+            // );
         }
         // -------------------------- //
         // Level n-1 (coarsest Level) //
@@ -63,6 +63,9 @@ void GMGPolar::setup() {
                 maxOpenMPThreads, taskingThreads[current_level]
             );
             levels_[current_level].initializeResidual(domain_geometry_, system_parameters_, DirBC_Interior, 
+                maxOpenMPThreads, taskingThreads[current_level]
+            );
+            levels_[current_level].initializeSmoothing(domain_geometry_, system_parameters_, DirBC_Interior, 
                 maxOpenMPThreads, taskingThreads[current_level]
             );
         }

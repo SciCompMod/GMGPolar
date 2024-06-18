@@ -48,11 +48,8 @@ private:
     const int maxOpenMPThreads_;
     const int openMPTaskThreads_;
 
-    std::vector<SparseMatrix<double>> circle_Asc_matrix_;
-    std::vector<SparseMatrix<double>> radial_Asc_matrix_;
-
-    std::vector<DMUMPS_STRUC_C> circle_Asc_mumps_;
-    std::vector<DMUMPS_STRUC_C> radial_Asc_mumps_;
+    SparseMatrix<double> inner_boundary_circle_Asc_matrix_;
+    DMUMPS_STRUC_C inner_boundary_circle_Asc_mumps_;
 
     std::vector<SymmetricTridiagonalSolver<double>> circle_symmetric_cyclic_tridiagonal_solver_;
     std::vector<SymmetricTridiagonalSolver<double>> radial_symmetric_tridiagonal_solver_;
@@ -66,9 +63,13 @@ private:
     int ptr_nz_index_circle_Asc(const int i_r, const int i_theta) const;
     int ptr_nz_index_radial_Asc(const int i_r, const int i_theta) const;
 
-    void build_Asc_matrices(std::vector<SparseMatrix<double>>& circle_Asc_matrix, std::vector<SparseMatrix<double>>& radial_Asc_matrix);
+    void build_Asc_matrices(
+        SparseMatrix<double>& inner_boundary_circle_Asc_matrix, 
+        std::vector<SymmetricTridiagonalSolver<double>>& circle_symmetric_cyclic_tridiagonal_solver,
+        std::vector<SymmetricTridiagonalSolver<double>>& radial_symmetric_tridiagonal_solver
+    );
 
-    void initializeMumps(std::vector<DMUMPS_STRUC_C>& Asc_mumps, const std::vector<SparseMatrix<double>>& Asc_matrix);
-    void deleteMumps(std::vector<DMUMPS_STRUC_C>& Asc_mumps);
+    void initializeMumps(DMUMPS_STRUC_C& Asc_mumps, const SparseMatrix<double>& Asc_matrix);
+    void deleteMumps(DMUMPS_STRUC_C& Asc_mumps);
 };
 

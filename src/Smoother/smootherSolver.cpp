@@ -469,23 +469,28 @@ do { \
     /* std::cout << "CIRCLE SOLVE i_r = " << i_r << std::endl; */ \
     const int start = grid_.index(i_r, 0); \
     const int end = start + grid_.ntheta(); \
-    circle_Asc_mumps_[i_r].job = JOB_COMPUTE_SOLUTION; \
-    circle_Asc_mumps_[i_r].nrhs = 1; \
-    circle_Asc_mumps_[i_r].nz_rhs = end - start; \
-    circle_Asc_mumps_[i_r].rhs = temp_rhs.begin() + start; \
-    circle_Asc_mumps_[i_r].lrhs = end - start; \
-    _Pragma("omp critical") \
-    dmumps_c(&circle_Asc_mumps_[i_r]); \
-    if (circle_Asc_mumps_[i_r].info[0] != 0) { \
-        std::cerr << "Error solving the system: " << circle_Asc_mumps_[i_r].info[0] << std::endl; \
+    if(i_r == 0){ \
+        inner_boundary_circle_Asc_mumps_.job = JOB_COMPUTE_SOLUTION; \
+        inner_boundary_circle_Asc_mumps_.nrhs = 1; \
+        inner_boundary_circle_Asc_mumps_.nz_rhs = end - start; \
+        inner_boundary_circle_Asc_mumps_.rhs = temp_rhs.begin() + start; \
+        inner_boundary_circle_Asc_mumps_.lrhs = end - start; \
+        dmumps_c(&inner_boundary_circle_Asc_mumps_); \
+        if (inner_boundary_circle_Asc_mumps_.info[0] != 0) { \
+            std::cerr << "Error solving the system: " << inner_boundary_circle_Asc_mumps_.info[0] << std::endl; \
+        } \
+        std::move(temp_rhs.begin() + start, \
+            temp_rhs.begin() + end, \
+            x.begin() + start \
+        );  \
     } \
-    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) { \
-        x[grid_.index(i_r, i_theta)] = temp_rhs[grid_.index(i_r, i_theta)]; \
+    else { \
+        circle_symmetric_cyclic_tridiagonal_solver_[i_r].solveInPlace(temp_rhs.begin() + start, circle_solver_storage_1.begin(), circle_solver_storage_2.begin()); \
+        std::move(temp_rhs.begin() + start, \
+            temp_rhs.begin() + end, \
+            x.begin() + start \
+        );  \
     } \
-    /* std::move(temp_rhs.begin() + start, */ \
-    /*     temp_rhs.begin() + end, */ \
-    /*     x.begin() + start */ \
-    /* ); */ \
 } while(0)
 
 #define RADIAL_SECTION_SOLVE_SMOOTER(i_theta) \
@@ -493,23 +498,11 @@ do { \
     /* std::cout << "RADIAL SOLVE i_theta = " << i_theta << std::endl; */ \
     const int start = grid_.index(grid_.numberSmootherCircles(), i_theta); \
     const int end = start + grid_.lengthSmootherRadial(); \
-    radial_Asc_mumps_[i_theta].job = JOB_COMPUTE_SOLUTION; \
-    radial_Asc_mumps_[i_theta].nrhs = 1; \
-    radial_Asc_mumps_[i_theta].nz_rhs = end - start; \
-    radial_Asc_mumps_[i_theta].rhs = temp_rhs.begin() + start; \
-    radial_Asc_mumps_[i_theta].lrhs = end - start; \
-    _Pragma("omp critical") \
-    dmumps_c(&radial_Asc_mumps_[i_theta]); \
-    if (radial_Asc_mumps_[i_theta].info[0] != 0) { \
-        std::cerr << "Error solving the system: " << radial_Asc_mumps_[i_theta].info[0] << std::endl; \
-    } \
-    for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) { \
-        x[grid_.index(i_r, i_theta)] = temp_rhs[grid_.index(i_r, i_theta)]; \
-    } \
-    /* std::move(temp_rhs.begin() + start, */ \
-    /*     temp_rhs.begin() + end, */ \
-    /*     x.begin() + start */ \
-    /* ); */ \
+    radial_symmetric_tridiagonal_solver_[i_theta].solveInPlace(temp_rhs.begin() + start, radial_solver_storage.begin()); \
+    std::move(temp_rhs.begin() + start, \
+        temp_rhs.begin() + end, \
+        x.begin() + start \
+    ); \
 } while(0)
 
 
@@ -549,7 +542,9 @@ void Smoother::smoothing(Vector<double>& x, Vector<double>& temp_rhs){
         double coeff_alpha, coeff_beta;
         double detDF;
 
-        // double* solver_storage = new double[std::max(2*grid_.ntheta(), grid_.lengthSmootherRadial())];
+        Vector<double> circle_solver_storage_1(grid_.ntheta());
+        Vector<double> circle_solver_storage_2(grid_.ntheta());
+        Vector<double> radial_solver_storage(grid_.lengthSmootherRadial());
 
         #pragma omp single
         {

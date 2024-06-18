@@ -51,7 +51,7 @@ public:
     T& cyclic_corner_element();
 
     // Unified Solve method
-    void SolveInPlace(T* sol_rhs, T* temp1, T* temp2 = nullptr);
+    void solveInPlace(T* sol_rhs, T* temp1, T* temp2 = nullptr);
 private:
     int matrix_dimension_;
     std::unique_ptr<T[]> main_diagonal_values_;
@@ -62,7 +62,7 @@ private:
 
     // Solve methods
     void solve_symmetricTridiagonal(T* x, T* scratch);
-    void solve_symmetricCyclicTridiagonal(T* x, T* chmod, T* u);
+    void solve_symmetricCyclicTridiagonal(T* x, T* u, T* scratch);
 };
 
 
@@ -187,7 +187,7 @@ T& SymmetricTridiagonalSolver<T>::cyclic_corner_element(){
 }
 
 template<typename T>
-void SymmetricTridiagonalSolver<T>::SolveInPlace(T* sol_rhs, T* temp1, T* temp2){
+void SymmetricTridiagonalSolver<T>::solveInPlace(T* sol_rhs, T* temp1, T* temp2){
     assert(sol_rhs != nullptr);
     assert(temp1 != nullptr);
     if(is_cyclic_){
@@ -206,14 +206,12 @@ void SymmetricTridiagonalSolver<T>::SolveInPlace(T* sol_rhs, T* temp1, T* temp2)
 /* Algorithm based on: https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm */
 template<typename T>
 void SymmetricTridiagonalSolver<T>::solve_symmetricTridiagonal(T* x, T* scratch){
-    assert(!equals(main_diagonal(0), 0.0));
-
+    
     scratch[0] = sub_diagonal(0) / main_diagonal(0);
     x[0] /= main_diagonal(0);
 
     for (int i = 1; i < matrix_dimension_; i++){
         if(i < matrix_dimension_ - 1){
-            assert(!equals(main_diagonal(i) - sub_diagonal(i-1) * scratch[i-1], 0.0));
             scratch[i] = sub_diagonal(i) / (main_diagonal(i) - sub_diagonal(i-1) * scratch[i-1]);
         }
         assert(!equals(main_diagonal(i) - sub_diagonal(i-1) * scratch[i-1], 0.0));
@@ -229,48 +227,20 @@ void SymmetricTridiagonalSolver<T>::solve_symmetricTridiagonal(T* x, T* scratch)
 // Cyclic Tridiagonal Solver //
 // ------------------------- //
 
+
 /* Algorithm based on: https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm */
 template<typename T>
-void SymmetricTridiagonalSolver<T>::solve_symmetricCyclicTridiagonal(T* x, T* cmod, T* u){
-    /* ------------------------------------- */
-    /* Optimized version found on wikipedia. */
-    /* ------------------------------------- */
-    
-    /* arbitrary, but chosen such that division by zero is avoided */
-    const double gamma = -main_diagonal(0);
-
-    cmod[0] = cyclic_corner_element() / (main_diagonal(0) - gamma);
-    u[0] = gamma / (main_diagonal(0) - gamma);
-    x[0] /= (main_diagonal(0) - gamma);
-
-    for (int i = 1; i + 1 < matrix_dimension_; i++){
-        const double m = 1.0 / (main_diagonal(i) - sub_diagonal(i-1) * cmod[i-1]);
-        cmod[i] = sub_diagonal(i) * m;
-        u[i] = (0.0 - sub_diagonal(i-1) * u[i-1]) * m;
-        x[i] = (x[i] - sub_diagonal(i-1) * x[i-1]) * m;
-    }
-
-    const double m = 1.0 / (main_diagonal(matrix_dimension_-1) - cyclic_corner_element() * cyclic_corner_element() / gamma - cyclic_corner_element() * cmod[matrix_dimension_-2]);
-    u[matrix_dimension_-1] = (cyclic_corner_element() - sub_diagonal(matrix_dimension_-2) * u[matrix_dimension_-2]) * m;
-    x[matrix_dimension_-1] = (x[matrix_dimension_-1] - sub_diagonal(matrix_dimension_-2) * x[matrix_dimension_-2]) * m;
-
-    for (int i = matrix_dimension_-2; i >= 0; i--){
-        u[i] -= cmod[i] * u[i+1];
-        x[i] -= cmod[i] * x[i+1];
-    }
-
-    const double fact = (x[0] + x[matrix_dimension_-1] * cyclic_corner_element() / gamma) / (1.0 + u[0] + u[matrix_dimension_-1] * cyclic_corner_element() / gamma);
-    
-    for (int i = 0; i < matrix_dimension_; i++){
-        x[i] -= fact * u[i];
-    }
-
-    /* ------------------------------------------------------------------- */
-    /* This is the straigt forward unoptimized version found on wikipedia. */
-    /* ------------------------------------------------------------------- */
-
-    /*
-    const double gamma = -main_diagonal(0);
+void SymmetricTridiagonalSolver<T>::solve_symmetricCyclicTridiagonal(T* x, T* u, T* scratch){
+    /* ------------------------------------------------------------ */
+    /* I fixed the bugs which were in the wikipedia implementation. */
+    /* To get a better understanding of the code                    */
+    /* you can take a look at the unoptimized version below         */
+    /* ------------------------------------------------------------ */
+    /* When we increase the precision, then the adjusted radial smoothing matrices */
+    /* will get closer to be diagonally dominant, */
+    /* thus increasing the stability of the cyclic thomas algorithm. */
+    const double precision = 1.0e15;
+    const double gamma = -precision * main_diagonal(0);
 
     if(!solver_setup_){
         main_diagonal(0) -= gamma;
@@ -278,19 +248,67 @@ void SymmetricTridiagonalSolver<T>::solve_symmetricCyclicTridiagonal(T* x, T* cm
         solver_setup_ = true;
     }
 
-    solve_symmetricTridiagonal(x, cmod);
+    scratch[0] = sub_diagonal(0) / main_diagonal(0);
 
-    u[0] = gamma;
-    for (int i = 1; i < matrix_dimension_-1; i++) u[i] = 0.0;
-    u[matrix_dimension_-1] = cyclic_corner_element();
+    x[0] /= main_diagonal(0);
+    u[0] = gamma / main_diagonal(0);
 
-    solve_symmetricTridiagonal(u, cmod);
+    for (int i = 1; i < matrix_dimension_-1; i++){
+        const double divisor = 1.0 / (main_diagonal(i) - sub_diagonal(i-1) * scratch[i-1]);
+        scratch[i] = sub_diagonal(i) * divisor;
+        x[i] = (x[i] - sub_diagonal(i-1) * x[i-1]) * divisor;
+        u[i] = (0.0 - sub_diagonal(i-1) * u[i-1]) * divisor;
+    }
 
-    const double dot_v_y = x[0] + cyclic_corner_element()/gamma * x[matrix_dimension_-1];
-    const double dot_v_q = u[0] + cyclic_corner_element()/gamma * u[matrix_dimension_-1];
+    const int i = matrix_dimension_ - 1;
+    const double divisor = 1.0 / (main_diagonal(i) - sub_diagonal(i-1) * scratch[i-1]);
+    x[i] = (x[i] - sub_diagonal(i-1) * x[i-1]) * divisor;
+    u[i] = (cyclic_corner_element() - sub_diagonal(i-1) * u[i-1]) * divisor;
+
+    for (int i = matrix_dimension_-2; i >= 0; i--){
+        x[i] -= scratch[i] * x[i+1];
+        u[i] -= scratch[i] * u[i+1];
+    }
+
+    const double dot_v_y = x[0] + cyclic_corner_element() / gamma * x[matrix_dimension_-1];
+    const double dot_v_q = u[0] + cyclic_corner_element() / gamma * u[matrix_dimension_-1];
 
     for (int i = 0; i < matrix_dimension_; i++){
         x[i] -= u[i] * dot_v_y / dot_v_q;
     }
-    */
 }
+
+// /* Algorithm based on: https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm */
+// template<typename T>
+// void SymmetricTridiagonalSolver<T>::solve_symmetricCyclicTridiagonal(T* x, T* u, T* temp){
+//     /* ------------------------------------------------------------------- */
+//     /* This is the straigt forward unoptimized version found on wikipedia. */
+//     /* ------------------------------------------------------------------- */
+
+//     /* When we increase the precision, then the adjusted radial smoothing matrices (see below) */
+//     /* will get closer to be diagonally dominant, */
+//     /* thus increasing the stability of the cyclic thomas algorithm. */
+//     const double precision = 1.0e15;
+//     const double gamma = -precision * main_diagonal(0);
+
+//     if(!solver_setup_){
+//         main_diagonal(0) -= gamma;
+//         main_diagonal(matrix_dimension_-1) -= cyclic_corner_element() * cyclic_corner_element() / gamma;
+//         solver_setup_ = true;
+//     }
+
+//     solve_symmetricTridiagonal(x, temp);
+
+//     u[0] = gamma;
+//     for (int i = 1; i < matrix_dimension_-1; i++) u[i] = 0.0;
+//     u[matrix_dimension_-1] = cyclic_corner_element();
+
+//     solve_symmetricTridiagonal(u, temp);
+
+//     const double dot_v_y = x[0] + cyclic_corner_element()/gamma * x[matrix_dimension_-1];
+//     const double dot_v_q = u[0] + cyclic_corner_element()/gamma * u[matrix_dimension_-1];
+
+//     for (int i = 0; i < matrix_dimension_; i++){
+//         x[i] -= u[i] * dot_v_y / dot_v_q;
+//     }
+// }

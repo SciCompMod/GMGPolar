@@ -14,13 +14,15 @@ Smoother::Smoother(const PolarGrid& grid, const LevelCache& level_data,
     openMPTaskThreads_(openMPTaskThreads),
     rhs_(grid.number_of_nodes())
 {
-    build_Asc_matrices(circle_Asc_matrix_, radial_Asc_matrix_);
-    initializeMumps(circle_Asc_mumps_, circle_Asc_matrix_);
-    initializeMumps(radial_Asc_mumps_, radial_Asc_matrix_);
+    build_Asc_matrices(
+        inner_boundary_circle_Asc_matrix_, 
+        circle_symmetric_cyclic_tridiagonal_solver_,
+        radial_symmetric_tridiagonal_solver_
+    );
+    initializeMumps(inner_boundary_circle_Asc_mumps_, inner_boundary_circle_Asc_matrix_);
 }
 
 Smoother::~Smoother(){
-    deleteMumps(circle_Asc_mumps_);
-    deleteMumps(radial_Asc_mumps_);
+    deleteMumps(inner_boundary_circle_Asc_mumps_);
 }
 
