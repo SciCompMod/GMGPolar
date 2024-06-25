@@ -41,6 +41,7 @@ file(GLOB_RECURSE LEVEL_SOURCES "src/Level/*.cpp")
 
 file(GLOB_RECURSE TASK_DISTRIBUTION_SOURCES "src/TaskDistribution/*.cpp")
 file(GLOB_RECURSE STENCIL_SOURCES "src/Stencil/*.cpp")
+file(GLOB_RECURSE INTERPOLATION_SOURCES "src/Interpolation/*.cpp")
 file(GLOB_RECURSE COARSE_SOLVER_SOURCES "src/CoarseSolver/*.cpp")
 file(GLOB_RECURSE RESIDUAL_SOURCES "src/Residual/*.cpp")
 file(GLOB_RECURSE SMOOTHER_SOURCES "src/Smoother/*.cpp")
@@ -65,6 +66,7 @@ add_executable(gmgpolar
     ${LEVEL_SOURCES}
     ${TASK_DISTRIBUTION_SOURCES}
     ${STENCIL_SOURCES}
+    ${INTERPOLATION_SOURCES}
     ${COARSE_SOLVER_SOURCES}
     ${RESIDUAL_SOURCES}
     ${SMOOTHER_SOURCES}

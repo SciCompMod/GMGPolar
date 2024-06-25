@@ -11,12 +11,12 @@ private:
     const double Rmax = 1.3;
 
     /* Shafranov Geometry */
-    // const double map1_kappa = 0.3;
-    // const double map1_delta = 0.2;
+    const double map1_kappa = 0.3;
+    const double map1_delta = 0.2;
 
     /* Czarny/Triangular Geometry */
-    const double map2_epsilon = 0.3;
-    const double map2_e = 1.4;
+    // const double map2_epsilon = 0.3;
+    // const double map2_e = 1.4;
 };
 
 #include "exactSolution.inl"

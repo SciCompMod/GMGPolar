@@ -2,5 +2,5 @@
 
 // In earlier versions denoted by 'exact_phi'
 inline double ExactSolution::exact_solution(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
-    return (1.0 - (r/Rmax) * (r/Rmax)) * sin(2.0 * M_PI * map2_e * (r/Rmax) * sin_theta / (sqrt(1.0 - 1.0 / 4.0 * (map2_epsilon * map2_epsilon)) * (2.0 - sqrt(map2_epsilon * (map2_epsilon + 2.0 * (r/Rmax) * cos_theta) + 1.0)))) * cos(2.0 * M_PI * (1.0 - sqrt(map2_epsilon * (map2_epsilon + 2.0 * (r/Rmax) * cos_theta) + 1.0)) / map2_epsilon);
+    return 0.4096 * pow(((r/Rmax) - 1.0), 6.0) * pow(((r/Rmax) + 1.0), 6.0) * sin(M_PI * (2.0 * map1_kappa * (r/Rmax) * sin_theta + 2.0 * (r/Rmax) * sin_theta)) * cos(M_PI * ((-2.0) * map1_delta * ((r/Rmax) * (r/Rmax)) - 2.0 * map1_kappa * (r/Rmax) * cos_theta + 2.0 * (r/Rmax) * cos_theta));
 }

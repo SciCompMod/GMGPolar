@@ -8,6 +8,9 @@ Residual::Residual(const PolarGrid& grid, const LevelCache& level_data,
     grid_(grid), 
     sin_theta_(level_data.sin_theta()),
     cos_theta_(level_data.cos_theta()),
+    rhs_f_(level_data.rhs_f()),
+    u_D_(level_data.u_D()),
+    u_D_Interior_(level_data.u_D_Interior()),
     domain_geometry_(domain_geometry),
     system_parameters_(system_parameters),
     DirBC_Interior_(DirBC_Interior),
@@ -65,7 +68,7 @@ do { \
         double coeff4 = 0.5*(h1+h2)/k2; \
         /* Fill result of (i,j) */ \
         result[grid.index(i_r,i_theta)] += \
-            0.25 * (h1+h2)*(k1+k2) * system_parameters.rhs_f(r, theta, sin_theta, cos_theta) * fabs(detDF); \
+            0.25 * (h1+h2)*(k1+k2) * rhs_f_[grid.index(i_r,i_theta)] * fabs(detDF); \
         /* Fill result(i,j) */ \
         result[grid.index(i_r,i_theta)] += factor * ( \
             0.25 * (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF) * x[grid.index(i_r,i_theta)] /* beta_{i,j} */ \
@@ -108,8 +111,7 @@ do { \
         /* ------------------------------------------------ */ \
         if(DirBC_Interior){ \
             /* Fill result of (i,j) */ \
-            result[grid.index(i_r,i_theta)] += \
-                system_parameters.u_D_Interior(r, theta, sin_theta, cos_theta); \
+            result[grid.index(i_r,i_theta)] += u_D_Interior_[i_theta]; \
             /* Fill result(i,j) */ \
             result[grid.index(i_r,i_theta)] += factor * x[grid.index(i_r,i_theta)]; \
             /* Give value to the interior nodes! */ \
@@ -140,7 +142,7 @@ do { \
             double coeff4 = 0.5*(h1+h2)/k2; \
             /* Fill result of (i,j) */ \
             result[grid.index(i_r,i_theta)] += \
-                0.25 * (h1+h2)*(k1+k2) * system_parameters.rhs_f(r, theta, sin_theta, cos_theta) * fabs(detDF); \
+                0.25 * (h1+h2)*(k1+k2) * rhs_f_[grid.index(i_r,i_theta)] * fabs(detDF); \
             /* Fill result(i,j) */ \
             result[grid.index(i_r,i_theta)] += factor * ( \
                 0.25 * (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF) * x[grid.index(i_r,i_theta)] /* beta_{i,j} */ \
@@ -190,7 +192,7 @@ do { \
         double coeff4 = 0.5*(h1+h2)/k2; \
         /* Fill result of (i,j) */ \
         result[grid.index(i_r,i_theta)] += \
-            0.25 * (h1+h2)*(k1+k2) * system_parameters.rhs_f(r, theta, sin_theta, cos_theta) * fabs(detDF); \
+            0.25 * (h1+h2)*(k1+k2) * rhs_f_[grid.index(i_r,i_theta)] * fabs(detDF); \
         /* Fill result(i,j) */ \
         result[grid.index(i_r,i_theta)] += factor * ( \
             0.25 * (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF) * x[grid.index(i_r,i_theta)] /* beta_{i,j} */ \
@@ -240,7 +242,7 @@ do { \
         double coeff4 = 0.5*(h1+h2)/k2; \
         /* Fill result of (i,j) */ \
         result[grid.index(i_r,i_theta)] += \
-            0.25 * (h1+h2)*(k1+k2) * system_parameters.rhs_f(r, theta, sin_theta, cos_theta) * fabs(detDF); \
+            0.25 * (h1+h2)*(k1+k2) * rhs_f_[grid.index(i_r,i_theta)] * fabs(detDF); \
         /* Fill result(i,j) */ \
         result[grid.index(i_r,i_theta)] += factor * ( \
             (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF) / 4 * x[grid.index(i_r,i_theta)] /* beta_{i,j} */ \
@@ -280,7 +282,7 @@ do { \
     /* ----------------------------- */ \
     } else if (i_r == grid.nr() - 1) { \
         /* Fill result of (i,j) */ \
-        result[grid.index(i_r,i_theta)] += system_parameters.u_D(r, theta, sin_theta, cos_theta); \
+        result[grid.index(i_r,i_theta)] += u_D_[i_theta]; \
         /* Dirichlet boundary */ \
         result[grid.index(i_r,i_theta)] += factor * x[grid.index(i_r,i_theta)]; \
         /* Give value to the interior nodes! */ \

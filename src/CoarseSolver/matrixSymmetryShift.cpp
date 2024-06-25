@@ -46,8 +46,7 @@ do { \
         r = grid_.radius(i_r); \
         coeff_alpha = system_parameters_.alpha(r); \
         coeff_beta = system_parameters_.beta(r); \
-        ARR_ATT_ART(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, \
-                arr, att, art, detDF); \
+        ARR_ATT_ART(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDF); \
         h2 = grid_.r_dist(i_r); \
         k1 = grid_.theta_dist(i_theta-1); \
         k2 = grid_.theta_dist(i_theta); \
@@ -211,5 +210,6 @@ void CoarseSolver::subtractSymmetryShift(Vector<double>& x){
         }
     }
     omp_set_num_threads(maxOpenMPThreads_);
+
     delete[] dep;
 }

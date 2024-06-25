@@ -3,19 +3,24 @@
 void GMGPolar::setup() {
     // -------------------------------
     // Create the finest mesh (level 0)
-    PolarGrid finest_grid = createFinestGrid();
-    std::cout << "System of size (nr x ntheta) = (" << finest_grid.nr() << " x " << finest_grid.ntheta() << ")\n";
+    auto finest_grid = std::make_unique<PolarGrid>(createFinestGrid());
+    std::cout << "System of size (nr x ntheta) = (" << finest_grid->nr() << " x " << finest_grid->ntheta() << ")\n";
     std::cout << "on the coordinates (r x theta): (" << R0 << ", " << Rmax << ") x (" << 0 << ", " << 2 * M_PI << ")\n";
 
-    // -------------------------------
-    // Building the grid on all levels
-    numberOflevels_ = chooseNumberOfLevels(finest_grid);
+    // ----------------------------------------------------------
+    // Building PolarGrid and LevelCache for all multigrid levels
+    numberOflevels_ = chooseNumberOfLevels(*finest_grid);
     levels_.reserve(numberOflevels_);
 
-    levels_.emplace_back(0, std::make_unique<PolarGrid>(std::move(finest_grid)));
+    int current_level = 0;
+    auto finest_levelCache = std::make_unique<LevelCache>(*finest_grid, system_parameters_, DirBC_Interior);
+    levels_.emplace_back(current_level, std::move(finest_grid), std::move(finest_levelCache));
 
-    for(int current_level = 1; current_level < numberOflevels_; current_level++) {
-        levels_.emplace_back(current_level, coarseningGrid(levels_[current_level-1].grid()));
+    for(current_level = 1; current_level < numberOflevels_; current_level++) {
+        auto current_grid = std::make_unique<PolarGrid>(coarseningGrid(levels_[current_level-1].grid()));
+        // auto current_levelCache = std::make_unique<LevelCache>(*current_grid, system_parameters_, DirBC_Interior);
+        auto current_levelCache = std::make_unique<LevelCache>(levels_[current_level-1], *current_grid, DirBC_Interior);
+        levels_.emplace_back(current_level, std::move(current_grid), std::move(current_levelCache));
     }
 
     if(write_grid_file) {
@@ -25,14 +30,16 @@ void GMGPolar::setup() {
 
     // -----------------------------------------------------------
     // Initializing the optimal number of threads for OpenMP tasks 
-    std::vector<int> taskingThreads(numberOflevels_, maxOpenMPThreads);
+    taskingThreads_.resize(numberOflevels_, maxOpenMPThreads);
     if(finestLevelThreads > 0){
         for (int current_level = 0; current_level < numberOflevels_; current_level++){
-            taskingThreads[current_level] = std::max(1, std::min(maxOpenMPThreads, 
+            taskingThreads_[current_level] = std::max(1, std::min(maxOpenMPThreads, 
                 static_cast<int>(std::floor(finestLevelThreads * std::pow(threadReductionFactor, current_level)))
             ));
         }
     }
+
+    interpolation_ = std::make_unique<Interpolation>(maxOpenMPThreads, taskingThreads_);
 
     // -------------------------------------------------------
     // Initializing various operators based on the level index
@@ -45,28 +52,27 @@ void GMGPolar::setup() {
                 // levels_[current_level].initializeExtrapolatedSmoothing(domain_geometry_, system_parameters_, DirBC_Interior, numThreadsUsed);
             } else{
                 levels_[current_level].initializeSmoothing(domain_geometry_, system_parameters_, DirBC_Interior, 
-                    maxOpenMPThreads, taskingThreads[current_level]
+                    maxOpenMPThreads, taskingThreads_[current_level]
                 );
             }
             levels_[current_level].initializeResidual(domain_geometry_, system_parameters_, DirBC_Interior, 
-                maxOpenMPThreads, taskingThreads[current_level]
+                maxOpenMPThreads, taskingThreads_[current_level]
             );
-            // levels_[current_level].initializeCoarseSolver(domain_geometry_, system_parameters_, DirBC_Interior, 
-            //     maxOpenMPThreads, taskingThreads[current_level]
-            // );
+
+            levels_[current_level].initializeCoarseSolver(domain_geometry_, system_parameters_, DirBC_Interior, 
+                maxOpenMPThreads, taskingThreads_[current_level]
+            );
+
         }
         // -------------------------- //
         // Level n-1 (coarsest Level) //
         // -------------------------- //
         else if(current_level == numberOflevels_ - 1){
             levels_[current_level].initializeCoarseSolver(domain_geometry_, system_parameters_, DirBC_Interior, 
-                maxOpenMPThreads, taskingThreads[current_level]
+                maxOpenMPThreads, taskingThreads_[current_level]
             );
             levels_[current_level].initializeResidual(domain_geometry_, system_parameters_, DirBC_Interior, 
-                maxOpenMPThreads, taskingThreads[current_level]
-            );
-            levels_[current_level].initializeSmoothing(domain_geometry_, system_parameters_, DirBC_Interior, 
-                maxOpenMPThreads, taskingThreads[current_level]
+                maxOpenMPThreads, taskingThreads_[current_level]
             );
         }
         // ------------------- //
@@ -74,7 +80,13 @@ void GMGPolar::setup() {
         // ------------------- //
         else{
             levels_[current_level].initializeSmoothing(domain_geometry_, system_parameters_, DirBC_Interior, 
-                maxOpenMPThreads, taskingThreads[current_level]
+                maxOpenMPThreads, taskingThreads_[current_level]
+            );
+            levels_[current_level].initializeCoarseSolver(domain_geometry_, system_parameters_, DirBC_Interior, 
+                maxOpenMPThreads, taskingThreads_[current_level]
+            );
+            levels_[current_level].initializeResidual(domain_geometry_, system_parameters_, DirBC_Interior, 
+                maxOpenMPThreads, taskingThreads_[current_level]
             );
         }
     }

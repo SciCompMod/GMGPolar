@@ -19,6 +19,8 @@ class LevelCache;
 #include "../LinearAlgebra/matrix.h"
 #include "../LinearAlgebra/operations.h"
 
+#include "../Interpolation/interpolation.h"
+
 #include <omp.h>
 #include <optional>
 #include <chrono>
@@ -69,7 +71,10 @@ private:
 
     // Multigrid levels
     int numberOflevels_;
+    std::vector<int> taskingThreads_;
     std::vector<Level> levels_;
+
+    std::unique_ptr<Interpolation> interpolation_;
 
     // Setup functions
     PolarGrid createFinestGrid();

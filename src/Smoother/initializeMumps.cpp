@@ -37,7 +37,7 @@ void Smoother::initializeMumps(DMUMPS_STRUC_C& Asc_mumps, const SparseMatrix<dou
     Asc_mumps.ICNTL(25) = 0; // Allows the computation of a solution of a deficient matrix and also of a null space basis
     Asc_mumps.ICNTL(26) = 0; // Drives the solution phase if a Schur complement matrix has been computed
     Asc_mumps.ICNTL(27) = -32; // Controls the blocking size for multiple right-hand sides.
-    Asc_mumps.ICNTL(28) = 0; // Determines whether a sequential or parallel computation of the ordering is performed
+    Asc_mumps.ICNTL(28) = 1; // Determines whether a sequential or parallel computation of the ordering is performed
     // 0: automatic, 1: sequential, 2: parallel
     Asc_mumps.ICNTL(29) = 0; // Defines the parallel ordering tool (when ICNTL(28)=1) to be used to compute the fill-in reducing permutation.
     Asc_mumps.ICNTL(30) = 0; // Computes a user-specified set of entries in the inverse A^−1 of the original matrix

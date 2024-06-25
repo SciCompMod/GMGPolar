@@ -57,11 +57,11 @@ const Stencil& Smoother::get_stencil(int i_r) const {
         if(i_r > numberSmootherCircles && i_r < grid_.nr()-2){
             return radial_stencil_interior;
         }
-        else if(i_r == grid_.nr()-1){
-            return stencil_DB;
-        }
         else if(i_r == numberSmootherCircles){
             return radial_stencil_next_circular_smoothing;
+        }
+        else if(i_r == grid_.nr()-1){
+            return stencil_DB;
         }
         else if(i_r == grid_.nr()-2){
             return radial_stencil_next_outer_DB;

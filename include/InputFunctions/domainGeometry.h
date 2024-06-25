@@ -30,28 +30,6 @@
 // Shafranov Geometry //
 // ------------------ //
 
-// class DomainGeometry {
-// public:
-//     explicit DomainGeometry() = default;
-
-//     double Fx(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const;
-//     double Fy(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const;
-//     double dFx_dr(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const;
-//     double dFy_dr(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const;
-//     double dFx_dt(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const;
-//     double dFy_dt(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const;
-
-// private:
-//     const double Rmax = 1.3;
-//     const double map1_kappa = 0.3;
-//     const double map1_delta = 0.2;
-// };
-
-
-// -------------------------- //
-// Czarny/Triangular Geometry //
-// -------------------------- //
-
 class DomainGeometry {
 public:
     explicit DomainGeometry() = default;
@@ -65,9 +43,31 @@ public:
 
 private:
     const double Rmax = 1.3;
-    const double map2_epsilon = 0.3;
-    const double map2_e = 1.4;
+    const double map1_kappa = 0.3;
+    const double map1_delta = 0.2;
 };
+
+
+// -------------------------- //
+// Czarny/Triangular Geometry //
+// -------------------------- //
+
+// class DomainGeometry {
+// public:
+//     explicit DomainGeometry() = default;
+
+//     double Fx(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const;
+//     double Fy(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const;
+//     double dFx_dr(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const;
+//     double dFy_dr(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const;
+//     double dFx_dt(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const;
+//     double dFy_dt(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const;
+
+// private:
+//     const double Rmax = 1.3;
+//     const double map2_epsilon = 0.3;
+//     const double map2_e = 1.4;
+// };
 
 
 // --------------- //

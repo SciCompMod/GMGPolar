@@ -34,12 +34,20 @@ public:
     void computeResidual_V3(Vector<double>& result, const Vector<double>& x);
 
 private:
+    /* ------------------- */
+    /* Constructor members */
     const PolarGrid& grid_;
+    /* Level Cache Data */
     const std::vector<double>& sin_theta_;
     const std::vector<double>& cos_theta_;
+    const Vector<double>& rhs_f_;
+    const std::vector<double>& u_D_;
+    const std::vector<double>& u_D_Interior_;
+
     const DomainGeometry& domain_geometry_;
     const SystemParameters& system_parameters_;
     const bool DirBC_Interior_;
+
     const int maxOpenMPThreads_;
     const int openMPTaskThreads_;
 };

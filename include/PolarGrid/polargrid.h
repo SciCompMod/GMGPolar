@@ -212,6 +212,6 @@ private:
 // ---------------------------------------------------- //
 // Generates a coarser PolarGrid from a finer PolarGrid //
 // ---------------------------------------------------- //
-std::unique_ptr<PolarGrid> coarseningGrid(const PolarGrid& grid);
+PolarGrid coarseningGrid(const PolarGrid& grid);
 
 #include "polargrid.inl"  // Include the inline function definitions

@@ -44,71 +44,71 @@
 // Shafranov Geometry //
 // ------------------ //
 
-// // In earlier versions denoted by 'x'
-// inline double DomainGeometry::Fx(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
-//     return (-map1_delta) * ((r/Rmax) * (r/Rmax)) - map1_kappa * (r/Rmax) * cos_theta + (r/Rmax) * cos_theta;
-// }
+// In earlier versions denoted by 'x'
+inline double DomainGeometry::Fx(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
+    return (-map1_delta) * ((r/Rmax) * (r/Rmax)) - map1_kappa * (r/Rmax) * cos_theta + (r/Rmax) * cos_theta;
+}
 
-// // In earlier versions denoted by 'y'
-// inline double DomainGeometry::Fy(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
-//     return map1_kappa * (r/Rmax) * sin_theta + (r/Rmax) * sin_theta;
-// }
+// In earlier versions denoted by 'y'
+inline double DomainGeometry::Fy(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
+    return map1_kappa * (r/Rmax) * sin_theta + (r/Rmax) * sin_theta;
+}
 
 
-// // In earlier versions denoted by 'Jrr'
-// inline double DomainGeometry::dFx_dr(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
-//     return ((-2.0) * map1_delta * (r/Rmax) - map1_kappa * cos_theta + cos_theta)/Rmax;
-// }
+// In earlier versions denoted by 'Jrr'
+inline double DomainGeometry::dFx_dr(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
+    return ((-2.0) * map1_delta * (r/Rmax) - map1_kappa * cos_theta + cos_theta)/Rmax;
+}
 
-// // In earlier versions denoted by 'Jtr'
-// inline double DomainGeometry::dFy_dr(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
-//     return ((map1_kappa + 1.0) * sin_theta)/Rmax;
-// }
+// In earlier versions denoted by 'Jtr'
+inline double DomainGeometry::dFy_dr(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
+    return ((map1_kappa + 1.0) * sin_theta)/Rmax;
+}
 
-// // In earlier versions denoted by 'Jrt'
-// inline double DomainGeometry::dFx_dt(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
-//     return (r/Rmax) * (map1_kappa * sin_theta - sin_theta);
-// }
+// In earlier versions denoted by 'Jrt'
+inline double DomainGeometry::dFx_dt(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
+    return (r/Rmax) * (map1_kappa * sin_theta - sin_theta);
+}
 
-// // In earlier versions denoted by 'Jtt'
-// inline double DomainGeometry::dFy_dt(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
-//     return (r/Rmax) * (map1_kappa * cos_theta + cos_theta);
-// }
+// In earlier versions denoted by 'Jtt'
+inline double DomainGeometry::dFy_dt(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
+    return (r/Rmax) * (map1_kappa * cos_theta + cos_theta);
+}
 
 
 // -------------------------- //
 // Czarny/Triangular Geometry //
 // -------------------------- //
 
-// In earlier versions denoted by 'x'
-inline double DomainGeometry::Fx(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
-    return (1.0 - sqrt(map2_epsilon * (map2_epsilon + 2.0 * (r/Rmax) * cos_theta) + 1.0)) / map2_epsilon;
-}
+// // In earlier versions denoted by 'x'
+// inline double DomainGeometry::Fx(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
+//     return (1.0 - sqrt(map2_epsilon * (map2_epsilon + 2.0 * (r/Rmax) * cos_theta) + 1.0)) / map2_epsilon;
+// }
 
-// In earlier versions denoted by 'y'
-inline double DomainGeometry::Fy(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
-    return map2_e * (r/Rmax) * sin_theta / (sqrt(1.0 - 1.0 / 4.0 * (map2_epsilon * map2_epsilon)) * (2.0 - sqrt(map2_epsilon * (map2_epsilon + 2.0 * (r/Rmax) * cos_theta) + 1.0)));
-}
+// // In earlier versions denoted by 'y'
+// inline double DomainGeometry::Fy(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
+//     return map2_e * (r/Rmax) * sin_theta / (sqrt(1.0 - 1.0 / 4.0 * (map2_epsilon * map2_epsilon)) * (2.0 - sqrt(map2_epsilon * (map2_epsilon + 2.0 * (r/Rmax) * cos_theta) + 1.0)));
+// }
 
-// In earlier versions denoted by 'Jrr'
-inline double DomainGeometry::dFx_dr(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
-    return ((-cos_theta) / sqrt(map2_epsilon * (map2_epsilon + 2.0 * (r/Rmax) * cos_theta) + 1.0))/Rmax;
-}
+// // In earlier versions denoted by 'Jrr'
+// inline double DomainGeometry::dFx_dr(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
+//     return ((-cos_theta) / sqrt(map2_epsilon * (map2_epsilon + 2.0 * (r/Rmax) * cos_theta) + 1.0))/Rmax;
+// }
 
-// In earlier versions denoted by 'Jtr'
-inline double DomainGeometry::dFy_dr(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
-    return (map2_e * map2_epsilon * (r/Rmax) * sin_theta * cos_theta / (sqrt(1.0 - 1.0 / 4.0 * (map2_epsilon * map2_epsilon)) * pow((2.0 - sqrt(map2_epsilon * (map2_epsilon + 2.0 * (r/Rmax) * cos_theta) + 1.0)), 2.0) * sqrt(map2_epsilon * (map2_epsilon + 2.0 * (r/Rmax) * cos_theta) + 1.0)) + map2_e * sin_theta / (sqrt(1.0 - 1.0 / 4.0 * (map2_epsilon * map2_epsilon)) * (2.0 - sqrt(map2_epsilon * (map2_epsilon + 2.0 * (r/Rmax) * cos_theta) + 1.0))))/Rmax;
-}
+// // In earlier versions denoted by 'Jtr'
+// inline double DomainGeometry::dFy_dr(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
+//     return (map2_e * map2_epsilon * (r/Rmax) * sin_theta * cos_theta / (sqrt(1.0 - 1.0 / 4.0 * (map2_epsilon * map2_epsilon)) * pow((2.0 - sqrt(map2_epsilon * (map2_epsilon + 2.0 * (r/Rmax) * cos_theta) + 1.0)), 2.0) * sqrt(map2_epsilon * (map2_epsilon + 2.0 * (r/Rmax) * cos_theta) + 1.0)) + map2_e * sin_theta / (sqrt(1.0 - 1.0 / 4.0 * (map2_epsilon * map2_epsilon)) * (2.0 - sqrt(map2_epsilon * (map2_epsilon + 2.0 * (r/Rmax) * cos_theta) + 1.0))))/Rmax;
+// }
 
-// In earlier versions denoted by 'Jrt'
-inline double DomainGeometry::dFx_dt(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
-    return (r/Rmax) * sin_theta / sqrt(map2_epsilon * (map2_epsilon + 2.0 * (r/Rmax) * cos_theta) + 1.0);
-}
+// // In earlier versions denoted by 'Jrt'
+// inline double DomainGeometry::dFx_dt(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
+//     return (r/Rmax) * sin_theta / sqrt(map2_epsilon * (map2_epsilon + 2.0 * (r/Rmax) * cos_theta) + 1.0);
+// }
 
-// In earlier versions denoted by 'Jtt'
-inline double DomainGeometry::dFy_dt(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
-    return (r/Rmax) * ((-map2_e) * map2_epsilon * (r/Rmax) * pow(sin_theta, 2.0) / (sqrt(1.0 - 1.0 / 4.0 * (map2_epsilon * map2_epsilon)) * pow((2.0 - sqrt(map2_epsilon * (map2_epsilon + 2.0 * (r/Rmax) * cos_theta) + 1.0)), 2.0) * sqrt(map2_epsilon * (map2_epsilon + 2.0 * (r/Rmax) * cos_theta) + 1.0)) + map2_e * cos_theta / (sqrt(1.0 - 1.0 / 4.0 * (map2_epsilon * map2_epsilon)) * (2.0 - sqrt(map2_epsilon * (map2_epsilon + 2.0 * (r/Rmax) * cos_theta) + 1.0))));
-}
+// // In earlier versions denoted by 'Jtt'
+// inline double DomainGeometry::dFy_dt(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
+//     return (r/Rmax) * ((-map2_e) * map2_epsilon * (r/Rmax) * pow(sin_theta, 2.0) / (sqrt(1.0 - 1.0 / 4.0 * (map2_epsilon * map2_epsilon)) * pow((2.0 - sqrt(map2_epsilon * (map2_epsilon + 2.0 * (r/Rmax) * cos_theta) + 1.0)), 2.0) * sqrt(map2_epsilon * (map2_epsilon + 2.0 * (r/Rmax) * cos_theta) + 1.0)) + map2_e * cos_theta / (sqrt(1.0 - 1.0 / 4.0 * (map2_epsilon * map2_epsilon)) * (2.0 - sqrt(map2_epsilon * (map2_epsilon + 2.0 * (r/Rmax) * cos_theta) + 1.0))));
+// }
 
 
 // --------------- //
@@ -322,33 +322,33 @@ inline double DomainGeometry::dFy_dt(const double& r, const double& theta, const
 //     }
 // }
 
-// // In earlier versions denoted by 'x'
+// In earlier versions denoted by 'x'
 // inline double DomainGeometry::Fx(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
 //     return (r/Rmax) * cos_theta + Delta((r/Rmax)) - E((r/Rmax)) * cos_theta - P((r/Rmax)) * cos_theta + T((r/Rmax)) * cos(2.0 * theta) + 5.0;
 // }
 
-// // In earlier versions denoted by 'y'
+// In earlier versions denoted by 'y'
 // inline double DomainGeometry::Fy(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
 //     return (r/Rmax) * sin_theta - E((r/Rmax)) * sin_theta - P((r/Rmax)) * sin_theta - T((r/Rmax)) * sin(2.0 * theta);
 // }
 
 
-// // In earlier versions denoted by 'Jrr'
+// In earlier versions denoted by 'Jrr'
 // inline double DomainGeometry::dFx_dr(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
 //     return (Delta_prime((r/Rmax)) - E_prime((r/Rmax)) * cos_theta + T_prime((r/Rmax)) * cos(2.0 * theta) - dP((r/Rmax)) * cos_theta + cos_theta)/Rmax;
 // }
 
-// // In earlier versions denoted by 'Jtr'
+// In earlier versions denoted by 'Jtr'
 // inline double DomainGeometry::dFy_dr(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
 //     return ((-E_prime((r/Rmax))) * sin_theta - T_prime((r/Rmax)) * sin(2.0 * theta) - dP((r/Rmax)) * sin_theta + sin_theta)/Rmax;
 // }
 
-// // In earlier versions denoted by 'Jrt'
+// In earlier versions denoted by 'Jrt'
 // inline double DomainGeometry::dFx_dt(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
 //     return (-(r/Rmax)) * sin_theta + E((r/Rmax)) * sin_theta + P((r/Rmax)) * sin_theta - 2.0 * T((r/Rmax)) * sin(2.0 * theta);
 // }
 
-// // In earlier versions denoted by 'Jtt'
+// In earlier versions denoted by 'Jtt'
 // inline double DomainGeometry::dFy_dt(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
 //     return (r/Rmax) * cos_theta - E((r/Rmax)) * cos_theta - P((r/Rmax)) * cos_theta - 2.0 * T((r/Rmax)) * cos(2.0 * theta);
 // }

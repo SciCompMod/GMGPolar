@@ -229,7 +229,7 @@ void PolarGrid::initializeLineSplitting(std::optional<double> splitting_radius){
 // Generates a coarser PolarGrid from a finer PolarGrid //
 // ---------------------------------------------------- //
 
-std::unique_ptr<PolarGrid> coarseningGrid(const PolarGrid& fineGrid) {
+PolarGrid coarseningGrid(const PolarGrid& fineGrid) {
     assert((fineGrid.nr() - 1) % 2 == 0 && (fineGrid.ntheta()) % 2 == 0);
     const int coarse_nr = (fineGrid.nr() + 1) / 2;
     const int coarse_ntheta = fineGrid.ntheta() / 2;
@@ -251,15 +251,12 @@ std::unique_ptr<PolarGrid> coarseningGrid(const PolarGrid& fineGrid) {
     }
 
     const bool useSameSplittingRadius = false;
-    std::unique_ptr<PolarGrid> coarseGrid;
 
     if (useSameSplittingRadius) {
-        coarseGrid = std::make_unique<PolarGrid>(coarse_r, coarse_theta, fineGrid.smoother_splitting_radius());
+        return PolarGrid(coarse_r, coarse_theta, fineGrid.smoother_splitting_radius());
     } else {
-        coarseGrid = std::make_unique<PolarGrid>(coarse_r, coarse_theta);
+        return PolarGrid(coarse_r, coarse_theta);
     }
-
-    return coarseGrid;
 }
 
 // ---------------- //

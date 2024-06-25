@@ -50,17 +50,20 @@ do { \
         double coeff3 = 0.5*(h1+h2)/k1; \
         double coeff4 = 0.5*(h1+h2)/k2; \
         \
+        const int i_theta_M1 = grid.wrap_theta_index(i_theta-1); \
+        const int i_theta_P1 = grid.wrap_theta_index(i_theta+1); \
+        \
         center_nz_index = ptr_nz_index_matrixA(i_r, i_theta); \
         left_nz_index = ptr_nz_index_matrixA(i_r-1, i_theta); \
         right_nz_index = ptr_nz_index_matrixA(i_r+1, i_theta); \
-        bottom_nz_index = ptr_nz_index_matrixA(i_r, grid.wrap_theta_index(i_theta-1)); \
-        top_nz_index = ptr_nz_index_matrixA(i_r, grid.wrap_theta_index(i_theta+1)); \
+        bottom_nz_index = ptr_nz_index_matrixA(i_r, i_theta_M1); \
+        top_nz_index = ptr_nz_index_matrixA(i_r, i_theta_P1); \
         \
-        center_index = grid.index(i_r,i_theta); \
-        left_index = grid.index(i_r-1,i_theta); \
-        right_index = grid.index(i_r+1,i_theta); \
-        bottom_index = grid.index(i_r,i_theta-1); \
-        top_index = grid.index(i_r,i_theta+1); \
+        center_index = grid.index(i_r, i_theta); \
+        left_index = grid.index(i_r-1, i_theta); \
+        right_index = grid.index(i_r+1, i_theta); \
+        bottom_index = grid.index(i_r, i_theta_M1); \
+        top_index = grid.index(i_r, i_theta_P1); \
         \
         /* Fill matrix row of (i,j) */ \
         const Stencil& CenterStencil = get_stencil(i_r); \
@@ -201,13 +204,16 @@ do { \
             double k2 = grid.theta_dist(i_theta); \
             double coeff2 = 0.5*(k1+k2)/h2; \
             \
+            const int i_theta_M1 = grid.wrap_theta_index(i_theta-1); \
+            const int i_theta_P1 = grid.wrap_theta_index(i_theta+1); \
+            \
             center_nz_index = ptr_nz_index_matrixA(i_r, i_theta); \
             right_nz_index = ptr_nz_index_matrixA(i_r+1, i_theta); \
             \
-            center_index = grid.index(i_r,i_theta); \
-            right_index = grid.index(i_r+1,i_theta); \
-            bottom_index = grid.index(i_r,i_theta-1); \
-            top_index = grid.index(i_r,i_theta+1); \
+            center_index = grid.index(i_r, i_theta); \
+            right_index = grid.index(i_r+1, i_theta); \
+            bottom_index = grid.index(i_r, i_theta_M1); \
+            top_index = grid.index(i_r, i_theta_P1); \
             \
             /* Fill matrix row of (i,j) */ \
             const Stencil& CenterStencil = get_stencil(i_r); \
@@ -260,17 +266,21 @@ do { \
             double coeff3 = 0.5*(h1+h2)/k1; \
             double coeff4 = 0.5*(h1+h2)/k2; \
             \
-            center_nz_index = ptr_nz_index_matrixA(i_r, i_theta); \
-            left_nz_index = ptr_nz_index_matrixA(i_r, grid.wrap_theta_index(i_theta + (grid.ntheta()>>1))); \
-            right_nz_index = ptr_nz_index_matrixA(i_r+1, i_theta); \
-            bottom_nz_index = ptr_nz_index_matrixA(i_r, grid.wrap_theta_index(i_theta-1)); \
-            top_nz_index = ptr_nz_index_matrixA(i_r, grid.wrap_theta_index(i_theta+1)); \
+            const int i_theta_M1 = grid.wrap_theta_index(i_theta-1); \
+            const int i_theta_P1 = grid.wrap_theta_index(i_theta+1); \
+            const int i_theta_AcrossOrigin = grid.wrap_theta_index(i_theta + (grid.ntheta()>>1)); \
             \
-            center_index = grid.index(i_r,i_theta); \
-            left_index = grid.index(i_r, i_theta + (grid.ntheta()>>1)); \
-            right_index = grid.index(i_r+1,i_theta); \
-            bottom_index = grid.index(i_r,i_theta-1); \
-            top_index = grid.index(i_r,i_theta+1); \
+            center_nz_index = ptr_nz_index_matrixA(i_r, i_theta); \
+            left_nz_index = ptr_nz_index_matrixA(i_r, i_theta_AcrossOrigin); \
+            right_nz_index = ptr_nz_index_matrixA(i_r+1, i_theta); \
+            bottom_nz_index = ptr_nz_index_matrixA(i_r, i_theta_M1); \
+            top_nz_index = ptr_nz_index_matrixA(i_r, i_theta_P1); \
+            \
+            center_index = grid.index(i_r, i_theta); \
+            left_index = grid.index(i_r, i_theta_AcrossOrigin); \
+            right_index = grid.index(i_r+1, i_theta); \
+            bottom_index = grid.index(i_r, i_theta_M1); \
+            top_index = grid.index(i_r, i_theta_P1); \
             \
             /* Fill matrix row of (i,j) */ \
             const Stencil& CenterStencil = get_stencil(i_r); \
@@ -417,17 +427,20 @@ do { \
         double coeff3 = 0.5*(h1+h2)/k1; \
         double coeff4 = 0.5*(h1+h2)/k2; \
         \
+        const int i_theta_M1 = grid.wrap_theta_index(i_theta-1); \
+        const int i_theta_P1 = grid.wrap_theta_index(i_theta+1); \
+        \
         center_nz_index = ptr_nz_index_matrixA(i_r, i_theta); \
         left_nz_index = ptr_nz_index_matrixA(i_r-1, i_theta); \
         right_nz_index = ptr_nz_index_matrixA(i_r+1, i_theta); \
-        bottom_nz_index = ptr_nz_index_matrixA(i_r, grid.wrap_theta_index(i_theta-1)); \
-        top_nz_index = ptr_nz_index_matrixA(i_r, grid.wrap_theta_index(i_theta+1)); \
+        bottom_nz_index = ptr_nz_index_matrixA(i_r, i_theta_M1); \
+        top_nz_index = ptr_nz_index_matrixA(i_r, i_theta_P1); \
         \
-        center_index = grid.index(i_r,i_theta); \
-        left_index = grid.index(i_r-1,i_theta); \
-        right_index = grid.index(i_r+1,i_theta); \
-        bottom_index = grid.index(i_r,i_theta-1); \
-        top_index = grid.index(i_r,i_theta+1); \
+        center_index = grid.index(i_r, i_theta); \
+        left_index = grid.index(i_r-1, i_theta); \
+        right_index = grid.index(i_r+1, i_theta); \
+        bottom_index = grid.index(i_r, i_theta_M1); \
+        top_index = grid.index(i_r, i_theta_P1); \
         \
         /* Fill matrix row of (i,j) */ \
         const Stencil& CenterStencil = get_stencil(i_r); \
@@ -579,17 +592,20 @@ do { \
         double coeff3 = 0.5*(h1+h2)/k1; \
         double coeff4 = 0.5*(h1+h2)/k2; \
         \
+        const int i_theta_M1 = grid.wrap_theta_index(i_theta-1); \
+        const int i_theta_P1 = grid.wrap_theta_index(i_theta+1); \
+        \
         center_nz_index = ptr_nz_index_matrixA(i_r, i_theta); \
         left_nz_index = ptr_nz_index_matrixA(i_r-1, i_theta); \
         right_nz_index = ptr_nz_index_matrixA(i_r+1, i_theta); \
-        bottom_nz_index = ptr_nz_index_matrixA(i_r, grid.wrap_theta_index(i_theta-1)); \
-        top_nz_index = ptr_nz_index_matrixA(i_r, grid.wrap_theta_index(i_theta+1)); \
+        bottom_nz_index = ptr_nz_index_matrixA(i_r, i_theta_M1); \
+        top_nz_index = ptr_nz_index_matrixA(i_r, i_theta_P1); \
         \
-        center_index = grid.index(i_r,i_theta); \
-        left_index = grid.index(i_r-1,i_theta); \
-        right_index = grid.index(i_r+1,i_theta); \
-        bottom_index = grid.index(i_r,i_theta-1); \
-        top_index = grid.index(i_r,i_theta+1); \
+        center_index = grid.index(i_r, i_theta); \
+        left_index = grid.index(i_r-1, i_theta); \
+        right_index = grid.index(i_r+1, i_theta); \
+        bottom_index = grid.index(i_r, i_theta_M1); \
+        top_index = grid.index(i_r, i_theta_P1); \
         \
         /* Fill matrix row of (i,j) */ \
         const Stencil& CenterStencil = get_stencil(i_r); \
@@ -726,13 +742,16 @@ do { \
         double k2 = grid.theta_dist(i_theta); \
         double coeff1 = 0.5*(k1+k2)/h1; \
         \
+        const int i_theta_M1 = grid.wrap_theta_index(i_theta-1); \
+        const int i_theta_P1 = grid.wrap_theta_index(i_theta+1); \
+        \
         center_nz_index = ptr_nz_index_matrixA(i_r, i_theta); \
         left_nz_index = ptr_nz_index_matrixA(i_r-1, i_theta); \
         \
-        center_index = grid.index(i_r,i_theta); \
-        left_index = grid.index(i_r-1,i_theta); \
-        bottom_index = grid.index(i_r,i_theta-1); \
-        top_index = grid.index(i_r,i_theta+1); \
+        center_index = grid.index(i_r, i_theta); \
+        left_index = grid.index(i_r-1, i_theta); \
+        bottom_index = grid.index(i_r, i_theta_M1); \
+        top_index = grid.index(i_r, i_theta_P1); \
         \
         /* Fill matrix row of (i,j) */ \
         const Stencil& CenterStencil = get_stencil(i_r); \
@@ -968,21 +987,19 @@ void CoarseSolver::buildMatrixA(SparseMatrix<double>& symetric_matrixA)
     omp_set_num_threads(maxOpenMPThreads_);
     delete[] dep;
 
-    symetric_matrixA = std::move(matrixA);
+    const int symmetric_matrixA_nnz = matrixA_nnz - (matrixA_nnz - n) / 2;
+    symetric_matrixA = SparseMatrix<double> (n, n, symmetric_matrixA_nnz);
+    symetric_matrixA.is_symmetric(true);
 
-    // const int symmetric_matrixA_nnz = matrixA_nnz - (matrixA_nnz - n) / 2;
-    // symetric_matrixA = SparseMatrix<double> (n, n, symmetric_matrixA_nnz);
-    // symetric_matrixA.is_symmetric(true);
-
-    // int current_nz = 0;
-    // for (int nz_index = 0; nz_index < matrixA.non_zero_size(); nz_index++) {
-    //     int current_matrixA_row = matrixA.row_index(nz_index);
-    //     int current_matrixA_col = matrixA.col_index(nz_index);
-    //     if (current_matrixA_row <= current_matrixA_col) {
-    //         // symetric_matrixA.row_index(current_nz) = current_matrixA_row;
-    //         // symetric_matrixA.col_index(current_nz) = current_matrixA_col;
-    //         // symetric_matrixA.value(current_nz) = std::move(matrixA.value(nz_index));
-    //         current_nz++;
-    //     }
-    // }
+    int current_nz = 0;
+    for (int nz_index = 0; nz_index < matrixA.non_zero_size(); nz_index++) {
+        int current_matrixA_row = matrixA.row_index(nz_index);
+        int current_matrixA_col = matrixA.col_index(nz_index);
+        if (current_matrixA_row <= current_matrixA_col) {
+            symetric_matrixA.row_index(current_nz) = current_matrixA_row;
+            symetric_matrixA.col_index(current_nz) = current_matrixA_col;
+            symetric_matrixA.value(current_nz) = std::move(matrixA.value(nz_index));
+            current_nz++;
+        }
+    }
 }

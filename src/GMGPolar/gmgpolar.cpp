@@ -17,7 +17,6 @@ void GMGPolar::setSolution(const ExactSolution& exact_solution) {
     exact_solution_ = std::make_shared<ExactSolution>(exact_solution);
 }
 
-
 void GMGPolar::setParameters(int argc, char* argv[]) {
     if(argc != 0){
         try {
@@ -27,6 +26,7 @@ void GMGPolar::setParameters(int argc, char* argv[]) {
             std::cerr << "Usage: " << parser_.usage() << std::endl;
         }
     }
+    
     parseGrid(); parseGeometry();
     parseMultigrid(); parseGeneral();
 }
