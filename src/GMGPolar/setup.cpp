@@ -13,7 +13,7 @@ void GMGPolar::setup() {
     levels_.reserve(numberOflevels_);
 
     int current_level = 0;
-    auto finest_levelCache = std::make_unique<LevelCache>(*finest_grid, system_parameters_, DirBC_Interior);
+    auto finest_levelCache = std::make_unique<LevelCache>(*finest_grid, domain_geometry_, system_parameters_, DirBC_Interior);
     levels_.emplace_back(current_level, std::move(finest_grid), std::move(finest_levelCache));
 
     for(current_level = 1; current_level < numberOflevels_; current_level++) {
@@ -58,11 +58,6 @@ void GMGPolar::setup() {
             levels_[current_level].initializeResidual(domain_geometry_, system_parameters_, DirBC_Interior, 
                 maxOpenMPThreads, taskingThreads_[current_level]
             );
-
-            levels_[current_level].initializeCoarseSolver(domain_geometry_, system_parameters_, DirBC_Interior, 
-                maxOpenMPThreads, taskingThreads_[current_level]
-            );
-
         }
         // -------------------------- //
         // Level n-1 (coarsest Level) //
@@ -71,18 +66,12 @@ void GMGPolar::setup() {
             levels_[current_level].initializeCoarseSolver(domain_geometry_, system_parameters_, DirBC_Interior, 
                 maxOpenMPThreads, taskingThreads_[current_level]
             );
-            levels_[current_level].initializeResidual(domain_geometry_, system_parameters_, DirBC_Interior, 
-                maxOpenMPThreads, taskingThreads_[current_level]
-            );
         }
         // ------------------- //
         // Intermediate levels //
         // ------------------- //
         else{
             levels_[current_level].initializeSmoothing(domain_geometry_, system_parameters_, DirBC_Interior, 
-                maxOpenMPThreads, taskingThreads_[current_level]
-            );
-            levels_[current_level].initializeCoarseSolver(domain_geometry_, system_parameters_, DirBC_Interior, 
                 maxOpenMPThreads, taskingThreads_[current_level]
             );
             levels_[current_level].initializeResidual(domain_geometry_, system_parameters_, DirBC_Interior, 
@@ -146,3 +135,4 @@ int GMGPolar::chooseNumberOfLevels(const PolarGrid& finestGrid) {
 
     return levels;
 }
+

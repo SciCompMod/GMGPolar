@@ -8,9 +8,6 @@ Residual::Residual(const PolarGrid& grid, const LevelCache& level_data,
     grid_(grid), 
     sin_theta_(level_data.sin_theta()),
     cos_theta_(level_data.cos_theta()),
-    rhs_f_(level_data.rhs_f()),
-    u_D_(level_data.u_D()),
-    u_D_Interior_(level_data.u_D_Interior()),
     domain_geometry_(domain_geometry),
     system_parameters_(system_parameters),
     DirBC_Interior_(DirBC_Interior),
@@ -51,7 +48,7 @@ do { \
 
 #define NODE_APPLY_RESIDUAL_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, \
     system_parameters, grid, DirBC_Interior, \
-    result, x, factor, \
+    result, rhs, x, factor, \
     arr, att, art, coeff_beta, detDF) \
 do { \
     /* -------------------- */ \
@@ -67,8 +64,7 @@ do { \
         double coeff3 = 0.5*(h1+h2)/k1; \
         double coeff4 = 0.5*(h1+h2)/k2; \
         /* Fill result of (i,j) */ \
-        result[grid.index(i_r,i_theta)] += \
-            0.25 * (h1+h2)*(k1+k2) * rhs_f_[grid.index(i_r,i_theta)] * fabs(detDF); \
+        result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
         /* Fill result(i,j) */ \
         result[grid.index(i_r,i_theta)] += factor * ( \
             0.25 * (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF) * x[grid.index(i_r,i_theta)] /* beta_{i,j} */ \
@@ -111,7 +107,7 @@ do { \
         /* ------------------------------------------------ */ \
         if(DirBC_Interior){ \
             /* Fill result of (i,j) */ \
-            result[grid.index(i_r,i_theta)] += u_D_Interior_[i_theta]; \
+            result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; /* Contains u_D_Interior */ \
             /* Fill result(i,j) */ \
             result[grid.index(i_r,i_theta)] += factor * x[grid.index(i_r,i_theta)]; \
             /* Give value to the interior nodes! */ \
@@ -141,8 +137,7 @@ do { \
             double coeff3 = 0.5*(h1+h2)/k1; \
             double coeff4 = 0.5*(h1+h2)/k2; \
             /* Fill result of (i,j) */ \
-            result[grid.index(i_r,i_theta)] += \
-                0.25 * (h1+h2)*(k1+k2) * rhs_f_[grid.index(i_r,i_theta)] * fabs(detDF); \
+            result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
             /* Fill result(i,j) */ \
             result[grid.index(i_r,i_theta)] += factor * ( \
                 0.25 * (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF) * x[grid.index(i_r,i_theta)] /* beta_{i,j} */ \
@@ -191,8 +186,7 @@ do { \
         double coeff3 = 0.5*(h1+h2)/k1; \
         double coeff4 = 0.5*(h1+h2)/k2; \
         /* Fill result of (i,j) */ \
-        result[grid.index(i_r,i_theta)] += \
-            0.25 * (h1+h2)*(k1+k2) * rhs_f_[grid.index(i_r,i_theta)] * fabs(detDF); \
+        result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
         /* Fill result(i,j) */ \
         result[grid.index(i_r,i_theta)] += factor * ( \
             0.25 * (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF) * x[grid.index(i_r,i_theta)] /* beta_{i,j} */ \
@@ -241,8 +235,7 @@ do { \
         double coeff3 = 0.5*(h1+h2)/k1; \
         double coeff4 = 0.5*(h1+h2)/k2; \
         /* Fill result of (i,j) */ \
-        result[grid.index(i_r,i_theta)] += \
-            0.25 * (h1+h2)*(k1+k2) * rhs_f_[grid.index(i_r,i_theta)] * fabs(detDF); \
+        result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
         /* Fill result(i,j) */ \
         result[grid.index(i_r,i_theta)] += factor * ( \
             (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF) / 4 * x[grid.index(i_r,i_theta)] /* beta_{i,j} */ \
@@ -282,7 +275,7 @@ do { \
     /* ----------------------------- */ \
     } else if (i_r == grid.nr() - 1) { \
         /* Fill result of (i,j) */ \
-        result[grid.index(i_r,i_theta)] += u_D_[i_theta]; \
+        result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; /* Contains u_D */ \
         /* Dirichlet boundary */ \
         result[grid.index(i_r,i_theta)] += factor * x[grid.index(i_r,i_theta)]; \
         /* Give value to the interior nodes! */ \
@@ -316,7 +309,7 @@ do { \
         \
         NODE_APPLY_RESIDUAL_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, \
             system_parameters_, grid_, DirBC_Interior_, \
-            result, x, factor, \
+            result, rhs, x, factor, \
             arr, att, art, coeff_beta, detDF); \
     } \
 } while(0)
@@ -338,7 +331,7 @@ do { \
         \
         NODE_APPLY_RESIDUAL_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, \
             system_parameters_, grid_, DirBC_Interior_, \
-            result, x, factor, \
+            result, rhs, x, factor, \
             arr, att, art, coeff_beta, detDF); \
     } \
 } while(0)
@@ -346,13 +339,14 @@ do { \
 
 
 /* ------------------------- */
-/* result = f + factor * A*x */
-void Residual::computeResidual_V1(Vector<double>& result, const Vector<double>& x){
+/* result = rhs + factor * A*x */
+void Residual::computeResidual_V1(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const {
     assert(result.size() == x.size());
 
     const double factor = -1.0;
 
     omp_set_num_threads(maxOpenMPThreads_);
+
     assign(result, 0.0);
 
     const int numCircleTasks = grid_.numberSmootherCircles();
@@ -485,7 +479,7 @@ void Residual::computeResidual_V1(Vector<double>& result, const Vector<double>& 
 
 /* ------------------------- */
 /* result = f + factor * A*x */
-void Residual::computeResidual_V2(Vector<double>& result, const Vector<double>& x){
+void Residual::computeResidual_V2(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const{
     assert(result.size() == x.size());
 
     const double factor = -1.0;
@@ -588,7 +582,7 @@ void Residual::computeResidual_V2(Vector<double>& result, const Vector<double>& 
 
 /* ------------------------- */
 /* result = f + factor * A*x */
-void Residual::computeResidual_V3(Vector<double>& result, const Vector<double>& x){
+void Residual::computeResidual_V3(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const{
     assert(result.size() == x.size());
 
     const double factor = -1.0;

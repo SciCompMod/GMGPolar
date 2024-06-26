@@ -29,9 +29,9 @@ public:
         const int maxOpenMPThreads, const int openMPTaskThreads
     );
     
-    void computeResidual_V1(Vector<double>& result, const Vector<double>& x);
-    void computeResidual_V2(Vector<double>& result, const Vector<double>& x);
-    void computeResidual_V3(Vector<double>& result, const Vector<double>& x);
+    void computeResidual_V1(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const;
+    void computeResidual_V2(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const;
+    void computeResidual_V3(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const;
 
 private:
     /* ------------------- */
@@ -40,9 +40,6 @@ private:
     /* Level Cache Data */
     const std::vector<double>& sin_theta_;
     const std::vector<double>& cos_theta_;
-    const Vector<double>& rhs_f_;
-    const std::vector<double>& u_D_;
-    const std::vector<double>& u_D_Interior_;
 
     const DomainGeometry& domain_geometry_;
     const SystemParameters& system_parameters_;

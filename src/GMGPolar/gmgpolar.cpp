@@ -30,3 +30,16 @@ void GMGPolar::setParameters(int argc, char* argv[]) {
     parseGrid(); parseGeometry();
     parseMultigrid(); parseGeneral();
 }
+
+
+void GMGPolar::prolongateToNextLevel(const int current_level, Vector<double>& result, const Vector<double>& x) const {
+    assert(static_cast<size_t>(current_level) < levels_.size() && 1 <= current_level);
+    if(!interpolation_) throw std::runtime_error("Interpolation not initialized.");
+    interpolation_->applyProlongation(levels_[current_level], levels_[current_level-1], result, x);
+}
+
+void GMGPolar::restrictToLowerLevel(const int current_level, Vector<double>& result, const Vector<double>& x) const {
+    assert(static_cast<size_t>(current_level) < levels_.size() - 1 && 0 <= current_level);
+    if(!interpolation_) throw std::runtime_error("Interpolation not initialized.");
+    interpolation_->applyRestrictionTake(levels_[current_level], levels_[current_level+1], result, x);
+}

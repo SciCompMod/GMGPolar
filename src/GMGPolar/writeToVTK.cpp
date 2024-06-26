@@ -1,10 +1,10 @@
 #include "../../include/GMGPolar/gmgpolar.h"  
 
-void GMGPolar::write_to_vtk(const std::filesystem::path& file_path, const PolarGrid& grid, const Vector<double>& grid_function, const LevelCache& leveldata){
+void GMGPolar::write_to_vtk(const std::filesystem::path& file_path, const PolarGrid& grid, const Vector<double>& grid_function, const LevelCache& level_cache){
     assert(grid.number_of_nodes() == grid_function.size());
 
-    const Vector<double>& sin_theta_vec = leveldata.sin_theta();
-    const Vector<double>& cos_theta_vec = leveldata.cos_theta();
+    const Vector<double>& sin_theta_vec = level_cache.sin_theta();
+    const Vector<double>& cos_theta_vec = level_cache.cos_theta();
 
     const auto filename = file_path.stem().string() + ".vtu";
 
@@ -47,7 +47,7 @@ void GMGPolar::write_to_vtk(const std::filesystem::path& file_path, const PolarG
 
     
     file << "<DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n";
-    for (int i = 0; i < (grid.nr() - 1) * grid.ntheta(); i++) {
+    for (size_t i = 0; i < (grid.nr() - 1) * grid.ntheta(); i++) {
         file << 4 * (i + 1) << " ";
     }
 

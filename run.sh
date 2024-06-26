@@ -10,8 +10,8 @@
 --Rmax 1.3 \
 --nr_exp 5 \
 --ntheta_exp 5 \
---anisotropic_factor 0 \
---divideBy2 0 \
+--anisotropic_factor 4 \
+--divideBy2 5 \
 --write_grid_file 0 \
 --load_grid_file 0 \
 --file_grid_r "_radii.txt" \
@@ -20,7 +20,7 @@
 --DirBC_Interior 1 \
 \
 --extrapolation 0 \
---maxLevels 2 \
+--maxLevels -1 \
 --v1 1 \
 --v2 1 \
 --cycle 1 \

@@ -35,6 +35,16 @@ void assign(Vector<T>& lhs, const T& rhs){
 }
 
 template<typename T>
+void add(Vector<T>& result, const Vector<T>& x){
+    assert(result.size()==x.size());
+    const int size=x.size();
+    #pragma omp parallel for
+    for(int i = 0; i < size; ++i) {
+        result[i] += x[i];
+    }
+}
+
+template<typename T>
 void add(Vector<T>& result, const Vector<T>& lhs,const Vector<T>& rhs){
     assert(lhs.size()==rhs.size());
     assert(result.size()==rhs.size());
@@ -46,13 +56,23 @@ void add(Vector<T>& result, const Vector<T>& lhs,const Vector<T>& rhs){
 }
 
 template<typename T>
+void subtract(Vector<T>& result, const Vector<T>& x){
+    assert(result.size()==x.size());
+    const int size=x.size();
+    #pragma omp parallel for
+    for(int i=0;i<size;++i){
+        result[i] -= x[i];
+    }
+}
+
+template<typename T>
 void subtract(Vector<T>& result, const Vector<T>& lhs,const Vector<T>& rhs){
     assert(lhs.size()==rhs.size());
     assert(result.size()==rhs.size());
     const int size=lhs.size();
     #pragma omp parallel for
     for(int i=0;i<size;++i){
-        result[i]=lhs[i]-rhs[i];
+        result[i] = lhs[i] - rhs[i];
     }
 }
 

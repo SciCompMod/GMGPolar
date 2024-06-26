@@ -44,7 +44,7 @@ do { \
 
 #define NODE_APPLY_ASC_ORTHO_CIRCLE_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, \
     system_parameters, grid, DirBC_Interior, color, \
-    x, result, factor, \
+    x, rhs, temp, factor, \
     arr, att, art, coeff_beta, detDF) \
 do { \
     assert(i_r >= 0 && i_r <= grid_.numberSmootherCircles()); \
@@ -66,36 +66,33 @@ do { \
         /* -------------------- */ \
         /* Inside Section Parts */ \
         if(node_color == color){ \
-            /* Fill result of (i,j) */ \
-            result[grid.index(i_r,i_theta)] += \
-                0.25 * (h1+h2)*(k1+k2) * rhs_f_[grid.index(i_r,i_theta)] * fabs(detDF); \
-            /* Fill result(i,j) */ \
-            result[grid.index(i_r,i_theta)] += factor * ( \
+            /* Fill temp(i,j) */ \
+            temp[grid.index(i_r,i_theta)] += factor * ( \
                 - coeff1 * arr * x[grid.index(i_r-1,i_theta)] /* Left */ \
                 - coeff2 * arr * x[grid.index(i_r+1,i_theta)] /* Right */ \
             ); \
-            /* Fill result(i,j-1) */ \
-            result[grid.index(i_r,i_theta-1)] += factor * ( \
+            /* Fill temp(i,j-1) */ \
+            temp[grid.index(i_r,i_theta-1)] += factor * ( \
                 - 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Top Right */ \
                 + 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Top Left */ \
-            /* Fill result(i,j+1) */ \
-            result[grid.index(i_r,i_theta+1)] += factor * ( \
+            /* Fill temp(i,j+1) */ \
+            temp[grid.index(i_r,i_theta+1)] += factor * ( \
                 + 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Bottom Right */ \
                 - 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Bottom Left */ \
         } \
         /* --------------------- */ \
         /* Outside Section Parts */ \
         else if(node_color != color){ \
-            /* Fill result(i-1,j) */ \
+            /* Fill temp(i-1,j) */ \
             if(!DirBC_Interior || i_r > 1) { \
-                result[grid.index(i_r-1,i_theta)] += factor * ( \
+                temp[grid.index(i_r-1,i_theta)] += factor * ( \
                     - coeff1 * arr * x[grid.index(i_r,i_theta)] /* Right */ \
                     - 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Right */ \
                     + 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Right */ \
             } \
-            /* Fill result(i+1,j) */ \
+            /* Fill temp(i+1,j) */ \
             if(i_r < grid.numberSmootherCircles() - 1) { \
-                result[grid.index(i_r+1,i_theta)] += factor * ( \
+                temp[grid.index(i_r+1,i_theta)] += factor * ( \
                     - coeff2 * arr * x[grid.index(i_r,i_theta)] /* Left */ \
                     + 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Left */ \
                     - 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Left */ \
@@ -117,15 +114,13 @@ do { \
             /* -------------------- */ \
             /* Inside Section Parts */ \
             if(node_color == color){ \
-                /* Fill result of (i,j) */ \
-                result[grid.index(i_r,i_theta)] += \
-                    u_D_Interior_[grid.index(i_r,i_theta)]; \
+                \
             } \
             /* --------------------- */ \
             /* Outside Section Parts */ \
             else if(node_color != color){ \
-                /* Fill result(i+1,j) */ \
-                result[grid.index(i_r+1,i_theta)] += factor * ( \
+                /* Fill temp(i+1,j) */ \
+                temp[grid.index(i_r+1,i_theta)] += factor * ( \
                     - coeff2 * arr * x[grid.index(i_r,i_theta)] /* Left */ \
                     + 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Left */ \
                     - 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Left */ \
@@ -149,28 +144,25 @@ do { \
             /* -------------------- */ \
             /* Inside Section Parts */ \
             if(node_color == color){ \
-                /* Fill result of (i,j) */ \
-                result[grid.index(i_r,i_theta)] += \
-                    0.25 * (h1+h2)*(k1+k2) * rhs_f_[grid.index(i_r,i_theta)] * fabs(detDF); \
-                /* Fill result(i,j) */ \
-                result[grid.index(i_r,i_theta)] += factor * ( \
+                /* Fill temp(i,j) */ \
+                temp[grid.index(i_r,i_theta)] += factor * ( \
                     /* - coeff1 * arr * x[grid.index(i_r, i_theta + (grid.ntheta()>>1))] // Left: Not in Asc_ortho */ \
                     - coeff2 * arr * x[grid.index(i_r+1,i_theta)] /* Right */ \
                 ); \
-                /* Fill result(i,j-1) */ \
-                result[grid.index(i_r,i_theta-1)] += factor * ( \
+                /* Fill temp(i,j-1) */ \
+                temp[grid.index(i_r,i_theta-1)] += factor * ( \
                     - 0.25 * art * x[grid.index(i_r+1,i_theta)] ); /* Top Right */ \
                 /*  + 0.25 * art * x[grid.index(i_r-1,i_theta)]; // Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */ \
-                /* Fill result(i,j+1) */ \
-                result[grid.index(i_r,i_theta+1)] += factor * ( \
+                /* Fill temp(i,j+1) */ \
+                temp[grid.index(i_r,i_theta+1)] += factor * ( \
                     + 0.25 * art * x[grid.index(i_r+1,i_theta)] ); /* Bottom Right */ \
                 /*  - 0.25 * art * x[grid.index(i_r-1,i_theta)]; // Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */ \
             } \
             /* --------------------- */ \
             /* Outside Section Parts */ \
             else if(node_color != color){ \
-                /* Fill result(i+1,j) */ \
-                result[grid.index(i_r+1,i_theta)] += factor * ( \
+                /* Fill temp(i+1,j) */ \
+                temp[grid.index(i_r+1,i_theta)] += factor * ( \
                     - coeff2 * arr * x[grid.index(i_r,i_theta)] /* Left */ \
                     + 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Left */ \
                     - 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Left */ \
@@ -193,8 +185,8 @@ do { \
             double coeff4 = 0.5*(h1+h2)/k2; \
             /* --------------------- */ \
             /* Outside Section Parts */ \
-            /* Fill result(i-1,j) */ \
-            result[grid.index(i_r-1,i_theta)] += factor * ( \
+            /* Fill temp(i-1,j) */ \
+            temp[grid.index(i_r-1,i_theta)] += factor * ( \
                 - coeff1 * arr * x[grid.index(i_r,i_theta)] /* Right */ \
                 - 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Right */ \
                 + 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Right */ \
@@ -209,7 +201,7 @@ do { \
 
 #define NODE_APPLY_ASC_ORTHO_RADIAL_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, \
     system_parameters, grid, DirBC_Interior, color, \
-    x, result, factor, \
+    x, rhs, temp, factor, \
     arr, att, art, coeff_beta, detDF) \
 do { \
     assert(i_r >= grid.numberSmootherCircles()-1 && i_r < grid.nr()); \
@@ -229,33 +221,30 @@ do { \
         /* -------------------- */ \
         /* Inside Section Parts */ \
         if(node_color == color){ \
-            /* Fill result of (i,j) */ \
-            result[grid.index(i_r,i_theta)] += \
-                0.25 * (h1+h2)*(k1+k2) * rhs_f_[grid.index(i_r,i_theta)] * fabs(detDF); \
-            /* Fill result(i,j) */ \
-            result[grid.index(i_r,i_theta)] += factor * ( \
+            /* Fill temp(i,j) */ \
+            temp[grid.index(i_r,i_theta)] += factor * ( \
                 - coeff3 * att * x[grid.index(i_r,i_theta-1)] /* Bottom */ \
                 - coeff4 * att * x[grid.index(i_r,i_theta+1)] /* Top */ \
             ); \
-            /* Fill result(i-1,j) */ \
-            result[grid.index(i_r-1,i_theta)] += factor * ( \
+            /* Fill temp(i-1,j) */ \
+            temp[grid.index(i_r-1,i_theta)] += factor * ( \
                 - 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Right */ \
                 + 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Right */ \
-            /* Fill result(i+1,j) */ \
-            result[grid.index(i_r+1,i_theta)] += factor * ( \
+            /* Fill temp(i+1,j) */ \
+            temp[grid.index(i_r+1,i_theta)] += factor * ( \
                 + 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Left */ \
                 - 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Left */ \
         } \
         /* --------------------- */ \
         /* Outside Section Parts */ \
         else if(node_color != color){ \
-            /* Fill result(i,j-1) */ \
-            result[grid.index(i_r,i_theta-1)] += factor * ( \
+            /* Fill temp(i,j-1) */ \
+            temp[grid.index(i_r,i_theta-1)] += factor * ( \
                 - coeff3 * att * x[grid.index(i_r,i_theta)] /* Top */ \
                 - 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Top Right */ \
                 + 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Top Left */ \
-            /* Fill result(i,j+1) */ \
-            result[grid.index(i_r,i_theta+1)] += factor * ( \
+            /* Fill temp(i,j+1) */ \
+            temp[grid.index(i_r,i_theta+1)] += factor * ( \
                 - coeff4 * att * x[grid.index(i_r,i_theta)] /* Bottom */ \
                 + 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Bottom Right */ \
                 - 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Bottom Left */ \
@@ -273,8 +262,8 @@ do { \
         /* -------------------- */ \
         /* Inside Section Parts */ \
         if(node_color == color){ \
-            /* Fill result(i+1,j) */ \
-            result[grid.index(i_r+1,i_theta)] += factor * ( \
+            /* Fill temp(i+1,j) */ \
+            temp[grid.index(i_r+1,i_theta)] += factor * ( \
                 - coeff2 * arr * x[grid.index(i_r,i_theta)] /* Left */ \
                 + 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Left */ \
                 - 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Left */ \
@@ -297,30 +286,27 @@ do { \
         /* -------------------- */ \
         /* Inside Section Parts */ \
         if(node_color == color){ \
-            /* Fill result of (i,j) */ \
-            result[grid.index(i_r,i_theta)] += \
-                0.25 * (h1+h2)*(k1+k2) * rhs_f_[grid.index(i_r,i_theta)] * fabs(detDF); \
-            /* Fill result(i,j) */ \
-            result[grid.index(i_r,i_theta)] += factor * ( \
+            /* Fill temp(i,j) */ \
+            temp[grid.index(i_r,i_theta)] += factor * ( \
                 - coeff1 * arr * x[grid.index(i_r-1,i_theta)] /* Left */ \
                 - coeff3 * att * x[grid.index(i_r,i_theta-1)] /* Bottom */ \
                 - coeff4 * att * x[grid.index(i_r,i_theta+1)] /* Top */ \
             ); \
-            /* Fill result(i+1,j) */ \
-            result[grid.index(i_r+1,i_theta)] += factor * ( \
+            /* Fill temp(i+1,j) */ \
+            temp[grid.index(i_r+1,i_theta)] += factor * ( \
                 + 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Left */ \
                 - 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Left */ \
         } \
         /* --------------------- */ \
         /* Outside Section Parts */ \
         else if(node_color != color){ \
-            /* Fill result(i,j-1) */ \
-            result[grid.index(i_r,i_theta-1)] += factor * ( \
+            /* Fill temp(i,j-1) */ \
+            temp[grid.index(i_r,i_theta-1)] += factor * ( \
                 - coeff3 * att * x[grid.index(i_r,i_theta)] /* Top */ \
                 - 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Top Right */ \
                 + 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Top Left */ \
-            /* Fill result(i,j+1) */ \
-            result[grid.index(i_r,i_theta+1)] += factor * ( \
+            /* Fill temp(i,j+1) */ \
+            temp[grid.index(i_r,i_theta+1)] += factor * ( \
                 - coeff4 * att * x[grid.index(i_r,i_theta)] /* Bottom */ \
                 + 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Bottom Right */ \
                 - 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Bottom Left */ \
@@ -338,35 +324,32 @@ do { \
         /* -------------------- */ \
         /* Inside Section Parts */ \
         if(node_color == color){ \
-            /* Fill result of (i,j) */ \
-            result[grid.index(i_r,i_theta)] += \
-                0.25 * (h1+h2)*(k1+k2) * rhs_f_[grid.index(i_r,i_theta)] * fabs(detDF); \
-            /* Fill result(i,j) */ \
-            result[grid.index(i_r,i_theta)] += factor * ( \
+            /* Fill temp(i,j) */ \
+            temp[grid.index(i_r,i_theta)] += factor * ( \
             - coeff3 * att * x[grid.index(i_r,i_theta-1)] /* Bottom */ \
             - coeff4 * att * x[grid.index(i_r,i_theta+1)] /* Top */ \
             ); \
-            /* Fill result(i-1,j) */ \
-            result[grid.index(i_r-1,i_theta)] += factor * ( \
+            /* Fill temp(i-1,j) */ \
+            temp[grid.index(i_r-1,i_theta)] += factor * ( \
                 - 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Right */ \
                 + 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Right */ \
             \
             /* "Right" is part of the radial Asc^ortho matrices, */ \
             /* but is shifted over to the rhs to make the radial Asc^ortho matrices symmetric. */ \
             /* Note that the circle Asc^ortho matrices are symmetric by default. */ \
-            result[grid.index(i_r,i_theta)] -= /* Right: Symmetry shift! */ \
-                -coeff2 * arr * u_D_[theta]; \
+            temp[grid.index(i_r,i_theta)] -= /* Right: Symmetry shift! */ \
+                -coeff2 * arr * rhs[grid.index(i_r,i_theta)]; \
         } \
         /* --------------------- */ \
         /* Outside Section Parts */ \
         else if(node_color != color){ \
-            /* Fill result(i,j-1) */ \
-            result[grid.index(i_r,i_theta-1)] += factor * ( \
+            /* Fill temp(i,j-1) */ \
+            temp[grid.index(i_r,i_theta-1)] += factor * ( \
                 - coeff3 * att * x[grid.index(i_r,i_theta)] /* Top */ \
                 - 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Top Right */ \
                 + 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Top Left */ \
-            /* Fill result(i,j+1) */ \
-            result[grid.index(i_r,i_theta+1)] += factor * ( \
+            /* Fill temp(i,j+1) */ \
+            temp[grid.index(i_r,i_theta+1)] += factor * ( \
                 - coeff4 * att * x[grid.index(i_r,i_theta)] /* Bottom */ \
                 + 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Bottom Right */ \
                 - 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Bottom Left */ \
@@ -376,10 +359,8 @@ do { \
         /* -------------------- */ \
         /* Inside Section Parts */ \
         if(node_color == color){ \
-            /* Fill result of (i,j) */ \
-            result[grid.index(i_r,i_theta)] += u_D_[theta]; \
-            /* Fill result(i-1,j) */ \
-            result[grid.index(i_r-1,i_theta)] += factor * ( \
+            /* Fill temp(i-1,j) */ \
+            temp[grid.index(i_r-1,i_theta)] += factor * ( \
                 - 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Right */ \
                 + 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Right */ \
         } \
@@ -410,7 +391,7 @@ do { \
         \
         NODE_APPLY_ASC_ORTHO_CIRCLE_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, \
             system_parameters_, grid_, DirBC_Interior_, color, \
-            x, temp_rhs, factor, \
+            x, rhs, temp, factor, \
             arr, att, art, coeff_beta, detDF); \
     } \
 } while(0)
@@ -431,7 +412,7 @@ do { \
         \
         NODE_APPLY_ASC_ORTHO_RADIAL_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, \
             system_parameters_, grid_, DirBC_Interior_, color, \
-            x, temp_rhs, factor, \
+            x, rhs, temp, factor, \
             arr, att, art, coeff_beta, detDF); \
     } \
 } while(0)
@@ -447,22 +428,22 @@ do { \
         inner_boundary_circle_Asc_mumps_.job = JOB_COMPUTE_SOLUTION; \
         inner_boundary_circle_Asc_mumps_.nrhs = 1; \
         inner_boundary_circle_Asc_mumps_.nz_rhs = end - start; \
-        inner_boundary_circle_Asc_mumps_.rhs = temp_rhs.begin() + start; \
+        inner_boundary_circle_Asc_mumps_.rhs = temp.begin() + start; \
         inner_boundary_circle_Asc_mumps_.lrhs = end - start; \
         dmumps_c(&inner_boundary_circle_Asc_mumps_); \
         if (inner_boundary_circle_Asc_mumps_.info[0] != 0) { \
             std::cerr << "Error solving the system: " << inner_boundary_circle_Asc_mumps_.info[0] << std::endl; \
         } \
-        std::move(temp_rhs.begin() + start, \
-            temp_rhs.begin() + end, \
+        std::move(temp.begin() + start, \
+            temp.begin() + end, \
             x.begin() + start \
         );  \
     } \
     else { \
         const int circle_solver_index = i_r - 1; \
-        circle_symmetric_cyclic_tridiagonal_solver_[circle_solver_index].solveInPlace(temp_rhs.begin() + start, circle_solver_storage_1.begin(), circle_solver_storage_2.begin()); \
-        std::move(temp_rhs.begin() + start, \
-            temp_rhs.begin() + end, \
+        circle_symmetric_cyclic_tridiagonal_solver_[circle_solver_index].solveInPlace(temp.begin() + start, circle_solver_storage_1.begin(), circle_solver_storage_2.begin()); \
+        std::move(temp.begin() + start, \
+            temp.begin() + end, \
             x.begin() + start \
         );  \
     } \
@@ -473,22 +454,23 @@ do { \
     /* std::cout << "RADIAL SOLVE i_theta = " << i_theta << std::endl; */ \
     const int start = grid_.index(grid_.numberSmootherCircles(), i_theta); \
     const int end = start + grid_.lengthSmootherRadial(); \
-    radial_symmetric_tridiagonal_solver_[i_theta].solveInPlace(temp_rhs.begin() + start, radial_solver_storage.begin()); \
-    std::move(temp_rhs.begin() + start, \
-        temp_rhs.begin() + end, \
+    radial_symmetric_tridiagonal_solver_[i_theta].solveInPlace(temp.begin() + start, radial_solver_storage.begin()); \
+    std::move(temp.begin() + start, \
+        temp.begin() + end, \
         x.begin() + start \
     ); \
 } while(0)
 
 
 
-void Smoother::smoothingInPlace(Vector<double>& x, Vector<double>& temp_rhs){
-    assert(x.size() == temp_rhs.size());
+void Smoother::smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) {
+    assert(x.size() == rhs.size());
+    assert(temp.size() == rhs.size());
 
     omp_set_num_threads(maxOpenMPThreads_);
 
-    assign(temp_rhs, 0.0);
-
+    temp = rhs;
+    
     const double factor = -1.0;
 
     const int numCircleTasks = grid_.numberSmootherCircles();

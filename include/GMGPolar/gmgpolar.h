@@ -80,7 +80,6 @@ private:
     PolarGrid createFinestGrid();
     int chooseNumberOfLevels(const PolarGrid& finest_grid);
 
-    
     void write_to_vtk(const std::filesystem::path& file_path, const PolarGrid& grid, const Vector<double>& grid_function, const LevelCache& leveldata);
 
     // Parser functions for GMGPolar parameters
@@ -93,4 +92,9 @@ private:
     void parseGeometry();
     void parseMultigrid();
     void parseGeneral();
+
+    void prolongateToNextLevel(const int current_level, Vector<double>& result, const Vector<double>& x) const;
+    void restrictToLowerLevel(const int current_level, Vector<double>& result, const Vector<double>& x) const;
+
+    void multigrid_iteration(const int level_depth);
 };

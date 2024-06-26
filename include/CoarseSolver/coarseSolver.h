@@ -44,9 +44,6 @@ private:
     /* Level Cache Data */
     const std::vector<double>& sin_theta_;
     const std::vector<double>& cos_theta_;
-    const Vector<double>& rhs_f_;
-    const std::vector<double>& u_D_;
-    const std::vector<double>& u_D_Interior_;
 
     const DomainGeometry& domain_geometry_;
     const SystemParameters& system_parameters_;
@@ -65,7 +62,7 @@ private:
     int ptr_nz_index_matrixA(const int i_r, const int i_theta) const;
 
     void buildMatrixA(SparseMatrix<double>& matrixA);
-    void subtractSymmetryShift(Vector<double>& rhs);
+    void subtractSymmetryShift(Vector<double>& rhs) const;
 
     void initializeMumps(DMUMPS_STRUC_C& mumps, const SparseMatrix<double>& matrixA);
     void solveMumps(Vector<double>& result_rhs);

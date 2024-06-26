@@ -126,7 +126,7 @@ do { \
 /* Boundary Symmetry Shift */
 /* ----------------------- */
 
-void CoarseSolver::subtractSymmetryShift(Vector<double>& x){
+void CoarseSolver::subtractSymmetryShift(Vector<double>& x) const {
     assert(x.size() == grid_.number_of_nodes());
 
     omp_set_num_threads(maxOpenMPThreads_);

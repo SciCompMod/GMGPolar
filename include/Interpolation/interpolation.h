@@ -24,12 +24,7 @@ public:
 
     void applyRestrictionTake0(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const;
     void applyRestrictionTake(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const;
-    void applyRestrictionTakeTasks(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const;
 
-    void applyRestrictionGive0(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const;
-    void applyRestrictionGive(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const;
-    void applyRestrictionGiveTasks(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const;
-    
 private:
     const int maxOpenMPThreads_;
     const std::vector<int>& taskingThreads_;
