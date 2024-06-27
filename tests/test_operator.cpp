@@ -268,6 +268,22 @@ TEST_P(test_operator, arr_art_att)
     }
 }
 
+std::vector<double> calculatecoeff(int j, int i, int mod_pk)
+{
+    int sz;
+    if (j == 0 && mod_pk != 0) {
+        sz = 21;
+    }
+    else {
+        if (mod_pk != 0) {
+            sz = 27;
+        }
+        else {
+            sz = 15;
+        }
+    }
+}
+
 TEST_P(test_operator, apply_A)
 {
     gyro::icntl[Param::DirBC_Interior] = 0;
@@ -287,11 +303,13 @@ TEST_P(test_operator, apply_A)
     for (int j = 0; j < nr_int + 1; ++j) {
         for (int i = 0; i < ntheta_int; ++i) {
             int ind = j * ntheta_int + i;
-            if (gyro::icntl[Param::DirBC_Interior] && j == 0) {
+            std::vector<double> coeff() if (gyro::icntl[Param::DirBC_Interior] && j == 0)
+            {
                 EXPECT_EQ(u_test[ind], sol[ind]);
             }
             //void calculate_coeff(double& arr, double& art, double& att, double r, double theta, int mod_pk)
-            else if (j == 0) { //across the origin
+            else if (j == 0)
+            { //across the origin
                 EXPECT_EQ(ntheta_int % 2, 0);
                 int i_across_orig = (i + (ntheta_int / 2)) % ntheta_int;
                 double across     = (test_level.theta[i] + PI) >= 2 * PI ? (test_level.theta[i] + PI) - 2 * PI
@@ -307,17 +325,6 @@ TEST_P(test_operator, apply_A)
                                       : 2 * PI - test_level.theta[test_level.ntheta_int - 1];
                 double hs   = test_level.r[1] - test_level.r[0];
                 double hsm1 = 2 * test_level.r[0];
-
-                double att_stm1, att_st, att_stp1, arr_st, arr_sp1t, art_stm1, art_sp1t, art_stp1, arr_sm1t;
-                double art_st, arr_stm1, arr_stp1, att_sp1t, art_sm1t, att_sm1t;
-                calculate_coeff(arr_st, art_st, att_st, test_level.r[j], test_level.theta[i],
-                                gyro::icntl[Param::mod_pk]);
-                calculate_coeff(arr_stm1, art_stm1, att_stm1, test_level.r[j], test_level.theta[(i - 1) % ntheta_int],
-                                gyro::icntl[Param::mod_pk]);
-                calculate_coeff(arr_stp1, art_stp1, att_stp1, test_level.r[j], test_level.theta[(i + 1) % ntheta_int],
-                                gyro::icntl[Param::mod_pk]);
-                calculate_coeff(arr_sp1t, art_sp1t, att_sp1t, test_level.r[j + 1], test_level.theta[i],
-                                gyro::icntl[Param::mod_pk]);
             }
         }
     }
