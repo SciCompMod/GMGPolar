@@ -67,8 +67,7 @@ TEST_P(test_smoother, test_line_splitting)
     int i = test_level.delete_circles;
     std::cout << i << std::endl;
     double k_j = test_level.theta[1] - test_level.theta[0];
-    double h_i = test_level.r[i] -
-                 test_level.r[i - 1]; //TO ASK: In paper it should be r[i+1]-r[i], no ? no max r in [r_i, r_i + h_i]
+    double h_i = test_level.r[i] - test_level.r[i - 1];
     EXPECT_GT(k_j * test_level.r[i], h_i) << "case 1" << std::flush;
 }
 
@@ -76,7 +75,7 @@ TEST_P(
     test_smoother,
     mapping_usc_to_u_extrapol) //maps local indices (k,smoother) i.e the k.th coordinate from Black row etc to global one
 {
-
+    //
     const int& val_size            = GetParam();
     gyro::icntl[Param::nr_exp]     = (int)(val_size / 3) + 3;
     gyro::icntl[Param::ntheta_exp] = (val_size % 3) + 3;
@@ -117,10 +116,10 @@ TEST_P(
             }
             else {
                 if (smoother < 2) {
-                    nodesperblock = test_level.ntheta_int;
+                    nodesperblock = test_level.ntheta_int; //nodes in one circle
                 }
                 else {
-                    nodesperblock = test_level.nr - test_level.delete_circles;
+                    nodesperblock = test_level.nr - test_level.delete_circles; //nodes in one radial
                 }
             }
         }
@@ -150,7 +149,6 @@ TEST_P(
                            std::to_string(test_level.delete_circles);
             }
         }
-        //TODO: This test just rewrites the function.. maybe test some szenarios better
     }
 }
 

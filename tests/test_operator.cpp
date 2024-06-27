@@ -271,6 +271,7 @@ TEST_P(test_operator, arr_art_att)
 std::vector<double> calculatecoeff(int j, int i, int mod_pk)
 {
     int sz;
+    std::vector<double> res;
     if (j == 0 && mod_pk != 0) {
         sz = 21;
     }
@@ -282,6 +283,8 @@ std::vector<double> calculatecoeff(int j, int i, int mod_pk)
             sz = 15;
         }
     }
+    std::vector<double> res(sz);
+    //UNFINISHED
 }
 
 TEST_P(test_operator, apply_A)
@@ -328,6 +331,7 @@ TEST_P(test_operator, apply_A)
             }
         }
     }
+    //UNFINISHED
 }
 /*
 TEST_F(test_operator, apply_A)
