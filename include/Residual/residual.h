@@ -33,6 +33,15 @@ public:
     void computeResidual_V2(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const;
     void computeResidual_V3(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const;
 
+    /* ----------- */
+    /* Debug Tests */
+    void applyATake0(Vector<double>& result, const Vector<double>& x, const double& scaleAx) const;
+    void arr_att_art(const double& r, const double& theta, 
+        const double& sin_theta, const double& cos_theta, 
+        const double& coeff_alpha, double& arr, double& att, double& art, double& detDF
+    ) const;
+    /* ----------- */
+
 private:
     /* ------------------- */
     /* Constructor members */

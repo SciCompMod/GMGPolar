@@ -69,7 +69,6 @@ private:
 //     const double map2_e = 1.4;
 // };
 
-
 // --------------- //
 // Culham Geometry //
 // --------------- //

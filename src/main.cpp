@@ -31,12 +31,7 @@ int main(int argc, char* argv[]){
 
     // Configure solver parameters from command-line arguments
     solver.setParameters(argc, argv);
-
-    // // Setup and solve the problem
-    // solver.setup();
-    // solver.solve();
-
-
+    
     // Time the setup section
     auto start = std::chrono::high_resolution_clock::now();
     

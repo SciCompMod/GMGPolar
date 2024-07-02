@@ -27,13 +27,13 @@ class Level;
 #include <vector>
 #include <iostream>
 
-class CoarseSolver {
+class DirectSolver {
 public:
-    explicit CoarseSolver(const PolarGrid& grid, const LevelCache& level_data, 
+    explicit DirectSolver(const PolarGrid& grid, const LevelCache& level_data, 
         const DomainGeometry& domain_geometry, const SystemParameters& system_parameters, const bool DirBC_Interior, 
         const int maxOpenMPThreads, const int openMPTaskThreads
     );
-    ~CoarseSolver();
+    ~DirectSolver();
 
     void solveInPlace(Vector<double>& x);
 

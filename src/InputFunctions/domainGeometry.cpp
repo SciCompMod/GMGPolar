@@ -10,13 +10,13 @@
 // Shafranov Geometry //
 // ------------------ //
 
-// /* Default constructor */
+/* Default constructor */
 
 // -------------------------- //
 // Czarny/Triangular Geometry //
 // -------------------------- //
 
-/* Default constructor */
+// /* Default constructor */
 
 // --------------- //
 // Culham Geometry //

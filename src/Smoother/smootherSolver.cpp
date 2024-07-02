@@ -66,6 +66,7 @@ do { \
         /* -------------------- */ \
         /* Inside Section Parts */ \
         if(node_color == color){ \
+            temp[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
             /* Fill temp(i,j) */ \
             temp[grid.index(i_r,i_theta)] += factor * ( \
                 - coeff1 * arr * x[grid.index(i_r-1,i_theta)] /* Left */ \
@@ -84,7 +85,7 @@ do { \
         /* Outside Section Parts */ \
         else if(node_color != color){ \
             /* Fill temp(i-1,j) */ \
-            if(!DirBC_Interior || i_r > 1) { \
+            if(i_r > 1 || !DirBC_Interior) { \
                 temp[grid.index(i_r-1,i_theta)] += factor * ( \
                     - coeff1 * arr * x[grid.index(i_r,i_theta)] /* Right */ \
                     - 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Right */ \
@@ -114,7 +115,7 @@ do { \
             /* -------------------- */ \
             /* Inside Section Parts */ \
             if(node_color == color){ \
-                \
+                temp[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
             } \
             /* --------------------- */ \
             /* Outside Section Parts */ \
@@ -133,7 +134,7 @@ do { \
             /* h1 gets replaced with 2 * R0. */ \
             /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()>>1)). */ \
             /* Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil. */ \
-            double h1 = 2 * grid.radius(0); \
+            double h1 = 2.0 * grid.radius(0); \
             double h2 = grid.r_dist(i_r); \
             double k1 = grid.theta_dist(i_theta-1); \
             double k2 = grid.theta_dist(i_theta); \
@@ -144,6 +145,7 @@ do { \
             /* -------------------- */ \
             /* Inside Section Parts */ \
             if(node_color == color){ \
+                temp[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
                 /* Fill temp(i,j) */ \
                 temp[grid.index(i_r,i_theta)] += factor * ( \
                     /* - coeff1 * arr * x[grid.index(i_r, i_theta + (grid.ntheta()>>1))] // Left: Not in Asc_ortho */ \
@@ -221,6 +223,7 @@ do { \
         /* -------------------- */ \
         /* Inside Section Parts */ \
         if(node_color == color){ \
+            temp[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
             /* Fill temp(i,j) */ \
             temp[grid.index(i_r,i_theta)] += factor * ( \
                 - coeff3 * att * x[grid.index(i_r,i_theta-1)] /* Bottom */ \
@@ -286,6 +289,7 @@ do { \
         /* -------------------- */ \
         /* Inside Section Parts */ \
         if(node_color == color){ \
+            temp[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
             /* Fill temp(i,j) */ \
             temp[grid.index(i_r,i_theta)] += factor * ( \
                 - coeff1 * arr * x[grid.index(i_r-1,i_theta)] /* Left */ \
@@ -324,21 +328,22 @@ do { \
         /* -------------------- */ \
         /* Inside Section Parts */ \
         if(node_color == color){ \
+            temp[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
             /* Fill temp(i,j) */ \
             temp[grid.index(i_r,i_theta)] += factor * ( \
-            - coeff3 * att * x[grid.index(i_r,i_theta-1)] /* Bottom */ \
-            - coeff4 * att * x[grid.index(i_r,i_theta+1)] /* Top */ \
+                - coeff3 * att * x[grid.index(i_r,i_theta-1)] /* Bottom */ \
+                - coeff4 * att * x[grid.index(i_r,i_theta+1)] /* Top */ \
             ); \
             /* Fill temp(i-1,j) */ \
             temp[grid.index(i_r-1,i_theta)] += factor * ( \
                 - 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Right */ \
                 + 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Right */ \
             \
-            /* "Right" is part of the radial Asc^ortho matrices, */ \
-            /* but is shifted over to the rhs to make the radial Asc^ortho matrices symmetric. */ \
-            /* Note that the circle Asc^ortho matrices are symmetric by default. */ \
+            /* "Right" is part of the radial Asc smoother matrices, */ \
+            /* but is shifted over to the rhs to make the radial Asc smoother matrices symmetric. */ \
+            /* Note that the circle Asc smoother matrices are symmetric by default. */ \
             temp[grid.index(i_r,i_theta)] -= /* Right: Symmetry shift! */ \
-                -coeff2 * arr * rhs[grid.index(i_r,i_theta)]; \
+                -coeff2 * arr * rhs[grid.index(i_r+1,i_theta)]; \
         } \
         /* --------------------- */ \
         /* Outside Section Parts */ \
@@ -356,11 +361,17 @@ do { \
         } \
     } \
     else if(i_r == grid.nr()-1){ \
+        double h1 = grid.r_dist(i_r-1); \
+        double k1 = grid.theta_dist(i_theta-1); \
+        double k2 = grid.theta_dist(i_theta); \
+        double coeff1 = 0.5*(k1+k2)/h1; \
         /* -------------------- */ \
         /* Inside Section Parts */ \
         if(node_color == color){ \
+            temp[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
             /* Fill temp(i-1,j) */ \
             temp[grid.index(i_r-1,i_theta)] += factor * ( \
+                - coeff1 * arr * x[grid.index(i_r,i_theta)] /* Right */ \
                 - 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Right */ \
                 + 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Right */ \
         } \
@@ -434,18 +445,16 @@ do { \
         if (inner_boundary_circle_Asc_mumps_.info[0] != 0) { \
             std::cerr << "Error solving the system: " << inner_boundary_circle_Asc_mumps_.info[0] << std::endl; \
         } \
-        std::move(temp.begin() + start, \
-            temp.begin() + end, \
-            x.begin() + start \
-        );  \
+        std::move(temp.begin() + start, temp.begin() + end, x.begin() + start);  \
     } \
     else { \
         const int circle_solver_index = i_r - 1; \
-        circle_symmetric_cyclic_tridiagonal_solver_[circle_solver_index].solveInPlace(temp.begin() + start, circle_solver_storage_1.begin(), circle_solver_storage_2.begin()); \
-        std::move(temp.begin() + start, \
-            temp.begin() + end, \
-            x.begin() + start \
-        );  \
+        circle_symmetric_cyclic_tridiagonal_solver_[circle_solver_index].solveInPlace( \
+            temp.begin() + start, \
+            circle_solver_storage_1.begin(), \
+            circle_solver_storage_2.begin() \
+        ); \
+        std::move(temp.begin() + start, temp.begin() + end, x.begin() + start);  \
     } \
 } while(0)
 
@@ -454,11 +463,11 @@ do { \
     /* std::cout << "RADIAL SOLVE i_theta = " << i_theta << std::endl; */ \
     const int start = grid_.index(grid_.numberSmootherCircles(), i_theta); \
     const int end = start + grid_.lengthSmootherRadial(); \
-    radial_symmetric_tridiagonal_solver_[i_theta].solveInPlace(temp.begin() + start, radial_solver_storage.begin()); \
-    std::move(temp.begin() + start, \
-        temp.begin() + end, \
-        x.begin() + start \
+    radial_symmetric_tridiagonal_solver_[i_theta].solveInPlace( \
+        temp.begin() + start, \
+        radial_solver_storage.begin() \
     ); \
+    std::move(temp.begin() + start, temp.begin() + end, x.begin() + start); \
 } while(0)
 
 
@@ -468,8 +477,7 @@ void Smoother::smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Ve
     assert(temp.size() == rhs.size());
 
     omp_set_num_threads(maxOpenMPThreads_);
-
-    temp = rhs;
+    assign(temp, 0.0);
     
     const double factor = -1.0;
 
@@ -544,7 +552,7 @@ void Smoother::smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Ve
                         asc_ortho_circle_dep[circle_task-1 + shift+1], \
                         asc_ortho_circle_dep[circle_task+2 + shift+1])  
                 {
-                    int i_r = numCircleTasks - circle_task - 1;    
+                    int i_r = numCircleTasks - circle_task - 1;   
                     CIRCLE_SECTION_APPLY_ASC_ORTHO_GIVE(i_r, SmootherColor::Black);
                 }
             }
@@ -558,7 +566,7 @@ void Smoother::smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Ve
                         asc_ortho_circle_dep[circle_task+0 + shift+1], \
                         asc_ortho_circle_dep[circle_task+1 + shift+1])   
                 {
-                    int i_r = numCircleTasks - circle_task - 1;    
+                    int i_r = numCircleTasks - circle_task - 1;
                     CIRCLE_SECTION_SOLVE_SMOOTER(i_r);
                 }
             }
@@ -793,7 +801,6 @@ void Smoother::smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Ve
             }
         }
     }
-
     omp_set_num_threads(maxOpenMPThreads_);
 
     delete[] asc_ortho_circle_dep;

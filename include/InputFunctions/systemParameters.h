@@ -28,8 +28,8 @@ private:
 
     // const double alpha_jump = 0.5; /* Poisson */
     // const double alpha_jump = 0.66; /* Sonnendrucker */
-    const double alpha_jump = 0.4837; /* Zoni */
-    // const double alpha_jump = 0.7081; /* Zoni Shifted */
+    // const double alpha_jump = 0.4837; /* Zoni */
+    const double alpha_jump = 0.7081; /* Zoni Shifted */
 };
 
 #include "systemParameters.inl"

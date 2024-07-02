@@ -1,6 +1,6 @@
-#include "../../include/CoarseSolver/coarseSolver.h"
+#include "../../include/DirectSolver/directSolver.h"
 
-CoarseSolver::CoarseSolver(const PolarGrid& grid, const LevelCache& level_data, 
+DirectSolver::DirectSolver(const PolarGrid& grid, const LevelCache& level_data, 
     const DomainGeometry& domain_geometry, const SystemParameters& system_parameters, const bool DirBC_Interior, 
     const int maxOpenMPThreads, const int openMPTaskThreads
 ) :
@@ -17,11 +17,11 @@ CoarseSolver::CoarseSolver(const PolarGrid& grid, const LevelCache& level_data,
     initializeMumps(mumps_, matrixA_);
 }
 
-CoarseSolver::~CoarseSolver() {
+DirectSolver::~DirectSolver() {
     deleteMumps(mumps_);
 }
 
-void CoarseSolver::solveInPlace(Vector<double>& x) {
+void DirectSolver::solveInPlace(Vector<double>& x) {
     subtractSymmetryShift(x);
     solveMumps(x);
 }

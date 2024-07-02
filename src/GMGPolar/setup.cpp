@@ -13,13 +13,12 @@ void GMGPolar::setup() {
     levels_.reserve(numberOflevels_);
 
     int current_level = 0;
-    auto finest_levelCache = std::make_unique<LevelCache>(*finest_grid, domain_geometry_, system_parameters_, DirBC_Interior);
+    auto finest_levelCache = std::make_unique<LevelCache>(*finest_grid);
     levels_.emplace_back(current_level, std::move(finest_grid), std::move(finest_levelCache));
 
     for(current_level = 1; current_level < numberOflevels_; current_level++) {
         auto current_grid = std::make_unique<PolarGrid>(coarseningGrid(levels_[current_level-1].grid()));
-        // auto current_levelCache = std::make_unique<LevelCache>(*current_grid, system_parameters_, DirBC_Interior);
-        auto current_levelCache = std::make_unique<LevelCache>(levels_[current_level-1], *current_grid, DirBC_Interior);
+        auto current_levelCache = std::make_unique<LevelCache>(levels_[current_level-1], *current_grid);
         levels_.emplace_back(current_level, std::move(current_grid), std::move(current_levelCache));
     }
 
@@ -63,7 +62,7 @@ void GMGPolar::setup() {
         // Level n-1 (coarsest Level) //
         // -------------------------- //
         else if(current_level == numberOflevels_ - 1){
-            levels_[current_level].initializeCoarseSolver(domain_geometry_, system_parameters_, DirBC_Interior, 
+            levels_[current_level].initializeDirectSolver(domain_geometry_, system_parameters_, DirBC_Interior, 
                 maxOpenMPThreads, taskingThreads_[current_level]
             );
         }
@@ -80,8 +79,6 @@ void GMGPolar::setup() {
         }
     }
 }
-
-
 
 PolarGrid GMGPolar::createFinestGrid() {
     PolarGrid finest_grid;
@@ -123,10 +120,14 @@ int GMGPolar::chooseNumberOfLevels(const PolarGrid& finestGrid) {
         angularMaxLevel++;
     }
 
+    const int linear_complexity_levels = 
+        std::ceil( (2.0 * std::log(static_cast<double>(finestGrid.number_of_nodes())) - std::log(3.0)) / (3.0 * std::log(4.0)));
+
     // Determine the number of levels as the minimum of radial maximum level, angular maximum level, 
     // and the maximum levels specified.
     int levels = std::min(radialMaxLevel, angularMaxLevel);
     if(maxLevels > 0) levels = std::min(maxLevels, levels);
+    if(maxLevels < 0) levels = std::min(linear_complexity_levels, levels);
 
     // Check if levels is less than Multigrid minimum level and throw an error
     if (levels < multigridMinLevel) {

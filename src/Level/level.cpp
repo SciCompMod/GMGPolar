@@ -6,6 +6,7 @@ Level::Level(const int level, std::unique_ptr<const PolarGrid> grid, std::unique
     level_(level), 
     grid_(std::move(grid)), 
     level_cache_(std::move(level_cache)),
+    rhs_(grid_->number_of_nodes()),
     solution_(grid_->number_of_nodes()),
     residual_(grid_->number_of_nodes())
 {}
@@ -29,6 +30,9 @@ LevelCache& Level::levelCache() {
     return *level_cache_;
 }
 
+Vector<double>& Level::rhs() {
+    return rhs_;
+}
 Vector<double>& Level::solution() {
     return solution_;
 }
@@ -52,16 +56,16 @@ void Level::computeResidual(Vector<double>& result, const Vector<double>& rhs, c
 
 // ------------------- //
 // Solve coarse System //
-void Level::initializeCoarseSolver(
+void Level::initializeDirectSolver(
     const DomainGeometry& domain_geometry, const SystemParameters& system_parameters, const bool DirBC_Interior, 
     const int maxOpenMPThreads, const int openMPTaskThreads)
 {
-    op_coarseSolver_ = std::make_unique<CoarseSolver>(*grid_, *level_cache_, domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
-    if (!op_coarseSolver_) throw std::runtime_error("Failed to initialize Coarse Solver.");
+    op_directSolver_ = std::make_unique<DirectSolver>(*grid_, *level_cache_, domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
+    if (!op_directSolver_) throw std::runtime_error("Failed to initialize Direct Solver.");
 }
-void Level::coarseSolveInPlace(Vector<double>& x) const {
-    if (!op_coarseSolver_) throw std::runtime_error("Coarse Solver not initialized.");
-    op_coarseSolver_->solveInPlace(x);
+void Level::directSolveInPlace(Vector<double>& x) const {
+    if (!op_directSolver_) throw std::runtime_error("Coarse Solver not initialized.");
+    op_directSolver_->solveInPlace(x);
 }
 
 // --------------- //

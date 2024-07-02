@@ -1,4 +1,4 @@
-#include "../../include/CoarseSolver/coarseSolver.h"
+#include "../../include/DirectSolver/directSolver.h"
 
 
 #define ARR_ATT_ART(domain_geometry, r, theta, sin_theta, cos_theta, coeff_alpha, \
@@ -41,17 +41,17 @@ do { \
     /* Node in the interior */ \
     /* -------------------- */ \
     if (i_r > 1 && i_r < grid.nr() - 2) { \
+        const int i_theta_M1 = grid.wrap_theta_index(i_theta-1); \
+        const int i_theta_P1 = grid.wrap_theta_index(i_theta+1); \
+        \
         double h1 = grid.r_dist(i_r-1); \
         double h2 = grid.r_dist(i_r); \
-        double k1 = grid.theta_dist(i_theta-1); \
+        double k1 = grid.theta_dist(i_theta_M1); \
         double k2 = grid.theta_dist(i_theta); \
         double coeff1 = 0.5*(k1+k2)/h1; \
         double coeff2 = 0.5*(k1+k2)/h2; \
         double coeff3 = 0.5*(h1+h2)/k1; \
         double coeff4 = 0.5*(h1+h2)/k2; \
-        \
-        const int i_theta_M1 = grid.wrap_theta_index(i_theta-1); \
-        const int i_theta_P1 = grid.wrap_theta_index(i_theta+1); \
         \
         center_nz_index = ptr_nz_index_matrixA(i_r, i_theta); \
         left_nz_index = ptr_nz_index_matrixA(i_r-1, i_theta); \
@@ -257,18 +257,18 @@ do { \
             /* h1 gets replaced with 2 * R0. */ \
             /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()>>1)). */ \
             /* Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil. */ \
+            const int i_theta_M1 = grid.wrap_theta_index(i_theta-1); \
+            const int i_theta_P1 = grid.wrap_theta_index(i_theta+1); \
+            const int i_theta_AcrossOrigin = grid.wrap_theta_index(i_theta + (grid.ntheta()>>1)); \
+            \
             double h1 = 2 * grid.radius(0); \
             double h2 = grid.r_dist(i_r); \
-            double k1 = grid.theta_dist(i_theta-1); \
+            double k1 = grid.theta_dist(i_theta_M1); \
             double k2 = grid.theta_dist(i_theta); \
             double coeff1 = 0.5*(k1+k2)/h1; \
             double coeff2 = 0.5*(k1+k2)/h2; \
             double coeff3 = 0.5*(h1+h2)/k1; \
             double coeff4 = 0.5*(h1+h2)/k2; \
-            \
-            const int i_theta_M1 = grid.wrap_theta_index(i_theta-1); \
-            const int i_theta_P1 = grid.wrap_theta_index(i_theta+1); \
-            const int i_theta_AcrossOrigin = grid.wrap_theta_index(i_theta + (grid.ntheta()>>1)); \
             \
             center_nz_index = ptr_nz_index_matrixA(i_r, i_theta); \
             left_nz_index = ptr_nz_index_matrixA(i_r, i_theta_AcrossOrigin); \
@@ -844,7 +844,7 @@ do { \
 /* -> shift non-symmetric part to rhs */
 /* ---------------------------------- */
 
-void CoarseSolver::buildMatrixA(SparseMatrix<double>& symetric_matrixA)
+void DirectSolver::buildMatrixA(SparseMatrix<double>& symetric_matrixA)
 {
     omp_set_num_threads(maxOpenMPThreads_);
 

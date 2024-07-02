@@ -19,11 +19,13 @@ class Interpolation {
 public:
     explicit Interpolation(const int maxOpenMPThreads, const std::vector<int>& taskingThreads);
 
+    void applyInjection(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const;
+
     void applyProlongation0(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const;
     void applyProlongation(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const;
 
-    void applyRestrictionTake0(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const;
-    void applyRestrictionTake(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const;
+    void applyRestriction0(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const;
+    void applyRestriction(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const;
 
 private:
     const int maxOpenMPThreads_;

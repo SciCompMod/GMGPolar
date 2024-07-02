@@ -1,6 +1,6 @@
 #pragma once
 
-class CoarseSolver;
+class DirectSolver;
 class Residual;
 class Smoother;
 
@@ -9,7 +9,7 @@ class Smoother;
 #include "../InputFunctions/domainGeometry.h"
 #include "../InputFunctions/systemParameters.h"
 
-#include "../CoarseSolver/coarseSolver.h"
+#include "../DirectSolver/directSolver.h"
 #include "../Residual/residual.h"
 #include "../Smoother/smoother.h"
 
@@ -32,6 +32,7 @@ public:
     const LevelCache& levelCache() const;
     LevelCache& levelCache();
 
+    Vector<double>& rhs();
     Vector<double>& solution();
     Vector<double>& residual();
 
@@ -44,10 +45,10 @@ public:
 
     // ------------------- //
     // Solve coarse System //
-    void initializeCoarseSolver(
+    void initializeDirectSolver(
         const DomainGeometry& domain_geometry, const SystemParameters& system_parameters, const bool DirBC_Interior,
         const int maxOpenMPThreads, const int openMPTaskThreads);
-    void coarseSolveInPlace(Vector<double>& x) const;
+    void directSolveInPlace(Vector<double>& x) const;
 
     // --------------- //
     // Apply Smoothing //
@@ -67,12 +68,13 @@ private:
     std::unique_ptr<const PolarGrid> grid_;
     std::unique_ptr<LevelCache> level_cache_;
 
-    std::unique_ptr<CoarseSolver> op_coarseSolver_;
+    std::unique_ptr<DirectSolver> op_directSolver_;
     std::unique_ptr<Residual> op_residual_;
     std::unique_ptr<Smoother> op_smoother_;
 
     // std::unique_ptr<const ExtrapolatedSmoother> 
 
+    Vector<double> rhs_;
     Vector<double> solution_;
     Vector<double> residual_;
 };
@@ -81,18 +83,12 @@ private:
 
 class LevelCache {
 public:
-    explicit LevelCache(const PolarGrid& grid, const DomainGeometry& domain_geometry, const SystemParameters& system_parameters, const bool DirBC_Interior);
-    explicit LevelCache(const Level& previous_level, const PolarGrid& current_grid, const bool DirBC_Interior);
+    explicit LevelCache(const PolarGrid& grid);
+    explicit LevelCache(const Level& previous_level, const PolarGrid& current_grid);
 
     const std::vector<double>& sin_theta() const;
     const std::vector<double>& cos_theta() const;
-
-    const Vector<double>& rhs() const;
-    Vector<double>& rhs();
 private:
     std::vector<double> sin_theta_;
     std::vector<double> cos_theta_;
-
-    /* Vector<double> and is used when the size matches grid.numberOfNodes(). */
-    Vector<double> rhs_;
 };

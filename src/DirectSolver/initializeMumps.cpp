@@ -1,6 +1,6 @@
-#include "../../include/CoarseSolver/coarseSolver.h"
+#include "../../include/DirectSolver/directSolver.h"
 
-void CoarseSolver::initializeMumps(DMUMPS_STRUC_C& mumps, const SparseMatrix<double>& matrixA){
+void DirectSolver::initializeMumps(DMUMPS_STRUC_C& mumps, const SparseMatrix<double>& matrixA){
     mumps.job = JOB_INIT;
     mumps.par = 1;
     mumps.sym = (matrixA.is_symmetric() ? 1 : 0);
@@ -68,16 +68,16 @@ void CoarseSolver::initializeMumps(DMUMPS_STRUC_C& mumps, const SparseMatrix<dou
     // CNTL(8-15) Don't exist
 
     mumps.job = JOB_ANALYSIS_AND_FACTORIZATION; 
-    assert(matrixA_.rows() == matrixA_.columns());
-    mumps.n = matrixA_.rows();
-    mumps.nz = matrixA_.non_zero_size();
-    mumps.irn = matrixA_.row_indices_data();
-    mumps.jcn = matrixA_.column_indices_data();
-    mumps.a = matrixA_.values_data();
+    assert(matrixA.rows() == matrixA.columns());
+    mumps.n = matrixA.rows();
+    mumps.nz = matrixA.non_zero_size();
+    mumps.irn = matrixA.row_indices_data();
+    mumps.jcn = matrixA.column_indices_data();
+    mumps.a = matrixA.values_data();
     dmumps_c(&mumps);
 }
 
-void CoarseSolver::solveMumps(Vector<double>& result_rhs){
+void DirectSolver::solveMumps(Vector<double>& result_rhs){
     mumps_.job = JOB_COMPUTE_SOLUTION;
     mumps_.nrhs = 1;
     mumps_.nz_rhs = result_rhs.size();
@@ -89,7 +89,7 @@ void CoarseSolver::solveMumps(Vector<double>& result_rhs){
     }
 }
 
-void CoarseSolver::deleteMumps(DMUMPS_STRUC_C& mumps){
+void DirectSolver::deleteMumps(DMUMPS_STRUC_C& mumps){
     mumps.job = JOB_END;
     dmumps_c(&mumps);
 }

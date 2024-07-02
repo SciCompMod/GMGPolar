@@ -1,6 +1,6 @@
-#include "../../include/CoarseSolver/coarseSolver.h"
+#include "../../include/DirectSolver/directSolver.h"
 
-const Stencil& CoarseSolver::get_stencil(int i_r) const {
+const Stencil& DirectSolver::get_stencil(int i_r) const {
     assert(0 <= i_r && i_r < grid_.nr());
 
     static const Stencil stencil_interior = 
@@ -48,7 +48,7 @@ const Stencil& CoarseSolver::get_stencil(int i_r) const {
     throw std::out_of_range("Invalid index for stencil");
 }
 
-int CoarseSolver::nnz_matrixA() const {
+int DirectSolver::nnz_matrixA() const {
     const int size_stencil_inner_boundary = DirBC_Interior_ ? 1 : 7 ;
     const int size_stencil_next_inner_boundary = DirBC_Interior_ ? 6 : 9;
     const int size_stencil_interior = 9;
@@ -66,7 +66,7 @@ int CoarseSolver::nnz_matrixA() const {
     ); 
 }
 
-int CoarseSolver::ptr_nz_index_matrixA(const int i_r, const int i_theta) const {
+int DirectSolver::ptr_nz_index_matrixA(const int i_r, const int i_theta) const {
     const int size_stencil_inner_boundary = DirBC_Interior_ ? 1 : 7 ;
     const int size_stencil_next_inner_boundary = DirBC_Interior_ ? 6 : 9;
     const int size_stencil_interior = 9;
@@ -84,7 +84,7 @@ int CoarseSolver::ptr_nz_index_matrixA(const int i_r, const int i_theta) const {
         const int prior_interior_nodes = (i_r-2) * grid_.ntheta() + i_theta;
         return
             size_stencil_inner_boundary * prior_inner_boundary_nodes +
-            size_stencil_next_inner_boundary  * prior_next_inner_boundary_nodes +
+            size_stencil_next_inner_boundary * prior_next_inner_boundary_nodes +
             size_stencil_interior * prior_interior_nodes;
     }
     if(i_r >= grid_.numberSmootherCircles() && i_r < grid_.nr() - 2) {
@@ -99,7 +99,7 @@ int CoarseSolver::ptr_nz_index_matrixA(const int i_r, const int i_theta) const {
         const int prior_outer_boundary_nodes = i_theta;
         return
             size_stencil_inner_boundary * prior_inner_boundary_nodes +
-            size_stencil_next_inner_boundary  * prior_next_inner_boundary_nodes +
+            size_stencil_next_inner_boundary * prior_next_inner_boundary_nodes +
             size_stencil_interior * prior_interior_nodes + 
             size_stencil_next_outer_boundary * prior_next_outer_boundary_nodes +
             size_stencil_outer_boundary * prior_outer_boundary_nodes;
@@ -129,7 +129,7 @@ int CoarseSolver::ptr_nz_index_matrixA(const int i_r, const int i_theta) const {
         const int prior_outer_boundary_nodes = i_theta;
         return
             size_stencil_inner_boundary * prior_inner_boundary_nodes +
-            size_stencil_next_inner_boundary  * prior_next_inner_boundary_nodes +
+            size_stencil_next_inner_boundary * prior_next_inner_boundary_nodes +
             size_stencil_interior * prior_interior_nodes + 
             size_stencil_next_outer_boundary * prior_next_outer_boundary_nodes +
             size_stencil_outer_boundary * prior_outer_boundary_nodes;
@@ -145,7 +145,7 @@ int CoarseSolver::ptr_nz_index_matrixA(const int i_r, const int i_theta) const {
         const int prior_outer_boundary_nodes = i_theta;
         return
             size_stencil_inner_boundary * prior_inner_boundary_nodes +
-            size_stencil_next_inner_boundary  * prior_next_inner_boundary_nodes +
+            size_stencil_next_inner_boundary * prior_next_inner_boundary_nodes +
             size_stencil_interior * prior_interior_nodes + 
             size_stencil_next_outer_boundary * prior_next_outer_boundary_nodes +
             size_stencil_outer_boundary * prior_outer_boundary_nodes;

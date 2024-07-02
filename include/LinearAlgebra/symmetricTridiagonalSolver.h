@@ -93,9 +93,16 @@ SymmetricTridiagonalSolver<T>::SymmetricTridiagonalSolver(const SymmetricTridiag
 // copy assignment
 template<typename T>
 SymmetricTridiagonalSolver<T>& SymmetricTridiagonalSolver<T>::operator=(const SymmetricTridiagonalSolver& other){
-    matrix_dimension_ = other.matrix_dimension_;
-    main_diagonal_values_ = std::make_unique<T[]>(matrix_dimension_);
-    sub_diagonal_values_ = std::make_unique<T[]>(matrix_dimension_-1);
+    if (this == &other) {
+        // Self-assignment, no work needed
+        return *this;
+    }
+    // Only allocate new memory if the sizes are different
+    if (matrix_dimension_ != other.matrix_dimension_) {
+        matrix_dimension_ = other.matrix_dimension_;
+        main_diagonal_values_ = std::make_unique<T[]>(matrix_dimension_);
+        sub_diagonal_values_ = std::make_unique<T[]>(matrix_dimension_-1);
+    }
     cyclic_corner_element_ = other.cyclic_corner_element_;
     is_cyclic_ = other.is_cyclic_;
     std::copy(other.main_diagonal_values_.get(), other.main_diagonal_values_.get() + matrix_dimension_, main_diagonal_values_.get());
@@ -191,6 +198,7 @@ T& SymmetricTridiagonalSolver<T>::cyclic_corner_element(){
 
 template<typename T>
 void SymmetricTridiagonalSolver<T>::solveInPlace(T* sol_rhs, T* temp1, T* temp2) const{
+    assert(matrix_dimension_ >= 2);
     assert(sol_rhs != nullptr);
     assert(temp1 != nullptr);
     if(is_cyclic_){

@@ -102,7 +102,7 @@ void Interpolation::applyProlongation0(const Level& fromLevel, const Level& toLe
 // Optimized version of applyProlongation0 //
 // --------------------------------------- //
 
-#define FINE_NODE_TAKE_PROLONGATION() \
+#define FINE_NODE_PROLONGATION() \
 do { \
     if(i_r & 1) { \
         if(i_theta & 1) { \
@@ -112,12 +112,13 @@ do { \
             double h2 = fineGrid.r_dist(i_r); \
             double k1 = fineGrid.theta_dist(i_theta-1); \
             double k2 = fineGrid.theta_dist(i_theta); \
+            int i_theta_coarse_P1 = coarseGrid.wrap_theta_index(i_theta_coarse+1); \
             double divisor = (h1+h2) * (k1+k2); \
             double value = ( \
-                h1*k1*x[coarseGrid.index(i_r_coarse,   i_theta_coarse)] +  /* Bottom left */ \
+                h1*k1*x[coarseGrid.index(i_r_coarse, i_theta_coarse)] +  /* Bottom left */ \
                 h2*k1*x[coarseGrid.index(i_r_coarse+1, i_theta_coarse)] +  /* Bottom right */ \
-                h1*k2*x[coarseGrid.index(i_r_coarse,   i_theta_coarse+1)] + /* Top left */ \
-                h2*k2*x[coarseGrid.index(i_r_coarse+1, i_theta_coarse+1)]   /* Top right */ \
+                h1*k2*x[coarseGrid.index(i_r_coarse, i_theta_coarse_P1)] + /* Top left */ \
+                h2*k2*x[coarseGrid.index(i_r_coarse+1, i_theta_coarse_P1)]   /* Top right */ \
             ); \
             result[fineGrid.index(i_r, i_theta)] = value / divisor; \
         } \
@@ -128,7 +129,7 @@ do { \
             double h2 = fineGrid.r_dist(i_r); \
             double divisor = (h1+h2); \
             double value = ( \
-                h1*x[coarseGrid.index(i_r_coarse,   i_theta_coarse)] +  /* left */ \
+                h1*x[coarseGrid.index(i_r_coarse, i_theta_coarse)] +  /* left */ \
                 h2*x[coarseGrid.index(i_r_coarse+1, i_theta_coarse)]    /* right */ \
             ); \
             result[fineGrid.index(i_r, i_theta)] = value / divisor; \
@@ -140,10 +141,11 @@ do { \
             /* Fine node between coarse nodes in theta direction */ \
             double k1 = fineGrid.theta_dist(i_theta-1); \
             double k2 = fineGrid.theta_dist(i_theta); \
+            int i_theta_coarse_P1 = coarseGrid.wrap_theta_index(i_theta_coarse+1); \
             double divisor = (k1+k2); \
             double value = ( \
-                k1*x[coarseGrid.index(i_r_coarse, i_theta_coarse)] +  /* bottom */ \
-                k2*x[coarseGrid.index(i_r_coarse, i_theta_coarse+1)]   /* top */ \
+                k1*x[coarseGrid.index(i_r_coarse, i_theta_coarse)] + /* bottom */ \
+                k2*x[coarseGrid.index(i_r_coarse, i_theta_coarse_P1)] /* top */ \
             ); \
             result[fineGrid.index(i_r, i_theta)] = value / divisor; \
         } \
@@ -167,33 +169,28 @@ void Interpolation::applyProlongation(const Level& fromLevel, const Level& toLev
     assert(x.size() == coarseGrid.number_of_nodes());
     assert(result.size() == fineGrid.number_of_nodes());
 
-
-    const int openMPTaskThreads = taskingThreads_[fromLevel.level()];
-    omp_set_num_threads(openMPTaskThreads);
-
-    #pragma omp parallel num_threads(openMPTaskThreads)
+    #pragma omp parallel num_threads(maxOpenMPThreads_)
     {
-        // Circular Smoother section
-        // For loop matches circular access pattern
+        /* Circluar Indexing Section */
+        /* For loop matches circular access pattern */
         #pragma omp for nowait
         for (int i_r = 0; i_r < fineGrid.numberSmootherCircles(); i_r++){
             int i_r_coarse = i_r >> 1;
             for (int i_theta = 0; i_theta < fineGrid.ntheta(); i_theta++){
                 int i_theta_coarse = i_theta >> 1;
-                FINE_NODE_TAKE_PROLONGATION();
+                FINE_NODE_PROLONGATION();
             }
         }
 
-        // Radial smoother section
-        // For loop matches radial access pattern
+        /* Radial Indexing Section */
+        /* For loop matches radial access pattern */
         #pragma omp for nowait
         for (int i_theta = 0; i_theta < fineGrid.ntheta(); i_theta++){
             int i_theta_coarse = i_theta >> 1;
             for (int i_r = fineGrid.numberSmootherCircles(); i_r < fineGrid.nr(); i_r++){
                 int i_r_coarse = i_r >> 1;
-                FINE_NODE_TAKE_PROLONGATION();
+                FINE_NODE_PROLONGATION();
             }
         }
     }
-    omp_set_num_threads(maxOpenMPThreads_);
 }

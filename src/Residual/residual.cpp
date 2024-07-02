@@ -65,6 +65,7 @@ do { \
         double coeff4 = 0.5*(h1+h2)/k2; \
         /* Fill result of (i,j) */ \
         result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
+        /* result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; */ \
         /* Fill result(i,j) */ \
         result[grid.index(i_r,i_theta)] += factor * ( \
             0.25 * (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF) * x[grid.index(i_r,i_theta)] /* beta_{i,j} */ \
@@ -108,6 +109,7 @@ do { \
         if(DirBC_Interior){ \
             /* Fill result of (i,j) */ \
             result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; /* Contains u_D_Interior */ \
+            /* result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; // Contains u_D_Interior */ \
             /* Fill result(i,j) */ \
             result[grid.index(i_r,i_theta)] += factor * x[grid.index(i_r,i_theta)]; \
             /* Give value to the interior nodes! */ \
@@ -128,7 +130,7 @@ do { \
             /* h1 gets replaced with 2 * R0. */ \
             /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()>>1)). */ \
             /* Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil. */ \
-            double h1 = 2 * grid.radius(0); \
+            double h1 = 2.0 * grid.radius(0); \
             double h2 = grid.r_dist(i_r); \
             double k1 = grid.theta_dist(i_theta-1); \
             double k2 = grid.theta_dist(i_theta); \
@@ -138,6 +140,7 @@ do { \
             double coeff4 = 0.5*(h1+h2)/k2; \
             /* Fill result of (i,j) */ \
             result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
+            /* result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; */ \
             /* Fill result(i,j) */ \
             result[grid.index(i_r,i_theta)] += factor * ( \
                 0.25 * (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF) * x[grid.index(i_r,i_theta)] /* beta_{i,j} */ \
@@ -187,6 +190,7 @@ do { \
         double coeff4 = 0.5*(h1+h2)/k2; \
         /* Fill result of (i,j) */ \
         result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
+        /* result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; */ \
         /* Fill result(i,j) */ \
         result[grid.index(i_r,i_theta)] += factor * ( \
             0.25 * (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF) * x[grid.index(i_r,i_theta)] /* beta_{i,j} */ \
@@ -236,9 +240,10 @@ do { \
         double coeff4 = 0.5*(h1+h2)/k2; \
         /* Fill result of (i,j) */ \
         result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
+        /* result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; */ \
         /* Fill result(i,j) */ \
         result[grid.index(i_r,i_theta)] += factor * ( \
-            (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF) / 4 * x[grid.index(i_r,i_theta)] /* beta_{i,j} */ \
+            0.25 * (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF) * x[grid.index(i_r,i_theta)] /* beta_{i,j} */ \
             - coeff1 * arr * x[grid.index(i_r-1,i_theta)] /* Left */ \
             - coeff2 * arr * x[grid.index(i_r+1,i_theta)] /* Right */ \
             - coeff3 * att * x[grid.index(i_r,i_theta-1)] /* Bottom */ \
@@ -276,6 +281,7 @@ do { \
     } else if (i_r == grid.nr() - 1) { \
         /* Fill result of (i,j) */ \
         result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; /* Contains u_D */ \
+        /* result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; // Contains u_D */ \
         /* Dirichlet boundary */ \
         result[grid.index(i_r,i_theta)] += factor * x[grid.index(i_r,i_theta)]; \
         /* Give value to the interior nodes! */ \
@@ -346,7 +352,6 @@ void Residual::computeResidual_V1(Vector<double>& result, const Vector<double>& 
     const double factor = -1.0;
 
     omp_set_num_threads(maxOpenMPThreads_);
-
     assign(result, 0.0);
 
     const int numCircleTasks = grid_.numberSmootherCircles();

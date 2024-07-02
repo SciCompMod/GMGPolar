@@ -42,7 +42,7 @@ file(GLOB_RECURSE LEVEL_SOURCES "src/Level/*.cpp")
 file(GLOB_RECURSE TASK_DISTRIBUTION_SOURCES "src/TaskDistribution/*.cpp")
 file(GLOB_RECURSE STENCIL_SOURCES "src/Stencil/*.cpp")
 file(GLOB_RECURSE INTERPOLATION_SOURCES "src/Interpolation/*.cpp")
-file(GLOB_RECURSE COARSE_SOLVER_SOURCES "src/CoarseSolver/*.cpp")
+file(GLOB_RECURSE DIRECT_SOLVER_SOURCES "src/DirectSolver/*.cpp")
 file(GLOB_RECURSE RESIDUAL_SOURCES "src/Residual/*.cpp")
 file(GLOB_RECURSE SMOOTHER_SOURCES "src/Smoother/*.cpp")
 
@@ -67,7 +67,7 @@ add_executable(gmgpolar
     ${TASK_DISTRIBUTION_SOURCES}
     ${STENCIL_SOURCES}
     ${INTERPOLATION_SOURCES}
-    ${COARSE_SOLVER_SOURCES}
+    ${DIRECT_SOLVER_SOURCES}
     ${RESIDUAL_SOURCES}
     ${SMOOTHER_SOURCES}
 
@@ -85,3 +85,7 @@ if(OpenMP_CXX_FOUND)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 target_link_libraries(gmgpolar PUBLIC ${MUMPS_LIBRARIES} OpenMP::OpenMP_CXX)
+
+enable_testing()
+add_subdirectory(third-party)
+add_subdirectory(tests)

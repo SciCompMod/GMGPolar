@@ -93,8 +93,10 @@ private:
     void parseMultigrid();
     void parseGeneral();
 
-    void prolongateToNextLevel(const int current_level, Vector<double>& result, const Vector<double>& x) const;
+    void prolongateToUpperLevel(const int current_level, Vector<double>& result, const Vector<double>& x) const;
     void restrictToLowerLevel(const int current_level, Vector<double>& result, const Vector<double>& x) const;
+
+    void build_rhs_f_discretization(const Level& level, Vector<double>& rhs_f_discretization);
 
     void multigrid_iteration(const int level_depth);
 };

@@ -145,16 +145,33 @@ SparseMatrix<T>::SparseMatrix(const SparseMatrix& other) :
 // copy assignment
 template<typename T>
 SparseMatrix<T>& SparseMatrix<T>::operator=(const SparseMatrix& other){
+
+    std::cout<<"Hello There"<<std::endl;
+
+    if (this == &other) {
+        // Self-assignment, no work needed
+        std::cout<<"P1"<<std::endl;
+        return *this;
+    }
+    // Only allocate new memory if the sizes are different
+    if (nnz_ != other.nnz_) {
+        std::cout<<"P2"<<std::endl;
+        row_indices_ = std::make_unique<int[]>(nnz_);
+        column_indices_ = std::make_unique<int[]>(nnz_);
+        values_ = std::make_unique<T[]>(nnz_);
+    }
+    std::cout<<"P3"<<std::endl;
+    // Copy the elements
     rows_ = other.rows_;
     columns_= other.columns_;
     nnz_ = other.nnz_;
-    row_indices_ = std::make_unique<int[]>(nnz_);
-    column_indices_ = std::make_unique<int[]>(nnz_);
-    values_ = std::make_unique<T[]>(nnz_);
     is_symmetric_ = other.is_symmetric_;
     std::copy(other.row_indices_.get(), other.row_indices_.get() + nnz_, row_indices_.get());
     std::copy(other.column_indices_.get(), other.column_indices_.get() + nnz_, column_indices_.get());
     std::copy(other.values_.get(), other.values_.get() + nnz_, values_.get());
+
+    std::cout<<"Fail"<<std::endl;
+
     return *this;
 }
 

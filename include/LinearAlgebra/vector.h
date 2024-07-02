@@ -6,6 +6,7 @@
 #include <initializer_list>
 #include <sstream>
 #include <vector>
+#include <iostream>
 
 template<typename T>
 class Vector
@@ -68,11 +69,20 @@ Vector<T>::Vector(const Vector& other):
 {
     std::copy(other.values_.get(), other.values_.get() + size_, values_.get());
 }
+
 // copy assignment
 template<typename T>
-Vector<T>& Vector<T>::operator=(const Vector& other){
-    size_ = other.size_;
-    values_ = std::make_unique<T[]>(size_);
+Vector<T>& Vector<T>::operator=(const Vector& other) {
+    if (this == &other) {
+        // Self-assignment, no work needed
+        return *this;
+    }
+    // Only allocate new memory if the sizes are different
+    if (size_ != other.size_) {
+        size_ = other.size_;
+        values_ = std::make_unique<T[]>(size_);
+    }
+    // Copy the elements
     std::copy(other.values_.get(), other.values_.get() + size_, values_.get());
     return *this;
 }
@@ -97,6 +107,7 @@ Vector<T>::Vector(int size):
     size_(size),
     values_(std::make_unique<T[]>(size_))
 {}
+
 // constructor with initialization
 template<typename T>
 Vector<T>::Vector(const std::initializer_list<T>& init):

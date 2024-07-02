@@ -1,4 +1,4 @@
-#include "../../include/CoarseSolver/coarseSolver.h"
+#include "../../include/DirectSolver/directSolver.h"
 
 
 #define ARR_ATT_ART(domain_geometry, r, theta, sin_theta, cos_theta, coeff_alpha, \
@@ -126,7 +126,7 @@ do { \
 /* Boundary Symmetry Shift */
 /* ----------------------- */
 
-void CoarseSolver::subtractSymmetryShift(Vector<double>& x) const {
+void DirectSolver::subtractSymmetryShift(Vector<double>& x) const {
     assert(x.size() == grid_.number_of_nodes());
 
     omp_set_num_threads(maxOpenMPThreads_);
@@ -180,7 +180,7 @@ void CoarseSolver::subtractSymmetryShift(Vector<double>& x) const {
                     depend(out: dep[boundary_task]) \
                     depend(in: dep[boundary_task-1], dep[(boundary_task+2) % numBoundaryTasks])   
                 {
-                    if(boundary_task > 0){
+                    if(boundary_task > 1){
                         int i_theta = boundary_task + additionalBoundaryTasks;    
                         GIVE_BOUNDARY_SYMMETRY_SHIFT(i_theta);
                     } else {
