@@ -1,5 +1,64 @@
 #pragma once
 
+/* ----------------------------------- */
+/* Gmg Polar - Enumeration Definitions */
+/* ----------------------------------- */
+
+/* Multigrid Cycle Types */
+enum class MultigridCycleType
+{
+    V_CYCLE = 0,
+    W_CYCLE = 1,
+    F_CYCLE = 2
+};
+
+/* Residual Norm Type */
+enum class ResidualNormType
+{
+    EUCLIDEAN = 0,             // Corresponds to the L2 norm
+    WEIGHTED_EUCLIDEAN = 1,    // A weighted version of the L2 norm
+    INFINITY_NORM = 2          // Corresponds to the L∞ norm
+};
+
+/* Geometry Types - domain_geometry */
+enum class GeometryType
+{
+    CIRCULAR = 0,
+    SHAFRANOV = 1,
+    CZARNY = 2,
+    CULHAM = 3
+};
+
+/* Test Problem Types - exact_solution */
+enum class ProblemType
+{
+    CARTESIAN_R2 = 0,
+    CARTESIAN_R6 = 1,
+    POLAR_R6 = 2,
+    REFINED_RADIUS = 3
+};
+
+/* Alpha Coefficient Types */
+enum class AlphaCoeff
+{
+    POISSON = 0,
+    SONNENDRUCKER = 1,
+    ZONI = 2,
+    ZONI_SHIFTED = 3
+};
+
+/* Beta Coefficient Types */
+enum class BetaCoeff
+{
+    ZERO = 0,
+    ALPHA_INVERSE = 1
+};
+
+
+/* ---------------------------- */
+/* Mumps - Constant Definitions */
+/* ---------------------------- */
+
 /* Mumps macro s.t. indices match documentation */
 #define ICNTL(I) icntl[(I)-1]
 #define CNTL(I) cntl[(I)-1]
@@ -21,4 +80,3 @@
 #define JOB_SAVE_INTERNAL_DATA 7
 #define JOB_RESTORE_INTERNAL_DATA 8
 #define JOB_DISTRIBUTE_RHS 9
-

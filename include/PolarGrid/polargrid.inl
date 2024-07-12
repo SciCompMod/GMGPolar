@@ -71,7 +71,7 @@ inline const double& PolarGrid::theta_dist(const int unwrapped_theta_index) cons
 // ------------------ //
 
 inline int PolarGrid::wrap_theta_index(const int unwrapped_theta_index) const
-{
+{   
     // unwrapped_theta_index may be negative or larger than ntheta() to allow for periodicity.
     // If ntheta = 2^k we can use the optimization idx & (ntheta-1)
     return is_ntheta_PowerOfTwo_ ? 

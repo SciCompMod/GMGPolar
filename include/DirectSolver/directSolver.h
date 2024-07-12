@@ -29,7 +29,7 @@ class Level;
 
 class DirectSolver {
 public:
-    explicit DirectSolver(const PolarGrid& grid, const LevelCache& level_data, 
+    explicit DirectSolver(const PolarGrid& grid, const LevelCache& level_cache, 
         const DomainGeometry& domain_geometry, const SystemParameters& system_parameters, const bool DirBC_Interior, 
         const int maxOpenMPThreads, const int openMPTaskThreads
     );

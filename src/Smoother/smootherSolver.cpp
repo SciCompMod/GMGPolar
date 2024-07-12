@@ -445,7 +445,7 @@ do { \
         if (inner_boundary_circle_Asc_mumps_.info[0] != 0) { \
             std::cerr << "Error solving the system: " << inner_boundary_circle_Asc_mumps_.info[0] << std::endl; \
         } \
-        std::move(temp.begin() + start, temp.begin() + end, x.begin() + start);  \
+        std::move(temp.begin() + start, temp.begin() + end, x.begin() + start); \
     } \
     else { \
         const int circle_solver_index = i_r - 1; \
@@ -454,7 +454,7 @@ do { \
             circle_solver_storage_1.begin(), \
             circle_solver_storage_2.begin() \
         ); \
-        std::move(temp.begin() + start, temp.begin() + end, x.begin() + start);  \
+        std::move(temp.begin() + start, temp.begin() + end, x.begin() + start); \
     } \
 } while(0)
 

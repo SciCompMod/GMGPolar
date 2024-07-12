@@ -215,7 +215,6 @@ void PolarGrid::initializeLineSplitting(std::optional<double> splitting_radius){
         }
         lengthSmootherRadial_ = nr() - numberSmootherCircles_;
         smoother_splitting_radius_ = radius(numberSmootherCircles_);
-        std::cout << "Shifting from circle to radial at radius " << numberSmootherCircles_ << ", "<< smoother_splitting_radius_ <<"\n";
     }
 
     numberCircularSmootherNodes_ = numberSmootherCircles_ * ntheta();

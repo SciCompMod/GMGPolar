@@ -141,3 +141,4 @@ double CartesianR2ZoniShafranov::phi_exact(double r, double theta, double map1_k
 {
     return (1.0 - (r/Rmax) * (r/Rmax)) * sin(M_PI * (2.0 * map1_kappa * (r/Rmax) * sin_theta + 2.0 * (r/Rmax) * sin_theta)) * cos(M_PI * ((-2.0) * map1_delta * ((r/Rmax) * (r/Rmax)) - 2.0 * map1_kappa * (r/Rmax) * cos_theta + 2.0 * (r/Rmax) * cos_theta));
 }
+

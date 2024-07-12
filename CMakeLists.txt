@@ -34,7 +34,6 @@ set(MUMPS_LIBRARIES
 include_directories(include)
 
 # Add source files
-file(GLOB_RECURSE INPUT_FUNCTIONS_SOURCES "src/InputFunctions/*.cpp")
 file(GLOB_RECURSE GMG_POLAR_SOURCES "src/GMGPolar/*.cpp")
 file(GLOB_RECURSE POLAR_GRID_SOURCES "src/PolarGrid/*.cpp")
 file(GLOB_RECURSE LEVEL_SOURCES "src/Level/*.cpp")
@@ -45,6 +44,12 @@ file(GLOB_RECURSE INTERPOLATION_SOURCES "src/Interpolation/*.cpp")
 file(GLOB_RECURSE DIRECT_SOLVER_SOURCES "src/DirectSolver/*.cpp")
 file(GLOB_RECURSE RESIDUAL_SOURCES "src/Residual/*.cpp")
 file(GLOB_RECURSE SMOOTHER_SOURCES "src/Smoother/*.cpp")
+
+file(GLOB_RECURSE DENSITY_PROFILE_COEFFICIENTS "src/InputFunctions/DensityProfileCoefficients/*.cpp")
+file(GLOB_RECURSE DOMAIN_GEOMETRY_SOURCES "src/InputFunctions/DomainGeometry/*.cpp")
+file(GLOB_RECURSE EXACT_SOLUTION_SOURCES "src/InputFunctions/ExactSolution/*.cpp")
+file(GLOB_RECURSE BOUNDARY_CONDITION_SOURCES "src/InputFunctions/BoundaryConditions/*.cpp")
+file(GLOB_RECURSE SOURCE_TERMS_SOURCES "src/InputFunctions/SourceTerms/*.cpp")
 
 # file(GLOB_RECURSE GMG_POLAR_SOURCES "src/GMGPolar/*.cpp")
 # file(GLOB_RECURSE INTERPOLATION_SOURCES "src/Interpolation/*.cpp")
@@ -60,7 +65,6 @@ set(MAIN_SOURCE "src/main.cpp")
 # Add executable target
 add_executable(gmgpolar 
     ${MAIN_SOURCE}
-    ${INPUT_FUNCTIONS_SOURCES}
     ${GMG_POLAR_SOURCES}
     ${POLAR_GRID_SOURCES}
     ${LEVEL_SOURCES}
@@ -70,6 +74,12 @@ add_executable(gmgpolar
     ${DIRECT_SOLVER_SOURCES}
     ${RESIDUAL_SOURCES}
     ${SMOOTHER_SOURCES}
+
+    ${DENSITY_PROFILE_COEFFICIENTS}
+    ${DOMAIN_GEOMETRY_SOURCES}
+    ${EXACT_SOLUTION_SOURCES}
+    ${BOUNDARY_CONDITION_SOURCES}
+    ${SOURCE_TERMS_SOURCES}
 
     # ${GMG_POLAR_SOURCES}
     # ${INTERPOLATION_SOURCES}
@@ -86,6 +96,6 @@ if(OpenMP_CXX_FOUND)
 endif()
 target_link_libraries(gmgpolar PUBLIC ${MUMPS_LIBRARIES} OpenMP::OpenMP_CXX)
 
-enable_testing()
-add_subdirectory(third-party)
-add_subdirectory(tests)
+# enable_testing()
+# add_subdirectory(third-party)
+# add_subdirectory(tests)

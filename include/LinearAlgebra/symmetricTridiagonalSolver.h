@@ -59,8 +59,6 @@ private:
     T cyclic_corner_element_ = 0.0;
     bool is_cyclic_ = true;
 
-    bool solver_setup_ = false;
-
     // Solve methods
     void solve_symmetricTridiagonal(T* x, T* scratch) const;
     void solve_symmetricCyclicTridiagonal(T* x, T* u, T* scratch) const;

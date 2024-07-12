@@ -1,398 +1,260 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
-
-#include <chrono>
-#include <iostream>
-
-void GMGPolar::multigrid_iteration(const int level_depth) {
+void GMGPolar::multigrid_V_Cycle(const int level_depth) {
     assert(0 <= level_depth && level_depth < numberOflevels_-1);
+
+    auto start_MGC = std::chrono::high_resolution_clock::now();
 
     Level& level = levels_[level_depth];
     Level& next_level = levels_[level_depth+1];
 
-    auto start = std::chrono::high_resolution_clock::now();
+    auto start_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
 
     /* ------------ */
     /* Presmoothing */
-    auto presmooth_start = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < v1; i++){
+    for (int i = 0; i < preSmoothingSteps_; i++){
         level.smoothingInPlace(level.solution(), level.rhs(), level.residual());
     }
-    auto presmooth_end = std::chrono::high_resolution_clock::now();
+
+    auto end_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
+    t_avg_MGC_preSmoothing += std::chrono::duration<double>(end_MGC_preSmoothing - start_MGC_preSmoothing).count();
 
     /* ---------------------- */
     /* Coarse grid correction */
     /* ---------------------- */
 
+    auto start_MGC_residual = std::chrono::high_resolution_clock::now();
+
     /* Compute the residual */
-    auto residual_start = std::chrono::high_resolution_clock::now();
     level.computeResidual(level.residual(), level.rhs(), level.solution());
-    auto residual_end = std::chrono::high_resolution_clock::now();
+
+    auto end_MGC_residual = std::chrono::high_resolution_clock::now();
+    t_avg_MGC_residual += std::chrono::duration<double>(end_MGC_residual - start_MGC_residual).count();
 
     /* Restrict the residual */
-    auto restrict_start = std::chrono::high_resolution_clock::now();
     restrictToLowerLevel(level_depth, next_level.residual(), level.residual());
-    auto restrict_end = std::chrono::high_resolution_clock::now();
 
     /* Solve A * error = residual */
-    auto solve_start = std::chrono::high_resolution_clock::now();
     if(level_depth+1 == numberOflevels_-1){
+        auto start_MGC_directSolver = std::chrono::high_resolution_clock::now();
+
         /* Using a direct solver */
         next_level.directSolveInPlace(next_level.residual());
+
+        auto end_MGC_directSolver = std::chrono::high_resolution_clock::now();
+        t_avg_MGC_directSolver += std::chrono::duration<double>(end_MGC_directSolver - start_MGC_directSolver).count();
     } else{
-        /* Recursively calling the multigrid cycle */
+        /* By recursively calling the multigrid cycle */
         next_level.rhs() = next_level.residual();
         assign(next_level.solution(), 0.0);
-        multigrid_iteration(level_depth+1);
+        multigrid_V_Cycle(level_depth+1);
     }
-    auto solve_end = std::chrono::high_resolution_clock::now();
 
     /* Interpolate the correction */
-    auto prolongate_start = std::chrono::high_resolution_clock::now();
     prolongateToUpperLevel(level_depth+1, level.residual(), next_level.residual());
-    auto prolongate_end = std::chrono::high_resolution_clock::now();
 
     /* Compute the corrected approximation: u = u + error */
-    auto add_start = std::chrono::high_resolution_clock::now();
     add(level.solution(), level.residual());
-    auto add_end = std::chrono::high_resolution_clock::now();
+
+    auto start_MGC_postSmoothing = std::chrono::high_resolution_clock::now();
 
     /* ------------- */
     /* Postsmoothing */
-    auto postsmooth_start = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < v2; i++){
+    for (int i = 0; i < postSmoothingSteps_; i++){
         level.smoothingInPlace(level.solution(), level.rhs(), level.residual());
     }
-    auto postsmooth_end = std::chrono::high_resolution_clock::now();
 
-    auto end = std::chrono::high_resolution_clock::now();
+    auto end_MGC_postSmoothing = std::chrono::high_resolution_clock::now();
+    t_avg_MGC_postSmoothing += std::chrono::duration<double>(end_MGC_postSmoothing - start_MGC_postSmoothing).count();
 
-    std::cout<<level_depth<<std::endl;
-
-    // Print durations
-    std::cout << "Presmoothing time: " 
-              << std::chrono::duration_cast<std::chrono::microseconds>(presmooth_end - presmooth_start).count() / 1000000.0
-              << " seconds" << std::endl;
-    std::cout << "Residual computation time: " 
-              << std::chrono::duration_cast<std::chrono::microseconds>(residual_end - residual_start).count() / 1000000.0
-              << " seconds" << std::endl;
-    std::cout << "Restriction time: " 
-              << std::chrono::duration_cast<std::chrono::microseconds>(restrict_end - restrict_start).count() / 1000000.0
-              << " seconds" << std::endl;
-    std::cout << "Solving time: " 
-              << std::chrono::duration_cast<std::chrono::microseconds>(solve_end - solve_start).count() / 1000000.0
-              << " seconds" << std::endl;
-    std::cout << "Prolongation time: " 
-              << std::chrono::duration_cast<std::chrono::microseconds>(prolongate_end - prolongate_start).count() / 1000000.0
-              << " seconds" << std::endl;
-    std::cout << "Addition time: " 
-              << std::chrono::duration_cast<std::chrono::microseconds>(add_end - add_start).count() / 1000000.0
-              << " seconds" << std::endl;
-    std::cout << "Postsmoothing time: " 
-              << std::chrono::duration_cast<std::chrono::microseconds>(postsmooth_end - postsmooth_start).count() / 1000000.0
-              << " seconds" << std::endl;
-    std::cout << "Total time: " 
-              << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 1000000.0
-              << " seconds" << std::endl;
+    auto end_MGC = std::chrono::high_resolution_clock::now();
+    t_avg_MGC_total += std::chrono::duration<double>(end_MGC - start_MGC).count();
 }
-
-
-// void GMGPolar::multigrid_iteration(const int level_depth) {
-//     assert(0 <= level_depth && level_depth < numberOflevels_-1);
-
-//     Level& level = levels_[level_depth];
-//     Level& next_level = levels_[level_depth+1];
-
-//     /* ------------ */
-//     /* Presmoothing */
-//     for (int i = 0; i < v1; i++){
-//         level.smoothingInPlace(level.solution(), level.rhs(), level.residual());
-//     }
-
-//     /* ---------------------- */
-//     /* Coarse grid correction */
-//     /* ---------------------- */
-
-//     /* Compute the residual */
-//     level.computeResidual(level.residual(), level.rhs(), level.solution());
-
-//     /* Restrict the residual */
-//     restrictToLowerLevel(level_depth, next_level.residual(), level.residual());
-
-//     /* Solve A * error = residual */
-//     if(level_depth+1 == numberOflevels_-1){
-//         /* Using a direct solver */
-//         next_level.directSolveInPlace(next_level.residual());
-//     } else{
-//         /* By recursively calling the multigrid cycle */
-//         next_level.rhs() = next_level.residual();
-//         assign(next_level.solution(), 0.0);
-//         multigrid_iteration(level_depth+1);
-//     }
-
-//     /* Interpolate the correction */
-//     prolongateToUpperLevel(level_depth+1, level.residual(), next_level.residual());
-
-//     /* Compute the corrected approximation: u = u + error */
-//     add(level.solution(), level.residual());
-
-//     /* ------------- */
-//     /* Postsmoothing */
-//     for (int i = 0; i < v2; i++){
-//         level.smoothingInPlace(level.solution(), level.rhs(), level.residual());
-//     }
-// }
 
 
 void GMGPolar::solve() {
+    auto start_solve = std::chrono::high_resolution_clock::now();
+
     int start_level_depth = 0;
     Level& level = levels_[start_level_depth];
 
-    auto rhs_start = std::chrono::high_resolution_clock::now();
-    build_rhs_f_discretization(level, level.rhs());
-    auto rhs_end = std::chrono::high_resolution_clock::now();
-    auto totalDuration = std::chrono::duration_cast<std::chrono::milliseconds>(rhs_end - rhs_start);
-    std::cout << "Rhs time: " << totalDuration.count() << " ms" << std::endl;
-
+    /* ---------------------------- */
+    /* Initialize starting solution */
     assign(level.solution(), 0.0);
 
-    std::cout<<"Start!"<<std::endl;
-
-    level.computeResidual(level.residual(), level.rhs(), level.solution());
-    std::cout<< "Weighted l2-norm: "<<sqrt(l2_norm_squared(level.residual())) / sqrt(level.grid().number_of_nodes()) << std::endl;
-    std::cout<< "l2-norm: "<<sqrt(l2_norm_squared(level.residual())) << std::endl;
-
-
-    
-    for (int i = 0; i < 50; i++)
-    {
-        multigrid_iteration(start_level_depth);
-
-        std::cout<<"Iteration: "<< i+1<<std::endl;
-        level.computeResidual(level.residual(), level.rhs(), level.solution());
-        std::cout<< "Weighted l2-norm: "<<sqrt(l2_norm_squared(level.residual())) / sqrt(level.grid().number_of_nodes()) << std::endl;
-        std::cout<< "l2-norm: "<< sqrt(l2_norm_squared(level.residual())) << std::endl;
+    /* ---------------- */
+    /* Discretize rhs_f */
+    if(extrapolation_ > 0){
+        Level& next_level = levels_[start_level_depth+1];
+        injectToLowerLevel(start_level_depth, next_level.rhs(), level.rhs());
+        discretize_rhs_f(next_level, next_level.rhs());
     }
+    discretize_rhs_f(level, level.rhs());
 
+    /* ------------ */
+    /* Start Solver */
 
+    int number_of_iterations_ = 0;
 
+    double initial_residual_norm; 
+    double current_residual_norm, current_relative_residual_norm;
 
+    while(number_of_iterations_ < max_iterations_){
+        std::cout<<"\nIteration: "<< number_of_iterations_ << std::endl;
 
-    || r+1 / r|| < tol
-    
+        /* ---------------------------------------------- */
+        /* Test solution against exact solution if given. */
+        /* ---------------------------------------------- */
+        if(exact_solution_ != nullptr) {
+            auto start_check_exact_error = std::chrono::high_resolution_clock::now();
 
-    // write_to_vtk("SolutionMGC", level.grid(), level.solution(), level.levelCache());
+            std::pair<double, double> exact_error = compute_exact_error(level, level.solution(), level.residual());
+            exact_errors_.push_back(exact_error);
 
+            auto end_check_exact_error = std::chrono::high_resolution_clock::now();
+            t_check_exact_error += std::chrono::duration<double>(end_check_exact_error - start_check_exact_error).count();
 
-
-    auto recover_start = std::chrono::high_resolution_clock::now();
-
-
-
-    int level_depth = 0;
-
-    const auto& grid = levels_[level_depth].grid();
-    const int n = grid.number_of_nodes();
-
-    Vector<double> error(n);
-
-    for (int i = 0; i < 1; i++)
-    {
-        for (int index = 0; index < grid.number_of_nodes(); index++)
-        {
-            MultiIndex node = grid.multiindex(index);
-            Point coords = grid.polar_coordinates(node);
-            error[index] = (*exact_solution_).exact_solution(coords[0], coords[1], sin(coords[1]), cos(coords[1])) - level.solution()[index];
+            std::cout << "Exact Weighted-Euclidean Error: " << exact_error.first << std::endl;
+            std::cout << "Exact Infinity Error: " << exact_error.second << std::endl;
         }
 
-        // #pragma omp parallel for
-        // for (size_t i = 0; i < n; i++) error[i] = std::abs(solution[i] - y[i]);
-        // std::cout<<dot_product(error,error)<<std::endl;
+        /* ---------------------------- */
+        /* Compute convergence criteria */
+        /* ---------------------------- */
+        if(absolute_tolerance_.has_value() || relative_tolerance_.has_value()){
+            auto start_check_convergence = std::chrono::high_resolution_clock::now();
+
+            level.computeResidual(level.residual(), level.rhs(), level.solution());
+
+            switch (residual_norm_type_)
+            {
+                case ResidualNormType::EUCLIDEAN:
+                    current_residual_norm = sqrt(l2_norm_squared(level.residual()));
+                    break;
+                case ResidualNormType::WEIGHTED_EUCLIDEAN:
+                    current_residual_norm = sqrt(l2_norm_squared(level.residual())) / sqrt(level.grid().number_of_nodes());
+                    break;
+                case ResidualNormType::INFINITY_NORM:
+                    current_residual_norm = infinity_norm(level.residual());
+                    break;
+                default:
+                    throw std::invalid_argument("Unknown ResidualNormType");
+            }
+            residual_norms_.push_back(current_residual_norm);
+            
+            if(number_of_iterations_ == 0) {
+                initial_residual_norm = current_residual_norm;
+                current_relative_residual_norm = 1.0;
+            } else{
+                current_relative_residual_norm = current_residual_norm / initial_residual_norm;
+            }
+
+            auto end_check_convergence = std::chrono::high_resolution_clock::now();
+            t_check_convergence += std::chrono::duration<double>(end_check_convergence - start_check_convergence).count();
+
+            std::cout<< "Residual Norm: " << current_residual_norm <<std::endl;
+            std::cout<< "Relative Residual Norm: " << current_relative_residual_norm <<std::endl;
+
+            if(converged(current_residual_norm, current_relative_residual_norm)) break;
+        }
+
+        /* ------------------------- */
+        /* Start Multigrid Iteration */
+        /* ------------------------- */
+        auto start_solve_multigrid_iterations = std::chrono::high_resolution_clock::now();
+
+        switch (multigrid_cycle_)
+        {
+            case MultigridCycleType::V_CYCLE:
+                multigrid_V_Cycle(start_level_depth);
+                break;
+            case MultigridCycleType::W_CYCLE:
+                break;
+            case MultigridCycleType::F_CYCLE:
+                break;
+            default:
+                throw std::invalid_argument("Unknown MultigridCycleType");
+        }
+        number_of_iterations_++;
+
+        auto end_solve_multigrid_iterations = std::chrono::high_resolution_clock::now();
+        t_solve_multigrid_iterations += std::chrono::duration<double>(end_solve_multigrid_iterations - start_solve_multigrid_iterations).count();
     }
 
-    std::cout<<l1_norm(error)<<", "<<sqrt(l2_norm_squared(error))<<", "<<infinity_norm(error)<<std::endl;
-
-    // write_to_vtk("LookErrorMGC", grid, error, level.levelCache());
-
-
-
-    auto recover_end = std::chrono::high_resolution_clock::now();
-    auto rtotalDuration = std::chrono::duration_cast<std::chrono::milliseconds>(recover_end - recover_start);
-    std::cout << "Recover error time: " << rtotalDuration.count() << " ms" << std::endl;
-
-
-
-
-
-
-
-
-
-
-    // Level& level = levels_[level_depth];
-
-    // Vector<double>& f_0 = level.levelCache().discretization_rhs_f();
-    // Vector<double>& u_0 = level.solution();
-    // Vector<double>& r_0 = level.residual();
-
-    // assign(u_0, 0.0); 
-
-    // multigrid_iteration(level_depth);
-
-
-
-
-
-    // /* Presmoothing */
-    // for (int i = 0; i < v1; i++){
-    //     r_0 = f_0;
-    //     level.smoothingInPlace(u_0, r_0);
-    // }
-
-    // /* Residual */
-    // level.computeResidual(r_0, u_0);
-
-
-    // Level& next_level = levels_[level_depth-1];
-    // Vector<double>& temp_1 = level.levelCache().discretization_rhs_f();
-    // Vector<double>& e_1 = level.solution();
-    // Vector<double>& r_1 = level.residual();
-
-    // /* Restrict Residual */
-    // restrictToLowerLevel(level_depth, r_1, r_0);
-
-
-
-
-    // /* Presmoothing */
-    // for (int i = 0; i < v1; i++){
-    //     r_1 = temp_1;
-    //     next_level.smoothingInPlace(u_0, r_0);
-    // }
-
-
-
-    // int current_level_depth = 0;
-    // Level& current_level = levels_[current_level_depth];
-
-    // const auto& grid = current_level.grid();
-    // const int n = grid.number_of_nodes();
-
-    // Vector<double> solution(n);
-    // Vector<double> temp(n);
-
-    // assign(solution, 0.0);
-
-    // /* Presmoothing */
-    // for (int i = 0; i < v1; i++){
-    //     current_level.smoothingInPlace(solution, temp);
-    // }
-
-    // current_level.computeResidual(temp, solution);
-
-
-    // int next_level_depth = current_level_depth + 1;
-    // Level& next_level = levels_[next_level_depth];
-
-    // const auto& next_grid = next_level.grid();
-    // const int next_n = next_grid.number_of_nodes();
-
-    // Vector<double> solution2(next_n);
-    // Vector<double> temp2(next_n);
-
-    // restrictToLowerLevel(current_level_depth, temp2, temp);
-
-    // coa
-
-
-
-    // int current_level = 0;
-
-    // const auto& grid = levels_[current_level].grid();
-    // const int n = grid.number_of_nodes();
-
-    // Vector<double> x(n);
-    // Vector<double> result(levels_[current_level+1].grid().number_of_nodes());
-
-    // assign(x, 4.0);
-
-    // for (int i = 0; i < x.size(); i++)
-    // {
-    //     x[i] = 4.0 * i;
-    // }
-
-    
-
-    // // interpolation_ -> applyRestrictionTake0(levels_[current_level], levels_[current_level+1], result, x);
-
-    // restrictToLowerLevel(current_level, result, x);
-
-    // interpolation_ -> applyProlongation0(levels_[current_level+1], levels_[current_level], x, result);
-
-    // std::cout<< result<<std::endl;
-
-    // std::cout<<x<<std::endl;
-
-
-
-    // int current_level = 0;
-
-    // const auto& grid = levels_[current_level].grid();
-    // const int n = grid.number_of_nodes();
-
-    // Vector<double> x(n);
-    // Vector<double> y(n);
-    // Vector<double> temp(n);
-
-    // for (int i = 0; i < n; i++)
-    // {
-    //     x[i] = i* 3.407;
-    //     y[i] = i* 1.407;
-    //     temp[i] = i* 7.407;
-    // }
-    
-
-    // // Timing variables
-    // auto start = std::chrono::high_resolution_clock::now();
-    // auto end = start;
-
-    
-    // // Step 2: Smoothing
-    // start = std::chrono::high_resolution_clock::now();
-    // levels_[current_level].smoothingInPlace(x, y, temp);
-    // end = std::chrono::high_resolution_clock::now();
-    // std::chrono::duration<double> time_smoothing = end - start;
-
-    // // Step 3: Compute Residual
-    // start = std::chrono::high_resolution_clock::now();
-    // levels_[current_level].computeResidual(y, x, temp);
-    // end = std::chrono::high_resolution_clock::now();
-    // std::chrono::duration<double> time_compute_residual = end - start;
-
-    // // Step 4: Coarse Solve
-    // start = std::chrono::high_resolution_clock::now();
-    // levels_[numberOflevels_-1].coarseSolveInPlace(y);
-    // end = std::chrono::high_resolution_clock::now();
-    // std::chrono::duration<double> time_coarse_solve = end - start;
-
-    // // Step 5: Update x
-    // start = std::chrono::high_resolution_clock::now();
-    // #pragma omp parallel for
-    // for (int i = 0; i < x.size(); i++) {
-    //     x[i] += y[i];
-    // }
-    // end = std::chrono::high_resolution_clock::now();
-    // std::chrono::duration<double> time_update_x = end - start;
-
-    // // Print times
-    // std::cout << "Time for smoothing: " << time_smoothing.count() << " seconds" << std::endl;
-    // std::cout << "Time for compute residual: " << time_compute_residual.count() << " seconds" << std::endl;
-    // std::cout << "Time for coarse solve: " << time_coarse_solve.count() << " seconds" << std::endl;
-    // std::cout << "Time for update x: " << time_update_x.count() << " seconds" << std::endl;
-
-    // std::cout<<x[0]<<" "<< y[0]<<std::endl;
-
+    /* --------------------------------------------- */
+    /* Compute the average Multigrid Iteration times */
+    /* --------------------------------------------- */
+    t_avg_MGC_total /= number_of_iterations_;
+    t_avg_MGC_preSmoothing /= number_of_iterations_;
+    t_avg_MGC_postSmoothing /= number_of_iterations_;
+    t_avg_MGC_residual /= number_of_iterations_;
+    t_avg_MGC_directSolver /= number_of_iterations_;
+
+    /* -------------------------------- */
+    /* Compute the reduction factor rho */
+    /* -------------------------------- */
+    mean_residual_reduction_factor_rho_ = std::pow(current_residual_norm / initial_residual_norm, 1.0 / number_of_iterations_);
+
+    std::cout<< "\nMean Residual Reduction Factor Rho: "<< mean_residual_reduction_factor_rho_ <<std::endl;
+
+    auto end_solve = std::chrono::high_resolution_clock::now();
+    t_solve_total += std::chrono::duration<double>(end_solve - start_solve).count();
 }
+ 
+bool GMGPolar::converged(const double& residual_norm, const double& relative_residual_norm){
+    if(relative_tolerance_.has_value()){
+        if(!(relative_residual_norm > relative_tolerance_.value())){
+            return true;
+        }
+    }
+    if(absolute_tolerance_.has_value()){
+        if(!(residual_norm > absolute_tolerance_.value())){
+            return true;
+        }
+    }
+    return false;
+}
+
+
+std::pair<double, double> GMGPolar::compute_exact_error(Level& level, const Vector<double>& solution, Vector<double>& error){
+    const PolarGrid& grid = level.grid();
+    const LevelCache& levelCache = level.levelCache();
+    const auto& sin_theta_cache = levelCache.sin_theta();
+    const auto& cos_theta_cache = levelCache.cos_theta();
+
+    assert(solution.size() == error.size());
+    assert(solution.size() == grid.number_of_nodes());
+
+    #pragma omp parallel
+    {
+        #pragma omp for nowait
+        for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++){
+            double r = grid.radius(i_r);
+            for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++){
+                double theta = grid.theta(i_theta);
+                double sin_theta = sin_theta_cache[i_theta];
+                double cos_theta = cos_theta_cache[i_theta];
+                error[grid.index(i_r, i_theta)] = exact_solution_->exact_solution(r, theta, sin_theta, cos_theta) - solution[grid.index(i_r, i_theta)];
+            }
+        }
+        #pragma omp for nowait
+        for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++){
+            double theta = grid.theta(i_theta);
+            double sin_theta = sin_theta_cache[i_theta];
+            double cos_theta = cos_theta_cache[i_theta];
+            for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++){
+                double r = grid.radius(i_r);
+                error[grid.index(i_r, i_theta)] = exact_solution_->exact_solution(r, theta, sin_theta, cos_theta) - solution[grid.index(i_r, i_theta)];
+            }
+        }
+    }
+
+    double weighted_euclidean_error = sqrt(l2_norm_squared(error)) / sqrt(grid.number_of_nodes());
+    double infinity_error = infinity_norm(error);
+
+    return std::make_pair(weighted_euclidean_error, infinity_error);
+}
+
 
     // int current_level = 0;
 

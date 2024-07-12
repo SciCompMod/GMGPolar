@@ -39,6 +39,15 @@ Vector<double>& Level::solution() {
 Vector<double>& Level::residual() {
     return residual_;
 }
+const Vector<double>& Level::rhs() const {
+    return rhs_;
+}
+const Vector<double>& Level::solution() const {
+    return solution_;
+}
+const Vector<double>& Level::residual() const {
+    return residual_;
+}
 
 // -------------- //
 // Apply Residual //

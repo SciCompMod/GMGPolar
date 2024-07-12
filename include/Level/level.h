@@ -33,8 +33,11 @@ public:
     LevelCache& levelCache();
 
     Vector<double>& rhs();
+    const Vector<double>& rhs() const;
     Vector<double>& solution();
+    const Vector<double>& solution() const;
     Vector<double>& residual();
+    const Vector<double>& residual() const;
 
     // -------------- //
     // Apply Residual //

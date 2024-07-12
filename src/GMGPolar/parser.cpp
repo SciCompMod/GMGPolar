@@ -7,35 +7,112 @@ enum {
 };
 
 void GMGPolar::parseGrid() {
-    R0 = parser_.get<double>("R0");
-    Rmax = parser_.get<double>("Rmax");
-    nr_exp = parser_.get<int>("nr_exp");
-    ntheta_exp = parser_.get<int>("ntheta_exp");
-    anisotropic_factor = parser_.get<int>("anisotropic_factor");
-    divideBy2 = parser_.get<int>("divideBy2");
-    write_grid_file = parser_.get<int>("write_grid_file") != 0;
-    load_grid_file = parser_.get<int>("load_grid_file") != 0;
-    file_grid_r = parser_.get<std::string>("file_grid_r");
-    file_grid_theta = parser_.get<std::string>("file_grid_theta");
+    R0_ = parser_.get<double>("R0");
+    Rmax_ = parser_.get<double>("Rmax");
+    nr_exp_ = parser_.get<int>("nr_exp");
+    ntheta_exp_ = parser_.get<int>("ntheta_exp");
+    anisotropic_factor_ = parser_.get<int>("anisotropic_factor");
+    divideBy2_ = parser_.get<int>("divideBy2");
+    write_grid_file_ = parser_.get<int>("write_grid_file") != 0;
+    load_grid_file_ = parser_.get<int>("load_grid_file") != 0;
+    file_grid_radii_ = parser_.get<std::string>("file_grid_radii");
+    file_grid_angles_ = parser_.get<std::string>("file_grid_angles");
 }
 
 void GMGPolar::parseGeometry() {
-    DirBC_Interior = parser_.get<int>("DirBC_Interior") != 0;
+    DirBC_Interior_ = parser_.get<int>("DirBC_Interior") != 0;
+
+    const int alphaValue = parser_.get<int>("alpha_coeff");
+    if (alphaValue == static_cast<int>(AlphaCoeff::POISSON) ||
+        alphaValue == static_cast<int>(AlphaCoeff::SONNENDRUCKER) ||
+        alphaValue == static_cast<int>(AlphaCoeff::ZONI) ||
+        alphaValue == static_cast<int>(AlphaCoeff::ZONI_SHIFTED)) {
+        alpha_ = static_cast<AlphaCoeff>(alphaValue);
+    } else {
+        throw std::runtime_error("Invalid alpha coefficient value.\n");
+    }
+
+    const int problemValue = parser_.get<int>("problem");
+    if (problemValue == static_cast<int>(ProblemType::CARTESIAN_R2) ||
+        problemValue == static_cast<int>(ProblemType::CARTESIAN_R6) ||
+        problemValue == static_cast<int>(ProblemType::POLAR_R6) ||
+        problemValue == static_cast<int>(ProblemType::REFINED_RADIUS)) {
+        problem_ = static_cast<ProblemType>(problemValue);
+    } else {
+        throw std::runtime_error("Invalid choice for the problem.\n");
+    }
+
+    const int geometryValue = parser_.get<int>("geometry");
+    if (geometryValue == static_cast<int>(GeometryType::CIRCULAR) ||
+        geometryValue == static_cast<int>(GeometryType::SHAFRANOV) ||
+        geometryValue == static_cast<int>(GeometryType::CZARNY) ||
+        geometryValue == static_cast<int>(GeometryType::CULHAM)) {
+        geometry_ = static_cast<GeometryType>(geometryValue);
+    } else {
+        throw std::runtime_error("Invalid choice for the geometry\n");
+    }
+
+    const int betaValue = parser_.get<int>("beta_coeff");
+    if (betaValue == static_cast<int>(BetaCoeff::ZERO) ||
+        betaValue == static_cast<int>(BetaCoeff::ALPHA_INVERSE)) {
+        beta_ = static_cast<BetaCoeff>(betaValue);
+    } else {
+        throw std::runtime_error("Invalid beta coefficient value.\n");
+    }
+
+    alpha_jump_ = parser_.get<double>("alpha_jump");
+
+    kappa_eps_ = parser_.get<double>("kappa_eps");
+    delta_e_ = parser_.get<double>("delta_e");
+
+    selectTestCase();
 }
 
 void GMGPolar::parseMultigrid() {
-    extrapolation = parser_.get<int>("extrapolation");
-    maxLevels = parser_.get<int>("maxLevels");
-    v1 = parser_.get<int>("v1");
-    v2 = parser_.get<int>("v2");
-    cycle = parser_.get<int>("cycle");
+    extrapolation_ = parser_.get<int>("extrapolation");
+    maxLevels_ = parser_.get<int>("maxLevels");
+    preSmoothingSteps_ = parser_.get<int>("preSmoothingSteps");
+    postSmoothingSteps_ = parser_.get<int>("postSmoothingSteps");
+
+    const int cycleValue = parser_.get<int>("multigridCycle");
+    if (cycleValue == static_cast<int>(MultigridCycleType::V_CYCLE) ||
+        cycleValue == static_cast<int>(MultigridCycleType::W_CYCLE) ||
+        cycleValue == static_cast<int>(MultigridCycleType::F_CYCLE)) {
+        multigrid_cycle_ = static_cast<MultigridCycleType>(cycleValue);
+    } else {
+        throw std::runtime_error("Invalid multigrid cycle value.\n");
+    }
+
+    max_iterations_ = parser_.get<int>("maxIterations");
+
+    const int normValue = parser_.get<int>("residualNormType");
+    if (normValue == static_cast<int>(ResidualNormType::EUCLIDEAN) ||
+        normValue == static_cast<int>(ResidualNormType::WEIGHTED_EUCLIDEAN) ||
+        normValue == static_cast<int>(ResidualNormType::INFINITY_NORM)) {
+        residual_norm_type_ = static_cast<ResidualNormType>(normValue);
+    } else {
+        throw std::runtime_error("Invalid residual norm type.\n");
+    }
+
+    double absTol = parser_.get<double>("absoluteTolerance");
+    if (absTol > 0) {
+        absolute_tolerance_ = absTol;
+    } else {
+        absolute_tolerance_ = std::nullopt;
+    }
+    double relTol = parser_.get<double>("relativeTolerance");
+    if (relTol > 0) {
+        relative_tolerance_ = relTol;
+    } else {
+        relative_tolerance_ = std::nullopt;
+    }
 }
 
 void GMGPolar::parseGeneral() {
-    maxOpenMPThreads = parser_.get<int>("maxOpenMPThreads");
-    finestLevelThreads = parser_.get<int>("finestLevelThreads");
-    threadReductionFactor = parser_.get<double>("threadReductionFactor");
-    omp_set_num_threads(maxOpenMPThreads);
+    maxOpenMPThreads_ = parser_.get<int>("maxOpenMPThreads");
+    finestLevelThreads_ = parser_.get<int>("finestLevelThreads");
+    threadReductionFactor_ = parser_.get<double>("threadReductionFactor");
+    omp_set_num_threads(maxOpenMPThreads_);
 }
 
 void GMGPolar::initializeGrid() {
@@ -76,11 +153,11 @@ void GMGPolar::initializeGrid() {
         OPTIONAL, 0, cmdline::oneof(0,1)
     );
     parser_.add<std::string>(
-        "file_grid_r", '\0', "Path to the file containing radii values for grid divisions in the r-direction.",
+        "file_grid_radii", '\0', "Path to the file containing radii values for grid divisions in the r-direction.",
         OPTIONAL, ""
     );
     parser_.add<std::string>(
-        "file_grid_theta", '\0', "Path to the file containing theta values for grid divisions in the theta-direction.",
+        "file_grid_angles", '\0', "Path to the file containing theta values for grid divisions in the theta-direction.",
         OPTIONAL, ""
     );
 }
@@ -89,6 +166,36 @@ void GMGPolar::initializeGeometry() {
     parser_.add<int>(
         "DirBC_Interior", '\0', "Defines the boundary condition on the interior circle. Across-origin(0), Dirichlet-boundary(1).",
         OPTIONAL, 0, cmdline::oneof(0,1)
+    );
+
+    parser_.add<int>(
+        "geometry", '\0', "Defines the form of the considered cross-section. Circular (0), Shafranov (1), Czarny (2), Culham (3)",
+        OPTIONAL, 0, cmdline::oneof(0,1,2,3)
+    );
+    parser_.add<double>(
+        "alpha_jump", '\0', "Defines the radius of rapid decay of alpha.",
+        OPTIONAL, 0.0
+    );
+    parser_.add<double>(
+        "kappa_eps", 'k', "Defines the Elongation of the geometry.",
+        OPTIONAL, 0.0
+    );
+    parser_.add<double>(
+        "delta_e", 'd', "Defines the outward radial displacement of the centre of flux.",
+        OPTIONAL, 0.0
+    );
+
+    parser_.add<int>(
+        "problem", '\0', "Defines the problem to solve (exact solution). CartesianR2 (0), PolarR6 (1), CartesianR6 (2), RefinedRadius (3).",
+        OPTIONAL, 0, cmdline::oneof(0,1,2,3)
+    );
+    parser_.add<int>(
+        "alpha_coeff", '\0', "Defines the coefficient alpha. Poisson (0), Sonnendrucker (1), Zoni (2), Zoni-Shifted (3).",
+        OPTIONAL, 0, cmdline::oneof(0,1,2,3)
+    );
+    parser_.add<int>(
+        "beta_coeff", '\0', "Defines the coefficient beta. beta=0 (0), beta=1/alpha (1).",
+        OPTIONAL, 0, cmdline::oneof(0, 1)
     );
 }
 
@@ -105,22 +212,40 @@ void GMGPolar::initializeMultigrid() {
         OPTIONAL, -1
     );
     parser_.add<int>(
-        "v1", '\0', 
+        "preSmoothingSteps", '\0', 
         "Defines the number of pre-smoothing steps.", 
         OPTIONAL, 1
     );
     parser_.add<int>(
-        "v2", '\0', 
+        "postSmoothingSteps", '\0', 
         "Defines the number of post-smoothing steps.", 
         OPTIONAL, 1
     );
-    // Type of Multigrid Cycle
-    // - 1: V-cycle (default setting)
-    // - 2: W-cycle
     parser_.add<int>(
-        "cycle", '\0', 
-        "Type of Multigrid Cycle.", 
-        OPTIONAL, 1
+        "multigridCycle", '\0', 
+        "Type of Multigrid Cycle. V-cycle (0), W-cycle (1), F-cycle (2).", 
+        OPTIONAL, 0, cmdline::oneof(0, 1, 2)
+    );
+
+    parser_.add<int>(
+        "residualNormType", '\0', 
+        "Type of Residual Norm. Euclidean (0), Weighted-Euclidean (1), Infinity (2).", 
+        OPTIONAL, 0, cmdline::oneof(0, 1, 2)
+    );
+    parser_.add<int>(
+        "maxIterations", '\0', 
+        "Maximal number of Multigrid iterations.", 
+        OPTIONAL, 150
+    );
+    parser_.add<double>(
+        "absoluteTolerance", '\0', 
+        "Convergenced when absolute tolerance reached.", 
+        OPTIONAL, 1e-8
+    );
+    parser_.add<double>(
+        "relativeTolerance", '\0', 
+        "Convergenced when relative tolerance reached.", 
+        OPTIONAL, 1e-8
     );
 }
 
