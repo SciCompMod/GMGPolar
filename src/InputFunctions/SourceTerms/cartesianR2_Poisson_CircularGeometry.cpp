@@ -8,3 +8,4 @@ double CartesianR2_Poisson_CircularGeometry::rhs_f(const double& r, const double
 {
     return 0.0;
 }
+

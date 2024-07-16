@@ -1,17 +1,5 @@
 #include "../../include/Smoother/smoother.h"
 
-enum class SmootherColor {
-    Black = 0,
-    White = 1,
-};
-
-const char* toString(SmootherColor color) {
-    switch (color) {
-        case SmootherColor::Black: return "Black";
-        case SmootherColor::White: return "White";
-        default: return "Unknown";
-    }
-}
 
 #define ARR_ATT_ART(domain_geometry, r, theta, sin_theta, cos_theta, coeff_alpha, \
     arr, att, art, detDF) \
@@ -809,4 +797,3 @@ void Smoother::smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Ve
     delete[] smoother_circle_dep;
     delete[] smoother_radial_dep;
 }
-

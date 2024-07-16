@@ -95,16 +95,16 @@ void GMGPolar::parseMultigrid() {
     }
 
     double absTol = parser_.get<double>("absoluteTolerance");
-    if (absTol > 0) {
-        absolute_tolerance_ = absTol;
-    } else {
+    if (absTol < 0) {
         absolute_tolerance_ = std::nullopt;
+    } else {
+        absolute_tolerance_ = absTol;
     }
     double relTol = parser_.get<double>("relativeTolerance");
-    if (relTol > 0) {
-        relative_tolerance_ = relTol;
-    } else {
+    if (relTol < 0) {
         relative_tolerance_ = std::nullopt;
+    } else {
+        relative_tolerance_ = relTol;
     }
 }
 

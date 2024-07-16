@@ -18,5 +18,3 @@ double CartesianR2_CzarnyGeometry::exact_solution(const double& r, const double&
         sin(2.0 * M_PI * ellipticity_e * (r/Rmax) * sin_theta * factor_xi / (2.0 - temp)) * 
         cos(2.0 * M_PI * (1.0 - temp) / inverse_aspect_ratio_epsilon);
 }
-
-

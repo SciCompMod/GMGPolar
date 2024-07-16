@@ -137,7 +137,7 @@ SymmetricTridiagonalSolver<T>::SymmetricTridiagonalSolver(const int matrix_dimen
     cyclic_corner_element_(0.0),
     is_cyclic_(true)
 {
-    assert(matrix_dimension >= 1);
+    assert(matrix_dimension_ >= 1);
 }
 
 

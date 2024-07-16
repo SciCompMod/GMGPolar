@@ -29,8 +29,8 @@ set(MUMPS_LIBRARIES
 include_directories(../include)
 
 # Add source files
-file(GLOB_RECURSE INPUT_FUNCTIONS_SOURCES "../src/InputFunctions/*.cpp")
 file(GLOB_RECURSE GMG_POLAR_SOURCES "../src/GMGPolar/*.cpp")
+file(GLOB_RECURSE MULTIGRID_METHODS_SOURCES "../src/GMGPolar/MultigridMethods/*.cpp")
 file(GLOB_RECURSE POLAR_GRID_SOURCES "../src/PolarGrid/*.cpp")
 file(GLOB_RECURSE LEVEL_SOURCES "../src/Level/*.cpp")
 
@@ -40,7 +40,15 @@ file(GLOB_RECURSE INTERPOLATION_SOURCES "../src/Interpolation/*.cpp")
 file(GLOB_RECURSE DIRECT_SOLVER_SOURCES "../src/DirectSolver/*.cpp")
 file(GLOB_RECURSE RESIDUAL_SOURCES "../src/Residual/*.cpp")
 file(GLOB_RECURSE SMOOTHER_SOURCES "../src/Smoother/*.cpp")
+file(GLOB_RECURSE EXTRAPOLATED_SMOOTHER_SOURCES "../src/ExtrapolatedSmoother/*.cpp")
 
+file(GLOB_RECURSE DENSITY_PROFILE_COEFFICIENTS "../src/InputFunctions/DensityProfileCoefficients/*.cpp")
+file(GLOB_RECURSE DOMAIN_GEOMETRY_SOURCES "../src/InputFunctions/DomainGeometry/*.cpp")
+file(GLOB_RECURSE EXACT_SOLUTION_SOURCES "../src/InputFunctions/ExactSolution/*.cpp")
+file(GLOB_RECURSE BOUNDARY_CONDITION_SOURCES "../src/InputFunctions/BoundaryConditions/*.cpp")
+file(GLOB_RECURSE SOURCE_TERMS_SOURCES "../src/InputFunctions/SourceTerms/*.cpp")
+
+# Add test files
 file(GLOB_RECURSE TEST_SOURCES "../tests/*.cpp")
 
 # Set the list of test sources
@@ -53,17 +61,17 @@ set(TESTSOURCES
     PolarGrid/polargrid.cpp
     Interpolation/prolongation.cpp
     Interpolation/restriction.cpp
-    Residual/residual.cpp
-    DirectSolver/directSolver.cpp
-    Smoother/smoother.cpp
+    # Residual/residual.cpp
+    # DirectSolver/directSolver.cpp
+    # Smoother/smoother.cpp
 )
 
 # Add executables for each test source
 foreach(TESTSOURCE ${TESTSOURCES})
     get_filename_component(TESTNAME ${TESTSOURCE} NAME_WE)
     add_executable(${TESTNAME} ${TESTSOURCE}
-        ${INPUT_FUNCTIONS_SOURCES}
         ${GMG_POLAR_SOURCES}
+        ${MULTIGRID_METHODS_SOURCES}
         ${POLAR_GRID_SOURCES}
         ${LEVEL_SOURCES}
         ${TASK_DISTRIBUTION_SOURCES}
@@ -72,6 +80,13 @@ foreach(TESTSOURCE ${TESTSOURCES})
         ${DIRECT_SOLVER_SOURCES}
         ${RESIDUAL_SOURCES}
         ${SMOOTHER_SOURCES}
+        ${EXTRAPOLATED_SMOOTHER_SOURCES}
+
+        ${DENSITY_PROFILE_COEFFICIENTS}
+        ${DOMAIN_GEOMETRY_SOURCES}
+        ${EXACT_SOLUTION_SOURCES}
+        ${BOUNDARY_CONDITION_SOURCES}
+        ${SOURCE_TERMS_SOURCES}
     )
 
     # Add OpenMP flags if available

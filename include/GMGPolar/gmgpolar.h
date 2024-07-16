@@ -118,6 +118,8 @@ public:
     double threadReductionFactor() const;
     void threadReductionFactor(double threadReductionFactor);
 
+    /* --------*/
+    /* Timings */
     void printTimings() const;
 
     double t_setup_total = 0.0;
@@ -232,10 +234,19 @@ private:
     /* ------------------- */
     /* Multigrid Functions */
     void multigrid_V_Cycle(const int level_depth);
+    void multigrid_W_Cycle(const int level_depth);
+    void multigrid_F_Cycle(const int level_depth);
+    void implicitly_extrapolated_multigrid_V_Cycle(const int level_depth);
+    void implicitly_extrapolated_multigrid_W_Cycle(const int level_depth);
+    void implicitly_extrapolated_multigrid_F_Cycle(const int level_depth);
 
     void prolongateToUpperLevel(const int current_level, Vector<double>& result, const Vector<double>& x) const;
     void restrictToLowerLevel(const int current_level, Vector<double>& result, const Vector<double>& x) const;
     void injectToLowerLevel(const int current_level, Vector<double>& result, const Vector<double>& x) const;
+    void extrapolation_prolongateToUpperLevel(const int current_level, Vector<double>& result, const Vector<double>& x) const;
+    void extrapolation_restrictToLowerLevel(const int current_level, Vector<double>& result, const Vector<double>& x) const;
+
+    void extrapolated_residual(Vector<double>& residual_level_0, const Vector<double>& residual_level_1);
 
     /* ------------- */
     /* Visualization */

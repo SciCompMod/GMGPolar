@@ -20,6 +20,16 @@ enum class ResidualNormType
     INFINITY_NORM = 2          // Corresponds to the L∞ norm
 };
 
+/* Smoother Colors */
+enum class SmootherColor {
+    Black = 0,
+    White = 1,
+};
+
+/* -----------*/
+/* Test Cases */
+/* -----------*/
+
 /* Geometry Types - domain_geometry */
 enum class GeometryType
 {

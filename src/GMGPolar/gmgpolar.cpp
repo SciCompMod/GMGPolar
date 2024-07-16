@@ -44,12 +44,14 @@ const PolarGrid& GMGPolar::grid() const {
 }
 
 void GMGPolar::printTimings() const {
-    std::cout << "\nTiming Information:" << std::endl;
+    std::cout<< "\n------------------"<<std::endl;
+    std::cout << "Timing Information" << std::endl;
+    std::cout<< "------------------"<<std::endl;
     std::cout << "Setup Time: " << t_setup_total << " seconds" << std::endl;
     std::cout << "    Create Levels: " << t_setup_createLevels << " seconds" << std::endl;
     std::cout << "    (Build rhs_f: " << t_setup_rhs << " seconds)" << std::endl;
-    std::cout << "    Direct Solver: " << t_setup_directSolver << " seconds" << std::endl;
     std::cout << "    Smoother: " << t_setup_smoother << " seconds" << std::endl;
+    std::cout << "    Direct Solver: " << t_setup_directSolver << " seconds" << std::endl;
     std::cout << "\nSolve Time: " << t_solve_total << " seconds" << std::endl;
     std::cout << "    Multigrid Iteration: " << t_solve_multigrid_iterations << " seconds" << std::endl;
     std::cout << "    Check Convergence: " << t_check_convergence << " seconds" << std::endl;
@@ -58,7 +60,7 @@ void GMGPolar::printTimings() const {
     std::cout << "    PreSmoothing: " << t_avg_MGC_preSmoothing << " seconds" << std::endl;
     std::cout << "    PostSmoothing: " << t_avg_MGC_postSmoothing << " seconds" << std::endl;
     std::cout << "    Residual: " << t_avg_MGC_residual << " seconds" << std::endl;
-    std::cout << "    DirectSolver: " << t_avg_MGC_directSolver << " seconds" << std::endl;
+    std::cout << "    DirectSolve: " << t_avg_MGC_directSolver << " seconds" << std::endl;
     std::cout<<"\n"<<std::endl;
 }
 

@@ -64,7 +64,17 @@ void GMGPolar::setup() {
         // ---------------------- //
         if(current_level == 0){
             if(extrapolation_){
-                // levels_[current_level].initializeExtrapolatedSmoothing(domain_geometry_, system_parameters_, DirBC_Interior, numThreadsUsed);
+                auto start_setup_smoother = std::chrono::high_resolution_clock::now();
+                levels_[current_level].initializeExtrapolatedSmoothing(*domain_geometry_, *system_parameters_, DirBC_Interior_, 
+                    maxOpenMPThreads_, taskingThreads_[current_level]
+                );
+
+                levels_[current_level].initializeSmoothing(*domain_geometry_, *system_parameters_, DirBC_Interior_, 
+                    maxOpenMPThreads_, taskingThreads_[current_level]
+                );
+
+                auto end_setup_smoother = std::chrono::high_resolution_clock::now();
+                t_setup_smoother += std::chrono::duration<double>(end_setup_smoother - start_setup_smoother).count();
             } else{
                 auto start_setup_smoother = std::chrono::high_resolution_clock::now();
                 levels_[current_level].initializeSmoothing(*domain_geometry_, *system_parameters_, DirBC_Interior_, 

@@ -12,6 +12,7 @@ class Level;
 #include "../LinearAlgebra/matrix.h"
 #include "../LinearAlgebra/operations.h"
 #include "../LinearAlgebra/symmetricTridiagonalSolver.h"
+#include "../LinearAlgebra/diagonalSolver.h"
 
 #include "../common/constants.h"
 
@@ -28,14 +29,14 @@ class Level;
 #include <vector>
 #include <iostream>
 
-class Smoother {
+class ExtrapolatedSmoother {
 public:
-    explicit Smoother(const PolarGrid& grid, const LevelCache& level_data, 
+    explicit ExtrapolatedSmoother(const PolarGrid& grid, const LevelCache& level_data, 
         const DomainGeometry& domain_geometry, const SystemParameters& system_parameters, const bool DirBC_Interior, 
         const int maxOpenMPThreads, const int openMPTaskThreads);
-    ~Smoother();
+    ~ExtrapolatedSmoother();
 
-    void smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
+    void extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
 
 private:
     /* ------------------- */
@@ -52,15 +53,18 @@ private:
     const int maxOpenMPThreads_;
     const int openMPTaskThreads_;
 
-    /* ---------------- */
-    /* Smoother members */
+    /* ----------------------------- */
+    /* Extrapolated Smoother members */
     SparseMatrix<double> inner_boundary_circle_Asc_matrix_;
     DMUMPS_STRUC_C inner_boundary_circle_Asc_mumps_;
+
+    std::vector<DiagonalSolver<double>> circle_diagonal_solver_;
+    std::vector<DiagonalSolver<double>> radial_diagonal_solver_;
 
     std::vector<SymmetricTridiagonalSolver<double>> circle_symmetric_cyclic_tridiagonal_solver_;
     std::vector<SymmetricTridiagonalSolver<double>> radial_symmetric_tridiagonal_solver_;
 
-    const Stencil& get_stencil(int i_r) const;
+    const Stencil& get_stencil(int i_r, int i_theta) const;
     int nnz_circle_Asc(const int i_r) const;
     int nnz_radial_Asc(const int i_theta) const;
 

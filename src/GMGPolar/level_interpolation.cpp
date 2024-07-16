@@ -20,3 +20,17 @@ void GMGPolar::injectToLowerLevel(const int current_level, Vector<double>& resul
     
     interpolation_->applyInjection(levels_[current_level], levels_[current_level+1], result, x);
 }
+
+void GMGPolar::extrapolation_prolongateToUpperLevel(const int current_level, Vector<double>& result, const Vector<double>& x) const {
+    assert(current_level < numberOflevels_ && 1 <= current_level);
+    if(!interpolation_) throw std::runtime_error("Interpolation not initialized.");
+
+    interpolation_->applyExtrapolatedProlongation(levels_[current_level], levels_[current_level-1], result, x);
+}
+
+void GMGPolar::extrapolation_restrictToLowerLevel(const int current_level, Vector<double>& result, const Vector<double>& x) const {
+    assert(current_level < numberOflevels_ - 1 && 0 <= current_level);
+    if(!interpolation_) throw std::runtime_error("Interpolation not initialized.");
+
+    interpolation_->applyExtrapolatedRestriction(levels_[current_level], levels_[current_level+1], result, x);
+}

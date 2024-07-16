@@ -1,77 +1,5 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
-void GMGPolar::multigrid_V_Cycle(const int level_depth) {
-    assert(0 <= level_depth && level_depth < numberOflevels_-1);
-
-    auto start_MGC = std::chrono::high_resolution_clock::now();
-
-    Level& level = levels_[level_depth];
-    Level& next_level = levels_[level_depth+1];
-
-    auto start_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
-
-    /* ------------ */
-    /* Presmoothing */
-    for (int i = 0; i < preSmoothingSteps_; i++){
-        level.smoothingInPlace(level.solution(), level.rhs(), level.residual());
-    }
-
-    auto end_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
-    t_avg_MGC_preSmoothing += std::chrono::duration<double>(end_MGC_preSmoothing - start_MGC_preSmoothing).count();
-
-    /* ---------------------- */
-    /* Coarse grid correction */
-    /* ---------------------- */
-
-    auto start_MGC_residual = std::chrono::high_resolution_clock::now();
-
-    /* Compute the residual */
-    level.computeResidual(level.residual(), level.rhs(), level.solution());
-
-    auto end_MGC_residual = std::chrono::high_resolution_clock::now();
-    t_avg_MGC_residual += std::chrono::duration<double>(end_MGC_residual - start_MGC_residual).count();
-
-    /* Restrict the residual */
-    restrictToLowerLevel(level_depth, next_level.residual(), level.residual());
-
-    /* Solve A * error = residual */
-    if(level_depth+1 == numberOflevels_-1){
-        auto start_MGC_directSolver = std::chrono::high_resolution_clock::now();
-
-        /* Using a direct solver */
-        next_level.directSolveInPlace(next_level.residual());
-
-        auto end_MGC_directSolver = std::chrono::high_resolution_clock::now();
-        t_avg_MGC_directSolver += std::chrono::duration<double>(end_MGC_directSolver - start_MGC_directSolver).count();
-    } else{
-        /* By recursively calling the multigrid cycle */
-        next_level.rhs() = next_level.residual();
-        assign(next_level.solution(), 0.0);
-        multigrid_V_Cycle(level_depth+1);
-    }
-
-    /* Interpolate the correction */
-    prolongateToUpperLevel(level_depth+1, level.residual(), next_level.residual());
-
-    /* Compute the corrected approximation: u = u + error */
-    add(level.solution(), level.residual());
-
-    auto start_MGC_postSmoothing = std::chrono::high_resolution_clock::now();
-
-    /* ------------- */
-    /* Postsmoothing */
-    for (int i = 0; i < postSmoothingSteps_; i++){
-        level.smoothingInPlace(level.solution(), level.rhs(), level.residual());
-    }
-
-    auto end_MGC_postSmoothing = std::chrono::high_resolution_clock::now();
-    t_avg_MGC_postSmoothing += std::chrono::duration<double>(end_MGC_postSmoothing - start_MGC_postSmoothing).count();
-
-    auto end_MGC = std::chrono::high_resolution_clock::now();
-    t_avg_MGC_total += std::chrono::duration<double>(end_MGC - start_MGC).count();
-}
-
-
 void GMGPolar::solve() {
     auto start_solve = std::chrono::high_resolution_clock::now();
 
@@ -125,6 +53,11 @@ void GMGPolar::solve() {
             auto start_check_convergence = std::chrono::high_resolution_clock::now();
 
             level.computeResidual(level.residual(), level.rhs(), level.solution());
+            if(extrapolation_){
+                Level& next_level = levels_[start_level_depth+1];
+                next_level.computeResidual(next_level.residual(), next_level.rhs(), next_level.solution());
+                extrapolated_residual(level.residual(), next_level.residual());
+            }
 
             switch (residual_norm_type_)
             {
@@ -166,11 +99,25 @@ void GMGPolar::solve() {
         switch (multigrid_cycle_)
         {
             case MultigridCycleType::V_CYCLE:
-                multigrid_V_Cycle(start_level_depth);
+                if(!extrapolation_){
+                    multigrid_V_Cycle(start_level_depth);
+                } else{
+                    implicitly_extrapolated_multigrid_V_Cycle(start_level_depth);
+                }
                 break;
             case MultigridCycleType::W_CYCLE:
+                if(!extrapolation_){
+                    multigrid_W_Cycle(start_level_depth);
+                } else{
+                    implicitly_extrapolated_multigrid_W_Cycle(start_level_depth);
+                }
                 break;
             case MultigridCycleType::F_CYCLE:
+                if(!extrapolation_){
+                    multigrid_F_Cycle(start_level_depth);
+                } else{
+                    implicitly_extrapolated_multigrid_F_Cycle(start_level_depth);
+                }
                 break;
             default:
                 throw std::invalid_argument("Unknown MultigridCycleType");
@@ -181,25 +128,28 @@ void GMGPolar::solve() {
         t_solve_multigrid_iterations += std::chrono::duration<double>(end_solve_multigrid_iterations - start_solve_multigrid_iterations).count();
     }
 
-    /* --------------------------------------------- */
-    /* Compute the average Multigrid Iteration times */
-    /* --------------------------------------------- */
-    t_avg_MGC_total /= number_of_iterations_;
-    t_avg_MGC_preSmoothing /= number_of_iterations_;
-    t_avg_MGC_postSmoothing /= number_of_iterations_;
-    t_avg_MGC_residual /= number_of_iterations_;
-    t_avg_MGC_directSolver /= number_of_iterations_;
+    if(number_of_iterations_ > 0){
+        /* --------------------------------------------- */
+        /* Compute the average Multigrid Iteration times */
+        /* --------------------------------------------- */
+        t_avg_MGC_total = t_solve_multigrid_iterations / number_of_iterations_;
+        t_avg_MGC_preSmoothing /= number_of_iterations_;
+        t_avg_MGC_postSmoothing /= number_of_iterations_;
+        t_avg_MGC_residual /= number_of_iterations_;
+        t_avg_MGC_directSolver /= number_of_iterations_;
 
-    /* -------------------------------- */
-    /* Compute the reduction factor rho */
-    /* -------------------------------- */
-    mean_residual_reduction_factor_rho_ = std::pow(current_residual_norm / initial_residual_norm, 1.0 / number_of_iterations_);
+        /* -------------------------------- */
+        /* Compute the reduction factor rho */
+        /* -------------------------------- */
+        mean_residual_reduction_factor_rho_ = std::pow(current_residual_norm / initial_residual_norm, 1.0 / number_of_iterations_);
 
-    std::cout<< "\nMean Residual Reduction Factor Rho: "<< mean_residual_reduction_factor_rho_ <<std::endl;
+        std::cout<< "\nMean Residual Reduction Factor Rho: "<< mean_residual_reduction_factor_rho_ <<std::endl;
+    }
 
     auto end_solve = std::chrono::high_resolution_clock::now();
     t_solve_total += std::chrono::duration<double>(end_solve - start_solve).count();
 }
+
  
 bool GMGPolar::converged(const double& residual_norm, const double& relative_residual_norm){
     if(relative_tolerance_.has_value()){
@@ -256,106 +206,54 @@ std::pair<double, double> GMGPolar::compute_exact_error(Level& level, const Vect
 }
 
 
-    // int current_level = 0;
+void GMGPolar::extrapolated_residual(Vector<double>& residual_level_0, const Vector<double>& residual_level_1){
 
-    // const auto& grid = levels_[current_level].grid();
-    // const int n = grid.number_of_nodes();
+    omp_set_num_threads(maxOpenMPThreads_);
 
-    // Vector<double> x(n);
-    // assign(x, 0.0);
-    // Vector<double> residual(n);
+    const PolarGrid& coarseGrid = levels_[0].grid();
+    const PolarGrid& fineGrid = levels_[1].grid();
 
-    // levels_[current_level].computeResidual(residual,x);
-    // levels_[current_level].coarseSolveInPlace(residual);
+    assert(residual_level_0.size() == fineGrid.number_of_nodes());
+    assert(residual_level_1.size() == coarseGrid.number_of_nodes());
 
-    // Vector<double> solution = residual;
+    #pragma omp parallel num_threads(maxOpenMPThreads_)
+    {
+        /* Circluar Indexing Section */
+        /* For loop matches circular access pattern */
+        #pragma omp for nowait
+        for (int i_r = 0; i_r < fineGrid.numberSmootherCircles(); i_r++){
+            int i_r_coarse = i_r >> 1;
+            for (int i_theta = 0; i_theta < fineGrid.ntheta(); i_theta++){
+                int i_theta_coarse = i_theta >> 1;
 
-    // // levels_[current_level].smoothingInPlace(solution, residual);
+                if(i_r & 1 || i_theta & 1){
+                    residual_level_0[fineGrid.index(i_r,i_theta)] *= 4.0 / 3.0;
+                }
+                else{
+                    int fine_idx = fineGrid.index(i_r, i_theta);
+                    int coarse_idx = coarseGrid.index(i_r_coarse, i_theta_coarse);
+                    residual_level_0[fine_idx] = (4.0 * residual_level_0[fine_idx] - residual_level_1[coarse_idx]) / 3.0;
+                }   
+            }
+        }
 
+        /* Radial Indexing Section */
+        /* For loop matches radial access pattern */
+        #pragma omp for nowait
+        for (int i_theta = 0; i_theta < fineGrid.ntheta(); i_theta++){
+            int i_theta_coarse = i_theta >> 1;
+            for (int i_r = fineGrid.numberSmootherCircles(); i_r < fineGrid.nr(); i_r++){
+                int i_r_coarse = i_r >> 1;
 
-    // Vector<double> y(n);
-    // assign(y, 0.0);
-    
-    // y = solution;
-
-    // y[10] = 900;
-
-    // Vector<double> temp(n);
-
-    // Vector<double> error(n);
-
-    // for (int i = 0; i < 100; i++)
-    // {
-    //     for (int index = 0; index < grid.number_of_nodes(); index++)
-    //     {
-    //         MultiIndex node = grid.multiindex(index);
-    //         Point coords = grid.polar_coordinates(node);
-    //         //error[index] = std::abs(solution[index] - y[index]);
-    //         error[index] = std::abs( (*exact_solution_).exact_solution(coords[0], coords[1], sin(coords[1]), cos(coords[1])) - y[index]);
-    //     }
-    //     temp = levels_[current_level].levelCache().discretization_rhs_f();
-    //     levels_[current_level].smoothingInPlace(y,temp);   
-
-    //     // #pragma omp parallel for
-    //     // for (size_t i = 0; i < n; i++) error[i] = std::abs(solution[i] - y[i]);
-    //     std::cout<<dot_product(error,error)<<std::endl;
-    // }
-
-
-
-
-
-
-    // for (int i_r = 0; i_r < grid.nr(); i_r++)
-    // {
-    //     for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++)
-    //     {
-    //         v2[grid.index(i_r,i_theta)] = std::abs(v2[grid.index(i_r,i_theta)] - (*exact_solution_).exact_solution( grid.radius(i_r), 
-    //             grid.theta(i_theta), sin(grid.theta(i_theta)), cos(grid.theta(i_theta))  ) );
-    //     }
-    // }
-
-    // std::cout<<v2<<std::endl;
-    
-    
-    // const std::filesystem::path file_path = "ErrorDirBC";
-    // const LevelCache& level_data = levels_[current_level].levelData();
-
-    // write_to_vtk(file_path, grid, v2, level_data);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // // std::cout<<"End"<<std::endl;
-    // // std::cout<<v2<<std::endl;
-
-    // int i_r = grid.nr() / 3;
-    // int i_theta = grid.ntheta() / 3;
-
-    // std::cout<<v2[grid.index(i_r, i_theta)]<<std::endl;
-
-    // std::cout<<(*exact_solution_).exact_solution(grid.radius(i_r), 
-    //     grid.theta(i_theta), sin(grid.theta(i_theta)), cos(grid.theta(i_theta)))<<std::endl;;
-
+                if(i_r & 1 || i_theta & 1){
+                    residual_level_0[fineGrid.index(i_r,i_theta)] *= 4.0 / 3.0;
+                }
+                else{
+                    int fine_idx = fineGrid.index(i_r, i_theta);
+                    int coarse_idx = coarseGrid.index(i_r_coarse, i_theta_coarse);
+                    residual_level_0[fine_idx] = (4.0 * residual_level_0[fine_idx] - residual_level_1[coarse_idx]) / 3.0;
+                }   
+            }
+        }
+    }
+}

@@ -35,6 +35,7 @@ include_directories(include)
 
 # Add source files
 file(GLOB_RECURSE GMG_POLAR_SOURCES "src/GMGPolar/*.cpp")
+file(GLOB_RECURSE MULTIGRID_METHODS_SOURCES "src/GMGPolar/MultigridMethods/*.cpp")
 file(GLOB_RECURSE POLAR_GRID_SOURCES "src/PolarGrid/*.cpp")
 file(GLOB_RECURSE LEVEL_SOURCES "src/Level/*.cpp")
 
@@ -44,6 +45,7 @@ file(GLOB_RECURSE INTERPOLATION_SOURCES "src/Interpolation/*.cpp")
 file(GLOB_RECURSE DIRECT_SOLVER_SOURCES "src/DirectSolver/*.cpp")
 file(GLOB_RECURSE RESIDUAL_SOURCES "src/Residual/*.cpp")
 file(GLOB_RECURSE SMOOTHER_SOURCES "src/Smoother/*.cpp")
+file(GLOB_RECURSE EXTRAPOLATED_SMOOTHER_SOURCES "src/ExtrapolatedSmoother/*.cpp")
 
 file(GLOB_RECURSE DENSITY_PROFILE_COEFFICIENTS "src/InputFunctions/DensityProfileCoefficients/*.cpp")
 file(GLOB_RECURSE DOMAIN_GEOMETRY_SOURCES "src/InputFunctions/DomainGeometry/*.cpp")
@@ -66,6 +68,7 @@ set(MAIN_SOURCE "src/main.cpp")
 add_executable(gmgpolar 
     ${MAIN_SOURCE}
     ${GMG_POLAR_SOURCES}
+    ${MULTIGRID_METHODS_SOURCES}
     ${POLAR_GRID_SOURCES}
     ${LEVEL_SOURCES}
     ${TASK_DISTRIBUTION_SOURCES}
@@ -74,6 +77,7 @@ add_executable(gmgpolar
     ${DIRECT_SOLVER_SOURCES}
     ${RESIDUAL_SOURCES}
     ${SMOOTHER_SOURCES}
+    ${EXTRAPOLATED_SMOOTHER_SOURCES}
 
     ${DENSITY_PROFILE_COEFFICIENTS}
     ${DOMAIN_GEOMETRY_SOURCES}
@@ -96,6 +100,6 @@ if(OpenMP_CXX_FOUND)
 endif()
 target_link_libraries(gmgpolar PUBLIC ${MUMPS_LIBRARIES} OpenMP::OpenMP_CXX)
 
-# enable_testing()
-# add_subdirectory(third-party)
-# add_subdirectory(tests)
+enable_testing()
+add_subdirectory(third-party)
+add_subdirectory(tests)

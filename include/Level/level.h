@@ -3,6 +3,7 @@
 class DirectSolver;
 class Residual;
 class Smoother;
+class ExtrapolatedSmoother;
 
 #include "../PolarGrid/polargrid.h"
 
@@ -12,6 +13,7 @@ class Smoother;
 #include "../DirectSolver/directSolver.h"
 #include "../Residual/residual.h"
 #include "../Smoother/smoother.h"
+#include "../ExtrapolatedSmoother/extrapolated_smoother.h"
 
 #include <memory>
 #include <omp.h>
@@ -60,11 +62,12 @@ public:
         const int maxOpenMPThreads, const int openMPTaskThreads);
     void smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const;
 
-
-    // void initializeExtrapolatedSmoothing(
-    //     const DomainGeometry& domain_geometry, const SystemParameters& system_parameters, const bool DirBC_Interior,
-    //     const int maxOpenMPThreads, const int openMPTaskThreads);
-    // void extrapolatedSmoothing(Vector<double>& result, const Vector<double>& x);
+    // ---------------------------- //
+    // Apply Extrapolated Smoothing //
+    void initializeExtrapolatedSmoothing(
+        const DomainGeometry& domain_geometry, const SystemParameters& system_parameters, const bool DirBC_Interior,
+        const int maxOpenMPThreads, const int openMPTaskThreads);
+    void extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const;
 
 private:
     const int level_;
@@ -74,8 +77,7 @@ private:
     std::unique_ptr<DirectSolver> op_directSolver_;
     std::unique_ptr<Residual> op_residual_;
     std::unique_ptr<Smoother> op_smoother_;
-
-    // std::unique_ptr<const ExtrapolatedSmoother> 
+    std::unique_ptr<ExtrapolatedSmoother> op_extrapolated_smoother_;
 
     Vector<double> rhs_;
     Vector<double> solution_;

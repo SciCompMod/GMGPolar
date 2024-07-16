@@ -91,3 +91,16 @@ void Level::smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vecto
     op_smoother_ -> smoothingInPlace(x, rhs, temp);
 }
 
+// ---------------------------- //
+// Apply Extrapolated Smoothing //
+void Level::initializeExtrapolatedSmoothing(
+    const DomainGeometry& domain_geometry, const SystemParameters& system_parameters, const bool DirBC_Interior, 
+    const int maxOpenMPThreads, const int openMPTaskThreads)
+{
+    op_extrapolated_smoother_ = std::make_unique<ExtrapolatedSmoother>(*grid_, *level_cache_, domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
+    if (!op_extrapolated_smoother_) throw std::runtime_error("Failed to initialize Extrapolated Smoother.");
+}
+void Level::extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const {
+    if (!op_extrapolated_smoother_) throw std::runtime_error("Extrapolated Smoother not initialized.");
+    op_extrapolated_smoother_ -> extrapolatedSmoothingInPlace(x, rhs, temp);
+}
