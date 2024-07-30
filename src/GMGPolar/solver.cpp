@@ -55,8 +55,9 @@ void GMGPolar::solve() {
             level.computeResidual(level.residual(), level.rhs(), level.solution());
             if(extrapolation_){
                 Level& next_level = levels_[start_level_depth+1];
+                injectToLowerLevel(start_level_depth, next_level.solution(), level.solution());
                 next_level.computeResidual(next_level.residual(), next_level.rhs(), next_level.solution());
-                extrapolated_residual(level.residual(), next_level.residual());
+                extrapolated_residual(start_level_depth, level.residual(), next_level.residual());
             }
 
             switch (residual_norm_type_)
@@ -100,23 +101,23 @@ void GMGPolar::solve() {
         {
             case MultigridCycleType::V_CYCLE:
                 if(!extrapolation_){
-                    multigrid_V_Cycle(start_level_depth);
+                    multigrid_V_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
                 } else{
-                    implicitly_extrapolated_multigrid_V_Cycle(start_level_depth);
+                    implicitly_extrapolated_multigrid_V_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
                 }
                 break;
             case MultigridCycleType::W_CYCLE:
                 if(!extrapolation_){
-                    multigrid_W_Cycle(start_level_depth);
+                    multigrid_W_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
                 } else{
-                    implicitly_extrapolated_multigrid_W_Cycle(start_level_depth);
+                    implicitly_extrapolated_multigrid_W_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
                 }
                 break;
             case MultigridCycleType::F_CYCLE:
                 if(!extrapolation_){
-                    multigrid_F_Cycle(start_level_depth);
+                    multigrid_F_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
                 } else{
-                    implicitly_extrapolated_multigrid_F_Cycle(start_level_depth);
+                    implicitly_extrapolated_multigrid_F_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
                 }
                 break;
             default:
@@ -206,15 +207,14 @@ std::pair<double, double> GMGPolar::compute_exact_error(Level& level, const Vect
 }
 
 
-void GMGPolar::extrapolated_residual(Vector<double>& residual_level_0, const Vector<double>& residual_level_1){
-
+void GMGPolar::extrapolated_residual(const int current_level, Vector<double>& residual, const Vector<double>& residual_next_level){
     omp_set_num_threads(maxOpenMPThreads_);
 
-    const PolarGrid& coarseGrid = levels_[0].grid();
-    const PolarGrid& fineGrid = levels_[1].grid();
+    const PolarGrid& fineGrid = levels_[current_level].grid();
+    const PolarGrid& coarseGrid = levels_[current_level+1].grid();
 
-    assert(residual_level_0.size() == fineGrid.number_of_nodes());
-    assert(residual_level_1.size() == coarseGrid.number_of_nodes());
+    assert(residual.size() == fineGrid.number_of_nodes());
+    assert(residual_next_level.size() == coarseGrid.number_of_nodes());
 
     #pragma omp parallel num_threads(maxOpenMPThreads_)
     {
@@ -227,12 +227,12 @@ void GMGPolar::extrapolated_residual(Vector<double>& residual_level_0, const Vec
                 int i_theta_coarse = i_theta >> 1;
 
                 if(i_r & 1 || i_theta & 1){
-                    residual_level_0[fineGrid.index(i_r,i_theta)] *= 4.0 / 3.0;
+                    residual[fineGrid.index(i_r,i_theta)] *= 4.0 / 3.0;
                 }
                 else{
                     int fine_idx = fineGrid.index(i_r, i_theta);
                     int coarse_idx = coarseGrid.index(i_r_coarse, i_theta_coarse);
-                    residual_level_0[fine_idx] = (4.0 * residual_level_0[fine_idx] - residual_level_1[coarse_idx]) / 3.0;
+                    residual[fine_idx] = (4.0 * residual[fine_idx] - residual_next_level[coarse_idx]) / 3.0;
                 }   
             }
         }
@@ -246,12 +246,12 @@ void GMGPolar::extrapolated_residual(Vector<double>& residual_level_0, const Vec
                 int i_r_coarse = i_r >> 1;
 
                 if(i_r & 1 || i_theta & 1){
-                    residual_level_0[fineGrid.index(i_r,i_theta)] *= 4.0 / 3.0;
+                    residual[fineGrid.index(i_r,i_theta)] *= 4.0 / 3.0;
                 }
                 else{
                     int fine_idx = fineGrid.index(i_r, i_theta);
                     int coarse_idx = coarseGrid.index(i_r_coarse, i_theta_coarse);
-                    residual_level_0[fine_idx] = (4.0 * residual_level_0[fine_idx] - residual_level_1[coarse_idx]) / 3.0;
+                    residual[fine_idx] = (4.0 * residual[fine_idx] - residual_next_level[coarse_idx]) / 3.0;
                 }   
             }
         }

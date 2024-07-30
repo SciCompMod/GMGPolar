@@ -50,9 +50,9 @@ void Interpolation::applyExtrapolatedRestriction0(const Level& fromLevel, const 
             value += 0.5 * x[neighbors[0].second];
         }
 
-        // Top Right
-        if(neighbors[1].second != -1){
-            value += 0.5 * x[neighbors[1].second];
+        // Top Left
+        if(neighbors[1].first != -1){
+            value += 0.5 * x[neighbors[1].first];
         }
 
         result[index] = value;

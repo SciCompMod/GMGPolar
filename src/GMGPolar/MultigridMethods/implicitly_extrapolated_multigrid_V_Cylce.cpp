@@ -1,6 +1,6 @@
 #include "../../../include/GMGPolar/gmgpolar.h"
 
-void GMGPolar::implicitly_extrapolated_multigrid_V_Cycle(const int level_depth) {
+void GMGPolar::implicitly_extrapolated_multigrid_V_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual) {
     assert(0 <= level_depth && level_depth < numberOflevels_-1);
 
     Level& level = levels_[level_depth];
@@ -11,8 +11,7 @@ void GMGPolar::implicitly_extrapolated_multigrid_V_Cycle(const int level_depth) 
     /* ------------ */
     /* Presmoothing */
     for (int i = 0; i < preSmoothingSteps_; i++){
-        // level.extrapolatedSmoothingInPlace(level.solution(), level.rhs(), level.residual());
-        level.smoothingInPlace(level.solution(), level.rhs(), level.residual());
+        level.extrapolatedSmoothingInPlace(solution, rhs, residual);
     }
 
     auto end_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
@@ -22,51 +21,57 @@ void GMGPolar::implicitly_extrapolated_multigrid_V_Cycle(const int level_depth) 
     /* Coarse grid correction */
     /* ---------------------- */
 
-    auto start_MGC_residual = std::chrono::high_resolution_clock::now();
-
-    /* Compute the residual */
-    level.computeResidual(level.residual(), level.rhs(), level.solution());
-
-    injectToLowerLevel(level_depth, next_level.solution(), level.solution());
-    next_level.computeResidual(next_level.residual(), next_level.rhs(), next_level.solution());
-
-    extrapolation_restrictToLowerLevel(level_depth, next_level.solution(), level.residual());
-
-    linear_combination(next_level.residual(), -1.0 / 3.0, next_level.solution(), 4.0 / 3.0);
-
-    auto end_MGC_residual = std::chrono::high_resolution_clock::now();
-    t_avg_MGC_residual += std::chrono::duration<double>(end_MGC_residual - start_MGC_residual).count();
-
+    /* -------------------------- */
     /* Solve A * error = residual */
     if(level_depth+1 == numberOflevels_-1){
-        auto start_MGC_directSolver = std::chrono::high_resolution_clock::now();
-
+        /* --------------------- */
         /* Using a direct solver */
+        /* --------------------- */
+        /* Step 1: Compute extrapolated residual */
+        auto start_MGC_residual = std::chrono::high_resolution_clock::now();
+        level.computeResidual(residual, rhs, solution);
+        extrapolation_restrictToLowerLevel(level_depth, next_level.residual(), residual);
+        injectToLowerLevel(level_depth, next_level.solution(), solution);
+        next_level.computeResidual(next_level.rhs_error(), next_level.rhs(), next_level.solution());
+        linear_combination(next_level.residual(), 4.0 / 3.0, next_level.rhs_error(), -1.0 / 3.0);
+        auto end_MGC_residual = std::chrono::high_resolution_clock::now();
+        t_avg_MGC_residual += std::chrono::duration<double>(end_MGC_residual - start_MGC_residual).count();
+        /* Step 2: Solve for the error in place */
+        auto start_MGC_directSolver = std::chrono::high_resolution_clock::now();   
         next_level.directSolveInPlace(next_level.residual());
-
         auto end_MGC_directSolver = std::chrono::high_resolution_clock::now();
         t_avg_MGC_directSolver += std::chrono::duration<double>(end_MGC_directSolver - start_MGC_directSolver).count();
     } else{
+        /* ------------------------------------------ */
         /* By recursively calling the multigrid cycle */
-        next_level.rhs() = next_level.residual();
-        assign(next_level.solution(), 0.0);
-
-        multigrid_V_Cycle(level_depth+1);
+        /* ------------------------------------------ */
+        /* Step 1: Compute extrapolated residual. */
+        auto start_MGC_residual = std::chrono::high_resolution_clock::now();
+        level.computeResidual(residual, rhs, solution);
+        extrapolation_restrictToLowerLevel(level_depth, next_level.rhs_error(), residual);
+        injectToLowerLevel(level_depth, next_level.solution(), solution);
+        next_level.computeResidual(next_level.residual(), next_level.rhs(), next_level.solution());
+        linear_combination(next_level.rhs_error(), 4.0 / 3.0, next_level.residual(), -1.0 / 3.0);
+        auto end_MGC_residual = std::chrono::high_resolution_clock::now();
+        t_avg_MGC_residual += std::chrono::duration<double>(end_MGC_residual - start_MGC_residual).count();
+        /* Step 2: Set starting error to zero. */
+        assign(next_level.residual(), 0.0);
+        /* Step 3: Solve for the error by recursively calling the multigrid cycle. */
+        multigrid_V_Cycle(level_depth+1, next_level.residual(), next_level.rhs_error(), next_level.solution());
     }
 
     /* Interpolate the correction */
-    extrapolation_prolongateToUpperLevel(level_depth+1, level.residual(), next_level.residual());
+    extrapolation_prolongateToUpperLevel(level_depth+1, residual, next_level.residual());
 
     /* Compute the corrected approximation: u = u + error */
-    add(level.solution(), level.residual());
+    add(solution, residual);
 
     auto start_MGC_postSmoothing = std::chrono::high_resolution_clock::now();
 
     /* ------------- */
     /* Postsmoothing */
     for (int i = 0; i < postSmoothingSteps_; i++){
-        //level.extrapolatedSmoothingInPlace(level.solution(), level.rhs(), level.residual());
-        level.smoothingInPlace(level.solution(), level.rhs(), level.residual());
+        level.extrapolatedSmoothingInPlace(solution, rhs, residual);
     }
 
     auto end_MGC_postSmoothing = std::chrono::high_resolution_clock::now();

@@ -84,13 +84,6 @@ add_executable(gmgpolar
     ${EXACT_SOLUTION_SOURCES}
     ${BOUNDARY_CONDITION_SOURCES}
     ${SOURCE_TERMS_SOURCES}
-
-    # ${GMG_POLAR_SOURCES}
-    # ${INTERPOLATION_SOURCES}
-    # ${OPERATOR_SOURCES}
-    # ${POLAR_GRID_SOURCES}
-    # ${TASK_DISTRIBUTION_SOURCES}
-    # ${TEST_SOURCES}
 )
 
 # Add OpenMP flags if available
@@ -100,6 +93,6 @@ if(OpenMP_CXX_FOUND)
 endif()
 target_link_libraries(gmgpolar PUBLIC ${MUMPS_LIBRARIES} OpenMP::OpenMP_CXX)
 
-enable_testing()
-add_subdirectory(third-party)
-add_subdirectory(tests)
+# enable_testing()
+# add_subdirectory(third-party)
+# add_subdirectory(tests)

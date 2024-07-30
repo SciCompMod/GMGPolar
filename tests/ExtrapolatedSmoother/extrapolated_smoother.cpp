@@ -25,14 +25,12 @@ Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int s
     return x;
 }
 
-TEST(OperatorATest, applyA_DirBC_Interior) {
+TEST(SmootherTest, SmootherDirBC_Interior) {
     std::vector<double> radii = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {0, M_PI/16, M_PI/8, M_PI/2, M_PI, M_PI+M_PI/16, M_PI+M_PI/8, M_PI+M_PI/2, M_PI+M_PI};
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
-
     auto levelCache = std::make_unique<LevelCache>(*grid);
-
     Level level(0, std::move(grid), std::move(levelCache));
 
     double Rmax = radii.back();
@@ -52,51 +50,44 @@ TEST(OperatorATest, applyA_DirBC_Interior) {
     int maxOpenMPThreads = 1;
     int openMPTaskThreads = 1;
     
-    Residual residual_operator(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
+    DirectSolver solver_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
+    Residual residual_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
+    ExtrapolatedSmoother extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
 
-    unsigned int seed = 42;
-    Vector<double> x = generate_random_sample_data(level.grid(), seed);
-    Vector<double> rhs = generate_random_sample_data(level.grid(), seed);
+    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution = rhs;
+    solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> result1(level.grid().number_of_nodes());
-    Vector<double> result2(level.grid().number_of_nodes());
-    Vector<double> result3(level.grid().number_of_nodes());
-
-    residual_operator.computeResidual_V1(result1, rhs, x);
-    residual_operator.computeResidual_V2(result2, rhs, x);
-    residual_operator.computeResidual_V3(result3, rhs, x);
-
-    ASSERT_EQ(result1.size(), result2.size());
-    for (size_t i = 0; i < result1.size(); ++i) {
-        ASSERT_NEAR(result1[i], result2[i], 1e-12);
+    /* Set coarse values to the solution and fill the rest with random values. */
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 42);
+    for (int i_r = 0; i_r < level.grid().nr(); i_r+=2){
+        for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta+=2){
+           smoother_solution[level.grid().index(i_r,i_theta)] = discrete_solution[level.grid().index(i_r,i_theta)];
+        }
     }
 
-    ASSERT_EQ(result2.size(), result3.size());
-    for (size_t i = 0; i < result2.size(); ++i) {
-        ASSERT_NEAR(result2[i], result3[i], 1e-12);
+    Vector<double> temp(level.grid().number_of_nodes());
+    
+    for (int i = 0; i < 1000; i++){
+        extrapolated_smoother_op.extrapolatedSmoothingInPlace(smoother_solution, rhs, temp);
     }
 
-    Vector<double> result4(level.grid().number_of_nodes());
-    result4 = rhs;
-    residual_operator.applyATake0(result4, x, -1.0);
-
-    ASSERT_EQ(result2.size(), result3.size());
-    for (size_t i = 0; i < result1.size(); ++i) {
-        MultiIndex alpha = level.grid().multiindex(i);
-        if(alpha[0] == 0 && !DirBC_Interior) ASSERT_NEAR(result1[i], result4[i], 1e-8);
-        else ASSERT_NEAR(result1[i], result4[i], 1e-11);
+    Vector<double> error(level.grid().number_of_nodes());
+    for (int i = 0; i < error.size(); i++){
+        error[i] = discrete_solution[i] - smoother_solution[i];
     }
+
+    ASSERT_NEAR(l1_norm(error), 0.0, 1e-12);
+    ASSERT_NEAR(sqrt(l2_norm_squared(error)), 0.0, 1e-13);
+    ASSERT_NEAR(infinity_norm(error), 0.0, 1e-13);
 }
 
-
-TEST(OperatorATest, applyA_AcrossOrigin) {
+TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherAcrossOrigin) {
     std::vector<double> radii = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {0, M_PI/16, M_PI/8, M_PI/2, M_PI, M_PI+M_PI/16, M_PI+M_PI/8, M_PI+M_PI/2, M_PI+M_PI};
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
-
     auto levelCache = std::make_unique<LevelCache>(*grid);
-
     Level level(0, std::move(grid), std::move(levelCache));
 
     double Rmax = radii.back();
@@ -116,38 +107,34 @@ TEST(OperatorATest, applyA_AcrossOrigin) {
     int maxOpenMPThreads = 1;
     int openMPTaskThreads = 1;
     
-    Residual residual_operator(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
+    DirectSolver solver_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
+    Residual residual_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
+    ExtrapolatedSmoother extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
 
-    unsigned int seed = 42;
-    Vector<double> x = generate_random_sample_data(level.grid(), seed);
-    Vector<double> rhs = generate_random_sample_data(level.grid(), seed);
+    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution = rhs;
+    solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> result1(level.grid().number_of_nodes());
-    Vector<double> result2(level.grid().number_of_nodes());
-    Vector<double> result3(level.grid().number_of_nodes());
-
-    residual_operator.computeResidual_V1(result1, rhs, x);
-    residual_operator.computeResidual_V2(result2, rhs, x);
-    residual_operator.computeResidual_V3(result3, rhs, x);
-
-    ASSERT_EQ(result1.size(), result2.size());
-    for (size_t i = 0; i < result1.size(); ++i) {
-        ASSERT_NEAR(result1[i], result2[i], 1e-12);
+    /* Set coarse values to the solution and fill the rest with random values. */
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 42);
+    for (int i_r = 0; i_r < level.grid().nr(); i_r+=2){
+        for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta+=2){
+           smoother_solution[level.grid().index(i_r,i_theta)] = discrete_solution[level.grid().index(i_r,i_theta)];
+        }
     }
 
-    ASSERT_EQ(result2.size(), result3.size());
-    for (size_t i = 0; i < result2.size(); ++i) {
-        ASSERT_NEAR(result2[i], result3[i], 1e-12);
+    Vector<double> temp(level.grid().number_of_nodes());
+    
+    for (int i = 0; i < 1000; i++){
+        extrapolated_smoother_op.extrapolatedSmoothingInPlace(smoother_solution, rhs, temp);
+    }
+    
+    Vector<double> error(level.grid().number_of_nodes());
+    for (int i = 0; i < error.size(); i++){
+        error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
-    Vector<double> result4(level.grid().number_of_nodes());
-    result4 = rhs;
-    residual_operator.applyATake0(result4, x, -1.0);
-
-    ASSERT_EQ(result2.size(), result3.size());
-    for (size_t i = 0; i < result1.size(); ++i) {
-        MultiIndex alpha = level.grid().multiindex(i);
-        if(alpha[0] == 0 && !DirBC_Interior) ASSERT_NEAR(result1[i], result4[i], 1e-8);
-        else ASSERT_NEAR(result1[i], result4[i], 1e-11);
-    }
+    ASSERT_NEAR(l1_norm(error), 0.0, 1e-11);
+    ASSERT_NEAR(sqrt(l2_norm_squared(error)), 0.0, 1e-12);
+    ASSERT_NEAR(infinity_norm(error), 0.0, 1e-12);
 }

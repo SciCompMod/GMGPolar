@@ -54,11 +54,16 @@ int ExtrapolatedSmoother::ptr_nz_index_circle_Asc(const int i_r, const int i_the
     assert((grid_.ntheta() / 2) % 2 == 0);
 
     if(i_r == 0){
-        if(i_theta % 2 == 0){
-            return 3 * (i_theta/2);
+        if (!DirBC_Interior_) {
+            if(i_theta % 2 == 0){
+                return 3 * (i_theta/2);
+            }
+            else{
+                return 3 * (i_theta/2) + 1;
+            }
         }
         else{
-            return 3 * (i_theta/2) + 1;
+            return i_theta;
         }
     }
 

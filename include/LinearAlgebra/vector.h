@@ -77,13 +77,16 @@ Vector<T>& Vector<T>::operator=(const Vector& other) {
         // Self-assignment, no work needed
         return *this;
     }
-    // Only allocate new memory if the sizes are different
+    
+    // Allocate new memory if necessary
     if (size_ != other.size_) {
         size_ = other.size_;
         values_ = std::make_unique<T[]>(size_);
     }
+    
     // Copy the elements
-    std::copy(other.values_.get(), other.values_.get() + size_, values_.get());
+    std::copy(other.values_.get(), other.values_.get() + other.size_, values_.get());
+
     return *this;
 }
 
@@ -92,12 +95,19 @@ template<typename T>
 Vector<T>::Vector(Vector&& other) noexcept:
     size_(other.size_),
     values_(std::move(other.values_))
-{}
+{
+    other.size_ = 0;
+}
+
 // move assignment
 template<typename T>
-Vector<T>& Vector<T>::operator=(Vector&& other) noexcept{
-    size_ = other.size_;
-    values_ = std::move(other.values_);
+Vector<T>& Vector<T>::operator=(Vector&& other) noexcept {
+    if (this != &other) {
+        size_ = other.size_;
+        values_ = std::move(other.values_);
+        
+        other.size_ = 0;
+    }
     return *this;
 }
 

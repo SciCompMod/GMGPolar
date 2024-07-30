@@ -61,42 +61,46 @@ set(TESTSOURCES
     PolarGrid/polargrid.cpp
     Interpolation/prolongation.cpp
     Interpolation/restriction.cpp
-    # Residual/residual.cpp
-    # DirectSolver/directSolver.cpp
-    # Smoother/smoother.cpp
+    Interpolation/extrapolated_prolongation.cpp
+    Interpolation/extrapolated_restriction.cpp
+    Residual/residual.cpp
+    DirectSolver/directSolver.cpp
+    Smoother/smoother.cpp
+    ExtrapolatedSmoother/extrapolated_smoother.cpp
 )
 
+# Create static libraries from source files
+add_library(GMGPolarLib STATIC
+    ${GMG_POLAR_SOURCES}
+    ${MULTIGRID_METHODS_SOURCES}
+    ${POLAR_GRID_SOURCES}
+    ${LEVEL_SOURCES}
+    ${TASK_DISTRIBUTION_SOURCES}
+    ${STENCIL_SOURCES}
+    ${INTERPOLATION_SOURCES}
+    ${DIRECT_SOLVER_SOURCES}
+    ${RESIDUAL_SOURCES}
+    ${SMOOTHER_SOURCES}
+    ${EXTRAPOLATED_SMOOTHER_SOURCES}
+    ${DENSITY_PROFILE_COEFFICIENTS}
+    ${DOMAIN_GEOMETRY_SOURCES}
+    ${EXACT_SOLUTION_SOURCES}
+    ${BOUNDARY_CONDITION_SOURCES}
+    ${SOURCE_TERMS_SOURCES}
+)
+
+# Add OpenMP flags if available
+find_package(OpenMP REQUIRED)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(GMGPolarLib PUBLIC OpenMP::OpenMP_CXX)
+endif()
+
 # Add executables for each test source
-foreach(TESTSOURCE ${TESTSOURCES})
+foreach(TESTSOURCE ${TEST_SOURCES})
     get_filename_component(TESTNAME ${TESTSOURCE} NAME_WE)
-    add_executable(${TESTNAME} ${TESTSOURCE}
-        ${GMG_POLAR_SOURCES}
-        ${MULTIGRID_METHODS_SOURCES}
-        ${POLAR_GRID_SOURCES}
-        ${LEVEL_SOURCES}
-        ${TASK_DISTRIBUTION_SOURCES}
-        ${STENCIL_SOURCES}
-        ${INTERPOLATION_SOURCES}
-        ${DIRECT_SOLVER_SOURCES}
-        ${RESIDUAL_SOURCES}
-        ${SMOOTHER_SOURCES}
-        ${EXTRAPOLATED_SMOOTHER_SOURCES}
-
-        ${DENSITY_PROFILE_COEFFICIENTS}
-        ${DOMAIN_GEOMETRY_SOURCES}
-        ${EXACT_SOLUTION_SOURCES}
-        ${BOUNDARY_CONDITION_SOURCES}
-        ${SOURCE_TERMS_SOURCES}
-    )
-
-    # Add OpenMP flags if available
-    find_package(OpenMP REQUIRED)
-    if(OpenMP_CXX_FOUND)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    endif()
-
+    add_executable(${TESTNAME} ${TESTSOURCE})
+    target_link_libraries(${TESTNAME} GMGPolarLib GTest::gtest_main ${MUMPS_LIBRARIES})
     target_compile_features(${TESTNAME} PRIVATE cxx_std_20)
-    target_link_libraries(${TESTNAME} GTest::gtest_main ${MUMPS_LIBRARIES} OpenMP::OpenMP_CXX)
     list(APPEND TESTS ${TESTNAME})
 endforeach()
 

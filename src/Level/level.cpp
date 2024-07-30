@@ -2,15 +2,15 @@
 
 // ----------- //
 // Constructor //
-Level::Level(const int level, std::unique_ptr<const PolarGrid> grid, std::unique_ptr<LevelCache> level_cache) :
-    level_(level), 
-    grid_(std::move(grid)), 
+Level::Level(int level, std::unique_ptr<const PolarGrid> grid, std::unique_ptr<LevelCache> level_cache, int extrapolation) :
+    level_(level),
+    grid_(std::move(grid)),
     level_cache_(std::move(level_cache)),
-    rhs_(grid_->number_of_nodes()),
+    rhs_((level == 0 || level == 1 && extrapolation > 0) ? grid_->number_of_nodes() : 0),
     solution_(grid_->number_of_nodes()),
-    residual_(grid_->number_of_nodes())
+    residual_(grid_->number_of_nodes()),
+    rhs_error_((level > 0) ? grid_->number_of_nodes() : 0)
 {}
-
 
 // ---------------- //
 // Getter Functions //
@@ -33,20 +33,26 @@ LevelCache& Level::levelCache() {
 Vector<double>& Level::rhs() {
     return rhs_;
 }
+const Vector<double>& Level::rhs() const {
+    return rhs_;
+}
 Vector<double>& Level::solution() {
+    return solution_;
+}
+const Vector<double>& Level::solution() const {
     return solution_;
 }
 Vector<double>& Level::residual() {
     return residual_;
 }
-const Vector<double>& Level::rhs() const {
-    return rhs_;
-}
-const Vector<double>& Level::solution() const {
-    return solution_;
-}
 const Vector<double>& Level::residual() const {
     return residual_;
+}
+Vector<double>& Level::rhs_error() {
+    return rhs_error_;
+}
+const Vector<double>& Level::rhs_error() const {
+    return rhs_error_;
 }
 
 // -------------- //

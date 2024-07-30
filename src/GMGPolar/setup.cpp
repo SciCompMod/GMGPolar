@@ -18,12 +18,12 @@ void GMGPolar::setup() {
 
     int current_level = 0;
     auto finest_levelCache = std::make_unique<LevelCache>(*finest_grid);
-    levels_.emplace_back(current_level, std::move(finest_grid), std::move(finest_levelCache));
+    levels_.emplace_back(current_level, std::move(finest_grid), std::move(finest_levelCache), extrapolation_);
 
     for(current_level = 1; current_level < numberOflevels_; current_level++) {
         auto current_grid = std::make_unique<PolarGrid>(coarseningGrid(levels_[current_level-1].grid()));
         auto current_levelCache = std::make_unique<LevelCache>(levels_[current_level-1], *current_grid);
-        levels_.emplace_back(current_level, std::move(current_grid), std::move(current_levelCache));
+        levels_.emplace_back(current_level, std::move(current_grid), std::move(current_levelCache), extrapolation_);
     }
 
     auto end_setup_createLevels = std::chrono::high_resolution_clock::now();
@@ -63,26 +63,24 @@ void GMGPolar::setup() {
         // Level 0 (finest Level) //
         // ---------------------- //
         if(current_level == 0){
-            if(extrapolation_){
-                auto start_setup_smoother = std::chrono::high_resolution_clock::now();
+            auto start_setup_smoother = std::chrono::high_resolution_clock::now();
+            if(extrapolation_ > 0){
                 levels_[current_level].initializeExtrapolatedSmoothing(*domain_geometry_, *system_parameters_, DirBC_Interior_, 
                     maxOpenMPThreads_, taskingThreads_[current_level]
                 );
-
-                levels_[current_level].initializeSmoothing(*domain_geometry_, *system_parameters_, DirBC_Interior_, 
-                    maxOpenMPThreads_, taskingThreads_[current_level]
-                );
-
-                auto end_setup_smoother = std::chrono::high_resolution_clock::now();
-                t_setup_smoother += std::chrono::duration<double>(end_setup_smoother - start_setup_smoother).count();
+                if(extrapolation_ > 1){
+                    levels_[current_level].initializeSmoothing(*domain_geometry_, *system_parameters_, DirBC_Interior_, 
+                        maxOpenMPThreads_, taskingThreads_[current_level]
+                    );
+                }
             } else{
-                auto start_setup_smoother = std::chrono::high_resolution_clock::now();
                 levels_[current_level].initializeSmoothing(*domain_geometry_, *system_parameters_, DirBC_Interior_, 
                     maxOpenMPThreads_, taskingThreads_[current_level]
                 );
-                auto end_setup_smoother = std::chrono::high_resolution_clock::now();
-                t_setup_smoother += std::chrono::duration<double>(end_setup_smoother - start_setup_smoother).count();
             }
+            auto end_setup_smoother = std::chrono::high_resolution_clock::now();
+            t_setup_smoother += std::chrono::duration<double>(end_setup_smoother - start_setup_smoother).count();
+
             levels_[current_level].initializeResidual(*domain_geometry_, *system_parameters_, DirBC_Interior_, 
                 maxOpenMPThreads_, taskingThreads_[current_level]
             );
@@ -97,6 +95,10 @@ void GMGPolar::setup() {
             );
             auto end_setup_directSolver = std::chrono::high_resolution_clock::now();
             t_setup_directSolver += std::chrono::duration<double>(end_setup_directSolver - start_setup_directSolver).count();
+
+            levels_[current_level].initializeResidual(*domain_geometry_, *system_parameters_, DirBC_Interior_, 
+                maxOpenMPThreads_, taskingThreads_[current_level]
+            );
         }
         // ------------------- //
         // Intermediate levels //
@@ -139,10 +141,10 @@ PolarGrid GMGPolar::createFinestGrid() {
 
 int GMGPolar::chooseNumberOfLevels(const PolarGrid& finestGrid) {
     const int minRadialNodes = 5;
-    const int minAngularDivisions = 8;
+    const int minAngularDivisions = 4;
 
     // Minimum level for Multigrid
-    const int multigridMinLevel = extrapolation_ ? 3 : 2;
+    const int multigridMinLevel = extrapolation_ ? 2 : 2;
 
     // Calculate radial maximum level
     int radialNodes = finestGrid.nr();

@@ -72,19 +72,14 @@ do { \
         int top_index = i_theta_P1; \
         /* -------------------------- */ \
         /* Cyclic Tridiagonal Section */ \
+        /* i_r % 2 == 1               */ \
         if(i_r & 1){ \
-            /* Neighbors if i_theta & 1 is true */ \
-            /* | X | O | X | */ \
-            /* |   |   |   | */ \
-            /* | 0 | Õ | O | */ \
-            /* |   |   |   | */ \
-            /* | X | O | X | */ \
-            /* Neighbors if i_theta & 1 is false */ \
-            /* | O | O | O | */ \
-            /* |   |   |   | */ \
-            /* | X | Õ | X | */ \
-            /* |   |   |   | */ \
-            /* | O | O | O | */ \
+            /* i_theta % 2 == 1 */           /* i_theta % 2 == 0 */ \
+            /* | X | O | X | */              /* | O | O | O | */ \
+            /* |   |   |   | */              /* |   |   |   | */ \
+            /* | 0 | Õ | O | */   /* or */   /* | X | Õ | X | */ \
+            /* |   |   |   | */              /* |   |   |   | */ \
+            /* | X | O | X | */              /* | O | O | O | */ \
             \
             auto& center_matrix = circle_symmetric_cyclic_tridiagonal_solver[i_r/2]; \
             auto& left_matrix = circle_diagonal_solver[(i_r-1)/2]; \
@@ -150,22 +145,30 @@ do { \
             else if(row == 0 && column == center_matrix.columns()-1) center_matrix.cyclic_corner_element() += value; \
             \
             if(i_theta & 1) { \
-                /* Fill matrix row of (i-1,j) */ \
-                if(!DirBC_Interior && i_r == 1) { \
-                    const Stencil& LeftStencil = get_stencil(i_r-1, i_theta); \
-                    int left_nz_index = ptr_nz_index_circle_Asc(i_r-1, i_theta); \
-                    int nz_index = left_nz_index + LeftStencil[StencilType::Center]; \
-                    nonSymmetric_inner_boundary_circle_Asc_matrix.row_index(nz_index) = left_index + 1; \
-                    nonSymmetric_inner_boundary_circle_Asc_matrix.col_index(nz_index) = left_index + 1; \
-                    nonSymmetric_inner_boundary_circle_Asc_matrix.value(nz_index) += coeff1 * arr; /* Center: (Right) */ \
-                } \
-                if(i_r > 1) { \
-                    row = left_index; \
-                    column = left_index; \
-                    value = coeff1 * arr; /* Center: (Right) */ \
-                    left_matrix.diagonal(row) += value; \
-                } \
+                /* i_theta % 2 == 1 */ \
+                /* | X | O | X | */ \
+                /* |   |   |   | */ \
+                /* | 0 | Õ | O | */ \
+                /* |   |   |   | */ \
+                /* | X | O | X | */ \
                 \
+                /* Fill matrix row of (i-1,j) */ \
+                if(!DirBC_Interior){ \
+                    if(i_r == 1){ \
+                        const Stencil& LeftStencil = get_stencil(i_r-1, i_theta); \
+                        int left_nz_index = ptr_nz_index_circle_Asc(i_r-1, i_theta); \
+                        int nz_index = left_nz_index + LeftStencil[StencilType::Center]; \
+                        nonSymmetric_inner_boundary_circle_Asc_matrix.row_index(nz_index) = left_index + 1; \
+                        nonSymmetric_inner_boundary_circle_Asc_matrix.col_index(nz_index) = left_index + 1; \
+                        nonSymmetric_inner_boundary_circle_Asc_matrix.value(nz_index) += coeff1 * arr; /* Center: (Right) */ \
+                    } \
+                    else{ \
+                        row = left_index; \
+                        column = left_index; \
+                        value = coeff1 * arr; /* Center: (Right) */ \
+                        left_matrix.diagonal(row) += value; \
+                    } \
+                } \
                 /* Fill matrix row of (i+1,j) */ \
                 row = right_index; \
                 column = right_index; \
@@ -175,25 +178,20 @@ do { \
         } \
         /* ---------------- */ \
         /* Diagonal Section */ \
+        /* i_r % 2 == 0     */ \
         else{ \
-            /* Neighbors if i_theta & 1 is true */ \
-            /* | O | X | O | */ \
-            /* |   |   |   | */ \
-            /* | 0 | Õ | O | */ \
-            /* |   |   |   | */ \
-            /* | O | X | O | */ \
-            /* Neighbors if i_theta & 1 is false */ \
-            /* | O | O | O | */ \
-            /* |   |   |   | */ \
-            /* | O | X̃ | O | */ \
-            /* |   |   |   | */ \
-            /* | O | O | O | */ \
+            /* i_theta % 2 == 1 */           /* i_theta % 2 == 0 */ \
+            /* | O | X | O | */              /* | O | O | O | */ \
+            /* |   |   |   | */              /* |   |   |   | */ \
+            /* | O | Õ | O | */   /* or */   /* | O | X̃ | O | */ \
+            /* |   |   |   | */              /* |   |   |   | */ \
+            /* | O | X | O | */              /* | O | O | O | */ \
             \
             auto& center_matrix = circle_diagonal_solver[i_r/2]; \
             auto& left_matrix = circle_symmetric_cyclic_tridiagonal_solver[(i_r-1)/2]; \
             auto& right_matrix = circle_symmetric_cyclic_tridiagonal_solver[(i_r+1)/2]; \
             \
-            if(i_theta & 1){ \
+            if(i_theta & 1){ /* i_theta % 2 == 1 */ \
                 /* Fill matrix row of (i,j) */ \
                 row = center_index; \
                 column = center_index; \
@@ -205,12 +203,12 @@ do { \
                 value = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */ \
                 center_matrix.diagonal(row) += value; \
                 \
-            }else{ \
+            } \
+            else{ /* i_theta % 2 == 0 */ \
                 /* Fill matrix row of (i,j) */ \
                 row = center_index; \
                 column = center_index; \
-                value = 1.0; \
-                center_matrix.diagonal(row) += value; \
+                center_matrix.diagonal(row) += 1.0; \
                 \
                 row = bottom_index; \
                 column = bottom_index; \
@@ -262,23 +260,16 @@ do { \
         int top_index = i_r - numberSmootherCircles; \
         /* ------------------- */ \
         /* Tridiagonal Section */ \
+        /* i_theta % 2 == 1    */ \
         if(i_theta & 1){ \
-            /* Neighbors if i_r & 1 is true */ \
-            /* ---------- */ \
-            /* X   O   X  */ \
-            /* ---------- */ \
-            /* O   Õ   O  */ \
-            /* ---------- */ \
-            /* X   O   X  */ \
-            /* ---------- */ \
-            /* Neighbors if i_r & 1 is false */ \
-            /* ---------- */ \
-            /* O   X   O  */ \
-            /* ---------- */ \
-            /* O   Õ   O  */ \
-            /* ---------- */ \
-            /* O   X   O  */ \
-            /* ---------- */ \
+            /* i_r % 2 == 1 */            /* i_r % 2 == 0 */ \
+            /* ---------- */              /* ---------- */ \
+            /* X   O   X  */              /* O   X   O  */ \
+            /* ---------- */              /* ---------- */ \
+            /* O   Õ   O  */   /* or */   /* O   Õ   O  */ \
+            /* ---------- */              /* ---------- */ \
+            /* X   O   X  */              /* O   X   O  */ \
+            /* ---------- */              /* ---------- */ \
             \
             auto& center_matrix = radial_symmetric_tridiagonal_solver[i_theta/2]; \
             auto& bottom_matrix = radial_diagonal_solver[i_theta_M1/2]; \
@@ -342,7 +333,15 @@ do { \
             if(row == column) center_matrix.main_diagonal(row) += value; \
             else if(row == column - 1) center_matrix.sub_diagonal(row) += value; \
             else if(row == 0 && column == center_matrix.columns()-1) center_matrix.cyclic_corner_element() += value; \
-            if(i_r & 1){ \
+            \
+            if(i_r & 1){ /* i_r % 2 == 1 */ \
+                /* ---------- */ \
+                /* X   O   X  */ \
+                /* ---------- */ \
+                /* O   Õ   O  */ \
+                /* ---------- */ \
+                /* X   O   X  */ \
+                /* ---------- */ \
                 /* Fill matrix row of (i,j-1) */ \
                 row = bottom_index; \
                 column = bottom_index; \
@@ -358,28 +357,21 @@ do { \
         } \
         /* ---------------- */ \
         /* Diagonal Section */ \
+        /* i_theta % 2 == 0 */ \
         else { \
-            /* Neighbors if i_r & 1 is true */ \
-            /* ---------- */ \
-            /* O   O   O  */ \
-            /* ---------- */ \
-            /* X   Õ   X  */ \
-            /* ---------- */ \
-            /* O   O   O  */ \
-            /* ---------- */ \
-            /* Neighbors if i_r & 1 is false */ \
-            /* ---------- */ \
-            /* O   O   O  */ \
-            /* ---------- */ \
-            /* O   X̃   O  */ \
-            /* ---------- */ \
-            /* O   O   O  */ \
-            /* ---------- */ \
+            /* i_r % 2 == 1 */            /* i_r % 2 == 0 */ \
+            /* ---------- */              /* ---------- */ \
+            /* O   O   O  */              /* O   O   O  */ \
+            /* ---------- */              /* ---------- */ \
+            /* X   Õ   X  */   /* or */   /* O   X̃   O  */ \
+            /* ---------- */              /* ---------- */ \
+            /* O   O   O  */              /* O   O   O  */ \
+            /* ---------- */              /* ---------- */ \
             \
             auto& center_matrix = radial_diagonal_solver[i_theta/2]; \
             auto& bottom_matrix = radial_symmetric_tridiagonal_solver[i_theta_M1/2]; \
             auto& top_matrix = radial_symmetric_tridiagonal_solver[i_theta_P1/2]; \
-            if(i_r & 1){ \
+            if(i_r & 1){ /* i_r % 2 == 1 */ \
                 /* Fill matrix row of (i,j) */ \
                 row = center_index; \
                 column = center_index; \
@@ -391,12 +383,11 @@ do { \
                 value = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */ \
                 center_matrix.diagonal(row) += value; \
             } \
-            else{ \
+            else{ /* i_r % 2 == 0 */ \
                 /* Fill matrix row of (i,j) */ \
                 row = center_index; \
                 column = center_index; \
-                value = 1.0; \
-                center_matrix.diagonal(row) += value; \
+                center_matrix.diagonal(row) += 1.0; \
                 \
                 /* Fill matrix row of (i-1,j) */ \
                 row = left_index; \
@@ -503,6 +494,13 @@ do { \
             const Stencil& CenterStencil = get_stencil(i_r, i_theta); \
             \
             if(i_theta & 1){ \
+                /* i_theta % 2 == 1 */ \
+                /* -| X | O | X | */ \
+                /* -|   |   |   | */ \
+                /* -| Õ | O | O | */ \
+                /* -|   |   |   | */ \
+                /* -| X | O | X | */ \
+                \
                 auto& center_matrix = nonSymmetric_inner_boundary_circle_Asc_matrix; \
                 auto& right_matrix = circle_symmetric_cyclic_tridiagonal_solver[(i_r+1)/2]; \
                 auto& left_matrix = nonSymmetric_inner_boundary_circle_Asc_matrix; \
@@ -546,23 +544,21 @@ do { \
                 else if(row == 0 && column == right_matrix.columns()-1) right_matrix.cyclic_corner_element() += value; \
             } \
             else{ \
+                /* i_theta % 2 == 0 */ \
+                /* -| O | O | O | */ \
+                /* -|   |   |   | */ \
+                /* -| X̃ | O | X | */ \
+                /* -|   |   |   | */ \
+                /* -| O | O | O | */ \
+                \
                 auto& center_matrix = nonSymmetric_inner_boundary_circle_Asc_matrix; \
                 auto& right_matrix = circle_symmetric_cyclic_tridiagonal_solver[(i_r+1)/2]; \
                 auto& left_matrix = nonSymmetric_inner_boundary_circle_Asc_matrix; \
-                /* Fill matrix row of (i-1,j) */ \
+                /* Fill matrix row of (i,j) */ \
                 nz_index = center_nz_index + CenterStencil[StencilType::Center]; \
                 center_matrix.row_index(nz_index) = center_index + 1; \
                 center_matrix.col_index(nz_index) = center_index + 1; \
                 center_matrix.value(nz_index) += 1.0; \
-                \
-                /* Fill matrix row of (i+1,j) */ \
-                row = right_index; \
-                column = right_index; \
-                value = coeff2 * arr; /* Center: (Left) */ \
-                if(row == column) right_matrix.main_diagonal(row) += value; \
-                else if(row == column - 1) right_matrix.sub_diagonal(row) += value; \
-                else if(row == 0 && column == right_matrix.columns()-1) right_matrix.cyclic_corner_element() += value; \
-                \
                 /* Fill matrix row of (i,j-1) */ \
                 const Stencil& BottomStencil = CenterStencil; \
                 \
@@ -578,6 +574,15 @@ do { \
                 center_matrix.row_index(nz_index) = top_index + 1; \
                 center_matrix.col_index(nz_index) = top_index + 1; \
                 center_matrix.value(nz_index) += coeff4 * att; /* Center: (Bottom) */ \
+                \
+                /* Fill matrix row of (i+1,j) */ \
+                row = right_index; \
+                column = right_index; \
+                value = coeff2 * arr; /* Center: (Left) */ \
+                if(row == column) right_matrix.main_diagonal(row) += value; \
+                else if(row == column - 1) right_matrix.sub_diagonal(row) += value; \
+                else if(row == 0 && column == right_matrix.columns()-1) right_matrix.cyclic_corner_element() += value; \
+                \
             } \
         } \
     } \
@@ -607,7 +612,7 @@ do { \
         \
         if(i_r & 1){ \
             if(i_theta & 1){ \
-                /* View of neighboring nodes. */ \
+                /* i_r % 2 == 1 and i_theta % 2 == 1 */ \
                 /* | O | X | O || X   O   X   O  */ \
                 /* |   |   |   || -------------- */ \
                 /* | 0 | O | Õ || O   O   O   O  */ \
@@ -692,7 +697,7 @@ do { \
                 else if(row == 0 && column == right_matrix.columns()-1) right_matrix.cyclic_corner_element() += value; \
             } \
             else{ \
-                /* View of neighboring nodes. */ \
+                /* i_r % 2 == 1 and i_theta % 2 == 0 */ \
                 /* | O | O | O || O   O   O   O  */ \
                 /* |   |   |   || -------------- */ \
                 /* | 0 | X | Õ || X   O   X   O  */ \
@@ -765,7 +770,7 @@ do { \
         } \
         else{ \
             if(i_theta & 1){ \
-                /* View of neighboring nodes. */ \
+                /* i_r % 2 == 0 and i_theta % 2 == 1 */ \
                 /* | X | O | X || O   X   O   X  */ \
                 /* |   |   |   || -------------- */ \
                 /* | 0 | O | Õ || O   O   O   O  */ \
@@ -804,7 +809,7 @@ do { \
                 else if(row == 0 && column == right_matrix.columns()-1) right_matrix.cyclic_corner_element() += value; \
             } \
             else{ \
-                /* View of neighboring nodes. */ \
+                /* i_r % 2 == 0 and i_theta % 2 == 0 */ \
                 /* | O | O | O || O   O   O   O  */ \
                 /* |   |   |   || -------------- */ \
                 /* | X | O | X̃ || O   X   O   X  */ \
@@ -872,7 +877,7 @@ do { \
         \
         if(i_theta & 1){ \
             if(i_r & 1){ \
-                /* View of neighboring nodes. */ \
+                /* i_theta % 2 == 1 and i_r % 2 == 1 */ \
                 /* | X | O | X || O   X   O   X  */ \
                 /* |   |   |   || -------------- */ \
                 /* | 0 | O | O || Õ   O   O   O  */ \
@@ -940,7 +945,7 @@ do { \
                 top_matrix.diagonal(row) += value; \
             } \
             else{ \
-                /* View of neighboring nodes. */ \
+                /* i_theta % 2 == 1 and i_r % 2 == 0 */ \
                 /* | O | X | O || X   O   X   O  */ \
                 /* |   |   |   || -------------- */ \
                 /* | 0 | O | O || Õ   O   O   O  */ \
@@ -1000,7 +1005,7 @@ do { \
         } \
         else{ \
             if(i_r & 1){ \
-                /* View of neighboring nodes. */ \
+                /* i_theta % 2 == 0 and i_r % 2 == 1 */ \
                 /* | O | O | O || O   O   O   O  */ \
                 /* |   |   |   || -------------- */ \
                 /* | X | O | X || Õ   X   O   X  */ \
@@ -1040,7 +1045,7 @@ do { \
                 else if(row == 0 && column == top_matrix.columns()-1) top_matrix.cyclic_corner_element() += value; \
             } \
             else{ \
-                /* View of neighboring nodes. */ \
+                /* i_theta % 2 == 0 and i_r % 2 == 0 */ \
                 /* | O | O | O || O   O   O   O  */ \
                 /* |   |   |   || -------------- */ \
                 /* | O | X | O || X̃   O   X   O  */ \
@@ -1094,7 +1099,7 @@ do { \
     /* Radial Section: Node next to outer boundary */ \
     /* ------------------------------------------- */ \
     else if(i_r == grid.nr() - 2){ \
-        assert(i_r & 1); \
+        assert(i_r % 2 == 1); \
         \
         double h1 = grid.r_dist(i_r-1); \
         double h2 = grid.r_dist(i_r); \
@@ -1115,7 +1120,7 @@ do { \
         int top_index = i_r - numberSmootherCircles; \
         \
         if(i_theta & 1){ \
-            /* View of neighboring nodes */ \
+            /* i_theta % 2 == 1 */ \
             /* ---------------|| */ \
             /* O   X   O   X  || */ \
             /* ---------------|| */ \
@@ -1163,6 +1168,9 @@ do { \
             else if(row == column - 1) center_matrix.sub_diagonal(row) += value; \
             else if(row == 0 && column == center_matrix.columns()-1) center_matrix.cyclic_corner_element() += value; \
             \
+            /* Fill matrix row of (i+1,j) */ \
+            /* Nothing to be done */ \
+            \
             /* Fill matrix row of (i,j-1) */ \
             row = bottom_index; \
             column = bottom_index; \
@@ -1176,7 +1184,7 @@ do { \
             top_matrix.diagonal(row) += value; \
         } \
         else{ \
-            /* View of neighboring nodes */ \
+            /* i_theta % 2 == 0 */ \
             /* ---------------|| */ \
             /* O   O   O   O  || */ \
             /* ---------------|| */ \
@@ -1219,7 +1227,7 @@ do { \
     /* Radial Section: Node on the outer boundary */ \
     /* ------------------------------------------ */ \
     else if(i_r == grid.nr() - 1){ \
-        assert(!(i_r & 1)); \
+        assert(!i_r % 2 == 0); \
         \
         double h1 = grid.r_dist(i_r-1); \
         double k1 = grid.theta_dist(i_theta-1); \
@@ -1230,6 +1238,14 @@ do { \
         int left_index = i_r - numberSmootherCircles - 1; \
         \
         if(i_theta & 1){ \
+            /* i_theta % 2 == 1 */ \
+            /* -----------|| */ \
+            /* X   O   X  || */ \
+            /* -----------|| */ \
+            /* O   O   Õ  || */ \
+            /* -----------|| */ \
+            /* X   O   X  || */ \
+            /* -----------|| */ \
             auto& center_matrix = radial_symmetric_tridiagonal_solver[i_theta/2]; \
             \
             /* Fill matrix row of (i,j) */ \
@@ -1249,13 +1265,20 @@ do { \
             else if(row == 0 && column == center_matrix.columns()-1) center_matrix.cyclic_corner_element() += value; \
         } \
         else{ \
+            /* i_theta % 2 == 0 */ \
+            /* -----------|| */ \
+            /* O   O   O  || */ \
+            /* -----------|| */ \
+            /* X   O   X̃  || */ \
+            /* -----------|| */ \
+            /* O   O   O  || */ \
+            /* -----------|| */ \
             auto& center_matrix = radial_diagonal_solver[i_theta/2]; \
             \
             /* Fill matrix row of (i,j) */ \
             row = center_index; \
             column = center_index; \
-            value = 1.0; \
-            center_matrix.diagonal(row) += value; \
+            center_matrix.diagonal(row) += 1.0; \
             \
             /* Fill matrix row of (i-1,j) */ \
             row = left_index; \
@@ -1335,6 +1358,7 @@ void ExtrapolatedSmoother::build_Asc_matrices()
     circle_symmetric_cyclic_tridiagonal_solver_.resize(numberSmootherCircles / 2);
     circle_diagonal_solver_.resize(numberSmootherCircles - numberSmootherCircles/2);
 
+    assert((grid_.ntheta() / 2) % 2 == 0);
     const int num_radial_nodes = lengthSmootherRadial;
     radial_symmetric_tridiagonal_solver_.resize(grid_.ntheta() / 2);
     radial_diagonal_solver_.resize(grid_.ntheta() / 2);
@@ -1417,9 +1441,9 @@ void ExtrapolatedSmoother::build_Asc_matrices()
         }
     }
 
-    /* ---------------------------------- */
-    /* Part 2: Fill Asc Smoother matrices */
-    /* ---------------------------------- */
+    // /* ---------------------------------- */
+    // /* Part 2: Fill Asc Smoother matrices */
+    // /* ---------------------------------- */
 
     const int numCircleTasks = grid_.numberSmootherCircles();
     const int additionalRadialTasks = grid_.ntheta() % 3;

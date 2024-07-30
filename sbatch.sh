@@ -9,16 +9,16 @@
 #SBATCH -t 28800
 #SBATCH --exclusive
 
-maxOpenMPThreads=55
-finestLevelThreads=55
+maxOpenMPThreads=10
+finestLevelThreads=10
 threadReductionFactor=1.0
 
 R0=1e-5
 Rmax=1.3
-nr_exp=14
+nr_exp=4
 ntheta_exp=-1
 anisotropic_factor=0
-divideBy2=0
+divideBy2=6
 
 write_grid_file=0
 load_grid_file=0
@@ -28,14 +28,14 @@ file_grid_angles="_angles.txt"
 DirBC_Interior=0 # Across-origin(0), u_D_Interior(1)
 
 # Test Cases #
-geometry=2 # Circular 0), Shafranov(1), Czarny(2), Culham (3)
-problem=2 # CartesianR2(0), CartesianR6(1), PolarR6(2), RefinedRadius(3)
-alpha_coeff=2 # Poisson(0), Sonnendrucker(1), Zoni(2), Zoni-Shifted(3)
-beta_coeff=1 # Zero(0), Gyro - Alpha Inverse(1)
+geometry=1 # Circular (0), Shafranov(1), Czarny(2), Culham (3)
+problem=0 # CartesianR2(0), CartesianR6(1), PolarR6(2), RefinedRadius(3)
+alpha_coeff=1 # Poisson(0), Sonnendrucker(1), Zoni(2), Zoni-Shifted(3)
+beta_coeff=0 # Zero(0), Gyro - Alpha Inverse(1)
 # Remark: For Culham Geometry choose geometry=3, problem=2,3, alpha_coeff=3, beta_coeff=1
 
-extrapolation=0
-maxLevels=8
+extrapolation=1
+maxLevels=5
 preSmoothingSteps=1
 postSmoothingSteps=1
 multigridCycle=0

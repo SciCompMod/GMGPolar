@@ -25,7 +25,8 @@ class Level {
 public:
     // ----------- //
     // Constructor //
-    explicit Level(const int level, std::unique_ptr<const PolarGrid> grid, std::unique_ptr<LevelCache> level_cache);
+
+    explicit Level(int level, std::unique_ptr<const PolarGrid> grid, std::unique_ptr<LevelCache> level_cache, int extrapolation);
 
     // ---------------- //
     // Getter Functions //
@@ -40,6 +41,8 @@ public:
     const Vector<double>& solution() const;
     Vector<double>& residual();
     const Vector<double>& residual() const;
+    Vector<double>& rhs_error();
+    const Vector<double>& rhs_error() const;
 
     // -------------- //
     // Apply Residual //
@@ -82,6 +85,7 @@ private:
     Vector<double> rhs_;
     Vector<double> solution_;
     Vector<double> residual_;
+    Vector<double> rhs_error_;
 };
 
 

@@ -233,12 +233,12 @@ private:
 
     /* ------------------- */
     /* Multigrid Functions */
-    void multigrid_V_Cycle(const int level_depth);
-    void multigrid_W_Cycle(const int level_depth);
-    void multigrid_F_Cycle(const int level_depth);
-    void implicitly_extrapolated_multigrid_V_Cycle(const int level_depth);
-    void implicitly_extrapolated_multigrid_W_Cycle(const int level_depth);
-    void implicitly_extrapolated_multigrid_F_Cycle(const int level_depth);
+    void multigrid_V_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
+    void multigrid_W_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
+    void multigrid_F_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
+    void implicitly_extrapolated_multigrid_V_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
+    void implicitly_extrapolated_multigrid_W_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
+    void implicitly_extrapolated_multigrid_F_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
 
     void prolongateToUpperLevel(const int current_level, Vector<double>& result, const Vector<double>& x) const;
     void restrictToLowerLevel(const int current_level, Vector<double>& result, const Vector<double>& x) const;
@@ -246,7 +246,7 @@ private:
     void extrapolation_prolongateToUpperLevel(const int current_level, Vector<double>& result, const Vector<double>& x) const;
     void extrapolation_restrictToLowerLevel(const int current_level, Vector<double>& result, const Vector<double>& x) const;
 
-    void extrapolated_residual(Vector<double>& residual_level_0, const Vector<double>& residual_level_1);
+    void extrapolated_residual(const int current_level, Vector<double>& residual, const Vector<double>& residual_next_level);
 
     /* ------------- */
     /* Visualization */

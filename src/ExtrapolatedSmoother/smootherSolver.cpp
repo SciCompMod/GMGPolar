@@ -55,6 +55,7 @@ do { \
         if(node_color == color){ \
             if(i_r & 1){ \
                 if(i_theta & 1){ \
+                    /* i_r % 2 == 1 and i_theta % 2 == 1 */ \
                     /* | X | O | X | */ \
                     /* |   |   |   | */ \
                     /* | O | Õ | O | */ \
@@ -78,6 +79,7 @@ do { \
                         - 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Bottom Left */ \
                 } \
                 else{ \
+                    /* i_r % 2 == 1 and i_theta % 2 == 0 */ \
                     /* | O | O | O | */ \
                     /* |   |   |   | */ \
                     /* | X | Õ | X | */ \
@@ -101,6 +103,7 @@ do { \
             } \
             else{ \
                 if(i_theta & 1){ \
+                    /* i_r % 2 == 0 and i_theta % 2 == 1 */ \
                     /* | O | X | O | */ \
                     /* |   |   |   | */ \
                     /* | O | Õ | O | */ \
@@ -116,6 +119,7 @@ do { \
                     ); \
                 } \
                 else{ \
+                    /* i_r % 2 == 0 and i_theta % 2 == 0 */ \
                     /* | O | O | O | */ \
                     /* |   |   |   | */ \
                     /* | O | X̃ | O | */ \
@@ -125,10 +129,12 @@ do { \
                     \
                     /* Fill temp(i,j-1) */ \
                     temp[grid.index(i_r,i_theta-1)] += factor * ( \
+                        - coeff3 * att * x[grid.index(i_r,i_theta)] /* Top */ \
                         - 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Top Right */ \
                         + 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Top Left */ \
                     /* Fill temp(i,j+1) */ \
                     temp[grid.index(i_r,i_theta+1)] += factor * ( \
+                        - coeff4 * att * x[grid.index(i_r,i_theta)] /* Bottom */ \
                         + 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Bottom Right */ \
                         - 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Bottom Left */ \
                 } \
@@ -139,6 +145,7 @@ do { \
         else if(node_color != color){ \
             if(i_r & 1){ \
                 if(i_theta & 1){ \
+                    /* i_r % 2 == 1 and i_theta % 2 == 1 */ \
                     /* | X | O | X | */ \
                     /* |   |   |   | */ \
                     /* | O | Õ | O | */ \
@@ -161,16 +168,19 @@ do { \
                     } \
                 } \
                 else{ \
-                    /* Nothing to do! */ \
+                    /* i_r % 2 == 1 and i_theta % 2 == 0 */ \
                     /* | O | O | O | */ \
                     /* |   |   |   | */ \
                     /* | X | Õ | X | */ \
                     /* |   |   |   | */ \
                     /* | O | O | O | */ \
+                    \
+                    /* Nothing to do! */ \
                 } \
             } \
             else{ \
                 if(i_theta & 1){ \
+                    /* i_r % 2 == 0 and i_theta % 2 == 1 */ \
                     /* | O | X | O | */ \
                     /* |   |   |   | */ \
                     /* | O | Õ | O | */ \
@@ -193,6 +203,7 @@ do { \
                     } \
                 } \
                 else{ \
+                    /* i_r % 2 == 0 and i_theta % 2 == 0 */ \
                     /* | O | O | O | */ \
                     /* |   |   |   | */ \
                     /* | O | X̃ | O | */ \
@@ -233,9 +244,21 @@ do { \
             /* Inside Section Parts */ \
             if(node_color == color){ \
                 if(i_theta & 1){ \
+                    /* i_theta % 2 == 1 */ \
+                    /* || X | O | X | */ \
+                    /* ||   |   |   | */ \
+                    /* || Õ | O | O | */ \
+                    /* ||   |   |   | */ \
+                    /* || X | O | X | */ \
                     temp[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
                 } \
                 else{ \
+                    /* i_theta % 2 == 0 */ \
+                    /* || O | O | O | */ \
+                    /* ||   |   |   | */ \
+                    /* || X̃ | O | X | */ \
+                    /* ||   |   |   | */ \
+                    /* || O | O | O | */ \
                     temp[grid.index(i_r,i_theta)] += x[grid.index(i_r,i_theta)]; \
                 } \
             } \
@@ -268,6 +291,12 @@ do { \
             /* Inside Section Parts */ \
             if(node_color == color){ \
                 if(i_theta & 1){ \
+                    /* i_theta % 2 == 1 */ \
+                    /* -| X | O | X | */ \
+                    /* -|   |   |   | */ \
+                    /* -| Õ | O | O | */ \
+                    /* -|   |   |   | */ \
+                    /* -| X | O | X | */ \
                     temp[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
                     /* Fill temp(i,j) */ \
                     temp[grid.index(i_r,i_theta)] += factor * ( \
@@ -278,6 +307,13 @@ do { \
                     ); \
                 } \
                 else{ \
+                    /* i_theta % 2 == 0 */ \
+                    /* -| O | O | O | */ \
+                    /* -|   |   |   | */ \
+                    /* -| X̃ | O | X | */ \
+                    /* -|   |   |   | */ \
+                    /* -| O | O | O | */ \
+                    \
                     temp[grid.index(i_r,i_theta)] += x[grid.index(i_r,i_theta)]; \
                     /* Fill temp(i,j-1) */ \
                     temp[grid.index(i_r,i_theta-1)] += factor * ( \
@@ -316,7 +352,40 @@ do { \
             double coeff2 = 0.5*(k1+k2)/h2; \
             double coeff3 = 0.5*(h1+h2)/k1; \
             double coeff4 = 0.5*(h1+h2)/k2; \
-            if(i_theta & 1) { \
+            \
+            /* i_theta % 2 == 1 and i_r % 2 == 1 */ \
+            /* | X | O | X || O   X   O   X  */ \
+            /* |   |   |   || -------------- */ \
+            /* | 0 | O | O || Õ   O   O   O  */ \
+            /* |   |   |   || -------------- */ \
+            /* | X | O | X || O   X   O   X  */ \
+            /* -> Give Left */ \
+            \
+            /* i_theta % 2 == 1 and i_r % 2 == 0 */ \
+            /* | O | X | O || X   O   X   O  */ \
+            /* |   |   |   || -------------- */ \
+            /* | 0 | O | O || Õ   O   O   O  */ \
+            /* |   |   |   || -------------- */ \
+            /* | O | X | O || X   O   X   O  */ \
+            /* -> Give Left */ \
+            \
+            /* i_theta % 2 == 0 and i_r % 2 == 1 */ \
+            /* | O | O | O || O   O   O   O  */ \
+            /* |   |   |   || -------------- */ \
+            /* | X | O | X || Õ   X   O   X  */ \
+            /* |   |   |   || -------------- */ \
+            /* | O | O | O || O   O   O   O  */ \
+            /* -> Don't give to the Left! */ \
+            \
+            /* i_theta % 2 == 0 and i_r % 2 == 0 */ \
+            /* | O | O | O || O   O   O   O  */ \
+            /* |   |   |   || -------------- */ \
+            /* | O | X | O || X̃   O   X   O  */ \
+            /* |   |   |   || -------------- */ \
+            /* | O | O | O || O   O   O   O  */ \
+            /* -> Give Left */ \
+            \
+            if(i_theta & 1 || !(i_r & 1)) { \
                 /* --------------------- */ \
                 /* Outside Section Parts */ \
                 /* Fill temp(i-1,j) */ \
@@ -328,9 +397,6 @@ do { \
         } \
     } \
 } while(0) \
-
-
-
 
 
 
@@ -358,6 +424,7 @@ do { \
         if(node_color == color){ \
             if(i_theta & 1){ \
                 if(i_r & 1){ \
+                    /* i_theta % 2 == 1 and i_r % 2 == 1 */ \
                     /* ---------- */ \
                     /* X   O   X  */ \
                     /* ---------- */ \
@@ -381,6 +448,7 @@ do { \
                         - 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Left */ \
                 } \
                 else{ \
+                    /* i_theta % 2 == 1 and i_r % 2 == 0 */ \
                     /* ---------- */ \
                     /* O   X   O  */ \
                     /* ---------- */ \
@@ -406,6 +474,7 @@ do { \
             } \
             else{ \
                 if(i_r & 1){ \
+                    /* i_theta % 2 == 0 and i_r % 2 == 1 */ \
                     /* ---------- */ \
                     /* O   O   O  */ \
                     /* ---------- */ \
@@ -423,6 +492,7 @@ do { \
                     ); \
                 } \
                 else{ \
+                    /* i_theta % 2 == 0 and i_r % 2 == 0 */ \
                     /* ---------- */ \
                     /* O   O   O  */ \
                     /* ---------- */ \
@@ -449,6 +519,7 @@ do { \
         else if(node_color != color){ \
             if(i_theta & 1){ \
                 if(i_r & 1){ \
+                    /* i_theta % 2 == 1 and i_r % 2 == 1 */ \
                     /* ---------- */ \
                     /* X   O   X  */ \
                     /* ---------- */ \
@@ -468,7 +539,7 @@ do { \
                         - 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Bottom Left */ \
                 } \
                 else{ \
-                    /* Nothing to do! */ \
+                    /* i_theta % 2 == 1 and i_r % 2 == 0 */ \
                     /* ---------- */ \
                     /* O   X   O  */ \
                     /* ---------- */ \
@@ -476,10 +547,13 @@ do { \
                     /* ---------- */ \
                     /* O   X   O  */ \
                     /* ---------- */ \
+                    \
+                    /* Nothing to do! */ \
                 } \
             } \
             else{ \
                 if(i_r & 1){ \
+                    /* i_theta % 2 == 0 and i_r % 2 == 1 */ \
                     /* ---------- */ \
                     /* O   O   O  */ \
                     /* ---------- */ \
@@ -499,6 +573,7 @@ do { \
                         - 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Bottom Left */ \
                 } \
                 else{ \
+                    /* i_theta % 2 == 0 and i_r % 2 == 0 */ \
                     /* ---------- */ \
                     /* O   O   O  */ \
                     /* ---------- */ \
@@ -533,12 +608,13 @@ do { \
         /* Inside Section Parts */ \
         if(node_color == color){ \
             /* Dont give to the right when this case happens! */ \
+            /* i_theta % 2 = 0 and i_r % 2 == 1 */ \
             /* | O | O | O || O   O   O   O  */ \
             /* |   |   |   || -------------- */ \
             /* | 0 | X | Õ || X   O   X   O  */ \
             /* |   |   |   || -------------- */ \
             /* | O | O | O || O   O   O   O  */ \
-            if(((i_r+1) & 1 || (i_theta & 1))){ \
+            if((!(i_r & 1) || (i_theta & 1))){ \
                 /* Fill temp(i+1,j) */ \
                 temp[grid.index(i_r+1,i_theta)] += factor * ( \
                     - coeff2 * arr * x[grid.index(i_r,i_theta)] /* Left */ \
@@ -566,6 +642,7 @@ do { \
         if(node_color == color){ \
             if(i_theta & 1){ \
                 if(i_r & 1){ \
+                    /* i_theta % 2 == 1 and i_r % 2 == 1 */ \
                     /* | X | O | X || O   X   O   X  */ \
                     /* |   |   |   || -------------- */ \
                     /* | 0 | O | O || Õ   O   O   O  */ \
@@ -584,6 +661,7 @@ do { \
                         - 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Left */ \
                 } \
                 else{ \
+                    /* i_theta % 2 == 1 and i_r % 2 == 0 */ \
                     /* | O | X | O || X   O   X   O  */ \
                     /* |   |   |   || -------------- */ \
                     /* | 0 | O | O || Õ   O   O   O  */ \
@@ -604,6 +682,7 @@ do { \
             } \
             else{ \
                 if(i_r & 1){ \
+                    /* i_theta % 2 == 0 and i_r % 2 == 1 */ \
                     /* | O | O | O || O   O   O   O  */ \
                     /* |   |   |   || -------------- */ \
                     /* | X | O | X || Õ   X   O   X  */ \
@@ -619,6 +698,7 @@ do { \
                     ); \
                 } \
                 else{ \
+                    /* i_theta % 2 == 0 and i_r % 2 == 0 */ \
                     /* | O | O | O || O   O   O   O  */ \
                     /* |   |   |   || -------------- */ \
                     /* | O | X | O || X̃   O   X   O  */ \
@@ -637,6 +717,7 @@ do { \
         /* Outside Section Parts */ \
         else if(node_color != color){ \
             /* Dont give to bottom and up when this case happens! */ \
+            /* i_theta % 2 == 1 and i_r % 2 == 0 */ \
             /* | O | X | O || X   O   X   O  */ \
             /* |   |   |   || -------------- */ \
             /* | 0 | O | O || Õ   O   O   O  */ \
@@ -671,6 +752,7 @@ do { \
         /* Inside Section Parts */ \
         if(node_color == color){ \
             if(i_theta & 1){ \
+                /* i_theta % 2 == 1 */ \
                 /* ---------------|| */ \
                 /* O   X   O   X  || */ \
                 /* ---------------|| */ \
@@ -707,7 +789,6 @@ do { \
                 /* Fill temp(i,j) */ \
                 temp[grid.index(i_r,i_theta)] += factor * ( \
                     - coeff1 * arr * x[grid.index(i_r-1,i_theta)] /* Left */ \
-                    - coeff2 * arr * x[grid.index(i_r+1,i_theta)] /* Right */ \
                     - coeff3 * att * x[grid.index(i_r,i_theta-1)] /* Bottom */ \
                     - coeff4 * att * x[grid.index(i_r,i_theta+1)] /* Top */ \
                 ); \
@@ -715,7 +796,7 @@ do { \
                 /* but is shifted over to the rhs to make the radial Asc smoother matrices symmetric. */ \
                 /* Note that the circle Asc smoother matrices are symmetric by default. */ \
                 temp[grid.index(i_r,i_theta)] -= /* Right: Symmetry shift! */ \
-                    -coeff2 * arr * rhs[grid.index(i_r+1,i_theta)]; \
+                    -coeff2 * arr * x[grid.index(i_r+1,i_theta)]; /* We need to change rhs to x here since f_c is now x_c. */ \
             } \
         } \
         /* --------------------- */ \
@@ -1197,5 +1278,7 @@ void ExtrapolatedSmoother::extrapolatedSmoothingInPlace(Vector<double>& x, const
 
     delete[] smoother_circle_dep;
     delete[] smoother_radial_dep;
+
+    assign(temp, 10000000.0);
 }
 

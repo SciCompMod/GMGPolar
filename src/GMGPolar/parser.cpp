@@ -191,7 +191,7 @@ void GMGPolar::initializeGeometry() {
     );
     parser_.add<int>(
         "alpha_coeff", '\0', "Defines the coefficient alpha. Poisson (0), Sonnendrucker (1), Zoni (2), Zoni-Shifted (3).",
-        OPTIONAL, 0, cmdline::oneof(0,1,2,3)
+        OPTIONAL, 1, cmdline::oneof(0,1,2,3)
     );
     parser_.add<int>(
         "beta_coeff", '\0', "Defines the coefficient beta. beta=0 (0), beta=1/alpha (1).",
