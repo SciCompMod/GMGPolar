@@ -39,6 +39,9 @@ public:
     /* ------------------------ */
     /* GMGPoloar initialization */
     GMGPolar();
+    GMGPolar(std::unique_ptr<const DomainGeometry> domain_geometry, 
+             std::unique_ptr<const SystemParameters> system_parameters);
+
     void setParameters(int argc, char* argv[]);
     void setSolution(std::unique_ptr<const ExactSolution> exact_solution);
 
@@ -252,4 +255,6 @@ private:
     /* Visualization */
     void write_to_vtk(const std::filesystem::path& file_path, const PolarGrid& grid);
     void write_to_vtk(const std::filesystem::path& file_path, const Level& level, const Vector<double>& grid_function);
+
+    void resetTimings();
 };

@@ -67,25 +67,33 @@ Vector<T>::Vector(const Vector& other):
     size_(other.size_),
     values_(std::make_unique<T[]>(size_))
 {
-    std::copy(other.values_.get(), other.values_.get() + size_, values_.get());
+    // std::copy(other.values_.get(), other.values_.get() + size_, values_.get());
+    #pragma omp parallel for if(size_ > 100'000)
+    for (std::size_t i = 0; i < size_; ++i) {
+        values_[i] = other.values_[i];
+    }
 }
 
 // copy assignment
 template<typename T>
 Vector<T>& Vector<T>::operator=(const Vector& other) {
     if (this == &other) {
-        // Self-assignment, no work needed
+        /* Self-assignment, no work needed */
         return *this;
     }
     
-    // Allocate new memory if necessary
+    /* Allocate new memory if necessary */
     if (size_ != other.size_) {
         size_ = other.size_;
         values_ = std::make_unique<T[]>(size_);
     }
     
-    // Copy the elements
-    std::copy(other.values_.get(), other.values_.get() + other.size_, values_.get());
+    /* Copy the elements */
+    // std::copy(other.values_.get(), other.values_.get() + other.size_, values_.get());
+    #pragma omp parallel for if(size_ > 100'000)
+    for (std::size_t i = 0; i < size_; ++i) {
+        values_[i] = other.values_[i];
+    }
 
     return *this;
 }
@@ -105,7 +113,6 @@ Vector<T>& Vector<T>::operator=(Vector&& other) noexcept {
     if (this != &other) {
         size_ = other.size_;
         values_ = std::move(other.values_);
-        
         other.size_ = 0;
     }
     return *this;

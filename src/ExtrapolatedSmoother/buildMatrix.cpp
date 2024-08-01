@@ -153,8 +153,8 @@ do { \
                 /* | X | O | X | */ \
                 \
                 /* Fill matrix row of (i-1,j) */ \
-                if(!DirBC_Interior){ \
-                    if(i_r == 1){ \
+                if(i_r == 1){ \
+                    if(!DirBC_Interior){ \
                         const Stencil& LeftStencil = get_stencil(i_r-1, i_theta); \
                         int left_nz_index = ptr_nz_index_circle_Asc(i_r-1, i_theta); \
                         int nz_index = left_nz_index + LeftStencil[StencilType::Center]; \
@@ -162,13 +162,13 @@ do { \
                         nonSymmetric_inner_boundary_circle_Asc_matrix.col_index(nz_index) = left_index + 1; \
                         nonSymmetric_inner_boundary_circle_Asc_matrix.value(nz_index) += coeff1 * arr; /* Center: (Right) */ \
                     } \
-                    else{ \
-                        row = left_index; \
-                        column = left_index; \
-                        value = coeff1 * arr; /* Center: (Right) */ \
-                        left_matrix.diagonal(row) += value; \
-                    } \
+                } else{ \
+                    row = left_index; \
+                    column = left_index; \
+                    value = coeff1 * arr; /* Center: (Right) */ \
+                    left_matrix.diagonal(row) += value; \
                 } \
+                \
                 /* Fill matrix row of (i+1,j) */ \
                 row = right_index; \
                 column = right_index; \
@@ -1363,7 +1363,7 @@ void ExtrapolatedSmoother::build_Asc_matrices()
     radial_symmetric_tridiagonal_solver_.resize(grid_.ntheta() / 2);
     radial_diagonal_solver_.resize(grid_.ntheta() / 2);
 
-    #pragma omp parallel num_threads(maxOpenMPThreads_)
+    #pragma omp parallel num_threads(maxOpenMPThreads_) if(grid_.number_of_nodes() > 100'000)
     {
         // ---------------- //
         // Circular Section //
@@ -1441,9 +1441,9 @@ void ExtrapolatedSmoother::build_Asc_matrices()
         }
     }
 
-    // /* ---------------------------------- */
-    // /* Part 2: Fill Asc Smoother matrices */
-    // /* ---------------------------------- */
+    /* ---------------------------------- */
+    /* Part 2: Fill Asc Smoother matrices */
+    /* ---------------------------------- */
 
     const int numCircleTasks = grid_.numberSmootherCircles();
     const int additionalRadialTasks = grid_.ntheta() % 3;

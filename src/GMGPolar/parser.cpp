@@ -17,11 +17,10 @@ void GMGPolar::parseGrid() {
     load_grid_file_ = parser_.get<int>("load_grid_file") != 0;
     file_grid_radii_ = parser_.get<std::string>("file_grid_radii");
     file_grid_angles_ = parser_.get<std::string>("file_grid_angles");
+    DirBC_Interior_ = parser_.get<int>("DirBC_Interior") != 0;
 }
 
 void GMGPolar::parseGeometry() {
-    DirBC_Interior_ = parser_.get<int>("DirBC_Interior") != 0;
-
     const int alphaValue = parser_.get<int>("alpha_coeff");
     if (alphaValue == static_cast<int>(AlphaCoeff::POISSON) ||
         alphaValue == static_cast<int>(AlphaCoeff::SONNENDRUCKER) ||
@@ -160,14 +159,13 @@ void GMGPolar::initializeGrid() {
         "file_grid_angles", '\0', "Path to the file containing theta values for grid divisions in the theta-direction.",
         OPTIONAL, ""
     );
-}
-
-void GMGPolar::initializeGeometry() {
     parser_.add<int>(
         "DirBC_Interior", '\0', "Defines the boundary condition on the interior circle. Across-origin(0), Dirichlet-boundary(1).",
         OPTIONAL, 0, cmdline::oneof(0,1)
     );
+}
 
+void GMGPolar::initializeGeometry() {
     parser_.add<int>(
         "geometry", '\0', "Defines the form of the considered cross-section. Circular (0), Shafranov (1), Czarny (2), Culham (3)",
         OPTIONAL, 0, cmdline::oneof(0,1,2,3)
@@ -204,7 +202,7 @@ void GMGPolar::initializeMultigrid() {
     parser_.add<int>(
         "extrapolation", 'e', 
         "Specifies if extrapolation is used used.", 
-        OPTIONAL, 0, cmdline::oneof(0,1)
+        OPTIONAL, 0, cmdline::oneof(0,1,2)
     );
     parser_.add<int>(
         "maxLevels", 'l', 

@@ -9,6 +9,18 @@ GMGPolar::GMGPolar() :
     setParameters(0, nullptr);
 }
 
+GMGPolar::GMGPolar(std::unique_ptr<const DomainGeometry> domain_geometry, std::unique_ptr<const SystemParameters> system_parameters) :
+    domain_geometry_(std::move(domain_geometry)), 
+    system_parameters_(std::move(system_parameters)),
+    parser_()
+{
+    initializeGrid(); initializeGeometry();
+    initializeMultigrid(); initializeGeneral();
+
+    parseGrid(); /* parseGeometry(); */ 
+    parseMultigrid(); parseGeneral();
+}
+
 
 void GMGPolar::setParameters(int argc, char* argv[]) {
     if(argc != 0){
@@ -205,6 +217,13 @@ int GMGPolar::maxIterations() const {
 
 void GMGPolar::maxIterations(int maxIterations) {
     max_iterations_ = maxIterations;
+}
+
+ResidualNormType GMGPolar::residualNormType() const {
+    return residual_norm_type_;
+}
+void GMGPolar::residualNormType(ResidualNormType residualNormType) {
+    residual_norm_type_ = residualNormType;
 }
 
 double GMGPolar::absoluteTolerance() const {

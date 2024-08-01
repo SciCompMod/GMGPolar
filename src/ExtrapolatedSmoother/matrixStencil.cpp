@@ -37,7 +37,7 @@ int ExtrapolatedSmoother::nnz_circle_Asc(const int i_r) const {
 
     if(i_r == 0){
         if (!DirBC_Interior_) {
-            return grid_.ntheta()/2 + 2*grid_.ntheta()/2;
+            return grid_.ntheta()/2 + 2*(grid_.ntheta()/2);
         } else {
             return grid_.ntheta();
         }

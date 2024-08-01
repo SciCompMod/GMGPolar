@@ -185,7 +185,12 @@ SparseMatrix<T>::SparseMatrix(SparseMatrix&& other) noexcept :
     column_indices_(std::move(other.column_indices_)),
     values_(std::move(other.values_)),
     is_symmetric_(other.is_symmetric_)
-{}
+{
+    other.nnz_ = 0;
+    other.rows_ = 0;
+    other.columns_ = 0;
+    other.is_symmetric_ = false;
+}
 
 // move assignment
 template<typename T>
@@ -197,6 +202,10 @@ SparseMatrix<T>& SparseMatrix<T>::operator=(SparseMatrix&& other) noexcept{
     column_indices_ = std::move(other.column_indices_);
     values_ = std::move(other.values_);
     is_symmetric_ = other.is_symmetric_;
+    other.nnz_ = 0;
+    other.rows_ = 0;
+    other.columns_ = 0;
+    other.is_symmetric_ = false;
     return *this;
 }
 

@@ -27,6 +27,8 @@ int main(int argc, char* argv[]){
         std::cout << "Build Type: Debug\n"<<std::endl;
     #endif
 
+    std::cout << std::scientific  << std::setprecision(10);
+
     GMGPolar solver;
 
     // Configure solver parameters from command-line arguments
@@ -42,6 +44,7 @@ int main(int argc, char* argv[]){
 
     // Print Timings
     solver.printTimings();
+
 
 
 

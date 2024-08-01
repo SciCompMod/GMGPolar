@@ -1,5 +1,7 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
+#include <chrono>
+
 void GMGPolar::solve() {
     auto start_solve = std::chrono::high_resolution_clock::now();
 
@@ -144,7 +146,8 @@ void GMGPolar::solve() {
         /* -------------------------------- */
         mean_residual_reduction_factor_rho_ = std::pow(current_residual_norm / initial_residual_norm, 1.0 / number_of_iterations_);
 
-        std::cout<< "\nMean Residual Reduction Factor Rho: "<< mean_residual_reduction_factor_rho_ <<std::endl;
+        std::cout<<"\nTotal Iterations: "<<number_of_iterations_<<std::endl;
+        std::cout<<"Mean Residual Reduction Factor Rho: "<< mean_residual_reduction_factor_rho_ <<std::endl;
     }
 
     auto end_solve = std::chrono::high_resolution_clock::now();

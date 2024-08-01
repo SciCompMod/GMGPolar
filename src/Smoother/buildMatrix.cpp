@@ -711,7 +711,7 @@ void Smoother::build_Asc_matrices()
     const int num_radial_nodes = lengthSmootherRadial;
     radial_symmetric_tridiagonal_solver_.resize(grid_.ntheta());
 
-    #pragma omp parallel num_threads(maxOpenMPThreads_)
+    #pragma omp parallel num_threads(maxOpenMPThreads_) if(grid_.number_of_nodes() > 100'000)
     {
         // ---------------- //
         // Circular Section //

@@ -169,7 +169,7 @@ void Interpolation::applyProlongation(const Level& fromLevel, const Level& toLev
     assert(x.size() == coarseGrid.number_of_nodes());
     assert(result.size() == fineGrid.number_of_nodes());
 
-    #pragma omp parallel num_threads(maxOpenMPThreads_)
+    #pragma omp parallel num_threads(maxOpenMPThreads_) if(fineGrid.number_of_nodes() > 10'000)
     {
         /* Circluar Indexing Section */
         /* For loop matches circular access pattern */

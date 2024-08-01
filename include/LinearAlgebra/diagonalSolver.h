@@ -78,13 +78,16 @@ template<typename T>
 DiagonalSolver<T>::DiagonalSolver(DiagonalSolver&& other) noexcept :
     matrix_dimension_(other.matrix_dimension_),
     diagonal_values_(std::move(other.diagonal_values_))
-{}
+{
+    other.matrix_dimension_ = 0;
+}
 
 // move assignment
 template<typename T>
 DiagonalSolver<T>& DiagonalSolver<T>::operator=(DiagonalSolver&& other) noexcept{
     matrix_dimension_ = other.matrix_dimension_;
     diagonal_values_ = std::move(other.diagonal_values_);
+    other.matrix_dimension_ = 0;
     return *this;
 }
 

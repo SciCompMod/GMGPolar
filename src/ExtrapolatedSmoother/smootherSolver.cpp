@@ -1278,7 +1278,5 @@ void ExtrapolatedSmoother::extrapolatedSmoothingInPlace(Vector<double>& x, const
 
     delete[] smoother_circle_dep;
     delete[] smoother_radial_dep;
-
-    assign(temp, 10000000.0);
 }
 

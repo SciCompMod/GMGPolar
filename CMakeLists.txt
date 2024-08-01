@@ -9,7 +9,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -pedantic")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
 
 set(MUMPS_PREFIX_PATH "~/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/mumps-5.6.2-m4xrhc4mshzrxmgptzbpult3nbf6qrzk")
 include_directories(${MUMPS_PREFIX_PATH}/include)
@@ -63,6 +63,8 @@ file(GLOB_RECURSE SOURCE_TERMS_SOURCES "src/InputFunctions/SourceTerms/*.cpp")
 
 # Add main.cpp to the list of source files
 set(MAIN_SOURCE "src/main.cpp")
+
+# set(MAIN_SOURCE "src/shafranov_benchmark.cpp")
 
 # Add executable target
 add_executable(gmgpolar 

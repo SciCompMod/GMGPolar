@@ -76,7 +76,7 @@ void Interpolation::applyExtrapolatedRestriction(const Level& fromLevel, const L
 
     const int coarseNumberSmootherCircles = coarseGrid.numberSmootherCircles();
 
-    #pragma omp parallel num_threads(maxOpenMPThreads_)
+    #pragma omp parallel num_threads(maxOpenMPThreads_) if(fineGrid.number_of_nodes() > 10'000)
     {
         /* For loop matches circular access pattern */
         #pragma omp for nowait

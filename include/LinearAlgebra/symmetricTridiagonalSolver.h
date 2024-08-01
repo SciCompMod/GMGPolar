@@ -116,7 +116,11 @@ SymmetricTridiagonalSolver<T>::SymmetricTridiagonalSolver(SymmetricTridiagonalSo
     sub_diagonal_values_(std::move(other.sub_diagonal_values_)),
     cyclic_corner_element_(other.cyclic_corner_element_),
     is_cyclic_(other.is_cyclic_)
-{}
+{
+    other.matrix_dimension_ = 0;
+    other.cyclic_corner_element_ = 0.0;
+    other.is_cyclic_ = true;
+}
 
 // move assignment
 template<typename T>
@@ -126,6 +130,9 @@ SymmetricTridiagonalSolver<T>& SymmetricTridiagonalSolver<T>::operator=(Symmetri
     sub_diagonal_values_ = std::move(other.sub_diagonal_values_);
     cyclic_corner_element_ = other.cyclic_corner_element_;
     is_cyclic_ = other.is_cyclic_;
+    other.matrix_dimension_ = 0;
+    other.cyclic_corner_element_ = 0.0;
+    other.is_cyclic_ = true;
     return *this;
 }
 
@@ -215,7 +222,6 @@ void SymmetricTridiagonalSolver<T>::solveInPlace(T* sol_rhs, T* temp1, T* temp2)
 /* Algorithm based on: https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm */
 template<typename T>
 void SymmetricTridiagonalSolver<T>::solve_symmetricTridiagonal(T* x, T* scratch) const{
-
     scratch[0] = sub_diagonal(0) / main_diagonal(0);
     x[0] /= main_diagonal(0);
 
@@ -224,11 +230,11 @@ void SymmetricTridiagonalSolver<T>::solve_symmetricTridiagonal(T* x, T* scratch)
         x[i] = (x[i] - sub_diagonal(i-1) * x[i-1]) / (main_diagonal(i) - sub_diagonal(i-1) * scratch[i-1]);
     }
 
-    const int i = matrix_dimension_ - 1;
+    const int i = matrix_dimension_-1;
     x[i] = (x[i] - sub_diagonal(i-1) * x[i-1]) / (main_diagonal(i) - sub_diagonal(i-1) * scratch[i-1]);
 
-    for (int i = matrix_dimension_ - 2; i >= 0; i--){
-        x[i] -= scratch[i] * x[i + 1];
+    for (int i = matrix_dimension_-2; i >= 0; i--){
+        x[i] -= scratch[i] * x[i+1];
     }
 }
 
@@ -254,7 +260,7 @@ void SymmetricTridiagonalSolver<T>::solve_symmetricCyclicTridiagonal(T* x, T* u,
         u[i] = (0.0 - sub_diagonal(i-1) * u[i-1]) * divisor;
     }
 
-    const int i = matrix_dimension_ - 1;
+    const int i = matrix_dimension_-1;
     const double divisor = 1.0 / (last_main_diagonal - sub_diagonal(i-1) * scratch[i-1]);
     x[i] = (x[i] - sub_diagonal(i-1) * x[i-1]) * divisor;
     u[i] = (cyclic_corner_element() - sub_diagonal(i-1) * u[i-1]) * divisor;

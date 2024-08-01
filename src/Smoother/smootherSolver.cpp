@@ -796,6 +796,4 @@ void Smoother::smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Ve
 
     delete[] smoother_circle_dep;
     delete[] smoother_radial_dep;
-
-    assign(temp, 10000000.0);
 }

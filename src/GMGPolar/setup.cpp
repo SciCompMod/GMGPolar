@@ -1,6 +1,7 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
 void GMGPolar::setup() {
+    resetTimings();
     auto start_setup = std::chrono::high_resolution_clock::now();
 
     auto start_setup_createLevels = std::chrono::high_resolution_clock::now();
@@ -14,7 +15,7 @@ void GMGPolar::setup() {
     // ----------------------------------------------------------
     // Building PolarGrid and LevelCache for all multigrid levels
     numberOflevels_ = chooseNumberOfLevels(*finest_grid); /* Implementation below */
-    levels_.reserve(numberOflevels_);
+    levels_.clear(); levels_.reserve(numberOflevels_);
 
     int current_level = 0;
     auto finest_levelCache = std::make_unique<LevelCache>(*finest_grid);
@@ -123,6 +124,7 @@ void GMGPolar::setup() {
 
 PolarGrid GMGPolar::createFinestGrid() {
     PolarGrid finest_grid;
+
     if(load_grid_file_) {
         assert(!file_grid_radii_.empty() && !file_grid_angles_.empty());
         finest_grid = PolarGrid(file_grid_radii_, file_grid_angles_);
@@ -179,3 +181,22 @@ int GMGPolar::chooseNumberOfLevels(const PolarGrid& finestGrid) {
     return levels;
 }
 
+
+void GMGPolar::resetTimings(){
+    t_setup_total = 0.0;
+    t_setup_createLevels = 0.0;
+    t_setup_rhs = 0.0;
+    t_setup_smoother = 0.0;
+    t_setup_directSolver = 0.0;
+
+    t_solve_total = 0.0;
+    t_solve_multigrid_iterations = 0.0;
+    t_check_convergence = 0.0;
+    t_check_exact_error = 0.0;
+
+    t_avg_MGC_total = 0.0;
+    t_avg_MGC_preSmoothing = 0.0;
+    t_avg_MGC_postSmoothing = 0.0;
+    t_avg_MGC_residual = 0.0;
+    t_avg_MGC_directSolver = 0.0;
+}
