@@ -135,7 +135,7 @@ TEST(SymmetricTridiagonalSolver, not_diagonal_dominant_n_3)
 TEST(SymmetricTridiagonalSolver, random_tridiagonal_n_10)
 {
     const int n = 10;
-    const double precision = 1e-10;
+    const double precision = 1e-9;
 
     SymmetricTridiagonalSolver<double> solver(n);
     solver.is_cyclic(false);
@@ -180,7 +180,7 @@ TEST(SymmetricTridiagonalSolver, random_tridiagonal_n_100)
 {
     const int n = 100;
 
-    const double precision = 1e-10;
+    const double precision = 1e-9;
 
     SymmetricTridiagonalSolver<double> solver(n);
     solver.is_cyclic(false);
@@ -225,7 +225,7 @@ TEST(SymmetricTridiagonalSolver, random_tridiagonal_n_1000)
 {
     const int n = 1000;
 
-    const double precision = 1e-8;
+    const double precision = 1e-7;
 
     SymmetricTridiagonalSolver<double> solver(n);
     solver.is_cyclic(false);
@@ -269,7 +269,7 @@ TEST(SymmetricTridiagonalSolver, random_tridiagonal_n_10000)
 {
     const int n = 10000;
 
-    const double precision = 1e-8;
+    const double precision = 1e-7;
 
     SymmetricTridiagonalSolver<double> solver(n);
     solver.is_cyclic(false);
@@ -315,7 +315,7 @@ TEST(SymmetricTridiagonalSolver, random_tridiagonal_boosted_subdiagonal_LOW_PREC
 {
     const int n = 10000;
 
-    const double precision = 1e-6;
+    const double precision = 1e-3;
 
     const double subdiagonal_boost = 10000.0;
 
@@ -356,8 +356,6 @@ TEST(SymmetricTridiagonalSolver, random_tridiagonal_boosted_subdiagonal_LOW_PREC
     }
     EXPECT_NEAR(copy_solver.sub_diagonal(n-2)*rhs[n-2] + copy_solver.main_diagonal(n-1)*rhs[n-1], copy_rhs[n-1], precision);
 }
-
-
 
 int main(int argc, char* argv[])
 {

@@ -8,10 +8,30 @@ void GMGPolar::implicitly_extrapolated_multigrid_V_Cycle(const int level_depth, 
 
     auto start_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
 
+    if(level_depth == 0){
+        std::cout<<""<<std::endl;
+           std::cout<<"Solution: "<<std::endl;
+        for (int i = 0; i < level.grid().nr(); i++){
+            for (int j = 0; j < level.grid().ntheta(); j++){
+                std::cout<<solution[level.grid().index(i,j)]<<", ";
+            }
+        } 
+    }
+
     /* ------------ */
     /* Presmoothing */
     for (int i = 0; i < preSmoothingSteps_; i++){
         level.extrapolatedSmoothingInPlace(solution, rhs, residual);
+    }
+
+    if(level_depth == 0){
+        std::cout<<""<<std::endl;
+           std::cout<<"EXTRAPOLATED SMOOTHER: "<<std::endl;
+        for (int i = 0; i < level.grid().nr(); i++){
+            for (int j = 0; j < level.grid().ntheta(); j++){
+                std::cout<<solution[level.grid().index(i,j)]<<", ";
+            }
+        } 
     }
 
     auto end_MGC_preSmoothing = std::chrono::high_resolution_clock::now();

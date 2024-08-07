@@ -15,6 +15,12 @@
 #include <fstream>
 #include <iostream>
 
+
+
+#include "dmumps_c.h"
+#include <vector>
+#include <iostream>
+
 /* ------------------------------------------------------------------ */
 /* Thomas' algorithm is not stable in general,                        */
 /* but is so in several special cases, such as                        */

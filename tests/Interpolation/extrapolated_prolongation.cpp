@@ -6,7 +6,7 @@
 #include "../../include/Interpolation/interpolation.h"
 
 // Function to generate sample data for vector x using random values with seed
-Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed) {
+Vector<double> generate_random_sample_data_Extrapolated_Prolongation(const PolarGrid& grid, unsigned int seed) {
     Vector<double> x(grid.number_of_nodes());
     std::mt19937 gen(seed);  // Standard mersenne_twister_engine seeded with seed
     std::uniform_real_distribution<double> dist(0.0, 1.0);  // Generate random double between 0 and 1
@@ -26,8 +26,9 @@ TEST(ExtrapolatedProlongationTest, ExtrapolatedProlongationSmoothingRadius) {
     auto finest_levelCache = std::make_unique<LevelCache>(*finest_grid);
     auto coarse_levelCache = std::make_unique<LevelCache>(*coarse_grid);
 
-    Level finest_level(0, std::move(finest_grid), std::move(finest_levelCache));
-    Level coarse_level(1, std::move(coarse_grid), std::move(coarse_levelCache));
+    int extrapolation = 1;
+    Level finest_level(0, std::move(finest_grid), std::move(finest_levelCache), extrapolation);
+    Level coarse_level(1, std::move(coarse_grid), std::move(coarse_levelCache), extrapolation);
 
     const int maxOpenMPThreads = 5;
     const std::vector<int> taskingThreads = {5,5};
@@ -35,7 +36,7 @@ TEST(ExtrapolatedProlongationTest, ExtrapolatedProlongationSmoothingRadius) {
     Interpolation interpolation_operator(maxOpenMPThreads, taskingThreads);
 
     unsigned int seed = 42;
-    Vector<double> x = generate_random_sample_data(coarse_level.grid(), seed);
+    Vector<double> x = generate_random_sample_data_Extrapolated_Prolongation(coarse_level.grid(), seed);
 
     // Apply prolongation to both functions
     Vector<double> result1(finest_level.grid().number_of_nodes());

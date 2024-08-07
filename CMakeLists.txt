@@ -53,18 +53,8 @@ file(GLOB_RECURSE EXACT_SOLUTION_SOURCES "src/InputFunctions/ExactSolution/*.cpp
 file(GLOB_RECURSE BOUNDARY_CONDITION_SOURCES "src/InputFunctions/BoundaryConditions/*.cpp")
 file(GLOB_RECURSE SOURCE_TERMS_SOURCES "src/InputFunctions/SourceTerms/*.cpp")
 
-# file(GLOB_RECURSE GMG_POLAR_SOURCES "src/GMGPolar/*.cpp")
-# file(GLOB_RECURSE INTERPOLATION_SOURCES "src/Interpolation/*.cpp")
-# file(GLOB_RECURSE OPERATOR_SOURCES "src/Operator/*.cpp")
-# file(GLOB_RECURSE POLAR_GRID_SOURCES "src/PolarGrid/*.cpp")
-# file(GLOB_RECURSE TASK_DISTRIBUTION_SOURCES "src/TaskDistribution/*.cpp")
-# file(GLOB_RECURSE TEST_SOURCES "src/test_cases/*.cpp")
-# file(GLOB_RECURSE INPUT_FUNCTIONS_SOURCES "src/InputFunctions/*.cpp")
-
 # Add main.cpp to the list of source files
 set(MAIN_SOURCE "src/main.cpp")
-
-# set(MAIN_SOURCE "src/shafranov_benchmark.cpp")
 
 # Add executable target
 add_executable(gmgpolar 
@@ -95,6 +85,6 @@ if(OpenMP_CXX_FOUND)
 endif()
 target_link_libraries(gmgpolar PUBLIC ${MUMPS_LIBRARIES} OpenMP::OpenMP_CXX)
 
-# enable_testing()
-# add_subdirectory(third-party)
-# add_subdirectory(tests)
+enable_testing()
+add_subdirectory(third-party)
+add_subdirectory(tests)

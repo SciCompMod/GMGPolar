@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
 
-# Set the project name
 project(GMGPolarTests LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -48,27 +47,6 @@ file(GLOB_RECURSE EXACT_SOLUTION_SOURCES "../src/InputFunctions/ExactSolution/*.
 file(GLOB_RECURSE BOUNDARY_CONDITION_SOURCES "../src/InputFunctions/BoundaryConditions/*.cpp")
 file(GLOB_RECURSE SOURCE_TERMS_SOURCES "../src/InputFunctions/SourceTerms/*.cpp")
 
-# Add test files
-file(GLOB_RECURSE TEST_SOURCES "../tests/*.cpp")
-
-# Set the list of test sources
-set(TESTSOURCES
-    LinearAlgebra/vector.cpp
-    LinearAlgebra/vector_operations.cpp
-    LinearAlgebra/matrix.cpp
-    LinearAlgebra/tridiagonal_solver.cpp
-    LinearAlgebra/cyclic_tridiagonal_solver.cpp
-    PolarGrid/polargrid.cpp
-    Interpolation/prolongation.cpp
-    Interpolation/restriction.cpp
-    Interpolation/extrapolated_prolongation.cpp
-    Interpolation/extrapolated_restriction.cpp
-    Residual/residual.cpp
-    DirectSolver/directSolver.cpp
-    Smoother/smoother.cpp
-    ExtrapolatedSmoother/extrapolated_smoother.cpp
-)
-
 # Create static libraries from source files
 add_library(GMGPolarLib STATIC
     ${GMG_POLAR_SOURCES}
@@ -89,21 +67,110 @@ add_library(GMGPolarLib STATIC
     ${SOURCE_TERMS_SOURCES}
 )
 
-# Add OpenMP flags if available
-find_package(OpenMP REQUIRED)
-if(OpenMP_CXX_FOUND)
-    target_link_libraries(GMGPolarLib PUBLIC OpenMP::OpenMP_CXX)
-endif()
+add_executable(test_vector LinearAlgebra/vector.cpp)
+target_compile_features(test_vector PRIVATE cxx_std_17)
+target_link_libraries(test_vector GMGPolarLib GTest::gtest_main ${MUMPS_LIBRARIES})
+add_test(NAME test_vector COMMAND test_vector)
 
-# Add executables for each test source
-foreach(TESTSOURCE ${TEST_SOURCES})
-    get_filename_component(TESTNAME ${TESTSOURCE} NAME_WE)
-    add_executable(${TESTNAME} ${TESTSOURCE})
-    target_link_libraries(${TESTNAME} GMGPolarLib GTest::gtest_main ${MUMPS_LIBRARIES})
-    target_compile_features(${TESTNAME} PRIVATE cxx_std_20)
-    list(APPEND TESTS ${TESTNAME})
-endforeach()
+add_executable(test_vector_operations LinearAlgebra/vector_operations.cpp)
+target_compile_features(test_vector_operations PRIVATE cxx_std_17)
+target_link_libraries(test_vector_operations GMGPolarLib GTest::gtest_main ${MUMPS_LIBRARIES})
+add_test(NAME test_vector_operations COMMAND test_vector_operations)
 
-# Enable testing
+add_executable(test_matrix LinearAlgebra/matrix.cpp)
+target_compile_features(test_matrix PRIVATE cxx_std_17)
+target_link_libraries(test_matrix GMGPolarLib GTest::gtest_main ${MUMPS_LIBRARIES})
+add_test(NAME test_matrix COMMAND test_matrix)
+
+add_executable(test_tridiagonal_solver LinearAlgebra/tridiagonal_solver.cpp)
+target_compile_features(test_tridiagonal_solver PRIVATE cxx_std_17)
+target_link_libraries(test_tridiagonal_solver GMGPolarLib GTest::gtest_main ${MUMPS_LIBRARIES})
+add_test(NAME test_tridiagonal_solver COMMAND test_tridiagonal_solver)
+
+add_executable(test_cyclic_tridiagonal_solver LinearAlgebra/cyclic_tridiagonal_solver.cpp)
+target_compile_features(test_cyclic_tridiagonal_solver PRIVATE cxx_std_17)
+target_link_libraries(test_cyclic_tridiagonal_solver GMGPolarLib GTest::gtest_main ${MUMPS_LIBRARIES})
+add_test(NAME test_cyclic_tridiagonal_solver COMMAND test_cyclic_tridiagonal_solver)
+
+add_executable(test_polargrid PolarGrid/polargrid.cpp)
+target_compile_features(test_polargrid PRIVATE cxx_std_17)
+target_link_libraries(test_polargrid GMGPolarLib GTest::gtest_main ${MUMPS_LIBRARIES})
+add_test(NAME test_polargrid COMMAND test_polargrid)
+
+add_executable(test_prolongation Interpolation/prolongation.cpp)
+target_compile_features(test_prolongation PRIVATE cxx_std_17)
+target_link_libraries(test_prolongation GMGPolarLib GTest::gtest_main ${MUMPS_LIBRARIES})
+add_test(NAME test_prolongation COMMAND test_prolongation)
+
+add_executable(test_restriction Interpolation/restriction.cpp)
+target_compile_features(test_restriction PRIVATE cxx_std_17)
+target_link_libraries(test_restriction GMGPolarLib GTest::gtest_main ${MUMPS_LIBRARIES})
+add_test(NAME test_restriction COMMAND test_restriction)
+
+add_executable(test_extrapolated_prolongation Interpolation/extrapolated_prolongation.cpp)
+target_compile_features(test_extrapolated_prolongation PRIVATE cxx_std_17)
+target_link_libraries(test_extrapolated_prolongation GMGPolarLib GTest::gtest_main ${MUMPS_LIBRARIES})
+add_test(NAME test_extrapolated_prolongation COMMAND test_extrapolated_prolongation)
+
+add_executable(test_extrapolated_restriction Interpolation/extrapolated_restriction.cpp)
+target_compile_features(test_extrapolated_restriction PRIVATE cxx_std_17)
+target_link_libraries(test_extrapolated_restriction GMGPolarLib GTest::gtest_main ${MUMPS_LIBRARIES})
+add_test(NAME test_extrapolated_restriction COMMAND test_extrapolated_restriction)
+
+add_executable(test_residual Residual/residual.cpp)
+target_compile_features(test_residual PRIVATE cxx_std_17)
+target_link_libraries(test_residual GMGPolarLib GTest::gtest_main ${MUMPS_LIBRARIES})
+add_test(NAME test_residual COMMAND test_residual)
+
+add_executable(test_directSolver DirectSolver/directSolver.cpp)
+target_compile_features(test_directSolver PRIVATE cxx_std_17)
+target_link_libraries(test_directSolver GMGPolarLib GTest::gtest_main ${MUMPS_LIBRARIES})
+add_test(NAME test_directSolver COMMAND test_directSolver)
+
+add_executable(test_smoother Smoother/smoother.cpp)
+target_compile_features(test_smoother PRIVATE cxx_std_17)
+target_link_libraries(test_smoother GMGPolarLib GTest::gtest_main ${MUMPS_LIBRARIES})
+add_test(NAME test_smoother COMMAND test_smoother)
+
+add_executable(test_extrapolated_smoother ExtrapolatedSmoother/extrapolated_smoother.cpp)
+target_compile_features(test_extrapolated_smoother PRIVATE cxx_std_17)
+target_link_libraries(test_extrapolated_smoother GMGPolarLib GTest::gtest_main ${MUMPS_LIBRARIES})
+add_test(NAME test_extrapolated_smoother COMMAND test_extrapolated_smoother)
+
+
+
+
+
+# # Set the list of test sources
+# set(TestToRun
+#     LinearAlgebra/vector.cpp  <- Vector
+#     LinearAlgebra/vector_operations.cpp <- Vector
+#     LinearAlgebra/matrix.cpp <- Matrix
+#     LinearAlgebra/tridiagonal_solver.cpp <- ThomasAlgorithm
+#     LinearAlgebra/cyclic_tridiagonal_solver.cpp <- ThomasAlgorithm
+#     PolarGrid/polargrid.cpp <- PolarGrid
+#     Interpolation/prolongation.cpp <- Interpoaltion
+#     Interpolation/restriction.cpp <- Interpoaltion
+#     Interpolation/extrapolated_prolongation.cpp <- Interpoaltion
+#     Interpolation/extrapolated_restriction.cpp <- Interpoaltion
+#     Residual/residual.cpp <- Residual
+#     DirectSolver/directSolver.cpp <- DirectSolver
+#     Smoother/smoother.cpp <- Smoother
+#     ExtrapolatedSmoother/extrapolated_smoother.cpp <- ExtrapolatedSmoother
+# )
+# # Create the test source list
+# set(Tests CommonTests.cpp ${TestToRun})
+
+# # Add the executable
+# add_executable(CommonTests ${Tests})
+
+# # Add all the ADD_TEST for each test
+# foreach(test ${TestToRun})
+#   get_filename_component(TName ${test} NAME_WE)
+#   add_test(NAME ${TName} COMMAND CommonTests ${TName})
+# endforeach()
+
+# # Link the libraries
+# target_link_libraries(CommonTests GMGPolarLib GTest::gtest_main ${MUMPS_LIBRARIES})
+
 include(GoogleTest)
-gtest_discover_tests(${TESTS})

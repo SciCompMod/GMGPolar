@@ -607,7 +607,7 @@ do { \
         /* -------------------- */ \
         /* Inside Section Parts */ \
         if(node_color == color){ \
-            /* Dont give to the right when this case happens! */ \
+            /* Dont give to the right when this case occurs! */ \
             /* i_theta % 2 = 0 and i_r % 2 == 1 */ \
             /* | O | O | O || O   O   O   O  */ \
             /* |   |   |   || -------------- */ \
@@ -716,7 +716,7 @@ do { \
         /* --------------------- */ \
         /* Outside Section Parts */ \
         else if(node_color != color){ \
-            /* Dont give to bottom and up when this case happens! */ \
+            /* Dont give to bottom and up when this case occurs! */ \
             /* i_theta % 2 == 1 and i_r % 2 == 0 */ \
             /* | O | X | O || X   O   X   O  */ \
             /* |   |   |   || -------------- */ \
@@ -967,6 +967,8 @@ void ExtrapolatedSmoother::extrapolatedSmoothingInPlace(Vector<double>& x, const
     int* smoother_circle_dep = new int[numCircleTasks + 2*shift];
     int* smoother_radial_dep = new int[numRadialTasks + 2*shift];
 
+    std::cout<<"INTERETEST " << grid_.numberSmootherCircles() <<", "<< grid_.lengthSmootherRadial() <<std::endl;
+
     omp_set_num_threads(openMPTaskThreads_);
     #pragma omp parallel num_threads(openMPTaskThreads_) /* Outside variable are shared by default */
     {
@@ -1147,7 +1149,7 @@ void ExtrapolatedSmoother::extrapolatedSmoothingInPlace(Vector<double>& x, const
                 }
             }
 
-            /* First additional Radial */
+            /* First additional Radials */
             if(additionalRadialTasks >= 1){
                 int radial_task = numRadialTasks - additionalRadialTasks;
                 #pragma omp task \
@@ -1160,7 +1162,7 @@ void ExtrapolatedSmoother::extrapolatedSmoothingInPlace(Vector<double>& x, const
                 }
             }
 
-            /* Second additional Radial */
+            /* Second additional Radials */
             if(additionalRadialTasks >= 2){
                 int radial_task = numRadialTasks - additionalRadialTasks + 1;
                 #pragma omp task \
@@ -1230,7 +1232,7 @@ void ExtrapolatedSmoother::extrapolatedSmoothingInPlace(Vector<double>& x, const
                 }
             }
 
-            /* First additional Radial */
+            /* First additional Radials */
             if(additionalRadialTasks >= 1){
                 int radial_task = numRadialTasks - additionalRadialTasks;
                 #pragma omp task \
@@ -1243,7 +1245,7 @@ void ExtrapolatedSmoother::extrapolatedSmoothingInPlace(Vector<double>& x, const
                 }
             }
 
-            /* Second additional Radial */
+            /* Second additional Radials */
             if(additionalRadialTasks >= 2){
                 int radial_task = numRadialTasks - additionalRadialTasks + 1;
                 #pragma omp task \

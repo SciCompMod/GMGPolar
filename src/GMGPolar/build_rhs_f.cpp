@@ -25,7 +25,7 @@ void GMGPolar::build_rhs_f(const Level& level, Vector<double>& rhs_f){
                 else if(i_r == 0 && DirBC_Interior_){
                     rhs_f[grid.index(i_r,i_theta)] = system_parameters_->u_D_Interior(r, theta, sin_theta, cos_theta);
                 }
-                else if(i_r = grid.nr()-1){
+                else if(i_r == grid.nr()-1){
                     rhs_f[grid.index(i_r,i_theta)] = system_parameters_->u_D(r, theta, sin_theta, cos_theta);
                 }
             }
@@ -47,7 +47,7 @@ void GMGPolar::build_rhs_f(const Level& level, Vector<double>& rhs_f){
                 else if(i_r == 0 && DirBC_Interior_){
                     rhs_f[grid.index(i_r,i_theta)] = system_parameters_->u_D_Interior(r, theta, sin_theta, cos_theta);
                 }
-                else if(i_r = grid.nr()-1){
+                else if(i_r == grid.nr()-1){
                     rhs_f[grid.index(i_r,i_theta)] = system_parameters_->u_D(r, theta, sin_theta, cos_theta);
                 } 
             }
@@ -95,7 +95,7 @@ void GMGPolar::discretize_rhs_f(const Level& level, Vector<double>& rhs_f){
                 else if(i_r == 0 && DirBC_Interior_){
                     rhs_f[grid.index(i_r,i_theta)] *= 1.0;
                 }
-                else if(i_r = grid.nr()-1){
+                else if(i_r == grid.nr()-1){
                     rhs_f[grid.index(i_r,i_theta)] *= 1.0;
 
                 }
@@ -132,7 +132,7 @@ void GMGPolar::discretize_rhs_f(const Level& level, Vector<double>& rhs_f){
                 else if(i_r == 0 && DirBC_Interior_){
                     rhs_f[grid.index(i_r,i_theta)] *= 1.0;
                 }
-                else if(i_r = grid.nr()-1){
+                else if(i_r == grid.nr()-1){
                     rhs_f[grid.index(i_r,i_theta)] *= 1.0;
                 } 
             }

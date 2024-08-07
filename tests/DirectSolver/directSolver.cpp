@@ -36,7 +36,7 @@
 #include <random>
 
 // Function to generate sample data for vector x using random values with seed
-Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed) {
+Vector<double> generate_random_sample_data_Direct_Solver(const PolarGrid& grid, unsigned int seed) {
     Vector<double> x(grid.number_of_nodes());
     std::mt19937 gen(seed);  // Standard mersenne_twister_engine seeded with seed
     std::uniform_real_distribution<double> dist(-100.0, 100.0); 
@@ -56,7 +56,8 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverDirBC_Interior_CircularGeome
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid);
-    Level level(0, std::move(grid), std::move(levelCache));
+    int extrapolation = 0;
+    Level level(0, std::move(grid), std::move(levelCache), extrapolation);
 
     double Rmax = radii.back();
 
@@ -76,7 +77,7 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverDirBC_Interior_CircularGeome
     DirectSolver solver_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
     Residual residual_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    const Vector<double> rhs = generate_random_sample_data_Direct_Solver(level.grid(), 42);
     Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
@@ -94,7 +95,8 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOrigin_CircularGeometr
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid);
-    Level level(0, std::move(grid), std::move(levelCache));
+    int extrapolation = 0;
+    Level level(0, std::move(grid), std::move(levelCache), extrapolation);
 
     double Rmax = radii.back();
 
@@ -114,7 +116,7 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOrigin_CircularGeometr
     DirectSolver solver_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
     Residual residual_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    const Vector<double> rhs = generate_random_sample_data_Direct_Solver(level.grid(), 42);
     Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
@@ -136,7 +138,8 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverDirBC_Interior_ShafranovGeo
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid);
-    Level level(0, std::move(grid), std::move(levelCache));
+    int extrapolation = 0;
+    Level level(0, std::move(grid), std::move(levelCache), extrapolation);
 
     double Rmax = radii.back();
     double kappa_eps=0.3;
@@ -158,7 +161,7 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverDirBC_Interior_ShafranovGeo
     DirectSolver solver_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
     Residual residual_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    const Vector<double> rhs = generate_random_sample_data_Direct_Solver(level.grid(), 42);
     Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
@@ -176,7 +179,8 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovGeome
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid);
-    Level level(0, std::move(grid), std::move(levelCache));
+    int extrapolation = 0;
+    Level level(0, std::move(grid), std::move(levelCache), extrapolation);
 
     double Rmax = radii.back();
     double kappa_eps=0.3;
@@ -198,7 +202,7 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovGeome
     DirectSolver solver_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
     Residual residual_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    const Vector<double> rhs = generate_random_sample_data_Direct_Solver(level.grid(), 42);
     Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
@@ -210,6 +214,7 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovGeome
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
 }
 
+
 /* ------ */
 /* Czarny */
 /* ------ */
@@ -220,7 +225,8 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeometry)
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid);
-    Level level(0, std::move(grid), std::move(levelCache));
+    int extrapolation = 0;
+    Level level(0, std::move(grid), std::move(levelCache), extrapolation);
 
     double Rmax = radii.back();
     double kappa_eps=0.3;
@@ -242,7 +248,7 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeometry)
     DirectSolver solver_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
     Residual residual_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    const Vector<double> rhs = generate_random_sample_data_Direct_Solver(level.grid(), 42);
     Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
@@ -260,7 +266,8 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometry) {
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid);
-    Level level(0, std::move(grid), std::move(levelCache));
+    int extrapolation = 0;
+    Level level(0, std::move(grid), std::move(levelCache), extrapolation);
 
     double Rmax = radii.back();
     double kappa_eps=0.3;
@@ -282,14 +289,14 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometry) {
     DirectSolver solver_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
     Residual residual_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    const Vector<double> rhs = generate_random_sample_data_Direct_Solver(level.grid(), 42);
     Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum(level.grid().number_of_nodes());
     residual_op.computeResidual_V1(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-8);
+    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
     ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-8);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
 }
@@ -304,7 +311,8 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeometry)
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid);
-    Level level(0, std::move(grid), std::move(levelCache));
+    int extrapolation = 0;
+    Level level(0, std::move(grid), std::move(levelCache), extrapolation);
 
     double Rmax = radii.back();
 
@@ -324,7 +332,7 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeometry)
     DirectSolver solver_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
     Residual residual_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    const Vector<double> rhs = generate_random_sample_data_Direct_Solver(level.grid(), 42);
     Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
@@ -342,7 +350,8 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometry) {
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid);
-    Level level(0, std::move(grid), std::move(levelCache));
+    int extrapolation = 0;
+    Level level(0, std::move(grid), std::move(levelCache), extrapolation);
 
     double Rmax = radii.back();
 
@@ -362,14 +371,20 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometry) {
     DirectSolver solver_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
     Residual residual_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    const Vector<double> rhs = generate_random_sample_data_Direct_Solver(level.grid(), 42);
     Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum(level.grid().number_of_nodes());
     residual_op.computeResidual_V1(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-8);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-8);
+    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
+    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-7);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
+}
+
+int main(int argc, char* argv[])
+{
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

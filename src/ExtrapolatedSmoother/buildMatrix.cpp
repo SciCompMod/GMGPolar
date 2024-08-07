@@ -154,6 +154,7 @@ do { \
                 \
                 /* Fill matrix row of (i-1,j) */ \
                 if(i_r == 1){ \
+                    /* Only in the case of AcrossOrigin */ \
                     if(!DirBC_Interior){ \
                         const Stencil& LeftStencil = get_stencil(i_r-1, i_theta); \
                         int left_nz_index = ptr_nz_index_circle_Asc(i_r-1, i_theta); \
@@ -210,11 +211,13 @@ do { \
                 column = center_index; \
                 center_matrix.diagonal(row) += 1.0; \
                 \
+                /* Fill matrix row of (i,j-1) */ \
                 row = bottom_index; \
                 column = bottom_index; \
                 value = coeff3 * att; /* Center: (Top) */ \
                 center_matrix.diagonal(row) += value; \
                 \
+                /* Fill matrix row of (i,j+1) */ \
                 row = top_index; \
                 column = top_index; \
                 value = coeff4 * att; /* Center: (Bottom) */ \
@@ -466,7 +469,7 @@ do { \
             /* h1 gets replaced with 2 * R0. */ \
             /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()>>1)). */ \
             /* Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil. */ \
-            double h1 = 2 * grid.radius(0); \
+            double h1 = 2.0 * grid.radius(0); \
             double h2 = grid.r_dist(i_r); \
             double k1 = grid.theta_dist(i_theta-1); \
             double k2 = grid.theta_dist(i_theta); \
@@ -1146,6 +1149,8 @@ do { \
             else if(row == column - 1) center_matrix.sub_diagonal(row) += value; \
             else if(row == 0 && column == center_matrix.columns()-1) center_matrix.cyclic_corner_element() += value; \
             \
+            /* Remark: Right is not included here due to the symmetry shift */ \
+            \
             row = center_index; \
             column = center_index; \
             value = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */ \
@@ -1356,7 +1361,7 @@ void ExtrapolatedSmoother::build_Asc_matrices()
 
     const int num_circle_nodes = grid_.ntheta();
     circle_symmetric_cyclic_tridiagonal_solver_.resize(numberSmootherCircles / 2);
-    circle_diagonal_solver_.resize(numberSmootherCircles - numberSmootherCircles/2);
+    circle_diagonal_solver_.resize(numberSmootherCircles - numberSmootherCircles / 2);
 
     assert((grid_.ntheta() / 2) % 2 == 0);
     const int num_radial_nodes = lengthSmootherRadial;

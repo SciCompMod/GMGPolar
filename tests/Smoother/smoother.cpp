@@ -15,7 +15,7 @@
 #include <random>
 
 // Function to generate sample data for vector x using random values with seed
-Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed) {
+Vector<double> generate_random_sample_data_Smoother(const PolarGrid& grid, unsigned int seed) {
     Vector<double> x(grid.number_of_nodes());
     std::mt19937 gen(seed);  // Standard mersenne_twister_engine seeded with seed
     std::uniform_real_distribution<double> dist(-100.0, 100.0); 
@@ -31,7 +31,8 @@ TEST(SmootherTest, SmootherDirBC_Interior) {
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid);
-    Level level(0, std::move(grid), std::move(levelCache));
+    int extrapolation = 0;
+    Level level(0, std::move(grid), std::move(levelCache), extrapolation);
 
     double Rmax = radii.back();
     double kappa_eps=0.3;
@@ -55,7 +56,7 @@ TEST(SmootherTest, SmootherDirBC_Interior) {
     Smoother smoother_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
 
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    const Vector<double> rhs = generate_random_sample_data_Smoother(level.grid(), 42);
     Vector<double> discrete_solution = rhs;
     solver_op.solveInPlace(discrete_solution);
 
@@ -80,10 +81,11 @@ TEST(SmootherTest, SmootherDirBC_Interior) {
 TEST(SmootherTest, SmootherAcrossOrigin) {
     std::vector<double> radii = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {0, M_PI/16, M_PI/8, M_PI/2, M_PI, M_PI+M_PI/16, M_PI+M_PI/8, M_PI+M_PI/2, M_PI+M_PI};
-
+    
     auto grid = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid);
-    Level level(0, std::move(grid), std::move(levelCache));
+    int extrapolation = 0;
+    Level level(0, std::move(grid), std::move(levelCache), extrapolation);
 
     double Rmax = radii.back();
     double kappa_eps=0.3;
@@ -107,7 +109,7 @@ TEST(SmootherTest, SmootherAcrossOrigin) {
     Smoother smoother_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
 
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    const Vector<double> rhs = generate_random_sample_data_Smoother(level.grid(), 42);
     Vector<double> discrete_solution = rhs;
     solver_op.solveInPlace(discrete_solution);
 
@@ -125,8 +127,8 @@ TEST(SmootherTest, SmootherAcrossOrigin) {
     }
 
     ASSERT_NEAR(l1_norm(error), 0.0, 1e-7);
-    ASSERT_NEAR(sqrt(l2_norm_squared(error)), 0.0, 1e-8);
-    ASSERT_NEAR(infinity_norm(error), 0.0, 1e-8);
+    ASSERT_NEAR(sqrt(l2_norm_squared(error)), 0.0, 1e-9);
+    ASSERT_NEAR(infinity_norm(error), 0.0, 1e-10);
 }
 
 TEST(SmootherTest, SmootherDirBC_Interior_SmallestGrid) {
@@ -135,7 +137,8 @@ TEST(SmootherTest, SmootherDirBC_Interior_SmallestGrid) {
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid);
-    Level level(0, std::move(grid), std::move(levelCache));
+    int extrapolation = 0;
+    Level level(0, std::move(grid), std::move(levelCache), extrapolation);
 
     double Rmax = radii.back();
     double kappa_eps=0.3;
@@ -159,7 +162,7 @@ TEST(SmootherTest, SmootherDirBC_Interior_SmallestGrid) {
     Smoother smoother_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
 
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    const Vector<double> rhs = generate_random_sample_data_Smoother(level.grid(), 42);
     Vector<double> discrete_solution = rhs;
     solver_op.solveInPlace(discrete_solution);
 
@@ -188,7 +191,8 @@ TEST(SmootherTest, SmootherAcrossOrigin_SmallestGrid) {
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid);
-    Level level(0, std::move(grid), std::move(levelCache));
+    int extrapolation = 0;
+    Level level(0, std::move(grid), std::move(levelCache), extrapolation);
 
     double Rmax = radii.back();
     double kappa_eps=0.3;
@@ -212,7 +216,7 @@ TEST(SmootherTest, SmootherAcrossOrigin_SmallestGrid) {
     Smoother smoother_op(level.grid(), level.levelCache(), domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
 
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    const Vector<double> rhs = generate_random_sample_data_Smoother(level.grid(), 42);
     Vector<double> discrete_solution = rhs;
     solver_op.solveInPlace(discrete_solution);
 
@@ -229,7 +233,13 @@ TEST(SmootherTest, SmootherAcrossOrigin_SmallestGrid) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
-    ASSERT_NEAR(l1_norm(error), 0.0, 1e-7);
-    ASSERT_NEAR(sqrt(l2_norm_squared(error)), 0.0, 1e-8);
-    ASSERT_NEAR(infinity_norm(error), 0.0, 1e-8);
+    ASSERT_NEAR(l1_norm(error), 0.0, 1e-11);
+    ASSERT_NEAR(sqrt(l2_norm_squared(error)), 0.0, 1e-13);
+    ASSERT_NEAR(infinity_norm(error), 0.0, 1e-13);
+}
+
+int main(int argc, char* argv[])
+{
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
