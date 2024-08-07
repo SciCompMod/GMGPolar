@@ -10,30 +10,10 @@ void GMGPolar::multigrid_V_Cycle(const int level_depth, Vector<double>& solution
 
     auto start_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
 
-    if(level_depth == 0){
-        std::cout<<""<<std::endl;
-           std::cout<<"SOLUTION: "<<std::endl;
-        for (int i = 0; i < level.grid().nr(); i++){
-            for (int j = 0; j < level.grid().ntheta(); j++){
-                std::cout<<solution[level.grid().index(i,j)]<<", ";
-            }
-        } 
-    }
-
     /* ------------ */
     /* Presmoothing */
     for (int i = 0; i < preSmoothingSteps_; i++){
         level.smoothingInPlace(solution, rhs, residual);
-    }
-
-    if(level_depth == 0){
-        std::cout<<""<<std::endl;
-           std::cout<<"SMOOTHER: "<<std::endl;
-        for (int i = 0; i < level.grid().nr(); i++){
-            for (int j = 0; j < level.grid().ntheta(); j++){
-                std::cout<<solution[level.grid().index(i,j)]<<", ";
-            }
-        } 
     }
 
     auto end_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
@@ -48,18 +28,6 @@ void GMGPolar::multigrid_V_Cycle(const int level_depth, Vector<double>& solution
     /* Compute the residual */
     level.computeResidual(residual, rhs, solution);
 
-
-    if(level_depth == 0){
-        std::cout<<""<<std::endl;
-           std::cout<<"RESIDUAL: "<<std::endl;
-        for (int i = 0; i < level.grid().nr(); i++){
-            for (int j = 0; j < level.grid().ntheta(); j++){
-                std::cout<<residual[level.grid().index(i,j)]<<", ";
-            }
-        } 
-    }
-
-
     auto end_MGC_residual = std::chrono::high_resolution_clock::now();
     t_avg_MGC_residual += std::chrono::duration<double>(end_MGC_residual - start_MGC_residual).count();
 
@@ -69,26 +37,14 @@ void GMGPolar::multigrid_V_Cycle(const int level_depth, Vector<double>& solution
         /* --------------------- */
         /* Using a direct solver */
         /* --------------------- */
+
         /* Step 1: Restrict the residual */
         restrictToLowerLevel(level_depth, next_level.residual(), residual);
-        std::cout<<""<<std::endl;
-        std::cout<<"RESTRICT RESIDUAL: "<<std::endl;
-        for (int i = 0; i < next_level.grid().nr(); i++){
-            for (int j = 0; j < next_level.grid().ntheta(); j++){
-                std::cout<<next_level.residual()[next_level.grid().index(i,j)]<<", ";
-            }
-        }
-        // assign(next_level.residual(),1.0);
-        /* Step 2: Solve for the error in place */
-        auto start_MGC_directSolver = std::chrono::high_resolution_clock::now();   
-        next_level.directSolveInPlace(next_level.residual());
 
-        std::cout<<"Error add: "<<std::endl;
-        for (int i = 0; i < next_level.grid().nr(); i++){
-            for (int j = 0; j < next_level.grid().ntheta(); j++){
-                std::cout<<next_level.residual()[next_level.grid().index(i,j)]<<", ";
-            }
-        }
+        /* Step 2: Solve for the error in place */
+        auto start_MGC_directSolver = std::chrono::high_resolution_clock::now(); 
+
+        next_level.directSolveInPlace(next_level.residual());
 
         auto end_MGC_directSolver = std::chrono::high_resolution_clock::now();
         t_avg_MGC_directSolver += std::chrono::duration<double>(end_MGC_directSolver - start_MGC_directSolver).count();
@@ -96,29 +52,19 @@ void GMGPolar::multigrid_V_Cycle(const int level_depth, Vector<double>& solution
         /* ------------------------------------------ */
         /* By recursively calling the multigrid cycle */
         /* ------------------------------------------ */
+
         /* Step 1: Restrict the residual. */
         restrictToLowerLevel(level_depth, next_level.rhs_error(), residual);
+
         /* Step 2: Set starting error to zero. */
         assign(next_level.residual(), 0.0);
+
         /* Step 3: Solve for the error by recursively calling the multigrid cycle. */
         multigrid_V_Cycle(level_depth+1, next_level.residual(), next_level.rhs_error(), next_level.solution());
     }
 
-        // for (int i = 0; i < next_level.grid().nr(); i++){
-        //     for (int j = 0; j < next_level.grid().ntheta(); j++){
-        //         next_level.residual()[next_level.grid().index(i,j)] = 4.0 * (i*next_level.grid().ntheta()+j);
-        //     }
-        // }
-
     /* Interpolate the correction */
     prolongateToUpperLevel(level_depth+1, residual, next_level.residual());
-
-        std::cout<<"Prolongation: "<<std::endl;
-        for (int i = 0; i < level.grid().nr(); i++){
-            for (int j = 0; j < level.grid().ntheta(); j++){
-                std::cout<<residual[level.grid().index(i,j)]<<", ";
-            }
-        }
 
     /* Compute the corrected approximation: u = u + error */
     add(solution, residual);

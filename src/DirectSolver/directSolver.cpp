@@ -22,6 +22,6 @@ DirectSolver::~DirectSolver() {
 }
 
 void DirectSolver::solveInPlace(Vector<double>& x) {
-    // subtractSymmetryShift(x);
+    subtractSymmetryShift(x);
     solveMumps(x);
 }

@@ -12,45 +12,6 @@ void GMGPolar::solve() {
     /* Initialize starting solution */
     assign(level.solution(), 0.0);
 
-// Iteration: 0
-// Exact Weighted-Euclidean Error: 3.2363237151e-05
-// Exact Infinity Error: 9.9999999964e-05
-// Residual Norm: 1.2822691453e-03
-// Relative Residual Norm: 1.0000000000e+00
-
-// Iteration: 0
-// Exact Weighted-Euclidean Error: 3.2363237151e-05
-// Exact Infinity Error: 9.9999999964e-05
-// Residual Norm: 1.2822691453e-03
-// Relative Residual Norm: 1.0000000000e+00
-
-    {
-        assign(level.solution(), 1.0);
-
-    auto& grid = level.grid();
-    for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++)
-    {
-        int i_r;
-        double r, theta, sin_theta, cos_theta;
-
-        i_r = 0;
-        r = grid.radius(i_r);
-        theta = grid.theta(i_theta);
-        sin_theta = sin(theta);
-        cos_theta = cos(theta);
-        level.solution()[grid.index(i_r, i_theta)] = exact_solution_->exact_solution(r, theta, sin_theta, cos_theta);
-
-        i_r = grid.nr()-1;
-        r = grid.radius(i_r);
-        theta = grid.theta(i_theta);
-        sin_theta = sin(theta);
-        cos_theta = cos(theta);
-        level.solution()[grid.index(i_r, i_theta)] = exact_solution_->exact_solution(r, theta, sin_theta, cos_theta);
-    }
-    }
-
-    std::cout<<level.solution()<<std::endl;
-
     /* ---------------- */
     /* Discretize rhs_f */
     if(extrapolation_ > 0){
@@ -165,9 +126,6 @@ void GMGPolar::solve() {
                 throw std::invalid_argument("Unknown MultigridCycleType");
         }
         number_of_iterations_++;
-
-        // std::cout<<"HELLO"<<std::endl;
-        // std::cout<<level.solution()<<std::endl;
 
         auto end_solve_multigrid_iterations = std::chrono::high_resolution_clock::now();
         t_solve_multigrid_iterations += std::chrono::duration<double>(end_solve_multigrid_iterations - start_solve_multigrid_iterations).count();

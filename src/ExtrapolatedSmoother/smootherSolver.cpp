@@ -967,8 +967,6 @@ void ExtrapolatedSmoother::extrapolatedSmoothingInPlace(Vector<double>& x, const
     int* smoother_circle_dep = new int[numCircleTasks + 2*shift];
     int* smoother_radial_dep = new int[numRadialTasks + 2*shift];
 
-    std::cout<<"INTERETEST " << grid_.numberSmootherCircles() <<", "<< grid_.lengthSmootherRadial() <<std::endl;
-
     omp_set_num_threads(openMPTaskThreads_);
     #pragma omp parallel num_threads(openMPTaskThreads_) /* Outside variable are shared by default */
     {

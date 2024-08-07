@@ -145,9 +145,6 @@ SparseMatrix<T>::SparseMatrix(const SparseMatrix& other) :
 // copy assignment
 template<typename T>
 SparseMatrix<T>& SparseMatrix<T>::operator=(const SparseMatrix& other){
-
-    std::cout<<"Hello There"<<std::endl;
-
     if (this == &other) {
         // Self-assignment, no work needed
         return *this;
