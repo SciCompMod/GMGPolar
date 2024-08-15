@@ -1,7 +1,7 @@
-// PolarR6 simulates solution (22) of Bourne et al. https://doi.org/10.1016/j.jcp.2023.112249
 #include "PolarR6PoissonCircular.h"
 #include <stdlib.h>
 #include <math.h>
+#include <stdint.h>
 
 
 /*........................................*/
@@ -133,14 +133,14 @@ void PolarR6PoissonCircular::J_tt(double r, std::vector<double> const& theta, do
 /*........................................*/
 double PolarR6PoissonCircular::J_xs(double r, double theta, double unused_1, double unused_2, double Rmax) const
 {
-    return (-pow(sin(theta), 2.0)) / cos(theta) + pow(cos(theta), (double)((-1)));
+    return (-pow(sin(theta), 2.0)) / cos(theta) + pow(cos(theta), (double)((-INT64_C(1))));
 }
 /*........................................*/
 void PolarR6PoissonCircular::J_xs(std::vector<double> const& r, double theta, double unused_1, double unused_2, double Rmax, std::vector<double>& sol) const
 {
     for (std::size_t i=0; i < sol.size(); ++i)
     {
-        sol[i] = (-pow(sin(theta), 2.0)) / cos(theta) + pow(cos(theta), (double)((-1)));
+        sol[i] = (-pow(sin(theta), 2.0)) / cos(theta) + pow(cos(theta), (double)((-INT64_C(1))));
     }
 }
 /*........................................*/
@@ -148,7 +148,7 @@ void PolarR6PoissonCircular::J_xs(double r, std::vector<double> const& theta, do
 {
     for (std::size_t i=0; i < sol.size(); ++i)
     {
-        sol[i] = (-pow(sin_theta[i], 2.0)) / cos_theta[i] + pow(cos_theta[i], (double)((-1)));
+        sol[i] = (-pow(sin_theta[i], 2.0)) / cos_theta[i] + pow(cos_theta[i], (double)((-INT64_C(1))));
     }
 }
 /*........................................*/
@@ -217,14 +217,14 @@ void PolarR6PoissonCircular::J_yt(double r, std::vector<double> const& theta, do
 /*........................................*/
 double PolarR6PoissonCircular::rho_glob(double r, double theta, double unused_1, double unused_2, double Rmax) const
 {
-    return 0.0;
+    return (-pow((r/Rmax), 4.0)) * (14.7456 * (r/Rmax) * pow(((r/Rmax) - 1.0), 5.0) * cos(11.0 * theta) + 1.0 * (r/Rmax) * (12.288 * (r/Rmax) * pow(((r/Rmax) - 1.0), 4.0) * cos(11.0 * theta) + 17.2032 * pow(((r/Rmax) - 1.0), 5.0) * cos(11.0 * theta)) - 34.816 * pow(((r/Rmax) - 1.0), 6.0) * cos(11.0 * theta));
 }
 /*........................................*/
 void PolarR6PoissonCircular::rho_glob(std::vector<double> const& r, double theta, double unused_1, double unused_2, double Rmax, std::vector<double>& sol) const
 {
     for (std::size_t i=0; i < sol.size(); ++i)
     {
-        sol[i] = 0.0;
+        sol[i] = (-pow((r[i]/Rmax), 4.0)) * (14.7456 * (r[i]/Rmax) * pow(((r[i]/Rmax) - 1.0), 5.0) * cos(11.0 * theta) + 1.0 * (r[i]/Rmax) * (12.288 * (r[i]/Rmax) * pow(((r[i]/Rmax) - 1.0), 4.0) * cos(11.0 * theta) + 17.2032 * pow(((r[i]/Rmax) - 1.0), 5.0) * cos(11.0 * theta)) - 34.816 * pow(((r[i]/Rmax) - 1.0), 6.0) * cos(11.0 * theta));
     }
 }
 /*........................................*/
@@ -232,7 +232,7 @@ void PolarR6PoissonCircular::rho_glob(double r, std::vector<double> const& theta
 {
     for (std::size_t i=0; i < sol.size(); ++i)
     {
-        sol[i] = 0.0;
+        sol[i] = (-pow((r/Rmax), 4.0)) * (14.7456 * (r/Rmax) * pow(((r/Rmax) - 1.0), 5.0) * cos(11.0 * theta[i]) + 1.0 * (r/Rmax) * (12.288 * (r/Rmax) * pow(((r/Rmax) - 1.0), 4.0) * cos(11.0 * theta[i]) + 17.2032 * pow(((r/Rmax) - 1.0), 5.0) * cos(11.0 * theta[i])) - 34.816 * pow(((r/Rmax) - 1.0), 6.0) * cos(11.0 * theta[i]));
     }
 }
 /*........................................*/
@@ -259,14 +259,14 @@ void PolarR6PoissonCircular::rho_pole(double r, std::vector<double> const& theta
 /*........................................*/
 double PolarR6PoissonCircular::coeffs1(double r, double Rmax) const
 {
-    return 0.0;
+    return 1.0;
 }
 /*........................................*/
 void PolarR6PoissonCircular::coeffs1(std::vector<double> const& r, double Rmax, std::vector<double>& sol) const
 {
     for (std::size_t i=0; i < sol.size(); ++i)
     {
-        sol[i] = 0.0;
+        sol[i] = 1.0;
     }
 }
 /*........................................*/
