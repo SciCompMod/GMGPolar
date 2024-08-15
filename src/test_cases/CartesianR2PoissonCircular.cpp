@@ -1,6 +1,7 @@
 #include "CartesianR2PoissonCircular.h"
 #include <stdlib.h>
 #include <math.h>
+#include <stdint.h>
 
 
 /*........................................*/
@@ -132,14 +133,14 @@ void CartesianR2PoissonCircular::J_tt(double r, std::vector<double> const& theta
 /*........................................*/
 double CartesianR2PoissonCircular::J_xs(double r, double theta, double unused_1, double unused_2, double Rmax) const
 {
-    return (-pow(sin(theta), 2.0)) / cos(theta) + pow(cos(theta), (double)((-1)));
+    return (-pow(sin(theta), 2.0)) / cos(theta) + pow(cos(theta), (double)((-INT64_C(1))));
 }
 /*........................................*/
 void CartesianR2PoissonCircular::J_xs(std::vector<double> const& r, double theta, double unused_1, double unused_2, double Rmax, std::vector<double>& sol) const
 {
     for (std::size_t i=0; i < sol.size(); ++i)
     {
-        sol[i] = (-pow(sin(theta), 2.0)) / cos(theta) + pow(cos(theta), (double)((-1)));
+        sol[i] = (-pow(sin(theta), 2.0)) / cos(theta) + pow(cos(theta), (double)((-INT64_C(1))));
     }
 }
 /*........................................*/
@@ -147,7 +148,7 @@ void CartesianR2PoissonCircular::J_xs(double r, std::vector<double> const& theta
 {
     for (std::size_t i=0; i < sol.size(); ++i)
     {
-        sol[i] = (-pow(sin_theta[i], 2.0)) / cos_theta[i] + pow(cos_theta[i], (double)((-1)));
+        sol[i] = (-pow(sin_theta[i], 2.0)) / cos_theta[i] + pow(cos_theta[i], (double)((-INT64_C(1))));
     }
 }
 /*........................................*/
@@ -216,14 +217,14 @@ void CartesianR2PoissonCircular::J_yt(double r, std::vector<double> const& theta
 /*........................................*/
 double CartesianR2PoissonCircular::rho_glob(double r, double theta, double unused_1, double unused_2, double Rmax) const
 {
-    return 0.0;
+    return 8.0 * M_PI * (r/Rmax) * sin(theta) * cos(2.0 * M_PI * (r/Rmax) * sin(theta)) * cos(2.0 * M_PI * (r/Rmax) * cos(theta)) - 8.0 * M_PI * (r/Rmax) * sin(2.0 * M_PI * (r/Rmax) * sin(theta)) * sin(2.0 * M_PI * (r/Rmax) * cos(theta)) * cos(theta) + 8.0 * (M_PI * M_PI) * (1.0 - (r/Rmax) * (r/Rmax)) * pow(sin(theta), 2.0) * sin(2.0 * M_PI * (r/Rmax) * sin(theta)) * cos(2.0 * M_PI * (r/Rmax) * cos(theta)) + 8.0 * (M_PI * M_PI) * (1.0 - (r/Rmax) * (r/Rmax)) * sin(2.0 * M_PI * (r/Rmax) * sin(theta)) * pow(cos(theta), 2.0) * cos(2.0 * M_PI * (r/Rmax) * cos(theta)) + 4.0 * sin(2.0 * M_PI * (r/Rmax) * sin(theta)) * cos(2.0 * M_PI * (r/Rmax) * cos(theta));
 }
 /*........................................*/
 void CartesianR2PoissonCircular::rho_glob(std::vector<double> const& r, double theta, double unused_1, double unused_2, double Rmax, std::vector<double>& sol) const
 {
     for (std::size_t i=0; i < sol.size(); ++i)
     {
-        sol[i] = 0.0;
+        sol[i] = 8.0 * M_PI * (r[i]/Rmax) * sin(theta) * cos(2.0 * M_PI * (r[i]/Rmax) * sin(theta)) * cos(2.0 * M_PI * (r[i]/Rmax) * cos(theta)) - 8.0 * M_PI * (r[i]/Rmax) * sin(2.0 * M_PI * (r[i]/Rmax) * sin(theta)) * sin(2.0 * M_PI * (r[i]/Rmax) * cos(theta)) * cos(theta) + 8.0 * (M_PI * M_PI) * (1.0 - (r[i]/Rmax) * (r[i]/Rmax)) * pow(sin(theta), 2.0) * sin(2.0 * M_PI * (r[i]/Rmax) * sin(theta)) * cos(2.0 * M_PI * (r[i]/Rmax) * cos(theta)) + 8.0 * (M_PI * M_PI) * (1.0 - (r[i]/Rmax) * (r[i]/Rmax)) * sin(2.0 * M_PI * (r[i]/Rmax) * sin(theta)) * pow(cos(theta), 2.0) * cos(2.0 * M_PI * (r[i]/Rmax) * cos(theta)) + 4.0 * sin(2.0 * M_PI * (r[i]/Rmax) * sin(theta)) * cos(2.0 * M_PI * (r[i]/Rmax) * cos(theta));
     }
 }
 /*........................................*/
@@ -231,7 +232,7 @@ void CartesianR2PoissonCircular::rho_glob(double r, std::vector<double> const& t
 {
     for (std::size_t i=0; i < sol.size(); ++i)
     {
-        sol[i] = 0.0;
+        sol[i] = 8.0 * M_PI * (r/Rmax) * sin_theta[i] * cos(2.0 * M_PI * (r/Rmax) * sin_theta[i]) * cos(2.0 * M_PI * (r/Rmax) * cos_theta[i]) - 8.0 * M_PI * (r/Rmax) * sin(2.0 * M_PI * (r/Rmax) * sin_theta[i]) * sin(2.0 * M_PI * (r/Rmax) * cos_theta[i]) * cos_theta[i] + 8.0 * (M_PI * M_PI) * (1.0 - (r/Rmax) * (r/Rmax)) * pow(sin_theta[i], 2.0) * sin(2.0 * M_PI * (r/Rmax) * sin_theta[i]) * cos(2.0 * M_PI * (r/Rmax) * cos_theta[i]) + 8.0 * (M_PI * M_PI) * (1.0 - (r/Rmax) * (r/Rmax)) * sin(2.0 * M_PI * (r/Rmax) * sin_theta[i]) * pow(cos_theta[i], 2.0) * cos(2.0 * M_PI * (r/Rmax) * cos_theta[i]) + 4.0 * sin(2.0 * M_PI * (r/Rmax) * sin_theta[i]) * cos(2.0 * M_PI * (r/Rmax) * cos_theta[i]);
     }
 }
 /*........................................*/
@@ -258,14 +259,14 @@ void CartesianR2PoissonCircular::rho_pole(double r, std::vector<double> const& t
 /*........................................*/
 double CartesianR2PoissonCircular::coeffs1(double r, double Rmax) const
 {
-    return 0.0;
+    return 1.0;
 }
 /*........................................*/
 void CartesianR2PoissonCircular::coeffs1(std::vector<double> const& r, double Rmax, std::vector<double>& sol) const
 {
     for (std::size_t i=0; i < sol.size(); ++i)
     {
-        sol[i] = 0.0;
+        sol[i] = 1.0;
     }
 }
 /*........................................*/
