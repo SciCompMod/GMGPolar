@@ -19,7 +19,7 @@ PolarGrid::PolarGrid(
     // Check parameter validity
     checkParameters(radii, angles);
     // Store distances to adjacent neighboring nodes.
-    // Initializes r_dist_, theta_dist_
+    // Initializes radial_spacings_, angular_spacings_ 
     initializeDistances();
     // Initializes smoothers splitting radius for circle/radial indexing.
     initializeLineSplitting(splitting_radius);
@@ -40,7 +40,7 @@ PolarGrid::PolarGrid(
     // Check parameter validity
     checkParameters(radii_, angles_);
     // Store distances to adjacent neighboring nodes.
-    // Initializes r_dist_, theta_dist_
+    // Initializes radial_spacings_, angular_spacings_ 
     initializeDistances();
     // Initializes smoothers splitting radius for circle/radial indexing.
     initializeLineSplitting(splitting_radius);
@@ -60,7 +60,7 @@ PolarGrid::PolarGrid(
     // Check parameter validity
     checkParameters(radii_, angles_);
     // Store distances to adjacent neighboring nodes.
-    // Initializes r_dist_, theta_dist_
+    // Initializes radial_spacings_, angular_spacings_ 
     initializeDistances();    
     // Initializes smoothers splitting radius for circle/radial indexing.
     initializeLineSplitting(splitting_radius);
@@ -140,7 +140,7 @@ std::vector<double> PolarGrid::divideVector(const std::vector<double>& vec, cons
     size_t vecSize = vec.size();
     size_t resultSize = vecSize + (vecSize - 1) * (powerOfTwo - 1);
     std::vector<double> result(resultSize);
-    #pragma omp parallel for
+    
     for (size_t i = 0; i < vecSize - 1; ++i) {
         size_t baseIndex = i * powerOfTwo;
         result[baseIndex] = vec[i];  // Add the original value
@@ -154,27 +154,20 @@ std::vector<double> PolarGrid::divideVector(const std::vector<double>& vec, cons
 }
 
 void PolarGrid::initializeDistances(){
-    // r_dist contains the distances between each consecutive radii division.
-    // r_dist = [R_1-R0, ..., R_{N} - R_{N-1}].
-    r_dist_.resize(nr() - 1);
-    // theta_dist contains the angles between each consecutive theta division.
+    // radial_spacings contains the distances between each consecutive radii division.
+    // radial_spacings = [R_1-R0, ..., R_{N} - R_{N-1}].
+    radial_spacings_.resize(nr() - 1);
+    for (int i = 0; i < nr() - 1; i++){
+        radial_spacings_[i] = radius(i+1) - radius(i);
+    }
+    // angular_spacings contains the angles between each consecutive theta division.
     // Since we have a periodic boundary in theta direction, 
     // we have to make sure the index wraps around correctly when accessing it.
     // Here theta_0 = 0.0 and theta_N = 2*pi refer to the same point. 
-    // theta_dist = [theta_{1}-theta_{0}, ..., theta_{N}-theta_{N-1}].
-    theta_dist_.resize(ntheta());
-
-    #pragma omp parallel
-    {
-        #pragma omp for nowait
-        for (int i = 0; i < nr() - 1; i++){
-            r_dist_[i] = radius(i+1) - radius(i);
-        }
-
-        #pragma omp for
-        for (int i = 0; i < ntheta(); i++){
-            theta_dist_[i] = theta(i+1) - theta(i);
-        }
+    // angular_spacings = [theta_{1}-theta_{0}, ..., theta_{N}-theta_{N-1}].
+    angular_spacings_.resize(ntheta());
+    for (int i = 0; i < ntheta(); i++){
+        angular_spacings_[i] = theta(i+1) - theta(i);
     }
 }
 
@@ -186,45 +179,45 @@ void PolarGrid::initializeDistances(){
 void PolarGrid::initializeLineSplitting(std::optional<double> splitting_radius){
     if (splitting_radius.has_value()) {
         if(splitting_radius.value() < radii_.front()){
-            numberSmootherCircles_ = 0;
-            lengthSmootherRadial_ = nr();
+            number_smoother_circles_ = 0;
+            length_smoother_radial_ = nr();
             smoother_splitting_radius_ = -1.0;
         } else {
             auto it = std::lower_bound(radii_.begin(), radii_.end(), splitting_radius.value());
             if (it != radii_.end()) {
-                numberSmootherCircles_ = std::distance(radii_.begin(), it);
-                lengthSmootherRadial_ = nr() - numberSmootherCircles_;
+                number_smoother_circles_ = std::distance(radii_.begin(), it);
+                length_smoother_radial_ = nr() - number_smoother_circles_;
                 smoother_splitting_radius_ = splitting_radius.value();
             } else {
-                numberSmootherCircles_ = nr();
-                lengthSmootherRadial_ = 0;
+                number_smoother_circles_ = nr();
+                length_smoother_radial_ = 0;
                 smoother_splitting_radius_ = radii_.back() + 1.0;
             }
         }
     } else {
-        numberSmootherCircles_ = 2; /* We assume numberSmootherCircles_ >= 2 in the further implementation */
+        number_smoother_circles_ = 2; /* We assume numberSmootherCircles_ >= 2 in the further implementation */
         for (int i_r = 2; i_r < nr() - 2; i_r++){ /* We assume lengthSmootherRadial_ >= 3 in the further implementation */
             double uniform_theta_k = (2*M_PI) / ntheta();
             double radius_r = radius(i_r);
             double radial_dist_h = radius(i_r) - radius(i_r - 1);; 
             double q = uniform_theta_k / radial_dist_h;
             if(q * radius_r > 1.0){
-                numberSmootherCircles_ = i_r;
+                number_smoother_circles_ = i_r;
                 break;
             }
         }
         /* The ExtrapolatedSmoother requires numberSmootherCircles_ >= 3 and lengthSmootherRadial_ >= 3. */
-        if(numberSmootherCircles_ < 3 && nr() > 5) numberSmootherCircles_ = 3;
+        if(number_smoother_circles_ < 3 && nr() > 5) number_smoother_circles_ = 3;
         
-        lengthSmootherRadial_ = nr() - numberSmootherCircles_;
-        smoother_splitting_radius_ = radius(numberSmootherCircles_);
+        length_smoother_radial_ = nr() - number_smoother_circles_;
+        smoother_splitting_radius_ = radius(number_smoother_circles_);
     }
 
-    numberCircularSmootherNodes_ = numberSmootherCircles_ * ntheta();
-    numberRadialSmootherNodes_ = lengthSmootherRadial_ * ntheta();
+    number_circular_smoother_nodes_ = number_smoother_circles_ * ntheta();
+    number_radial_smoother_nodes_ = length_smoother_radial_ * ntheta();
 
     assert(numberSmootherCircles() + lengthSmootherRadial() == nr());
-    assert(numberCircularSmootherNodes() + numberRadialSmootherNodes() == number_of_nodes());
+    assert(numberCircularSmootherNodes() + numberRadialSmootherNodes() == numberOfNodes());
 }
 
 // ---------------------------------------------------- //
@@ -239,23 +232,18 @@ PolarGrid coarseningGrid(const PolarGrid& fineGrid) {
     std::vector<double> coarse_r(coarse_nr);
     std::vector<double> coarse_theta(coarse_ntheta + 1);
 
-    #pragma omp parallel
-    {
-        #pragma omp for nowait
-        for (int i = 0; i < coarse_nr; i++) {
-            coarse_r[i] = fineGrid.radius(2*i);
-        }
-        
-        #pragma omp for
-        for (int j = 0; j < coarse_ntheta + 1; j++) {
-            coarse_theta[j] = fineGrid.theta(2*j);
-        }
+
+    for (int i = 0; i < coarse_nr; i++) {
+        coarse_r[i] = fineGrid.radius(2*i);
     }
+    for (int j = 0; j < coarse_ntheta + 1; j++) {
+        coarse_theta[j] = fineGrid.theta(2*j);
+    }
+    
+    const bool use_same_splitting_radius = false;
 
-    const bool useSameSplittingRadius = false;
-
-    if (useSameSplittingRadius) {
-        return PolarGrid(coarse_r, coarse_theta, fineGrid.smoother_splitting_radius());
+    if (use_same_splitting_radius) {
+        return PolarGrid(coarse_r, coarse_theta, fineGrid.smootherSplittingRadius());
     } else {
         return PolarGrid(coarse_r, coarse_theta);
     }
@@ -272,15 +260,8 @@ const std::vector<double>& PolarGrid::angles() const {
     return angles_; 
 }
 
-const std::vector<double>& PolarGrid::r_distances() const{
-    return r_dist_;
-}
-const std::vector<double>& PolarGrid::theta_distances() const{
-    return theta_dist_;
-}
-
 // Get the radius at which the grid is split into circular and radial smoothing
-double PolarGrid::smoother_splitting_radius() const{
+double PolarGrid::smootherSplittingRadius() const{
     return smoother_splitting_radius_;
 }
 
@@ -302,9 +283,9 @@ int PolarGrid::index(const MultiIndex& position) const
     }
 }
 
-MultiIndex PolarGrid::multiindex(const int node_index) const
+MultiIndex PolarGrid::multiIndex(const int node_index) const
 {
-    assert(0 <= node_index && node_index < number_of_nodes());
+    assert(0 <= node_index && node_index < numberOfNodes());
     if(node_index < numberCircularSmootherNodes()){
         auto result = std::div(node_index, ntheta());
         return MultiIndex(result.quot, result.rem);
@@ -315,7 +296,7 @@ MultiIndex PolarGrid::multiindex(const int node_index) const
     }
 }
 
-Point PolarGrid::polar_coordinates(const MultiIndex& position) const
+Point PolarGrid::polarCoordinates(const MultiIndex& position) const
 {
     assert(position[0] >= 0 && position[0] < nr());
     assert(position[1] >= 0 && position[1] < ntheta());
@@ -323,21 +304,21 @@ Point PolarGrid::polar_coordinates(const MultiIndex& position) const
 }
 
 
-void PolarGrid::adjacent_neighbor_distances(const MultiIndex& position,
+void PolarGrid::adjacentNeighborDistances(const MultiIndex& position,
     std::array<std::pair<double,double>, space_dimension>& neighbor_distance) const
 {
     assert(position[0] >= 0 && position[0] < nr());
     assert(position[1] >= 0 && position[1] < ntheta());
 
-    neighbor_distance[0].first = (position[0] <= 0) ? 0.0 : r_dist(position[0] - 1);
-    neighbor_distance[0].second = (position[0] >= nr()-1) ? 0.0 : r_dist(position[0]);
+    neighbor_distance[0].first = (position[0] <= 0) ? 0.0 : radialSpacing(position[0] - 1);
+    neighbor_distance[0].second = (position[0] >= nr()-1) ? 0.0 : radialSpacing(position[0]);
 
-    neighbor_distance[1].first = theta_dist(position[1]-1);
-    neighbor_distance[1].second = theta_dist(position[1]);
+    neighbor_distance[1].first = angularSpacing(position[1]-1);
+    neighbor_distance[1].second = angularSpacing(position[1]);
 }
 
 
-void PolarGrid::adjacent_neighbors_of(const MultiIndex& position, 
+void PolarGrid::adjacentNeighborsOf(const MultiIndex& position, 
     std::array<std::pair<int,int>, space_dimension>& neighbors) const
 {
     assert(position[0] >= 0 && position[0] < nr());
@@ -362,7 +343,7 @@ void PolarGrid::adjacent_neighbors_of(const MultiIndex& position,
     neighbors[1].second = index(neigbor_position);
 }
 
-void PolarGrid::diagonal_neighbors_of(const MultiIndex& position, 
+void PolarGrid::diagonalNeighborsOf(const MultiIndex& position, 
     std::array<std::pair<int,int>, space_dimension>& neighbors) const
 {
     assert(position[0] >= 0 && position[0] < nr());
@@ -430,7 +411,7 @@ void PolarGrid::checkParameters(const std::vector<double>& radii, const std::vec
         throw std::invalid_argument("Last angle must be 2*pi.");
     }
 
-    // Additional constraint for our stencil. Not needed in PolarGrid.
+    // Additional constraint for our stencil. Not needed in general.
     if (!std::all_of(angles.begin(), angles.end(), [&angles](double theta) {
         double opposite = theta + M_PI >= 2*M_PI ? theta - M_PI : theta + M_PI;
         return std::find_if(angles.begin(), angles.end(), [&opposite](double angle){

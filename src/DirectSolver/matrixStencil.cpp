@@ -1,6 +1,6 @@
 #include "../../include/DirectSolver/directSolver.h"
 
-const Stencil& DirectSolver::get_stencil(int i_r) const {
+const Stencil& DirectSolver::getStencil(int i_r) const {
     assert(0 <= i_r && i_r < grid_.nr());
 
     static const Stencil stencil_interior = 
@@ -48,7 +48,7 @@ const Stencil& DirectSolver::get_stencil(int i_r) const {
     throw std::out_of_range("Invalid index for stencil");
 }
 
-int DirectSolver::nnz_matrixA() const {
+int DirectSolver::getNonZeroCountSolverMatrix() const {
     const int size_stencil_inner_boundary = DirBC_Interior_ ? 1 : 7 ;
     const int size_stencil_next_inner_boundary = DirBC_Interior_ ? 6 : 9;
     const int size_stencil_interior = 9;
@@ -66,7 +66,9 @@ int DirectSolver::nnz_matrixA() const {
     ); 
 }
 
-int DirectSolver::ptr_nz_index_matrixA(const int i_r, const int i_theta) const {
+/* ----------------------------------------------------------------- */
+/* If the indexing is not smoother-based, please adjust the indexing */
+int DirectSolver::getSolverMatrixIndex(const int i_r, const int i_theta) const {
     const int size_stencil_inner_boundary = DirBC_Interior_ ? 1 : 7 ;
     const int size_stencil_next_inner_boundary = DirBC_Interior_ ? 6 : 9;
     const int size_stencil_interior = 9;

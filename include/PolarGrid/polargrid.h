@@ -52,39 +52,36 @@ public:
     // Get the index of a node based on its position.
     int index(const MultiIndex& position) const;
     // Get the position of a node based on its index.
-    MultiIndex multiindex(const int node_index) const;
+    MultiIndex multiIndex(const int node_index) const;
     // Get the polar coordinates of a node based on its position.
-    Point polar_coordinates(const MultiIndex& position) const;
+    Point polarCoordinates(const MultiIndex& position) const;
 
     // Optimized, inlined indexing.
-    int wrap_theta_index(const int unwrapped_theta_index) const;
+    int wrapThetaIndex(const int unwrapped_theta_index) const;
     int index(const int r_index, const int unwrapped_theta_index) const;
-    void multiindex(const int node_index, int& r_index, int& theta_index) const;
+    void multiIndex(const int node_index, int& r_index, int& theta_index) const;
 
     // Neighboring nodes
     // Get adjacent neighbors of a node.
     // If the neighbor index is -1, then there is no neighboring node in that direction.
-    void adjacent_neighbors_of(const MultiIndex& position, 
+    void adjacentNeighborsOf(const MultiIndex& position, 
         std::array<std::pair<int,int>, space_dimension>& neighbors
     ) const;
     // Get diagonal neighbors of a node.
     // If the neighbor index is -1, then there is no neighboring node in that direction.
-    void diagonal_neighbors_of(
+    void diagonalNeighborsOf(
         const MultiIndex& position, 
         std::array<std::pair<int,int>, space_dimension>& neighbors
     ) const;
     // Neighbor distances
     // Get distances to adjacent neighbors of a node.
     // If there is no neighboring node in that direction, then the neighbor distance is 0.
-    void adjacent_neighbor_distances(const MultiIndex& position, 
+    void adjacentNeighborDistances(const MultiIndex& position, 
         std::array<std::pair<double,double>, space_dimension>& neighbor_distances
     ) const;
 
     // Number of grid nodes
-    int number_of_nodes() const;
-    int number_of_inner_nodes() const;
-    int number_of_inner_boundary_nodes() const;
-    int number_of_outer_boundary_nodes() const;
+    int numberOfNodes() const;
 
     // Grid Parameters
     // Get the number of grid points in radial direction
@@ -101,17 +98,13 @@ public:
 
     // Grid distances
     // Get the radial distance to the next consecutive radial node at a specified radial index.
-    const double& r_dist(const int r_index) const;
+    const double& radialSpacing(const int r_index) const;
     // Get the angular distance to the next consecutive angular node at a specified unwrapped angular index.
-    const double& theta_dist(const int unwrapped_theta_index) const;
-    // Get the vector of distances between consecutive radial nodes.
-    const std::vector<double>& r_distances() const;
-    // Get the vector of distances of the angular divisions.
-    const std::vector<double>& theta_distances() const;
+    const double& angularSpacing(const int unwrapped_theta_index) const;
 
     // Circle/radial smoother division
     // Get the radius which splits the grid into circular and radial smoothing
-    double smoother_splitting_radius() const;
+    double smootherSplittingRadius() const;
     // Get the number of circles in the circular smoother.
     int numberSmootherCircles() const;
     // Get the length of the radial smoother lines. 
@@ -134,30 +127,30 @@ private:
 
     // We will use the convention.
     // radii = [R0, ..., R], angles = [0, ..., 2*pi]
-    // Note that ntheta will be one less than the size of angles since 0 and 2pi or the same point.
+    // Note that ntheta will be one less than the size of angles since 0 and 2pi are the same point.
     int nr_; // number of nodes in radial direction
     int ntheta_; // number of (unique) nodes in angular direction 
     bool is_ntheta_PowerOfTwo_;
     std::vector<double> radii_; // Vector of radial coordiantes
     std::vector<double> angles_; // Vector of angular coordinates
 
-    // r_dist contains the distances between each consecutive radii division.
-    // r_dist = [r_{1}-r_{0}, ..., r_{N}-r_{N-1}].
-    std::vector<double> r_dist_; // size(r_dist) = nr() - 1
+    // radial_spacings_ contains the distances between each consecutive radii division.
+    // radial_spacings_ = [r_{1}-r_{0}, ..., r_{N}-r_{N-1}].
+    std::vector<double> radial_spacings_; // size(radial_spacings_) = nr() - 1
 
-    // theta_dist contains the angles between each consecutive theta division.
+    // angular_spacings_ contains the angles between each consecutive theta division.
     // Since we have a periodic boundary in theta direction, 
     // we have to make sure the index wraps around correctly when accessing it.
     // Here theta_0 = 0.0 and theta_N = 2*pi refer to the same point. 
-    // theta_dist = [theta_{1}-theta_{0}, ..., theta_{N}-theta_{N-1}].
-    std::vector<double> theta_dist_; // size(theta_dist) = ntheta()
+    // angular_spacings_ = [theta_{1}-theta_{0}, ..., theta_{N}-theta_{N-1}].
+    std::vector<double> angular_spacings_; // size(angular_spacings_) = ntheta()
 
     // Circle/radial smoother division
     double smoother_splitting_radius_; // Radius at which the grid is split into circular and radial smoothing
-    int numberSmootherCircles_; // Number of smoother circles in the grid
-    int lengthSmootherRadial_; // Length of the radial smoother lines. 
-    int numberCircularSmootherNodes_; // Number of nodes in the circular smoother
-    int numberRadialSmootherNodes_; // Number of nodes in the radial smoother
+    int number_smoother_circles_; // Number of smoother circles in the grid
+    int length_smoother_radial_; // Length of the radial smoother lines. 
+    int number_circular_smoother_nodes_; // Number of nodes in the circular smoother
+    int number_radial_smoother_nodes_; // Number of nodes in the radial smoother
 
     /*
      * Relationship constraints:
@@ -172,7 +165,7 @@ private:
 
     // Check parameter validity
     void checkParameters(const std::vector<double>& radii, const std::vector<double>& angles) const;
-    // Initialize r_dist_, theta_dist_
+    // Initialize radial_spacings_, angular_spacings_
     void initializeDistances();
 
     // Initializes line splitting parameters for Circle/radial indexing.

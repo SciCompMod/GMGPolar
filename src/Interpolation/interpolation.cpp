@@ -1,6 +1,5 @@
 #include "../../include/Interpolation/interpolation.h"
 
-Interpolation::Interpolation(const int maxOpenMPThreads, const std::vector<int>& taskingThreads) :
-    maxOpenMPThreads_(maxOpenMPThreads),
-    taskingThreads_(taskingThreads)
+Interpolation::Interpolation(const std::vector<int>& threads_per_level) :
+    threads_per_level_(threads_per_level)
 {}

@@ -11,12 +11,12 @@ void GMGPolar::solve() {
     /* ---------------------------- */
     /* Initialize starting solution */
     assign(level.solution(), 0.0);
-
+    
     /* ---------------- */
     /* Discretize rhs_f */
     if(extrapolation_ > 0){
         Level& next_level = levels_[start_level_depth+1];
-        injectToLowerLevel(start_level_depth, next_level.rhs(), level.rhs());
+        injection(start_level_depth, next_level.rhs(), level.rhs());
         discretize_rhs_f(next_level, next_level.rhs());
     }
     discretize_rhs_f(level, level.rhs());
@@ -38,7 +38,7 @@ void GMGPolar::solve() {
         if(exact_solution_ != nullptr) {
             auto start_check_exact_error = std::chrono::high_resolution_clock::now();
 
-            std::pair<double, double> exact_error = compute_exact_error(level, level.solution(), level.residual());
+            std::pair<double, double> exact_error = computeExactError(level, level.solution(), level.residual());
             exact_errors_.push_back(exact_error);
 
             auto end_check_exact_error = std::chrono::high_resolution_clock::now();
@@ -57,9 +57,9 @@ void GMGPolar::solve() {
             level.computeResidual(level.residual(), level.rhs(), level.solution());
             if(extrapolation_){
                 Level& next_level = levels_[start_level_depth+1];
-                injectToLowerLevel(start_level_depth, next_level.solution(), level.solution());
+                injection(start_level_depth, next_level.solution(), level.solution());
                 next_level.computeResidual(next_level.residual(), next_level.rhs(), next_level.solution());
-                extrapolated_residual(start_level_depth, level.residual(), next_level.residual());
+                extrapolatedResidual(start_level_depth, level.residual(), next_level.residual());
             }
 
             switch (residual_norm_type_)
@@ -68,7 +68,7 @@ void GMGPolar::solve() {
                     current_residual_norm = sqrt(l2_norm_squared(level.residual()));
                     break;
                 case ResidualNormType::WEIGHTED_EUCLIDEAN:
-                    current_residual_norm = sqrt(l2_norm_squared(level.residual())) / sqrt(level.grid().number_of_nodes());
+                    current_residual_norm = sqrt(l2_norm_squared(level.residual())) / sqrt(level.grid().numberOfNodes());
                     break;
                 case ResidualNormType::INFINITY_NORM:
                     current_residual_norm = infinity_norm(level.residual());
@@ -105,21 +105,21 @@ void GMGPolar::solve() {
                 if(!extrapolation_){
                     multigrid_V_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
                 } else{
-                    implicitly_extrapolated_multigrid_V_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
+                    implicitlyExtrapolatedMultigrid_V_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
                 }
                 break;
             case MultigridCycleType::W_CYCLE:
                 if(!extrapolation_){
                     multigrid_W_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
                 } else{
-                    implicitly_extrapolated_multigrid_W_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
+                    implicitlyExtrapolatedMultigrid_W_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
                 }
                 break;
             case MultigridCycleType::F_CYCLE:
                 if(!extrapolation_){
                     multigrid_F_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
                 } else{
-                    implicitly_extrapolated_multigrid_F_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
+                    implicitlyExtrapolatedMultigrid_F_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
                 }
                 break;
             default:
@@ -144,10 +144,10 @@ void GMGPolar::solve() {
         /* -------------------------------- */
         /* Compute the reduction factor rho */
         /* -------------------------------- */
-        mean_residual_reduction_factor_rho_ = std::pow(current_residual_norm / initial_residual_norm, 1.0 / number_of_iterations_);
+        mean_residual_reduction_factor_ = std::pow(current_residual_norm / initial_residual_norm, 1.0 / number_of_iterations_);
 
         std::cout<<"\nTotal Iterations: "<<number_of_iterations_<<std::endl;
-        std::cout<<"Mean Residual Reduction Factor Rho: "<< mean_residual_reduction_factor_rho_ <<std::endl;
+        std::cout<<"Mean Residual Reduction Factor Rho: "<< mean_residual_reduction_factor_ <<std::endl;
     }
 
     auto end_solve = std::chrono::high_resolution_clock::now();
@@ -170,14 +170,18 @@ bool GMGPolar::converged(const double& residual_norm, const double& relative_res
 }
 
 
-std::pair<double, double> GMGPolar::compute_exact_error(Level& level, const Vector<double>& solution, Vector<double>& error){
+std::pair<double, double> GMGPolar::computeExactError(Level& level, const Vector<double>& solution, Vector<double>& error){
+    assert(exact_solution_ != nullptr);
+
+    omp_set_num_threads(threads_per_level_[level.level()]);
+
     const PolarGrid& grid = level.grid();
     const LevelCache& levelCache = level.levelCache();
     const auto& sin_theta_cache = levelCache.sin_theta();
     const auto& cos_theta_cache = levelCache.cos_theta();
 
     assert(solution.size() == error.size());
-    assert(solution.size() == grid.number_of_nodes());
+    assert(solution.size() == grid.numberOfNodes());
 
     #pragma omp parallel
     {
@@ -203,23 +207,23 @@ std::pair<double, double> GMGPolar::compute_exact_error(Level& level, const Vect
         }
     }
 
-    double weighted_euclidean_error = sqrt(l2_norm_squared(error)) / sqrt(grid.number_of_nodes());
+    double weighted_euclidean_error = sqrt(l2_norm_squared(error)) / sqrt(grid.numberOfNodes());
     double infinity_error = infinity_norm(error);
 
     return std::make_pair(weighted_euclidean_error, infinity_error);
 }
 
 
-void GMGPolar::extrapolated_residual(const int current_level, Vector<double>& residual, const Vector<double>& residual_next_level){
-    omp_set_num_threads(maxOpenMPThreads_);
+void GMGPolar::extrapolatedResidual(const int current_level, Vector<double>& residual, const Vector<double>& residual_next_level){
+    omp_set_num_threads(threads_per_level_[current_level]);
 
     const PolarGrid& fineGrid = levels_[current_level].grid();
     const PolarGrid& coarseGrid = levels_[current_level+1].grid();
 
-    assert(residual.size() == fineGrid.number_of_nodes());
-    assert(residual_next_level.size() == coarseGrid.number_of_nodes());
+    assert(residual.size() == fineGrid.numberOfNodes());
+    assert(residual_next_level.size() == coarseGrid.numberOfNodes());
 
-    #pragma omp parallel num_threads(maxOpenMPThreads_)
+    #pragma omp parallel
     {
         /* Circluar Indexing Section */
         /* For loop matches circular access pattern */

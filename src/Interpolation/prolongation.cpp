@@ -9,19 +9,19 @@
 void Interpolation::applyProlongation0(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const{
     assert(toLevel.level() == fromLevel.level() - 1);
 
-    omp_set_num_threads(maxOpenMPThreads_);
+    omp_set_num_threads(threads_per_level_[toLevel.level()]);
 
     const PolarGrid& coarseGrid = fromLevel.grid();
     const PolarGrid& fineGrid = toLevel.grid();
 
-    assert(x.size() == coarseGrid.number_of_nodes());
-    assert(result.size() == fineGrid.number_of_nodes());
+    assert(x.size() == coarseGrid.numberOfNodes());
+    assert(result.size() == fineGrid.numberOfNodes());
 
     #pragma omp parallel for
-    for (int index = 0; index < fineGrid.number_of_nodes(); index++) {
+    for (int index = 0; index < fineGrid.numberOfNodes(); index++) {
         std::array<std::pair<double,double>, space_dimension> neighbor_distance;
 
-        MultiIndex fine_node = fineGrid.multiindex(index);
+        MultiIndex fine_node = fineGrid.multiIndex(index);
         MultiIndex coarse_node(fine_node[0] / 2, fine_node[1] / 2); // Nearest lower left coarse node in the fine grid.
 
         if(fine_node[0] % 2 == 0 && fine_node[1] % 2 == 0){
@@ -36,7 +36,7 @@ void Interpolation::applyProlongation0(const Level& fromLevel, const Level& toLe
             // O
             // |
             // X
-            fineGrid.adjacent_neighbor_distances(fine_node, neighbor_distance);
+            fineGrid.adjacentNeighborDistances(fine_node, neighbor_distance);
 
             double k1 = neighbor_distance[1].first;
             double k2 = neighbor_distance[1].second;
@@ -52,7 +52,7 @@ void Interpolation::applyProlongation0(const Level& fromLevel, const Level& toLe
         if(fine_node[0] % 2 == 1 && fine_node[1] % 2 == 0){
             // Fine node between two coarse nodes in radial direction
             // X -- O -- X
-            fineGrid.adjacent_neighbor_distances(fine_node, neighbor_distance);
+            fineGrid.adjacentNeighborDistances(fine_node, neighbor_distance);
 
             double h1 = neighbor_distance[0].first;
             double h2 = neighbor_distance[0].second;
@@ -75,7 +75,7 @@ void Interpolation::applyProlongation0(const Level& fromLevel, const Level& toLe
             /*            /   \                         */
             //           X     X
             //
-            fineGrid.adjacent_neighbor_distances(fine_node, neighbor_distance);
+            fineGrid.adjacentNeighborDistances(fine_node, neighbor_distance);
 
             double h1 = neighbor_distance[0].first;
             double h2 = neighbor_distance[0].second;
@@ -108,11 +108,11 @@ do { \
         if(i_theta & 1) { \
             /* i_r % 2 == 1, i_theta % 2 == 1 */ \
             /* Fine node in the center of four coarse nodes */ \
-            double h1 = fineGrid.r_dist(i_r-1); \
-            double h2 = fineGrid.r_dist(i_r); \
-            double k1 = fineGrid.theta_dist(i_theta-1); \
-            double k2 = fineGrid.theta_dist(i_theta); \
-            int i_theta_coarse_P1 = coarseGrid.wrap_theta_index(i_theta_coarse+1); \
+            double h1 = fineGrid.radialSpacing(i_r-1); \
+            double h2 = fineGrid.radialSpacing(i_r); \
+            double k1 = fineGrid.angularSpacing(i_theta-1); \
+            double k2 = fineGrid.angularSpacing(i_theta); \
+            int i_theta_coarse_P1 = coarseGrid.wrapThetaIndex(i_theta_coarse+1); \
             double divisor = (h1+h2) * (k1+k2); \
             double value = ( \
                 h1*k1*x[coarseGrid.index(i_r_coarse, i_theta_coarse)] +  /* Bottom left */ \
@@ -125,8 +125,8 @@ do { \
         else { \
             /* i_r % 2 == 1, i_theta % 2 == 0 */ \
             /* Fine node between coarse nodes in radial direction */ \
-            double h1 = fineGrid.r_dist(i_r-1); \
-            double h2 = fineGrid.r_dist(i_r); \
+            double h1 = fineGrid.radialSpacing(i_r-1); \
+            double h2 = fineGrid.radialSpacing(i_r); \
             double divisor = (h1+h2); \
             double value = ( \
                 h1*x[coarseGrid.index(i_r_coarse, i_theta_coarse)] +  /* left */ \
@@ -139,9 +139,9 @@ do { \
         if(i_theta & 1) { \
             /* i_r % 2 == 0, i_theta % 2 == 1 */ \
             /* Fine node between coarse nodes in theta direction */ \
-            double k1 = fineGrid.theta_dist(i_theta-1); \
-            double k2 = fineGrid.theta_dist(i_theta); \
-            int i_theta_coarse_P1 = coarseGrid.wrap_theta_index(i_theta_coarse+1); \
+            double k1 = fineGrid.angularSpacing(i_theta-1); \
+            double k2 = fineGrid.angularSpacing(i_theta); \
+            int i_theta_coarse_P1 = coarseGrid.wrapThetaIndex(i_theta_coarse+1); \
             double divisor = (k1+k2); \
             double value = ( \
                 k1*x[coarseGrid.index(i_r_coarse, i_theta_coarse)] + /* bottom */ \
@@ -161,15 +161,15 @@ do { \
 void Interpolation::applyProlongation(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const{
     assert(toLevel.level() == fromLevel.level() - 1);
 
-    omp_set_num_threads(maxOpenMPThreads_);
+    omp_set_num_threads(threads_per_level_[toLevel.level()]);
 
     const PolarGrid& coarseGrid = fromLevel.grid();
     const PolarGrid& fineGrid = toLevel.grid();
 
-    assert(x.size() == coarseGrid.number_of_nodes());
-    assert(result.size() == fineGrid.number_of_nodes());
+    assert(x.size() == coarseGrid.numberOfNodes());
+    assert(result.size() == fineGrid.numberOfNodes());
 
-    #pragma omp parallel num_threads(maxOpenMPThreads_) if(fineGrid.number_of_nodes() > 10'000)
+    #pragma omp parallel if(fineGrid.numberOfNodes() > 10'000)
     {
         /* Circluar Indexing Section */
         /* For loop matches circular access pattern */

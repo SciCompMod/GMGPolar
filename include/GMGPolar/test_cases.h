@@ -1,7 +1,9 @@
 #pragma once
 
 #include "../InputFunctions/domainGeometry.h"
-#include "../InputFunctions/systemParameters.h"
+#include "../InputFunctions/densityProfileCoefficients.h"
+#include "../InputFunctions/boundaryConditions.h"
+#include "../InputFunctions/sourceTerm.h"
 #include "../InputFunctions/exactSolution.h"
 
 /* ---------- */

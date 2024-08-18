@@ -1,7 +1,7 @@
 #include "../../../include/GMGPolar/gmgpolar.h"
 
 void GMGPolar::multigrid_V_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual) {
-    assert(0 <= level_depth && level_depth < numberOflevels_-1);
+    assert(0 <= level_depth && level_depth < number_of_levels_-1);
 
     auto start_MGC = std::chrono::high_resolution_clock::now();
 
@@ -12,7 +12,7 @@ void GMGPolar::multigrid_V_Cycle(const int level_depth, Vector<double>& solution
 
     /* ------------ */
     /* Presmoothing */
-    for (int i = 0; i < preSmoothingSteps_; i++){
+    for (int i = 0; i < pre_smoothing_steps_; i++){
         level.smoothingInPlace(solution, rhs, residual);
     }
 
@@ -33,13 +33,13 @@ void GMGPolar::multigrid_V_Cycle(const int level_depth, Vector<double>& solution
 
     /* -------------------------- */
     /* Solve A * error = residual */
-    if(level_depth+1 == numberOflevels_-1){
+    if(level_depth+1 == number_of_levels_-1){
         /* --------------------- */
         /* Using a direct solver */
         /* --------------------- */
 
         /* Step 1: Restrict the residual */
-        restrictToLowerLevel(level_depth, next_level.residual(), residual);
+        restriction(level_depth, next_level.residual(), residual);
 
         /* Step 2: Solve for the error in place */
         auto start_MGC_directSolver = std::chrono::high_resolution_clock::now(); 
@@ -54,17 +54,17 @@ void GMGPolar::multigrid_V_Cycle(const int level_depth, Vector<double>& solution
         /* ------------------------------------------ */
 
         /* Step 1: Restrict the residual. */
-        restrictToLowerLevel(level_depth, next_level.rhs_error(), residual);
+        restriction(level_depth, next_level.error_correction(), residual);
 
         /* Step 2: Set starting error to zero. */
         assign(next_level.residual(), 0.0);
 
         /* Step 3: Solve for the error by recursively calling the multigrid cycle. */
-        multigrid_V_Cycle(level_depth+1, next_level.residual(), next_level.rhs_error(), next_level.solution());
+        multigrid_V_Cycle(level_depth+1, next_level.residual(), next_level.error_correction(), next_level.solution());
     }
 
     /* Interpolate the correction */
-    prolongateToUpperLevel(level_depth+1, residual, next_level.residual());
+    prolongation(level_depth+1, residual, next_level.residual());
 
     /* Compute the corrected approximation: u = u + error */
     add(solution, residual);
@@ -73,7 +73,7 @@ void GMGPolar::multigrid_V_Cycle(const int level_depth, Vector<double>& solution
 
     /* ------------- */
     /* Postsmoothing */
-    for (int i = 0; i < postSmoothingSteps_; i++){
+    for (int i = 0; i < post_smoothing_steps_; i++){
         level.smoothingInPlace(solution, rhs, residual);
     }
 

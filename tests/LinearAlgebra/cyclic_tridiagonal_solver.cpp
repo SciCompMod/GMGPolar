@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 
 #include "../../include/LinearAlgebra/vector.h"
-#include "../../include/LinearAlgebra/operations.h"
+#include "../../include/LinearAlgebra/vector_operations.h"
 #include "../../include/LinearAlgebra/symmetricTridiagonalSolver.h"
 
 // ----------------------------- //

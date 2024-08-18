@@ -1,37 +1,29 @@
 #pragma once
 
-class Level;
-class LevelCache;
-
-#include "../Level/level.h"
-
-#include "../InputFunctions/domainGeometry.h"
-#include "../InputFunctions/systemParameters.h"
-#include "../InputFunctions/exactSolution.h"
-
-#include "../common/constants.h"
-
-#include "../PolarGrid/polargrid.h"
-
-#include "../Utilities/cmdline.h"
-
-#include "../Level/level.h"
-
-#include "../LinearAlgebra/vector.h"
-#include "../LinearAlgebra/matrix.h"
-#include "../LinearAlgebra/operations.h"
-
-#include "../Interpolation/interpolation.h"
-
 #include <iostream>
 #include <memory>
 #include <filesystem>
 #include <optional>
 #include <utility>
 #include <chrono>
-
 #include <omp.h>
 
+class Level;
+class LevelCache;
+
+#include "../Level/level.h"
+#include "../InputFunctions/domainGeometry.h"
+#include "../InputFunctions/densityProfileCoefficients.h"
+#include "../InputFunctions/boundaryConditions.h"
+#include "../InputFunctions/sourceTerm.h"
+#include "../InputFunctions/exactSolution.h"
+#include "../common/constants.h"
+#include "../PolarGrid/polargrid.h"
+#include "../Utilities/cmdline.h"
+#include "../LinearAlgebra/vector.h"
+#include "../LinearAlgebra/matrix.h"
+#include "../LinearAlgebra/vector_operations.h"
+#include "../Interpolation/interpolation.h"
 #include "test_cases.h"
 
 class GMGPolar {
@@ -40,7 +32,9 @@ public:
     /* GMGPoloar initialization */
     GMGPolar();
     GMGPolar(std::unique_ptr<const DomainGeometry> domain_geometry, 
-             std::unique_ptr<const SystemParameters> system_parameters);
+             std::unique_ptr<const DensityProfileCoefficients> density_profile_coefficients,
+             std::unique_ptr<const BoundaryConditions> boundary_conditions,
+             std::unique_ptr<const SourceTerm> source_term);
 
     void setParameters(int argc, char* argv[]);
     void setSolution(std::unique_ptr<const ExactSolution> exact_solution);
@@ -94,53 +88,52 @@ public:
     void extrapolation(int extrapolation);
 
     int maxLevels() const;
-    void maxLevels(int maxLevels);
-    MultigridCycleType multigrid_cycle() const;
-    void multigrid_cycle(MultigridCycleType multigrid_cycle);
+    void maxLevels(int max_levels);
+    MultigridCycleType multigridCycle() const;
+    void multigridCycle(MultigridCycleType multigrid_cycle);
     
     int preSmoothingSteps() const;
-    void preSmoothingSteps(int preSmoothingSteps);
+    void preSmoothingSteps(int pre_smoothing_steps);
     int postSmoothingSteps() const;
-    void postSmoothingSteps(int postSmoothingSteps);
+    void postSmoothingSteps(int post_smoothing_steps);
 
     int maxIterations() const;
-    void maxIterations(int maxIterations);
+    void maxIterations(int max_iterations);
     ResidualNormType residualNormType() const;
-    void residualNormType(ResidualNormType residualNormType);
+    void residualNormType(ResidualNormType residual_norm_type);
     double absoluteTolerance() const;
-    void absoluteTolerance(double absoluteTolerance);
+    void absoluteTolerance(double absolute_tolerance);
     double relativeTolerance() const;
-    void relativeTolerance(double relativeTolerance);
+    void relativeTolerance(double relative_tolerance);
 
     /* ------------------ */
     /* Control Parameters */
     int maxOpenMPThreads() const;
-    void maxOpenMPThreads(int maxOpenMPThreads);
-    int finestLevelThreads() const;
-    void finestLevelThreads(int finestLevelThreads);
+    void maxOpenMPThreads(int max_omp_threads);
     double threadReductionFactor() const;
-    void threadReductionFactor(double threadReductionFactor);
+    void threadReductionFactor(double thread_reduction_factor);
 
     /* --------*/
     /* Timings */
     void printTimings() const;
+    void resetTimings();
 
-    double t_setup_total = 0.0;
-    double t_setup_createLevels = 0.0;
-    double t_setup_rhs = 0.0;
-    double t_setup_smoother = 0.0;
-    double t_setup_directSolver = 0.0;
+    double t_setup_total;
+    double t_setup_createLevels;
+    double t_setup_rhs;
+    double t_setup_smoother;
+    double t_setup_directSolver;
 
-    double t_solve_total = 0.0;
-    double t_solve_multigrid_iterations = 0.0;
-    double t_check_convergence = 0.0;
-    double t_check_exact_error = 0.0;
+    double t_solve_total;
+    double t_solve_multigrid_iterations;
+    double t_check_convergence;
+    double t_check_exact_error;
 
-    double t_avg_MGC_total = 0.0;
-    double t_avg_MGC_preSmoothing = 0.0;
-    double t_avg_MGC_postSmoothing = 0.0;
-    double t_avg_MGC_residual = 0.0;
-    double t_avg_MGC_directSolver = 0.0;
+    double t_avg_MGC_total;
+    double t_avg_MGC_preSmoothing;
+    double t_avg_MGC_postSmoothing;
+    double t_avg_MGC_residual;
+    double t_avg_MGC_directSolver;
 
 private:
     /* --------------- */
@@ -170,9 +163,9 @@ private:
     /* -------------------- */
     /* Multigrid Parameters */
     int extrapolation_;
-    int maxLevels_;
-    int preSmoothingSteps_;
-    int postSmoothingSteps_;
+    int max_levels_;
+    int pre_smoothing_steps_;
+    int post_smoothing_steps_;
     MultigridCycleType multigrid_cycle_;
     int max_iterations_;
     ResidualNormType residual_norm_type_;
@@ -180,9 +173,8 @@ private:
     std::optional<double> relative_tolerance_;
     /* ------------------ */
     /* Control Parameters */
-    int maxOpenMPThreads_;
-    int finestLevelThreads_;
-    double threadReductionFactor_;
+    int max_omp_threads_;
+    double thread_reduction_factor_;
 
     /* ------------------------------ */
     /* Parser for GMGPolar parameters */
@@ -191,14 +183,16 @@ private:
     /* --------------- */
     /* Input Functions */
     std::unique_ptr<const DomainGeometry> domain_geometry_;
-    std::unique_ptr<const SystemParameters> system_parameters_;
+    std::unique_ptr<const DensityProfileCoefficients> density_profile_coefficients_;
+    std::unique_ptr<const BoundaryConditions> boundary_conditions_;
+    std::unique_ptr<const SourceTerm> source_term_;
     std::unique_ptr<const ExactSolution> exact_solution_ = nullptr; // Optional exact solution for validation
 
     /* ---------------- */
     /* Multigrid levels */
-    int numberOflevels_;
+    int number_of_levels_;
     std::vector<Level> levels_;
-    std::vector<int> taskingThreads_; // Optimal number of threads for OpenMP tasks on each level
+    std::vector<int> threads_per_level_;
 
     std::unique_ptr<Interpolation> interpolation_;
 
@@ -206,11 +200,11 @@ private:
     /* Convergence criteria */
     int number_of_iterations_;
     std::vector<double> residual_norms_;
-    double mean_residual_reduction_factor_rho_;
+    double mean_residual_reduction_factor_;
     bool converged(const double& current_residual_norm, const double& first_residual_norm);
 
     std::vector<std::pair<double,double>> exact_errors_; // Only when exact solution provided
-    std::pair<double, double> compute_exact_error(Level& level, const Vector<double>& solution, Vector<double>& error);
+    std::pair<double, double> computeExactError(Level& level, const Vector<double>& solution, Vector<double>& error);
 
     /* ---------------------------------------- */
     /* Parser Functions for GMGPolar Parameters */
@@ -239,22 +233,20 @@ private:
     void multigrid_V_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
     void multigrid_W_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
     void multigrid_F_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
-    void implicitly_extrapolated_multigrid_V_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
-    void implicitly_extrapolated_multigrid_W_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
-    void implicitly_extrapolated_multigrid_F_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
+    void implicitlyExtrapolatedMultigrid_V_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
+    void implicitlyExtrapolatedMultigrid_W_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
+    void implicitlyExtrapolatedMultigrid_F_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
 
-    void prolongateToUpperLevel(const int current_level, Vector<double>& result, const Vector<double>& x) const;
-    void restrictToLowerLevel(const int current_level, Vector<double>& result, const Vector<double>& x) const;
-    void injectToLowerLevel(const int current_level, Vector<double>& result, const Vector<double>& x) const;
-    void extrapolation_prolongateToUpperLevel(const int current_level, Vector<double>& result, const Vector<double>& x) const;
-    void extrapolation_restrictToLowerLevel(const int current_level, Vector<double>& result, const Vector<double>& x) const;
+    void prolongation(const int current_level, Vector<double>& result, const Vector<double>& x) const;
+    void restriction(const int current_level, Vector<double>& result, const Vector<double>& x) const;
+    void injection(const int current_level, Vector<double>& result, const Vector<double>& x) const;
+    void extrapolatedProlongation(const int current_level, Vector<double>& result, const Vector<double>& x) const;
+    void extrapolatedRestriction(const int current_level, Vector<double>& result, const Vector<double>& x) const;
 
-    void extrapolated_residual(const int current_level, Vector<double>& residual, const Vector<double>& residual_next_level);
+    void extrapolatedResidual(const int current_level, Vector<double>& residual, const Vector<double>& residual_next_level);
 
     /* ------------- */
     /* Visualization */
-    void write_to_vtk(const std::filesystem::path& file_path, const PolarGrid& grid);
-    void write_to_vtk(const std::filesystem::path& file_path, const Level& level, const Vector<double>& grid_function);
-
-    void resetTimings();
+    void writeToVTK(const std::filesystem::path& file_path, const PolarGrid& grid);
+    void writeToVTK(const std::filesystem::path& file_path, const Level& level, const Vector<double>& grid_function);
 };

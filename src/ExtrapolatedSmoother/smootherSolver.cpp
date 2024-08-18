@@ -1,6 +1,7 @@
 #include "../../include/ExtrapolatedSmoother/extrapolated_smoother.h"
 
-#define ARR_ATT_ART(domain_geometry, r, theta, sin_theta, cos_theta, coeff_alpha, \
+
+#define COMPUTE_JACOBIAN_ELEMENTS(domain_geometry, r, theta, sin_theta, cos_theta, coeff_alpha, \
     arr, att, art, detDF) \
 do { \
     /* Calculate the elements of the Jacobian matrix for the transformation mapping */ \
@@ -28,11 +29,10 @@ do { \
 } while(0) \
 
 
-
+// The current position is marked with a ~ symbol.
 #define NODE_APPLY_ASC_ORTHO_CIRCLE_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, \
-    system_parameters, grid, DirBC_Interior, color, \
-    x, rhs, temp, factor, \
-    arr, att, art, coeff_beta, detDF) \
+    grid, DirBC_Interior, smoother_color, x, rhs, temp, \
+    arr, att, art, detDF, coeff_beta) \
 do { \
     assert(i_r >= 0 && i_r <= grid_.numberSmootherCircles()); \
     bool isOddNumberSmootherCircles = (grid.numberSmootherCircles() & 1); \
@@ -42,17 +42,17 @@ do { \
     /* Node in the interior */ \
     /* -------------------- */ \
     if(i_r > 0 && i_r < grid.numberSmootherCircles()){ \
-        double h1 = grid.r_dist(i_r-1); \
-        double h2 = grid.r_dist(i_r); \
-        double k1 = grid.theta_dist(i_theta-1); \
-        double k2 = grid.theta_dist(i_theta); \
+        double h1 = grid.radialSpacing(i_r-1); \
+        double h2 = grid.radialSpacing(i_r); \
+        double k1 = grid.angularSpacing(i_theta-1); \
+        double k2 = grid.angularSpacing(i_theta); \
         double coeff1 = 0.5*(k1+k2)/h1; \
         double coeff2 = 0.5*(k1+k2)/h2; \
         double coeff3 = 0.5*(h1+h2)/k1; \
         double coeff4 = 0.5*(h1+h2)/k2; \
         /* -------------------- */ \
         /* Inside Section Parts */ \
-        if(node_color == color){ \
+        if(node_color == smoother_color){ \
             if(i_r & 1){ \
                 if(i_theta & 1){ \
                     /* i_r % 2 == 1 and i_theta % 2 == 1 */ \
@@ -62,19 +62,17 @@ do { \
                     /* |   |   |   | */ \
                     /* | X | O | X | */ \
                     \
-                    /* Fill temp of (i,j) */ \
-                    temp[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
                     /* Fill temp(i,j) */ \
-                    temp[grid.index(i_r,i_theta)] += factor * ( \
+                    temp[grid.index(i_r,i_theta)] -= ( \
                         - coeff1 * arr * x[grid.index(i_r-1,i_theta)] /* Left */ \
                         - coeff2 * arr * x[grid.index(i_r+1,i_theta)] /* Right */ \
                     ); \
                     /* Fill temp(i,j-1) */ \
-                    temp[grid.index(i_r,i_theta-1)] += factor * ( \
+                    temp[grid.index(i_r,i_theta-1)] -= ( \
                         - 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Top Right */ \
                         + 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Top Left */ \
                     /* Fill temp(i,j+1) */ \
-                    temp[grid.index(i_r,i_theta+1)] += factor * ( \
+                    temp[grid.index(i_r,i_theta+1)] -= ( \
                         + 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Bottom Right */ \
                         - 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Bottom Left */ \
                 } \
@@ -85,18 +83,17 @@ do { \
                     /* | X | Õ | X | */ \
                     /* |   |   |   | */ \
                     /* | O | O | O | */ \
-                    temp[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
                     /* Fill temp(i,j) */ \
-                    temp[grid.index(i_r,i_theta)] += factor * ( \
+                    temp[grid.index(i_r,i_theta)] -= ( \
                         - coeff1 * arr * x[grid.index(i_r-1,i_theta)] /* Left */ \
                         - coeff2 * arr * x[grid.index(i_r+1,i_theta)] /* Right */ \
                     ); \
                     /* Fill temp(i,j-1) */ \
-                    temp[grid.index(i_r,i_theta-1)] += factor * ( \
+                    temp[grid.index(i_r,i_theta-1)] -= ( \
                         - 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Top Right */ \
                         + 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Top Left */ \
                     /* Fill temp(i,j+1) */ \
-                    temp[grid.index(i_r,i_theta+1)] += factor * ( \
+                    temp[grid.index(i_r,i_theta+1)] -= ( \
                         + 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Bottom Right */ \
                         - 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Bottom Left */ \
                 } \
@@ -109,9 +106,8 @@ do { \
                     /* | O | Õ | O | */ \
                     /* |   |   |   | */ \
                     /* | O | X | O | */ \
-                    temp[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
                     /* Fill temp(i,j) */ \
-                    temp[grid.index(i_r,i_theta)] += factor * ( \
+                    temp[grid.index(i_r,i_theta)] -= ( \
                         - coeff1 * arr * x[grid.index(i_r-1,i_theta)] /* Left */ \
                         - coeff2 * arr * x[grid.index(i_r+1,i_theta)] /* Right */ \
                         - coeff3 * att * x[grid.index(i_r,i_theta-1)] /* Bottom */ \
@@ -125,15 +121,14 @@ do { \
                     /* | O | X̃ | O | */ \
                     /* |   |   |   | */ \
                     /* | O | O | O | */ \
-                    temp[grid.index(i_r,i_theta)] += x[grid.index(i_r,i_theta)]; \
                     \
                     /* Fill temp(i,j-1) */ \
-                    temp[grid.index(i_r,i_theta-1)] += factor * ( \
+                    temp[grid.index(i_r,i_theta-1)] -= ( \
                         - coeff3 * att * x[grid.index(i_r,i_theta)] /* Top */ \
                         - 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Top Right */ \
                         + 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Top Left */ \
                     /* Fill temp(i,j+1) */ \
-                    temp[grid.index(i_r,i_theta+1)] += factor * ( \
+                    temp[grid.index(i_r,i_theta+1)] -= ( \
                         - coeff4 * att * x[grid.index(i_r,i_theta)] /* Bottom */ \
                         + 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Bottom Right */ \
                         - 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Bottom Left */ \
@@ -142,7 +137,7 @@ do { \
         } \
         /* --------------------- */ \
         /* Outside Section Parts */ \
-        else if(node_color != color){ \
+        else if(node_color != smoother_color){ \
             if(i_r & 1){ \
                 if(i_theta & 1){ \
                     /* i_r % 2 == 1 and i_theta % 2 == 1 */ \
@@ -154,14 +149,14 @@ do { \
                     \
                     /* Fill temp(i-1,j) */ \
                     if(i_r > 1 || !DirBC_Interior) { \
-                        temp[grid.index(i_r-1,i_theta)] += factor * ( \
+                        temp[grid.index(i_r-1,i_theta)] -= ( \
                             - coeff1 * arr * x[grid.index(i_r,i_theta)] /* Right */ \
                             - 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Right */ \
                             + 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Right */ \
                     } \
                     /* Fill temp(i+1,j) */ \
                     if(i_r < grid.numberSmootherCircles() - 1) { \
-                        temp[grid.index(i_r+1,i_theta)] += factor * ( \
+                        temp[grid.index(i_r+1,i_theta)] -= ( \
                             - coeff2 * arr * x[grid.index(i_r,i_theta)] /* Left */ \
                             + 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Left */ \
                             - 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Left */ \
@@ -189,14 +184,14 @@ do { \
                     \
                     /* Fill temp(i-1,j) */ \
                     if(i_r > 1 || !DirBC_Interior) { \
-                        temp[grid.index(i_r-1,i_theta)] += factor * ( \
+                        temp[grid.index(i_r-1,i_theta)] -= ( \
                             - coeff1 * arr * x[grid.index(i_r,i_theta)] /* Right */ \
                             - 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Right */ \
                             + 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Right */ \
                     } \
                     /* Fill temp(i+1,j) */ \
                     if(i_r < grid.numberSmootherCircles() - 1) { \
-                        temp[grid.index(i_r+1,i_theta)] += factor * ( \
+                        temp[grid.index(i_r+1,i_theta)] -= ( \
                             - coeff2 * arr * x[grid.index(i_r,i_theta)] /* Left */ \
                             + 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Left */ \
                             - 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Left */ \
@@ -212,14 +207,14 @@ do { \
                     \
                     /* Fill temp(i-1,j) */ \
                     if(i_r > 1 || !DirBC_Interior) { \
-                        temp[grid.index(i_r-1,i_theta)] += factor * ( \
+                        temp[grid.index(i_r-1,i_theta)] -= ( \
                             - coeff1 * arr * x[grid.index(i_r,i_theta)] /* Right */ \
                             - 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Right */ \
                             + 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Right */ \
                     } \
                     /* Fill temp(i+1,j) */ \
                     if(i_r < grid.numberSmootherCircles() - 1) { \
-                        temp[grid.index(i_r+1,i_theta)] += factor * ( \
+                        temp[grid.index(i_r+1,i_theta)] -= ( \
                             - coeff2 * arr * x[grid.index(i_r,i_theta)] /* Left */ \
                             + 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Left */ \
                             - 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Left */ \
@@ -236,13 +231,13 @@ do { \
         /* Case 1: Dirichlet boundary on the inner boundary */ \
         /* ------------------------------------------------ */ \
         if(DirBC_Interior){ \
-            double h2 = grid.r_dist(i_r); \
-            double k1 = grid.theta_dist(i_theta-1); \
-            double k2 = grid.theta_dist(i_theta); \
+            double h2 = grid.radialSpacing(i_r); \
+            double k1 = grid.angularSpacing(i_theta-1); \
+            double k2 = grid.angularSpacing(i_theta); \
             double coeff2 = 0.5*(k1+k2)/h2; \
             /* -------------------- */ \
             /* Inside Section Parts */ \
-            if(node_color == color){ \
+            if(node_color == smoother_color){ \
                 if(i_theta & 1){ \
                     /* i_theta % 2 == 1 */ \
                     /* || X | O | X | */ \
@@ -250,7 +245,7 @@ do { \
                     /* || Õ | O | O | */ \
                     /* ||   |   |   | */ \
                     /* || X | O | X | */ \
-                    temp[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
+                    /* Nothing to do! */ \
                 } \
                 else{ \
                     /* i_theta % 2 == 0 */ \
@@ -259,14 +254,14 @@ do { \
                     /* || X̃ | O | X | */ \
                     /* ||   |   |   | */ \
                     /* || O | O | O | */ \
-                    temp[grid.index(i_r,i_theta)] += x[grid.index(i_r,i_theta)]; \
+                    /* Nothing to do! */ \
                 } \
             } \
             /* --------------------- */ \
             /* Outside Section Parts */ \
-            else if(node_color != color){ \
+            else if(node_color != smoother_color){ \
                 /* Fill temp(i+1,j) */ \
-                temp[grid.index(i_r+1,i_theta)] += factor * ( \
+                temp[grid.index(i_r+1,i_theta)] -= ( \
                     - coeff2 * arr * x[grid.index(i_r,i_theta)] /* Left */ \
                     + 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Left */ \
                     - 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Left */ \
@@ -280,16 +275,16 @@ do { \
             /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()>>1)). */ \
             /* Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil. */ \
             double h1 = 2.0 * grid.radius(0); \
-            double h2 = grid.r_dist(i_r); \
-            double k1 = grid.theta_dist(i_theta-1); \
-            double k2 = grid.theta_dist(i_theta); \
+            double h2 = grid.radialSpacing(i_r); \
+            double k1 = grid.angularSpacing(i_theta-1); \
+            double k2 = grid.angularSpacing(i_theta); \
             double coeff1 = 0.5*(k1+k2)/h1; \
             double coeff2 = 0.5*(k1+k2)/h2; \
             double coeff3 = 0.5*(h1+h2)/k1; \
             double coeff4 = 0.5*(h1+h2)/k2; \
             /* -------------------- */ \
             /* Inside Section Parts */ \
-            if(node_color == color){ \
+            if(node_color == smoother_color){ \
                 if(i_theta & 1){ \
                     /* i_theta % 2 == 1 */ \
                     /* -| X | O | X | */ \
@@ -297,9 +292,8 @@ do { \
                     /* -| Õ | O | O | */ \
                     /* -|   |   |   | */ \
                     /* -| X | O | X | */ \
-                    temp[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
                     /* Fill temp(i,j) */ \
-                    temp[grid.index(i_r,i_theta)] += factor * ( \
+                    temp[grid.index(i_r,i_theta)] -= ( \
                         /* - coeff1 * arr * x[grid.index(i_r, i_theta + (grid.ntheta()>>1))] // Left: Not in Asc_ortho */ \
                         - coeff2 * arr * x[grid.index(i_r+1,i_theta)] /* Right */ \
                         - coeff3 * att * x[grid.index(i_r,i_theta-1)] /* Bottom */ \
@@ -314,14 +308,13 @@ do { \
                     /* -|   |   |   | */ \
                     /* -| O | O | O | */ \
                     \
-                    temp[grid.index(i_r,i_theta)] += x[grid.index(i_r,i_theta)]; \
                     /* Fill temp(i,j-1) */ \
-                    temp[grid.index(i_r,i_theta-1)] += factor * ( \
+                    temp[grid.index(i_r,i_theta-1)] -= ( \
                         - coeff3 * att * x[grid.index(i_r,i_theta)] /* Top */ \
                         - 0.25 * art * x[grid.index(i_r+1,i_theta)] ); /* Top Right */ \
                     /*  + 0.25 * art * x[grid.index(i_r-1,i_theta)]; // Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */ \
                     /* Fill temp(i,j+1) */ \
-                    temp[grid.index(i_r,i_theta+1)] += factor * ( \
+                    temp[grid.index(i_r,i_theta+1)] -= ( \
                         - coeff4 * att * x[grid.index(i_r,i_theta)] /* Bottom */ \
                         + 0.25 * art * x[grid.index(i_r+1,i_theta)] ); /* Bottom Right */ \
                     /*  - 0.25 * art * x[grid.index(i_r-1,i_theta)]; // Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */ \
@@ -329,9 +322,9 @@ do { \
             } \
             /* --------------------- */ \
             /* Outside Section Parts */ \
-            else if(node_color != color){ \
+            else if(node_color != smoother_color){ \
                 /* Fill temp(i+1,j) */ \
-                temp[grid.index(i_r+1,i_theta)] += factor * ( \
+                temp[grid.index(i_r+1,i_theta)] -= ( \
                     - coeff2 * arr * x[grid.index(i_r,i_theta)] /* Left */ \
                     + 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Left */ \
                     - 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Left */ \
@@ -343,11 +336,11 @@ do { \
     /* ----------------------------- */ \
     else if(i_r == grid.numberSmootherCircles()) { \
         assert(node_color == SmootherColor::White); \
-        if(color == SmootherColor::Black){ \
-            double h1 = grid.r_dist(i_r-1); \
-            double h2 = grid.r_dist(i_r); \
-            double k1 = grid.theta_dist(i_theta-1); \
-            double k2 = grid.theta_dist(i_theta); \
+        if(smoother_color == SmootherColor::Black){ \
+            double h1 = grid.radialSpacing(i_r-1); \
+            double h2 = grid.radialSpacing(i_r); \
+            double k1 = grid.angularSpacing(i_theta-1); \
+            double k2 = grid.angularSpacing(i_theta); \
             double coeff1 = 0.5*(k1+k2)/h1; \
             double coeff2 = 0.5*(k1+k2)/h2; \
             double coeff3 = 0.5*(h1+h2)/k1; \
@@ -389,7 +382,7 @@ do { \
                 /* --------------------- */ \
                 /* Outside Section Parts */ \
                 /* Fill temp(i-1,j) */ \
-                temp[grid.index(i_r-1,i_theta)] += factor * ( \
+                temp[grid.index(i_r-1,i_theta)] -= ( \
                     - coeff1 * arr * x[grid.index(i_r,i_theta)] /* Right */ \
                     - 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Right */ \
                     + 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Right */ \
@@ -401,9 +394,8 @@ do { \
 
 
 #define NODE_APPLY_ASC_ORTHO_RADIAL_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, \
-    system_parameters, grid, DirBC_Interior, color, \
-    x, rhs, temp, factor, \
-    arr, att, art, coeff_beta, detDF) \
+    grid, DirBC_Interior, smoother_color, x, rhs, temp, \
+    arr, att, art, detDF, coeff_beta) \
 do { \
     assert(i_r >= grid.numberSmootherCircles()-1 && i_r < grid.nr()); \
     SmootherColor node_color = (i_theta & 1) ? SmootherColor::White : SmootherColor::Black; \
@@ -411,17 +403,17 @@ do { \
     /* Node in the interior */ \
     /* -------------------- */ \
     if(i_r > grid.numberSmootherCircles() && i_r < grid.nr()-2){ \
-        double h1 = grid.r_dist(i_r-1); \
-        double h2 = grid.r_dist(i_r); \
-        double k1 = grid.theta_dist(i_theta-1); \
-        double k2 = grid.theta_dist(i_theta); \
+        double h1 = grid.radialSpacing(i_r-1); \
+        double h2 = grid.radialSpacing(i_r); \
+        double k1 = grid.angularSpacing(i_theta-1); \
+        double k2 = grid.angularSpacing(i_theta); \
         double coeff1 = 0.5*(k1+k2)/h1; \
         double coeff2 = 0.5*(k1+k2)/h2; \
         double coeff3 = 0.5*(h1+h2)/k1; \
         double coeff4 = 0.5*(h1+h2)/k2; \
         /* -------------------- */ \
         /* Inside Section Parts */ \
-        if(node_color == color){ \
+        if(node_color == smoother_color){ \
             if(i_theta & 1){ \
                 if(i_r & 1){ \
                     /* i_theta % 2 == 1 and i_r % 2 == 1 */ \
@@ -432,18 +424,17 @@ do { \
                     /* ---------- */ \
                     /* X   O   X  */ \
                     /* ---------- */ \
-                    temp[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
                     /* Fill temp(i,j) */ \
-                    temp[grid.index(i_r,i_theta)] += factor * ( \
+                    temp[grid.index(i_r,i_theta)] -= ( \
                         - coeff3 * att * x[grid.index(i_r,i_theta-1)] /* Bottom */ \
                         - coeff4 * att * x[grid.index(i_r,i_theta+1)] /* Top */ \
                     ); \
                     /* Fill temp(i-1,j) */ \
-                    temp[grid.index(i_r-1,i_theta)] += factor * ( \
+                    temp[grid.index(i_r-1,i_theta)] -= ( \
                         - 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Right */ \
                         + 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Right */ \
                     /* Fill temp(i+1,j) */ \
-                    temp[grid.index(i_r+1,i_theta)] += factor * ( \
+                    temp[grid.index(i_r+1,i_theta)] -= ( \
                         + 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Left */ \
                         - 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Left */ \
                 } \
@@ -456,18 +447,17 @@ do { \
                     /* ---------- */ \
                     /* O   X   O  */ \
                     /* ---------- */ \
-                    temp[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
                     /* Fill temp(i,j) */ \
-                    temp[grid.index(i_r,i_theta)] += factor * ( \
+                    temp[grid.index(i_r,i_theta)] -= ( \
                         - coeff3 * att * x[grid.index(i_r,i_theta-1)] /* Bottom */ \
                         - coeff4 * att * x[grid.index(i_r,i_theta+1)] /* Top */ \
                     ); \
                     /* Fill temp(i-1,j) */ \
-                    temp[grid.index(i_r-1,i_theta)] += factor * ( \
+                    temp[grid.index(i_r-1,i_theta)] -= ( \
                         - 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Right */ \
                         + 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Right */ \
                     /* Fill temp(i+1,j) */ \
-                    temp[grid.index(i_r+1,i_theta)] += factor * ( \
+                    temp[grid.index(i_r+1,i_theta)] -= ( \
                         + 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Left */ \
                         - 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Left */ \
                 } \
@@ -482,9 +472,8 @@ do { \
                     /* ---------- */ \
                     /* O   O   O  */ \
                     /* ---------- */ \
-                    temp[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
                     /* Fill temp(i,j) */ \
-                    temp[grid.index(i_r,i_theta)] += factor * ( \
+                    temp[grid.index(i_r,i_theta)] -= ( \
                         - coeff1 * arr * x[grid.index(i_r-1,i_theta)] /* Left */ \
                         - coeff2 * arr * x[grid.index(i_r+1,i_theta)] /* Right */ \
                         - coeff3 * att * x[grid.index(i_r,i_theta-1)] /* Bottom */ \
@@ -500,14 +489,13 @@ do { \
                     /* ---------- */ \
                     /* O   O   O  */ \
                     /* ---------- */ \
-                    temp[grid.index(i_r,i_theta)] += x[grid.index(i_r,i_theta)]; \
                     /* Fill temp(i-1,j) */ \
-                    temp[grid.index(i_r-1,i_theta)] += factor * ( \
+                    temp[grid.index(i_r-1,i_theta)] -= ( \
                         - coeff1 * arr * x[grid.index(i_r,i_theta)] /* Right */ \
                         - 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Right */ \
                         + 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Right */ \
                     /* Fill temp(i+1,j) */ \
-                    temp[grid.index(i_r+1,i_theta)] += factor * ( \
+                    temp[grid.index(i_r+1,i_theta)] -= ( \
                         - coeff2 * arr * x[grid.index(i_r,i_theta)] /* Left */ \
                         + 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Left */ \
                         - 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Left */ \
@@ -516,7 +504,7 @@ do { \
         } \
         /* --------------------- */ \
         /* Outside Section Parts */ \
-        else if(node_color != color){ \
+        else if(node_color != smoother_color){ \
             if(i_theta & 1){ \
                 if(i_r & 1){ \
                     /* i_theta % 2 == 1 and i_r % 2 == 1 */ \
@@ -528,12 +516,12 @@ do { \
                     /* X   O   X  */ \
                     /* ---------- */ \
                     /* Fill temp(i,j-1) */ \
-                    temp[grid.index(i_r,i_theta-1)] += factor * ( \
+                    temp[grid.index(i_r,i_theta-1)] -= ( \
                         - coeff3 * att * x[grid.index(i_r,i_theta)] /* Top */ \
                         - 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Top Right */ \
                         + 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Top Left */ \
                     /* Fill temp(i,j+1) */ \
-                    temp[grid.index(i_r,i_theta+1)] += factor * ( \
+                    temp[grid.index(i_r,i_theta+1)] -= ( \
                         - coeff4 * att * x[grid.index(i_r,i_theta)] /* Bottom */ \
                         + 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Bottom Right */ \
                         - 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Bottom Left */ \
@@ -562,12 +550,12 @@ do { \
                     /* O   O   O  */ \
                     /* ---------- */ \
                     /* Fill temp(i,j-1) */ \
-                    temp[grid.index(i_r,i_theta-1)] += factor * ( \
+                    temp[grid.index(i_r,i_theta-1)] -= ( \
                         - coeff3 * att * x[grid.index(i_r,i_theta)] /* Top */ \
                         - 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Top Right */ \
                         + 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Top Left */ \
                     /* Fill temp(i,j+1) */ \
-                    temp[grid.index(i_r,i_theta+1)] += factor * ( \
+                    temp[grid.index(i_r,i_theta+1)] -= ( \
                         - coeff4 * att * x[grid.index(i_r,i_theta)] /* Bottom */ \
                         + 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Bottom Right */ \
                         - 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Bottom Left */ \
@@ -582,12 +570,12 @@ do { \
                     /* O   O   O  */ \
                     /* ---------- */ \
                     /* Fill temp(i,j-1) */ \
-                    temp[grid.index(i_r,i_theta-1)] += factor * ( \
+                    temp[grid.index(i_r,i_theta-1)] -= ( \
                         - coeff3 * att * x[grid.index(i_r,i_theta)] /* Top */ \
                         - 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Top Right */ \
                         + 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Top Left */ \
                     /* Fill temp(i,j+1) */ \
-                    temp[grid.index(i_r,i_theta+1)] += factor * ( \
+                    temp[grid.index(i_r,i_theta+1)] -= ( \
                         - coeff4 * att * x[grid.index(i_r,i_theta)] /* Bottom */ \
                         + 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Bottom Right */ \
                         - 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Bottom Left */ \
@@ -596,17 +584,17 @@ do { \
         } \
     } \
     else if(i_r == grid.numberSmootherCircles()-1){ \
-        double h1 = grid.r_dist(i_r-1); \
-        double h2 = grid.r_dist(i_r); \
-        double k1 = grid.theta_dist(i_theta-1); \
-        double k2 = grid.theta_dist(i_theta); \
+        double h1 = grid.radialSpacing(i_r-1); \
+        double h2 = grid.radialSpacing(i_r); \
+        double k1 = grid.angularSpacing(i_theta-1); \
+        double k2 = grid.angularSpacing(i_theta); \
         double coeff1 = 0.5*(k1+k2)/h1; \
         double coeff2 = 0.5*(k1+k2)/h2; \
         double coeff3 = 0.5*(h1+h2)/k1; \
         double coeff4 = 0.5*(h1+h2)/k2; \
         /* -------------------- */ \
         /* Inside Section Parts */ \
-        if(node_color == color){ \
+        if(node_color == smoother_color){ \
             /* Dont give to the right when this case occurs! */ \
             /* i_theta % 2 = 0 and i_r % 2 == 1 */ \
             /* | O | O | O || O   O   O   O  */ \
@@ -616,7 +604,7 @@ do { \
             /* | O | O | O || O   O   O   O  */ \
             if((!(i_r & 1) || (i_theta & 1))){ \
                 /* Fill temp(i+1,j) */ \
-                temp[grid.index(i_r+1,i_theta)] += factor * ( \
+                temp[grid.index(i_r+1,i_theta)] -= ( \
                     - coeff2 * arr * x[grid.index(i_r,i_theta)] /* Left */ \
                     + 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Left */ \
                     - 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Left */ \
@@ -624,22 +612,22 @@ do { \
         } \
         /* --------------------- */ \
         /* Outside Section Parts */ \
-        else if(node_color != color){ \
+        else if(node_color != smoother_color){ \
             /* Nothing to be done here */ \
         } \
     } \
     else if(i_r == grid.numberSmootherCircles()){ \
-        double h1 = grid.r_dist(i_r-1); \
-        double h2 = grid.r_dist(i_r); \
-        double k1 = grid.theta_dist(i_theta-1); \
-        double k2 = grid.theta_dist(i_theta); \
+        double h1 = grid.radialSpacing(i_r-1); \
+        double h2 = grid.radialSpacing(i_r); \
+        double k1 = grid.angularSpacing(i_theta-1); \
+        double k2 = grid.angularSpacing(i_theta); \
         double coeff1 = 0.5*(k1+k2)/h1; \
         double coeff2 = 0.5*(k1+k2)/h2; \
         double coeff3 = 0.5*(h1+h2)/k1; \
         double coeff4 = 0.5*(h1+h2)/k2; \
         /* -------------------- */ \
         /* Inside Section Parts */ \
-        if(node_color == color){ \
+        if(node_color == smoother_color){ \
             if(i_theta & 1){ \
                 if(i_r & 1){ \
                     /* i_theta % 2 == 1 and i_r % 2 == 1 */ \
@@ -648,15 +636,14 @@ do { \
                     /* | 0 | O | O || Õ   O   O   O  */ \
                     /* |   |   |   || -------------- */ \
                     /* | X | O | X || O   X   O   X  */ \
-                    temp[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
                     /* Fill temp(i,j) */ \
-                    temp[grid.index(i_r,i_theta)] += factor * ( \
+                    temp[grid.index(i_r,i_theta)] -= ( \
                         - coeff1 * arr * x[grid.index(i_r-1,i_theta)] /* Left */ \
                         - coeff3 * att * x[grid.index(i_r,i_theta-1)] /* Bottom */ \
                         - coeff4 * att * x[grid.index(i_r,i_theta+1)] /* Top */ \
                     ); \
                     /* Fill temp(i+1,j) */ \
-                    temp[grid.index(i_r+1,i_theta)] += factor * ( \
+                    temp[grid.index(i_r+1,i_theta)] -= ( \
                         + 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Left */ \
                         - 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Left */ \
                 } \
@@ -667,15 +654,14 @@ do { \
                     /* | 0 | O | O || Õ   O   O   O  */ \
                     /* |   |   |   || -------------- */ \
                     /* | O | X | O || X   O   X   O  */ \
-                    temp[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
                     /* Fill temp(i,j) */ \
-                    temp[grid.index(i_r,i_theta)] += factor * ( \
+                    temp[grid.index(i_r,i_theta)] -= ( \
                         - coeff1 * arr * x[grid.index(i_r-1,i_theta)] /* Left */ \
                         - coeff3 * att * x[grid.index(i_r,i_theta-1)] /* Bottom */ \
                         - coeff4 * att * x[grid.index(i_r,i_theta+1)] /* Top */ \
                     ); \
                     /* Fill temp(i+1,j) */ \
-                    temp[grid.index(i_r+1,i_theta)] += factor * ( \
+                    temp[grid.index(i_r+1,i_theta)] -= ( \
                         + 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Left */ \
                         - 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Left */ \
                 } \
@@ -688,9 +674,8 @@ do { \
                     /* | X | O | X || Õ   X   O   X  */ \
                     /* |   |   |   || -------------- */ \
                     /* | O | O | O || O   O   O   O  */ \
-                    temp[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
                     /* Fill temp(i,j) */ \
-                    temp[grid.index(i_r,i_theta)] += factor * ( \
+                    temp[grid.index(i_r,i_theta)] -= ( \
                         - coeff1 * arr * x[grid.index(i_r-1,i_theta)] /* Left */ \
                         - coeff2 * arr * x[grid.index(i_r+1,i_theta)] /* Right */ \
                         - coeff3 * att * x[grid.index(i_r,i_theta-1)] /* Bottom */ \
@@ -704,9 +689,8 @@ do { \
                     /* | O | X | O || X̃   O   X   O  */ \
                     /* |   |   |   || -------------- */ \
                     /* | O | O | O || O   O   O   O  */ \
-                    temp[grid.index(i_r,i_theta)] += x[grid.index(i_r,i_theta)]; \
                     /* Fill temp(i+1,j) */ \
-                    temp[grid.index(i_r+1,i_theta)] += factor * ( \
+                    temp[grid.index(i_r+1,i_theta)] -= ( \
                         - coeff2 * arr * x[grid.index(i_r,i_theta)] /* Left */ \
                         + 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Left */ \
                         - 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Left */ \
@@ -715,7 +699,7 @@ do { \
         } \
         /* --------------------- */ \
         /* Outside Section Parts */ \
-        else if(node_color != color){ \
+        else if(node_color != smoother_color){ \
             /* Dont give to bottom and up when this case occurs! */ \
             /* i_theta % 2 == 1 and i_r % 2 == 0 */ \
             /* | O | X | O || X   O   X   O  */ \
@@ -725,12 +709,12 @@ do { \
             /* | O | X | O || X   O   X   O  */ \
             if(i_r & 1 || !(i_theta & 1)){ \
                 /* Fill temp(i,j-1) */ \
-                temp[grid.index(i_r,i_theta-1)] += factor * ( \
+                temp[grid.index(i_r,i_theta-1)] -= ( \
                     - coeff3 * att * x[grid.index(i_r,i_theta)] /* Top */ \
                     - 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Top Right */ \
                     + 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Top Left */ \
                 /* Fill temp(i,j+1) */ \
-                temp[grid.index(i_r,i_theta+1)] += factor * ( \
+                temp[grid.index(i_r,i_theta+1)] -= ( \
                     - coeff4 * att * x[grid.index(i_r,i_theta)] /* Bottom */ \
                     + 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Bottom Right */ \
                     - 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Bottom Left */ \
@@ -740,17 +724,17 @@ do { \
     else if(i_r == grid.nr()-2){ \
         assert(i_r & 1); \
         \
-        double h1 = grid.r_dist(i_r-1); \
-        double h2 = grid.r_dist(i_r); \
-        double k1 = grid.theta_dist(i_theta-1); \
-        double k2 = grid.theta_dist(i_theta); \
+        double h1 = grid.radialSpacing(i_r-1); \
+        double h2 = grid.radialSpacing(i_r); \
+        double k1 = grid.angularSpacing(i_theta-1); \
+        double k2 = grid.angularSpacing(i_theta); \
         double coeff1 = 0.5*(k1+k2)/h1; \
         double coeff2 = 0.5*(k1+k2)/h2; \
         double coeff3 = 0.5*(h1+h2)/k1; \
         double coeff4 = 0.5*(h1+h2)/k2; \
         /* -------------------- */ \
         /* Inside Section Parts */ \
-        if(node_color == color){ \
+        if(node_color == smoother_color){ \
             if(i_theta & 1){ \
                 /* i_theta % 2 == 1 */ \
                 /* ---------------|| */ \
@@ -760,14 +744,13 @@ do { \
                 /* ---------------|| */ \
                 /* O   X   O   X  || */ \
                 /* ---------------|| */ \
-                temp[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
                 /* Fill temp(i,j) */ \
-                temp[grid.index(i_r,i_theta)] += factor * ( \
+                temp[grid.index(i_r,i_theta)] -= ( \
                     - coeff3 * att * x[grid.index(i_r,i_theta-1)] /* Bottom */ \
                     - coeff4 * att * x[grid.index(i_r,i_theta+1)] /* Top */ \
                 ); \
                 /* Fill temp(i-1,j) */ \
-                temp[grid.index(i_r-1,i_theta)] += factor * ( \
+                temp[grid.index(i_r-1,i_theta)] -= ( \
                     - 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Right */ \
                     + 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Right */ \
                 \
@@ -775,7 +758,7 @@ do { \
                 /* but is shifted over to the rhs to make the radial Asc smoother matrices symmetric. */ \
                 /* Note that the circle Asc smoother matrices are symmetric by default. */ \
                 temp[grid.index(i_r,i_theta)] -= /* Right: Symmetry shift! */ \
-                    -coeff2 * arr * rhs[grid.index(i_r+1,i_theta)]; \
+                    - coeff2 * arr * rhs[grid.index(i_r+1,i_theta)]; \
             } \
             else{ \
                 /* ---------------|| */ \
@@ -785,9 +768,8 @@ do { \
                 /* ---------------|| */ \
                 /* O   O   O   O  || */ \
                 /* ---------------|| */ \
-                temp[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
                 /* Fill temp(i,j) */ \
-                temp[grid.index(i_r,i_theta)] += factor * ( \
+                temp[grid.index(i_r,i_theta)] -= ( \
                     - coeff1 * arr * x[grid.index(i_r-1,i_theta)] /* Left */ \
                     - coeff3 * att * x[grid.index(i_r,i_theta-1)] /* Bottom */ \
                     - coeff4 * att * x[grid.index(i_r,i_theta+1)] /* Top */ \
@@ -796,19 +778,19 @@ do { \
                 /* but is shifted over to the rhs to make the radial Asc smoother matrices symmetric. */ \
                 /* Note that the circle Asc smoother matrices are symmetric by default. */ \
                 temp[grid.index(i_r,i_theta)] -= /* Right: Symmetry shift! */ \
-                    -coeff2 * arr * x[grid.index(i_r+1,i_theta)]; /* We need to change rhs to x here since f_c is now x_c. */ \
+                    - coeff2 * arr * x[grid.index(i_r+1,i_theta)]; /* We need to change rhs to x here since f_c is now x_c. */ \
             } \
         } \
         /* --------------------- */ \
         /* Outside Section Parts */ \
-        else if(node_color != color){ \
+        else if(node_color != smoother_color){ \
             /* Fill temp(i,j-1) */ \
-            temp[grid.index(i_r,i_theta-1)] += factor * ( \
+            temp[grid.index(i_r,i_theta-1)] -= ( \
                 - coeff3 * att * x[grid.index(i_r,i_theta)] /* Top */ \
                 - 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Top Right */ \
                 + 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Top Left */ \
             /* Fill temp(i,j+1) */ \
-            temp[grid.index(i_r,i_theta+1)] += factor * ( \
+            temp[grid.index(i_r,i_theta+1)] -= ( \
                 - coeff4 * att * x[grid.index(i_r,i_theta)] /* Bottom */ \
                 + 0.25 * art * x[grid.index(i_r+1,i_theta)] /* Bottom Right */ \
                 - 0.25 * art * x[grid.index(i_r-1,i_theta)] ); /* Bottom Left */ \
@@ -817,25 +799,23 @@ do { \
     else if(i_r == grid.nr()-1){ \
         assert(!(i_r & 1)); \
         \
-        double h1 = grid.r_dist(i_r-1); \
-        double k1 = grid.theta_dist(i_theta-1); \
-        double k2 = grid.theta_dist(i_theta); \
+        double h1 = grid.radialSpacing(i_r-1); \
+        double k1 = grid.angularSpacing(i_theta-1); \
+        double k2 = grid.angularSpacing(i_theta); \
         double coeff1 = 0.5*(k1+k2)/h1; \
         /* -------------------- */ \
         /* Inside Section Parts */ \
-        if(node_color == color){ \
+        if(node_color == smoother_color){ \
             if(i_theta & 1){ \
-                temp[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
                 /* Fill temp(i-1,j) */ \
-                temp[grid.index(i_r-1,i_theta)] += factor * ( \
+                temp[grid.index(i_r-1,i_theta)] -= ( \
                     - coeff1 * arr * x[grid.index(i_r,i_theta)] /* Right */ \
                     - 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Right */ \
                     + 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Right */ \
             } \
             else{ \
-                temp[grid.index(i_r,i_theta)] += x[grid.index(i_r,i_theta)]; \
                 /* Fill temp(i-1,j) */ \
-                temp[grid.index(i_r-1,i_theta)] += factor * ( \
+                temp[grid.index(i_r-1,i_theta)] -= ( \
                     - coeff1 * arr * x[grid.index(i_r,i_theta)] /* Right */ \
                     - 0.25 * art * x[grid.index(i_r,i_theta+1)] /* Top Right */ \
                     + 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Right */ \
@@ -843,440 +823,476 @@ do { \
         } \
         /* --------------------- */ \
         /* Outside Section Parts */ \
-        else if(node_color != color){ \
+        else if(node_color != smoother_color){ \
             /* Nothing to be done here */ \
         } \
     } \
 } while(0) \
 
 
+void ExtrapolatedSmoother::applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color, const Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp){
+    assert(i_r >= 0 && i_r < grid_.numberSmootherCircles()+1);
+    const double r = grid_.radius(i_r);
+    const double coeff_alpha = coeff_alpha_cache_[i_r];
+    const double coeff_beta = coeff_beta_cache_[i_r];
+    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++){
+        const double theta = grid_.theta(i_theta);
+        const double sin_theta = sin_theta_cache_[i_theta];
+        const double cos_theta = cos_theta_cache_[i_theta];
+        // Compute arr, att, art, detDF value at the current node 
+        double arr, att, art, detDF;
+        COMPUTE_JACOBIAN_ELEMENTS(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha,
+            arr, att, art, detDF);
+        // Apply Asc Ortho at the current node
+        NODE_APPLY_ASC_ORTHO_CIRCLE_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta,
+            grid_, DirBC_Interior_, smoother_color, x, rhs, temp,
+            arr, att, art, detDF, coeff_beta);
+    }
+}
 
-#define CIRCLE_SECTION_APPLY_ASC_ORTHO_GIVE(i_r, color) \
-do { \
-    assert(i_r >= 0 && i_r <= grid_.numberSmootherCircles()); \
-    r = grid_.radius(i_r); \
-    coeff_alpha = system_parameters_.alpha(r); \
-    coeff_beta = system_parameters_.beta(r); \
-    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++){ \
-        theta = grid_.theta(i_theta); \
-        sin_theta = sin_theta_[i_theta]; \
-        cos_theta = cos_theta_[i_theta]; \
-        \
-        ARR_ATT_ART(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, \
-            arr, att, art, detDF); \
-        \
-        NODE_APPLY_ASC_ORTHO_CIRCLE_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, \
-            system_parameters_, grid_, DirBC_Interior_, color, \
-            x, rhs, temp, factor, \
-            arr, att, art, coeff_beta, detDF); \
-    } \
-} while(0)
-
-#define RADIAL_SECTION_APPLY_ASC_ORTHO_GIVE(i_theta, color) \
-do { \
-    theta = grid_.theta(i_theta); \
-    sin_theta = sin_theta_[i_theta]; \
-    cos_theta = cos_theta_[i_theta]; \
-    for (int i_r = grid_.numberSmootherCircles()-1; i_r < grid_.nr(); i_r++){ \
-        r = grid_.radius(i_r); \
-        coeff_alpha = system_parameters_.alpha(r); \
-        coeff_beta = system_parameters_.beta(r); \
-        /* Get arr, att, art, detDF value at the current node */ \
-        ARR_ATT_ART(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, \
-            arr, att, art, detDF); \
-        \
-        NODE_APPLY_ASC_ORTHO_RADIAL_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, \
-            system_parameters_, grid_, DirBC_Interior_, color, \
-            x, rhs, temp, factor, \
-            arr, att, art, coeff_beta, detDF); \
-    } \
-} while(0)
+void ExtrapolatedSmoother::applyAscOrthoRadialSection(const int i_theta, const SmootherColor smoother_color, const Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp){
+    const double theta = grid_.theta(i_theta);
+    const double sin_theta = sin_theta_cache_[i_theta];
+    const double cos_theta = cos_theta_cache_[i_theta];
+    for (int i_r = grid_.numberSmootherCircles()-1; i_r < grid_.nr(); i_r++){
+        const double r = grid_.radius(i_r);
+        const double coeff_alpha = coeff_alpha_cache_[i_r];
+        const double coeff_beta = coeff_beta_cache_[i_r];
+        // Compute arr, att, art, detDF value at the current node 
+        double arr, att, art, detDF;
+        COMPUTE_JACOBIAN_ELEMENTS(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha,
+            arr, att, art, detDF);
+        // Apply Asc Ortho at the current node
+        NODE_APPLY_ASC_ORTHO_RADIAL_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta,
+            grid_, DirBC_Interior_, smoother_color, x, rhs, temp,
+            arr, att, art, detDF, coeff_beta);
+    }
+}
 
 
+void ExtrapolatedSmoother::solveCircleSection(const int i_r, Vector<double>& x, Vector<double>& temp, Vector<double>& solver_storage_1, Vector<double>& solver_storage_2) {
+    const int start = grid_.index(i_r, 0);
+    const int end = start + grid_.ntheta();
+    if(i_r == 0){
+        inner_boundary_mumps_solver_.job = JOB_COMPUTE_SOLUTION;
+        inner_boundary_mumps_solver_.nrhs = 1; // single rhs vector
+        inner_boundary_mumps_solver_.nz_rhs = grid_.ntheta(); // non-zeros in rhs
+        inner_boundary_mumps_solver_.rhs = temp.begin() + start;
+        inner_boundary_mumps_solver_.lrhs = grid_.ntheta(); // leading dimension of rhs
+        dmumps_c(&inner_boundary_mumps_solver_);
+        if (inner_boundary_mumps_solver_.info[0] != 0) {
+            std::cerr << "Error solving the system: " << inner_boundary_mumps_solver_.info[0] << std::endl;
+        }
+    }
+    else {
+        if(i_r & 1){
+            circle_tridiagonal_solver_[i_r/2].solveInPlace(temp.begin() + start, solver_storage_1.begin(), solver_storage_2.begin());
+        }
+        else{
+            circle_diagonal_solver_[i_r/2].solveInPlace(temp.begin() + start);
+        }
+    }
+    // Move updated values to x
+    std::move(temp.begin() + start, temp.begin() + end, x.begin() + start);
+}
 
-#define CIRCLE_SECTION_SOLVE_SMOOTER(i_r) \
-do { \
-    const int start = grid_.index(i_r, 0); \
-    const int end = start + grid_.ntheta(); \
-    if(i_r == 0){ \
-        inner_boundary_circle_Asc_mumps_.job = JOB_COMPUTE_SOLUTION; \
-        inner_boundary_circle_Asc_mumps_.nrhs = 1; \
-        inner_boundary_circle_Asc_mumps_.nz_rhs = end - start; \
-        inner_boundary_circle_Asc_mumps_.rhs = temp.begin() + start; \
-        inner_boundary_circle_Asc_mumps_.lrhs = end - start; \
-        dmumps_c(&inner_boundary_circle_Asc_mumps_); \
-        if (inner_boundary_circle_Asc_mumps_.info[0] != 0) { \
-            std::cerr << "Error solving the system: " << inner_boundary_circle_Asc_mumps_.info[0] << std::endl; \
-        } \
-    } \
-    else { \
-        if(i_r & 1){ \
-            circle_symmetric_cyclic_tridiagonal_solver_[i_r/2].solveInPlace( \
-                temp.begin() + start, \
-                circle_solver_storage_1.begin(), \
-                circle_solver_storage_2.begin() \
-            ); \
-        } \
-        else{ \
-            circle_diagonal_solver_[i_r/2].solveInPlace(temp.begin() + start); \
-        } \
-    } \
-    std::move(temp.begin() + start, temp.begin() + end, x.begin() + start); \
-} while(0)
+void ExtrapolatedSmoother::solveRadialSection(const int i_theta, Vector<double>& x, Vector<double>& temp, Vector<double>& solver_storage) {
+    const int start = grid_.index(grid_.numberSmootherCircles(), i_theta);
+    const int end = start + grid_.lengthSmootherRadial();
+    if(i_theta & 1){
+        radial_tridiagonal_solver_[i_theta/2].solveInPlace(temp.begin() + start, solver_storage.begin());
+    }
+    else{
+        radial_diagonal_solver_[i_theta/2].solveInPlace(temp.begin() + start);
+    }
+    // Move updated values to x
+    std::move(temp.begin() + start, temp.begin() + end, x.begin() + start);
+}
 
-
-#define RADIAL_SECTION_SOLVE_SMOOTER(i_theta) \
-do { \
-    const int start = grid_.index(grid_.numberSmootherCircles(), i_theta); \
-    const int end = start + grid_.lengthSmootherRadial(); \
-    if(i_theta & 1){ \
-        radial_symmetric_tridiagonal_solver_[i_theta/2].solveInPlace( \
-            temp.begin() + start, \
-            radial_solver_storage.begin() \
-        ); \
-    } \
-    else{ \
-        radial_diagonal_solver_[i_theta/2].solveInPlace(temp.begin() + start); \
-    } \
-    std::move(temp.begin() + start, temp.begin() + end, x.begin() + start); \
-} while(0)
-
-
+// Quick overview:
+// Step 1: temp = rhs - Asc_ortho(x)
+// Step 2: Solve in place
+// Step 3: Update x
 void ExtrapolatedSmoother::extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
-    omp_set_num_threads(maxOpenMPThreads_);
-    assign(temp, 0.0);
-    
-    const double factor = -1.0;
+    omp_set_num_threads(num_omp_threads_);
 
-    const int numCircleTasks = grid_.numberSmootherCircles();
-    const int numRadialTasks = grid_.ntheta();
-
-    const int additionalRadialTasks = numRadialTasks % 3;
-
-    assert(numCircleTasks >= 2);
-    assert(numRadialTasks >= 3 && numRadialTasks % 2 == 0);
-
-    const int shift = 2; /* To stay in bounds of the dependency arrays */
-
-    int* asc_ortho_circle_dep = new int[numCircleTasks+1 + 2*shift];
-    int* asc_ortho_radial_dep = new int[numRadialTasks + 2*shift];
-
-    int* smoother_circle_dep = new int[numCircleTasks + 2*shift];
-    int* smoother_radial_dep = new int[numRadialTasks + 2*shift];
-
-    omp_set_num_threads(openMPTaskThreads_);
-    #pragma omp parallel num_threads(openMPTaskThreads_) /* Outside variable are shared by default */
+    #pragma omp parallel
     {
-        /* Define thread-local variables */
-        double r, theta;
-        double sin_theta, cos_theta;
-        double arr, att, art;
-        double coeff_alpha, coeff_beta;
-        double detDF;
+        #pragma omp for nowait
+        for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++){
+            for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++){
+                const int index = grid_.index(i_r, i_theta);
+                temp[index] = (i_r & 1 || i_theta & 1) ? rhs[index] : x[index];
+            }
+        }
+        #pragma omp for nowait
+        for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++){
+            for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++){
+                const int index = grid_.index(i_r, i_theta);
+                temp[index] = (i_r & 1 || i_theta & 1) ? rhs[index] : x[index];
+            }
+        }
+    }
 
+    if(num_omp_threads_ == 1){
+        /* Single-threaded execution */
         Vector<double> circle_solver_storage_1(grid_.ntheta());
         Vector<double> circle_solver_storage_2(grid_.ntheta());
         Vector<double> radial_solver_storage(grid_.lengthSmootherRadial());
 
-        #pragma omp single
+        /* ---------------------------- */
+        /* ------ CIRCLE SECTION ------ */
+
+        /* The outer most circle next to the radial section is defined to be black. */
+        /* Priority: Black -> White. */
+        for (int i_r = 0; i_r < grid_.numberSmootherCircles()+1; i_r++){
+            applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
+        }
+        const int start_black_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 1 : 0;
+        for (int i_r = start_black_circles; i_r < grid_.numberSmootherCircles(); i_r += 2){
+            solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
+        }
+        for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++){
+            applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
+        }
+        const int start_white_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 0 : 1;
+        for (int i_r = start_white_circles; i_r < grid_.numberSmootherCircles(); i_r += 2){
+            solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
+        }
+        /* ---------------------------- */
+        /* ------ RADIAL SECTION ------ */
+        for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++){
+            applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
+        }
+        for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta += 2){
+            solveRadialSection(i_theta, x, temp, radial_solver_storage);
+        }
+        for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++){
+            applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
+        }
+        for (int i_theta = 1; i_theta < grid_.ntheta(); i_theta += 2){
+            solveRadialSection(i_theta, x, temp, radial_solver_storage);
+        }
+    }
+    else{
+        /* Multi-threaded execution */        
+        const int num_circle_tasks = grid_.numberSmootherCircles();
+        const int num_radial_tasks = grid_.ntheta();
+
+        const int additional_radial_tasks = num_radial_tasks % 3;
+
+        assert(num_circle_tasks >= 2);
+        assert(num_radial_tasks >= 3 && num_radial_tasks % 2 == 0);
+
+        /* Make sure to deallocate at the end */
+        const int shift = 3; // Additional space to ensure safe access
+        int* asc_ortho_circle_dep = new int[num_circle_tasks + 2*shift]; // -1 is an additional asc_artho task!
+        int* smoother_circle_dep = new int[num_circle_tasks + 2*shift];
+
+        int* asc_ortho_radial_dep = new int[num_radial_tasks];
+        int* smoother_radial_dep = new int[num_radial_tasks];
+
+        #pragma omp parallel
         {
-            /* ---------------------------- */
-            /* ------ CIRCLE SECTION ------ */
+            Vector<double> circle_solver_storage_1(grid_.ntheta());
+            Vector<double> circle_solver_storage_2(grid_.ntheta());
+            Vector<double> radial_solver_storage(grid_.lengthSmootherRadial());
 
-            /* ---------------------------- */
-            /* Asc ortho Black Circle Tasks */
-            /* ---------------------------- */
+            #pragma omp single
+            {
+                /* ---------------------------- */
+                /* ------ CIRCLE SECTION ------ */
 
-            /* Mod 0 Black Circles */
-            for(int circle_task = -1; circle_task < numCircleTasks; circle_task += 3) {
-                #pragma omp task \
-                    depend(out: asc_ortho_circle_dep[circle_task + shift+1])
-                {
-                    int i_r = numCircleTasks - circle_task - 1;    
-                    CIRCLE_SECTION_APPLY_ASC_ORTHO_GIVE(i_r, SmootherColor::Black);
-                }
-            }
-            /* Mod 1 Black Circles */
-            for(int circle_task = 0; circle_task < numCircleTasks; circle_task += 3) {
-                #pragma omp task \
-                    depend(out: \
-                        asc_ortho_circle_dep[circle_task + shift+1]) \
-                    depend(in: \
-                        asc_ortho_circle_dep[circle_task-1 + shift+1], \
-                        asc_ortho_circle_dep[circle_task+2 + shift+1])   
-                {
-                    int i_r = numCircleTasks - circle_task - 1;    
-                    CIRCLE_SECTION_APPLY_ASC_ORTHO_GIVE(i_r, SmootherColor::Black);
-                }
-                
-            }
-            /* Mod 2 Black Circles */
-            for(int circle_task = 1; circle_task < numCircleTasks; circle_task += 3) {
-                #pragma omp task \
-                    depend(out: \
-                        asc_ortho_circle_dep[circle_task + shift+1]) \
-                    depend(in: \
-                        asc_ortho_circle_dep[circle_task-1 + shift+1], \
-                        asc_ortho_circle_dep[circle_task+2 + shift+1])  
-                {
-                    int i_r = numCircleTasks - circle_task - 1;   
-                    CIRCLE_SECTION_APPLY_ASC_ORTHO_GIVE(i_r, SmootherColor::Black);
-                }
-            }
+                /* ---------------------------- */
+                /* Asc ortho Black Circle Tasks */
+                /* ---------------------------- */
 
-            /* Black Circle Smoother */
-            for(int circle_task = 0; circle_task < numCircleTasks; circle_task += 2) {
-                #pragma omp task \
-                    depend(out: smoother_circle_dep[circle_task + shift]) \
-                    depend(in: \
-                        asc_ortho_circle_dep[circle_task-1 + shift+1], \
-                        asc_ortho_circle_dep[circle_task+0 + shift+1], \
-                        asc_ortho_circle_dep[circle_task+1 + shift+1])   
-                {
-                    int i_r = numCircleTasks - circle_task - 1;
-                    CIRCLE_SECTION_SOLVE_SMOOTER(i_r);
+                /* Mod 0 Black Circles */
+                for(int circle_task = -1; circle_task < num_circle_tasks; circle_task += 3) {
+                    #pragma omp task \
+                        depend(out: asc_ortho_circle_dep[circle_task + shift])
+                    {
+                        int i_r = num_circle_tasks - circle_task - 1;
+                        applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
+                    }
                 }
-            }
+                /* Mod 1 Black Circles */
+                for(int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
+                    #pragma omp task \
+                        depend(out: \
+                            asc_ortho_circle_dep[circle_task + shift]) \
+                        depend(in: \
+                            asc_ortho_circle_dep[circle_task-1 + shift], \
+                            asc_ortho_circle_dep[circle_task+2 + shift])   
+                    {
+                        int i_r = num_circle_tasks - circle_task - 1;
+                        applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
+                    }
+                    
+                }
+                /* Mod 2 Black Circles */
+                for(int circle_task = 1; circle_task < num_circle_tasks; circle_task += 3) {
+                    #pragma omp task \
+                        depend(out: \
+                            asc_ortho_circle_dep[circle_task + shift]) \
+                        depend(in: \
+                            asc_ortho_circle_dep[circle_task-1 + shift], \
+                            asc_ortho_circle_dep[circle_task+2 + shift])  
+                    {
+                        int i_r = num_circle_tasks - circle_task - 1;
+                        applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
+                    }
+                }
 
-            /* ---------------------------- */
-            /* Asc ortho White Circle Tasks */
-            /* ---------------------------- */
+                /* Black Circle Smoother */
+                for(int circle_task = 0; circle_task < num_circle_tasks; circle_task += 2) {
+                    #pragma omp task \
+                        depend(out: smoother_circle_dep[circle_task + shift]) \
+                        depend(in: \
+                            asc_ortho_circle_dep[circle_task-1 + shift], \
+                            asc_ortho_circle_dep[circle_task+0 + shift], \
+                            asc_ortho_circle_dep[circle_task+1 + shift])   
+                    {
+                        int i_r = num_circle_tasks - circle_task - 1;
+                        solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
+                    }
+                }
 
-            /* Mod 0 White Circles */
-            for(int circle_task = 0; circle_task < numCircleTasks; circle_task += 3) {
-                #pragma omp task \
-                    depend(out: asc_ortho_circle_dep[circle_task + shift+1]) \
-                    depend(in: \
-                        smoother_circle_dep[circle_task-1 + shift], \
-                        smoother_circle_dep[circle_task+0 + shift], \
-                        smoother_circle_dep[circle_task+1 + shift])
-                {
-                    int i_r = numCircleTasks - circle_task - 1;    
-                    CIRCLE_SECTION_APPLY_ASC_ORTHO_GIVE(i_r, SmootherColor::White);
-                }
-            }
-            /* Mod 1 White Circles */
-            for(int circle_task = 1; circle_task < numCircleTasks; circle_task += 3) {
-                #pragma omp task \
-                    depend(out: asc_ortho_circle_dep[circle_task + shift+1]) \
-                    depend(in: \
-                        smoother_circle_dep[circle_task-1 + shift], \
-                        smoother_circle_dep[circle_task+0 + shift], \
-                        smoother_circle_dep[circle_task+1 + shift], \
-                        asc_ortho_circle_dep[circle_task-1 + shift+1], \
-                        asc_ortho_circle_dep[circle_task+2 + shift+1])  
-                {
-                    int i_r = numCircleTasks - circle_task - 1;    
-                    CIRCLE_SECTION_APPLY_ASC_ORTHO_GIVE(i_r, SmootherColor::White);
-                }
-                
-            }
-            /* Mod 2 White Circles */
-            for(int circle_task = 2; circle_task < numCircleTasks; circle_task += 3) {
-                #pragma omp task \
-                    depend(out: asc_ortho_circle_dep[circle_task + shift+1]) \
-                    depend(in: \
-                        smoother_circle_dep[circle_task-1 + shift], \
-                        smoother_circle_dep[circle_task+0 + shift], \
-                        smoother_circle_dep[circle_task+1 + shift], \
-                        asc_ortho_circle_dep[circle_task-1 + shift+1], \
-                        asc_ortho_circle_dep[circle_task+2 + shift+1])  
-                {
-                    int i_r = numCircleTasks - circle_task - 1;    
-                    CIRCLE_SECTION_APPLY_ASC_ORTHO_GIVE(i_r, SmootherColor::White);
-                }
-            }
+                /* ---------------------------- */
+                /* Asc ortho White Circle Tasks */
+                /* ---------------------------- */
 
-            /* White Circle Smoother */
-            for(int circle_task = 1; circle_task < numCircleTasks; circle_task += 2) {
-                #pragma omp task \
-                    depend(out: smoother_circle_dep[circle_task + shift]) \
-                    depend(in: \
-                        asc_ortho_circle_dep[circle_task-1 + shift+1], \
-                        asc_ortho_circle_dep[circle_task+0 + shift+1], \
-                        asc_ortho_circle_dep[circle_task+1 + shift+1])   
-                {
-                    int i_r = numCircleTasks - circle_task - 1;    
-                    CIRCLE_SECTION_SOLVE_SMOOTER(i_r);
+                /* Mod 0 White Circles */
+                for(int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
+                    #pragma omp task \
+                        depend(out: asc_ortho_circle_dep[circle_task + shift]) \
+                        depend(in: \
+                            smoother_circle_dep[circle_task-1 + shift], \
+                            smoother_circle_dep[circle_task+0 + shift], \
+                            smoother_circle_dep[circle_task+1 + shift])
+                    {
+                        int i_r = num_circle_tasks - circle_task - 1;
+                        applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
+                    }
                 }
-            }
+                /* Mod 1 White Circles */
+                for(int circle_task = 1; circle_task < num_circle_tasks; circle_task += 3) {
+                    #pragma omp task \
+                        depend(out: asc_ortho_circle_dep[circle_task + shift]) \
+                        depend(in: \
+                            asc_ortho_circle_dep[circle_task-1 + shift], \
+                            asc_ortho_circle_dep[circle_task+2 + shift])  
+                    {
+                        int i_r = num_circle_tasks - circle_task - 1;
+                        applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
+                    }
+                    
+                }
+                /* Mod 2 White Circles */
+                for(int circle_task = 2; circle_task < num_circle_tasks; circle_task += 3) {
+                    #pragma omp task \
+                        depend(out: asc_ortho_circle_dep[circle_task + shift]) \
+                        depend(in: \
+                            asc_ortho_circle_dep[circle_task-1 + shift], \
+                            asc_ortho_circle_dep[circle_task+2 + shift])  
+                    {
+                        int i_r = num_circle_tasks - circle_task - 1;
+                        applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
+                    }
+                }
 
-            /* ---------------------------- */
-            /* ------ RADIAL SECTION ------ */
+                /* White Circle Smoother */
+                for(int circle_task = 1; circle_task < num_circle_tasks; circle_task += 2) {
+                    #pragma omp task \
+                        depend(out: smoother_circle_dep[circle_task + shift]) \
+                        depend(in: \
+                            asc_ortho_circle_dep[circle_task-1 + shift], \
+                            asc_ortho_circle_dep[circle_task+0 + shift], \
+                            asc_ortho_circle_dep[circle_task+1 + shift])   
+                    {
+                        int i_r = num_circle_tasks - circle_task - 1;
+                        solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
+                    }
+                }
 
-            /* ---------------------------- */
-            /* Asc ortho Black Radial Tasks */
-            /* ---------------------------- */
+                /* ---------------------------- */
+                /* ------ RADIAL SECTION ------ */
 
-            /* Mod 0 Black Radials */
-            for(int radial_task = 0; radial_task < numRadialTasks - additionalRadialTasks; radial_task += 3) {
-                #pragma omp task \
-                    depend(out: asc_ortho_radial_dep[radial_task + shift]) \
-                    depend(in : smoother_circle_dep[0 + shift])
-                {
-                    int i_theta = radial_task;    
-                    RADIAL_SECTION_APPLY_ASC_ORTHO_GIVE(i_theta, SmootherColor::Black);
-                }
-            }
-            /* Mod 1 Black Radials */
-            for(int radial_task = 1; radial_task < numRadialTasks - additionalRadialTasks; radial_task += 3) {
-                #pragma omp task \
-                    depend(out: asc_ortho_radial_dep[radial_task + shift]) \
-                    depend(in: \
-                        asc_ortho_radial_dep[radial_task-1 + shift], \
-                        asc_ortho_radial_dep[radial_task+2 + shift])   
-                {
-                    int i_theta = radial_task;    
-                    RADIAL_SECTION_APPLY_ASC_ORTHO_GIVE(i_theta, SmootherColor::Black);
-                }
-                
-            }
-            /* Mod 2 Black Radials */
-            for(int radial_task = 2; radial_task < numRadialTasks - additionalRadialTasks; radial_task += 3) {
-                #pragma omp task \
-                    depend(out: asc_ortho_radial_dep[radial_task + shift]) \
-                    depend(in: \
-                        asc_ortho_radial_dep[radial_task-1 + shift], \
-                        asc_ortho_radial_dep[radial_task+2 + shift])    
-                {
-                    int i_theta = radial_task;    
-                    RADIAL_SECTION_APPLY_ASC_ORTHO_GIVE(i_theta, SmootherColor::Black);
-                }
-            }
+                /* ---------------------------- */
+                /* Asc ortho Black Radial Tasks */
+                /* ---------------------------- */
 
-            /* First additional Radials */
-            if(additionalRadialTasks >= 1){
-                int radial_task = numRadialTasks - additionalRadialTasks;
-                #pragma omp task \
-                    depend(out: asc_ortho_radial_dep[radial_task + shift]) \
-                    depend(in: \
-                        asc_ortho_radial_dep[radial_task-1 + shift])    
-                {
-                    int i_theta = radial_task;    
-                    RADIAL_SECTION_APPLY_ASC_ORTHO_GIVE(i_theta, SmootherColor::Black);
+                /* Mod 0 Black Radials */
+                for(int radial_task = 0; radial_task < num_radial_tasks - additional_radial_tasks; radial_task += 3) {
+                    #pragma omp task \
+                        depend(out: asc_ortho_radial_dep[radial_task]) \
+                        depend(in : smoother_circle_dep[0 + shift])
+                    {
+                        int i_theta = radial_task;
+                        applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
+                    }
                 }
-            }
+                /* Mod 1 Black Radials */
+                for(int radial_task = 1; radial_task < num_radial_tasks - additional_radial_tasks; radial_task += 3) {
+                    #pragma omp task \
+                        depend(out: asc_ortho_radial_dep[radial_task]) \
+                        depend(in: \
+                            asc_ortho_radial_dep[radial_task-1], \
+                            asc_ortho_radial_dep[(radial_task+2) % num_radial_tasks])   
+                    {
+                        int i_theta = radial_task;
+                        applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
+                    }
+                    
+                }
+                /* Mod 2 Black Radials */
+                for(int radial_task = 2; radial_task < num_radial_tasks - additional_radial_tasks; radial_task += 3) {
+                    #pragma omp task \
+                        depend(out: asc_ortho_radial_dep[radial_task]) \
+                        depend(in: \
+                            asc_ortho_radial_dep[radial_task-1], \
+                            asc_ortho_radial_dep[(radial_task+2) % num_radial_tasks])    
+                    {
+                        int i_theta = radial_task;
+                        applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
+                    }
+                }
 
-            /* Second additional Radials */
-            if(additionalRadialTasks >= 2){
-                int radial_task = numRadialTasks - additionalRadialTasks + 1;
-                #pragma omp task \
-                    depend(out: asc_ortho_radial_dep[radial_task + shift]) \
-                    depend(in: \
-                        asc_ortho_radial_dep[radial_task-1 + shift])
-                {
-                    int i_theta = radial_task;    
-                    RADIAL_SECTION_APPLY_ASC_ORTHO_GIVE(i_theta, SmootherColor::Black);
+                /* First additional Radials */
+                if(additional_radial_tasks >= 1){
+                    int radial_task = num_radial_tasks - additional_radial_tasks;
+                    #pragma omp task \
+                        depend(out: asc_ortho_radial_dep[radial_task]) \
+                        depend(in: \
+                            asc_ortho_radial_dep[radial_task-1], \
+                            asc_ortho_radial_dep[0], \
+                            asc_ortho_radial_dep[1])    
+                    {
+                        int i_theta = radial_task;
+                        applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
+                    }
                 }
-            }
 
-            /* Black Radial Smoother */
-            for(int radial_task = 0; radial_task < numRadialTasks; radial_task += 2) {
-                #pragma omp task \
-                    depend(out: smoother_radial_dep[radial_task + shift]) \
-                    depend(in: \
-                        asc_ortho_radial_dep[(radial_task-1 + numRadialTasks) % numRadialTasks + shift], \
-                        asc_ortho_radial_dep[(radial_task+0 + numRadialTasks) % numRadialTasks + shift], \
-                        asc_ortho_radial_dep[(radial_task+1 + numRadialTasks) % numRadialTasks + shift])     
-                {
-                    int i_theta = radial_task;    
-                    RADIAL_SECTION_SOLVE_SMOOTER(i_theta);
+                /* Second additional Radials */
+                if(additional_radial_tasks >= 2){
+                    int radial_task = num_radial_tasks - additional_radial_tasks + 1;
+                    #pragma omp task \
+                        depend(out: asc_ortho_radial_dep[radial_task]) \
+                        depend(in: \
+                            asc_ortho_radial_dep[radial_task-1])    
+                    {
+                        int i_theta = radial_task;
+                        applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
+                    }
                 }
-            }
 
-            /* ---------------------------- */
-            /* Asc ortho White Circle Tasks */
-            /* ---------------------------- */
+                /* Black Radial Smoother */
+                for(int radial_task = 0; radial_task < num_radial_tasks; radial_task += 2) {
+                    #pragma omp task \
+                        depend(out: smoother_radial_dep[radial_task]) \
+                        depend(in: \
+                            asc_ortho_radial_dep[(radial_task-1 + num_radial_tasks) % num_radial_tasks], \
+                            asc_ortho_radial_dep[(radial_task+0 + num_radial_tasks) % num_radial_tasks], \
+                            asc_ortho_radial_dep[(radial_task+1 + num_radial_tasks) % num_radial_tasks])     
+                    {
+                        int i_theta = radial_task;
+                        solveRadialSection(i_theta, x, temp, radial_solver_storage);
+                    }
+                }
 
-            /* Mod 0 White Radials */
-            for(int radial_task = 0; radial_task < numRadialTasks - additionalRadialTasks; radial_task += 3) {
-                #pragma omp task \
-                    depend(out: asc_ortho_radial_dep[radial_task + shift]) \
-                    depend(in : \
-                        smoother_radial_dep[(radial_task-1 + numRadialTasks) % numRadialTasks + shift], \
-                        smoother_radial_dep[(radial_task+0 + numRadialTasks) % numRadialTasks + shift], \
-                        smoother_radial_dep[(radial_task+1 + numRadialTasks) % numRadialTasks + shift])
-                {
-                    int i_theta = radial_task;    
-                    RADIAL_SECTION_APPLY_ASC_ORTHO_GIVE(i_theta, SmootherColor::White);
-                }
-            }
-            /* Mod 1 White Radials */
-            for(int radial_task = 1; radial_task < numRadialTasks - additionalRadialTasks; radial_task += 3) {
-                #pragma omp task \
-                    depend(out: asc_ortho_radial_dep[radial_task + shift]) \
-                    depend(in: \
-                        asc_ortho_radial_dep[radial_task-1 + shift], \
-                        asc_ortho_radial_dep[radial_task+2 + shift])   
-                {
-                    int i_theta = radial_task;    
-                    RADIAL_SECTION_APPLY_ASC_ORTHO_GIVE(i_theta, SmootherColor::White);
-                }
-                
-            }
-            /* Mod 2 White Radials */
-            for(int radial_task = 2; radial_task < numRadialTasks - additionalRadialTasks; radial_task += 3) {
-                #pragma omp task \
-                    depend(out: asc_ortho_radial_dep[radial_task + shift]) \
-                    depend(in: \
-                        asc_ortho_radial_dep[radial_task-1 + shift], \
-                        asc_ortho_radial_dep[radial_task+2 + shift])    
-                {
-                    int i_theta = radial_task;    
-                    RADIAL_SECTION_APPLY_ASC_ORTHO_GIVE(i_theta, SmootherColor::White);
-                }
-            }
+                /* ---------------------------- */
+                /* Asc ortho White Circle Tasks */
+                /* ---------------------------- */
 
-            /* First additional Radials */
-            if(additionalRadialTasks >= 1){
-                int radial_task = numRadialTasks - additionalRadialTasks;
-                #pragma omp task \
-                    depend(out: asc_ortho_radial_dep[radial_task + shift]) \
-                    depend(in: \
-                        asc_ortho_radial_dep[radial_task-1 + shift])    
-                {
-                    int i_theta = radial_task;    
-                    RADIAL_SECTION_APPLY_ASC_ORTHO_GIVE(i_theta, SmootherColor::White);
+                /* Mod 0 White Radials */
+                for(int radial_task = 0; radial_task < num_radial_tasks - additional_radial_tasks; radial_task += 3) {
+                    #pragma omp task \
+                        depend(out: asc_ortho_radial_dep[radial_task]) \
+                        depend(in : \
+                            smoother_radial_dep[(radial_task-1 + num_radial_tasks) % num_radial_tasks], \
+                            smoother_radial_dep[(radial_task+0 + num_radial_tasks) % num_radial_tasks], \
+                            smoother_radial_dep[(radial_task+1 + num_radial_tasks) % num_radial_tasks])
+                    {
+                        int i_theta = radial_task;
+                        applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
+                    }
                 }
-            }
-
-            /* Second additional Radials */
-            if(additionalRadialTasks >= 2){
-                int radial_task = numRadialTasks - additionalRadialTasks + 1;
-                #pragma omp task \
-                    depend(out: asc_ortho_radial_dep[radial_task + shift]) \
-                    depend(in: \
-                        asc_ortho_radial_dep[radial_task-1 + shift])
-                {
-                    int i_theta = radial_task;    
-                    RADIAL_SECTION_APPLY_ASC_ORTHO_GIVE(i_theta, SmootherColor::White);
+                /* Mod 1 White Radials */
+                for(int radial_task = 1; radial_task < num_radial_tasks - additional_radial_tasks; radial_task += 3) {
+                    #pragma omp task \
+                        depend(out: asc_ortho_radial_dep[radial_task]) \
+                        depend(in: \
+                            asc_ortho_radial_dep[radial_task-1], \
+                            asc_ortho_radial_dep[(radial_task+2) % num_radial_tasks])   
+                    {
+                        int i_theta = radial_task;
+                        applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
+                    }
+                    
                 }
-            }
+                /* Mod 2 White Radials */
+                for(int radial_task = 2; radial_task < num_radial_tasks - additional_radial_tasks; radial_task += 3) {
+                    #pragma omp task \
+                        depend(out: asc_ortho_radial_dep[radial_task]) \
+                        depend(in: \
+                            asc_ortho_radial_dep[radial_task-1], \
+                            asc_ortho_radial_dep[(radial_task+2) % num_radial_tasks])    
+                    {
+                        int i_theta = radial_task;
+                        applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
+                    }
+                }
 
-            /* White Radial Smoother */
-            for(int radial_task = 1; radial_task < numRadialTasks; radial_task += 2) {
-                #pragma omp task \
-                    depend(out: smoother_radial_dep[radial_task + shift]) \
-                    depend(in: \
-                        asc_ortho_radial_dep[(radial_task-1 + numRadialTasks) % numRadialTasks + shift], \
-                        asc_ortho_radial_dep[(radial_task+0 + numRadialTasks) % numRadialTasks + shift], \
-                        asc_ortho_radial_dep[(radial_task+1 + numRadialTasks) % numRadialTasks + shift])     
-                {
-                    int i_theta = radial_task;    
-                    RADIAL_SECTION_SOLVE_SMOOTER(i_theta);
+                /* First additional Radials */
+                if(additional_radial_tasks >= 1){
+                    int radial_task = num_radial_tasks - additional_radial_tasks;
+                    #pragma omp task \
+                        depend(out: asc_ortho_radial_dep[radial_task]) \
+                        depend(in: \
+                            asc_ortho_radial_dep[radial_task-1], \
+                            asc_ortho_radial_dep[0], \
+                            asc_ortho_radial_dep[1])        
+                    {
+                        int i_theta = radial_task;
+                        applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
+                    }
+                }
+
+                /* Second additional Radials */
+                if(additional_radial_tasks >= 2){
+                    int radial_task = num_radial_tasks - additional_radial_tasks + 1;
+                    #pragma omp task \
+                        depend(out: asc_ortho_radial_dep[radial_task]) \
+                        depend(in: \
+                            asc_ortho_radial_dep[radial_task-1])    
+                    {
+                        int i_theta = radial_task;
+                        applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
+                    }
+                }
+
+                /* White Radial Smoother */
+                for(int radial_task = 1; radial_task < num_radial_tasks; radial_task += 2) {
+                    #pragma omp task \
+                        depend(out: smoother_radial_dep[radial_task]) \
+                        depend(in: \
+                            asc_ortho_radial_dep[(radial_task-1 + num_radial_tasks) % num_radial_tasks], \
+                            asc_ortho_radial_dep[(radial_task+0 + num_radial_tasks) % num_radial_tasks], \
+                            asc_ortho_radial_dep[(radial_task+1 + num_radial_tasks) % num_radial_tasks])     
+                    {
+                        int i_theta = radial_task;
+                        solveRadialSection(i_theta, x, temp, radial_solver_storage);
+                    }
                 }
             }
         }
+        delete[] asc_ortho_circle_dep;
+        delete[] asc_ortho_radial_dep;
+        delete[] smoother_circle_dep;
+        delete[] smoother_radial_dep;
     }
-    omp_set_num_threads(maxOpenMPThreads_);
-
-    delete[] asc_ortho_circle_dep;
-    delete[] asc_ortho_radial_dep;
-
-    delete[] smoother_circle_dep;
-    delete[] smoother_radial_dep;
 }
 

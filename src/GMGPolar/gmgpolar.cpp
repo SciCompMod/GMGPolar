@@ -9,15 +9,21 @@ GMGPolar::GMGPolar() :
     setParameters(0, nullptr);
 }
 
-GMGPolar::GMGPolar(std::unique_ptr<const DomainGeometry> domain_geometry, std::unique_ptr<const SystemParameters> system_parameters) :
+GMGPolar::GMGPolar(std::unique_ptr<const DomainGeometry> domain_geometry, 
+                   std::unique_ptr<const DensityProfileCoefficients> density_profile_coefficients,
+                   std::unique_ptr<const BoundaryConditions> boundary_conditions,
+                   std::unique_ptr<const SourceTerm> source_term) :
+
     domain_geometry_(std::move(domain_geometry)), 
-    system_parameters_(std::move(system_parameters)),
+    density_profile_coefficients_(std::move(density_profile_coefficients)),
+    boundary_conditions_(std::move(boundary_conditions)), 
+    source_term_(std::move(source_term)),
     parser_()
 {
     initializeGrid(); initializeGeometry();
     initializeMultigrid(); initializeGeneral();
 
-    parseGrid(); /* parseGeometry(); */ 
+    parseGrid(); /* Removed: parseGeometry(); */ 
     parseMultigrid(); parseGeneral();
 }
 
@@ -180,35 +186,35 @@ void GMGPolar::extrapolation(int extrapolation) {
 }
 
 int GMGPolar::maxLevels() const {
-    return maxLevels_;
+    return max_levels_;
 }
 
-void GMGPolar::maxLevels(int maxLevels) {
-    maxLevels_ = maxLevels;
+void GMGPolar::maxLevels(int max_levels) {
+    max_levels_ = max_levels;
 }
 
-MultigridCycleType GMGPolar::multigrid_cycle() const {
+MultigridCycleType GMGPolar::multigridCycle() const {
     return multigrid_cycle_;
 }
 
-void GMGPolar::multigrid_cycle(MultigridCycleType multigrid_cycle) {
+void GMGPolar::multigridCycle(MultigridCycleType multigrid_cycle) {
     multigrid_cycle_ = multigrid_cycle;
 }
 
 int GMGPolar::preSmoothingSteps() const {
-    return preSmoothingSteps_;
+    return pre_smoothing_steps_;
 }
 
-void GMGPolar::preSmoothingSteps(int preSmoothingSteps) {
-    preSmoothingSteps_ = preSmoothingSteps;
+void GMGPolar::preSmoothingSteps(int pre_smoothing_steps) {
+    pre_smoothing_steps_ = pre_smoothing_steps;
 }
 
 int GMGPolar::postSmoothingSteps() const {
-    return postSmoothingSteps_;
+    return post_smoothing_steps_;
 }
 
-void GMGPolar::postSmoothingSteps(int postSmoothingSteps) {
-    postSmoothingSteps_ = postSmoothingSteps;
+void GMGPolar::postSmoothingSteps(int post_smoothing_steps) {
+    post_smoothing_steps_ = post_smoothing_steps;
 }
 
 int GMGPolar::maxIterations() const {
@@ -234,9 +240,9 @@ double GMGPolar::absoluteTolerance() const {
     }
 }
 
-void GMGPolar::absoluteTolerance(double absoluteTolerance) {
-    if(absoluteTolerance > 0 ){
-        absolute_tolerance_ = absoluteTolerance;
+void GMGPolar::absoluteTolerance(double absolute_tolerance) {
+    if(absolute_tolerance > 0 ){
+        absolute_tolerance_ = absolute_tolerance;
     } else{
         absolute_tolerance_ = std::nullopt;
     }
@@ -250,9 +256,9 @@ double GMGPolar::relativeTolerance() const {
     }
 }
 
-void GMGPolar::relativeTolerance(double relativeTolerance) {
-    if(relativeTolerance > 0 ){
-        relative_tolerance_ = relativeTolerance;
+void GMGPolar::relativeTolerance(double relative_tolerance) {
+    if(relative_tolerance > 0 ){
+        relative_tolerance_ = relative_tolerance;
     } else{
         relative_tolerance_ = std::nullopt;
     }
@@ -261,25 +267,17 @@ void GMGPolar::relativeTolerance(double relativeTolerance) {
 /* ------------------ */
 /* Control Parameters */
 int GMGPolar::maxOpenMPThreads() const {
-    return maxOpenMPThreads_;
+    return max_omp_threads_;
 }
 
-void GMGPolar::maxOpenMPThreads(int maxOpenMPThreads) {
-    maxOpenMPThreads_ = maxOpenMPThreads;
-}
-
-int GMGPolar::finestLevelThreads() const {
-    return finestLevelThreads_;
-}
-
-void GMGPolar::finestLevelThreads(int finestLevelThreads) {
-    finestLevelThreads_ = finestLevelThreads;
+void GMGPolar::maxOpenMPThreads(int max_omp_threads) {
+    max_omp_threads_ = max_omp_threads;
 }
 
 double GMGPolar::threadReductionFactor() const {
-    return threadReductionFactor_;
+    return thread_reduction_factor_;
 }
 
-void GMGPolar::threadReductionFactor(double threadReductionFactor) {
-    threadReductionFactor_ = threadReductionFactor;
+void GMGPolar::threadReductionFactor(double thread_reduction_factor) {
+    thread_reduction_factor_ = thread_reduction_factor;
 }

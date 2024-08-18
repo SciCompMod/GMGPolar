@@ -69,9 +69,9 @@ void GMGPolar::parseGeometry() {
 
 void GMGPolar::parseMultigrid() {
     extrapolation_ = parser_.get<int>("extrapolation");
-    maxLevels_ = parser_.get<int>("maxLevels");
-    preSmoothingSteps_ = parser_.get<int>("preSmoothingSteps");
-    postSmoothingSteps_ = parser_.get<int>("postSmoothingSteps");
+    max_levels_ = parser_.get<int>("maxLevels");
+    pre_smoothing_steps_ = parser_.get<int>("preSmoothingSteps");
+    post_smoothing_steps_ = parser_.get<int>("postSmoothingSteps");
 
     const int cycleValue = parser_.get<int>("multigridCycle");
     if (cycleValue == static_cast<int>(MultigridCycleType::V_CYCLE) ||
@@ -108,10 +108,9 @@ void GMGPolar::parseMultigrid() {
 }
 
 void GMGPolar::parseGeneral() {
-    maxOpenMPThreads_ = parser_.get<int>("maxOpenMPThreads");
-    finestLevelThreads_ = parser_.get<int>("finestLevelThreads");
-    threadReductionFactor_ = parser_.get<double>("threadReductionFactor");
-    omp_set_num_threads(maxOpenMPThreads_);
+    max_omp_threads_ = parser_.get<int>("maxOpenMPThreads");
+    thread_reduction_factor_ = parser_.get<double>("threadReductionFactor");
+    omp_set_num_threads(max_omp_threads_);
 }
 
 void GMGPolar::initializeGrid() {
@@ -252,11 +251,6 @@ void GMGPolar::initializeGeneral() {
         "maxOpenMPThreads", '\0', 
         "Defines the maximum number of OpenMP threads used.", 
         REQUIRED, 1
-    );
-    parser_.add<int>(
-        "finestLevelThreads", '\0', 
-        "Optimal number of OpenMP threads for the finest level, can exceed maxOpenMPThreads.", 
-        OPTIONAL, -1
     );
     parser_.add<double>(
         "threadReductionFactor", '\0', 

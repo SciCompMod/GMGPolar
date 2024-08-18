@@ -1,6 +1,6 @@
 #include "../../include/Smoother/smoother.h"
 
-const Stencil& Smoother::get_stencil(int i_r) const {
+const Stencil& Smoother::getStencil(int i_r) const {
 
     assert(0 <= i_r && i_r < grid_.nr());
 
@@ -70,7 +70,7 @@ const Stencil& Smoother::get_stencil(int i_r) const {
     throw std::out_of_range("Invalid index for stencil");
 }
 
-int Smoother::nnz_circle_Asc(const int i_r) const {
+int Smoother::getNonZeroCountCircleAsc(const int i_r) const {
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles());
 
     const int numberSmootherCircles = grid_.numberSmootherCircles();
@@ -88,7 +88,7 @@ int Smoother::nnz_circle_Asc(const int i_r) const {
 }
 
 
-int Smoother::ptr_nz_index_circle_Asc(const int i_r, const int i_theta) const {
+int Smoother::getCircleAscIndex(const int i_r, const int i_theta) const {
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles());
 
     const int numberSmootherCircles = grid_.numberSmootherCircles();
@@ -105,7 +105,7 @@ int Smoother::ptr_nz_index_circle_Asc(const int i_r, const int i_theta) const {
 
 
 
-int Smoother::nnz_radial_Asc(const int i_theta) const {
+int Smoother::getNonZeroCountRadialAsc(const int i_theta) const {
     assert(i_theta >= 0 && i_theta < grid_.ntheta());
 
     const int size_stencil_next_circluar_smoothing = 2;
@@ -124,7 +124,7 @@ int Smoother::nnz_radial_Asc(const int i_theta) const {
 
 
 
-int Smoother::ptr_nz_index_radial_Asc(const int i_r, const int i_theta) const {
+int Smoother::getRadialAscIndex(const int i_r, const int i_theta) const {
     assert(i_theta >= 0 && i_theta < grid_.ntheta());
 
     const int size_stencil_next_circluar_smoothing = 2;

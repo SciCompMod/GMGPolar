@@ -10,7 +10,9 @@
 #include "../include/InputFunctions/DomainGeometry/culhamGeometry.h"
 
 #include "../include/InputFunctions/exactSolution.h"
-#include "../include/InputFunctions/systemParameters.h"
+#include "../InputFunctions/densityProfileCoefficients.h"
+#include "../InputFunctions/boundaryConditions.h"
+#include "../InputFunctions/sourceTerm.h"
 
 #include "../include/InputFunctions/ExactSolution/cartesianR2_CzarnyGeometry.h"
 
@@ -40,10 +42,8 @@ int main(int argc, char* argv[]){
     std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<CartesianR2_Boundary_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
     std::unique_ptr<SourceTerm> source_term = std::make_unique<CartesianR2_SonnendruckerGyro_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
 
-    SystemParameters system_parameters(std::move(coefficients), std::move(boundary_conditions), std::move(source_term));
-
     // Initialize the solver with domain geometry and system parameters
-    GMGPolar solver(std::move(domain_geometry), std::make_unique<SystemParameters>(std::move(system_parameters)));
+    GMGPolar solver(std::move(domain_geometry), std::move(coefficients), std::move(boundary_conditions), std::move(source_term));
 
     // Set the exact solution if available
     solver.setSolution(std::move(exact_solution));
@@ -138,7 +138,7 @@ int main(int argc, char* argv[]){
         Vector<double>& solution = solver.solution();
         const PolarGrid& grid = solver.grid();
 
-        int num_nodes = grid.number_of_nodes(); // Assuming this method exists and returns an integer
+        int num_nodes = grid.numberOfNodes(); // Assuming this method exists and returns an integer
         sqrt_n[divideBy2] = std::sqrt(num_nodes);
     }
 

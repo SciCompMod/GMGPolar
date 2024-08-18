@@ -10,14 +10,14 @@
 #include "../Level/level.h"
 
 #include "../LinearAlgebra/vector.h"
-#include "../LinearAlgebra/operations.h"
+#include "../LinearAlgebra/vector_operations.h"
 
 #include "../common/constants.h"
 #include "../TaskDistribution/taskDistribution.h"
 
 class Interpolation {
 public:
-    explicit Interpolation(const int maxOpenMPThreads, const std::vector<int>& taskingThreads);
+    explicit Interpolation(const std::vector<int>& threads_per_level);
 
     void applyInjection(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const;
 
@@ -32,6 +32,5 @@ public:
     void applyExtrapolatedRestriction(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const;
 
 private:
-    const int maxOpenMPThreads_;
-    const std::vector<int>& taskingThreads_;
+    const std::vector<int>& threads_per_level_;
 };

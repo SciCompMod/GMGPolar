@@ -14,14 +14,14 @@ void GMGPolar::setup() {
 
     // ----------------------------------------------------------
     // Building PolarGrid and LevelCache for all multigrid levels
-    numberOflevels_ = chooseNumberOfLevels(*finest_grid); /* Implementation below */
-    levels_.clear(); levels_.reserve(numberOflevels_);
+    number_of_levels_ = chooseNumberOfLevels(*finest_grid); /* Implementation below */
+    levels_.clear(); levels_.reserve(number_of_levels_);
 
     int current_level = 0;
-    auto finest_levelCache = std::make_unique<LevelCache>(*finest_grid);
+    auto finest_levelCache = std::make_unique<LevelCache>(*finest_grid, *density_profile_coefficients_);
     levels_.emplace_back(current_level, std::move(finest_grid), std::move(finest_levelCache), extrapolation_);
 
-    for(current_level = 1; current_level < numberOflevels_; current_level++) {
+    for(current_level = 1; current_level < number_of_levels_; current_level++) {
         auto current_grid = std::make_unique<PolarGrid>(coarseningGrid(levels_[current_level-1].grid()));
         auto current_levelCache = std::make_unique<LevelCache>(levels_[current_level-1], *current_grid);
         levels_.emplace_back(current_level, std::move(current_grid), std::move(current_levelCache), extrapolation_);
@@ -37,16 +37,15 @@ void GMGPolar::setup() {
 
     // -----------------------------------------------------------
     // Initializing the optimal number of threads for OpenMP tasks 
-    taskingThreads_.resize(numberOflevels_, maxOpenMPThreads_);
-    if(finestLevelThreads_ > 0){
-        for (int current_level = 0; current_level < numberOflevels_; current_level++){
-            taskingThreads_[current_level] = std::max(1, std::min(maxOpenMPThreads_, 
-                static_cast<int>(std::floor(finestLevelThreads_ * std::pow(threadReductionFactor_, current_level)))
-            ));
-        }
-    }
+    threads_per_level_.resize(number_of_levels_, max_omp_threads_);
 
-    interpolation_ = std::make_unique<Interpolation>(maxOpenMPThreads_, taskingThreads_);
+    for (int current_level = 0; current_level < number_of_levels_; current_level++){
+        threads_per_level_[current_level] = std::max(1, std::min(max_omp_threads_, 
+            static_cast<int>(std::floor(max_omp_threads_ * std::pow(thread_reduction_factor_, current_level)))
+        ));
+    }
+    
+    interpolation_ = std::make_unique<Interpolation>(threads_per_level_);
 
     auto start_setup_rhs = std::chrono::high_resolution_clock::now();
 
@@ -59,62 +58,43 @@ void GMGPolar::setup() {
 
     // -------------------------------------------------------
     // Initializing various operators based on the level index
-    for (int current_level = 0; current_level < numberOflevels_; current_level++){
+    for (int current_level = 0; current_level < number_of_levels_; current_level++){
         // ---------------------- //
         // Level 0 (finest Level) //
         // ---------------------- //
         if(current_level == 0){
             auto start_setup_smoother = std::chrono::high_resolution_clock::now();
             if(extrapolation_ > 0){
-                levels_[current_level].initializeExtrapolatedSmoothing(*domain_geometry_, *system_parameters_, DirBC_Interior_, 
-                    maxOpenMPThreads_, taskingThreads_[current_level]
-                );
+                levels_[current_level].initializeExtrapolatedSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
                 if(extrapolation_ > 1){
-                    levels_[current_level].initializeSmoothing(*domain_geometry_, *system_parameters_, DirBC_Interior_, 
-                        maxOpenMPThreads_, taskingThreads_[current_level]
-                    );
+                    levels_[current_level].initializeSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
                 }
             } else{
-                levels_[current_level].initializeSmoothing(*domain_geometry_, *system_parameters_, DirBC_Interior_, 
-                    maxOpenMPThreads_, taskingThreads_[current_level]
-                );
+                levels_[current_level].initializeSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
             }
             auto end_setup_smoother = std::chrono::high_resolution_clock::now();
             t_setup_smoother += std::chrono::duration<double>(end_setup_smoother - start_setup_smoother).count();
-
-            levels_[current_level].initializeResidual(*domain_geometry_, *system_parameters_, DirBC_Interior_, 
-                maxOpenMPThreads_, taskingThreads_[current_level]
-            );
+            levels_[current_level].initializeResidual(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
         }
         // -------------------------- //
         // Level n-1 (coarsest Level) //
         // -------------------------- //
-        else if(current_level == numberOflevels_ - 1){
+        else if(current_level == number_of_levels_ - 1){
             auto start_setup_directSolver = std::chrono::high_resolution_clock::now();
-            levels_[current_level].initializeDirectSolver(*domain_geometry_, *system_parameters_, DirBC_Interior_, 
-                maxOpenMPThreads_, taskingThreads_[current_level]
-            );
+            levels_[current_level].initializeDirectSolver(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
             auto end_setup_directSolver = std::chrono::high_resolution_clock::now();
             t_setup_directSolver += std::chrono::duration<double>(end_setup_directSolver - start_setup_directSolver).count();
-
-            levels_[current_level].initializeResidual(*domain_geometry_, *system_parameters_, DirBC_Interior_, 
-                maxOpenMPThreads_, taskingThreads_[current_level]
-            );
+            levels_[current_level].initializeResidual(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
         }
         // ------------------- //
         // Intermediate levels //
         // ------------------- //
         else{
             auto start_setup_smoother = std::chrono::high_resolution_clock::now();
-            levels_[current_level].initializeSmoothing(*domain_geometry_, *system_parameters_, DirBC_Interior_, 
-                maxOpenMPThreads_, taskingThreads_[current_level]
-            );
+            levels_[current_level].initializeSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
             auto end_setup_smoother = std::chrono::high_resolution_clock::now();
             t_setup_smoother += std::chrono::duration<double>(end_setup_smoother - start_setup_smoother).count();
-
-            levels_[current_level].initializeResidual(*domain_geometry_, *system_parameters_, DirBC_Interior_, 
-                maxOpenMPThreads_, taskingThreads_[current_level]
-            );
+            levels_[current_level].initializeResidual(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
         }
     }
     auto end_setup = std::chrono::high_resolution_clock::now();
@@ -129,7 +109,7 @@ PolarGrid GMGPolar::createFinestGrid() {
         assert(!file_grid_radii_.empty() && !file_grid_angles_.empty());
         finest_grid = PolarGrid(file_grid_radii_, file_grid_angles_);
     } else {
-        const double& refinement_radius = system_parameters_->getAlphaJump(); /* Radius of anisotropic grid refinement */
+        const double& refinement_radius = density_profile_coefficients_->getAlphaJump(); /* Radius of anisotropic grid refinement */
         std::optional<double> splitting_radius = std::nullopt; /* (Automatic) line splitting radius for the smoother */
         finest_grid = PolarGrid(R0_, Rmax_, nr_exp_, ntheta_exp_, refinement_radius, anisotropic_factor_, divideBy2_, splitting_radius);
     }
@@ -164,14 +144,14 @@ int GMGPolar::chooseNumberOfLevels(const PolarGrid& finestGrid) {
         angularMaxLevel++;
     }
 
-    /* Currently unused */
+    /* Currently unused: Number of levels which guarantee linear scalability */
     const int linear_complexity_levels = 
-        std::ceil( (2.0 * std::log(static_cast<double>(finestGrid.number_of_nodes())) - std::log(3.0)) / (3.0 * std::log(4.0)));
+        std::ceil( (2.0 * std::log(static_cast<double>(finestGrid.numberOfNodes())) - std::log(3.0)) / (3.0 * std::log(4.0)));
 
     // Determine the number of levels as the minimum of radial maximum level, angular maximum level, 
     // and the maximum levels specified.
     int levels = std::min(radialMaxLevel, angularMaxLevel);
-    if(maxLevels_ > 0) levels = std::min(maxLevels_, levels);
+    if(max_levels_ > 0) levels = std::min(max_levels_, levels);
 
     // Check if levels is less than Multigrid minimum level and throw an error
     if (levels < multigridMinLevel) {
@@ -180,7 +160,6 @@ int GMGPolar::chooseNumberOfLevels(const PolarGrid& finestGrid) {
 
     return levels;
 }
-
 
 void GMGPolar::resetTimings(){
     t_setup_total = 0.0;

@@ -2,14 +2,14 @@
 
 // ----------- //
 // Constructor //
-Level::Level(int level, std::unique_ptr<const PolarGrid> grid, std::unique_ptr<LevelCache> level_cache, int extrapolation) :
+Level::Level(int level, std::unique_ptr<const PolarGrid> grid, std::unique_ptr<const LevelCache> level_cache, int extrapolation) :
     level_(level),
     grid_(std::move(grid)),
     level_cache_(std::move(level_cache)),
-    rhs_((level == 0 || level == 1 && extrapolation > 0) ? grid_->number_of_nodes() : 0),
-    solution_(grid_->number_of_nodes()),
-    residual_(grid_->number_of_nodes()),
-    rhs_error_((level > 0) ? grid_->number_of_nodes() : 0)
+    rhs_((level == 0 || level == 1 && extrapolation > 0) ? grid_->numberOfNodes() : 0),
+    solution_(grid_->numberOfNodes()),
+    residual_(grid_->numberOfNodes()),
+    error_correction_((level > 0) ? grid_->numberOfNodes() : 0)
 {}
 
 // ---------------- //
@@ -23,10 +23,6 @@ const PolarGrid& Level::grid() const {
 }
 
 const LevelCache& Level::levelCache() const{
-    return *level_cache_;
-}
-
-LevelCache& Level::levelCache() {
     return *level_cache_;
 }
 
@@ -48,34 +44,30 @@ Vector<double>& Level::residual() {
 const Vector<double>& Level::residual() const {
     return residual_;
 }
-Vector<double>& Level::rhs_error() {
-    return rhs_error_;
+Vector<double>& Level::error_correction() {
+    return error_correction_;
 }
-const Vector<double>& Level::rhs_error() const {
-    return rhs_error_;
+const Vector<double>& Level::error_correction() const {
+    return error_correction_;
 }
 
 // -------------- //
 // Apply Residual //
-void Level::initializeResidual(
-    const DomainGeometry& domain_geometry, const SystemParameters& system_parameters, const bool DirBC_Interior,
-    const int maxOpenMPThreads, const int openMPTaskThreads)
+void Level::initializeResidual(const DomainGeometry& domain_geometry, const bool DirBC_Interior, const int num_omp_threads)
 {
-    op_residual_ = std::make_unique<Residual>(*grid_, *level_cache_, domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
+    op_residual_ = std::make_unique<Residual>(*grid_, *level_cache_, domain_geometry, DirBC_Interior, num_omp_threads);
     if (!op_residual_) throw std::runtime_error("Failed to initialize Residual.");
 }
 void Level::computeResidual(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const {
     if (!op_residual_) throw std::runtime_error("Residual not initialized.");
-    op_residual_ -> computeResidual_V1(result, rhs, x);
+    op_residual_ -> computeResidual(result, rhs, x);
 }
 
 // ------------------- //
 // Solve coarse System //
-void Level::initializeDirectSolver(
-    const DomainGeometry& domain_geometry, const SystemParameters& system_parameters, const bool DirBC_Interior, 
-    const int maxOpenMPThreads, const int openMPTaskThreads)
+void Level::initializeDirectSolver(const DomainGeometry& domain_geometry, const bool DirBC_Interior, const int num_omp_threads)
 {
-    op_directSolver_ = std::make_unique<DirectSolver>(*grid_, *level_cache_, domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
+    op_directSolver_ = std::make_unique<DirectSolver>(*grid_, *level_cache_, domain_geometry, DirBC_Interior, num_omp_threads);
     if (!op_directSolver_) throw std::runtime_error("Failed to initialize Direct Solver.");
 }
 void Level::directSolveInPlace(Vector<double>& x) const {
@@ -85,11 +77,9 @@ void Level::directSolveInPlace(Vector<double>& x) const {
 
 // --------------- //
 // Apply Smoothing //
-void Level::initializeSmoothing(
-    const DomainGeometry& domain_geometry, const SystemParameters& system_parameters, const bool DirBC_Interior, 
-    const int maxOpenMPThreads, const int openMPTaskThreads)
+void Level::initializeSmoothing(const DomainGeometry& domain_geometry, const bool DirBC_Interior, const int num_omp_threads)
 {
-    op_smoother_ = std::make_unique<Smoother>(*grid_, *level_cache_, domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
+    op_smoother_ = std::make_unique<Smoother>(*grid_, *level_cache_, domain_geometry, DirBC_Interior, num_omp_threads);
     if (!op_smoother_) throw std::runtime_error("Failed to initialize Smoother.");
 }
 void Level::smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const {
@@ -99,11 +89,9 @@ void Level::smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vecto
 
 // ---------------------------- //
 // Apply Extrapolated Smoothing //
-void Level::initializeExtrapolatedSmoothing(
-    const DomainGeometry& domain_geometry, const SystemParameters& system_parameters, const bool DirBC_Interior, 
-    const int maxOpenMPThreads, const int openMPTaskThreads)
+void Level::initializeExtrapolatedSmoothing(const DomainGeometry& domain_geometry, const bool DirBC_Interior, const int num_omp_threads)
 {
-    op_extrapolated_smoother_ = std::make_unique<ExtrapolatedSmoother>(*grid_, *level_cache_, domain_geometry, system_parameters, DirBC_Interior, maxOpenMPThreads, openMPTaskThreads);
+    op_extrapolated_smoother_ = std::make_unique<ExtrapolatedSmoother>(*grid_, *level_cache_, domain_geometry, DirBC_Interior, num_omp_threads);
     if (!op_extrapolated_smoother_) throw std::runtime_error("Failed to initialize Extrapolated Smoother.");
 }
 void Level::extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const {

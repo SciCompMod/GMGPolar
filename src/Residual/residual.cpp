@@ -1,23 +1,21 @@
 #include "../../include/Residual/residual.h"
 
-
-Residual::Residual(const PolarGrid& grid, const LevelCache& level_data, 
-    const DomainGeometry& domain_geometry, const SystemParameters& system_parameters, const bool DirBC_Interior, 
-    const int maxOpenMPThreads, const int openMPTaskThreads
+Residual::Residual(const PolarGrid& grid, const LevelCache& level_cache, 
+                           const DomainGeometry& domain_geometry,
+                           bool DirBC_Interior, int num_omp_threads
 ) :
-    grid_(grid), 
-    sin_theta_(level_data.sin_theta()),
-    cos_theta_(level_data.cos_theta()),
+    grid_(grid),
+    sin_theta_cache_(level_cache.sin_theta()),
+    cos_theta_cache_(level_cache.cos_theta()),
+    coeff_alpha_cache_(level_cache.coeff_alpha()),
+    coeff_beta_cache_(level_cache.coeff_beta()),
     domain_geometry_(domain_geometry),
-    system_parameters_(system_parameters),
     DirBC_Interior_(DirBC_Interior),
-    maxOpenMPThreads_(maxOpenMPThreads),
-    openMPTaskThreads_(openMPTaskThreads)
+    num_omp_threads_(num_omp_threads)
 {}
 
 
-
-#define ARR_ATT_ART(domain_geometry, r, theta, sin_theta, cos_theta, coeff_alpha, \
+#define COMPUTE_JACOBIAN_ELEMENTS(domain_geometry, r, theta, sin_theta, cos_theta, coeff_alpha, \
     arr, att, art, detDF) \
 do { \
     /* Calculate the elements of the Jacobian matrix for the transformation mapping */ \
@@ -45,27 +43,23 @@ do { \
 } while(0) \
 
 
-
-#define NODE_APPLY_RESIDUAL_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, \
-    system_parameters, grid, DirBC_Interior, \
-    result, rhs, x, factor, \
-    arr, att, art, coeff_beta, detDF) \
+#define NODE_APPLY_A_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, \
+    grid, DirBC_Interior, \
+    result, x, factor, \
+    arr, att, art, detDF, coeff_beta) \
 do { \
     /* -------------------- */ \
     /* Node in the interior */ \
     /* -------------------- */ \
     if (i_r > 1 && i_r < grid.nr() - 2) { \
-        double h1 = grid.r_dist(i_r-1); \
-        double h2 = grid.r_dist(i_r); \
-        double k1 = grid.theta_dist(i_theta-1); \
-        double k2 = grid.theta_dist(i_theta); \
+        double h1 = grid.radialSpacing(i_r-1); \
+        double h2 = grid.radialSpacing(i_r); \
+        double k1 = grid.angularSpacing(i_theta-1); \
+        double k2 = grid.angularSpacing(i_theta); \
         double coeff1 = 0.5*(k1+k2)/h1; \
         double coeff2 = 0.5*(k1+k2)/h2; \
         double coeff3 = 0.5*(h1+h2)/k1; \
         double coeff4 = 0.5*(h1+h2)/k2; \
-        /* Fill result of (i,j) */ \
-        result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
-        /* result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; */ \
         /* Fill result(i,j) */ \
         result[grid.index(i_r,i_theta)] += factor * ( \
             0.25 * (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF) * x[grid.index(i_r,i_theta)] /* beta_{i,j} */ \
@@ -107,15 +101,12 @@ do { \
         /* Case 1: Dirichlet boundary on the inner boundary */ \
         /* ------------------------------------------------ */ \
         if(DirBC_Interior){ \
-            /* Fill result of (i,j) */ \
-            result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; /* Contains u_D_Interior */ \
-            /* result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; // Contains u_D_Interior */ \
             /* Fill result(i,j) */ \
             result[grid.index(i_r,i_theta)] += factor * x[grid.index(i_r,i_theta)]; \
             /* Give value to the interior nodes! */ \
-            double h2 = grid.r_dist(i_r); \
-            double k1 = grid.theta_dist(i_theta-1); \
-            double k2 = grid.theta_dist(i_theta); \
+            double h2 = grid.radialSpacing(i_r); \
+            double k1 = grid.angularSpacing(i_theta-1); \
+            double k2 = grid.angularSpacing(i_theta); \
             double coeff2 = 0.5*(k1+k2)/h2; \
             /* Fill result(i+1,j) */ \
             result[grid.index(i_r+1,i_theta)] += factor * ( \
@@ -131,16 +122,13 @@ do { \
             /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()>>1)). */ \
             /* Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil. */ \
             double h1 = 2.0 * grid.radius(0); \
-            double h2 = grid.r_dist(i_r); \
-            double k1 = grid.theta_dist(i_theta-1); \
-            double k2 = grid.theta_dist(i_theta); \
+            double h2 = grid.radialSpacing(i_r); \
+            double k1 = grid.angularSpacing(i_theta-1); \
+            double k2 = grid.angularSpacing(i_theta); \
             double coeff1 = 0.5*(k1+k2)/h1; \
             double coeff2 = 0.5*(k1+k2)/h2; \
             double coeff3 = 0.5*(h1+h2)/k1; \
             double coeff4 = 0.5*(h1+h2)/k2; \
-            /* Fill result of (i,j) */ \
-            result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
-            /* result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; */ \
             /* Fill result(i,j) */ \
             result[grid.index(i_r,i_theta)] += factor * ( \
                 0.25 * (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF) * x[grid.index(i_r,i_theta)] /* beta_{i,j} */ \
@@ -180,17 +168,14 @@ do { \
     /* Node next to the inner boundary */ \
     /* ------------------------------- */ \
     } else if (i_r == 1) { \
-        double h1 = grid.r_dist(i_r-1); \
-        double h2 = grid.r_dist(i_r); \
-        double k1 = grid.theta_dist(i_theta-1); \
-        double k2 = grid.theta_dist(i_theta); \
+        double h1 = grid.radialSpacing(i_r-1); \
+        double h2 = grid.radialSpacing(i_r); \
+        double k1 = grid.angularSpacing(i_theta-1); \
+        double k2 = grid.angularSpacing(i_theta); \
         double coeff1 = 0.5*(k1+k2)/h1; \
         double coeff2 = 0.5*(k1+k2)/h2; \
         double coeff3 = 0.5*(h1+h2)/k1; \
         double coeff4 = 0.5*(h1+h2)/k2; \
-        /* Fill result of (i,j) */ \
-        result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
-        /* result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; */ \
         /* Fill result(i,j) */ \
         result[grid.index(i_r,i_theta)] += factor * ( \
             0.25 * (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF) * x[grid.index(i_r,i_theta)] /* beta_{i,j} */ \
@@ -230,17 +215,14 @@ do { \
     /* Node next to the outer boundary */ \
     /* ------------------------------- */ \
     } else if (i_r == grid.nr() - 2) { \
-        double h1 = grid.r_dist(i_r-1); \
-        double h2 = grid.r_dist(i_r); \
-        double k1 = grid.theta_dist(i_theta-1); \
-        double k2 = grid.theta_dist(i_theta); \
+        double h1 = grid.radialSpacing(i_r-1); \
+        double h2 = grid.radialSpacing(i_r); \
+        double k1 = grid.angularSpacing(i_theta-1); \
+        double k2 = grid.angularSpacing(i_theta); \
         double coeff1 = 0.5*(k1+k2)/h1; \
         double coeff2 = 0.5*(k1+k2)/h2; \
         double coeff3 = 0.5*(h1+h2)/k1; \
         double coeff4 = 0.5*(h1+h2)/k2; \
-        /* Fill result of (i,j) */ \
-        result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; \
-        /* result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; */ \
         /* Fill result(i,j) */ \
         result[grid.index(i_r,i_theta)] += factor * ( \
             0.25 * (h1+h2)*(k1+k2) * coeff_beta * fabs(detDF) * x[grid.index(i_r,i_theta)] /* beta_{i,j} */ \
@@ -280,14 +262,11 @@ do { \
     /* ----------------------------- */ \
     } else if (i_r == grid.nr() - 1) { \
         /* Fill result of (i,j) */ \
-        result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; /* Contains u_D */ \
-        /* result[grid.index(i_r,i_theta)] += rhs[grid.index(i_r,i_theta)]; // Contains u_D */ \
-        /* Dirichlet boundary */ \
         result[grid.index(i_r,i_theta)] += factor * x[grid.index(i_r,i_theta)]; \
         /* Give value to the interior nodes! */ \
-        double h1 = grid.r_dist(i_r-1); \
-        double k1 = grid.theta_dist(i_theta-1); \
-        double k2 = grid.theta_dist(i_theta); \
+        double h1 = grid.radialSpacing(i_r-1); \
+        double k1 = grid.angularSpacing(i_theta-1); \
+        double k2 = grid.angularSpacing(i_theta); \
         double coeff1 = 0.5*(k1+k2)/h1; \
         /* Fill result(i-1,j) */ \
         result[grid.index(i_r-1,i_theta)] += factor * ( \
@@ -299,366 +278,186 @@ do { \
 } while(0)
 
 
-
-#define CIRCLE_SECTION_APPLY_RESIDUAL_GIVE(i_r) \
-do { \
-    r = grid_.radius(i_r); \
-    coeff_alpha = system_parameters_.alpha(r); \
-    coeff_beta = system_parameters_.beta(r); \
-    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++){ \
-        theta = grid_.theta(i_theta); \
-        sin_theta = sin_theta_[i_theta]; \
-        cos_theta = cos_theta_[i_theta]; \
-        \
-        ARR_ATT_ART(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, \
-            arr, att, art, detDF); \
-        \
-        NODE_APPLY_RESIDUAL_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, \
-            system_parameters_, grid_, DirBC_Interior_, \
-            result, rhs, x, factor, \
-            arr, att, art, coeff_beta, detDF); \
-    } \
-} while(0)
-
+void Residual::applyAGiveCircleSection(const int i_r, Vector<double>& result, const Vector<double>& x, const double& factor) const 
+{
+    const double r = grid_.radius(i_r);
+    const double coeff_alpha = coeff_alpha_cache_[i_r];
+    const double coeff_beta = coeff_beta_cache_[i_r];
+    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++){
+        const double theta = grid_.theta(i_theta);
+        const double sin_theta = sin_theta_cache_[i_theta];
+        const double cos_theta = cos_theta_cache_[i_theta];
+        /* Compute arr, att, art, detDF value at the current node */
+        double arr, att, art, detDF;
+        COMPUTE_JACOBIAN_ELEMENTS(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, 
+            arr, att, art, detDF);
+        NODE_APPLY_A_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta,
+            grid_, DirBC_Interior_,
+            result, x, factor,
+            arr, att, art, detDF, coeff_beta);
+    }
+}
 
 
-#define RADIAL_SECTION_APPLY_RESIDUAL_GIVE(i_theta) \
-do { \
-    theta = grid_.theta(i_theta); \
-    sin_theta = sin_theta_[i_theta]; \
-    cos_theta = cos_theta_[i_theta]; \
-    for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++){ \
-        r = grid_.radius(i_r); \
-        coeff_alpha = system_parameters_.alpha(r); \
-        coeff_beta = system_parameters_.beta(r); \
-        /* Get arr, att, art, detDF value at the current node */ \
-        ARR_ATT_ART(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, \
-            arr, att, art, detDF); \
-        \
-        NODE_APPLY_RESIDUAL_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, \
-            system_parameters_, grid_, DirBC_Interior_, \
-            result, rhs, x, factor, \
-            arr, att, art, coeff_beta, detDF); \
-    } \
-} while(0)
+void Residual::applyAGiveRadialSection(const int i_theta, Vector<double>& result, const Vector<double>& x, const double& factor) const 
+{
+    const double theta = grid_.theta(i_theta);
+    const double sin_theta = sin_theta_cache_[i_theta];
+    const double cos_theta = cos_theta_cache_[i_theta];
+    for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++){
+        const double r = grid_.radius(i_r);
+        const double coeff_alpha = coeff_alpha_cache_[i_r];
+        const double coeff_beta = coeff_beta_cache_[i_r];
+        // Compute arr, att, art, detDF value at the current node 
+        double arr, att, art, detDF;
+        COMPUTE_JACOBIAN_ELEMENTS(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha,
+            arr, att, art, detDF);
+        // Build solver matrix at the current node
+        NODE_APPLY_A_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta,
+            grid_, DirBC_Interior_,
+            result, x, factor,
+            arr, att, art, detDF, coeff_beta);
+    }
+}
 
 
 
-/* ------------------------- */
-/* result = rhs + factor * A*x */
-void Residual::computeResidual_V1(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const {
+/* ------------------ */
+/* result = rhs - A*x */
+void Residual::computeResidual(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const {
     assert(result.size() == x.size());
+
+    omp_set_num_threads(num_omp_threads_);
+
+    result = rhs;
 
     const double factor = -1.0;
 
-    omp_set_num_threads(maxOpenMPThreads_);
-    assign(result, 0.0);
+    if(omp_get_max_threads() == 1){
+        /* Single-threaded execution */
+        for(int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
+            applyAGiveCircleSection(i_r, result, x, factor);
+        }
+        for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
+            applyAGiveRadialSection(i_theta, result, x, factor);
+        }
+    }
+    else{
+        /* Multi-threaded execution */
+        const int num_circle_tasks = grid_.numberSmootherCircles();
+        const int additional_radial_tasks = grid_.ntheta() % 3;
+        const int num_radial_tasks = grid_.ntheta() - additional_radial_tasks;
 
-    const int numCircleTasks = grid_.numberSmootherCircles();
-    const int additionalRadialTasks = grid_.ntheta() % 3;
-    const int numRadialTasks = grid_.ntheta() - additionalRadialTasks;
+        assert(num_circle_tasks >= 2);
+        assert(num_radial_tasks >= 3 && num_radial_tasks % 3 == 0);
 
-    assert(numCircleTasks >= 2);
-    assert(numRadialTasks >= 3 && numRadialTasks % 3 == 0);
+        /* Make sure to deallocate at the end */
+        const int boundary_margin = 2; // Additional space to ensure safe access
+        int* circle_dep = new int[num_circle_tasks + boundary_margin];
+        int* radial_dep = new int[num_radial_tasks];
 
-    /* Make sure to deallocate at the end */
-    int* dep = new int[numCircleTasks + numRadialTasks];
-
-    omp_set_num_threads(openMPTaskThreads_);
-    #pragma omp parallel num_threads(openMPTaskThreads_) /* Outside variable are shared by default */
-    {
-        /* Define thread-local variables */
-        double r, theta;
-        double sin_theta, cos_theta;
-        double arr, att, art;
-        double coeff_alpha, coeff_beta;
-        double detDF;
-
-        #pragma omp single
+        #pragma omp parallel 
         {
-            /* ------------ */
-            /* Circle Tasks */
-            /* ------------ */
+            #pragma omp single
+            {
+                /* ------------ */
+                /* Circle Tasks */
+                /* ------------ */
 
-            /* Mod 0 Circles */
-            for(int circle_task = 0; circle_task < numCircleTasks; circle_task += 3) {
-                #pragma omp task \
-                    depend(out: dep[circle_task])
-                {
-                    int i_r = grid_.numberSmootherCircles() - circle_task - 1;    
-                    CIRCLE_SECTION_APPLY_RESIDUAL_GIVE(i_r);
+                /* Mod 0 Circles */
+                for(int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
+                    #pragma omp task \
+                        depend(out: circle_dep[circle_task])
+                    {
+                        int i_r = grid_.numberSmootherCircles() - circle_task - 1;    
+                        applyAGiveCircleSection(i_r, result, x, factor);
+                    }
                 }
-            }
-            /* Mod 2 Circles */
-            for(int circle_task = 1; circle_task < numCircleTasks; circle_task += 3) {
-                #pragma omp task \
-                    depend(out: dep[circle_task]) \
-                    depend(in: dep[circle_task-1], dep[circle_task+2])   
-                {
-                    int i_r = grid_.numberSmootherCircles() - circle_task - 1;    
-                    CIRCLE_SECTION_APPLY_RESIDUAL_GIVE(i_r);
+                /* Mod 2 Circles */
+                for(int circle_task = 1; circle_task < num_circle_tasks; circle_task += 3) {
+                    #pragma omp task \
+                        depend(out: circle_dep[circle_task]) \
+                        depend(in: circle_dep[circle_task-1], circle_dep[circle_task+2])   
+                    {
+                        int i_r = grid_.numberSmootherCircles() - circle_task - 1;    
+                        applyAGiveCircleSection(i_r, result, x, factor);
+                    }
                 }
-            }
-            /* Mod 2 Circles */
-            for(int circle_task = 2; circle_task < numCircleTasks; circle_task += 3) {
-                #pragma omp task \
-                    depend(out: dep[circle_task]) \
-                    depend(in: dep[circle_task-1], dep[circle_task+2])   
-                {
-                    int i_r = grid_.numberSmootherCircles() - circle_task - 1;    
-                    CIRCLE_SECTION_APPLY_RESIDUAL_GIVE(i_r);
+                /* Mod 2 Circles */
+                for(int circle_task = 2; circle_task < num_circle_tasks; circle_task += 3) {
+                    #pragma omp task \
+                        depend(out: circle_dep[circle_task]) \
+                        depend(in: circle_dep[circle_task-1], circle_dep[circle_task+2])   
+                    {
+                        int i_r = grid_.numberSmootherCircles() - circle_task - 1;    
+                        applyAGiveCircleSection(i_r, result, x, factor);
+                    }
                 }
-            }
 
-            /* ------------ */
-            /* Radial Tasks */
-            /* ------------ */
+                /* ------------ */
+                /* Radial Tasks */
+                /* ------------ */
 
-            /* Mod 0 Radials */
-            for(int radial_task = 0; radial_task < numRadialTasks; radial_task += 3) {
-                #pragma omp task \
-                    depend(out: dep[numCircleTasks+radial_task]) \
-                    depend(in: dep[1]) /* Wait for Circle Smoother */
-                {
-                    if(radial_task > 0){
-                        int i_theta = radial_task + additionalRadialTasks;    
-                        RADIAL_SECTION_APPLY_RESIDUAL_GIVE(i_theta);
-                    } else{
-                        if(additionalRadialTasks == 0){
-                            RADIAL_SECTION_APPLY_RESIDUAL_GIVE(0);
-                        } 
-                        else if(additionalRadialTasks >= 1){
-                            RADIAL_SECTION_APPLY_RESIDUAL_GIVE(0);
-                            RADIAL_SECTION_APPLY_RESIDUAL_GIVE(1);
+                /* Mod 0 Radials */
+                for(int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {
+                    #pragma omp task \
+                        depend(out: radial_dep[radial_task]) \
+                        depend(in: circle_dep[1]) /* Wait for Circle Smoother */
+                    {
+                        if(radial_task > 0){
+                            int i_theta = radial_task + additional_radial_tasks;    
+                            applyAGiveRadialSection(i_theta, result, x, factor);
+                        } else{
+                            if(additional_radial_tasks == 0){
+                                applyAGiveRadialSection(0, result, x, factor);
+                            } 
+                            else if(additional_radial_tasks >= 1){
+                                applyAGiveRadialSection(0, result, x, factor);
+                                applyAGiveRadialSection(1, result, x, factor);
+                            }
                         }
                     }
                 }
-            }
-            /* Mod 1 Radials */
-            for(int radial_task = 1; radial_task < numRadialTasks; radial_task += 3) {
-                #pragma omp task \
-                    depend(out: dep[numCircleTasks + radial_task]) \
-                    depend(in: \
-                        dep[1], /* Wait for Circle Smoother */ \
-                        dep[numCircleTasks + radial_task-1], \
-                        dep[numCircleTasks + (radial_task+2) % numRadialTasks])   
-                {
-                    if(radial_task > 1){
-                        int i_theta = radial_task + additionalRadialTasks;    
-                        RADIAL_SECTION_APPLY_RESIDUAL_GIVE(i_theta);
-                    } else {
-                        if(additionalRadialTasks == 0){
-                            RADIAL_SECTION_APPLY_RESIDUAL_GIVE(1);
-                        } 
-                        else if(additionalRadialTasks == 1){
-                            RADIAL_SECTION_APPLY_RESIDUAL_GIVE(2);
-                        }
-                        else if(additionalRadialTasks == 2){
-                            RADIAL_SECTION_APPLY_RESIDUAL_GIVE(2);
-                            RADIAL_SECTION_APPLY_RESIDUAL_GIVE(3);
+                /* Mod 1 Radials */
+                for(int radial_task = 1; radial_task < num_radial_tasks; radial_task += 3) {
+                    #pragma omp task \
+                        depend(out: radial_dep[radial_task]) \
+                        depend(in: \
+                            radial_dep[radial_task-1], \
+                            radial_dep[(radial_task+2) % num_radial_tasks])   
+                    {
+                        if(radial_task > 1){
+                            int i_theta = radial_task + additional_radial_tasks;    
+                            applyAGiveRadialSection(i_theta, result, x, factor);
+                        } else {
+                            if(additional_radial_tasks == 0){
+                                applyAGiveRadialSection(1, result, x, factor);
+                            } 
+                            else if(additional_radial_tasks == 1){
+                                applyAGiveRadialSection(2, result, x, factor);
+                            }
+                            else if(additional_radial_tasks == 2){
+                                applyAGiveRadialSection(2, result, x, factor);
+                                applyAGiveRadialSection(3, result, x, factor);
+                            }
                         }
                     }
                 }
-            }
-            /* Mod 2 Radials */
-            for(int radial_task = 2; radial_task < numRadialTasks; radial_task += 3) {
-                #pragma omp task \
-                    depend(out: dep[numCircleTasks + radial_task]) \
-                    depend(in: \
-                        dep[1], /* Wait for Circle Smoother */ \
-                        dep[numCircleTasks + radial_task-1], \
-                        dep[numCircleTasks + (radial_task+2) % numRadialTasks])   
-                {
-                    int i_theta = radial_task + additionalRadialTasks;    
-                    RADIAL_SECTION_APPLY_RESIDUAL_GIVE(i_theta);
+                /* Mod 2 Radials */
+                for(int radial_task = 2; radial_task < num_radial_tasks; radial_task += 3) {
+                    #pragma omp task \
+                        depend(out: radial_dep[radial_task]) \
+                        depend(in: \
+                            radial_dep[radial_task-1], \
+                            radial_dep[(radial_task+2) % num_radial_tasks])   
+                    {
+                        int i_theta = radial_task + additional_radial_tasks;    
+                        applyAGiveRadialSection(i_theta, result, x, factor);
+                    }
                 }
             }
         }
-    }
-
-    delete[] dep;
-    omp_set_num_threads(maxOpenMPThreads_);
-}
-
-
-
-/* ------------------------- */
-/* result = f + factor * A*x */
-void Residual::computeResidual_V2(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const{
-    assert(result.size() == x.size());
-
-    const double factor = -1.0;
-
-    omp_set_num_threads(maxOpenMPThreads_);
-    assign(result, 0.0);
-
-    const int numCircleTasks = grid_.numberSmootherCircles();
-    const int additionalRadialTasks = grid_.ntheta() % 3;
-    const int numRadialTasks = grid_.ntheta() - additionalRadialTasks;
-
-    assert(numCircleTasks >= 2);
-    assert(numRadialTasks >= 3 && numRadialTasks % 3 == 0);
-
-    #pragma omp parallel num_threads(maxOpenMPThreads_) /* Outside variable are shared by default */
-    {
-        /* Define thread-local variables */
-        double r, theta;
-        double sin_theta, cos_theta;
-        double arr, att, art;
-        double coeff_alpha, coeff_beta;
-        double detDF;
-
-        /* ------------ */
-        /* Circle Tasks */
-        /* ------------ */
-
-        /* Mod 0 Circles */
-        #pragma omp for
-        for (int circle_task = 0; circle_task < numCircleTasks; circle_task += 3){
-            int i_r = grid_.numberSmootherCircles() - circle_task - 1;    
-            CIRCLE_SECTION_APPLY_RESIDUAL_GIVE(i_r);
-        }
-        #pragma omp barrier
-        /* Mod 1 Circles */
-        #pragma omp for
-        for (int circle_task = 1; circle_task < numCircleTasks; circle_task += 3){
-            int i_r = grid_.numberSmootherCircles() - circle_task - 1;    
-            CIRCLE_SECTION_APPLY_RESIDUAL_GIVE(i_r);
-        }
-        /* Mod 2 Circles */
-        #pragma omp barrier
-        #pragma omp for nowait
-        for (int circle_task = 2; circle_task < numCircleTasks; circle_task += 3){
-            int i_r = grid_.numberSmootherCircles() - circle_task - 1;    
-            CIRCLE_SECTION_APPLY_RESIDUAL_GIVE(i_r);
-        }
-
-        /* ------------ */
-        /* Radial Tasks */
-        /* ------------ */
-        
-        /* Mod 0 Radials */
-        #pragma omp for
-        for (int radial_task = 0; radial_task < numRadialTasks; radial_task += 3){
-            if(radial_task > 0){
-                int i_theta = radial_task + additionalRadialTasks;    
-                RADIAL_SECTION_APPLY_RESIDUAL_GIVE(i_theta);
-            } else{
-                if(additionalRadialTasks == 0){
-                    RADIAL_SECTION_APPLY_RESIDUAL_GIVE(0);
-                } 
-                else if(additionalRadialTasks >= 1){
-                    RADIAL_SECTION_APPLY_RESIDUAL_GIVE(0);
-                    RADIAL_SECTION_APPLY_RESIDUAL_GIVE(1);
-                }
-            }
-        }
-        #pragma omp barrier
-        /* Mod 1 Radials */
-        #pragma omp for
-        for (int radial_task = 1; radial_task < numRadialTasks; radial_task += 3){
-            if(radial_task > 1){
-                int i_theta = radial_task + additionalRadialTasks;    
-                RADIAL_SECTION_APPLY_RESIDUAL_GIVE(i_theta);
-            } else {
-                if(additionalRadialTasks == 0){
-                    RADIAL_SECTION_APPLY_RESIDUAL_GIVE(1);
-                } 
-                else if(additionalRadialTasks == 1){
-                    RADIAL_SECTION_APPLY_RESIDUAL_GIVE(2);
-                }
-                else if(additionalRadialTasks == 2){
-                    RADIAL_SECTION_APPLY_RESIDUAL_GIVE(2);
-                    RADIAL_SECTION_APPLY_RESIDUAL_GIVE(3);
-                }
-            }
-        }
-        #pragma omp barrier
-        /* Mod 2 Radials */
-        #pragma omp for
-        for (int radial_task = 2; radial_task < numRadialTasks; radial_task += 3){
-            int i_theta = radial_task + additionalRadialTasks;    
-            RADIAL_SECTION_APPLY_RESIDUAL_GIVE(i_theta);
-        }
-    }
-}
-
-
-
-/* ------------------------- */
-/* result = f + factor * A*x */
-void Residual::computeResidual_V3(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const{
-    assert(result.size() == x.size());
-
-    const double factor = -1.0;
-
-    omp_set_num_threads(maxOpenMPThreads_);
-    assign(result, 0.0);
-
-    // ------------------------ //
-    // Custom Task Distribution //
-    // ------------------------ //
-    const int numThreads = omp_get_max_threads();
-    omp_set_num_threads(numThreads);
-    const int minimalChunkSize = 4;
-    const int zone = 2;
-
-    // Distribute Tasks to each thread
-    TaskDistribution CircleSmootherTasks(grid_.numberSmootherCircles(), minimalChunkSize, numThreads);
-    TaskDistribution RadialSmootherTasks(grid_.ntheta(), minimalChunkSize, numThreads);
-
-    #pragma omp parallel num_threads(maxOpenMPThreads_) /* Outside variable are shared by default */
-    {
-        /* Define thread-local variables */
-        double r, theta;
-        double sin_theta, cos_theta;
-        double arr, att, art;
-        double coeff_alpha, coeff_beta;
-        double detDF;
-
-        const int threadID = omp_get_thread_num();
-        // ----------------------------------------------------------- //
-        // Take care of the separation strips of the circular smoother //
-        // ----------------------------------------------------------- //
-        const int circle_task_start = CircleSmootherTasks.getStart(threadID);
-        const int circle_task_end = CircleSmootherTasks.getEnd(threadID);
-        const int circle_task_separation = std::min(circle_task_end - circle_task_start, zone);
-
-        for (int circle_task = circle_task_start; circle_task < circle_task_start + circle_task_separation; circle_task++){
-            int i_r = grid_.numberSmootherCircles() - circle_task - 1;    
-            CIRCLE_SECTION_APPLY_RESIDUAL_GIVE(i_r);
-        }
-        
-        #pragma omp barrier
-
-        // -------------------------------------------------------- //
-        // Take care of the separation strips of the radial smoother //
-        // -------------------------------------------------------- //
-        const int radial_task_start = RadialSmootherTasks.getStart(threadID);
-        const int radial_task_end = RadialSmootherTasks.getEnd(threadID);
-        const int radial_task_separation = std::min(radial_task_end-radial_task_start, zone);
-
-        for (int radial_task = radial_task_start; radial_task < radial_task_start + radial_task_separation; radial_task++){
-            int i_theta = radial_task;  
-            RADIAL_SECTION_APPLY_RESIDUAL_GIVE(i_theta);
-        }
-
-        #pragma omp barrier
-
-        // ------------------------------------------ //
-        // Take care of the circular smoother section //
-        // ------------------------------------------ //
-        for (int circle_task = circle_task_start + circle_task_separation; circle_task < circle_task_end; circle_task++){
-            int i_r = grid_.numberSmootherCircles() - circle_task - 1;    
-            CIRCLE_SECTION_APPLY_RESIDUAL_GIVE(i_r);
-        }
-
-        // ---------------------------------------- //
-        // Take care of the radial smoother section //
-        // ---------------------------------------- //
-        for (int radial_task = radial_task_start + radial_task_separation; radial_task < radial_task_end; radial_task++){
-            int i_theta = radial_task;  
-            RADIAL_SECTION_APPLY_RESIDUAL_GIVE(i_theta);
-        }
+        delete[] circle_dep;
+        delete[] radial_dep;
     }
 }

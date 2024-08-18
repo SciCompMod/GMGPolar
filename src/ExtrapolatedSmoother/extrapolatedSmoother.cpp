@@ -1,10 +1,10 @@
-#include "../../include/Smoother/smoother.h"
+#include "../../include/ExtrapolatedSmoother/extrapolated_smoother.h"
 
-Smoother::Smoother(const PolarGrid& grid, const LevelCache& level_cache, 
-                   const DomainGeometry& domain_geometry,
-                   bool DirBC_Interior, int num_omp_threads
+ExtrapolatedSmoother::ExtrapolatedSmoother(const PolarGrid& grid, const LevelCache& level_cache, 
+                                           const DomainGeometry& domain_geometry, 
+                                           const bool DirBC_Interior, const int num_omp_threads
 ) :
-    grid_(grid),
+    grid_(grid), 
     sin_theta_cache_(level_cache.sin_theta()),
     cos_theta_cache_(level_cache.cos_theta()),
     coeff_alpha_cache_(level_cache.coeff_alpha()),
@@ -17,7 +17,7 @@ Smoother::Smoother(const PolarGrid& grid, const LevelCache& level_cache,
     initializeMumpsSolver(inner_boundary_mumps_solver_, inner_boundary_circle_matrix_);    
 }
 
-Smoother::~Smoother(){
+ExtrapolatedSmoother::~ExtrapolatedSmoother(){
     finalizeMumpsSolver(inner_boundary_mumps_solver_);
 }
 

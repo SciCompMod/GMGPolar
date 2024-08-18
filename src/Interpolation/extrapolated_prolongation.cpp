@@ -3,19 +3,19 @@
 void Interpolation::applyExtrapolatedProlongation0(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const {
     assert(toLevel.level() == fromLevel.level() - 1);
 
-    omp_set_num_threads(maxOpenMPThreads_);
+    omp_set_num_threads(threads_per_level_[toLevel.level()]);
 
     const PolarGrid& coarseGrid = fromLevel.grid();
     const PolarGrid& fineGrid = toLevel.grid();
 
-    assert(x.size() == coarseGrid.number_of_nodes());
-    assert(result.size() == fineGrid.number_of_nodes());
+    assert(x.size() == coarseGrid.numberOfNodes());
+    assert(result.size() == fineGrid.numberOfNodes());
 
     #pragma omp parallel for
-    for (int index = 0; index < fineGrid.number_of_nodes(); index++) {
+    for (int index = 0; index < fineGrid.numberOfNodes(); index++) {
         std::array<std::pair<double,double>, space_dimension> neighbor_distance;
 
-        MultiIndex fine_node = fineGrid.multiindex(index);
+        MultiIndex fine_node = fineGrid.multiIndex(index);
         MultiIndex coarse_node(fine_node[0] / 2, fine_node[1] / 2); // Nearest lower left coarse node in the fine grid.
 
         if(fine_node[0] % 2 == 0 && fine_node[1] % 2 == 0){
@@ -106,15 +106,15 @@ do { \
 void Interpolation::applyExtrapolatedProlongation(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const{
     assert(toLevel.level() == fromLevel.level() - 1);
 
-    omp_set_num_threads(maxOpenMPThreads_);
+    omp_set_num_threads(threads_per_level_[toLevel.level()]);
 
     const PolarGrid& coarseGrid = fromLevel.grid();
     const PolarGrid& fineGrid = toLevel.grid();
 
-    assert(x.size() == coarseGrid.number_of_nodes());
-    assert(result.size() == fineGrid.number_of_nodes());
+    assert(x.size() == coarseGrid.numberOfNodes());
+    assert(result.size() == fineGrid.numberOfNodes());
 
-    #pragma omp parallel num_threads(maxOpenMPThreads_) if(fineGrid.number_of_nodes() > 10'000)
+    #pragma omp parallel if(fineGrid.numberOfNodes() > 10'000)
     {
         /* Circluar Indexing Section */
         /* For loop matches circular access pattern */

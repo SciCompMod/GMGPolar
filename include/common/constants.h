@@ -64,7 +64,6 @@ enum class BetaCoeff
     ALPHA_INVERSE = 1
 };
 
-
 /* ---------------------------- */
 /* Mumps - Constant Definitions */
 /* ---------------------------- */
@@ -90,3 +89,7 @@ enum class BetaCoeff
 #define JOB_SAVE_INTERNAL_DATA 7
 #define JOB_RESTORE_INTERNAL_DATA 8
 #define JOB_DISTRIBUTE_RHS 9
+
+#define SYM_UNSYMMETRIC 0
+#define SYM_POSITIVE_DEFINITE 1
+#define SYM_GENERAL_SYMMETRIC 2

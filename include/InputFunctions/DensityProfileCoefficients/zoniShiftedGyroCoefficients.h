@@ -17,7 +17,5 @@ public:
 
 private:
     const double Rmax = 1.3;
-    const double alpha_jump = 0.7081;
+    const double alpha_jump = 0.7081 * 1.3;
 };
-
-#include "zoniShiftedGyroCoefficients.inl"

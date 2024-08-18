@@ -10,7 +10,9 @@
 // #include "../include/InputFunctions/DomainGeometry/culhamGeometry.h"
 
 // #include "../include/InputFunctions/exactSolution.h"
-// #include "../include/InputFunctions/systemParameters.h"
+// #include "../InputFunctions/densityProfileCoefficients.h"
+// #include "../InputFunctions/boundaryConditions.h"
+// #include "../InputFunctions/sourceTerm.h"
 
 // #include "../include/InputFunctions/ExactSolution/cartesianR2_CircularGeometry.h"
 
@@ -27,8 +29,6 @@ int main(int argc, char* argv[]){
         std::cout << "Build Type: Debug\n"<<std::endl;
     #endif
 
-    std::cout << std::scientific  << std::setprecision(10);
-
     GMGPolar solver;
 
     // Configure solver parameters from command-line arguments
@@ -41,6 +41,10 @@ int main(int argc, char* argv[]){
     // Recover solution
     Vector<double>& solution = solver.solution();
     const PolarGrid& grid = solver.grid();
+
+
+
+    
 
     // Print Timings
     solver.printTimings();

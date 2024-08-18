@@ -3,17 +3,17 @@
 void Interpolation::applyInjection(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const{
     assert(toLevel.level() == fromLevel.level() + 1);
 
-    omp_set_num_threads(maxOpenMPThreads_);
+    omp_set_num_threads(threads_per_level_[toLevel.level()]);
 
     const PolarGrid& fineGrid = fromLevel.grid();
     const PolarGrid& coarseGrid = toLevel.grid();
 
-    assert(x.size() == fineGrid.number_of_nodes());
-    assert(result.size() == coarseGrid.number_of_nodes());
+    assert(x.size() == fineGrid.numberOfNodes());
+    assert(result.size() == coarseGrid.numberOfNodes());
 
     const int coarseNumberSmootherCircles = coarseGrid.numberSmootherCircles();
 
-    #pragma omp parallel num_threads(maxOpenMPThreads_) if(fineGrid.number_of_nodes() > 10'000)
+    #pragma omp parallel if(fineGrid.numberOfNodes() > 10'000)
     {
         /* For loop matches circular access pattern */
         #pragma omp for nowait

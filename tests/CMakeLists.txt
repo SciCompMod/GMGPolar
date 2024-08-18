@@ -47,7 +47,7 @@ file(GLOB_RECURSE EXACT_SOLUTION_SOURCES "../src/InputFunctions/ExactSolution/*.
 file(GLOB_RECURSE BOUNDARY_CONDITION_SOURCES "../src/InputFunctions/BoundaryConditions/*.cpp")
 file(GLOB_RECURSE SOURCE_TERMS_SOURCES "../src/InputFunctions/SourceTerms/*.cpp")
 
-# Create static libraries from source files
+Create static libraries from source files
 add_library(GMGPolarLib STATIC
     ${GMG_POLAR_SOURCES}
     ${MULTIGRID_METHODS_SOURCES}
@@ -136,41 +136,5 @@ add_executable(test_extrapolated_smoother ExtrapolatedSmoother/extrapolated_smoo
 target_compile_features(test_extrapolated_smoother PRIVATE cxx_std_17)
 target_link_libraries(test_extrapolated_smoother GMGPolarLib GTest::gtest_main ${MUMPS_LIBRARIES})
 add_test(NAME test_extrapolated_smoother COMMAND test_extrapolated_smoother)
-
-
-
-
-
-# # Set the list of test sources
-# set(TestToRun
-#     LinearAlgebra/vector.cpp  <- Vector
-#     LinearAlgebra/vector_operations.cpp <- Vector
-#     LinearAlgebra/matrix.cpp <- Matrix
-#     LinearAlgebra/tridiagonal_solver.cpp <- ThomasAlgorithm
-#     LinearAlgebra/cyclic_tridiagonal_solver.cpp <- ThomasAlgorithm
-#     PolarGrid/polargrid.cpp <- PolarGrid
-#     Interpolation/prolongation.cpp <- Interpoaltion
-#     Interpolation/restriction.cpp <- Interpoaltion
-#     Interpolation/extrapolated_prolongation.cpp <- Interpoaltion
-#     Interpolation/extrapolated_restriction.cpp <- Interpoaltion
-#     Residual/residual.cpp <- Residual
-#     DirectSolver/directSolver.cpp <- DirectSolver
-#     Smoother/smoother.cpp <- Smoother
-#     ExtrapolatedSmoother/extrapolated_smoother.cpp <- ExtrapolatedSmoother
-# )
-# # Create the test source list
-# set(Tests CommonTests.cpp ${TestToRun})
-
-# # Add the executable
-# add_executable(CommonTests ${Tests})
-
-# # Add all the ADD_TEST for each test
-# foreach(test ${TestToRun})
-#   get_filename_component(TName ${test} NAME_WE)
-#   add_test(NAME ${TName} COMMAND CommonTests ${TName})
-# endforeach()
-
-# # Link the libraries
-# target_link_libraries(CommonTests GMGPolarLib GTest::gtest_main ${MUMPS_LIBRARIES})
 
 include(GoogleTest)

@@ -4,6 +4,9 @@ void PolarGrid::RadialAnisotropicDivision(std::vector<double>& r_temp,
     const double& R0, const double& R, const int nr_exp, const double& refinement_radius,
     const int anisotropic_factor) const 
 {
+    // Calculate the percentage of refinement_radius.
+    const double percentage = (refinement_radius - R0) / (R - R0);
+
     // 1) uniform division with nr=2^dummy_lognr - 2^aniso
     // 2) remaining nodes are added by refining the part centered around 2/3 of r
     std::set<double, std::greater<double>>::iterator itr, itr_p1;
@@ -32,12 +35,12 @@ void PolarGrid::RadialAnisotropicDivision(std::vector<double>& r_temp,
     int se;
 
     // Added by Allan Kuhn to fix a memory error
-    if (floor(nr * refinement_radius) > nr - (n_elems_refined / 2)) {
-        int new_aniso   = log2(nr - floor(nr * refinement_radius)) + 1;
+    if (floor(nr * percentage) > nr - (n_elems_refined / 2)) {
+        int new_aniso   = log2(nr - floor(nr * percentage)) + 1;
         n_elems_refined = pow(2, new_aniso);
     }
 
-    se = floor(nr * refinement_radius) - n_elems_refined / 2;
+    se = floor(nr * percentage) - n_elems_refined / 2;
     int ee = se + n_elems_refined;
     // takeout
     int st = ceil((double)n_elems_refined / 4.0 + 1) - 1;

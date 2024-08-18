@@ -5,15 +5,17 @@
 void Interpolation::applyExtrapolatedRestriction0(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const{
     assert(toLevel.level() == fromLevel.level() + 1);
 
+    omp_set_num_threads(threads_per_level_[toLevel.level()]);
+
     const PolarGrid& fineGrid = fromLevel.grid();
     const PolarGrid& coarseGrid = toLevel.grid();
 
-    assert(x.size() == fineGrid.number_of_nodes());
-    assert(result.size() == coarseGrid.number_of_nodes());
+    assert(x.size() == fineGrid.numberOfNodes());
+    assert(result.size() == coarseGrid.numberOfNodes());
 
     #pragma omp parallel for
-    for(int index = 0; index < coarseGrid.number_of_nodes(); index ++){
-        MultiIndex coarse_node = coarseGrid.multiindex(index);
+    for(int index = 0; index < coarseGrid.numberOfNodes(); index ++){
+        MultiIndex coarse_node = coarseGrid.multiIndex(index);
         MultiIndex fine_node(2*coarse_node[0], 2*coarse_node[1]);
 
         std::array<std::pair<int,int>, space_dimension> neighbors;
@@ -21,7 +23,7 @@ void Interpolation::applyExtrapolatedRestriction0(const Level& fromLevel, const 
         // Center
         double value = x[fineGrid.index(fine_node)];
 
-        fineGrid.adjacent_neighbors_of(fine_node, neighbors);
+        fineGrid.adjacentNeighborsOf(fine_node, neighbors);
 
         // Left
         if(neighbors[0].first != -1){
@@ -43,7 +45,7 @@ void Interpolation::applyExtrapolatedRestriction0(const Level& fromLevel, const 
             value += 0.5 * x[neighbors[1].second];
         }
 
-        fineGrid.diagonal_neighbors_of(fine_node, neighbors);
+        fineGrid.diagonalNeighborsOf(fine_node, neighbors);
 
         // Bottom Right
         if(neighbors[0].second != -1){
@@ -66,17 +68,17 @@ void Interpolation::applyExtrapolatedRestriction0(const Level& fromLevel, const 
 void Interpolation::applyExtrapolatedRestriction(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const{
     assert(toLevel.level() == fromLevel.level() + 1);
 
-    omp_set_num_threads(maxOpenMPThreads_);
+    omp_set_num_threads(threads_per_level_[toLevel.level()]);
 
     const PolarGrid& fineGrid = fromLevel.grid();
     const PolarGrid& coarseGrid = toLevel.grid();
 
-    assert(x.size() == fineGrid.number_of_nodes());
-    assert(result.size() == coarseGrid.number_of_nodes());
+    assert(x.size() == fineGrid.numberOfNodes());
+    assert(result.size() == coarseGrid.numberOfNodes());
 
     const int coarseNumberSmootherCircles = coarseGrid.numberSmootherCircles();
 
-    #pragma omp parallel num_threads(maxOpenMPThreads_) if(fineGrid.number_of_nodes() > 10'000)
+    #pragma omp parallel if(fineGrid.numberOfNodes() > 10'000)
     {
         /* For loop matches circular access pattern */
         #pragma omp for nowait
@@ -86,8 +88,9 @@ void Interpolation::applyExtrapolatedRestriction(const Level& fromLevel, const L
                 int i_theta = i_theta_coarse << 1;
 
                 if(0 < i_r_coarse && i_r_coarse < coarseNumberSmootherCircles-1){
-                    int i_theta_M1 = fineGrid.wrap_theta_index(i_theta-1);
-                    int i_theta_P1 = fineGrid.wrap_theta_index(i_theta+1);
+                    int i_theta_M1 = fineGrid.wrapThetaIndex(i_theta-1);
+                    int i_theta_P1 = fineGrid.wrapThetaIndex(i_theta+1);
+
                     result[coarseGrid.index(i_r_coarse,i_theta_coarse)] =   
                         // Center
                         x[fineGrid.index(i_r,i_theta)] +
@@ -101,8 +104,8 @@ void Interpolation::applyExtrapolatedRestriction(const Level& fromLevel, const L
                         0.5 * x[fineGrid.index(i_r-1, i_theta_P1)];
                 } else{
                     /* First and Last Circle have to be checked for domain boundary */
-                    int i_theta_M1 = fineGrid.wrap_theta_index(i_theta-1);
-                    int i_theta_P1 = fineGrid.wrap_theta_index(i_theta+1);
+                    int i_theta_M1 = fineGrid.wrapThetaIndex(i_theta-1);
+                    int i_theta_P1 = fineGrid.wrapThetaIndex(i_theta+1);
                     // Center, Bottom, Top
                     double value = x[fineGrid.index(i_r,i_theta)] +
                         0.5 * x[fineGrid.index(i_r, i_theta_M1)] +
@@ -133,8 +136,9 @@ void Interpolation::applyExtrapolatedRestriction(const Level& fromLevel, const L
                 int i_r = i_r_coarse << 1;
 
                 if(coarseGrid.numberSmootherCircles() < i_r_coarse && i_r_coarse < coarseGrid.nr()-1){
-                    int i_theta_M1 = fineGrid.wrap_theta_index(i_theta-1);
-                    int i_theta_P1 = fineGrid.wrap_theta_index(i_theta+1);
+                    int i_theta_M1 = fineGrid.wrapThetaIndex(i_theta-1);
+                    int i_theta_P1 = fineGrid.wrapThetaIndex(i_theta+1);
+
                     result[coarseGrid.index(i_r_coarse,i_theta_coarse)] =   
                         // Center
                         x[fineGrid.index(i_r,i_theta)] +
@@ -148,8 +152,8 @@ void Interpolation::applyExtrapolatedRestriction(const Level& fromLevel, const L
                         0.5 * x[fineGrid.index(i_r-1, i_theta_P1)];
                 } else{
                     /* First and Last radial nodes have to be checked for domain boundary */
-                    int i_theta_M1 = fineGrid.wrap_theta_index(i_theta-1);
-                    int i_theta_P1 = fineGrid.wrap_theta_index(i_theta+1);
+                    int i_theta_M1 = fineGrid.wrapThetaIndex(i_theta-1);
+                    int i_theta_P1 = fineGrid.wrapThetaIndex(i_theta+1);
                     // Center, Bottom, Top
                     double value = x[fineGrid.index(i_r,i_theta)] +
                         0.5 * x[fineGrid.index(i_r, i_theta_M1)] +

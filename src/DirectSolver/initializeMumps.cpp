@@ -1,6 +1,6 @@
-#include "../../include/ExtrapolatedSmoother/extrapolated_smoother.h"
+#include "../../include/DirectSolver/directSolver.h"
 
-void ExtrapolatedSmoother::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const SparseMatrix<double>& solver_matrix){
+void DirectSolver::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const SparseMatrix<double>& solver_matrix){
     mumps_solver.job = JOB_INIT;
     mumps_solver.par = 1;
     /* SYM_POSITIVE_DEFINITE or SYM_GENERAL_SYMMETRIC? */
@@ -78,7 +78,19 @@ void ExtrapolatedSmoother::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, c
     dmumps_c(&mumps_solver);
 }
 
-void ExtrapolatedSmoother::finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver){
+void DirectSolver::solveWithMumps(Vector<double>& result_rhs){
+    mumps_solver_.job = JOB_COMPUTE_SOLUTION;
+    mumps_solver_.nrhs = 1;
+    mumps_solver_.nz_rhs = result_rhs.size();
+    mumps_solver_.rhs = result_rhs.begin();
+    mumps_solver_.lrhs = result_rhs.size();
+    dmumps_c(&mumps_solver_);
+    if (mumps_solver_.info[0] != 0) {
+        std::cerr << "Error solving the direct system: " << mumps_solver_.info[0] << std::endl;
+    }
+}
+
+void DirectSolver::finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver){
     mumps_solver.job = JOB_END;
     dmumps_c(&mumps_solver);
 }

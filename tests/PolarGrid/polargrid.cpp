@@ -15,10 +15,7 @@ TEST(PolarGridTest, NumberOfNodes) {
     std::vector<double> radii = {0.1, 0.2, 0.5, 0.9, 1.3};
     std::vector<double> angles = {0, M_PI/8, M_PI/2, M_PI, M_PI+M_PI/8, M_PI+M_PI/2, M_PI+M_PI};
     PolarGrid grid(radii, angles);
-    ASSERT_EQ(grid.number_of_nodes(), radii.size() * (angles.size()-1));
-    ASSERT_EQ(grid.number_of_inner_nodes(), (radii.size()-2) * (angles.size()-1));
-    ASSERT_EQ(grid.number_of_inner_boundary_nodes(), angles.size()-1);
-    ASSERT_EQ(grid.number_of_outer_boundary_nodes(), angles.size()-1);
+    ASSERT_EQ(grid.numberOfNodes(), radii.size() * (angles.size()-1));
 }
 
 TEST(PolarGridTest, AccessorsTest) {
@@ -58,14 +55,14 @@ TEST(PolarGridTest, IndexingTest) {
         for(int j=0; j < grid.ntheta(); j++) {
             MultiIndex alpha(i,j);
             int node_index = grid.index(alpha);
-            MultiIndex beta = grid.multiindex(node_index);
+            MultiIndex beta = grid.multiIndex(node_index);
             ASSERT_EQ(alpha[0], beta[0]);
             ASSERT_EQ(alpha[1], beta[1]); 
         }
     }
 
-    for(int i=0; i < grid.number_of_nodes(); i++) {
-        MultiIndex alpha = grid.multiindex(i);
+    for(int i=0; i < grid.numberOfNodes(); i++) {
+        MultiIndex alpha = grid.multiIndex(i);
         int node_index = grid.index(alpha);
         ASSERT_EQ(node_index, i); 
     }
@@ -81,7 +78,7 @@ TEST(PolarGridTest, IndexingValuesTest) {
         MultiIndex alpha(2,6);
         int node_index = grid.index(alpha);
         ASSERT_EQ(node_index, 22);
-        MultiIndex beta = grid.multiindex(node_index);
+        MultiIndex beta = grid.multiIndex(node_index);
         ASSERT_EQ(alpha[0], beta[0]);
         ASSERT_EQ(alpha[1], beta[1]);
     }
@@ -90,7 +87,7 @@ TEST(PolarGridTest, IndexingValuesTest) {
         MultiIndex alpha(3,2);
         int node_index = grid.index(alpha);
         ASSERT_EQ(node_index, 26);
-        MultiIndex beta = grid.multiindex(node_index);
+        MultiIndex beta = grid.multiIndex(node_index);
         ASSERT_EQ(alpha[0], beta[0]);
         ASSERT_EQ(alpha[1], beta[1]);
     }
@@ -99,7 +96,7 @@ TEST(PolarGridTest, IndexingValuesTest) {
         MultiIndex alpha(6,4);
         int node_index = grid.index(alpha);
         ASSERT_EQ(node_index, 54);
-        MultiIndex beta = grid.multiindex(node_index);
+        MultiIndex beta = grid.multiIndex(node_index);
         ASSERT_EQ(alpha[0], beta[0]);
         ASSERT_EQ(alpha[1], beta[1]);
     }
@@ -108,7 +105,7 @@ TEST(PolarGridTest, IndexingValuesTest) {
         MultiIndex alpha(4,7);
         int node_index = grid.index(alpha);
         ASSERT_EQ(node_index, 67);
-        MultiIndex beta = grid.multiindex(node_index);
+        MultiIndex beta = grid.multiIndex(node_index);
         ASSERT_EQ(alpha[0], beta[0]);
         ASSERT_EQ(alpha[1], beta[1]);
     }
@@ -121,13 +118,13 @@ TEST(PolarGridTest, CoordinatesTest) {
     PolarGrid grid(radii, angles, jump_radius);
     
     MultiIndex alpha(3,2);
-    Point P1 = grid.polar_coordinates(alpha);
+    Point P1 = grid.polarCoordinates(alpha);
     ASSERT_DOUBLE_EQ(P1[0], 0.5);
     ASSERT_DOUBLE_EQ(P1[1], M_PI/8);
         
     alpha[0] += 4;
     alpha[1] -= 1;
-    P1 = grid.polar_coordinates(alpha);
+    P1 = grid.polarCoordinates(alpha);
     ASSERT_DOUBLE_EQ(P1[0], 1.4);
     ASSERT_DOUBLE_EQ(P1[1], M_PI/16);
 }
@@ -141,7 +138,7 @@ TEST(PolarGridTest, NeighborDistanceTest) {
     std::array<std::pair<double,double>,space_dimension> neighbor_distance;
     {
         MultiIndex alpha(3,2);
-        grid.adjacent_neighbor_distances(alpha, neighbor_distance);
+        grid.adjacentNeighborDistances(alpha, neighbor_distance);
         ASSERT_DOUBLE_EQ(neighbor_distance[0].first, 0.5 - 0.25);
         ASSERT_DOUBLE_EQ(neighbor_distance[0].second, 0.8 - 0.5);
         ASSERT_DOUBLE_EQ(neighbor_distance[1].first, M_PI/8 - M_PI/16);
@@ -150,7 +147,7 @@ TEST(PolarGridTest, NeighborDistanceTest) {
 
     {
         MultiIndex alpha(8,7);
-        grid.adjacent_neighbor_distances(alpha, neighbor_distance);
+        grid.adjacentNeighborDistances(alpha, neighbor_distance);
         ASSERT_DOUBLE_EQ(neighbor_distance[0].first, 2.0 - 1.4);
         ASSERT_DOUBLE_EQ(neighbor_distance[0].second, 0.0);
         ASSERT_DOUBLE_EQ(neighbor_distance[1].first, M_PI/2 - M_PI/8);
@@ -159,7 +156,7 @@ TEST(PolarGridTest, NeighborDistanceTest) {
 
     {
         MultiIndex alpha(4,0);
-        grid.adjacent_neighbor_distances(alpha, neighbor_distance);
+        grid.adjacentNeighborDistances(alpha, neighbor_distance);
         ASSERT_DOUBLE_EQ(neighbor_distance[0].first, 0.8 - 0.5);
         ASSERT_DOUBLE_EQ(neighbor_distance[0].second, 0.9 - 0.8);
         ASSERT_DOUBLE_EQ(neighbor_distance[1].first, M_PI/2);
@@ -168,7 +165,7 @@ TEST(PolarGridTest, NeighborDistanceTest) {
 
     {
         MultiIndex alpha(0,5);
-        grid.adjacent_neighbor_distances(alpha, neighbor_distance);
+        grid.adjacentNeighborDistances(alpha, neighbor_distance);
         ASSERT_DOUBLE_EQ(neighbor_distance[0].first, 0.0);
         ASSERT_DOUBLE_EQ(neighbor_distance[0].second, 0.2 - 0.1);
         ASSERT_NEAR(neighbor_distance[1].first, M_PI/16, 1e-15);
@@ -189,12 +186,12 @@ TEST(PolarGridTest, NeighborsTest) {
 
     {
         MultiIndex alpha(3,2);
-        grid.adjacent_neighbors_of(alpha, neighbors);
+        grid.adjacentNeighborsOf(alpha, neighbors);
         ASSERT_EQ(neighbors[0].first, 18);
         ASSERT_EQ(neighbors[0].second, 42);
         ASSERT_EQ(neighbors[1].first, 25);
         ASSERT_EQ(neighbors[1].second, 27);
-        grid.diagonal_neighbors_of(alpha, neighbors);
+        grid.diagonalNeighborsOf(alpha, neighbors);
         ASSERT_EQ(neighbors[0].first, 17);
         ASSERT_EQ(neighbors[0].second, 37);
         ASSERT_EQ(neighbors[1].first, 19);
@@ -203,12 +200,12 @@ TEST(PolarGridTest, NeighborsTest) {
 
     {
         MultiIndex alpha(8,7);
-        grid.adjacent_neighbors_of(alpha, neighbors);
+        grid.adjacentNeighborsOf(alpha, neighbors);
         ASSERT_EQ(neighbors[0].first, 70);
         ASSERT_EQ(neighbors[0].second, -1);
         ASSERT_EQ(neighbors[1].first, 66);
         ASSERT_EQ(neighbors[1].second, 36);
-        grid.diagonal_neighbors_of(alpha, neighbors);
+        grid.diagonalNeighborsOf(alpha, neighbors);
         ASSERT_EQ(neighbors[0].first, 65);
         ASSERT_EQ(neighbors[0].second, -1);
         ASSERT_EQ(neighbors[1].first, 35);
@@ -217,12 +214,12 @@ TEST(PolarGridTest, NeighborsTest) {
 
     {
         MultiIndex alpha(4,0);
-        grid.adjacent_neighbors_of(alpha, neighbors);
+        grid.adjacentNeighborsOf(alpha, neighbors);
         ASSERT_EQ(neighbors[0].first, 24);
         ASSERT_EQ(neighbors[0].second, 33);
         ASSERT_EQ(neighbors[1].first, 67);
         ASSERT_EQ(neighbors[1].second, 37);
-        grid.diagonal_neighbors_of(alpha, neighbors);
+        grid.diagonalNeighborsOf(alpha, neighbors);
         ASSERT_EQ(neighbors[0].first, 31);
         ASSERT_EQ(neighbors[0].second, 68);
         ASSERT_EQ(neighbors[1].first, 25);
@@ -231,12 +228,12 @@ TEST(PolarGridTest, NeighborsTest) {
 
     {
         MultiIndex alpha(0,5);
-        grid.adjacent_neighbors_of(alpha, neighbors);
+        grid.adjacentNeighborsOf(alpha, neighbors);
         ASSERT_EQ(neighbors[0].first, -1);
         ASSERT_EQ(neighbors[0].second, 13);
         ASSERT_EQ(neighbors[1].first, 4);
         ASSERT_EQ(neighbors[1].second, 6);
-        grid.diagonal_neighbors_of(alpha, neighbors);
+        grid.diagonalNeighborsOf(alpha, neighbors);
         ASSERT_EQ(neighbors[0].first, -1);
         ASSERT_EQ(neighbors[0].second, 12);
         ASSERT_EQ(neighbors[1].first, -1);

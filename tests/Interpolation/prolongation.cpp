@@ -4,43 +4,47 @@
 
 #include "../../include/GMGPolar/gmgpolar.h"
 #include "../../include/Interpolation/interpolation.h"
+#include "../../include/InputFunctions/DensityProfileCoefficients/poissonCoefficients.h"
 
-// Function to generate sample data for vector x using random values with seed
-Vector<double> generate_random_sample_data_Prolongation(const PolarGrid& grid, unsigned int seed) {
-    Vector<double> x(grid.number_of_nodes());
-    std::mt19937 gen(seed);  // Standard mersenne_twister_engine seeded with seed
-    std::uniform_real_distribution<double> dist(0.0, 1.0);  // Generate random double between 0 and 1
-    for (size_t i = 0; i < x.size(); ++i) {
-        x[i] = dist(gen);
+namespace ProlongationTest {
+    Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed) {
+        Vector<double> x(grid.numberOfNodes());
+        std::mt19937 gen(seed);
+        std::uniform_real_distribution<double> dist(-100.0, 100.0); 
+        for (size_t i = 0; i < x.size(); ++i) {
+            x[i] = dist(gen);
+        }
+        return x;
     }
-    return x;
 }
 
-TEST(ProlongationTest, ProlongationSmoothingRadius) {
+using namespace ProlongationTest;
+
+TEST(ProlongationTest, ProlongationTest) {
     std::vector<double> fine_radii = {0.1, 0.2, 0.25, 0.5, 0.8, 0.9, 1.3, 1.4, 2.0};
     std::vector<double> fine_angles = {0, M_PI/16, M_PI/8, M_PI/2, M_PI, M_PI+M_PI/16, M_PI+M_PI/8, M_PI+M_PI/2, M_PI+M_PI};
 
     auto finest_grid = std::make_unique<PolarGrid>(fine_radii, fine_angles);
     auto coarse_grid = std::make_unique<PolarGrid>(coarseningGrid(*finest_grid));
 
-    auto finest_levelCache = std::make_unique<LevelCache>(*finest_grid);
-    auto coarse_levelCache = std::make_unique<LevelCache>(*coarse_grid);
+    std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<PoissonCoefficients>();
+    auto finest_levelCache = std::make_unique<LevelCache>(*finest_grid, *coefficients);
+    auto coarse_levelCache = std::make_unique<LevelCache>(*coarse_grid, *coefficients);
 
     int extrapolation = 0;
     Level finest_level(0, std::move(finest_grid), std::move(finest_levelCache), extrapolation);
     Level coarse_level(1, std::move(coarse_grid), std::move(coarse_levelCache), extrapolation);
 
-    const int maxOpenMPThreads = 5;
-    const std::vector<int> taskingThreads = {5,5};
+    const int maxOpenMPThreads = 16;
+    const std::vector<int> threads_per_level = {maxOpenMPThreads, maxOpenMPThreads};
     
-    Interpolation interpolation_operator(maxOpenMPThreads, taskingThreads);
+    Interpolation interpolation_operator(threads_per_level);
 
-    unsigned int seed = 42;
-    Vector<double> x = generate_random_sample_data_Prolongation(coarse_level.grid(), seed);
+    Vector<double> x = generate_random_sample_data(coarse_level.grid(), 42);
 
     // Apply prolongation to both functions
-    Vector<double> result1(finest_level.grid().number_of_nodes());
-    Vector<double> result2(finest_level.grid().number_of_nodes());
+    Vector<double> result1(finest_level.grid().numberOfNodes());
+    Vector<double> result2(finest_level.grid().numberOfNodes());
 
     interpolation_operator.applyProlongation0(coarse_level, finest_level, result1, x);
     interpolation_operator.applyProlongation(coarse_level, finest_level, result2, x);
