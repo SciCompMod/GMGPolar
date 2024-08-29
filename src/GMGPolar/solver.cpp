@@ -29,10 +29,11 @@ void GMGPolar::solve() {
     double initial_residual_norm; 
     double current_residual_norm, current_relative_residual_norm;
 
-    exact_solution_ = nullptr;
-
     while(number_of_iterations_ < max_iterations_){
-        std::cout<<"\nIteration: "<< number_of_iterations_ << std::endl;
+
+        if(verbose_ > 0) {
+            std::cout<<"\nIteration: "<< number_of_iterations_ << std::endl;
+        }
 
         /* ---------------------------------------------- */
         /* Test solution against exact solution if given. */
@@ -46,8 +47,10 @@ void GMGPolar::solve() {
             auto end_check_exact_error = std::chrono::high_resolution_clock::now();
             t_check_exact_error += std::chrono::duration<double>(end_check_exact_error - start_check_exact_error).count();
 
-            std::cout << "Exact Weighted-Euclidean Error: " << exact_error.first << std::endl;
-            std::cout << "Exact Infinity Error: " << exact_error.second << std::endl;
+            if(verbose_ > 0) {
+                std::cout << "Exact Weighted-Euclidean Error: " << exact_error.first << std::endl;
+                std::cout << "Exact Infinity Error: " << exact_error.second << std::endl;
+            }
         }
 
         /* ---------------------------- */
@@ -90,8 +93,10 @@ void GMGPolar::solve() {
             auto end_check_convergence = std::chrono::high_resolution_clock::now();
             t_check_convergence += std::chrono::duration<double>(end_check_convergence - start_check_convergence).count();
 
-            std::cout<< "Residual Norm: " << current_residual_norm <<std::endl;
-            std::cout<< "Relative Residual Norm: " << current_relative_residual_norm <<std::endl;
+            if(verbose_ > 0) {
+                std::cout<< "Residual Norm: " << current_residual_norm <<std::endl;
+                std::cout<< "Relative Residual Norm: " << current_relative_residual_norm <<std::endl;
+            }
 
             if(converged(current_residual_norm, current_relative_residual_norm)) break;
         }
@@ -148,8 +153,10 @@ void GMGPolar::solve() {
         /* -------------------------------- */
         mean_residual_reduction_factor_ = std::pow(current_residual_norm / initial_residual_norm, 1.0 / number_of_iterations_);
 
-        std::cout<<"\nTotal Iterations: "<<number_of_iterations_<<std::endl;
-        std::cout<<"Mean Residual Reduction Factor Rho: "<< mean_residual_reduction_factor_ <<std::endl;
+        if(verbose_ > 0) {
+            std::cout<<"\nTotal Iterations: "<<number_of_iterations_<<std::endl;
+            std::cout<<"Mean Residual Reduction Factor Rho: "<< mean_residual_reduction_factor_ <<std::endl;
+        }
     }
 
     auto end_solve = std::chrono::high_resolution_clock::now();

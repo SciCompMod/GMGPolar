@@ -12,15 +12,6 @@
 #include <unistd.h>
 #include <omp.h>
 
-#include <fstream>
-#include <iostream>
-
-
-
-#include "dmumps_c.h"
-#include <vector>
-#include <iostream>
-
 /* ------------------------------------------------------------------ */
 /* Thomas' algorithm is not stable in general,                        */
 /* but is so in several special cases, such as                        */
@@ -226,18 +217,24 @@ void SymmetricTridiagonalSolver<T>::solveInPlace(T* sol_rhs, T* temp1, T* temp2)
 // ------------------ //
 
 /* Algorithm based on: https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm */
+/* The algorithm is optimized for numerical stability by performing division */
+/* operations directly instead of multiplying by the inverse, reducing the risk of */
+/* precision errors. */
+
 template<typename T>
 void SymmetricTridiagonalSolver<T>::solve_symmetricTridiagonal(T* x, T* scratch) const{
     scratch[0] = sub_diagonal(0) / main_diagonal(0);
     x[0] /= main_diagonal(0);
 
     for (int i = 1; i < matrix_dimension_-1; i++){
-        scratch[i] = sub_diagonal(i) / (main_diagonal(i) - sub_diagonal(i-1) * scratch[i-1]);
-        x[i] = (x[i] - sub_diagonal(i-1) * x[i-1]) / (main_diagonal(i) - sub_diagonal(i-1) * scratch[i-1]);
+        const double divisor = main_diagonal(i) - sub_diagonal(i-1) * scratch[i-1];
+        scratch[i] = sub_diagonal(i) / divisor;
+        x[i] = (x[i] - sub_diagonal(i-1) * x[i-1]) / divisor;
     }
 
     const int i = matrix_dimension_-1;
-    x[i] = (x[i] - sub_diagonal(i-1) * x[i-1]) / (main_diagonal(i) - sub_diagonal(i-1) * scratch[i-1]);
+    const double divisor = main_diagonal(i) - sub_diagonal(i-1) * scratch[i-1];
+    x[i] = (x[i] - sub_diagonal(i-1) * x[i-1]) / divisor;
 
     for (int i = matrix_dimension_-2; i >= 0; i--){
         x[i] -= scratch[i] * x[i+1];
@@ -249,6 +246,10 @@ void SymmetricTridiagonalSolver<T>::solve_symmetricTridiagonal(T* x, T* scratch)
 // ------------------------- //
 
 /* Algorithm based on: https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm */
+/* The algorithm is optimized for numerical stability by performing division */
+/* operations directly instead of multiplying by the inverse, reducing the risk of */
+/* precision errors. */
+
 template<typename T>
 void SymmetricTridiagonalSolver<T>::solve_symmetricCyclicTridiagonal(T* x, T* u, T* scratch) const{
     const double gamma = -main_diagonal(0);
@@ -260,25 +261,25 @@ void SymmetricTridiagonalSolver<T>::solve_symmetricCyclicTridiagonal(T* x, T* u,
     u[0] = gamma / first_main_diagonal;
 
     for (int i = 1; i < matrix_dimension_-1; i++){
-        const double divisor = 1.0 / (main_diagonal(i) - sub_diagonal(i-1) * scratch[i-1]);
-        scratch[i] = sub_diagonal(i) * divisor;
-        x[i] = (x[i] - sub_diagonal(i-1) * x[i-1]) * divisor;
-        u[i] = (0.0 - sub_diagonal(i-1) * u[i-1]) * divisor;
+        const double divisor = main_diagonal(i) - sub_diagonal(i-1) * scratch[i-1];
+        scratch[i] = sub_diagonal(i) / divisor;
+        x[i] = (x[i] - sub_diagonal(i-1) * x[i-1]) / divisor;
+        u[i] = (0.0 - sub_diagonal(i-1) * u[i-1]) / divisor;
     }
 
     const int i = matrix_dimension_-1;
-    const double divisor = 1.0 / (last_main_diagonal - sub_diagonal(i-1) * scratch[i-1]);
-    x[i] = (x[i] - sub_diagonal(i-1) * x[i-1]) * divisor;
-    u[i] = (cyclic_corner_element() - sub_diagonal(i-1) * u[i-1]) * divisor;
+    const double divisor = last_main_diagonal - sub_diagonal(i-1) * scratch[i-1];
+    x[i] = (x[i] - sub_diagonal(i-1) * x[i-1]) / divisor;
+    u[i] = (cyclic_corner_element() - sub_diagonal(i-1) * u[i-1]) / divisor;
 
     for (int i = matrix_dimension_-2; i >= 0; i--){
         x[i] -= scratch[i] * x[i+1];
         u[i] -= scratch[i] * u[i+1];
     }
 
-    const double dot_v_y = x[0] + cyclic_corner_element() / gamma * x[matrix_dimension_-1];
-    const double dot_v_q = u[0] + cyclic_corner_element() / gamma * u[matrix_dimension_-1];
-    const double factor = dot_v_y / (1.0 + dot_v_q);
+    const double dot_product_x_v = x[0] + cyclic_corner_element() / gamma * x[matrix_dimension_-1];
+    const double dot_product_u_v = u[0] + cyclic_corner_element() / gamma * u[matrix_dimension_-1];
+    const double factor = dot_product_x_v / (1.0 + dot_product_u_v);
 
     for (int i = 0; i < matrix_dimension_; i++){
         x[i] -= factor * u[i];

@@ -108,6 +108,8 @@ public:
 
     /* ------------------ */
     /* Control Parameters */
+    int verbose() const;
+    void verbose(int verbose);
     int maxOpenMPThreads() const;
     void maxOpenMPThreads(int max_omp_threads);
     double threadReductionFactor() const;
@@ -173,6 +175,7 @@ private:
     std::optional<double> relative_tolerance_;
     /* ------------------ */
     /* Control Parameters */
+    int verbose_;
     int max_omp_threads_;
     double thread_reduction_factor_;
 

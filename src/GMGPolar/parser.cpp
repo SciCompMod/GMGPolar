@@ -108,6 +108,7 @@ void GMGPolar::parseMultigrid() {
 }
 
 void GMGPolar::parseGeneral() {
+    verbose_ = parser_.get<int>("verbose");
     max_omp_threads_ = parser_.get<int>("maxOpenMPThreads");
     thread_reduction_factor_ = parser_.get<double>("threadReductionFactor");
     omp_set_num_threads(max_omp_threads_);
@@ -247,6 +248,11 @@ void GMGPolar::initializeMultigrid() {
 }
 
 void GMGPolar::initializeGeneral() {
+    parser_.add<int>(
+        "verbose", '\0', 
+        "Controls the level of detail in the output. Higher values increase the amount of diagnostic and informational messages displayed.", 
+        OPTIONAL, 1
+    );
     parser_.add<int>(
         "maxOpenMPThreads", '\0', 
         "Defines the maximum number of OpenMP threads used.", 

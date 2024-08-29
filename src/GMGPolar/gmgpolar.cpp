@@ -67,7 +67,7 @@ void GMGPolar::printTimings() const {
     std::cout<< "------------------"<<std::endl;
     std::cout << "Setup Time: " << t_setup_total << " seconds" << std::endl;
     std::cout << "    Create Levels: " << t_setup_createLevels << " seconds" << std::endl;
-    std::cout << "    (Build rhs_f: " << t_setup_rhs << " seconds)" << std::endl;
+    std::cout << "    (Build rhs: " << t_setup_rhs << " seconds)" << std::endl;
     std::cout << "    Smoother: " << t_setup_smoother << " seconds" << std::endl;
     std::cout << "    Direct Solver: " << t_setup_directSolver << " seconds" << std::endl;
     std::cout << "\nSolve Time: " << t_solve_total << " seconds" << std::endl;
@@ -266,6 +266,14 @@ void GMGPolar::relativeTolerance(double relative_tolerance) {
 
 /* ------------------ */
 /* Control Parameters */
+int GMGPolar::verbose() const {
+    return verbose_;
+}
+
+void GMGPolar::verbose(int verbose) {
+    verbose_ = verbose;
+}
+
 int GMGPolar::maxOpenMPThreads() const {
     return max_omp_threads_;
 }

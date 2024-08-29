@@ -33,12 +33,9 @@ int main(int argc, char* argv[]){
     double Rmax = 1.3;
     double inverse_aspect_ratio_epsilon = 0.3;
     double ellipticity_e = 1.4;
-    double elongation_kappa = 0.3;
-    double shift_delta = 0.2;
     double alpha_jump = 0.66;
 
-    std::unique_ptr<DomainGeometry> domain_geometry = std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<DomainGeometry> domain_geometry = std::make_unique<CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
+    std::unique_ptr<DomainGeometry> domain_geometry = std::make_unique<CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
     std::unique_ptr<ExactSolution> exact_solution = std::make_unique<CartesianR2_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
 
     std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<SonnendruckerGyroCoefficients>(Rmax, alpha_jump);
@@ -49,8 +46,9 @@ int main(int argc, char* argv[]){
     GMGPolar solver(std::move(domain_geometry), std::move(coefficients), std::move(boundary_conditions), std::move(source_term));
 
     // Set the exact solution if available
-    // solver.setSolution(std::move(exact_solution));
+    solver.setSolution(std::move(exact_solution));
 
+    int verbose = 0;
     int maxOpenMPThreads = 8;
     double threadReductionFactor = 1.0;
 
@@ -107,6 +105,7 @@ int main(int argc, char* argv[]){
 
     /* ------------------ */
     /* Control Parameters */
+    solver.verbose(verbose);
     solver.maxOpenMPThreads(maxOpenMPThreads);
     solver.threadReductionFactor(threadReductionFactor);
 

@@ -2,21 +2,34 @@
 
 void GMGPolar::setup() {
     resetTimings();
+    std::string message;
+
     auto start_setup = std::chrono::high_resolution_clock::now();
 
     auto start_setup_createLevels = std::chrono::high_resolution_clock::now();
 
     // --------------------------------
     // Create the finest mesh (level 0)
+    message = "Setup: Creating finest mesh...";
+    std::cout << message << std::flush;
     auto finest_grid = std::make_unique<PolarGrid>(createFinestGrid()); /* Implementation below */
-    std::cout << "System of size (nr x ntheta) = (" << finest_grid->nr() << " x " << finest_grid->ntheta() << ")\n";
-    std::cout << "on the coordinates (r x theta): (" << R0_ << ", " << Rmax_ << ") x (" << 0 << ", " << 2 * M_PI << ")\n";
+    std::cout << "\r" << std::string(message.length(), ' ') << "\r" << std::flush;
+    if(verbose_ > 0) {
+        std::cout << "System of size (nr x ntheta) = (" << finest_grid->nr() << " x " << finest_grid->ntheta() << ")\n";
+        std::cout << "on the coordinates (r x theta): (" << R0_ << ", " << Rmax_ << ") x (" << 0 << ", " << 2 * M_PI << ")\n";
+    }
 
     // ----------------------------------------------------------
     // Building PolarGrid and LevelCache for all multigrid levels
     number_of_levels_ = chooseNumberOfLevels(*finest_grid); /* Implementation below */
     levels_.clear(); levels_.reserve(number_of_levels_);
 
+    if(verbose_ > 0) {
+        std::cout<<"Number of levels: "<<number_of_levels_<<"\n";
+    }
+
+    message = "Setup: Creating Levels...";
+    std::cout << message << std::flush;
     int current_level = 0;
     auto finest_levelCache = std::make_unique<LevelCache>(*finest_grid, *density_profile_coefficients_);
     levels_.emplace_back(current_level, std::move(finest_grid), std::move(finest_levelCache), extrapolation_);
@@ -26,6 +39,7 @@ void GMGPolar::setup() {
         auto current_levelCache = std::make_unique<LevelCache>(levels_[current_level-1], *current_grid);
         levels_.emplace_back(current_level, std::move(current_grid), std::move(current_levelCache), extrapolation_);
     }
+    std::cout << "\r" << std::string(message.length(), ' ') << "\r" << std::flush;
 
     auto end_setup_createLevels = std::chrono::high_resolution_clock::now();
     t_setup_createLevels += std::chrono::duration<double>(end_setup_createLevels - start_setup_createLevels).count();
@@ -38,11 +52,13 @@ void GMGPolar::setup() {
     // -----------------------------------------------------------
     // Initializing the optimal number of threads for OpenMP tasks 
     threads_per_level_.resize(number_of_levels_, max_omp_threads_);
-
     for (int current_level = 0; current_level < number_of_levels_; current_level++){
         threads_per_level_[current_level] = std::max(1, std::min(max_omp_threads_, 
             static_cast<int>(std::floor(max_omp_threads_ * std::pow(thread_reduction_factor_, current_level)))
         ));
+    }
+    if(verbose_ > 0) {
+        std::cout<<"Maxmimum number of threads: "<<max_omp_threads_<<"\n";
     }
     
     interpolation_ = std::make_unique<Interpolation>(threads_per_level_);
@@ -51,26 +67,38 @@ void GMGPolar::setup() {
 
     // ------------------------------------- //
     // Build rhs_f on Level 0 (finest Level) //
+    message = "Setup: Computing rhs...";
+    std::cout << message << std::flush;
     build_rhs_f(levels_[0], levels_[0].rhs());
+    std::cout << "\r" << std::string(message.length(), ' ') << "\r" << std::flush;
 
     auto end_setup_rhs = std::chrono::high_resolution_clock::now();
     t_setup_rhs += std::chrono::duration<double>(end_setup_rhs - start_setup_rhs).count();
 
     // -------------------------------------------------------
     // Initializing various operators based on the level index
+    message = "Setup: Computing matrices...";
+    std::cout << message << std::flush;
     for (int current_level = 0; current_level < number_of_levels_; current_level++){
         // ---------------------- //
         // Level 0 (finest Level) //
         // ---------------------- //
         if(current_level == 0){
             auto start_setup_smoother = std::chrono::high_resolution_clock::now();
-            if(extrapolation_ > 0){
-                levels_[current_level].initializeExtrapolatedSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
-                if(extrapolation_ > 1){
+            switch(extrapolation_) {
+                case 0:
                     levels_[current_level].initializeSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
-                }
-            } else{
-                levels_[current_level].initializeSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
+                    break;
+                case 1:
+                    levels_[current_level].initializeExtrapolatedSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
+                    break;
+                case 2:
+                    levels_[current_level].initializeSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
+                    break;
+                default:
+                    levels_[current_level].initializeSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
+                    levels_[current_level].initializeExtrapolatedSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
+                    break;
             }
             auto end_setup_smoother = std::chrono::high_resolution_clock::now();
             t_setup_smoother += std::chrono::duration<double>(end_setup_smoother - start_setup_smoother).count();
@@ -97,6 +125,7 @@ void GMGPolar::setup() {
             levels_[current_level].initializeResidual(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
         }
     }
+    std::cout << "\r" << std::string(message.length(), ' ') << "\r" << std::flush;
     auto end_setup = std::chrono::high_resolution_clock::now();
     t_setup_total += std::chrono::duration<double>(end_setup - start_setup).count();
 }

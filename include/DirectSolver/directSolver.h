@@ -27,6 +27,7 @@ public:
     ~DirectSolver();
 
     void solveInPlace(Vector<double>& solution);
+    
 private:
     // Constructor parameters
     const PolarGrid& grid_;
