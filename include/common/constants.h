@@ -73,6 +73,8 @@ enum class BetaCoeff
 #define CNTL(I) cntl[(I)-1]
 
 #define USE_COMM_WORLD -987654
+#define PAR_NOT_PARALLEL 0
+#define PAR_PARALLEL 1
 
 #define JOB_INIT -1
 #define JOB_END -2

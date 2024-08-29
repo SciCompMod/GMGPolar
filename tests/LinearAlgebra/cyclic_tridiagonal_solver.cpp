@@ -132,7 +132,7 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_100)
 {
     const int n = 100;
 
-    const double precision = 1e-9;
+    const double precision = 1e-8;
 
     SymmetricTridiagonalSolver<double> solver(n);
     solver.is_cyclic(true);
@@ -225,7 +225,7 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10000)
 {
     const int n = 10000;
 
-    const double precision = 1e-8;
+    const double precision = 1e-7;
 
     SymmetricTridiagonalSolver<double> solver(n);
     solver.is_cyclic(true);

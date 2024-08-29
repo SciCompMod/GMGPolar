@@ -1,12 +1,12 @@
 #!/bin/bash
 
-maxOpenMPThreads=8
+maxOpenMPThreads=1
 threadReductionFactor=1.0
 
 R0=1e-5
 Rmax=1.3
-nr_exp=8
-ntheta_exp=-1
+nr_exp=6
+ntheta_exp=6
 anisotropic_factor=0
 divideBy2=0
 
@@ -18,18 +18,18 @@ file_grid_angles="_angles.txt"
 DirBC_Interior=1 # Across-origin(0), u_D_Interior(1)
 
 # Test Cases #
-geometry=1 # Circular (0), Shafranov(1), Czarny(2), Culham (3)
+geometry=2 # Circular (0), Shafranov(1), Czarny(2), Culham (3)
 problem=1 # CartesianR2(0), CartesianR6(1), PolarR6(2), RefinedRadius(3)
-alpha_coeff=0 # Poisson(0), Sonnendrucker(1), Zoni(2), Zoni-Shifted(3)
+alpha_coeff=2 # Poisson(0), Sonnendrucker(1), Zoni(2), Zoni-Shifted(3)
 beta_coeff=0 # Zero(0), Gyro - Alpha Inverse(1)
 # Remark: For RefinedRadius choose alpha_coeff=3, beta_coeff=1
 # Remark: For Culham Geometry choose geometry=3, problem=2,3, alpha_coeff=3, beta_coeff=1
 # Remark: For Culham Geometry the provided exactSolution may be incorrect.
 
 extrapolation=0
-maxLevels=5
-preSmoothingSteps=1
-postSmoothingSteps=1
+maxLevels=2
+preSmoothingSteps=20
+postSmoothingSteps=20
 multigridCycle=0 # For multigridCycle > 0 we define reSmoothingSteps = preSmoothingSteps + postSmoothingSteps
 
 maxIterations=150

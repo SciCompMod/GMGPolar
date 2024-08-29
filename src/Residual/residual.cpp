@@ -1,8 +1,8 @@
 #include "../../include/Residual/residual.h"
 
 Residual::Residual(const PolarGrid& grid, const LevelCache& level_cache, 
-                           const DomainGeometry& domain_geometry,
-                           bool DirBC_Interior, int num_omp_threads
+                    const DomainGeometry& domain_geometry,
+                    bool DirBC_Interior, int num_omp_threads
 ) :
     grid_(grid),
     sin_theta_cache_(level_cache.sin_theta()),
@@ -321,11 +321,12 @@ void Residual::applyAGiveRadialSection(const int i_theta, Vector<double>& result
 }
 
 
-
 /* ------------------ */
 /* result = rhs - A*x */
 void Residual::computeResidual(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const {
     assert(result.size() == x.size());
+
+    bool use_simple_parallelism = true; // Fastest: true
 
     omp_set_num_threads(num_omp_threads_);
 
@@ -344,120 +345,186 @@ void Residual::computeResidual(Vector<double>& result, const Vector<double>& rhs
     }
     else{
         /* Multi-threaded execution */
-        const int num_circle_tasks = grid_.numberSmootherCircles();
-        const int additional_radial_tasks = grid_.ntheta() % 3;
-        const int num_radial_tasks = grid_.ntheta() - additional_radial_tasks;
+        if(use_simple_parallelism) {
+            /* For-Loop based parallelism */
+            const int num_circle_tasks = grid_.numberSmootherCircles();
+            const int additional_radial_tasks = grid_.ntheta() % 3;
+            const int num_radial_tasks = grid_.ntheta() - additional_radial_tasks;
 
-        assert(num_circle_tasks >= 2);
-        assert(num_radial_tasks >= 3 && num_radial_tasks % 3 == 0);
-
-        /* Make sure to deallocate at the end */
-        const int boundary_margin = 2; // Additional space to ensure safe access
-        int* circle_dep = new int[num_circle_tasks + boundary_margin];
-        int* radial_dep = new int[num_radial_tasks];
-
-        #pragma omp parallel 
-        {
-            #pragma omp single
+            #pragma omp parallel
             {
-                /* ------------ */
-                /* Circle Tasks */
-                /* ------------ */
-
-                /* Mod 0 Circles */
+                #pragma omp for
                 for(int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
-                    #pragma omp task \
-                        depend(out: circle_dep[circle_task])
-                    {
-                        int i_r = grid_.numberSmootherCircles() - circle_task - 1;    
-                        applyAGiveCircleSection(i_r, result, x, factor);
-                    }
+                    int i_r = grid_.numberSmootherCircles() - circle_task - 1;   
+                    applyAGiveCircleSection(i_r, result, x, factor);
                 }
-                /* Mod 2 Circles */
+                #pragma omp for
                 for(int circle_task = 1; circle_task < num_circle_tasks; circle_task += 3) {
-                    #pragma omp task \
-                        depend(out: circle_dep[circle_task]) \
-                        depend(in: circle_dep[circle_task-1], circle_dep[circle_task+2])   
-                    {
-                        int i_r = grid_.numberSmootherCircles() - circle_task - 1;    
-                        applyAGiveCircleSection(i_r, result, x, factor);
-                    }
+                    int i_r = grid_.numberSmootherCircles() - circle_task - 1;   
+                    applyAGiveCircleSection(i_r, result, x, factor);
                 }
-                /* Mod 2 Circles */
+                #pragma omp for nowait
                 for(int circle_task = 2; circle_task < num_circle_tasks; circle_task += 3) {
-                    #pragma omp task \
-                        depend(out: circle_dep[circle_task]) \
-                        depend(in: circle_dep[circle_task-1], circle_dep[circle_task+2])   
-                    {
-                        int i_r = grid_.numberSmootherCircles() - circle_task - 1;    
-                        applyAGiveCircleSection(i_r, result, x, factor);
-                    }
+                    int i_r = grid_.numberSmootherCircles() - circle_task - 1;   
+                    applyAGiveCircleSection(i_r, result, x, factor);
                 }
 
-                /* ------------ */
-                /* Radial Tasks */
-                /* ------------ */
-
-                /* Mod 0 Radials */
-                for(int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {
-                    #pragma omp task \
-                        depend(out: radial_dep[radial_task]) \
-                        depend(in: circle_dep[1]) /* Wait for Circle Smoother */
-                    {
-                        if(radial_task > 0){
-                            int i_theta = radial_task + additional_radial_tasks;    
-                            applyAGiveRadialSection(i_theta, result, x, factor);
-                        } else{
-                            if(additional_radial_tasks == 0){
-                                applyAGiveRadialSection(0, result, x, factor);
-                            } 
-                            else if(additional_radial_tasks >= 1){
-                                applyAGiveRadialSection(0, result, x, factor);
-                                applyAGiveRadialSection(1, result, x, factor);
-                            }
-                        }
-                    }
-                }
-                /* Mod 1 Radials */
-                for(int radial_task = 1; radial_task < num_radial_tasks; radial_task += 3) {
-                    #pragma omp task \
-                        depend(out: radial_dep[radial_task]) \
-                        depend(in: \
-                            radial_dep[radial_task-1], \
-                            radial_dep[(radial_task+2) % num_radial_tasks])   
-                    {
-                        if(radial_task > 1){
-                            int i_theta = radial_task + additional_radial_tasks;    
-                            applyAGiveRadialSection(i_theta, result, x, factor);
-                        } else {
-                            if(additional_radial_tasks == 0){
-                                applyAGiveRadialSection(1, result, x, factor);
-                            } 
-                            else if(additional_radial_tasks == 1){
-                                applyAGiveRadialSection(2, result, x, factor);
-                            }
-                            else if(additional_radial_tasks == 2){
-                                applyAGiveRadialSection(2, result, x, factor);
-                                applyAGiveRadialSection(3, result, x, factor);
-                            }
-                        }
-                    }
-                }
-                /* Mod 2 Radials */
-                for(int radial_task = 2; radial_task < num_radial_tasks; radial_task += 3) {
-                    #pragma omp task \
-                        depend(out: radial_dep[radial_task]) \
-                        depend(in: \
-                            radial_dep[radial_task-1], \
-                            radial_dep[(radial_task+2) % num_radial_tasks])   
-                    {
+                #pragma omp for
+                for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {
+                    if(radial_task > 0){
                         int i_theta = radial_task + additional_radial_tasks;    
                         applyAGiveRadialSection(i_theta, result, x, factor);
+                    } else{
+                        if(additional_radial_tasks == 0){
+                            applyAGiveRadialSection(0, result, x, factor);
+                        } 
+                        else if(additional_radial_tasks >= 1){
+                            applyAGiveRadialSection(0, result, x, factor);
+                            applyAGiveRadialSection(1, result, x, factor);
+                        }
                     }
+                }
+                #pragma omp for
+                for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 3) {
+                    if(radial_task > 1){
+                        int i_theta = radial_task + additional_radial_tasks;    
+                        applyAGiveRadialSection(i_theta, result, x, factor);
+                    } else {
+                        if(additional_radial_tasks == 0){
+                            applyAGiveRadialSection(1, result, x, factor);
+                        } 
+                        else if(additional_radial_tasks == 1){
+                            applyAGiveRadialSection(2, result, x, factor);
+                        }
+                        else if(additional_radial_tasks == 2){
+                            applyAGiveRadialSection(2, result, x, factor);
+                            applyAGiveRadialSection(3, result, x, factor);
+                        }
+                    }
+                }
+                #pragma omp for
+                for (int radial_task = 2; radial_task < num_radial_tasks; radial_task += 3) {
+                    int i_theta = radial_task + additional_radial_tasks;    
+                    applyAGiveRadialSection(i_theta, result, x, factor);
                 }
             }
         }
-        delete[] circle_dep;
-        delete[] radial_dep;
+        else{
+            /* Task dependency based parallelism */
+            const int num_circle_tasks = grid_.numberSmootherCircles();
+            const int additional_radial_tasks = grid_.ntheta() % 3;
+            const int num_radial_tasks = grid_.ntheta() - additional_radial_tasks;
+
+            assert(num_circle_tasks >= 2);
+            assert(num_radial_tasks >= 3 && num_radial_tasks % 3 == 0);
+
+            /* Make sure to deallocate at the end */
+            const int boundary_margin = 2; // Additional space to ensure safe access
+            int* circle_dep = new int[num_circle_tasks + boundary_margin];
+            int* radial_dep = new int[num_radial_tasks];
+
+            #pragma omp parallel 
+            {
+                #pragma omp single
+                {
+                    /* ------------ */
+                    /* Circle Tasks */
+                    /* ------------ */
+
+                    /* Mod 0 Circles */
+                    for(int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
+                        #pragma omp task \
+                            depend(out: circle_dep[circle_task])
+                        {
+                            int i_r = grid_.numberSmootherCircles() - circle_task - 1;    
+                            applyAGiveCircleSection(i_r, result, x, factor);
+                        }
+                    }
+                    /* Mod 2 Circles */
+                    for(int circle_task = 1; circle_task < num_circle_tasks; circle_task += 3) {
+                        #pragma omp task \
+                            depend(out: circle_dep[circle_task]) \
+                            depend(in: circle_dep[circle_task-1], circle_dep[circle_task+2])   
+                        {
+                            int i_r = grid_.numberSmootherCircles() - circle_task - 1;    
+                            applyAGiveCircleSection(i_r, result, x, factor);
+                        }
+                    }
+                    /* Mod 2 Circles */
+                    for(int circle_task = 2; circle_task < num_circle_tasks; circle_task += 3) {
+                        #pragma omp task \
+                            depend(out: circle_dep[circle_task]) \
+                            depend(in: circle_dep[circle_task-1], circle_dep[circle_task+2])   
+                        {
+                            int i_r = grid_.numberSmootherCircles() - circle_task - 1;    
+                            applyAGiveCircleSection(i_r, result, x, factor);
+                        }
+                    }
+
+                    /* ------------ */
+                    /* Radial Tasks */
+                    /* ------------ */
+
+                    /* Mod 0 Radials */
+                    for(int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {
+                        #pragma omp task \
+                            depend(out: radial_dep[radial_task]) \
+                            depend(in: circle_dep[1]) /* Wait for Circle Smoother */
+                        {
+                            if(radial_task > 0){
+                                int i_theta = radial_task + additional_radial_tasks;    
+                                applyAGiveRadialSection(i_theta, result, x, factor);
+                            } else{
+                                if(additional_radial_tasks == 0){
+                                    applyAGiveRadialSection(0, result, x, factor);
+                                } 
+                                else if(additional_radial_tasks >= 1){
+                                    applyAGiveRadialSection(0, result, x, factor);
+                                    applyAGiveRadialSection(1, result, x, factor);
+                                }
+                            }
+                        }
+                    }
+                    /* Mod 1 Radials */
+                    for(int radial_task = 1; radial_task < num_radial_tasks; radial_task += 3) {
+                        #pragma omp task \
+                            depend(out: radial_dep[radial_task]) \
+                            depend(in: \
+                                radial_dep[radial_task-1], \
+                                radial_dep[(radial_task+2) % num_radial_tasks])   
+                        {
+                            if(radial_task > 1){
+                                int i_theta = radial_task + additional_radial_tasks;    
+                                applyAGiveRadialSection(i_theta, result, x, factor);
+                            } else {
+                                if(additional_radial_tasks == 0){
+                                    applyAGiveRadialSection(1, result, x, factor);
+                                } 
+                                else if(additional_radial_tasks == 1){
+                                    applyAGiveRadialSection(2, result, x, factor);
+                                }
+                                else if(additional_radial_tasks == 2){
+                                    applyAGiveRadialSection(2, result, x, factor);
+                                    applyAGiveRadialSection(3, result, x, factor);
+                                }
+                            }
+                        }
+                    }
+                    /* Mod 2 Radials */
+                    for(int radial_task = 2; radial_task < num_radial_tasks; radial_task += 3) {
+                        #pragma omp task \
+                            depend(in: \
+                                radial_dep[radial_task-1], \
+                                radial_dep[(radial_task+2) % num_radial_tasks])   
+                        {
+                            int i_theta = radial_task + additional_radial_tasks;    
+                            applyAGiveRadialSection(i_theta, result, x, factor);
+                        }
+                    }
+                }
+            }
+            delete[] circle_dep;
+            delete[] radial_dep;
+        }
     }
 }

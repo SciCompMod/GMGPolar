@@ -4,18 +4,19 @@
 #SBATCH --error=Output/slurm-%A-p6-r4-dbt7-mpk2-s3-e1--N1-R1-maxC128.err
 #SBATCH -N 1
 #SBATCH -n 1
-#SBATCH -c 55
+#SBATCH -c 56
 #SBATCH --threads-per-core=1
-#SBATCH -t 28800
+#SBATCH -t 1400
+#SBATCH --nodelist="be-cpu03"
 #SBATCH --exclusive
 
-maxOpenMPThreads=16
+maxOpenMPThreads=56
 threadReductionFactor=1.0
 
 R0=1e-5
 Rmax=1.3
-nr_exp=12
-ntheta_exp=-1
+nr_exp=11
+ntheta_exp=11
 anisotropic_factor=0
 divideBy2=0
 
@@ -24,7 +25,7 @@ load_grid_file=0
 file_grid_radii="_radii.txt"
 file_grid_angles="_angles.txt"
 
-DirBC_Interior=1 # Across-origin(0), u_D_Interior(1)
+DirBC_Interior=0 # Across-origin(0), u_D_Interior(1)
 
 # Test Cases #
 geometry=2 # Circular (0), Shafranov(1), Czarny(2), Culham (3)
@@ -37,13 +38,13 @@ beta_coeff=1 # Zero(0), Gyro - Alpha Inverse(1)
 extrapolation=0
 maxLevels=5
 preSmoothingSteps=1
-postSmoothingSteps=1 # If extrapolation=1 and multigridCycle>0, postSmoothingSteps >= 2 recommended (Additional re-Smoothing steps are necessary).
-multigridCycle=0
+postSmoothingSteps=1
+multigridCycle=0 # For multigridCycle > 0 we define reSmoothingSteps = preSmoothingSteps + postSmoothingSteps
 
-maxIterations=150
+maxIterations=10
 residualNormType=0 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
-absoluteTolerance=1e-10
-relativeTolerance=1e-8
+absoluteTolerance=1e-50
+relativeTolerance=1e-50
 
 # Define additional geometry parameters
 kappa_eps=0.0

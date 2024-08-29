@@ -18,23 +18,14 @@ class Level;
 #include "../LinearAlgebra/vector_operations.h"
 #include "../common/constants.h"
 #include "../Level/level.h"
-#include "../TaskDistribution/taskDistribution.h"
 
 class Residual{
 public:
     explicit Residual(const PolarGrid& grid, const LevelCache& level_cache, 
                       const DomainGeometry& domain_geometry, const bool DirBC_Interior, const int num_omp_threads);
     
+    void computeResidualTake0(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const;
     void computeResidual(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const;
-
-    /* ----------------------- */
-    /* Used in tests/Residual/ */
-    void applyATake0(Vector<double>& result, const Vector<double>& x, const double& scaleAx) const;
-    void arr_att_art(const double& r, const double& theta, 
-        const double& sin_theta, const double& cos_theta, 
-        const double& coeff_alpha, double& arr, double& att, double& art, double& detDF
-    ) const;
-    /* ----------------------- */
 
 private:
     /* ------------------- */

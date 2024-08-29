@@ -21,3 +21,8 @@ ExtrapolatedSmoother::~ExtrapolatedSmoother(){
     finalizeMumpsSolver(inner_boundary_mumps_solver_);
 }
 
+void ExtrapolatedSmoother::extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp){
+    extrapolatedSmoothingInPlaceForLoop(x, rhs, temp); /* This is the fastest option */
+    // extrapolatedSmoothingInPlaceTaskLoop(x, rhs, temp);
+    // extrapolatedSmoothingInPlaceTaskDependencies(x, rhs, temp);
+}

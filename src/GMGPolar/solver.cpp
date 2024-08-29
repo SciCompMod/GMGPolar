@@ -29,6 +29,8 @@ void GMGPolar::solve() {
     double initial_residual_norm; 
     double current_residual_norm, current_relative_residual_norm;
 
+    exact_solution_ = nullptr;
+
     while(number_of_iterations_ < max_iterations_){
         std::cout<<"\nIteration: "<< number_of_iterations_ << std::endl;
 

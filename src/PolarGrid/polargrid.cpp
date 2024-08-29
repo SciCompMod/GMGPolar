@@ -84,7 +84,6 @@ void PolarGrid::constructRadialDivisions(
         double uniform_distance = (R - R0) / (nr - 1);
         assert(uniform_distance > 0.0);
         r_temp.resize(nr);
-        #pragma omp parallel for
         for (int i = 0; i < nr - 1; i++) {
             r_temp[i] = R0 + i * uniform_distance;
         }
@@ -96,7 +95,6 @@ void PolarGrid::constructRadialDivisions(
     // Refine division in the middle for extrapolation
     nr_ = 2 * r_temp.size() - 1;
     radii_.resize(nr_);
-    #pragma omp parallel for
     for (int i = 0; i < nr_; i++) {
         if (!(i % 2))
             radii_[i] = r_temp[i / 2];
@@ -119,7 +117,6 @@ void PolarGrid::constructAngularDivisions(const int ntheta_exp, const int nr) {
     // Note that currently ntheta_ = 2^k which allows us to do some optimizations when indexing.
     double uniform_distance = 2 * M_PI / ntheta_;
     angles_.resize(ntheta_ + 1);
-    #pragma omp parallel for
     for (int i = 0; i < ntheta_; i++){
         angles_[i] = i * uniform_distance;
     }

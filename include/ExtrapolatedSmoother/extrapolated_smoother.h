@@ -21,7 +21,6 @@ class Level;
 #include "../common/constants.h"
 #include "../Level/level.h"
 #include "../Stencil/stencil.h"
-#include "../TaskDistribution/taskDistribution.h"
 
 class ExtrapolatedSmoother {
 public:
@@ -31,6 +30,11 @@ public:
     ~ExtrapolatedSmoother();
 
     void extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
+
+    void extrapolatedSmoothingInPlaceSequential(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
+    void extrapolatedSmoothingInPlaceForLoop(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp); /* This is the fastest option */
+    void extrapolatedSmoothingInPlaceTaskLoop(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
+    void extrapolatedSmoothingInPlaceTaskDependencies(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
 
 private:
     /* ------------------- */

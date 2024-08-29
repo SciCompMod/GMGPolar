@@ -63,8 +63,7 @@ TEST(OperatorATest, applyA_DirBC_Interior) {
     residual_operator.computeResidual(result_Give, rhs, x);
 
     Vector<double> result_Take(level.grid().numberOfNodes());
-    result_Take = rhs;
-    residual_operator.applyATake0(result_Take, x, -1.0);
+    residual_operator.computeResidualTake0(result_Take, rhs, x);
 
     ASSERT_EQ(result_Give.size(), result_Take.size());
     for (std::size_t index = 0; index < result_Give.size(); index++) {
@@ -106,8 +105,7 @@ TEST(OperatorATest, applyA_AcrossOrigin) {
     residual_operator.computeResidual(result_Give, rhs, x);
 
     Vector<double> result_Take(level.grid().numberOfNodes());
-    result_Take = rhs;
-    residual_operator.applyATake0(result_Take, x, -1.0);
+    residual_operator.computeResidualTake0(result_Take, rhs, x);
 
     ASSERT_EQ(result_Give.size(), result_Take.size());
     for (std::size_t index = 0; index < result_Give.size(); index++) {

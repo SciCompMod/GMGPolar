@@ -6,12 +6,12 @@ LevelCache::LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& 
     coeff_alpha_(grid.nr()),
     coeff_beta_(grid.nr())
 {
-    for (size_t i_theta = 0; i_theta < grid.ntheta(); i_theta++){
+    for (std::size_t i_theta = 0; i_theta < grid.ntheta(); i_theta++){
         const double theta = grid.theta(i_theta);
         sin_theta_[i_theta] = sin(theta);
         cos_theta_[i_theta] = cos(theta);
     }
-    for (size_t i_r = 0; i_r < grid.nr(); i_r++){
+    for (std::size_t i_r = 0; i_r < grid.nr(); i_r++){
         const double r = grid.radius(i_r);
         coeff_alpha_[i_r] = density_profile_coefficients.alpha(r);
         coeff_beta_[i_r] = density_profile_coefficients.beta(r);
@@ -26,13 +26,13 @@ LevelCache::LevelCache(const Level& previous_level, const PolarGrid& current_gri
 {
     const auto& previous_level_cache = previous_level.levelCache();
 
-    for (size_t i_theta = 0; i_theta < current_grid.ntheta(); i_theta++){
+    for (std::size_t i_theta = 0; i_theta < current_grid.ntheta(); i_theta++){
         const double theta = current_grid.theta(i_theta);
         sin_theta_[i_theta] = sin(theta);
         cos_theta_[i_theta] = cos(theta);
     }
 
-    for (size_t i_r = 0; i_r < current_grid.nr(); i_r++){
+    for (std::size_t i_r = 0; i_r < current_grid.nr(); i_r++){
         coeff_alpha_[i_r] = previous_level_cache.coeff_alpha()[2*i_r];
         coeff_beta_[i_r] = previous_level_cache.coeff_beta()[2*i_r];
     }

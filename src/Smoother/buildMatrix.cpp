@@ -757,130 +757,197 @@ void Smoother::buildAscMatrices()
     /* Part 2: Fill Asc Smoother matrices */
     /* ---------------------------------- */
 
-    if(num_omp_threads_ == 1){
+    bool use_simple_parallelism = true; // Fastest: true
+
+    if(omp_get_max_threads() == 1) {
         /* Single-threaded execution */
-        for(int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++){
+        for(int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
             buildAscCircleSection(i_r);
         }
-        for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++){
+        for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
             buildAscRadialSection(i_theta);
         }
     }
     else{
-        /* Multi-threaded execution */
+        if(use_simple_parallelism){
+            /*  Multi-threaded execution: For Loops */
+            const int num_circle_tasks = grid_.numberSmootherCircles();
+            const int additional_radial_tasks = grid_.ntheta() % 3;
+            const int num_radial_tasks = grid_.ntheta() - additional_radial_tasks;
 
-        const int num_circle_tasks = grid_.numberSmootherCircles();
-        const int additional_radial_tasks = grid_.ntheta() % 3;
-        const int num_radial_tasks = grid_.ntheta() - additional_radial_tasks;
-
-        assert(num_circle_tasks >= 2);
-        assert(num_radial_tasks >= 3 && num_radial_tasks % 3 == 0);
-
-        /* Make sure to deallocate at the end */
-        const int boundary_margin = 2; // Additional space to ensure safe access
-        int* circle_dep = new int[num_circle_tasks + boundary_margin];
-        int* radial_dep = new int[num_radial_tasks];
-
-        #pragma omp parallel
-        {
-            #pragma omp single
+            #pragma omp parallel
             {
-                /* ------------ */
-                /* Circle Tasks */
-                /* ------------ */
-
-                /* Mod 0 Circles */
+                #pragma omp for
                 for(int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
-                    #pragma omp task \
-                        depend(out: circle_dep[circle_task])
-                    {
-                        int i_r = grid_.numberSmootherCircles() - circle_task - 1;    
-                        buildAscCircleSection(i_r);
-                    }
+                    int i_r = grid_.numberSmootherCircles() - circle_task - 1;   
+                    buildAscCircleSection(i_r);
                 }
-                /* Mod 2 Circles */
+                #pragma omp for
                 for(int circle_task = 1; circle_task < num_circle_tasks; circle_task += 3) {
-                    #pragma omp task \
-                        depend(out: circle_dep[circle_task]) \
-                        depend(in: circle_dep[circle_task-1], circle_dep[circle_task+2])   
-                    {
-                        int i_r = grid_.numberSmootherCircles() - circle_task - 1;    
-                        buildAscCircleSection(i_r);
-                    }
-                    
+                    int i_r = grid_.numberSmootherCircles() - circle_task - 1;   
+                    buildAscCircleSection(i_r);
                 }
-                /* Mod 2 Circles */
+                #pragma omp for nowait
                 for(int circle_task = 2; circle_task < num_circle_tasks; circle_task += 3) {
-                    #pragma omp task \
-                        depend(out: circle_dep[circle_task]) \
-                        depend(in: circle_dep[circle_task-1], circle_dep[circle_task+2])   
-                    {
-                        int i_r = grid_.numberSmootherCircles() - circle_task - 1;    
-                        buildAscCircleSection(i_r);
-                    }
+                    int i_r = grid_.numberSmootherCircles() - circle_task - 1;   
+                    buildAscCircleSection(i_r);
                 }
 
-                /* ------------ */
-                /* Radial Tasks */
-                /* ------------ */
-
-                /* Mod 0 Radials */
-                for(int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {
-                    #pragma omp task \
-                        depend(out: radial_dep[radial_task]) \
-                        depend(in: circle_dep[1])   
-                    {
-                        if(radial_task > 2){
-                            int i_theta = radial_task + additional_radial_tasks;    
-                            buildAscRadialSection(i_theta);
-                        } else{
-                            if(additional_radial_tasks == 0){
-                                buildAscRadialSection(0);
-                            } 
-                            else if(additional_radial_tasks >= 1){
-                                buildAscRadialSection(0);
-                                buildAscRadialSection(1);
-                            }
-                        }
-                    }
-                }
-                /* Mod 1 Radials */
-                for(int radial_task = 1; radial_task < num_radial_tasks; radial_task += 3) {
-                    #pragma omp task \
-                        depend(out: radial_dep[radial_task]) \
-                        depend(in: radial_dep[radial_task-1], radial_dep[(radial_task+2) % num_radial_tasks])   
-                    {
-                        if(radial_task > 2){
-                            int i_theta = radial_task + additional_radial_tasks;    
-                            buildAscRadialSection(i_theta);
-                        } else {
-                            if(additional_radial_tasks == 0){
-                                buildAscRadialSection(1);
-                            } 
-                            else if(additional_radial_tasks == 1){
-                                buildAscRadialSection(2);
-                            }
-                            else if(additional_radial_tasks == 2){
-                                buildAscRadialSection(2);
-                                buildAscRadialSection(3);
-                            }
-                        }
-                    }
-                }
-                /* Mod 2 Radials */
-                for(int radial_task = 2; radial_task < num_radial_tasks; radial_task += 3) {
-                    #pragma omp task \
-                        depend(out: radial_dep[radial_task]) \
-                        depend(in: radial_dep[radial_task-1], radial_dep[(radial_task+2) % num_radial_tasks])   
-                    {
+                #pragma omp for
+                for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {
+                    if(radial_task > 0){
                         int i_theta = radial_task + additional_radial_tasks;    
                         buildAscRadialSection(i_theta);
+                    } else{
+                        if(additional_radial_tasks == 0){
+                            buildAscRadialSection(0);
+                        } 
+                        else if(additional_radial_tasks >= 1){
+                            buildAscRadialSection(0);
+                            buildAscRadialSection(1);
+                        }
+                    }
+                }
+                #pragma omp for
+                for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 3) {
+                    if(radial_task > 1){
+                        int i_theta = radial_task + additional_radial_tasks;    
+                        buildAscRadialSection(i_theta);
+                    } else {
+                        if(additional_radial_tasks == 0){
+                            buildAscRadialSection(1);
+                        } 
+                        else if(additional_radial_tasks == 1){
+                            buildAscRadialSection(2);
+                        }
+                        else if(additional_radial_tasks == 2){
+                            buildAscRadialSection(2);
+                            buildAscRadialSection(3);
+                        }
+                    }
+                }
+                #pragma omp for
+                for (int radial_task = 2; radial_task < num_radial_tasks; radial_task += 3) {
+                    int i_theta = radial_task + additional_radial_tasks;    
+                    buildAscRadialSection(i_theta);
+                }
+            }    
+        }
+        else{
+            /*  Multi-threaded execution: Task Dependencies */
+            const int num_circle_tasks = grid_.numberSmootherCircles();
+            const int additional_radial_tasks = grid_.ntheta() % 3;
+            const int num_radial_tasks = grid_.ntheta() - additional_radial_tasks;
+
+            assert(num_circle_tasks >= 2);
+            assert(num_radial_tasks >= 3 && num_radial_tasks % 3 == 0);
+
+            /* Make sure to deallocate at the end */
+            const int boundary_margin = 2; // Additional space to ensure safe access
+            int* circle_dep = new int[num_circle_tasks + boundary_margin];
+            int* radial_dep = new int[num_radial_tasks];
+
+            #pragma omp parallel
+            {
+                #pragma omp single
+                {
+                    /* ------------ */
+                    /* Circle Tasks */
+                    /* ------------ */
+
+                    /* Mod 0 Circles */
+                    for(int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
+                        #pragma omp task \
+                            depend(out: circle_dep[circle_task])
+                        {
+                            const int i_r = grid_.numberSmootherCircles() - circle_task - 1;    
+                            buildAscCircleSection(i_r);
+                        }
+                    }
+                    /* Mod 2 Circles */
+                    for(int circle_task = 1; circle_task < num_circle_tasks; circle_task += 3) {
+                        #pragma omp task \
+                            depend(out: circle_dep[circle_task]) \
+                            depend(in: circle_dep[circle_task-1], circle_dep[circle_task+2])   
+                        {
+                            const int i_r = grid_.numberSmootherCircles() - circle_task - 1;    
+                            buildAscCircleSection(i_r);
+                        }
+                        
+                    }
+                    /* Mod 2 Circles */
+                    for(int circle_task = 2; circle_task < num_circle_tasks; circle_task += 3) {
+                            #pragma omp task \
+                                depend(out: circle_dep[circle_task]) \
+                                depend(in: circle_dep[circle_task-1], circle_dep[circle_task+2])   
+                            {
+                                const int i_r = grid_.numberSmootherCircles() - circle_task - 1;    
+                                buildAscCircleSection(i_r);
+                            }
+                    }
+
+                    /* ------------ */
+                    /* Radial Tasks */
+                    /* ------------ */
+
+                    /* Mod 0 Radials */
+                    for(int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {
+                        #pragma omp task \
+                            depend(out: radial_dep[radial_task]) \
+                            depend(in: circle_dep[1])
+                        {
+                            if(radial_task > 2){
+                                const int i_theta = radial_task + additional_radial_tasks;    
+                                buildAscRadialSection(i_theta);
+                            } else{
+                                if(additional_radial_tasks == 0){
+                                    buildAscRadialSection(0);
+                                } 
+                                else if(additional_radial_tasks >= 1){
+                                    buildAscRadialSection(0);
+                                    buildAscRadialSection(1);
+                                }
+                            }
+                        }
+                    }
+                    /* Mod 1 Radials */
+                    for(int radial_task = 1; radial_task < num_radial_tasks; radial_task += 3) {
+                        #pragma omp task \
+                            depend(out: radial_dep[radial_task]) \
+                            depend(in: radial_dep[radial_task-1], radial_dep[(radial_task+2) % num_radial_tasks])   
+                        {
+                            if(radial_task > 2){
+                                int i_theta = radial_task + additional_radial_tasks;    
+                                buildAscRadialSection(i_theta);
+                            } else {
+                                if(additional_radial_tasks == 0){
+                                    buildAscRadialSection(1);
+                                } 
+                                else if(additional_radial_tasks == 1){
+                                    buildAscRadialSection(2);
+                                }
+                                else if(additional_radial_tasks == 2){
+                                    buildAscRadialSection(2);
+                                    buildAscRadialSection(3);
+                                }
+                            }
+                        }
+                    }
+                    /* Mod 2 Radials */
+                    for(int radial_task = 2; radial_task < num_radial_tasks; radial_task += 3) {
+                        #pragma omp task \
+                            depend(out: radial_dep[radial_task]) \
+                            depend(in: radial_dep[radial_task-1], radial_dep[(radial_task+2) % num_radial_tasks])   
+                        {
+                            int i_theta = radial_task + additional_radial_tasks;    
+                            buildAscRadialSection(i_theta);
+                        }
                     }
                 }
             }
+            delete[] circle_dep;
+            delete[] radial_dep;
         }
-        delete[] circle_dep;
-        delete[] radial_dep;
     }
 
     /* ----------------------------------------------------------------------------------- */

@@ -32,8 +32,6 @@ file(GLOB_RECURSE GMG_POLAR_SOURCES "../src/GMGPolar/*.cpp")
 file(GLOB_RECURSE MULTIGRID_METHODS_SOURCES "../src/GMGPolar/MultigridMethods/*.cpp")
 file(GLOB_RECURSE POLAR_GRID_SOURCES "../src/PolarGrid/*.cpp")
 file(GLOB_RECURSE LEVEL_SOURCES "../src/Level/*.cpp")
-
-file(GLOB_RECURSE TASK_DISTRIBUTION_SOURCES "../src/TaskDistribution/*.cpp")
 file(GLOB_RECURSE STENCIL_SOURCES "../src/Stencil/*.cpp")
 file(GLOB_RECURSE INTERPOLATION_SOURCES "../src/Interpolation/*.cpp")
 file(GLOB_RECURSE DIRECT_SOLVER_SOURCES "../src/DirectSolver/*.cpp")
@@ -52,7 +50,6 @@ add_library(GMGPolarLib STATIC
     ${MULTIGRID_METHODS_SOURCES}
     ${POLAR_GRID_SOURCES}
     ${LEVEL_SOURCES}
-    ${TASK_DISTRIBUTION_SOURCES}
     ${STENCIL_SOURCES}
     ${INTERPOLATION_SOURCES}
     ${DIRECT_SOLVER_SOURCES}

@@ -1,22 +1,29 @@
 #include "../../include/Residual/residual.h"
 
-void Residual::arr_att_art(
-    const double& r, const double& theta, const double& sin_theta, const double& cos_theta, const double& coeff_alpha, 
-    double& arr, double& att, double& art, double& detDF) const
-{
-    const double Jrr = domain_geometry_.dFx_dr(r, theta, sin_theta, cos_theta);
-    const double Jtr = domain_geometry_.dFy_dr(r, theta, sin_theta, cos_theta);
-    const double Jrt = domain_geometry_.dFx_dt(r, theta, sin_theta, cos_theta);
-    const double Jtt = domain_geometry_.dFy_dt(r, theta, sin_theta, cos_theta);
-    detDF = Jrr * Jtt - Jrt * Jtr;
-    arr = 0.5 * (Jtt * Jtt + Jrt * Jrt) * coeff_alpha / fabs(detDF);
-    att = 0.5 * (Jtr * Jtr + Jrr * Jrr) * coeff_alpha / fabs(detDF);
-    art = (- Jtt * Jtr - Jrt * Jrr) * coeff_alpha / fabs(detDF);
+namespace {
+    void arr_att_art(const DomainGeometry& domain_geometry,
+        const double& r, const double& theta, const double& sin_theta, const double& cos_theta, const double& coeff_alpha, 
+        double& arr, double& att, double& art, double& detDF)
+    {
+        const double Jrr = domain_geometry.dFx_dr(r, theta, sin_theta, cos_theta);
+        const double Jtr = domain_geometry.dFy_dr(r, theta, sin_theta, cos_theta);
+        const double Jrt = domain_geometry.dFx_dt(r, theta, sin_theta, cos_theta);
+        const double Jtt = domain_geometry.dFy_dt(r, theta, sin_theta, cos_theta);
+        detDF = Jrr * Jtt - Jrt * Jtr;
+        arr = 0.5 * (Jtt * Jtt + Jrt * Jrt) * coeff_alpha / fabs(detDF);
+        att = 0.5 * (Jtr * Jtr + Jrr * Jrr) * coeff_alpha / fabs(detDF);
+        art = (- Jtt * Jtr - Jrt * Jrr) * coeff_alpha / fabs(detDF);
+    }
 }
 
-void Residual::applyATake0(Vector<double>& result, const Vector<double>& x, const double& scaleAx) const{
+
+void Residual::computeResidualTake0(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const{
     assert(x.size() == grid_.numberOfNodes());
     assert(result.size() == grid_.numberOfNodes());
+
+    result = rhs;
+
+    double scaleAx = -1.0;
 
     #pragma omp parallel for
     for(int index = 0; index < grid_.numberOfNodes(); index ++){
@@ -36,7 +43,7 @@ void Residual::applyATake0(Vector<double>& result, const Vector<double>& x, cons
 
         sin_theta = sin(coords[1]); cos_theta = cos(coords[1]);
 
-        arr_att_art(coords[0], coords[1], sin_theta, cos_theta, coeff_alpha, arr, att, art, detDF);
+        arr_att_art(domain_geometry_, coords[0], coords[1], sin_theta, cos_theta, coeff_alpha, arr, att, art, detDF);
 
         std::array<std::pair<double,double>, space_dimension> neighbor_distance;
         grid_.adjacentNeighborDistances(node, neighbor_distance);
@@ -54,13 +61,13 @@ void Residual::applyATake0(Vector<double>& result, const Vector<double>& x, cons
                 Point left_coords = grid_.polarCoordinates(left_node); 
                 double coeff_alpha_left = coeff_alpha_cache_[left_node[0]];
                 sin_theta = sin(left_coords[1]); cos_theta = cos(left_coords[1]);
-                arr_att_art(left_coords[0], left_coords[1], sin_theta, cos_theta, coeff_alpha_left, arr_left, att_left, art_left, detDF_left);     
+                arr_att_art(domain_geometry_, left_coords[0], left_coords[1], sin_theta, cos_theta, coeff_alpha_left, arr_left, att_left, art_left, detDF_left);     
             }else{
                 MultiIndex across_origin_node(0, (node[1] + grid_.ntheta() / 2) % grid_.ntheta());
                 Point across_origin_coords = grid_.polarCoordinates(across_origin_node);
                 double coeff_alpha_left = coeff_alpha_cache_[across_origin_node[0]];
                 sin_theta = sin(across_origin_coords[1]); cos_theta = cos(across_origin_coords[1]);
-                arr_att_art(across_origin_coords[0], across_origin_coords[1], sin_theta, cos_theta, coeff_alpha_left, arr_left, att_left, art_left, detDF_left);  
+                arr_att_art(domain_geometry_, across_origin_coords[0], across_origin_coords[1], sin_theta, cos_theta, coeff_alpha_left, arr_left, att_left, art_left, detDF_left);  
             }
 
             // Right
@@ -69,7 +76,7 @@ void Residual::applyATake0(Vector<double>& result, const Vector<double>& x, cons
                 Point right_coords = grid_.polarCoordinates(right_node);
                 double coeff_alpha_right = coeff_alpha_cache_[right_node[0]];
                 sin_theta = sin(right_coords[1]); cos_theta = cos(right_coords[1]);
-                arr_att_art(right_coords[0], right_coords[1], sin_theta, cos_theta, coeff_alpha_right, arr_right, att_right, art_right, detDF_right);     
+                arr_att_art(domain_geometry_, right_coords[0], right_coords[1], sin_theta, cos_theta, coeff_alpha_right, arr_right, att_right, art_right, detDF_right);     
             }
             // Bottom
             if(neighbors[1].first != -1){
@@ -77,7 +84,7 @@ void Residual::applyATake0(Vector<double>& result, const Vector<double>& x, cons
                 Point bottom_coords = grid_.polarCoordinates(bottom_node);
                 double coeff_alpha_bottom = coeff_alpha_cache_[bottom_node[0]];
                 sin_theta = sin(bottom_coords[1]); cos_theta = cos(bottom_coords[1]);
-                arr_att_art(bottom_coords[0], bottom_coords[1], sin_theta, cos_theta, coeff_alpha_bottom, arr_bottom, att_bottom, art_bottom, detDF_bottom);   
+                arr_att_art(domain_geometry_, bottom_coords[0], bottom_coords[1], sin_theta, cos_theta, coeff_alpha_bottom, arr_bottom, att_bottom, art_bottom, detDF_bottom);   
             }
             // Top
             if(neighbors[1].second != -1){
@@ -85,7 +92,7 @@ void Residual::applyATake0(Vector<double>& result, const Vector<double>& x, cons
                 Point top_coords = grid_.polarCoordinates(top_node);
                 double coeff_alpha_top = coeff_alpha_cache_[top_node[0]];
                 sin_theta = sin(top_coords[1]); cos_theta = cos(top_coords[1]);
-                arr_att_art(top_coords[0], top_coords[1], sin_theta, cos_theta, coeff_alpha_top, arr_top, att_top, art_top, detDF_top);   
+                arr_att_art(domain_geometry_, top_coords[0], top_coords[1], sin_theta, cos_theta, coeff_alpha_top, arr_top, att_top, art_top, detDF_top);   
             }
 
             double h1 = neighbor_distance[0].first;

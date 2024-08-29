@@ -22,7 +22,6 @@ class Level;
 #include "../common/constants.h"
 #include "../Level/level.h"
 #include "../Stencil/stencil.h"
-#include "../TaskDistribution/taskDistribution.h"
 
 class Smoother {
 public:
@@ -32,6 +31,11 @@ public:
     ~Smoother();
 
     void smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
+
+    void smoothingInPlaceSequential(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
+    void smoothingInPlaceForLoop(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp); /* This is the fastest option */
+    void smoothingInPlaceTaskLoop(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
+    void smoothingInPlaceTaskDependencies(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
 
 private:
     /* ------------------- */
@@ -71,5 +75,22 @@ private:
 
     void initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const SparseMatrix<double>& solver_matrix);
     void finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver);
+
+    /* Paralelization */
+    std::vector<int> circle_black_Asc_;
+    std::vector<int> circle_white_Asc_;
+    std::vector<int> circle_smoother_;
+    std::vector<int> radial_black_Asc_;
+    std::vector<int> radial_white_Asc_;
+    std::vector<int> radial_smoother_;
+
+    bool decrement(std::vector<int>& dependency_counter, const int index);
+
+    void start_radials(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
+    void radial_black_Asc0(const int radial_index, Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
+    void radial_black_Asc1(const int radial_index, Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
+    void radial_black_Asc2(const int radial_index, Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
+
+
 };
 
