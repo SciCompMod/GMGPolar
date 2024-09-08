@@ -18,6 +18,7 @@ void GMGPolar::setup() {
         std::cout << "System of size (nr x ntheta) = (" << finest_grid->nr() << " x " << finest_grid->ntheta() << ")\n";
         std::cout << "on the coordinates (r x theta): (" << R0_ << ", " << Rmax_ << ") x (" << 0 << ", " << 2 * M_PI << ")\n";
     }
+    if(verbose_ > 50) writeToVTK("finest_grid", *finest_grid);
 
     // ----------------------------------------------------------
     // Building PolarGrid and LevelCache for all multigrid levels
@@ -25,19 +26,19 @@ void GMGPolar::setup() {
     levels_.clear(); levels_.reserve(number_of_levels_);
 
     if(verbose_ > 0) {
-        std::cout<<"Number of levels: "<<number_of_levels_<<"\n";
+        std::cout <<"Number of levels: "<<number_of_levels_<<"\n";
     }
 
     message = "Setup: Creating Levels...";
     std::cout << message << std::flush;
     int current_level = 0;
     auto finest_levelCache = std::make_unique<LevelCache>(*finest_grid, *density_profile_coefficients_);
-    levels_.emplace_back(current_level, std::move(finest_grid), std::move(finest_levelCache), extrapolation_);
+    levels_.emplace_back(current_level, std::move(finest_grid), std::move(finest_levelCache), extrapolation_, FMG_);
 
     for(current_level = 1; current_level < number_of_levels_; current_level++) {
         auto current_grid = std::make_unique<PolarGrid>(coarseningGrid(levels_[current_level-1].grid()));
         auto current_levelCache = std::make_unique<LevelCache>(levels_[current_level-1], *current_grid);
-        levels_.emplace_back(current_level, std::move(current_grid), std::move(current_levelCache), extrapolation_);
+        levels_.emplace_back(current_level, std::move(current_grid), std::move(current_levelCache), extrapolation_, FMG_);
     }
     std::cout << "\r" << std::string(message.length(), ' ') << "\r" << std::flush;
 
@@ -58,7 +59,7 @@ void GMGPolar::setup() {
         ));
     }
     if(verbose_ > 0) {
-        std::cout<<"Maxmimum number of threads: "<<max_omp_threads_<<"\n";
+        std::cout <<"Maxmimum number of threads: "<<max_omp_threads_<<"\n";
     }
     
     interpolation_ = std::make_unique<Interpolation>(threads_per_level_);
@@ -86,14 +87,21 @@ void GMGPolar::setup() {
         if(current_level == 0){
             auto start_setup_smoother = std::chrono::high_resolution_clock::now();
             switch(extrapolation_) {
-                case 0:
+                case 0: /* No extrapolation*/
                     levels_[current_level].initializeSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
                     break;
-                case 1:
+                case 1: /* Implicit extrapolation*/
                     levels_[current_level].initializeExtrapolatedSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
+                    if(FMG_){
+                        levels_[current_level].initializeSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
+                    }
                     break;
-                case 2:
+                case 2: /* Implicit extrapolation with full grid smoothing */
                     levels_[current_level].initializeSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
+                    break;
+                case 3: /* A combination of both extrapolation methods */
+                    levels_[current_level].initializeSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
+                    levels_[current_level].initializeExtrapolatedSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
                     break;
                 default:
                     levels_[current_level].initializeSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);

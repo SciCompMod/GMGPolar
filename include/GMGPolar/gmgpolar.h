@@ -84,6 +84,8 @@ public:
 
     /* -------------------- */
     /* Multigrid Parameters */
+    bool FMG() const;
+    void FMG(bool FMG);
     int extrapolation() const;
     void extrapolation(int extrapolation);
 
@@ -164,6 +166,7 @@ private:
     BetaCoeff beta_;
     /* -------------------- */
     /* Multigrid Parameters */
+    bool FMG_;
     int extrapolation_;
     int max_levels_;
     int pre_smoothing_steps_;

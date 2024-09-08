@@ -161,13 +161,9 @@ do { \
         assert(node_color == SmootherColor::White); \
         if(smoother_color == SmootherColor::Black){ \
             double h1 = grid.radialSpacing(i_r-1); \
-            double h2 = grid.radialSpacing(i_r); \
             double k1 = grid.angularSpacing(i_theta-1); \
             double k2 = grid.angularSpacing(i_theta); \
             double coeff1 = 0.5*(k1+k2)/h1; \
-            double coeff2 = 0.5*(k1+k2)/h2; \
-            double coeff3 = 0.5*(h1+h2)/k1; \
-            double coeff4 = 0.5*(h1+h2)/k2; \
             /* --------------------- */ \
             /* Outside Section Parts */ \
             /* Fill temp(i-1,j) */ \
@@ -439,8 +435,6 @@ void Smoother::solveRadialSection(const int i_theta, Vector<double>& x, Vector<d
 
 }
 
-
-
 /* ------------------ */
 /* Sequential Version */
 /* ------------------ */
@@ -532,13 +526,17 @@ void Smoother::smoothingInPlaceForLoop(Vector<double>& x, const Vector<double>& 
                 int i_r = num_circle_tasks - circle_task - 1;
                 applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
             }
+
             /* Outside Black Section (Part 1)*/
+            auto start_time2 = std::chrono::steady_clock::now();
             #pragma omp for
             for (int circle_task = -1; circle_task < num_circle_tasks; circle_task += 4) {
                 int i_r = num_circle_tasks - circle_task - 1;
                 applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
             }
+
             /* Outside Black Section (Part 2)*/
+            auto start_time3 = std::chrono::steady_clock::now();
             #pragma omp for
             for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 4) {
                     int i_r = num_circle_tasks - circle_task - 1;
@@ -546,6 +544,7 @@ void Smoother::smoothingInPlaceForLoop(Vector<double>& x, const Vector<double>& 
             }
 
             /* Black Circle Smoother */
+            auto start_time4 = std::chrono::steady_clock::now();
             #pragma omp for
             for(int circle_task = 0; circle_task < num_circle_tasks; circle_task += 2) { 
                 int i_r = num_circle_tasks - circle_task - 1;

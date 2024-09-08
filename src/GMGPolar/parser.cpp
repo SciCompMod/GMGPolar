@@ -68,6 +68,7 @@ void GMGPolar::parseGeometry() {
 }
 
 void GMGPolar::parseMultigrid() {
+    FMG_ = parser_.get<int>("FMG") != 0;
     extrapolation_ = parser_.get<int>("extrapolation");
     max_levels_ = parser_.get<int>("maxLevels");
     pre_smoothing_steps_ = parser_.get<int>("preSmoothingSteps");
@@ -200,9 +201,14 @@ void GMGPolar::initializeGeometry() {
 
 void GMGPolar::initializeMultigrid() {
     parser_.add<int>(
+        "FMG", '\0', 
+        "Specifies if initial approximation is obtained by nested iteration.", 
+        OPTIONAL, 0, cmdline::oneof(0,1)
+    );
+    parser_.add<int>(
         "extrapolation", 'e', 
-        "Specifies if extrapolation is used used.", 
-        OPTIONAL, 0, cmdline::oneof(0,1,2)
+        "No extrapolation (0), Implicit extrapolation (1), Implicit Extrapolation with full grid smoothing (2), A combination of both extrapoaltion methods (3).",
+        OPTIONAL, 0, cmdline::oneof(0,1,2,3)
     );
     parser_.add<int>(
         "maxLevels", 'l', 

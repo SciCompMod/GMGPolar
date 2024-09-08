@@ -8,28 +8,28 @@ void GMGPolar::multigrid_W_Cycle(const int level_depth, Vector<double>& solution
     Level& level = levels_[level_depth];
     Level& next_level = levels_[level_depth+1];
 
-    auto start_MGC1_preSmoothing = std::chrono::high_resolution_clock::now();
+    auto start_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
 
-    /* ------------- */
-    /* Pre-Smoothing */
+    /* ------------ */
+    /* Presmoothing */
     for (int i = 0; i < pre_smoothing_steps_; i++){
         level.smoothingInPlace(solution, rhs, residual);
     }
 
-    auto end_MGC1_preSmoothing = std::chrono::high_resolution_clock::now();
-    t_avg_MGC_preSmoothing += std::chrono::duration<double>(end_MGC1_preSmoothing - start_MGC1_preSmoothing).count();
+    auto end_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
+    t_avg_MGC_preSmoothing += std::chrono::duration<double>(end_MGC_preSmoothing - start_MGC_preSmoothing).count();
 
     /* ---------------------- */
     /* Coarse grid correction */
     /* ---------------------- */
 
-    auto start_MGC1_residual = std::chrono::high_resolution_clock::now();
+    auto start_MGC_residual = std::chrono::high_resolution_clock::now();
 
     /* Compute the residual */
     level.computeResidual(residual, rhs, solution);
 
-    auto end_MGC1_residual = std::chrono::high_resolution_clock::now();
-    t_avg_MGC_residual += std::chrono::duration<double>(end_MGC1_residual - start_MGC1_residual).count();
+    auto end_MGC_residual = std::chrono::high_resolution_clock::now();
+    t_avg_MGC_residual += std::chrono::duration<double>(end_MGC_residual - start_MGC_residual).count();
 
     /* -------------------------- */
     /* Solve A * error = residual */
@@ -42,7 +42,7 @@ void GMGPolar::multigrid_W_Cycle(const int level_depth, Vector<double>& solution
         restriction(level_depth, next_level.residual(), residual);
 
         /* Step 2: Solve for the error in place */
-        auto start_MGC_directSolver = std::chrono::high_resolution_clock::now();  
+        auto start_MGC_directSolver = std::chrono::high_resolution_clock::now(); 
 
         next_level.directSolveInPlace(next_level.residual());
 
@@ -61,66 +61,6 @@ void GMGPolar::multigrid_W_Cycle(const int level_depth, Vector<double>& solution
 
         /* Step 3: Solve for the error by recursively calling the multigrid cycle. */
         multigrid_W_Cycle(level_depth+1, next_level.residual(), next_level.error_correction(), next_level.solution());
-    }
-
-    /* Interpolate the correction */
-    prolongation(level_depth+1, residual, next_level.residual());
-
-    /* Compute the corrected approximation: u = u + error */
-    add(solution, residual);
-
-    auto start_MGC1_postSmoothing = std::chrono::high_resolution_clock::now();
-
-    /* ------------ */
-    /* Re-Smoothing */
-    for (int i = 0; i < post_smoothing_steps_ + post_smoothing_steps_; i++){
-        level.smoothingInPlace(solution, rhs, residual);
-    }
-
-    auto end_MGC1_postSmoothing = std::chrono::high_resolution_clock::now();
-    t_avg_MGC_postSmoothing += std::chrono::duration<double>(end_MGC1_postSmoothing - start_MGC1_postSmoothing).count();
-
-    /* ---------------------- */
-    /* Coarse grid correction */
-    /* ---------------------- */
-
-    auto start_MGC2_residual = std::chrono::high_resolution_clock::now();
-
-    /* Compute the residual */
-    level.computeResidual(residual, rhs, solution);
-
-    auto end_MGC2_residual = std::chrono::high_resolution_clock::now();
-    t_avg_MGC_residual += std::chrono::duration<double>(end_MGC2_residual - start_MGC2_residual).count();
-
-    /* -------------------------- */
-    /* Solve A * error = residual */
-    if(level_depth+1 == number_of_levels_-1){
-        /* --------------------- */
-        /* Using a direct solver */
-        /* --------------------- */
-
-        /* Step 1: Restrict the residual */
-        restriction(level_depth, next_level.residual(), residual);
-
-        /* Step 2: Solve for the error in place */
-        auto start_MGC_directSolver = std::chrono::high_resolution_clock::now();  
-
-        next_level.directSolveInPlace(next_level.residual());
-
-        auto end_MGC_directSolver = std::chrono::high_resolution_clock::now();
-        t_avg_MGC_directSolver += std::chrono::duration<double>(end_MGC_directSolver - start_MGC_directSolver).count();
-    } else{
-        /* ------------------------------------------ */
-        /* By recursively calling the multigrid cycle */
-        /* ------------------------------------------ */
-
-        /* Step 1: Restrict the residual. */
-        restriction(level_depth, next_level.error_correction(), residual);
-
-        /* Step 2: Set starting error to zero. */
-        assign(next_level.residual(), 0.0);
-        
-        /* Step 3: Solve for the error by recursively calling the multigrid cycle. */
         multigrid_W_Cycle(level_depth+1, next_level.residual(), next_level.error_correction(), next_level.solution());
     }
 
@@ -130,7 +70,7 @@ void GMGPolar::multigrid_W_Cycle(const int level_depth, Vector<double>& solution
     /* Compute the corrected approximation: u = u + error */
     add(solution, residual);
 
-    auto start_MGC2_postSmoothing = std::chrono::high_resolution_clock::now();
+    auto start_MGC_postSmoothing = std::chrono::high_resolution_clock::now();
 
     /* ------------- */
     /* Postsmoothing */
@@ -138,8 +78,8 @@ void GMGPolar::multigrid_W_Cycle(const int level_depth, Vector<double>& solution
         level.smoothingInPlace(solution, rhs, residual);
     }
 
-    auto end_MGC2_postSmoothing = std::chrono::high_resolution_clock::now();
-    t_avg_MGC_postSmoothing += std::chrono::duration<double>(end_MGC2_postSmoothing - start_MGC2_postSmoothing).count();
+    auto end_MGC_postSmoothing = std::chrono::high_resolution_clock::now();
+    t_avg_MGC_postSmoothing += std::chrono::duration<double>(end_MGC_postSmoothing - start_MGC_postSmoothing).count();
 
     auto end_MGC = std::chrono::high_resolution_clock::now();
     t_avg_MGC_total += std::chrono::duration<double>(end_MGC - start_MGC).count();

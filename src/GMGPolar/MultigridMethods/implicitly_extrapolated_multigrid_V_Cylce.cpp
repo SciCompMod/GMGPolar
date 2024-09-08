@@ -11,7 +11,12 @@ void GMGPolar::implicitlyExtrapolatedMultigrid_V_Cycle(const int level_depth, Ve
     /* ------------ */
     /* Presmoothing */
     for (int i = 0; i < pre_smoothing_steps_; i++){
-        level.extrapolatedSmoothingInPlace(solution, rhs, residual);
+        if(extrapolation_ == 1){
+            level.extrapolatedSmoothingInPlace(solution, rhs, residual);
+        }
+        else{
+            level.smoothingInPlace(solution, rhs, residual);
+        }
     }
 
     auto end_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
@@ -85,7 +90,12 @@ void GMGPolar::implicitlyExtrapolatedMultigrid_V_Cycle(const int level_depth, Ve
     /* ------------- */
     /* Postsmoothing */
     for (int i = 0; i < post_smoothing_steps_; i++){
-        level.extrapolatedSmoothingInPlace(solution, rhs, residual);
+        if(extrapolation_ == 1){
+            level.extrapolatedSmoothingInPlace(solution, rhs, residual);
+        }
+        else{
+            level.smoothingInPlace(solution, rhs, residual);
+        }
     }
 
     auto end_MGC_postSmoothing = std::chrono::high_resolution_clock::now();

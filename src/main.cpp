@@ -9,9 +9,9 @@
 
 int main(int argc, char* argv[]){
     #ifdef NDEBUG
-        std::cout << "Build Type: Release\n"<<std::endl;
+        std::cout << "Build Type: Release\n"<< std::endl;
     #else
-        std::cout << "Build Type: Debug\n"<<std::endl;
+        std::cout << "Build Type: Debug\n"<< std::endl;
     #endif
 
     GMGPolar solver;

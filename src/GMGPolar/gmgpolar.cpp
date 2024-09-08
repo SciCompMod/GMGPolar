@@ -62,10 +62,10 @@ const PolarGrid& GMGPolar::grid() const {
 }
 
 void GMGPolar::printTimings() const {
-    std::cout<< "\n------------------"<<std::endl;
+    std::cout << "\n------------------"<< std::endl;
     std::cout << "Timing Information" << std::endl;
-    std::cout<< "------------------"<<std::endl;
-    std::cout << "Setup Time: " << t_setup_total << " seconds" << std::endl;
+    std::cout << "------------------"<< std::endl;
+    std::cout << "Setup Time: " << t_setup_total-t_setup_rhs << " seconds" << std::endl;
     std::cout << "    Create Levels: " << t_setup_createLevels << " seconds" << std::endl;
     std::cout << "    (Build rhs: " << t_setup_rhs << " seconds)" << std::endl;
     std::cout << "    Smoother: " << t_setup_smoother << " seconds" << std::endl;
@@ -79,7 +79,7 @@ void GMGPolar::printTimings() const {
     std::cout << "    PostSmoothing: " << t_avg_MGC_postSmoothing << " seconds" << std::endl;
     std::cout << "    Residual: " << t_avg_MGC_residual << " seconds" << std::endl;
     std::cout << "    DirectSolve: " << t_avg_MGC_directSolver << " seconds" << std::endl;
-    std::cout<<"\n"<<std::endl;
+    std::cout <<"\n"<< std::endl;
 }
 
 
@@ -177,6 +177,15 @@ void GMGPolar::DirBC_Interior(bool DirBC_Interior) {
 
 /* -------------------- */
 /* Multigrid Parameters */
+
+bool GMGPolar::FMG() const {
+    return FMG_;
+}
+
+void GMGPolar::FMG(bool FMG) {
+    FMG_ = FMG;
+}
+
 int GMGPolar::extrapolation() const {
     return extrapolation_;
 }

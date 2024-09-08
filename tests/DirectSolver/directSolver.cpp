@@ -162,7 +162,7 @@ TEST(DirectSolverTest_CircularGeometry, SequentialDirectSolverAcrossOrigin_Circu
 
 
 TEST(DirectSolverTest_CircularGeometry, ParallelDirectSolverAcrossOrigin_CircularGeometry) {
-    std::vector<double> radii = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
+    std::vector<double> radii = {1e-5, 0.1, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {0, M_PI/16, M_PI/8, M_PI/2, M_PI, M_PI+M_PI/16, M_PI+M_PI/8, M_PI+M_PI/2, M_PI+M_PI};
 
     double Rmax = radii.back();
@@ -426,6 +426,43 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometry) {
     ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-7);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
 }
+
+
+TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_CircularGeometry) {
+    std::vector<double> radii = {1e-5, 1.441*1e-5, 3.8833*1e-5, 8.7666*1e-5, 1.8533*1e-4, 3.806*1e-4,7.713*1e-4, 1.55265*1e-3, 3.1153*1e-3, 6.2406*1e-3, 0.01249125, 0.0249925, 0.049995, 0.1, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
+    std::vector<double> angles = {0, M_PI/16, M_PI/8, M_PI/2, M_PI, M_PI+M_PI/16, M_PI+M_PI/8, M_PI+M_PI/2, M_PI+M_PI};
+
+    double Rmax = radii.back();
+
+    CircularGeometry domain_geometry(Rmax);
+
+    double alpha_jump = 0.66 * Rmax;
+    std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<SonnendruckerGyroCoefficients>(Rmax, alpha_jump);
+    std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<CartesianR2_Boundary_CircularGeometry>(Rmax);
+    std::unique_ptr<SourceTerm> source_term = std::make_unique<CartesianR2_SonnendruckerGyro_CircularGeometry>(Rmax);
+
+    bool DirBC_Interior = false;
+    int maxOpenMPThreads = 1;
+
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients);
+    Level level(0, std::move(grid), std::move(levelCache), 0);
+
+    DirectSolver solver_op(level.grid(), level.levelCache(), domain_geometry, DirBC_Interior, maxOpenMPThreads);
+    Residual residual_op(level.grid(), level.levelCache(), domain_geometry, DirBC_Interior, maxOpenMPThreads);
+
+    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
+    solver_op.solveInPlace(solution);
+
+    Vector<double> residuum(level.grid().numberOfNodes());
+    residual_op.computeResidual(residuum, rhs, solution);
+
+    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-10);
+    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-11);
+}
+
 
 int main(int argc, char* argv[])
 {

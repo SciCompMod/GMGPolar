@@ -2,48 +2,22 @@
 
 const Stencil& DirectSolver::getStencil(int i_r) const {
     assert(0 <= i_r && i_r < grid_.nr());
-
-    static const Stencil stencil_interior = 
-        {7, 4, 8,
-        1, 0, 2,
-        5, 3, 6};
-
-    static const Stencil stencil_across_origin = 
-        {-1, 4, 6,
-        1, 0, 2,
-        -1, 3, 5};
-
-    static const Stencil stencil_DB = 
-        {-1, -1, -1,
-        -1,  0, -1,
-        -1, -1, -1};
-
-    static const Stencil stencil_next_inner_DB = 
-        {-1, 3, 5,
-        -1, 0, 1,
-        -1, 2, 4};
-
-    static const Stencil stencil_next_outer_DB = 
-        {5, 3, -1,
-        1, 0, -1,
-        4, 2, -1};
-
     assert(grid_.nr() >= 4);
 
     if ((i_r > 1 && i_r < grid_.nr() - 2) || (i_r == 1 && !DirBC_Interior_)) {
-        return stencil_interior;
+        return stencil_interior_;
     } 
     else if(i_r == 0 && !DirBC_Interior_) {
-        return stencil_across_origin;
+        return stencil_across_origin_;
     }
     else if((i_r == 0 && DirBC_Interior_) || i_r == grid_.nr() - 1) {
-        return stencil_DB;
+        return stencil_DB_;
     }
     else if(i_r == 1 && DirBC_Interior_) {
-        return stencil_next_inner_DB;
+        return stencil_next_inner_DB_;
     }
     else if(i_r == grid_.nr() - 2) {
-        return stencil_next_outer_DB;
+        return stencil_next_outer_DB_;
     }
     throw std::out_of_range("Invalid index for stencil");
 }

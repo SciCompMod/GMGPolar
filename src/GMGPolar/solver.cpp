@@ -5,24 +5,60 @@
 void GMGPolar::solve() {
     auto start_solve = std::chrono::high_resolution_clock::now();
 
-    int start_level_depth = 0;
-    Level& level = levels_[start_level_depth];
+    /* ---------------- */
+    /* Discretize rhs_f */
+    /* ---------------- */
+
+    int initial_rhs_f_levels = FMG_ ? number_of_levels_ : (extrapolation_ ? 2 : 1);
+    // Loop through the levels, injecting and discretizing rhs
+    for (int level_idx = 0; level_idx < initial_rhs_f_levels; ++level_idx) 
+    {
+        Level& current_level = levels_[level_idx];
+
+        // Inject rhs if there is a next level
+        if (level_idx + 1 < initial_rhs_f_levels) {
+            Level& next_level = levels_[level_idx + 1];
+            injection(level_idx, next_level.rhs(), current_level.rhs());
+        }
+
+        // Discretize the rhs for the current level
+        discretize_rhs_f(current_level, current_level.rhs());
+    }
 
     /* ---------------------------- */
     /* Initialize starting solution */
-    assign(level.solution(), 0.0);
-    
-    /* ---------------- */
-    /* Discretize rhs_f */
-    if(extrapolation_ > 0){
-        Level& next_level = levels_[start_level_depth+1];
-        injection(start_level_depth, next_level.rhs(), level.rhs());
-        discretize_rhs_f(next_level, next_level.rhs());
+    /* ---------------------------- */
+
+    if (!FMG_) {
+        int start_level_depth = 0;
+        Level& level = levels_[start_level_depth];
+        assign(level.solution(), 0.0); // Assign zero initial guess if not using FMG
     }
-    discretize_rhs_f(level, level.rhs());
+    else {
+        // Start from the coarsest level
+        int FMG_start_level_depth = number_of_levels_ - 1;
+        Level& FMG_level = levels_[FMG_start_level_depth];
+
+        // Solve directly on the coarsest level
+        FMG_level.solution() = FMG_level.rhs();
+        FMG_level.directSolveInPlace(FMG_level.solution());  // Direct solve on coarsest grid
+
+        // Prolongate the solution from the coarsest level up to the finest, while applying a V-Cycle on each level
+        for (int current_level = FMG_start_level_depth - 1; current_level > 0; --current_level) {
+            Level& FMG_level = levels_[current_level];         // The current level
+            Level& next_FMG_level = levels_[current_level-1];  // The finer level
+
+            prolongation(current_level, next_FMG_level.solution(), FMG_level.solution());
+            multigrid_V_Cycle(current_level-1, next_FMG_level.solution(), next_FMG_level.rhs(), next_FMG_level.residual());
+        }
+    }
 
     /* ------------ */
     /* Start Solver */
+    /* ------------ */
+
+    int start_level_depth = 0;
+    Level& level = levels_[start_level_depth];
 
     int number_of_iterations_ = 0;
 
@@ -32,7 +68,7 @@ void GMGPolar::solve() {
     while(number_of_iterations_ < max_iterations_){
 
         if(verbose_ > 0) {
-            std::cout<<"\nIteration: "<< number_of_iterations_ << std::endl;
+            std::cout <<"\nIteration: "<< number_of_iterations_ << std::endl;
         }
 
         /* ---------------------------------------------- */
@@ -86,17 +122,39 @@ void GMGPolar::solve() {
             if(number_of_iterations_ == 0) {
                 initial_residual_norm = current_residual_norm;
                 current_relative_residual_norm = 1.0;
-            } else{
+                if(verbose_ > 0) {
+                    std::cout << "Residual Norm: " << current_residual_norm << std::endl;
+                }
+            } 
+            else{
                 current_relative_residual_norm = current_residual_norm / initial_residual_norm;
+                const double current_residual_reduction_factor = residual_norms_[number_of_iterations_] / residual_norms_[number_of_iterations_-1];
+
+                if(verbose_ > 0) {
+                    std::cout << "Residual Norm: " << current_residual_norm << std::endl;
+                    std::cout << "Relative Residual Norm: " << current_relative_residual_norm << std::endl;
+                    std::cout << "Residual Reduction Factor: " << current_residual_reduction_factor << std::endl;
+                }
+
+                bool switched_extrapolation = false;
+                if(current_residual_reduction_factor > 0.4 && extrapolation_ == 3){
+                    switched_extrapolation = true;
+                    extrapolation_ = 1;
+                    if(verbose_ > 0){
+                        std::cout << "Switching from full grid smoothing to standard extrapolated smoothing!" << std::endl;
+                    }
+                }
+
+                if(!switched_extrapolation && (current_residual_reduction_factor > 1.0 || equals(current_residual_reduction_factor, 1.0))){
+                    if(verbose_ > 0){
+                        std::cout << "Stopped Multigrid: Residuals are not improving further!" << std::endl;
+                    }
+                    break;
+                }
             }
 
             auto end_check_convergence = std::chrono::high_resolution_clock::now();
             t_check_convergence += std::chrono::duration<double>(end_check_convergence - start_check_convergence).count();
-
-            if(verbose_ > 0) {
-                std::cout<< "Residual Norm: " << current_residual_norm <<std::endl;
-                std::cout<< "Relative Residual Norm: " << current_relative_residual_norm <<std::endl;
-            }
 
             if(converged(current_residual_norm, current_relative_residual_norm)) break;
         }
@@ -109,21 +167,21 @@ void GMGPolar::solve() {
         switch (multigrid_cycle_)
         {
             case MultigridCycleType::V_CYCLE:
-                if(!extrapolation_){
+                if(extrapolation_ == 0){
                     multigrid_V_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
                 } else{
                     implicitlyExtrapolatedMultigrid_V_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
                 }
                 break;
             case MultigridCycleType::W_CYCLE:
-                if(!extrapolation_){
+                if(extrapolation_ == 0){
                     multigrid_W_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
                 } else{
                     implicitlyExtrapolatedMultigrid_W_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
                 }
                 break;
             case MultigridCycleType::F_CYCLE:
-                if(!extrapolation_){
+                if(extrapolation_ == 0){
                     multigrid_F_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
                 } else{
                     implicitlyExtrapolatedMultigrid_F_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
@@ -154,13 +212,19 @@ void GMGPolar::solve() {
         mean_residual_reduction_factor_ = std::pow(current_residual_norm / initial_residual_norm, 1.0 / number_of_iterations_);
 
         if(verbose_ > 0) {
-            std::cout<<"\nTotal Iterations: "<<number_of_iterations_<<std::endl;
-            std::cout<<"Mean Residual Reduction Factor Rho: "<< mean_residual_reduction_factor_ <<std::endl;
+            std::cout <<"\nTotal Iterations: "<<number_of_iterations_<< std::endl;
+            std::cout <<"Mean Residual Reduction Factor Rho: "<< mean_residual_reduction_factor_ << std::endl;
         }
     }
 
     auto end_solve = std::chrono::high_resolution_clock::now();
     t_solve_total += std::chrono::duration<double>(end_solve - start_solve).count();
+
+    if(verbose_ > 50){
+        computeExactError(level, level.solution(), level.residual());
+        writeToVTK("solution", level, level.solution());
+        writeToVTK("error", level, level.residual());
+    }
 }
 
  

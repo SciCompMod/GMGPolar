@@ -27,7 +27,7 @@ class Level {
 public:
     // ----------- //
     // Constructor //
-    explicit Level(int level, std::unique_ptr<const PolarGrid> grid, std::unique_ptr<const LevelCache> level_cache, int extrapolation);
+    explicit Level(int level, std::unique_ptr<const PolarGrid> grid, std::unique_ptr<const LevelCache> level_cache, int extrapolation, int FMG);
 
     // ---------------- //
     // Getter Functions //

@@ -3,7 +3,7 @@
 void DirectSolver::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const SparseMatrix<double>& solver_matrix){
     mumps_solver.job = JOB_INIT;
     mumps_solver.par = PAR_PARALLEL;
-    /* SYM_POSITIVE_DEFINITE or SYM_GENERAL_SYMMETRIC? */
+    /* SYM_POSITIVE_DEFINITE yields better results than SYM_GENERAL_SYMMETRIC */
     mumps_solver.sym = (solver_matrix.is_symmetric() ? SYM_POSITIVE_DEFINITE : SYM_UNSYMMETRIC); 
     mumps_solver.comm_fortran = USE_COMM_WORLD;
     dmumps_c(&mumps_solver);

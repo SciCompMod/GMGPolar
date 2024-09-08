@@ -1,8 +1,8 @@
 #pragma once
 
-/* ----------------------------------- */
-/* Gmg Polar - Enumeration Definitions */
-/* ----------------------------------- */
+/* ---------------------------------- */
+/* GMGPolar - Enumeration Definitions */
+/* ---------------------------------- */
 
 /* Multigrid Cycle Types */
 enum class MultigridCycleType
@@ -48,7 +48,7 @@ enum class ProblemType
     REFINED_RADIUS = 3
 };
 
-/* Alpha Coefficient Types */
+/* Alpha Coefficient Types - profile_coefficient alpha */
 enum class AlphaCoeff
 {
     POISSON = 0,
@@ -57,7 +57,7 @@ enum class AlphaCoeff
     ZONI_SHIFTED = 3
 };
 
-/* Beta Coefficient Types */
+/* Beta Coefficient Types - profile_coefficient beta */
 enum class BetaCoeff
 {
     ZERO = 0,

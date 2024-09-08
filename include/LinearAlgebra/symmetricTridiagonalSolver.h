@@ -264,7 +264,7 @@ void SymmetricTridiagonalSolver<T>::solve_symmetricCyclicTridiagonal(T* x, T* u,
         const double divisor = main_diagonal(i) - sub_diagonal(i-1) * scratch[i-1];
         scratch[i] = sub_diagonal(i) / divisor;
         x[i] = (x[i] - sub_diagonal(i-1) * x[i-1]) / divisor;
-        u[i] = (0.0 - sub_diagonal(i-1) * u[i-1]) / divisor;
+        u[i] = (0.0 - sub_diagonal(i-1) * u[i-1]) / divisor;    
     }
 
     const int i = matrix_dimension_-1;

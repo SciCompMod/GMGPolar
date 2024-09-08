@@ -34,7 +34,7 @@ void GMGPolar::build_rhs_f(const Level& level, Vector<double>& rhs_f){
         // --------------------------------------- //
         // Store rhs values (radial index section) //
         // --------------------------------------- //
-        #pragma omp for nowait
+        #pragma omp for
         for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++){
             double theta = grid.theta(i_theta);
             double sin_theta = sin_theta_cache[i_theta];

@@ -8,4 +8,4 @@ double CartesianR2_CircularGeometry::exact_solution(const double& r, const doubl
     return (1.0 - (r/Rmax) * (r/Rmax)) * 
         sin(2.0 * M_PI * (r/Rmax) * sin_theta) * 
         cos(2.0 * M_PI * (r/Rmax) * cos_theta);
-}
+}   

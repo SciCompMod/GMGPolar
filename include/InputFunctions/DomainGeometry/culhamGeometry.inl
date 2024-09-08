@@ -2,36 +2,80 @@
 
 #include "culhamGeometry.h"
 
+// // In earlier versions denoted by 'x'
+// inline double CulhamGeometry::Fx(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
+//     return (r/Rmax) * cos_theta + Delta((r/Rmax)) - E((r/Rmax)) * cos_theta - P((r/Rmax)) * cos_theta + T((r/Rmax)) * cos(2.0 * theta) + 5.0;
+// }
+
+// // In earlier versions denoted by 'y'
+// inline double CulhamGeometry::Fy(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
+//     return (r/Rmax) * sin_theta - E((r/Rmax)) * sin_theta - P((r/Rmax)) * sin_theta - T((r/Rmax)) * sin(2.0 * theta);
+// }
+
+
+// // In earlier versions denoted by 'Jrr'
+// inline double CulhamGeometry::dFx_dr(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
+//     return (Delta_prime((r/Rmax)) - E_prime((r/Rmax)) * cos_theta + T_prime((r/Rmax)) * cos(2.0 * theta) - dP((r/Rmax)) * cos_theta + cos_theta)/Rmax;
+// }
+
+// // In earlier versions denoted by 'Jtr'
+// inline double CulhamGeometry::dFy_dr(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
+//     return ((-E_prime((r/Rmax))) * sin_theta - T_prime((r/Rmax)) * sin(2.0 * theta) - dP((r/Rmax)) * sin_theta + sin_theta)/Rmax;
+// }
+
+// // In earlier versions denoted by 'Jrt'
+// inline double CulhamGeometry::dFx_dt(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
+//     return (-(r/Rmax)) * sin_theta + E((r/Rmax)) * sin_theta + P((r/Rmax)) * sin_theta - 2.0 * T((r/Rmax)) * sin(2.0 * theta);
+// }
+
+// // In earlier versions denoted by 'Jtt'
+// inline double CulhamGeometry::dFy_dt(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
+//     return (r/Rmax) * cos_theta - E((r/Rmax)) * cos_theta - P((r/Rmax)) * cos_theta - 2.0 * T((r/Rmax)) * cos(2.0 * theta);
+// }
+
+
+
+
 // In earlier versions denoted by 'x'
 inline double CulhamGeometry::Fx(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
-    return (r/Rmax) * cos_theta + Delta((r/Rmax)) - E((r/Rmax)) * cos_theta - P((r/Rmax)) * cos_theta + T((r/Rmax)) * cos(2.0 * theta) + 5.0;
+    const double cos_two_theta = 1.0 - sin_theta * sin_theta;
+    return (r/Rmax) * cos_theta + Delta((r/Rmax)) - E((r/Rmax)) * cos_theta - P((r/Rmax)) * cos_theta + T((r/Rmax)) * cos_two_theta + 5.0;
 }
 
 // In earlier versions denoted by 'y'
 inline double CulhamGeometry::Fy(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
-    return (r/Rmax) * sin_theta - E((r/Rmax)) * sin_theta - P((r/Rmax)) * sin_theta - T((r/Rmax)) * sin(2.0 * theta);
+    const double sin_two_theta = 2.0 * sin_theta * cos_theta;
+    return (r/Rmax) * sin_theta - E((r/Rmax)) * sin_theta - P((r/Rmax)) * sin_theta - T((r/Rmax)) * sin_two_theta;
 }
 
 
 // In earlier versions denoted by 'Jrr'
 inline double CulhamGeometry::dFx_dr(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
-    return (Delta_prime((r/Rmax)) - E_prime((r/Rmax)) * cos_theta + T_prime((r/Rmax)) * cos(2.0 * theta) - dP((r/Rmax)) * cos_theta + cos_theta)/Rmax;
+    const double cos_two_theta = 1.0 - sin_theta * sin_theta;
+    return (Delta_prime((r/Rmax)) - E_prime((r/Rmax)) * cos_theta + T_prime((r/Rmax)) * cos_two_theta - dP((r/Rmax)) * cos_theta + cos_theta)/Rmax;
 }
 
 // In earlier versions denoted by 'Jtr'
 inline double CulhamGeometry::dFy_dr(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
-    return ((-E_prime((r/Rmax))) * sin_theta - T_prime((r/Rmax)) * sin(2.0 * theta) - dP((r/Rmax)) * sin_theta + sin_theta)/Rmax;
+    const double sin_two_theta = 2.0 * sin_theta * cos_theta;
+    return ((-E_prime((r/Rmax))) * sin_theta - T_prime((r/Rmax)) * sin_two_theta - dP((r/Rmax)) * sin_theta + sin_theta)/Rmax;
 }
 
 // In earlier versions denoted by 'Jrt'
 inline double CulhamGeometry::dFx_dt(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
-    return (-(r/Rmax)) * sin_theta + E((r/Rmax)) * sin_theta + P((r/Rmax)) * sin_theta - 2.0 * T((r/Rmax)) * sin(2.0 * theta);
+    const double sin_two_theta = 2.0 * sin_theta * cos_theta;
+    return (-(r/Rmax)) * sin_theta + E((r/Rmax)) * sin_theta + P((r/Rmax)) * sin_theta - 2.0 * T((r/Rmax)) * sin_two_theta;
 }
 
 // In earlier versions denoted by 'Jtt'
 inline double CulhamGeometry::dFy_dt(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
-    return (r/Rmax) * cos_theta - E((r/Rmax)) * cos_theta - P((r/Rmax)) * cos_theta - 2.0 * T((r/Rmax)) * cos(2.0 * theta);
+    const double cos_two_theta = 1.0 - sin_theta * sin_theta;
+    return (r/Rmax) * cos_theta - E((r/Rmax)) * cos_theta - P((r/Rmax)) * cos_theta - 2.0 * T((r/Rmax)) * cos_two_theta;
 }
+
+
+
+
 
 
 inline double CulhamGeometry::my_sum(std::array<double, 1001>& f, int64_t start_idx, int64_t end_idx) const
