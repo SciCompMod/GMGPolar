@@ -6,7 +6,7 @@ threadReductionFactor=1.0
 
 R0=1e-12
 Rmax=1.0
-nr_exp=10
+nr_exp=12
 ntheta_exp=-1
 anisotropic_factor=0
 divideBy2=0
@@ -20,12 +20,12 @@ file_grid_angles="_angles.txt"
 # Interior boundary condition: 
 # 0: Across-origin
 # 1: u_D_Interior
-DirBC_Interior=0
+DirBC_Interior=1
 
 ### Custom Test Cases ###
 geometry=2 # Circular (0), Shafranov(1), Czarny(2), Culham (3)
-problem=2 # CartesianR2(0), CartesianR6(1), PolarR6(2), RefinedRadius(3)
-alpha_coeff=1 # Poisson(0), Sonnendrucker(1), Zoni(2), Zoni-Shifted(3)
+problem=1 # CartesianR2(0), CartesianR6(1), PolarR6(2), RefinedRadius(3)
+alpha_coeff=3 # Poisson(0), Sonnendrucker(1), Zoni(2), Zoni-Shifted(3)
 beta_coeff=1 # Zero(0), Gyro - Alpha Inverse(1)
 # Remark: For RefinedRadius choose alpha_coeff=3, beta_coeff=1
 # Remark: For Culham Geometry choose geometry=3, problem=2,3, alpha_coeff=3, beta_coeff=1
@@ -34,15 +34,15 @@ beta_coeff=1 # Zero(0), Gyro - Alpha Inverse(1)
 # Full Multigrid Method:
 # 0: Initial approximation is set to zero
 # 1: Initial approximation obtained by nested iteration (recommended)
-FMG=0
+FMG=1
 # Extrapolation Method:
 # 0: No extrapolation
 # 1: Implicit extrapolation
 # 2: Implicit extrapolation with full grid smoothing (residuals cannot be used as convergence criteria)
 # 3: Combination of both implicit extrapolation methods (recommended)
-extrapolation=0
+extrapolation=1
 # Maximum number of multigrid levels:
-maxLevels=5
+maxLevels=6
 # Number of smoothing steps:
 preSmoothingSteps=1
 postSmoothingSteps=1
@@ -55,8 +55,8 @@ multigridCycle=0
 # Convergence criteria:
 maxIterations=150
 residualNormType=0 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
-absoluteTolerance=1e-8
-relativeTolerance=1e-8
+absoluteTolerance=1e-15
+relativeTolerance=1e-15
 
 # Define additional geometry parameters
 kappa_eps=0.0

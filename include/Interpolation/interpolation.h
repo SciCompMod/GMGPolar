@@ -30,6 +30,8 @@ public:
     void applyExtrapolatedRestriction0(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const;
     void applyExtrapolatedRestriction(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const;
 
+    void applyFMGInterpolation(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const;
+
 private:
     const std::vector<int>& threads_per_level_;
 };

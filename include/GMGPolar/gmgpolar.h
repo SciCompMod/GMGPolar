@@ -86,8 +86,8 @@ public:
     /* Multigrid Parameters */
     bool FMG() const;
     void FMG(bool FMG);
-    int extrapolation() const;
-    void extrapolation(int extrapolation);
+    ExtrapolationType extrapolation() const;
+    void extrapolation(ExtrapolationType extrapolation);
 
     int maxLevels() const;
     void maxLevels(int max_levels);
@@ -129,6 +129,7 @@ public:
     double t_setup_directSolver;
 
     double t_solve_total;
+    double t_solve_initial_approximation;
     double t_solve_multigrid_iterations;
     double t_check_convergence;
     double t_check_exact_error;
@@ -167,7 +168,7 @@ private:
     /* -------------------- */
     /* Multigrid Parameters */
     bool FMG_;
-    int extrapolation_;
+    ExtrapolationType extrapolation_;
     int max_levels_;
     int pre_smoothing_steps_;
     int post_smoothing_steps_;
@@ -179,6 +180,7 @@ private:
     /* ------------------ */
     /* Control Parameters */
     int verbose_;
+    bool paraview_ = false;
     int max_omp_threads_;
     double thread_reduction_factor_;
 
@@ -201,6 +203,9 @@ private:
     std::vector<int> threads_per_level_;
 
     std::unique_ptr<Interpolation> interpolation_;
+
+    /* Chooses if full grid smoothing is active on level 0 for extrapolation > 0. */
+    bool full_grid_smoothing_ = false;
 
     /* -------------------- */
     /* Convergence criteria */
@@ -248,6 +253,7 @@ private:
     void injection(const int current_level, Vector<double>& result, const Vector<double>& x) const;
     void extrapolatedProlongation(const int current_level, Vector<double>& result, const Vector<double>& x) const;
     void extrapolatedRestriction(const int current_level, Vector<double>& result, const Vector<double>& x) const;
+    void FMGInterpolation(const int current_level, Vector<double>& result, const Vector<double>& x) const;
 
     void extrapolatedResidual(const int current_level, Vector<double>& residual, const Vector<double>& residual_next_level);
 

@@ -5,29 +5,11 @@
 void GMGPolar::solve() {
     auto start_solve = std::chrono::high_resolution_clock::now();
 
-    /* ---------------- */
-    /* Discretize rhs_f */
-    /* ---------------- */
-
-    int initial_rhs_f_levels = FMG_ ? number_of_levels_ : (extrapolation_ ? 2 : 1);
-    // Loop through the levels, injecting and discretizing rhs
-    for (int level_idx = 0; level_idx < initial_rhs_f_levels; ++level_idx) 
-    {
-        Level& current_level = levels_[level_idx];
-
-        // Inject rhs if there is a next level
-        if (level_idx + 1 < initial_rhs_f_levels) {
-            Level& next_level = levels_[level_idx + 1];
-            injection(level_idx, next_level.rhs(), current_level.rhs());
-        }
-
-        // Discretize the rhs for the current level
-        discretize_rhs_f(current_level, current_level.rhs());
-    }
-
     /* ---------------------------- */
     /* Initialize starting solution */
     /* ---------------------------- */
+
+    auto start_initial_approximation = std::chrono::high_resolution_clock::now();
 
     if (!FMG_) {
         int start_level_depth = 0;
@@ -35,6 +17,9 @@ void GMGPolar::solve() {
         assign(level.solution(), 0.0); // Assign zero initial guess if not using FMG
     }
     else {
+        const int number_of_multigrid_cycles = 3;
+        MultigridCycleType FMG_cycle = MultigridCycleType::F_CYCLE;
+
         // Start from the coarsest level
         int FMG_start_level_depth = number_of_levels_ - 1;
         Level& FMG_level = levels_[FMG_start_level_depth];
@@ -44,14 +29,61 @@ void GMGPolar::solve() {
         FMG_level.directSolveInPlace(FMG_level.solution());  // Direct solve on coarsest grid
 
         // Prolongate the solution from the coarsest level up to the finest, while applying a V-Cycle on each level
-        for (int current_level = FMG_start_level_depth - 1; current_level > 0; --current_level) {
+        for (int current_level = FMG_start_level_depth-1; current_level > 0; --current_level) {
             Level& FMG_level = levels_[current_level];         // The current level
             Level& next_FMG_level = levels_[current_level-1];  // The finer level
 
-            prolongation(current_level, next_FMG_level.solution(), FMG_level.solution());
-            multigrid_V_Cycle(current_level-1, next_FMG_level.solution(), next_FMG_level.rhs(), next_FMG_level.residual());
+            // The bi-cubic FMG interpolation is of higher order
+            FMGInterpolation(current_level, next_FMG_level.solution(), FMG_level.solution());
+
+            // Apply some FMG iterations
+            for (int i = 0; i < number_of_multigrid_cycles; i++){
+                if(current_level-1 == 0 && (extrapolation_ == ExtrapolationType::IMPLICIT_EXTRAPOLATION)){
+                    switch(FMG_cycle) {
+                        case MultigridCycleType::V_CYCLE:
+                            implicitlyExtrapolatedMultigrid_V_Cycle(current_level-1, next_FMG_level.solution(), next_FMG_level.rhs(), next_FMG_level.residual());
+                            break;
+
+                        case MultigridCycleType::W_CYCLE:
+                            implicitlyExtrapolatedMultigrid_W_Cycle(current_level-1, next_FMG_level.solution(), next_FMG_level.rhs(), next_FMG_level.residual());
+                            break;
+
+                        case MultigridCycleType::F_CYCLE:
+                            implicitlyExtrapolatedMultigrid_F_Cycle(current_level-1, next_FMG_level.solution(), next_FMG_level.rhs(), next_FMG_level.residual());
+                            break;
+
+                        default:
+                            std::cerr << "Error: Unknown multigrid cycle type!" << std::endl;
+                            throw std::runtime_error("Invalid multigrid cycle type encountered.");
+                            break;
+                    }
+                }
+                else{
+                    switch(FMG_cycle) {
+                        case MultigridCycleType::V_CYCLE:
+                            multigrid_V_Cycle(current_level-1, next_FMG_level.solution(), next_FMG_level.rhs(), next_FMG_level.residual());
+                            break;
+
+                        case MultigridCycleType::W_CYCLE:
+                            multigrid_W_Cycle(current_level-1, next_FMG_level.solution(), next_FMG_level.rhs(), next_FMG_level.residual());
+                            break;
+
+                        case MultigridCycleType::F_CYCLE:
+                            multigrid_F_Cycle(current_level-1, next_FMG_level.solution(), next_FMG_level.rhs(), next_FMG_level.residual());
+                            break;
+
+                        default:
+                            std::cerr << "Error: Unknown multigrid cycle type!" << std::endl;
+                            throw std::runtime_error("Invalid multigrid cycle type encountered.");
+                            break;
+                    }
+                }
+            }
         }
     }
+
+    auto end_initial_approximation = std::chrono::high_resolution_clock::now();
+    t_solve_initial_approximation += std::chrono::duration<double>(end_initial_approximation - start_initial_approximation).count();
 
     /* ------------ */
     /* Start Solver */
@@ -96,7 +128,7 @@ void GMGPolar::solve() {
             auto start_check_convergence = std::chrono::high_resolution_clock::now();
 
             level.computeResidual(level.residual(), level.rhs(), level.solution());
-            if(extrapolation_){
+            if(extrapolation_ != ExtrapolationType::NONE){
                 Level& next_level = levels_[start_level_depth+1];
                 injection(start_level_depth, next_level.solution(), level.solution());
                 next_level.computeResidual(next_level.residual(), next_level.rhs(), next_level.solution());
@@ -136,20 +168,10 @@ void GMGPolar::solve() {
                     std::cout << "Residual Reduction Factor: " << current_residual_reduction_factor << std::endl;
                 }
 
-                bool switched_extrapolation = false;
-                if(current_residual_reduction_factor > 0.4 && extrapolation_ == 3){
-                    switched_extrapolation = true;
-                    extrapolation_ = 1;
-                    if(verbose_ > 0){
-                        std::cout << "Switching from full grid smoothing to standard extrapolated smoothing!" << std::endl;
-                    }
-                }
-
-                if(!switched_extrapolation && (current_residual_reduction_factor > 1.0 || equals(current_residual_reduction_factor, 1.0))){
-                    if(verbose_ > 0){
-                        std::cout << "Stopped Multigrid: Residuals are not improving further!" << std::endl;
-                    }
-                    break;
+                const double convergence_factor = 0.7;
+                if(current_residual_reduction_factor > convergence_factor && extrapolation_ == ExtrapolationType::COMBINED && full_grid_smoothing_){
+                    full_grid_smoothing_ = false;
+                    std::cout << "Switching from full grid smoothing to standard extrapolated smoothing." << std::endl;
                 }
             }
 
@@ -167,21 +189,21 @@ void GMGPolar::solve() {
         switch (multigrid_cycle_)
         {
             case MultigridCycleType::V_CYCLE:
-                if(extrapolation_ == 0){
+                if(extrapolation_ == ExtrapolationType::NONE){
                     multigrid_V_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
                 } else{
                     implicitlyExtrapolatedMultigrid_V_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
                 }
                 break;
             case MultigridCycleType::W_CYCLE:
-                if(extrapolation_ == 0){
+                if(extrapolation_ == ExtrapolationType::NONE){
                     multigrid_W_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
                 } else{
                     implicitlyExtrapolatedMultigrid_W_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
                 }
                 break;
             case MultigridCycleType::F_CYCLE:
-                if(extrapolation_ == 0){
+                if(extrapolation_ == ExtrapolationType::NONE){
                     multigrid_F_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
                 } else{
                     implicitlyExtrapolatedMultigrid_F_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());

@@ -20,6 +20,14 @@ enum class ResidualNormType
     INFINITY_NORM = 2          // Corresponds to the L∞ norm
 };
 
+enum class ExtrapolationType
+{
+    NONE = 0,
+    IMPLICIT_EXTRAPOLATION = 1,
+    IMPLICIT_FULL_GRID_SMOOTHING = 2,
+    COMBINED = 3,
+};
+
 /* Smoother Colors */
 enum class SmootherColor {
     Black = 0,

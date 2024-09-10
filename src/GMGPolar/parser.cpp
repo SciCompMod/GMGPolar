@@ -69,7 +69,15 @@ void GMGPolar::parseGeometry() {
 
 void GMGPolar::parseMultigrid() {
     FMG_ = parser_.get<int>("FMG") != 0;
-    extrapolation_ = parser_.get<int>("extrapolation");
+    const int extrapolationValue = parser_.get<int>("extrapolation");
+    if (extrapolationValue == static_cast<int>(ExtrapolationType::NONE) ||
+        extrapolationValue == static_cast<int>(ExtrapolationType::IMPLICIT_EXTRAPOLATION) ||
+        extrapolationValue == static_cast<int>(ExtrapolationType::IMPLICIT_FULL_GRID_SMOOTHING) ||
+        extrapolationValue == static_cast<int>(ExtrapolationType::COMBINED)) {
+        extrapolation_ = static_cast<ExtrapolationType>(extrapolationValue);
+    } else {
+        throw std::runtime_error("Invalid extrapolation value.\n");
+    }
     max_levels_ = parser_.get<int>("maxLevels");
     pre_smoothing_steps_ = parser_.get<int>("preSmoothingSteps");
     post_smoothing_steps_ = parser_.get<int>("postSmoothingSteps");

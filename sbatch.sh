@@ -11,12 +11,12 @@
 #SBATCH --exclusive
 
 verbose=1
-maxOpenMPThreads=56
+maxOpenMPThreads=32
 threadReductionFactor=1.0
 
 R0=1e-8
 Rmax=1.0
-nr_exp=14
+nr_exp=12
 ntheta_exp=-1
 anisotropic_factor=0
 divideBy2=0
@@ -45,14 +45,16 @@ beta_coeff=1 # Zero(0), Gyro - Alpha Inverse(1)
 # 0: Initial approximation is set to zero
 # 1: Initial approximation obtained by nested iteration (recommended)
 FMG=1
+FMG_iterations=3
+FMG_multigridCycle=2
 # Extrapolation Method:
 # 0: No extrapolation
-# 1: Implicit extrapolation
+# 1: Implicit extrapolation (recommended)
 # 2: Implicit extrapolation with full grid smoothing (residuals cannot be used as convergence criteria)
-# 3: Combination of both implicit extrapolation methods (recommended)
-extrapolation=3
+# 3: Combination of both implicit extrapolation methods (usefull if FMG=0)
+extrapolation=1
 # Maximum number of multigrid levels:
-maxLevels=6
+maxLevels=7
 # Number of smoothing steps:
 preSmoothingSteps=1
 postSmoothingSteps=1
@@ -60,13 +62,13 @@ postSmoothingSteps=1
 # 0: V-Cycle
 # 1: W-Cycle
 # 2: F-Cycle
-multigridCycle=2
+multigridCycle=0
 
 # Convergence criteria:
 maxIterations=150
 residualNormType=0 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
-absoluteTolerance=1e-12
-relativeTolerance=1e-12
+absoluteTolerance=1e-15
+relativeTolerance=1e-15
 
 # Define additional geometry parameters
 kappa_eps=0.0

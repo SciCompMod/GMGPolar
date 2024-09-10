@@ -2,11 +2,11 @@
 
 // ----------- //
 // Constructor //
-Level::Level(int level, std::unique_ptr<const PolarGrid> grid, std::unique_ptr<const LevelCache> level_cache, int extrapolation, int FMG) :
+Level::Level(int level, std::unique_ptr<const PolarGrid> grid, std::unique_ptr<const LevelCache> level_cache, ExtrapolationType extrapolation, int FMG) :
     level_(level),
     grid_(std::move(grid)),
     level_cache_(std::move(level_cache)),
-    rhs_((FMG || level == 0 || level == 1 && extrapolation > 0) ? grid_->numberOfNodes() : 0),
+    rhs_((FMG || level == 0 || (level == 1 && extrapolation != ExtrapolationType::NONE)) ? grid_->numberOfNodes() : 0),
     solution_(grid_->numberOfNodes()),
     residual_(grid_->numberOfNodes()),
     error_correction_((level > 0) ? grid_->numberOfNodes() : 0)

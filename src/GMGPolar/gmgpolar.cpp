@@ -71,6 +71,7 @@ void GMGPolar::printTimings() const {
     std::cout << "    Smoother: " << t_setup_smoother << " seconds" << std::endl;
     std::cout << "    Direct Solver: " << t_setup_directSolver << " seconds" << std::endl;
     std::cout << "\nSolve Time: " << t_solve_total << " seconds" << std::endl;
+    std::cout << "    Initial Approximation: " << t_solve_initial_approximation << " seconds" << std::endl;
     std::cout << "    Multigrid Iteration: " << t_solve_multigrid_iterations << " seconds" << std::endl;
     std::cout << "    Check Convergence: " << t_check_convergence << " seconds" << std::endl;
     std::cout << "    Check Exact Error: " << t_check_exact_error << " seconds" << std::endl;
@@ -186,11 +187,11 @@ void GMGPolar::FMG(bool FMG) {
     FMG_ = FMG;
 }
 
-int GMGPolar::extrapolation() const {
+ExtrapolationType GMGPolar::extrapolation() const {
     return extrapolation_;
 }
 
-void GMGPolar::extrapolation(int extrapolation) {
+void GMGPolar::extrapolation(ExtrapolationType extrapolation) {
     extrapolation_ = extrapolation;
 }
 
