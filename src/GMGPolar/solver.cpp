@@ -17,9 +17,6 @@ void GMGPolar::solve() {
         assign(level.solution(), 0.0); // Assign zero initial guess if not using FMG
     }
     else {
-        const int number_of_multigrid_cycles = 3;
-        MultigridCycleType FMG_cycle = MultigridCycleType::F_CYCLE;
-
         // Start from the coarsest level
         int FMG_start_level_depth = number_of_levels_ - 1;
         Level& FMG_level = levels_[FMG_start_level_depth];
@@ -37,9 +34,9 @@ void GMGPolar::solve() {
             FMGInterpolation(current_level, next_FMG_level.solution(), FMG_level.solution());
 
             // Apply some FMG iterations
-            for (int i = 0; i < number_of_multigrid_cycles; i++){
-                if(current_level-1 == 0 && (extrapolation_ == ExtrapolationType::IMPLICIT_EXTRAPOLATION)){
-                    switch(FMG_cycle) {
+            for (int i = 0; i < FMG_iterations_; i++){
+                if(current_level-1 == 0 && (extrapolation_ != ExtrapolationType::NONE)){
+                    switch(FMG_cycle_) {
                         case MultigridCycleType::V_CYCLE:
                             implicitlyExtrapolatedMultigrid_V_Cycle(current_level-1, next_FMG_level.solution(), next_FMG_level.rhs(), next_FMG_level.residual());
                             break;
@@ -59,7 +56,7 @@ void GMGPolar::solve() {
                     }
                 }
                 else{
-                    switch(FMG_cycle) {
+                    switch(FMG_cycle_) {
                         case MultigridCycleType::V_CYCLE:
                             multigrid_V_Cycle(current_level-1, next_FMG_level.solution(), next_FMG_level.rhs(), next_FMG_level.residual());
                             break;

@@ -168,6 +168,8 @@ private:
     /* -------------------- */
     /* Multigrid Parameters */
     bool FMG_;
+    int FMG_iterations_;
+    MultigridCycleType FMG_cycle_;
     ExtrapolationType extrapolation_;
     int max_levels_;
     int pre_smoothing_steps_;

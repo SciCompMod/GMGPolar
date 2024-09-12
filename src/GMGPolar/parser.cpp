@@ -69,6 +69,15 @@ void GMGPolar::parseGeometry() {
 
 void GMGPolar::parseMultigrid() {
     FMG_ = parser_.get<int>("FMG") != 0;
+    FMG_iterations_ = parser_.get<int>("FMG_iterations");
+    const int FMG_cycleValue = parser_.get<int>("FMG_cycle");
+    if (FMG_cycleValue == static_cast<int>(MultigridCycleType::V_CYCLE) ||
+        FMG_cycleValue == static_cast<int>(MultigridCycleType::W_CYCLE) ||
+        FMG_cycleValue == static_cast<int>(MultigridCycleType::F_CYCLE)) {
+        FMG_cycle_ = static_cast<MultigridCycleType>(FMG_cycleValue);
+    } else {
+        throw std::runtime_error("Invalid extrapolation value.\n");
+    }
     const int extrapolationValue = parser_.get<int>("extrapolation");
     if (extrapolationValue == static_cast<int>(ExtrapolationType::NONE) ||
         extrapolationValue == static_cast<int>(ExtrapolationType::IMPLICIT_EXTRAPOLATION) ||
@@ -212,6 +221,16 @@ void GMGPolar::initializeMultigrid() {
         "FMG", '\0', 
         "Specifies if initial approximation is obtained by nested iteration.", 
         OPTIONAL, 0, cmdline::oneof(0,1)
+    );
+    parser_.add<int>(
+        "FMG_iterations", '\0', 
+        "Specifies the number of FMG iterations.", 
+        OPTIONAL, 2
+    );
+    parser_.add<int>(
+        "FMG_cycle", '\0', 
+        "Type of FMG Cycle. V-cycle (0), W-cycle (1), F-cycle (2).", 
+        OPTIONAL, 0, cmdline::oneof(0,1,2)
     );
     parser_.add<int>(
         "extrapolation", 'e', 

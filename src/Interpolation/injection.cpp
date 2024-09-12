@@ -1,5 +1,7 @@
 #include "../../include/Interpolation/interpolation.h"
 
+/* Remark: This injection is not scaled. */
+
 void Interpolation::applyInjection(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const{
     assert(toLevel.level() == fromLevel.level() + 1);
 
