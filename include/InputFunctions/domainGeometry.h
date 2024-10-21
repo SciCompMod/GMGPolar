@@ -4,16 +4,17 @@
  * @class DomainGeometry
  * @brief An abstract base class representing the geometric properties of a domain.
  *
- * This class provides an interface for calculating geometric transformations and their derivatives 
- * for a domain in polar coordinates (r, θ). It includes pure virtual functions to compute the 
- * Cartesian coordinates (Fx, Fy) from polar coordinates, as well as their partial derivatives with 
+ * This class provides an interface for calculating geometric transformations and their derivatives
+ * for a domain in polar coordinates (r, θ). It includes pure virtual functions to compute the
+ * Cartesian coordinates (Fx, Fy) from polar coordinates, as well as their partial derivatives with
  * respect to r and θ.
  *
- * Subclasses should implement the specific transformations and derivative calculations for their 
+ * Subclasses should implement the specific transformations and derivative calculations for their
  * respective geometric domains.
  */
 
-class DomainGeometry {
+class DomainGeometry
+{
 public:
     DomainGeometry() = default;
     virtual ~DomainGeometry() = default;

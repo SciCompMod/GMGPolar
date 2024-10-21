@@ -301,7 +301,7 @@ do { \
         const int right = grid.index(i_r+1, i_theta); \
         const int top_right = grid.index(i_r+1, i_theta_P1); \
         \
-        if(i_r & 1){ \
+        if(i_theta & 1){ \
             /* i_theta % 2 == 1 and i_r % 2 == 1 */ \
             /* | X | O | X || O   X   O   X  */ \
             /* |   |   |   || -------------- */ \
@@ -396,7 +396,6 @@ do { \
             /* but is shifted over to the rhs to make the radial Asc smoother matrices symmetric. */ \
             /* Note that the circle Asc smoother matrices are symmetric by default. */ \
             temp[center] = rhs[center] - ( \
-                - coeff1 * (arr[center] + arr[left]) * x[left]  /* Left */ \
                 - coeff2 * (arr[center] + arr[right]) * rhs[right]  /* Right: Symmetry shift! */ \
                 - coeff3 * (att[center] + att[bottom]) * x[bottom] /* Bottom */ \
                 - coeff4 * (att[center] + att[top]) * x[top] /* Top */ \
@@ -548,8 +547,6 @@ void ExtrapolatedSmootherTake::extrapolatedSmoothingInPlace(Vector<double>& x, c
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
 
-    assign(temp, 0.0); //TO BE REMOVED
-
     #pragma omp parallel
     {
         Vector<double> circle_solver_storage_1(grid_.ntheta());
@@ -565,29 +562,28 @@ void ExtrapolatedSmootherTake::extrapolatedSmoothingInPlace(Vector<double>& x, c
         #pragma omp for
         for (int i_r = start_black_circles; i_r < grid_.numberSmootherCircles(); i_r += 2){
             applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
-            // solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
+            solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
         } /* Implicit barrier */
 
         /* White Circle Section */
         #pragma omp for nowait
         for (int i_r = start_white_circles; i_r < grid_.numberSmootherCircles(); i_r += 2){
             applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
-            // solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
+            solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
         }
         /* Black Radial Section */
         #pragma omp for
         for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta += 2){
             applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
-            // solveRadialSection(i_theta, x, temp, radial_solver_storage);
+            solveRadialSection(i_theta, x, temp, radial_solver_storage);
         } /* Implicit barrier */
 
         /* White Radial Section*/
         #pragma omp for
         for (int i_theta = 1; i_theta < grid_.ntheta(); i_theta += 2){
             applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
-            // solveRadialSection(i_theta, x, temp, radial_solver_storage);
+            solveRadialSection(i_theta, x, temp, radial_solver_storage);
         } /* Implicit barrier */
     }
 
-    x = temp;
 }

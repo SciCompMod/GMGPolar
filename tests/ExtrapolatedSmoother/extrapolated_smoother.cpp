@@ -41,7 +41,7 @@ using namespace ExtrapolatedExtrapolatedSmootherTest;
 
 
 TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_DirBC_Interior) {
-    std::vector<double> radii = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
+    std::vector<double> radii = {1e-2, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {0, M_PI/16, M_PI/8, M_PI/2, M_PI, M_PI+M_PI/16, M_PI+M_PI/8, M_PI+M_PI/2, M_PI+M_PI};
 
     double Rmax = radii.back();
@@ -79,28 +79,28 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_DirBC_Interior) {
     Vector<double> solution_Take = start;
     smootherTake_operator.extrapolatedSmoothingInPlace(solution_Take, rhs, temp);
 
-    subtract(solution_Give , solution_Take);
+    // subtract(solution_Give , solution_Take);
 
 
-    std::cout<< level.grid().numberSmootherCircles()<<std::endl;
+    // std::cout<< level.grid().numberSmootherCircles()<<std::endl;
 
 
-    for (int i_theta = level.grid().ntheta() - 1; i_theta >= 0; i_theta--) 
-    {
-        for (int i_r = 0; i_r < level.grid().nr(); i_r++) 
-        {
-            std::cout << solution_Give[level.grid().index(i_r, i_theta)] << " ";
-        }
-        std::cout << std::endl;  // Newline after printing each row
-    }
+    // for (int i_theta = level.grid().ntheta() - 1; i_theta >= 0; i_theta--) 
+    // {
+    //     for (int i_r = 0; i_r < level.grid().nr(); i_r++) 
+    //     {
+    //         std::cout << solution_Give[level.grid().index(i_r, i_theta)] << " ";
+    //     }
+    //     std::cout << std::endl;  // Newline after printing each row
+    // }
         
 
-    // ASSERT_EQ(solution_Give.size(), solution_Take.size());
-    // for (std::size_t index = 0; index < solution_Give.size(); index++) {
-    //     MultiIndex alpha = level.grid().multiIndex(index);
-    //     if(alpha[0] == 0 && !DirBC_Interior) ASSERT_NEAR(solution_Give[index], solution_Take[index], 1e-11);
-    //     else ASSERT_NEAR(solution_Give[index], solution_Take[index], 1e-11);
-    // }
+    ASSERT_EQ(solution_Give.size(), solution_Take.size());
+    for (std::size_t index = 0; index < solution_Give.size(); index++) {
+        MultiIndex alpha = level.grid().multiIndex(index);
+        if(alpha[0] == 0 && !DirBC_Interior) ASSERT_NEAR(solution_Give[index], solution_Take[index], 1e-11);
+        else ASSERT_NEAR(solution_Give[index], solution_Take[index], 1e-11);
+    }
 }
 
 

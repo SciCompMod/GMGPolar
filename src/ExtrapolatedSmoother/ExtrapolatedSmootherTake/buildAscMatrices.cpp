@@ -147,137 +147,6 @@ do { \
         } \
     } \
     /* ------------------------------------------ */ \
-    /* Node in the interior of the Radial Section */ \
-    /* ------------------------------------------ */ \
-    else if(i_r > numberSmootherCircles && i_r < grid.nr() - 2){ \
-        /* ------------------- */ \
-        /* Tridiagonal Section */ \
-        /* i_theta % 2 == 1    */ \
-        if(i_theta & 1){ \
-            /* i_r % 2 == 1 */            /* i_r % 2 == 0 */ \
-            /* ---------- */              /* ---------- */ \
-            /* X   O   X  */              /* O   X   O  */ \
-            /* ---------- */              /* ---------- */ \
-            /* O   Õ   O  */   /* or */   /* O   Õ   O  */ \
-            /* ---------- */              /* ---------- */ \
-            /* X   O   X  */              /* O   X   O  */ \
-            /* ---------- */              /* ---------- */ \
-            \
-            double h1 = grid.radialSpacing(i_r-1); \
-            double h2 = grid.radialSpacing(i_r); \
-            double k1 = grid.angularSpacing(i_theta-1); \
-            double k2 = grid.angularSpacing(i_theta); \
-            \
-            double coeff1 = 0.5*(k1+k2)/h1; \
-            double coeff2 = 0.5*(k1+k2)/h2; \
-            double coeff3 = 0.5*(h1+h2)/k1; \
-            double coeff4 = 0.5*(h1+h2)/k2; \
-            \
-            const int i_theta_M1 = grid.wrapThetaIndex(i_theta-1); \
-            const int i_theta_P1 = grid.wrapThetaIndex(i_theta+1); \
-            \
-            const int left = grid.index(i_r-1, i_theta); \
-            const int bottom = grid.index(i_r, i_theta_M1); \
-            const int center = grid.index(i_r, i_theta); \
-            const int top = grid.index(i_r, i_theta_P1); \
-            const int right = grid.index(i_r+1, i_theta); \
-            \
-            auto& matrix = radial_tridiagonal_solver[i_theta/2]; \
-            const int center_index = i_r - numberSmootherCircles; \
-            const int left_index = i_r - numberSmootherCircles - 1; \
-            const int right_index = i_r - numberSmootherCircles + 1; \
-            \
-            /* Center: (Left, Right, Bottom, Top) */ \
-            row = center_index; \
-            column = center_index; \
-            value = ( \
-                + 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) \
-                \
-                + coeff1 * (arr[center] + arr[left]) \
-                + coeff2 * (arr[center] + arr[right]) \
-                + coeff3 * (att[center] + att[bottom]) \
-                + coeff4 * (att[center] + att[top]) \
-            ); \
-            if(row == column) matrix.main_diagonal(row) = value; \
-            else if(row == column - 1) matrix.sub_diagonal(row) = value; \
-            else if(row == 0 && column == matrix.columns()-1) matrix.cyclic_corner_element() = value; \
-            \
-            /* Left */ \
-            row = center_index; \
-            column = left_index; \
-            value = - coeff1 * (arr[center] + arr[left]); \
-            if(row == column) matrix.main_diagonal(row) = value; \
-            else if(row == column - 1) matrix.sub_diagonal(row) = value; \
-            else if(row == 0 && column == matrix.columns()-1) matrix.cyclic_corner_element() = value; \
-            \
-            /* Right */ \
-            row = center_index; \
-            column = right_index; \
-            value = - coeff2 * (arr[center] + arr[right]); \
-            if(row == column) matrix.main_diagonal(row) = value; \
-            else if(row == column - 1) matrix.sub_diagonal(row) = value; \
-            else if(row == 0 && column == matrix.columns()-1) matrix.cyclic_corner_element() = value; \
-        } \
-        /* ---------------- */ \
-        /* Diagonal Section */ \
-        /* i_theta % 2 == 0 */ \
-        else { \
-            /* i_r % 2 == 1 */            /* i_r % 2 == 0 */ \
-            /* ---------- */              /* ---------- */ \
-            /* O   O   O  */              /* O   O   O  */ \
-            /* ---------- */              /* ---------- */ \
-            /* X   Õ   X  */   /* or */   /* O   X̃   O  */ \
-            /* ---------- */              /* ---------- */ \
-            /* O   O   O  */              /* O   O   O  */ \
-            /* ---------- */              /* ---------- */ \
-            if(i_r & 1){ /* i_r % 2 == 1 */ \
-                double h1 = grid.radialSpacing(i_r-1); \
-                double h2 = grid.radialSpacing(i_r); \
-                double k1 = grid.angularSpacing(i_theta-1); \
-                double k2 = grid.angularSpacing(i_theta); \
-                \
-                double coeff1 = 0.5*(k1+k2)/h1; \
-                double coeff2 = 0.5*(k1+k2)/h2; \
-                double coeff3 = 0.5*(h1+h2)/k1; \
-                double coeff4 = 0.5*(h1+h2)/k2; \
-                \
-                const int i_theta_M1 = grid.wrapThetaIndex(i_theta-1); \
-                const int i_theta_P1 = grid.wrapThetaIndex(i_theta+1); \
-                \
-                const int left = grid.index(i_r-1, i_theta); \
-                const int bottom = grid.index(i_r, i_theta_M1); \
-                const int center = grid.index(i_r, i_theta); \
-                const int top = grid.index(i_r, i_theta_P1); \
-                const int right = grid.index(i_r+1, i_theta); \
-                \
-                auto& matrix = radial_diagonal_solver[i_theta/2]; \
-                const int center_index = i_r - numberSmootherCircles; \
-                \
-                /* Center: (Left, Right, Bottom, Top) */ \
-                row = center_index; \
-                column = center_index; \
-                value = ( \
-                    + 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) \
-                    \
-                    + coeff1 * (arr[center] + arr[left]) \
-                    + coeff2 * (arr[center] + arr[right]) \
-                    + coeff3 * (att[center] + att[bottom]) \
-                    + coeff4 * (att[center] + att[top]) \
-                ); \
-                matrix.diagonal(row) = value; \
-            } \
-            else{ /* i_r % 2 == 0 */ \
-                /* Center: Coarse */ \
-                auto& matrix = radial_diagonal_solver[i_theta/2]; \
-                int center_index = i_theta; \
-                \
-                row = center_index; \
-                column = center_index; \
-                matrix.diagonal(row) = 1.0; \
-            } \
-        } \
-    } \
-    /* ------------------------------------------ */ \
     /* Circle Section: Node in the inner boundary */ \
     /* ------------------------------------------ */ \
     else if(i_r == 0){ \
@@ -403,6 +272,137 @@ do { \
                 matrix.row_index(nz_index) = center_index + 1; \
                 matrix.col_index(nz_index) = center_index + 1; \
                 matrix.value(nz_index) = 1.0; \
+            } \
+        } \
+    } \
+    /* ------------------------------------------ */ \
+    /* Node in the interior of the Radial Section */ \
+    /* ------------------------------------------ */ \
+    else if(i_r > numberSmootherCircles && i_r < grid.nr() - 2){ \
+        /* ------------------- */ \
+        /* Tridiagonal Section */ \
+        /* i_theta % 2 == 1    */ \
+        if(i_theta & 1){ \
+            /* i_r % 2 == 1 */            /* i_r % 2 == 0 */ \
+            /* ---------- */              /* ---------- */ \
+            /* X   O   X  */              /* O   X   O  */ \
+            /* ---------- */              /* ---------- */ \
+            /* O   Õ   O  */   /* or */   /* O   Õ   O  */ \
+            /* ---------- */              /* ---------- */ \
+            /* X   O   X  */              /* O   X   O  */ \
+            /* ---------- */              /* ---------- */ \
+            \
+            double h1 = grid.radialSpacing(i_r-1); \
+            double h2 = grid.radialSpacing(i_r); \
+            double k1 = grid.angularSpacing(i_theta-1); \
+            double k2 = grid.angularSpacing(i_theta); \
+            \
+            double coeff1 = 0.5*(k1+k2)/h1; \
+            double coeff2 = 0.5*(k1+k2)/h2; \
+            double coeff3 = 0.5*(h1+h2)/k1; \
+            double coeff4 = 0.5*(h1+h2)/k2; \
+            \
+            const int i_theta_M1 = grid.wrapThetaIndex(i_theta-1); \
+            const int i_theta_P1 = grid.wrapThetaIndex(i_theta+1); \
+            \
+            const int left = grid.index(i_r-1, i_theta); \
+            const int bottom = grid.index(i_r, i_theta_M1); \
+            const int center = grid.index(i_r, i_theta); \
+            const int top = grid.index(i_r, i_theta_P1); \
+            const int right = grid.index(i_r+1, i_theta); \
+            \
+            auto& matrix = radial_tridiagonal_solver[i_theta/2]; \
+            const int center_index = i_r - numberSmootherCircles; \
+            const int left_index = i_r - numberSmootherCircles - 1; \
+            const int right_index = i_r - numberSmootherCircles + 1; \
+            \
+            /* Center: (Left, Right, Bottom, Top) */ \
+            row = center_index; \
+            column = center_index; \
+            value = ( \
+                + 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) \
+                \
+                + coeff1 * (arr[center] + arr[left]) \
+                + coeff2 * (arr[center] + arr[right]) \
+                + coeff3 * (att[center] + att[bottom]) \
+                + coeff4 * (att[center] + att[top]) \
+            ); \
+            if(row == column) matrix.main_diagonal(row) = value; \
+            else if(row == column - 1) matrix.sub_diagonal(row) = value; \
+            else if(row == 0 && column == matrix.columns()-1) matrix.cyclic_corner_element() = value; \
+            \
+            /* Left */ \
+            row = center_index; \
+            column = left_index; \
+            value = - coeff1 * (arr[center] + arr[left]); \
+            if(row == column) matrix.main_diagonal(row) = value; \
+            else if(row == column - 1) matrix.sub_diagonal(row) = value; \
+            else if(row == 0 && column == matrix.columns()-1) matrix.cyclic_corner_element() = value; \
+            \
+            /* Right */ \
+            row = center_index; \
+            column = right_index; \
+            value = - coeff2 * (arr[center] + arr[right]); \
+            if(row == column) matrix.main_diagonal(row) = value; \
+            else if(row == column - 1) matrix.sub_diagonal(row) = value; \
+            else if(row == 0 && column == matrix.columns()-1) matrix.cyclic_corner_element() = value; \
+        } \
+        /* ---------------- */ \
+        /* Diagonal Section */ \
+        /* i_theta % 2 == 0 */ \
+        else { \
+            /* i_r % 2 == 1 */            /* i_r % 2 == 0 */ \
+            /* ---------- */              /* ---------- */ \
+            /* O   O   O  */              /* O   O   O  */ \
+            /* ---------- */              /* ---------- */ \
+            /* X   Õ   X  */   /* or */   /* O   X̃   O  */ \
+            /* ---------- */              /* ---------- */ \
+            /* O   O   O  */              /* O   O   O  */ \
+            /* ---------- */              /* ---------- */ \
+            if(i_r & 1){ /* i_r % 2 == 1 */ \
+                double h1 = grid.radialSpacing(i_r-1); \
+                double h2 = grid.radialSpacing(i_r); \
+                double k1 = grid.angularSpacing(i_theta-1); \
+                double k2 = grid.angularSpacing(i_theta); \
+                \
+                double coeff1 = 0.5*(k1+k2)/h1; \
+                double coeff2 = 0.5*(k1+k2)/h2; \
+                double coeff3 = 0.5*(h1+h2)/k1; \
+                double coeff4 = 0.5*(h1+h2)/k2; \
+                \
+                const int i_theta_M1 = grid.wrapThetaIndex(i_theta-1); \
+                const int i_theta_P1 = grid.wrapThetaIndex(i_theta+1); \
+                \
+                const int left = grid.index(i_r-1, i_theta); \
+                const int bottom = grid.index(i_r, i_theta_M1); \
+                const int center = grid.index(i_r, i_theta); \
+                const int top = grid.index(i_r, i_theta_P1); \
+                const int right = grid.index(i_r+1, i_theta); \
+                \
+                auto& matrix = radial_diagonal_solver[i_theta/2]; \
+                const int center_index = i_r - numberSmootherCircles; \
+                \
+                /* Center: (Left, Right, Bottom, Top) */ \
+                row = center_index; \
+                column = center_index; \
+                value = ( \
+                    + 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) \
+                    \
+                    + coeff1 * (arr[center] + arr[left]) \
+                    + coeff2 * (arr[center] + arr[right]) \
+                    + coeff3 * (att[center] + att[bottom]) \
+                    + coeff4 * (att[center] + att[top]) \
+                ); \
+                matrix.diagonal(row) = value; \
+            } \
+            else{ /* i_r % 2 == 0 */ \
+                /* Center: Coarse */ \
+                auto& matrix = radial_diagonal_solver[i_theta/2]; \
+                int center_index = i_r - numberSmootherCircles; \
+                \
+                row = center_index; \
+                column = center_index; \
+                matrix.diagonal(row) = 1.0; \
             } \
         } \
     } \

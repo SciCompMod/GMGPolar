@@ -1,6 +1,7 @@
 #pragma once
 
-class ExactSolution {
+class ExactSolution
+{
 public:
     ExactSolution() = default;
     virtual ~ExactSolution() = default;

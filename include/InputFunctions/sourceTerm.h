@@ -1,6 +1,7 @@
 #pragma once
 
-class SourceTerm {
+class SourceTerm
+{
 public:
     SourceTerm() = default;
     virtual ~SourceTerm() = default;

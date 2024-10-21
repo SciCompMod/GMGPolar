@@ -6,6 +6,7 @@
 // P = 1/4 * |2  4  2|
 //           |1  2  1|
 
+// clang-format off
 void Interpolation::applyProlongation0(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const
 {
     assert(toLevel.level() == fromLevel.level() - 1);
@@ -18,7 +19,7 @@ void Interpolation::applyProlongation0(const Level& fromLevel, const Level& toLe
     assert(x.size() == coarseGrid.numberOfNodes());
     assert(result.size() == fineGrid.numberOfNodes());
 
-#pragma omp parallel for
+    #pragma omp parallel for
     for (int index = 0; index < fineGrid.numberOfNodes(); index++)
     {
         std::array<std::pair<double, double>, space_dimension> neighbor_distance;
@@ -89,12 +90,16 @@ void Interpolation::applyProlongation0(const Level& fromLevel, const Level& toLe
             MultiIndex top_left_neighbor(coarse_node[0], (coarse_node[1] + 1) % coarseGrid.ntheta());
             MultiIndex top_right_neighbor(coarse_node[0] + 1, (coarse_node[1] + 1) % coarseGrid.ntheta());
 
-            result[index] = (h1 * k1 * x[coarseGrid.index(bottom_left_neighbor)] + h2 * k1 * x[coarseGrid.index(bottom_right_neighbor)] +
-                             h1 * k2 * x[coarseGrid.index(top_left_neighbor)] + h2 * k2 * x[coarseGrid.index(top_right_neighbor)]) /
-                            ((h1 + h2) * (k1 + k2));
+            result[index] = (
+                h1 * k1 * x[coarseGrid.index(bottom_left_neighbor)] +
+                h2 * k1 * x[coarseGrid.index(bottom_right_neighbor)] +
+                h1 * k2 * x[coarseGrid.index(top_left_neighbor)] +
+                h2 * k2 * x[coarseGrid.index(top_right_neighbor)]
+            ) / ((h1 + h2) * (k1 + k2));
         }
     }
 }
+// clang-format on
 
 // --------------------------------------- //
 // Optimized version of applyProlongation0 //
@@ -200,4 +205,4 @@ void Interpolation::applyProlongation(const Level& fromLevel, const Level& toLev
         }
     }
 }
- // clang-format on
+// clang-format on

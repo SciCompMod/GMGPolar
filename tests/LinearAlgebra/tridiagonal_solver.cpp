@@ -261,7 +261,6 @@ TEST(SymmetricTridiagonalSolver, random_tridiagonal_n_1000)
     EXPECT_NEAR(copy_solver.main_diagonal(0)*rhs[0] + copy_solver.sub_diagonal(0)*rhs[1], copy_rhs[0], precision);
     for(int i = 1; i < n-1; ++i){
         EXPECT_NEAR(copy_solver.sub_diagonal(i-1)*rhs[i-1] + copy_solver.main_diagonal(i)*rhs[i] + copy_solver.sub_diagonal(i)*rhs[i+1], copy_rhs[i], precision);
-        std::cout<<copy_solver.sub_diagonal(i-1)*rhs[i-1] + copy_solver.main_diagonal(i)*rhs[i] + copy_solver.sub_diagonal(i)*rhs[i+1]- copy_rhs[i]<<std::endl;
     }
     EXPECT_NEAR(copy_solver.sub_diagonal(n-2)*rhs[n-2] + copy_solver.main_diagonal(n-1)*rhs[n-1], copy_rhs[n-1], precision);
 }

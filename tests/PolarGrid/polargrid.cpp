@@ -34,8 +34,8 @@ TEST(PolarGridTest, AccessorsTest) {
 TEST(PolarGridTest, GridJumpTest) {
     std::vector<double> radii = {0.1, 0.2, 0.5, 0.9, 1.3};
     std::vector<double> angles = {0, M_PI/8, M_PI/2, M_PI, M_PI+M_PI/8, M_PI+M_PI/2, M_PI+M_PI};
-    double jump_radius = 0.4;
-    PolarGrid grid(radii, angles, jump_radius);
+    double splitting_radius = 0.4;
+    PolarGrid grid(radii, angles, splitting_radius);
     ASSERT_DOUBLE_EQ(grid.radius(0), 0.1);
     ASSERT_DOUBLE_EQ(grid.radius(1), 0.2);
     ASSERT_DOUBLE_EQ(grid.radius(4), 1.3);
@@ -48,8 +48,8 @@ TEST(PolarGridTest, GridJumpTest) {
 TEST(PolarGridTest, IndexingTest) {
     std::vector<double> radii = {0.1, 0.2, 0.25, 0.5, 0.8, 0.9, 1.3, 1.4, 2.0};
     std::vector<double> angles = {0, M_PI/16, M_PI/8, M_PI/2, M_PI, M_PI+M_PI/16, M_PI+M_PI/8, M_PI+M_PI/2, M_PI+M_PI};
-    double jump_radius = 0.6;
-    PolarGrid grid(radii, angles, jump_radius);
+    double splitting_radius = 0.6;
+    PolarGrid grid(radii, angles, splitting_radius);
 
     for(int i=0; i < grid.nr(); i++) {
         for(int j=0; j < grid.ntheta(); j++) {
@@ -71,8 +71,8 @@ TEST(PolarGridTest, IndexingTest) {
 TEST(PolarGridTest, IndexingValuesTest) {
     std::vector<double> radii = {0.1, 0.2, 0.25, 0.5, 0.8, 0.9, 1.3, 1.4, 2.0};
     std::vector<double> angles = {0, M_PI/16, M_PI/8, M_PI/2, M_PI, M_PI+M_PI/16, M_PI+M_PI/8, M_PI+M_PI/2, M_PI+M_PI};
-    double jump_radius = 0.6;
-    PolarGrid grid(radii, angles, jump_radius);
+    double splitting_radius = 0.6;
+    PolarGrid grid(radii, angles, splitting_radius);
 
     {
         MultiIndex alpha(2,6);
@@ -114,8 +114,8 @@ TEST(PolarGridTest, IndexingValuesTest) {
 TEST(PolarGridTest, CoordinatesTest) {
     std::vector<double> radii = {0.1, 0.2, 0.25, 0.5, 0.8, 0.9, 1.3, 1.4, 2.0};
     std::vector<double> angles = {0, M_PI/16, M_PI/8, M_PI/2, M_PI, M_PI+M_PI/16, M_PI+M_PI/8, M_PI+M_PI/2, M_PI+M_PI};
-    double jump_radius = 0.6;
-    PolarGrid grid(radii, angles, jump_radius);
+    double splitting_radius = 0.6;
+    PolarGrid grid(radii, angles, splitting_radius);
     
     MultiIndex alpha(3,2);
     Point P1 = grid.polarCoordinates(alpha);
@@ -132,8 +132,8 @@ TEST(PolarGridTest, CoordinatesTest) {
 TEST(PolarGridTest, NeighborDistanceTest) {
     std::vector<double> radii = {0.1, 0.2, 0.25, 0.5, 0.8, 0.9, 1.3, 1.4, 2.0};
     std::vector<double> angles = {0, M_PI/16, M_PI/8, M_PI/2, M_PI, M_PI+M_PI/16, M_PI+M_PI/8, M_PI+M_PI/2, M_PI+M_PI};
-    double jump_radius = 0.6;
-    PolarGrid grid(radii, angles, jump_radius);
+    double splitting_radius = 0.6;
+    PolarGrid grid(radii, angles, splitting_radius);
 
     std::array<std::pair<double,double>,space_dimension> neighbor_distance;
     {
@@ -179,8 +179,8 @@ TEST(PolarGridTest, NeighborDistanceTest) {
 TEST(PolarGridTest, NeighborsTest) {
     std::vector<double> radii = {0.1, 0.2, 0.25, 0.5, 0.8, 0.9, 1.3, 1.4, 2.0};
     std::vector<double> angles = {0, M_PI/16, M_PI/8, M_PI/2, M_PI, M_PI+M_PI/16, M_PI+M_PI/8, M_PI+M_PI/2, M_PI+M_PI};
-    double jump_radius = 0.6;
-    PolarGrid grid(radii, angles, jump_radius);
+    double splitting_radius = 0.6;
+    PolarGrid grid(radii, angles, splitting_radius);
 
     std::array<std::pair<int,int>,space_dimension> neighbors;
 

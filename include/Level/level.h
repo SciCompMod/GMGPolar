@@ -97,8 +97,6 @@ public:
     const std::vector<double>& sin_theta() const;
     const std::vector<double>& cos_theta() const;
 
-    const ImplementationType implementationType() const;
-
     bool cacheDensityProfileCoefficients() const;
     const std::vector<double>& coeff_alpha() const;
     const std::vector<double>& coeff_beta() const;

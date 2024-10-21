@@ -45,13 +45,13 @@ void GMGPolar::writeToVTK(const std::filesystem::path& file_path, const PolarGri
     file << "</DataArray>\n";
 
     file << "<DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n";
-    for (size_t i = 0; i < (grid.nr() - 1) * grid.ntheta(); i++) {
+    for (int i = 0; i < (grid.nr() - 1) * grid.ntheta(); i++) {
         file << 4 * (i + 1) << " ";
     }
     file << "</DataArray>\n";
 
     file << "<DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">\n";
-    for (size_t i = 0; i < (grid.nr() - 1) * grid.ntheta(); i++) {
+    for (int i = 0; i < (grid.nr() - 1) * grid.ntheta(); i++) {
         file << "9 "; // VTK_QUAD
     }
     file << "</DataArray>\n";
@@ -114,14 +114,14 @@ void GMGPolar::writeToVTK(const std::filesystem::path& file_path, const Level& l
 
     
     file << "<DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n";
-    for (size_t i = 0; i < (grid.nr() - 1) * grid.ntheta(); i++) {
+    for (int i = 0; i < (grid.nr() - 1) * grid.ntheta(); i++) {
         file << 4 * (i + 1) << " ";
     }
 
     file << "</DataArray>\n";
     // Cell types
     file << "<DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">\n";
-    for (size_t i = 0; i < (grid.nr() - 1) * grid.ntheta(); ++i) {
+    for (int i = 0; i < (grid.nr() - 1) * grid.ntheta(); ++i) {
         file << "9 "; // VTK_QUAD
     }
 

@@ -51,7 +51,7 @@ file_grid_angles="_angles.txt"
 # Interior boundary condition: 
 # 0: Across-origin
 # 1: u_D_Interior
-DirBC_Interior=0
+DirBC_Interior=1
 
 ### Custom Test Cases ###
 geometry=2 # Circular (0), Shafranov(1), Czarny(2), Culham (3)
@@ -65,7 +65,7 @@ beta_coeff=1 # Zero(0), Gyro - Alpha Inverse(1)
 # Full Multigrid Method:
 # 0: Initial approximation is set to zero
 # 1: Initial approximation obtained by nested iteration (recommended)
-FMG=1
+FMG=0
 FMG_iterations=3
 FMG_cycle=2 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
 
@@ -76,7 +76,7 @@ FMG_cycle=2 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
 # 3: Combination of both implicit extrapolation methods (May be usefull for FMG=0)
 extrapolation=0
 # Maximum number of multigrid levels:
-maxLevels=6
+maxLevels=4
 # Number of smoothing steps:
 preSmoothingSteps=1
 postSmoothingSteps=1
@@ -89,8 +89,8 @@ multigridCycle=0
 # Convergence criteria:
 maxIterations=150
 residualNormType=0 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
-absoluteTolerance=1e-15
-relativeTolerance=1e-15
+absoluteTolerance=1e-10
+relativeTolerance=1e-10
 
 # Define additional geometry parameters
 kappa_eps=0.0

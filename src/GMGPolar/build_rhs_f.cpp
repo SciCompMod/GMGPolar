@@ -19,7 +19,7 @@ void GMGPolar::build_rhs_f(const Level& level, Vector<double>& rhs_f){
                 double theta = grid.theta(i_theta);
                 double sin_theta = sin_theta_cache[i_theta];
                 double cos_theta = cos_theta_cache[i_theta];
-                if(0 < i_r && i_r < grid.nr()-1 || (i_r == 0 && !DirBC_Interior_)){
+                if((0 < i_r && i_r < grid.nr()-1) || (i_r == 0 && !DirBC_Interior_)){
                     rhs_f[grid.index(i_r,i_theta)] = source_term_->rhs_f(r, theta, sin_theta, cos_theta);
                 }
                 else if(i_r == 0 && DirBC_Interior_){
@@ -41,7 +41,7 @@ void GMGPolar::build_rhs_f(const Level& level, Vector<double>& rhs_f){
             double cos_theta = cos_theta_cache[i_theta];
             for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++){
                 double r = grid.radius(i_r);
-                if(0 < i_r && i_r < grid.nr()-1 || (i_r == 0 && !DirBC_Interior_)){
+                if((0 < i_r && i_r < grid.nr()-1) || (i_r == 0 && !DirBC_Interior_)){
                     rhs_f[grid.index(i_r,i_theta)] = source_term_->rhs_f(r, theta, sin_theta, cos_theta);
                 }
                 else if(i_r == 0 && DirBC_Interior_){
@@ -73,7 +73,7 @@ void GMGPolar::discretize_rhs_f(const Level& level, Vector<double>& rhs_f){
                 double r = grid.radius(i_r);
                 for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++){
                     double theta = grid.theta(i_theta);
-                    if(0 < i_r && i_r < grid.nr()-1 || (i_r == 0 && !DirBC_Interior_)){
+                    if((0 < i_r && i_r < grid.nr()-1) || (i_r == 0 && !DirBC_Interior_)){
                         double h1 = (i_r == 0) ? 2.0 * grid.radius(0) : grid.radialSpacing(i_r-1);
                         double h2 = grid.radialSpacing(i_r);
                         double k1 = grid.angularSpacing(i_theta-1);
@@ -98,7 +98,7 @@ void GMGPolar::discretize_rhs_f(const Level& level, Vector<double>& rhs_f){
                 double theta = grid.theta(i_theta);
                 for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++){
                     double r = grid.radius(i_r);
-                    if(0 < i_r && i_r < grid.nr()-1 || (i_r == 0 && !DirBC_Interior_)){
+                    if((0 < i_r && i_r < grid.nr()-1) || (i_r == 0 && !DirBC_Interior_)){
                         double h1 = (i_r == 0) ? 2.0 * grid.radius(0) : grid.radialSpacing(i_r-1);
                         double h2 = grid.radialSpacing(i_r);
                         double k1 = grid.angularSpacing(i_theta-1);
@@ -132,7 +132,7 @@ void GMGPolar::discretize_rhs_f(const Level& level, Vector<double>& rhs_f){
                     double theta = grid.theta(i_theta);
                     double sin_theta = sin_theta_cache[i_theta];
                     double cos_theta = cos_theta_cache[i_theta];
-                    if(0 < i_r && i_r < grid.nr()-1 || (i_r == 0 && !DirBC_Interior_)){
+                    if((0 < i_r && i_r < grid.nr()-1) || (i_r == 0 && !DirBC_Interior_)){
                         double h1 = (i_r == 0) ? 2.0 * grid.radius(0) : grid.radialSpacing(i_r-1);
                         double h2 = grid.radialSpacing(i_r);
                         double k1 = grid.angularSpacing(i_theta-1);
@@ -169,7 +169,7 @@ void GMGPolar::discretize_rhs_f(const Level& level, Vector<double>& rhs_f){
                 double cos_theta = cos_theta_cache[i_theta];
                 for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++){
                     double r = grid.radius(i_r);
-                    if(0 < i_r && i_r < grid.nr()-1 || (i_r == 0 && !DirBC_Interior_)){
+                    if((0 < i_r && i_r < grid.nr()-1) || (i_r == 0 && !DirBC_Interior_)){
                         double h1 = (i_r == 0) ? 2.0 * grid.radius(0) : grid.radialSpacing(i_r-1);
                         double h2 = grid.radialSpacing(i_r);
                         double k1 = grid.angularSpacing(i_theta-1);

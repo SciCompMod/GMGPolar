@@ -11,7 +11,7 @@ namespace ProlongationTest {
         Vector<double> x(grid.numberOfNodes());
         std::mt19937 gen(seed);
         std::uniform_real_distribution<double> dist(-100.0, 100.0); 
-        for (size_t i = 0; i < x.size(); ++i) {
+        for (int i = 0; i < x.size(); ++i) {
             x[i] = dist(gen);
         }
         return x;
@@ -55,7 +55,7 @@ TEST(ProlongationTest, ProlongationTest) {
     interpolation_operator.applyProlongation(coarse_level, finest_level, result2, x);
 
     ASSERT_EQ(result1.size(), result2.size());
-    for (size_t i = 0; i < result1.size(); ++i) {
+    for (int i = 0; i < result1.size(); ++i) {
         ASSERT_DOUBLE_EQ(result1[i], result2[i]);
     }
 }

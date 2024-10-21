@@ -596,7 +596,6 @@ void SmootherGive::smoothingInPlaceForLoop(Vector<double>& x, const Vector<doubl
             }
 
             /* Outside Black Section (Part 1)*/
-            auto start_time2 = std::chrono::steady_clock::now();
             #pragma omp for
             for (int circle_task = -1; circle_task < num_circle_tasks; circle_task += 4) {
                 int i_r = num_circle_tasks - circle_task - 1;
@@ -604,7 +603,6 @@ void SmootherGive::smoothingInPlaceForLoop(Vector<double>& x, const Vector<doubl
             }
 
             /* Outside Black Section (Part 2)*/
-            auto start_time3 = std::chrono::steady_clock::now();
             #pragma omp for
             for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 4) {
                     int i_r = num_circle_tasks - circle_task - 1;
@@ -612,7 +610,6 @@ void SmootherGive::smoothingInPlaceForLoop(Vector<double>& x, const Vector<doubl
             }
 
             /* Black Circle Smoother */
-            auto start_time4 = std::chrono::steady_clock::now();
             #pragma omp for
             for(int circle_task = 0; circle_task < num_circle_tasks; circle_task += 2) { 
                 int i_r = num_circle_tasks - circle_task - 1;

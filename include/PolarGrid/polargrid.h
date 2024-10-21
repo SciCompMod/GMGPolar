@@ -62,7 +62,7 @@ public:
     int fastIndex(const int r_index, const int theta_index) const;
     void multiIndex(const int node_index, int& r_index, int& theta_index) const;
 
-    // Neighboring nodes
+    // Obtaining neighboring nodes (unoptimized)
     // Get adjacent neighbors of a node.
     // If the neighbor index is -1, then there is no neighboring node in that direction.
     void adjacentNeighborsOf(const MultiIndex& position, 
@@ -126,7 +126,7 @@ private:
     // Private members //
     // --------------- //
 
-    // We will use the convention.
+    // We will use the convention:
     // radii = [R0, ..., R], angles = [0, ..., 2*pi]
     // Note that ntheta will be one less than the size of angles since 0 and 2pi are the same point.
     int nr_; // number of nodes in radial direction

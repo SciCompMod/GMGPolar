@@ -16,7 +16,7 @@ namespace ExtrapolatedProlongationTest {
         Vector<double> x(grid.numberOfNodes());
         std::mt19937 gen(seed);  // Standard mersenne_twister_engine seeded with seed
         std::uniform_real_distribution<double> dist(0.0, 1.0);  // Generate random double between 0 and 1
-        for (size_t i = 0; i < x.size(); ++i) {
+        for (int i = 0; i < x.size(); ++i) {
             x[i] = dist(gen);
         }
         return x;
@@ -61,7 +61,7 @@ TEST(ExtrapolatedProlongationTest, ExtrapolatedProlongationSmoothingRadius) {
     interpolation_operator.applyExtrapolatedProlongation(coarse_level, finest_level, result2, x);
 
     ASSERT_EQ(result1.size(), result2.size());
-    for (size_t i = 0; i < result1.size(); ++i) {
+    for (int i = 0; i < result1.size(); ++i) {
         ASSERT_DOUBLE_EQ(result1[i], result2[i]);
     }
 }

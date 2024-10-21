@@ -197,10 +197,6 @@ private:
     bool cache_density_profile_coefficients_;
     bool cache_domain_geometry_;
 
-    /* ------------------------------ */
-    /* Parser for GMGPolar parameters */
-    cmdline::parser parser_;
-
     /* --------------- */
     /* Input Functions */
     std::unique_ptr<const DomainGeometry> domain_geometry_;
@@ -208,6 +204,10 @@ private:
     std::unique_ptr<const BoundaryConditions> boundary_conditions_;
     std::unique_ptr<const SourceTerm> source_term_;
     std::unique_ptr<const ExactSolution> exact_solution_ = nullptr; // Optional exact solution for validation
+
+    /* ------------------------------ */
+    /* Parser for GMGPolar parameters */
+    cmdline::parser parser_;
 
     /* ---------------- */
     /* Multigrid levels */

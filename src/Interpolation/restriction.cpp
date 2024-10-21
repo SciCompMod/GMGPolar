@@ -249,7 +249,7 @@ void Interpolation::applyRestriction(const Level& fromLevel, const Level& toLeve
                             h2*k3 * x[fineGrid.index(i_r-1, i_theta_P1)] / ((h1+h2)*(k3+k4));               
                     } 
                     if(i_r_coarse < coarseGrid.nr() - 1){
-                       // Right Part
+                        // Right Part
                         double h3 = fineGrid.radialSpacing(i_r);
                         double h4 = fineGrid.radialSpacing(i_r+1);
                         // Right, Bottom Right, Top Right

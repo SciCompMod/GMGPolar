@@ -8,9 +8,10 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -pedantic")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -pedantic -Wno-unused")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -mtune=generic")
 
+# External library paths
 set(MUMPS_PREFIX_PATH "~/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/mumps-5.6.2-m4xrhc4mshzrxmgptzbpult3nbf6qrzk")
 include_directories(${MUMPS_PREFIX_PATH}/include)
 link_directories(${MUMPS_PREFIX_PATH}/lib)
@@ -31,39 +32,44 @@ set(MUMPS_LIBRARIES
     metis
 )
 
+# Include directories for the project
 include_directories(include)
 
-# Add source files
+# 1. Create a library target for the PolarGrid module
+file(GLOB_RECURSE POLAR_GRID_SOURCES "src/PolarGrid/*.cpp")
+add_library(PolarGrid STATIC ${POLAR_GRID_SOURCES})
+target_include_directories(PolarGrid PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/PolarGrid)
+
+# 2. Create a library target for the InputFunctions module
+file(GLOB_RECURSE INPUT_FUNCTIONS_SOURCES
+    "src/InputFunctions/DensityProfileCoefficients/*.cpp"
+    "src/InputFunctions/DomainGeometry/*.cpp"
+    "src/InputFunctions/ExactSolution/*.cpp"
+    "src/InputFunctions/BoundaryConditions/*.cpp"
+    "src/InputFunctions/SourceTerms/*.cpp"
+)
+add_library(InputFunctions STATIC ${INPUT_FUNCTIONS_SOURCES})
+target_include_directories(InputFunctions PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/InputFunctions)
+
+# 3. Add source files for the rest of the project
 file(GLOB_RECURSE GMG_POLAR_SOURCES "src/GMGPolar/*.cpp")
 file(GLOB_RECURSE MULTIGRID_METHODS_SOURCES "src/GMGPolar/MultigridMethods/*.cpp")
-file(GLOB_RECURSE POLAR_GRID_SOURCES "src/PolarGrid/*.cpp")
 file(GLOB_RECURSE LEVEL_SOURCES "src/Level/*.cpp")
 file(GLOB_RECURSE STENCIL_SOURCES "src/Stencil/*.cpp")
 file(GLOB_RECURSE INTERPOLATION_SOURCES "src/Interpolation/*.cpp")
 file(GLOB_RECURSE DIRECT_SOLVER_SOURCES "src/DirectSolver/*.cpp" "src/DirectSolverGive/*.cpp" "src/DirectSolverTake/*.cpp")
 file(GLOB_RECURSE RESIDUAL_SOURCES "src/Residual/*.cpp" "src/Residual/ResidualGive/*.cpp" "src/Residual/ResidualTake/*.cpp")
 file(GLOB_RECURSE SMOOTHER_SOURCES "src/Smoother/*.cpp" "src/SmootherGive/*.cpp" "src/SmootherTake/*.cpp")
-file(GLOB_RECURSE EXTRAPOLATED_SMOOTHER_SOURCES 
-    "src/ExtrapolatedSmoother/*.cpp" 
-    "src/ExtrapolatedSmoother/ExtrapolatedSmootherGive/*.cpp"
-    "src/ExtrapolatedSmoother/ExtrapolatedSmootherTake/*.cpp"
-)
-
-file(GLOB_RECURSE DENSITY_PROFILE_COEFFICIENTS "src/InputFunctions/DensityProfileCoefficients/*.cpp")
-file(GLOB_RECURSE DOMAIN_GEOMETRY_SOURCES "src/InputFunctions/DomainGeometry/*.cpp")
-file(GLOB_RECURSE EXACT_SOLUTION_SOURCES "src/InputFunctions/ExactSolution/*.cpp")
-file(GLOB_RECURSE BOUNDARY_CONDITION_SOURCES "src/InputFunctions/BoundaryConditions/*.cpp")
-file(GLOB_RECURSE SOURCE_TERMS_SOURCES "src/InputFunctions/SourceTerms/*.cpp")
+file(GLOB_RECURSE EXTRAPOLATED_SMOOTHER_SOURCES "src/ExtrapolatedSmoother/*.cpp" "src/ExtrapolatedSmoother/ExtrapolatedSmootherGive/*.cpp" "src/ExtrapolatedSmoother/ExtrapolatedSmootherTake/*.cpp")
 
 # Add main.cpp to the list of source files
 set(MAIN_SOURCE "src/main.cpp")
 
-# Add executable target
+# 4. Add the main executable target
 add_executable(gmgpolar 
     ${MAIN_SOURCE}
     ${GMG_POLAR_SOURCES}
     ${MULTIGRID_METHODS_SOURCES}
-    ${POLAR_GRID_SOURCES}
     ${LEVEL_SOURCES}
     ${STENCIL_SOURCES}
     ${INTERPOLATION_SOURCES}
@@ -71,21 +77,18 @@ add_executable(gmgpolar
     ${RESIDUAL_SOURCES}
     ${SMOOTHER_SOURCES}
     ${EXTRAPOLATED_SMOOTHER_SOURCES}
-
-    ${DENSITY_PROFILE_COEFFICIENTS}
-    ${DOMAIN_GEOMETRY_SOURCES}
-    ${EXACT_SOLUTION_SOURCES}
-    ${BOUNDARY_CONDITION_SOURCES}
-    ${SOURCE_TERMS_SOURCES}
 )
 
-# Add OpenMP flags if available
+# 5. Link the PolarGrid and InputFunctions libraries to the main executable
+target_link_libraries(gmgpolar PRIVATE PolarGrid InputFunctions ${MUMPS_LIBRARIES} OpenMP::OpenMP_CXX)
+
+# 6. Add OpenMP flags if available
 find_package(OpenMP REQUIRED)
 if(OpenMP_CXX_FOUND)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
-target_link_libraries(gmgpolar PUBLIC ${MUMPS_LIBRARIES} OpenMP::OpenMP_CXX)
 
+# 7. Enable testing and include other directories
 enable_testing()
 add_subdirectory(third-party)
 add_subdirectory(tests)

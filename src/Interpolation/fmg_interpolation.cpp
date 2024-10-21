@@ -1,5 +1,8 @@
 #include "../../include/Interpolation/interpolation.h"
 
+// /* Bicubic FMG interpolator 1/16 * [-1, 9, 9, -1] */ based on:
+// Lagrange interpolation (4 interpolation points, 1 interpolated value)
+
 // clang-format off
 #define FINE_NODE_FMG_INTERPOLATION() \
 do { \

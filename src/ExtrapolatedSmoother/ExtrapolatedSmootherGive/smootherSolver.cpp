@@ -1008,8 +1008,6 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingInPlaceSequential(Vector<dou
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
-    assign(temp, 0.0); //TO BE REMOVED
-
     for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++){
         for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++){
             const int index = grid_.index(i_r, i_theta);
@@ -1039,14 +1037,14 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingInPlaceSequential(Vector<dou
     }
     const int start_black_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 1 : 0;
     for (int i_r = start_black_circles; i_r < grid_.numberSmootherCircles(); i_r += 2){
-        // solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
+        solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
     }
     for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++){
         applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
     }
     const int start_white_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 0 : 1;
     for (int i_r = start_white_circles; i_r < grid_.numberSmootherCircles(); i_r += 2){
-        // solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
+        solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
     }
     /* ---------------------------- */
     /* ------ RADIAL SECTION ------ */
@@ -1054,15 +1052,14 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingInPlaceSequential(Vector<dou
         applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
     }
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta += 2){
-        // solveRadialSection(i_theta, x, temp, radial_solver_storage);
+        solveRadialSection(i_theta, x, temp, radial_solver_storage);
     }
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++){
         applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
     }
     for (int i_theta = 1; i_theta < grid_.ntheta(); i_theta += 2){
-        // solveRadialSection(i_theta, x, temp, radial_solver_storage);
+        solveRadialSection(i_theta, x, temp, radial_solver_storage);
     }
-    x = temp;
 }
 
 
