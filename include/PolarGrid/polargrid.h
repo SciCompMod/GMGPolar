@@ -59,6 +59,7 @@ public:
     // Optimized, inlined indexing.
     int wrapThetaIndex(const int unwrapped_theta_index) const;
     int index(const int r_index, const int unwrapped_theta_index) const;
+    int fastIndex(const int r_index, const int theta_index) const;
     void multiIndex(const int node_index, int& r_index, int& theta_index) const;
 
     // Neighboring nodes

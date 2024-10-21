@@ -1,6 +1,6 @@
-#include "../../include/Smoother/smoother.h"
+#include "../../../include/Smoother/SmootherTake/smootherTake.h"
 
-void Smoother::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const SparseMatrix<double>& solver_matrix){
+void SmootherTake::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const SparseMatrix<double>& solver_matrix){
     mumps_solver.job = JOB_INIT;
     mumps_solver.par = PAR_PARALLEL;
     /* SYM_POSITIVE_DEFINITE or SYM_GENERAL_SYMMETRIC? */
@@ -78,7 +78,7 @@ void Smoother::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const SparseM
     dmumps_c(&mumps_solver);
 }
 
-void Smoother::finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver){
+void SmootherTake::finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver){
     mumps_solver.job = JOB_END;
     dmumps_c(&mumps_solver);
 }

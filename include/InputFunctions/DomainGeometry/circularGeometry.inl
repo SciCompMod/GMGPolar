@@ -4,7 +4,7 @@
 
 // In earlier versions denoted by 'x'
 inline double CircularGeometry::Fx(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const {
-    return (r / Rmax) * cos_theta;
+    return (r/Rmax) * cos_theta;
 }
 
 // In earlier versions denoted by 'y'

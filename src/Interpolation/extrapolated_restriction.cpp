@@ -2,7 +2,9 @@
 
 /* For the restriction we use R_ex = P_ex^T */
 
-void Interpolation::applyExtrapolatedRestriction0(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const{
+// clang-format off
+void Interpolation::applyExtrapolatedRestriction0(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const
+{
     assert(toLevel.level() == fromLevel.level() + 1);
 
     omp_set_num_threads(threads_per_level_[toLevel.level()]);
@@ -14,11 +16,12 @@ void Interpolation::applyExtrapolatedRestriction0(const Level& fromLevel, const 
     assert(result.size() == coarseGrid.numberOfNodes());
 
     #pragma omp parallel for
-    for(int index = 0; index < coarseGrid.numberOfNodes(); index ++){
+    for (int index = 0; index < coarseGrid.numberOfNodes(); index++)
+    {
         MultiIndex coarse_node = coarseGrid.multiIndex(index);
-        MultiIndex fine_node(2*coarse_node[0], 2*coarse_node[1]);
+        MultiIndex fine_node(2 * coarse_node[0], 2 * coarse_node[1]);
 
-        std::array<std::pair<int,int>, space_dimension> neighbors;
+        std::array<std::pair<int, int>, space_dimension> neighbors;
 
         // Center
         double value = x[fineGrid.index(fine_node)];
@@ -26,45 +29,53 @@ void Interpolation::applyExtrapolatedRestriction0(const Level& fromLevel, const 
         fineGrid.adjacentNeighborsOf(fine_node, neighbors);
 
         // Left
-        if(neighbors[0].first != -1){
+        if (neighbors[0].first != -1)
+        {
             value += 0.5 * x[neighbors[0].first];
         }
 
         // Right
-        if(neighbors[0].second != -1){
+        if (neighbors[0].second != -1)
+        {
             value += 0.5 * x[neighbors[0].second];
         }
-        
+
         // Bottom
-        if(neighbors[1].first != -1){
+        if (neighbors[1].first != -1)
+        {
             value += 0.5 * x[neighbors[1].first];
         }
-        
+
         // Top
-        if(neighbors[1].second != -1){
+        if (neighbors[1].second != -1)
+        {
             value += 0.5 * x[neighbors[1].second];
         }
 
         fineGrid.diagonalNeighborsOf(fine_node, neighbors);
 
         // Bottom Right
-        if(neighbors[0].second != -1){
+        if (neighbors[0].second != -1)
+        {
             value += 0.5 * x[neighbors[0].second];
         }
 
         // Top Left
-        if(neighbors[1].first != -1){
+        if (neighbors[1].first != -1)
+        {
             value += 0.5 * x[neighbors[1].first];
         }
 
         result[index] = value;
     }
 }
+// clang-format on
 
 // -------------------------------------- //
 // Optimized version of applyRestriction0 //
 // -------------------------------------- //
 
+// clang-format off
 void Interpolation::applyExtrapolatedRestriction(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const{
     assert(toLevel.level() == fromLevel.level() + 1);
 
@@ -176,3 +187,4 @@ void Interpolation::applyExtrapolatedRestriction(const Level& fromLevel, const L
         }
     }
 }
+// clang-format on

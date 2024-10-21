@@ -1,17 +1,48 @@
 #!/bin/bash
 
+# Verbosity level: 
+# 0 - No output 
+# 1 - Basic output 
 verbose=1
+# Set Paraview usage flag:
+# 0 - Do not use Paraview 
+# 1 - Enable Paraview to visualize the grid, solution and error
+paraview=0
+
+# OpenMP settings:
+# Maximum number of threads OpenMP can use for parallel execution
 maxOpenMPThreads=32
+# Factor to reduce the number of threads OpenMP uses (e.g., 1.0 means no reduction)
 threadReductionFactor=1.0
 
+# Implementation strategy:
+# 0 - CPU "Take": Each node independently applies the stencil
+# 1 - CPU "Give": The stencil operation is distributed across adjacent neighboring nodes
+implementationType=1
+# Caching behavior:
+# 0 - Recompute values on each iteration: Uses less memory but results in slower execution.
+# 1 - Reuse cached values: Consumes more memory but significantly improves performance.
+cacheDensityProfileCoefficients=1
+cacheDomainGeometry=1
+# Note: In the "Take" approach (implementationType=0), 
+# caching is required for optimal performance, 
+# so both density profile coefficients and domain geometry need to be cached.
+if [[ $implementationType -eq 0 ]]; then
+  if [[ $cacheDensityProfileCoefficients -ne 1 || $cacheDomainGeometry -ne 1 ]]; then
+    echo "Error: Caching must be enabled (set to 1) for both density profile coefficients and domain geometry in 'Take' approach (implementationType=0)."
+    exit 1
+  fi
+fi
+
+# Finest grid parameters
 R0=1e-8
 Rmax=1.0
 nr_exp=10
-ntheta_exp=-1
+ntheta_exp=10
 anisotropic_factor=0
 divideBy2=0
 
-paraview=0
+# Finest grid can be loaded from a text file
 write_grid_file=0
 load_grid_file=0
 file_grid_radii="_radii.txt"
@@ -20,7 +51,7 @@ file_grid_angles="_angles.txt"
 # Interior boundary condition: 
 # 0: Across-origin
 # 1: u_D_Interior
-DirBC_Interior=1
+DirBC_Interior=0
 
 ### Custom Test Cases ###
 geometry=2 # Circular (0), Shafranov(1), Czarny(2), Culham (3)
@@ -43,7 +74,7 @@ FMG_cycle=2 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
 # 1: Implicit extrapolation (recommended)
 # 2: Implicit extrapolation with full grid smoothing (residuals cannot be used as convergence criteria)
 # 3: Combination of both implicit extrapolation methods (May be usefull for FMG=0)
-extrapolation=1
+extrapolation=0
 # Maximum number of multigrid levels:
 maxLevels=6
 # Number of smoothing steps:
@@ -58,8 +89,8 @@ multigridCycle=0
 # Convergence criteria:
 maxIterations=150
 residualNormType=0 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
-absoluteTolerance=1e-12
-relativeTolerance=1e-12
+absoluteTolerance=1e-15
+relativeTolerance=1e-15
 
 # Define additional geometry parameters
 kappa_eps=0.0
@@ -73,6 +104,7 @@ elif [ "$geometry" -eq 2 ]; then
 fi
 
 # Set alpha_jump based on alpha_coeff value
+# Used for anisotropic grid refinement -> refinement_radius
 if [ "$alpha_coeff" -eq 0 ]; then
     alpha_jump=$(echo "0.5 * $Rmax" | bc)
 elif [ "$alpha_coeff" -eq 1 ]; then
@@ -86,10 +118,11 @@ else
     exit 1
 fi
 
-./build/gmgpolar --verbose $verbose --maxOpenMPThreads $maxOpenMPThreads --threadReductionFactor $threadReductionFactor --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --write_grid_file $write_grid_file --load_grid_file $load_grid_file --file_grid_radii "$file_grid_radii" --file_grid_angles "$file_grid_angles" --DirBC_Interior $DirBC_Interior --geometry $geometry --kappa_eps $kappa_eps --delta_e $delta_e --problem $problem --alpha_coeff $alpha_coeff --alpha_jump $alpha_jump --beta_coeff $beta_coeff --FMG $FMG --FMG_iterations $FMG_iterations --FMG_cycle $FMG_cycle --extrapolation $extrapolation --maxLevels $maxLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
-# valgrind --tool=massif ./build/gmgpolar --verbose $verbose --maxOpenMPThreads $maxOpenMPThreads --threadReductionFactor $threadReductionFactor --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --write_grid_file $write_grid_file --load_grid_file $load_grid_file --file_grid_radii "$file_grid_radii" --file_grid_angles "$file_grid_angles" --DirBC_Interior $DirBC_Interior --geometry $geometry --kappa_eps $kappa_eps --delta_e $delta_e --problem $problem --alpha_coeff $alpha_coeff --alpha_jump $alpha_jump --beta_coeff $beta_coeff --extrapolation $extrapolation --maxLevels $maxLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
-# valgrind --tool=memcheck --leak-check=full ./build/gmgpolar --verbose $verbose --maxOpenMPThreads $maxOpenMPThreads --threadReductionFactor $threadReductionFactor --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --write_grid_file $write_grid_file --load_grid_file $load_grid_file --file_grid_radii "$file_grid_radii" --file_grid_angles "$file_grid_angles" --DirBC_Interior $DirBC_Interior --geometry $geometry --kappa_eps $kappa_eps --delta_e $delta_e --problem $problem --alpha_coeff $alpha_coeff --alpha_jump $alpha_jump --beta_coeff $beta_coeff --extrapolation $extrapolation --maxLevels $maxLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
-# valgrind --tool=helgrind ./build/gmgpolar --verbose $verbose --maxOpenMPThreads $maxOpenMPThreads --threadReductionFactor $threadReductionFactor --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --write_grid_file $write_grid_file --load_grid_file $load_grid_file --file_grid_radii "$file_grid_radii" --file_grid_angles "$file_grid_angles" --DirBC_Interior $DirBC_Interior --geometry $geometry --kappa_eps $kappa_eps --delta_e $delta_e --problem $problem --alpha_coeff $alpha_coeff --alpha_jump $alpha_jump --beta_coeff $beta_coeff --extrapolation $extrapolation --maxLevels $maxLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
-# valgrind --tool=cachegrind ./build/gmgpolar --verbose $verbose --maxOpenMPThreads $maxOpenMPThreads --threadReductionFactor $threadReductionFactor --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --write_grid_file $write_grid_file --load_grid_file $load_grid_file --file_grid_radii "$file_grid_radii" --file_grid_angles "$file_grid_angles" --DirBC_Interior $DirBC_Interior --geometry $geometry --kappa_eps $kappa_eps --delta_e $delta_e --problem $problem --alpha_coeff $alpha_coeff --alpha_jump $alpha_jump --beta_coeff $beta_coeff --extrapolation $extrapolation --maxLevels $maxLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
-# valgrind --tool=callgrind ./build/gmgpolar --verbose $verbose --maxOpenMPThreads $maxOpenMPThreads --threadReductionFactor $threadReductionFactor --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --write_grid_file $write_grid_file --load_grid_file $load_grid_file --file_grid_radii "$file_grid_radii" --file_grid_angles "$file_grid_angles" --DirBC_Interior $DirBC_Interior --geometry $geometry --kappa_eps $kappa_eps --delta_e $delta_e --problem $problem --alpha_coeff $alpha_coeff --alpha_jump $alpha_jump --beta_coeff $beta_coeff --extrapolation $extrapolation --maxLevels $maxLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
-# valgrind --tool=drd ./build/gmgpolar --verbose $verbose --maxOpenMPThreads $maxOpenMPThreads --threadReductionFactor $threadReductionFactor --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --write_grid_file $write_grid_file --load_grid_file $load_grid_file --file_grid_radii "$file_grid_radii" --file_grid_angles "$file_grid_angles" --DirBC_Interior $DirBC_Interior --geometry $geometry --kappa_eps $kappa_eps --delta_e $delta_e --problem $problem --alpha_coeff $alpha_coeff --alpha_jump $alpha_jump --beta_coeff $beta_coeff --extrapolation $extrapolation --maxLevels $maxLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
+./build/gmgpolar --verbose $verbose --paraview $paraview --maxOpenMPThreads $maxOpenMPThreads --threadReductionFactor $threadReductionFactor --implementationType $implementationType --cacheDensityProfileCoefficients $cacheDensityProfileCoefficients --cacheDomainGeometry $cacheDomainGeometry --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --write_grid_file $write_grid_file --load_grid_file $load_grid_file --file_grid_radii "$file_grid_radii" --file_grid_angles "$file_grid_angles" --DirBC_Interior $DirBC_Interior --geometry $geometry --kappa_eps $kappa_eps --delta_e $delta_e --problem $problem --alpha_coeff $alpha_coeff --alpha_jump $alpha_jump --beta_coeff $beta_coeff --FMG $FMG --FMG_iterations $FMG_iterations --FMG_cycle $FMG_cycle --extrapolation $extrapolation --maxLevels $maxLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
+
+# valgrind --tool=massif ./build/gmgpolar
+# valgrind --tool=memcheck --leak-check=full ./build/gmgpolar
+# valgrind --tool=helgrind ./build/gmgpolar
+# valgrind --tool=cachegrind ./build/gmgpolar
+# valgrind --tool=callgrind ./build/gmgpolar
+# valgrind --tool=drd ./build/gmgpolar

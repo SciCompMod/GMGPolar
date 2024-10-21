@@ -35,11 +35,31 @@ public:
     T& diagonal(const int index);
 
     void solveInPlace(T* sol_rhs) const;
+
+    template<typename U>
+    friend std::ostream& operator<<(std::ostream& stream, const DiagonalSolver<U>& solver);
+
 private:
     int matrix_dimension_;
     std::unique_ptr<T[]> diagonal_values_;
 };
 
+
+template<typename U>
+std::ostream& operator<<(std::ostream& stream, const DiagonalSolver<U>& solver)
+{
+    stream << "Diagonal Matrix (Dimension: " << solver.matrix_dimension_ << " x " << solver.matrix_dimension_ << ")\n";
+
+    stream << "Diagonal Elements: [";
+    for (int i = 0; i < solver.matrix_dimension_; ++i) {
+        stream << solver.diagonal(i);
+        if (i != solver.matrix_dimension_ - 1)
+            stream << ", ";
+    }
+    stream << "]\n";
+
+    return stream;
+}
 
 // default construction
 template<typename T>

@@ -16,7 +16,7 @@
 
 class Interpolation {
 public:
-    explicit Interpolation(const std::vector<int>& threads_per_level);
+    explicit Interpolation(const std::vector<int>& threads_per_level, const bool DirBC_Interior);
 
     /* Remark: This injection is not scaled. */
     void applyInjection(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const;
@@ -38,4 +38,5 @@ public:
 
 private:
     const std::vector<int>& threads_per_level_;
+    const bool DirBC_Interior_;
 };

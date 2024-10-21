@@ -1,5 +1,6 @@
 #include "../../include/Interpolation/interpolation.h"
 
+// clang-format off
 #define FINE_NODE_FMG_INTERPOLATION() \
 do { \
     if(i_r == 0 || i_r == fineGrid.nr() - 1){ \
@@ -9,10 +10,10 @@ do { \
             double k2 = fineGrid.angularSpacing(i_theta); \
             double k3 = coarseGrid.angularSpacing(i_theta_coarse+1); \
             \
-                double w_theta0 = - k1/k0 * k2/(k0+k1+k2) * (k2+k3)/(k0+k1+k2+k3); \
-                double w_theta1 = (k0+k1)/k0 * k2/(k1+k2) * (k2+k3)/(k1+k2+k3); \
-                double w_theta2 = (k0+k1)/(k0+k1+k2) * k1/(k1+k2) * (k2+k3)/k3; \
-                double w_theta3 = - (k0+k1)/(k0+k1+k2+k3) * k1/(k1+k2+k3) * k2/k3; \
+            double w_theta0 = - k1/k0 * k2/(k0+k1+k2) * (k2+k3)/(k0+k1+k2+k3); \
+            double w_theta1 = (k0+k1)/k0 * k2/(k1+k2) * (k2+k3)/(k1+k2+k3); \
+            double w_theta2 = (k0+k1)/(k0+k1+k2) * k1/(k1+k2) * (k2+k3)/k3; \
+            double w_theta3 = - (k0+k1)/(k0+k1+k2+k3) * k1/(k1+k2+k3) * k2/k3; \
             \
             result[fineGrid.index(i_r, i_theta)] = ( \
                 w_theta0 * x[coarseGrid.index(i_r_coarse, i_theta_coarse-1)] + /* (0, -3) */ \
@@ -33,10 +34,10 @@ do { \
             double k2 = fineGrid.angularSpacing(i_theta); \
             double k3 = coarseGrid.angularSpacing(i_theta_coarse+1); \
             \
-                double w_theta0 = - k1/k0 * k2/(k0+k1+k2) * (k2+k3)/(k0+k1+k2+k3); \
-                double w_theta1 = (k0+k1)/k0 * k2/(k1+k2) * (k2+k3)/(k1+k2+k3); \
-                double w_theta2 = (k0+k1)/(k0+k1+k2) * k1/(k1+k2) * (k2+k3)/k3; \
-                double w_theta3 = - (k0+k1)/(k0+k1+k2+k3) * k1/(k1+k2+k3) * k2/k3; \
+            double w_theta0 = - k1/k0 * k2/(k0+k1+k2) * (k2+k3)/(k0+k1+k2+k3); \
+            double w_theta1 = (k0+k1)/k0 * k2/(k1+k2) * (k2+k3)/(k1+k2+k3); \
+            double w_theta2 = (k0+k1)/(k0+k1+k2) * k1/(k1+k2) * (k2+k3)/k3; \
+            double w_theta3 = - (k0+k1)/(k0+k1+k2+k3) * k1/(k1+k2+k3) * k2/k3; \
             \
             double left_value = ( \
                 w_theta0 * x[coarseGrid.index(i_r_coarse, i_theta_coarse-1)] + /* (-1, -3) */ \
@@ -132,7 +133,7 @@ do { \
                 \
                 result[fineGrid.index(i_r, i_theta)] = ( \
                     w_r0 * x[coarseGrid.index(i_r_coarse-1, i_theta_coarse)] + /* (-3, 0) */ \
-                    w_r1 * x[coarseGrid.index(i_r_coarse, i_theta_coarse)] + /* (-1, 0) */ \
+                    w_r1 * x[coarseGrid.index(i_r_coarse, i_theta_coarse  )] + /* (-1, 0) */ \
                     w_r2 * x[coarseGrid.index(i_r_coarse+1, i_theta_coarse)] + /* (+1, 0) */ \
                     w_r3 * x[coarseGrid.index(i_r_coarse+2, i_theta_coarse)] /* (+3, 0) */ \
                 ); \
@@ -163,10 +164,12 @@ do { \
         } \
     } \
 } while(0)
+// clang-format on
 
 
-
-void Interpolation::applyFMGInterpolation(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const{
+// clang-format off
+void Interpolation::applyFMGInterpolation(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const
+{
     assert(toLevel.level() == fromLevel.level() - 1);
 
     omp_set_num_threads(threads_per_level_[toLevel.level()]);
@@ -177,14 +180,16 @@ void Interpolation::applyFMGInterpolation(const Level& fromLevel, const Level& t
     assert(x.size() == coarseGrid.numberOfNodes());
     assert(result.size() == fineGrid.numberOfNodes());
 
-    #pragma omp parallel if(fineGrid.numberOfNodes() > 10'000)
+    #pragma omp parallel if (fineGrid.numberOfNodes() > 10'000)
     {
         /* Circluar Indexing Section */
         /* For loop matches circular access pattern */
         #pragma omp for nowait
-        for (int i_r = 0; i_r < fineGrid.numberSmootherCircles(); i_r++){
+        for (int i_r = 0; i_r < fineGrid.numberSmootherCircles(); i_r++)
+        {
             int i_r_coarse = i_r >> 1;
-            for (int i_theta = 0; i_theta < fineGrid.ntheta(); i_theta++){
+            for (int i_theta = 0; i_theta < fineGrid.ntheta(); i_theta++)
+            {
                 int i_theta_coarse = i_theta >> 1;
                 FINE_NODE_FMG_INTERPOLATION();
             }
@@ -193,12 +198,15 @@ void Interpolation::applyFMGInterpolation(const Level& fromLevel, const Level& t
         /* Radial Indexing Section */
         /* For loop matches radial access pattern */
         #pragma omp for nowait
-        for (int i_theta = 0; i_theta < fineGrid.ntheta(); i_theta++){
+        for (int i_theta = 0; i_theta < fineGrid.ntheta(); i_theta++)
+        {
             int i_theta_coarse = i_theta >> 1;
-            for (int i_r = fineGrid.numberSmootherCircles(); i_r < fineGrid.nr(); i_r++){
+            for (int i_r = fineGrid.numberSmootherCircles(); i_r < fineGrid.nr(); i_r++)
+            {
                 int i_r_coarse = i_r >> 1;
                 FINE_NODE_FMG_INTERPOLATION();
             }
         }
     }
 }
+// clang-format on

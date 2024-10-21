@@ -6,7 +6,8 @@
 // R = 1/4 * |2  4  2| = P^T
 //           |1  2  1|
 
-void Interpolation::applyRestriction0(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const{
+void Interpolation::applyRestriction0(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const
+{
     assert(toLevel.level() == fromLevel.level() + 1);
 
     omp_set_num_threads(threads_per_level_[toLevel.level()]);
@@ -17,13 +18,14 @@ void Interpolation::applyRestriction0(const Level& fromLevel, const Level& toLev
     assert(x.size() == fineGrid.numberOfNodes());
     assert(result.size() == coarseGrid.numberOfNodes());
 
-    #pragma omp parallel for
-    for(int index = 0; index < coarseGrid.numberOfNodes(); index ++){
+#pragma omp parallel for
+    for (int index = 0; index < coarseGrid.numberOfNodes(); index++)
+    {
         MultiIndex coarse_node = coarseGrid.multiIndex(index);
-        MultiIndex fine_node(2*coarse_node[0], 2*coarse_node[1]);
+        MultiIndex fine_node(2 * coarse_node[0], 2 * coarse_node[1]);
 
-        std::array<std::pair<double,double>, space_dimension> neighbor_distance;
-        std::array<std::pair<int,int>, space_dimension> neighbors;
+        std::array<std::pair<double, double>, space_dimension> neighbor_distance;
+        std::array<std::pair<int, int>, space_dimension> neighbors;
 
         // Center
         double value = x[fineGrid.index(fine_node)];
@@ -31,53 +33,65 @@ void Interpolation::applyRestriction0(const Level& fromLevel, const Level& toLev
         fineGrid.adjacentNeighborsOf(fine_node, neighbors);
 
         // Left
-        if(neighbors[0].first != -1){
+        if (neighbors[0].first != -1)
+        {
             fineGrid.adjacentNeighborDistances(fineGrid.multiIndex(neighbors[0].first), neighbor_distance);
-            value += neighbor_distance[0].second*x[neighbors[0].first] / (neighbor_distance[0].first + neighbor_distance[0].second);
+            value += neighbor_distance[0].second * x[neighbors[0].first] / (neighbor_distance[0].first + neighbor_distance[0].second);
         }
 
         // Right
-        if(neighbors[0].second != -1){
+        if (neighbors[0].second != -1)
+        {
             fineGrid.adjacentNeighborDistances(fineGrid.multiIndex(neighbors[0].second), neighbor_distance);
-            value += neighbor_distance[0].first*x[neighbors[0].second] / (neighbor_distance[0].first + neighbor_distance[0].second);
+            value += neighbor_distance[0].first * x[neighbors[0].second] / (neighbor_distance[0].first + neighbor_distance[0].second);
         }
-        
+
         // Bottom
-        if(neighbors[1].first != -1){
+        if (neighbors[1].first != -1)
+        {
             fineGrid.adjacentNeighborDistances(fineGrid.multiIndex(neighbors[1].first), neighbor_distance);
-            value += neighbor_distance[1].second*x[neighbors[1].first] / (neighbor_distance[1].first + neighbor_distance[1].second);
+            value += neighbor_distance[1].second * x[neighbors[1].first] / (neighbor_distance[1].first + neighbor_distance[1].second);
         }
-        
+
         // Top
-        if(neighbors[1].second != -1){
+        if (neighbors[1].second != -1)
+        {
             fineGrid.adjacentNeighborDistances(fineGrid.multiIndex(neighbors[1].second), neighbor_distance);
-            value += neighbor_distance[1].first*x[neighbors[1].second] / (neighbor_distance[1].first + neighbor_distance[1].second);
+            value += neighbor_distance[1].first * x[neighbors[1].second] / (neighbor_distance[1].first + neighbor_distance[1].second);
         }
 
         fineGrid.diagonalNeighborsOf(fine_node, neighbors);
 
         // Bottom Left
-        if(neighbors[0].first != -1){
+        if (neighbors[0].first != -1)
+        {
             fineGrid.adjacentNeighborDistances(fineGrid.multiIndex(neighbors[0].first), neighbor_distance);
-            value += neighbor_distance[0].second*neighbor_distance[1].second * x[neighbors[0].first] / ((neighbor_distance[0].first+neighbor_distance[0].second)*(neighbor_distance[1].first+neighbor_distance[1].second));
+            value += neighbor_distance[0].second * neighbor_distance[1].second * x[neighbors[0].first] /
+                     ((neighbor_distance[0].first + neighbor_distance[0].second) * (neighbor_distance[1].first + neighbor_distance[1].second));
         }
 
         // Bottom Right
-        if(neighbors[0].second != -1){
+        if (neighbors[0].second != -1)
+        {
             fineGrid.adjacentNeighborDistances(fineGrid.multiIndex(neighbors[0].second), neighbor_distance);
-            value += neighbor_distance[0].first*neighbor_distance[1].second* x[neighbors[0].second] / ((neighbor_distance[0].first + neighbor_distance[0].second)* (neighbor_distance[1].first + neighbor_distance[1].second));
+            value += neighbor_distance[0].first * neighbor_distance[1].second * x[neighbors[0].second] /
+                     ((neighbor_distance[0].first + neighbor_distance[0].second) * (neighbor_distance[1].first + neighbor_distance[1].second));
         }
-        
+
         // Top Left
-        if(neighbors[1].first != -1){
+        if (neighbors[1].first != -1)
+        {
             fineGrid.adjacentNeighborDistances(fineGrid.multiIndex(neighbors[1].first), neighbor_distance);
-            value += neighbor_distance[0].second*neighbor_distance[1].first* x[neighbors[1].first] / ((neighbor_distance[0].first + neighbor_distance[0].second)* (neighbor_distance[1].first + neighbor_distance[1].second));
+            value += neighbor_distance[0].second * neighbor_distance[1].first * x[neighbors[1].first] /
+                     ((neighbor_distance[0].first + neighbor_distance[0].second) * (neighbor_distance[1].first + neighbor_distance[1].second));
         }
-        
+
         // Top Right
-        if(neighbors[1].second != -1){
+        if (neighbors[1].second != -1)
+        {
             fineGrid.adjacentNeighborDistances(fineGrid.multiIndex(neighbors[1].second), neighbor_distance);
-            value +=  neighbor_distance[0].first*neighbor_distance[1].first* x[neighbors[1].second] / ((neighbor_distance[0].first + neighbor_distance[0].second)* (neighbor_distance[1].first + neighbor_distance[1].second));
+            value += neighbor_distance[0].first * neighbor_distance[1].first * x[neighbors[1].second] /
+                     ((neighbor_distance[0].first + neighbor_distance[0].second) * (neighbor_distance[1].first + neighbor_distance[1].second));
         }
 
         result[index] = value;
@@ -88,6 +102,7 @@ void Interpolation::applyRestriction0(const Level& fromLevel, const Level& toLev
 // Optimized version of applyRestriction0 //
 // -------------------------------------- //
 
+// clang-format off
 void Interpolation::applyRestriction(const Level& fromLevel, const Level& toLevel, Vector<double>& result, const Vector<double>& x) const{
     assert(toLevel.level() == fromLevel.level() + 1);
 
@@ -248,3 +263,4 @@ void Interpolation::applyRestriction(const Level& fromLevel, const Level& toLeve
         }
     }
 }
+//clang-format on

@@ -1,76 +1,42 @@
-#include "../../include/Smoother/smoother.h"
+#include "../../../include/Smoother/SmootherTake/smootherTake.h"
 
-const Stencil& Smoother::getStencil(int i_r) const {
+const Stencil& SmootherTake::getStencil(int i_r) const {
 
     assert(0 <= i_r && i_r < grid_.nr());
 
     assert(grid_.numberSmootherCircles() >= 2);
     assert(grid_.lengthSmootherRadial() >= 3);
 
-    static const Stencil stencil_DB = 
-        {-1, -1, -1,
-        -1,  0, -1,
-        -1, -1, -1};
-
-    /* Circle Stencils */
-
-    static const Stencil circle_stencil_interior = 
-        {-1, 2, -1,
-        -1,  0, -1,
-        -1, 1, -1};
-
-    static const Stencil circle_stencil_across_origin = 
-        {-1, 3, -1,
-        1,  0, -1,
-        -1, 2, -1};
-
-    /* Radial Stencils */
-
-    static const Stencil radial_stencil_interior = 
-        {-1, -1, -1,
-        1, 0, 2,
-        -1, -1, -1};
-
-    static const Stencil radial_stencil_next_outer_DB = 
-        {-1, -1, -1,
-        1, 0, -1,
-        -1, -1, -1};
-
-    static const Stencil radial_stencil_next_circular_smoothing = 
-        {-1, -1, -1,
-        -1, 0, 1,
-        -1, -1, -1};
-
     const int numberSmootherCircles = grid_.numberSmootherCircles();
 
     if(i_r < numberSmootherCircles){
         /* Circle Section */
         if(i_r > 0 && i_r < numberSmootherCircles){
-            return circle_stencil_interior;
+            return circle_stencil_interior_;
         } 
         else if(i_r == 0){
-            return DirBC_Interior_? stencil_DB : circle_stencil_across_origin;
+            return DirBC_Interior_? stencil_DB_ : circle_stencil_across_origin_;
         }
 
     } else{
         /* Radial Section */
         if(i_r > numberSmootherCircles && i_r < grid_.nr()-2){
-            return radial_stencil_interior;
+            return radial_stencil_interior_;
         }
         else if(i_r == numberSmootherCircles){
-            return radial_stencil_next_circular_smoothing;
+            return radial_stencil_next_circular_smoothing_;
         }
         else if(i_r == grid_.nr()-1){
-            return stencil_DB;
+            return stencil_DB_;
         }
         else if(i_r == grid_.nr()-2){
-            return radial_stencil_next_outer_DB;
+            return radial_stencil_next_outer_DB_;
         }
     }
     throw std::out_of_range("Invalid index for stencil");
 }
 
-int Smoother::getNonZeroCountCircleAsc(const int i_r) const {
+int SmootherTake::getNonZeroCountCircleAsc(const int i_r) const {
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles());
 
     const int numberSmootherCircles = grid_.numberSmootherCircles();
@@ -88,7 +54,7 @@ int Smoother::getNonZeroCountCircleAsc(const int i_r) const {
 }
 
 
-int Smoother::getCircleAscIndex(const int i_r, const int i_theta) const {
+int SmootherTake::getCircleAscIndex(const int i_r, const int i_theta) const {
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles());
 
     const int numberSmootherCircles = grid_.numberSmootherCircles();
@@ -105,7 +71,7 @@ int Smoother::getCircleAscIndex(const int i_r, const int i_theta) const {
 
 
 
-int Smoother::getNonZeroCountRadialAsc(const int i_theta) const {
+int SmootherTake::getNonZeroCountRadialAsc(const int i_theta) const {
     assert(i_theta >= 0 && i_theta < grid_.ntheta());
 
     const int size_stencil_next_circluar_smoothing = 2;
@@ -124,7 +90,7 @@ int Smoother::getNonZeroCountRadialAsc(const int i_theta) const {
 
 
 
-int Smoother::getRadialAscIndex(const int i_r, const int i_theta) const {
+int SmootherTake::getRadialAscIndex(const int i_r, const int i_theta) const {
     assert(i_theta >= 0 && i_theta < grid_.ntheta());
 
     const int size_stencil_next_circluar_smoothing = 2;

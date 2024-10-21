@@ -69,9 +69,20 @@ inline int PolarGrid::wrapThetaIndex(const int unwrapped_theta_index) const
 inline int PolarGrid::index(const int r_index, const int unwrapped_theta_index) const
 {
     // unwrapped_theta_index may be negative or larger than ntheta() to allow for periodicity.
-    assert(r_index >= 0 && r_index < nr());
+    assert(0 <= r_index && r_index < nr());
     const int theta_index = wrapThetaIndex(unwrapped_theta_index);
-    assert(theta_index >= 0 && theta_index < ntheta());
+    assert(0 <= theta_index && theta_index < ntheta());
+    return r_index < numberSmootherCircles() ? 
+        theta_index + ntheta() * r_index : 
+        numberCircularSmootherNodes() + 
+        r_index - numberSmootherCircles() + lengthSmootherRadial() * theta_index;
+}
+
+inline int PolarGrid::fastIndex(const int r_index, const int theta_index) const
+{
+    // unwrapped_theta_index may be negative or larger than ntheta() to allow for periodicity.
+    assert(0 <= r_index && r_index < nr());
+    assert(0 <= theta_index && theta_index < ntheta());
     return r_index < numberSmootherCircles() ? 
         theta_index + ntheta() * r_index : 
         numberCircularSmootherNodes() + 

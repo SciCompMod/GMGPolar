@@ -15,6 +15,36 @@ void GMGPolar::solve() {
         int start_level_depth = 0;
         Level& level = levels_[start_level_depth];
         assign(level.solution(), 0.0); // Assign zero initial guess if not using FMG
+
+        /* Consider setting the boundary conditions u_D and u_D_Interior if DirBC_Interior to the initial solution */
+        bool use_boundary_condition = true;
+        if(use_boundary_condition) {
+            const auto& grid = level.grid();
+            const auto& sin_theta_cache = level.levelCache().sin_theta();
+            const auto& cos_theta_cache = level.levelCache().cos_theta();
+
+            if(DirBC_Interior_){
+                const int i_r = 0;
+                const double r = grid.radius(i_r);
+                for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++){
+                    const double theta = grid.theta(i_theta);
+                    const int index = grid.index(i_r, i_theta);
+                    const double sin_theta = sin_theta_cache[i_theta];
+                    const double cos_theta = cos_theta_cache[i_theta];
+                    level.solution()[index] = boundary_conditions_->u_D_Interior(r, theta, sin_theta, cos_theta);
+                }
+            }
+
+            const int i_r = grid.nr()-1;
+            const double r = grid.radius(i_r);
+            for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++){
+                const double theta = grid.theta(i_theta);
+                const int index = grid.index(i_r, i_theta);
+                const double sin_theta = sin_theta_cache[i_theta];
+                const double cos_theta = cos_theta_cache[i_theta];
+                level.solution()[index] = boundary_conditions_->u_D(r, theta, sin_theta, cos_theta);
+            }
+        }
     }
     else {
         // Start from the coarsest level
@@ -25,7 +55,7 @@ void GMGPolar::solve() {
         FMG_level.solution() = FMG_level.rhs();
         FMG_level.directSolveInPlace(FMG_level.solution());  // Direct solve on coarsest grid
 
-        // Prolongate the solution from the coarsest level up to the finest, while applying a V-Cycle on each level
+        // Prolongate the solution from the coarsest level up to the finest, while applying Multigrid Cycles on each level
         for (int current_level = FMG_start_level_depth-1; current_level > 0; --current_level) {
             Level& FMG_level = levels_[current_level];         // The current level
             Level& next_FMG_level = levels_[current_level-1];  // The finer level
@@ -125,6 +155,7 @@ void GMGPolar::solve() {
             auto start_check_convergence = std::chrono::high_resolution_clock::now();
 
             level.computeResidual(level.residual(), level.rhs(), level.solution());
+            
             if(extrapolation_ != ExtrapolationType::NONE){
                 Level& next_level = levels_[start_level_depth+1];
                 injection(start_level_depth, next_level.solution(), level.solution());
@@ -239,7 +270,7 @@ void GMGPolar::solve() {
     auto end_solve = std::chrono::high_resolution_clock::now();
     t_solve_total += std::chrono::duration<double>(end_solve - start_solve).count();
 
-    if(verbose_ > 50){
+    if(paraview_){
         computeExactError(level, level.solution(), level.residual());
         writeToVTK("solution", level, level.solution());
         writeToVTK("error", level, level.residual());

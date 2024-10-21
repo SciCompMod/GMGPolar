@@ -40,10 +40,14 @@ file(GLOB_RECURSE POLAR_GRID_SOURCES "src/PolarGrid/*.cpp")
 file(GLOB_RECURSE LEVEL_SOURCES "src/Level/*.cpp")
 file(GLOB_RECURSE STENCIL_SOURCES "src/Stencil/*.cpp")
 file(GLOB_RECURSE INTERPOLATION_SOURCES "src/Interpolation/*.cpp")
-file(GLOB_RECURSE DIRECT_SOLVER_SOURCES "src/DirectSolver/*.cpp")
-file(GLOB_RECURSE RESIDUAL_SOURCES "src/Residual/*.cpp")
-file(GLOB_RECURSE SMOOTHER_SOURCES "src/Smoother/*.cpp")
-file(GLOB_RECURSE EXTRAPOLATED_SMOOTHER_SOURCES "src/ExtrapolatedSmoother/*.cpp")
+file(GLOB_RECURSE DIRECT_SOLVER_SOURCES "src/DirectSolver/*.cpp" "src/DirectSolverGive/*.cpp" "src/DirectSolverTake/*.cpp")
+file(GLOB_RECURSE RESIDUAL_SOURCES "src/Residual/*.cpp" "src/Residual/ResidualGive/*.cpp" "src/Residual/ResidualTake/*.cpp")
+file(GLOB_RECURSE SMOOTHER_SOURCES "src/Smoother/*.cpp" "src/SmootherGive/*.cpp" "src/SmootherTake/*.cpp")
+file(GLOB_RECURSE EXTRAPOLATED_SMOOTHER_SOURCES 
+    "src/ExtrapolatedSmoother/*.cpp" 
+    "src/ExtrapolatedSmoother/ExtrapolatedSmootherGive/*.cpp"
+    "src/ExtrapolatedSmoother/ExtrapolatedSmootherTake/*.cpp"
+)
 
 file(GLOB_RECURSE DENSITY_PROFILE_COEFFICIENTS "src/InputFunctions/DensityProfileCoefficients/*.cpp")
 file(GLOB_RECURSE DOMAIN_GEOMETRY_SOURCES "src/InputFunctions/DomainGeometry/*.cpp")
@@ -82,6 +86,6 @@ if(OpenMP_CXX_FOUND)
 endif()
 target_link_libraries(gmgpolar PUBLIC ${MUMPS_LIBRARIES} OpenMP::OpenMP_CXX)
 
-# enable_testing()
-# add_subdirectory(third-party)
-# add_subdirectory(tests)
+enable_testing()
+add_subdirectory(third-party)
+add_subdirectory(tests)

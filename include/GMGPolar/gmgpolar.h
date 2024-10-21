@@ -112,10 +112,18 @@ public:
     /* Control Parameters */
     int verbose() const;
     void verbose(int verbose);
+    bool paraview() const;
+    void paraview(bool paraview);
     int maxOpenMPThreads() const;
     void maxOpenMPThreads(int max_omp_threads);
     double threadReductionFactor() const;
     void threadReductionFactor(double thread_reduction_factor);
+    ImplementationType implementationType() const;
+    void implementationType(ImplementationType implementation_type);
+    bool cacheDensityProfileCoefficients() const;
+    void cacheDensityProfileCoefficients(bool cache_density_profile_coefficients);
+    bool cacheDomainGeometry() const;
+    void cacheDomainGeometry(bool cache_domain_geometry);
 
     /* --------*/
     /* Timings */
@@ -182,9 +190,12 @@ private:
     /* ------------------ */
     /* Control Parameters */
     int verbose_;
-    bool paraview_ = false;
+    bool paraview_;
     int max_omp_threads_;
     double thread_reduction_factor_;
+    ImplementationType implementation_type_;
+    bool cache_density_profile_coefficients_;
+    bool cache_domain_geometry_;
 
     /* ------------------------------ */
     /* Parser for GMGPolar parameters */

@@ -7,6 +7,14 @@ void GMGPolar::setup() {
 
     auto start_setup_createLevels = std::chrono::high_resolution_clock::now();
 
+    if (implementation_type_ == ImplementationType::CPU_TAKE) {
+        if (!cache_density_profile_coefficients_ || !cache_domain_geometry_) {
+            throw std::runtime_error(
+                "Error: Caching must be enabled for both density profile coefficients and domain geometry in 'Take' implementation strategy."
+            );
+        }
+    }
+
     // -------------------------------- //
     // Create the finest mesh (level 0) //
     // -------------------------------- //
@@ -27,7 +35,7 @@ void GMGPolar::setup() {
     if(verbose_ > 0) std::cout <<"Number of levels: "<<number_of_levels_<<"\n";
 
     int current_level = 0;
-    auto finest_levelCache = std::make_unique<LevelCache>(*finest_grid, *density_profile_coefficients_);
+    auto finest_levelCache = std::make_unique<LevelCache>(*finest_grid, *density_profile_coefficients_, *domain_geometry_, cache_density_profile_coefficients_, cache_domain_geometry_);
     levels_.emplace_back(current_level, std::move(finest_grid), std::move(finest_levelCache), extrapolation_, FMG_);
 
     for(current_level = 1; current_level < number_of_levels_; current_level++) {
@@ -35,7 +43,6 @@ void GMGPolar::setup() {
         auto current_levelCache = std::make_unique<LevelCache>(levels_[current_level-1], *current_grid);
         levels_.emplace_back(current_level, std::move(current_grid), std::move(current_levelCache), extrapolation_, FMG_);
     }
-
 
     auto end_setup_createLevels = std::chrono::high_resolution_clock::now();
     t_setup_createLevels += std::chrono::duration<double>(end_setup_createLevels - start_setup_createLevels).count();
@@ -51,9 +58,10 @@ void GMGPolar::setup() {
             static_cast<int>(std::floor(max_omp_threads_ * std::pow(thread_reduction_factor_, current_level)))
         ));
     }
+
     if(verbose_ > 0) std::cout <<"Maxmimum number of threads: "<<max_omp_threads_<<"\n";
     
-    interpolation_ = std::make_unique<Interpolation>(threads_per_level_);
+    interpolation_ = std::make_unique<Interpolation>(threads_per_level_, DirBC_Interior_);
 
     auto start_setup_rhs = std::chrono::high_resolution_clock::now();
 
@@ -82,13 +90,6 @@ void GMGPolar::setup() {
     auto end_setup_rhs = std::chrono::high_resolution_clock::now();
     t_setup_rhs += std::chrono::duration<double>(end_setup_rhs - start_setup_rhs).count();
 
-
-    if(extrapolation_ == ExtrapolationType::IMPLICIT_FULL_GRID_SMOOTHING || extrapolation_ == ExtrapolationType::COMBINED){
-        full_grid_smoothing_ = true;
-    } else{
-        full_grid_smoothing_ = false;
-    }
-
     // -------------------------------------------------------
     // Initializing various operators based on the level index
     for (int current_level = 0; current_level < number_of_levels_; current_level++){
@@ -100,56 +101,57 @@ void GMGPolar::setup() {
             switch(extrapolation_) {
                 case ExtrapolationType::NONE:
                     full_grid_smoothing_ = true;
-                    levels_[current_level].initializeSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
+                    levels_[current_level].initializeSmoothing(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_, threads_per_level_[current_level], implementation_type_);
                     break;
                 case ExtrapolationType::IMPLICIT_EXTRAPOLATION:
                     full_grid_smoothing_ = false;
-                    levels_[current_level].initializeExtrapolatedSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
+                    levels_[current_level].initializeExtrapolatedSmoothing(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_, threads_per_level_[current_level], implementation_type_);
                     break;
                 case ExtrapolationType::IMPLICIT_FULL_GRID_SMOOTHING:
                     full_grid_smoothing_ = true;
-                    levels_[current_level].initializeSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
+                    levels_[current_level].initializeSmoothing(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_, threads_per_level_[current_level], implementation_type_);
                     break;
                 case ExtrapolationType::COMBINED:
                     full_grid_smoothing_ = true;
-                    levels_[current_level].initializeSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
-                    levels_[current_level].initializeExtrapolatedSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
+                    levels_[current_level].initializeSmoothing(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_, threads_per_level_[current_level], implementation_type_);
+                    levels_[current_level].initializeExtrapolatedSmoothing(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_, threads_per_level_[current_level], implementation_type_);
                     break;
                 default:
                     full_grid_smoothing_ = false;
-                    levels_[current_level].initializeSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
-                    levels_[current_level].initializeExtrapolatedSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
+                    levels_[current_level].initializeSmoothing(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_, threads_per_level_[current_level], implementation_type_);
+                    levels_[current_level].initializeExtrapolatedSmoothing(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_, threads_per_level_[current_level], implementation_type_);
                     break;
             }
             auto end_setup_smoother = std::chrono::high_resolution_clock::now();
             t_setup_smoother += std::chrono::duration<double>(end_setup_smoother - start_setup_smoother).count();
-            levels_[current_level].initializeResidual(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
+            levels_[current_level].initializeResidual(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_, threads_per_level_[current_level], implementation_type_);
         }
         // -------------------------- //
         // Level n-1 (coarsest Level) //
         // -------------------------- //
         else if(current_level == number_of_levels_ - 1){
             auto start_setup_directSolver = std::chrono::high_resolution_clock::now();
-            levels_[current_level].initializeDirectSolver(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
+            levels_[current_level].initializeDirectSolver(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_, threads_per_level_[current_level], implementation_type_);
             auto end_setup_directSolver = std::chrono::high_resolution_clock::now();
             t_setup_directSolver += std::chrono::duration<double>(end_setup_directSolver - start_setup_directSolver).count();
-            levels_[current_level].initializeResidual(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
+            levels_[current_level].initializeResidual(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_, threads_per_level_[current_level], implementation_type_);
         }
         // ------------------- //
         // Intermediate levels //
         // ------------------- //
         else{
             auto start_setup_smoother = std::chrono::high_resolution_clock::now();
-            levels_[current_level].initializeSmoothing(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
+            levels_[current_level].initializeSmoothing(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_, threads_per_level_[current_level], implementation_type_);
             auto end_setup_smoother = std::chrono::high_resolution_clock::now();
             t_setup_smoother += std::chrono::duration<double>(end_setup_smoother - start_setup_smoother).count();
-            levels_[current_level].initializeResidual(*domain_geometry_, DirBC_Interior_, threads_per_level_[current_level]);
+            levels_[current_level].initializeResidual(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_, threads_per_level_[current_level], implementation_type_);
         }
     }
 
     auto end_setup = std::chrono::high_resolution_clock::now();
     t_setup_total += std::chrono::duration<double>(end_setup - start_setup).count();
 }
+
 
 
 PolarGrid GMGPolar::createFinestGrid() {
@@ -169,6 +171,7 @@ PolarGrid GMGPolar::createFinestGrid() {
     }
     return finest_grid;
 }
+
 
 
 int GMGPolar::chooseNumberOfLevels(const PolarGrid& finestGrid) {
@@ -219,6 +222,7 @@ void GMGPolar::resetTimings(){
     t_setup_directSolver = 0.0;
 
     t_solve_total = 0.0;
+    t_solve_initial_approximation = 0.0;
     t_solve_multigrid_iterations = 0.0;
     t_check_convergence = 0.0;
     t_check_exact_error = 0.0;

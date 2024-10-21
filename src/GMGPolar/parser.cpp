@@ -1,6 +1,6 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
-/* Defines if user input is required */
+/* Specifies whether user input is required */
 enum {
     OPTIONAL = 0,
     REQUIRED = 1
@@ -127,9 +127,18 @@ void GMGPolar::parseMultigrid() {
 
 void GMGPolar::parseGeneral() {
     verbose_ = parser_.get<int>("verbose");
-    max_omp_threads_ = parser_.get<int>("maxOpenMPThreads");
+    paraview_ = parser_.get<int>("paraview") != 0;
+    max_omp_threads_ = parser_.get<int>("maxOpenMPThreads"); omp_set_num_threads(max_omp_threads_);
     thread_reduction_factor_ = parser_.get<double>("threadReductionFactor");
-    omp_set_num_threads(max_omp_threads_);
+    const int implementationTypeValue = parser_.get<int>("implementationType");
+    if (implementationTypeValue == static_cast<int>(ImplementationType::CPU_TAKE) ||
+        implementationTypeValue == static_cast<int>(ImplementationType::CPU_GIVE)) {
+        implementation_type_ = static_cast<ImplementationType>(implementationTypeValue);
+    } else {
+        throw std::runtime_error("Invalid implementation type.\n");
+    }
+    cache_density_profile_coefficients_ = parser_.get<int>("cacheDensityProfileCoefficients") != 0;
+    cache_domain_geometry_ = parser_.get<int>("cacheDomainGeometry") != 0;
 }
 
 void GMGPolar::initializeGrid() {
@@ -144,21 +153,21 @@ void GMGPolar::initializeGrid() {
     parser_.add<int>(
         "nr_exp", 'n', 
         "Number of nodes (exponents) in the radial direction.", 
-        OPTIONAL, 4
+        OPTIONAL, 5
     );
     parser_.add<int>(
         "ntheta_exp", '\0', 
-        "Number of nodes (exponents) in the angular direction.", 
+        "Number of nodes (exponents) in the angular direction. Default: ntheta_exp = nr_exp + 1.", 
         OPTIONAL, -1
     );
     parser_.add<int>(
         "anisotropic_factor", '\0', 
-        "Defines anisotropic discretization in r-direction.", 
+        "Defines anisotropic discretization in r-direction.",
         OPTIONAL, 0
     );
     parser_.add<int>(
         "divideBy2", '\0', 
-        "Refines the grid globally divideBy2 times.", 
+        "Refines the grid globally divideBy2 times.",
         OPTIONAL, 0
     );
     parser_.add<int>(
@@ -287,13 +296,33 @@ void GMGPolar::initializeGeneral() {
         OPTIONAL, 1
     );
     parser_.add<int>(
+        "paraview", '\0', 
+        "Specifies whether Paraview output files should be generated.", 
+        OPTIONAL, 0
+    );
+    parser_.add<int>(
         "maxOpenMPThreads", '\0', 
         "Defines the maximum number of OpenMP threads used.", 
-        REQUIRED, 1
+        OPTIONAL, 1
     );
     parser_.add<double>(
         "threadReductionFactor", '\0', 
         "Thread reduction factor to coarser levels.", 
         OPTIONAL, 1.0
+    );
+    parser_.add<int>(
+        "implementationType", '\0', 
+        "Type of implementation to distribute stencil. CPU_Take (0), CPU_Give (1).", 
+        OPTIONAL, 0, cmdline::oneof(0, 1)
+    );
+    parser_.add<int>(
+        "cacheDensityProfileCoefficients", '\0', 
+        "Specifies whether the density profile coefficients should be precomputed and cached, or dynamically recalculated during runtime.", 
+        OPTIONAL, 1, cmdline::oneof(0, 1)
+    );
+    parser_.add<int>(
+        "cacheDomainGeometry", '\0', 
+        "Specifies whether the domain geometry should be precomputed and cached, or dynamically recalculated during runtime.", 
+        OPTIONAL, 1, cmdline::oneof(0, 1)
     );
 }

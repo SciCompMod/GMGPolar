@@ -19,7 +19,7 @@ class ExtrapolatedSmoother;
 #include "../DirectSolver/directSolver.h"
 #include "../Residual/residual.h"
 #include "../Smoother/smoother.h"
-#include "../ExtrapolatedSmoother/extrapolated_smoother.h"
+#include "../ExtrapolatedSmoother/extrapolatedSmoother.h"
 
 class LevelCache;
 
@@ -27,7 +27,10 @@ class Level {
 public:
     // ----------- //
     // Constructor //
-    explicit Level(int level, std::unique_ptr<const PolarGrid> grid, std::unique_ptr<const LevelCache> level_cache, ExtrapolationType extrapolation, int FMG);
+    explicit Level(
+        const int level, std::unique_ptr<const PolarGrid> grid, std::unique_ptr<const LevelCache> level_cache, 
+        const ExtrapolationType extrapolation, const bool FMG
+    );
 
     // ---------------- //
     // Getter Functions //
@@ -46,22 +49,22 @@ public:
 
     // -------------- //
     // Apply Residual //
-    void initializeResidual(const DomainGeometry& domain_geometry, const bool DirBC_Interior, const int num_omp_threads);
+    void initializeResidual(const DomainGeometry& domain_geometry, const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior, const int num_omp_threads, const ImplementationType implementation_type);
     void computeResidual(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const;
 
     // ------------------- //
     // Solve coarse System //
-    void initializeDirectSolver(const DomainGeometry& domain_geometry, const bool DirBC_Interior, const int num_omp_threads);
+    void initializeDirectSolver(const DomainGeometry& domain_geometry, const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior, const int num_omp_threads, const ImplementationType implementation_type);
     void directSolveInPlace(Vector<double>& x) const;
 
     // --------------- //
     // Apply Smoothing //
-    void initializeSmoothing(const DomainGeometry& domain_geometry, const bool DirBC_Interior, const int num_omp_threads);
+    void initializeSmoothing(const DomainGeometry& domain_geometry, const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior, const int num_omp_threads, const ImplementationType implementation_type);
     void smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const;
 
     // ---------------------------- //
     // Apply Extrapolated Smoothing //
-    void initializeExtrapolatedSmoothing(const DomainGeometry& domain_geometry, const bool DirBC_Interior, const int num_omp_threads);
+    void initializeExtrapolatedSmoothing(const DomainGeometry& domain_geometry, const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior, const int num_omp_threads, const ImplementationType implementation_type);
     void extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const;
 
 private:
@@ -84,19 +87,39 @@ private:
 
 class LevelCache {
 public:
-    explicit LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients);
+    explicit LevelCache(
+        const PolarGrid& grid, 
+        const DensityProfileCoefficients& density_profile_coefficients, const DomainGeometry& domain_geometry,
+        const bool cache_density_profile_coefficients, const bool cache_domain_geometry
+    );
     explicit LevelCache(const Level& previous_level, const PolarGrid& current_grid);
 
     const std::vector<double>& sin_theta() const;
     const std::vector<double>& cos_theta() const;
 
+    const ImplementationType implementationType() const;
+
+    bool cacheDensityProfileCoefficients() const;
     const std::vector<double>& coeff_alpha() const;
     const std::vector<double>& coeff_beta() const;
+
+    bool cacheDomainGeometry() const;
+    const Vector<double>& arr() const;
+    const Vector<double>& att() const;
+    const Vector<double>& art() const;
+    const Vector<double>& detDF() const;
 
 private:
     std::vector<double> sin_theta_;
     std::vector<double> cos_theta_;
 
+    bool cache_density_profile_coefficients_;
     std::vector<double> coeff_alpha_;
     std::vector<double> coeff_beta_;
+
+    bool cache_domain_geometry_;
+    Vector<double> arr_;
+    Vector<double> att_;
+    Vector<double> art_;
+    Vector<double> detDF_;
 };

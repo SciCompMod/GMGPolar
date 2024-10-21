@@ -1,7 +1,7 @@
 import re
 
 # Define the filename
-filename = 'massif.out.2908275'
+filename = 'massif.out.328959'
 
 # Initialize variables to store maximum memory usage
 max_memory_usage_MB = 0

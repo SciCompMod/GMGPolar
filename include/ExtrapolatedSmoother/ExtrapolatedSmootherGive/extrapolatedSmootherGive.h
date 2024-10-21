@@ -1,55 +1,24 @@
 #pragma once
 
-class LevelCache;
-class Level;
+#include "../extrapolatedSmoother.h"
 
-#include <chrono>
-#include <vector>
-#include <iostream>
-
-#include "mpi.h" 
-#include "dmumps_c.h"
-
-#include "../PolarGrid/polargrid.h"
-#include "../InputFunctions/domainGeometry.h"
-#include "../LinearAlgebra/vector.h"
-#include "../LinearAlgebra/matrix.h"
-#include "../LinearAlgebra/vector_operations.h"
-#include "../LinearAlgebra/symmetricTridiagonalSolver.h"
-#include "../LinearAlgebra/diagonalSolver.h"
-
-#include "../common/constants.h"
-#include "../Level/level.h"
-#include "../Stencil/stencil.h"
-
-class ExtrapolatedSmoother {
+class ExtrapolatedSmootherGive : public ExtrapolatedSmoother {
 public:
-    explicit ExtrapolatedSmoother(const PolarGrid& grid, const LevelCache& level_cache, 
-                                  const DomainGeometry& domain_geometry,
-                                  bool DirBC_Interior, int num_omp_threads);
-    ~ExtrapolatedSmoother();
+    explicit ExtrapolatedSmootherGive(
+        const PolarGrid& grid, const LevelCache& level_cache, 
+        const DomainGeometry& domain_geometry, const DensityProfileCoefficients& density_profile_coefficients,
+        bool DirBC_Interior, int num_omp_threads
+    );
+    ~ExtrapolatedSmootherGive() override;
 
-    void extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
+    void extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) override;
 
+private:
     void extrapolatedSmoothingInPlaceSequential(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
     void extrapolatedSmoothingInPlaceForLoop(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp); /* This is the fastest option */
     void extrapolatedSmoothingInPlaceTaskLoop(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
     void extrapolatedSmoothingInPlaceTaskDependencies(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
 
-private:
-    /* ------------------- */
-    /* Constructor members */
-    const PolarGrid& grid_;
-    const std::vector<double>& sin_theta_cache_;
-    const std::vector<double>& cos_theta_cache_;
-    const std::vector<double>& coeff_alpha_cache_;
-    const std::vector<double>& coeff_beta_cache_;
-    const DomainGeometry& domain_geometry_;
-    const bool DirBC_Interior_;
-    const int num_omp_threads_;
-
-    /* ----------------------------- */
-    /* Extrapolated Smoother members */
     SparseMatrix<double> inner_boundary_circle_matrix_;
     DMUMPS_STRUC_C inner_boundary_mumps_solver_;
     std::vector<DiagonalSolver<double>> circle_diagonal_solver_;

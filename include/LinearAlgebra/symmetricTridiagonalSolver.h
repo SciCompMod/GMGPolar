@@ -49,6 +49,10 @@ public:
 
     // Unified Solve method
     void solveInPlace(T* sol_rhs, T* temp1, T* temp2 = nullptr) const;
+
+    template<typename U>
+    friend std::ostream& operator<<(std::ostream& stream, const SymmetricTridiagonalSolver<U>& solver);
+
 private:
     int matrix_dimension_;
     std::unique_ptr<T[]> main_diagonal_values_;
@@ -60,6 +64,37 @@ private:
     void solve_symmetricTridiagonal(T* x, T* scratch) const;
     void solve_symmetricCyclicTridiagonal(T* x, T* u, T* scratch) const;
 };
+
+
+template<typename U>
+std::ostream& operator<<(std::ostream& stream, const SymmetricTridiagonalSolver<U>& solver)
+{
+    stream << "Symmetric Tridiagonal Matrix (Dimension: " << solver.matrix_dimension_ << ")\n";
+    
+    stream << "Main Diagonal: [";
+    for (int i = 0; i < solver.matrix_dimension_; ++i) {
+        stream << solver.main_diagonal(i);
+        if (i != solver.matrix_dimension_ - 1)
+            stream << ", ";
+    }
+    stream << "]\n";
+    
+    stream << "Sub Diagonal: [";
+    for (int i = 0; i < solver.matrix_dimension_ - 1; ++i) {
+        stream << solver.sub_diagonal(i);
+        if (i != solver.matrix_dimension_ - 2)
+            stream << ", ";
+    }
+    stream << "]\n";
+
+    if (solver.is_cyclic_) {
+        stream << "Cyclic Corner Element: " << solver.cyclic_corner_element() << "\n";
+    } else {
+        stream << "Matrix is not cyclic.\n";
+    }
+    
+    return stream;
+}
 
 
 // default construction

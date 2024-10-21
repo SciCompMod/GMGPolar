@@ -1,4 +1,4 @@
-#include "../../include/Smoother/smoother.h"
+#include "../../../include/Smoother/SmootherGive/smootherGive.h"
 
 /* arr, att, art and detDF get computed */
 #define COMPUTE_JACOBIAN_ELEMENTS(domain_geometry, r, theta, sin_theta, cos_theta, coeff_alpha, \
@@ -27,7 +27,6 @@ do { \
     /* [Jtt, -Jrt] */ \
     /* [-Jtr, Jrr] */ \
 } while(0) \
-
 
 
 #define NODE_BUILD_SMOOTHER_GIVE(i_r, i_theta, grid, DirBC_Interior, \
@@ -322,7 +321,7 @@ do { \
             \
             const int i_theta_M1 = grid.wrapThetaIndex(i_theta-1); \
             const int i_theta_P1 = grid.wrapThetaIndex(i_theta+1); \
-            const int i_theta_AcrossOrigin = grid.wrapThetaIndex(i_theta + (grid.ntheta()>>1)); \
+            const int i_theta_AcrossOrigin = grid.wrapThetaIndex(i_theta + grid.ntheta()/2); \
             \
             const int center_index = i_theta; \
             const int left_index = i_theta_AcrossOrigin; \
@@ -641,17 +640,48 @@ do { \
 } while(0)
 
 
-void Smoother::buildAscCircleSection(const int i_r) {
+void SmootherGive::buildAscCircleSection(const int i_r) {
+    const auto& sin_theta_cache = level_cache_.sin_theta();
+    const auto& cos_theta_cache = level_cache_.cos_theta();
+
     const double r = grid_.radius(i_r);
-    const double coeff_alpha = coeff_alpha_cache_[i_r];
-    const double coeff_beta = coeff_beta_cache_[i_r];
+
+    double coeff_beta;
+    if(level_cache_.cacheDensityProfileCoefficients()){
+        coeff_beta = level_cache_.coeff_beta()[i_r];
+    }
+    else{
+        coeff_beta = density_profile_coefficients_.beta(r);
+    }
+
+    double coeff_alpha;
+    if(!level_cache_.cacheDomainGeometry()){
+        if(level_cache_.cacheDensityProfileCoefficients()){
+            coeff_alpha = level_cache_.coeff_alpha()[i_r];
+        }
+        else{
+            coeff_alpha = density_profile_coefficients_.alpha(r);
+        }
+    }
+
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++){
         const double theta = grid_.theta(i_theta);
-        const double sin_theta = sin_theta_cache_[i_theta];
-        const double cos_theta = cos_theta_cache_[i_theta];
-        /* Get arr, att, art, detDF value at the current node */
+        const double sin_theta = sin_theta_cache[i_theta];
+        const double cos_theta = cos_theta_cache[i_theta];
+
+        /* Compute arr, att, art, detDF value at the current node */
         double arr, att, art, detDF;
-        COMPUTE_JACOBIAN_ELEMENTS(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDF);
+        if(level_cache_.cacheDomainGeometry()){
+            const int index = grid_.index(i_r, i_theta);
+            arr = level_cache_.arr()[index];
+            att = level_cache_.att()[index];
+            art = level_cache_.art()[index];
+            detDF = level_cache_.detDF()[index];
+        }
+        else{
+            COMPUTE_JACOBIAN_ELEMENTS(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDF); 
+        }
+
         // Build Asc at the current node
         NODE_BUILD_SMOOTHER_GIVE(i_r, i_theta, grid_, DirBC_Interior_,
             inner_boundary_circle_matrix_,
@@ -661,17 +691,48 @@ void Smoother::buildAscCircleSection(const int i_r) {
     }
 }
 
-void Smoother::buildAscRadialSection(const int i_theta) {
+void SmootherGive::buildAscRadialSection(const int i_theta) {
+    const auto& sin_theta_cache = level_cache_.sin_theta();
+    const auto& cos_theta_cache = level_cache_.cos_theta();
+
     const double theta = grid_.theta(i_theta);
-    const double sin_theta = sin_theta_cache_[i_theta];
-    const double cos_theta = cos_theta_cache_[i_theta];
+    const double sin_theta = sin_theta_cache[i_theta];
+    const double cos_theta = cos_theta_cache[i_theta];
+    
     for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++){
         const double r = grid_.radius(i_r);
-        const double coeff_alpha = coeff_alpha_cache_[i_r];
-        const double coeff_beta = coeff_beta_cache_[i_r];
-        /* Get arr, att, art, detDF value at the current node */
+
+        double coeff_beta;
+        if(level_cache_.cacheDensityProfileCoefficients()){
+            coeff_beta = level_cache_.coeff_beta()[i_r];
+        }
+        else{
+            coeff_beta = density_profile_coefficients_.beta(r);
+        }
+
+        double coeff_alpha;
+        if(!level_cache_.cacheDomainGeometry()){
+            if(level_cache_.cacheDensityProfileCoefficients()){
+                coeff_alpha = level_cache_.coeff_alpha()[i_r];
+            }
+            else{
+                coeff_alpha = density_profile_coefficients_.alpha(r);
+            }
+        }
+
+        /* Compute arr, att, art, detDF value at the current node */
         double arr, att, art, detDF;
-        COMPUTE_JACOBIAN_ELEMENTS(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDF);
+        if(level_cache_.cacheDomainGeometry()){
+            const int index = grid_.index(i_r, i_theta);
+            arr = level_cache_.arr()[index];
+            att = level_cache_.att()[index];
+            art = level_cache_.art()[index];
+            detDF = level_cache_.detDF()[index];
+        }
+        else{
+            COMPUTE_JACOBIAN_ELEMENTS(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDF); 
+        }
+
         // Build Asc at the current node
         NODE_BUILD_SMOOTHER_GIVE(i_r, i_theta, grid_, DirBC_Interior_,
             inner_boundary_circle_matrix_,
@@ -679,9 +740,11 @@ void Smoother::buildAscRadialSection(const int i_theta) {
             radial_tridiagonal_solver_
         );
     }
+
+
 }
 
-void Smoother::buildAscMatrices()
+void SmootherGive::buildAscMatrices()
 {
     omp_set_num_threads(num_omp_threads_);
 
@@ -950,9 +1013,9 @@ void Smoother::buildAscMatrices()
         }
     }
 
-    /* ----------------------------------------------------------------------------------- */
+    /* ------------------------------------------------------------------ */
     /* Part 3: Convert inner_boundary_circle_matrix to a symmetric matrix */
-    /* ----------------------------------------------------------------------------------- */
+    /* ------------------------------------------------------------------ */
 
     SparseMatrix<double> full_matrix = std::move(inner_boundary_circle_matrix_);
 

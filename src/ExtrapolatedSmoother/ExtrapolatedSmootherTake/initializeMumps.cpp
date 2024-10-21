@@ -1,6 +1,6 @@
-#include "../../include/ExtrapolatedSmoother/extrapolated_smoother.h"
+#include "../../../include/ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.h"
 
-void ExtrapolatedSmoother::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const SparseMatrix<double>& solver_matrix){
+void ExtrapolatedSmootherTake::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const SparseMatrix<double>& solver_matrix){
     mumps_solver.job = JOB_INIT;
     mumps_solver.par = PAR_PARALLEL;
     /* SYM_POSITIVE_DEFINITE or SYM_GENERAL_SYMMETRIC? */
@@ -78,7 +78,7 @@ void ExtrapolatedSmoother::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, c
     dmumps_c(&mumps_solver);
 }
 
-void ExtrapolatedSmoother::finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver){
+void ExtrapolatedSmootherTake::finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver){
     mumps_solver.job = JOB_END;
     dmumps_c(&mumps_solver);
 }

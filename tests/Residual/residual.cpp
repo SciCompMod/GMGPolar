@@ -5,6 +5,9 @@
 
 #include "../../include/GMGPolar/gmgpolar.h"
 
+#include "../../include/Residual/ResidualGive/residualGive.h"
+#include "../../include/Residual/ResidualTake/residualTake.h"
+
 #include "../../include/InputFunctions/domainGeometry.h"
 #include "../../include/InputFunctions/densityProfileCoefficients.h"
 #include "../../include/InputFunctions/boundaryConditions.h"
@@ -50,20 +53,25 @@ TEST(OperatorATest, applyA_DirBC_Interior) {
     bool DirBC_Interior = true;
     int maxOpenMPThreads = 16;
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
-    auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients);
-    Level level(0, std::move(grid), std::move(levelCache), 0);
+    // "Take" requires cached values
+    bool cache_density_rpofile_coefficients = true;
+    bool cache_domain_geometry = true;
 
-    Residual residual_operator(level.grid(), level.levelCache(), domain_geometry, DirBC_Interior, maxOpenMPThreads);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+    Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
+
+    ResidualGive residualGive_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualTake residualTake_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior, maxOpenMPThreads);
 
     Vector<double> x = generate_random_sample_data(level.grid(), 42);
     Vector<double> rhs = generate_random_sample_data(level.grid(), 69);
 
     Vector<double> result_Give(level.grid().numberOfNodes());
-    residual_operator.computeResidual(result_Give, rhs, x);
+    residualGive_operator.computeResidual(result_Give, rhs, x);
 
     Vector<double> result_Take(level.grid().numberOfNodes());
-    residual_operator.computeResidualTake0(result_Take, rhs, x);
+    residualTake_operator.computeResidual(result_Take, rhs, x);
 
     ASSERT_EQ(result_Give.size(), result_Take.size());
     for (std::size_t index = 0; index < result_Give.size(); index++) {
@@ -72,6 +80,7 @@ TEST(OperatorATest, applyA_DirBC_Interior) {
         else ASSERT_NEAR(result_Give[index], result_Take[index], 1e-11);
     }
 }
+
 
 
 TEST(OperatorATest, applyA_AcrossOrigin) {
@@ -92,20 +101,25 @@ TEST(OperatorATest, applyA_AcrossOrigin) {
     bool DirBC_Interior = false;
     int maxOpenMPThreads = 16;
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
-    auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients);
-    Level level(0, std::move(grid), std::move(levelCache), 0);
+    // "Take" requires cached values
+    bool cache_density_rpofile_coefficients = true;
+    bool cache_domain_geometry = true;
 
-    Residual residual_operator(level.grid(), level.levelCache(), domain_geometry, DirBC_Interior, maxOpenMPThreads);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+    Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
+
+    ResidualGive residualGive_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualTake residualTake_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior, maxOpenMPThreads);
 
     Vector<double> x = generate_random_sample_data(level.grid(), 42);
     Vector<double> rhs = generate_random_sample_data(level.grid(), 69);
 
     Vector<double> result_Give(level.grid().numberOfNodes());
-    residual_operator.computeResidual(result_Give, rhs, x);
+    residualGive_operator.computeResidual(result_Give, rhs, x);
 
     Vector<double> result_Take(level.grid().numberOfNodes());
-    residual_operator.computeResidualTake0(result_Take, rhs, x);
+    residualTake_operator.computeResidual(result_Take, rhs, x);
 
     ASSERT_EQ(result_Give.size(), result_Take.size());
     for (std::size_t index = 0; index < result_Give.size(); index++) {

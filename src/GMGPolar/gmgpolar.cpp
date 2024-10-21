@@ -3,6 +3,7 @@
 GMGPolar::GMGPolar() : 
     parser_()
 {
+    resetTimings();
     initializeGrid(); initializeGeometry();
     initializeMultigrid(); initializeGeneral();
     
@@ -20,6 +21,7 @@ GMGPolar::GMGPolar(std::unique_ptr<const DomainGeometry> domain_geometry,
     source_term_(std::move(source_term)),
     parser_()
 {
+    resetTimings();
     initializeGrid(); initializeGeometry();
     initializeMultigrid(); initializeGeneral();
 
@@ -284,6 +286,14 @@ void GMGPolar::verbose(int verbose) {
     verbose_ = verbose;
 }
 
+bool GMGPolar::paraview() const {
+    return paraview_;
+}
+
+void GMGPolar::paraview(bool paraview) {
+    paraview_ = paraview;
+}
+
 int GMGPolar::maxOpenMPThreads() const {
     return max_omp_threads_;
 }
@@ -298,4 +308,28 @@ double GMGPolar::threadReductionFactor() const {
 
 void GMGPolar::threadReductionFactor(double thread_reduction_factor) {
     thread_reduction_factor_ = thread_reduction_factor;
+}
+
+ImplementationType GMGPolar::implementationType() const {
+    return implementation_type_;
+}
+
+void GMGPolar::implementationType(ImplementationType implementation_type) {
+    implementation_type_ = implementation_type;
+}
+
+bool GMGPolar::cacheDensityProfileCoefficients() const {
+    return cache_density_profile_coefficients_;
+}
+
+void GMGPolar::cacheDensityProfileCoefficients(bool cache_density_profile_coefficients) {
+    cache_density_profile_coefficients_ = cache_density_profile_coefficients;
+}
+
+bool GMGPolar::cacheDomainGeometry() const {
+    return cache_domain_geometry_;
+}
+
+void GMGPolar::cacheDomainGeometry(bool cache_domain_geometry) {
+    cache_domain_geometry_ = cache_domain_geometry;
 }

@@ -4,6 +4,12 @@
 /* GMGPolar - Enumeration Definitions */
 /* ---------------------------------- */
 
+enum class ImplementationType
+{
+    CPU_TAKE = 0,
+    CPU_GIVE = 1
+};
+
 /* Multigrid Cycle Types */
 enum class MultigridCycleType
 {

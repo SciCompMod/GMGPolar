@@ -1,6 +1,6 @@
-#include "../../include/ExtrapolatedSmoother/extrapolated_smoother.h"
+#include "../../../include/ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h"
 
-const Stencil& ExtrapolatedSmoother::getStencil(int i_r, int i_theta) const {
+const Stencil& ExtrapolatedSmootherGive::getStencil(int i_r, int i_theta) const {
     assert(0 <= i_r && i_r < grid_.nr());
 
     assert((grid_.ntheta() / 2) % 2 == 0);
@@ -30,7 +30,7 @@ const Stencil& ExtrapolatedSmoother::getStencil(int i_r, int i_theta) const {
     throw std::out_of_range("getStencil: Only i_r = 0 implemented.");
 }
 
-int ExtrapolatedSmoother::getNonZeroCountCircleAsc(const int i_r) const {
+int ExtrapolatedSmootherGive::getNonZeroCountCircleAsc(const int i_r) const {
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles());
 
     assert((grid_.ntheta() / 2) % 2 == 0);
@@ -48,7 +48,7 @@ int ExtrapolatedSmoother::getNonZeroCountCircleAsc(const int i_r) const {
 }
 
 
-int ExtrapolatedSmoother::getCircleAscIndex(const int i_r, const int i_theta) const {
+int ExtrapolatedSmootherGive::getCircleAscIndex(const int i_r, const int i_theta) const {
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles());
 
     assert((grid_.ntheta() / 2) % 2 == 0);
@@ -72,12 +72,12 @@ int ExtrapolatedSmoother::getCircleAscIndex(const int i_r, const int i_theta) co
 
 
 
-int ExtrapolatedSmoother::getNonZeroCountRadialAsc(const int i_theta) const {
+int ExtrapolatedSmootherGive::getNonZeroCountRadialAsc(const int i_theta) const {
     throw std::out_of_range("ExtrapolatedSmoother: nnz_radial_Asc not implemented.");
 }
 
 
 
-int ExtrapolatedSmoother::getRadialAscIndex(const int i_r, const int i_theta) const {
+int ExtrapolatedSmootherGive::getRadialAscIndex(const int i_r, const int i_theta) const {
     throw std::out_of_range("ExtrapolatedSmoother: ptr_nz_index_radial_Asc not implemented.");
 }

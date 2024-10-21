@@ -93,7 +93,7 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10)
     solver.cyclic_corner_element() = 0.0;
     // Create random number generator
     std::random_device rd;
-    std::mt19937 gen(rd());
+    std::mt19937 gen(42);
     std::uniform_real_distribution<> dis(-100.0, 100.0);
     
     // Fill main_diagonal with random values
@@ -140,7 +140,7 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_100)
 
     // Create random number generator
     std::random_device rd;
-    std::mt19937 gen(rd());
+    std::mt19937 gen(42);
     std::uniform_real_distribution<> dis(-100.0, 100.0);
     
     // Fill main_diagonal with random values
@@ -187,7 +187,7 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_1000)
 
     // Create random number generator
     std::random_device rd;
-    std::mt19937 gen(rd());
+    std::mt19937 gen(42);
     std::uniform_real_distribution<> dis(-100.0, 100.0);
     
     // Fill main_diagonal with random values
@@ -233,7 +233,7 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10000)
 
     // Create random number generator
     std::random_device rd;
-    std::mt19937 gen(rd());
+    std::mt19937 gen(42);
     std::uniform_real_distribution<> dis(-100.0, 100.0);
     
     // Fill main_diagonal with random values
@@ -283,7 +283,7 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_boosted_subdiagona
 
     // Create random number generator
     std::random_device rd;
-    std::mt19937 gen(rd());
+    std::mt19937 gen(42);
     std::uniform_real_distribution<> dis(-100.0, 100.0);
     
     // Fill main_diagonal with random values
@@ -408,7 +408,7 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10)
 
     // Create random number generator
     std::random_device rd;
-    std::mt19937 gen(rd());
+    std::mt19937 gen(42);
     std::uniform_real_distribution<> dis(-100.0, 100.0);
     
     // Fill main_diagonal with random values
@@ -455,7 +455,7 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_100)
 
     // Create random number generator
     std::random_device rd;
-    std::mt19937 gen(rd());
+    std::mt19937 gen(42);
     std::uniform_real_distribution<> dis(-100.0, 100.0);
     
     // Fill main_diagonal with random values
@@ -502,7 +502,7 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_1000)
 
     // Create random number generator
     std::random_device rd;
-    std::mt19937 gen(rd());
+    std::mt19937 gen(42);
     std::uniform_real_distribution<> dis(-100.0, 100.0);
     
     // Fill main_diagonal with random values
@@ -548,7 +548,7 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10000)
 
     // Create random number generator
     std::random_device rd;
-    std::mt19937 gen(rd());
+    std::mt19937 gen(42);
     std::uniform_real_distribution<> dis(-100.0, 100.0);
     
     // Fill main_diagonal with random values
@@ -598,7 +598,7 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_boosted_subdiagonal_LO
 
     // Create random number generator
     std::random_device rd;
-    std::mt19937 gen(rd());
+    std::mt19937 gen(42);
     std::uniform_real_distribution<> dis(-100.0, 100.0);
     
     // Fill main_diagonal with random values
