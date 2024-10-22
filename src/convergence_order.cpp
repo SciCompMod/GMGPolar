@@ -61,7 +61,7 @@ int main(int argc, char* argv[]){
 
     const ExtrapolationType extrapolation = ExtrapolationType::IMPLICIT_EXTRAPOLATION;
     const int maxLevels = 6;
-    const int preSmoothingSteps = 1;
+    const int preSmoothingSteps = 1; 
     const int postSmoothingSteps = 1;
     const MultigridCycleType multigridCycle = MultigridCycleType::F_CYCLE;
 
