@@ -1,14 +1,4 @@
 #!/bin/bash
-#SBATCH --job-name=gmgpolar
-#SBATCH --output=Output/slurm-%A-p6-r4-dbt7-mpk2-s3-e1--N1-R1-maxC128.out
-#SBATCH --error=Output/slurm-%A-p6-r4-dbt7-mpk2-s3-e1--N1-R1-maxC128.err
-#SBATCH -N 1
-#SBATCH -n 1
-#SBATCH -c 56
-#SBATCH --threads-per-core=1
-#SBATCH -t 1400
-# #SBATCH --nodelist="be-cpu01"
-#SBATCH --exclusive
 
 # Verbosity level: 
 # 0 - No output 
@@ -47,8 +37,8 @@ fi
 # Finest grid parameters
 R0=1e-8
 Rmax=1.0
-nr_exp=14
-ntheta_exp=-1
+nr_exp=10
+ntheta_exp=10
 anisotropic_factor=0
 divideBy2=0
 
@@ -61,11 +51,11 @@ file_grid_angles="_angles.txt"
 # Interior boundary condition: 
 # 0: Across-origin
 # 1: u_D_Interior
-DirBC_Interior=0
+DirBC_Interior=1
 
 ### Custom Test Cases ###
 geometry=2 # Circular (0), Shafranov(1), Czarny(2), Culham (3)
-problem=1 # CartesianR2(0), CartesianR6(1), PolarR6(2), RefinedRadius(3)
+problem=2 # CartesianR2(0), CartesianR6(1), PolarR6(2), RefinedRadius(3)
 alpha_coeff=2 # Poisson(0), Sonnendrucker(1), Zoni(2), Zoni-Shifted(3)
 beta_coeff=1 # Zero(0), Gyro - Alpha Inverse(1)
 # Remark: For RefinedRadius choose alpha_coeff=3, beta_coeff=1
@@ -75,7 +65,7 @@ beta_coeff=1 # Zero(0), Gyro - Alpha Inverse(1)
 # Full Multigrid Method:
 # 0: Initial approximation is set to zero
 # 1: Initial approximation obtained by nested iteration (recommended)
-FMG=1
+FMG=0
 FMG_iterations=3
 FMG_cycle=2 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
 
@@ -86,7 +76,7 @@ FMG_cycle=2 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
 # 3: Combination of both implicit extrapolation methods (May be usefull for FMG=0)
 extrapolation=0
 # Maximum number of multigrid levels:
-maxLevels=7
+maxLevels=4
 # Number of smoothing steps:
 preSmoothingSteps=1
 postSmoothingSteps=1
@@ -99,8 +89,8 @@ multigridCycle=0
 # Convergence criteria:
 maxIterations=150
 residualNormType=0 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
-absoluteTolerance=1e-15
-relativeTolerance=1e-15
+absoluteTolerance=1e-10
+relativeTolerance=1e-10
 
 # Define additional geometry parameters
 kappa_eps=0.0
@@ -128,4 +118,4 @@ else
     exit 1
 fi
 
-srun ./build/gmgpolar --verbose $verbose --paraview $paraview --maxOpenMPThreads $maxOpenMPThreads --threadReductionFactor $threadReductionFactor --implementationType $implementationType --cacheDensityProfileCoefficients $cacheDensityProfileCoefficients --cacheDomainGeometry $cacheDomainGeometry --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --write_grid_file $write_grid_file --load_grid_file $load_grid_file --file_grid_radii "$file_grid_radii" --file_grid_angles "$file_grid_angles" --DirBC_Interior $DirBC_Interior --geometry $geometry --kappa_eps $kappa_eps --delta_e $delta_e --problem $problem --alpha_coeff $alpha_coeff --alpha_jump $alpha_jump --beta_coeff $beta_coeff --FMG $FMG --FMG_iterations $FMG_iterations --FMG_cycle $FMG_cycle --extrapolation $extrapolation --maxLevels $maxLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
+./../build/gmgpolar --verbose $verbose --paraview $paraview --maxOpenMPThreads $maxOpenMPThreads --threadReductionFactor $threadReductionFactor --implementationType $implementationType --cacheDensityProfileCoefficients $cacheDensityProfileCoefficients --cacheDomainGeometry $cacheDomainGeometry --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --write_grid_file $write_grid_file --load_grid_file $load_grid_file --file_grid_radii "$file_grid_radii" --file_grid_angles "$file_grid_angles" --DirBC_Interior $DirBC_Interior --geometry $geometry --kappa_eps $kappa_eps --delta_e $delta_e --problem $problem --alpha_coeff $alpha_coeff --alpha_jump $alpha_jump --beta_coeff $beta_coeff --FMG $FMG --FMG_iterations $FMG_iterations --FMG_cycle $FMG_cycle --extrapolation $extrapolation --maxLevels $maxLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance

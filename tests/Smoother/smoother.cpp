@@ -29,7 +29,7 @@ namespace SmootherTest {
         Vector<double> x(grid.numberOfNodes());
         std::mt19937 gen(seed);
         std::uniform_real_distribution<double> dist(-100.0, 100.0); 
-        for (size_t i = 0; i < x.size(); ++i) {
+        for (int i = 0; i < x.size(); ++i) {
             x[i] = dist(gen);
         }
         return x;
@@ -38,7 +38,8 @@ namespace SmootherTest {
 
 using namespace SmootherTest;
 
-
+/* Test 1/2: */
+/* Does the Take and Give Implementation match up? */
 
 TEST(SmootherTest, smoother_DirBC_Interior) {
     std::vector<double> radii = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
@@ -56,7 +57,7 @@ TEST(SmootherTest, smoother_DirBC_Interior) {
     std::unique_ptr<SourceTerm> source_term = std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
 
     bool DirBC_Interior = true;
-    int maxOpenMPThreads = 1;
+    int maxOpenMPThreads = 16;
 
     // "Take" requires cached values
     bool cache_density_rpofile_coefficients = true;
@@ -80,7 +81,7 @@ TEST(SmootherTest, smoother_DirBC_Interior) {
     smootherTake_operator.smoothingInPlace(solution_Take, rhs, temp);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
-    for (std::size_t index = 0; index < solution_Give.size(); index++) {
+    for (int index = 0; index < solution_Give.size(); index++) {
         MultiIndex alpha = level.grid().multiIndex(index);
         if(alpha[0] == 0 && !DirBC_Interior) ASSERT_NEAR(solution_Give[index], solution_Take[index], 1e-11);
         else ASSERT_NEAR(solution_Give[index], solution_Take[index], 1e-11);
@@ -105,7 +106,7 @@ TEST(SmootherTest, smoother_AcrossOrigin) {
     std::unique_ptr<SourceTerm> source_term = std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
 
     bool DirBC_Interior = false;
-    int maxOpenMPThreads = 1;
+    int maxOpenMPThreads = 16;
 
     // "Take" requires cached values
     bool cache_density_rpofile_coefficients = true;
@@ -129,16 +130,15 @@ TEST(SmootherTest, smoother_AcrossOrigin) {
     smootherTake_operator.smoothingInPlace(solution_Take, rhs, temp);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
-    for (std::size_t index = 0; index < solution_Give.size(); index++) {
+    for (int index = 0; index < solution_Give.size(); index++) {
         MultiIndex alpha = level.grid().multiIndex(index);
         if(alpha[0] == 0 && !DirBC_Interior) ASSERT_NEAR(solution_Give[index], solution_Take[index], 1e-8);
         else ASSERT_NEAR(solution_Give[index], solution_Take[index], 1e-10);
     }
 }
 
-
-
-
+/* Test 2/2: */
+/* Does the smoother converge to the directSolver solution? */
 
 TEST(SmootherTest, SequentialSmootherDirBC_Interior) {
     std::vector<double> radii = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
@@ -181,7 +181,7 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior) {
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
     #pragma omp parallel for
-    for (std::size_t i = 0; i < error.size(); i++) {
+    for (int i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -194,7 +194,7 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior) {
         smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
 
         #pragma omp parallel for
-        for (std::size_t i = 0; i < error.size(); i++) {
+        for (int i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -254,7 +254,7 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior) {
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
     #pragma omp parallel for
-    for (std::size_t i = 0; i < error.size(); i++) {
+    for (int i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -267,7 +267,7 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior) {
         smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
 
         #pragma omp parallel for
-        for (std::size_t i = 0; i < error.size(); i++) {
+        for (int i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -327,7 +327,7 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin) {
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
     #pragma omp parallel for
-    for (std::size_t i = 0; i < error.size(); i++) {
+    for (int i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -340,7 +340,7 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin) {
         smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
 
         #pragma omp parallel for
-        for (std::size_t i = 0; i < error.size(); i++) {
+        for (int i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -399,7 +399,7 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin) {
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
     #pragma omp parallel for
-    for (std::size_t i = 0; i < error.size(); i++) {
+    for (int i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -412,7 +412,7 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin) {
         smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
 
         #pragma omp parallel for
-        for (std::size_t i = 0; i < error.size(); i++) {
+        for (int i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -472,7 +472,7 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior_SmallestGrid) {
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
     #pragma omp parallel for
-    for (std::size_t i = 0; i < error.size(); i++) {
+    for (int i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -485,7 +485,7 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior_SmallestGrid) {
         smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
 
         #pragma omp parallel for
-        for (std::size_t i = 0; i < error.size(); i++) {
+        for (int i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -545,7 +545,7 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior_SmallestGrid) {
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
     #pragma omp parallel for
-    for (std::size_t i = 0; i < error.size(); i++) {
+    for (int i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -558,7 +558,7 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior_SmallestGrid) {
         smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
 
         #pragma omp parallel for
-        for (std::size_t i = 0; i < error.size(); i++) {
+        for (int i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -618,7 +618,7 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin_SmallestGrid) {
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
     #pragma omp parallel for
-    for (std::size_t i = 0; i < error.size(); i++) {
+    for (int i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -631,7 +631,7 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin_SmallestGrid) {
         smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
 
         #pragma omp parallel for
-        for (std::size_t i = 0; i < error.size(); i++) {
+        for (int i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -690,7 +690,7 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin_SmallestGrid) {
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
     #pragma omp parallel for
-    for (std::size_t i = 0; i < error.size(); i++) {
+    for (int i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -703,7 +703,7 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin_SmallestGrid) {
         smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
 
         #pragma omp parallel for
-        for (std::size_t i = 0; i < error.size(); i++) {
+        for (int i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -765,7 +765,7 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior) {
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
     #pragma omp parallel for
-    for (std::size_t i = 0; i < error.size(); i++) {
+    for (int i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -778,7 +778,7 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior) {
         smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
 
         #pragma omp parallel for
-        for (std::size_t i = 0; i < error.size(); i++) {
+        for (int i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -838,7 +838,7 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior) {
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
     #pragma omp parallel for
-    for (std::size_t i = 0; i < error.size(); i++) {
+    for (int i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -851,7 +851,7 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior) {
         smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
 
         #pragma omp parallel for
-        for (std::size_t i = 0; i < error.size(); i++) {
+        for (int i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -912,7 +912,7 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin) {
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
     #pragma omp parallel for
-    for (std::size_t i = 0; i < error.size(); i++) {
+    for (int i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -925,7 +925,7 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin) {
         smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
 
         #pragma omp parallel for
-        for (std::size_t i = 0; i < error.size(); i++) {
+        for (int i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -985,7 +985,7 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin) {
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
     #pragma omp parallel for
-    for (std::size_t i = 0; i < error.size(); i++) {
+    for (int i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -998,7 +998,7 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin) {
         smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
 
         #pragma omp parallel for
-        for (std::size_t i = 0; i < error.size(); i++) {
+        for (int i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -1059,7 +1059,7 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior_SmallestGrid) {
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
     #pragma omp parallel for
-    for (std::size_t i = 0; i < error.size(); i++) {
+    for (int i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -1072,7 +1072,7 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior_SmallestGrid) {
         smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
 
         #pragma omp parallel for
-        for (std::size_t i = 0; i < error.size(); i++) {
+        for (int i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -1133,7 +1133,7 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior_SmallestGrid) {
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
     #pragma omp parallel for
-    for (std::size_t i = 0; i < error.size(); i++) {
+    for (int i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -1146,7 +1146,7 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior_SmallestGrid) {
         smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
 
         #pragma omp parallel for
-        for (std::size_t i = 0; i < error.size(); i++) {
+        for (int i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -1207,7 +1207,7 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin_SmallestGrid) {
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
     #pragma omp parallel for
-    for (std::size_t i = 0; i < error.size(); i++) {
+    for (int i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -1220,7 +1220,7 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin_SmallestGrid) {
         smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
 
         #pragma omp parallel for
-        for (std::size_t i = 0; i < error.size(); i++) {
+        for (int i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -1280,7 +1280,7 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin_SmallestGrid) {
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
     #pragma omp parallel for
-    for (std::size_t i = 0; i < error.size(); i++) {
+    for (int i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -1293,7 +1293,7 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin_SmallestGrid) {
         smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
 
         #pragma omp parallel for
-        for (std::size_t i = 0; i < error.size(); i++) {
+        for (int i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;

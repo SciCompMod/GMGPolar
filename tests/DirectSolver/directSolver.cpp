@@ -47,7 +47,7 @@ namespace DirectSolverTest {
         Vector<double> x(grid.numberOfNodes());
         std::mt19937 gen(seed);
         std::uniform_real_distribution<double> dist(-100.0, 100.0); 
-        for (size_t i = 0; i < x.size(); ++i) {
+        for (int i = 0; i < x.size(); ++i) {
             x[i] = dist(gen);
         }
         return x;
@@ -56,6 +56,8 @@ namespace DirectSolverTest {
 
 using namespace DirectSolverTest;
 
+/* Test 1/2: */
+/* Does the Take and Give Implementation match up? */
 
 TEST(DirectSolverTest, directSolver_DirBC_Interior) {
     std::vector<double> radii = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
@@ -81,7 +83,7 @@ TEST(DirectSolverTest, directSolver_DirBC_Interior) {
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
+    Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, false);
 
     DirectSolverGive directSolverGive_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior, maxOpenMPThreads);
     DirectSolverTake directSolverTake_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior, maxOpenMPThreads);
@@ -95,14 +97,12 @@ TEST(DirectSolverTest, directSolver_DirBC_Interior) {
     directSolverTake_operator.solveInPlace(solution_Take);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
-    for (std::size_t index = 0; index < solution_Give.size(); index++) {
+    for (int index = 0; index < solution_Give.size(); index++) {
         MultiIndex alpha = level.grid().multiIndex(index);
         if(alpha[0] == 0 && !DirBC_Interior) ASSERT_NEAR(solution_Give[index], solution_Take[index], 1e-11);
         else ASSERT_NEAR(solution_Give[index], solution_Take[index], 1e-11);
     }
 }
-
-
 
 TEST(DirectSolverTest, directSolver_AcrossOrigin) {
     std::vector<double> radii = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
@@ -142,12 +142,15 @@ TEST(DirectSolverTest, directSolver_AcrossOrigin) {
     directSolverTake_operator.solveInPlace(solution_Take);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
-    for (std::size_t index = 0; index < solution_Give.size(); index++) {
+    for (int index = 0; index < solution_Give.size(); index++) {
         MultiIndex alpha = level.grid().multiIndex(index);
         if(alpha[0] == 0 && !DirBC_Interior) ASSERT_NEAR(solution_Give[index], solution_Take[index], 1e-8);
         else ASSERT_NEAR(solution_Give[index], solution_Take[index], 1e-9);
     }
 }
+
+/* Test 2/2: */
+/* Are the DirectSolver and Residual are compatible with each other? */
 
 /* -------- */
 /* Circular */
@@ -544,6 +547,7 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometry) {
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
 }
 
+/* We adjust the PolarGrid to increase the precision */
 
 TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_CircularGeometry) {
     std::vector<double> radii = {1e-5, 1.441*1e-5, 3.8833*1e-5, 8.7666*1e-5, 1.8533*1e-4, 3.806*1e-4,7.713*1e-4, 1.55265*1e-3, 3.1153*1e-3, 6.2406*1e-3, 0.01249125, 0.0249925, 0.049995, 0.1, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
@@ -619,7 +623,7 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision2
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-12);
 }
 
-/* Using "Take" */
+/* Same test now using Take */
 
 TEST(DirectSolverTakeTest_CircularGeometry, SequentialDirectSolverDirBC_Interior_CircularGeometry) {
     std::vector<double> radii = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};

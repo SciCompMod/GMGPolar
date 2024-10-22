@@ -1,5 +1,5 @@
 title: GMGPolar
-version: 1.0.0
+version: 2.0.0
 date-released: "2023-04-14"
 repository-code: "https://github.com/mknaranja/GMGPolar"
 url: "https://github.com/mknaranja/GMGPolar"
@@ -34,7 +34,7 @@ authors:
     family-names: Litz
     affiliation: "German Aerospace Center (DLR)"             
 #Contributors
-cff-version: 1.0.0
+cff-version: 2.0.0
 message: >-
   If you use this software, please cite it using the
   metadata from this file.

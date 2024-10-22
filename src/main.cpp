@@ -1,10 +1,5 @@
 #include <iostream>
-#include <chrono>
-#include <memory>
-#include <random>
 
-#include <thread>
-#include <chrono>
 #include "../include/GMGPolar/gmgpolar.h"
 
 int main(int argc, char* argv[]){

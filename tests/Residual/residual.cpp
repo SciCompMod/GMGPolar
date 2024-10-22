@@ -25,7 +25,7 @@ namespace ResidualTest {
         Vector<double> x(grid.numberOfNodes());
         std::mt19937 gen(seed);
         std::uniform_real_distribution<double> dist(-100.0, 100.0); 
-        for (size_t i = 0; i < x.size(); ++i) {
+        for (int i = 0; i < x.size(); ++i) {
             x[i] = dist(gen);
         }
         return x;
@@ -34,6 +34,8 @@ namespace ResidualTest {
 
 using namespace ResidualTest;
 
+/* Test 1/1: */
+/* Does the Take and Give Implementation match up? */
 
 TEST(OperatorATest, applyA_DirBC_Interior) {
     std::vector<double> radii = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
@@ -59,7 +61,7 @@ TEST(OperatorATest, applyA_DirBC_Interior) {
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
+    Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, false);
 
     ResidualGive residualGive_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior, maxOpenMPThreads);
     ResidualTake residualTake_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior, maxOpenMPThreads);
@@ -74,7 +76,7 @@ TEST(OperatorATest, applyA_DirBC_Interior) {
     residualTake_operator.computeResidual(result_Take, rhs, x);
 
     ASSERT_EQ(result_Give.size(), result_Take.size());
-    for (std::size_t index = 0; index < result_Give.size(); index++) {
+    for (int index = 0; index < result_Give.size(); index++) {
         MultiIndex alpha = level.grid().multiIndex(index);
         if(alpha[0] == 0 && !DirBC_Interior) ASSERT_NEAR(result_Give[index], result_Take[index], 1e-8);
         else ASSERT_NEAR(result_Give[index], result_Take[index], 1e-11);
@@ -107,7 +109,7 @@ TEST(OperatorATest, applyA_AcrossOrigin) {
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
+    Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, false);
 
     ResidualGive residualGive_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior, maxOpenMPThreads);
     ResidualTake residualTake_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior, maxOpenMPThreads);
@@ -122,7 +124,7 @@ TEST(OperatorATest, applyA_AcrossOrigin) {
     residualTake_operator.computeResidual(result_Take, rhs, x);
 
     ASSERT_EQ(result_Give.size(), result_Take.size());
-    for (std::size_t index = 0; index < result_Give.size(); index++) {
+    for (int index = 0; index < result_Give.size(); index++) {
         MultiIndex alpha = level.grid().multiIndex(index);
         if(alpha[0] == 0 && !DirBC_Interior) ASSERT_NEAR(result_Give[index], result_Take[index], 1e-8);
         else ASSERT_NEAR(result_Give[index], result_Take[index], 1e-11);
