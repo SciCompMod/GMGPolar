@@ -55,7 +55,7 @@ int main(int argc, char* argv[]){
 
     const bool DirBC_Interior = false;
 
-    const bool FMG = false;
+    const bool FMG = true;
     const int FMG_iterations = 3;
     const MultigridCycleType FMG_cycle = MultigridCycleType::F_CYCLE;
 
