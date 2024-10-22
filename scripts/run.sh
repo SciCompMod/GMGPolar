@@ -10,9 +10,9 @@ verbose=1
 paraview=0
 
 # OpenMP settings:
-# Maximum number of threads OpenMP can use for parallel execution
-maxOpenMPThreads=32
-# Factor to reduce the number of threads OpenMP uses (e.g., 1.0 means no reduction)
+# Maximum number of threads OpenMP for parallel execution
+maxOpenMPThreads=16
+# Factor to reduce the number of threads OpenMP between levels (e.g., 1.0 means no reduction)
 threadReductionFactor=1.0
 
 # Implementation strategy:
@@ -23,7 +23,7 @@ implementationType=1
 # 0 - Recompute values on each iteration: Uses less memory but results in slower execution.
 # 1 - Reuse cached values: Consumes more memory but significantly improves performance.
 cacheDensityProfileCoefficients=1
-cacheDomainGeometry=1
+cacheDomainGeometry=0
 # Note: In the "Take" approach (implementationType=0), 
 # caching is required for optimal performance, 
 # so both density profile coefficients and domain geometry need to be cached.
@@ -37,10 +37,10 @@ fi
 # Finest grid parameters
 R0=1e-8
 Rmax=1.0
-nr_exp=10
-ntheta_exp=10
-anisotropic_factor=0
-divideBy2=0
+nr_exp=4
+ntheta_exp=-1
+anisotropic_factor=3
+divideBy2=3
 
 # Finest grid can be loaded from a text file
 write_grid_file=0
@@ -51,12 +51,12 @@ file_grid_angles="_angles.txt"
 # Interior boundary condition: 
 # 0: Across-origin
 # 1: u_D_Interior
-DirBC_Interior=1
+DirBC_Interior=0
 
 ### Custom Test Cases ###
 geometry=2 # Circular (0), Shafranov(1), Czarny(2), Culham (3)
 problem=2 # CartesianR2(0), CartesianR6(1), PolarR6(2), RefinedRadius(3)
-alpha_coeff=2 # Poisson(0), Sonnendrucker(1), Zoni(2), Zoni-Shifted(3)
+alpha_coeff=1 # Poisson(0), Sonnendrucker(1), Zoni(2), Zoni-Shifted(3)
 beta_coeff=1 # Zero(0), Gyro - Alpha Inverse(1)
 # Remark: For RefinedRadius choose alpha_coeff=3, beta_coeff=1
 # Remark: For Culham Geometry choose geometry=3, problem=2,3, alpha_coeff=3, beta_coeff=1
@@ -65,7 +65,7 @@ beta_coeff=1 # Zero(0), Gyro - Alpha Inverse(1)
 # Full Multigrid Method:
 # 0: Initial approximation is set to zero
 # 1: Initial approximation obtained by nested iteration (recommended)
-FMG=0
+FMG=1
 FMG_iterations=3
 FMG_cycle=2 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
 
@@ -74,9 +74,9 @@ FMG_cycle=2 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
 # 1: Implicit extrapolation (recommended)
 # 2: Implicit extrapolation with full grid smoothing (residuals cannot be used as convergence criteria)
 # 3: Combination of both implicit extrapolation methods (May be usefull for FMG=0)
-extrapolation=0
+extrapolation=1
 # Maximum number of multigrid levels:
-maxLevels=4
+maxLevels=6
 # Number of smoothing steps:
 preSmoothingSteps=1
 postSmoothingSteps=1
@@ -89,7 +89,7 @@ multigridCycle=0
 # Convergence criteria:
 maxIterations=150
 residualNormType=0 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
-absoluteTolerance=1e-10
+absoluteTolerance=1e-8
 relativeTolerance=1e-10
 
 # Define additional geometry parameters
