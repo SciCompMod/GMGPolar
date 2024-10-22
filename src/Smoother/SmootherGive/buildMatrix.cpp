@@ -763,7 +763,7 @@ void SmootherGive::buildAscMatrices()
 
     // Remark: circle_tridiagonal_solver_[0] is unitialized.
     // Please use inner_boundary_circle_matrix_ instead!
-    #pragma omp parallel if(grid_.numberOfNodes() > 100'000)
+    #pragma omp parallel if(grid_.numberOfNodes() > 10'000)
     {
         // ---------------- //
         // Circular Section //

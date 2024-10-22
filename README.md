@@ -20,7 +20,7 @@ To begin, download the latest stable version of GMGPolar by running the followin
 
 ## Configuring the Solver
 
-After cloning the repository, you'll need to configure the solver for your system. Edit the ``CMakeLists.txt`` and ``tests/CMakeLists.txt`` files to reflect your system's configuration (e.g., paths to libraries, file names, etc.).
+After cloning the repository, you'll need to configure the solver for your system. Edit the ``CMakeLists.txt`` file to reflect your system's configuration (e.g., paths to libraries, file names, etc.).
 
 ## Installing MUMPS using Spack
 
@@ -81,12 +81,11 @@ After installing MUMPS and other dependencies, ensure that the paths to the libr
 Once everything is configured, compile the solver by running the following commands:
 
 ```bash
-cd GMGPolar
-mkdir build
-cd build
-cmake ..
-make
+cd scripts
+./compile.sh [Debug|Release]
 ```
+
+After executing ./compile.sh [Debug|Release], the script will compile the solver using the specified build type. You can also run ./compile.sh without any arguments afterward, and it will automatically use the last configured build type.
 
 Currently, the default build process only supports gnu compiler although Intel compiler
 has been successfully tested for some configurations.

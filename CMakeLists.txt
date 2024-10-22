@@ -51,7 +51,7 @@ file(GLOB_RECURSE INPUT_FUNCTIONS_SOURCES
 add_library(InputFunctions STATIC ${INPUT_FUNCTIONS_SOURCES})
 target_include_directories(InputFunctions PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/InputFunctions)
 
-# 3. Add source files for the rest of the project
+# 3. Collect all the common source files for GMGPolar into a library
 file(GLOB_RECURSE GMG_POLAR_SOURCES "src/GMGPolar/*.cpp")
 file(GLOB_RECURSE MULTIGRID_METHODS_SOURCES "src/GMGPolar/MultigridMethods/*.cpp")
 file(GLOB_RECURSE LEVEL_SOURCES "src/Level/*.cpp")
@@ -62,12 +62,8 @@ file(GLOB_RECURSE RESIDUAL_SOURCES "src/Residual/*.cpp" "src/Residual/ResidualGi
 file(GLOB_RECURSE SMOOTHER_SOURCES "src/Smoother/*.cpp" "src/SmootherGive/*.cpp" "src/SmootherTake/*.cpp")
 file(GLOB_RECURSE EXTRAPOLATED_SMOOTHER_SOURCES "src/ExtrapolatedSmoother/*.cpp" "src/ExtrapolatedSmoother/ExtrapolatedSmootherGive/*.cpp" "src/ExtrapolatedSmoother/ExtrapolatedSmootherTake/*.cpp")
 
-# Add main.cpp to the list of source files
-set(MAIN_SOURCE "src/main.cpp")
-
-# 4. Add the main executable target
-add_executable(gmgpolar 
-    ${MAIN_SOURCE}
+# 4. Create the GMGPolarLib library and link PolarGrid and InputFunctions
+add_library(GMGPolarLib STATIC
     ${GMG_POLAR_SOURCES}
     ${MULTIGRID_METHODS_SOURCES}
     ${LEVEL_SOURCES}
@@ -78,17 +74,28 @@ add_executable(gmgpolar
     ${SMOOTHER_SOURCES}
     ${EXTRAPOLATED_SMOOTHER_SOURCES}
 )
+# Link PolarGrid and InputFunctions to GMGPolarLib
+target_link_libraries(GMGPolarLib PUBLIC PolarGrid InputFunctions)
 
-# 5. Link the PolarGrid and InputFunctions libraries to the main executable
-target_link_libraries(gmgpolar PRIVATE PolarGrid InputFunctions ${MUMPS_LIBRARIES} OpenMP::OpenMP_CXX)
+# 5. Add the main executable target (gmgpolar)
+set(MAIN_SOURCE "src/main.cpp")
+add_executable(gmgpolar ${MAIN_SOURCE})
 
-# 6. Add OpenMP flags if available
+# 6. Add another executable target (convergence_order)
+set(CONVERGENCE_ORDER_SOURCE "src/convergence_order.cpp")
+add_executable(convergence_order ${CONVERGENCE_ORDER_SOURCE})
+
+# 7. Link GMGPolarLib (which now includes PolarGrid and InputFunctions) to both executables
+target_link_libraries(gmgpolar PRIVATE GMGPolarLib ${MUMPS_LIBRARIES} OpenMP::OpenMP_CXX)
+target_link_libraries(convergence_order PRIVATE GMGPolarLib ${MUMPS_LIBRARIES} OpenMP::OpenMP_CXX)
+
+# 8. Add OpenMP flags if available
 find_package(OpenMP REQUIRED)
 if(OpenMP_CXX_FOUND)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
-# 7. Enable testing and include other directories
+# 9. Enable testing and include other directories
 enable_testing()
 add_subdirectory(third-party)
 add_subdirectory(tests)

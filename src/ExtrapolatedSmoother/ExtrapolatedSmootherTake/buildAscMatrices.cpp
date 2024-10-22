@@ -523,7 +523,7 @@ do { \
                 /* | O | O | O || O   O   O   O  */ \
                 /* Center: Coarse */ \
                 auto& matrix = radial_diagonal_solver[i_theta/2]; \
-                int center_index = i_theta; \
+                const int center_index = i_r - numberSmootherCircles; \
                 row = center_index; \
                 column = center_index; \
                 matrix.diagonal(row) = 1.0; \
@@ -784,7 +784,7 @@ void ExtrapolatedSmootherTake::buildAscMatrices()
 
     // Remark: circle_diagonal_solver_[0] is undefnied.
     // Use inner_boundary_circle_matrix_ instead.
-    #pragma omp parallel if(grid_.numberOfNodes() > 100'000)
+    #pragma omp parallel if(grid_.numberOfNodes() > 10'000)
     {
         // ---------------- //
         // Circular Section //

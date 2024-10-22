@@ -50,6 +50,13 @@ public:
     const Vector<double>& solution() const;
     const PolarGrid& grid() const;
 
+    /* Solve Properties */
+    int numberOfIterations() const;
+    double meanResidualReductionFactor() const; 
+    // Only when exact solution provided
+    std::optional<double> exactErrorWeightedEuclidean() const;
+    std::optional<double> exactErrorInfinity() const;
+
     /* --------------- */
     /* Grid Parameters */
     double R0() const;
@@ -86,6 +93,11 @@ public:
     /* Multigrid Parameters */
     bool FMG() const;
     void FMG(bool FMG);
+    int FMG_iterations() const;
+    void FMG_iterations(int FMG_iterations);
+    MultigridCycleType FMG_cycle() const;
+    void FMG_cycle(MultigridCycleType FMG_cycle);
+
     ExtrapolationType extrapolation() const;
     void extrapolation(ExtrapolationType extrapolation);
 

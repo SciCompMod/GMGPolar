@@ -70,7 +70,7 @@ Vector<T>::Vector(const Vector& other)
     : size_(other.size_)
     , values_(std::make_unique<T[]>(size_))
 {
-    #pragma omp parallel for if (size_ > 100'000)
+    #pragma omp parallel for if (size_ > 10'000)
     for (int i = 0; i < size_; ++i)
     {
         values_[i] = other.values_[i];
@@ -94,7 +94,7 @@ Vector<T>& Vector<T>::operator=(const Vector& other)
         values_ = std::make_unique<T[]>(size_);
     }
 
-    #pragma omp parallel for if (size_ > 100'000)
+    #pragma omp parallel for if (size_ > 10'000)
     for (int i = 0; i < size_; ++i)
     {
         values_[i] = other.values_[i];

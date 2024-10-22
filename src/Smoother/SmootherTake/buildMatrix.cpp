@@ -404,7 +404,7 @@ void SmootherTake::buildAscMatrices()
 
     // Remark: circle_tridiagonal_solver_[0] is unitialized.
     // Please use inner_boundary_circle_matrix_ instead!
-    #pragma omp parallel if(grid_.numberOfNodes() > 100'000)
+    #pragma omp parallel if(grid_.numberOfNodes() > 10'000)
     {
         // ---------------- //
         // Circular Section //
@@ -422,7 +422,6 @@ void SmootherTake::buildAscMatrices()
             /* Interior Circle Section */
             else{
                 auto& solverMatrix = circle_tridiagonal_solver_[circle_Asc_index];
-
                 solverMatrix = SymmetricTridiagonalSolver<double>(num_circle_nodes);
                 solverMatrix.is_cyclic(true);
             }
@@ -433,7 +432,6 @@ void SmootherTake::buildAscMatrices()
         #pragma omp for nowait
         for (int radial_Asc_index = 0; radial_Asc_index < grid_.ntheta(); radial_Asc_index++){
             auto& solverMatrix = radial_tridiagonal_solver_[radial_Asc_index];
-
             solverMatrix = SymmetricTridiagonalSolver<double>(num_radial_nodes);
             solverMatrix.is_cyclic(false);
         }

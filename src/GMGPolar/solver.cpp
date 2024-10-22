@@ -17,7 +17,7 @@ void GMGPolar::solve() {
         assign(level.solution(), 0.0); // Assign zero initial guess if not using FMG
 
         /* Consider setting the boundary conditions u_D and u_D_Interior if DirBC_Interior to the initial solution */
-        bool use_boundary_condition = true;
+        bool use_boundary_condition = false;
         if(use_boundary_condition) {
             const auto& grid = level.grid();
             const auto& sin_theta_cache = level.levelCache().sin_theta();
@@ -119,7 +119,7 @@ void GMGPolar::solve() {
     int start_level_depth = 0;
     Level& level = levels_[start_level_depth];
 
-    int number_of_iterations_ = 0;
+    number_of_iterations_ = 0;
 
     double initial_residual_norm; 
     double current_residual_norm, current_relative_residual_norm;

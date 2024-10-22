@@ -896,7 +896,7 @@ SparseMatrix<double> DirectSolverGive::buildSolverMatrix()
     SparseMatrix<double> solver_matrix(n, n, nnz);
     solver_matrix.is_symmetric(false);
 
-    #pragma omp parallel for if(nnz > 100'000)
+    #pragma omp parallel for if(nnz > 10'000)
     for (int i = 0; i < nnz; i++){
         solver_matrix.value(i) = 0.0;
     }

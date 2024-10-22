@@ -63,6 +63,29 @@ const PolarGrid& GMGPolar::grid() const {
     return levels_[0].grid();
 }
 
+
+/* Solve Properties */
+int GMGPolar::numberOfIterations() const {
+    return number_of_iterations_;
+}
+double GMGPolar::meanResidualReductionFactor() const {
+    return mean_residual_reduction_factor_;
+}
+// Only when exact solution provided
+std::optional<double> GMGPolar::exactErrorWeightedEuclidean() const {
+    if(exact_solution_) {
+        return exact_errors_.back().first;
+    }
+    return std::nullopt;
+}
+std::optional<double> GMGPolar::exactErrorInfinity() const {
+    if(exact_solution_) {
+        return exact_errors_.back().second;
+    }
+    return std::nullopt;
+}
+
+
 void GMGPolar::printTimings() const {
     std::cout << "\n------------------"<< std::endl;
     std::cout << "Timing Information" << std::endl;
@@ -187,6 +210,22 @@ bool GMGPolar::FMG() const {
 
 void GMGPolar::FMG(bool FMG) {
     FMG_ = FMG;
+}
+
+int GMGPolar::FMG_iterations() const {
+    return FMG_iterations_;
+}
+
+void GMGPolar::FMG_iterations(int FMG_iterations) {
+    FMG_iterations_ = FMG_iterations;
+}
+
+MultigridCycleType GMGPolar::FMG_cycle() const {
+    return FMG_cycle_;
+}
+
+void GMGPolar::FMG_cycle(MultigridCycleType FMG_cycle) {
+    FMG_cycle_ = FMG_cycle;
 }
 
 ExtrapolationType GMGPolar::extrapolation() const {

@@ -1427,7 +1427,7 @@ void ExtrapolatedSmootherGive::buildAscMatrices()
 
     // Remark: circle_diagonal_solver_[0] is undefnied.
     // Use inner_boundary_circle_matrix_ instead.
-    #pragma omp parallel if(grid_.numberOfNodes() > 100'000)
+    #pragma omp parallel if(grid_.numberOfNodes() > 10'000)
     {
         // ---------------- //
         // Circular Section //
