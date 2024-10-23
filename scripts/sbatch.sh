@@ -33,7 +33,7 @@ implementationType=1
 # 0 - Recompute values on each iteration: Uses less memory but results in slower execution.
 # 1 - Reuse cached values: Consumes more memory but significantly improves performance.
 cacheDensityProfileCoefficients=1
-cacheDomainGeometry=1
+cacheDomainGeometry=0
 # Note: In the "Take" approach (implementationType=0), 
 # caching is required for optimal performance, 
 # so both density profile coefficients and domain geometry need to be cached.
@@ -47,7 +47,7 @@ fi
 # Finest grid parameters
 R0=1e-8
 Rmax=1.0
-nr_exp=14
+nr_exp=12
 ntheta_exp=-1
 anisotropic_factor=0
 divideBy2=0
@@ -84,7 +84,7 @@ FMG_cycle=2 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
 # 1: Implicit extrapolation (recommended)
 # 2: Implicit extrapolation with full grid smoothing (residuals cannot be used as convergence criteria)
 # 3: Combination of both implicit extrapolation methods (May be usefull for FMG=0)
-extrapolation=0
+extrapolation=1
 # Maximum number of multigrid levels:
 maxLevels=7
 # Number of smoothing steps:
@@ -99,8 +99,8 @@ multigridCycle=0
 # Convergence criteria:
 maxIterations=150
 residualNormType=0 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
-absoluteTolerance=1e-15
-relativeTolerance=1e-15
+absoluteTolerance=1e-12
+relativeTolerance=1e-10
 
 # Define additional geometry parameters
 kappa_eps=0.0
