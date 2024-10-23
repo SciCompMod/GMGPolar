@@ -18,7 +18,6 @@ void GMGPolar::setup() {
     // -------------------------------- //
     // Create the finest mesh (level 0) //
     // -------------------------------- //
-
     auto finest_grid = std::make_unique<PolarGrid>(createFinestGrid()); /* Implementation below */
     if(verbose_ > 0) {
         std::cout << "System of size (nr x ntheta) = (" << finest_grid->nr() << " x " << finest_grid->ntheta() << ")\n";

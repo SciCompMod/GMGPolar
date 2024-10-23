@@ -171,6 +171,7 @@ More points
     - Built matrices to be symmetric, reducing factorization time.
   - **Smoother:**
     - Separated into extrapolated and standard smoothers.
+    - Replaced the LU-Decomposition algorithm with the Thomas algorithm for improved efficiency.
   
 #### New Features
 
@@ -183,6 +184,7 @@ More points
 #### Performance Improvements
 
 - Removed the task-based approach, which did not scale well with increasing parallelization.
+- Reduced maximum usage by 61.5% by constructing symmetric matrices and utilizing the tridiagonal structure of smoother matrices.
 
 #### Removed Features
 

@@ -18,21 +18,30 @@ int main(int argc, char* argv[]){
     const double R0 = 1e-8; const double Rmax = 1.3;
     const double inverse_aspect_ratio_epsilon = 0.3; const double ellipticity_e = 1.4;
     const double elongation_kappa = 0.3; const double shift_delta = 0.2;
-    const double alpha_jump = 0.66;
+    
+    /* Example 1: Polar Solution -> Higher Order 4.0 */
+    const double alpha_jump = 0.4837 * Rmax;
+    std::unique_ptr<DomainGeometry> domain_geometry = std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+    std::unique_ptr<ExactSolution> exact_solution = std::make_unique<PolarR6_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+    std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniGyroCoefficients>(Rmax, alpha_jump);
+    std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<PolarR6_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+    std::unique_ptr<SourceTerm> source_term = std::make_unique<PolarR6_ZoniGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
 
-    /* Example 1: Cartesian Solution -> Lower Order */
-    std::unique_ptr<DomainGeometry> domain_geometry = std::make_unique<CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    std::unique_ptr<ExactSolution> exact_solution = std::make_unique<CartesianR2_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<SonnendruckerGyroCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<CartesianR2_Boundary_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    std::unique_ptr<SourceTerm> source_term = std::make_unique<CartesianR2_SonnendruckerGyro_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
+    /* Example 2: Cartesian Solution -> Lower Order 3.5 */
+    // const double alpha_jump = 0.66 * Rmax;
+    // std::unique_ptr<DomainGeometry> domain_geometry = std::make_unique<CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
+    // std::unique_ptr<ExactSolution> exact_solution = std::make_unique<CartesianR2_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
+    // std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<SonnendruckerGyroCoefficients>(Rmax, alpha_jump);
+    // std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<CartesianR2_Boundary_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
+    // std::unique_ptr<SourceTerm> source_term = std::make_unique<CartesianR2_SonnendruckerGyro_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
 
-    /* Example 2: Polar Solution -> Higher Order */
+    /* Example 3: Refined Solution -> Lower Order 3.5 */
+    // const double alpha_jump = 0.9 * Rmax; // Refinement where the solution is most complex
     // std::unique_ptr<DomainGeometry> domain_geometry = std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<ExactSolution> exact_solution = std::make_unique<PolarR6_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniGyroCoefficients>(Rmax, alpha_jump);
-    // std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<PolarR6_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<SourceTerm> source_term = std::make_unique<PolarR6_ZoniGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+    // std::unique_ptr<ExactSolution> exact_solution = std::make_unique<Refined_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+    // std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
+    // std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<Refined_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+    // std::unique_ptr<SourceTerm> source_term = std::make_unique<Refined_ZoniShiftedGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
 
     GMGPolar solver(std::move(domain_geometry), std::move(coefficients), std::move(boundary_conditions), std::move(source_term));
 
@@ -41,7 +50,7 @@ int main(int argc, char* argv[]){
     const int verbose = 0;
     const bool paraview = false;
 
-    const int maxOpenMPThreads = 32;
+    const int maxOpenMPThreads = 16;
     const double threadReductionFactor = 1.0;
 
     const ImplementationType implementationType = ImplementationType::CPU_GIVE;
@@ -119,15 +128,8 @@ int main(int argc, char* argv[]){
     {
         solver.divideBy2(divideBy2);
 
-        auto start = std::chrono::high_resolution_clock::now();
-
         solver.setup();
         solver.solve();
-
-        auto end = std::chrono::high_resolution_clock::now();
-
-        std::chrono::duration<double> elapsed_seconds = end - start;
-        double total_time_seconds = elapsed_seconds.count(); 
 
         table_nr[divideBy2] = solver.grid().nr();
         table_ntheta[divideBy2] = solver.grid().ntheta();
@@ -136,7 +138,7 @@ int main(int argc, char* argv[]){
         table_reduction_factor[divideBy2] = solver.meanResidualReductionFactor();
         table_exact_error_weighted_euclidean[divideBy2] = solver.exactErrorWeightedEuclidean().value();
         table_exact_error_infinity[divideBy2] = solver.exactErrorInfinity().value();
-        table_total_time[divideBy2] = total_time_seconds;
+        table_total_time[divideBy2] = solver.t_setup_total + solver.t_solve_total;
     }
 
     table_exact_error_weighted_euclidean_order[0] = std::numeric_limits<double>::max();;
@@ -159,11 +161,11 @@ int main(int argc, char* argv[]){
 
     // Print the header
     std::cout << std::setw(12) << "nr x nθ"
-              << std::setw(8)  << "its"
-              << std::setw(8)  << "ρ̂"
+              << std::setw(9)  << "its"
+              << std::setw(7)  << "ρ"
               << std::setw(25) << "||err||_2/sqrt(m)"
               << std::setw(6)  << "ord"
-              << std::setw(20) << "||err||_∞"
+              << std::setw(22) << "||err||_∞"
               << std::setw(6)  << "ord"
               << std::setw(15) << "time[s]" << std::endl;
 
@@ -171,15 +173,15 @@ int main(int argc, char* argv[]){
     for (int i = 0; i < MAX_DIVIDE_BY_2; i++) {
         // Start the row
         std::cout << std::setw(6)  << table_nr[i] << " x " << table_ntheta[i]
-                  << std::setw(7)  << table_iterations[i]
-                  << std::setw(8)  << table_reduction_factor[i];
+                  << std::setw(7.5)  << table_iterations[i]
+                  << std::setw(9)  << table_reduction_factor[i];
 
         // Print ||err||_2/sqrt(m) in scientific notation
-        std::cout << std::scientific << std::setprecision(3);
+        std::cout << std::scientific << std::setprecision(2);
         std::cout << std::setw(20) << table_exact_error_weighted_euclidean[i];
 
         // Print ord for ||err||_2/sqrt(m)
-        std::cout << std::fixed << std::setprecision(1);  // Go back to fixed notation
+        std::cout << std::fixed << std::setprecision(2);  // Go back to fixed notation
         std::cout << std::setw(10);
         if (table_exact_error_weighted_euclidean_order[i] != std::numeric_limits<double>::max())
             std::cout << table_exact_error_weighted_euclidean_order[i];
@@ -187,11 +189,11 @@ int main(int argc, char* argv[]){
             std::cout << "-";
 
         // Print ||err||_∞ in scientific notation
-        std::cout << std::scientific << std::setprecision(3);
+        std::cout << std::scientific << std::setprecision(2);
         std::cout << std::setw(18) << table_exact_error_infinity[i];
 
         // Print ord for ||err||_∞
-        std::cout << std::fixed << std::setprecision(1);  // Back to fixed
+        std::cout << std::fixed << std::setprecision(2);  // Back to fixed
         std::cout << std::setw(8);
         if (table_exact_error_infinity_order[i] != std::numeric_limits<double>::max())
             std::cout << table_exact_error_infinity_order[i];
