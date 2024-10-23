@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../InputFunctions/domainGeometry.h"
-#include "../InputFunctions/densityProfileCoefficients.h"
 #include "../InputFunctions/boundaryConditions.h"
-#include "../InputFunctions/sourceTerm.h"
+#include "../InputFunctions/densityProfileCoefficients.h"
+#include "../InputFunctions/domainGeometry.h"
 #include "../InputFunctions/exactSolution.h"
+#include "../InputFunctions/sourceTerm.h"
 
 /* ---------- */
 /* Test Cases */
@@ -13,9 +13,9 @@
 /* --------------- */
 /* Domain Geometry */
 #include "../include/InputFunctions/DomainGeometry/circularGeometry.h"
-#include "../include/InputFunctions/DomainGeometry/shafranovGeometry.h"
-#include "../include/InputFunctions/DomainGeometry/czarnyGeometry.h"
 #include "../include/InputFunctions/DomainGeometry/culhamGeometry.h"
+#include "../include/InputFunctions/DomainGeometry/czarnyGeometry.h"
+#include "../include/InputFunctions/DomainGeometry/shafranovGeometry.h"
 
 /* --------------- */
 /* Exact Solutions */
@@ -29,9 +29,9 @@
 #include "../include/InputFunctions/ExactSolution/polarR6_CulhamGeometry.h"
 #include "../include/InputFunctions/ExactSolution/polarR6_CzarnyGeometry.h"
 #include "../include/InputFunctions/ExactSolution/polarR6_ShafranovGeometry.h"
-#include "../include/InputFunctions/ExactSolution/refined_CzarnyGeometry.h"
 #include "../include/InputFunctions/ExactSolution/refined_CircularGeometry.h"
 #include "../include/InputFunctions/ExactSolution/refined_CulhamGeometry.h"
+#include "../include/InputFunctions/ExactSolution/refined_CzarnyGeometry.h"
 #include "../include/InputFunctions/ExactSolution/refined_ShafranovGeometry.h"
 
 /* ------------------- */
@@ -46,9 +46,9 @@
 #include "../include/InputFunctions/BoundaryConditions/polarR6_Boundary_CulhamGeometry.h"
 #include "../include/InputFunctions/BoundaryConditions/polarR6_Boundary_CzarnyGeometry.h"
 #include "../include/InputFunctions/BoundaryConditions/polarR6_Boundary_ShafranovGeometry.h"
-#include "../include/InputFunctions/BoundaryConditions/refined_Boundary_CzarnyGeometry.h"
 #include "../include/InputFunctions/BoundaryConditions/refined_Boundary_CircularGeometry.h"
 #include "../include/InputFunctions/BoundaryConditions/refined_Boundary_CulhamGeometry.h"
+#include "../include/InputFunctions/BoundaryConditions/refined_Boundary_CzarnyGeometry.h"
 #include "../include/InputFunctions/BoundaryConditions/refined_Boundary_ShafranovGeometry.h"
 
 /* -----------------------------*/
@@ -122,6 +122,7 @@
 #include "../include/InputFunctions/SourceTerms/polarR6_ZoniGyro_CzarnyGeometry.h"
 #include "../include/InputFunctions/SourceTerms/polarR6_ZoniGyro_ShafranovGeometry.h"
 #include "../include/InputFunctions/SourceTerms/polarR6_ZoniShiftedGyro_CircularGeometry.h"
+#include "../include/InputFunctions/SourceTerms/polarR6_ZoniShiftedGyro_CulhamGeometry.h" /* Culham */
 #include "../include/InputFunctions/SourceTerms/polarR6_ZoniShiftedGyro_CzarnyGeometry.h"
 #include "../include/InputFunctions/SourceTerms/polarR6_ZoniShiftedGyro_ShafranovGeometry.h"
 #include "../include/InputFunctions/SourceTerms/polarR6_ZoniShifted_CircularGeometry.h"
@@ -130,11 +131,10 @@
 #include "../include/InputFunctions/SourceTerms/polarR6_Zoni_CircularGeometry.h"
 #include "../include/InputFunctions/SourceTerms/polarR6_Zoni_CzarnyGeometry.h"
 #include "../include/InputFunctions/SourceTerms/polarR6_Zoni_ShafranovGeometry.h"
-#include "../include/InputFunctions/SourceTerms/polarR6_ZoniShiftedGyro_CulhamGeometry.h" /* Culham */
 
 /* --------------------- */
 /* Source Terms: Refined */
 #include "../include/InputFunctions/SourceTerms/refined_ZoniShiftedGyro_CircularGeometry.h"
+#include "../include/InputFunctions/SourceTerms/refined_ZoniShiftedGyro_CulhamGeometry.h" /* Culham */
 #include "../include/InputFunctions/SourceTerms/refined_ZoniShiftedGyro_CzarnyGeometry.h"
 #include "../include/InputFunctions/SourceTerms/refined_ZoniShiftedGyro_ShafranovGeometry.h"
-#include "../include/InputFunctions/SourceTerms/refined_ZoniShiftedGyro_CulhamGeometry.h" /* Culham */

@@ -1,5 +1,6 @@
 #include "../../../include/Smoother/SmootherGive/smootherGive.h"
 
+// clang-format off
 #define COMPUTE_JACOBIAN_ELEMENTS(domain_geometry, r, theta, sin_theta, cos_theta, coeff_alpha, \
     arr, att, art, detDF) \
 do { \
@@ -26,7 +27,6 @@ do { \
     /* [Jtt, -Jrt] */ \
     /* [-Jtr, Jrr] */ \
 } while(0) \
-
 
 
 #define NODE_APPLY_ASC_ORTHO_CIRCLE_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, \
@@ -362,9 +362,9 @@ do { \
         } \
     } \
 } while(0) \
+// clang-format on
 
-
-
+// clang-format off
 void SmootherGive::applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color, const Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp){
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles()+1);
 

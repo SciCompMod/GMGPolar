@@ -11,26 +11,28 @@ class ExtrapolatedSmoother;
 
 #include "../PolarGrid/polargrid.h"
 
-#include "../InputFunctions/domainGeometry.h"
-#include "../InputFunctions/densityProfileCoefficients.h"
 #include "../InputFunctions/boundaryConditions.h"
+#include "../InputFunctions/densityProfileCoefficients.h"
+#include "../InputFunctions/domainGeometry.h"
 #include "../InputFunctions/sourceTerm.h"
 
 #include "../DirectSolver/directSolver.h"
+#include "../ExtrapolatedSmoother/extrapolatedSmoother.h"
 #include "../Residual/residual.h"
 #include "../Smoother/smoother.h"
-#include "../ExtrapolatedSmoother/extrapolatedSmoother.h"
 
 class LevelCache;
 
-class Level {
+class Level
+{
 public:
     // ----------- //
     // Constructor //
-    explicit Level(
-        const int level, std::unique_ptr<const PolarGrid> grid, std::unique_ptr<const LevelCache> level_cache, 
-        const ExtrapolationType extrapolation, const bool FMG
-    );
+    explicit Level(const int level,
+                   std::unique_ptr<const PolarGrid> grid,
+                   std::unique_ptr<const LevelCache> level_cache,
+                   const ExtrapolationType extrapolation,
+                   const bool FMG);
 
     // ---------------- //
     // Getter Functions //
@@ -49,22 +51,38 @@ public:
 
     // -------------- //
     // Apply Residual //
-    void initializeResidual(const DomainGeometry& domain_geometry, const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior, const int num_omp_threads, const ImplementationType implementation_type);
+    void initializeResidual(const DomainGeometry& domain_geometry,
+                            const DensityProfileCoefficients& density_profile_coefficients,
+                            const bool DirBC_Interior,
+                            const int num_omp_threads,
+                            const ImplementationType implementation_type);
     void computeResidual(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const;
 
     // ------------------- //
     // Solve coarse System //
-    void initializeDirectSolver(const DomainGeometry& domain_geometry, const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior, const int num_omp_threads, const ImplementationType implementation_type);
+    void initializeDirectSolver(const DomainGeometry& domain_geometry,
+                                const DensityProfileCoefficients& density_profile_coefficients,
+                                const bool DirBC_Interior,
+                                const int num_omp_threads,
+                                const ImplementationType implementation_type);
     void directSolveInPlace(Vector<double>& x) const;
 
     // --------------- //
     // Apply Smoothing //
-    void initializeSmoothing(const DomainGeometry& domain_geometry, const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior, const int num_omp_threads, const ImplementationType implementation_type);
+    void initializeSmoothing(const DomainGeometry& domain_geometry,
+                             const DensityProfileCoefficients& density_profile_coefficients,
+                             const bool DirBC_Interior,
+                             const int num_omp_threads,
+                             const ImplementationType implementation_type);
     void smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const;
 
     // ---------------------------- //
     // Apply Extrapolated Smoothing //
-    void initializeExtrapolatedSmoothing(const DomainGeometry& domain_geometry, const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior, const int num_omp_threads, const ImplementationType implementation_type);
+    void initializeExtrapolatedSmoothing(const DomainGeometry& domain_geometry,
+                                         const DensityProfileCoefficients& density_profile_coefficients,
+                                         const bool DirBC_Interior,
+                                         const int num_omp_threads,
+                                         const ImplementationType implementation_type);
     void extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const;
 
 private:
@@ -83,15 +101,14 @@ private:
     Vector<double> error_correction_;
 };
 
-
-
-class LevelCache {
+class LevelCache
+{
 public:
-    explicit LevelCache(
-        const PolarGrid& grid, 
-        const DensityProfileCoefficients& density_profile_coefficients, const DomainGeometry& domain_geometry,
-        const bool cache_density_profile_coefficients, const bool cache_domain_geometry
-    );
+    explicit LevelCache(const PolarGrid& grid,
+                        const DensityProfileCoefficients& density_profile_coefficients,
+                        const DomainGeometry& domain_geometry,
+                        const bool cache_density_profile_coefficients,
+                        const bool cache_domain_geometry);
     explicit LevelCache(const Level& previous_level, const PolarGrid& current_grid);
 
     const std::vector<double>& sin_theta() const;

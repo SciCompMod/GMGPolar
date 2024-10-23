@@ -1,19 +1,19 @@
 #pragma once
 
-#include <optional>
-#include <vector>
-#include <string>
-#include <iterator>
-#include <stdexcept>
-#include <fstream>
-#include <cmath>
-#include <cassert>
-#include <set>
-#include <functional>
-#include <iostream>
-#include <iomanip>
-#include <memory>
 #include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <iterator>
+#include <memory>
+#include <optional>
+#include <set>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 #include <omp.h>
 
@@ -26,27 +26,27 @@
 // It is designed to handle polar coordinates, providing functionalities
 // for storing data points and performing operations on them.
 
-class PolarGrid {
+class PolarGrid
+{
 public:
     // Default constructor.
     explicit PolarGrid() = default;
 
     // Constructor to initialize grid using vectors of radii and angles.
-    PolarGrid(const std::vector<double>& radii, const std::vector<double>& angles, 
-        std::optional<double> splitting_radius = std::nullopt
-    );
+    PolarGrid(const std::vector<double>& radii, const std::vector<double>& angles, std::optional<double> splitting_radius = std::nullopt);
 
     // Constructor to initialize grid using data from text files containing radii and angles.
-    PolarGrid(const std::string& file_grid_radii, const std::string& file_grid_angles, 
-        std::optional<double> splitting_radius = std::nullopt
-    );
+    PolarGrid(const std::string& file_grid_radii, const std::string& file_grid_angles, std::optional<double> splitting_radius = std::nullopt);
 
     // Constructor to initialize grid using parameters from GMGPolar.
-    explicit PolarGrid(
-        const double& R0, const double& Rmax, const int nr_exp, const int ntheta_exp, const double& refinement_radius,
-        const int anisotropic_factor, const int divideBy2, 
-        std::optional<double> splitting_radius = std::nullopt
-    );
+    explicit PolarGrid(const double& R0,
+                       const double& Rmax,
+                       const int nr_exp,
+                       const int ntheta_exp,
+                       const double& refinement_radius,
+                       const int anisotropic_factor,
+                       const int divideBy2,
+                       std::optional<double> splitting_radius = std::nullopt);
 
     // Node Indexing (based on the circle/radial smoother)
     // Get the index of a node based on its position.
@@ -65,21 +65,14 @@ public:
     // Obtaining neighboring nodes (unoptimized)
     // Get adjacent neighbors of a node.
     // If the neighbor index is -1, then there is no neighboring node in that direction.
-    void adjacentNeighborsOf(const MultiIndex& position, 
-        std::array<std::pair<int,int>, space_dimension>& neighbors
-    ) const;
+    void adjacentNeighborsOf(const MultiIndex& position, std::array<std::pair<int, int>, space_dimension>& neighbors) const;
     // Get diagonal neighbors of a node.
     // If the neighbor index is -1, then there is no neighboring node in that direction.
-    void diagonalNeighborsOf(
-        const MultiIndex& position, 
-        std::array<std::pair<int,int>, space_dimension>& neighbors
-    ) const;
+    void diagonalNeighborsOf(const MultiIndex& position, std::array<std::pair<int, int>, space_dimension>& neighbors) const;
     // Neighbor distances
     // Get distances to adjacent neighbors of a node.
     // If there is no neighboring node in that direction, then the neighbor distance is 0.
-    void adjacentNeighborDistances(const MultiIndex& position, 
-        std::array<std::pair<double,double>, space_dimension>& neighbor_distances
-    ) const;
+    void adjacentNeighborDistances(const MultiIndex& position, std::array<std::pair<double, double>, space_dimension>& neighbor_distances) const;
 
     // Number of grid nodes
     int numberOfNodes() const;
@@ -108,7 +101,7 @@ public:
     double smootherSplittingRadius() const;
     // Get the number of circles in the circular smoother.
     int numberSmootherCircles() const;
-    // Get the length of the radial smoother lines. 
+    // Get the length of the radial smoother lines.
     int lengthSmootherRadial() const;
     // Get the number of nodes in circular smoother.
     int numberCircularSmootherNodes() const;
@@ -117,9 +110,7 @@ public:
 
     // Implementation in src/PolarGrid/load_write_grid.cpp
     // Write the grid data to files specified for radii and angles with given precision.
-    void writeToFile(
-        const std::string& file_r, const std::string& file_theta, const int precision
-    ) const;
+    void writeToFile(const std::string& file_r, const std::string& file_theta, const int precision) const;
 
 private:
     // --------------- //
@@ -129,10 +120,10 @@ private:
     // We will use the convention:
     // radii = [R0, ..., R], angles = [0, ..., 2*pi]
     // Note that ntheta will be one less than the size of angles since 0 and 2pi are the same point.
-    int nr_; // number of nodes in radial direction
-    int ntheta_; // number of (unique) nodes in angular direction 
+    int nr_;     // number of nodes in radial direction
+    int ntheta_; // number of (unique) nodes in angular direction
     bool is_ntheta_PowerOfTwo_;
-    std::vector<double> radii_; // Vector of radial coordiantes
+    std::vector<double> radii_;  // Vector of radial coordiantes
     std::vector<double> angles_; // Vector of angular coordinates
 
     // radial_spacings_ contains the distances between each consecutive radii division.
@@ -140,18 +131,18 @@ private:
     std::vector<double> radial_spacings_; // size(radial_spacings_) = nr() - 1
 
     // angular_spacings_ contains the angles between each consecutive theta division.
-    // Since we have a periodic boundary in theta direction, 
+    // Since we have a periodic boundary in theta direction,
     // we have to make sure the index wraps around correctly when accessing it.
-    // Here theta_0 = 0.0 and theta_N = 2*pi refer to the same point. 
+    // Here theta_0 = 0.0 and theta_N = 2*pi refer to the same point.
     // angular_spacings_ = [theta_{1}-theta_{0}, ..., theta_{N}-theta_{N-1}].
     std::vector<double> angular_spacings_; // size(angular_spacings_) = ntheta()
 
     // Circle/radial smoother division
-    double smoother_splitting_radius_; // Radius at which the grid is split into circular and radial smoothing
-    int number_smoother_circles_; // Number of smoother circles in the grid
-    int length_smoother_radial_; // Length of the radial smoother lines. 
+    double smoother_splitting_radius_;   // Radius at which the grid is split into circular and radial smoothing
+    int number_smoother_circles_;        // Number of smoother circles in the grid
+    int length_smoother_radial_;         // Length of the radial smoother lines.
     int number_circular_smoother_nodes_; // Number of nodes in the circular smoother
-    int number_radial_smoother_nodes_; // Number of nodes in the radial smoother
+    int number_radial_smoother_nodes_;   // Number of nodes in the radial smoother
 
     /*
      * Relationship constraints:
@@ -177,9 +168,7 @@ private:
     void initializeLineSplitting(std::optional<double> splitting_radius);
 
     // Construct radial divisions for grid generation.
-    void constructRadialDivisions(
-        const double& R0, const double& R, const int nr_exp, const double& refinement_radius,
-        const int anisotropic_factor);
+    void constructRadialDivisions(const double& R0, const double& R, const int nr_exp, const double& refinement_radius, const int anisotropic_factor);
     // Construct angular divisions for grid generation.
     void constructAngularDivisions(const int ntheta_exp, const int nr);
 
@@ -189,18 +178,16 @@ private:
 
     // Help constrcut radii_ when an anisotropic radial division is requested
     // Implementation in src/PolarGrid/anisotropic_division.cpp
-    void RadialAnisotropicDivision(std::vector<double>& r_temp, 
-        const double& R0, const double& R, const int nr_exp, const double& refinement_radius,
-        const int anisotropic_factor
-    ) const;
+    void RadialAnisotropicDivision(std::vector<double>& r_temp,
+                                   const double& R0,
+                                   const double& R,
+                                   const int nr_exp,
+                                   const double& refinement_radius,
+                                   const int anisotropic_factor) const;
 
     // Implementation in src/PolarGrid/load_write_grid.cpp
-    void writeVectorToFile(
-        const std::string& filename, const std::vector<double>& vector, const int precision
-    ) const;
-    void loadVectorFromFile(
-        const std::string& filename, std::vector<double>& vector
-    ) const;
+    void writeVectorToFile(const std::string& filename, const std::vector<double>& vector, const int precision) const;
+    void loadVectorFromFile(const std::string& filename, std::vector<double>& vector) const;
 };
 
 // ---------------------------------------------------- //
@@ -208,4 +195,4 @@ private:
 // ---------------------------------------------------- //
 PolarGrid coarseningGrid(const PolarGrid& grid);
 
-#include "polargrid.inl"  // Include the inline function definitions
+#include "polargrid.inl" // Include the inline function definitions

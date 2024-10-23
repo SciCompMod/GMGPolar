@@ -1,11 +1,12 @@
 #include "../../include/Interpolation/interpolation.h"
 
-// /* Bicubic FMG interpolator 1/16 * [-1, 9, 9, -1] */ based on:
+// /* Bicubic FMG interpolator 1/16 * [-1, 9, 9, -1] */ based on
 // Lagrange interpolation (4 interpolation points, 1 interpolated value)
 
 // clang-format off
 #define FINE_NODE_FMG_INTERPOLATION() \
 do { \
+    /* Case 1: On the boundary */ \
     if(i_r == 0 || i_r == fineGrid.nr() - 1){ \
         if(i_theta & 1){ \
             double k0 = coarseGrid.angularSpacing(i_theta_coarse-1); \
@@ -30,6 +31,7 @@ do { \
                 x[coarseGrid.index(i_r_coarse, i_theta_coarse)]; /* center */ \
         } \
     } \
+    /* Case 2: Next to the boundary */ \
     else if(i_r == 1 || i_r == fineGrid.nr() - 2){ \
         if(i_theta & 1){ \
             double k0 = coarseGrid.angularSpacing(i_theta_coarse-1); \
@@ -69,6 +71,7 @@ do { \
         } \
     } \
     else{ \
+        /* Case 3: In the interior */ \
         if(i_r & 1){ \
             if(i_theta & 1){ \
                 double k0 = coarseGrid.angularSpacing(i_theta_coarse-1); \

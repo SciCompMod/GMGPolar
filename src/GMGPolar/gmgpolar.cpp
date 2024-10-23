@@ -1,5 +1,6 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
+// clang-format off
 GMGPolar::GMGPolar() : 
     parser_()
 {

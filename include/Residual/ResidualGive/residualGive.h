@@ -2,13 +2,15 @@
 
 #include "../residual.h"
 
-class ResidualGive : public Residual {
+class ResidualGive : public Residual
+{
 public:
-    explicit ResidualGive(
-        const PolarGrid& grid, const LevelCache& level_cache, 
-        const DomainGeometry& domain_geometry, const DensityProfileCoefficients& density_profile_coefficients,
-        const bool DirBC_Interior, const int num_omp_threads
-    );
+    explicit ResidualGive(const PolarGrid& grid,
+                          const LevelCache& level_cache,
+                          const DomainGeometry& domain_geometry,
+                          const DensityProfileCoefficients& density_profile_coefficients,
+                          const bool DirBC_Interior,
+                          const int num_omp_threads);
     ~ResidualGive() override = default;
 
     void computeResidual(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const override;

@@ -1,6 +1,6 @@
 #include "../../../include/ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h"
 
-
+// clang-format off
 #define COMPUTE_JACOBIAN_ELEMENTS(domain_geometry, r, theta, sin_theta, cos_theta, coeff_alpha, \
     arr, att, art, detDF) \
 do { \
@@ -1292,9 +1292,9 @@ do { \
         } \
     } \
 } while(0)
+// clang-format on
 
-
-
+// clang-format off
 void ExtrapolatedSmootherGive::buildAscCircleSection(const int i_r){
     const auto& sin_theta_cache = level_cache_.sin_theta();
     const auto& cos_theta_cache = level_cache_.cos_theta();

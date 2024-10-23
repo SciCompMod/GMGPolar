@@ -1,5 +1,6 @@
 #include "../../../include/DirectSolver/DirectSolverTake/directSolverTake.h"
 
+// clang-format off
 DirectSolverTake::DirectSolverTake(
     const PolarGrid& grid, const LevelCache& level_cache, 
     const DomainGeometry& domain_geometry, const DensityProfileCoefficients& density_profile_coefficients,

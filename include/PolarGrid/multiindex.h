@@ -1,8 +1,8 @@
 #pragma once
 
+#include <algorithm>
 #include <cassert>
 #include <iterator>
-#include <algorithm>
 
 #include "../common/space_dimension.h"
 

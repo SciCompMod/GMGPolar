@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cassert>
 #include <algorithm>
+#include <cassert>
 #include <iterator>
 
 #include "../common/equals.h"
@@ -40,6 +40,6 @@ private:
 
 bool equals(const Point& lhs, const Point& rhs);
 double norm(const Point& point);
-void add(Point& result, const Point& lhs,const Point& rhs);
-void subtract(Point& result, const Point& lhs,const Point& rhs);
+void add(Point& result, const Point& lhs, const Point& rhs);
+void subtract(Point& result, const Point& lhs, const Point& rhs);
 void multiply(Point& result, const double& scalar, const Point& lhs);

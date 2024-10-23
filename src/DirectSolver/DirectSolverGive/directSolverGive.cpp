@@ -1,5 +1,6 @@
 #include "../../../include/DirectSolver/DirectSolverGive/directSolverGive.h"
 
+// clang-format off
 DirectSolverGive::DirectSolverGive(
     const PolarGrid& grid, const LevelCache& level_cache, 
     const DomainGeometry& domain_geometry, const DensityProfileCoefficients& density_profile_coefficients,
@@ -11,7 +12,8 @@ DirectSolverGive::DirectSolverGive(
     initializeMumpsSolver(mumps_solver_, solver_matrix_);
 }
 
-void DirectSolverGive::solveInPlace(Vector<double>& solution) {
+void DirectSolverGive::solveInPlace(Vector<double>& solution) 
+{
     // Adjusts the right-hand side vector to account for symmetry corrections.
     // This transforms the system matrixA * solution = rhs into the equivalent system:
     // symmetric(matrixA) * solution = rhs - applySymmetryShift(rhs).
@@ -21,6 +23,7 @@ void DirectSolverGive::solveInPlace(Vector<double>& solution) {
 }
 
 
-DirectSolverGive::~DirectSolverGive() {
+DirectSolverGive::~DirectSolverGive() 
+{
     finalizeMumpsSolver(mumps_solver_);
 }

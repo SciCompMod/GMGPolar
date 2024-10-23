@@ -1,27 +1,34 @@
 #include "../../../include/DirectSolver/DirectSolverGive/directSolverGive.h"
 
-const Stencil& DirectSolverGive::getStencil(int i_r) const {
+const Stencil& DirectSolverGive::getStencil(int i_r) const
+{
     assert(0 <= i_r && i_r < grid_.nr());
     assert(grid_.nr() >= 4);
 
-    if ((i_r > 1 && i_r < grid_.nr() - 2) || (i_r == 1 && !DirBC_Interior_)) {
+    if ((i_r > 1 && i_r < grid_.nr() - 2) || (i_r == 1 && !DirBC_Interior_))
+    {
         return stencil_interior_;
-    } 
-    else if(i_r == 0 && !DirBC_Interior_) {
+    }
+    else if (i_r == 0 && !DirBC_Interior_)
+    {
         return stencil_across_origin_;
     }
-    else if((i_r == 0 && DirBC_Interior_) || i_r == grid_.nr() - 1) {
+    else if ((i_r == 0 && DirBC_Interior_) || i_r == grid_.nr() - 1)
+    {
         return stencil_DB_;
     }
-    else if(i_r == 1 && DirBC_Interior_) {
+    else if (i_r == 1 && DirBC_Interior_)
+    {
         return stencil_next_inner_DB_;
     }
-    else if(i_r == grid_.nr() - 2) {
+    else if (i_r == grid_.nr() - 2)
+    {
         return stencil_next_outer_DB_;
     }
     throw std::out_of_range("Invalid index for stencil");
 }
 
+// clang-format off
 int DirectSolverGive::getNonZeroCountSolverMatrix() const {
     const int size_stencil_inner_boundary = DirBC_Interior_ ? 1 : 7 ;
     const int size_stencil_next_inner_boundary = DirBC_Interior_ ? 6 : 9;
@@ -128,3 +135,4 @@ int DirectSolverGive::getSolverMatrixIndex(const int i_r, const int i_theta) con
     }
     throw std::out_of_range("Invalid index for stencil");
 }
+// clang-format on

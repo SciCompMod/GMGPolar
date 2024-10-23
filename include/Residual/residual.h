@@ -4,28 +4,30 @@ class LevelCache;
 class Level;
 
 #include <chrono>
-#include <vector>
 #include <iostream>
+#include <vector>
 
 #include "../PolarGrid/polargrid.h"
 
-#include "../InputFunctions/domainGeometry.h"
-#include "../InputFunctions/densityProfileCoefficients.h"
 #include "../InputFunctions/boundaryConditions.h"
+#include "../InputFunctions/densityProfileCoefficients.h"
+#include "../InputFunctions/domainGeometry.h"
 #include "../InputFunctions/sourceTerm.h"
-#include "../LinearAlgebra/vector.h"
+#include "../Level/level.h"
 #include "../LinearAlgebra/matrix.h"
+#include "../LinearAlgebra/vector.h"
 #include "../LinearAlgebra/vector_operations.h"
 #include "../common/constants.h"
-#include "../Level/level.h"
 
-class Residual {
+class Residual
+{
 public:
-    explicit Residual(
-        const PolarGrid& grid, const LevelCache& level_cache, 
-        const DomainGeometry& domain_geometry, const DensityProfileCoefficients& density_profile_coefficients,
-        const bool DirBC_Interior, const int num_omp_threads
-    );
+    explicit Residual(const PolarGrid& grid,
+                      const LevelCache& level_cache,
+                      const DomainGeometry& domain_geometry,
+                      const DensityProfileCoefficients& density_profile_coefficients,
+                      const bool DirBC_Interior,
+                      const int num_omp_threads);
     virtual ~Residual() = default;
 
     virtual void computeResidual(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const = 0;

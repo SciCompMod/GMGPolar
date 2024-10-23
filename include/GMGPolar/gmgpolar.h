@@ -1,37 +1,38 @@
 #pragma once
 
+#include <chrono>
+#include <filesystem>
 #include <iostream>
 #include <memory>
-#include <filesystem>
+#include <omp.h>
 #include <optional>
 #include <utility>
-#include <chrono>
-#include <omp.h>
 
 class Level;
 class LevelCache;
 
-#include "../Level/level.h"
-#include "../InputFunctions/domainGeometry.h"
-#include "../InputFunctions/densityProfileCoefficients.h"
 #include "../InputFunctions/boundaryConditions.h"
-#include "../InputFunctions/sourceTerm.h"
+#include "../InputFunctions/densityProfileCoefficients.h"
+#include "../InputFunctions/domainGeometry.h"
 #include "../InputFunctions/exactSolution.h"
-#include "../common/constants.h"
+#include "../InputFunctions/sourceTerm.h"
+#include "../Interpolation/interpolation.h"
+#include "../Level/level.h"
+#include "../LinearAlgebra/matrix.h"
+#include "../LinearAlgebra/vector.h"
+#include "../LinearAlgebra/vector_operations.h"
 #include "../PolarGrid/polargrid.h"
 #include "../Utilities/cmdline.h"
-#include "../LinearAlgebra/vector.h"
-#include "../LinearAlgebra/matrix.h"
-#include "../LinearAlgebra/vector_operations.h"
-#include "../Interpolation/interpolation.h"
+#include "../common/constants.h"
 #include "test_cases.h"
 
-class GMGPolar {
+class GMGPolar
+{
 public:
     /* ------------------------ */
     /* GMGPoloar initialization */
     GMGPolar();
-    GMGPolar(std::unique_ptr<const DomainGeometry> domain_geometry, 
+    GMGPolar(std::unique_ptr<const DomainGeometry> domain_geometry,
              std::unique_ptr<const DensityProfileCoefficients> density_profile_coefficients,
              std::unique_ptr<const BoundaryConditions> boundary_conditions,
              std::unique_ptr<const SourceTerm> source_term);
@@ -52,7 +53,7 @@ public:
 
     /* Solve Properties */
     int numberOfIterations() const;
-    double meanResidualReductionFactor() const; 
+    double meanResidualReductionFactor() const;
     // Only when exact solution provided
     std::optional<double> exactErrorWeightedEuclidean() const;
     std::optional<double> exactErrorInfinity() const;
@@ -63,17 +64,17 @@ public:
     void R0(double R0);
     double Rmax() const;
     void Rmax(double Rmax);
-    
+
     int nr_exp() const;
     void nr_exp(int nr_exp);
     int ntheta_exp() const;
     void ntheta_exp(int ntheta_exp);
-    
+
     int anisotropic_factor() const;
     void anisotropic_factor(int anisotropic_factor);
     int divideBy2() const;
     void divideBy2(int divideBy2);
-    
+
     bool write_grid_file() const;
     void write_grid_file(bool write_grid_file);
     bool load_grid_file() const;
@@ -105,7 +106,7 @@ public:
     void maxLevels(int max_levels);
     MultigridCycleType multigridCycle() const;
     void multigridCycle(MultigridCycleType multigrid_cycle);
-    
+
     int preSmoothingSteps() const;
     void preSmoothingSteps(int pre_smoothing_steps);
     int postSmoothingSteps() const;
@@ -239,7 +240,7 @@ private:
     double mean_residual_reduction_factor_;
     bool converged(const double& current_residual_norm, const double& first_residual_norm);
 
-    std::vector<std::pair<double,double>> exact_errors_; // Only when exact solution provided
+    std::vector<std::pair<double, double>> exact_errors_; // Only when exact solution provided
     std::pair<double, double> computeExactError(Level& level, const Vector<double>& solution, Vector<double>& error);
 
     /* ---------------------------------------- */

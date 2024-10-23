@@ -1,6 +1,6 @@
 #include "../../../include/Residual/ResidualGive/residualGive.h"
 
-
+// clang-format off
 #define COMPUTE_JACOBIAN_ELEMENTS(domain_geometry, r, theta, sin_theta, cos_theta, coeff_alpha, \
     arr, att, art, detDF) \
 do { \
@@ -262,61 +262,64 @@ do { \
             + 0.25 * art * x[grid.index(i_r,i_theta-1)] ); /* Bottom Right */ \
     } \
 } while(0)
+// clang-format on
 
-
-
-void ResidualGive::applyCircleSection(const int i_r, Vector<double>& result, const Vector<double>& x, const double& factor) const 
-{    
+void ResidualGive::applyCircleSection(const int i_r, Vector<double>& result, const Vector<double>& x, const double& factor) const
+{
     const auto& sin_theta_cache = level_cache_.sin_theta();
     const auto& cos_theta_cache = level_cache_.cos_theta();
 
     const double r = grid_.radius(i_r);
 
     double coeff_beta;
-    if(level_cache_.cacheDensityProfileCoefficients()){
+    if (level_cache_.cacheDensityProfileCoefficients())
+    {
         coeff_beta = level_cache_.coeff_beta()[i_r];
     }
-    else{
+    else
+    {
         coeff_beta = density_profile_coefficients_.beta(r);
     }
 
     double coeff_alpha;
-    if(!level_cache_.cacheDomainGeometry()){
-        if(level_cache_.cacheDensityProfileCoefficients()){
+    if (!level_cache_.cacheDomainGeometry())
+    {
+        if (level_cache_.cacheDensityProfileCoefficients())
+        {
             coeff_alpha = level_cache_.coeff_alpha()[i_r];
         }
-        else{
+        else
+        {
             coeff_alpha = density_profile_coefficients_.alpha(r);
         }
     }
 
-    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++){
+    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++)
+    {
         const double theta = grid_.theta(i_theta);
         const double sin_theta = sin_theta_cache[i_theta];
         const double cos_theta = cos_theta_cache[i_theta];
 
         /* Compute arr, att, art, detDF value at the current node */
         double arr, att, art, detDF;
-        if(level_cache_.cacheDomainGeometry()){
+        if (level_cache_.cacheDomainGeometry())
+        {
             const int index = grid_.index(i_r, i_theta);
             arr = level_cache_.arr()[index];
             att = level_cache_.att()[index];
             art = level_cache_.art()[index];
             detDF = level_cache_.detDF()[index];
         }
-        else{
-            COMPUTE_JACOBIAN_ELEMENTS(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDF); 
+        else
+        {
+            COMPUTE_JACOBIAN_ELEMENTS(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDF);
         }
 
-        NODE_APPLY_A_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta,
-            grid_, DirBC_Interior_,
-            result, x, factor,
-            arr, att, art, detDF, coeff_beta);
+        NODE_APPLY_A_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, grid_, DirBC_Interior_, result, x, factor, arr, att, art, detDF, coeff_beta);
     }
 }
 
-
-void ResidualGive::applyRadialSection(const int i_theta, Vector<double>& result, const Vector<double>& x, const double& factor) const 
+void ResidualGive::applyRadialSection(const int i_theta, Vector<double>& result, const Vector<double>& x, const double& factor) const
 {
     const auto& sin_theta_cache = level_cache_.sin_theta();
     const auto& cos_theta_cache = level_cache_.cos_theta();
@@ -324,44 +327,49 @@ void ResidualGive::applyRadialSection(const int i_theta, Vector<double>& result,
     const double theta = grid_.theta(i_theta);
     const double sin_theta = sin_theta_cache[i_theta];
     const double cos_theta = cos_theta_cache[i_theta];
-    
-    for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++){
+
+    for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++)
+    {
         const double r = grid_.radius(i_r);
 
         double coeff_beta;
-        if(level_cache_.cacheDensityProfileCoefficients()){
+        if (level_cache_.cacheDensityProfileCoefficients())
+        {
             coeff_beta = level_cache_.coeff_beta()[i_r];
         }
-        else{
+        else
+        {
             coeff_beta = density_profile_coefficients_.beta(r);
         }
 
         double coeff_alpha;
-        if(!level_cache_.cacheDomainGeometry()){
-            if(level_cache_.cacheDensityProfileCoefficients()){
+        if (!level_cache_.cacheDomainGeometry())
+        {
+            if (level_cache_.cacheDensityProfileCoefficients())
+            {
                 coeff_alpha = level_cache_.coeff_alpha()[i_r];
             }
-            else{
+            else
+            {
                 coeff_alpha = density_profile_coefficients_.alpha(r);
             }
         }
 
         /* Compute arr, att, art, detDF value at the current node */
         double arr, att, art, detDF;
-        if(level_cache_.cacheDomainGeometry()){
+        if (level_cache_.cacheDomainGeometry())
+        {
             const int index = grid_.index(i_r, i_theta);
             arr = level_cache_.arr()[index];
             att = level_cache_.att()[index];
             art = level_cache_.art()[index];
             detDF = level_cache_.detDF()[index];
         }
-        else{
-            COMPUTE_JACOBIAN_ELEMENTS(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDF); 
+        else
+        {
+            COMPUTE_JACOBIAN_ELEMENTS(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDF);
         }
 
-        NODE_APPLY_A_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta,
-            grid_, DirBC_Interior_,
-            result, x, factor,
-            arr, att, art, detDF, coeff_beta);
+        NODE_APPLY_A_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, grid_, DirBC_Interior_, result, x, factor, arr, att, art, detDF, coeff_beta);
     }
 }

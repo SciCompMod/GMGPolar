@@ -1,11 +1,15 @@
 #include "../../include/PolarGrid/polargrid.h"
 
-void PolarGrid::RadialAnisotropicDivision(std::vector<double>& r_temp, const double& R0, const double& R, const int nr_exp,
-                                          const double& refinement_radius, const int anisotropic_factor) const
+void PolarGrid::RadialAnisotropicDivision(std::vector<double>& r_temp,
+                                          const double& R0,
+                                          const double& R,
+                                          const int nr_exp,
+                                          const double& refinement_radius,
+                                          const int anisotropic_factor) const
 {
     // Calculate the percentage of refinement_radius.
     const double percentage = (refinement_radius - R0) / (R - R0);
-    assert(percentage >= 0.0 && percentage =< 1.0);
+    assert(percentage >= 0.0 && percentage <= 1.0);
 
     // 1) uniform division with nr=2^dummy_lognr - 2^aniso
     // 2) remaining nodes are added by refining the part centered around 2/3 of r

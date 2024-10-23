@@ -1,5 +1,6 @@
 #include "../../../include/Residual/ResidualTake/residualTake.h"
 
+// clang-format off
 #define NODE_APPLY_RESIDUAL_TAKE( \
     i_r, i_theta, \
     grid, DirBC_Interior, \
@@ -108,31 +109,9 @@ do { \
         result[center] = rhs[center] - x[center]; \
     } \
 } while(0)
+// clang-format on
 
-
-void ResidualTake::applyCircleSection(const int i_r, Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const 
-{    
-    assert(level_cache_.cacheDensityProfileCoefficients());
-    assert(level_cache_.cacheDomainGeometry());
-
-    const auto& arr = level_cache_.arr();
-    const auto& att = level_cache_.att();
-    const auto& art = level_cache_.art();
-    const auto& detDF = level_cache_.detDF();
-    const auto& coeff_beta = level_cache_.coeff_beta();
-
-    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++){
-        NODE_APPLY_RESIDUAL_TAKE(
-            i_r, i_theta,
-            grid_, DirBC_Interior_,
-            result, rhs, x,
-            arr, att, art, detDF, coeff_beta
-        );
-    }
-}
-
-
-void ResidualTake::applyRadialSection(const int i_theta, Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const 
+void ResidualTake::applyCircleSection(const int i_r, Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -143,12 +122,25 @@ void ResidualTake::applyRadialSection(const int i_theta, Vector<double>& result,
     const auto& detDF = level_cache_.detDF();
     const auto& coeff_beta = level_cache_.coeff_beta();
 
-    for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++){
-        NODE_APPLY_RESIDUAL_TAKE(
-            i_r, i_theta,
-            grid_, DirBC_Interior_,
-            result, rhs, x,
-            arr, att, art, detDF, coeff_beta
-        );
+    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++)
+    {
+        NODE_APPLY_RESIDUAL_TAKE(i_r, i_theta, grid_, DirBC_Interior_, result, rhs, x, arr, att, art, detDF, coeff_beta);
+    }
+}
+
+void ResidualTake::applyRadialSection(const int i_theta, Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const
+{
+    assert(level_cache_.cacheDensityProfileCoefficients());
+    assert(level_cache_.cacheDomainGeometry());
+
+    const auto& arr = level_cache_.arr();
+    const auto& att = level_cache_.att();
+    const auto& art = level_cache_.art();
+    const auto& detDF = level_cache_.detDF();
+    const auto& coeff_beta = level_cache_.coeff_beta();
+
+    for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++)
+    {
+        NODE_APPLY_RESIDUAL_TAKE(i_r, i_theta, grid_, DirBC_Interior_, result, rhs, x, arr, att, art, detDF, coeff_beta);
     }
 }

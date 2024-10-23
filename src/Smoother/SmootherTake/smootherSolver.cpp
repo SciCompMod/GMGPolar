@@ -1,6 +1,6 @@
 #include "../../../include/Smoother/SmootherTake/smootherTake.h"
 
-
+// clang-format off
 #define NODE_APPLY_ASC_ORTHO_CIRCLE_TAKE(i_r, i_theta, \
     grid, DirBC_Interior, smoother_color, x, rhs, temp, \
     arr, att, art, detDF, coeff_beta) \
@@ -85,10 +85,6 @@ do { \
         } \
     } \
 } while(0) \
-
-
-
-
 
 
 #define NODE_APPLY_ASC_ORTHO_RADIAL_TAKE(i_r, i_theta, \
@@ -211,9 +207,9 @@ do { \
         temp[center] = rhs[center]; \
     } \
 } while(0) \
+// clang-format on
 
-
-
+// clang-format off
 void SmootherTake::applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color, const Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp){
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles());
 

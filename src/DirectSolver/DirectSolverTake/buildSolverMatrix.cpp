@@ -1,6 +1,6 @@
 #include "../../../include/DirectSolver/DirectSolverTake/directSolverTake.h"
 
-
+// clang-format off
 #define NODE_BUILD_SOLVER_MATRIX_TAKE(i_r, i_theta, \
     grid, DirBC_Interior, solver_matrix, \
     arr, att, art, detDF, coeff_beta) \
@@ -110,7 +110,9 @@ do { \
         /* ------------------------------------------------ */ \
         if(DirBC_Interior){ \
             const int center_nz_index = getSolverMatrixIndex(i_r, i_theta); \
+            \
             int nz_index; /* Current non_zero index in solver_matrix */ \
+            \
             const int center_index = grid.index(i_r, i_theta); \
             \
             /* Fill matrix row of (i,j) */ \
@@ -432,8 +434,10 @@ do { \
     /* Node on the outer dirichlet boundary */ \
     /* ------------------------------------ */ \
     } else if (i_r == grid.nr() - 1) { \
-        int nz_index; /* Current non_zero index in solver_matrix */ \
         const int center_nz_index = getSolverMatrixIndex(i_r, i_theta); \
+        \
+        int nz_index; /* Current non_zero index in solver_matrix */ \
+        \
         const int center_index = grid.index(i_r, i_theta); \
         \
         /* Fill matrix row of (i,j) */ \
@@ -448,7 +452,8 @@ do { \
 } while(0)
 
 
-void DirectSolverTake::buildSolverMatrixCircleSection(const int i_r, SparseMatrix<double>& solver_matrix){
+void DirectSolverTake::buildSolverMatrixCircleSection(const int i_r, SparseMatrix<double>& solver_matrix)
+{
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
 
@@ -458,15 +463,16 @@ void DirectSolverTake::buildSolverMatrixCircleSection(const int i_r, SparseMatri
     const auto& detDF = level_cache_.detDF();
     const auto& coeff_beta = level_cache_.coeff_beta();
 
-    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++){
+    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++)
+    {
         // Build solver matrix at the current node
-        NODE_BUILD_SOLVER_MATRIX_TAKE(i_r, i_theta,
-            grid_, DirBC_Interior_, solver_matrix,
-            arr, att, art, detDF, coeff_beta);
+        NODE_BUILD_SOLVER_MATRIX_TAKE(i_r, i_theta, grid_, DirBC_Interior_, solver_matrix, arr, att, art, detDF, coeff_beta);
     }
 }
 
-void DirectSolverTake::buildSolverMatrixRadialSection(const int i_theta, SparseMatrix<double>& solver_matrix){
+
+void DirectSolverTake::buildSolverMatrixRadialSection(const int i_theta, SparseMatrix<double>& solver_matrix)
+{
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
 
@@ -476,14 +482,12 @@ void DirectSolverTake::buildSolverMatrixRadialSection(const int i_theta, SparseM
     const auto& detDF = level_cache_.detDF();
     const auto& coeff_beta = level_cache_.coeff_beta();
 
-    for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++){
+    for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++)
+    {
         // Build solver matrix at the current node
-        NODE_BUILD_SOLVER_MATRIX_TAKE(i_r, i_theta,
-            grid_, DirBC_Interior_, solver_matrix,
-            arr, att, art, detDF, coeff_beta);
+        NODE_BUILD_SOLVER_MATRIX_TAKE(i_r, i_theta, grid_, DirBC_Interior_, solver_matrix, arr, att, art, detDF, coeff_beta);
     }
 }
-
 
 /* ------------------------------------------------------------------------ */
 /* If the indexing is not smoother-based, please adjust the access patterns */
@@ -498,27 +502,33 @@ SparseMatrix<double> DirectSolverTake::buildSolverMatrix()
     SparseMatrix<double> solver_matrix(n, n, nnz);
     solver_matrix.is_symmetric(false);
 
-    if(omp_get_max_threads() == 1) {
+    if (omp_get_max_threads() == 1)
+    {
         /* Single-threaded execution */
-        for(int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
+        for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++)
+        {
             buildSolverMatrixCircleSection(i_r, solver_matrix);
         }
-        for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
+        for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++)
+        {
             buildSolverMatrixRadialSection(i_theta, solver_matrix);
         }
     }
-    else{
+    else
+    {
         /* Multi-threaded execution */
         #pragma omp parallel
         {
             /* Circle Section */
             #pragma omp for nowait
-            for(int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
+            for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++)
+            {
                 buildSolverMatrixCircleSection(i_r, solver_matrix);
             }
             /* Radial Section */
             #pragma omp for nowait
-            for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
+            for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++)
+            {
                 buildSolverMatrixRadialSection(i_theta, solver_matrix);
             }
         }
@@ -527,7 +537,8 @@ SparseMatrix<double> DirectSolverTake::buildSolverMatrix()
     /* Mumps: In the case of symmetric matrices, only half of the matrix should be provided. */
     const bool construct_symmetric = true;
 
-    if(!construct_symmetric){
+    if (!construct_symmetric)
+    {
         return solver_matrix;
     }
 
@@ -537,10 +548,12 @@ SparseMatrix<double> DirectSolverTake::buildSolverMatrix()
     symmetric_solver_matrix.is_symmetric(true);
 
     int current_nz = 0;
-    for (int nz_index = 0; nz_index < nnz; nz_index++) {
+    for (int nz_index = 0; nz_index < nnz; nz_index++)
+    {
         const int row = solver_matrix.row_index(nz_index);
         const int col = solver_matrix.col_index(nz_index);
-        if (row <= col) {
+        if (row <= col)
+        {
             symmetric_solver_matrix.row_index(current_nz) = row;
             symmetric_solver_matrix.col_index(current_nz) = col;
             symmetric_solver_matrix.value(current_nz) = std::move(solver_matrix.value(nz_index));

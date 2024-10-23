@@ -4,32 +4,34 @@ class LevelCache;
 class Level;
 
 #include <chrono>
-#include <vector>
 #include <iostream>
+#include <vector>
 
-#include "mpi.h" 
-#include "dmumps_c.h"   
+#include "dmumps_c.h"
+#include "mpi.h"
 
-#include "../PolarGrid/polargrid.h"
-#include "../Level/level.h"
 #include "../InputFunctions/domainGeometry.h"
-#include "../LinearAlgebra/vector.h"
+#include "../Level/level.h"
 #include "../LinearAlgebra/matrix.h"
+#include "../LinearAlgebra/vector.h"
 #include "../LinearAlgebra/vector_operations.h"
-#include "../common/constants.h"
+#include "../PolarGrid/polargrid.h"
 #include "../Stencil/stencil.h"
+#include "../common/constants.h"
 
-class DirectSolver {
+class DirectSolver
+{
 public:
-    explicit DirectSolver(
-        const PolarGrid& grid, const LevelCache& level_cache, 
-        const DomainGeometry& domain_geometry, const DensityProfileCoefficients& density_profile_coefficients,
-        bool DirBC_Interior, int num_omp_threads
-    );
+    explicit DirectSolver(const PolarGrid& grid,
+                          const LevelCache& level_cache,
+                          const DomainGeometry& domain_geometry,
+                          const DensityProfileCoefficients& density_profile_coefficients,
+                          bool DirBC_Interior,
+                          int num_omp_threads);
     virtual ~DirectSolver() = default;
 
     virtual void solveInPlace(Vector<double>& solution) = 0;
-    
+
 protected:
     const PolarGrid& grid_;
     const LevelCache& level_cache_;

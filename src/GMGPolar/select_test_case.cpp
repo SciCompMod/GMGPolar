@@ -1,9 +1,11 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
-void GMGPolar::selectTestCase(){
+void GMGPolar::selectTestCase()
+{
     /* --------------- */
     /* Domain Geometry */
-    switch (geometry_) {
+    switch (geometry_)
+    {
         case GeometryType::CIRCULAR:
             domain_geometry_ = std::make_unique<CircularGeometry>(Rmax_);
             break;
@@ -26,13 +28,15 @@ void GMGPolar::selectTestCase(){
 
     /* ---------------------------- */
     /* Density Profile Coefficients */
-    switch (alpha_) {
+    switch (alpha_)
+    {
         case AlphaCoeff::POISSON:
             density_profile_coefficients_ = std::make_unique<PoissonCoefficients>(Rmax_, alpha_jump_);
             break;
 
         case AlphaCoeff::SONNENDRUCKER:
-            switch (beta_) {
+            switch (beta_)
+            {
                 case BetaCoeff::ZERO:
                     density_profile_coefficients_ = std::make_unique<SonnendruckerCoefficients>(Rmax_, alpha_jump_);
                     break;
@@ -45,7 +49,8 @@ void GMGPolar::selectTestCase(){
             break;
 
         case AlphaCoeff::ZONI:
-            switch (beta_) {
+            switch (beta_)
+            {
                 case BetaCoeff::ZERO:
                     density_profile_coefficients_ = std::make_unique<ZoniCoefficients>(Rmax_, alpha_jump_);
                     break;
@@ -58,7 +63,8 @@ void GMGPolar::selectTestCase(){
             break;
 
         case AlphaCoeff::ZONI_SHIFTED:
-            switch (beta_) {
+            switch (beta_)
+            {
                 case BetaCoeff::ZERO:
                     density_profile_coefficients_ = std::make_unique<ZoniShiftedCoefficients>(Rmax_, alpha_jump_);
                     break;
@@ -76,9 +82,11 @@ void GMGPolar::selectTestCase(){
 
     /* ------------------------------------ */
     /* Exact Solution & Boundary Conditions */
-    switch (problem_) {
+    switch (problem_)
+    {
         case ProblemType::CARTESIAN_R2:
-            switch (geometry_) {
+            switch (geometry_)
+            {
                 case GeometryType::CIRCULAR:
                     exact_solution_ = std::make_unique<CartesianR2_CircularGeometry>(Rmax_);
                     boundary_conditions_ = std::make_unique<CartesianR2_Boundary_CircularGeometry>(Rmax_);
@@ -97,7 +105,8 @@ void GMGPolar::selectTestCase(){
             break;
 
         case ProblemType::CARTESIAN_R6:
-            switch (geometry_) {
+            switch (geometry_)
+            {
                 case GeometryType::CIRCULAR:
                     exact_solution_ = std::make_unique<CartesianR6_CircularGeometry>(Rmax_);
                     boundary_conditions_ = std::make_unique<CartesianR6_Boundary_CircularGeometry>(Rmax_);
@@ -116,7 +125,8 @@ void GMGPolar::selectTestCase(){
             break;
 
         case ProblemType::POLAR_R6:
-            switch (geometry_) {
+            switch (geometry_)
+            {
                 case GeometryType::CIRCULAR:
                     exact_solution_ = std::make_unique<PolarR6_CircularGeometry>(Rmax_);
                     boundary_conditions_ = std::make_unique<PolarR6_Boundary_CircularGeometry>(Rmax_);
@@ -137,9 +147,10 @@ void GMGPolar::selectTestCase(){
                     throw std::runtime_error("Invalid geometry for configuration.\n");
             }
             break;
-            
+
         case ProblemType::REFINED_RADIUS:
-            switch (geometry_) {
+            switch (geometry_)
+            {
                 case GeometryType::CIRCULAR:
                     exact_solution_ = std::make_unique<Refined_CircularGeometry>(Rmax_);
                     boundary_conditions_ = std::make_unique<Refined_Boundary_CircularGeometry>(Rmax_);
@@ -167,18 +178,22 @@ void GMGPolar::selectTestCase(){
 
     /* ------------------- */
     /* Source Term (rhs_f) */
-    switch (problem_) {
+    switch (problem_)
+    {
         case ProblemType::CARTESIAN_R2:
 
-            switch (geometry_) {
+            switch (geometry_)
+            {
                 case GeometryType::CIRCULAR:
 
-                    switch (alpha_) {
+                    switch (alpha_)
+                    {
                         case AlphaCoeff::POISSON:
                             source_term_ = std::make_unique<CartesianR2_Poisson_CircularGeometry>(Rmax_);
                             break;
                         case AlphaCoeff::SONNENDRUCKER:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<CartesianR2_Sonnendrucker_CircularGeometry>(Rmax_);
                                     break;
@@ -187,11 +202,11 @@ void GMGPolar::selectTestCase(){
                                     break;
                                 default:
                                     throw std::runtime_error("Invalid beta.\n");
-                                
                             }
                             break;
                         case AlphaCoeff::ZONI:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<CartesianR2_Zoni_CircularGeometry>(Rmax_);
                                     break;
@@ -203,7 +218,8 @@ void GMGPolar::selectTestCase(){
                             }
                             break;
                         case AlphaCoeff::ZONI_SHIFTED:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<CartesianR2_ZoniShifted_CircularGeometry>(Rmax_);
                                     break;
@@ -221,12 +237,14 @@ void GMGPolar::selectTestCase(){
 
                 case GeometryType::SHAFRANOV:
 
-                    switch (alpha_) {
+                    switch (alpha_)
+                    {
                         case AlphaCoeff::POISSON:
                             source_term_ = std::make_unique<CartesianR2_Poisson_ShafranovGeometry>(Rmax_, kappa_eps_, delta_e_);
                             break;
                         case AlphaCoeff::SONNENDRUCKER:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<CartesianR2_Sonnendrucker_ShafranovGeometry>(Rmax_, kappa_eps_, delta_e_);
                                     break;
@@ -238,7 +256,8 @@ void GMGPolar::selectTestCase(){
                             }
                             break;
                         case AlphaCoeff::ZONI:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<CartesianR2_Zoni_ShafranovGeometry>(Rmax_, kappa_eps_, delta_e_);
                                     break;
@@ -250,7 +269,8 @@ void GMGPolar::selectTestCase(){
                             }
                             break;
                         case AlphaCoeff::ZONI_SHIFTED:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<CartesianR2_ZoniShifted_ShafranovGeometry>(Rmax_, kappa_eps_, delta_e_);
                                     break;
@@ -268,12 +288,14 @@ void GMGPolar::selectTestCase(){
 
                 case GeometryType::CZARNY:
 
-                    switch (alpha_) {
+                    switch (alpha_)
+                    {
                         case AlphaCoeff::POISSON:
                             source_term_ = std::make_unique<CartesianR2_Poisson_CzarnyGeometry>(Rmax_, kappa_eps_, delta_e_);
                             break;
                         case AlphaCoeff::SONNENDRUCKER:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<CartesianR2_Sonnendrucker_CzarnyGeometry>(Rmax_, kappa_eps_, delta_e_);
                                     break;
@@ -285,7 +307,8 @@ void GMGPolar::selectTestCase(){
                             }
                             break;
                         case AlphaCoeff::ZONI:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<CartesianR2_Zoni_CzarnyGeometry>(Rmax_, kappa_eps_, delta_e_);
                                     break;
@@ -297,7 +320,8 @@ void GMGPolar::selectTestCase(){
                             }
                             break;
                         case AlphaCoeff::ZONI_SHIFTED:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<CartesianR2_ZoniShifted_CzarnyGeometry>(Rmax_, kappa_eps_, delta_e_);
                                     break;
@@ -320,15 +344,18 @@ void GMGPolar::selectTestCase(){
 
         case ProblemType::CARTESIAN_R6:
 
-            switch (geometry_) {
+            switch (geometry_)
+            {
                 case GeometryType::CIRCULAR:
 
-                    switch (alpha_) {
+                    switch (alpha_)
+                    {
                         case AlphaCoeff::POISSON:
                             source_term_ = std::make_unique<CartesianR6_Poisson_CircularGeometry>(Rmax_);
                             break;
                         case AlphaCoeff::SONNENDRUCKER:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<CartesianR6_Sonnendrucker_CircularGeometry>(Rmax_);
                                     break;
@@ -340,7 +367,8 @@ void GMGPolar::selectTestCase(){
                             }
                             break;
                         case AlphaCoeff::ZONI:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<CartesianR6_Zoni_CircularGeometry>(Rmax_);
                                     break;
@@ -352,7 +380,8 @@ void GMGPolar::selectTestCase(){
                             }
                             break;
                         case AlphaCoeff::ZONI_SHIFTED:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<CartesianR6_ZoniShifted_CircularGeometry>(Rmax_);
                                     break;
@@ -370,12 +399,14 @@ void GMGPolar::selectTestCase(){
 
                 case GeometryType::SHAFRANOV:
 
-                    switch (alpha_) {
+                    switch (alpha_)
+                    {
                         case AlphaCoeff::POISSON:
                             source_term_ = std::make_unique<CartesianR6_Poisson_ShafranovGeometry>(Rmax_, kappa_eps_, delta_e_);
                             break;
                         case AlphaCoeff::SONNENDRUCKER:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<CartesianR6_Sonnendrucker_ShafranovGeometry>(Rmax_, kappa_eps_, delta_e_);
                                     break;
@@ -387,7 +418,8 @@ void GMGPolar::selectTestCase(){
                             }
                             break;
                         case AlphaCoeff::ZONI:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<CartesianR6_Zoni_ShafranovGeometry>(Rmax_, kappa_eps_, delta_e_);
                                     break;
@@ -399,7 +431,8 @@ void GMGPolar::selectTestCase(){
                             }
                             break;
                         case AlphaCoeff::ZONI_SHIFTED:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<CartesianR6_ZoniShifted_ShafranovGeometry>(Rmax_, kappa_eps_, delta_e_);
                                     break;
@@ -417,12 +450,14 @@ void GMGPolar::selectTestCase(){
 
                 case GeometryType::CZARNY:
 
-                    switch (alpha_) {
+                    switch (alpha_)
+                    {
                         case AlphaCoeff::POISSON:
                             source_term_ = std::make_unique<CartesianR6_Poisson_CzarnyGeometry>(Rmax_, kappa_eps_, delta_e_);
                             break;
                         case AlphaCoeff::SONNENDRUCKER:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<CartesianR6_Sonnendrucker_CzarnyGeometry>(Rmax_, kappa_eps_, delta_e_);
                                     break;
@@ -434,7 +469,8 @@ void GMGPolar::selectTestCase(){
                             }
                             break;
                         case AlphaCoeff::ZONI:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<CartesianR6_Zoni_CzarnyGeometry>(Rmax_, kappa_eps_, delta_e_);
                                     break;
@@ -446,7 +482,8 @@ void GMGPolar::selectTestCase(){
                             }
                             break;
                         case AlphaCoeff::ZONI_SHIFTED:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<CartesianR6_ZoniShifted_CzarnyGeometry>(Rmax_, kappa_eps_, delta_e_);
                                     break;
@@ -469,15 +506,18 @@ void GMGPolar::selectTestCase(){
 
         case ProblemType::POLAR_R6:
 
-            switch (geometry_) {
+            switch (geometry_)
+            {
                 case GeometryType::CIRCULAR:
 
-                    switch (alpha_) {
+                    switch (alpha_)
+                    {
                         case AlphaCoeff::POISSON:
                             source_term_ = std::make_unique<PolarR6_Poisson_CircularGeometry>(Rmax_);
                             break;
                         case AlphaCoeff::SONNENDRUCKER:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<PolarR6_Sonnendrucker_CircularGeometry>(Rmax_);
                                     break;
@@ -489,7 +529,8 @@ void GMGPolar::selectTestCase(){
                             }
                             break;
                         case AlphaCoeff::ZONI:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<PolarR6_Zoni_CircularGeometry>(Rmax_);
                                     break;
@@ -501,7 +542,8 @@ void GMGPolar::selectTestCase(){
                             }
                             break;
                         case AlphaCoeff::ZONI_SHIFTED:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<PolarR6_ZoniShifted_CircularGeometry>(Rmax_);
                                     break;
@@ -519,12 +561,14 @@ void GMGPolar::selectTestCase(){
 
                 case GeometryType::SHAFRANOV:
 
-                    switch (alpha_) {
+                    switch (alpha_)
+                    {
                         case AlphaCoeff::POISSON:
                             source_term_ = std::make_unique<PolarR6_Poisson_ShafranovGeometry>(Rmax_, kappa_eps_, delta_e_);
                             break;
                         case AlphaCoeff::SONNENDRUCKER:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<PolarR6_Sonnendrucker_ShafranovGeometry>(Rmax_, kappa_eps_, delta_e_);
                                     break;
@@ -536,7 +580,8 @@ void GMGPolar::selectTestCase(){
                             }
                             break;
                         case AlphaCoeff::ZONI:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<PolarR6_Zoni_ShafranovGeometry>(Rmax_, kappa_eps_, delta_e_);
                                     break;
@@ -548,7 +593,8 @@ void GMGPolar::selectTestCase(){
                             }
                             break;
                         case AlphaCoeff::ZONI_SHIFTED:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<PolarR6_ZoniShifted_ShafranovGeometry>(Rmax_, kappa_eps_, delta_e_);
                                     break;
@@ -566,12 +612,14 @@ void GMGPolar::selectTestCase(){
 
                 case GeometryType::CZARNY:
 
-                    switch (alpha_) {
+                    switch (alpha_)
+                    {
                         case AlphaCoeff::POISSON:
                             source_term_ = std::make_unique<PolarR6_Poisson_CzarnyGeometry>(Rmax_, kappa_eps_, delta_e_);
                             break;
                         case AlphaCoeff::SONNENDRUCKER:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<PolarR6_Sonnendrucker_CzarnyGeometry>(Rmax_, kappa_eps_, delta_e_);
                                     break;
@@ -583,7 +631,8 @@ void GMGPolar::selectTestCase(){
                             }
                             break;
                         case AlphaCoeff::ZONI:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<PolarR6_Zoni_CzarnyGeometry>(Rmax_, kappa_eps_, delta_e_);
                                     break;
@@ -595,7 +644,8 @@ void GMGPolar::selectTestCase(){
                             }
                             break;
                         case AlphaCoeff::ZONI_SHIFTED:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ZERO:
                                     source_term_ = std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(Rmax_, kappa_eps_, delta_e_);
                                     break;
@@ -612,9 +662,11 @@ void GMGPolar::selectTestCase(){
                     break;
 
                 case GeometryType::CULHAM:
-                    switch (alpha_) {
+                    switch (alpha_)
+                    {
                         case AlphaCoeff::ZONI_SHIFTED:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ALPHA_INVERSE:
                                     source_term_ = std::make_unique<PolarR6_ZoniShiftedGyro_CulhamGeometry>(Rmax_);
                                     break;
@@ -632,15 +684,17 @@ void GMGPolar::selectTestCase(){
             }
             break;
 
-
         case ProblemType::REFINED_RADIUS:
 
-            switch (geometry_) {
+            switch (geometry_)
+            {
                 case GeometryType::CIRCULAR:
 
-                    switch (alpha_) {
+                    switch (alpha_)
+                    {
                         case AlphaCoeff::ZONI_SHIFTED:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ALPHA_INVERSE:
                                     source_term_ = std::make_unique<Refined_ZoniShiftedGyro_CircularGeometry>(Rmax_);
                                     break;
@@ -655,9 +709,11 @@ void GMGPolar::selectTestCase(){
 
                 case GeometryType::SHAFRANOV:
 
-                    switch (alpha_) {
+                    switch (alpha_)
+                    {
                         case AlphaCoeff::ZONI_SHIFTED:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ALPHA_INVERSE:
                                     source_term_ = std::make_unique<Refined_ZoniShiftedGyro_ShafranovGeometry>(Rmax_, kappa_eps_, delta_e_);
                                     break;
@@ -672,9 +728,11 @@ void GMGPolar::selectTestCase(){
 
                 case GeometryType::CZARNY:
 
-                    switch (alpha_) {
+                    switch (alpha_)
+                    {
                         case AlphaCoeff::ZONI_SHIFTED:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ALPHA_INVERSE:
                                     source_term_ = std::make_unique<Refined_ZoniShiftedGyro_CzarnyGeometry>(Rmax_, kappa_eps_, delta_e_);
                                     break;
@@ -683,15 +741,17 @@ void GMGPolar::selectTestCase(){
                             }
                             break;
                         default:
-                            throw std::runtime_error("Invalid alpha for configuration.\n"); 
+                            throw std::runtime_error("Invalid alpha for configuration.\n");
                     }
                     break;
 
                 case GeometryType::CULHAM:
 
-                    switch (alpha_) {
+                    switch (alpha_)
+                    {
                         case AlphaCoeff::ZONI_SHIFTED:
-                            switch (beta_) {
+                            switch (beta_)
+                            {
                                 case BetaCoeff::ALPHA_INVERSE:
                                     source_term_ = std::make_unique<Refined_ZoniShiftedGyro_CulhamGeometry>(Rmax_);
                                     break;
@@ -700,7 +760,7 @@ void GMGPolar::selectTestCase(){
                             }
                             break;
                         default:
-                            throw std::runtime_error("Invalid alpha for configuration.\n"); 
+                            throw std::runtime_error("Invalid alpha for configuration.\n");
                     }
                     break;
 

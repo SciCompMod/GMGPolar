@@ -4,6 +4,7 @@
 /* Boundary Symmetry Shift */
 /* ----------------------- */
 
+// clang-format off
 void DirectSolverTake::applySymmetryShiftInnerBoundary(Vector<double>& x) const {
     assert(DirBC_Interior_);
 
@@ -86,7 +87,7 @@ void DirectSolverTake::applySymmetryShift(Vector<double>& x) const {
 
     if(num_omp_threads_ == 1) {
         /* Single-threaded execution */
-        if(DirBC_Interior_){
+        if(DirBC_Interior_) {
             applySymmetryShiftInnerBoundary(x);
         }
         applySymmetryShiftOuterBoundary(x);

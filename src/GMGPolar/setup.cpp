@@ -1,5 +1,6 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
+// clang-format off
 void GMGPolar::setup() {
     auto start_setup = std::chrono::high_resolution_clock::now();
 

@@ -1,7 +1,7 @@
 #include "../../../include/ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.h"
 
-
-// The current position is marked with a ~ symbol.
+// clang-format off
+/* The current position is marked with a ~ symbol. */
 #define NODE_APPLY_ASC_ORTHO_CIRCLE_TAKE(i_r, i_theta, \
     grid, DirBC_Interior, smoother_color, x, rhs, temp, \
     arr, att, art, detDF, coeff_beta) \
@@ -585,5 +585,4 @@ void ExtrapolatedSmootherTake::extrapolatedSmoothingInPlace(Vector<double>& x, c
             solveRadialSection(i_theta, x, temp, radial_solver_storage);
         } /* Implicit barrier */
     }
-
 }

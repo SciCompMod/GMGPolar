@@ -1,5 +1,6 @@
 #include "../../../include/ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h"
 
+// clang-format off
 #define COMPUTE_JACOBIAN_ELEMENTS(domain_geometry, r, theta, sin_theta, cos_theta, coeff_alpha, \
     arr, att, art, detDF) \
 do { \
@@ -1242,6 +1243,7 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingInPlaceForLoop(Vector<double
 /* Parallelization Version 2: Task Loop */
 /* ------------------------------------ */
 
+/* UNUSED! */
 void ExtrapolatedSmootherGive::extrapolatedSmoothingInPlaceTaskLoop(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
@@ -1510,6 +1512,7 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingInPlaceTaskLoop(Vector<doubl
 /* Parallelization Version 2: Task Dependencies */
 /* -------------------------------------------- */
 
+/* UNUSED! */
 void ExtrapolatedSmootherGive::extrapolatedSmoothingInPlaceTaskDependencies(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());

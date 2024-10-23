@@ -2,13 +2,15 @@
 
 #include "../directSolver.h"
 
-class DirectSolverGive : public DirectSolver {
+class DirectSolverGive : public DirectSolver
+{
 public:
-    explicit DirectSolverGive(
-        const PolarGrid& grid, const LevelCache& level_cache, 
-        const DomainGeometry& domain_geometry, const DensityProfileCoefficients& density_profile_coefficients,
-        bool DirBC_Interior, int num_omp_threads
-    );
+    explicit DirectSolverGive(const PolarGrid& grid,
+                              const LevelCache& level_cache,
+                              const DomainGeometry& domain_geometry,
+                              const DensityProfileCoefficients& density_profile_coefficients,
+                              bool DirBC_Interior,
+                              int num_omp_threads);
     ~DirectSolverGive() override;
 
     void solveInPlace(Vector<double>& solution) override;
@@ -18,6 +20,7 @@ private:
     SparseMatrix<double> solver_matrix_;
     DMUMPS_STRUC_C mumps_solver_;
 
+    // clang-format off
     const Stencil stencil_interior_ = 
         {7, 4, 8,
         1, 0, 2,
@@ -38,12 +41,13 @@ private:
         {5, 3, -1,
         1, 0, -1,
         4, 2, -1};
+    // clang-format on
 
     // Constructs a symmetric solver matrix.
     SparseMatrix<double> buildSolverMatrix();
     void buildSolverMatrixCircleSection(const int i_r, SparseMatrix<double>& solver_matrix);
     void buildSolverMatrixRadialSection(const int i_theta, SparseMatrix<double>& solver_matrix);
-    
+
     // Initializes the MUMPS solver with the specified matrix.
     void initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const SparseMatrix<double>& solver_matrix);
 
@@ -53,7 +57,7 @@ private:
     void applySymmetryShift(Vector<double>& rhs) const;
     void applySymmetryShiftInnerBoundary(Vector<double>& x) const;
     void applySymmetryShiftOuterBoundary(Vector<double>& x) const;
-    
+
     // Solves the adjusted system symmetric(matrixA) * solution = rhs using the MUMPS solver.
     void solveWithMumps(Vector<double>& solution);
 

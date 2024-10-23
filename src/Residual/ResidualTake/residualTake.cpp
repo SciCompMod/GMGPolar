@@ -1,6 +1,6 @@
 #include "../../../include/Residual/ResidualTake/residualTake.h"
 
-
+// clang-format off
 ResidualTake::ResidualTake(
     const PolarGrid& grid, const LevelCache& level_cache, 
     const DomainGeometry& domain_geometry, const DensityProfileCoefficients& density_profile_coefficients,

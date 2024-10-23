@@ -1,6 +1,7 @@
 #include "../../../include/Smoother/SmootherGive/smootherGive.h"
 
 /* arr, att, art and detDF get computed */
+// clang-format off
 #define COMPUTE_JACOBIAN_ELEMENTS(domain_geometry, r, theta, sin_theta, cos_theta, coeff_alpha, \
     arr, att, art, detDF) \
 do { \
@@ -638,8 +639,9 @@ do { \
         else if(row == 0 && column == center_matrix.columns()-1) center_matrix.cyclic_corner_element() += value; \
     } \
 } while(0)
+// clang-format on
 
-
+// clang-format off
 void SmootherGive::buildAscCircleSection(const int i_r) {
     const auto& sin_theta_cache = level_cache_.sin_theta();
     const auto& cos_theta_cache = level_cache_.cos_theta();

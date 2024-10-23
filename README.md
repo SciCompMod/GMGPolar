@@ -74,7 +74,7 @@ MUMPS relies on other packages like `Metis` for matrix ordering and `Likwid` for
 
 ## Step 4: Configure CMake for GMGPolar
 
-After installing MUMPS and other dependencies, ensure that the paths to the libraries are correctly set in the CMakeLists.txt and tests/CMakeLists.txt files.
+After installing MUMPS and other dependencies, ensure that the paths to the libraries are correctly set in the CMakeLists.txt file.
 
 ## Final Step: Compiling the GMGPolar Solver
 

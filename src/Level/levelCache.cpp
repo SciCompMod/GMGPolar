@@ -1,5 +1,6 @@
 #include "../../include/Level/level.h"
 
+// clang-format off
 LevelCache::LevelCache(
     const PolarGrid& grid, 
     const DensityProfileCoefficients& density_profile_coefficients, const DomainGeometry& domain_geometry,

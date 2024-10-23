@@ -1,11 +1,13 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
 /* Specifies whether user input is required */
-enum {
+enum
+{
     OPTIONAL = 0,
     REQUIRED = 1
 };
 
+// clang-format off
 void GMGPolar::parseGrid() {
     R0_ = parser_.get<double>("R0");
     Rmax_ = parser_.get<double>("Rmax");
@@ -141,13 +143,14 @@ void GMGPolar::parseGeneral() {
     cache_domain_geometry_ = parser_.get<int>("cacheDomainGeometry") != 0;
 }
 
+
 void GMGPolar::initializeGrid() {
     parser_.add<double>(
-        "R0", 'r', "Interior radius of the disk", 
+        "R0", 'r', "Interior radius of the disk.", 
         OPTIONAL, 1e-5
     );
     parser_.add<double>(
-        "Rmax", 'R', "Exterior radius of the disk", 
+        "Rmax", 'R', "Exterior radius of the disk.", 
         OPTIONAL, 1.3
     );
     parser_.add<int>(
@@ -157,17 +160,17 @@ void GMGPolar::initializeGrid() {
     );
     parser_.add<int>(
         "ntheta_exp", '\0', 
-        "Number of nodes (exponents) in the angular direction. Default: ntheta_exp = nr_exp + 1.", 
+        "Number of nodes (exponents) in the angular direction.", 
         OPTIONAL, -1
     );
     parser_.add<int>(
         "anisotropic_factor", '\0', 
-        "Defines anisotropic discretization in r-direction.",
+        "Defines anisotropic discretization in the radial direction.",
         OPTIONAL, 0
     );
     parser_.add<int>(
         "divideBy2", '\0', 
-        "Refines the grid globally divideBy2 times.",
+        "Refines the grid globally `divideBy2` times.",
         OPTIONAL, 0
     );
     parser_.add<int>(
@@ -179,47 +182,54 @@ void GMGPolar::initializeGrid() {
         OPTIONAL, 0, cmdline::oneof(0,1)
     );
     parser_.add<std::string>(
-        "file_grid_radii", '\0', "Path to the file containing radii values for grid divisions in the r-direction.",
+        "file_grid_radii", '\0', "Path to the file containing radii values for grid divisions in the radial direction.",
         OPTIONAL, ""
     );
     parser_.add<std::string>(
-        "file_grid_angles", '\0', "Path to the file containing theta values for grid divisions in the theta-direction.",
+        "file_grid_angles", '\0', "Path to the file containing theta values for grid divisions in the angular direction.",
         OPTIONAL, ""
     );
     parser_.add<int>(
-        "DirBC_Interior", '\0', "Defines the boundary condition on the interior circle. Across-origin(0), Dirichlet-boundary(1).",
+        "DirBC_Interior", '\0', "Defines the boundary condition on the interior circle: Across-origin (0), Dirichlet boundary (1).",
         OPTIONAL, 0, cmdline::oneof(0,1)
     );
 }
 
 void GMGPolar::initializeGeometry() {
     parser_.add<int>(
-        "geometry", '\0', "Defines the form of the considered cross-section. Circular (0), Shafranov (1), Czarny (2), Culham (3)",
+        "geometry", '\0', 
+        "Defines the shape of the cross-section: Circular (0), Shafranov (1), Czarny (2), Culham (3).",
         OPTIONAL, 0, cmdline::oneof(0,1,2,3)
     );
     parser_.add<double>(
-        "alpha_jump", '\0', "Defines the radius of rapid decay of alpha.",
+        "alpha_jump", '\0', 
+        "Defines the radius of rapid decay of the density profile alpha.",
         OPTIONAL, 0.0
     );
     parser_.add<double>(
-        "kappa_eps", 'k', "Defines the Elongation of the geometry.",
+        "kappa_eps", 'k', 
+        "Defines the elongation of the geometry.",
         OPTIONAL, 0.0
     );
     parser_.add<double>(
-        "delta_e", 'd', "Defines the outward radial displacement of the centre of flux.",
+        "delta_e", 'd', 
+        "Defines the outward radial displacement of the center of flux.",
         OPTIONAL, 0.0
     );
 
     parser_.add<int>(
-        "problem", '\0', "Defines the problem to solve (exact solution). CartesianR2 (0), PolarR6 (1), CartesianR6 (2), RefinedRadius (3).",
+        "problem", '\0', 
+        "Defines the problem to solve (exact solution): CartesianR2 (0), PolarR6 (1), CartesianR6 (2), RefinedRadius (3).",
         OPTIONAL, 0, cmdline::oneof(0,1,2,3)
     );
     parser_.add<int>(
-        "alpha_coeff", '\0', "Defines the coefficient alpha. Poisson (0), Sonnendrucker (1), Zoni (2), Zoni-Shifted (3).",
+        "alpha_coeff", '\0', 
+        "Defines the alpha coefficient: Poisson (0), Sonnendrucker (1), Zoni (2), Zoni-Shifted (3).",
         OPTIONAL, 1, cmdline::oneof(0,1,2,3)
     );
     parser_.add<int>(
-        "beta_coeff", '\0', "Defines the coefficient beta. beta=0 (0), beta=1/alpha (1).",
+        "beta_coeff", '\0', 
+        "Defines the beta coefficient: beta=0 (0), beta=1/alpha (1).",
         OPTIONAL, 0, cmdline::oneof(0, 1)
     );
 }
@@ -228,7 +238,7 @@ void GMGPolar::initializeGeometry() {
 void GMGPolar::initializeMultigrid() {
     parser_.add<int>(
         "FMG", '\0', 
-        "Specifies if initial approximation is obtained by nested iteration.", 
+        "Specifies whether the initial approximation is obtained by nested iteration.", 
         OPTIONAL, 0, cmdline::oneof(0,1)
     );
     parser_.add<int>(
@@ -238,53 +248,53 @@ void GMGPolar::initializeMultigrid() {
     );
     parser_.add<int>(
         "FMG_cycle", '\0', 
-        "Type of FMG Cycle. V-cycle (0), W-cycle (1), F-cycle (2).", 
+        "Specifies the type of FMG Cycle: V-cycle (0), W-cycle (1), F-cycle (2).", 
         OPTIONAL, 0, cmdline::oneof(0,1,2)
     );
     parser_.add<int>(
         "extrapolation", 'e', 
-        "No extrapolation (0), Implicit extrapolation (1), Implicit Extrapolation with full grid smoothing (2), A combination of both extrapoaltion methods (3).",
+        "Specifies the type of extrapolation: No extrapolation (0), Implicit extrapolation (1), Implicit extrapolation with full grid smoothing (2), Combination of both methods (3).",
         OPTIONAL, 0, cmdline::oneof(0,1,2,3)
     );
     parser_.add<int>(
         "maxLevels", 'l', 
-        "Defines the maximum number of levels used in the multigrid scheme.", 
+        "Defines the maximum number of levels in the multigrid scheme.", 
         OPTIONAL, -1
     );
     parser_.add<int>(
         "preSmoothingSteps", '\0', 
-        "Defines the number of pre-smoothing steps.", 
+        "Number of pre-smoothing steps.", 
         OPTIONAL, 1
     );
     parser_.add<int>(
         "postSmoothingSteps", '\0', 
-        "Defines the number of post-smoothing steps.", 
+        "Number of post-smoothing steps.", 
         OPTIONAL, 1
     );
     parser_.add<int>(
         "multigridCycle", '\0', 
-        "Type of Multigrid Cycle. V-cycle (0), W-cycle (1), F-cycle (2).", 
+        "Type of Multigrid Cycle: V-cycle (0), W-cycle (1), F-cycle (2).", 
         OPTIONAL, 0, cmdline::oneof(0, 1, 2)
     );
 
     parser_.add<int>(
         "residualNormType", '\0', 
-        "Type of Residual Norm. Euclidean (0), Weighted-Euclidean (1), Infinity (2).", 
+        "Type of Residual Norm: Euclidean (0), Weighted Euclidean (1), Infinity (2).", 
         OPTIONAL, 0, cmdline::oneof(0, 1, 2)
     );
     parser_.add<int>(
         "maxIterations", '\0', 
-        "Maximal number of Multigrid iterations.", 
+        "Maximum number of Multigrid iterations.", 
         OPTIONAL, 150
     );
     parser_.add<double>(
         "absoluteTolerance", '\0', 
-        "Convergenced when absolute tolerance reached.", 
+        "Convergence achieved when absolute tolerance is reached.", 
         OPTIONAL, 1e-8
     );
     parser_.add<double>(
         "relativeTolerance", '\0', 
-        "Convergenced when relative tolerance reached.", 
+        "Convergence achieved when relative tolerance is reached.", 
         OPTIONAL, 1e-8
     );
 }
@@ -292,12 +302,12 @@ void GMGPolar::initializeMultigrid() {
 void GMGPolar::initializeGeneral() {
     parser_.add<int>(
         "verbose", '\0', 
-        "Controls the level of detail in the output. Higher values increase the amount of diagnostic and informational messages displayed.", 
+        "Controls the verbosity of the output. Higher values produce more detailed diagnostic information.", 
         OPTIONAL, 1
     );
     parser_.add<int>(
         "paraview", '\0', 
-        "Specifies whether Paraview output files should be generated.", 
+        "Specifies whether to generate Paraview output files.", 
         OPTIONAL, 0
     );
     parser_.add<int>(
@@ -307,22 +317,22 @@ void GMGPolar::initializeGeneral() {
     );
     parser_.add<double>(
         "threadReductionFactor", '\0', 
-        "Thread reduction factor to coarser levels.", 
+        "Reduction factor for threads at coarser levels.", 
         OPTIONAL, 1.0
     );
     parser_.add<int>(
         "implementationType", '\0', 
-        "Type of implementation to distribute stencil. CPU_Take (0), CPU_Give (1).", 
+        "Specifies how to distribute the stencil: CPU_Take (0), CPU_Give (1).", 
         OPTIONAL, 0, cmdline::oneof(0, 1)
     );
     parser_.add<int>(
         "cacheDensityProfileCoefficients", '\0', 
-        "Specifies whether the density profile coefficients should be precomputed and cached, or dynamically recalculated during runtime.", 
+        "Specifies whether to cache the density profile coefficients or recalculate them dynamically.", 
         OPTIONAL, 1, cmdline::oneof(0, 1)
     );
     parser_.add<int>(
         "cacheDomainGeometry", '\0', 
-        "Specifies whether the domain geometry should be precomputed and cached, or dynamically recalculated during runtime.", 
+        "Specifies whether to cache the domain geometry or recalculate it dynamically.", 
         OPTIONAL, 1, cmdline::oneof(0, 1)
     );
 }

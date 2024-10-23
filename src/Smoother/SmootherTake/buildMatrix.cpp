@@ -1,6 +1,6 @@
 #include "../../../include/Smoother/SmootherTake/smootherTake.h"
 
-
+// clang-format off
 #define NODE_BUILD_SMOOTHER_TAKE(i_r, i_theta, grid, DirBC_Interior, \
     inner_boundary_circle_matrix, \
     circle_tridiagonal_solver, \
@@ -343,8 +343,9 @@ do { \
         else if(row == 0 && column == matrix.columns()-1) matrix.cyclic_corner_element() = value; \
     } \
 } while(0)
+// clang-format on
 
-
+// clang-format off
 void SmootherTake::buildAscCircleSection(const int i_r) {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
