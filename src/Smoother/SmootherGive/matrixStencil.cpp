@@ -10,35 +10,27 @@ const Stencil& SmootherGive::getStencil(int i_r) const
 
     const int numberSmootherCircles = grid_.numberSmootherCircles();
 
-    if (i_r < numberSmootherCircles)
-    {
+    if (i_r < numberSmootherCircles) {
         /* Circle Section */
-        if (i_r > 0 && i_r < numberSmootherCircles)
-        {
+        if (i_r > 0 && i_r < numberSmootherCircles) {
             return circle_stencil_interior_;
         }
-        else if (i_r == 0)
-        {
+        else if (i_r == 0) {
             return DirBC_Interior_ ? stencil_DB_ : circle_stencil_across_origin_;
         }
     }
-    else
-    {
+    else {
         /* Radial Section */
-        if (i_r > numberSmootherCircles && i_r < grid_.nr() - 2)
-        {
+        if (i_r > numberSmootherCircles && i_r < grid_.nr() - 2) {
             return radial_stencil_interior_;
         }
-        else if (i_r == numberSmootherCircles)
-        {
+        else if (i_r == numberSmootherCircles) {
             return radial_stencil_next_circular_smoothing_;
         }
-        else if (i_r == grid_.nr() - 1)
-        {
+        else if (i_r == grid_.nr() - 1) {
             return stencil_DB_;
         }
-        else if (i_r == grid_.nr() - 2)
-        {
+        else if (i_r == grid_.nr() - 2) {
             return radial_stencil_next_outer_DB_;
         }
     }
@@ -54,7 +46,7 @@ int SmootherGive::getNonZeroCountCircleAsc(const int i_r) const {
     const int size_stencil_inner_boundary = DirBC_Interior_ ? 1 : 4;
     const int size_stencil_interior = 3;
 
-    if(i_r > 0){
+    if(i_r > 0) {
         return size_stencil_interior * grid_.ntheta();
     }
     else if(i_r == 0){
@@ -72,7 +64,7 @@ int SmootherGive::getCircleAscIndex(const int i_r, const int i_theta) const {
     const int size_stencil_inner_boundary = DirBC_Interior_ ? 1 : 4;
     const int size_stencil_interior = 3;
 
-    if(i_r > 0){
+    if(i_r > 0) {
         return size_stencil_interior * i_theta;
     } else{
         return size_stencil_inner_boundary * i_theta;
@@ -113,20 +105,20 @@ int SmootherGive::getRadialAscIndex(const int i_r, const int i_theta) const {
 
     const int numberSmootherCircles = grid_.numberSmootherCircles();
 
-    if(i_r > numberSmootherCircles && i_r < grid_.nr()-2){
+    if(i_r > numberSmootherCircles && i_r < grid_.nr()-2) {
         return 
             size_stencil_next_circluar_smoothing + 
             (i_r-numberSmootherCircles-1) * size_stencil_interior;
     }
-    else if(i_r == numberSmootherCircles){
+    else if(i_r == numberSmootherCircles) {
         return 0;
     }
-    else if(i_r == grid_.nr()-2){
+    else if(i_r == grid_.nr()-2) {
         return 
             size_stencil_next_circluar_smoothing +
             (grid_.lengthSmootherRadial()-3) * size_stencil_interior;
     }
-    else if(i_r == grid_.nr()-1){
+    else if(i_r == grid_.nr()-1) {
         return 
             size_stencil_next_circluar_smoothing + 
             (grid_.lengthSmootherRadial()-3) * size_stencil_interior + 

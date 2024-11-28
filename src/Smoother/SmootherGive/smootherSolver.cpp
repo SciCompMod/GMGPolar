@@ -361,8 +361,7 @@ do { \
             /* Nothing to be done here */ \
         } \
     } \
-} while(0) \
-// clang-format on
+} while(0) // clang-format on
 
 // clang-format off
 void SmootherGive::applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color, const Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp){

@@ -11,6 +11,7 @@ public:
                               const DensityProfileCoefficients& density_profile_coefficients,
                               bool DirBC_Interior,
                               int num_omp_threads);
+
     ~DirectSolverGive() override;
 
     void solveInPlace(Vector<double>& solution) override;

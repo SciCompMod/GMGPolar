@@ -15,3 +15,4 @@ SmootherTake::SmootherTake(
 SmootherTake::~SmootherTake(){
     finalizeMumpsSolver(inner_boundary_mumps_solver_);
 }
+// clang-format on

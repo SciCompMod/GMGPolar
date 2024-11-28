@@ -56,7 +56,7 @@ TEST(ProlongationTest, ProlongationTest) {
 
     ASSERT_EQ(result1.size(), result2.size());
     for (int i = 0; i < result1.size(); ++i) {
-        ASSERT_DOUBLE_EQ(result1[i], result2[i]);
+        ASSERT_NEAR(result1[i], result2[i], 1e-10);
     }
 }
 

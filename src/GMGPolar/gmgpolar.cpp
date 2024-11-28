@@ -1,5 +1,7 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
+#include <iomanip>
+
 // clang-format off
 GMGPolar::GMGPolar() : 
     parser_()
@@ -93,19 +95,20 @@ void GMGPolar::printTimings() const {
     std::cout << "------------------"<< std::endl;
     std::cout << "Setup Time: " << t_setup_total-t_setup_rhs << " seconds" << std::endl;
     std::cout << "    Create Levels: " << t_setup_createLevels << " seconds" << std::endl;
-    std::cout << "    (Build rhs: " << t_setup_rhs << " seconds)" << std::endl;
     std::cout << "    Smoother: " << t_setup_smoother << " seconds" << std::endl;
     std::cout << "    Direct Solver: " << t_setup_directSolver << " seconds" << std::endl;
+    std::cout << "    (Build rhs: " << t_setup_rhs << " seconds)" << std::endl;
     std::cout << "\nSolve Time: " << t_solve_total << " seconds" << std::endl;
     std::cout << "    Initial Approximation: " << t_solve_initial_approximation << " seconds" << std::endl;
     std::cout << "    Multigrid Iteration: " << t_solve_multigrid_iterations << " seconds" << std::endl;
     std::cout << "    Check Convergence: " << t_check_convergence << " seconds" << std::endl;
-    std::cout << "    Check Exact Error: " << t_check_exact_error << " seconds" << std::endl;
+    std::cout << "    (Check Exact Error: " << t_check_exact_error << " seconds)" << std::endl;
     std::cout << "\nAverage Multigrid Iteration: " << t_avg_MGC_total << " seconds" << std::endl;
     std::cout << "    PreSmoothing: " << t_avg_MGC_preSmoothing << " seconds" << std::endl;
     std::cout << "    PostSmoothing: " << t_avg_MGC_postSmoothing << " seconds" << std::endl;
     std::cout << "    Residual: " << t_avg_MGC_residual << " seconds" << std::endl;
     std::cout << "    DirectSolve: " << t_avg_MGC_directSolver << " seconds" << std::endl;
+    std::cout << "    Other Computations: " << std::max(t_avg_MGC_total - t_avg_MGC_preSmoothing - t_avg_MGC_postSmoothing - t_avg_MGC_residual - t_avg_MGC_directSolver, 0.0) << " seconds" << std::endl;
     std::cout <<"\n"<< std::endl;
 }
 
@@ -350,12 +353,12 @@ void GMGPolar::threadReductionFactor(double thread_reduction_factor) {
     thread_reduction_factor_ = thread_reduction_factor;
 }
 
-ImplementationType GMGPolar::implementationType() const {
-    return implementation_type_;
+StencilDistributionMethod GMGPolar::stencilDistributionMethod() const {
+    return stencil_distribution_method_;
 }
 
-void GMGPolar::implementationType(ImplementationType implementation_type) {
-    implementation_type_ = implementation_type;
+void GMGPolar::stencilDistributionMethod(StencilDistributionMethod stencil_distribution_method) {
+    stencil_distribution_method_ = stencil_distribution_method;
 }
 
 bool GMGPolar::cacheDensityProfileCoefficients() const {

@@ -1,12 +1,14 @@
-#include <iostream>
-#include <iomanip>
-#include <vector>
-#include <cmath>
 #include <chrono>
+#include <cmath>
+#include <iomanip>
+#include <iostream>
 #include <limits>
+#include <vector>
 
 #include "../include/GMGPolar/gmgpolar.h"
 #include "../include/GMGPolar/test_cases.h"
+
+// clang-format off
 
 int main(int argc, char* argv[]){
     #ifdef NDEBUG
@@ -20,12 +22,12 @@ int main(int argc, char* argv[]){
     const double elongation_kappa = 0.3; const double shift_delta = 0.2;
     
     /* Example 1: Polar Solution -> Higher Order 4.0 */
-    // const double alpha_jump = 0.4837 * Rmax;
-    // std::unique_ptr<DomainGeometry> domain_geometry = std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<ExactSolution> exact_solution = std::make_unique<PolarR6_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniGyroCoefficients>(Rmax, alpha_jump);
-    // std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<PolarR6_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<SourceTerm> source_term = std::make_unique<PolarR6_ZoniGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+    const double alpha_jump = 0.4837 * Rmax;
+    std::unique_ptr<DomainGeometry> domain_geometry = std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+    std::unique_ptr<ExactSolution> exact_solution = std::make_unique<PolarR6_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+    std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniGyroCoefficients>(Rmax, alpha_jump);
+    std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<PolarR6_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+    std::unique_ptr<SourceTerm> source_term = std::make_unique<PolarR6_ZoniGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
 
     /* Example 2: Cartesian Solution -> Lower Order 3.5 */
     // const double alpha_jump = 0.66 * Rmax;
@@ -36,12 +38,12 @@ int main(int argc, char* argv[]){
     // std::unique_ptr<SourceTerm> source_term = std::make_unique<CartesianR2_SonnendruckerGyro_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
 
     /* Example 3: Refined Solution -> Lower Order 3.5 */
-    const double alpha_jump = 0.9 * Rmax; // Refinement where the solution is most complex
-    std::unique_ptr<DomainGeometry> domain_geometry = std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    std::unique_ptr<ExactSolution> exact_solution = std::make_unique<Refined_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<Refined_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    std::unique_ptr<SourceTerm> source_term = std::make_unique<Refined_ZoniShiftedGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+    // const double alpha_jump = 0.9 * Rmax; // Refinement where the solution is most complex
+    // std::unique_ptr<DomainGeometry> domain_geometry = std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+    // std::unique_ptr<ExactSolution> exact_solution = std::make_unique<Refined_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+    // std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
+    // std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<Refined_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+    // std::unique_ptr<SourceTerm> source_term = std::make_unique<Refined_ZoniShiftedGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
 
     GMGPolar solver(std::move(domain_geometry), std::move(coefficients), std::move(boundary_conditions), std::move(source_term));
 
@@ -53,7 +55,7 @@ int main(int argc, char* argv[]){
     const int maxOpenMPThreads = 16;
     const double threadReductionFactor = 1.0;
 
-    const ImplementationType implementationType = ImplementationType::CPU_GIVE;
+    const StencilDistributionMethod stencilDistributionMethod = StencilDistributionMethod::CPU_GIVE;
     const bool cacheDensityProfileCoefficients = true;
     const bool cacheDomainGeometry = false;
 
@@ -85,7 +87,7 @@ int main(int argc, char* argv[]){
     solver.maxOpenMPThreads(maxOpenMPThreads);
     solver.threadReductionFactor(threadReductionFactor);
 
-    solver.implementationType(implementationType);
+    solver.stencilDistributionMethod(stencilDistributionMethod);
     solver.cacheDensityProfileCoefficients(cacheDensityProfileCoefficients);
     solver.cacheDomainGeometry(cacheDomainGeometry);
 
@@ -208,3 +210,5 @@ int main(int argc, char* argv[]){
 
     return 0;    
 }
+
+// clang-format on

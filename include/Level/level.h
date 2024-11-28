@@ -55,7 +55,7 @@ public:
                             const DensityProfileCoefficients& density_profile_coefficients,
                             const bool DirBC_Interior,
                             const int num_omp_threads,
-                            const ImplementationType implementation_type);
+                            const StencilDistributionMethod stencil_distribution_method);
     void computeResidual(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const;
 
     // ------------------- //
@@ -64,7 +64,7 @@ public:
                                 const DensityProfileCoefficients& density_profile_coefficients,
                                 const bool DirBC_Interior,
                                 const int num_omp_threads,
-                                const ImplementationType implementation_type);
+                                const StencilDistributionMethod stencil_distribution_method);
     void directSolveInPlace(Vector<double>& x) const;
 
     // --------------- //
@@ -73,7 +73,7 @@ public:
                              const DensityProfileCoefficients& density_profile_coefficients,
                              const bool DirBC_Interior,
                              const int num_omp_threads,
-                             const ImplementationType implementation_type);
+                             const StencilDistributionMethod stencil_distribution_method);
     void smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const;
 
     // ---------------------------- //
@@ -82,7 +82,7 @@ public:
                                          const DensityProfileCoefficients& density_profile_coefficients,
                                          const bool DirBC_Interior,
                                          const int num_omp_threads,
-                                         const ImplementationType implementation_type);
+                                         const StencilDistributionMethod stencil_distribution_method);
     void extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const;
 
 private:

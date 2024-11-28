@@ -4,7 +4,8 @@ void DirectSolverGive::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const
 {
     mumps_solver.job = JOB_INIT;
     mumps_solver.par = PAR_PARALLEL;
-    /* SYM_POSITIVE_DEFINITE yields better results than SYM_GENERAL_SYMMETRIC */
+    /* The matrix is positive definite for invertible mappings. */
+    /* Therefore we use SYM_POSITIVE_DEFINITE instead of SYM_GENERAL_SYMMETRIC. */
     mumps_solver.sym = (solver_matrix.is_symmetric() ? SYM_POSITIVE_DEFINITE : SYM_UNSYMMETRIC);
     mumps_solver.comm_fortran = USE_COMM_WORLD;
     dmumps_c(&mumps_solver);
@@ -77,6 +78,10 @@ void DirectSolverGive::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const
     mumps_solver.jcn = solver_matrix.column_indices_data();
     mumps_solver.a = solver_matrix.values_data();
     dmumps_c(&mumps_solver);
+
+    if (mumps_solver.sym == SYM_POSITIVE_DEFINITE && mumps_solver.INFOG(12) != 0) {
+        std::cout<< "Warning: DirectSolver matrix is not positive definite: Negative pivots in the factorization phase." << std::endl;
+    }
 }
 
 void DirectSolverGive::solveWithMumps(Vector<double>& result_rhs)

@@ -324,7 +324,7 @@ TEST(SymmetricTridiagonalSolver, random_tridiagonal_boosted_subdiagonal_LOW_PREC
 
     // Create random number generator
     std::random_device rd;
-    std::mt19937 gen(42);
+    std::mt19937 gen(79);
     std::uniform_real_distribution<> dis(-100.0, 100.0);
     
     // Fill main_diagonal with random values

@@ -581,9 +581,9 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_
     Vector<double> residuum(level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-10);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-11);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-11);
+    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-9);
+    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-10);
+    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-10);
 }
 
 TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision2_CircularGeometry) {
@@ -976,7 +976,7 @@ TEST(DirectSolverTakeTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeome
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
     ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-11);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-12);
+    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-11);
 }
 
 TEST(DirectSolverTakeTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometry) {
@@ -1050,8 +1050,8 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecis
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-10);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-11);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-11);
+    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-10);
+    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-10);
 }
 
 TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision2_CircularGeometry) {

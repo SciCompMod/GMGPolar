@@ -43,19 +43,19 @@ To install and set up Spack, execute the following commands in your terminal:
 
 With Spack set up, you can now install MUMPS. The following command installs version 5.5.1 of MUMPS with specific options that are recommended for GMGPolar:
 
-    spack install mumps@5.5.1 \
-        blr_mt=false \
-        complex=false \
-        double=true \
-        float=true \
-        incfort=false \
-        int64=false \
-        metis=true \
-        mpi=false \
-        openmp=true \
-        parmetis=false \
-        ptscotch=false \
-        scotch=false \
+    spack install mumps@5.5.1
+        blr_mt=false
+        complex=false
+        double=true
+        float=true
+        incfort=false
+        int64=false
+        metis=true
+        mpi=false
+        openmp=true
+        parmetis=false
+        ptscotch=false
+        scotch=false
         shared=true
 
 ## Step 3: Install Required Dependencies
@@ -96,7 +96,7 @@ You can run the solver without having to write a code (as we do in the next sect
 the library, a binary is created called ``./build/gmgpolar``, it takes parameters directly from command-line.
 
     # To try GMGPolar on a small problem size, without having to write any code,
-    # ./build/GMGPolar_simulation uses default parameters with a grid 33 x 64.
+    # ./build/gmgpolar uses default parameters with a grid 33 x 64.
 
     ./build/gmgpolar
 

@@ -206,8 +206,7 @@ do { \
         const int center = grid.index(i_r, i_theta); \
         temp[center] = rhs[center]; \
     } \
-} while(0) \
-// clang-format on
+} while(0) // clang-format on
 
 // clang-format off
 void SmootherTake::applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color, const Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp){
@@ -334,3 +333,4 @@ void SmootherTake::smoothingInPlace(Vector<double>& x, const Vector<double>& rhs
         } /* Implicit barrier */
     }
 }
+// clang-format on

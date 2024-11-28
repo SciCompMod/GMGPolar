@@ -131,8 +131,8 @@ public:
     void maxOpenMPThreads(int max_omp_threads);
     double threadReductionFactor() const;
     void threadReductionFactor(double thread_reduction_factor);
-    ImplementationType implementationType() const;
-    void implementationType(ImplementationType implementation_type);
+    StencilDistributionMethod stencilDistributionMethod() const;
+    void stencilDistributionMethod(StencilDistributionMethod stencil_distribution_method);
     bool cacheDensityProfileCoefficients() const;
     void cacheDensityProfileCoefficients(bool cache_density_profile_coefficients);
     bool cacheDomainGeometry() const;
@@ -206,7 +206,7 @@ private:
     bool paraview_;
     int max_omp_threads_;
     double thread_reduction_factor_;
-    ImplementationType implementation_type_;
+    StencilDistributionMethod stencil_distribution_method_;
     bool cache_density_profile_coefficients_;
     bool cache_domain_geometry_;
 

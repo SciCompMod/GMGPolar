@@ -28,6 +28,7 @@ public:
                           const DensityProfileCoefficients& density_profile_coefficients,
                           bool DirBC_Interior,
                           int num_omp_threads);
+
     virtual ~DirectSolver() = default;
 
     virtual void solveInPlace(Vector<double>& solution) = 0;

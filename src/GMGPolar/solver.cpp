@@ -125,6 +125,13 @@ void GMGPolar::solve()
         }
     }
 
+    /* These times are included in the initial approximation and don't count towards the multigrid cyclces. */
+    t_avg_MGC_total = 0.0;
+    t_avg_MGC_preSmoothing = 0.0;
+    t_avg_MGC_postSmoothing = 0.0;
+    t_avg_MGC_residual = 0.0;
+    t_avg_MGC_directSolver = 0.0;
+
     auto end_initial_approximation = std::chrono::high_resolution_clock::now();
     t_solve_initial_approximation += std::chrono::duration<double>(end_initial_approximation - start_initial_approximation).count();
 
@@ -151,6 +158,7 @@ void GMGPolar::solve()
         /* ---------------------------------------------- */
         /* Test solution against exact solution if given. */
         /* ---------------------------------------------- */
+        LIKWID_STOP("Solver");
         if (exact_solution_ != nullptr)
         {
             auto start_check_exact_error = std::chrono::high_resolution_clock::now();
@@ -167,6 +175,7 @@ void GMGPolar::solve()
                 std::cout << "Exact Infinity Error: " << exact_error.second << std::endl;
             }
         }
+        LIKWID_START("Solver");
 
         /* ---------------------------- */
         /* Compute convergence criteria */
@@ -307,12 +316,13 @@ void GMGPolar::solve()
 
     auto end_solve = std::chrono::high_resolution_clock::now();
     t_solve_total += std::chrono::duration<double>(end_solve - start_solve).count();
+    t_solve_total -= t_check_exact_error;
 
     if (paraview_)
     {
         computeExactError(level, level.solution(), level.residual());
-        writeToVTK("solution", level, level.solution());
-        writeToVTK("error", level, level.residual());
+        writeToVTK("output_solution", level, level.solution());
+        writeToVTK("output_error", level, level.residual());
     }
 }
 

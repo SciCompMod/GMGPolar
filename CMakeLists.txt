@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.12)
 project(GMGPolar VERSION 2.0.0 LANGUAGES CXX)
 
+option(GMGPOLAR_BUILD_TESTS "Build GMGPolar unit tests." ON)
+option(GMGPOLAR_USE_LIKWID "Use LIKWID to measure code (regions)." ON)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
@@ -11,26 +14,20 @@ endif()
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -pedantic -Wno-unused")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -mtune=generic")
 
-# External library paths
+# Mumps: Sparse Matrix Solver
 set(MUMPS_PREFIX_PATH "~/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/mumps-5.6.2-m4xrhc4mshzrxmgptzbpult3nbf6qrzk")
 include_directories(${MUMPS_PREFIX_PATH}/include)
 link_directories(${MUMPS_PREFIX_PATH}/lib)
 
+# Metis: Matrix reordering for Mumps
 set(METIS_PREFIX_PATH "~/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/metis-5.1.0-bgoncx22w55soviybggl5ydjakvkm34v")
 include_directories(${METIS_PREFIX_PATH}/include)
 link_directories(${METIS_PREFIX_PATH}/lib)
 
+# Likwid: Performance monitoring
 set(LIKWID_PREFIX_PATH "~/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/likwid-5.3.0-6mvx2snsqnamuyhaqspd6gxkfuaso36g")
 include_directories(${LIKWID_PREFIX_PATH}/include)
 link_directories(${LIKWID_PREFIX_PATH}/lib)
-
-set(MUMPS_LIBRARIES
-    mumps_common
-    smumps
-    dmumps
-    mpiseq
-    metis
-)
 
 # Include directories for the project
 include_directories(include)
@@ -77,6 +74,22 @@ add_library(GMGPolarLib STATIC
 # Link PolarGrid and InputFunctions to GMGPolarLib
 target_link_libraries(GMGPolarLib PUBLIC PolarGrid InputFunctions)
 
+# Link Likwid to GMGPolarLib
+if(GMGPOLAR_USE_LIKWID)
+    target_link_libraries(GMGPolarLib PUBLIC likwid)
+    target_compile_definitions(GMGPolarLib PUBLIC "-DLIKWID_PERFMON")
+    add_compile_definitions(GMGPOLAR_USE_LIKWID)
+endif()
+
+# Mumps options
+set(MUMPS_LIBRARIES
+    mumps_common
+    smumps
+    dmumps
+    mpiseq
+    metis
+)
+
 # 5. Add the main executable target (gmgpolar)
 set(MAIN_SOURCE "src/main.cpp")
 add_executable(gmgpolar ${MAIN_SOURCE})
@@ -85,9 +98,17 @@ add_executable(gmgpolar ${MAIN_SOURCE})
 set(CONVERGENCE_ORDER_SOURCE "src/convergence_order.cpp")
 add_executable(convergence_order ${CONVERGENCE_ORDER_SOURCE})
 
+set(WEAK_SCALING_SOURCE "src/weak_scaling.cpp")
+add_executable(weak_scaling ${WEAK_SCALING_SOURCE})
+
+set(STRONG_SCALING_SOURCE "src/strong_scaling.cpp")
+add_executable(strong_scaling ${STRONG_SCALING_SOURCE})
+
 # 7. Link GMGPolarLib (which now includes PolarGrid and InputFunctions) to both executables
 target_link_libraries(gmgpolar PRIVATE GMGPolarLib ${MUMPS_LIBRARIES} OpenMP::OpenMP_CXX)
 target_link_libraries(convergence_order PRIVATE GMGPolarLib ${MUMPS_LIBRARIES} OpenMP::OpenMP_CXX)
+target_link_libraries(weak_scaling PRIVATE GMGPolarLib ${MUMPS_LIBRARIES} OpenMP::OpenMP_CXX)
+target_link_libraries(strong_scaling PRIVATE GMGPolarLib ${MUMPS_LIBRARIES} OpenMP::OpenMP_CXX)
 
 # 8. Add OpenMP flags if available
 find_package(OpenMP REQUIRED)
@@ -96,6 +117,8 @@ if(OpenMP_CXX_FOUND)
 endif()
 
 # 9. Enable testing and include other directories
-enable_testing()
-add_subdirectory(third-party)
-add_subdirectory(tests)
+if(GMGPOLAR_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(third-party)
+    add_subdirectory(tests)
+endif()

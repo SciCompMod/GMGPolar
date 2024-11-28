@@ -132,12 +132,12 @@ void GMGPolar::parseGeneral() {
     paraview_ = parser_.get<int>("paraview") != 0;
     max_omp_threads_ = parser_.get<int>("maxOpenMPThreads"); omp_set_num_threads(max_omp_threads_);
     thread_reduction_factor_ = parser_.get<double>("threadReductionFactor");
-    const int implementationTypeValue = parser_.get<int>("implementationType");
-    if (implementationTypeValue == static_cast<int>(ImplementationType::CPU_TAKE) ||
-        implementationTypeValue == static_cast<int>(ImplementationType::CPU_GIVE)) {
-        implementation_type_ = static_cast<ImplementationType>(implementationTypeValue);
+    const int stencilDistributionMethodValue = parser_.get<int>("stencilDistributionMethod");
+    if (stencilDistributionMethodValue == static_cast<int>(StencilDistributionMethod::CPU_TAKE) ||
+        stencilDistributionMethodValue == static_cast<int>(StencilDistributionMethod::CPU_GIVE)) {
+        stencil_distribution_method_ = static_cast<StencilDistributionMethod>(stencilDistributionMethodValue);
     } else {
-        throw std::runtime_error("Invalid implementation type.\n");
+        throw std::runtime_error("Invalid stencil distribution method.\n");
     }
     cache_density_profile_coefficients_ = parser_.get<int>("cacheDensityProfileCoefficients") != 0;
     cache_domain_geometry_ = parser_.get<int>("cacheDomainGeometry") != 0;
@@ -321,7 +321,7 @@ void GMGPolar::initializeGeneral() {
         OPTIONAL, 1.0
     );
     parser_.add<int>(
-        "implementationType", '\0', 
+        "stencilDistributionMethod", '\0', 
         "Specifies how to distribute the stencil: CPU_Take (0), CPU_Give (1).", 
         OPTIONAL, 0, cmdline::oneof(0, 1)
     );

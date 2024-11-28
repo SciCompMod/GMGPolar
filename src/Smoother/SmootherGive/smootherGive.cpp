@@ -21,3 +21,4 @@ void SmootherGive::smoothingInPlace(Vector<double>& x, const Vector<double>& rhs
     // smoothingInPlaceTaskLoop(x, rhs, temp);
     // smoothingInPlaceTaskDependencies(x, rhs, temp);
 }
+// clang-format on

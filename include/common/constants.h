@@ -4,7 +4,7 @@
 /* GMGPolar - Enumeration Definitions */
 /* ---------------------------------- */
 
-enum class ImplementationType
+enum class StencilDistributionMethod
 {
     CPU_TAKE = 0,
     CPU_GIVE = 1
@@ -85,6 +85,7 @@ enum class BetaCoeff
 /* Mumps macro s.t. indices match documentation */
 #define ICNTL(I) icntl[(I)-1]
 #define CNTL(I) cntl[(I)-1]
+#define INFOG(I) infog[(I)-1]
 
 #define USE_COMM_WORLD -987654
 #define PAR_NOT_PARALLEL 0
@@ -109,3 +110,35 @@ enum class BetaCoeff
 #define SYM_UNSYMMETRIC 0
 #define SYM_POSITIVE_DEFINITE 1
 #define SYM_GENERAL_SYMMETRIC 2
+
+// --------------------------------------- //
+// Function-like macros for LIKWID markers //
+// --------------------------------------- //
+
+#ifdef GMGPOLAR_USE_LIKWID
+    #include <likwid.h>
+    #include <likwid-marker.h>
+    #define LIKWID_INIT() LIKWID_MARKER_INIT
+    #define LIKWID_REGISTER(marker) \
+        _Pragma("omp parallel") \
+        { \
+            LIKWID_MARKER_REGISTER(marker); \
+        }
+    #define LIKWID_START(marker) \
+        _Pragma("omp parallel") \
+        { \
+            LIKWID_MARKER_START(marker); \
+        }
+    #define LIKWID_STOP(marker) \
+        _Pragma("omp parallel") \
+        { \
+            LIKWID_MARKER_STOP(marker); \
+        }
+    #define LIKWID_CLOSE() LIKWID_MARKER_CLOSE
+#else
+    #define LIKWID_INIT()
+    #define LIKWID_REGISTER(marker)
+    #define LIKWID_START(marker)
+    #define LIKWID_STOP(marker)
+    #define LIKWID_CLOSE()
+#endif

@@ -11,6 +11,7 @@ public:
                                       const DensityProfileCoefficients& density_profile_coefficients,
                                       bool DirBC_Interior,
                                       int num_omp_threads);
+
     ~ExtrapolatedSmootherTake() override;
 
     void extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) override;
@@ -46,13 +47,10 @@ private:
     void buildAscCircleSection(const int i_r);
     void buildAscRadialSection(const int i_theta);
 
-    void applyAscOrthoCircleSection(
-        const int i_r, const SmootherColor smoother_color, const Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
-    void applyAscOrthoRadialSection(
-        const int i_theta, const SmootherColor smoother_color, const Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
+    void applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color, const Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
+    void applyAscOrthoRadialSection(const int i_theta, const SmootherColor smoother_color, const Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
 
-    void
-    solveCircleSection(const int i_r, Vector<double>& x, Vector<double>& temp, Vector<double>& solver_storage_1, Vector<double>& solver_storage_2);
+    void solveCircleSection(const int i_r, Vector<double>& x, Vector<double>& temp, Vector<double>& solver_storage_1, Vector<double>& solver_storage_2);
     void solveRadialSection(const int i_theta, Vector<double>& x, Vector<double>& temp, Vector<double>& solver_storage);
 
     void initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const SparseMatrix<double>& solver_matrix);
