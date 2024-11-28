@@ -1,0 +1,216 @@
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Xeon(R) Gold 6132 CPU @ 2.60GHz
+CPU type:	Intel Skylake SP processor
+CPU clock:	2.59 GHz
+--------------------------------------------------------------------------------
+Region Setup, Group 1: MEM_DP
++-------------------+----------+----------+----------+
+|    Region Info    |  Core 0  |  Core 1  |  Core 2  |
++-------------------+----------+----------+----------+
+| RDTSC Runtime [s] | 0.384731 | 0.385684 | 0.385700 |
+|     call count    |        2 |        2 |        2 |
++-------------------+----------+----------+----------+
++------------------------------------------+---------+-----------+-----------+-----------+
+|                   Event                  | Counter |   Core 0  |   Core 1  |   Core 2  |
++------------------------------------------+---------+-----------+-----------+-----------+
+|             INSTR_RETIRED_ANY            |  FIXC0  | 943220500 | 807798700 | 803933100 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  | 478069600 | 485358300 | 486150300 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  | 654124800 | 664169900 | 665274900 |
+|              PWR_PKG_ENERGY              |   PWR0  |   13.3024 |         0 |         0 |
+|              PWR_DRAM_ENERGY             |   PWR3  |    1.7490 |         0 |         0 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |     23000 |         0 |         0 |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  | 244944700 | 234476100 | 233412800 |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |     15090 |         0 |         0 |
+| FP_ARITH_INST_RETIRED_512B_PACKED_DOUBLE |   PMC3  |    141851 |         0 |         0 |
+|               CAS_COUNT_RD               | MBOX0C0 |    351194 |         0 |         0 |
+|               CAS_COUNT_WR               | MBOX0C1 |    620942 |         0 |         0 |
+|               CAS_COUNT_RD               | MBOX1C0 |    351019 |         0 |         0 |
+|               CAS_COUNT_WR               | MBOX1C1 |    620536 |         0 |         0 |
+|               CAS_COUNT_RD               | MBOX2C0 |    351221 |         0 |         0 |
+|               CAS_COUNT_WR               | MBOX2C1 |    621196 |         0 |         0 |
+|               CAS_COUNT_RD               | MBOX3C0 |    304276 |         0 |         0 |
+|               CAS_COUNT_WR               | MBOX3C1 |    613462 |         0 |         0 |
+|               CAS_COUNT_RD               | MBOX4C0 |    305232 |         0 |         0 |
+|               CAS_COUNT_WR               | MBOX4C1 |    615662 |         0 |         0 |
+|               CAS_COUNT_RD               | MBOX5C0 |    304304 |         0 |         0 |
+|               CAS_COUNT_WR               | MBOX5C1 |    613956 |         0 |         0 |
++------------------------------------------+---------+-----------+-----------+-----------+
++-----------------------------------------------+---------+------------+-----------+-----------+--------------+
+|                     Event                     | Counter |     Sum    |    Min    |    Max    |      Avg     |
++-----------------------------------------------+---------+------------+-----------+-----------+--------------+
+|             INSTR_RETIRED_ANY STAT            |  FIXC0  | 2554952300 | 803933100 | 943220500 | 8.516508e+08 |
+|           CPU_CLK_UNHALTED_CORE STAT          |  FIXC1  | 1449578200 | 478069600 | 486150300 | 4.831927e+08 |
+|           CPU_CLK_UNHALTED_REF STAT           |  FIXC2  | 1983569600 | 654124800 | 665274900 | 6.611899e+08 |
+|              PWR_PKG_ENERGY STAT              |   PWR0  |    13.3024 |         0 |   13.3024 |       4.4341 |
+|              PWR_DRAM_ENERGY STAT             |   PWR3  |     1.7490 |         0 |    1.7490 |       0.5830 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE STAT |   PMC0  |      23000 |         0 |     23000 |    7666.6667 |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE STAT   |   PMC1  |  712833600 | 233412800 | 244944700 |    237611200 |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE STAT |   PMC2  |      15090 |         0 |     15090 |         5030 |
+| FP_ARITH_INST_RETIRED_512B_PACKED_DOUBLE STAT |   PMC3  |     141851 |         0 |    141851 |   47283.6667 |
+|               CAS_COUNT_RD STAT               | MBOX0C0 |     351194 |         0 |    351194 |  117064.6667 |
+|               CAS_COUNT_WR STAT               | MBOX0C1 |     620942 |         0 |    620942 |  206980.6667 |
+|               CAS_COUNT_RD STAT               | MBOX1C0 |     351019 |         0 |    351019 |  117006.3333 |
+|               CAS_COUNT_WR STAT               | MBOX1C1 |     620536 |         0 |    620536 |  206845.3333 |
+|               CAS_COUNT_RD STAT               | MBOX2C0 |     351221 |         0 |    351221 |  117073.6667 |
+|               CAS_COUNT_WR STAT               | MBOX2C1 |     621196 |         0 |    621196 |  207065.3333 |
+|               CAS_COUNT_RD STAT               | MBOX3C0 |     304276 |         0 |    304276 |  101425.3333 |
+|               CAS_COUNT_WR STAT               | MBOX3C1 |     613462 |         0 |    613462 |  204487.3333 |
+|               CAS_COUNT_RD STAT               | MBOX4C0 |     305232 |         0 |    305232 |       101744 |
+|               CAS_COUNT_WR STAT               | MBOX4C1 |     615662 |         0 |    615662 |  205220.6667 |
+|               CAS_COUNT_RD STAT               | MBOX5C0 |     304304 |         0 |    304304 |  101434.6667 |
+|               CAS_COUNT_WR STAT               | MBOX5C1 |     613956 |         0 |    613956 |       204652 |
++-----------------------------------------------+---------+------------+-----------+-----------+--------------+
++-----------------------------------+-----------+-----------+-----------+
+|               Metric              |   Core 0  |   Core 1  |   Core 2  |
++-----------------------------------+-----------+-----------+-----------+
+|        Runtime (RDTSC) [s]        |    0.3847 |    0.3857 |    0.3857 |
+|        Runtime unhalted [s]       |    0.1843 |    0.1871 |    0.1874 |
+|            Clock [MHz]            | 1895.6625 | 1895.4563 | 1895.3959 |
+|                CPI                |    0.5068 |    0.6008 |    0.6047 |
+|             Energy [J]            |   13.3024 |         0 |         0 |
+|             Power [W]             |   34.5758 |         0 |         0 |
+|          Energy DRAM [J]          |    1.7490 |         0 |         0 |
+|           Power DRAM [W]          |    4.5460 |         0 |         0 |
+|            DP [MFLOP/s]           |  639.8914 |  607.9483 |  605.1673 |
+|          AVX DP [MFLOP/s]         |    3.1065 |         0 |         0 |
+|          Packed [MUOPS/s]         |    0.4677 |         0 |         0 |
+|          Scalar [MUOPS/s]         |  636.6653 |  607.9483 |  605.1673 |
+|  Memory read bandwidth [MBytes/s] |  327.2516 |         0 |         0 |
+|  Memory read data volume [GBytes] |    0.1259 |         0 |         0 |
+| Memory write bandwidth [MBytes/s] |  616.4526 |         0 |         0 |
+| Memory write data volume [GBytes] |    0.2372 |         0 |         0 |
+|    Memory bandwidth [MBytes/s]    |  943.7043 |         0 |         0 |
+|    Memory data volume [GBytes]    |    0.3631 |         0 |         0 |
+|       Operational intensity       |    0.6781 |    0.6458 |    0.6429 |
++-----------------------------------+-----------+-----------+-----------+
++----------------------------------------+-----------+-----------+-----------+-----------+
+|                 Metric                 |    Sum    |    Min    |    Max    |    Avg    |
++----------------------------------------+-----------+-----------+-----------+-----------+
+|        Runtime (RDTSC) [s] STAT        |    1.1561 |    0.3847 |    0.3857 |    0.3854 |
+|        Runtime unhalted [s] STAT       |    0.5588 |    0.1843 |    0.1874 |    0.1863 |
+|            Clock [MHz] STAT            | 5686.5147 | 1895.3959 | 1895.6625 | 1895.5049 |
+|                CPI STAT                |    1.7123 |    0.5068 |    0.6047 |    0.5708 |
+|             Energy [J] STAT            |   13.3024 |         0 |   13.3024 |    4.4341 |
+|             Power [W] STAT             |   34.5758 |         0 |   34.5758 |   11.5253 |
+|          Energy DRAM [J] STAT          |    1.7490 |         0 |    1.7490 |    0.5830 |
+|           Power DRAM [W] STAT          |    4.5460 |         0 |    4.5460 |    1.5153 |
+|            DP [MFLOP/s] STAT           | 1853.0070 |  605.1673 |  639.8914 |  617.6690 |
+|          AVX DP [MFLOP/s] STAT         |    3.1065 |         0 |    3.1065 |    1.0355 |
+|          Packed [MUOPS/s] STAT         |    0.4677 |         0 |    0.4677 |    0.1559 |
+|          Scalar [MUOPS/s] STAT         | 1849.7809 |  605.1673 |  636.6653 |  616.5936 |
+|  Memory read bandwidth [MBytes/s] STAT |  327.2516 |         0 |  327.2516 |  109.0839 |
+|  Memory read data volume [GBytes] STAT |    0.1259 |         0 |    0.1259 |    0.0420 |
+| Memory write bandwidth [MBytes/s] STAT |  616.4526 |         0 |  616.4526 |  205.4842 |
+| Memory write data volume [GBytes] STAT |    0.2372 |         0 |    0.2372 |    0.0791 |
+|    Memory bandwidth [MBytes/s] STAT    |  943.7043 |         0 |  943.7043 |  314.5681 |
+|    Memory data volume [GBytes] STAT    |    0.3631 |         0 |    0.3631 |    0.1210 |
+|       Operational intensity STAT       |    1.9668 |    0.6429 |    0.6781 |    0.6556 |
++----------------------------------------+-----------+-----------+-----------+-----------+
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Xeon(R) Gold 6132 CPU @ 2.60GHz
+CPU type:	Intel Skylake SP processor
+CPU clock:	2.59 GHz
+--------------------------------------------------------------------------------
+Region Solve, Group 1: MEM_DP
++-------------------+-----------+-----------+-----------+
+|    Region Info    |   Core 0  |   Core 1  |   Core 2  |
++-------------------+-----------+-----------+-----------+
+| RDTSC Runtime [s] | 47.381430 | 47.381920 | 47.381920 |
+|     call count    |         1 |         1 |         1 |
++-------------------+-----------+-----------+-----------+
++------------------------------------------+---------+--------------+--------------+--------------+
+|                   Event                  | Counter |    Core 0    |    Core 1    |    Core 2    |
++------------------------------------------+---------+--------------+--------------+--------------+
+|             INSTR_RETIRED_ANY            |  FIXC0  | 190421400000 | 188744400000 | 190732800000 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  |  89144020000 |  89328450000 |  86281750000 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  | 121986400000 | 122239000000 | 118072600000 |
+|              PWR_PKG_ENERGY              |   PWR0  |    1729.3050 |            0 |            0 |
+|              PWR_DRAM_ENERGY             |   PWR3  |     221.4019 |            0 |            0 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |        65560 |            0 |            0 |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |  56774500000 |  56016060000 |  56184550000 |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |        83556 |            0 |            0 |
+| FP_ARITH_INST_RETIRED_512B_PACKED_DOUBLE |   PMC3  |       417868 |            0 |            0 |
+|               CAS_COUNT_RD               | MBOX0C0 |    129927700 |            0 |            0 |
+|               CAS_COUNT_WR               | MBOX0C1 |     58361730 |            0 |            0 |
+|               CAS_COUNT_RD               | MBOX1C0 |    129209200 |            0 |            0 |
+|               CAS_COUNT_WR               | MBOX1C1 |     57879710 |            0 |            0 |
+|               CAS_COUNT_RD               | MBOX2C0 |    129471700 |            0 |            0 |
+|               CAS_COUNT_WR               | MBOX2C1 |     58004090 |            0 |            0 |
+|               CAS_COUNT_RD               | MBOX3C0 |    128363800 |            0 |            0 |
+|               CAS_COUNT_WR               | MBOX3C1 |     57817630 |            0 |            0 |
+|               CAS_COUNT_RD               | MBOX4C0 |    128616300 |            0 |            0 |
+|               CAS_COUNT_WR               | MBOX4C1 |     58055820 |            0 |            0 |
+|               CAS_COUNT_RD               | MBOX5C0 |    128116400 |            0 |            0 |
+|               CAS_COUNT_WR               | MBOX5C1 |     57674160 |            0 |            0 |
++------------------------------------------+---------+--------------+--------------+--------------+
++-----------------------------------------------+---------+--------------+--------------+--------------+--------------+
+|                     Event                     | Counter |      Sum     |      Min     |      Max     |      Avg     |
++-----------------------------------------------+---------+--------------+--------------+--------------+--------------+
+|             INSTR_RETIRED_ANY STAT            |  FIXC0  | 569898600000 | 188744400000 | 190732800000 | 189966200000 |
+|           CPU_CLK_UNHALTED_CORE STAT          |  FIXC1  | 264754220000 |  86281750000 |  89328450000 | 8.825141e+10 |
+|           CPU_CLK_UNHALTED_REF STAT           |  FIXC2  | 362298000000 | 118072600000 | 122239000000 | 120766000000 |
+|              PWR_PKG_ENERGY STAT              |   PWR0  |    1729.3050 |            0 |    1729.3050 |     576.4350 |
+|              PWR_DRAM_ENERGY STAT             |   PWR3  |     221.4019 |            0 |     221.4019 |      73.8006 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE STAT |   PMC0  |        65560 |            0 |        65560 |   21853.3333 |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE STAT   |   PMC1  | 168975110000 |  56016060000 |  56774500000 | 5.632504e+10 |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE STAT |   PMC2  |        83556 |            0 |        83556 |        27852 |
+| FP_ARITH_INST_RETIRED_512B_PACKED_DOUBLE STAT |   PMC3  |       417868 |            0 |       417868 |  139289.3333 |
+|               CAS_COUNT_RD STAT               | MBOX0C0 |    129927700 |            0 |    129927700 | 4.330923e+07 |
+|               CAS_COUNT_WR STAT               | MBOX0C1 |     58361730 |            0 |     58361730 |     19453910 |
+|               CAS_COUNT_RD STAT               | MBOX1C0 |    129209200 |            0 |    129209200 | 4.306973e+07 |
+|               CAS_COUNT_WR STAT               | MBOX1C1 |     57879710 |            0 |     57879710 | 1.929324e+07 |
+|               CAS_COUNT_RD STAT               | MBOX2C0 |    129471700 |            0 |    129471700 | 4.315723e+07 |
+|               CAS_COUNT_WR STAT               | MBOX2C1 |     58004090 |            0 |     58004090 | 1.933470e+07 |
+|               CAS_COUNT_RD STAT               | MBOX3C0 |    128363800 |            0 |    128363800 | 4.278793e+07 |
+|               CAS_COUNT_WR STAT               | MBOX3C1 |     57817630 |            0 |     57817630 | 1.927254e+07 |
+|               CAS_COUNT_RD STAT               | MBOX4C0 |    128616300 |            0 |    128616300 |     42872100 |
+|               CAS_COUNT_WR STAT               | MBOX4C1 |     58055820 |            0 |     58055820 |     19351940 |
+|               CAS_COUNT_RD STAT               | MBOX5C0 |    128116400 |            0 |    128116400 | 4.270547e+07 |
+|               CAS_COUNT_WR STAT               | MBOX5C1 |     57674160 |            0 |     57674160 |     19224720 |
++-----------------------------------------------+---------+--------------+--------------+--------------+--------------+
++-----------------------------------+-----------+-----------+-----------+
+|               Metric              |   Core 0  |   Core 1  |   Core 2  |
++-----------------------------------+-----------+-----------+-----------+
+|        Runtime (RDTSC) [s]        |   47.3814 |   47.3819 |   47.3819 |
+|        Runtime unhalted [s]       |   34.3686 |   34.4397 |   33.2651 |
+|            Clock [MHz]            | 1895.4456 | 1895.4421 | 1895.3976 |
+|                CPI                |    0.4681 |    0.4733 |    0.4524 |
+|             Energy [J]            | 1729.3050 |         0 |         0 |
+|             Power [W]             |   36.4975 |         0 |         0 |
+|          Energy DRAM [J]          |  221.4019 |         0 |         0 |
+|           Power DRAM [W]          |    4.6728 |         0 |         0 |
+|            DP [MFLOP/s]           | 1198.3241 | 1182.2244 | 1185.7804 |
+|          AVX DP [MFLOP/s]         |    0.0776 |         0 |         0 |
+|          Packed [MUOPS/s]         |    0.0120 |         0 |         0 |
+|          Scalar [MUOPS/s]         | 1198.2437 | 1182.2244 | 1185.7804 |
+|  Memory read bandwidth [MBytes/s] | 1045.0745 |         0 |         0 |
+|  Memory read data volume [GBytes] |   49.5171 |         0 |         0 |
+| Memory write bandwidth [MBytes/s] |  469.7782 |         0 |         0 |
+| Memory write data volume [GBytes] |   22.2588 |         0 |         0 |
+|    Memory bandwidth [MBytes/s]    | 1514.8527 |         0 |         0 |
+|    Memory data volume [GBytes]    |   71.7759 |         0 |         0 |
+|       Operational intensity       |    0.7910 |    0.7804 |    0.7828 |
++-----------------------------------+-----------+-----------+-----------+
++----------------------------------------+-----------+-----------+-----------+-----------+
+|                 Metric                 |    Sum    |    Min    |    Max    |    Avg    |
++----------------------------------------+-----------+-----------+-----------+-----------+
+|        Runtime (RDTSC) [s] STAT        |  142.1452 |   47.3814 |   47.3819 |   47.3817 |
+|        Runtime unhalted [s] STAT       |  102.0734 |   33.2651 |   34.4397 |   34.0245 |
+|            Clock [MHz] STAT            | 5686.2853 | 1895.3976 | 1895.4456 | 1895.4284 |
+|                CPI STAT                |    1.3938 |    0.4524 |    0.4733 |    0.4646 |
+|             Energy [J] STAT            | 1729.3050 |         0 | 1729.3050 |  576.4350 |
+|             Power [W] STAT             |   36.4975 |         0 |   36.4975 |   12.1658 |
+|          Energy DRAM [J] STAT          |  221.4019 |         0 |  221.4019 |   73.8006 |
+|           Power DRAM [W] STAT          |    4.6728 |         0 |    4.6728 |    1.5576 |
+|            DP [MFLOP/s] STAT           | 3566.3289 | 1182.2244 | 1198.3241 | 1188.7763 |
+|          AVX DP [MFLOP/s] STAT         |    0.0776 |         0 |    0.0776 |    0.0259 |
+|          Packed [MUOPS/s] STAT         |    0.0120 |         0 |    0.0120 |    0.0040 |
+|          Scalar [MUOPS/s] STAT         | 3566.2485 | 1182.2244 | 1198.2437 | 1188.7495 |
+|  Memory read bandwidth [MBytes/s] STAT | 1045.0745 |         0 | 1045.0745 |  348.3582 |
+|  Memory read data volume [GBytes] STAT |   49.5171 |         0 |   49.5171 |   16.5057 |
+| Memory write bandwidth [MBytes/s] STAT |  469.7782 |         0 |  469.7782 |  156.5927 |
+| Memory write data volume [GBytes] STAT |   22.2588 |         0 |   22.2588 |    7.4196 |
+|    Memory bandwidth [MBytes/s] STAT    | 1514.8527 |         0 | 1514.8527 |  504.9509 |
+|    Memory data volume [GBytes] STAT    |   71.7759 |         0 |   71.7759 |   23.9253 |
+|       Operational intensity STAT       |    2.3542 |    0.7804 |    0.7910 |    0.7847 |
++----------------------------------------+-----------+-----------+-----------+-----------+

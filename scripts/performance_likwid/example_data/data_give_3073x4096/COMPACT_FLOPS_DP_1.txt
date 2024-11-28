@@ -1,0 +1,74 @@
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Xeon(R) Gold 6132 CPU @ 2.60GHz
+CPU type:	Intel Skylake SP processor
+CPU clock:	2.59 GHz
+--------------------------------------------------------------------------------
+Region Setup, Group 1: FLOPS_DP
++-------------------+----------+
+|    Region Info    |  Core 0  |
++-------------------+----------+
+| RDTSC Runtime [s] | 3.208712 |
+|     call count    |        2 |
++-------------------+----------+
++------------------------------------------+---------+-------------+
+|                   Event                  | Counter |    Core 0   |
++------------------------------------------+---------+-------------+
+|             INSTR_RETIRED_ANY            |  FIXC0  | 10103580000 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  |  4859807000 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  |  6649859000 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |      122920 |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |  2850724000 |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |       81488 |
+| FP_ARITH_INST_RETIRED_512B_PACKED_DOUBLE |   PMC3  |     1080242 |
++------------------------------------------+---------+-------------+
++----------------------+-----------+
+|        Metric        |   Core 0  |
++----------------------+-----------+
+|  Runtime (RDTSC) [s] |    3.2087 |
+| Runtime unhalted [s] |    1.8736 |
+|      Clock [MHz]     | 1895.5636 |
+|          CPI         |    0.4810 |
+|     DP [MFLOP/s]     |  891.3040 |
+|   AVX DP [MFLOP/s]   |    2.7949 |
+|  AVX512 DP [MFLOP/s] |    2.6933 |
+|   Packed [MUOPS/s]   |    0.4004 |
+|   Scalar [MUOPS/s]   |  888.4325 |
+|  Vectorization ratio |    0.0450 |
++----------------------+-----------+
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Xeon(R) Gold 6132 CPU @ 2.60GHz
+CPU type:	Intel Skylake SP processor
+CPU clock:	2.59 GHz
+--------------------------------------------------------------------------------
+Region Solve, Group 1: FLOPS_DP
++-------------------+------------+
+|    Region Info    |   Core 0   |
++-------------------+------------+
+| RDTSC Runtime [s] | 520.272300 |
+|     call count    |          1 |
++-------------------+------------+
++------------------------------------------+---------+---------------+
+|                   Event                  | Counter |     Core 0    |
++------------------------------------------+---------+---------------+
+|             INSTR_RETIRED_ANY            |  FIXC0  | 2167738000000 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  |  969848100000 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  | 1327164000000 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |        218232 |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |  645109700000 |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |        302358 |
+| FP_ARITH_INST_RETIRED_512B_PACKED_DOUBLE |   PMC3  |       2178750 |
++------------------------------------------+---------+---------------+
++----------------------+-----------+
+|        Metric        |   Core 0  |
++----------------------+-----------+
+|  Runtime (RDTSC) [s] |  520.2723 |
+| Runtime unhalted [s] |  373.9142 |
+|      Clock [MHz]     | 1895.4438 |
+|          CPI         |    0.4474 |
+|     DP [MFLOP/s]     | 1239.9829 |
+|   AVX DP [MFLOP/s]   |    0.0358 |
+|  AVX512 DP [MFLOP/s] |    0.0335 |
+|   Packed [MUOPS/s]   |    0.0052 |
+|   Scalar [MUOPS/s]   | 1239.9463 |
+|  Vectorization ratio |    0.0004 |
++----------------------+-----------+
