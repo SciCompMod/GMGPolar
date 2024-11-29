@@ -42,7 +42,3 @@ Known issues:
 - The use of alpha_jump and refinement_radius is unituitive.
   Alpha jump is only used for the refinement_radius.
   Suggestion: Remove alpha_jump entirely and use refinement_radius instead. 
-
-
-Benchmarks:
-- Addition of a weak / strong scaling plot generation scripts.
