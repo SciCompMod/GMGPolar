@@ -1,0 +1,120 @@
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Xeon(R) Gold 6132 CPU @ 2.60GHz
+CPU type:	Intel Skylake SP processor
+CPU clock:	2.59 GHz
+--------------------------------------------------------------------------------
+Region Setup, Group 1: MEM_DP
++-------------------+----------+
+|    Region Info    |  Core 0  |
++-------------------+----------+
+| RDTSC Runtime [s] | 0.868490 |
+|     call count    |        2 |
++-------------------+----------+
++------------------------------------------+---------+------------+
+|                   Event                  | Counter |   Core 0   |
++------------------------------------------+---------+------------+
+|             INSTR_RETIRED_ANY            |  FIXC0  | 2293625000 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  | 1106494000 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  | 1513956000 |
+|              PWR_PKG_ENERGY              |   PWR0  |    27.3421 |
+|              PWR_DRAM_ENERGY             |   PWR3  |     3.8966 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |      23000 |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |  546170800 |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |      15090 |
+| FP_ARITH_INST_RETIRED_512B_PACKED_DOUBLE |   PMC3  |     141851 |
+|               CAS_COUNT_RD               | MBOX0C0 |    1114979 |
+|               CAS_COUNT_WR               | MBOX0C1 |    1228375 |
+|               CAS_COUNT_RD               | MBOX1C0 |    1114314 |
+|               CAS_COUNT_WR               | MBOX1C1 |    1227177 |
+|               CAS_COUNT_RD               | MBOX2C0 |    1115217 |
+|               CAS_COUNT_WR               | MBOX2C1 |    1228506 |
+|               CAS_COUNT_RD               | MBOX3C0 |    1020954 |
+|               CAS_COUNT_WR               | MBOX3C1 |    1174792 |
+|               CAS_COUNT_RD               | MBOX4C0 |    1020964 |
+|               CAS_COUNT_WR               | MBOX4C1 |    1174838 |
+|               CAS_COUNT_RD               | MBOX5C0 |    1020682 |
+|               CAS_COUNT_WR               | MBOX5C1 |    1174412 |
++------------------------------------------+---------+------------+
++-----------------------------------+-----------+
+|               Metric              |   Core 0  |
++-----------------------------------+-----------+
+|        Runtime (RDTSC) [s]        |    0.8685 |
+|        Runtime unhalted [s]       |    0.4266 |
+|            Clock [MHz]            | 1895.6781 |
+|                CPI                |    0.4824 |
+|             Energy [J]            |   27.3421 |
+|             Power [W]             |   31.4823 |
+|          Energy DRAM [J]          |    3.8966 |
+|           Power DRAM [W]          |    4.4866 |
+|            DP [MFLOP/s]           |  630.3032 |
+|          AVX DP [MFLOP/s]         |    1.3761 |
+|          Packed [MUOPS/s]         |    0.2072 |
+|          Scalar [MUOPS/s]         |  628.8741 |
+|  Memory read bandwidth [MBytes/s] |  472.1472 |
+|  Memory read data volume [GBytes] |    0.4101 |
+| Memory write bandwidth [MBytes/s] |  531.1730 |
+| Memory write data volume [GBytes] |    0.4613 |
+|    Memory bandwidth [MBytes/s]    | 1003.3202 |
+|    Memory data volume [GBytes]    |    0.8714 |
+|       Operational intensity       |    0.6282 |
++-----------------------------------+-----------+
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Xeon(R) Gold 6132 CPU @ 2.60GHz
+CPU type:	Intel Skylake SP processor
+CPU clock:	2.59 GHz
+--------------------------------------------------------------------------------
+Region Solve, Group 1: MEM_DP
++-------------------+-----------+
+|    Region Info    |   Core 0  |
++-------------------+-----------+
+| RDTSC Runtime [s] | 50.165580 |
+|     call count    |         1 |
++-------------------+-----------+
++------------------------------------------+---------+--------------+
+|                   Event                  | Counter |    Core 0    |
++------------------------------------------+---------+--------------+
+|             INSTR_RETIRED_ANY            |  FIXC0  | 238321600000 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  |  91359480000 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  | 125021000000 |
+|              PWR_PKG_ENERGY              |   PWR0  |    1587.8770 |
+|              PWR_DRAM_ENERGY             |   PWR3  |     239.9218 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |        65560 |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |  63917010000 |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |        83556 |
+| FP_ARITH_INST_RETIRED_512B_PACKED_DOUBLE |   PMC3  |       417868 |
+|               CAS_COUNT_RD               | MBOX0C0 |    161618900 |
+|               CAS_COUNT_WR               | MBOX0C1 |     35856700 |
+|               CAS_COUNT_RD               | MBOX1C0 |    161771600 |
+|               CAS_COUNT_WR               | MBOX1C1 |     35985860 |
+|               CAS_COUNT_RD               | MBOX2C0 |    161652600 |
+|               CAS_COUNT_WR               | MBOX2C1 |     35892220 |
+|               CAS_COUNT_RD               | MBOX3C0 |    160694400 |
+|               CAS_COUNT_WR               | MBOX3C1 |     35813770 |
+|               CAS_COUNT_RD               | MBOX4C0 |    160612800 |
+|               CAS_COUNT_WR               | MBOX4C1 |     35729640 |
+|               CAS_COUNT_RD               | MBOX5C0 |    160756400 |
+|               CAS_COUNT_WR               | MBOX5C1 |     35891400 |
++------------------------------------------+---------+--------------+
++-----------------------------------+-----------+
+|               Metric              |   Core 0  |
++-----------------------------------+-----------+
+|        Runtime (RDTSC) [s]        |   50.1656 |
+|        Runtime unhalted [s]       |   35.2229 |
+|            Clock [MHz]            | 1895.3937 |
+|                CPI                |    0.3833 |
+|             Energy [J]            | 1587.8770 |
+|             Power [W]             |   31.6527 |
+|          Energy DRAM [J]          |  239.9218 |
+|           Power DRAM [W]          |    4.7826 |
+|            DP [MFLOP/s]           | 1274.1967 |
+|          AVX DP [MFLOP/s]         |    0.0733 |
+|          Packed [MUOPS/s]         |    0.0113 |
+|          Scalar [MUOPS/s]         | 1274.1208 |
+|  Memory read bandwidth [MBytes/s] | 1233.8107 |
+|  Memory read data volume [GBytes] |   61.8948 |
+| Memory write bandwidth [MBytes/s] |  274.5080 |
+| Memory write data volume [GBytes] |   13.7709 |
+|    Memory bandwidth [MBytes/s]    | 1508.3187 |
+|    Memory data volume [GBytes]    |   75.6657 |
+|       Operational intensity       |    0.8448 |
++-----------------------------------+-----------+
