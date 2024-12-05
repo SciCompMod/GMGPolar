@@ -5,11 +5,9 @@
 class DirectSolverGive : public DirectSolver
 {
 public:
-    explicit DirectSolverGive(const PolarGrid& grid,
-                              const LevelCache& level_cache,
+    explicit DirectSolverGive(const PolarGrid& grid, const LevelCache& level_cache,
                               const DomainGeometry& domain_geometry,
-                              const DensityProfileCoefficients& density_profile_coefficients,
-                              bool DirBC_Interior,
+                              const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior,
                               int num_omp_threads);
 
     ~DirectSolverGive() override;
@@ -21,28 +19,11 @@ private:
     SparseMatrix<double> solver_matrix_;
     DMUMPS_STRUC_C mumps_solver_;
 
-    // clang-format off
-    const Stencil stencil_interior_ = 
-        {7, 4, 8,
-        1, 0, 2,
-        5, 3, 6};
-    const Stencil stencil_across_origin_ = 
-        {-1, 4, 6,
-        1, 0, 2,
-        -1, 3, 5};
-    const Stencil stencil_DB_ = 
-        {-1, -1, -1,
-        -1,  0, -1,
-        -1, -1, -1};
-    const Stencil stencil_next_inner_DB_ = 
-        {-1, 3, 5,
-        -1, 0, 1,
-        -1, 2, 4};
-    const Stencil stencil_next_outer_DB_ = 
-        {5, 3, -1,
-        1, 0, -1,
-        4, 2, -1};
-    // clang-format on
+    const Stencil stencil_interior_      = {7, 4, 8, 1, 0, 2, 5, 3, 6};
+    const Stencil stencil_across_origin_ = {-1, 4, 6, 1, 0, 2, -1, 3, 5};
+    const Stencil stencil_DB_            = {-1, -1, -1, -1, 0, -1, -1, -1, -1};
+    const Stencil stencil_next_inner_DB_ = {-1, 3, 5, -1, 0, 1, -1, 2, 4};
+    const Stencil stencil_next_outer_DB_ = {5, 3, -1, 1, 0, -1, 4, 2, -1};
 
     // Constructs a symmetric solver matrix.
     SparseMatrix<double> buildSolverMatrix();

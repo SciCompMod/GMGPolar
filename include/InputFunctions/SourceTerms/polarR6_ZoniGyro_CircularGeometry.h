@@ -4,7 +4,8 @@
 
 #include "../sourceTerm.h"
 
-class PolarR6_ZoniGyro_CircularGeometry : public SourceTerm { 
+class PolarR6_ZoniGyro_CircularGeometry : public SourceTerm
+{
 public:
     PolarR6_ZoniGyro_CircularGeometry() = default;
     explicit PolarR6_ZoniGyro_CircularGeometry(const double& Rmax);

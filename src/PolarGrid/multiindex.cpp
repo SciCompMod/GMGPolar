@@ -28,10 +28,8 @@ int MultiIndex::size() const
 
 bool MultiIndex::operator==(const MultiIndex& other) const
 {
-    for (int d = 0; d < space_dimension; d++)
-    {
-        if (data_[d] != other.data_[d])
-        {
+    for (int d = 0; d < space_dimension; d++) {
+        if (data_[d] != other.data_[d]) {
             return false;
         }
     }
@@ -40,10 +38,8 @@ bool MultiIndex::operator==(const MultiIndex& other) const
 
 bool MultiIndex::operator!=(const MultiIndex& other) const
 {
-    for (int d = 0; d < space_dimension; d++)
-    {
-        if (data_[d] != other.data_[d])
-        {
+    for (int d = 0; d < space_dimension; d++) {
+        if (data_[d] != other.data_[d]) {
             return true;
         }
     }

@@ -43,7 +43,7 @@ int SmootherTake::getNonZeroCountCircleAsc(const int i_r) const
     const int numberSmootherCircles = grid_.numberSmootherCircles();
 
     const int size_stencil_inner_boundary = DirBC_Interior_ ? 1 : 4;
-    const int size_stencil_interior = 3;
+    const int size_stencil_interior       = 3;
 
     if (i_r > 0) {
         return size_stencil_interior * grid_.ntheta();
@@ -61,7 +61,7 @@ int SmootherTake::getCircleAscIndex(const int i_r, const int i_theta) const
     const int numberSmootherCircles = grid_.numberSmootherCircles();
 
     const int size_stencil_inner_boundary = DirBC_Interior_ ? 1 : 4;
-    const int size_stencil_interior = 3;
+    const int size_stencil_interior       = 3;
 
     if (i_r > 0) {
         return size_stencil_interior * i_theta;
@@ -76,14 +76,14 @@ int SmootherTake::getNonZeroCountRadialAsc(const int i_theta) const
     assert(i_theta >= 0 && i_theta < grid_.ntheta());
 
     const int size_stencil_next_circluar_smoothing = 2;
-    const int size_stencil_interior = 3;
-    const int size_stencil_next_outer_boundary = 2;
-    const int size_stencil_outer_boundary = 1;
+    const int size_stencil_interior                = 3;
+    const int size_stencil_next_outer_boundary     = 2;
+    const int size_stencil_outer_boundary          = 1;
 
     assert(grid_.lengthSmootherRadial() >= 3);
 
-    return size_stencil_next_circluar_smoothing + (grid_.lengthSmootherRadial() - 3) * size_stencil_interior + size_stencil_next_outer_boundary +
-           size_stencil_outer_boundary;
+    return size_stencil_next_circluar_smoothing + (grid_.lengthSmootherRadial() - 3) * size_stencil_interior +
+           size_stencil_next_outer_boundary + size_stencil_outer_boundary;
 }
 
 int SmootherTake::getRadialAscIndex(const int i_r, const int i_theta) const
@@ -91,9 +91,9 @@ int SmootherTake::getRadialAscIndex(const int i_r, const int i_theta) const
     assert(i_theta >= 0 && i_theta < grid_.ntheta());
 
     const int size_stencil_next_circluar_smoothing = 2;
-    const int size_stencil_interior = 3;
-    const int size_stencil_next_outer_boundary = 2;
-    const int size_stencil_outer_boundary = 1;
+    const int size_stencil_interior                = 3;
+    const int size_stencil_next_outer_boundary     = 2;
+    const int size_stencil_outer_boundary          = 1;
 
     assert(grid_.lengthSmootherRadial() >= 3);
     assert(grid_.numberSmootherCircles() >= 2);
@@ -110,7 +110,8 @@ int SmootherTake::getRadialAscIndex(const int i_r, const int i_theta) const
         return size_stencil_next_circluar_smoothing + (grid_.lengthSmootherRadial() - 3) * size_stencil_interior;
     }
     else if (i_r == grid_.nr() - 1) {
-        return size_stencil_next_circluar_smoothing + (grid_.lengthSmootherRadial() - 3) * size_stencil_interior + size_stencil_next_outer_boundary;
+        return size_stencil_next_circluar_smoothing + (grid_.lengthSmootherRadial() - 3) * size_stencil_interior +
+               size_stencil_next_outer_boundary;
     }
     throw std::out_of_range("Invalid index for stencil");
 }

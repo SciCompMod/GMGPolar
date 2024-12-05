@@ -1,10 +1,7 @@
 #include "../../include/DirectSolver/directSolver.h"
 
-DirectSolver::DirectSolver(const PolarGrid& grid,
-                           const LevelCache& level_cache,
-                           const DomainGeometry& domain_geometry,
-                           const DensityProfileCoefficients& density_profile_coefficients,
-                           bool DirBC_Interior,
+DirectSolver::DirectSolver(const PolarGrid& grid, const LevelCache& level_cache, const DomainGeometry& domain_geometry,
+                           const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior,
                            int num_omp_threads)
     : grid_(grid)
     , level_cache_(level_cache)

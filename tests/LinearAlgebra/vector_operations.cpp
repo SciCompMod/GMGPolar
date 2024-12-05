@@ -7,7 +7,7 @@
 
 TEST(VectorOperations, equals_vector_vector)
 {
-    const Vector<double> v = {1, 2, 3};
+    const Vector<double> v  = {1, 2, 3};
     const Vector<double> v1 = {1, 2, 3};
     const Vector<double> v2 = {1, 2, 3, 4};
     const Vector<double> v3 = {1, 2};
@@ -35,7 +35,7 @@ TEST(VectorOperations, assign_vector_scalar)
 
 TEST(VectorOperations, add_vector_vector)
 {
-    Vector<double> v1 = {1, 2, 3};
+    Vector<double> v1       = {1, 2, 3};
     const Vector<double> v2 = {-1, -5, 2};
     add(v1, v2);
     const Vector<double> expected_result = {0, -3, 5};
@@ -46,7 +46,7 @@ TEST(VectorOperations, add_vector_vector)
 
 TEST(VectorOperations, subtract_vector_vector)
 {
-    Vector<double> v1 = {1, 2, 3};
+    Vector<double> v1       = {1, 2, 3};
     const Vector<double> v2 = {-1, -5, 2};
     subtract(v1, v2);
     const Vector<double> expected_result = {2, 7, 1};
@@ -57,10 +57,10 @@ TEST(VectorOperations, subtract_vector_vector)
 
 TEST(VectorOperations, linear_combination)
 {
-    Vector<double> v1 = {1, 2, 3};
+    Vector<double> v1       = {1, 2, 3};
     const Vector<double> v2 = {-1, -5, 2};
-    const double alpha = -3.0;
-    const double beta = 2.0;
+    const double alpha      = -3.0;
+    const double beta       = 2.0;
     linear_combination(v1, alpha, v2, beta);
     const Vector<double> expected_result = {-5.0, -16.0, -5.0};
     EXPECT_TRUE(equals(v1, expected_result));
@@ -70,7 +70,7 @@ TEST(VectorOperations, linear_combination)
 
 TEST(VectorOperations, multiply_vector_scalar)
 {
-    Vector<double> v1 = {1, -2, 3};
+    Vector<double> v1  = {1, -2, 3};
     const double alpha = -3.0;
     multiply(v1, alpha);
     const Vector<double> expected_result = {-3.0, 6.0, -9.0};

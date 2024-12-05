@@ -53,10 +53,10 @@ private:
     std::unique_ptr<T[]> main_diagonal_values_;
     std::unique_ptr<T[]> sub_diagonal_values_;
     T cyclic_corner_element_ = 0.0;
-    bool is_cyclic_ = true;
+    bool is_cyclic_          = true;
 
     bool factorized_ = false;
-    T gamma_ = 0.0;
+    T gamma_         = 0.0;
 
     // Solve methods
     void solveSymmetricTridiagonal(T* x, T* scratch);
@@ -71,45 +71,43 @@ std::ostream& operator<<(std::ostream& stream, const SymmetricTridiagonalSolver<
     if (solver.factorized_) {
         // Print the L, D decomposition if factorized
         stream << "L Factor (Sub Diagonal Elements): [";
-        for (int i = 0; i < solver.matrix_dimension_ - 1; ++i)
-        {
+        for (int i = 0; i < solver.matrix_dimension_ - 1; ++i) {
             stream << solver.L_factor(i);
-            if (i != solver.matrix_dimension_ - 2) stream << ", ";
+            if (i != solver.matrix_dimension_ - 2)
+                stream << ", ";
         }
         stream << "]\n";
 
         stream << "D Factor (Diagonal Elements): [";
-        for (int i = 0; i < solver.matrix_dimension_; ++i)
-        {
+        for (int i = 0; i < solver.matrix_dimension_; ++i) {
             stream << solver.D_factor(i);
-            if (i != solver.matrix_dimension_ - 1) stream << ", ";
+            if (i != solver.matrix_dimension_ - 1)
+                stream << ", ";
         }
         stream << "]\n";
-
-    } else {
+    }
+    else {
         // Print the matrix in its tridiagonal form if not factorized
         stream << "Main Diagonal: [";
-        for (int i = 0; i < solver.matrix_dimension_; ++i)
-        {
+        for (int i = 0; i < solver.matrix_dimension_; ++i) {
             stream << solver.main_diagonal(i);
-            if (i != solver.matrix_dimension_ - 1) stream << ", ";
+            if (i != solver.matrix_dimension_ - 1)
+                stream << ", ";
         }
         stream << "]\n";
 
         stream << "Sub Diagonal: [";
-        for (int i = 0; i < solver.matrix_dimension_ - 1; ++i)
-        {
+        for (int i = 0; i < solver.matrix_dimension_ - 1; ++i) {
             stream << solver.sub_diagonal(i);
-            if (i != solver.matrix_dimension_ - 2) stream << ", ";
+            if (i != solver.matrix_dimension_ - 2)
+                stream << ", ";
         }
         stream << "]\n";
 
-        if (solver.is_cyclic_)
-        {
+        if (solver.is_cyclic_) {
             stream << "Cyclic Corner Element: " << solver.cyclic_corner_element() << "\n";
         }
-        else
-        {
+        else {
             stream << "Matrix is not cyclic.\n";
         }
     }
@@ -137,30 +135,32 @@ SymmetricTridiagonalSolver<T>::SymmetricTridiagonalSolver(const SymmetricTridiag
     , cyclic_corner_element_(other.cyclic_corner_element_)
     , is_cyclic_(other.is_cyclic_)
 {
-    std::copy(other.main_diagonal_values_.get(), other.main_diagonal_values_.get() + matrix_dimension_, main_diagonal_values_.get());
-    std::copy(other.sub_diagonal_values_.get(), other.sub_diagonal_values_.get() + matrix_dimension_ - 1, sub_diagonal_values_.get());
+    std::copy(other.main_diagonal_values_.get(), other.main_diagonal_values_.get() + matrix_dimension_,
+              main_diagonal_values_.get());
+    std::copy(other.sub_diagonal_values_.get(), other.sub_diagonal_values_.get() + matrix_dimension_ - 1,
+              sub_diagonal_values_.get());
 }
 
 // copy assignment
 template <typename T>
 SymmetricTridiagonalSolver<T>& SymmetricTridiagonalSolver<T>::operator=(const SymmetricTridiagonalSolver& other)
 {
-    if (this == &other)
-    {
+    if (this == &other) {
         // Self-assignment, no work needed
         return *this;
     }
     // Only allocate new memory if the sizes are different
-    if (matrix_dimension_ != other.matrix_dimension_)
-    {
-        matrix_dimension_ = other.matrix_dimension_;
+    if (matrix_dimension_ != other.matrix_dimension_) {
+        matrix_dimension_     = other.matrix_dimension_;
         main_diagonal_values_ = std::make_unique<T[]>(matrix_dimension_);
-        sub_diagonal_values_ = std::make_unique<T[]>(matrix_dimension_ - 1);
+        sub_diagonal_values_  = std::make_unique<T[]>(matrix_dimension_ - 1);
     }
     cyclic_corner_element_ = other.cyclic_corner_element_;
-    is_cyclic_ = other.is_cyclic_;
-    std::copy(other.main_diagonal_values_.get(), other.main_diagonal_values_.get() + matrix_dimension_, main_diagonal_values_.get());
-    std::copy(other.sub_diagonal_values_.get(), other.sub_diagonal_values_.get() + matrix_dimension_ - 1, sub_diagonal_values_.get());
+    is_cyclic_             = other.is_cyclic_;
+    std::copy(other.main_diagonal_values_.get(), other.main_diagonal_values_.get() + matrix_dimension_,
+              main_diagonal_values_.get());
+    std::copy(other.sub_diagonal_values_.get(), other.sub_diagonal_values_.get() + matrix_dimension_ - 1,
+              sub_diagonal_values_.get());
     return *this;
 }
 
@@ -173,23 +173,23 @@ SymmetricTridiagonalSolver<T>::SymmetricTridiagonalSolver(SymmetricTridiagonalSo
     , cyclic_corner_element_(other.cyclic_corner_element_)
     , is_cyclic_(other.is_cyclic_)
 {
-    other.matrix_dimension_ = 0;
+    other.matrix_dimension_      = 0;
     other.cyclic_corner_element_ = 0.0;
-    other.is_cyclic_ = true;
+    other.is_cyclic_             = true;
 }
 
 // move assignment
 template <typename T>
 SymmetricTridiagonalSolver<T>& SymmetricTridiagonalSolver<T>::operator=(SymmetricTridiagonalSolver&& other) noexcept
 {
-    matrix_dimension_ = other.matrix_dimension_;
-    main_diagonal_values_ = std::move(other.main_diagonal_values_);
-    sub_diagonal_values_ = std::move(other.sub_diagonal_values_);
-    cyclic_corner_element_ = other.cyclic_corner_element_;
-    is_cyclic_ = other.is_cyclic_;
-    other.matrix_dimension_ = 0;
+    matrix_dimension_            = other.matrix_dimension_;
+    main_diagonal_values_        = std::move(other.main_diagonal_values_);
+    sub_diagonal_values_         = std::move(other.sub_diagonal_values_);
+    cyclic_corner_element_       = other.cyclic_corner_element_;
+    is_cyclic_                   = other.is_cyclic_;
+    other.matrix_dimension_      = 0;
     other.cyclic_corner_element_ = 0.0;
-    other.is_cyclic_ = true;
+    other.is_cyclic_             = true;
     return *this;
 }
 
@@ -277,13 +277,11 @@ void SymmetricTridiagonalSolver<T>::solveInPlace(T* sol_rhs, T* temp1, T* temp2)
     assert(matrix_dimension_ >= 2);
     assert(sol_rhs != nullptr);
     assert(temp1 != nullptr);
-    if (is_cyclic_)
-    {
+    if (is_cyclic_) {
         assert(temp2 != nullptr);
         solveSymmetricCyclicTridiagonal(sol_rhs, temp1, temp2);
     }
-    else
-    {
+    else {
         solveSymmetricTridiagonal(sol_rhs, temp1);
     }
 }
@@ -310,11 +308,11 @@ void SymmetricTridiagonalSolver<T>::solveSymmetricTridiagonal(T* x, T* scratch)
     * need not be recalculated each time.
     * ---------------------------------------------------------- */
 
-    if(!factorized_){
-        for (int i = 1; i < matrix_dimension_; i++){
-            assert(!equals(main_diagonal(i-1), 0.0));
-            sub_diagonal(i-1) /= main_diagonal(i-1);
-            main_diagonal(i) -= sub_diagonal(i-1) * sub_diagonal(i-1) * main_diagonal(i-1);
+    if (!factorized_) {
+        for (int i = 1; i < matrix_dimension_; i++) {
+            assert(!equals(main_diagonal(i - 1), 0.0));
+            sub_diagonal(i - 1) /= main_diagonal(i - 1);
+            main_diagonal(i) -= sub_diagonal(i - 1) * sub_diagonal(i - 1) * main_diagonal(i - 1);
         }
         factorized_ = true;
     }
@@ -329,7 +327,7 @@ void SymmetricTridiagonalSolver<T>::solveSymmetricTridiagonal(T* x, T* scratch)
     }
 
     for (int i = matrix_dimension_ - 2; i >= 0; i--) {
-        x[i] -= sub_diagonal(i) * x[i + 1]; 
+        x[i] -= sub_diagonal(i) * x[i + 1];
     }
 
     /* --------------------------------------------------------------- */
@@ -389,14 +387,14 @@ void SymmetricTridiagonalSolver<T>::solveSymmetricCyclicTridiagonal(T* x, T* u, 
      * being stored internally.
      * ---------------------------------------------------------- */
 
-    if(!factorized_){
+    if (!factorized_) {
         gamma_ = -main_diagonal(0);
         main_diagonal(0) -= gamma_;
-        main_diagonal(matrix_dimension_-1) -= cyclic_corner_element() * cyclic_corner_element() / gamma_;
+        main_diagonal(matrix_dimension_ - 1) -= cyclic_corner_element() * cyclic_corner_element() / gamma_;
 
-        for (int i = 1; i < matrix_dimension_; i++){
-            sub_diagonal(i-1) /= main_diagonal(i-1);
-            main_diagonal(i) -= sub_diagonal(i-1) * sub_diagonal(i-1) * main_diagonal(i-1);
+        for (int i = 1; i < matrix_dimension_; i++) {
+            sub_diagonal(i - 1) /= main_diagonal(i - 1);
+            main_diagonal(i) -= sub_diagonal(i - 1) * sub_diagonal(i - 1) * main_diagonal(i - 1);
         }
         factorized_ = true;
     }
@@ -404,9 +402,9 @@ void SymmetricTridiagonalSolver<T>::solveSymmetricCyclicTridiagonal(T* x, T* u, 
     u[0] = gamma_;
     for (int i = 1; i < matrix_dimension_; i++) {
         x[i] -= sub_diagonal(i - 1) * x[i - 1];
-        if(i < matrix_dimension_ - 1)
+        if (i < matrix_dimension_ - 1)
             u[i] = 0.0 - sub_diagonal(i - 1) * u[i - 1];
-        else 
+        else
             u[i] = cyclic_corner_element() - sub_diagonal(i - 1) * u[i - 1];
     }
 
@@ -422,10 +420,9 @@ void SymmetricTridiagonalSolver<T>::solveSymmetricCyclicTridiagonal(T* x, T* u, 
 
     const double dot_product_x_v = x[0] + cyclic_corner_element() / gamma_ * x[matrix_dimension_ - 1];
     const double dot_product_u_v = u[0] + cyclic_corner_element() / gamma_ * u[matrix_dimension_ - 1];
-    const double factor = dot_product_x_v / (1.0 + dot_product_u_v);
+    const double factor          = dot_product_x_v / (1.0 + dot_product_u_v);
 
-    for (int i = 0; i < matrix_dimension_; i++)
-    {
+    for (int i = 0; i < matrix_dimension_; i++) {
         x[i] -= factor * u[i];
     }
 

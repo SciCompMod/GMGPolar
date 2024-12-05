@@ -6,20 +6,15 @@ const Stencil& ExtrapolatedSmootherTake::getStencil(int i_r, int i_theta) const
 
     assert((grid_.ntheta() / 2) % 2 == 0);
 
-    if (i_r == 0)
-    {
-        if (i_theta % 2 == 0)
-        {
+    if (i_r == 0) {
+        if (i_theta % 2 == 0) {
             return stencil_center_;
         }
-        else
-        {
-            if (!DirBC_Interior_)
-            {
+        else {
+            if (!DirBC_Interior_) {
                 return stencil_center_left_;
             }
-            else
-            {
+            else {
                 return stencil_center_;
             }
         }
@@ -34,14 +29,11 @@ int ExtrapolatedSmootherTake::getNonZeroCountCircleAsc(const int i_r) const
 
     assert((grid_.ntheta() / 2) % 2 == 0);
 
-    if (i_r == 0)
-    {
-        if (!DirBC_Interior_)
-        {
+    if (i_r == 0) {
+        if (!DirBC_Interior_) {
             return grid_.ntheta() / 2 + 2 * (grid_.ntheta() / 2);
         }
-        else
-        {
+        else {
             return grid_.ntheta();
         }
     }
@@ -55,21 +47,16 @@ int ExtrapolatedSmootherTake::getCircleAscIndex(const int i_r, const int i_theta
 
     assert((grid_.ntheta() / 2) % 2 == 0);
 
-    if (i_r == 0)
-    {
-        if (!DirBC_Interior_)
-        {
-            if (i_theta % 2 == 0)
-            {
+    if (i_r == 0) {
+        if (!DirBC_Interior_) {
+            if (i_theta % 2 == 0) {
                 return 3 * (i_theta / 2);
             }
-            else
-            {
+            else {
                 return 3 * (i_theta / 2) + 1;
             }
         }
-        else
-        {
+        else {
             return i_theta;
         }
     }

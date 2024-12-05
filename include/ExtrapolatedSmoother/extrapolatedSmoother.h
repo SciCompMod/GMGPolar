@@ -25,11 +25,9 @@ class Level;
 class ExtrapolatedSmoother
 {
 public:
-    explicit ExtrapolatedSmoother(const PolarGrid& grid,
-                                  const LevelCache& level_cache,
+    explicit ExtrapolatedSmoother(const PolarGrid& grid, const LevelCache& level_cache,
                                   const DomainGeometry& domain_geometry,
-                                  const DensityProfileCoefficients& density_profile_coefficients,
-                                  bool DirBC_Interior,
+                                  const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior,
                                   int num_omp_threads);
     virtual ~ExtrapolatedSmoother() = default;
 

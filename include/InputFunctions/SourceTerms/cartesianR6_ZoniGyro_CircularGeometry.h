@@ -4,7 +4,8 @@
 
 #include "../sourceTerm.h"
 
-class CartesianR6_ZoniGyro_CircularGeometry : public SourceTerm { 
+class CartesianR6_ZoniGyro_CircularGeometry : public SourceTerm
+{
 public:
     CartesianR6_ZoniGyro_CircularGeometry() = default;
     explicit CartesianR6_ZoniGyro_CircularGeometry(const double& Rmax);

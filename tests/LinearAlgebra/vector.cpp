@@ -4,8 +4,9 @@
 
 #include "../../include/LinearAlgebra/vector.h"
 
-#define EXPECT_DOUBLE_COMPLEX_EQ(a, b) \
-    EXPECT_DOUBLE_EQ((a).real(), (b).real()); EXPECT_DOUBLE_EQ((a).imag(), (b).imag())
+#define EXPECT_DOUBLE_COMPLEX_EQ(a, b)                                                                                 \
+    EXPECT_DOUBLE_EQ((a).real(), (b).real());                                                                          \
+    EXPECT_DOUBLE_EQ((a).imag(), (b).imag())
 
 // -------------- //
 // Vector<double> //
@@ -64,7 +65,7 @@ TEST(VectorDouble, copy_assign)
 
     {
         const Vector<double> v1 = {1.0, 2.0, 3.0};
-        v2 = v1;
+        v2                      = v1;
 
         ASSERT_EQ(v1.size(), 3);
         EXPECT_DOUBLE_EQ(v1[0], 1.0);
@@ -170,13 +171,13 @@ TEST(VectorDouble, size_construct_modify)
 // Vector<float> //
 // ------------- //
 
-TEST(VectorFloat , default_construct)
+TEST(VectorFloat, default_construct)
 {
     const Vector<float> v;
     (void)v;
 }
 
-TEST(VectorFloat , value_construct)
+TEST(VectorFloat, value_construct)
 {
     const Vector<float> v = {1.0, 2.0, 3.0};
     ASSERT_EQ(v.size(), 3);
@@ -185,13 +186,13 @@ TEST(VectorFloat , value_construct)
     EXPECT_FLOAT_EQ(v[2], 3.0);
 }
 
-TEST(VectorFloat , size_construct)
+TEST(VectorFloat, size_construct)
 {
     const Vector<float> v(5);
     ASSERT_EQ(v.size(), 5);
 }
 
-TEST(VectorFloat , copy_construct)
+TEST(VectorFloat, copy_construct)
 {
     const Vector<float> v1 = {1.0, 2.0, 3.0};
     const Vector<float> v2 = v1;
@@ -207,13 +208,13 @@ TEST(VectorFloat , copy_construct)
     EXPECT_FLOAT_EQ(v2[2], 3.0);
 }
 
-TEST(VectorFloat , copy_assign)
+TEST(VectorFloat, copy_assign)
 {
     Vector<float> v2;
 
     {
         const Vector<float> v1 = {1.0, 2.0, 3.0};
-        v2 = v1;
+        v2                     = v1;
 
         ASSERT_EQ(v1.size(), 3);
         EXPECT_FLOAT_EQ(v1[0], 1.0);
@@ -232,7 +233,7 @@ TEST(VectorFloat , copy_assign)
     EXPECT_FLOAT_EQ(v2[2], 3.0);
 }
 
-TEST(VectorFloat , move_construct)
+TEST(VectorFloat, move_construct)
 {
     Vector<float> v1 = {1.0, 2.0, 3.0};
 
@@ -249,7 +250,7 @@ TEST(VectorFloat , move_construct)
     EXPECT_FLOAT_EQ(v2[2], 3.0);
 }
 
-TEST(VectorFloat , move_assign)
+TEST(VectorFloat, move_assign)
 {
     Vector<float> v2;
 
@@ -274,7 +275,7 @@ TEST(VectorFloat , move_assign)
     EXPECT_FLOAT_EQ(v2[2], 3.0);
 }
 
-TEST(VectorFloat , value_construct_modify)
+TEST(VectorFloat, value_construct_modify)
 {
     Vector<float> v = {1.0, 2.0, 3.0};
     ASSERT_EQ(v.size(), 3);
@@ -289,7 +290,7 @@ TEST(VectorFloat , value_construct_modify)
     EXPECT_FLOAT_EQ(v[2], 5.0);
 }
 
-TEST(VectorFloat , size_construct_modify)
+TEST(VectorFloat, size_construct_modify)
 {
     Vector<float> v(5);
     ASSERT_EQ(v.size(), 5);
@@ -311,13 +312,13 @@ TEST(VectorFloat , size_construct_modify)
 // Vector<std::complex<double>> //
 // ---------------------------- //
 
-TEST(VectorDoubleComplex , default_construct)
+TEST(VectorDoubleComplex, default_construct)
 {
     const Vector<std::complex<double>> v;
     (void)v;
 }
 
-TEST(VectorDoubleComplex , value_construct)
+TEST(VectorDoubleComplex, value_construct)
 {
     using namespace std::complex_literals;
     const Vector<std::complex<double>> v = {1.0 + 4.0i, 2.0 + 5.0i, 3.0 + 6.0i};
@@ -327,13 +328,13 @@ TEST(VectorDoubleComplex , value_construct)
     EXPECT_DOUBLE_COMPLEX_EQ(v[2], 3.0 + 6.0i);
 }
 
-TEST(VectorDoubleComplex , size_construct)
+TEST(VectorDoubleComplex, size_construct)
 {
     const Vector<std::complex<double>> v(5);
     ASSERT_EQ(v.size(), 5);
 }
 
-TEST(VectorDoubleComplex , copy_construct)
+TEST(VectorDoubleComplex, copy_construct)
 {
     using namespace std::complex_literals;
     const Vector<std::complex<double>> v1 = {1.0 + 4.0i, 2.0 + 5.0i, 3.0 + 6.0i};
@@ -350,14 +351,14 @@ TEST(VectorDoubleComplex , copy_construct)
     EXPECT_DOUBLE_COMPLEX_EQ(v2[2], 3.0 + 6.0i);
 }
 
-TEST(VectorDoubleComplex , copy_assign)
+TEST(VectorDoubleComplex, copy_assign)
 {
     using namespace std::complex_literals;
     Vector<std::complex<double>> v2;
 
     {
         const Vector<std::complex<double>> v1 = {1.0 + 4.0i, 2.0 + 5.0i, 3.0 + 6.0i};
-        v2 = v1;
+        v2                                    = v1;
 
         ASSERT_EQ(v1.size(), 3);
         EXPECT_DOUBLE_COMPLEX_EQ(v1[0], 1.0 + 4.0i);
@@ -376,7 +377,7 @@ TEST(VectorDoubleComplex , copy_assign)
     EXPECT_DOUBLE_COMPLEX_EQ(v2[2], 3.0 + 6.0i);
 }
 
-TEST(VectorDoubleComplex , move_construct)
+TEST(VectorDoubleComplex, move_construct)
 {
     using namespace std::complex_literals;
     Vector<std::complex<double>> v1 = {1.0 + 4.0i, 2.0 + 5.0i, 3.0 + 6.0i};
@@ -394,7 +395,7 @@ TEST(VectorDoubleComplex , move_construct)
     EXPECT_DOUBLE_COMPLEX_EQ(v2[2], 3.0 + 6.0i);
 }
 
-TEST(VectorDoubleComplex , move_assign)
+TEST(VectorDoubleComplex, move_assign)
 {
     using namespace std::complex_literals;
     Vector<std::complex<double>> v2;
@@ -420,7 +421,7 @@ TEST(VectorDoubleComplex , move_assign)
     EXPECT_DOUBLE_COMPLEX_EQ(v2[2], 3.0 + 6.0i);
 }
 
-TEST(VectorDoubleComplex , value_construct_modify)
+TEST(VectorDoubleComplex, value_construct_modify)
 {
     using namespace std::complex_literals;
     Vector<std::complex<double>> v = {1.0 + 4.0i, 2.0 + 5.0i, 3.0 + 6.0i};
@@ -436,7 +437,7 @@ TEST(VectorDoubleComplex , value_construct_modify)
     EXPECT_DOUBLE_COMPLEX_EQ(v[2], 5.0 + 0.0i);
 }
 
-TEST(VectorDoubleComplex , size_construct_modify)
+TEST(VectorDoubleComplex, size_construct_modify)
 {
     using namespace std::complex_literals;
     Vector<std::complex<double>> v(5);

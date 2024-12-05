@@ -267,12 +267,18 @@ private:
 
     /* ------------------- */
     /* Multigrid Functions */
-    void multigrid_V_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
-    void multigrid_W_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
-    void multigrid_F_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
-    void implicitlyExtrapolatedMultigrid_V_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
-    void implicitlyExtrapolatedMultigrid_W_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
-    void implicitlyExtrapolatedMultigrid_F_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
+    void multigrid_V_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs,
+                           Vector<double>& residual);
+    void multigrid_W_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs,
+                           Vector<double>& residual);
+    void multigrid_F_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs,
+                           Vector<double>& residual);
+    void implicitlyExtrapolatedMultigrid_V_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs,
+                                                 Vector<double>& residual);
+    void implicitlyExtrapolatedMultigrid_W_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs,
+                                                 Vector<double>& residual);
+    void implicitlyExtrapolatedMultigrid_F_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs,
+                                                 Vector<double>& residual);
 
     void prolongation(const int current_level, Vector<double>& result, const Vector<double>& x) const;
     void restriction(const int current_level, Vector<double>& result, const Vector<double>& x) const;
@@ -281,7 +287,8 @@ private:
     void extrapolatedRestriction(const int current_level, Vector<double>& result, const Vector<double>& x) const;
     void FMGInterpolation(const int current_level, Vector<double>& result, const Vector<double>& x) const;
 
-    void extrapolatedResidual(const int current_level, Vector<double>& residual, const Vector<double>& residual_next_level);
+    void extrapolatedResidual(const int current_level, Vector<double>& residual,
+                              const Vector<double>& residual_next_level);
 
     /* ------------- */
     /* Visualization */

@@ -1,26 +1,24 @@
 #include "../../../include/GMGPolar/gmgpolar.h"
 
-void GMGPolar::implicitlyExtrapolatedMultigrid_W_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual)
+void GMGPolar::implicitlyExtrapolatedMultigrid_W_Cycle(const int level_depth, Vector<double>& solution,
+                                                       Vector<double>& rhs, Vector<double>& residual)
 {
     assert(0 <= level_depth && level_depth < number_of_levels_ - 1);
 
     auto start_MGC = std::chrono::high_resolution_clock::now();
 
-    Level& level = levels_[level_depth];
+    Level& level      = levels_[level_depth];
     Level& next_level = levels_[level_depth + 1];
 
     auto start_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
 
     /* ------------ */
     /* Presmoothing */
-    for (int i = 0; i < pre_smoothing_steps_; i++)
-    {
-        if (level_depth == 0 && !full_grid_smoothing_)
-        {
+    for (int i = 0; i < pre_smoothing_steps_; i++) {
+        if (level_depth == 0 && !full_grid_smoothing_) {
             level.extrapolatedSmoothingInPlace(solution, rhs, residual);
         }
-        else
-        {
+        else {
             level.smoothingInPlace(solution, rhs, residual);
         }
     }
@@ -34,8 +32,7 @@ void GMGPolar::implicitlyExtrapolatedMultigrid_W_Cycle(const int level_depth, Ve
 
     /* -------------------------- */
     /* Solve A * error = residual */
-    if (level_depth + 1 == number_of_levels_ - 1)
-    {
+    if (level_depth + 1 == number_of_levels_ - 1) {
         /* --------------------- */
         /* Using a direct solver */
         /* --------------------- */
@@ -61,8 +58,7 @@ void GMGPolar::implicitlyExtrapolatedMultigrid_W_Cycle(const int level_depth, Ve
         auto end_MGC_directSolver = std::chrono::high_resolution_clock::now();
         t_avg_MGC_directSolver += std::chrono::duration<double>(end_MGC_directSolver - start_MGC_directSolver).count();
     }
-    else
-    {
+    else {
         /* ------------------------------------------ */
         /* By recursively calling the multigrid cycle */
         /* ------------------------------------------ */
@@ -99,14 +95,11 @@ void GMGPolar::implicitlyExtrapolatedMultigrid_W_Cycle(const int level_depth, Ve
 
     /* ------------- */
     /* Postsmoothing */
-    for (int i = 0; i < post_smoothing_steps_; i++)
-    {
-        if (level_depth == 0 && !full_grid_smoothing_)
-        {
+    for (int i = 0; i < post_smoothing_steps_; i++) {
+        if (level_depth == 0 && !full_grid_smoothing_) {
             level.extrapolatedSmoothingInPlace(solution, rhs, residual);
         }
-        else
-        {
+        else {
             level.smoothingInPlace(solution, rhs, residual);
         }
     }

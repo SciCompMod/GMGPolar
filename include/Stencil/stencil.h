@@ -16,10 +16,12 @@ enum class StencilType
     BottomRight,
 };
 
-class Stencil {
+class Stencil
+{
 public:
     Stencil(std::initializer_list<int> init);
     int operator[](StencilType type) const;
+
 private:
     std::array<int, 9> values_;
     int stencil_size_;

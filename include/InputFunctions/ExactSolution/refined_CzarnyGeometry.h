@@ -4,19 +4,22 @@
 
 #include "../exactSolution.h"
 
-class Refined_CzarnyGeometry : public ExactSolution {
+class Refined_CzarnyGeometry : public ExactSolution
+{
 public:
     explicit Refined_CzarnyGeometry();
-    explicit Refined_CzarnyGeometry(const double& Rmax, const double& inverse_aspect_ratio_epsilon, const double& ellipticity_e);
+    explicit Refined_CzarnyGeometry(const double& Rmax, const double& inverse_aspect_ratio_epsilon,
+                                    const double& ellipticity_e);
 
     virtual ~Refined_CzarnyGeometry() = default;
 
-    double exact_solution(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const override;
+    double exact_solution(const double& r, const double& theta, const double& sin_theta,
+                          const double& cos_theta) const override;
 
 private:
-    const double Rmax = 1.3;
+    const double Rmax                         = 1.3;
     const double inverse_aspect_ratio_epsilon = 0.3;
-    const double ellipticity_e = 1.4;
+    const double ellipticity_e                = 1.4;
 
     void initializeGeometry();
     double factor_xi;

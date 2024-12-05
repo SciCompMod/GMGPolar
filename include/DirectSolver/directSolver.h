@@ -22,11 +22,8 @@ class Level;
 class DirectSolver
 {
 public:
-    explicit DirectSolver(const PolarGrid& grid,
-                          const LevelCache& level_cache,
-                          const DomainGeometry& domain_geometry,
-                          const DensityProfileCoefficients& density_profile_coefficients,
-                          bool DirBC_Interior,
+    explicit DirectSolver(const PolarGrid& grid, const LevelCache& level_cache, const DomainGeometry& domain_geometry,
+                          const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior,
                           int num_omp_threads);
 
     virtual ~DirectSolver() = default;

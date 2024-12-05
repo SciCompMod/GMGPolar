@@ -1,20 +1,17 @@
 #include "../../../include/Residual/ResidualGive/residualGive.h"
 #include "../../../include/Residual/residual.h"
 
-// clang-format off
-
-ResidualGive::ResidualGive(
-    const PolarGrid& grid, const LevelCache& level_cache, 
-    const DomainGeometry& domain_geometry, const DensityProfileCoefficients& density_profile_coefficients,
-    bool DirBC_Interior, int num_omp_threads
-) :
-    Residual(grid, level_cache, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads)
-{}
-
+ResidualGive::ResidualGive(const PolarGrid& grid, const LevelCache& level_cache, const DomainGeometry& domain_geometry,
+                           const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior,
+                           int num_omp_threads)
+    : Residual(grid, level_cache, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads)
+{
+}
 
 /* ------------------ */
 /* result = rhs - A*x */
-void ResidualGive::computeResidual(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const {
+void ResidualGive::computeResidual(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const
+{
     assert(result.size() == x.size());
     omp_set_num_threads(num_omp_threads_);
 
@@ -22,81 +19,83 @@ void ResidualGive::computeResidual(Vector<double>& result, const Vector<double>&
 
     const double factor = -1.0;
 
-    if(omp_get_max_threads() == 1){
+    if (omp_get_max_threads() == 1) {
         /* Single-threaded execution */
-        for(int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
+        for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
             applyCircleSection(i_r, result, x, factor);
         }
         for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
             applyRadialSection(i_theta, result, x, factor);
         }
     }
-    else{
+    else {
         /* Multi-threaded execution */
-        const int num_circle_tasks = grid_.numberSmootherCircles();
+        const int num_circle_tasks        = grid_.numberSmootherCircles();
         const int additional_radial_tasks = grid_.ntheta() % 3;
-        const int num_radial_tasks = grid_.ntheta() - additional_radial_tasks;
+        const int num_radial_tasks        = grid_.ntheta() - additional_radial_tasks;
 
-        #pragma omp parallel
+#pragma omp parallel
         {
-            /* Circle Section 0 */
-            #pragma omp for
-            for(int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
-                int i_r = grid_.numberSmootherCircles() - circle_task - 1;   
+/* Circle Section 0 */
+#pragma omp for
+            for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
+                int i_r = grid_.numberSmootherCircles() - circle_task - 1;
                 applyCircleSection(i_r, result, x, factor);
             }
-            /* Circle Section 1 */
-            #pragma omp for
-            for(int circle_task = 1; circle_task < num_circle_tasks; circle_task += 3) {
-                int i_r = grid_.numberSmootherCircles() - circle_task - 1;   
+/* Circle Section 1 */
+#pragma omp for
+            for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 3) {
+                int i_r = grid_.numberSmootherCircles() - circle_task - 1;
                 applyCircleSection(i_r, result, x, factor);
             }
-            /* Circle Section 2 */
-            #pragma omp for nowait
-            for(int circle_task = 2; circle_task < num_circle_tasks; circle_task += 3) {
-                int i_r = grid_.numberSmootherCircles() - circle_task - 1;   
+/* Circle Section 2 */
+#pragma omp for nowait
+            for (int circle_task = 2; circle_task < num_circle_tasks; circle_task += 3) {
+                int i_r = grid_.numberSmootherCircles() - circle_task - 1;
                 applyCircleSection(i_r, result, x, factor);
             }
 
-            /* Radial Section 0 */
-            #pragma omp for
+/* Radial Section 0 */
+#pragma omp for
             for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {
-                if(radial_task > 0){
-                    int i_theta = radial_task + additional_radial_tasks;    
+                if (radial_task > 0) {
+                    int i_theta = radial_task + additional_radial_tasks;
                     applyRadialSection(i_theta, result, x, factor);
-                } else{
-                    if(additional_radial_tasks == 0){
+                }
+                else {
+                    if (additional_radial_tasks == 0) {
                         applyRadialSection(0, result, x, factor);
-                    } 
-                    else if(additional_radial_tasks >= 1){
+                    }
+                    else if (additional_radial_tasks >= 1) {
                         applyRadialSection(0, result, x, factor);
                         applyRadialSection(1, result, x, factor);
                     }
                 }
             }
-            /* Radial Section 1 */
-            #pragma omp for
+/* Radial Section 1 */
+#pragma omp for
             for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 3) {
-                if(radial_task > 1){
-                    int i_theta = radial_task + additional_radial_tasks;    
+                if (radial_task > 1) {
+                    int i_theta = radial_task + additional_radial_tasks;
                     applyRadialSection(i_theta, result, x, factor);
-                } else {
-                    if(additional_radial_tasks == 0){
+                }
+                else {
+                    if (additional_radial_tasks == 0) {
                         applyRadialSection(1, result, x, factor);
-                    } 
-                    else if(additional_radial_tasks == 1){
+                    }
+                    else if (additional_radial_tasks == 1) {
                         applyRadialSection(2, result, x, factor);
                     }
-                    else if(additional_radial_tasks == 2){
+                    else if (additional_radial_tasks == 2) {
                         applyRadialSection(2, result, x, factor);
                         applyRadialSection(3, result, x, factor);
                     }
                 }
             }
-            /* Radial Section 2 */
-            #pragma omp for
+/* Radial Section 2 */
+#pragma omp for
             for (int radial_task = 2; radial_task < num_radial_tasks; radial_task += 3) {
-                int i_theta = radial_task + additional_radial_tasks;    
+                int i_theta = radial_task + additional_radial_tasks;
                 applyRadialSection(i_theta, result, x, factor);
             }
         }

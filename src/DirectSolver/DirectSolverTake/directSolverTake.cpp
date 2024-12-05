@@ -1,18 +1,17 @@
 #include "../../../include/DirectSolver/DirectSolverTake/directSolverTake.h"
 
-// clang-format off
-DirectSolverTake::DirectSolverTake(
-    const PolarGrid& grid, const LevelCache& level_cache, 
-    const DomainGeometry& domain_geometry, const DensityProfileCoefficients& density_profile_coefficients,
-    bool DirBC_Interior, int num_omp_threads
-) :
-    DirectSolver(grid, level_cache, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads)
+DirectSolverTake::DirectSolverTake(const PolarGrid& grid, const LevelCache& level_cache,
+                                   const DomainGeometry& domain_geometry,
+                                   const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior,
+                                   int num_omp_threads)
+    : DirectSolver(grid, level_cache, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads)
 {
     solver_matrix_ = buildSolverMatrix();
     initializeMumpsSolver(mumps_solver_, solver_matrix_);
 }
 
-void DirectSolverTake::solveInPlace(Vector<double>& solution) {
+void DirectSolverTake::solveInPlace(Vector<double>& solution)
+{
     // Adjusts the right-hand side vector to account for symmetry corrections.
     // This transforms the system matrixA * solution = rhs into the equivalent system:
     // symmetric(matrixA) * solution = rhs - applySymmetryShift(rhs).
@@ -21,7 +20,7 @@ void DirectSolverTake::solveInPlace(Vector<double>& solution) {
     solveWithMumps(solution);
 }
 
-
-DirectSolverTake::~DirectSolverTake() {
+DirectSolverTake::~DirectSolverTake()
+{
     finalizeMumpsSolver(mumps_solver_);
 }

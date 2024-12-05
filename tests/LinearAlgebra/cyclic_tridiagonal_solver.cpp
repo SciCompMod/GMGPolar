@@ -17,11 +17,11 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, diagonal_dominant_n_3)
     SymmetricTridiagonalSolver<double> solver(n);
     solver.is_cyclic(true);
     solver.cyclic_corner_element() = 0.0;
-    solver.main_diagonal(0) = -5.0;
-    solver.main_diagonal(1) = 10.0;
-    solver.main_diagonal(2) = 12.0;
-    solver.sub_diagonal(0) = 1.0;
-    solver.sub_diagonal(1) = -9.0;
+    solver.main_diagonal(0)        = -5.0;
+    solver.main_diagonal(1)        = 10.0;
+    solver.main_diagonal(2)        = 12.0;
+    solver.sub_diagonal(0)         = 1.0;
+    solver.sub_diagonal(1)         = -9.0;
 
     Vector<double> rhs(n);
     rhs[0] = 65.0;
@@ -44,8 +44,6 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, diagonal_dominant_n_3)
     EXPECT_TRUE(equals(rhs, exact_solution));
 }
 
-
-
 TEST(ZeroCyclicSymmetricTridiagonalSolver, not_diagonal_dominant_n_3)
 {
     const int n = 3;
@@ -53,11 +51,11 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, not_diagonal_dominant_n_3)
     SymmetricTridiagonalSolver<double> solver(n);
     solver.is_cyclic(true);
     solver.cyclic_corner_element() = 0.0;
-    solver.main_diagonal(0) = -1.0;
-    solver.main_diagonal(1) = 0.001;
-    solver.main_diagonal(2) = 0.6;
-    solver.sub_diagonal(0) = -20.0;
-    solver.sub_diagonal(1) = -9.0;
+    solver.main_diagonal(0)        = -1.0;
+    solver.main_diagonal(1)        = 0.001;
+    solver.main_diagonal(2)        = 0.6;
+    solver.sub_diagonal(0)         = -20.0;
+    solver.sub_diagonal(1)         = -9.0;
 
     Vector<double> rhs(n);
     rhs[0] = 65.0;
@@ -82,10 +80,9 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, not_diagonal_dominant_n_3)
     EXPECT_TRUE(equals(rhs, exact_solution));
 }
 
-
 TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10)
 {
-    const int n = 10;
+    const int n            = 10;
     const double precision = 1e-10;
 
     SymmetricTridiagonalSolver<double> solver(n);
@@ -95,22 +92,22 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10)
     std::random_device rd;
     std::mt19937 gen(42);
     std::uniform_real_distribution<> dis(-100.0, 100.0);
-    
+
     // Fill main_diagonal with random values
-    for(int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         solver.main_diagonal(i) = dis(gen);
     }
 
     // Fill sub_diagonal with random values
-    for(int i = 0; i < n-1; ++i) {
+    for (int i = 0; i < n - 1; ++i) {
         solver.sub_diagonal(i) = dis(gen);
     }
 
     const SymmetricTridiagonalSolver<double> copy_solver = solver;
-    
+
     // Fill rhs with random values
     Vector<double> rhs(n);
-    for(int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         rhs[i] = dis(gen);
     }
 
@@ -120,13 +117,15 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10)
     Vector<double> temp2(n);
     solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
 
-    EXPECT_NEAR(copy_solver.main_diagonal(0)*rhs[0] + copy_solver.sub_diagonal(0)*rhs[1], copy_rhs[0], precision);
-    for(int i = 1; i < n-1; ++i){
-        EXPECT_NEAR(copy_solver.sub_diagonal(i-1)*rhs[i-1] + copy_solver.main_diagonal(i)*rhs[i] + copy_solver.sub_diagonal(i)*rhs[i+1], copy_rhs[i], precision);
+    EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1], copy_rhs[0], precision);
+    for (int i = 1; i < n - 1; ++i) {
+        EXPECT_NEAR(copy_solver.sub_diagonal(i - 1) * rhs[i - 1] + copy_solver.main_diagonal(i) * rhs[i] +
+                        copy_solver.sub_diagonal(i) * rhs[i + 1],
+                    copy_rhs[i], precision);
     }
-    EXPECT_NEAR(copy_solver.sub_diagonal(n-2)*rhs[n-2] + copy_solver.main_diagonal(n-1)*rhs[n-1], copy_rhs[n-1], precision);
+    EXPECT_NEAR(copy_solver.sub_diagonal(n - 2) * rhs[n - 2] + copy_solver.main_diagonal(n - 1) * rhs[n - 1],
+                copy_rhs[n - 1], precision);
 }
-
 
 TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_100)
 {
@@ -142,22 +141,22 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_100)
     std::random_device rd;
     std::mt19937 gen(42);
     std::uniform_real_distribution<> dis(-100.0, 100.0);
-    
+
     // Fill main_diagonal with random values
-    for(int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         solver.main_diagonal(i) = dis(gen);
     }
 
     // Fill sub_diagonal with random values
-    for(int i = 0; i < n-1; ++i) {
+    for (int i = 0; i < n - 1; ++i) {
         solver.sub_diagonal(i) = dis(gen);
     }
 
     const SymmetricTridiagonalSolver<double> copy_solver = solver;
-    
+
     // Fill rhs with random values
     Vector<double> rhs(n);
-    for(int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         rhs[i] = dis(gen);
     }
 
@@ -167,13 +166,15 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_100)
     Vector<double> temp2(n);
     solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
 
-    EXPECT_NEAR(copy_solver.main_diagonal(0)*rhs[0] + copy_solver.sub_diagonal(0)*rhs[1], copy_rhs[0], precision);
-    for(int i = 1; i < n-1; ++i){
-        EXPECT_NEAR(copy_solver.sub_diagonal(i-1)*rhs[i-1] + copy_solver.main_diagonal(i)*rhs[i] + copy_solver.sub_diagonal(i)*rhs[i+1], copy_rhs[i], precision);
+    EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1], copy_rhs[0], precision);
+    for (int i = 1; i < n - 1; ++i) {
+        EXPECT_NEAR(copy_solver.sub_diagonal(i - 1) * rhs[i - 1] + copy_solver.main_diagonal(i) * rhs[i] +
+                        copy_solver.sub_diagonal(i) * rhs[i + 1],
+                    copy_rhs[i], precision);
     }
-    EXPECT_NEAR(copy_solver.sub_diagonal(n-2)*rhs[n-2] + copy_solver.main_diagonal(n-1)*rhs[n-1], copy_rhs[n-1], precision);
+    EXPECT_NEAR(copy_solver.sub_diagonal(n - 2) * rhs[n - 2] + copy_solver.main_diagonal(n - 1) * rhs[n - 1],
+                copy_rhs[n - 1], precision);
 }
-
 
 TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_1000)
 {
@@ -189,22 +190,22 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_1000)
     std::random_device rd;
     std::mt19937 gen(42);
     std::uniform_real_distribution<> dis(-100.0, 100.0);
-    
+
     // Fill main_diagonal with random values
-    for(int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         solver.main_diagonal(i) = dis(gen);
     }
 
     // Fill sub_diagonal with random values
-    for(int i = 0; i < n-1; ++i) {
+    for (int i = 0; i < n - 1; ++i) {
         solver.sub_diagonal(i) = dis(gen);
     }
 
     const SymmetricTridiagonalSolver<double> copy_solver = solver;
-    
+
     // Fill rhs with random values
     Vector<double> rhs(n);
-    for(int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         rhs[i] = dis(gen);
     }
 
@@ -214,11 +215,14 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_1000)
     Vector<double> temp2(n);
     solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
 
-    EXPECT_NEAR(copy_solver.main_diagonal(0)*rhs[0] + copy_solver.sub_diagonal(0)*rhs[1], copy_rhs[0], precision);
-    for(int i = 1; i < n-1; ++i){
-        EXPECT_NEAR(copy_solver.sub_diagonal(i-1)*rhs[i-1] + copy_solver.main_diagonal(i)*rhs[i] + copy_solver.sub_diagonal(i)*rhs[i+1], copy_rhs[i], precision);
+    EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1], copy_rhs[0], precision);
+    for (int i = 1; i < n - 1; ++i) {
+        EXPECT_NEAR(copy_solver.sub_diagonal(i - 1) * rhs[i - 1] + copy_solver.main_diagonal(i) * rhs[i] +
+                        copy_solver.sub_diagonal(i) * rhs[i + 1],
+                    copy_rhs[i], precision);
     }
-    EXPECT_NEAR(copy_solver.sub_diagonal(n-2)*rhs[n-2] + copy_solver.main_diagonal(n-1)*rhs[n-1], copy_rhs[n-1], precision);
+    EXPECT_NEAR(copy_solver.sub_diagonal(n - 2) * rhs[n - 2] + copy_solver.main_diagonal(n - 1) * rhs[n - 1],
+                copy_rhs[n - 1], precision);
 }
 
 TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10000)
@@ -235,22 +239,22 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10000)
     std::random_device rd;
     std::mt19937 gen(42);
     std::uniform_real_distribution<> dis(-100.0, 100.0);
-    
+
     // Fill main_diagonal with random values
-    for(int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         solver.main_diagonal(i) = dis(gen);
     }
 
     // Fill sub_diagonal with random values
-    for(int i = 0; i < n-1; ++i) {
+    for (int i = 0; i < n - 1; ++i) {
         solver.sub_diagonal(i) = dis(gen);
     }
 
     const SymmetricTridiagonalSolver<double> copy_solver = solver;
-    
+
     // Fill rhs with random values
     Vector<double> rhs(n);
-    for(int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         rhs[i] = dis(gen);
     }
 
@@ -260,14 +264,15 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10000)
     Vector<double> temp2(n);
     solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
 
-    EXPECT_NEAR(copy_solver.main_diagonal(0)*rhs[0] + copy_solver.sub_diagonal(0)*rhs[1], copy_rhs[0], precision);
-    for(int i = 1; i < n-1; ++i){
-        EXPECT_NEAR(copy_solver.sub_diagonal(i-1)*rhs[i-1] + copy_solver.main_diagonal(i)*rhs[i] + copy_solver.sub_diagonal(i)*rhs[i+1], copy_rhs[i], precision);
+    EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1], copy_rhs[0], precision);
+    for (int i = 1; i < n - 1; ++i) {
+        EXPECT_NEAR(copy_solver.sub_diagonal(i - 1) * rhs[i - 1] + copy_solver.main_diagonal(i) * rhs[i] +
+                        copy_solver.sub_diagonal(i) * rhs[i + 1],
+                    copy_rhs[i], precision);
     }
-    EXPECT_NEAR(copy_solver.sub_diagonal(n-2)*rhs[n-2] + copy_solver.main_diagonal(n-1)*rhs[n-1], copy_rhs[n-1], precision);
+    EXPECT_NEAR(copy_solver.sub_diagonal(n - 2) * rhs[n - 2] + copy_solver.main_diagonal(n - 1) * rhs[n - 1],
+                copy_rhs[n - 1], precision);
 }
-
-
 
 TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_boosted_subdiagonal_LOW_PRECISION_n_10000)
 {
@@ -285,22 +290,22 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_boosted_subdiagona
     std::random_device rd;
     std::mt19937 gen(42);
     std::uniform_real_distribution<> dis(-100.0, 100.0);
-    
+
     // Fill main_diagonal with random values
-    for(int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         solver.main_diagonal(i) = dis(gen);
     }
 
     // Fill sub_diagonal with random values
-    for(int i = 0; i < n-1; ++i) {
+    for (int i = 0; i < n - 1; ++i) {
         solver.sub_diagonal(i) = subdiagonal_boost * dis(gen);
     }
 
     const SymmetricTridiagonalSolver<double> copy_solver = solver;
-    
+
     // Fill rhs with random values
     Vector<double> rhs(n);
-    for(int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         rhs[i] = dis(gen);
     }
 
@@ -310,20 +315,19 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_boosted_subdiagona
     Vector<double> temp2(n);
     solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
 
-    EXPECT_NEAR(copy_solver.main_diagonal(0)*rhs[0] + copy_solver.sub_diagonal(0)*rhs[1], copy_rhs[0], precision);
-    for(int i = 1; i < n-1; ++i){
-        EXPECT_NEAR(copy_solver.sub_diagonal(i-1)*rhs[i-1] + copy_solver.main_diagonal(i)*rhs[i] + copy_solver.sub_diagonal(i)*rhs[i+1], copy_rhs[i], precision);
+    EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1], copy_rhs[0], precision);
+    for (int i = 1; i < n - 1; ++i) {
+        EXPECT_NEAR(copy_solver.sub_diagonal(i - 1) * rhs[i - 1] + copy_solver.main_diagonal(i) * rhs[i] +
+                        copy_solver.sub_diagonal(i) * rhs[i + 1],
+                    copy_rhs[i], precision);
     }
-    EXPECT_NEAR(copy_solver.sub_diagonal(n-2)*rhs[n-2] + copy_solver.main_diagonal(n-1)*rhs[n-1], copy_rhs[n-1], precision);
+    EXPECT_NEAR(copy_solver.sub_diagonal(n - 2) * rhs[n - 2] + copy_solver.main_diagonal(n - 1) * rhs[n - 1],
+                copy_rhs[n - 1], precision);
 }
-
-
 
 // ------------------------------ //
 // cyclic_corner_element() != 0.0 //
 // ------------------------------ //
-
-
 
 TEST(CyclicSymmetricTridiagonalSolver, diagonal_dominant_n_3)
 {
@@ -332,11 +336,11 @@ TEST(CyclicSymmetricTridiagonalSolver, diagonal_dominant_n_3)
     SymmetricTridiagonalSolver<double> solver(n);
     solver.is_cyclic(true);
     solver.cyclic_corner_element() = -3.0;
-    solver.main_diagonal(0) = -5.0;
-    solver.main_diagonal(1) = 10.0;
-    solver.main_diagonal(2) = 12.0;
-    solver.sub_diagonal(0) = 1.0;
-    solver.sub_diagonal(1) = -9.0;
+    solver.main_diagonal(0)        = -5.0;
+    solver.main_diagonal(1)        = 10.0;
+    solver.main_diagonal(2)        = 12.0;
+    solver.sub_diagonal(0)         = 1.0;
+    solver.sub_diagonal(1)         = -9.0;
 
     Vector<double> rhs(n);
     rhs[0] = 65.0;
@@ -359,8 +363,6 @@ TEST(CyclicSymmetricTridiagonalSolver, diagonal_dominant_n_3)
     EXPECT_TRUE(equals(rhs, exact_solution));
 }
 
-
-
 TEST(CyclicSymmetricTridiagonalSolver, not_diagonal_dominant_n_3)
 {
     const int n = 3;
@@ -368,11 +370,11 @@ TEST(CyclicSymmetricTridiagonalSolver, not_diagonal_dominant_n_3)
     SymmetricTridiagonalSolver<double> solver(n);
     solver.is_cyclic(true);
     solver.cyclic_corner_element() = 6.0;
-    solver.main_diagonal(0) = -1.0;
-    solver.main_diagonal(1) = 0.001;
-    solver.main_diagonal(2) = 0.6;
-    solver.sub_diagonal(0) = -20.0;
-    solver.sub_diagonal(1) = -9.0;
+    solver.main_diagonal(0)        = -1.0;
+    solver.main_diagonal(1)        = 0.001;
+    solver.main_diagonal(2)        = 0.6;
+    solver.sub_diagonal(0)         = -20.0;
+    solver.sub_diagonal(1)         = -9.0;
 
     Vector<double> rhs(n);
     rhs[0] = 65.0;
@@ -397,10 +399,9 @@ TEST(CyclicSymmetricTridiagonalSolver, not_diagonal_dominant_n_3)
     EXPECT_TRUE(equals(rhs, exact_solution));
 }
 
-
 TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10)
 {
-    const int n = 10;
+    const int n            = 10;
     const double precision = 1e-9;
 
     SymmetricTridiagonalSolver<double> solver(n);
@@ -410,23 +411,23 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10)
     std::random_device rd;
     std::mt19937 gen(42);
     std::uniform_real_distribution<> dis(-100.0, 100.0);
-    
+
     // Fill main_diagonal with random values
-    for(int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         solver.main_diagonal(i) = dis(gen);
     }
 
     // Fill sub_diagonal with random values
-    for(int i = 0; i < n-1; ++i) {
+    for (int i = 0; i < n - 1; ++i) {
         solver.sub_diagonal(i) = dis(gen);
     }
     solver.cyclic_corner_element() = dis(gen);
 
     const SymmetricTridiagonalSolver<double> copy_solver = solver;
-    
+
     // Fill rhs with random values
     Vector<double> rhs(n);
-    for(int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         rhs[i] = dis(gen);
     }
 
@@ -436,13 +437,18 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10)
     Vector<double> temp2(n);
     solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
 
-    EXPECT_NEAR(copy_solver.main_diagonal(0)*rhs[0] + copy_solver.sub_diagonal(0)*rhs[1] + copy_solver.cyclic_corner_element()*rhs[n-1], copy_rhs[0], precision);
-    for(int i = 1; i < n-1; ++i){
-        EXPECT_NEAR(copy_solver.sub_diagonal(i-1)*rhs[i-1] + copy_solver.main_diagonal(i)*rhs[i] + copy_solver.sub_diagonal(i)*rhs[i+1], copy_rhs[i], precision);
+    EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1] +
+                    copy_solver.cyclic_corner_element() * rhs[n - 1],
+                copy_rhs[0], precision);
+    for (int i = 1; i < n - 1; ++i) {
+        EXPECT_NEAR(copy_solver.sub_diagonal(i - 1) * rhs[i - 1] + copy_solver.main_diagonal(i) * rhs[i] +
+                        copy_solver.sub_diagonal(i) * rhs[i + 1],
+                    copy_rhs[i], precision);
     }
-    EXPECT_NEAR(copy_solver.sub_diagonal(n-2)*rhs[n-2] + copy_solver.main_diagonal(n-1)*rhs[n-1] + copy_solver.cyclic_corner_element()*rhs[0], copy_rhs[n-1], precision);
+    EXPECT_NEAR(copy_solver.sub_diagonal(n - 2) * rhs[n - 2] + copy_solver.main_diagonal(n - 1) * rhs[n - 1] +
+                    copy_solver.cyclic_corner_element() * rhs[0],
+                copy_rhs[n - 1], precision);
 }
-
 
 TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_100)
 {
@@ -457,23 +463,23 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_100)
     std::random_device rd;
     std::mt19937 gen(42);
     std::uniform_real_distribution<> dis(-100.0, 100.0);
-    
+
     // Fill main_diagonal with random values
-    for(int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         solver.main_diagonal(i) = dis(gen);
     }
 
     // Fill sub_diagonal with random values
-    for(int i = 0; i < n-1; ++i) {
+    for (int i = 0; i < n - 1; ++i) {
         solver.sub_diagonal(i) = dis(gen);
     }
     solver.cyclic_corner_element() = dis(gen);
 
     const SymmetricTridiagonalSolver<double> copy_solver = solver;
-    
+
     // Fill rhs with random values
     Vector<double> rhs(n);
-    for(int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         rhs[i] = dis(gen);
     }
 
@@ -483,13 +489,18 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_100)
     Vector<double> temp2(n);
     solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
 
-    EXPECT_NEAR(copy_solver.main_diagonal(0)*rhs[0] + copy_solver.sub_diagonal(0)*rhs[1] + copy_solver.cyclic_corner_element()*rhs[n-1], copy_rhs[0], precision);
-    for(int i = 1; i < n-1; ++i){
-        EXPECT_NEAR(copy_solver.sub_diagonal(i-1)*rhs[i-1] + copy_solver.main_diagonal(i)*rhs[i] + copy_solver.sub_diagonal(i)*rhs[i+1], copy_rhs[i], precision);
+    EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1] +
+                    copy_solver.cyclic_corner_element() * rhs[n - 1],
+                copy_rhs[0], precision);
+    for (int i = 1; i < n - 1; ++i) {
+        EXPECT_NEAR(copy_solver.sub_diagonal(i - 1) * rhs[i - 1] + copy_solver.main_diagonal(i) * rhs[i] +
+                        copy_solver.sub_diagonal(i) * rhs[i + 1],
+                    copy_rhs[i], precision);
     }
-    EXPECT_NEAR(copy_solver.sub_diagonal(n-2)*rhs[n-2] + copy_solver.main_diagonal(n-1)*rhs[n-1] + copy_solver.cyclic_corner_element()*rhs[0], copy_rhs[n-1], precision);
+    EXPECT_NEAR(copy_solver.sub_diagonal(n - 2) * rhs[n - 2] + copy_solver.main_diagonal(n - 1) * rhs[n - 1] +
+                    copy_solver.cyclic_corner_element() * rhs[0],
+                copy_rhs[n - 1], precision);
 }
-
 
 TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_1000)
 {
@@ -504,23 +515,23 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_1000)
     std::random_device rd;
     std::mt19937 gen(42);
     std::uniform_real_distribution<> dis(-100.0, 100.0);
-    
+
     // Fill main_diagonal with random values
-    for(int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         solver.main_diagonal(i) = dis(gen);
     }
 
     // Fill sub_diagonal with random values
-    for(int i = 0; i < n-1; ++i) {
+    for (int i = 0; i < n - 1; ++i) {
         solver.sub_diagonal(i) = dis(gen);
     }
     solver.cyclic_corner_element() = dis(gen);
 
     const SymmetricTridiagonalSolver<double> copy_solver = solver;
-    
+
     // Fill rhs with random values
     Vector<double> rhs(n);
-    for(int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         rhs[i] = dis(gen);
     }
 
@@ -530,11 +541,17 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_1000)
     Vector<double> temp2(n);
     solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
 
-    EXPECT_NEAR(copy_solver.main_diagonal(0)*rhs[0] + copy_solver.sub_diagonal(0)*rhs[1] + copy_solver.cyclic_corner_element()*rhs[n-1], copy_rhs[0], precision);
-    for(int i = 1; i < n-1; ++i){
-        EXPECT_NEAR(copy_solver.sub_diagonal(i-1)*rhs[i-1] + copy_solver.main_diagonal(i)*rhs[i] + copy_solver.sub_diagonal(i)*rhs[i+1], copy_rhs[i], precision);
+    EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1] +
+                    copy_solver.cyclic_corner_element() * rhs[n - 1],
+                copy_rhs[0], precision);
+    for (int i = 1; i < n - 1; ++i) {
+        EXPECT_NEAR(copy_solver.sub_diagonal(i - 1) * rhs[i - 1] + copy_solver.main_diagonal(i) * rhs[i] +
+                        copy_solver.sub_diagonal(i) * rhs[i + 1],
+                    copy_rhs[i], precision);
     }
-    EXPECT_NEAR(copy_solver.sub_diagonal(n-2)*rhs[n-2] + copy_solver.main_diagonal(n-1)*rhs[n-1] + copy_solver.cyclic_corner_element()*rhs[0], copy_rhs[n-1], precision);
+    EXPECT_NEAR(copy_solver.sub_diagonal(n - 2) * rhs[n - 2] + copy_solver.main_diagonal(n - 1) * rhs[n - 1] +
+                    copy_solver.cyclic_corner_element() * rhs[0],
+                copy_rhs[n - 1], precision);
 }
 
 TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10000)
@@ -550,23 +567,23 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10000)
     std::random_device rd;
     std::mt19937 gen(42);
     std::uniform_real_distribution<> dis(-100.0, 100.0);
-    
+
     // Fill main_diagonal with random values
-    for(int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         solver.main_diagonal(i) = dis(gen);
     }
 
     // Fill sub_diagonal with random values
-    for(int i = 0; i < n-1; ++i) {
+    for (int i = 0; i < n - 1; ++i) {
         solver.sub_diagonal(i) = dis(gen);
     }
     solver.cyclic_corner_element() = dis(gen);
 
     const SymmetricTridiagonalSolver<double> copy_solver = solver;
-    
+
     // Fill rhs with random values
     Vector<double> rhs(n);
-    for(int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         rhs[i] = dis(gen);
     }
 
@@ -576,14 +593,18 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10000)
     Vector<double> temp2(n);
     solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
 
-    EXPECT_NEAR(copy_solver.main_diagonal(0)*rhs[0] + copy_solver.sub_diagonal(0)*rhs[1] + copy_solver.cyclic_corner_element()*rhs[n-1], copy_rhs[0], precision);
-    for(int i = 1; i < n-1; ++i){
-        EXPECT_NEAR(copy_solver.sub_diagonal(i-1)*rhs[i-1] + copy_solver.main_diagonal(i)*rhs[i] + copy_solver.sub_diagonal(i)*rhs[i+1], copy_rhs[i], precision);
+    EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1] +
+                    copy_solver.cyclic_corner_element() * rhs[n - 1],
+                copy_rhs[0], precision);
+    for (int i = 1; i < n - 1; ++i) {
+        EXPECT_NEAR(copy_solver.sub_diagonal(i - 1) * rhs[i - 1] + copy_solver.main_diagonal(i) * rhs[i] +
+                        copy_solver.sub_diagonal(i) * rhs[i + 1],
+                    copy_rhs[i], precision);
     }
-    EXPECT_NEAR(copy_solver.sub_diagonal(n-2)*rhs[n-2] + copy_solver.main_diagonal(n-1)*rhs[n-1] + copy_solver.cyclic_corner_element()*rhs[0], copy_rhs[n-1], precision);
+    EXPECT_NEAR(copy_solver.sub_diagonal(n - 2) * rhs[n - 2] + copy_solver.main_diagonal(n - 1) * rhs[n - 1] +
+                    copy_solver.cyclic_corner_element() * rhs[0],
+                copy_rhs[n - 1], precision);
 }
-
-
 
 TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_boosted_subdiagonal_LOW_PRECISION_n_10000)
 {
@@ -600,23 +621,23 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_boosted_subdiagonal_LO
     std::random_device rd;
     std::mt19937 gen(42);
     std::uniform_real_distribution<> dis(-100.0, 100.0);
-    
+
     // Fill main_diagonal with random values
-    for(int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         solver.main_diagonal(i) = dis(gen);
     }
 
     // Fill sub_diagonal with random values
-    for(int i = 0; i < n-1; ++i) {
+    for (int i = 0; i < n - 1; ++i) {
         solver.sub_diagonal(i) = subdiagonal_boost * dis(gen);
     }
     solver.cyclic_corner_element() = subdiagonal_boost * dis(gen);
 
     const SymmetricTridiagonalSolver<double> copy_solver = solver;
-    
+
     // Fill rhs with random values
     Vector<double> rhs(n);
-    for(int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         rhs[i] = dis(gen);
     }
 
@@ -626,11 +647,17 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_boosted_subdiagonal_LO
     Vector<double> temp2(n);
     solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
 
-    EXPECT_NEAR(copy_solver.main_diagonal(0)*rhs[0] + copy_solver.sub_diagonal(0)*rhs[1] + copy_solver.cyclic_corner_element()*rhs[n-1], copy_rhs[0], precision);
-    for(int i = 1; i < n-1; ++i){
-        EXPECT_NEAR(copy_solver.sub_diagonal(i-1)*rhs[i-1] + copy_solver.main_diagonal(i)*rhs[i] + copy_solver.sub_diagonal(i)*rhs[i+1], copy_rhs[i], precision);
+    EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1] +
+                    copy_solver.cyclic_corner_element() * rhs[n - 1],
+                copy_rhs[0], precision);
+    for (int i = 1; i < n - 1; ++i) {
+        EXPECT_NEAR(copy_solver.sub_diagonal(i - 1) * rhs[i - 1] + copy_solver.main_diagonal(i) * rhs[i] +
+                        copy_solver.sub_diagonal(i) * rhs[i + 1],
+                    copy_rhs[i], precision);
     }
-    EXPECT_NEAR(copy_solver.sub_diagonal(n-2)*rhs[n-2] + copy_solver.main_diagonal(n-1)*rhs[n-1] + copy_solver.cyclic_corner_element()*rhs[0], copy_rhs[n-1], precision);
+    EXPECT_NEAR(copy_solver.sub_diagonal(n - 2) * rhs[n - 2] + copy_solver.main_diagonal(n - 1) * rhs[n - 1] +
+                    copy_solver.cyclic_corner_element() * rhs[0],
+                copy_rhs[n - 1], precision);
 }
 
 int main(int argc, char* argv[])

@@ -71,14 +71,13 @@ std::ostream& operator<<(std::ostream& stream, const SparseMatrix<U>& matrix)
 {
     stream << "SparseMatrix: " << matrix.rows_ << " x " << matrix.columns_ << "\n";
     stream << "Number of non-zeros (nnz): " << matrix.nnz_ << "\n";
-    if (matrix.is_symmetric_)
-    {
+    if (matrix.is_symmetric_) {
         stream << "Matrix is symmetric.\n";
     }
     stream << "Non-zero elements (row, column, value):\n";
-    for (int i = 0; i < matrix.nnz_; ++i)
-    {
-        stream << "(" << matrix.row_indices_[i] << ", " << matrix.column_indices_[i] << ", " << matrix.values_[i] << ")\n";
+    for (int i = 0; i < matrix.nnz_; ++i) {
+        stream << "(" << matrix.row_indices_[i] << ", " << matrix.column_indices_[i] << ", " << matrix.values_[i]
+               << ")\n";
     }
     return stream;
 }
@@ -87,19 +86,16 @@ template <typename T>
 void SparseMatrix<T>::write_to_file(const std::string& filename) const
 {
     std::ofstream file(filename);
-    if (!file.is_open())
-    {
+    if (!file.is_open()) {
         throw std::runtime_error("Unable to open file");
     }
     file << "SparseMatrix: " << rows_ << " x " << columns_ << "\n";
     file << "Number of non-zeros (nnz): " << nnz_ << "\n";
-    if (is_symmetric_)
-    {
+    if (is_symmetric_) {
         file << "Matrix is symmetric.\n";
     }
     file << "Non-zero elements (row, column, value):\n";
-    for (int i = 0; i < nnz_; ++i)
-    {
+    for (int i = 0; i < nnz_; ++i) {
         file << "(" << row_indices_[i] << ", " << column_indices_[i] << ", " << values_[i] << ")\n";
     }
     file.close();
@@ -108,16 +104,13 @@ void SparseMatrix<T>::write_to_file(const std::string& filename) const
 template <typename T>
 void sort_entries(std::vector<std::tuple<int, int, T>>& entries)
 {
-    const auto compare = [](const auto entry1, const auto entry2)
-    {
+    const auto compare = [](const auto entry1, const auto entry2) {
         const auto local_r1 = std::get<0>(entry1);
         const auto local_r2 = std::get<0>(entry2);
-        if (local_r1 < local_r2)
-        {
+        if (local_r1 < local_r2) {
             return true;
         }
-        else if (local_r1 == local_r2)
-        {
+        else if (local_r1 == local_r2) {
             return std::get<1>(entry1) < std::get<1>(entry2);
         }
         return false;
@@ -158,22 +151,20 @@ SparseMatrix<T>::SparseMatrix(const SparseMatrix& other)
 template <typename T>
 SparseMatrix<T>& SparseMatrix<T>::operator=(const SparseMatrix& other)
 {
-    if (this == &other)
-    {
+    if (this == &other) {
         // Self-assignment, no work needed
         return *this;
     }
     // Only allocate new memory if the sizes are different
-    if (nnz_ != other.nnz_)
-    {
-        row_indices_ = std::make_unique<int[]>(nnz_);
+    if (nnz_ != other.nnz_) {
+        row_indices_    = std::make_unique<int[]>(nnz_);
         column_indices_ = std::make_unique<int[]>(nnz_);
-        values_ = std::make_unique<T[]>(nnz_);
+        values_         = std::make_unique<T[]>(nnz_);
     }
     // Copy the elements
-    rows_ = other.rows_;
-    columns_ = other.columns_;
-    nnz_ = other.nnz_;
+    rows_         = other.rows_;
+    columns_      = other.columns_;
+    nnz_          = other.nnz_;
     is_symmetric_ = other.is_symmetric_;
     std::copy(other.row_indices_.get(), other.row_indices_.get() + nnz_, row_indices_.get());
     std::copy(other.column_indices_.get(), other.column_indices_.get() + nnz_, column_indices_.get());
@@ -192,9 +183,9 @@ SparseMatrix<T>::SparseMatrix(SparseMatrix&& other) noexcept
     , values_(std::move(other.values_))
     , is_symmetric_(other.is_symmetric_)
 {
-    other.nnz_ = 0;
-    other.rows_ = 0;
-    other.columns_ = 0;
+    other.nnz_          = 0;
+    other.rows_         = 0;
+    other.columns_      = 0;
     other.is_symmetric_ = false;
 }
 
@@ -202,16 +193,16 @@ SparseMatrix<T>::SparseMatrix(SparseMatrix&& other) noexcept
 template <typename T>
 SparseMatrix<T>& SparseMatrix<T>::operator=(SparseMatrix&& other) noexcept
 {
-    rows_ = other.rows_;
-    columns_ = other.columns_;
-    nnz_ = other.nnz_;
-    row_indices_ = std::move(other.row_indices_);
-    column_indices_ = std::move(other.column_indices_);
-    values_ = std::move(other.values_);
-    is_symmetric_ = other.is_symmetric_;
-    other.nnz_ = 0;
-    other.rows_ = 0;
-    other.columns_ = 0;
+    rows_               = other.rows_;
+    columns_            = other.columns_;
+    nnz_                = other.nnz_;
+    row_indices_        = std::move(other.row_indices_);
+    column_indices_     = std::move(other.column_indices_);
+    values_             = std::move(other.values_);
+    is_symmetric_       = other.is_symmetric_;
+    other.nnz_          = 0;
+    other.rows_         = 0;
+    other.columns_      = 0;
     other.is_symmetric_ = false;
     return *this;
 }
@@ -246,13 +237,12 @@ SparseMatrix<T>::SparseMatrix(int rows, int columns, const std::vector<triplet_t
     assert(columns_ >= 0);
     assert(nnz_ >= 0);
 #pragma omp parallel for
-    for (int i = 0; i < nnz_; i++)
-    {
+    for (int i = 0; i < nnz_; i++) {
         assert(0 <= std::get<0>(entries[i]) && std::get<0>(entries[i]) < rows_);
         assert(0 <= std::get<1>(entries[i]) && std::get<1>(entries[i]) < columns_);
-        row_indices_[i] = std::get<0>(entries[i]);
+        row_indices_[i]    = std::get<0>(entries[i]);
         column_indices_[i] = std::get<1>(entries[i]);
-        values_[i] = std::get<2>(entries[i]);
+        values_[i]         = std::get<2>(entries[i]);
     }
 }
 

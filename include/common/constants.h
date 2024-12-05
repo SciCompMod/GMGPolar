@@ -21,21 +21,22 @@ enum class MultigridCycleType
 /* Residual Norm Type */
 enum class ResidualNormType
 {
-    EUCLIDEAN = 0,             // Corresponds to the L2 norm
-    WEIGHTED_EUCLIDEAN = 1,    // A weighted version of the L2 norm
-    INFINITY_NORM = 2          // Corresponds to the L∞ norm
+    EUCLIDEAN          = 0, // Corresponds to the L2 norm
+    WEIGHTED_EUCLIDEAN = 1, // A weighted version of the L2 norm
+    INFINITY_NORM      = 2 // Corresponds to the L∞ norm
 };
 
 enum class ExtrapolationType
 {
-    NONE = 0,
-    IMPLICIT_EXTRAPOLATION = 1,
+    NONE                         = 0,
+    IMPLICIT_EXTRAPOLATION       = 1,
     IMPLICIT_FULL_GRID_SMOOTHING = 2,
-    COMBINED = 3,
+    COMBINED                     = 3,
 };
 
 /* Smoother Colors */
-enum class SmootherColor {
+enum class SmootherColor
+{
     Black = 0,
     White = 1,
 };
@@ -47,34 +48,34 @@ enum class SmootherColor {
 /* Geometry Types - domain_geometry */
 enum class GeometryType
 {
-    CIRCULAR = 0,
+    CIRCULAR  = 0,
     SHAFRANOV = 1,
-    CZARNY = 2,
-    CULHAM = 3
+    CZARNY    = 2,
+    CULHAM    = 3
 };
 
 /* Test Problem Types - exact_solution */
 enum class ProblemType
 {
-    CARTESIAN_R2 = 0,
-    CARTESIAN_R6 = 1,
-    POLAR_R6 = 2,
+    CARTESIAN_R2   = 0,
+    CARTESIAN_R6   = 1,
+    POLAR_R6       = 2,
     REFINED_RADIUS = 3
 };
 
 /* Alpha Coefficient Types - profile_coefficient alpha */
 enum class AlphaCoeff
 {
-    POISSON = 0,
+    POISSON       = 0,
     SONNENDRUCKER = 1,
-    ZONI = 2,
-    ZONI_SHIFTED = 3
+    ZONI          = 2,
+    ZONI_SHIFTED  = 3
 };
 
 /* Beta Coefficient Types - profile_coefficient beta */
 enum class BetaCoeff
 {
-    ZERO = 0,
+    ZERO          = 0,
     ALPHA_INVERSE = 1
 };
 
@@ -83,9 +84,9 @@ enum class BetaCoeff
 /* ---------------------------- */
 
 /* Mumps macro s.t. indices match documentation */
-#define ICNTL(I) icntl[(I)-1]
-#define CNTL(I) cntl[(I)-1]
-#define INFOG(I) infog[(I)-1]
+#define ICNTL(I) icntl[(I) - 1]
+#define CNTL(I) cntl[(I) - 1]
+#define INFOG(I) infog[(I) - 1]
 
 #define USE_COMM_WORLD -987654
 #define PAR_NOT_PARALLEL 0
@@ -119,20 +120,20 @@ enum class BetaCoeff
     #include <likwid.h>
     #include <likwid-marker.h>
     #define LIKWID_INIT() LIKWID_MARKER_INIT
-    #define LIKWID_REGISTER(marker) \
-        _Pragma("omp parallel") \
-        { \
-            LIKWID_MARKER_REGISTER(marker); \
+    #define LIKWID_REGISTER(marker)                                                                                    \
+        _Pragma("omp parallel")                                                                                        \
+        {                                                                                                              \
+            LIKWID_MARKER_REGISTER(marker);                                                                            \
         }
-    #define LIKWID_START(marker) \
-        _Pragma("omp parallel") \
-        { \
-            LIKWID_MARKER_START(marker); \
+    #define LIKWID_START(marker)                                                                                       \
+        _Pragma("omp parallel")                                                                                        \
+        {                                                                                                              \
+            LIKWID_MARKER_START(marker);                                                                               \
         }
-    #define LIKWID_STOP(marker) \
-        _Pragma("omp parallel") \
-        { \
-            LIKWID_MARKER_STOP(marker); \
+    #define LIKWID_STOP(marker)                                                                                        \
+        _Pragma("omp parallel")                                                                                        \
+        {                                                                                                              \
+            LIKWID_MARKER_STOP(marker);                                                                                \
         }
     #define LIKWID_CLOSE() LIKWID_MARKER_CLOSE
 #else

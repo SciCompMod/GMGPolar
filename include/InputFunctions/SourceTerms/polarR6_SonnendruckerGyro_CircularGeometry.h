@@ -4,7 +4,8 @@
 
 #include "../sourceTerm.h"
 
-class PolarR6_SonnendruckerGyro_CircularGeometry : public SourceTerm { 
+class PolarR6_SonnendruckerGyro_CircularGeometry : public SourceTerm
+{
 public:
     PolarR6_SonnendruckerGyro_CircularGeometry() = default;
     explicit PolarR6_SonnendruckerGyro_CircularGeometry(const double& Rmax);

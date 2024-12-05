@@ -4,7 +4,8 @@
 
 #include "../densityProfileCoefficients.h"
 
-class SonnendruckerCoefficients : public DensityProfileCoefficients { 
+class SonnendruckerCoefficients : public DensityProfileCoefficients
+{
 public:
     SonnendruckerCoefficients() = default;
     explicit SonnendruckerCoefficients(const double& Rmax, const double& alpha);
@@ -16,6 +17,6 @@ public:
     double getAlphaJump() const override;
 
 private:
-    const double Rmax = 1.3;
+    const double Rmax       = 1.3;
     const double alpha_jump = 0.66 * 1.3;
 };

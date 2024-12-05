@@ -22,11 +22,8 @@ class Level;
 class Residual
 {
 public:
-    explicit Residual(const PolarGrid& grid,
-                      const LevelCache& level_cache,
-                      const DomainGeometry& domain_geometry,
-                      const DensityProfileCoefficients& density_profile_coefficients,
-                      const bool DirBC_Interior,
+    explicit Residual(const PolarGrid& grid, const LevelCache& level_cache, const DomainGeometry& domain_geometry,
+                      const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior,
                       const int num_omp_threads);
     virtual ~Residual() = default;
 

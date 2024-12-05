@@ -26,11 +26,8 @@ class Level;
 class Smoother
 {
 public:
-    explicit Smoother(const PolarGrid& grid,
-                      const LevelCache& level_cache,
-                      const DomainGeometry& domain_geometry,
-                      const DensityProfileCoefficients& density_profile_coefficients,
-                      bool DirBC_Interior,
+    explicit Smoother(const PolarGrid& grid, const LevelCache& level_cache, const DomainGeometry& domain_geometry,
+                      const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior,
                       int num_omp_threads);
     virtual ~Smoother() = default;
 

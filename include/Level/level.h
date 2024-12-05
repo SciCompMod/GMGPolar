@@ -28,10 +28,8 @@ class Level
 public:
     // ----------- //
     // Constructor //
-    explicit Level(const int level,
-                   std::unique_ptr<const PolarGrid> grid,
-                   std::unique_ptr<const LevelCache> level_cache,
-                   const ExtrapolationType extrapolation,
+    explicit Level(const int level, std::unique_ptr<const PolarGrid> grid,
+                   std::unique_ptr<const LevelCache> level_cache, const ExtrapolationType extrapolation,
                    const bool FMG);
 
     // ---------------- //
@@ -52,36 +50,30 @@ public:
     // -------------- //
     // Apply Residual //
     void initializeResidual(const DomainGeometry& domain_geometry,
-                            const DensityProfileCoefficients& density_profile_coefficients,
-                            const bool DirBC_Interior,
-                            const int num_omp_threads,
-                            const StencilDistributionMethod stencil_distribution_method);
+                            const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior,
+                            const int num_omp_threads, const StencilDistributionMethod stencil_distribution_method);
     void computeResidual(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const;
 
     // ------------------- //
     // Solve coarse System //
     void initializeDirectSolver(const DomainGeometry& domain_geometry,
                                 const DensityProfileCoefficients& density_profile_coefficients,
-                                const bool DirBC_Interior,
-                                const int num_omp_threads,
+                                const bool DirBC_Interior, const int num_omp_threads,
                                 const StencilDistributionMethod stencil_distribution_method);
     void directSolveInPlace(Vector<double>& x) const;
 
     // --------------- //
     // Apply Smoothing //
     void initializeSmoothing(const DomainGeometry& domain_geometry,
-                             const DensityProfileCoefficients& density_profile_coefficients,
-                             const bool DirBC_Interior,
-                             const int num_omp_threads,
-                             const StencilDistributionMethod stencil_distribution_method);
+                             const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior,
+                             const int num_omp_threads, const StencilDistributionMethod stencil_distribution_method);
     void smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const;
 
     // ---------------------------- //
     // Apply Extrapolated Smoothing //
     void initializeExtrapolatedSmoothing(const DomainGeometry& domain_geometry,
                                          const DensityProfileCoefficients& density_profile_coefficients,
-                                         const bool DirBC_Interior,
-                                         const int num_omp_threads,
+                                         const bool DirBC_Interior, const int num_omp_threads,
                                          const StencilDistributionMethod stencil_distribution_method);
     void extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const;
 
@@ -104,10 +96,8 @@ private:
 class LevelCache
 {
 public:
-    explicit LevelCache(const PolarGrid& grid,
-                        const DensityProfileCoefficients& density_profile_coefficients,
-                        const DomainGeometry& domain_geometry,
-                        const bool cache_density_profile_coefficients,
+    explicit LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients,
+                        const DomainGeometry& domain_geometry, const bool cache_density_profile_coefficients,
                         const bool cache_domain_geometry);
     explicit LevelCache(const Level& previous_level, const PolarGrid& current_grid);
 

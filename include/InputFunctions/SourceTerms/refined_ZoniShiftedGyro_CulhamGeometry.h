@@ -4,7 +4,8 @@
 
 #include "../sourceTerm.h"
 
-class Refined_ZoniShiftedGyro_CulhamGeometry : public SourceTerm { 
+class Refined_ZoniShiftedGyro_CulhamGeometry : public SourceTerm
+{
 public:
     Refined_ZoniShiftedGyro_CulhamGeometry() = default;
     explicit Refined_ZoniShiftedGyro_CulhamGeometry(const double& Rmax);

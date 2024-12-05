@@ -4,7 +4,8 @@
 
 #include "../sourceTerm.h"
 
-class CartesianR6_SonnendruckerGyro_CircularGeometry : public SourceTerm { 
+class CartesianR6_SonnendruckerGyro_CircularGeometry : public SourceTerm
+{
 public:
     CartesianR6_SonnendruckerGyro_CircularGeometry() = default;
     explicit CartesianR6_SonnendruckerGyro_CircularGeometry(const double& Rmax);

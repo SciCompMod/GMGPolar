@@ -4,7 +4,8 @@
 
 #include "../sourceTerm.h"
 
-class CartesianR2_Poisson_CircularGeometry : public SourceTerm { 
+class CartesianR2_Poisson_CircularGeometry : public SourceTerm
+{
 public:
     CartesianR2_Poisson_CircularGeometry() = default;
     explicit CartesianR2_Poisson_CircularGeometry(const double& Rmax);

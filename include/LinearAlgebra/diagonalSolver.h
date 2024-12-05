@@ -50,10 +50,10 @@ std::ostream& operator<<(std::ostream& stream, const DiagonalSolver<U>& solver)
     stream << "Diagonal Matrix (Dimension: " << solver.matrix_dimension_ << " x " << solver.matrix_dimension_ << ")\n";
 
     stream << "Diagonal Elements: [";
-    for (int i = 0; i < solver.matrix_dimension_; ++i)
-    {
+    for (int i = 0; i < solver.matrix_dimension_; ++i) {
         stream << solver.diagonal(i);
-        if (i != solver.matrix_dimension_ - 1) stream << ", ";
+        if (i != solver.matrix_dimension_ - 1)
+            stream << ", ";
     }
     stream << "]\n";
 
@@ -82,16 +82,14 @@ DiagonalSolver<T>::DiagonalSolver(const DiagonalSolver& other)
 template <typename T>
 DiagonalSolver<T>& DiagonalSolver<T>::operator=(const DiagonalSolver& other)
 {
-    if (this == &other)
-    {
+    if (this == &other) {
         // Self-assignment, no work needed
         return *this;
     }
     // Only allocate new memory if the sizes are different
-    if (matrix_dimension_ != other.matrix_dimension_)
-    {
+    if (matrix_dimension_ != other.matrix_dimension_) {
         matrix_dimension_ = other.matrix_dimension_;
-        diagonal_values_ = std::make_unique<T[]>(matrix_dimension_);
+        diagonal_values_  = std::make_unique<T[]>(matrix_dimension_);
     }
     // Consider using a parllized OpenMP For-Loop instead
     std::copy(other.diagonal_values_.get(), other.diagonal_values_.get() + matrix_dimension_, diagonal_values_.get());
@@ -111,8 +109,8 @@ DiagonalSolver<T>::DiagonalSolver(DiagonalSolver&& other) noexcept
 template <typename T>
 DiagonalSolver<T>& DiagonalSolver<T>::operator=(DiagonalSolver&& other) noexcept
 {
-    matrix_dimension_ = other.matrix_dimension_;
-    diagonal_values_ = std::move(other.diagonal_values_);
+    matrix_dimension_       = other.matrix_dimension_;
+    diagonal_values_        = std::move(other.diagonal_values_);
     other.matrix_dimension_ = 0;
     return *this;
 }
@@ -160,8 +158,7 @@ T& DiagonalSolver<T>::diagonal(const int index)
 template <typename T>
 void DiagonalSolver<T>::solveInPlace(T* sol_rhs) const
 {
-    for (int i = 0; i < matrix_dimension_; i++)
-    {
+    for (int i = 0; i < matrix_dimension_; i++) {
         sol_rhs[i] /= diagonal(i);
     }
 }

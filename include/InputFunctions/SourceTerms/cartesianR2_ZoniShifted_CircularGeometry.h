@@ -4,7 +4,8 @@
 
 #include "../sourceTerm.h"
 
-class CartesianR2_ZoniShifted_CircularGeometry : public SourceTerm { 
+class CartesianR2_ZoniShifted_CircularGeometry : public SourceTerm
+{
 public:
     CartesianR2_ZoniShifted_CircularGeometry() = default;
     explicit CartesianR2_ZoniShifted_CircularGeometry(const double& Rmax);

@@ -1,10 +1,28 @@
 #include "../include/InputFunctions/SourceTerms/polarR6_SonnendruckerGyro_CircularGeometry.h"
 
-PolarR6_SonnendruckerGyro_CircularGeometry::PolarR6_SonnendruckerGyro_CircularGeometry(const double& Rmax) : 
-    Rmax(Rmax) 
-{}
-
-double PolarR6_SonnendruckerGyro_CircularGeometry::rhs_f(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const 
+PolarR6_SonnendruckerGyro_CircularGeometry::PolarR6_SonnendruckerGyro_CircularGeometry(const double& Rmax)
+    : Rmax(Rmax)
 {
-    return 0.4096 * pow((r/Rmax), 6.0) * pow(((r/Rmax) - 1.0), 6.0) * cos(11.0 * theta) / (0.452961672473868 - 0.348432055749129 * atan(14.4444444444444 * (r/Rmax) - 11.1111111111111)) - pow((r/Rmax), 4.0) * ((r/Rmax) * (0.452961672473868 - 0.348432055749129 * atan(14.4444444444444 * (r/Rmax) - 11.1111111111111)) * (12.288 * (r/Rmax) * pow(((r/Rmax) - 1.0), 4.0) * cos(11.0 * theta) + 17.2032 * pow(((r/Rmax) - 1.0), 5.0) * cos(11.0 * theta)) - 5.03290747193186 * (r/Rmax) * (2.4576 * (r/Rmax) * pow(((r/Rmax) - 1.0), 5.0) * cos(11.0 * theta) + 2.4576 * pow(((r/Rmax) - 1.0), 6.0) * cos(11.0 * theta)) / (208.641975308642 * pow(((r/Rmax) - 0.769230769230769), 2.0) + 1.0) - 49.5616 * (0.452961672473868 - 0.348432055749129 * atan(14.4444444444444 * (r/Rmax) - 11.1111111111111)) * pow(((r/Rmax) - 1.0), 6.0) * cos(11.0 * theta) + 6.0 * (0.452961672473868 - 0.348432055749129 * atan(14.4444444444444 * (r/Rmax) - 11.1111111111111)) * (2.4576 * (r/Rmax) * pow(((r/Rmax) - 1.0), 5.0) * cos(11.0 * theta) + 2.4576 * pow(((r/Rmax) - 1.0), 6.0) * cos(11.0 * theta)));
+}
+
+double PolarR6_SonnendruckerGyro_CircularGeometry::rhs_f(const double& r, const double& theta, const double& sin_theta,
+                                                         const double& cos_theta) const
+{
+    return 0.4096 * pow((r / Rmax), 6.0) * pow(((r / Rmax) - 1.0), 6.0) * cos(11.0 * theta) /
+               (0.452961672473868 - 0.348432055749129 * atan(14.4444444444444 * (r / Rmax) - 11.1111111111111)) -
+           pow((r / Rmax), 4.0) *
+               ((r / Rmax) *
+                    (0.452961672473868 - 0.348432055749129 * atan(14.4444444444444 * (r / Rmax) - 11.1111111111111)) *
+                    (12.288 * (r / Rmax) * pow(((r / Rmax) - 1.0), 4.0) * cos(11.0 * theta) +
+                     17.2032 * pow(((r / Rmax) - 1.0), 5.0) * cos(11.0 * theta)) -
+                5.03290747193186 * (r / Rmax) *
+                    (2.4576 * (r / Rmax) * pow(((r / Rmax) - 1.0), 5.0) * cos(11.0 * theta) +
+                     2.4576 * pow(((r / Rmax) - 1.0), 6.0) * cos(11.0 * theta)) /
+                    (208.641975308642 * pow(((r / Rmax) - 0.769230769230769), 2.0) + 1.0) -
+                49.5616 *
+                    (0.452961672473868 - 0.348432055749129 * atan(14.4444444444444 * (r / Rmax) - 11.1111111111111)) *
+                    pow(((r / Rmax) - 1.0), 6.0) * cos(11.0 * theta) +
+                6.0 * (0.452961672473868 - 0.348432055749129 * atan(14.4444444444444 * (r / Rmax) - 11.1111111111111)) *
+                    (2.4576 * (r / Rmax) * pow(((r / Rmax) - 1.0), 5.0) * cos(11.0 * theta) +
+                     2.4576 * pow(((r / Rmax) - 1.0), 6.0) * cos(11.0 * theta)));
 }

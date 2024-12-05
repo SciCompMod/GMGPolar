@@ -41,16 +41,14 @@ private:
     std::unique_ptr<T[]> values_;
 };
 
-// clang-format off
-
 template <typename U>
 std::ostream& operator<<(std::ostream& stream, const Vector<U>& vector)
 {
     stream << "[";
-    for (int i = 0; i < vector.size(); ++i)
-    {
+    for (int i = 0; i < vector.size(); ++i) {
         stream << vector[i];
-        if (i != vector.size() - 1) stream << ", ";
+        if (i != vector.size() - 1)
+            stream << ", ";
     }
     stream << "]\n";
     return stream;
@@ -70,9 +68,8 @@ Vector<T>::Vector(const Vector& other)
     : size_(other.size_)
     , values_(std::make_unique<T[]>(size_))
 {
-    #pragma omp parallel for if (size_ > 10'000)
-    for (int i = 0; i < size_; ++i)
-    {
+#pragma omp parallel for if (size_ > 10'000)
+    for (int i = 0; i < size_; ++i) {
         values_[i] = other.values_[i];
     }
 }
@@ -81,22 +78,19 @@ Vector<T>::Vector(const Vector& other)
 template <typename T>
 Vector<T>& Vector<T>::operator=(const Vector& other)
 {
-    if (this == &other)
-    {
+    if (this == &other) {
         /* Self-assignment, no work needed */
         return *this;
     }
 
     /* Allocate new memory if necessary */
-    if (size_ != other.size_)
-    {
-        size_ = other.size_;
+    if (size_ != other.size_) {
+        size_   = other.size_;
         values_ = std::make_unique<T[]>(size_);
     }
 
-    #pragma omp parallel for if (size_ > 10'000)
-    for (int i = 0; i < size_; ++i)
-    {
+#pragma omp parallel for if (size_ > 10'000)
+    for (int i = 0; i < size_; ++i) {
         values_[i] = other.values_[i];
     }
 
@@ -116,10 +110,9 @@ Vector<T>::Vector(Vector&& other) noexcept
 template <typename T>
 Vector<T>& Vector<T>::operator=(Vector&& other) noexcept
 {
-    if (this != &other)
-    {
-        size_ = other.size_;
-        values_ = std::move(other.values_);
+    if (this != &other) {
+        size_       = other.size_;
+        values_     = std::move(other.values_);
         other.size_ = 0;
     }
     return *this;
@@ -196,5 +189,3 @@ const T* Vector<T>::end() const noexcept
 {
     return values_.get() + size_;
 }
-
-// clang-format on

@@ -2,22 +2,21 @@
 
 #include "../include/GMGPolar/gmgpolar.h"
 
-// clang-format off
+int main(int argc, char* argv[])
+{
+// Display Build Type
+#ifdef NDEBUG
+    std::cout << "Build Type: Release" << std::endl;
+#else
+    std::cout << "Build Type: Debug" << std::endl;
+#endif
 
-int main(int argc, char* argv[]) {
-    // Display Build Type
-    #ifdef NDEBUG
-        std::cout << "Build Type: Release" << std::endl;
-    #else
-        std::cout << "Build Type: Debug" << std::endl;
-    #endif
-
-    // Check Likwid Status
-    #ifdef GMGPOLAR_USE_LIKWID
-        std::cout << "Likwid: ON\n" << std::endl;
-    #else
-        std::cout << "Likwid: OFF\n" << std::endl;
-    #endif
+// Check Likwid Status
+#ifdef GMGPOLAR_USE_LIKWID
+    std::cout << "Likwid: ON\n" << std::endl;
+#else
+    std::cout << "Likwid: OFF\n" << std::endl;
+#endif
 
     // Initialize solver and set parameters from command-line arguments
     GMGPolar solver;
@@ -43,11 +42,9 @@ int main(int argc, char* argv[]) {
 
     // Retrieve and print solution and timings
     Vector<double>& solution = solver.solution();
-    const PolarGrid& grid = solver.grid();
-    
+    const PolarGrid& grid    = solver.grid();
+
     solver.printTimings();
 
     return 0;
 }
-
-// clang-format on

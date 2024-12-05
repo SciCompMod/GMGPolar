@@ -1,11 +1,9 @@
 #include "../../include/ExtrapolatedSmoother/extrapolatedSmoother.h"
 
-ExtrapolatedSmoother::ExtrapolatedSmoother(const PolarGrid& grid,
-                                           const LevelCache& level_cache,
+ExtrapolatedSmoother::ExtrapolatedSmoother(const PolarGrid& grid, const LevelCache& level_cache,
                                            const DomainGeometry& domain_geometry,
                                            const DensityProfileCoefficients& density_profile_coefficients,
-                                           const bool DirBC_Interior,
-                                           const int num_omp_threads)
+                                           const bool DirBC_Interior, const int num_omp_threads)
     : grid_(grid)
     , level_cache_(level_cache)
     , domain_geometry_(domain_geometry)
