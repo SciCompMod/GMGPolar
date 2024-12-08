@@ -72,7 +72,7 @@ std::ostream& operator<<(std::ostream& stream, const SymmetricTridiagonalSolver<
         // Print the L, D decomposition if factorized
         stream << "L Factor (Sub Diagonal Elements): [";
         for (int i = 0; i < solver.matrix_dimension_ - 1; ++i) {
-            stream << solver.L_factor(i);
+            stream << solver.sub_diagonal(i);
             if (i != solver.matrix_dimension_ - 2)
                 stream << ", ";
         }
@@ -80,7 +80,7 @@ std::ostream& operator<<(std::ostream& stream, const SymmetricTridiagonalSolver<
 
         stream << "D Factor (Diagonal Elements): [";
         for (int i = 0; i < solver.matrix_dimension_; ++i) {
-            stream << solver.D_factor(i);
+            stream << solver.main_diagonal(i);
             if (i != solver.matrix_dimension_ - 1)
                 stream << ", ";
         }
