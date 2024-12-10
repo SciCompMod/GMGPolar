@@ -243,19 +243,19 @@ void SmootherTakeCPU::solveCircleSection(const int i_r, Vector<double>& x, Vecto
     const int start = grid_.index(i_r, 0);
     const int end   = start + grid_.ntheta();
     if (i_r == 0) {
-        // inner_boundary_mumps_solver_.job    = JOB_COMPUTE_SOLUTION;
-        // inner_boundary_mumps_solver_.nrhs   = 1; // single rhs vector
-        // inner_boundary_mumps_solver_.nz_rhs = grid_.ntheta(); // non-zeros in rhs
-        // inner_boundary_mumps_solver_.rhs    = temp.begin() + start;
-        // inner_boundary_mumps_solver_.lrhs   = grid_.ntheta(); // leading dimension of rhs
-        // dmumps_c(&inner_boundary_mumps_solver_);
-        // if (inner_boundary_mumps_solver_.info[0] != 0) {
-        //     std::cerr << "Error solving the system: " << inner_boundary_mumps_solver_.info[0] << std::endl;
-        // }
+        std::cout<<"Nothing"<<std::endl;
+        inner_boundary_mumps_solver_.job    = JOB_COMPUTE_SOLUTION;
+        inner_boundary_mumps_solver_.nrhs   = 1; // single rhs vector
+        inner_boundary_mumps_solver_.nz_rhs = grid_.ntheta(); // non-zeros in rhs
+        inner_boundary_mumps_solver_.rhs    = temp.begin() + start;
+        inner_boundary_mumps_solver_.lrhs   = grid_.ntheta(); // leading dimension of rhs
+        dmumps_c(&inner_boundary_mumps_solver_);
+        if (inner_boundary_mumps_solver_.info[0] != 0) {
+            std::cerr << "Error solving the system: " << inner_boundary_mumps_solver_.info[0] << std::endl;
+        }
     }
     else {
-        circle_tridiagonal_solver_[i_r].solveInPlace(temp.begin() + start, solver_storage_1.begin(),
-                                                     solver_storage_2.begin());
+        circle_tridiagonal_solver_[i_r].solveInPlace(temp.begin() + start, solver_storage_1.begin(), solver_storage_2.begin());
     }
     // Move updated values to x
     std::move(temp.begin() + start, temp.begin() + end, x.begin() + start);
@@ -315,8 +315,4 @@ void SmootherTakeCPU::smoothingInPlace(Vector<double>& x, const Vector<double>& 
             solveRadialSection(i_theta, x, temp, radial_solver_storage);
         } /* Implicit barrier */
     }
-    std::cout<<"HOST"<<std::endl;
-    std::cout<<x<<std::endl;
-    std::cout<<temp<<std::endl;
-
 }

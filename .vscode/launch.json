@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug test_smoother",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/tests/test_smoother",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build/tests",
+            "environment": [],
+        }
+    ]
+}

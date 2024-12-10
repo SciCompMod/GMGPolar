@@ -185,12 +185,12 @@ add_library(GMGPolarLib STATIC
     # ${RESIDUAL_SOURCES}
 )
 # Link PolarGrid and InputFunctions to GMGPolarLib
-target_link_libraries(GMGPolarLib PUBLIC PolarGrid InputFunctions cusparse)
+target_link_libraries(GMGPolarLib PUBLIC PolarGrid InputFunctions cusparse cusolver ${MUMPS_LIBRARIES})
 
 set(MAIN_SOURCE "src/main.cpp")
 add_executable(gmgpolar ${MAIN_SOURCE})
 
-target_link_libraries(gmgpolar PRIVATE GMGPolarLib ${MUMPS_LIBRARIES} ${OpenMP_CXX_LIB} cuda cudart cudadevrt cusparse)
+target_link_libraries(gmgpolar PRIVATE GMGPolarLib ${MUMPS_LIBRARIES} ${OpenMP_CXX_LIB} cuda cudart cudadevrt cusparse cusolver)
 
 if(GMGPOLAR_BUILD_TESTS)
     enable_testing()

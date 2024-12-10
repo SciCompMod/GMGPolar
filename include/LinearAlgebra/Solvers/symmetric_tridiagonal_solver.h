@@ -390,8 +390,6 @@ void SymmetricTridiagonalSolver<T>::solveSymmetricCyclicTridiagonal(T* x, T* u, 
     const double dot_product_u_v = u[0] + cyclic_corner_element() / gamma_ * u[matrix_dimension_ - 1];
     const double factor          = dot_product_x_v / (1.0 + dot_product_u_v);
 
-    // std::cout<<u[matrix_dimension_ - 1]<<std::endl;
-
     for (int i = 0; i < matrix_dimension_; i++) {
         x[i] -= factor * u[i];
     }
