@@ -29,10 +29,9 @@ void GMGPolar::setup() {
     assert(number_of_levels_ >= 2);
 
     int actual_gpu_levels;
-    if(gpu_levels_ <= 0 || gpu_levels_ >= number_of_levels_){
+    if(gpu_levels_ < 0 || gpu_levels_ >= number_of_levels_){
         actual_gpu_levels = number_of_levels_ - 1;
-    }
-    else{
+    } else{
         actual_gpu_levels = gpu_levels_;
     }
 
@@ -45,35 +44,32 @@ void GMGPolar::setup() {
 
     levels_.clear(); levels_.reserve(number_of_levels_);
 
-    int finest_level = 0;
-    ProcessingType finest_processing_type;
-
-    if (finest_level < actual_gpu_levels) {
-        finest_processing_type = ProcessingType::GPU;
-    } else if (finest_level == actual_gpu_levels) {
-        finest_processing_type = ProcessingType::CPU_HYBRID;
-    } else {
-        finest_processing_type = ProcessingType::CPU;
+    /* Example: number_of_levels_ = 5, actual_gpu_levels = 2. */
+    /* processing_type = [GPU, GPU; CPU_HYBRID, CPU, CPU]; */
+    std::vector<ProcessingType> processing_type(number_of_levels_);
+    for (int level = 0; level < number_of_levels_; level++){
+        if (level < actual_gpu_levels) {
+            processing_type[level] = ProcessingType::GPU;
+        } else if (level == actual_gpu_levels) {
+            processing_type[level] = ProcessingType::CPU_HYBRID;
+        } else {
+            processing_type[level] = ProcessingType::CPU;
+        }
+    }
+    /* If no GPU levels exist, CPU_Hybrid is set to CPU. */
+    if(processing_type[0] != ProcessingType::GPU){
+        for (int level = 0; level < number_of_levels_; level++)
+            processing_type[level] = ProcessingType::CPU;
     }
 
-    auto finest_levelCache = std::make_unique<LevelCache>(finest_processing_type, *finest_grid, *density_profile_coefficients_, *domain_geometry_);
-    levels_.emplace_back(finest_level, finest_processing_type, std::move(finest_grid), std::move(finest_levelCache), extrapolation_, FMG_);
-
+    int finest_level = 0;
+    auto finest_levelCache = std::make_unique<LevelCache>(processing_type[finest_level], *finest_grid, *density_profile_coefficients_, *domain_geometry_);
+    levels_.emplace_back(finest_level, processing_type[finest_level], std::move(finest_grid), std::move(finest_levelCache), extrapolation_, FMG_);
 
     for(int current_level = 1; current_level < number_of_levels_; current_level++) {
         auto current_grid = std::make_unique<PolarGrid>(coarseningGrid(levels_[current_level-1].grid()));
-
-        ProcessingType current_processing_type;
-        if (current_level < actual_gpu_levels) {
-            current_processing_type = ProcessingType::GPU;
-        } else if (current_level == actual_gpu_levels) {
-            current_processing_type = ProcessingType::CPU_HYBRID;
-        } else {
-            current_processing_type = ProcessingType::CPU;
-        }
-
-        auto current_levelCache = std::make_unique<LevelCache>(current_processing_type, *current_grid, *density_profile_coefficients_, *domain_geometry_);
-        levels_.emplace_back(current_level, current_processing_type, std::move(current_grid), std::move(current_levelCache), extrapolation_, FMG_);
+        auto current_levelCache = std::make_unique<LevelCache>(processing_type[current_level], *current_grid, *density_profile_coefficients_, *domain_geometry_);
+        levels_.emplace_back(current_level, processing_type[current_level], std::move(current_grid), std::move(current_levelCache), extrapolation_, FMG_);
     }
 
     auto end_setup_createLevels = std::chrono::high_resolution_clock::now();
@@ -85,32 +81,52 @@ void GMGPolar::setup() {
     
     interpolation_ = std::make_unique<Interpolation>(DirBC_Interior_);
 
-    // auto start_setup_rhs = std::chrono::high_resolution_clock::now();
+    auto start_setup_rhs = std::chrono::high_resolution_clock::now();
 
-    // // ------------------------------------- //
-    // // Build rhs_f on Level 0 (finest Level) //
-    // // ------------------------------------- //
-    // build_rhs_f(levels_[0], levels_[0].GPU_rhs());
+    // ------------------------------------- //
+    // Build rhs_f on Level 0 (finest Level) //
+    // ------------------------------------- //
+    if(levels_[0].processingType() == ProcessingType::GPU){
+        build_rhs_f(levels_[0], levels_[0].GPU_rhs());
+    } else{
+        build_rhs_f(levels_[0], levels_[0].rhs());
+    }
 
-    // /* ---------------- */
-    // /* Discretize rhs_f */
-    // /* ---------------- */
-    // int initial_rhs_f_levels = FMG_ ? number_of_levels_ : (extrapolation_ == ExtrapolationType::NONE ? 1 : 2);
-    // // Loop through the levels, injecting and discretizing rhs
-    // for (int level_idx = 0; level_idx < initial_rhs_f_levels; ++level_idx) 
-    // {
-    //     Level& current_level = levels_[level_idx];
-    //     // Inject rhs if there is a next level
-    //     if (level_idx + 1 < initial_rhs_f_levels) {
-    //         Level& next_level = levels_[level_idx + 1];
-    //         injection(level_idx, next_level.GPU_rhs(), current_level.GPU_rhs());
-    //     }
-    //     // Discretize the rhs for the current level
-    //     discretize_rhs_f(current_level, current_level.GPU_rhs());
-    // } 
+    /* ---------------- */
+    /* Discretize rhs_f */
+    /* ---------------- */
+    int initial_rhs_f_levels = FMG_ ? number_of_levels_ : (extrapolation_ == ExtrapolationType::NONE ? 1 : 2);
+    /* Loop through the levels, injecting and discretizing rhs */
+    for (int level_idx = 0; level_idx < initial_rhs_f_levels; level_idx++) 
+    {
+        Level& current_level = levels_[level_idx];
+        // Inject rhs if there is a next level
+        if (level_idx + 1 < initial_rhs_f_levels) {
+            Level& next_level = levels_[level_idx + 1];
 
-    // auto end_setup_rhs = std::chrono::high_resolution_clock::now();
-    // t_setup_rhs += std::chrono::duration<double>(end_setup_rhs - start_setup_rhs).count();
+            /* Injection */
+            if(current_level.processingType() == ProcessingType::GPU){
+                assert(next_level.processingType() != ProcessingType::CPU);
+                injection(level_idx, next_level.GPU_rhs(), current_level.GPU_rhs());
+            } else{
+                assert(next_level.processingType() == ProcessingType::CPU);
+                injection(level_idx, next_level.rhs(), current_level.rhs());
+            }
+            if(next_level.processingType() == ProcessingType::CPU_HYBRID){
+                copyDeviceToHost(next_level.GPU_rhs(), next_level.rhs());
+            }
+
+        }
+        /* Discretize the rhs for the current level */
+        if(current_level.processingType() == ProcessingType::GPU){
+            discretize_rhs_f(current_level, current_level.GPU_rhs());
+        } else{
+            discretize_rhs_f(current_level, current_level.rhs());
+        }
+    } 
+
+    auto end_setup_rhs = std::chrono::high_resolution_clock::now();
+    t_setup_rhs += std::chrono::duration<double>(end_setup_rhs - start_setup_rhs).count();
 
     // // -------------------------------------------------------
     // // Initializing various operators based on the level index

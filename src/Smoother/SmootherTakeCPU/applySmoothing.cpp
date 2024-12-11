@@ -243,7 +243,6 @@ void SmootherTakeCPU::solveCircleSection(const int i_r, Vector<double>& x, Vecto
     const int start = grid_.index(i_r, 0);
     const int end   = start + grid_.ntheta();
     if (i_r == 0) {
-        std::cout<<"Nothing"<<std::endl;
         inner_boundary_mumps_solver_.job    = JOB_COMPUTE_SOLUTION;
         inner_boundary_mumps_solver_.nrhs   = 1; // single rhs vector
         inner_boundary_mumps_solver_.nz_rhs = grid_.ntheta(); // non-zeros in rhs

@@ -4,13 +4,13 @@ __global__ void build_rhs_f_kernel(PolarGrid* grid, double* rhs_f, double* sin_t
     int i_r = blockIdx.x * blockDim.x + threadIdx.x;
     int i_theta = blockIdx.y * blockDim.y + threadIdx.y;
 
+    if (i_r >= grid->nr() || i_theta >= grid->ntheta()) return;
+
     double r = grid->radius(i_r);
     double theta = grid->theta(i_theta);
 
     double sin_theta = sin_theta_cache[i_theta];
     double cos_theta = cos_theta_cache[i_theta];
-
-    if (i_r >= grid->nr() || i_theta >= grid->ntheta()) return;
 
     double value;
 
@@ -62,13 +62,13 @@ __global__ void discretize_rhs_f_kernel(PolarGrid* grid, double* rhs_f, double* 
     int i_r = blockIdx.x * blockDim.x + threadIdx.x;
     int i_theta = blockIdx.y * blockDim.y + threadIdx.y;
 
+    if (i_r >= grid->nr() || i_theta >= grid->ntheta()) return;
+
     double r = grid->radius(i_r);
     double theta = grid->theta(i_theta);
 
     double sin_theta = sin_theta_cache[i_theta];
     double cos_theta = cos_theta_cache[i_theta];
-
-    if (i_r >= grid->nr() || i_theta >= grid->ntheta()) return;
 
     double value;
 

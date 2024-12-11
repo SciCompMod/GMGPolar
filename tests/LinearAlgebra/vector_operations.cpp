@@ -12,7 +12,7 @@ TEST(VectorOperations, assign_vector_scalar)
     const Vector<double> expected_result = {5, 5, 5};
 
     EXPECT_EQ(v.size(), expected_result.size()) << "Vector sizes do not match.";
-    for (size_t i = 0; i < v.size(); ++i) {
+    for (int i = 0; i < v.size(); ++i) {
         EXPECT_DOUBLE_EQ(v[i], expected_result[i]) << "Element mismatch at index " << i;
     }
 }
@@ -27,7 +27,7 @@ TEST(VectorOperations, add_vector_vector)
     const Vector<double> expected_result = {0, -3, 5};
 
     EXPECT_EQ(v1.size(), expected_result.size()) << "Vector sizes do not match.";
-    for (size_t i = 0; i < v1.size(); ++i) {
+    for (int i = 0; i < v1.size(); ++i) {
         EXPECT_DOUBLE_EQ(v1[i], expected_result[i]) << "Element mismatch at index " << i;
     }
 }
@@ -42,7 +42,7 @@ TEST(VectorOperations, subtract_vector_vector)
     const Vector<double> expected_result = {2, 7, 1};
 
     EXPECT_EQ(v1.size(), expected_result.size()) << "Vector sizes do not match.";
-    for (size_t i = 0; i < v1.size(); ++i) {
+    for (int i = 0; i < v1.size(); ++i) {
         EXPECT_DOUBLE_EQ(v1[i], expected_result[i]) << "Element mismatch at index " << i;
     }
 }
@@ -59,7 +59,7 @@ TEST(VectorOperations, linear_combination)
     const Vector<double> expected_result = {-5.0, -16.0, -5.0};
 
     EXPECT_EQ(v1.size(), expected_result.size()) << "Vector sizes do not match.";
-    for (size_t i = 0; i < v1.size(); ++i) {
+    for (int i = 0; i < v1.size(); ++i) {
         EXPECT_DOUBLE_EQ(v1[i], expected_result[i]) << "Element mismatch at index " << i;
     }
 }
@@ -74,7 +74,7 @@ TEST(VectorOperations, multiply_vector_scalar)
     const Vector<double> expected_result = {-3.0, 6.0, -9.0};
 
     EXPECT_EQ(v1.size(), expected_result.size()) << "Vector sizes do not match.";
-    for (size_t i = 0; i < v1.size(); ++i) {
+    for (int i = 0; i < v1.size(); ++i) {
         EXPECT_DOUBLE_EQ(v1[i], expected_result[i]) << "Element mismatch at index " << i;
     }
 }

@@ -15,7 +15,7 @@
 #include <fstream>
 #include <iostream>
 
-/* Matrix on the CPU in COO-Format */
+/* Matrix on the host in COO-Format */
 
 template <typename T>
 class SparseMatrix

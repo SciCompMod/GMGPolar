@@ -312,6 +312,7 @@ __global__ void build_AscMatrices_kernel(
     else if(i_r == grid->nr()-2){
         int center_index = i_r - numberSmootherCircles;
         int left_index   = i_r - numberSmootherCircles - 1;
+        int right_index   = i_r - numberSmootherCircles + 1;
 
         /* Center: (Left, Right, Bottom, Top) */  
         row = center_index;
@@ -338,6 +339,16 @@ __global__ void build_AscMatrices_kernel(
         else if (row == column - 1) radial_upper_diagonals[i_theta * radial_m + row] = value;
         else if (row == 0 && column == radial_m - 1) radial_lower_diagonals[i_theta * radial_m + row] = value;
         else if (row == radial_m - 1 && column == 0) radial_upper_diagonals[i_theta * radial_m + row] = value;
+
+        /* Right */  
+        row = center_index;
+        column = right_index;
+        value = 0.0;
+        if (row == column) radial_main_diagonals[i_theta * radial_m + row] = value;
+        else if (row == column + 1) radial_lower_diagonals[i_theta * radial_m + row] = value;
+        else if (row == column - 1) radial_upper_diagonals[i_theta * radial_m + row] = value;
+        else if (row == 0 && column == radial_m - 1) radial_lower_diagonals[i_theta * radial_m + row] = value;
+        else if (row == radial_m - 1 && column == 0) radial_upper_diagonals[i_theta * radial_m + row] = value;
     }
     /* ------------------------------------------ */
     /* Radial Section: Node on the outer boundary */
@@ -345,10 +356,20 @@ __global__ void build_AscMatrices_kernel(
     else if(i_r == grid->nr()-1){
 
         int center_index = i_r - numberSmootherCircles;
+        int left_index = i_r - numberSmootherCircles - 1;
 
         row = center_index;
         column = center_index;
         value = 1.0;
+        if (row == column) radial_main_diagonals[i_theta * radial_m + row] = value;
+        else if (row == column + 1) radial_lower_diagonals[i_theta * radial_m + row] = value;
+        else if (row == column - 1) radial_upper_diagonals[i_theta * radial_m + row] = value;
+        else if (row == 0 && column == radial_m - 1) radial_lower_diagonals[i_theta * radial_m + row] = value;
+        else if (row == radial_m - 1 && column == 0) radial_upper_diagonals[i_theta * radial_m + row] = value;
+
+        row = center_index;
+        column = left_index;
+        value = 0.0;
         if (row == column) radial_main_diagonals[i_theta * radial_m + row] = value;
         else if (row == column + 1) radial_lower_diagonals[i_theta * radial_m + row] = value;
         else if (row == column - 1) radial_upper_diagonals[i_theta * radial_m + row] = value;

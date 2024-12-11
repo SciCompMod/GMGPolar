@@ -253,8 +253,9 @@ private:
     int chooseNumberOfLevels(const PolarGrid& finest_grid);
 
     void build_rhs_f(const Level& level, Vector<double>& rhs_f);
-    void build_rhs_f(const Level& level, GPU_Vector<double>& rhs_f);
     void discretize_rhs_f(const Level& level, Vector<double>& rhs_f);
+    
+    void build_rhs_f(const Level& level, GPU_Vector<double>& rhs_f);
     void discretize_rhs_f(const Level& level, GPU_Vector<double>& rhs_f);
 
     // /* ------------------- */
@@ -272,6 +273,7 @@ private:
     void extrapolatedProlongation(const int current_level, Vector<double>& result, const Vector<double>& x) const;
     void extrapolatedRestriction(const int current_level, Vector<double>& result, const Vector<double>& x) const;
     void FMGInterpolation(const int current_level, Vector<double>& result, const Vector<double>& x) const;
+
     void prolongation(const int current_level, GPU_Vector<double>& result, const GPU_Vector<double>& x) const;
     void restriction(const int current_level, GPU_Vector<double>& result, const GPU_Vector<double>& x) const;
     void injection(const int current_level, GPU_Vector<double>& result, const GPU_Vector<double>& x) const;

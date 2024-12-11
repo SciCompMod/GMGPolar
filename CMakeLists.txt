@@ -105,7 +105,7 @@ set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 set(CMAKE_CUDA_ARCHITECTURES 70)
 enable_language(CUDA)
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -pedantic -Wno-unused")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -pedantic -Wno-unused -Wno-deprecated-declarations")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -mtune=generic")
 set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Xcompiler -fopenmp -arch=sm_70 -Wno-deprecated-declarations")
 set(CMAKE_CUDA_FLAGS_RELEASE "${CMAKE_CUDA_FLAGS_RELEASE} -O3")
@@ -158,7 +158,7 @@ target_include_directories(InputFunctions PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src
 file(GLOB_RECURSE GMG_POLAR_SOURCES "src/GMGPolar/*.cpp" "src/GMGPolar/*.cu")
 file(GLOB_RECURSE LEVEL_SOURCES "src/Level/*.cpp" "src/Level/*.cu")
 file(GLOB_RECURSE INTERPOLATION_SOURCES "src/Interpolation/*.cpp" "src/Interpolation/*.cu")
-# file(GLOB_RECURSE DIRECT_SOLVER_SOURCES "src/DirectSolver/*.cpp")
+file(GLOB_RECURSE DIRECT_SOLVER_SOURCES "src/DirectSolver/*.cpp")
 file(GLOB_RECURSE STENCIL_SOURCES "src/Stencil/*.cpp")
 
 file(GLOB_RECURSE RESIDUAL_TAKE_CPU_SOURCES "src/Residual/ResidualTakeCPU/*.cpp")
@@ -167,6 +167,8 @@ file(GLOB_RECURSE RESIDUAL_TAKE_GPU_SOURCES "src/Residual/ResidualTakeGPU/*.cpp"
 file(GLOB_RECURSE SMOOTHER_TAKE_CPU_SOURCES "src/Smoother/SmootherTakeCPU/*.cpp")
 file(GLOB_RECURSE SMOOTHER_TAKE_GPU_SOURCES "src/Smoother/SmootherTakeGPU/*.cpp" "src/Smoother/SmootherTakeGPU/*.cu")
 
+file(GLOB_RECURSE EXTRAPOLATED_SMOOTHER_TAKE_CPU_SOURCES "src/ExtrapolatedSmoother/ExtrapolatedSmootherTakeCPU/*.cpp")
+file(GLOB_RECURSE EXTRAPOLATED_SMOOTHER_TAKE_GPU_SOURCES "src/ExtrapolatedSmoother/ExtrapolatedSmootherTakeGPU/*.cpp" "src/ExtrapolatedSmoother/ExtrapolatedSmootherTakeGPU/*.cu")
 
 # 4. Create the GMGPolarLib library and link PolarGrid and InputFunctions
 add_library(GMGPolarLib STATIC
@@ -180,17 +182,19 @@ add_library(GMGPolarLib STATIC
     ${SMOOTHER_TAKE_CPU_SOURCES}
     ${SMOOTHER_TAKE_GPU_SOURCES}
 
-    # ${DIRECT_SOLVER_SOURCES}
+    ${DIRECT_SOLVER_SOURCES}
     ${STENCIL_SOURCES}
-    # ${RESIDUAL_SOURCES}
+
+    ${EXTRAPOLATED_SMOOTHER_TAKE_CPU_SOURCES}
+    ${EXTRAPOLATED_SMOOTHER_TAKE_GPU_SOURCES}
 )
 # Link PolarGrid and InputFunctions to GMGPolarLib
-target_link_libraries(GMGPolarLib PUBLIC PolarGrid InputFunctions cusparse cusolver ${MUMPS_LIBRARIES})
+target_link_libraries(GMGPolarLib PUBLIC PolarGrid InputFunctions ${MUMPS_LIBRARIES} ${OpenMP_CXX_LIB} cuda cudart cudadevrt cusparse cusolver)
 
 set(MAIN_SOURCE "src/main.cpp")
 add_executable(gmgpolar ${MAIN_SOURCE})
 
-target_link_libraries(gmgpolar PRIVATE GMGPolarLib ${MUMPS_LIBRARIES} ${OpenMP_CXX_LIB} cuda cudart cudadevrt cusparse cusolver)
+target_link_libraries(gmgpolar PRIVATE GMGPolarLib)
 
 if(GMGPOLAR_BUILD_TESTS)
     enable_testing()

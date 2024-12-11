@@ -2,7 +2,7 @@
 
 #include <chrono>
 
-__global__ void combineCicleFactor_kernel(
+__global__ void computeCicleFactor_kernel(
     double* x, double* temp, double* factor,
     double* circle_lower_diagonals, double* circle_main_diagonals, double* circle_upper_diagonals,
     double* sherman_morrison_gammas,
@@ -111,7 +111,7 @@ void SmootherTakeGPU::solveAsc_BlackCircle(GPU_Vector<double>& x, const GPU_Vect
 
     int factor_blockSize = 256;
     int factor_numBlocks = (batch_count + factor_blockSize - 1) / factor_blockSize;
-    combineCicleFactor_kernel<<<factor_numBlocks, factor_blockSize>>>(
+    computeCicleFactor_kernel<<<factor_numBlocks, factor_blockSize>>>(
         x.data(), temp.data(), factor_,
         circle_lower_diagonals_, circle_main_diagonals_, circle_upper_diagonals_,
         sherman_morrison_gammas_,
@@ -208,7 +208,7 @@ void SmootherTakeGPU::solveAsc_WhiteCircle(GPU_Vector<double>& x, const GPU_Vect
 
     int factor_blockSize = 256;
     int factor_numBlocks = (batch_count + factor_blockSize - 1) / factor_blockSize;
-    combineCicleFactor_kernel<<<factor_numBlocks, factor_blockSize>>>(
+    computeCicleFactor_kernel<<<factor_numBlocks, factor_blockSize>>>(
         x.data(), temp.data(), factor_,
         circle_lower_diagonals_, circle_main_diagonals_, circle_upper_diagonals_,
         sherman_morrison_gammas_,

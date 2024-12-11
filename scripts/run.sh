@@ -18,7 +18,7 @@ Rmax=1.3
 nr_exp=4
 ntheta_exp=-1
 anisotropic_factor=0
-divideBy2=1
+divideBy2=3
 
 # Interior boundary condition: 
 # 0: Across-origin
@@ -28,7 +28,7 @@ DirBC_Interior=0
 # Full Multigrid Method:
 # 0: Initial approximation is set to zero
 # 1: Initial approximation obtained by nested iteration (recommended)
-FMG=0
+FMG=1
 FMG_iterations=3
 FMG_cycle=2 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
 
@@ -39,8 +39,8 @@ FMG_cycle=2 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
 # 3: Combination of both implicit extrapolation methods (May be usefull for FMG=0)
 extrapolation=1
 # Maximum number of multigrid levels:
-maxLevels=2
-gpuLevels=0
+maxLevels=5
+gpuLevels=2
 # Number of smoothing steps:
 preSmoothingSteps=1
 postSmoothingSteps=1

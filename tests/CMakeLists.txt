@@ -95,10 +95,10 @@ target_compile_features(test_smoother PRIVATE cxx_std_20)
 target_link_libraries(test_smoother GTest::gtest_main GMGPolarLib ${MUMPS_LIBRARIES})
 add_test(NAME test_smoother COMMAND test_smoother)
 
-# add_executable(test_extrapolated_smoother ExtrapolatedSmoother/extrapolated_smoother.cpp)
-# target_compile_features(test_extrapolated_smoother PRIVATE cxx_std_17)
-# target_link_libraries(test_extrapolated_smoother GMGPolarLib GTest::gtest_main ${MUMPS_LIBRARIES})
-# add_test(NAME test_extrapolated_smoother COMMAND test_extrapolated_smoother)
+add_executable(test_extrapolated_smoother ExtrapolatedSmoother/extrapolated_smoother.cu)
+target_compile_features(test_extrapolated_smoother PRIVATE cxx_std_20)
+target_link_libraries(test_extrapolated_smoother GTest::gtest_main GMGPolarLib ${MUMPS_LIBRARIES})
+add_test(NAME test_extrapolated_smoother COMMAND test_extrapolated_smoother)
 
 
 

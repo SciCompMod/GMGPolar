@@ -2,6 +2,8 @@
 
 #include "../include/GMGPolar/gmgpolar.h"
 
+#include "../include/DirectSolver/directSolver.h"
+
 int main(int argc, char* argv[]) {
     // Display Build Type
     #ifdef NDEBUG

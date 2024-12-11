@@ -1,9 +1,13 @@
 #pragma once
 
-// class DirectSolver;
-// class Residual;
-// class Smoother;
-// class ExtrapolatedSmoother;
+class DirectSolver;
+class ResidualTakeCPU;
+class SmootherTakeCPU;
+class ExtrapolatedSmootherTakeCPU;
+class ResidualTakeGPU;
+class SmootherTakeGPU;
+class ExtrapolatedSmootherTakeGPU;
+
 
 #include <memory>
 #include <omp.h>
@@ -16,17 +20,21 @@
 #include "../LinearAlgebra/Vector/vector.h"
 #include "../LinearAlgebra/Vector/gpu_vector.h"
 
-
 #include "../InputFunctions/boundaryConditions.h"
 #include "../InputFunctions/densityProfileCoefficients.h"
 #include "../InputFunctions/domainGeometry.h"
 #include "../InputFunctions/sourceTerm.h"
 
 
-// #include "../DirectSolver/directSolver.h"
-// #include "../ExtrapolatedSmoother/extrapolatedSmoother.h"
-// #include "../Residual/residual.h"
-// #include "../Smoother/smoother.h"
+#include "../DirectSolver/directSolver.h"
+
+#include "../Residual/ResidualTakeCPU/residual.h"
+#include "../Smoother/SmootherTakeCPU/smoother.h"
+#include "../ExtrapolatedSmoother/ExtrapolatedSmootherTakeCPU/extrapolatedSmoother.h"
+
+#include "../Residual/ResidualTakeGPU/residual.h"
+#include "../Smoother/SmootherTakeGPU/smoother.h"
+#include "../ExtrapolatedSmoother/ExtrapolatedSmootherTakeGPU/extrapolatedSmoother.h"
 
 class LevelCache;
 
@@ -118,10 +126,15 @@ private:
     ExtrapolationType extrapolation_;
     int FMG_;
 
-    // std::unique_ptr<DirectSolver> op_directSolver_;
-    // std::unique_ptr<Residual> op_residual_;
-    // std::unique_ptr<Smoother> op_smoother_;
-    // std::unique_ptr<ExtrapolatedSmoother> op_extrapolated_smoother_;
+    std::unique_ptr<DirectSolver> op_directSolver_;
+
+    std::unique_ptr<ResidualTakeCPU> op_residual_CPU_;
+    std::unique_ptr<SmootherTakeCPU> op_smoother_CPU_;
+    std::unique_ptr<ExtrapolatedSmootherTakeCPU> op_extrapolated_smoother_CPU_;
+
+    std::unique_ptr<ResidualTakeGPU> op_residual_GPU_;
+    std::unique_ptr<SmootherTakeGPU> op_smoother_GPU_;
+    std::unique_ptr<ExtrapolatedSmootherTakeGPU> op_extrapolated_smoother_GPU_;
 
     Vector<double> rhs_;
     Vector<double> solution_;

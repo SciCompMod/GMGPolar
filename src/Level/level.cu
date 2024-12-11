@@ -1,16 +1,15 @@
 #include "../../include/Level/level.h"
 
-// #include "../../include/Residual/residual.h"
-// #include "../../include/Residual/ResidualTake/residualTake.h"
+#include "../../include/Residual/ResidualTakeCPU/residual.h"
+#include "../../include/Residual/ResidualTakeGPU/residual.h"
 
-// #include "../../include/DirectSolver/directSolver.h"
-// #include "../../include/DirectSolver/DirectSolverTake/directSolverTake.h"
+#include "../../include/DirectSolver/directSolver.h"
 
-// #include "../../include/Smoother/SmootherGive/smootherGive.h"
-// #include "../../include/Smoother/SmootherTake/smootherTake.h"
+#include "../../include/Smoother/SmootherTakeCPU/smoother.h"
+#include "../../include/Smoother/SmootherTakeGPU/smoother.h"
 
-// #include "../../include/ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h"
-// #include "../../include/ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.h"
+#include "../../include/ExtrapolatedSmoother/ExtrapolatedSmootherTakeCPU/extrapolatedSmoother.h"
+#include "../../include/ExtrapolatedSmoother/ExtrapolatedSmootherTakeGPU/extrapolatedSmoother.h"
 
 Level::Level(const int level, const ProcessingType processing_type, std::unique_ptr<const PolarGrid> grid,
              std::unique_ptr<const LevelCache> level_cache, const ExtrapolationType extrapolation, const bool FMG)
