@@ -85,37 +85,36 @@ public:
     const GPU_Vector<double>& GPU_error_correction() const;
 
 
-    // // -------------- //
-    // // Apply Residual //
-    // void initializeResidual(const DomainGeometry& domain_geometry,
-    //                         const DensityProfileCoefficients& density_profile_coefficients,
-    //                         const bool DirBC_Interior);
-    // void computeResidual(GPU_Vector<double>& result, const GPU_Vector<double>& rhs, const GPU_Vector<double>& x) const;
+    // -------------- //
+    // Apply Residual //
+    void initializeResidual(const DomainGeometry& domain_geometry,
+                            const DensityProfileCoefficients& density_profile_coefficients,
+                            const bool DirBC_Interior);
+    void computeResidual(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const;
+    void computeResidual(GPU_Vector<double>& result, const GPU_Vector<double>& rhs, const GPU_Vector<double>& x) const;
 
-    // // ------------------- //
-    // // Solve coarse System //
-    // void initializeDirectSolver(const DomainGeometry& domain_geometry,
-    //                             const DensityProfileCoefficients& density_profile_coefficients,
-    //                             const bool DirBC_Interior);
-    // void directSolveInPlace(Vector<double>& x) const;
+    // ------------------- //
+    // Solve coarse System //
+    void initializeDirectSolver(const DomainGeometry& domain_geometry,
+                                const DensityProfileCoefficients& density_profile_coefficients,
+                                const bool DirBC_Interior);
+    void directSolveInPlace(Vector<double>& x) const;
 
-    // // --------------- //
-    // // Apply Smoothing //
-    // void initializeSmoothing(const DomainGeometry& domain_geometry,
-    //                          const DensityProfileCoefficients& density_profile_coefficients,
-    //                          const bool DirBC_Interior,
-    //                          const int num_omp_threads,
-    //                          const StencilDistributionMethod stencil_distribution_method);
-    // void smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const;
+    // --------------- //
+    // Apply Smoothing //
+    void initializeSmoothing(const DomainGeometry& domain_geometry,
+                             const DensityProfileCoefficients& density_profile_coefficients,
+                             const bool DirBC_Interior);
+    void smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const;
+    void smoothingInPlace(GPU_Vector<double>& x, const GPU_Vector<double>& rhs, GPU_Vector<double>& temp) const;
 
-    // // ---------------------------- //
-    // // Apply Extrapolated Smoothing //
-    // void initializeExtrapolatedSmoothing(const DomainGeometry& domain_geometry,
-    //                                      const DensityProfileCoefficients& density_profile_coefficients,
-    //                                      const bool DirBC_Interior,
-    //                                      const int num_omp_threads,
-    //                                      const StencilDistributionMethod stencil_distribution_method);
-    // void extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const;
+    // ---------------------------- //
+    // Apply Extrapolated Smoothing //
+    void initializeExtrapolatedSmoothing(const DomainGeometry& domain_geometry,
+                                         const DensityProfileCoefficients& density_profile_coefficients,
+                                         const bool DirBC_Interior);
+    void extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const;
+    void extrapolatedSmoothingInPlace(GPU_Vector<double>& x, const GPU_Vector<double>& rhs, GPU_Vector<double>& temp) const;
 
 private:
     int level_;

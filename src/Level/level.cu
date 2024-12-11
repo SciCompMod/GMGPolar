@@ -213,85 +213,103 @@ const GPU_Vector<double>& Level::GPU_error_correction() const
     return gpu_error_correction_;
 }
 
-// // -------------- //
-// // Apply Residual //
-// void Level::initializeResidual(const DomainGeometry& domain_geometry,
-//                                const DensityProfileCoefficients& density_profile_coefficients,
-//                                const bool DirBC_Interior)
-// {
-//     op_residual_ = std::make_unique<Residual>(*this, domain_geometry, density_profile_coefficients, DirBC_Interior);
-//     if (!op_residual_) throw std::runtime_error("Failed to initialize Residual.");
-// }
-// void Level::computeResidual(GPU_Vector<double>& result, const GPU_Vector<double>& rhs, const GPU_Vector<double>& x) const
-// {
-//     if (!op_residual_) throw std::runtime_error("Residual not initialized.");
-//     op_residual_->computeResidual(result, rhs, x);
-// }
 
-// // ------------------- //
-// // Solve coarse System //
-// void Level::initializeDirectSolver(const DomainGeometry& domain_geometry,
-//                                    const DensityProfileCoefficients& density_profile_coefficients,
-//                                    const bool DirBC_Interior)
-// {
+// -------------- //
+// Apply Residual //
+void Level::initializeResidual(const DomainGeometry& domain_geometry,
+                               const DensityProfileCoefficients& density_profile_coefficients,
+                               const bool DirBC_Interior)
+{
+    if(processing_type_ == ProcessingType::GPU){
+        op_residual_GPU_ = std::make_unique<ResidualTakeGPU>(*this, domain_geometry, density_profile_coefficients, DirBC_Interior);
+        if (!op_residual_GPU_) throw std::runtime_error("Failed to initialize GPU Residual.");
+    }
+    else{
+        op_residual_CPU_ = std::make_unique<ResidualTakeCPU>(*this, domain_geometry, density_profile_coefficients, DirBC_Interior);
+        if (!op_residual_CPU_) throw std::runtime_error("Failed to initialize CPU Residual.");
+    }
+}
 
-//     op_directSolver_ = std::make_unique<DirectSolver>(*grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior);
-//     if (!op_directSolver_) throw std::runtime_error("Failed to initialize Direct Solver.");
-// }
-// void Level::directSolveInPlace(Vector<double>& x) const
-// {
-//     if (!op_directSolver_) throw std::runtime_error("Coarse Solver not initialized.");
-//     op_directSolver_->solveInPlace(x);
-// }
+void Level::computeResidual(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const
+{
+    if (!op_residual_CPU_) throw std::runtime_error("CPU Residual not initialized.");
+    op_residual_CPU_->computeResidual(result, rhs, x);
+}
+void Level::computeResidual(GPU_Vector<double>& result, const GPU_Vector<double>& rhs, const GPU_Vector<double>& x) const
+{
+    if (!op_residual_GPU_) throw std::runtime_error("GPU Residual not initialized.");
+    op_residual_GPU_->computeResidual(result, rhs, x);
+}
 
-// // --------------- //
-// // Apply Smoothing //
-// void Level::initializeSmoothing(const DomainGeometry& domain_geometry,
-//                                 const DensityProfileCoefficients& density_profile_coefficients,
-//                                 const bool DirBC_Interior,
-//                                 const int num_omp_threads,
-//                                 const StencilDistributionMethod stencil_distribution_method)
-// {
-//     if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE)
-//     {
-//         op_smoother_ =
-//             std::make_unique<SmootherTake>(*grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads);
-//     }
-//     else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE)
-//     {
-//         op_smoother_ =
-//             std::make_unique<SmootherGive>(*grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads);
-//     }
-//     if (!op_smoother_) throw std::runtime_error("Failed to initialize Smoother.");
-// }
-// void Level::smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const
-// {
-//     if (!op_smoother_) throw std::runtime_error("Smoother not initialized.");
-//     op_smoother_->smoothingInPlace(x, rhs, temp);
-// }
 
-// // ---------------------------- //
-// // Apply Extrapolated Smoothing //
-// void Level::initializeExtrapolatedSmoothing(const DomainGeometry& domain_geometry,
-//                                             const DensityProfileCoefficients& density_profile_coefficients,
-//                                             const bool DirBC_Interior,
-//                                             const int num_omp_threads,
-//                                             const StencilDistributionMethod stencil_distribution_method)
-// {
-//     if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE)
-//     {
-//         op_extrapolated_smoother_ = std::make_unique<ExtrapolatedSmootherTake>(*grid_, *level_cache_, domain_geometry, density_profile_coefficients,
-//                                                                                DirBC_Interior, num_omp_threads);
-//     }
-//     else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE)
-//     {
-//         op_extrapolated_smoother_ = std::make_unique<ExtrapolatedSmootherGive>(*grid_, *level_cache_, domain_geometry, density_profile_coefficients,
-//                                                                                DirBC_Interior, num_omp_threads);
-//     }
-//     if (!op_extrapolated_smoother_) throw std::runtime_error("Failed to initialize Extrapolated Smoother.");
-// }
-// void Level::extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const
-// {
-//     if (!op_extrapolated_smoother_) throw std::runtime_error("Extrapolated Smoother not initialized.");
-//     op_extrapolated_smoother_->extrapolatedSmoothingInPlace(x, rhs, temp);
-// }
+// ------------------- //
+// Solve coarse System //
+void Level::initializeDirectSolver(const DomainGeometry& domain_geometry,
+                                   const DensityProfileCoefficients& density_profile_coefficients,
+                                   const bool DirBC_Interior)
+{
+
+    op_directSolver_ = std::make_unique<DirectSolver>(*this, domain_geometry, density_profile_coefficients, DirBC_Interior);
+    if (!op_directSolver_) throw std::runtime_error("Failed to initialize Direct Solver.");
+}
+void Level::directSolveInPlace(Vector<double>& x) const
+{
+    if (!op_directSolver_) throw std::runtime_error("Coarse Solver not initialized.");
+    op_directSolver_->solveInPlace(x);
+}
+
+
+// --------------- //
+// Apply Smoothing //
+void Level::initializeSmoothing(const DomainGeometry& domain_geometry,
+                                const DensityProfileCoefficients& density_profile_coefficients,
+                                const bool DirBC_Interior)
+{
+    if(processing_type_ == ProcessingType::GPU){
+        op_smoother_GPU_ = std::make_unique<SmootherTakeGPU>(*this, domain_geometry, density_profile_coefficients, DirBC_Interior);
+        if (!op_smoother_GPU_) throw std::runtime_error("Failed to initialize GPU Smoother.");
+    }
+    else{
+        op_smoother_CPU_ = std::make_unique<SmootherTakeCPU>(*this, domain_geometry, density_profile_coefficients, DirBC_Interior);
+        if (!op_smoother_CPU_) throw std::runtime_error("Failed to initialize CPU Smoother.");
+    }
+}
+
+void Level::smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const
+{
+    if (!op_smoother_CPU_) throw std::runtime_error("CPU Smoother not initialized.");
+    op_smoother_CPU_->smoothingInPlace(x, rhs, x);
+}
+void Level::smoothingInPlace(GPU_Vector<double>& x, const GPU_Vector<double>& rhs, GPU_Vector<double>& temp) const
+{
+    if (!op_smoother_GPU_) throw std::runtime_error("GPU Smoother not initialized.");
+    op_smoother_GPU_->smoothingInPlace(x, rhs, temp);
+}
+
+// ---------------------------- //
+// Apply Extrapolated Smoothing //
+void Level::initializeExtrapolatedSmoothing(const DomainGeometry& domain_geometry,
+                                const DensityProfileCoefficients& density_profile_coefficients,
+                                const bool DirBC_Interior)
+{
+    if(processing_type_ == ProcessingType::GPU){
+        op_extrapolated_smoother_GPU_ = std::make_unique<ExtrapolatedSmootherTakeGPU>(*this, domain_geometry, density_profile_coefficients, DirBC_Interior);
+        if (!op_extrapolated_smoother_GPU_) throw std::runtime_error("Failed to initialize GPU Extrapolated Smoother.");
+    }
+    else{
+        op_extrapolated_smoother_CPU_ = std::make_unique<ExtrapolatedSmootherTakeCPU>(*this, domain_geometry, density_profile_coefficients, DirBC_Interior);
+        if (!op_extrapolated_smoother_CPU_) throw std::runtime_error("Failed to initialize CPU Extrapolated Smoother.");
+    }
+}
+
+void Level::extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const
+{
+    if (!op_extrapolated_smoother_CPU_) throw std::runtime_error("CPU Extrapolated Smoother not initialized.");
+    op_extrapolated_smoother_CPU_->extrapolatedSmoothingInPlace(x, rhs, x);
+}
+void Level::extrapolatedSmoothingInPlace(GPU_Vector<double>& x, const GPU_Vector<double>& rhs, GPU_Vector<double>& temp) const
+{
+    if (!op_extrapolated_smoother_GPU_) throw std::runtime_error("GPU Extrapolated Smoother not initialized.");
+    op_extrapolated_smoother_GPU_->extrapolatedSmoothingInPlace(x, rhs, temp);
+}
+

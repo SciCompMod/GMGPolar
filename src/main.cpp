@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
 
     solver.solve();
 
-    // solver.printTimings();
+    solver.printTimings();
 
     return 0;
 }

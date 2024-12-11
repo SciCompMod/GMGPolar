@@ -7,7 +7,6 @@ enum
     REQUIRED = 1
 };
 
-// clang-format off
 void GMGPolar::parseGrid() {
     R0_ = parser_.get<double>("R0");
     Rmax_ = parser_.get<double>("Rmax");

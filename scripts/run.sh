@@ -18,7 +18,7 @@ Rmax=1.3
 nr_exp=4
 ntheta_exp=-1
 anisotropic_factor=0
-divideBy2=3
+divideBy2=8
 
 # Interior boundary condition: 
 # 0: Across-origin
@@ -29,7 +29,7 @@ DirBC_Interior=0
 # 0: Initial approximation is set to zero
 # 1: Initial approximation obtained by nested iteration (recommended)
 FMG=1
-FMG_iterations=3
+FMG_iterations=1
 FMG_cycle=2 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
 
 # Extrapolation Method:
@@ -37,10 +37,10 @@ FMG_cycle=2 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
 # 1: Implicit extrapolation (recommended)
 # 2: Implicit extrapolation with full grid smoothing (residuals cannot be used as convergence criteria)
 # 3: Combination of both implicit extrapolation methods (May be usefull for FMG=0)
-extrapolation=1
+extrapolation=0
 # Maximum number of multigrid levels:
-maxLevels=5
-gpuLevels=2
+maxLevels=7
+gpuLevels=-1
 # Number of smoothing steps:
 preSmoothingSteps=1
 postSmoothingSteps=1
@@ -51,9 +51,9 @@ postSmoothingSteps=1
 multigridCycle=0
 
 # Convergence criteria:
-maxIterations=150
+maxIterations=2
 residualNormType=0 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
-absoluteTolerance=1e-8
-relativeTolerance=1e-8
+absoluteTolerance=1e-40
+relativeTolerance=1e-40
 
 ./../build/gmgpolar --verbose $verbose --paraview $paraview --maxOpenMPThreads $maxOpenMPThreads --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --DirBC_Interior $DirBC_Interior --FMG $FMG --FMG_iterations $FMG_iterations --FMG_cycle $FMG_cycle --extrapolation $extrapolation --maxLevels $maxLevels --gpuLevels $gpuLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance

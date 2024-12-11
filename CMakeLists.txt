@@ -105,7 +105,8 @@ set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 set(CMAKE_CUDA_ARCHITECTURES 70)
 enable_language(CUDA)
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -pedantic -Wno-unused -Wno-deprecated-declarations")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -pedantic -Wno-unused")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -mtune=generic")
 set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Xcompiler -fopenmp -arch=sm_70 -Wno-deprecated-declarations")
 set(CMAKE_CUDA_FLAGS_RELEASE "${CMAKE_CUDA_FLAGS_RELEASE} -O3")
@@ -155,7 +156,7 @@ file(GLOB_RECURSE INPUT_FUNCTIONS_SOURCES "src/InputFunctions/*.cpp" "src/InputF
 add_library(InputFunctions STATIC ${INPUT_FUNCTIONS_SOURCES})
 target_include_directories(InputFunctions PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/InputFunctions)
 
-file(GLOB_RECURSE GMG_POLAR_SOURCES "src/GMGPolar/*.cpp" "src/GMGPolar/*.cu")
+file(GLOB_RECURSE GMG_POLAR_SOURCES "src/GMGPolar/*.cpp" "src/GMGPolar/*.cu" "src/GMGPolar/MultigridMethods/*.cpp" "src/GMGPolar/MultigridMethods/*.cu")
 file(GLOB_RECURSE LEVEL_SOURCES "src/Level/*.cpp" "src/Level/*.cu")
 file(GLOB_RECURSE INTERPOLATION_SOURCES "src/Interpolation/*.cpp" "src/Interpolation/*.cu")
 file(GLOB_RECURSE DIRECT_SOLVER_SOURCES "src/DirectSolver/*.cpp")

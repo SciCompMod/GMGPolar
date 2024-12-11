@@ -222,18 +222,19 @@ private:
 
     std::unique_ptr<Interpolation> interpolation_;
 
-    // /* Chooses if full grid smoothing is active on level 0 for extrapolation > 0. */
-    // bool full_grid_smoothing_ = false;
+    /* Chooses if full grid smoothing is active on level 0 for extrapolation > 0. */
+    bool full_grid_smoothing_ = false;
 
-    // /* -------------------- */
-    // /* Convergence criteria */
-    // int number_of_iterations_;
-    // std::vector<double> residual_norms_;
-    // double mean_residual_reduction_factor_;
-    // bool converged(const double& current_residual_norm, const double& first_residual_norm);
+    /* -------------------- */
+    /* Convergence criteria */
+    int number_of_iterations_;
+    std::vector<double> residual_norms_;
+    double mean_residual_reduction_factor_;
+    bool converged(const double& current_residual_norm, const double& first_residual_norm);
 
-    // std::vector<std::pair<double, double>> exact_errors_; // Only when exact solution provided
-    // std::pair<double, double> computeExactError(Level& level, const Vector<double>& solution, Vector<double>& error);
+    std::vector<std::pair<double, double>> exact_errors_; // Only when exact solution provided
+    std::pair<double, double> computeExactError(Level& level, const Vector<double>& solution, Vector<double>& error);
+    std::pair<double, double> computeExactError(Level& level, const GPU_Vector<double>& solution, GPU_Vector<double>& error);
 
     // /* ---------------------------------------- */
     // /* Parser Functions for GMGPolar Parameters */
@@ -258,14 +259,22 @@ private:
     void build_rhs_f(const Level& level, GPU_Vector<double>& rhs_f);
     void discretize_rhs_f(const Level& level, GPU_Vector<double>& rhs_f);
 
-    // /* ------------------- */
-    // /* Multigrid Functions */
-    // void multigrid_V_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
-    // void multigrid_W_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
-    // void multigrid_F_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
-    // void implicitlyExtrapolatedMultigrid_V_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
-    // void implicitlyExtrapolatedMultigrid_W_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
-    // void implicitlyExtrapolatedMultigrid_F_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
+    /* ------------------- */
+    /* Multigrid Functions */
+    void multigrid_V_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
+    void multigrid_W_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
+    void multigrid_F_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
+    void implicitlyExtrapolatedMultigrid_V_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
+    void implicitlyExtrapolatedMultigrid_W_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
+    void implicitlyExtrapolatedMultigrid_F_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs, Vector<double>& residual);
+
+    void multigrid_V_Cycle(const int level_depth, GPU_Vector<double>& solution, GPU_Vector<double>& rhs, GPU_Vector<double>& residual);
+    void multigrid_W_Cycle(const int level_depth, GPU_Vector<double>& solution, GPU_Vector<double>& rhs, GPU_Vector<double>& residual);
+    void multigrid_F_Cycle(const int level_depth, GPU_Vector<double>& solution, GPU_Vector<double>& rhs, GPU_Vector<double>& residual);
+    void implicitlyExtrapolatedMultigrid_V_Cycle(const int level_depth, GPU_Vector<double>& solution, GPU_Vector<double>& rhs, GPU_Vector<double>& residual);
+    void implicitlyExtrapolatedMultigrid_W_Cycle(const int level_depth, GPU_Vector<double>& solution, GPU_Vector<double>& rhs, GPU_Vector<double>& residual);
+    void implicitlyExtrapolatedMultigrid_F_Cycle(const int level_depth, GPU_Vector<double>& solution, GPU_Vector<double>& rhs, GPU_Vector<double>& residual);
+
 
     void prolongation(const int current_level, Vector<double>& result, const Vector<double>& x) const;
     void restriction(const int current_level, Vector<double>& result, const Vector<double>& x) const;
@@ -281,10 +290,10 @@ private:
     void extrapolatedRestriction(const int current_level, GPU_Vector<double>& result, const GPU_Vector<double>& x) const;
     void FMGInterpolation(const int current_level, GPU_Vector<double>& result, const GPU_Vector<double>& x) const;
 
-    // void extrapolatedResidual(const int current_level, Vector<double>& residual, const Vector<double>& residual_next_level);
+    void extrapolatedResidual(const int current_level, Vector<double>& residual, const Vector<double>& residual_next_level);
+    void extrapolatedResidual(const int current_level, GPU_Vector<double>& residual, const GPU_Vector<double>& residual_next_level);
 
     /* ------------- */
     /* Visualization */
     void writeToVTK(const std::filesystem::path& file_path, const PolarGrid& grid);
-    // void writeToVTK(const std::filesystem::path& file_path, const Level& level, const Vector<double>& grid_function);
 };
