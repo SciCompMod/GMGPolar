@@ -28,730 +28,730 @@
         /* [-Jtr, Jrr] */                                                                                              \
     } while (0)
 
-#define NODE_BUILD_SMOOTHER_GIVE(i_r, i_theta, grid, DirBC_Interior, inner_boundary_circle_matrix,                             \
-                                 circle_tridiagonal_solver, radial_tridiagonal_solver)                                         \
-    do {                                                                                                                       \
-        assert(i_r >= 0 && i_r < grid.nr());                                                                                   \
-        assert(i_theta >= 0 && i_theta < grid.ntheta());                                                                       \
-                                                                                                                               \
-        const int numberSmootherCircles = grid.numberSmootherCircles();                                                        \
-        const int lengthSmootherRadial  = grid.lengthSmootherRadial();                                                         \
-                                                                                                                               \
-        assert(numberSmootherCircles >= 2);                                                                                    \
-        assert(lengthSmootherRadial >= 3);                                                                                     \
-                                                                                                                               \
-        int row, column;                                                                                                       \
-        double value;                                                                                                          \
-        /* ------------------------------------------ */                                                                       \
-        /* Node in the interior of the Circle Section */                                                                       \
-        /* ------------------------------------------ */                                                                       \
-        if (i_r > 0 && i_r < numberSmootherCircles) {                                                                          \
-            const double h1     = grid.radialSpacing(i_r - 1);                                                                 \
-            const double h2     = grid.radialSpacing(i_r);                                                                     \
-            const double k1     = grid.angularSpacing(i_theta - 1);                                                            \
-            const double k2     = grid.angularSpacing(i_theta);                                                                \
-            const double coeff1 = 0.5 * (k1 + k2) / h1;                                                                        \
-            const double coeff2 = 0.5 * (k1 + k2) / h2;                                                                        \
-            const double coeff3 = 0.5 * (h1 + h2) / k1;                                                                        \
-            const double coeff4 = 0.5 * (h1 + h2) / k2;                                                                        \
-                                                                                                                               \
-            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                           \
-            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                           \
-                                                                                                                               \
-            const int center_index = i_theta;                                                                                  \
-            const int left_index   = i_theta;                                                                                  \
-            const int right_index  = (i_r + 1 == numberSmootherCircles) ? 0 : i_theta;                                         \
-            const int bottom_index = i_theta_M1;                                                                               \
-            const int top_index    = i_theta_P1;                                                                               \
-                                                                                                                               \
-            auto& left_matrix   = circle_tridiagonal_solver[i_r - 1];                                                          \
-            auto& center_matrix = circle_tridiagonal_solver[i_r];                                                              \
-            auto& right_matrix  = (i_r + 1 == numberSmootherCircles) ? radial_tridiagonal_solver[i_theta]                      \
-                                                                     : circle_tridiagonal_solver[i_r + 1];                     \
-                                                                                                                               \
-            /* Fill matrix row of (i,j) */                                                                                     \
-            row    = center_index;                                                                                             \
-            column = center_index;                                                                                             \
-            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */                         \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            row    = center_index;                                                                                             \
-            column = bottom_index;                                                                                             \
-            value  = -coeff3 * att; /* Bottom */                                                                               \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            row    = center_index;                                                                                             \
-            column = top_index;                                                                                                \
-            value  = -coeff4 * att; /* Top */                                                                                  \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            row    = center_index;                                                                                             \
-            column = center_index;                                                                                             \
-            value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */               \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            /* Fill matrix row of (i,j-1) */                                                                                   \
-            row    = bottom_index;                                                                                             \
-            column = center_index;                                                                                             \
-            value  = -coeff3 * att; /* Top */                                                                                  \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            row    = bottom_index;                                                                                             \
-            column = bottom_index;                                                                                             \
-            value  = coeff3 * att; /* Center: (Top) */                                                                         \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            /* Fill matrix row of (i,j+1) */                                                                                   \
-            row    = top_index;                                                                                                \
-            column = center_index;                                                                                             \
-            value  = -coeff4 * att; /* Bottom */                                                                               \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            row    = top_index;                                                                                                \
-            column = top_index;                                                                                                \
-            value  = coeff4 * att; /* Center: (Bottom) */                                                                      \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            /* Fill matrix row of (i-1,j) */                                                                                   \
-            if (!DirBC_Interior && i_r == 1) {                                                                                 \
-                const Stencil& LeftStencil                       = getStencil(i_r - 1);                                        \
-                int left_nz_index                                = getCircleAscIndex(i_r - 1, i_theta);                        \
-                int nz_index                                     = left_nz_index + LeftStencil[StencilType::Center];           \
-                inner_boundary_circle_matrix.row_index(nz_index) = left_index + 1;                                             \
-                inner_boundary_circle_matrix.col_index(nz_index) = left_index + 1;                                             \
-                inner_boundary_circle_matrix.value(nz_index) += coeff1 * arr; /* Center: (Right) */                            \
-            }                                                                                                                  \
-            if (i_r > 1) {                                                                                                     \
-                row    = left_index;                                                                                           \
-                column = left_index;                                                                                           \
-                value  = coeff1 * arr; /* Center: (Right) */                                                                   \
-                if (row == column)                                                                                             \
-                    left_matrix.main_diagonal(row) += value;                                                                   \
-                else if (row == column - 1)                                                                                    \
-                    left_matrix.sub_diagonal(row) += value;                                                                    \
-                else if (row == 0 && column == left_matrix.columns() - 1)                                                      \
-                    left_matrix.cyclic_corner_element() += value;                                                              \
-            }                                                                                                                  \
-                                                                                                                               \
-            /* Fill matrix row of (i+1,j) */                                                                                   \
-            row    = right_index;                                                                                              \
-            column = right_index;                                                                                              \
-            value  = coeff2 * arr; /* Center: (Left) */                                                                        \
-            if (row == column)                                                                                                 \
-                right_matrix.main_diagonal(row) += value;                                                                      \
-            else if (row == column - 1)                                                                                        \
-                right_matrix.sub_diagonal(row) += value;                                                                       \
-            else if (row == 0 && column == right_matrix.columns() - 1)                                                         \
-                right_matrix.cyclic_corner_element() += value;                                                                 \
-        }                                                                                                                      \
-        /* ------------------------------------------ */                                                                       \
-        /* Node in the interior of the Radial Section */                                                                       \
-        /* ------------------------------------------ */                                                                       \
-        else if (i_r > numberSmootherCircles && i_r < grid.nr() - 2) {                                                         \
-            const double h1     = grid.radialSpacing(i_r - 1);                                                                 \
-            const double h2     = grid.radialSpacing(i_r);                                                                     \
-            const double k1     = grid.angularSpacing(i_theta - 1);                                                            \
-            const double k2     = grid.angularSpacing(i_theta);                                                                \
-            const double coeff1 = 0.5 * (k1 + k2) / h1;                                                                        \
-            const double coeff2 = 0.5 * (k1 + k2) / h2;                                                                        \
-            const double coeff3 = 0.5 * (h1 + h2) / k1;                                                                        \
-            const double coeff4 = 0.5 * (h1 + h2) / k2;                                                                        \
-                                                                                                                               \
-            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                           \
-            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                           \
-                                                                                                                               \
-            auto& bottom_matrix = radial_tridiagonal_solver[i_theta_M1];                                                       \
-            auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                          \
-            auto& top_matrix    = radial_tridiagonal_solver[i_theta_P1];                                                       \
-                                                                                                                               \
-            const int center_index = i_r - numberSmootherCircles;                                                              \
-            const int left_index   = i_r - numberSmootherCircles - 1;                                                          \
-            const int right_index  = i_r - numberSmootherCircles + 1;                                                          \
-            const int bottom_index = i_r - numberSmootherCircles;                                                              \
-            const int top_index    = i_r - numberSmootherCircles;                                                              \
-                                                                                                                               \
-            /* Fill matrix row of (i,j) */                                                                                     \
-            row    = center_index;                                                                                             \
-            column = center_index;                                                                                             \
-            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */                         \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            row    = center_index;                                                                                             \
-            column = left_index;                                                                                               \
-            value  = -coeff1 * arr; /* Left */                                                                                 \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            row    = center_index;                                                                                             \
-            column = right_index;                                                                                              \
-            value  = -coeff2 * arr; /* Right */                                                                                \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            row    = center_index;                                                                                             \
-            column = center_index;                                                                                             \
-            value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */               \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            /* Fill matrix row of (i-1,j) */                                                                                   \
-            row    = left_index;                                                                                               \
-            column = center_index;                                                                                             \
-            value  = -coeff1 * arr; /* Right */                                                                                \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            row    = left_index;                                                                                               \
-            column = left_index;                                                                                               \
-            value  = coeff1 * arr; /* Center: (Right) */                                                                       \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            /* Fill matrix row of (i+1,j) */                                                                                   \
-            row    = right_index;                                                                                              \
-            column = center_index;                                                                                             \
-            value  = -coeff2 * arr; /* Left */                                                                                 \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            row    = right_index;                                                                                              \
-            column = right_index;                                                                                              \
-            value  = coeff2 * arr; /* Center: (Left) */                                                                        \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            /* Fill matrix row of (i,j-1) */                                                                                   \
-            row    = bottom_index;                                                                                             \
-            column = bottom_index;                                                                                             \
-            value  = coeff3 * att; /* Center: (Top) */                                                                         \
-            if (row == column)                                                                                                 \
-                bottom_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                bottom_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == bottom_matrix.columns() - 1)                                                        \
-                bottom_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            /* Fill matrix row of (i,j+1) */                                                                                   \
-            row    = top_index;                                                                                                \
-            column = top_index;                                                                                                \
-            value  = coeff4 * att; /* Center: (Bottom) */                                                                      \
-            if (row == column)                                                                                                 \
-                top_matrix.main_diagonal(row) += value;                                                                        \
-            else if (row == column - 1)                                                                                        \
-                top_matrix.sub_diagonal(row) += value;                                                                         \
-            else if (row == 0 && column == top_matrix.columns() - 1)                                                           \
-                top_matrix.cyclic_corner_element() += value;                                                                   \
-        }                                                                                                                      \
-        /* ------------------------------------------ */                                                                       \
-        /* Circle Section: Node in the inner boundary */                                                                       \
-        /* ------------------------------------------ */                                                                       \
-        else if (i_r == 0) {                                                                                                   \
-            /* ------------------------------------------------ */                                                             \
-            /* Case 1: Dirichlet boundary on the inner boundary */                                                             \
-            /* ------------------------------------------------ */                                                             \
-            if (DirBC_Interior) {                                                                                              \
-                /* Fill result(i,j) */                                                                                         \
-                const double h2     = grid.radialSpacing(i_r);                                                                 \
-                const double k1     = grid.angularSpacing(i_theta - 1);                                                        \
-                const double k2     = grid.angularSpacing(i_theta);                                                            \
-                const double coeff2 = 0.5 * (k1 + k2) / h2;                                                                    \
-                                                                                                                               \
-                const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                       \
-                const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                       \
-                                                                                                                               \
-                auto& center_matrix = inner_boundary_circle_matrix;                                                            \
-                auto& right_matrix  = circle_tridiagonal_solver[i_r + 1];                                                      \
-                                                                                                                               \
-                const int center_index = i_theta;                                                                              \
-                const int right_index  = i_theta;                                                                              \
-                const int bottom_index = i_theta_M1;                                                                           \
-                const int top_index    = i_theta_P1;                                                                           \
-                                                                                                                               \
-                /* Fill matrix row of (i,j) */                                                                                 \
-                const Stencil& CenterStencil      = getStencil(i_r);                                                           \
-                int center_nz_index               = getCircleAscIndex(i_r, i_theta);                                           \
-                int nz_index                      = center_nz_index + CenterStencil[StencilType::Center];                      \
-                center_matrix.row_index(nz_index) = center_index + 1;                                                          \
-                center_matrix.col_index(nz_index) = center_index + 1;                                                          \
-                center_matrix.value(nz_index) += 1.0;                                                                          \
-                /* Fill matrix row of (i+1,j) */                                                                               \
-                row    = right_index;                                                                                          \
-                column = right_index;                                                                                          \
-                value  = coeff2 * arr; /* Center: (Left) */                                                                    \
-                if (row == column)                                                                                             \
-                    right_matrix.main_diagonal(row) += value;                                                                  \
-                else if (row == column - 1)                                                                                    \
-                    right_matrix.sub_diagonal(row) += value;                                                                   \
-                else if (row == 0 && column == right_matrix.columns() - 1)                                                     \
-                    right_matrix.cyclic_corner_element() += value;                                                             \
-            }                                                                                                                  \
-            else {                                                                                                             \
-                /* ------------------------------------------------------------- */                                            \
-                /* Case 2: Across origin discretization on the interior boundary */                                            \
-                /* ------------------------------------------------------------- */                                            \
-                /* h1 gets replaced with 2 * R0. */                                                                            \
-                /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()>>1)). */                                  \
-                /* Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil. */            \
-                const double h1     = 2 * grid.radius(0);                                                                      \
-                const double h2     = grid.radialSpacing(i_r);                                                                 \
-                const double k1     = grid.angularSpacing(i_theta - 1);                                                        \
-                const double k2     = grid.angularSpacing(i_theta);                                                            \
-                const double coeff1 = 0.5 * (k1 + k2) / h1;                                                                    \
-                const double coeff2 = 0.5 * (k1 + k2) / h2;                                                                    \
-                const double coeff3 = 0.5 * (h1 + h2) / k1;                                                                    \
-                const double coeff4 = 0.5 * (h1 + h2) / k2;                                                                    \
-                                                                                                                               \
-                auto& center_matrix = inner_boundary_circle_matrix;                                                            \
-                auto& right_matrix  = circle_tridiagonal_solver[i_r + 1];                                                      \
-                auto& left_matrix   = inner_boundary_circle_matrix;                                                            \
-                                                                                                                               \
-                const int i_theta_M1           = grid.wrapThetaIndex(i_theta - 1);                                             \
-                const int i_theta_P1           = grid.wrapThetaIndex(i_theta + 1);                                             \
-                const int i_theta_AcrossOrigin = grid.wrapThetaIndex(i_theta + grid.ntheta() / 2);                             \
-                                                                                                                               \
-                const int center_index = i_theta;                                                                              \
-                const int left_index   = i_theta_AcrossOrigin;                                                                 \
-                const int right_index  = i_theta;                                                                              \
-                const int bottom_index = i_theta_M1;                                                                           \
-                const int top_index    = i_theta_P1;                                                                           \
-                                                                                                                               \
-                const int center_nz_index = getCircleAscIndex(i_r, i_theta);                                                   \
-                const int bottom_nz_index = getCircleAscIndex(i_r, i_theta_M1);                                                \
-                const int top_nz_index    = getCircleAscIndex(i_r, i_theta_P1);                                                \
-                const int left_nz_index   = getCircleAscIndex(i_r, i_theta_AcrossOrigin);                                      \
-                                                                                                                               \
-                int nz_index;                                                                                                  \
-                /* Fill matrix row of (i,j) */                                                                                 \
-                const Stencil& CenterStencil = getStencil(i_r);                                                                \
-                                                                                                                               \
-                nz_index                          = center_nz_index + CenterStencil[StencilType::Center];                      \
-                center_matrix.row_index(nz_index) = center_index + 1;                                                          \
-                center_matrix.col_index(nz_index) = center_index + 1;                                                          \
-                center_matrix.value(nz_index) +=                                                                               \
-                    0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* beta_{i,j} */                                  \
-                                                                                                                               \
-                nz_index                          = center_nz_index + CenterStencil[StencilType::Left];                        \
-                center_matrix.row_index(nz_index) = center_index + 1;                                                          \
-                center_matrix.col_index(nz_index) = left_index + 1;                                                            \
-                center_matrix.value(nz_index) += -coeff1 * arr; /* Left */                                                     \
-                                                                                                                               \
-                nz_index                          = center_nz_index + CenterStencil[StencilType::Bottom];                      \
-                center_matrix.row_index(nz_index) = center_index + 1;                                                          \
-                center_matrix.col_index(nz_index) = bottom_index + 1;                                                          \
-                center_matrix.value(nz_index) += -coeff3 * att; /* Bottom */                                                   \
-                                                                                                                               \
-                nz_index                          = center_nz_index + CenterStencil[StencilType::Top];                         \
-                center_matrix.row_index(nz_index) = center_index + 1;                                                          \
-                center_matrix.col_index(nz_index) = top_index + 1;                                                             \
-                center_matrix.value(nz_index) += -coeff4 * att; /* Top */                                                      \
-                                                                                                                               \
-                nz_index                          = center_nz_index + CenterStencil[StencilType::Center];                      \
-                center_matrix.row_index(nz_index) = center_index + 1;                                                          \
-                center_matrix.col_index(nz_index) = center_index + 1;                                                          \
-                /* Center: (Left, Right, Bottom, Top) */                                                                       \
-                center_matrix.value(nz_index) += (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att;                            \
-                                                                                                                               \
-                /* Fill matrix row of (i-1,j) */                                                                               \
-                /* From view the view of the across origin node, */ \
-                /* the directions are roatated by 180 degrees in the stencil! */ \
-                const Stencil& LeftStencil = CenterStencil;                                                                    \
-                                                                                                                               \
-                nz_index                        = left_nz_index + LeftStencil[StencilType::Left];                              \
-                left_matrix.row_index(nz_index) = left_index + 1;                                                              \
-                left_matrix.col_index(nz_index) = center_index + 1;                                                            \
-                left_matrix.value(nz_index) += -coeff1 * arr; /* Right -> Left*/                                               \
-                                                                                                                               \
-                nz_index                        = left_nz_index + LeftStencil[StencilType::Center];                            \
-                left_matrix.row_index(nz_index) = left_index + 1;                                                              \
-                left_matrix.col_index(nz_index) = left_index + 1;                                                              \
-                left_matrix.value(nz_index) += coeff1 * arr; /* Center: (Right) -> Center: (Left) */                           \
-                                                                                                                               \
-                /* Top Right -> Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                                       \
-                /* nz_index = left_nz_index + LeftStencil[StencilType::BottomLeft]; */                                         \
-                /* left_matrix.row_index(nz_index) = left_index; */                                                            \
-                /* left_matrix.col_index(nz_index) = top_index; */                                                             \
-                /* left_matrix.value(nz_index) += - 0.25 * art; // Top Right -> Bottom Left*/                                  \
-                                                                                                                               \
-                /* Bottom Right -> Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                                       \
-                /* nz_index = left_nz_index + LeftStencil[StencilType::TopLeft]; */                                            \
-                /* left_matrix.row_index(nz_index) = left_index; */                                                            \
-                /* left_matrix.col_index(nz_index) = bottom_index; */                                                          \
-                /* lefc_matrix.value(nz_index) += 0.25 * art; // Bottom Right -> Top Left */                                   \
-                                                                                                                               \
-                /* Fill matrix row of (i+1,j) */                                                                               \
-                row    = right_index;                                                                                          \
-                column = right_index;                                                                                          \
-                value  = coeff2 * arr; /* Center: (Left) */                                                                    \
-                if (row == column)                                                                                             \
-                    right_matrix.main_diagonal(row) += value;                                                                  \
-                else if (row == column - 1)                                                                                    \
-                    right_matrix.sub_diagonal(row) += value;                                                                   \
-                else if (row == 0 && column == right_matrix.columns() - 1)                                                     \
-                    right_matrix.cyclic_corner_element() += value;                                                             \
-                                                                                                                               \
-                /* Fill matrix row of (i,j-1) */                                                                               \
-                const Stencil& BottomStencil = CenterStencil;                                                                  \
-                                                                                                                               \
-                nz_index                          = bottom_nz_index + BottomStencil[StencilType::Top];                         \
-                center_matrix.row_index(nz_index) = bottom_index + 1;                                                          \
-                center_matrix.col_index(nz_index) = center_index + 1;                                                          \
-                center_matrix.value(nz_index) += -coeff3 * att; /* Top */                                                      \
-                                                                                                                               \
-                nz_index                          = bottom_nz_index + BottomStencil[StencilType::Center];                      \
-                center_matrix.row_index(nz_index) = bottom_index + 1;                                                          \
-                center_matrix.col_index(nz_index) = bottom_index + 1;                                                          \
-                center_matrix.value(nz_index) += coeff3 * att; /* Center: (Top) */                                             \
-                                                                                                                               \
-                /* REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                                                                 \
-                /* nz_index = bottom_nz_index + BottomStencil[StencilType::TopLeft]; */                                        \
-                /* center_matrix.row_index(nz_index) = bottom_index + 1; */                                                    \
-                /* center_matrix.col_index(nz_index) = left_index + 1; */                                                      \
-                /* center_matrix.value(nz_index) += 0.25 * art; // Top Left */                                                 \
-                                                                                                                               \
-                /* Fill matrix row of (i,j+1) */                                                                               \
-                const Stencil& TopStencil = CenterStencil;                                                                     \
-                                                                                                                               \
-                nz_index                          = top_nz_index + TopStencil[StencilType::Bottom];                            \
-                center_matrix.row_index(nz_index) = top_index + 1;                                                             \
-                center_matrix.col_index(nz_index) = center_index + 1;                                                          \
-                center_matrix.value(nz_index) += -coeff4 * att; /* Bottom */                                                   \
-                                                                                                                               \
-                nz_index                          = top_nz_index + TopStencil[StencilType::Center];                            \
-                center_matrix.row_index(nz_index) = top_index + 1;                                                             \
-                center_matrix.col_index(nz_index) = top_index + 1;                                                             \
-                center_matrix.value(nz_index) += coeff4 * att; /* Center: (Bottom) */                                          \
-                                                                                                                               \
-                /* REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                                                                 \
-                /* nz_index = top_nz_index + TopStencil[StencilType::BottomLeft]; */                                           \
-                /* center_matrix.row_index(nz_index) = top_index + 1; */                                                       \
-                /* center_matrix.col_index(nz_index) = left_index + 1; */                                                      \
-                /* center_matrix.value(nz_index) += - 0.25 * art; // Bottom Left */                                            \
-            }                                                                                                                  \
-        }                                                                                                                      \
-        /* --------------------------------------------- */                                                                    \
-        /* Radial Section: Node next to circular section */                                                                    \
-        /* --------------------------------------------- */                                                                    \
-        else if (i_r == numberSmootherCircles) {                                                                               \
-            double h1     = grid.radialSpacing(i_r - 1);                                                                       \
-            double h2     = grid.radialSpacing(i_r);                                                                           \
-            double k1     = grid.angularSpacing(i_theta - 1);                                                                  \
-            double k2     = grid.angularSpacing(i_theta);                                                                      \
-            double coeff1 = 0.5 * (k1 + k2) / h1;                                                                              \
-            double coeff2 = 0.5 * (k1 + k2) / h2;                                                                              \
-            double coeff3 = 0.5 * (h1 + h2) / k1;                                                                              \
-            double coeff4 = 0.5 * (h1 + h2) / k2;                                                                              \
-                                                                                                                               \
-            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                           \
-            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                           \
-                                                                                                                               \
-            auto& bottom_matrix = radial_tridiagonal_solver[i_theta_M1];                                                       \
-            auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                          \
-            auto& top_matrix    = radial_tridiagonal_solver[i_theta_P1];                                                       \
-            auto& left_matrix   = circle_tridiagonal_solver[i_r - 1];                                                          \
-                                                                                                                               \
-            const int center_index = i_r - numberSmootherCircles;                                                              \
-            const int left_index   = i_theta;                                                                                  \
-            const int right_index  = i_r - numberSmootherCircles + 1;                                                          \
-            const int bottom_index = i_r - numberSmootherCircles;                                                              \
-            const int top_index    = i_r - numberSmootherCircles;                                                              \
-                                                                                                                               \
-            /* Fill matrix row of (i,j) */                                                                                     \
-            row    = center_index;                                                                                             \
-            column = center_index;                                                                                             \
-            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */                         \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            row    = center_index;                                                                                             \
-            column = right_index;                                                                                              \
-            value  = -coeff2 * arr; /* Right */                                                                                \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            row    = center_index;                                                                                             \
-            column = center_index;                                                                                             \
-            value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */               \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            /* Fill matrix row of (i-1,j) */                                                                                   \
-            row    = left_index;                                                                                               \
-            column = left_index;                                                                                               \
-            value  = coeff1 * arr; /* Center: (Right) */                                                                       \
-            if (row == column)                                                                                                 \
-                left_matrix.main_diagonal(row) += value;                                                                       \
-            else if (row == column - 1)                                                                                        \
-                left_matrix.sub_diagonal(row) += value;                                                                        \
-            else if (row == 0 && column == left_matrix.columns() - 1)                                                          \
-                left_matrix.cyclic_corner_element() += value;                                                                  \
-                                                                                                                               \
-            /* Fill matrix row of (i+1,j) */                                                                                   \
-            row    = right_index;                                                                                              \
-            column = center_index;                                                                                             \
-            value  = -coeff2 * arr; /* Left */                                                                                 \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            row    = right_index;                                                                                              \
-            column = right_index;                                                                                              \
-            value  = coeff2 * arr; /* Center: (Left) */                                                                        \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            /* Fill matrix row of (i,j-1) */                                                                                   \
-            row    = bottom_index;                                                                                             \
-            column = bottom_index;                                                                                             \
-            value  = coeff3 * att; /* Center: (Top) */                                                                         \
-            if (row == column)                                                                                                 \
-                bottom_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                bottom_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == bottom_matrix.columns() - 1)                                                        \
-                bottom_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            /* Fill matrix row of (i,j+1) */                                                                                   \
-            row    = top_index;                                                                                                \
-            column = top_index;                                                                                                \
-            value  = coeff4 * att; /* Center: (Bottom) */                                                                      \
-            if (row == column)                                                                                                 \
-                top_matrix.main_diagonal(row) += value;                                                                        \
-            else if (row == column - 1)                                                                                        \
-                top_matrix.sub_diagonal(row) += value;                                                                         \
-            else if (row == 0 && column == top_matrix.columns() - 1)                                                           \
-                top_matrix.cyclic_corner_element() += value;                                                                   \
-        }                                                                                                                      \
-        /* ------------------------------------------- */                                                                      \
-        /* Radial Section: Node next to outer boundary */                                                                      \
-        /* ------------------------------------------- */                                                                      \
-        else if (i_r == grid.nr() - 2) {                                                                                       \
-            const double h1     = grid.radialSpacing(i_r - 1);                                                                 \
-            const double h2     = grid.radialSpacing(i_r);                                                                     \
-            const double k1     = grid.angularSpacing(i_theta - 1);                                                            \
-            const double k2     = grid.angularSpacing(i_theta);                                                                \
-            const double coeff1 = 0.5 * (k1 + k2) / h1;                                                                        \
-            const double coeff2 = 0.5 * (k1 + k2) / h2;                                                                        \
-            const double coeff3 = 0.5 * (h1 + h2) / k1;                                                                        \
-            const double coeff4 = 0.5 * (h1 + h2) / k2;                                                                        \
-                                                                                                                               \
-            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                           \
-            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                           \
-                                                                                                                               \
-            auto& bottom_matrix = radial_tridiagonal_solver[i_theta_M1];                                                       \
-            auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                          \
-            auto& top_matrix    = radial_tridiagonal_solver[i_theta_P1];                                                       \
-                                                                                                                               \
-            const int center_index = i_r - numberSmootherCircles;                                                              \
-            const int left_index   = i_r - numberSmootherCircles - 1;                                                          \
-            const int right_index  = i_r - numberSmootherCircles + 1;                                                          \
-            const int bottom_index = i_r - numberSmootherCircles;                                                              \
-            const int top_index    = i_r - numberSmootherCircles;                                                              \
-                                                                                                                               \
-            /* ---------------------------- */                                                                                 \
-            /* Give values to center matrix */                                                                                 \
-            /* ---------------------------- */                                                                                 \
-            /* Fill matrix row of (i,j) */                                                                                     \
-            row    = center_index;                                                                                             \
-            column = center_index;                                                                                             \
-            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */                         \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            row    = center_index;                                                                                             \
-            column = left_index;                                                                                               \
-            value  = -coeff1 * arr; /* Left */                                                                                 \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            row    = center_index;                                                                                             \
-            column = center_index;                                                                                             \
-            value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */               \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            /* Fill matrix row of (i-1,j) */                                                                                   \
-            row    = left_index;                                                                                               \
-            column = center_index;                                                                                             \
-            value  = -coeff1 * arr; /* Right */                                                                                \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            row    = left_index;                                                                                               \
-            column = left_index;                                                                                               \
-            value  = coeff1 * arr; /* Center: (Right) */                                                                       \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            /* Fill matrix row of (i,j-1) */                                                                                   \
-            row    = bottom_index;                                                                                             \
-            column = bottom_index;                                                                                             \
-            value  = coeff3 * att; /* Center: (Top) */                                                                         \
-            if (row == column)                                                                                                 \
-                bottom_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                bottom_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == bottom_matrix.columns() - 1)                                                        \
-                bottom_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            /* Fill matrix row of (i,j+1) */                                                                                   \
-            row    = top_index;                                                                                                \
-            column = top_index;                                                                                                \
-            value  = coeff4 * att; /* Center: (Bottom) */                                                                      \
-            if (row == column)                                                                                                 \
-                top_matrix.main_diagonal(row) += value;                                                                        \
-            else if (row == column - 1)                                                                                        \
-                top_matrix.sub_diagonal(row) += value;                                                                         \
-            else if (row == 0 && column == top_matrix.columns() - 1)                                                           \
-                top_matrix.cyclic_corner_element() += value;                                                                   \
-        }                                                                                                                      \
-        /* ------------------------------------------ */                                                                       \
-        /* Radial Section: Node on the outer boundary */                                                                       \
-        /* ------------------------------------------ */                                                                       \
-        else if (i_r == grid.nr() - 1) {                                                                                       \
-            double h1     = grid.radialSpacing(i_r - 1);                                                                       \
-            double k1     = grid.angularSpacing(i_theta - 1);                                                                  \
-            double k2     = grid.angularSpacing(i_theta);                                                                      \
-            double coeff1 = 0.5 * (k1 + k2) / h1;                                                                              \
-                                                                                                                               \
-            auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                          \
-                                                                                                                               \
-            const int center_index = i_r - numberSmootherCircles;                                                              \
-            const int left_index   = i_r - numberSmootherCircles - 1;                                                          \
-                                                                                                                               \
-            /* Fill matrix row of (i,j) */                                                                                     \
-            row    = center_index;                                                                                             \
-            column = center_index;                                                                                             \
-            value  = 1.0;                                                                                                      \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-                                                                                                                               \
-            /* Fill matrix row of (i-1,j) */                                                                                   \
-            row    = left_index;                                                                                               \
-            column = left_index;                                                                                               \
-            value  = coeff1 * arr; /* Center: (Right) */                                                                       \
-            if (row == column)                                                                                                 \
-                center_matrix.main_diagonal(row) += value;                                                                     \
-            else if (row == column - 1)                                                                                        \
-                center_matrix.sub_diagonal(row) += value;                                                                      \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                        \
-                center_matrix.cyclic_corner_element() += value;                                                                \
-        }                                                                                                                      \
+#define NODE_BUILD_SMOOTHER_GIVE(i_r, i_theta, grid, DirBC_Interior, inner_boundary_circle_matrix,                     \
+                                 circle_tridiagonal_solver, radial_tridiagonal_solver)                                 \
+    do {                                                                                                               \
+        assert(i_r >= 0 && i_r < grid.nr());                                                                           \
+        assert(i_theta >= 0 && i_theta < grid.ntheta());                                                               \
+                                                                                                                       \
+        const int numberSmootherCircles = grid.numberSmootherCircles();                                                \
+        const int lengthSmootherRadial  = grid.lengthSmootherRadial();                                                 \
+                                                                                                                       \
+        assert(numberSmootherCircles >= 2);                                                                            \
+        assert(lengthSmootherRadial >= 3);                                                                             \
+                                                                                                                       \
+        int row, column;                                                                                               \
+        double value;                                                                                                  \
+        /* ------------------------------------------ */                                                               \
+        /* Node in the interior of the Circle Section */                                                               \
+        /* ------------------------------------------ */                                                               \
+        if (i_r > 0 && i_r < numberSmootherCircles) {                                                                  \
+            const double h1     = grid.radialSpacing(i_r - 1);                                                         \
+            const double h2     = grid.radialSpacing(i_r);                                                             \
+            const double k1     = grid.angularSpacing(i_theta - 1);                                                    \
+            const double k2     = grid.angularSpacing(i_theta);                                                        \
+            const double coeff1 = 0.5 * (k1 + k2) / h1;                                                                \
+            const double coeff2 = 0.5 * (k1 + k2) / h2;                                                                \
+            const double coeff3 = 0.5 * (h1 + h2) / k1;                                                                \
+            const double coeff4 = 0.5 * (h1 + h2) / k2;                                                                \
+                                                                                                                       \
+            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                   \
+            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                   \
+                                                                                                                       \
+            const int center_index = i_theta;                                                                          \
+            const int left_index   = i_theta;                                                                          \
+            const int right_index  = (i_r + 1 == numberSmootherCircles) ? 0 : i_theta;                                 \
+            const int bottom_index = i_theta_M1;                                                                       \
+            const int top_index    = i_theta_P1;                                                                       \
+                                                                                                                       \
+            auto& left_matrix   = circle_tridiagonal_solver[i_r - 1];                                                  \
+            auto& center_matrix = circle_tridiagonal_solver[i_r];                                                      \
+            auto& right_matrix  = (i_r + 1 == numberSmootherCircles) ? radial_tridiagonal_solver[i_theta]              \
+                                                                     : circle_tridiagonal_solver[i_r + 1];             \
+                                                                                                                       \
+            /* Fill matrix row of (i,j) */                                                                             \
+            row    = center_index;                                                                                     \
+            column = center_index;                                                                                     \
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */                 \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            row    = center_index;                                                                                     \
+            column = bottom_index;                                                                                     \
+            value  = -coeff3 * att; /* Bottom */                                                                       \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            row    = center_index;                                                                                     \
+            column = top_index;                                                                                        \
+            value  = -coeff4 * att; /* Top */                                                                          \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            row    = center_index;                                                                                     \
+            column = center_index;                                                                                     \
+            value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */       \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            /* Fill matrix row of (i,j-1) */                                                                           \
+            row    = bottom_index;                                                                                     \
+            column = center_index;                                                                                     \
+            value  = -coeff3 * att; /* Top */                                                                          \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            row    = bottom_index;                                                                                     \
+            column = bottom_index;                                                                                     \
+            value  = coeff3 * att; /* Center: (Top) */                                                                 \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            /* Fill matrix row of (i,j+1) */                                                                           \
+            row    = top_index;                                                                                        \
+            column = center_index;                                                                                     \
+            value  = -coeff4 * att; /* Bottom */                                                                       \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            row    = top_index;                                                                                        \
+            column = top_index;                                                                                        \
+            value  = coeff4 * att; /* Center: (Bottom) */                                                              \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            /* Fill matrix row of (i-1,j) */                                                                           \
+            if (!DirBC_Interior && i_r == 1) {                                                                         \
+                const Stencil& LeftStencil                       = getStencil(i_r - 1);                                \
+                int left_nz_index                                = getCircleAscIndex(i_r - 1, i_theta);                \
+                int nz_index                                     = left_nz_index + LeftStencil[StencilType::Center];   \
+                inner_boundary_circle_matrix.row_index(nz_index) = left_index + 1;                                     \
+                inner_boundary_circle_matrix.col_index(nz_index) = left_index + 1;                                     \
+                inner_boundary_circle_matrix.value(nz_index) += coeff1 * arr; /* Center: (Right) */                    \
+            }                                                                                                          \
+            if (i_r > 1) {                                                                                             \
+                row    = left_index;                                                                                   \
+                column = left_index;                                                                                   \
+                value  = coeff1 * arr; /* Center: (Right) */                                                           \
+                if (row == column)                                                                                     \
+                    left_matrix.main_diagonal(row) += value;                                                           \
+                else if (row == column - 1)                                                                            \
+                    left_matrix.sub_diagonal(row) += value;                                                            \
+                else if (row == 0 && column == left_matrix.columns() - 1)                                              \
+                    left_matrix.cyclic_corner_element() += value;                                                      \
+            }                                                                                                          \
+                                                                                                                       \
+            /* Fill matrix row of (i+1,j) */                                                                           \
+            row    = right_index;                                                                                      \
+            column = right_index;                                                                                      \
+            value  = coeff2 * arr; /* Center: (Left) */                                                                \
+            if (row == column)                                                                                         \
+                right_matrix.main_diagonal(row) += value;                                                              \
+            else if (row == column - 1)                                                                                \
+                right_matrix.sub_diagonal(row) += value;                                                               \
+            else if (row == 0 && column == right_matrix.columns() - 1)                                                 \
+                right_matrix.cyclic_corner_element() += value;                                                         \
+        }                                                                                                              \
+        /* ------------------------------------------ */                                                               \
+        /* Node in the interior of the Radial Section */                                                               \
+        /* ------------------------------------------ */                                                               \
+        else if (i_r > numberSmootherCircles && i_r < grid.nr() - 2) {                                                 \
+            const double h1     = grid.radialSpacing(i_r - 1);                                                         \
+            const double h2     = grid.radialSpacing(i_r);                                                             \
+            const double k1     = grid.angularSpacing(i_theta - 1);                                                    \
+            const double k2     = grid.angularSpacing(i_theta);                                                        \
+            const double coeff1 = 0.5 * (k1 + k2) / h1;                                                                \
+            const double coeff2 = 0.5 * (k1 + k2) / h2;                                                                \
+            const double coeff3 = 0.5 * (h1 + h2) / k1;                                                                \
+            const double coeff4 = 0.5 * (h1 + h2) / k2;                                                                \
+                                                                                                                       \
+            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                   \
+            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                   \
+                                                                                                                       \
+            auto& bottom_matrix = radial_tridiagonal_solver[i_theta_M1];                                               \
+            auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                  \
+            auto& top_matrix    = radial_tridiagonal_solver[i_theta_P1];                                               \
+                                                                                                                       \
+            const int center_index = i_r - numberSmootherCircles;                                                      \
+            const int left_index   = i_r - numberSmootherCircles - 1;                                                  \
+            const int right_index  = i_r - numberSmootherCircles + 1;                                                  \
+            const int bottom_index = i_r - numberSmootherCircles;                                                      \
+            const int top_index    = i_r - numberSmootherCircles;                                                      \
+                                                                                                                       \
+            /* Fill matrix row of (i,j) */                                                                             \
+            row    = center_index;                                                                                     \
+            column = center_index;                                                                                     \
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */                 \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            row    = center_index;                                                                                     \
+            column = left_index;                                                                                       \
+            value  = -coeff1 * arr; /* Left */                                                                         \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            row    = center_index;                                                                                     \
+            column = right_index;                                                                                      \
+            value  = -coeff2 * arr; /* Right */                                                                        \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            row    = center_index;                                                                                     \
+            column = center_index;                                                                                     \
+            value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */       \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            /* Fill matrix row of (i-1,j) */                                                                           \
+            row    = left_index;                                                                                       \
+            column = center_index;                                                                                     \
+            value  = -coeff1 * arr; /* Right */                                                                        \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            row    = left_index;                                                                                       \
+            column = left_index;                                                                                       \
+            value  = coeff1 * arr; /* Center: (Right) */                                                               \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            /* Fill matrix row of (i+1,j) */                                                                           \
+            row    = right_index;                                                                                      \
+            column = center_index;                                                                                     \
+            value  = -coeff2 * arr; /* Left */                                                                         \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            row    = right_index;                                                                                      \
+            column = right_index;                                                                                      \
+            value  = coeff2 * arr; /* Center: (Left) */                                                                \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            /* Fill matrix row of (i,j-1) */                                                                           \
+            row    = bottom_index;                                                                                     \
+            column = bottom_index;                                                                                     \
+            value  = coeff3 * att; /* Center: (Top) */                                                                 \
+            if (row == column)                                                                                         \
+                bottom_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                bottom_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == bottom_matrix.columns() - 1)                                                \
+                bottom_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            /* Fill matrix row of (i,j+1) */                                                                           \
+            row    = top_index;                                                                                        \
+            column = top_index;                                                                                        \
+            value  = coeff4 * att; /* Center: (Bottom) */                                                              \
+            if (row == column)                                                                                         \
+                top_matrix.main_diagonal(row) += value;                                                                \
+            else if (row == column - 1)                                                                                \
+                top_matrix.sub_diagonal(row) += value;                                                                 \
+            else if (row == 0 && column == top_matrix.columns() - 1)                                                   \
+                top_matrix.cyclic_corner_element() += value;                                                           \
+        }                                                                                                              \
+        /* ------------------------------------------ */                                                               \
+        /* Circle Section: Node in the inner boundary */                                                               \
+        /* ------------------------------------------ */                                                               \
+        else if (i_r == 0) {                                                                                           \
+            /* ------------------------------------------------ */                                                     \
+            /* Case 1: Dirichlet boundary on the inner boundary */                                                     \
+            /* ------------------------------------------------ */                                                     \
+            if (DirBC_Interior) {                                                                                      \
+                /* Fill result(i,j) */                                                                                 \
+                const double h2     = grid.radialSpacing(i_r);                                                         \
+                const double k1     = grid.angularSpacing(i_theta - 1);                                                \
+                const double k2     = grid.angularSpacing(i_theta);                                                    \
+                const double coeff2 = 0.5 * (k1 + k2) / h2;                                                            \
+                                                                                                                       \
+                const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                               \
+                const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                               \
+                                                                                                                       \
+                auto& center_matrix = inner_boundary_circle_matrix;                                                    \
+                auto& right_matrix  = circle_tridiagonal_solver[i_r + 1];                                              \
+                                                                                                                       \
+                const int center_index = i_theta;                                                                      \
+                const int right_index  = i_theta;                                                                      \
+                const int bottom_index = i_theta_M1;                                                                   \
+                const int top_index    = i_theta_P1;                                                                   \
+                                                                                                                       \
+                /* Fill matrix row of (i,j) */                                                                         \
+                const Stencil& CenterStencil      = getStencil(i_r);                                                   \
+                int center_nz_index               = getCircleAscIndex(i_r, i_theta);                                   \
+                int nz_index                      = center_nz_index + CenterStencil[StencilType::Center];              \
+                center_matrix.row_index(nz_index) = center_index + 1;                                                  \
+                center_matrix.col_index(nz_index) = center_index + 1;                                                  \
+                center_matrix.value(nz_index) += 1.0;                                                                  \
+                /* Fill matrix row of (i+1,j) */                                                                       \
+                row    = right_index;                                                                                  \
+                column = right_index;                                                                                  \
+                value  = coeff2 * arr; /* Center: (Left) */                                                            \
+                if (row == column)                                                                                     \
+                    right_matrix.main_diagonal(row) += value;                                                          \
+                else if (row == column - 1)                                                                            \
+                    right_matrix.sub_diagonal(row) += value;                                                           \
+                else if (row == 0 && column == right_matrix.columns() - 1)                                             \
+                    right_matrix.cyclic_corner_element() += value;                                                     \
+            }                                                                                                          \
+            else {                                                                                                     \
+                /* ------------------------------------------------------------- */                                    \
+                /* Case 2: Across origin discretization on the interior boundary */                                    \
+                /* ------------------------------------------------------------- */                                    \
+                /* h1 gets replaced with 2 * R0. */                                                                    \
+                /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()>>1)). */                          \
+                /* Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil. */    \
+                const double h1     = 2 * grid.radius(0);                                                              \
+                const double h2     = grid.radialSpacing(i_r);                                                         \
+                const double k1     = grid.angularSpacing(i_theta - 1);                                                \
+                const double k2     = grid.angularSpacing(i_theta);                                                    \
+                const double coeff1 = 0.5 * (k1 + k2) / h1;                                                            \
+                const double coeff2 = 0.5 * (k1 + k2) / h2;                                                            \
+                const double coeff3 = 0.5 * (h1 + h2) / k1;                                                            \
+                const double coeff4 = 0.5 * (h1 + h2) / k2;                                                            \
+                                                                                                                       \
+                auto& center_matrix = inner_boundary_circle_matrix;                                                    \
+                auto& right_matrix  = circle_tridiagonal_solver[i_r + 1];                                              \
+                auto& left_matrix   = inner_boundary_circle_matrix;                                                    \
+                                                                                                                       \
+                const int i_theta_M1           = grid.wrapThetaIndex(i_theta - 1);                                     \
+                const int i_theta_P1           = grid.wrapThetaIndex(i_theta + 1);                                     \
+                const int i_theta_AcrossOrigin = grid.wrapThetaIndex(i_theta + grid.ntheta() / 2);                     \
+                                                                                                                       \
+                const int center_index = i_theta;                                                                      \
+                const int left_index   = i_theta_AcrossOrigin;                                                         \
+                const int right_index  = i_theta;                                                                      \
+                const int bottom_index = i_theta_M1;                                                                   \
+                const int top_index    = i_theta_P1;                                                                   \
+                                                                                                                       \
+                const int center_nz_index = getCircleAscIndex(i_r, i_theta);                                           \
+                const int bottom_nz_index = getCircleAscIndex(i_r, i_theta_M1);                                        \
+                const int top_nz_index    = getCircleAscIndex(i_r, i_theta_P1);                                        \
+                const int left_nz_index   = getCircleAscIndex(i_r, i_theta_AcrossOrigin);                              \
+                                                                                                                       \
+                int nz_index;                                                                                          \
+                /* Fill matrix row of (i,j) */                                                                         \
+                const Stencil& CenterStencil = getStencil(i_r);                                                        \
+                                                                                                                       \
+                nz_index                          = center_nz_index + CenterStencil[StencilType::Center];              \
+                center_matrix.row_index(nz_index) = center_index + 1;                                                  \
+                center_matrix.col_index(nz_index) = center_index + 1;                                                  \
+                center_matrix.value(nz_index) +=                                                                       \
+                    0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* beta_{i,j} */                          \
+                                                                                                                       \
+                nz_index                          = center_nz_index + CenterStencil[StencilType::Left];                \
+                center_matrix.row_index(nz_index) = center_index + 1;                                                  \
+                center_matrix.col_index(nz_index) = left_index + 1;                                                    \
+                center_matrix.value(nz_index) += -coeff1 * arr; /* Left */                                             \
+                                                                                                                       \
+                nz_index                          = center_nz_index + CenterStencil[StencilType::Bottom];              \
+                center_matrix.row_index(nz_index) = center_index + 1;                                                  \
+                center_matrix.col_index(nz_index) = bottom_index + 1;                                                  \
+                center_matrix.value(nz_index) += -coeff3 * att; /* Bottom */                                           \
+                                                                                                                       \
+                nz_index                          = center_nz_index + CenterStencil[StencilType::Top];                 \
+                center_matrix.row_index(nz_index) = center_index + 1;                                                  \
+                center_matrix.col_index(nz_index) = top_index + 1;                                                     \
+                center_matrix.value(nz_index) += -coeff4 * att; /* Top */                                              \
+                                                                                                                       \
+                nz_index                          = center_nz_index + CenterStencil[StencilType::Center];              \
+                center_matrix.row_index(nz_index) = center_index + 1;                                                  \
+                center_matrix.col_index(nz_index) = center_index + 1;                                                  \
+                /* Center: (Left, Right, Bottom, Top) */                                                               \
+                center_matrix.value(nz_index) += (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att;                    \
+                                                                                                                       \
+                /* Fill matrix row of (i-1,j) */                                                                       \
+                /* From view the view of the across origin node, */                                                    \
+                /* the directions are roatated by 180 degrees in the stencil! */                                       \
+                const Stencil& LeftStencil = CenterStencil;                                                            \
+                                                                                                                       \
+                nz_index                        = left_nz_index + LeftStencil[StencilType::Left];                      \
+                left_matrix.row_index(nz_index) = left_index + 1;                                                      \
+                left_matrix.col_index(nz_index) = center_index + 1;                                                    \
+                left_matrix.value(nz_index) += -coeff1 * arr; /* Right -> Left*/                                       \
+                                                                                                                       \
+                nz_index                        = left_nz_index + LeftStencil[StencilType::Center];                    \
+                left_matrix.row_index(nz_index) = left_index + 1;                                                      \
+                left_matrix.col_index(nz_index) = left_index + 1;                                                      \
+                left_matrix.value(nz_index) += coeff1 * arr; /* Center: (Right) -> Center: (Left) */                   \
+                                                                                                                       \
+                /* Top Right -> Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                               \
+                /* nz_index = left_nz_index + LeftStencil[StencilType::BottomLeft]; */                                 \
+                /* left_matrix.row_index(nz_index) = left_index; */                                                    \
+                /* left_matrix.col_index(nz_index) = top_index; */                                                     \
+                /* left_matrix.value(nz_index) += - 0.25 * art; // Top Right -> Bottom Left*/                          \
+                                                                                                                       \
+                /* Bottom Right -> Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                               \
+                /* nz_index = left_nz_index + LeftStencil[StencilType::TopLeft]; */                                    \
+                /* left_matrix.row_index(nz_index) = left_index; */                                                    \
+                /* left_matrix.col_index(nz_index) = bottom_index; */                                                  \
+                /* lefc_matrix.value(nz_index) += 0.25 * art; // Bottom Right -> Top Left */                           \
+                                                                                                                       \
+                /* Fill matrix row of (i+1,j) */                                                                       \
+                row    = right_index;                                                                                  \
+                column = right_index;                                                                                  \
+                value  = coeff2 * arr; /* Center: (Left) */                                                            \
+                if (row == column)                                                                                     \
+                    right_matrix.main_diagonal(row) += value;                                                          \
+                else if (row == column - 1)                                                                            \
+                    right_matrix.sub_diagonal(row) += value;                                                           \
+                else if (row == 0 && column == right_matrix.columns() - 1)                                             \
+                    right_matrix.cyclic_corner_element() += value;                                                     \
+                                                                                                                       \
+                /* Fill matrix row of (i,j-1) */                                                                       \
+                const Stencil& BottomStencil = CenterStencil;                                                          \
+                                                                                                                       \
+                nz_index                          = bottom_nz_index + BottomStencil[StencilType::Top];                 \
+                center_matrix.row_index(nz_index) = bottom_index + 1;                                                  \
+                center_matrix.col_index(nz_index) = center_index + 1;                                                  \
+                center_matrix.value(nz_index) += -coeff3 * att; /* Top */                                              \
+                                                                                                                       \
+                nz_index                          = bottom_nz_index + BottomStencil[StencilType::Center];              \
+                center_matrix.row_index(nz_index) = bottom_index + 1;                                                  \
+                center_matrix.col_index(nz_index) = bottom_index + 1;                                                  \
+                center_matrix.value(nz_index) += coeff3 * att; /* Center: (Top) */                                     \
+                                                                                                                       \
+                /* REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                                                         \
+                /* nz_index = bottom_nz_index + BottomStencil[StencilType::TopLeft]; */                                \
+                /* center_matrix.row_index(nz_index) = bottom_index + 1; */                                            \
+                /* center_matrix.col_index(nz_index) = left_index + 1; */                                              \
+                /* center_matrix.value(nz_index) += 0.25 * art; // Top Left */                                         \
+                                                                                                                       \
+                /* Fill matrix row of (i,j+1) */                                                                       \
+                const Stencil& TopStencil = CenterStencil;                                                             \
+                                                                                                                       \
+                nz_index                          = top_nz_index + TopStencil[StencilType::Bottom];                    \
+                center_matrix.row_index(nz_index) = top_index + 1;                                                     \
+                center_matrix.col_index(nz_index) = center_index + 1;                                                  \
+                center_matrix.value(nz_index) += -coeff4 * att; /* Bottom */                                           \
+                                                                                                                       \
+                nz_index                          = top_nz_index + TopStencil[StencilType::Center];                    \
+                center_matrix.row_index(nz_index) = top_index + 1;                                                     \
+                center_matrix.col_index(nz_index) = top_index + 1;                                                     \
+                center_matrix.value(nz_index) += coeff4 * att; /* Center: (Bottom) */                                  \
+                                                                                                                       \
+                /* REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                                                         \
+                /* nz_index = top_nz_index + TopStencil[StencilType::BottomLeft]; */                                   \
+                /* center_matrix.row_index(nz_index) = top_index + 1; */                                               \
+                /* center_matrix.col_index(nz_index) = left_index + 1; */                                              \
+                /* center_matrix.value(nz_index) += - 0.25 * art; // Bottom Left */                                    \
+            }                                                                                                          \
+        }                                                                                                              \
+        /* --------------------------------------------- */                                                            \
+        /* Radial Section: Node next to circular section */                                                            \
+        /* --------------------------------------------- */                                                            \
+        else if (i_r == numberSmootherCircles) {                                                                       \
+            double h1     = grid.radialSpacing(i_r - 1);                                                               \
+            double h2     = grid.radialSpacing(i_r);                                                                   \
+            double k1     = grid.angularSpacing(i_theta - 1);                                                          \
+            double k2     = grid.angularSpacing(i_theta);                                                              \
+            double coeff1 = 0.5 * (k1 + k2) / h1;                                                                      \
+            double coeff2 = 0.5 * (k1 + k2) / h2;                                                                      \
+            double coeff3 = 0.5 * (h1 + h2) / k1;                                                                      \
+            double coeff4 = 0.5 * (h1 + h2) / k2;                                                                      \
+                                                                                                                       \
+            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                   \
+            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                   \
+                                                                                                                       \
+            auto& bottom_matrix = radial_tridiagonal_solver[i_theta_M1];                                               \
+            auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                  \
+            auto& top_matrix    = radial_tridiagonal_solver[i_theta_P1];                                               \
+            auto& left_matrix   = circle_tridiagonal_solver[i_r - 1];                                                  \
+                                                                                                                       \
+            const int center_index = i_r - numberSmootherCircles;                                                      \
+            const int left_index   = i_theta;                                                                          \
+            const int right_index  = i_r - numberSmootherCircles + 1;                                                  \
+            const int bottom_index = i_r - numberSmootherCircles;                                                      \
+            const int top_index    = i_r - numberSmootherCircles;                                                      \
+                                                                                                                       \
+            /* Fill matrix row of (i,j) */                                                                             \
+            row    = center_index;                                                                                     \
+            column = center_index;                                                                                     \
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */                 \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            row    = center_index;                                                                                     \
+            column = right_index;                                                                                      \
+            value  = -coeff2 * arr; /* Right */                                                                        \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            row    = center_index;                                                                                     \
+            column = center_index;                                                                                     \
+            value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */       \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            /* Fill matrix row of (i-1,j) */                                                                           \
+            row    = left_index;                                                                                       \
+            column = left_index;                                                                                       \
+            value  = coeff1 * arr; /* Center: (Right) */                                                               \
+            if (row == column)                                                                                         \
+                left_matrix.main_diagonal(row) += value;                                                               \
+            else if (row == column - 1)                                                                                \
+                left_matrix.sub_diagonal(row) += value;                                                                \
+            else if (row == 0 && column == left_matrix.columns() - 1)                                                  \
+                left_matrix.cyclic_corner_element() += value;                                                          \
+                                                                                                                       \
+            /* Fill matrix row of (i+1,j) */                                                                           \
+            row    = right_index;                                                                                      \
+            column = center_index;                                                                                     \
+            value  = -coeff2 * arr; /* Left */                                                                         \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            row    = right_index;                                                                                      \
+            column = right_index;                                                                                      \
+            value  = coeff2 * arr; /* Center: (Left) */                                                                \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            /* Fill matrix row of (i,j-1) */                                                                           \
+            row    = bottom_index;                                                                                     \
+            column = bottom_index;                                                                                     \
+            value  = coeff3 * att; /* Center: (Top) */                                                                 \
+            if (row == column)                                                                                         \
+                bottom_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                bottom_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == bottom_matrix.columns() - 1)                                                \
+                bottom_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            /* Fill matrix row of (i,j+1) */                                                                           \
+            row    = top_index;                                                                                        \
+            column = top_index;                                                                                        \
+            value  = coeff4 * att; /* Center: (Bottom) */                                                              \
+            if (row == column)                                                                                         \
+                top_matrix.main_diagonal(row) += value;                                                                \
+            else if (row == column - 1)                                                                                \
+                top_matrix.sub_diagonal(row) += value;                                                                 \
+            else if (row == 0 && column == top_matrix.columns() - 1)                                                   \
+                top_matrix.cyclic_corner_element() += value;                                                           \
+        }                                                                                                              \
+        /* ------------------------------------------- */                                                              \
+        /* Radial Section: Node next to outer boundary */                                                              \
+        /* ------------------------------------------- */                                                              \
+        else if (i_r == grid.nr() - 2) {                                                                               \
+            const double h1     = grid.radialSpacing(i_r - 1);                                                         \
+            const double h2     = grid.radialSpacing(i_r);                                                             \
+            const double k1     = grid.angularSpacing(i_theta - 1);                                                    \
+            const double k2     = grid.angularSpacing(i_theta);                                                        \
+            const double coeff1 = 0.5 * (k1 + k2) / h1;                                                                \
+            const double coeff2 = 0.5 * (k1 + k2) / h2;                                                                \
+            const double coeff3 = 0.5 * (h1 + h2) / k1;                                                                \
+            const double coeff4 = 0.5 * (h1 + h2) / k2;                                                                \
+                                                                                                                       \
+            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                   \
+            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                   \
+                                                                                                                       \
+            auto& bottom_matrix = radial_tridiagonal_solver[i_theta_M1];                                               \
+            auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                  \
+            auto& top_matrix    = radial_tridiagonal_solver[i_theta_P1];                                               \
+                                                                                                                       \
+            const int center_index = i_r - numberSmootherCircles;                                                      \
+            const int left_index   = i_r - numberSmootherCircles - 1;                                                  \
+            const int right_index  = i_r - numberSmootherCircles + 1;                                                  \
+            const int bottom_index = i_r - numberSmootherCircles;                                                      \
+            const int top_index    = i_r - numberSmootherCircles;                                                      \
+                                                                                                                       \
+            /* ---------------------------- */                                                                         \
+            /* Give values to center matrix */                                                                         \
+            /* ---------------------------- */                                                                         \
+            /* Fill matrix row of (i,j) */                                                                             \
+            row    = center_index;                                                                                     \
+            column = center_index;                                                                                     \
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */                 \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            row    = center_index;                                                                                     \
+            column = left_index;                                                                                       \
+            value  = -coeff1 * arr; /* Left */                                                                         \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            row    = center_index;                                                                                     \
+            column = center_index;                                                                                     \
+            value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */       \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            /* Fill matrix row of (i-1,j) */                                                                           \
+            row    = left_index;                                                                                       \
+            column = center_index;                                                                                     \
+            value  = -coeff1 * arr; /* Right */                                                                        \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            row    = left_index;                                                                                       \
+            column = left_index;                                                                                       \
+            value  = coeff1 * arr; /* Center: (Right) */                                                               \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            /* Fill matrix row of (i,j-1) */                                                                           \
+            row    = bottom_index;                                                                                     \
+            column = bottom_index;                                                                                     \
+            value  = coeff3 * att; /* Center: (Top) */                                                                 \
+            if (row == column)                                                                                         \
+                bottom_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                bottom_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == bottom_matrix.columns() - 1)                                                \
+                bottom_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            /* Fill matrix row of (i,j+1) */                                                                           \
+            row    = top_index;                                                                                        \
+            column = top_index;                                                                                        \
+            value  = coeff4 * att; /* Center: (Bottom) */                                                              \
+            if (row == column)                                                                                         \
+                top_matrix.main_diagonal(row) += value;                                                                \
+            else if (row == column - 1)                                                                                \
+                top_matrix.sub_diagonal(row) += value;                                                                 \
+            else if (row == 0 && column == top_matrix.columns() - 1)                                                   \
+                top_matrix.cyclic_corner_element() += value;                                                           \
+        }                                                                                                              \
+        /* ------------------------------------------ */                                                               \
+        /* Radial Section: Node on the outer boundary */                                                               \
+        /* ------------------------------------------ */                                                               \
+        else if (i_r == grid.nr() - 1) {                                                                               \
+            double h1     = grid.radialSpacing(i_r - 1);                                                               \
+            double k1     = grid.angularSpacing(i_theta - 1);                                                          \
+            double k2     = grid.angularSpacing(i_theta);                                                              \
+            double coeff1 = 0.5 * (k1 + k2) / h1;                                                                      \
+                                                                                                                       \
+            auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                  \
+                                                                                                                       \
+            const int center_index = i_r - numberSmootherCircles;                                                      \
+            const int left_index   = i_r - numberSmootherCircles - 1;                                                  \
+                                                                                                                       \
+            /* Fill matrix row of (i,j) */                                                                             \
+            row    = center_index;                                                                                     \
+            column = center_index;                                                                                     \
+            value  = 1.0;                                                                                              \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+                                                                                                                       \
+            /* Fill matrix row of (i-1,j) */                                                                           \
+            row    = left_index;                                                                                       \
+            column = left_index;                                                                                       \
+            value  = coeff1 * arr; /* Center: (Right) */                                                               \
+            if (row == column)                                                                                         \
+                center_matrix.main_diagonal(row) += value;                                                             \
+            else if (row == column - 1)                                                                                \
+                center_matrix.sub_diagonal(row) += value;                                                              \
+            else if (row == 0 && column == center_matrix.columns() - 1)                                                \
+                center_matrix.cyclic_corner_element() += value;                                                        \
+        }                                                                                                              \
     } while (0)
 
 void SmootherGive::buildAscCircleSection(const int i_r)

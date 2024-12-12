@@ -151,9 +151,9 @@ int main(int argc, char* argv[])
     }
 
     table_exact_error_weighted_euclidean_order[0] = std::numeric_limits<double>::max();
-    ;
+    
     table_exact_error_infinity_order[0] = std::numeric_limits<double>::max();
-    ;
+    
 
     for (int i = 1; i < MAX_DIVIDE_BY_2; i++) {
         table_exact_error_weighted_euclidean_order[i] =

@@ -45,10 +45,9 @@
             /* Center: (Left, Right, Bottom, Top) */                                                                   \
             row    = center_index;                                                                                     \
             column = center_index;                                                                                     \
-            value  = (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center])                            \
-                                                                                                                       \
-                     + coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
-                     coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]));                       \
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) +                            \
+                    coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                         \
+                    coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                          \
             if (row == column)                                                                                         \
                 matrix.main_diagonal(row) = value;                                                                     \
             else if (row == column - 1)                                                                                \
@@ -109,10 +108,9 @@
             /* Center: (Left, Right, Bottom, Top) */                                                                   \
             row    = center_index;                                                                                     \
             column = center_index;                                                                                     \
-            value  = (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center])                            \
-                                                                                                                       \
-                     + coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
-                     coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]));                       \
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) +                            \
+                    coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                         \
+                    coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                          \
             if (row == column)                                                                                         \
                 matrix.main_diagonal(row) = value;                                                                     \
             else if (row == column - 1)                                                                                \
@@ -201,11 +199,9 @@
                 /* Fill matrix row of (i,j) */                                                                         \
                 const Stencil& CenterStencil = getStencil(i_r);                                                        \
                                                                                                                        \
-                const double center_value =                                                                            \
-                    (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center])                             \
-                                                                                                                       \
-                     + coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                      \
-                     coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]));                        \
+                const double center_value = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) +     \
+                                            coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) + \
+                                            coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);  \
                 const double left_value   = -coeff1 * (arr[center] + arr[left]);                                       \
                 const double bottom_value = -coeff3 * (att[center] + att[bottom]);                                     \
                 const double top_value    = -coeff4 * (att[center] + att[top]);                                        \
@@ -261,10 +257,9 @@
             /* Center: (Left, Right, Bottom, Top) */                                                                   \
             row    = center_index;                                                                                     \
             column = center_index;                                                                                     \
-            value  = (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center])                            \
-                                                                                                                       \
-                     + coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
-                     coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]));                       \
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) +                            \
+                    coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                         \
+                    coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                          \
             if (row == column)                                                                                         \
                 matrix.main_diagonal(row) = value;                                                                     \
             else if (row == column - 1)                                                                                \
@@ -309,14 +304,14 @@
             auto& matrix           = radial_tridiagonal_solver[i_theta];                                               \
             const int center_index = i_r - numberSmootherCircles;                                                      \
             const int left_index   = i_r - numberSmootherCircles - 1;                                                  \
+            const int right_index  = i_r - numberSmootherCircles + 1;                                                  \
                                                                                                                        \
             /* Center: (Left, Right, Bottom, Top) */                                                                   \
             row    = center_index;                                                                                     \
             column = center_index;                                                                                     \
-            value  = (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center])                            \
-                                                                                                                       \
-                     + coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
-                     coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]));                       \
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) +                            \
+                    coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                         \
+                    coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                          \
             if (row == column)                                                                                         \
                 matrix.main_diagonal(row) = value;                                                                     \
             else if (row == column - 1)                                                                                \
@@ -334,6 +329,17 @@
                 matrix.sub_diagonal(row) = value;                                                                      \
             else if (row == 0 && column == matrix.columns() - 1)                                                       \
                 matrix.cyclic_corner_element() = value;                                                                \
+                                                                                                                       \
+            /* Right */                                                                                                \
+            row    = center_index;                                                                                     \
+            column = right_index;                                                                                      \
+            value  = 0.0;                                                                                              \
+            if (row == column)                                                                                         \
+                matrix.main_diagonal(row) = value;                                                                     \
+            else if (row == column - 1)                                                                                \
+                matrix.sub_diagonal(row) = value;                                                                      \
+            else if (row == 0 && column == matrix.columns() - 1)                                                       \
+                matrix.cyclic_corner_element() = value;                                                                \
         }                                                                                                              \
         /* ------------------------------------------ */                                                               \
         /* Radial Section: Node on the outer boundary */                                                               \
@@ -341,11 +347,23 @@
         else if (i_r == grid.nr() - 1) {                                                                               \
             auto& matrix           = radial_tridiagonal_solver[i_theta];                                               \
             const int center_index = i_r - numberSmootherCircles;                                                      \
+            const int left_index   = i_r - numberSmootherCircles - 1;                                                  \
                                                                                                                        \
             /* Fill matrix row of (i,j) */                                                                             \
             row    = center_index;                                                                                     \
             column = center_index;                                                                                     \
             value  = 1.0;                                                                                              \
+            if (row == column)                                                                                         \
+                matrix.main_diagonal(row) = value;                                                                     \
+            else if (row == column - 1)                                                                                \
+                matrix.sub_diagonal(row) = value;                                                                      \
+            else if (row == 0 && column == matrix.columns() - 1)                                                       \
+                matrix.cyclic_corner_element() = value;                                                                \
+                                                                                                                       \
+            /* Left */                                                                                                 \
+            row    = center_index;                                                                                     \
+            column = left_index;                                                                                       \
+            value  = 0.0;                                                                                              \
             if (row == column)                                                                                         \
                 matrix.main_diagonal(row) = value;                                                                     \
             else if (row == column - 1)                                                                                \
