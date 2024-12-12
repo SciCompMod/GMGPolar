@@ -18,8 +18,7 @@ void ExtrapolatedSmootherTake::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solve
     mumps_solver.ICNTL(5) = 0; // Controls the matrix input format
     mumps_solver.ICNTL(6) = 7; // Permutes the matrix to a zero-free diagonal and/or scale the matrix
     mumps_solver.ICNTL(7) =
-        5; // Computes a symmetric permutation (ordering) to determine the pivot order to be used for the
-    //                             factorization in case of sequential analysis
+        5; // Computes a symmetric permutation (ordering) to determine the pivot order to be used for the factorization in case of sequential analysis
     mumps_solver.ICNTL(8)  = 77; // Describes the scaling strategy
     mumps_solver.ICNTL(9)  = 1; // Computes the solution using A or A^T
     mumps_solver.ICNTL(10) = 0; // Applies the iterative refinement to the computed solution

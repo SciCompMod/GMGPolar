@@ -425,7 +425,8 @@
                 center_matrix.value(nz_index) += (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att;                            \
                                                                                                                                \
                 /* Fill matrix row of (i-1,j) */                                                                               \
-                /* From view the view of the across origin node, the directions are roatated by 180 degrees in the stencil! */ \
+                /* From view the view of the across origin node, */ \
+                /* the directions are roatated by 180 degrees in the stencil! */ \
                 const Stencil& LeftStencil = CenterStencil;                                                                    \
                                                                                                                                \
                 nz_index                        = left_nz_index + LeftStencil[StencilType::Left];                              \

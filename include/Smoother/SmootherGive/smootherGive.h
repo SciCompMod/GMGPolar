@@ -24,21 +24,40 @@ private:
     std::vector<SymmetricTridiagonalSolver<double>> circle_tridiagonal_solver_;
     std::vector<SymmetricTridiagonalSolver<double>> radial_tridiagonal_solver_;
 
-    const Stencil stencil_DB_ = {-1, -1, -1, -1, 0, -1, -1, -1, -1};
-
+    // clang-format off
+    const Stencil stencil_DB_ = {
+        -1, -1, -1,
+        -1,  0, -1,
+        -1, -1, -1
+    };
     /* Circle Stencils */
-
-    const Stencil circle_stencil_interior_ = {-1, 2, -1, -1, 0, -1, -1, 1, -1};
-
-    const Stencil circle_stencil_across_origin_ = {-1, 3, -1, 1, 0, -1, -1, 2, -1};
-
+    const Stencil circle_stencil_interior_ = {
+        -1,  2, -1,
+        -1,  0, -1,
+        -1,  1, -1
+    };
+    const Stencil circle_stencil_across_origin_ = {
+        -1,  3, -1,
+        1,  0, -1,
+        -1,  2, -1
+    };
     /* Radial Stencils */
-
-    const Stencil radial_stencil_interior_ = {-1, -1, -1, 1, 0, 2, -1, -1, -1};
-
-    const Stencil radial_stencil_next_outer_DB_ = {-1, -1, -1, 1, 0, -1, -1, -1, -1};
-
-    const Stencil radial_stencil_next_circular_smoothing_ = {-1, -1, -1, -1, 0, 1, -1, -1, -1};
+    const Stencil radial_stencil_interior_ = {
+        -1, -1, -1,
+        1,  0,  2,
+        -1, -1, -1
+    };
+    const Stencil radial_stencil_next_outer_DB_ = {
+        -1, -1, -1,
+        1,  0, -1,
+        -1, -1, -1
+    };
+    const Stencil radial_stencil_next_circular_smoothing_ = {
+        -1, -1, -1,
+        -1,  0,  1,
+        -1, -1, -1
+    };
+    // clang-format on
 
     const Stencil& getStencil(int i_r) const;
     int getNonZeroCountCircleAsc(const int i_r) const;

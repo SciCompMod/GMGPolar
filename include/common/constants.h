@@ -119,22 +119,27 @@ enum class BetaCoeff
 #ifdef GMGPOLAR_USE_LIKWID
     #include <likwid.h>
     #include <likwid-marker.h>
+
     #define LIKWID_INIT() LIKWID_MARKER_INIT
+
     #define LIKWID_REGISTER(marker)                                                                                    \
         _Pragma("omp parallel")                                                                                        \
         {                                                                                                              \
             LIKWID_MARKER_REGISTER(marker);                                                                            \
         }
+
     #define LIKWID_START(marker)                                                                                       \
         _Pragma("omp parallel")                                                                                        \
         {                                                                                                              \
             LIKWID_MARKER_START(marker);                                                                               \
         }
+
     #define LIKWID_STOP(marker)                                                                                        \
         _Pragma("omp parallel")                                                                                        \
         {                                                                                                              \
             LIKWID_MARKER_STOP(marker);                                                                                \
         }
+
     #define LIKWID_CLOSE() LIKWID_MARKER_CLOSE
 #else
     #define LIKWID_INIT()

@@ -6,6 +6,8 @@
 
 Output/
 
+*.vtu
+
 # dependencies
 /.pnp
 .pnp.js

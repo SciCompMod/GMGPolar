@@ -19,11 +19,33 @@ private:
     SparseMatrix<double> solver_matrix_;
     DMUMPS_STRUC_C mumps_solver_;
 
-    const Stencil stencil_interior_      = {7, 4, 8, 1, 0, 2, 5, 3, 6};
-    const Stencil stencil_across_origin_ = {-1, 4, 6, 1, 0, 2, -1, 3, 5};
-    const Stencil stencil_DB_            = {-1, -1, -1, -1, 0, -1, -1, -1, -1};
-    const Stencil stencil_next_inner_DB_ = {-1, 3, 5, -1, 0, 1, -1, 2, 4};
-    const Stencil stencil_next_outer_DB_ = {5, 3, -1, 1, 0, -1, 4, 2, -1};
+    // clang-format off
+    const Stencil stencil_interior_      = {
+        7, 4, 8,
+        1, 0, 2,
+        5, 3, 6
+    };
+    const Stencil stencil_across_origin_ = {
+        -1, 4, 6,
+        1, 0, 2,
+        -1, 3, 5
+    };
+    const Stencil stencil_DB_            = {
+        -1, -1, -1,
+        -1,  0, -1,
+        -1, -1, -1
+    };
+    const Stencil stencil_next_inner_DB_ = {
+        -1,  3,  5,
+        -1,  0,  1,
+        -1,  2,  4
+    };
+    const Stencil stencil_next_outer_DB_ = {
+        5,  3, -1,
+        1,  0, -1,
+        4,  2, -1
+    };
+    // clang-format on
 
     // Constructs a symmetric solver matrix.
     SparseMatrix<double> buildSolverMatrix();

@@ -29,9 +29,18 @@ private:
     std::vector<SymmetricTridiagonalSolver<double>> circle_tridiagonal_solver_;
     std::vector<SymmetricTridiagonalSolver<double>> radial_tridiagonal_solver_;
 
-    Stencil stencil_center_ = {-1, -1, -1, -1, 0, -1, -1, -1, -1};
-
-    Stencil stencil_center_left_ = {-1, -1, -1, 1, 0, -1, -1, -1, -1};
+    // clang-format off
+        Stencil stencil_center_ = {
+        -1, -1, -1,
+        -1,  0, -1,
+        -1, -1, -1
+    };
+    Stencil stencil_center_left_ = {
+        -1, -1, -1,
+        1,  0, -1,
+        -1, -1, -1
+    };
+    // clang-format on
 
     const Stencil& getStencil(int i_r, int i_theta) const;
     int getNonZeroCountCircleAsc(const int i_r) const;

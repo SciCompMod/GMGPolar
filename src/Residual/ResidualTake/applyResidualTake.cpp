@@ -94,9 +94,9 @@
                      - coeff4 * (att[center] + att[top]) * (x[top] - x[center]) /* Top - Center: (Top) */                                                             \
                                                                                                                                                                       \
                      /* - 0.25 * (art[left] + art[bottom]) * x[bottom_left] // Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                               \
-                     +                                                                                                                                                \
-                     0.25 * (art[right] + art[bottom]) *                                                                                                              \
-                         x[bottom_right] /* Bottom Right */ /* + 0.25 * (art[left] + art[top]) * x[top_left] // Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */ \
+                     + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */ \
+                     \
+                     /* + 0.25 * (art[left] + art[top]) * x[top_left] // Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */ \
                      - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */                                                                                  \
                     );                                                                                                                                                \
             }                                                                                                                                                         \
