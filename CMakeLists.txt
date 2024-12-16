@@ -23,6 +23,9 @@ option(GMGPOLAR_TEST_COVERAGE "Enable GCov coverage analysis (adds a 'coverage' 
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "DEBUG")
     if(GMGPOLAR_TEST_COVERAGE)
+        # importantly, set the path to the gcovr executable
+        set(GCOVR_PATH "/usr/bin/gcov-12")
+
         message(STATUS "Coverage enabled")
         include(CodeCoverage)
         append_coverage_compiler_flags()
