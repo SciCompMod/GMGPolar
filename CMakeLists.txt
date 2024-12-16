@@ -23,13 +23,16 @@ option(GMGPOLAR_TEST_COVERAGE "Enable GCov coverage analysis (adds a 'coverage' 
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "DEBUG")
     if(GMGPOLAR_TEST_COVERAGE)
+        # importantly, set the path to the gcov executable
+        set(GCOV_PATH "/usr/bin/gcov-13")
+
         message(STATUS "Coverage enabled")
         include(CodeCoverage)
         append_coverage_compiler_flags()
         setup_target_for_coverage_lcov(
             NAME coverage
             EXECUTABLE tests/gmgpolar_tests
-            EXCLUDE "${CMAKE_SOURCE_DIR}/tests*" "${CMAKE_SOURCE_DIR}/src/test_cases*" "${CMAKE_BINARY_DIR}/*" "/usr*"
+            EXCLUDE "${CMAKE_SOURCE_DIR}/tests*" "${CMAKE_SOURCE_DIR}/src/test_cases*" "${CMAKE_SOURCE_DIR}/include/test_cases*" "${CMAKE_BINARY_DIR}/*" "/usr*"
         )
     endif()
 endif()
