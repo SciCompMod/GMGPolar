@@ -35,7 +35,7 @@ runs:
       # compute code coverage
       run: |
         cd build
-        cmake --build . --target coverage/fast
+        cmake --build . --target coverage/fast --gcov-tool /usr/bin/gcov-12
     - name: Upload test report
       uses: actions/upload-artifact@v4
       with:
