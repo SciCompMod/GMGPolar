@@ -57,8 +57,8 @@ __global__ void applyExtrapolatedResidual_kernel(
     PolarGrid* fineGrid, PolarGrid* coarseGrid) 
 {
 
-    int i_r = blockIdx.x * 14 + threadIdx.x - 1;
-    int i_theta = blockIdx.y * 14 + threadIdx.y - 1;
+    int i_r = blockIdx.x * blockDim.x + threadIdx.x;
+    int i_theta = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (i_r < 0 || i_r >= fineGrid->nr() || i_theta < 0 || i_theta >= fineGrid->ntheta()) return;
 
@@ -87,8 +87,8 @@ void GMGPolar::extrapolatedResidual(const int current_level, GPU_Vector<double>&
     assert(residual_next_level.size() == coarseGrid.numberOfNodes());
 
     dim3 threadsPerBlock(16, 16);
-    dim3 numBlocks((fineGrid.nr() + 14 - 1) / 14,
-                   (fineGrid.ntheta() + 14 - 1) / 14);
+    dim3 numBlocks((fineGrid.nr() + threadsPerBlock.x - 1) / threadsPerBlock.x,
+                   (fineGrid.ntheta() + threadsPerBlock.y - 1) / threadsPerBlock.y);
 
     applyExtrapolatedResidual_kernel<<<numBlocks, threadsPerBlock>>>(
         residual.data(), residual_next_level.data(), 
