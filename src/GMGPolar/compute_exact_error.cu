@@ -54,9 +54,8 @@ __global__ void computeExactError_kernel(
     PolarGrid* grid, ExactSolution* exact_solution,
     double* sin_theta_cache, double* cos_theta_cache) 
 {
-
-    int i_r = blockIdx.x * 14 + threadIdx.x - 1;
-    int i_theta = blockIdx.y * 14 + threadIdx.y - 1;
+    int i_r = blockIdx.x * blockDim.x + threadIdx.x;
+    int i_theta = blockIdx.y * blockDim.y + threadIdx.y;
 
     if (i_r < 0 || i_r >= grid->nr() || i_theta < 0 || i_theta >= grid->ntheta()) return;
 
@@ -90,8 +89,8 @@ std::pair<double, double> GMGPolar::computeExactError(Level& level, const GPU_Ve
     cudaMemcpy(device_exact_solution, exact_solution_.get(), sizeof(ExactSolution), cudaMemcpyHostToDevice);
 
     dim3 threadsPerBlock(16, 16);
-    dim3 numBlocks((grid.nr() + 14 - 1) / 14,
-                   (grid.ntheta() + 14 - 1) / 14);
+    dim3 numBlocks((grid.nr() + threadsPerBlock.x - 1) / threadsPerBlock.x,
+                   (grid.ntheta() + threadsPerBlock.y - 1) / threadsPerBlock.y);
 
     computeExactError_kernel<<<numBlocks, threadsPerBlock>>>(
         solution.data(), error.data(), 
@@ -107,5 +106,4 @@ std::pair<double, double> GMGPolar::computeExactError(Level& level, const GPU_Ve
     double infinity_error           = infinity_norm(error);
 
     return std::make_pair(weighted_euclidean_error, infinity_error);
-
 }
