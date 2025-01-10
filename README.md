@@ -130,11 +130,11 @@ by giving:
 ### GMGPolar 2.0.0
 
 1) **Enhancements and New Class Layout:**
-- **Linear Algebra Enhancements:**
-    - Introduced custom **Vector** and **SparseMatrix** classes.
-    - Added a (cyclic) **Tridiagonal Solver** for improved performance and usability.
-- **Input Function Enhancements:**
-    - Separated into distinct components: **DomainGeometry**, **BoundaryConditions**, **SourceTerm**, etc.
+- **Linear Algebra:**
+    - Introduced custom Vector and SparseMatrix classes.
+    - Added a (cyclic) Tridiagonal Solver for improved performance and usability.
+- **Input Functions:**
+    - Separated into distinct components: DomainGeometry, BoundaryConditions, SourceTerm, etc.
 - **Polar Grid:**
     - Indexing is now based on circle/radial smoother.
 - **Residual**
