@@ -126,35 +126,10 @@ by giving:
 	c. Non-default implicit extrapolation with smoothing of all nodes on the finest level [experimental, use with care, convergence cannot be observed with residual] (--extrapolation 2)
 6) Optimization of apply_A / build_rhs / apply_prolongation / build_Asc / apply_Asc_ortho
 
+
 * GMGPolar 2.0.0
-More points
 
-## Release Notes
-
-### GMGPolar 1.0.0
-
-- **Multigrid Cycle:** Fully functional multigrid cycle implementation.
-- **Solver Options:** 
-  - In-house solver available.
-  - Option to link with **MUMPS** for smoothing and coarse grid solutions.
-- **Extrapolation Strategies:**
-  - **No Extrapolation:** Use with `--extrapolation 0`.
-  - **Default Implicit Extrapolation:** Use with `--extrapolation 1`.
-  - **Experimental Implicit Extrapolation:** 
-    - Applies smoothing to all nodes on the finest level.
-    - Use with caution; convergence cannot be observed with residual. 
-    - Use with `--extrapolation 2`.
-- **Performance Optimization:** 
-  - Optimized methods for:
-    - `apply_A`
-    - `build_rhs`
-    - `apply_prolongation`
-    - `build_Asc`
-    - `apply_Asc_ortho`
-
-### GMGPolar 2.0.0
-
-#### Enhancements
+### Enhancements
 
 - **Refactored Class Layout:** 
   - **Linear Algebra Enhancements:**
@@ -173,7 +148,7 @@ More points
     - Separated into extrapolated and standard smoothers.
     - Replaced the LU-Decomposition algorithm with the Thomas algorithm for improved efficiency.
   
-#### New Features
+### New Features
 
 - Introduced **W** and **F** cycles for enhanced solving capabilities.
 - Added **FMG** (Full Multigrid) to obtain improved starting solutions.
@@ -181,11 +156,11 @@ More points
 - Added a faster strategy named 'Take,' which is appropriate for cases where memory is less of a constraint, resulting in an 80% increase in memory usage.
 - **Comprehensive Unit Tests:** Integrated Google Unit Tests for all classes, ensuring robust and reliable functionality across the codebase.
 
-#### Performance Improvements
+### Performance Improvements
 
 - Removed the task-based approach, which did not scale well with increasing parallelization.
 - Reduced maximum usage by 61.5% by constructing symmetric matrices and utilizing the tridiagonal structure of smoother matrices.
 
-#### Removed Features
+### Removed Features
 
 - Discontinued the in-house solver, now replaced by MUMPS for improved functionality.
