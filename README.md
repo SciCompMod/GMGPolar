@@ -126,7 +126,7 @@ by giving:
 	c. Non-default implicit extrapolation with smoothing of all nodes on the finest level [experimental, use with care, convergence cannot be observed with residual] (--extrapolation 2)
 6) Optimization of apply_A / build_rhs / apply_prolongation / build_Asc / apply_Asc_ortho
 
-* GMGPolar 2.0
+* GMGPolar 2.0.0
 More points
 
 ## Release Notes
