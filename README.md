@@ -129,22 +129,20 @@ by giving:
 
 ### GMGPolar 2.0.0
 
-1) Enhancements
-
-- **Refactored Class Layout:**
-  - **Linear Algebra Enhancements:**
+1) Enhancements and Refactored Class Layout:
+- **Linear Algebra Enhancements:**
     - Introduced custom **Vector** and **SparseMatrix** classes.
     - Added a (cyclic) **Tridiagonal Solver** for improved performance and usability.
-  - **Input Function Enhancements:**
+- **Input Function Enhancements:**
     - Separated into distinct components: **DomainGeometry**, **BoundaryConditions**, **SourceTerm**, etc.
-  - **Polar Grid:**
+- **Polar Grid:**
     - Indexing is now based on circle/radial smoother.
-  - **Residual**
+- **Residual**
     - Improved the residual calculation by addressing the unintuitive behavior that previously applied only to the interior part of the matrix.
-  - **Direct Solver:**
+- **Direct Solver:**
     - Fixed a bug where boundary values were not treated correctly.
     - Built matrices to be symmetric, reducing factorization time.
-  - **Smoother:**
+- **Smoother:**
     - Separated into extrapolated and standard smoothers.
     - Replaced the LU-Decomposition algorithm with the Thomas algorithm for improved efficiency.
   
