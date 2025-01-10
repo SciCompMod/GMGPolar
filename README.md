@@ -129,11 +129,11 @@ by giving:
 
 ## GMGPolar 2.0.0
 
-### Enhancements
+# Enhancements
 
-- **Refactored Class Layout:** 
-  - **Linear Algebra Enhancements:**
-    - Introduced custom **Vector** and **SparseMatrix** classes.
+- *Refactored Class Layout:*
+  - *Linear Algebra Enhancements:*
+    - Introduced custom *Vector* and **SparseMatrix** classes.
     - Added a (cyclic) **Tridiagonal Solver** for improved performance and usability.
   - **Input Function Enhancements:**
     - Separated into distinct components: **DomainGeometry**, **BoundaryConditions**, **SourceTerm**, etc.
@@ -148,7 +148,7 @@ by giving:
     - Separated into extrapolated and standard smoothers.
     - Replaced the LU-Decomposition algorithm with the Thomas algorithm for improved efficiency.
   
-### New Features
+# New Features
 
 - Introduced **W** and **F** cycles for enhanced solving capabilities.
 - Added **FMG** (Full Multigrid) to obtain improved starting solutions.
@@ -156,11 +156,11 @@ by giving:
 - Added a faster strategy named 'Take,' which is appropriate for cases where memory is less of a constraint, resulting in an 80% increase in memory usage.
 - **Comprehensive Unit Tests:** Integrated Google Unit Tests for all classes, ensuring robust and reliable functionality across the codebase.
 
-### Performance Improvements
+# Performance Improvements
 
 - Removed the task-based approach, which did not scale well with increasing parallelization.
 - Reduced maximum usage by 61.5% by constructing symmetric matrices and utilizing the tridiagonal structure of smoother matrices.
 
-### Removed Features
+# Removed Features
 
 - Discontinued the in-house solver, now replaced by MUMPS for improved functionality.
