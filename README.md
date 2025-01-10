@@ -148,8 +148,8 @@ by giving:
   
 2) **New Features**
 
-- Introduced **W** and **F** cycles for enhanced solving capabilities.
-- Added **FMG** (Full Multigrid) to obtain improved starting solutions.
+- Introduced W- and F cycles for enhanced solving capabilities.
+- Added FMG (Full Multigrid) to obtain improved starting solutions.
 - Implemented advanced caching behavior options for the "Give" implementation strategy.
 - Added a faster strategy named 'Take,' which is appropriate for cases where memory is less of a constraint, resulting in an 80% increase in memory usage.
 - **Comprehensive Unit Tests:** Integrated Google Unit Tests for all classes, ensuring robust and reliable functionality across the codebase.
