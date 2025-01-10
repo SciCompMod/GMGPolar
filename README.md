@@ -152,7 +152,7 @@ More points
     - `build_Asc`
     - `apply_Asc_ortho`
 
-### GMGPolar 2.0
+### GMGPolar 2.0.0
 
 #### Enhancements
 
