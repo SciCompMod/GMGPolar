@@ -114,7 +114,7 @@ by giving:
 
 ## Release Notes
 
-## GMGPolar 1.0.0
+### GMGPolar 1.0.0
 1) Working multigrid cycle
 2) In-house solver and possibility to link with MUMPS for the smoothing and coarse grid solution
 3) Extrapolation strategies:
@@ -127,13 +127,13 @@ by giving:
 6) Optimization of apply_A / build_rhs / apply_prolongation / build_Asc / apply_Asc_ortho
 
 
-## GMGPolar 2.0.0
+### GMGPolar 2.0.0
 
-# Enhancements
+1) Enhancements
 
-- *Refactored Class Layout:*
-  - *Linear Algebra Enhancements:*
-    - Introduced custom *Vector* and **SparseMatrix** classes.
+- **Refactored Class Layout:**
+  - **Linear Algebra Enhancements:**
+    - Introduced custom **Vector** and **SparseMatrix** classes.
     - Added a (cyclic) **Tridiagonal Solver** for improved performance and usability.
   - **Input Function Enhancements:**
     - Separated into distinct components: **DomainGeometry**, **BoundaryConditions**, **SourceTerm**, etc.
@@ -148,7 +148,7 @@ by giving:
     - Separated into extrapolated and standard smoothers.
     - Replaced the LU-Decomposition algorithm with the Thomas algorithm for improved efficiency.
   
-# New Features
+2) New Features
 
 - Introduced **W** and **F** cycles for enhanced solving capabilities.
 - Added **FMG** (Full Multigrid) to obtain improved starting solutions.
@@ -156,11 +156,11 @@ by giving:
 - Added a faster strategy named 'Take,' which is appropriate for cases where memory is less of a constraint, resulting in an 80% increase in memory usage.
 - **Comprehensive Unit Tests:** Integrated Google Unit Tests for all classes, ensuring robust and reliable functionality across the codebase.
 
-# Performance Improvements
+3) Performance Improvements
 
 - Removed the task-based approach, which did not scale well with increasing parallelization.
 - Reduced maximum usage by 61.5% by constructing symmetric matrices and utilizing the tridiagonal structure of smoother matrices.
 
-# Removed Features
+4) Removed Features
 
 - Discontinued the in-house solver, now replaced by MUMPS for improved functionality.
