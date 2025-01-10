@@ -114,7 +114,7 @@ by giving:
 
 ## Release Notes
 
-* GMGPolar 1.0.0
+## GMGPolar 1.0.0
 1) Working multigrid cycle
 2) In-house solver and possibility to link with MUMPS for the smoothing and coarse grid solution
 3) Extrapolation strategies:
@@ -127,7 +127,7 @@ by giving:
 6) Optimization of apply_A / build_rhs / apply_prolongation / build_Asc / apply_Asc_ortho
 
 
-* GMGPolar 2.0.0
+## GMGPolar 2.0.0
 
 ### Enhancements
 
