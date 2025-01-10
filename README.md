@@ -131,7 +131,7 @@ More points
 
 ## Release Notes
 
-### GMGPolar 1.0
+### GMGPolar 1.0.0
 
 - **Multigrid Cycle:** Fully functional multigrid cycle implementation.
 - **Solver Options:** 
