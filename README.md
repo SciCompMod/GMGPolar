@@ -131,20 +131,20 @@ by giving:
 
 1) **Enhancements and New Class Layout:**
 - **Linear Algebra:**
-    - Introduced custom Vector and SparseMatrix classes.
-    - Added a (cyclic) Tridiagonal Solver for improved performance and usability.
+  - Introduced custom Vector and SparseMatrix classes.
+  - Added a (cyclic) Tridiagonal Solver for improved performance and usability.
 - **Input Functions:**
-    - Separated into distinct components: DomainGeometry, BoundaryConditions, SourceTerm, etc.
+  - Separated into distinct components: DomainGeometry, BoundaryConditions, SourceTerm, etc.
 - **Polar Grid:**
-    - Indexing is now based on circle/radial smoother.
-- **Residual**
-    - Improved the residual calculation by addressing the unintuitive behavior that previously applied only to the interior part of the matrix.
+  - Indexing is now based on circle/radial smoother.
+- **Residual:**
+  - Improved the residual calculation by addressing the unintuitive behavior that previously applied only to the interior part of the matrix.
 - **Direct Solver:**
-    - Fixed a bug where boundary values were not treated correctly.
-    - Built matrices to be symmetric, reducing factorization time.
+  - Fixed a bug where boundary values were not treated correctly.
+  - Built matrices to be symmetric, reducing factorization time.
 - **Smoother:**
-    - Separated into extrapolated and standard smoothers.
-    - Replaced the LU-Decomposition algorithm with the Thomas algorithm for improved efficiency.
+  - Separated into extrapolated and standard smoothers.
+  - Replaced the LU-Decomposition algorithm with the Thomas algorithm for improved efficiency.
   
 2) **New Features**
 
