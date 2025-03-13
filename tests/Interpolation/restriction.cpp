@@ -25,7 +25,7 @@ Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int s
 void applyRestrictionGive0(const Level& fromLevel, const Level& toLevel, Vector<double>& result,
                            const Vector<double>& x)
 {
-    assert(toLevel.level() == fromLevel.level() + 1);
+    assert(toLevel.level_depth() == fromLevel.level_depth() + 1);
 
     const PolarGrid& fineGrid   = fromLevel.grid();
     const PolarGrid& coarseGrid = toLevel.grid();

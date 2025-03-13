@@ -326,7 +326,7 @@ std::pair<double, double> GMGPolar::computeExactError(Level& level, const Vector
 {
     assert(exact_solution_ != nullptr);
 
-    omp_set_num_threads(threads_per_level_[level.level()]);
+    omp_set_num_threads(threads_per_level_[level.level_depth()]);
 
     const PolarGrid& grid        = level.grid();
     const LevelCache& levelCache = level.levelCache();

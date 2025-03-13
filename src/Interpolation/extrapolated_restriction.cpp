@@ -5,9 +5,9 @@
 void Interpolation::applyExtrapolatedRestriction0(const Level& fromLevel, const Level& toLevel, Vector<double>& result,
                                                   const Vector<double>& x) const
 {
-    assert(toLevel.level() == fromLevel.level() + 1);
+    assert(toLevel.level_depth() == fromLevel.level_depth() + 1);
 
-    omp_set_num_threads(threads_per_level_[toLevel.level()]);
+    omp_set_num_threads(threads_per_level_[toLevel.level_depth()]);
 
     const PolarGrid& fineGrid   = fromLevel.grid();
     const PolarGrid& coarseGrid = toLevel.grid();
@@ -70,9 +70,9 @@ void Interpolation::applyExtrapolatedRestriction0(const Level& fromLevel, const 
 void Interpolation::applyExtrapolatedRestriction(const Level& fromLevel, const Level& toLevel, Vector<double>& result,
                                                  const Vector<double>& x) const
 {
-    assert(toLevel.level() == fromLevel.level() + 1);
+    assert(toLevel.level_depth() == fromLevel.level_depth() + 1);
 
-    omp_set_num_threads(threads_per_level_[toLevel.level()]);
+    omp_set_num_threads(threads_per_level_[toLevel.level_depth()]);
 
     const PolarGrid& fineGrid   = fromLevel.grid();
     const PolarGrid& coarseGrid = toLevel.grid();

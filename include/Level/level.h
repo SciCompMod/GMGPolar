@@ -28,13 +28,13 @@ class Level
 public:
     // ----------- //
     // Constructor //
-    explicit Level(const int level, std::unique_ptr<const PolarGrid> grid,
+    explicit Level(const int level_depth, std::unique_ptr<const PolarGrid> grid,
                    std::unique_ptr<const LevelCache> level_cache, const ExtrapolationType extrapolation,
                    const bool FMG);
 
     // ---------------- //
     // Getter Functions //
-    int level() const;
+    int level_depth() const;
     const PolarGrid& grid() const;
     const LevelCache& levelCache() const;
 
@@ -78,7 +78,7 @@ public:
     void extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const;
 
 private:
-    const int level_;
+    const int level_depth_;
     std::unique_ptr<const PolarGrid> grid_;
     std::unique_ptr<const LevelCache> level_cache_;
 
