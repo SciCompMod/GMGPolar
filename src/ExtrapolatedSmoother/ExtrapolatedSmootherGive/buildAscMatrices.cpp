@@ -174,7 +174,7 @@
                         if (!DirBC_Interior) {                                                                         \
                             const Stencil& LeftStencil = getStencil(i_r - 1, i_theta);                                 \
                             int left_nz_index          = getCircleAscIndex(i_r - 1, i_theta);                          \
-                            int nz_index               = left_nz_index + LeftStencil[StencilType::Center];             \
+                            int nz_index               = left_nz_index + LeftStencil[StencilPosition::Center];             \
                             inner_boundary_circle_matrix.row_index(nz_index) = left_index + 1;                         \
                             inner_boundary_circle_matrix.col_index(nz_index) = left_index + 1;                         \
                             inner_boundary_circle_matrix.value(nz_index) += coeff1 * arr; /* Center: (Right) */        \
@@ -503,7 +503,7 @@
                 /* Fill matrix row of (i,j) */                                                                         \
                 const Stencil& CenterStencil      = getStencil(i_r, i_theta);                                          \
                 int center_nz_index               = getCircleAscIndex(i_r, i_theta);                                   \
-                int nz_index                      = center_nz_index + CenterStencil[StencilType::Center];              \
+                int nz_index                      = center_nz_index + CenterStencil[StencilPosition::Center];              \
                 center_matrix.row_index(nz_index) = center_index + 1;                                                  \
                 center_matrix.col_index(nz_index) = center_index + 1;                                                  \
                 center_matrix.value(nz_index) += 1.0;                                                                  \
@@ -565,18 +565,18 @@
                     auto& right_matrix  = circle_tridiagonal_solver[(i_r + 1) / 2];                                    \
                     auto& left_matrix   = inner_boundary_circle_matrix;                                                \
                     /* Fill matrix row of (i,j) */                                                                     \
-                    nz_index                          = center_nz_index + CenterStencil[StencilType::Center];          \
+                    nz_index                          = center_nz_index + CenterStencil[StencilPosition::Center];          \
                     center_matrix.row_index(nz_index) = center_index + 1;                                              \
                     center_matrix.col_index(nz_index) = center_index + 1;                                              \
                     center_matrix.value(nz_index) +=                                                                   \
                         0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* beta_{i,j} */                      \
                                                                                                                        \
-                    nz_index                          = center_nz_index + CenterStencil[StencilType::Left];            \
+                    nz_index                          = center_nz_index + CenterStencil[StencilPosition::Left];            \
                     center_matrix.row_index(nz_index) = center_index + 1;                                              \
                     center_matrix.col_index(nz_index) = left_index + 1;                                                \
                     center_matrix.value(nz_index) += -coeff1 * arr; /* Left */                                         \
                                                                                                                        \
-                    nz_index                          = center_nz_index + CenterStencil[StencilType::Center];          \
+                    nz_index                          = center_nz_index + CenterStencil[StencilPosition::Center];          \
                     center_matrix.row_index(nz_index) = center_index + 1;                                              \
                     center_matrix.col_index(nz_index) = center_index + 1;                                              \
                     /* Center: (Left, Right, Bottom, Top) */                                                           \
@@ -587,12 +587,12 @@
                     /* the directions are roatated by 180 degrees in the stencil! */                                   \
                     const Stencil& LeftStencil = CenterStencil;                                                        \
                                                                                                                        \
-                    nz_index                        = left_nz_index + LeftStencil[StencilType::Left];                  \
+                    nz_index                        = left_nz_index + LeftStencil[StencilPosition::Left];                  \
                     left_matrix.row_index(nz_index) = left_index + 1;                                                  \
                     left_matrix.col_index(nz_index) = center_index + 1;                                                \
                     left_matrix.value(nz_index) += -coeff1 * arr; /* Right -> Left*/                                   \
                                                                                                                        \
-                    nz_index                        = left_nz_index + LeftStencil[StencilType::Center];                \
+                    nz_index                        = left_nz_index + LeftStencil[StencilPosition::Center];                \
                     left_matrix.row_index(nz_index) = left_index + 1;                                                  \
                     left_matrix.col_index(nz_index) = left_index + 1;                                                  \
                     left_matrix.value(nz_index) += coeff1 * arr; /* Center: (Right) -> Center: (Left) */               \
@@ -620,14 +620,14 @@
                     auto& right_matrix  = circle_tridiagonal_solver[(i_r + 1) / 2];                                    \
                     auto& left_matrix   = inner_boundary_circle_matrix;                                                \
                     /* Fill matrix row of (i,j) */                                                                     \
-                    nz_index                          = center_nz_index + CenterStencil[StencilType::Center];          \
+                    nz_index                          = center_nz_index + CenterStencil[StencilPosition::Center];          \
                     center_matrix.row_index(nz_index) = center_index + 1;                                              \
                     center_matrix.col_index(nz_index) = center_index + 1;                                              \
                     center_matrix.value(nz_index) += 1.0;                                                              \
                     /* Fill matrix row of (i,j-1) */                                                                   \
                     const Stencil& BottomStencil = CenterStencil;                                                      \
                                                                                                                        \
-                    nz_index                          = bottom_nz_index + BottomStencil[StencilType::Center];          \
+                    nz_index                          = bottom_nz_index + BottomStencil[StencilPosition::Center];          \
                     center_matrix.row_index(nz_index) = bottom_index + 1;                                              \
                     center_matrix.col_index(nz_index) = bottom_index + 1;                                              \
                     center_matrix.value(nz_index) += coeff3 * att; /* Center: (Top) */                                 \
@@ -635,7 +635,7 @@
                     /* Fill matrix row of (i,j+1) */                                                                   \
                     const Stencil& TopStencil = CenterStencil;                                                         \
                                                                                                                        \
-                    nz_index                          = top_nz_index + TopStencil[StencilType::Center];                \
+                    nz_index                          = top_nz_index + TopStencil[StencilPosition::Center];                \
                     center_matrix.row_index(nz_index) = top_index + 1;                                                 \
                     center_matrix.col_index(nz_index) = top_index + 1;                                                 \
                     center_matrix.value(nz_index) += coeff4 * att; /* Center: (Bottom) */                              \

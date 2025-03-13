@@ -3,7 +3,7 @@
 #include <array>
 #include <initializer_list>
 
-enum class StencilType
+enum class StencilPosition
 {
     TopLeft,
     Top,
@@ -20,7 +20,7 @@ class Stencil
 {
 public:
     Stencil(std::initializer_list<int> init);
-    int operator[](StencilType type) const;
+    int operator[](StencilPosition type) const;
 
 private:
     std::array<int, 9> values_;

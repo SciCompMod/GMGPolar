@@ -62,32 +62,32 @@
             /* Fill matrix row of (i,j) */                                                                                     \
             const Stencil& CenterStencil = getStencil(i_r);                                                                    \
                                                                                                                                \
-            nz_index                          = center_nz_index + CenterStencil[StencilType::Center];                          \
+            nz_index                          = center_nz_index + CenterStencil[StencilPosition::Center];                          \
             solver_matrix.row_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.value(nz_index) += 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* beta_{i,j} */         \
                                                                                                                                \
-            nz_index                          = center_nz_index + CenterStencil[StencilType::Left];                            \
+            nz_index                          = center_nz_index + CenterStencil[StencilPosition::Left];                            \
             solver_matrix.row_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = left_index + 1;                                                                \
             solver_matrix.value(nz_index) += -coeff1 * arr; /* Left */                                                         \
                                                                                                                                \
-            nz_index                          = center_nz_index + CenterStencil[StencilType::Right];                           \
+            nz_index                          = center_nz_index + CenterStencil[StencilPosition::Right];                           \
             solver_matrix.row_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = right_index + 1;                                                               \
             solver_matrix.value(nz_index) += -coeff2 * arr; /* Right */                                                        \
                                                                                                                                \
-            nz_index                          = center_nz_index + CenterStencil[StencilType::Bottom];                          \
+            nz_index                          = center_nz_index + CenterStencil[StencilPosition::Bottom];                          \
             solver_matrix.row_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = bottom_index + 1;                                                              \
             solver_matrix.value(nz_index) += -coeff3 * att; /* Bottom */                                                       \
                                                                                                                                \
-            nz_index                          = center_nz_index + CenterStencil[StencilType::Top];                             \
+            nz_index                          = center_nz_index + CenterStencil[StencilPosition::Top];                             \
             solver_matrix.row_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = top_index + 1;                                                                 \
             solver_matrix.value(nz_index) += -coeff4 * att; /* Top */                                                          \
                                                                                                                                \
-            nz_index                          = center_nz_index + CenterStencil[StencilType::Center];                          \
+            nz_index                          = center_nz_index + CenterStencil[StencilPosition::Center];                          \
             solver_matrix.row_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = center_index + 1;                                                              \
             /* Center: (Left, Right, Bottom, Top) */                                                                           \
@@ -96,22 +96,22 @@
             /* Fill matrix row of (i-1,j) */                                                                                   \
             const Stencil& LeftStencil = getStencil(i_r - 1);                                                                  \
                                                                                                                                \
-            nz_index                          = left_nz_index + LeftStencil[StencilType::Right];                               \
+            nz_index                          = left_nz_index + LeftStencil[StencilPosition::Right];                               \
             solver_matrix.row_index(nz_index) = left_index + 1;                                                                \
             solver_matrix.col_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.value(nz_index) += -coeff1 * arr; /* Right */                                                        \
                                                                                                                                \
-            nz_index                          = left_nz_index + LeftStencil[StencilType::Center];                              \
+            nz_index                          = left_nz_index + LeftStencil[StencilPosition::Center];                              \
             solver_matrix.row_index(nz_index) = left_index + 1;                                                                \
             solver_matrix.col_index(nz_index) = left_index + 1;                                                                \
             solver_matrix.value(nz_index) += coeff1 * arr; /* Center: (Right) */                                               \
                                                                                                                                \
-            nz_index                          = left_nz_index + LeftStencil[StencilType::TopRight];                            \
+            nz_index                          = left_nz_index + LeftStencil[StencilPosition::TopRight];                            \
             solver_matrix.row_index(nz_index) = left_index + 1;                                                                \
             solver_matrix.col_index(nz_index) = top_index + 1;                                                                 \
             solver_matrix.value(nz_index) += -0.25 * art; /* Top Right */                                                      \
                                                                                                                                \
-            nz_index                          = left_nz_index + LeftStencil[StencilType::BottomRight];                         \
+            nz_index                          = left_nz_index + LeftStencil[StencilPosition::BottomRight];                         \
             solver_matrix.row_index(nz_index) = left_index + 1;                                                                \
             solver_matrix.col_index(nz_index) = bottom_index + 1;                                                              \
             solver_matrix.value(nz_index) += 0.25 * art; /* Bottom Right */                                                    \
@@ -119,22 +119,22 @@
             /* Fill matrix row of (i+1,j) */                                                                                   \
             const Stencil& RightStencil = getStencil(i_r + 1);                                                                 \
                                                                                                                                \
-            nz_index                          = right_nz_index + RightStencil[StencilType::Left];                              \
+            nz_index                          = right_nz_index + RightStencil[StencilPosition::Left];                              \
             solver_matrix.row_index(nz_index) = right_index + 1;                                                               \
             solver_matrix.col_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.value(nz_index) += -coeff2 * arr; /* Left */                                                         \
                                                                                                                                \
-            nz_index                          = right_nz_index + RightStencil[StencilType::Center];                            \
+            nz_index                          = right_nz_index + RightStencil[StencilPosition::Center];                            \
             solver_matrix.row_index(nz_index) = right_index + 1;                                                               \
             solver_matrix.col_index(nz_index) = right_index + 1;                                                               \
             solver_matrix.value(nz_index) += coeff2 * arr; /* Center: (Left) */                                                \
                                                                                                                                \
-            nz_index                          = right_nz_index + RightStencil[StencilType::TopLeft];                           \
+            nz_index                          = right_nz_index + RightStencil[StencilPosition::TopLeft];                           \
             solver_matrix.row_index(nz_index) = right_index + 1;                                                               \
             solver_matrix.col_index(nz_index) = top_index + 1;                                                                 \
             solver_matrix.value(nz_index) += 0.25 * art; /* Top Left */                                                        \
                                                                                                                                \
-            nz_index                          = right_nz_index + RightStencil[StencilType::BottomLeft];                        \
+            nz_index                          = right_nz_index + RightStencil[StencilPosition::BottomLeft];                        \
             solver_matrix.row_index(nz_index) = right_index + 1;                                                               \
             solver_matrix.col_index(nz_index) = bottom_index + 1;                                                              \
             solver_matrix.value(nz_index) += -0.25 * art; /* Bottom Left */                                                    \
@@ -142,22 +142,22 @@
             /* Fill matrix row of (i,j-1) */                                                                                   \
             const Stencil& BottomStencil = CenterStencil;                                                                      \
                                                                                                                                \
-            nz_index                          = bottom_nz_index + BottomStencil[StencilType::Top];                             \
+            nz_index                          = bottom_nz_index + BottomStencil[StencilPosition::Top];                             \
             solver_matrix.row_index(nz_index) = bottom_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.value(nz_index) += -coeff3 * att; /* Top */                                                          \
                                                                                                                                \
-            nz_index                          = bottom_nz_index + BottomStencil[StencilType::Center];                          \
+            nz_index                          = bottom_nz_index + BottomStencil[StencilPosition::Center];                          \
             solver_matrix.row_index(nz_index) = bottom_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = bottom_index + 1;                                                              \
             solver_matrix.value(nz_index) += coeff3 * att; /* Center: (Top) */                                                 \
                                                                                                                                \
-            nz_index                          = bottom_nz_index + BottomStencil[StencilType::TopRight];                        \
+            nz_index                          = bottom_nz_index + BottomStencil[StencilPosition::TopRight];                        \
             solver_matrix.row_index(nz_index) = bottom_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = right_index + 1;                                                               \
             solver_matrix.value(nz_index) += -0.25 * art; /* Top Right */                                                      \
                                                                                                                                \
-            nz_index                          = bottom_nz_index + BottomStencil[StencilType::TopLeft];                         \
+            nz_index                          = bottom_nz_index + BottomStencil[StencilPosition::TopLeft];                         \
             solver_matrix.row_index(nz_index) = bottom_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = left_index + 1;                                                                \
             solver_matrix.value(nz_index) += 0.25 * art; /* Top Left */                                                        \
@@ -165,22 +165,22 @@
             /* Fill matrix row of (i,j+1) */                                                                                   \
             const Stencil& TopStencil = CenterStencil;                                                                         \
                                                                                                                                \
-            nz_index                          = top_nz_index + TopStencil[StencilType::Bottom];                                \
+            nz_index                          = top_nz_index + TopStencil[StencilPosition::Bottom];                                \
             solver_matrix.row_index(nz_index) = top_index + 1;                                                                 \
             solver_matrix.col_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.value(nz_index) += -coeff4 * att; /* Bottom */                                                       \
                                                                                                                                \
-            nz_index                          = top_nz_index + TopStencil[StencilType::Center];                                \
+            nz_index                          = top_nz_index + TopStencil[StencilPosition::Center];                                \
             solver_matrix.row_index(nz_index) = top_index + 1;                                                                 \
             solver_matrix.col_index(nz_index) = top_index + 1;                                                                 \
             solver_matrix.value(nz_index) += coeff4 * att; /* Center: (Bottom) */                                              \
                                                                                                                                \
-            nz_index                          = top_nz_index + TopStencil[StencilType::BottomRight];                           \
+            nz_index                          = top_nz_index + TopStencil[StencilPosition::BottomRight];                           \
             solver_matrix.row_index(nz_index) = top_index + 1;                                                                 \
             solver_matrix.col_index(nz_index) = right_index + 1;                                                               \
             solver_matrix.value(nz_index) += 0.25 * art; /* Bottom Right */                                                    \
                                                                                                                                \
-            nz_index                          = top_nz_index + TopStencil[StencilType::BottomLeft];                            \
+            nz_index                          = top_nz_index + TopStencil[StencilPosition::BottomLeft];                            \
             solver_matrix.row_index(nz_index) = top_index + 1;                                                                 \
             solver_matrix.col_index(nz_index) = left_index + 1;                                                                \
             solver_matrix.value(nz_index) += -0.25 * art; /* Bottom Left */                                                    \
@@ -215,7 +215,7 @@
                 /* Fill matrix row of (i,j) */                                                                                 \
                 const Stencil& CenterStencil = getStencil(i_r);                                                                \
                                                                                                                                \
-                nz_index                          = center_nz_index + CenterStencil[StencilType::Center];                      \
+                nz_index                          = center_nz_index + CenterStencil[StencilPosition::Center];                      \
                 solver_matrix.row_index(nz_index) = center_index + 1;                                                          \
                 solver_matrix.col_index(nz_index) = center_index + 1;                                                          \
                 solver_matrix.value(nz_index) += 1.0;                                                                          \
@@ -224,24 +224,24 @@
                 const Stencil& RightStencil = getStencil(i_r + 1);                                                             \
                                                                                                                                \
                 /* REMOVED: Moved to the right hand side to make the matrix symmetric */                                       \
-                /* nz_index = right_nz_index + RightStencil[StencilType::Left]; */                                             \
+                /* nz_index = right_nz_index + RightStencil[StencilPosition::Left]; */                                             \
                 /* solver_matrix.row_index(nz_index) = right_index + 1; */                                                     \
                 /* solver_matrix.col_index(nz_index) = center_index + 1; */                                                    \
                 /* solver_matrix.value(nz_index) += - coeff2 * arr; // Left */                                                 \
                                                                                                                                \
-                nz_index                          = right_nz_index + RightStencil[StencilType::Center];                        \
+                nz_index                          = right_nz_index + RightStencil[StencilPosition::Center];                        \
                 solver_matrix.row_index(nz_index) = right_index + 1;                                                           \
                 solver_matrix.col_index(nz_index) = right_index + 1;                                                           \
                 solver_matrix.value(nz_index) += coeff2 * arr; /* Center: (Left) */                                            \
                                                                                                                                \
                 /* REMOVED: Moved to the right hand side to make the matrix symmetric */                                       \
-                /* nz_index = right_nz_index + RightStencil[StencilType::TopLeft]; */                                          \
+                /* nz_index = right_nz_index + RightStencil[StencilPosition::TopLeft]; */                                          \
                 /* solver_matrix.row_index(nz_index) = right_index + 1; */                                                     \
                 /* solver_matrix.col_index(nz_index) = top_index + 1; */                                                       \
                 /* solver_matrix.value(nz_index) += 0.25 * art; // Top Left */                                                 \
                                                                                                                                \
                 /* REMOVED: Moved to the right hand side to make the matrix symmetric */                                       \
-                /* nz_index = right_nz_index + RightStencil[StencilType::BottomLeft]; */                                       \
+                /* nz_index = right_nz_index + RightStencil[StencilPosition::BottomLeft]; */                                       \
                 /* solver_matrix.row_index(nz_index) = right_index + 1; */                                                     \
                 /* solver_matrix.col_index(nz_index) = bottom_index + 1; */                                                    \
                 /* solver_matrix.value(nz_index) += - 0.25 * art; // Bottom Left */                                            \
@@ -285,33 +285,33 @@
                 /* Fill matrix row of (i,j) */                                                                                 \
                 const Stencil& CenterStencil = getStencil(i_r);                                                                \
                                                                                                                                \
-                nz_index                          = center_nz_index + CenterStencil[StencilType::Center];                      \
+                nz_index                          = center_nz_index + CenterStencil[StencilPosition::Center];                      \
                 solver_matrix.row_index(nz_index) = center_index + 1;                                                          \
                 solver_matrix.col_index(nz_index) = center_index + 1;                                                          \
                 solver_matrix.value(nz_index) +=                                                                               \
                     0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* beta_{i,j} */                                  \
                                                                                                                                \
-                nz_index                          = center_nz_index + CenterStencil[StencilType::Left];                        \
+                nz_index                          = center_nz_index + CenterStencil[StencilPosition::Left];                        \
                 solver_matrix.row_index(nz_index) = center_index + 1;                                                          \
                 solver_matrix.col_index(nz_index) = left_index + 1;                                                            \
                 solver_matrix.value(nz_index) += -coeff1 * arr; /* Left */                                                     \
                                                                                                                                \
-                nz_index                          = center_nz_index + CenterStencil[StencilType::Right];                       \
+                nz_index                          = center_nz_index + CenterStencil[StencilPosition::Right];                       \
                 solver_matrix.row_index(nz_index) = center_index + 1;                                                          \
                 solver_matrix.col_index(nz_index) = right_index + 1;                                                           \
                 solver_matrix.value(nz_index) += -coeff2 * arr; /* Right */                                                    \
                                                                                                                                \
-                nz_index                          = center_nz_index + CenterStencil[StencilType::Bottom];                      \
+                nz_index                          = center_nz_index + CenterStencil[StencilPosition::Bottom];                      \
                 solver_matrix.row_index(nz_index) = center_index + 1;                                                          \
                 solver_matrix.col_index(nz_index) = bottom_index + 1;                                                          \
                 solver_matrix.value(nz_index) += -coeff3 * att; /* Bottom */                                                   \
                                                                                                                                \
-                nz_index                          = center_nz_index + CenterStencil[StencilType::Top];                         \
+                nz_index                          = center_nz_index + CenterStencil[StencilPosition::Top];                         \
                 solver_matrix.row_index(nz_index) = center_index + 1;                                                          \
                 solver_matrix.col_index(nz_index) = top_index + 1;                                                             \
                 solver_matrix.value(nz_index) += -coeff4 * att; /* Top */                                                      \
                                                                                                                                \
-                nz_index                          = center_nz_index + CenterStencil[StencilType::Center];                      \
+                nz_index                          = center_nz_index + CenterStencil[StencilPosition::Center];                      \
                 solver_matrix.row_index(nz_index) = center_index + 1;                                                          \
                 solver_matrix.col_index(nz_index) = center_index + 1;                                                          \
                 /* Center: (Left, Right, Bottom, Top) */                                                                       \
@@ -321,24 +321,24 @@
                 /* From view the view of the across origin node, the directions are roatated by 180 degrees in the stencil! */ \
                 const Stencil& LeftStencil = CenterStencil;                                                                    \
                                                                                                                                \
-                nz_index                          = left_nz_index + LeftStencil[StencilType::Left];                            \
+                nz_index                          = left_nz_index + LeftStencil[StencilPosition::Left];                            \
                 solver_matrix.row_index(nz_index) = left_index + 1;                                                            \
                 solver_matrix.col_index(nz_index) = center_index + 1;                                                          \
                 solver_matrix.value(nz_index) += -coeff1 * arr; /* Right -> Left*/                                             \
                                                                                                                                \
-                nz_index                          = left_nz_index + LeftStencil[StencilType::Center];                          \
+                nz_index                          = left_nz_index + LeftStencil[StencilPosition::Center];                          \
                 solver_matrix.row_index(nz_index) = left_index + 1;                                                            \
                 solver_matrix.col_index(nz_index) = left_index + 1;                                                            \
                 solver_matrix.value(nz_index) += coeff1 * arr; /* Center: (Right) -> Center: (Left) */                         \
                                                                                                                                \
                 /* Top Right -> Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                                       \
-                /* nz_index = left_nz_index + LeftStencil[StencilType::BottomLeft]; */                                         \
+                /* nz_index = left_nz_index + LeftStencil[StencilPosition::BottomLeft]; */                                         \
                 /* solver_matrix.row_index(nz_index) = left_index; */                                                          \
                 /* solver_matrix.col_index(nz_index) = top_index; */                                                           \
                 /* solver_matrix.value(nz_index) += - 0.25 * art; // Top Right -> Bottom Left*/                                \
                                                                                                                                \
                 /* Bottom Right -> Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                                       \
-                /* nz_index = left_nz_index + LeftStencil[StencilType::TopLeft]; */                                            \
+                /* nz_index = left_nz_index + LeftStencil[StencilPosition::TopLeft]; */                                            \
                 /* solver_matrix.row_index(nz_index) = left_index; */                                                          \
                 /* solver_matrix.col_index(nz_index) = bottom_index; */                                                        \
                 /* solver_matrix.value(nz_index) += 0.25 * art; // Bottom Right -> Top Left */                                 \
@@ -346,22 +346,22 @@
                 /* Fill matrix row of (i+1,j) */                                                                               \
                 const Stencil& RightStencil = getStencil(i_r + 1);                                                             \
                                                                                                                                \
-                nz_index                          = right_nz_index + RightStencil[StencilType::Left];                          \
+                nz_index                          = right_nz_index + RightStencil[StencilPosition::Left];                          \
                 solver_matrix.row_index(nz_index) = right_index + 1;                                                           \
                 solver_matrix.col_index(nz_index) = center_index + 1;                                                          \
                 solver_matrix.value(nz_index) += -coeff2 * arr; /* Left */                                                     \
                                                                                                                                \
-                nz_index                          = right_nz_index + RightStencil[StencilType::Center];                        \
+                nz_index                          = right_nz_index + RightStencil[StencilPosition::Center];                        \
                 solver_matrix.row_index(nz_index) = right_index + 1;                                                           \
                 solver_matrix.col_index(nz_index) = right_index + 1;                                                           \
                 solver_matrix.value(nz_index) += coeff2 * arr; /* Center: (Left) */                                            \
                                                                                                                                \
-                nz_index                          = right_nz_index + RightStencil[StencilType::TopLeft];                       \
+                nz_index                          = right_nz_index + RightStencil[StencilPosition::TopLeft];                       \
                 solver_matrix.row_index(nz_index) = right_index + 1;                                                           \
                 solver_matrix.col_index(nz_index) = top_index + 1;                                                             \
                 solver_matrix.value(nz_index) += 0.25 * art; /* Top Left */                                                    \
                                                                                                                                \
-                nz_index                          = right_nz_index + RightStencil[StencilType::BottomLeft];                    \
+                nz_index                          = right_nz_index + RightStencil[StencilPosition::BottomLeft];                    \
                 solver_matrix.row_index(nz_index) = right_index + 1;                                                           \
                 solver_matrix.col_index(nz_index) = bottom_index + 1;                                                          \
                 solver_matrix.value(nz_index) += -0.25 * art; /* Bottom Left */                                                \
@@ -369,23 +369,23 @@
                 /* Fill matrix row of (i,j-1) */                                                                               \
                 const Stencil& BottomStencil = CenterStencil;                                                                  \
                                                                                                                                \
-                nz_index                          = bottom_nz_index + BottomStencil[StencilType::Top];                         \
+                nz_index                          = bottom_nz_index + BottomStencil[StencilPosition::Top];                         \
                 solver_matrix.row_index(nz_index) = bottom_index + 1;                                                          \
                 solver_matrix.col_index(nz_index) = center_index + 1;                                                          \
                 solver_matrix.value(nz_index) += -coeff3 * att; /* Top */                                                      \
                                                                                                                                \
-                nz_index                          = bottom_nz_index + BottomStencil[StencilType::Center];                      \
+                nz_index                          = bottom_nz_index + BottomStencil[StencilPosition::Center];                      \
                 solver_matrix.row_index(nz_index) = bottom_index + 1;                                                          \
                 solver_matrix.col_index(nz_index) = bottom_index + 1;                                                          \
                 solver_matrix.value(nz_index) += coeff3 * att; /* Center: (Top) */                                             \
                                                                                                                                \
-                nz_index                          = bottom_nz_index + BottomStencil[StencilType::TopRight];                    \
+                nz_index                          = bottom_nz_index + BottomStencil[StencilPosition::TopRight];                    \
                 solver_matrix.row_index(nz_index) = bottom_index + 1;                                                          \
                 solver_matrix.col_index(nz_index) = right_index + 1;                                                           \
                 solver_matrix.value(nz_index) += -0.25 * art; /* Top Right */                                                  \
                                                                                                                                \
                 /* REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                                                                 \
-                /* nz_index = bottom_nz_index + BottomStencil[StencilType::TopLeft]; */                                        \
+                /* nz_index = bottom_nz_index + BottomStencil[StencilPosition::TopLeft]; */                                        \
                 /* solver_matrix.row_index(nz_index) = bottom_index + 1; */                                                    \
                 /* solver_matrix.col_index(nz_index) = left_index + 1; */                                                      \
                 /* solver_matrix.value(nz_index) += 0.25 * art; // Top Left */                                                 \
@@ -393,23 +393,23 @@
                 /* Fill matrix row of (i,j+1) */                                                                               \
                 const Stencil& TopStencil = CenterStencil;                                                                     \
                                                                                                                                \
-                nz_index                          = top_nz_index + TopStencil[StencilType::Bottom];                            \
+                nz_index                          = top_nz_index + TopStencil[StencilPosition::Bottom];                            \
                 solver_matrix.row_index(nz_index) = top_index + 1;                                                             \
                 solver_matrix.col_index(nz_index) = center_index + 1;                                                          \
                 solver_matrix.value(nz_index) += -coeff4 * att; /* Bottom */                                                   \
                                                                                                                                \
-                nz_index                          = top_nz_index + TopStencil[StencilType::Center];                            \
+                nz_index                          = top_nz_index + TopStencil[StencilPosition::Center];                            \
                 solver_matrix.row_index(nz_index) = top_index + 1;                                                             \
                 solver_matrix.col_index(nz_index) = top_index + 1;                                                             \
                 solver_matrix.value(nz_index) += coeff4 * att; /* Center: (Bottom) */                                          \
                                                                                                                                \
-                nz_index                          = top_nz_index + TopStencil[StencilType::BottomRight];                       \
+                nz_index                          = top_nz_index + TopStencil[StencilPosition::BottomRight];                       \
                 solver_matrix.row_index(nz_index) = top_index + 1;                                                             \
                 solver_matrix.col_index(nz_index) = right_index + 1;                                                           \
                 solver_matrix.value(nz_index) += 0.25 * art; /* Bottom Right */                                                \
                                                                                                                                \
                 /* REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                                                                 \
-                /* nz_index = top_nz_index + TopStencil[StencilType::BottomLeft]; */                                           \
+                /* nz_index = top_nz_index + TopStencil[StencilPosition::BottomLeft]; */                                           \
                 /* solver_matrix.row_index(nz_index) = top_index + 1; */                                                       \
                 /* solver_matrix.col_index(nz_index) = left_index + 1; */                                                      \
                 /* solver_matrix.value(nz_index) += - 0.25 * art; // Bottom Left */                                            \
@@ -448,35 +448,35 @@
             /* Fill matrix row of (i,j) */                                                                                     \
             const Stencil& CenterStencil = getStencil(i_r);                                                                    \
                                                                                                                                \
-            nz_index                          = center_nz_index + CenterStencil[StencilType::Center];                          \
+            nz_index                          = center_nz_index + CenterStencil[StencilPosition::Center];                          \
             solver_matrix.row_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.value(nz_index) += 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* beta_{i,j} */         \
                                                                                                                                \
             /* REMOVED: Moved to the right hand side to make the matrix symmetric */                                           \
             if (!DirBC_Interior) {                                                                                             \
-                nz_index                          = center_nz_index + CenterStencil[StencilType::Left];                        \
+                nz_index                          = center_nz_index + CenterStencil[StencilPosition::Left];                        \
                 solver_matrix.row_index(nz_index) = center_index + 1;                                                          \
                 solver_matrix.col_index(nz_index) = left_index + 1;                                                            \
                 solver_matrix.value(nz_index) += -coeff1 * arr; /* Left */                                                     \
             }                                                                                                                  \
                                                                                                                                \
-            nz_index                          = center_nz_index + CenterStencil[StencilType::Right];                           \
+            nz_index                          = center_nz_index + CenterStencil[StencilPosition::Right];                           \
             solver_matrix.row_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = right_index + 1;                                                               \
             solver_matrix.value(nz_index) += -coeff2 * arr; /* Right */                                                        \
                                                                                                                                \
-            nz_index                          = center_nz_index + CenterStencil[StencilType::Bottom];                          \
+            nz_index                          = center_nz_index + CenterStencil[StencilPosition::Bottom];                          \
             solver_matrix.row_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = bottom_index + 1;                                                              \
             solver_matrix.value(nz_index) += -coeff3 * att; /* Bottom */                                                       \
                                                                                                                                \
-            nz_index                          = center_nz_index + CenterStencil[StencilType::Top];                             \
+            nz_index                          = center_nz_index + CenterStencil[StencilPosition::Top];                             \
             solver_matrix.row_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = top_index + 1;                                                                 \
             solver_matrix.value(nz_index) += -coeff4 * att; /* Top */                                                          \
                                                                                                                                \
-            nz_index                          = center_nz_index + CenterStencil[StencilType::Center];                          \
+            nz_index                          = center_nz_index + CenterStencil[StencilPosition::Center];                          \
             solver_matrix.row_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = center_index + 1;                                                              \
             /* Center: (Left, Right, Bottom, Top) */                                                                           \
@@ -486,22 +486,22 @@
                 /* Fill matrix row of (i-1,j) */                                                                               \
                 const Stencil& LeftStencil = getStencil(i_r - 1);                                                              \
                                                                                                                                \
-                nz_index                          = left_nz_index + LeftStencil[StencilType::Right];                           \
+                nz_index                          = left_nz_index + LeftStencil[StencilPosition::Right];                           \
                 solver_matrix.row_index(nz_index) = left_index + 1;                                                            \
                 solver_matrix.col_index(nz_index) = center_index + 1;                                                          \
                 solver_matrix.value(nz_index) += -coeff1 * arr; /* Right */                                                    \
                                                                                                                                \
-                nz_index                          = left_nz_index + LeftStencil[StencilType::Center];                          \
+                nz_index                          = left_nz_index + LeftStencil[StencilPosition::Center];                          \
                 solver_matrix.row_index(nz_index) = left_index + 1;                                                            \
                 solver_matrix.col_index(nz_index) = left_index + 1;                                                            \
                 solver_matrix.value(nz_index) += coeff1 * arr; /* Center: (Right) */                                           \
                                                                                                                                \
-                nz_index                          = left_nz_index + LeftStencil[StencilType::TopRight];                        \
+                nz_index                          = left_nz_index + LeftStencil[StencilPosition::TopRight];                        \
                 solver_matrix.row_index(nz_index) = left_index + 1;                                                            \
                 solver_matrix.col_index(nz_index) = top_index + 1;                                                             \
                 solver_matrix.value(nz_index) += -0.25 * art; /* Top Right */                                                  \
                                                                                                                                \
-                nz_index                          = left_nz_index + LeftStencil[StencilType::BottomRight];                     \
+                nz_index                          = left_nz_index + LeftStencil[StencilPosition::BottomRight];                     \
                 solver_matrix.row_index(nz_index) = left_index + 1;                                                            \
                 solver_matrix.col_index(nz_index) = bottom_index + 1;                                                          \
                 solver_matrix.value(nz_index) += 0.25 * art; /* Bottom Right */                                                \
@@ -509,22 +509,22 @@
             /* Fill matrix row of (i+1,j) */                                                                                   \
             const Stencil& RightStencil = getStencil(i_r + 1);                                                                 \
                                                                                                                                \
-            nz_index                          = right_nz_index + RightStencil[StencilType::Left];                              \
+            nz_index                          = right_nz_index + RightStencil[StencilPosition::Left];                              \
             solver_matrix.row_index(nz_index) = right_index + 1;                                                               \
             solver_matrix.col_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.value(nz_index) += -coeff2 * arr; /* Left */                                                         \
                                                                                                                                \
-            nz_index                          = right_nz_index + RightStencil[StencilType::Center];                            \
+            nz_index                          = right_nz_index + RightStencil[StencilPosition::Center];                            \
             solver_matrix.row_index(nz_index) = right_index + 1;                                                               \
             solver_matrix.col_index(nz_index) = right_index + 1;                                                               \
             solver_matrix.value(nz_index) += coeff2 * arr; /* Center: (Left) */                                                \
                                                                                                                                \
-            nz_index                          = right_nz_index + RightStencil[StencilType::TopLeft];                           \
+            nz_index                          = right_nz_index + RightStencil[StencilPosition::TopLeft];                           \
             solver_matrix.row_index(nz_index) = right_index + 1;                                                               \
             solver_matrix.col_index(nz_index) = top_index + 1;                                                                 \
             solver_matrix.value(nz_index) += 0.25 * art; /* Top Left */                                                        \
                                                                                                                                \
-            nz_index                          = right_nz_index + RightStencil[StencilType::BottomLeft];                        \
+            nz_index                          = right_nz_index + RightStencil[StencilPosition::BottomLeft];                        \
             solver_matrix.row_index(nz_index) = right_index + 1;                                                               \
             solver_matrix.col_index(nz_index) = bottom_index + 1;                                                              \
             solver_matrix.value(nz_index) += -0.25 * art; /* Bottom Left */                                                    \
@@ -532,24 +532,24 @@
             /* Fill matrix row of (i,j-1) */                                                                                   \
             const Stencil& BottomStencil = CenterStencil;                                                                      \
                                                                                                                                \
-            nz_index                          = bottom_nz_index + BottomStencil[StencilType::Top];                             \
+            nz_index                          = bottom_nz_index + BottomStencil[StencilPosition::Top];                             \
             solver_matrix.row_index(nz_index) = bottom_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.value(nz_index) += -coeff3 * att; /* Top */                                                          \
                                                                                                                                \
-            nz_index                          = bottom_nz_index + BottomStencil[StencilType::Center];                          \
+            nz_index                          = bottom_nz_index + BottomStencil[StencilPosition::Center];                          \
             solver_matrix.row_index(nz_index) = bottom_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = bottom_index + 1;                                                              \
             solver_matrix.value(nz_index) += coeff3 * att; /* Center: (Top) */                                                 \
                                                                                                                                \
-            nz_index                          = bottom_nz_index + BottomStencil[StencilType::TopRight];                        \
+            nz_index                          = bottom_nz_index + BottomStencil[StencilPosition::TopRight];                        \
             solver_matrix.row_index(nz_index) = bottom_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = right_index + 1;                                                               \
             solver_matrix.value(nz_index) += -0.25 * art; /* Top Right */                                                      \
                                                                                                                                \
             /* REMOVED: Moved to the right hand side to make the matrix symmetric */                                           \
             if (!DirBC_Interior) {                                                                                             \
-                nz_index                          = bottom_nz_index + BottomStencil[StencilType::TopLeft];                     \
+                nz_index                          = bottom_nz_index + BottomStencil[StencilPosition::TopLeft];                     \
                 solver_matrix.row_index(nz_index) = bottom_index + 1;                                                          \
                 solver_matrix.col_index(nz_index) = left_index + 1;                                                            \
                 solver_matrix.value(nz_index) += 0.25 * art; /* Top Left */                                                    \
@@ -558,24 +558,24 @@
             /* Fill matrix row of (i,j+1) */                                                                                   \
             const Stencil& TopStencil = CenterStencil;                                                                         \
                                                                                                                                \
-            nz_index                          = top_nz_index + TopStencil[StencilType::Bottom];                                \
+            nz_index                          = top_nz_index + TopStencil[StencilPosition::Bottom];                                \
             solver_matrix.row_index(nz_index) = top_index + 1;                                                                 \
             solver_matrix.col_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.value(nz_index) += -coeff4 * att; /* Bottom */                                                       \
                                                                                                                                \
-            nz_index                          = top_nz_index + TopStencil[StencilType::Center];                                \
+            nz_index                          = top_nz_index + TopStencil[StencilPosition::Center];                                \
             solver_matrix.row_index(nz_index) = top_index + 1;                                                                 \
             solver_matrix.col_index(nz_index) = top_index + 1;                                                                 \
             solver_matrix.value(nz_index) += coeff4 * att; /* Center: (Bottom) */                                              \
                                                                                                                                \
-            nz_index                          = top_nz_index + TopStencil[StencilType::BottomRight];                           \
+            nz_index                          = top_nz_index + TopStencil[StencilPosition::BottomRight];                           \
             solver_matrix.row_index(nz_index) = top_index + 1;                                                                 \
             solver_matrix.col_index(nz_index) = right_index + 1;                                                               \
             solver_matrix.value(nz_index) += 0.25 * art; /* Bottom Right */                                                    \
                                                                                                                                \
             /* REMOVED: Moved to the right hand side to make the matrix symmetric */                                           \
             if (!DirBC_Interior) {                                                                                             \
-                nz_index                          = top_nz_index + TopStencil[StencilType::BottomLeft];                        \
+                nz_index                          = top_nz_index + TopStencil[StencilPosition::BottomLeft];                        \
                 solver_matrix.row_index(nz_index) = top_index + 1;                                                             \
                 solver_matrix.col_index(nz_index) = left_index + 1;                                                            \
                 solver_matrix.value(nz_index) += -0.25 * art; /* Bottom Left */                                                \
@@ -615,33 +615,33 @@
             /* Fill matrix row of (i,j) */                                                                                     \
             const Stencil& CenterStencil = getStencil(i_r);                                                                    \
                                                                                                                                \
-            nz_index                          = center_nz_index + CenterStencil[StencilType::Center];                          \
+            nz_index                          = center_nz_index + CenterStencil[StencilPosition::Center];                          \
             solver_matrix.row_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.value(nz_index) += 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* beta_{i,j} */         \
                                                                                                                                \
-            nz_index                          = center_nz_index + CenterStencil[StencilType::Left];                            \
+            nz_index                          = center_nz_index + CenterStencil[StencilPosition::Left];                            \
             solver_matrix.row_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = left_index + 1;                                                                \
             solver_matrix.value(nz_index) += -coeff1 * arr; /* Left */                                                         \
                                                                                                                                \
             /* REMOVED: Moved to the right hand side to make the matrix symmetric */                                           \
-            /* nz_index = center_nz_index + CenterStencil[StencilType::Right]; */                                              \
+            /* nz_index = center_nz_index + CenterStencil[StencilPosition::Right]; */                                              \
             /* solver_matrix.row_index(nz_index) = center_index + 1; */                                                        \
             /* solver_matrix.col_index(nz_index) = right_index + 1; */                                                         \
             /* solver_matrix.value(nz_index) += - coeff2 * arr; // Right */                                                    \
                                                                                                                                \
-            nz_index                          = center_nz_index + CenterStencil[StencilType::Bottom];                          \
+            nz_index                          = center_nz_index + CenterStencil[StencilPosition::Bottom];                          \
             solver_matrix.row_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = bottom_index + 1;                                                              \
             solver_matrix.value(nz_index) += -coeff3 * att; /* Bottom */                                                       \
                                                                                                                                \
-            nz_index                          = center_nz_index + CenterStencil[StencilType::Top];                             \
+            nz_index                          = center_nz_index + CenterStencil[StencilPosition::Top];                             \
             solver_matrix.row_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = top_index + 1;                                                                 \
             solver_matrix.value(nz_index) += -coeff4 * att; /* Top */                                                          \
                                                                                                                                \
-            nz_index                          = center_nz_index + CenterStencil[StencilType::Center];                          \
+            nz_index                          = center_nz_index + CenterStencil[StencilPosition::Center];                          \
             solver_matrix.row_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = center_index + 1;                                                              \
             /* Center: (Left, Right, Bottom, Top) */                                                                           \
@@ -650,22 +650,22 @@
             /* Fill matrix row of (i-1,j) */                                                                                   \
             const Stencil& LeftStencil = getStencil(i_r - 1);                                                                  \
                                                                                                                                \
-            nz_index                          = left_nz_index + LeftStencil[StencilType::Right];                               \
+            nz_index                          = left_nz_index + LeftStencil[StencilPosition::Right];                               \
             solver_matrix.row_index(nz_index) = left_index + 1;                                                                \
             solver_matrix.col_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.value(nz_index) += -coeff1 * arr; /* Right */                                                        \
                                                                                                                                \
-            nz_index                          = left_nz_index + LeftStencil[StencilType::Center];                              \
+            nz_index                          = left_nz_index + LeftStencil[StencilPosition::Center];                              \
             solver_matrix.row_index(nz_index) = left_index + 1;                                                                \
             solver_matrix.col_index(nz_index) = left_index + 1;                                                                \
             solver_matrix.value(nz_index) += coeff1 * arr; /* Center: (Right) */                                               \
                                                                                                                                \
-            nz_index                          = left_nz_index + LeftStencil[StencilType::TopRight];                            \
+            nz_index                          = left_nz_index + LeftStencil[StencilPosition::TopRight];                            \
             solver_matrix.row_index(nz_index) = left_index + 1;                                                                \
             solver_matrix.col_index(nz_index) = top_index + 1;                                                                 \
             solver_matrix.value(nz_index) += -0.25 * art; /* Top Right */                                                      \
                                                                                                                                \
-            nz_index                          = left_nz_index + LeftStencil[StencilType::BottomRight];                         \
+            nz_index                          = left_nz_index + LeftStencil[StencilPosition::BottomRight];                         \
             solver_matrix.row_index(nz_index) = left_index + 1;                                                                \
             solver_matrix.col_index(nz_index) = bottom_index + 1;                                                              \
             solver_matrix.value(nz_index) += 0.25 * art; /* Bottom Right */                                                    \
@@ -676,23 +676,23 @@
             /* Fill matrix row of (i,j-1) */                                                                                   \
             const Stencil& BottomStencil = CenterStencil;                                                                      \
                                                                                                                                \
-            nz_index                          = bottom_nz_index + BottomStencil[StencilType::Top];                             \
+            nz_index                          = bottom_nz_index + BottomStencil[StencilPosition::Top];                             \
             solver_matrix.row_index(nz_index) = bottom_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.value(nz_index) += -coeff3 * att; /* Top */                                                          \
                                                                                                                                \
-            nz_index                          = bottom_nz_index + BottomStencil[StencilType::Center];                          \
+            nz_index                          = bottom_nz_index + BottomStencil[StencilPosition::Center];                          \
             solver_matrix.row_index(nz_index) = bottom_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = bottom_index + 1;                                                              \
             solver_matrix.value(nz_index) += coeff3 * att; /* Center: (Top) */                                                 \
                                                                                                                                \
             /* REMOVED: Moved to the right hand side to make the matrix symmetric */                                           \
-            /* nz_index = bottom_nz_index + BottomStencil[StencilType::TopRight]; */                                           \
+            /* nz_index = bottom_nz_index + BottomStencil[StencilPosition::TopRight]; */                                           \
             /* solver_matrix.row_index(nz_index) = bottom_index + 1; */                                                        \
             /* solver_matrix.col_index(nz_index) = right_index + 1; */                                                         \
             /* solver_matrix.value(nz_index) += - 0.25 * art; // Top Right */                                                  \
                                                                                                                                \
-            nz_index                          = bottom_nz_index + BottomStencil[StencilType::TopLeft];                         \
+            nz_index                          = bottom_nz_index + BottomStencil[StencilPosition::TopLeft];                         \
             solver_matrix.row_index(nz_index) = bottom_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = left_index + 1;                                                                \
             solver_matrix.value(nz_index) += 0.25 * art; /* Top Left */                                                        \
@@ -700,23 +700,23 @@
             /* Fill matrix row of (i,j+1) */                                                                                   \
             const Stencil& TopStencil = CenterStencil;                                                                         \
                                                                                                                                \
-            nz_index                          = top_nz_index + TopStencil[StencilType::Bottom];                                \
+            nz_index                          = top_nz_index + TopStencil[StencilPosition::Bottom];                                \
             solver_matrix.row_index(nz_index) = top_index + 1;                                                                 \
             solver_matrix.col_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.value(nz_index) += -coeff4 * att; /* Bottom */                                                       \
                                                                                                                                \
-            nz_index                          = top_nz_index + TopStencil[StencilType::Center];                                \
+            nz_index                          = top_nz_index + TopStencil[StencilPosition::Center];                                \
             solver_matrix.row_index(nz_index) = top_index + 1;                                                                 \
             solver_matrix.col_index(nz_index) = top_index + 1;                                                                 \
             solver_matrix.value(nz_index) += coeff4 * att; /* Center: (Bottom) */                                              \
                                                                                                                                \
             /* REMOVED: Moved to the right hand side to make the matrix symmetric */                                           \
-            /* nz_index = top_nz_index + TopStencil[StencilType::BottomRight]; */                                              \
+            /* nz_index = top_nz_index + TopStencil[StencilPosition::BottomRight]; */                                              \
             /* solver_matrix.row_index(nz_index) = top_index + 1; */                                                           \
             /* solver_matrix.col_index(nz_index) = right_index + 1; */                                                         \
             /* solver_matrix.value(nz_index) += 0.25 * art; // Bottom Right */                                                 \
                                                                                                                                \
-            nz_index                          = top_nz_index + TopStencil[StencilType::BottomLeft];                            \
+            nz_index                          = top_nz_index + TopStencil[StencilPosition::BottomLeft];                            \
             solver_matrix.row_index(nz_index) = top_index + 1;                                                                 \
             solver_matrix.col_index(nz_index) = left_index + 1;                                                                \
             solver_matrix.value(nz_index) += -0.25 * art; /* Bottom Left */                                                    \
@@ -747,7 +747,7 @@
             /* Fill matrix row of (i,j) */                                                                                     \
             const Stencil& CenterStencil = getStencil(i_r);                                                                    \
                                                                                                                                \
-            nz_index                          = center_nz_index + CenterStencil[StencilType::Center];                          \
+            nz_index                          = center_nz_index + CenterStencil[StencilPosition::Center];                          \
             solver_matrix.row_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.col_index(nz_index) = center_index + 1;                                                              \
             solver_matrix.value(nz_index) += 1.0;                                                                              \
@@ -757,24 +757,24 @@
             const Stencil& LeftStencil = getStencil(i_r - 1);                                                                  \
                                                                                                                                \
             /* REMOVED: Moved to the right hand side to make the matrix symmetric */                                           \
-            /* nz_index = left_nz_index + LeftStencil[StencilType::Right]; */                                                  \
+            /* nz_index = left_nz_index + LeftStencil[StencilPosition::Right]; */                                                  \
             /* solver_matrix.row_index(nz_index) = left_index + 1; */                                                          \
             /* solver_matrix.col_index(nz_index) = center_index + 1; */                                                        \
             /* solver_matrix.value(nz_index) += - coeff1 * arr; // Right */                                                    \
                                                                                                                                \
-            nz_index                          = left_nz_index + LeftStencil[StencilType::Center];                              \
+            nz_index                          = left_nz_index + LeftStencil[StencilPosition::Center];                              \
             solver_matrix.row_index(nz_index) = left_index + 1;                                                                \
             solver_matrix.col_index(nz_index) = left_index + 1;                                                                \
             solver_matrix.value(nz_index) += coeff1 * arr; /* Center: (Right) */                                               \
                                                                                                                                \
             /* REMOVED: Moved to the right hand side to make the matrix symmetric */                                           \
-            /* nz_index = left_nz_index + LeftStencil[StencilType::TopRight]; */                                               \
+            /* nz_index = left_nz_index + LeftStencil[StencilPosition::TopRight]; */                                               \
             /* solver_matrix.row_index(nz_index) = left_index + 1; */                                                          \
             /* solver_matrix.col_index(nz_index) = top_index + 1; */                                                           \
             /* solver_matrix.value(nz_index) += - 0.25 * art; // Top Right */                                                  \
                                                                                                                                \
             /* REMOVED: Moved to the right hand side to make the matrix symmetric */                                           \
-            /* nz_index = left_nz_index + LeftStencil[StencilType::BottomRight]; */                                            \
+            /* nz_index = left_nz_index + LeftStencil[StencilPosition::BottomRight]; */                                            \
             /* solver_matrix.row_index(nz_index) = left_index + 1; */                                                          \
             /* solver_matrix.col_index(nz_index) = bottom_index + 1; */                                                        \
             /* solver_matrix.value(nz_index) += 0.25 * art; // Bottom Right */                                                 \

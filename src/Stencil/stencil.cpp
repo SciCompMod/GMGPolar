@@ -11,7 +11,7 @@ Stencil::Stencil(std::initializer_list<int> init)
     }
 }
 
-int Stencil::operator[](StencilType type) const
+int Stencil::operator[](StencilPosition type) const
 {
     return values_[static_cast<int>(type)];
 }

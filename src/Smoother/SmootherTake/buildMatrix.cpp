@@ -154,7 +154,7 @@
                 /* Fill matrix row of (i,j) */                                                                         \
                 const Stencil& CenterStencil = getStencil(i_r);                                                        \
                 const int center_nz_index    = getCircleAscIndex(i_r, i_theta);                                        \
-                const int nz_index           = center_nz_index + CenterStencil[StencilType::Center];                   \
+                const int nz_index           = center_nz_index + CenterStencil[StencilPosition::Center];                   \
                 matrix.row_index(nz_index)   = center_index + 1;                                                       \
                 matrix.col_index(nz_index)   = center_index + 1;                                                       \
                 matrix.value(nz_index)       = 1.0;                                                                    \
@@ -206,22 +206,22 @@
                 const double bottom_value = -coeff3 * (att[center] + att[bottom]);                                     \
                 const double top_value    = -coeff4 * (att[center] + att[top]);                                        \
                                                                                                                        \
-                nz_index                   = center_nz_index + CenterStencil[StencilType::Center];                     \
+                nz_index                   = center_nz_index + CenterStencil[StencilPosition::Center];                     \
                 matrix.row_index(nz_index) = center_index + 1;                                                         \
                 matrix.col_index(nz_index) = center_index + 1;                                                         \
                 matrix.value(nz_index)     = center_value;                                                             \
                                                                                                                        \
-                nz_index                   = center_nz_index + CenterStencil[StencilType::Left];                       \
+                nz_index                   = center_nz_index + CenterStencil[StencilPosition::Left];                       \
                 matrix.row_index(nz_index) = center_index + 1;                                                         \
                 matrix.col_index(nz_index) = left_index + 1;                                                           \
                 matrix.value(nz_index)     = left_value;                                                               \
                                                                                                                        \
-                nz_index                   = center_nz_index + CenterStencil[StencilType::Bottom];                     \
+                nz_index                   = center_nz_index + CenterStencil[StencilPosition::Bottom];                     \
                 matrix.row_index(nz_index) = center_index + 1;                                                         \
                 matrix.col_index(nz_index) = bottom_index + 1;                                                         \
                 matrix.value(nz_index)     = bottom_value;                                                             \
                                                                                                                        \
-                nz_index                   = center_nz_index + CenterStencil[StencilType::Top];                        \
+                nz_index                   = center_nz_index + CenterStencil[StencilPosition::Top];                        \
                 matrix.row_index(nz_index) = center_index + 1;                                                         \
                 matrix.col_index(nz_index) = top_index + 1;                                                            \
                 matrix.value(nz_index)     = top_value;                                                                \
