@@ -42,15 +42,7 @@ LevelCache::LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& 
 #pragma omp parallel for
         for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
             const double r = grid.radius(i_r);
-
-            double coeff_alpha;
-            if (cache_density_profile_coefficients_ && !cache_domain_geometry_) {
-                coeff_alpha = coeff_alpha_[i_r];
-            }
-            else {
-                coeff_alpha = density_profile_coefficients.alpha(r);
-            }
-
+            double coeff_alpha = density_profile_coefficients.alpha(r);
             for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
                 const double theta     = grid.theta(i_theta);
                 const double sin_theta = sin_theta_[i_theta];
