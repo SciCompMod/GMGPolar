@@ -207,8 +207,10 @@ private:
     int max_omp_threads_;
     double thread_reduction_factor_;
     StencilDistributionMethod stencil_distribution_method_;
-    bool cache_density_profile_coefficients_;
-    bool cache_domain_geometry_;
+    // `cache_density_profile_coefficients_` caches alpha(r_i), beta(r_i)
+    bool cache_density_profile_coefficients_; 
+    // `cache_domain_geometry_` caches transformation coefficients (arr, att, art) used in the Jacobian of the domain geometry mapping.
+    bool cache_domain_geometry_; 
 
     /* --------------- */
     /* Input Functions */
