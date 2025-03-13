@@ -11,7 +11,7 @@ public:
                               int num_omp_threads);
 
     ~DirectSolverGive() override;
-
+    // Note: The rhs (right-hand side) vector gets overwritten during the solution process.
     void solveInPlace(Vector<double>& solution) override;
 
 private:

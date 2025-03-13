@@ -60,7 +60,9 @@ public:
                                 const DensityProfileCoefficients& density_profile_coefficients,
                                 const bool DirBC_Interior, const int num_omp_threads,
                                 const StencilDistributionMethod stencil_distribution_method);
+    // Note: The rhs (right-hand side) vector gets overwritten during the solution process.
     void directSolveInPlace(Vector<double>& x) const;
+    
 
     // --------------- //
     // Apply Smoothing //
