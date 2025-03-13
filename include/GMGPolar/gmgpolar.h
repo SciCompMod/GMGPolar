@@ -23,7 +23,7 @@ class LevelCache;
 #include "../LinearAlgebra/vector_operations.h"
 #include "../PolarGrid/polargrid.h"
 #include "../Utilities/cmdline.h"
-#include "../common/constants.h"
+#include "../common/global_definitions.h"
 #include "test_cases.h"
 
 class GMGPolar

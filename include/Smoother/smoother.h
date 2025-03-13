@@ -21,7 +21,7 @@ class Level;
 #include "../LinearAlgebra/vector_operations.h"
 #include "../PolarGrid/polargrid.h"
 #include "../Stencil/stencil.h"
-#include "../common/constants.h"
+#include "../common/global_definitions.h"
 
 class Smoother
 {

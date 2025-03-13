@@ -20,7 +20,7 @@ class Level;
 
 #include "../Level/level.h"
 #include "../Stencil/stencil.h"
-#include "../common/constants.h"
+#include "../common/global_definitions.h"
 
 class ExtrapolatedSmoother
 {

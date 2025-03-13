@@ -17,7 +17,7 @@ class Level;
 #include "../LinearAlgebra/matrix.h"
 #include "../LinearAlgebra/vector.h"
 #include "../LinearAlgebra/vector_operations.h"
-#include "../common/constants.h"
+#include "../common/global_definitions.h"
 
 class Residual
 {
