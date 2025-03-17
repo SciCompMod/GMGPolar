@@ -85,9 +85,13 @@ private:
     bool is_cyclic_          = true;
 
     bool factorized_ = false;
-    T gamma_         = 0.0;
+    T gamma_         = 0.0; // Used in Shermann-Morrison factorization A = B + u*v^T
 
-    // Solve methods
+    // Solve methods:
+    // The notation 'u' and 'scratch' is directly taken from the implementation
+    // of the Thomas Algorithm listed on wikipedia.
+    // Note that the 'scratch' vector is unused, as we moved from the
+    // Thomas Algorithm to the faster Cholesky Decomposition.
     void solveSymmetricTridiagonal(T* x, T* scratch);
     void solveSymmetricCyclicTridiagonal(T* x, T* u, T* scratch);
 };
