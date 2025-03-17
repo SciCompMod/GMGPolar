@@ -22,7 +22,7 @@ enum class MultigridCycleType
 enum class ResidualNormType
 {
     EUCLIDEAN          = 0, // Corresponds to the L2 norm
-    WEIGHTED_EUCLIDEAN = 1, // A weighted version of the L2 norm
+    WEIGHTED_EUCLIDEAN = 1, // Scaled L2 norm (sqrt(u^T * u / DoFs))
     INFINITY_NORM      = 2 // Corresponds to the L∞ norm
 };
 
