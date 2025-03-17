@@ -1,11 +1,11 @@
 name: GMGPolarCI
 
-on:
+on :
   schedule:
     - cron: "40 2 * * *"
   push:
     branches:
-      - "Refactoring2024"
+      - "main"
   pull_request:
     types: [opened, reopened, synchronize, ready_for_review]
 
@@ -15,15 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      - name: Print Debug Message
-        run: echo "🚀 GitHub Actions Workflow Started - Debug Test ✅"
-      
-      - name: Install MUMPS and dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libmumps-dev libmumps-seq-dev
-
       - uses: ./.github/actions/build
       
   run-unit-test:
@@ -31,12 +22,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
-      - name: Install MUMPS and dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libmumps-dev libmumps-seq-dev
-      
       - uses: ./.github/actions/test
         with:
           build-artifact: build-cpp-linux-gmgpolar
@@ -61,56 +46,3 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.info
           verbose: true          
-
-
-
-
-
-# name: GMGPolarCI
-
-# on :
-#   schedule:
-#     - cron: "40 2 * * *"
-#   push:
-#     branches:
-#       - "main"
-#   pull_request:
-#     types: [opened, reopened, synchronize, ready_for_review]
-
-# jobs:
-#   install-and-build:
-#     if: github.event.pull_request.draft == false
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v3
-#       - uses: ./.github/actions/build
-      
-#   run-unit-test:
-#     needs: install-and-build
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v3
-#       - uses: ./.github/actions/test
-#         with:
-#           build-artifact: build-cpp-linux-gmgpolar
-
-#   codecov:
-#     if: github.event.pull_request.draft == false
-#     needs: [run-unit-test]
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v3
-#       - name: Install dependencies
-#         run: |
-#           sudo apt-get -qq update
-#           sudo apt-get -qq -y install git curl
-#       - name: Download cpp coverage report
-#         uses: actions/download-artifact@v3
-#         with:
-#           name: test-coverage-reports
-#       - name: Deploy to codecov.io
-#         uses: codecov/codecov-action@v3
-#         with:
-#           token: ${{ secrets.CODECOV_TOKEN }}
-#           files: ./coverage.info
-#           verbose: true          
