@@ -185,9 +185,9 @@ void Interpolation::applyFMGInterpolation(const Level& fromLevel, const Level& t
 /* For loop matches circular access pattern */
 #pragma omp for nowait
         for (int i_r = 0; i_r < fineGrid.numberSmootherCircles(); i_r++) {
-            int i_r_coarse = i_r >> 1;
+            int i_r_coarse = i_r / 2;
             for (int i_theta = 0; i_theta < fineGrid.ntheta(); i_theta++) {
-                int i_theta_coarse = i_theta >> 1;
+                int i_theta_coarse = i_theta / 2;
                 FINE_NODE_FMG_INTERPOLATION();
             }
         }
@@ -196,9 +196,9 @@ void Interpolation::applyFMGInterpolation(const Level& fromLevel, const Level& t
 /* For loop matches radial access pattern */
 #pragma omp for nowait
         for (int i_theta = 0; i_theta < fineGrid.ntheta(); i_theta++) {
-            int i_theta_coarse = i_theta >> 1;
+            int i_theta_coarse = i_theta / 2;
             for (int i_r = fineGrid.numberSmootherCircles(); i_r < fineGrid.nr(); i_r++) {
-                int i_r_coarse = i_r >> 1;
+                int i_r_coarse = i_r / 2;
                 FINE_NODE_FMG_INTERPOLATION();
             }
         }

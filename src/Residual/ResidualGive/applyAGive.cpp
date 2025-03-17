@@ -103,7 +103,7 @@
                 /* Case 2: Across origin discretization on the interior boundary */                                                       \
                 /* ------------------------------------------------------------- */                                                       \
                 /* h1 gets replaced with 2 * R0. */                                                                                       \
-                /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()>>1)). */                                             \
+                /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()/2)). */                                             \
                 /* Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil. */                       \
                 double h1     = 2.0 * grid.radius(0);                                                                                     \
                 double h2     = grid.radialSpacing(i_r);                                                                                  \
@@ -117,7 +117,7 @@
                 result[grid.index(i_r, i_theta)] +=                                                                                       \
                     factor * (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF) *                                                   \
                                   x[grid.index(i_r, i_theta)] /* beta_{i,j} */                                                            \
-                              - coeff1 * arr * x[grid.index(i_r, i_theta + (grid.ntheta() >> 1))] /* Left */                              \
+                              - coeff1 * arr * x[grid.index(i_r, i_theta + (grid.ntheta() / 2))] /* Left */                              \
                               - coeff2 * arr * x[grid.index(i_r + 1, i_theta)] /* Right */                                                \
                               - coeff3 * att * x[grid.index(i_r, i_theta - 1)] /* Bottom */                                               \
                               - coeff4 * att *                                                                                            \
@@ -125,11 +125,11 @@
                               + ((coeff1 + coeff2) * arr + (coeff3 + coeff4) * att) * x[grid.index(i_r, i_theta)]);                       \
                 /* Fill result(i-1,j) */                                                                                                  \
                 /* From view the view of the across origin node, the directions are roatated by 180 degrees in the stencil! */            \
-                result[grid.index(i_r, i_theta + (grid.ntheta() >> 1))] +=                                                                \
+                result[grid.index(i_r, i_theta + (grid.ntheta() / 2))] +=                                                                \
                     factor *                                                                                                              \
                     (-coeff1 * arr * x[grid.index(i_r, i_theta)] /* Right -> Left */                                                      \
                      + coeff1 * arr *                                                                                                     \
-                           x[grid.index(i_r, i_theta + (grid.ntheta() >> 1))]); /* Center: (Right) -> Center: (Left)*/                    \
+                           x[grid.index(i_r, i_theta + (grid.ntheta() / 2))]); /* Center: (Right) -> Center: (Left)*/                    \
                 /*  + 0.25 * art * x[grid.index(i_r,i_theta+1)]; // Top Right -> Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */ \
                 /*  - 0.25 * art * x[grid.index(i_r,i_theta-1)]; // Bottom Right -> Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */ \
                 /* Fill result(i+1,j) */                                                                                                  \

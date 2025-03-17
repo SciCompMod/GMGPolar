@@ -60,7 +60,7 @@
                 /* Case 2: Across origin discretization on the interior boundary */                                                     \
                 /* ------------------------------------------------------------- */                                                     \
                 /* h1 gets replaced with 2 * R0. */                                                                                     \
-                /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()>>1)). */                                           \
+                /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()/2)). */                                           \
                 /* Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil. */                     \
                 double h1 = 2.0 * grid.radius(0);                                                                                       \
                 double h2 = grid.radialSpacing(i_r);                                                                                    \
