@@ -5,7 +5,7 @@ on:
     - cron: "40 2 * * *"
   push:
     branches:
-      - "main"
+      - "Refactoring2024"
   pull_request:
     types: [opened, reopened, synchronize, ready_for_review]
 
