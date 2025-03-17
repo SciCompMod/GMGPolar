@@ -55,9 +55,13 @@ private:
     // Initializes the MUMPS solver with the specified matrix.
     void initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const SparseMatrixCOO<double>& solver_matrix);
 
-    // Adjusts the right-hand side vector to account for symmetry corrections.
-    // This transforms the system matrixA * solution = rhs into the equivalent system:
-    // symmetric(A) * solution = rhs - applySymmetryShift(rhs).
+    // Adjusts the right-hand side vector for symmetry corrections.
+    // This modifies the system from
+    //    A * solution = rhs
+    // to the equivalent system
+    //    symmetric(A) * solution = rhs - applySymmetryShift(rhs).
+    // The correction modifies the rhs to account for the influence of the Dirichlet boundary conditions,
+    // ensuring that the solution at the boundary is correctly adjusted and maintains the required symmetry.
     void applySymmetryShift(Vector<double>& rhs) const;
     void applySymmetryShiftInnerBoundary(Vector<double>& x) const;
     void applySymmetryShiftOuterBoundary(Vector<double>& x) const;
