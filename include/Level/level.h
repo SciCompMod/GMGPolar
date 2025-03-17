@@ -1,5 +1,6 @@
 #pragma once
 
+// Required to prevent circular dependencies.
 class DirectSolver;
 class Residual;
 class Smoother;
@@ -20,6 +21,17 @@ class ExtrapolatedSmoother;
 #include "../ExtrapolatedSmoother/extrapolatedSmoother.h"
 #include "../Residual/residual.h"
 #include "../Smoother/smoother.h"
+
+// The `Level` class represents a single level of a multigrid method. 
+// In multigrid solvers, the computational domain is divided into different levels, where each level corresponds to a grid with a different resolution. 
+// The `Level` class manages the specific data structures and operations needed to solve a problem at a given level, including residual computation, direct solving, and smoothing. 
+// It holds information for the for the solution, residuals, right-hand side, and error corrections used in the multigrid method.
+
+// The `LevelCache` class is responsible for caching auxiliary data required for solving a problem at a specific level of a multigrid method. 
+// It stores essential data such as trigonometric values (e.g., `sin_theta` and `cos_theta`) and profile coefficients (e.g., `alpha`, `beta`) 
+// that are frequently used in the solution process. Additionally, depending on the stencil distribution strategy, it can store transformation 
+// coefficients (`arr`, `att`, `art`) related to the domain geometry. These coefficients are critical for efficient matrix-free stencil operations 
+// and contribute to the accuracy and performance of the multigrid solver.
 
 class LevelCache;
 
@@ -62,7 +74,6 @@ public:
                                 const StencilDistributionMethod stencil_distribution_method);
     // Note: The rhs (right-hand side) vector gets overwritten during the solution process.
     void directSolveInPlace(Vector<double>& x) const;
-    
 
     // --------------- //
     // Apply Smoothing //
