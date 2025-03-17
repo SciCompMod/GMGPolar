@@ -1,6 +1,6 @@
 #include "../../../include/Smoother/SmootherTake/smootherTake.h"
 
-void SmootherTake::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const SparseMatrix<double>& solver_matrix)
+void SmootherTake::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const SparseMatrixCOO<double>& solver_matrix)
 {
     mumps_solver.job = JOB_INIT;
     mumps_solver.par = PAR_PARALLEL;

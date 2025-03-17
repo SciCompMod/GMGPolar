@@ -1,7 +1,7 @@
 #include "../../../include/ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h"
 
 void ExtrapolatedSmootherGive::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver,
-                                                     const SparseMatrix<double>& solver_matrix)
+                                                     const SparseMatrixCOO<double>& solver_matrix)
 {
     mumps_solver.job = JOB_INIT;
     mumps_solver.par = PAR_PARALLEL;

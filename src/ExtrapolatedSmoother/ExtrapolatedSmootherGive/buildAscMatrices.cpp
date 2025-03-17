@@ -1634,7 +1634,7 @@ void ExtrapolatedSmootherGive::buildAscMatrices()
             if (circle_Asc_index == 0) {
                 // Although the matrix is symmetric, we need to store all its entries, so we disable the symmetry.
                 const int nnz                 = getNonZeroCountCircleAsc(circle_Asc_index);
-                inner_boundary_circle_matrix_ = SparseMatrix<double>(num_circle_nodes, num_circle_nodes, nnz);
+                inner_boundary_circle_matrix_ = SparseMatrixCOO<double>(num_circle_nodes, num_circle_nodes, nnz);
                 inner_boundary_circle_matrix_.is_symmetric(false);
                 for (int i = 0; i < nnz; i++) {
                     inner_boundary_circle_matrix_.value(i) = 0.0;
@@ -1900,14 +1900,14 @@ void ExtrapolatedSmootherGive::buildAscMatrices()
     /* Part 3: Convert inner_boundary_circle_matrix_ to a symmetric matrix */
     /* ------------------------------------------------------------------- */
 
-    SparseMatrix<double> full_matrix = std::move(inner_boundary_circle_matrix_);
+    SparseMatrixCOO<double> full_matrix = std::move(inner_boundary_circle_matrix_);
 
     const int nnz           = full_matrix.non_zero_size();
     const int numRows       = full_matrix.rows();
     const int numColumns    = full_matrix.columns();
     const int symmetric_nnz = nnz - (nnz - numRows) / 2;
 
-    inner_boundary_circle_matrix_ = SparseMatrix<double>(numRows, numColumns, symmetric_nnz);
+    inner_boundary_circle_matrix_ = SparseMatrixCOO<double>(numRows, numColumns, symmetric_nnz);
     inner_boundary_circle_matrix_.is_symmetric(true);
 
     int current_nz = 0;

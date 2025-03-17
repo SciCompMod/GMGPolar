@@ -9,7 +9,7 @@ using triplet = std::tuple<int, int, double>;
 
 TEST(SparseMatrixDouble, default_construct)
 {
-    const SparseMatrix<double> m;
+    const SparseMatrixCOO<double> m;
     (void)m;
 }
 
@@ -17,7 +17,7 @@ TEST(SparseMatrixDouble, default_construct)
 
 TEST(SparseMatrixDouble, size_construct)
 {
-    const SparseMatrix<double> m(5, 5, 0);
+    const SparseMatrixCOO<double> m(5, 5, 0);
     ASSERT_EQ(m.rows(), 5);
     ASSERT_EQ(m.columns(), 5);
     ASSERT_EQ(m.non_zero_size(), 0);
@@ -28,7 +28,7 @@ TEST(SparseMatrixDouble, size_construct)
 TEST(SparseMatrixDouble, entries_construct)
 {
     std::vector<triplet> entries = {{0, 0, 1.0}, {1, 2, 2.0}, {2, 1, 3.0}};
-    const SparseMatrix<double> m(3, 3, entries);
+    const SparseMatrixCOO<double> m(3, 3, entries);
 
     ASSERT_EQ(m.rows(), 3);
     ASSERT_EQ(m.columns(), 3);
@@ -52,8 +52,8 @@ TEST(SparseMatrixDouble, entries_construct)
 TEST(SparseMatrixDouble, copy_construct)
 {
     std::vector<triplet> entries = {{0, 0, 1.0}, {1, 2, 2.0}, {2, 1, 3.0}};
-    const SparseMatrix<double> m1(3, 3, entries);
-    const SparseMatrix<double> m2 = m1;
+    const SparseMatrixCOO<double> m1(3, 3, entries);
+    const SparseMatrixCOO<double> m2 = m1;
 
     ASSERT_EQ(m2.rows(), 3);
     ASSERT_EQ(m2.columns(), 3);
@@ -77,13 +77,13 @@ TEST(SparseMatrixDouble, copy_construct)
 TEST(SparseMatrixDouble, move_construct)
 {
     std::vector<triplet> entries = {{0, 0, 1.0}, {1, 2, 2.0}, {2, 1, 3.0}};
-    SparseMatrix<double> m1(3, 3, entries);
+    SparseMatrixCOO<double> m1(3, 3, entries);
 
     ASSERT_EQ(m1.rows(), 3);
     ASSERT_EQ(m1.columns(), 3);
     ASSERT_EQ(m1.non_zero_size(), 3);
 
-    SparseMatrix<double> m2 = std::move(m1);
+    SparseMatrixCOO<double> m2 = std::move(m1);
 
     ASSERT_EQ(m2.rows(), 3);
     ASSERT_EQ(m2.columns(), 3);
@@ -107,8 +107,8 @@ TEST(SparseMatrixDouble, move_construct)
 TEST(SparseMatrixDouble, copy_assign)
 {
     std::vector<triplet> entries = {{0, 0, 1.0}, {1, 2, 2.0}, {2, 1, 3.0}};
-    const SparseMatrix<double> m1(3, 3, entries);
-    SparseMatrix<double> m2;
+    const SparseMatrixCOO<double> m1(3, 3, entries);
+    SparseMatrixCOO<double> m2;
 
     m2 = m1;
 
@@ -134,8 +134,8 @@ TEST(SparseMatrixDouble, copy_assign)
 TEST(SparseMatrixDouble, move_assign)
 {
     std::vector<triplet> entries = {{0, 0, 1.0}, {1, 2, 2.0}, {2, 1, 3.0}};
-    SparseMatrix<double> m1(3, 3, entries);
-    SparseMatrix<double> m2;
+    SparseMatrixCOO<double> m1(3, 3, entries);
+    SparseMatrixCOO<double> m2;
 
     m2 = std::move(m1);
 
@@ -161,7 +161,7 @@ TEST(SparseMatrixDouble, move_assign)
 TEST(SparseMatrixDouble, value_modify)
 {
     std::vector<triplet> entries = {{0, 0, 1.0}, {1, 2, 2.0}, {2, 1, 3.0}};
-    SparseMatrix<double> m(3, 3, entries);
+    SparseMatrixCOO<double> m(3, 3, entries);
 
     ASSERT_EQ(m.rows(), 3);
     ASSERT_EQ(m.columns(), 3);
@@ -180,7 +180,7 @@ TEST(SparseMatrixDouble, modify_construction)
     const int rows    = 4;
     const int columns = 5;
     const int nnz     = 6;
-    SparseMatrix<double> matrixA(rows, columns, nnz);
+    SparseMatrixCOO<double> matrixA(rows, columns, nnz);
 
     matrixA.row_index(0) = 0;
     matrixA.col_index(0) = 1;
@@ -212,7 +212,7 @@ TEST(SparseMatrixDouble, modify_construction)
 
     std::vector<triplet> entries = {{0, 1, 2.0}, {1, 0, 8.0}, {1, 3, -6.0}, {2, 0, -5.0}, {3, 1, 7.0}, {3, 3, 3.0}};
 
-    SparseMatrix<double> matrixB(rows, columns, entries);
+    SparseMatrixCOO<double> matrixB(rows, columns, entries);
 
     for (int i = 0; i < nnz; i++) {
         ASSERT_EQ(matrixA.row_index(i), matrixB.row_index(i));
@@ -226,7 +226,7 @@ TEST(SparseMatrixDouble, modify_construction)
 TEST(SparseMatrixDouble, symmetry_check)
 {
     std::vector<triplet> entries = {{0, 1, 2.0}, {1, 1, -3.0}, {1, 2, 3.0}};
-    SparseMatrix<double> m(3, 3, entries);
+    SparseMatrixCOO<double> m(3, 3, entries);
 
     ASSERT_FALSE(m.is_symmetric());
     m.is_symmetric(true);

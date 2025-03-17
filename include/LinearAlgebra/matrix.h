@@ -16,20 +16,20 @@
 #include <iostream>
 
 template <typename T>
-class SparseMatrix
+class SparseMatrixCOO
 {
 public:
     using triplet_type = std::tuple<int, int, T>;
 
-    SparseMatrix();
-    SparseMatrix(const SparseMatrix& other);
-    SparseMatrix(SparseMatrix&& other) noexcept;
+    SparseMatrixCOO();
+    SparseMatrixCOO(const SparseMatrixCOO& other);
+    SparseMatrixCOO(SparseMatrixCOO&& other) noexcept;
 
-    explicit SparseMatrix(int rows, int columns, int nnz);
-    explicit SparseMatrix(int rows, int columns, const std::vector<triplet_type>& entries);
+    explicit SparseMatrixCOO(int rows, int columns, int nnz);
+    explicit SparseMatrixCOO(int rows, int columns, const std::vector<triplet_type>& entries);
 
-    SparseMatrix& operator=(const SparseMatrix& other);
-    SparseMatrix& operator=(SparseMatrix&& other) noexcept;
+    SparseMatrixCOO& operator=(const SparseMatrixCOO& other);
+    SparseMatrixCOO& operator=(SparseMatrixCOO&& other) noexcept;
 
     int rows() const;
     int columns() const;
@@ -52,7 +52,7 @@ public:
     T* values_data() const;
 
     template <typename U>
-    friend std::ostream& operator<<(std::ostream& stream, const SparseMatrix<U>& matrix);
+    friend std::ostream& operator<<(std::ostream& stream, const SparseMatrixCOO<U>& matrix);
 
     void write_to_file(const std::string& filename) const;
 
@@ -67,9 +67,9 @@ private:
 };
 
 template <typename U>
-std::ostream& operator<<(std::ostream& stream, const SparseMatrix<U>& matrix)
+std::ostream& operator<<(std::ostream& stream, const SparseMatrixCOO<U>& matrix)
 {
-    stream << "SparseMatrix: " << matrix.rows_ << " x " << matrix.columns_ << "\n";
+    stream << "SparseMatrixCOO: " << matrix.rows_ << " x " << matrix.columns_ << "\n";
     stream << "Number of non-zeros (nnz): " << matrix.nnz_ << "\n";
     if (matrix.is_symmetric_) {
         stream << "Matrix is symmetric.\n";
@@ -83,13 +83,13 @@ std::ostream& operator<<(std::ostream& stream, const SparseMatrix<U>& matrix)
 }
 
 template <typename T>
-void SparseMatrix<T>::write_to_file(const std::string& filename) const
+void SparseMatrixCOO<T>::write_to_file(const std::string& filename) const
 {
     std::ofstream file(filename);
     if (!file.is_open()) {
         throw std::runtime_error("Unable to open file");
     }
-    file << "SparseMatrix: " << rows_ << " x " << columns_ << "\n";
+    file << "SparseMatrixCOO: " << rows_ << " x " << columns_ << "\n";
     file << "Number of non-zeros (nnz): " << nnz_ << "\n";
     if (is_symmetric_) {
         file << "Matrix is symmetric.\n";
@@ -120,7 +120,7 @@ void sort_entries(std::vector<std::tuple<int, int, T>>& entries)
 
 // default construction
 template <typename T>
-SparseMatrix<T>::SparseMatrix()
+SparseMatrixCOO<T>::SparseMatrixCOO()
     : rows_(0)
     , columns_(0)
     , nnz_(0)
@@ -133,7 +133,7 @@ SparseMatrix<T>::SparseMatrix()
 
 // copy construction
 template <typename T>
-SparseMatrix<T>::SparseMatrix(const SparseMatrix& other)
+SparseMatrixCOO<T>::SparseMatrixCOO(const SparseMatrixCOO& other)
     : rows_(other.rows_)
     , columns_(other.columns_)
     , nnz_(other.nnz_)
@@ -149,7 +149,7 @@ SparseMatrix<T>::SparseMatrix(const SparseMatrix& other)
 
 // copy assignment
 template <typename T>
-SparseMatrix<T>& SparseMatrix<T>::operator=(const SparseMatrix& other)
+SparseMatrixCOO<T>& SparseMatrixCOO<T>::operator=(const SparseMatrixCOO& other)
 {
     if (this == &other) {
         // Self-assignment, no work needed
@@ -174,7 +174,7 @@ SparseMatrix<T>& SparseMatrix<T>::operator=(const SparseMatrix& other)
 
 // move construction
 template <typename T>
-SparseMatrix<T>::SparseMatrix(SparseMatrix&& other) noexcept
+SparseMatrixCOO<T>::SparseMatrixCOO(SparseMatrixCOO&& other) noexcept
     : rows_(other.rows_)
     , columns_(other.columns_)
     , nnz_(other.nnz_)
@@ -191,7 +191,7 @@ SparseMatrix<T>::SparseMatrix(SparseMatrix&& other) noexcept
 
 // move assignment
 template <typename T>
-SparseMatrix<T>& SparseMatrix<T>::operator=(SparseMatrix&& other) noexcept
+SparseMatrixCOO<T>& SparseMatrixCOO<T>::operator=(SparseMatrixCOO&& other) noexcept
 {
     rows_               = other.rows_;
     columns_            = other.columns_;
@@ -208,7 +208,7 @@ SparseMatrix<T>& SparseMatrix<T>::operator=(SparseMatrix&& other) noexcept
 }
 
 template <typename T>
-SparseMatrix<T>::SparseMatrix(int rows, int columns, int nnz)
+SparseMatrixCOO<T>::SparseMatrixCOO(int rows, int columns, int nnz)
     : rows_(rows)
     , columns_(columns)
     , nnz_(nnz)
@@ -223,7 +223,7 @@ SparseMatrix<T>::SparseMatrix(int rows, int columns, int nnz)
 }
 
 template <typename T>
-SparseMatrix<T>::SparseMatrix(int rows, int columns, const std::vector<triplet_type>& entries)
+SparseMatrixCOO<T>::SparseMatrixCOO(int rows, int columns, const std::vector<triplet_type>& entries)
     : // entries: row_idx, col_idx, value
     rows_(rows)
     , columns_(columns)
@@ -247,19 +247,19 @@ SparseMatrix<T>::SparseMatrix(int rows, int columns, const std::vector<triplet_t
 }
 
 template <typename T>
-int SparseMatrix<T>::rows() const
+int SparseMatrixCOO<T>::rows() const
 {
     assert(this->rows_ >= 0);
     return this->rows_;
 }
 template <typename T>
-int SparseMatrix<T>::columns() const
+int SparseMatrixCOO<T>::columns() const
 {
     assert(this->columns_ >= 0);
     return this->columns_;
 }
 template <typename T>
-int SparseMatrix<T>::non_zero_size() const
+int SparseMatrixCOO<T>::non_zero_size() const
 {
     assert(this->nnz_ >= 0);
     assert(static_cast<size_t>(this->nnz_) <= static_cast<size_t>(this->rows_) * static_cast<size_t>(this->columns_));
@@ -267,14 +267,14 @@ int SparseMatrix<T>::non_zero_size() const
 }
 
 template <typename T>
-int& SparseMatrix<T>::row_index(int nz_index)
+int& SparseMatrixCOO<T>::row_index(int nz_index)
 {
     assert(nz_index >= 0);
     assert(nz_index < this->nnz_);
     return this->row_indices_[nz_index];
 }
 template <typename T>
-const int& SparseMatrix<T>::row_index(int nz_index) const
+const int& SparseMatrixCOO<T>::row_index(int nz_index) const
 {
     assert(nz_index >= 0);
     assert(nz_index < this->nnz_);
@@ -282,14 +282,14 @@ const int& SparseMatrix<T>::row_index(int nz_index) const
 }
 
 template <typename T>
-int& SparseMatrix<T>::col_index(int nz_index)
+int& SparseMatrixCOO<T>::col_index(int nz_index)
 {
     assert(nz_index >= 0);
     assert(nz_index < this->nnz_);
     return this->column_indices_[nz_index];
 }
 template <typename T>
-const int& SparseMatrix<T>::col_index(int nz_index) const
+const int& SparseMatrixCOO<T>::col_index(int nz_index) const
 {
     assert(nz_index >= 0);
     assert(nz_index < this->nnz_);
@@ -297,14 +297,14 @@ const int& SparseMatrix<T>::col_index(int nz_index) const
 }
 
 template <typename T>
-T& SparseMatrix<T>::value(int nz_index)
+T& SparseMatrixCOO<T>::value(int nz_index)
 {
     assert(nz_index >= 0);
     assert(nz_index < this->nnz_);
     return this->values_[nz_index];
 }
 template <typename T>
-const T& SparseMatrix<T>::value(int nz_index) const
+const T& SparseMatrixCOO<T>::value(int nz_index) const
 {
     assert(nz_index >= 0);
     assert(nz_index < this->nnz_);
@@ -312,30 +312,30 @@ const T& SparseMatrix<T>::value(int nz_index) const
 }
 
 template <typename T>
-bool SparseMatrix<T>::is_symmetric() const
+bool SparseMatrixCOO<T>::is_symmetric() const
 {
     return is_symmetric_;
 }
 template <typename T>
-void SparseMatrix<T>::is_symmetric(bool value)
+void SparseMatrixCOO<T>::is_symmetric(bool value)
 {
     is_symmetric_ = value;
 }
 
 template <typename T>
-int* SparseMatrix<T>::row_indices_data() const
+int* SparseMatrixCOO<T>::row_indices_data() const
 {
     return row_indices_.get();
 }
 
 template <typename T>
-int* SparseMatrix<T>::column_indices_data() const
+int* SparseMatrixCOO<T>::column_indices_data() const
 {
     return column_indices_.get();
 }
 
 template <typename T>
-T* SparseMatrix<T>::values_data() const
+T* SparseMatrixCOO<T>::values_data() const
 {
     return values_.get();
 }

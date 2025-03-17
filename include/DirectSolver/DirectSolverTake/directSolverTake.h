@@ -16,7 +16,7 @@ public:
 
 private:
     // Solver matrix and MUMPS solver structure
-    SparseMatrix<double> solver_matrix_;
+    SparseMatrixCOO<double> solver_matrix_;
     DMUMPS_STRUC_C mumps_solver_;
 
     // clang-format off
@@ -48,12 +48,12 @@ private:
     // clang-format on
 
     // Constructs a symmetric solver matrix.
-    SparseMatrix<double> buildSolverMatrix();
-    void buildSolverMatrixCircleSection(const int i_r, SparseMatrix<double>& solver_matrix);
-    void buildSolverMatrixRadialSection(const int i_theta, SparseMatrix<double>& solver_matrix);
+    SparseMatrixCOO<double> buildSolverMatrix();
+    void buildSolverMatrixCircleSection(const int i_r, SparseMatrixCOO<double>& solver_matrix);
+    void buildSolverMatrixRadialSection(const int i_theta, SparseMatrixCOO<double>& solver_matrix);
 
     // Initializes the MUMPS solver with the specified matrix.
-    void initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const SparseMatrix<double>& solver_matrix);
+    void initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const SparseMatrixCOO<double>& solver_matrix);
 
     // Adjusts the right-hand side vector to account for symmetry corrections.
     // This transforms the system matrixA * solution = rhs into the equivalent system:

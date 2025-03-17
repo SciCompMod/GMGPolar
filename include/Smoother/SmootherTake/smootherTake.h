@@ -13,7 +13,7 @@ public:
     void smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) override;
 
 private:
-    SparseMatrix<double> inner_boundary_circle_matrix_;
+    SparseMatrixCOO<double> inner_boundary_circle_matrix_;
     DMUMPS_STRUC_C inner_boundary_mumps_solver_;
     std::vector<SymmetricTridiagonalSolver<double>> circle_tridiagonal_solver_;
     std::vector<SymmetricTridiagonalSolver<double>> radial_tridiagonal_solver_;
@@ -73,6 +73,6 @@ private:
                             Vector<double>& solver_storage_2);
     void solveRadialSection(const int i_theta, Vector<double>& x, Vector<double>& temp, Vector<double>& solver_storage);
 
-    void initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const SparseMatrix<double>& solver_matrix);
+    void initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const SparseMatrixCOO<double>& solver_matrix);
     void finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver);
 };

@@ -451,7 +451,7 @@
         }                                                                                                              \
     } while (0)
 
-void DirectSolverTake::buildSolverMatrixCircleSection(const int i_r, SparseMatrix<double>& solver_matrix)
+void DirectSolverTake::buildSolverMatrixCircleSection(const int i_r, SparseMatrixCOO<double>& solver_matrix)
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -469,7 +469,7 @@ void DirectSolverTake::buildSolverMatrixCircleSection(const int i_r, SparseMatri
     }
 }
 
-void DirectSolverTake::buildSolverMatrixRadialSection(const int i_theta, SparseMatrix<double>& solver_matrix)
+void DirectSolverTake::buildSolverMatrixRadialSection(const int i_theta, SparseMatrixCOO<double>& solver_matrix)
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -489,7 +489,7 @@ void DirectSolverTake::buildSolverMatrixRadialSection(const int i_theta, SparseM
 
 /* ------------------------------------------------------------------------ */
 /* If the indexing is not smoother-based, please adjust the access patterns */
-SparseMatrix<double> DirectSolverTake::buildSolverMatrix()
+SparseMatrixCOO<double> DirectSolverTake::buildSolverMatrix()
 {
     omp_set_num_threads(num_omp_threads_);
 
@@ -497,7 +497,7 @@ SparseMatrix<double> DirectSolverTake::buildSolverMatrix()
     const int nnz = getNonZeroCountSolverMatrix();
 
     // Although the matrix is symmetric, we need to store all its entries, so we disable the symmetry.
-    SparseMatrix<double> solver_matrix(n, n, nnz);
+    SparseMatrixCOO<double> solver_matrix(n, n, nnz);
     solver_matrix.is_symmetric(false);
 
     if (omp_get_max_threads() == 1) {
@@ -535,7 +535,7 @@ SparseMatrix<double> DirectSolverTake::buildSolverMatrix()
 
     /* Only store the upper tridiagonal entries of the symmetric solver_matrix */
     const int symmetric_nnz = nnz - (nnz - n) / 2;
-    SparseMatrix<double> symmetric_solver_matrix(n, n, symmetric_nnz);
+    SparseMatrixCOO<double> symmetric_solver_matrix(n, n, symmetric_nnz);
     symmetric_solver_matrix.is_symmetric(true);
 
     int current_nz = 0;
