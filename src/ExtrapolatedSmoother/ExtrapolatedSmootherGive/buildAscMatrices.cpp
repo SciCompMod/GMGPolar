@@ -66,12 +66,19 @@
             /* Cyclic Tridiagonal Section */                                                                           \
             /* i_r % 2 == 1               */                                                                           \
             if (i_r & 1) {                                                                                             \
-                /* i_theta % 2 == 1 */ /* i_theta % 2 == 0 */                                                          \
-                /* | X | O | X | */ /* | O | O | O | */                                                                \
-                /* |   |   |   | */ /* |   |   |   | */                                                                \
-                /* | 0 | Õ | O | */ /* or */ /* | X | Õ | X | */                                                       \
-                /* |   |   |   | */ /* |   |   |   | */                                                                \
-                /* | X | O | X | */ /* | O | O | O | */                                                                \
+                /* i_theta % 2 == 1 */                                                                                 \
+                /* | X | O | X | */                                                                                    \
+                /* |   |   |   | */                                                                                    \
+                /* | 0 | Õ | O | */                                                                                    \
+                /* |   |   |   | */                                                                                    \
+                /* | X | O | X | */                                                                                    \
+                /* or */                                                                                               \
+                /* i_theta % 2 == 0 */                                                                                 \
+                /* | O | O | O | */                                                                                    \
+                /* |   |   |   | */                                                                                    \
+                /* | X | Õ | X | */                                                                                    \
+                /* |   |   |   | */                                                                                    \
+                /* | O | O | O | */                                                                                    \
                                                                                                                        \
                 auto& center_matrix = circle_tridiagonal_solver[i_r / 2];                                              \
                 auto& left_matrix   = circle_diagonal_solver[(i_r - 1) / 2];                                           \
@@ -174,7 +181,7 @@
                         if (!DirBC_Interior) {                                                                         \
                             const Stencil& LeftStencil = getStencil(i_r - 1, i_theta);                                 \
                             int left_nz_index          = getCircleAscIndex(i_r - 1, i_theta);                          \
-                            int nz_index               = left_nz_index + LeftStencil[StencilPosition::Center];             \
+                            int nz_index               = left_nz_index + LeftStencil[StencilPosition::Center];         \
                             inner_boundary_circle_matrix.row_index(nz_index) = left_index + 1;                         \
                             inner_boundary_circle_matrix.col_index(nz_index) = left_index + 1;                         \
                             inner_boundary_circle_matrix.value(nz_index) += coeff1 * arr; /* Center: (Right) */        \
@@ -198,12 +205,19 @@
             /* Diagonal Section */                                                                                     \
             /* i_r % 2 == 0     */                                                                                     \
             else {                                                                                                     \
-                /* i_theta % 2 == 1 */ /* i_theta % 2 == 0 */                                                          \
-                /* | O | X | O | */ /* | O | O | O | */                                                                \
-                /* |   |   |   | */ /* |   |   |   | */                                                                \
-                /* | O | Õ | O | */ /* or */ /* | O | X̃ | O | */                                                       \
-                /* |   |   |   | */ /* |   |   |   | */                                                                \
-                /* | O | X | O | */ /* | O | O | O | */                                                                \
+                /* i_theta % 2 == 1 */                                                                                 \
+                /* | O | X | O | */                                                                                    \
+                /* |   |   |   | */                                                                                    \
+                /* | O | Õ | O | */                                                                                    \
+                /* |   |   |   | */                                                                                    \
+                /* | O | X | O | */                                                                                    \
+                /* or */                                                                                               \
+                /* i_theta % 2 == 0 */                                                                                 \
+                /* | O | O | O | */                                                                                    \
+                /* |   |   |   | */                                                                                    \
+                /* | O | X̃ | O | */                                                                                    \
+                /* |   |   |   | */                                                                                    \
+                /* | O | O | O | */                                                                                    \
                                                                                                                        \
                 auto& center_matrix = circle_diagonal_solver[i_r / 2];                                                 \
                 auto& left_matrix   = circle_tridiagonal_solver[(i_r - 1) / 2];                                        \
@@ -288,14 +302,23 @@
             /* Tridiagonal Section */                                                                                  \
             /* i_theta % 2 == 1    */                                                                                  \
             if (i_theta & 1) {                                                                                         \
-                /* i_r % 2 == 1 */ /* i_r % 2 == 0 */                                                                  \
-                /* ---------- */ /* ---------- */                                                                      \
-                /* X   O   X  */ /* O   X   O  */                                                                      \
-                /* ---------- */ /* ---------- */                                                                      \
-                /* O   Õ   O  */ /* or */ /* O   Õ   O  */                                                             \
-                /* ---------- */ /* ---------- */                                                                      \
-                /* X   O   X  */ /* O   X   O  */                                                                      \
-                /* ---------- */ /* ---------- */                                                                      \
+                /* i_r % 2 == 1 */                                                                                     \
+                /* ---------- */                                                                                       \
+                /* X   O   X  */                                                                                       \
+                /* ---------- */                                                                                       \
+                /* O   Õ   O  */                                                                                       \
+                /* ---------- */                                                                                       \
+                /* X   O   X  */                                                                                       \
+                /* ---------- */                                                                                       \
+                /* or */                                                                                               \
+                /* i_r % 2 == 0 */                                                                                     \
+                /* ---------- */                                                                                       \
+                /* O   X   O  */                                                                                       \
+                /* ---------- */                                                                                       \
+                /* O   Õ   O  */                                                                                       \
+                /* ---------- */                                                                                       \
+                /* O   X   O  */                                                                                       \
+                /* ---------- */                                                                                       \
                                                                                                                        \
                 auto& center_matrix = radial_tridiagonal_solver[i_theta / 2];                                          \
                 auto& bottom_matrix = radial_diagonal_solver[i_theta_M1 / 2];                                          \
@@ -409,14 +432,23 @@
             /* Diagonal Section */                                                                                     \
             /* i_theta % 2 == 0 */                                                                                     \
             else {                                                                                                     \
-                /* i_r % 2 == 1 */ /* i_r % 2 == 0 */                                                                  \
-                /* ---------- */ /* ---------- */                                                                      \
-                /* O   O   O  */ /* O   O   O  */                                                                      \
-                /* ---------- */ /* ---------- */                                                                      \
-                /* X   Õ   X  */ /* or */ /* O   X̃   O  */                                                             \
-                /* ---------- */ /* ---------- */                                                                      \
-                /* O   O   O  */ /* O   O   O  */                                                                      \
-                /* ---------- */ /* ---------- */                                                                      \
+                /* i_r % 2 == 1 */                                                                                     \
+                /* ---------- */                                                                                       \
+                /* O   O   O  */                                                                                       \
+                /* ---------- */                                                                                       \
+                /* X   Õ   X  */                                                                                       \
+                /* ---------- */                                                                                       \
+                /* O   O   O  */                                                                                       \
+                /* ---------- */                                                                                       \
+                /* or */                                                                                               \
+                /* i_r % 2 == 0 */                                                                                     \
+                /* ---------- */                                                                                       \
+                /* O   O   O  */                                                                                       \
+                /* ---------- */                                                                                       \
+                /* O   X̃   O  */                                                                                       \
+                /* ---------- */                                                                                       \
+                /* O   O   O  */                                                                                       \
+                /* ---------- */                                                                                       \
                                                                                                                        \
                 auto& center_matrix = radial_diagonal_solver[i_theta / 2];                                             \
                 auto& bottom_matrix = radial_tridiagonal_solver[i_theta_M1 / 2];                                       \
@@ -503,7 +535,7 @@
                 /* Fill matrix row of (i,j) */                                                                         \
                 const Stencil& CenterStencil      = getStencil(i_r, i_theta);                                          \
                 int center_nz_index               = getCircleAscIndex(i_r, i_theta);                                   \
-                int nz_index                      = center_nz_index + CenterStencil[StencilPosition::Center];              \
+                int nz_index                      = center_nz_index + CenterStencil[StencilPosition::Center];          \
                 center_matrix.row_index(nz_index) = center_index + 1;                                                  \
                 center_matrix.col_index(nz_index) = center_index + 1;                                                  \
                 center_matrix.value(nz_index) += 1.0;                                                                  \
@@ -524,7 +556,7 @@
                 /* Case 2: Across origin discretization on the interior boundary */                                    \
                 /* ------------------------------------------------------------- */                                    \
                 /* h1 gets replaced with 2 * R0. */                                                                    \
-                /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()/2)). */                          \
+                /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()/2)). */                           \
                 /* Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil. */    \
                 double h1     = 2.0 * grid.radius(0);                                                                  \
                 double h2     = grid.radialSpacing(i_r);                                                               \
@@ -537,7 +569,7 @@
                                                                                                                        \
                 const int i_theta_M1           = grid.wrapThetaIndex(i_theta - 1);                                     \
                 const int i_theta_P1           = grid.wrapThetaIndex(i_theta + 1);                                     \
-                const int i_theta_AcrossOrigin = grid.wrapThetaIndex(i_theta + (grid.ntheta() / 2));                  \
+                const int i_theta_AcrossOrigin = grid.wrapThetaIndex(i_theta + (grid.ntheta() / 2));                   \
                                                                                                                        \
                 const int center_index = i_theta;                                                                      \
                 const int left_index   = i_theta_AcrossOrigin;                                                         \
@@ -565,18 +597,18 @@
                     auto& right_matrix  = circle_tridiagonal_solver[(i_r + 1) / 2];                                    \
                     auto& left_matrix   = inner_boundary_circle_matrix;                                                \
                     /* Fill matrix row of (i,j) */                                                                     \
-                    nz_index                          = center_nz_index + CenterStencil[StencilPosition::Center];          \
+                    nz_index                          = center_nz_index + CenterStencil[StencilPosition::Center];      \
                     center_matrix.row_index(nz_index) = center_index + 1;                                              \
                     center_matrix.col_index(nz_index) = center_index + 1;                                              \
                     center_matrix.value(nz_index) +=                                                                   \
                         0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* beta_{i,j} */                      \
                                                                                                                        \
-                    nz_index                          = center_nz_index + CenterStencil[StencilPosition::Left];            \
+                    nz_index                          = center_nz_index + CenterStencil[StencilPosition::Left];        \
                     center_matrix.row_index(nz_index) = center_index + 1;                                              \
                     center_matrix.col_index(nz_index) = left_index + 1;                                                \
                     center_matrix.value(nz_index) += -coeff1 * arr; /* Left */                                         \
                                                                                                                        \
-                    nz_index                          = center_nz_index + CenterStencil[StencilPosition::Center];          \
+                    nz_index                          = center_nz_index + CenterStencil[StencilPosition::Center];      \
                     center_matrix.row_index(nz_index) = center_index + 1;                                              \
                     center_matrix.col_index(nz_index) = center_index + 1;                                              \
                     /* Center: (Left, Right, Bottom, Top) */                                                           \
@@ -587,12 +619,12 @@
                     /* the directions are roatated by 180 degrees in the stencil! */                                   \
                     const Stencil& LeftStencil = CenterStencil;                                                        \
                                                                                                                        \
-                    nz_index                        = left_nz_index + LeftStencil[StencilPosition::Left];                  \
+                    nz_index                        = left_nz_index + LeftStencil[StencilPosition::Left];              \
                     left_matrix.row_index(nz_index) = left_index + 1;                                                  \
                     left_matrix.col_index(nz_index) = center_index + 1;                                                \
                     left_matrix.value(nz_index) += -coeff1 * arr; /* Right -> Left*/                                   \
                                                                                                                        \
-                    nz_index                        = left_nz_index + LeftStencil[StencilPosition::Center];                \
+                    nz_index                        = left_nz_index + LeftStencil[StencilPosition::Center];            \
                     left_matrix.row_index(nz_index) = left_index + 1;                                                  \
                     left_matrix.col_index(nz_index) = left_index + 1;                                                  \
                     left_matrix.value(nz_index) += coeff1 * arr; /* Center: (Right) -> Center: (Left) */               \
@@ -620,14 +652,14 @@
                     auto& right_matrix  = circle_tridiagonal_solver[(i_r + 1) / 2];                                    \
                     auto& left_matrix   = inner_boundary_circle_matrix;                                                \
                     /* Fill matrix row of (i,j) */                                                                     \
-                    nz_index                          = center_nz_index + CenterStencil[StencilPosition::Center];          \
+                    nz_index                          = center_nz_index + CenterStencil[StencilPosition::Center];      \
                     center_matrix.row_index(nz_index) = center_index + 1;                                              \
                     center_matrix.col_index(nz_index) = center_index + 1;                                              \
                     center_matrix.value(nz_index) += 1.0;                                                              \
                     /* Fill matrix row of (i,j-1) */                                                                   \
                     const Stencil& BottomStencil = CenterStencil;                                                      \
                                                                                                                        \
-                    nz_index                          = bottom_nz_index + BottomStencil[StencilPosition::Center];          \
+                    nz_index                          = bottom_nz_index + BottomStencil[StencilPosition::Center];      \
                     center_matrix.row_index(nz_index) = bottom_index + 1;                                              \
                     center_matrix.col_index(nz_index) = bottom_index + 1;                                              \
                     center_matrix.value(nz_index) += coeff3 * att; /* Center: (Top) */                                 \
@@ -635,7 +667,7 @@
                     /* Fill matrix row of (i,j+1) */                                                                   \
                     const Stencil& TopStencil = CenterStencil;                                                         \
                                                                                                                        \
-                    nz_index                          = top_nz_index + TopStencil[StencilPosition::Center];                \
+                    nz_index                          = top_nz_index + TopStencil[StencilPosition::Center];            \
                     center_matrix.row_index(nz_index) = top_index + 1;                                                 \
                     center_matrix.col_index(nz_index) = top_index + 1;                                                 \
                     center_matrix.value(nz_index) += coeff4 * att; /* Center: (Bottom) */                              \

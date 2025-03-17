@@ -14,6 +14,35 @@
 
 #include "../common/equals.h"
 
+/*
+ * SymmetricTridiagonalSolver is a class for solving symmetric tridiagonal systems of linear equations.
+ * The system is represented by a matrix that has non-zero values only on the main diagonal,
+ * the sub-diagonal, and (optionally) the cyclic corner element (if cyclic boundary conditions are used).
+ * This class provides efficient solvers for both cyclic and non-cyclic symmetric tridiagonal matrices.
+ * 
+ * The class supports the following:
+ * - Solving the system in-place using the `solveInPlace` method.
+ * - Handling both cyclic and non-cyclic boundary conditions.
+ * - Storing the matrix's main diagonal, sub-diagonal, and an optional cyclic corner element.
+ * - Peforming the Cholesky-Decomposition in-place.
+ * 
+ * The primary method for solving the system is `solveInPlace`, which computes the solution to the system 
+ * in place, updating the provided solution vector (`sol_rhs`) using intermediate storage (`temp1`, `temp2`).
+ * 
+ * Temporary storage (`temp1` and `temp2`) of length 'matrix_dimension_' must be provided by the user. 
+ * These temporary vectors are used for intermediate calculations during the solving process:
+ * - `temp1` is used in both non-cyclic and cyclic systems.
+ * - `temp2` is only required for cyclic systems.
+ * 
+ * Usage:
+ * - Instantiate the solver with a specified matrix dimension.
+ * - Optionally set the cyclic boundary condition flag.
+ * - Call `solveInPlace` to solve the system, passing the solution vector and the appropriate temporary storage.
+ * 
+ * The solver can handle both cyclic and non-cyclic matrices, and it uses efficient algorithms
+ * optimized for symmetric tridiagonal systems.
+ */
+
 template <typename T>
 class SymmetricTridiagonalSolver
 {
@@ -202,6 +231,8 @@ SymmetricTridiagonalSolver<T>::SymmetricTridiagonalSolver(const int matrix_dimen
     , is_cyclic_(true)
 {
     assert(matrix_dimension_ >= 1);
+    std::fill(main_diagonal_values_.get(), main_diagonal_values_.get() + matrix_dimension_, T(0));
+    std::fill(sub_diagonal_values_.get(), sub_diagonal_values_.get() + matrix_dimension_ - 1, T(0));
 }
 
 template <typename T>
