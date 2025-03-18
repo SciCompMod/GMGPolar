@@ -267,6 +267,11 @@ private:
     void build_rhs_f(const Level& level, Vector<double>& rhs_f);
     void discretize_rhs_f(const Level& level, Vector<double>& rhs_f);
 
+    /* --------------- */
+    /* Solve Functions */
+    void initializeSolution();
+
+
     /* ------------------- */
     /* Multigrid Functions */
     void multigrid_V_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs,

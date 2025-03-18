@@ -17,8 +17,9 @@ enum class StencilPosition
 };
 
 /**
- * @brief Represents a stencil pattern used in sparse matrix construction.
- *
+ * @brief Represents a stencil pattern used in sparse matrix construction 
+ * (see p. 44 table 4 of Julian Litz Master Thesis)
+ * 
  * The Stencil class helps define neighborhood structure of a grid node.
  * It maps each `StencilPosition` to an integer index that represents its 
  * inclusion in the stencil pattern.

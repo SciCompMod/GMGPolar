@@ -11,110 +11,10 @@ void GMGPolar::solve()
     /* ---------------------------- */
 
     auto start_initial_approximation = std::chrono::high_resolution_clock::now();
-
-    if (!FMG_) {
-        int start_level_depth = 0;
-        Level& level          = levels_[start_level_depth];
-        assign(level.solution(), 0.0); // Assign zero initial guess if not using FMG
-
-        /* Consider setting the boundary conditions u_D and u_D_Interior if DirBC_Interior to the initial solution */
-        bool use_boundary_condition = false;
-        if (use_boundary_condition) {
-            const auto& grid            = level.grid();
-            const auto& sin_theta_cache = level.levelCache().sin_theta();
-            const auto& cos_theta_cache = level.levelCache().cos_theta();
-
-            if (DirBC_Interior_) {
-                const int i_r  = 0;
-                const double r = grid.radius(i_r);
-                for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                    const double theta      = grid.theta(i_theta);
-                    const int index         = grid.index(i_r, i_theta);
-                    const double sin_theta  = sin_theta_cache[i_theta];
-                    const double cos_theta  = cos_theta_cache[i_theta];
-                    level.solution()[index] = boundary_conditions_->u_D_Interior(r, theta, sin_theta, cos_theta);
-                }
-            }
-
-            const int i_r  = grid.nr() - 1;
-            const double r = grid.radius(i_r);
-            for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                const double theta      = grid.theta(i_theta);
-                const int index         = grid.index(i_r, i_theta);
-                const double sin_theta  = sin_theta_cache[i_theta];
-                const double cos_theta  = cos_theta_cache[i_theta];
-                level.solution()[index] = boundary_conditions_->u_D(r, theta, sin_theta, cos_theta);
-            }
-        }
-    }
-    else {
-        // Start from the coarsest level
-        int FMG_start_level_depth = number_of_levels_ - 1;
-        Level& FMG_level          = levels_[FMG_start_level_depth];
-
-        // Solve directly on the coarsest level
-        FMG_level.solution() = FMG_level.rhs();
-        FMG_level.directSolveInPlace(FMG_level.solution()); // Direct solve on coarsest grid
-
-        // Prolongate the solution from the coarsest level up to the finest, while applying Multigrid Cycles on each level
-        for (int current_level = FMG_start_level_depth - 1; current_level > 0; --current_level) {
-            Level& FMG_level      = levels_[current_level]; // The current level
-            Level& next_FMG_level = levels_[current_level - 1]; // The finer level
-
-            // The bi-cubic FMG interpolation is of higher order
-            FMGInterpolation(current_level, next_FMG_level.solution(), FMG_level.solution());
-
-            // Apply some FMG iterations
-            for (int i = 0; i < FMG_iterations_; i++) {
-                if (current_level - 1 == 0 && (extrapolation_ != ExtrapolationType::NONE)) {
-                    switch (FMG_cycle_) {
-                    case MultigridCycleType::V_CYCLE:
-                        implicitlyExtrapolatedMultigrid_V_Cycle(current_level - 1, next_FMG_level.solution(),
-                                                                next_FMG_level.rhs(), next_FMG_level.residual());
-                        break;
-
-                    case MultigridCycleType::W_CYCLE:
-                        implicitlyExtrapolatedMultigrid_W_Cycle(current_level - 1, next_FMG_level.solution(),
-                                                                next_FMG_level.rhs(), next_FMG_level.residual());
-                        break;
-
-                    case MultigridCycleType::F_CYCLE:
-                        implicitlyExtrapolatedMultigrid_F_Cycle(current_level - 1, next_FMG_level.solution(),
-                                                                next_FMG_level.rhs(), next_FMG_level.residual());
-                        break;
-
-                    default:
-                        std::cerr << "Error: Unknown multigrid cycle type!" << std::endl;
-                        throw std::runtime_error("Invalid multigrid cycle type encountered.");
-                        break;
-                    }
-                }
-                else {
-                    switch (FMG_cycle_) {
-                    case MultigridCycleType::V_CYCLE:
-                        multigrid_V_Cycle(current_level - 1, next_FMG_level.solution(), next_FMG_level.rhs(),
-                                          next_FMG_level.residual());
-                        break;
-
-                    case MultigridCycleType::W_CYCLE:
-                        multigrid_W_Cycle(current_level - 1, next_FMG_level.solution(), next_FMG_level.rhs(),
-                                          next_FMG_level.residual());
-                        break;
-
-                    case MultigridCycleType::F_CYCLE:
-                        multigrid_F_Cycle(current_level - 1, next_FMG_level.solution(), next_FMG_level.rhs(),
-                                          next_FMG_level.residual());
-                        break;
-
-                    default:
-                        std::cerr << "Error: Unknown multigrid cycle type!" << std::endl;
-                        throw std::runtime_error("Invalid multigrid cycle type encountered.");
-                        break;
-                    }
-                }
-            }
-        }
-    }
+    initializeSolution();
+    auto end_initial_approximation = std::chrono::high_resolution_clock::now();
+    t_solve_initial_approximation +=
+        std::chrono::duration<double>(end_initial_approximation - start_initial_approximation).count();
 
     /* These times are included in the initial approximation and don't count towards the multigrid cyclces. */
     t_avg_MGC_total         = 0.0;
@@ -122,10 +22,6 @@ void GMGPolar::solve()
     t_avg_MGC_postSmoothing = 0.0;
     t_avg_MGC_residual      = 0.0;
     t_avg_MGC_directSolver  = 0.0;
-
-    auto end_initial_approximation = std::chrono::high_resolution_clock::now();
-    t_solve_initial_approximation +=
-        std::chrono::duration<double>(end_initial_approximation - start_initial_approximation).count();
 
     /* ------------ */
     /* Start Solver */
@@ -148,6 +44,7 @@ void GMGPolar::solve()
         /* ---------------------------------------------- */
         /* Test solution against exact solution if given. */
         /* ---------------------------------------------- */
+
         LIKWID_STOP("Solver");
         if (exact_solution_ != nullptr) {
             auto start_check_exact_error = std::chrono::high_resolution_clock::now();
@@ -303,6 +200,109 @@ void GMGPolar::solve()
         computeExactError(level, level.solution(), level.residual());
         writeToVTK("output_solution", level, level.solution());
         writeToVTK("output_error", level, level.residual());
+    }
+}
+
+void GMGPolar::initializeSolution()
+{
+    if (!FMG_) {
+        int start_level_depth = 0;
+        Level& level          = levels_[start_level_depth];
+        assign(level.solution(), 0.0); // Assign zero initial guess if not using FMG
+
+        /* Consider setting the boundary conditions u_D and u_D_Interior if DirBC_Interior to the initial solution */
+        bool use_boundary_condition = false;
+        if (use_boundary_condition) {
+            const auto& grid            = level.grid();
+            const auto& sin_theta_cache = level.levelCache().sin_theta();
+            const auto& cos_theta_cache = level.levelCache().cos_theta();
+
+            const int i_r_inner  = 0;
+            const int i_r_outer  = grid.nr() - 1;
+            const double r_inner = grid.radius(i_r_inner);
+            const double r_outer = grid.radius(i_r_outer);
+
+            for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
+                const double theta     = grid.theta(i_theta);
+                const double sin_theta = sin_theta_cache[i_theta];
+                const double cos_theta = cos_theta_cache[i_theta];
+                if (DirBC_Interior_) { // Apply interior Dirichlet BC if enabled.
+                    const int index         = grid.index(i_r_inner, i_theta);
+                    level.solution()[index] = boundary_conditions_->u_D_Interior(r_inner, theta, sin_theta, cos_theta);
+                }
+                // Always apply outer boundary condition.
+                const int index         = grid.index(i_r_outer, i_theta);
+                level.solution()[index] = boundary_conditions_->u_D(r_outer, theta, sin_theta, cos_theta);
+            }
+        }
+    }
+    else {
+        // Start from the coarsest level
+        int FMG_start_level_depth = number_of_levels_ - 1;
+        Level& FMG_level          = levels_[FMG_start_level_depth];
+
+        // Solve directly on the coarsest level
+        FMG_level.solution() = FMG_level.rhs();
+        FMG_level.directSolveInPlace(FMG_level.solution()); // Direct solve on coarsest grid
+
+        // Prolongate the solution from the coarsest level up to the finest, while applying Multigrid Cycles on each level
+        for (int current_level = FMG_start_level_depth - 1; current_level > 0; --current_level) {
+            Level& FMG_level      = levels_[current_level]; // The current level
+            Level& next_FMG_level = levels_[current_level - 1]; // The finer level
+
+            // The bi-cubic FMG interpolation is of higher order
+            FMGInterpolation(current_level, next_FMG_level.solution(), FMG_level.solution());
+
+            // Apply some FMG iterations
+            for (int i = 0; i < FMG_iterations_; i++) {
+                if (current_level - 1 == 0 && (extrapolation_ != ExtrapolationType::NONE)) {
+                    switch (FMG_cycle_) {
+                    case MultigridCycleType::V_CYCLE:
+                        implicitlyExtrapolatedMultigrid_V_Cycle(current_level - 1, next_FMG_level.solution(),
+                                                                next_FMG_level.rhs(), next_FMG_level.residual());
+                        break;
+
+                    case MultigridCycleType::W_CYCLE:
+                        implicitlyExtrapolatedMultigrid_W_Cycle(current_level - 1, next_FMG_level.solution(),
+                                                                next_FMG_level.rhs(), next_FMG_level.residual());
+                        break;
+
+                    case MultigridCycleType::F_CYCLE:
+                        implicitlyExtrapolatedMultigrid_F_Cycle(current_level - 1, next_FMG_level.solution(),
+                                                                next_FMG_level.rhs(), next_FMG_level.residual());
+                        break;
+
+                    default:
+                        std::cerr << "Error: Unknown multigrid cycle type!" << std::endl;
+                        throw std::runtime_error("Invalid multigrid cycle type encountered.");
+                        break;
+                    }
+                }
+                else {
+                    switch (FMG_cycle_) {
+                    case MultigridCycleType::V_CYCLE:
+                        multigrid_V_Cycle(current_level - 1, next_FMG_level.solution(), next_FMG_level.rhs(),
+                                          next_FMG_level.residual());
+                        break;
+
+                    case MultigridCycleType::W_CYCLE:
+                        multigrid_W_Cycle(current_level - 1, next_FMG_level.solution(), next_FMG_level.rhs(),
+                                          next_FMG_level.residual());
+                        break;
+
+                    case MultigridCycleType::F_CYCLE:
+                        multigrid_F_Cycle(current_level - 1, next_FMG_level.solution(), next_FMG_level.rhs(),
+                                          next_FMG_level.residual());
+                        break;
+
+                    default:
+                        std::cerr << "Error: Unknown multigrid cycle type!" << std::endl;
+                        throw std::runtime_error("Invalid multigrid cycle type encountered.");
+                        break;
+                    }
+                }
+            }
+        }
     }
 }
 
