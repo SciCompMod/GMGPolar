@@ -25,7 +25,7 @@ class ExtrapolatedSmoother;
 // The `Level` class represents a single level of a multigrid method. 
 // In multigrid solvers, the computational domain is divided into different levels, where each level corresponds to a grid with a different resolution. 
 // The `Level` class manages the specific data structures and operations needed to solve a problem at a given level, including residual computation, direct solving, and smoothing. 
-// It holds information for the for the solution, residuals, right-hand side, and error corrections used in the multigrid method.
+// It holds information for the solution, residuals, right-hand side, and error corrections used in the multigrid method.
 
 // The `LevelCache` class is responsible for caching auxiliary data required for solving a problem at a specific level of a multigrid method. 
 // It stores essential data such as trigonometric values (e.g., `sin_theta` and `cos_theta`) and profile coefficients (e.g., `alpha`, `beta`) 
