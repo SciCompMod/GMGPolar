@@ -996,7 +996,7 @@ void ExtrapolatedSmootherGive::solveRadialSection(const int i_theta, Vector<doub
 /* Sequential Version */
 /* ------------------ */
 
-void ExtrapolatedSmootherGive::extrapolatedSmoothingInPlaceSequential(Vector<double>& x, const Vector<double>& rhs,
+void ExtrapolatedSmootherGive::extrapolatedSmoothingSequential(Vector<double>& x, const Vector<double>& rhs,
                                                                       Vector<double>& temp)
 {
     assert(x.size() == rhs.size());
@@ -1060,7 +1060,7 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingInPlaceSequential(Vector<dou
 /* Parallelization Version 1: For Loops */
 /* ------------------------------------ */
 
-void ExtrapolatedSmootherGive::extrapolatedSmoothingInPlaceForLoop(Vector<double>& x, const Vector<double>& rhs,
+void ExtrapolatedSmootherGive::extrapolatedSmoothingForLoop(Vector<double>& x, const Vector<double>& rhs,
                                                                    Vector<double>& temp)
 {
     assert(x.size() == rhs.size());
@@ -1069,7 +1069,7 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingInPlaceForLoop(Vector<double
     omp_set_num_threads(num_omp_threads_);
 
     if (omp_get_max_threads() == 1) {
-        extrapolatedSmoothingInPlaceSequential(x, rhs, temp);
+        extrapolatedSmoothingSequential(x, rhs, temp);
     }
     else {
 
@@ -1235,7 +1235,7 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingInPlaceForLoop(Vector<double
 /* ------------------------------------ */
 
 /* UNUSED! */
-void ExtrapolatedSmootherGive::extrapolatedSmoothingInPlaceTaskLoop(Vector<double>& x, const Vector<double>& rhs,
+void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskLoop(Vector<double>& x, const Vector<double>& rhs,
                                                                     Vector<double>& temp)
 {
     assert(x.size() == rhs.size());
@@ -1244,7 +1244,7 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingInPlaceTaskLoop(Vector<doubl
     omp_set_num_threads(num_omp_threads_);
 
     if (omp_get_max_threads() == 1) {
-        extrapolatedSmoothingInPlaceSequential(x, rhs, temp);
+        extrapolatedSmoothingSequential(x, rhs, temp);
     }
     else {
 
@@ -1504,7 +1504,7 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingInPlaceTaskLoop(Vector<doubl
 /* -------------------------------------------- */
 
 /* UNUSED! */
-void ExtrapolatedSmootherGive::extrapolatedSmoothingInPlaceTaskDependencies(Vector<double>& x,
+void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskDependencies(Vector<double>& x,
                                                                             const Vector<double>& rhs,
                                                                             Vector<double>& temp)
 {
@@ -1514,7 +1514,7 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingInPlaceTaskDependencies(Vect
     omp_set_num_threads(num_omp_threads_);
 
     if (omp_get_max_threads() == 1) {
-        extrapolatedSmoothingInPlaceSequential(x, rhs, temp);
+        extrapolatedSmoothingSequential(x, rhs, temp);
     }
     else {
 

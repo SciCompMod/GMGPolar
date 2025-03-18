@@ -489,7 +489,7 @@ void SmootherGive::solveRadialSection(const int i_theta, Vector<double>& x, Vect
 /* Sequential Version */
 /* ------------------ */
 
-void SmootherGive::smoothingInPlaceSequential(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
+void SmootherGive::smoothingSequential(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
@@ -540,7 +540,7 @@ void SmootherGive::smoothingInPlaceSequential(Vector<double>& x, const Vector<do
 /* Parallelization Version 1: For Loops */
 /* ------------------------------------ */
 
-void SmootherGive::smoothingInPlaceForLoop(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
+void SmootherGive::smoothingForLoop(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
@@ -548,7 +548,7 @@ void SmootherGive::smoothingInPlaceForLoop(Vector<double>& x, const Vector<doubl
     omp_set_num_threads(num_omp_threads_);
 
     if (omp_get_max_threads() == 1) {
-        smoothingInPlaceSequential(x, rhs, temp);
+        smoothingSequential(x, rhs, temp);
     }
     else {
         temp = rhs;
@@ -698,7 +698,7 @@ void SmootherGive::smoothingInPlaceForLoop(Vector<double>& x, const Vector<doubl
 /* Parallelization Version 2: Task Loop */
 /* ------------------------------------ */
 
-void SmootherGive::smoothingInPlaceTaskLoop(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
+void SmootherGive::smoothingTaskLoop(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
@@ -706,7 +706,7 @@ void SmootherGive::smoothingInPlaceTaskLoop(Vector<double>& x, const Vector<doub
     omp_set_num_threads(num_omp_threads_);
 
     if (omp_get_max_threads() == 1) {
-        smoothingInPlaceSequential(x, rhs, temp);
+        smoothingSequential(x, rhs, temp);
     }
     else {
         temp = rhs;
@@ -948,7 +948,7 @@ void SmootherGive::smoothingInPlaceTaskLoop(Vector<double>& x, const Vector<doub
 /* Parallelization Version 3: Task Dependencies */
 /* -------------------------------------------- */
 
-void SmootherGive::smoothingInPlaceTaskDependencies(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
+void SmootherGive::smoothingTaskDependencies(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
@@ -956,7 +956,7 @@ void SmootherGive::smoothingInPlaceTaskDependencies(Vector<double>& x, const Vec
     omp_set_num_threads(num_omp_threads_);
 
     if (omp_get_max_threads() == 1) {
-        smoothingInPlaceSequential(x, rhs, temp);
+        smoothingSequential(x, rhs, temp);
     }
     else {
         temp = rhs;

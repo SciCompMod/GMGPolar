@@ -276,7 +276,7 @@ void SmootherTake::solveRadialSection(const int i_theta, Vector<double>& x, Vect
     std::move(temp.begin() + start, temp.begin() + end, x.begin() + start);
 }
 
-void SmootherTake::smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
+void SmootherTake::smoothing(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());

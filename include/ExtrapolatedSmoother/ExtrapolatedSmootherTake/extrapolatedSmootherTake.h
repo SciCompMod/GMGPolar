@@ -12,7 +12,7 @@ public:
 
     ~ExtrapolatedSmootherTake() override;
 
-    void extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) override;
+    void extrapolatedSmoothing(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) override;
 
 private:
     SparseMatrixCOO<double> inner_boundary_circle_matrix_;

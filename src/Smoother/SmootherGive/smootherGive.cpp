@@ -14,9 +14,9 @@ SmootherGive::~SmootherGive()
     finalizeMumpsSolver(inner_boundary_mumps_solver_);
 }
 
-void SmootherGive::smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
+void SmootherGive::smoothing(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
 {
-    smoothingInPlaceForLoop(x, rhs, temp); /* This is the fastest option */
-    // smoothingInPlaceTaskLoop(x, rhs, temp);
-    // smoothingInPlaceTaskDependencies(x, rhs, temp);
+    smoothingForLoop(x, rhs, temp); /* This is the fastest option */
+    // smoothingTaskLoop(x, rhs, temp);
+    // smoothingTaskDependencies(x, rhs, temp);
 }

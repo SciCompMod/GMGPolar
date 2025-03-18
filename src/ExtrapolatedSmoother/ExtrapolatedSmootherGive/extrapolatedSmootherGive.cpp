@@ -16,10 +16,10 @@ ExtrapolatedSmootherGive::~ExtrapolatedSmootherGive()
     finalizeMumpsSolver(inner_boundary_mumps_solver_);
 }
 
-void ExtrapolatedSmootherGive::extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs,
+void ExtrapolatedSmootherGive::extrapolatedSmoothing(Vector<double>& x, const Vector<double>& rhs,
                                                             Vector<double>& temp)
 {
-    extrapolatedSmoothingInPlaceForLoop(x, rhs, temp); /* This is the fastest option */
-    // extrapolatedSmoothingInPlaceTaskLoop(x, rhs, temp);
-    // extrapolatedSmoothingInPlaceTaskDependencies(x, rhs, temp);
+    extrapolatedSmoothingForLoop(x, rhs, temp); /* This is the fastest option */
+    // extrapolatedSmoothingTaskLoop(x, rhs, temp);
+    // extrapolatedSmoothingTaskDependencies(x, rhs, temp);
 }

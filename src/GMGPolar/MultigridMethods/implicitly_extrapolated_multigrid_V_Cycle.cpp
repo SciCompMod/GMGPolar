@@ -16,10 +16,10 @@ void GMGPolar::implicitlyExtrapolatedMultigrid_V_Cycle(const int level_depth, Ve
     /* Presmoothing */
     for (int i = 0; i < pre_smoothing_steps_; i++) {
         if (level_depth == 0 && !full_grid_smoothing_) {
-            level.extrapolatedSmoothingInPlace(solution, rhs, residual);
+            level.extrapolatedSmoothing(solution, rhs, residual);
         }
         else {
-            level.smoothingInPlace(solution, rhs, residual);
+            level.smoothing(solution, rhs, residual);
         }
     }
 
@@ -103,10 +103,10 @@ void GMGPolar::implicitlyExtrapolatedMultigrid_V_Cycle(const int level_depth, Ve
     /* Postsmoothing */
     for (int i = 0; i < post_smoothing_steps_; i++) {
         if (level_depth == 0 && !full_grid_smoothing_) {
-            level.extrapolatedSmoothingInPlace(solution, rhs, residual);
+            level.extrapolatedSmoothing(solution, rhs, residual);
         }
         else {
-            level.smoothingInPlace(solution, rhs, residual);
+            level.smoothing(solution, rhs, residual);
         }
     }
 

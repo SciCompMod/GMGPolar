@@ -15,7 +15,7 @@ void GMGPolar::multigrid_W_Cycle(const int level_depth, Vector<double>& solution
     /* ------------ */
     /* Presmoothing */
     for (int i = 0; i < pre_smoothing_steps_; i++) {
-        level.smoothingInPlace(solution, rhs, residual);
+        level.smoothing(solution, rhs, residual);
     }
 
     auto end_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
@@ -78,7 +78,7 @@ void GMGPolar::multigrid_W_Cycle(const int level_depth, Vector<double>& solution
     /* ------------- */
     /* Postsmoothing */
     for (int i = 0; i < post_smoothing_steps_; i++) {
-        level.smoothingInPlace(solution, rhs, residual);
+        level.smoothing(solution, rhs, residual);
     }
 
     auto end_MGC_postSmoothing = std::chrono::high_resolution_clock::now();

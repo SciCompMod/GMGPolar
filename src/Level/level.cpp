@@ -144,11 +144,11 @@ void Level::initializeSmoothing(const DomainGeometry& domain_geometry,
     if (!op_smoother_)
         throw std::runtime_error("Failed to initialize Smoother.");
 }
-void Level::smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const
+void Level::smoothing(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const
 {
     if (!op_smoother_)
         throw std::runtime_error("Smoother not initialized.");
-    op_smoother_->smoothingInPlace(x, rhs, temp);
+    op_smoother_->smoothing(x, rhs, temp);
 }
 
 // ---------------------------- //
@@ -169,9 +169,9 @@ void Level::initializeExtrapolatedSmoothing(const DomainGeometry& domain_geometr
     if (!op_extrapolated_smoother_)
         throw std::runtime_error("Failed to initialize Extrapolated Smoother.");
 }
-void Level::extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const
+void Level::extrapolatedSmoothing(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const
 {
     if (!op_extrapolated_smoother_)
         throw std::runtime_error("Extrapolated Smoother not initialized.");
-    op_extrapolated_smoother_->extrapolatedSmoothingInPlace(x, rhs, temp);
+    op_extrapolated_smoother_->extrapolatedSmoothing(x, rhs, temp);
 }

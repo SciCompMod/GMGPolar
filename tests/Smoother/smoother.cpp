@@ -85,10 +85,10 @@ TEST(SmootherTest, smoother_DirBC_Interior)
     Vector<double> temp  = generate_random_sample_data(level.grid(), 8);
 
     Vector<double> solution_Give = start;
-    smootherGive_operator.smoothingInPlace(solution_Give, rhs, temp);
+    smootherGive_operator.smoothing(solution_Give, rhs, temp);
 
     Vector<double> solution_Take = start;
-    smootherTake_operator.smoothingInPlace(solution_Take, rhs, temp);
+    smootherTake_operator.smoothing(solution_Take, rhs, temp);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
     for (int index = 0; index < solution_Give.size(); index++) {
@@ -142,10 +142,10 @@ TEST(SmootherTest, smoother_AcrossOrigin)
     Vector<double> temp  = generate_random_sample_data(level.grid(), 8);
 
     Vector<double> solution_Give = start;
-    smootherGive_operator.smoothingInPlace(solution_Give, rhs, temp);
+    smootherGive_operator.smoothing(solution_Give, rhs, temp);
 
     Vector<double> solution_Take = start;
-    smootherTake_operator.smoothingInPlace(solution_Take, rhs, temp);
+    smootherTake_operator.smoothing(solution_Take, rhs, temp);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
     for (int index = 0; index < solution_Give.size(); index++) {
@@ -219,7 +219,7 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior)
     const double precision      = 1e-12;
 
     while (infinity_norm(error) > precision) {
-        smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
+        smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -299,7 +299,7 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior)
     const double precision      = 1e-12;
 
     while (infinity_norm(error) > precision) {
-        smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
+        smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -379,7 +379,7 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin)
     const double precision      = 1e-8;
 
     while (infinity_norm(error) > precision) {
-        smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
+        smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -459,7 +459,7 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin)
     const double precision      = 1e-8;
 
     while (infinity_norm(error) > 1e-8) {
-        smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
+        smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -538,7 +538,7 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior_SmallestGrid)
     const double precision      = 1e-12;
 
     while (infinity_norm(error) > 1e-12) {
-        smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
+        smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -617,7 +617,7 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior_SmallestGrid)
     double precision            = 1e-12;
 
     while (infinity_norm(error) > precision) {
-        smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
+        smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -696,7 +696,7 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin_SmallestGrid)
     const double precision      = 1e-8;
 
     while (infinity_norm(error) > 1e-8) {
-        smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
+        smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -775,7 +775,7 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin_SmallestGrid)
     const double precision      = 1e-8;
 
     while (infinity_norm(error) > 1e-8) {
-        smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
+        smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -857,7 +857,7 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior)
     const double precision      = 1e-12;
 
     while (infinity_norm(error) > precision) {
-        smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
+        smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -937,7 +937,7 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior)
     const double precision      = 1e-12;
 
     while (infinity_norm(error) > precision) {
-        smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
+        smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -1017,7 +1017,7 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin)
     const double precision      = 1e-8;
 
     while (infinity_norm(error) > precision) {
-        smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
+        smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -1097,7 +1097,7 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin)
     const double precision      = 1e-8;
 
     while (infinity_norm(error) > 1e-8) {
-        smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
+        smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -1176,7 +1176,7 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior_SmallestGrid)
     const double precision      = 1e-12;
 
     while (infinity_norm(error) > 1e-12) {
-        smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
+        smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -1255,7 +1255,7 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior_SmallestGrid)
     double precision            = 1e-12;
 
     while (infinity_norm(error) > precision) {
-        smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
+        smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -1334,7 +1334,7 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin_SmallestGrid)
     const double precision      = 1e-8;
 
     while (infinity_norm(error) > 1e-8) {
-        smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
+        smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -1413,7 +1413,7 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin_SmallestGrid)
     const double precision      = 1e-8;
 
     while (infinity_norm(error) > 1e-8) {
-        smoother_op.smoothingInPlace(smoother_solution, rhs, temp);
+        smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {

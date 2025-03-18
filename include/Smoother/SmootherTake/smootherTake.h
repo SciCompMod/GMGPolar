@@ -10,7 +10,7 @@ public:
                           int num_omp_threads);
     ~SmootherTake() override;
 
-    void smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) override;
+    void smoothing(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) override;
 
 private:
     SparseMatrixCOO<double> inner_boundary_circle_matrix_;

@@ -10,14 +10,14 @@ public:
                           int num_omp_threads);
     ~SmootherGive() override;
 
-    void smoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) override;
+    void smoothing(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) override;
 
 private:
-    void smoothingInPlaceSequential(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
-    void smoothingInPlaceForLoop(Vector<double>& x, const Vector<double>& rhs,
+    void smoothingSequential(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
+    void smoothingForLoop(Vector<double>& x, const Vector<double>& rhs,
                                  Vector<double>& temp); /* This is the fastest option */
-    void smoothingInPlaceTaskLoop(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
-    void smoothingInPlaceTaskDependencies(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
+    void smoothingTaskLoop(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
+    void smoothingTaskDependencies(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
 
     SparseMatrixCOO<double> inner_boundary_circle_matrix_;
     DMUMPS_STRUC_C inner_boundary_mumps_solver_;

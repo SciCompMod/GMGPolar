@@ -12,14 +12,14 @@ public:
 
     ~ExtrapolatedSmootherGive() override;
 
-    void extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) override;
+    void extrapolatedSmoothing(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) override;
 
 private:
-    void extrapolatedSmoothingInPlaceSequential(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
-    void extrapolatedSmoothingInPlaceForLoop(Vector<double>& x, const Vector<double>& rhs,
+    void extrapolatedSmoothingSequential(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
+    void extrapolatedSmoothingForLoop(Vector<double>& x, const Vector<double>& rhs,
                                              Vector<double>& temp); /* This is the fastest option */
-    void extrapolatedSmoothingInPlaceTaskLoop(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
-    void extrapolatedSmoothingInPlaceTaskDependencies(Vector<double>& x, const Vector<double>& rhs,
+    void extrapolatedSmoothingTaskLoop(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
+    void extrapolatedSmoothingTaskDependencies(Vector<double>& x, const Vector<double>& rhs,
                                                       Vector<double>& temp);
 
     SparseMatrixCOO<double> inner_boundary_circle_matrix_;

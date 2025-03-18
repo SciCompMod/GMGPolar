@@ -534,7 +534,7 @@ void ExtrapolatedSmootherTake::solveRadialSection(const int i_theta, Vector<doub
     std::move(temp.begin() + start, temp.begin() + end, x.begin() + start);
 }
 
-void ExtrapolatedSmootherTake::extrapolatedSmoothingInPlace(Vector<double>& x, const Vector<double>& rhs,
+void ExtrapolatedSmootherTake::extrapolatedSmoothing(Vector<double>& x, const Vector<double>& rhs,
                                                             Vector<double>& temp)
 {
     assert(x.size() == rhs.size());

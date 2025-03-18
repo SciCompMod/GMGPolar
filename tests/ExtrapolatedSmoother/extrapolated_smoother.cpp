@@ -87,10 +87,10 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_DirBC_Interior)
     Vector<double> temp  = generate_random_sample_data(level.grid(), 8);
 
     Vector<double> solution_Give = start;
-    smootherGive_operator.extrapolatedSmoothingInPlace(solution_Give, rhs, temp);
+    smootherGive_operator.extrapolatedSmoothing(solution_Give, rhs, temp);
 
     Vector<double> solution_Take = start;
-    smootherTake_operator.extrapolatedSmoothingInPlace(solution_Take, rhs, temp);
+    smootherTake_operator.extrapolatedSmoothing(solution_Take, rhs, temp);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
     for (int index = 0; index < solution_Give.size(); index++) {
@@ -144,10 +144,10 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_AcossOrigin)
     Vector<double> temp  = generate_random_sample_data(level.grid(), 8);
 
     Vector<double> solution_Give = start;
-    smootherGive_operator.extrapolatedSmoothingInPlace(solution_Give, rhs, temp);
+    smootherGive_operator.extrapolatedSmoothing(solution_Give, rhs, temp);
 
     Vector<double> solution_Take = start;
-    smootherTake_operator.extrapolatedSmoothingInPlace(solution_Take, rhs, temp);
+    smootherTake_operator.extrapolatedSmoothing(solution_Take, rhs, temp);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
     for (int index = 0; index < solution_Give.size(); index++) {
@@ -226,7 +226,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior)
     const double precision      = 1e-12;
 
     while (infinity_norm(error) > precision) {
-        extrapolated_smoother_op.extrapolatedSmoothingInPlace(smoother_solution, rhs, temp);
+        extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -311,7 +311,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior)
     const double precision      = 1e-12;
 
     while (infinity_norm(error) > precision) {
-        extrapolated_smoother_op.extrapolatedSmoothingInPlace(smoother_solution, rhs, temp);
+        extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -396,7 +396,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin)
     const double precision      = 1e-8;
 
     while (infinity_norm(error) > precision) {
-        extrapolated_smoother_op.extrapolatedSmoothingInPlace(smoother_solution, rhs, temp);
+        extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -481,7 +481,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin)
     const double precision      = 1e-8;
 
     while (infinity_norm(error) > 1e-8) {
-        extrapolated_smoother_op.extrapolatedSmoothingInPlace(smoother_solution, rhs, temp);
+        extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -565,7 +565,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior_Smal
     const double precision      = 1e-12;
 
     while (infinity_norm(error) > 1e-12) {
-        extrapolated_smoother_op.extrapolatedSmoothingInPlace(smoother_solution, rhs, temp);
+        extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -649,7 +649,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior_Smalle
     double precision            = 1e-12;
 
     while (infinity_norm(error) > precision) {
-        extrapolated_smoother_op.extrapolatedSmoothingInPlace(smoother_solution, rhs, temp);
+        extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -733,7 +733,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin_Smalle
     const double precision      = 1e-8;
 
     while (infinity_norm(error) > 1e-8) {
-        extrapolated_smoother_op.extrapolatedSmoothingInPlace(smoother_solution, rhs, temp);
+        extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -817,7 +817,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin_Smallest
     const double precision      = 1e-8;
 
     while (infinity_norm(error) > 1e-8) {
-        extrapolated_smoother_op.extrapolatedSmoothingInPlace(smoother_solution, rhs, temp);
+        extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -904,7 +904,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior)
     const double precision      = 1e-12;
 
     while (infinity_norm(error) > precision) {
-        extrapolated_smoother_op.extrapolatedSmoothingInPlace(smoother_solution, rhs, temp);
+        extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -989,7 +989,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior)
     const double precision      = 1e-12;
 
     while (infinity_norm(error) > precision) {
-        extrapolated_smoother_op.extrapolatedSmoothingInPlace(smoother_solution, rhs, temp);
+        extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -1074,7 +1074,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin)
     const double precision      = 1e-8;
 
     while (infinity_norm(error) > precision) {
-        extrapolated_smoother_op.extrapolatedSmoothingInPlace(smoother_solution, rhs, temp);
+        extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -1159,7 +1159,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin)
     const double precision      = 1e-8;
 
     while (infinity_norm(error) > 1e-8) {
-        extrapolated_smoother_op.extrapolatedSmoothingInPlace(smoother_solution, rhs, temp);
+        extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -1243,7 +1243,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior_
     const double precision      = 1e-12;
 
     while (infinity_norm(error) > 1e-12) {
-        extrapolated_smoother_op.extrapolatedSmoothingInPlace(smoother_solution, rhs, temp);
+        extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -1327,7 +1327,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior_Sm
     double precision            = 1e-12;
 
     while (infinity_norm(error) > precision) {
-        extrapolated_smoother_op.extrapolatedSmoothingInPlace(smoother_solution, rhs, temp);
+        extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -1411,7 +1411,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin_Sm
     const double precision      = 1e-8;
 
     while (infinity_norm(error) > 1e-8) {
-        extrapolated_smoother_op.extrapolatedSmoothingInPlace(smoother_solution, rhs, temp);
+        extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
@@ -1495,7 +1495,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin_Smal
     const double precision      = 1e-8;
 
     while (infinity_norm(error) > 1e-8) {
-        extrapolated_smoother_op.extrapolatedSmoothingInPlace(smoother_solution, rhs, temp);
+        extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
