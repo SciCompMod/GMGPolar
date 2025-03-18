@@ -45,38 +45,14 @@ public:
                        const double& refinement_radius, const int anisotropic_factor, const int divideBy2,
                        std::optional<double> splitting_radius = std::nullopt);
 
-    // Node Indexing (based on the circle/radial smoother)
-    // Get the index of a node based on its position.
-    int index(const MultiIndex& position) const;
-    // Get the position of a node based on its index.
-    MultiIndex multiIndex(const int node_index) const;
-    // Get the polar coordinates of a node based on its position.
-    Point polarCoordinates(const MultiIndex& position) const;
-
     // Optimized, inlined indexing.
     int wrapThetaIndex(const int unwrapped_theta_index) const;
     int index(const int r_index, const int unwrapped_theta_index) const;
     int fastIndex(const int r_index, const int theta_index) const;
     void multiIndex(const int node_index, int& r_index, int& theta_index) const;
 
-    // Obtaining neighboring nodes (unoptimized)
-    // Get adjacent neighbors of a node.
-    // If the neighbor index is -1, then there is no neighboring node in that direction.
-    void adjacentNeighborsOf(const MultiIndex& position,
-                             std::array<std::pair<int, int>, space_dimension>& neighbors) const;
-    // Get diagonal neighbors of a node.
-    // If the neighbor index is -1, then there is no neighboring node in that direction.
-    void diagonalNeighborsOf(const MultiIndex& position,
-                             std::array<std::pair<int, int>, space_dimension>& neighbors) const;
-    // Neighbor distances
-    // Get distances to adjacent neighbors of a node.
-    // If there is no neighboring node in that direction, then the neighbor distance is 0.
-    void adjacentNeighborDistances(const MultiIndex& position,
-                                   std::array<std::pair<double, double>, space_dimension>& neighbor_distances) const;
-
     // Number of grid nodes
     int numberOfNodes() const;
-
     // Grid Parameters
     // Get the number of grid points in radial direction
     int nr() const;
@@ -111,6 +87,42 @@ public:
     // Implementation in src/PolarGrid/load_write_grid.cpp
     // Write the grid data to files specified for radii and angles with given precision.
     void writeToFile(const std::string& file_r, const std::string& file_theta, const int precision) const;
+
+    // ------------------------------------------- //
+    // Unoptimized Indexing and Neighbor Retrieval //
+    // ------------------------------------------- //
+    // Node Indexing (based on the combined circle-radial smoother)
+    // Get the index of a node based on its position.
+    int index(const MultiIndex& position) const;
+    // Get the position of a node based on its index.
+    MultiIndex multiIndex(const int node_index) const;
+    // Get the polar coordinates of a node based on its position.
+    Point polarCoordinates(const MultiIndex& position) const;
+    // Get adjacent neighbors of a node.
+    // If the neighbor index is -1, then there is no neighboring node in that direction.
+    // - The first entry (neighbors[0]) represents the radial direction (r):
+    //   - First: inward neighbor (r - 1)
+    //   - Second: outward neighbor (r + 1)
+    // - The second entry (neighbors[1]) represents the angular direction (theta):
+    //   - First: counterclockwise neighbor (theta - 1)
+    //   - Second: clockwise neighbor (theta + 1)
+    void adjacentNeighborsOf(const MultiIndex& position,
+                             std::array<std::pair<int, int>, space_dimension>& neighbors) const;
+    // Get diagonal neighbors of a node.
+    // If the neighbor index is -1, then there is no neighboring node in that direction.
+    // - The first entry (neighbors[0]) represents:
+    //   - First: bottom left neighbor (r - 1, theta - 1)
+    //   - Second: bottom right neighbor (r + 1, theta - 1)
+    // - The second entry (neighbors[1]) represents:
+    //   - First: top left neighbor (r - 1, theta + 1)
+    //   - Second: top right neighbor (r + 1, theta + 1)
+    void diagonalNeighborsOf(const MultiIndex& position,
+                             std::array<std::pair<int, int>, space_dimension>& neighbors) const;
+    // Neighbor distances
+    // Get distances to adjacent neighbors of a node.
+    // If there is no neighboring node in that direction, then the neighbor distance is 0.
+    void adjacentNeighborDistances(const MultiIndex& position,
+                                   std::array<std::pair<double, double>, space_dimension>& neighbor_distances) const;
 
 private:
     // --------------- //
