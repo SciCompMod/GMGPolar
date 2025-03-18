@@ -121,6 +121,7 @@ DiagonalSolver<T>::DiagonalSolver(const int matrix_dimension)
     , diagonal_values_(std::make_unique<T[]>(matrix_dimension_))
 {
     assert(matrix_dimension_ >= 1);
+    std::fill(diagonal_values_.get(), diagonal_values_.get() + matrix_dimension_, T(0));
 }
 
 template <typename T>

@@ -70,8 +70,16 @@ inline const double& PolarGrid::angularSpacing(const int unwrapped_theta_index) 
 
 inline int PolarGrid::wrapThetaIndex(const int unwrapped_theta_index) const
 {
-    // unwrapped_theta_index may be negative or larger than ntheta() to allow for periodicity.
-    // If ntheta = 2^k we can use the optimization idx & (ntheta-1)
+    // The unwrapped_theta_index may be negative or exceed the number of theta steps (ntheta()),
+    // so we need to wrap it into the valid range [0, ntheta() - 1] to maintain periodicity.
+    //
+    // When ntheta is a power of 2 (i.e., ntheta = 2^k), we can optimize the modulo operation:
+    // - ntheta() - 1 yields a bitmask with the lower k bits set to 1.
+    //   For example, if ntheta() is 8 (2^3), then ntheta() - 1 equals 7, which in binary is 0b111.
+    // - Applying the bitwise AND operator (&) with this mask extracts the lower k bits of unwrapped_theta_index.
+    //   This effectively computes unwrapped_theta_index % ntheta(), because it discards all higher bits.
+    //
+    // If ntheta is not a power of two, we use the standard modulo approach to handle wrapping.
     return is_ntheta_PowerOfTwo_ ? unwrapped_theta_index & (ntheta() - 1) : (unwrapped_theta_index % ntheta() + ntheta()) % ntheta();
 }
 

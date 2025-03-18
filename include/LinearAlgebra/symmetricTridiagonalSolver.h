@@ -455,7 +455,7 @@ void SymmetricTridiagonalSolver<T>::solveSymmetricCyclicTridiagonal(T* x, T* u, 
         x[i] -= sub_diagonal(i) * x[i + 1];
         u[i] -= sub_diagonal(i) * u[i + 1];
     }
-
+    // Shermann-Morrison Reonstruction
     const double dot_product_x_v = x[0] + cyclic_corner_element() / gamma_ * x[matrix_dimension_ - 1];
     const double dot_product_u_v = u[0] + cyclic_corner_element() / gamma_ * u[matrix_dimension_ - 1];
     const double factor          = dot_product_x_v / (1.0 + dot_product_u_v);
