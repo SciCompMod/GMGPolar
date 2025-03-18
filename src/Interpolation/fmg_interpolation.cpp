@@ -1,7 +1,39 @@
 #include "../../include/Interpolation/interpolation.h"
 
-// /* Bicubic FMG interpolator 1/16 * [-1, 9, 9, -1] */ based on
-// Lagrange interpolation (4 interpolation points, 1 interpolated value)
+/*
+ * Bicubic FMG Interpolator Using Lagrange Polynomial
+ * ----------------------------------------------------
+ * This implementation computes an interpolated value using a bicubic Full Multigrid (FMG)
+ * scheme. The interpolator applies a scaling factor of 1/16 with the coefficient vector [-1, 9, 9, -1].
+ *
+ * The method uses Lagrange interpolation with 4 coarse grid nodes to calculate a single interpolated value.
+ * Nodes with an X are the 4 coarse interpolation points used for the interpolation.
+ * The node marked with an O is the interpolated value which we aim to obtain.
+ *
+ * |                     |                     |                     |
+ * |                     |                     |                     |
+ * v                     v                     v                     v
+ * X ---------h0-------- X ---h1--- O ---h2--- X ---------h3-------- X
+ *                                  ^
+ *                                  |
+ *                                  |
+ * Lagrange Interpolation:
+ * -----------------------
+ * The interpolated value y is determined by forming a weighted sum of the function values:
+ *
+ *     y = w0 * f0 + w1 * f1 + w2 * f2 + w3 * f3
+ *
+ * Each weight w_i is calculated using the Lagrange interpolation formula. For example:
+ *
+ *     w0 = ((z - x1) / (x0 - x1)) * ((z - x2) / (x0 - x2)) * ((z - x3) / (x0 - x3))
+ *
+ * Similar expressions are used to compute weights w1, w2, and w3, where each weight excludes its corresponding node
+ * from the product.
+ * 
+ * First, the interpolation is performed along the angular direction. Thanks to the periodic boundary conditions,
+ * no additional linear interpolation is required near the edges. In the subsequent step, the angular interpolation
+ * results are further refined through radial interpolation to produce the final interpolated value.
+ */
 
 #define FINE_NODE_FMG_INTERPOLATION()                                                                                  \
     do {                                                                                                               \
