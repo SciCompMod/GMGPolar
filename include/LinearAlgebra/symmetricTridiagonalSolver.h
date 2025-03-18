@@ -343,6 +343,7 @@ void SymmetricTridiagonalSolver<T>::solveSymmetricTridiagonal(T* x, T* scratch)
     * need not be recalculated each time.
     * ---------------------------------------------------------- */
 
+    // Cholesky Decomposition
     if (!factorized_) {
         for (int i = 1; i < matrix_dimension_; i++) {
             assert(!equals(main_diagonal(i - 1), 0.0));
@@ -351,16 +352,16 @@ void SymmetricTridiagonalSolver<T>::solveSymmetricTridiagonal(T* x, T* scratch)
         }
         factorized_ = true;
     }
-
+    // Forward Substitution
     for (int i = 1; i < matrix_dimension_; i++) {
         x[i] -= sub_diagonal(i - 1) * x[i - 1];
     }
-
+    // Diagonal Scaling
     for (int i = 0; i < matrix_dimension_; i++) {
         assert(!equals(main_diagonal(i), 0.0));
         x[i] /= main_diagonal(i);
     }
-
+    // Backward Substitution
     for (int i = matrix_dimension_ - 2; i >= 0; i--) {
         x[i] -= sub_diagonal(i) * x[i + 1];
     }
@@ -422,7 +423,9 @@ void SymmetricTridiagonalSolver<T>::solveSymmetricCyclicTridiagonal(T* x, T* u, 
      * being stored internally.
      * ---------------------------------------------------------- */
 
+    // Cholesky Decomposition
     if (!factorized_) {
+        // Shermann-Morrison Adjustment
         gamma_ = -main_diagonal(0);
         main_diagonal(0) -= gamma_;
         main_diagonal(matrix_dimension_ - 1) -= cyclic_corner_element() * cyclic_corner_element() / gamma_;
@@ -433,7 +436,7 @@ void SymmetricTridiagonalSolver<T>::solveSymmetricCyclicTridiagonal(T* x, T* u, 
         }
         factorized_ = true;
     }
-
+    // Forward Substitution
     u[0] = gamma_;
     for (int i = 1; i < matrix_dimension_; i++) {
         x[i] -= sub_diagonal(i - 1) * x[i - 1];
@@ -442,12 +445,12 @@ void SymmetricTridiagonalSolver<T>::solveSymmetricCyclicTridiagonal(T* x, T* u, 
         else
             u[i] = cyclic_corner_element() - sub_diagonal(i - 1) * u[i - 1];
     }
-
+    // Diagonal Scaling
     for (int i = 0; i < matrix_dimension_; i++) {
         x[i] /= main_diagonal(i);
         u[i] /= main_diagonal(i);
     }
-
+    // Backward Substitution
     for (int i = matrix_dimension_ - 2; i >= 0; i--) {
         x[i] -= sub_diagonal(i) * x[i + 1];
         u[i] -= sub_diagonal(i) * u[i + 1];
