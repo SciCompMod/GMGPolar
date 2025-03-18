@@ -22,7 +22,7 @@ class ExtrapolatedSmoother;
 #include "../Residual/residual.h"
 #include "../Smoother/smoother.h"
 
-// The `Level` class represents a single level of a multigrid method. 
+// The `Level` class represents a single level of a multigrid method.
 // In multigrid solvers, the computational domain is divided into different levels, where each level corresponds to a grid with a different resolution. 
 // The `Level` class manages the specific data structures and operations needed to solve a problem at a given level, including residual computation, direct solving, and smoothing. 
 // It holds information for the solution, residuals, right-hand side, and error corrections used in the multigrid method.
