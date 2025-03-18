@@ -33,6 +33,24 @@
  * First, the interpolation is performed along the angular direction. Thanks to the periodic boundary conditions,
  * no additional linear interpolation is required near the edges. In the subsequent step, the angular interpolation
  * results are further refined through radial interpolation to produce the final interpolated value.
+ * 
+ * Step 1: Interpolate the 4 fine nodes marked with an O.
+ * Step 2: Interpolate the node Z using the results from Step 1.
+ * 
+ * X         X          X         X
+ * 
+ * 
+ * 
+ * X         X          X         X
+ * 
+ * O         O     Z    O         O
+ * 
+ * X         X          X         X
+ * 
+ * 
+ * 
+ * X         X          X         X
+ * 
  */
 
 #define FINE_NODE_FMG_INTERPOLATION()                                                                                  \
