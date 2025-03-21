@@ -149,9 +149,9 @@
                 /* Fill matrix row of (i,j) */                                                                         \
                 const Stencil& CenterStencil = getStencil(i_r, i_theta);                                               \
                 int center_nz_index          = getCircleAscIndex(i_r, i_theta);                                        \
-                int nz_index                 = center_nz_index + CenterStencil[StencilPosition::Center];                   \
-                matrix.row_index(nz_index)   = center_index + 1;                                                       \
-                matrix.col_index(nz_index)   = center_index + 1;                                                       \
+                int nz_index                 = center_nz_index + CenterStencil[StencilPosition::Center];               \
+                matrix.row_index(nz_index)   = center_index;                                                           \
+                matrix.col_index(nz_index)   = center_index;                                                           \
                 matrix.value(nz_index)       = 1.0;                                                                    \
             }                                                                                                          \
             else {                                                                                                     \
@@ -233,14 +233,14 @@
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
                     const double left_value = -coeff1 * (arr[center] + arr[left]);                                     \
                                                                                                                        \
-                    nz_index                   = center_nz_index + CenterStencil[StencilPosition::Center];                 \
-                    matrix.row_index(nz_index) = center_index + 1;                                                     \
-                    matrix.col_index(nz_index) = center_index + 1;                                                     \
+                    nz_index                   = center_nz_index + CenterStencil[StencilPosition::Center];             \
+                    matrix.row_index(nz_index) = center_index;                                                         \
+                    matrix.col_index(nz_index) = center_index;                                                         \
                     matrix.value(nz_index)     = center_value;                                                         \
                                                                                                                        \
-                    nz_index                   = center_nz_index + CenterStencil[StencilPosition::Left];                   \
-                    matrix.row_index(nz_index) = center_index + 1;                                                     \
-                    matrix.col_index(nz_index) = left_index + 1;                                                       \
+                    nz_index                   = center_nz_index + CenterStencil[StencilPosition::Left];               \
+                    matrix.row_index(nz_index) = center_index;                                                         \
+                    matrix.col_index(nz_index) = left_index;                                                           \
                     matrix.value(nz_index)     = left_value;                                                           \
                 }                                                                                                      \
                 else {                                                                                                 \
@@ -254,9 +254,9 @@
                     auto& matrix           = inner_boundary_circle_matrix;                                             \
                     const int center_index = i_theta;                                                                  \
                     /* Fill matrix row of (i,j) */                                                                     \
-                    nz_index                   = center_nz_index + CenterStencil[StencilPosition::Center];                 \
-                    matrix.row_index(nz_index) = center_index + 1;                                                     \
-                    matrix.col_index(nz_index) = center_index + 1;                                                     \
+                    nz_index                   = center_nz_index + CenterStencil[StencilPosition::Center];             \
+                    matrix.row_index(nz_index) = center_index;                                                         \
+                    matrix.col_index(nz_index) = center_index;                                                         \
                     matrix.value(nz_index)     = 1.0;                                                                  \
                 }                                                                                                      \
             }                                                                                                          \

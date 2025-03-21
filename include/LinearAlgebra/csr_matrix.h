@@ -22,6 +22,10 @@
 
 #include "vector.h"
 
+/* The CSR matrix format is currently unused, as we use MUMPS which relies on the COO format. */
+/* Here we provide a custom LU decomposition solver, which could be replaced by different library implementation, 
+if we would decide to move away from mumps. */
+
 template <typename T>
 class SparseMatrixCSR
 {
@@ -69,8 +73,7 @@ private:
     std::unique_ptr<int[]> row_start_indices_;
 };
 
-
-
+/* LU decomposition Solver (slow) */
 template <typename T>
 class SparseLUSolver {
 public:
@@ -84,6 +87,10 @@ private:
     bool factorized_ = false;
     void factorize(const SparseMatrixCSR<T>& A);
 };
+
+
+
+
 
 
 
@@ -341,8 +348,6 @@ SparseLUSolver<T>::SparseLUSolver(const SparseMatrixCSR<T>& A) {
 /* This is slow */
 template <typename T>
 void SparseLUSolver<T>::factorize(const SparseMatrixCSR<T>& A) {
-    std::cout<<"Start Factorization"<<std::endl;
-
     const int n = A.rows();
     L_row_ptr.resize(n + 1, 0);
     U_row_ptr.resize(n + 1, 0);
@@ -380,8 +385,6 @@ void SparseLUSolver<T>::factorize(const SparseMatrixCSR<T>& A) {
                 U_map[i][j] = val;
         }
     }
-
-    std::cout<<"End Factorization"<<std::endl;
 
     // Convert L_map and U_map into CSR format
     for (int i = 0; i < n; i++) {

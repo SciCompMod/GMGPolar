@@ -1,8 +1,18 @@
 #include "../../../include/ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h"
 
 void ExtrapolatedSmootherGive::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver,
-                                                     const SparseMatrixCOO<double>& solver_matrix)
+                                                    SparseMatrixCOO<double>& solver_matrix)
 {
+    /* 
+     * MUMPS (a parallel direct solver) uses 1-based indexing, 
+     * whereas the input matrix follows 0-based indexing. 
+     * Adjust row and column indices to match MUMPS' requirements.
+     */
+    for (int i = 0; i < solver_matrix.non_zero_size(); i++) {
+        solver_matrix.row_index(i) += 1;
+        solver_matrix.col_index(i) += 1;
+    }
+
     mumps_solver.job = JOB_INIT;
     mumps_solver.par = PAR_PARALLEL;
     /* The matrix is positive definite for invertible mappings. */

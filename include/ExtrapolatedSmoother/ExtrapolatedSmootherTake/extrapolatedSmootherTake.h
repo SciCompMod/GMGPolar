@@ -55,6 +55,6 @@ private:
                             Vector<double>& solver_storage_2);
     void solveRadialSection(const int i_theta, Vector<double>& x, Vector<double>& temp, Vector<double>& solver_storage);
 
-    void initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const SparseMatrixCOO<double>& solver_matrix);
+    void initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, SparseMatrixCOO<double>& solver_matrix);
     void finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver);
 };

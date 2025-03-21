@@ -53,7 +53,8 @@ private:
     void buildSolverMatrixRadialSection(const int i_theta, SparseMatrixCOO<double>& solver_matrix);
 
     // Initializes the MUMPS solver with the specified matrix.
-    void initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const SparseMatrixCOO<double>& solver_matrix);
+    // Converts to 1-based indexing.
+    void initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, SparseMatrixCOO<double>& solver_matrix);
 
     // Adjusts the right-hand side vector for symmetry corrections.
     // This modifies the system from

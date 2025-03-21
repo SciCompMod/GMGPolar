@@ -1,7 +1,17 @@
 #include "../../../include/DirectSolver/DirectSolverGive/directSolverGive.h"
 
-void DirectSolverGive::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const SparseMatrixCOO<double>& solver_matrix)
+void DirectSolverGive::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, SparseMatrixCOO<double>& solver_matrix)
 {
+    /* 
+     * MUMPS (a parallel direct solver) uses 1-based indexing, 
+     * whereas the input matrix follows 0-based indexing. 
+     * Adjust row and column indices to match MUMPS' requirements.
+     */
+    for (int i = 0; i < solver_matrix.non_zero_size(); i++) {
+        solver_matrix.row_index(i) += 1;
+        solver_matrix.col_index(i) += 1;
+    }
+
     mumps_solver.job = JOB_INIT;
     mumps_solver.par = PAR_PARALLEL;
     /* The matrix is positive definite for invertible mappings. */
@@ -73,7 +83,7 @@ void DirectSolverGive::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, const
     // CNTL(6) Doesn't exist
     mumps_solver.CNTL(7) = 0.0; // Defines the precision of the dropping parameter used during BLR compression
     // CNTL(8-15) Don't exist
-
+    
     mumps_solver.job = JOB_ANALYSIS_AND_FACTORIZATION;
     assert(solver_matrix.rows() == solver_matrix.columns());
     mumps_solver.n   = solver_matrix.rows();

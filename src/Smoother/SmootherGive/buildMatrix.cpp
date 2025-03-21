@@ -157,8 +157,8 @@
                 const Stencil& LeftStencil                       = getStencil(i_r - 1);                                \
                 int left_nz_index                                = getCircleAscIndex(i_r - 1, i_theta);                \
                 int nz_index                                     = left_nz_index + LeftStencil[StencilPosition::Center];   \
-                inner_boundary_circle_matrix.row_index(nz_index) = left_index + 1;                                     \
-                inner_boundary_circle_matrix.col_index(nz_index) = left_index + 1;                                     \
+                inner_boundary_circle_matrix.row_index(nz_index) = left_index;                                     \
+                inner_boundary_circle_matrix.col_index(nz_index) = left_index;                                     \
                 inner_boundary_circle_matrix.value(nz_index) += coeff1 * arr; /* Center: (Right) */                    \
             }                                                                                                          \
             if (i_r > 1) {                                                                                             \
@@ -344,8 +344,8 @@
                 const Stencil& CenterStencil      = getStencil(i_r);                                                   \
                 int center_nz_index               = getCircleAscIndex(i_r, i_theta);                                   \
                 int nz_index                      = center_nz_index + CenterStencil[StencilPosition::Center];              \
-                center_matrix.row_index(nz_index) = center_index + 1;                                                  \
-                center_matrix.col_index(nz_index) = center_index + 1;                                                  \
+                center_matrix.row_index(nz_index) = center_index;                                                  \
+                center_matrix.col_index(nz_index) = center_index;                                                  \
                 center_matrix.value(nz_index) += 1.0;                                                                  \
                 /* Fill matrix row of (i+1,j) */                                                                       \
                 row    = right_index;                                                                                  \
@@ -398,29 +398,29 @@
                 const Stencil& CenterStencil = getStencil(i_r);                                                        \
                                                                                                                        \
                 nz_index                          = center_nz_index + CenterStencil[StencilPosition::Center];              \
-                center_matrix.row_index(nz_index) = center_index + 1;                                                  \
-                center_matrix.col_index(nz_index) = center_index + 1;                                                  \
+                center_matrix.row_index(nz_index) = center_index;                                                  \
+                center_matrix.col_index(nz_index) = center_index;                                                  \
                 center_matrix.value(nz_index) +=                                                                       \
                     0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* beta_{i,j} */                          \
                                                                                                                        \
                 nz_index                          = center_nz_index + CenterStencil[StencilPosition::Left];                \
-                center_matrix.row_index(nz_index) = center_index + 1;                                                  \
-                center_matrix.col_index(nz_index) = left_index + 1;                                                    \
+                center_matrix.row_index(nz_index) = center_index;                                                  \
+                center_matrix.col_index(nz_index) = left_index;                                                    \
                 center_matrix.value(nz_index) += -coeff1 * arr; /* Left */                                             \
                                                                                                                        \
                 nz_index                          = center_nz_index + CenterStencil[StencilPosition::Bottom];              \
-                center_matrix.row_index(nz_index) = center_index + 1;                                                  \
-                center_matrix.col_index(nz_index) = bottom_index + 1;                                                  \
+                center_matrix.row_index(nz_index) = center_index;                                                  \
+                center_matrix.col_index(nz_index) = bottom_index;                                                  \
                 center_matrix.value(nz_index) += -coeff3 * att; /* Bottom */                                           \
                                                                                                                        \
                 nz_index                          = center_nz_index + CenterStencil[StencilPosition::Top];                 \
-                center_matrix.row_index(nz_index) = center_index + 1;                                                  \
-                center_matrix.col_index(nz_index) = top_index + 1;                                                     \
+                center_matrix.row_index(nz_index) = center_index;                                                  \
+                center_matrix.col_index(nz_index) = top_index;                                                     \
                 center_matrix.value(nz_index) += -coeff4 * att; /* Top */                                              \
                                                                                                                        \
                 nz_index                          = center_nz_index + CenterStencil[StencilPosition::Center];              \
-                center_matrix.row_index(nz_index) = center_index + 1;                                                  \
-                center_matrix.col_index(nz_index) = center_index + 1;                                                  \
+                center_matrix.row_index(nz_index) = center_index;                                                  \
+                center_matrix.col_index(nz_index) = center_index;                                                  \
                 /* Center: (Left, Right, Bottom, Top) */                                                               \
                 center_matrix.value(nz_index) += (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att;                    \
                                                                                                                        \
@@ -430,13 +430,13 @@
                 const Stencil& LeftStencil = CenterStencil;                                                            \
                                                                                                                        \
                 nz_index                        = left_nz_index + LeftStencil[StencilPosition::Left];                      \
-                left_matrix.row_index(nz_index) = left_index + 1;                                                      \
-                left_matrix.col_index(nz_index) = center_index + 1;                                                    \
+                left_matrix.row_index(nz_index) = left_index;                                                      \
+                left_matrix.col_index(nz_index) = center_index;                                                    \
                 left_matrix.value(nz_index) += -coeff1 * arr; /* Right -> Left*/                                       \
                                                                                                                        \
                 nz_index                        = left_nz_index + LeftStencil[StencilPosition::Center];                    \
-                left_matrix.row_index(nz_index) = left_index + 1;                                                      \
-                left_matrix.col_index(nz_index) = left_index + 1;                                                      \
+                left_matrix.row_index(nz_index) = left_index;                                                      \
+                left_matrix.col_index(nz_index) = left_index;                                                      \
                 left_matrix.value(nz_index) += coeff1 * arr; /* Center: (Right) -> Center: (Left) */                   \
                                                                                                                        \
                 /* Top Right -> Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                               \
@@ -466,38 +466,38 @@
                 const Stencil& BottomStencil = CenterStencil;                                                          \
                                                                                                                        \
                 nz_index                          = bottom_nz_index + BottomStencil[StencilPosition::Top];                 \
-                center_matrix.row_index(nz_index) = bottom_index + 1;                                                  \
-                center_matrix.col_index(nz_index) = center_index + 1;                                                  \
+                center_matrix.row_index(nz_index) = bottom_index;                                                  \
+                center_matrix.col_index(nz_index) = center_index;                                                  \
                 center_matrix.value(nz_index) += -coeff3 * att; /* Top */                                              \
                                                                                                                        \
                 nz_index                          = bottom_nz_index + BottomStencil[StencilPosition::Center];              \
-                center_matrix.row_index(nz_index) = bottom_index + 1;                                                  \
-                center_matrix.col_index(nz_index) = bottom_index + 1;                                                  \
+                center_matrix.row_index(nz_index) = bottom_index;                                                  \
+                center_matrix.col_index(nz_index) = bottom_index;                                                  \
                 center_matrix.value(nz_index) += coeff3 * att; /* Center: (Top) */                                     \
                                                                                                                        \
                 /* REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                                                         \
                 /* nz_index = bottom_nz_index + BottomStencil[StencilPosition::TopLeft]; */                                \
-                /* center_matrix.row_index(nz_index) = bottom_index + 1; */                                            \
-                /* center_matrix.col_index(nz_index) = left_index + 1; */                                              \
+                /* center_matrix.row_index(nz_index) = bottom_index; */                                            \
+                /* center_matrix.col_index(nz_index) = left_index; */                                              \
                 /* center_matrix.value(nz_index) += 0.25 * art; // Top Left */                                         \
                                                                                                                        \
                 /* Fill matrix row of (i,j+1) */                                                                       \
                 const Stencil& TopStencil = CenterStencil;                                                             \
                                                                                                                        \
                 nz_index                          = top_nz_index + TopStencil[StencilPosition::Bottom];                    \
-                center_matrix.row_index(nz_index) = top_index + 1;                                                     \
-                center_matrix.col_index(nz_index) = center_index + 1;                                                  \
+                center_matrix.row_index(nz_index) = top_index;                                                     \
+                center_matrix.col_index(nz_index) = center_index;                                                  \
                 center_matrix.value(nz_index) += -coeff4 * att; /* Bottom */                                           \
                                                                                                                        \
                 nz_index                          = top_nz_index + TopStencil[StencilPosition::Center];                    \
-                center_matrix.row_index(nz_index) = top_index + 1;                                                     \
-                center_matrix.col_index(nz_index) = top_index + 1;                                                     \
+                center_matrix.row_index(nz_index) = top_index;                                                     \
+                center_matrix.col_index(nz_index) = top_index;                                                     \
                 center_matrix.value(nz_index) += coeff4 * att; /* Center: (Bottom) */                                  \
                                                                                                                        \
                 /* REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                                                         \
                 /* nz_index = top_nz_index + TopStencil[StencilPosition::BottomLeft]; */                                   \
-                /* center_matrix.row_index(nz_index) = top_index + 1; */                                               \
-                /* center_matrix.col_index(nz_index) = left_index + 1; */                                              \
+                /* center_matrix.row_index(nz_index) = top_index; */                                               \
+                /* center_matrix.col_index(nz_index) = left_index; */                                              \
                 /* center_matrix.value(nz_index) += - 0.25 * art; // Bottom Left */                                    \
             }                                                                                                          \
         }                                                                                                              \

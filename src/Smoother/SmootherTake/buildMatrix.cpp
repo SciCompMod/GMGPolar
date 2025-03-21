@@ -154,9 +154,9 @@
                 /* Fill matrix row of (i,j) */                                                                         \
                 const Stencil& CenterStencil = getStencil(i_r);                                                        \
                 const int center_nz_index    = getCircleAscIndex(i_r, i_theta);                                        \
-                const int nz_index           = center_nz_index + CenterStencil[StencilPosition::Center];                   \
-                matrix.row_index(nz_index)   = center_index + 1;                                                       \
-                matrix.col_index(nz_index)   = center_index + 1;                                                       \
+                const int nz_index           = center_nz_index + CenterStencil[StencilPosition::Center];               \
+                matrix.row_index(nz_index)   = center_index;                                                           \
+                matrix.col_index(nz_index)   = center_index;                                                           \
                 matrix.value(nz_index)       = 1.0;                                                                    \
             }                                                                                                          \
             else {                                                                                                     \
@@ -164,7 +164,7 @@
                 /* Case 2: Across origin discretization on the interior boundary */                                    \
                 /* ------------------------------------------------------------- */                                    \
                 /* h1 gets replaced with 2 * R0. */                                                                    \
-                /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()/2)). */                          \
+                /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()/2)). */                           \
                 /* Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil. */    \
                 const double h1 = 2.0 * grid.radius(0);                                                                \
                 const double h2 = grid.radialSpacing(i_r);                                                             \
@@ -206,24 +206,24 @@
                 const double bottom_value = -coeff3 * (att[center] + att[bottom]);                                     \
                 const double top_value    = -coeff4 * (att[center] + att[top]);                                        \
                                                                                                                        \
-                nz_index                   = center_nz_index + CenterStencil[StencilPosition::Center];                     \
-                matrix.row_index(nz_index) = center_index + 1;                                                         \
-                matrix.col_index(nz_index) = center_index + 1;                                                         \
+                nz_index                   = center_nz_index + CenterStencil[StencilPosition::Center];                 \
+                matrix.row_index(nz_index) = center_index;                                                             \
+                matrix.col_index(nz_index) = center_index;                                                             \
                 matrix.value(nz_index)     = center_value;                                                             \
                                                                                                                        \
-                nz_index                   = center_nz_index + CenterStencil[StencilPosition::Left];                       \
-                matrix.row_index(nz_index) = center_index + 1;                                                         \
-                matrix.col_index(nz_index) = left_index + 1;                                                           \
+                nz_index                   = center_nz_index + CenterStencil[StencilPosition::Left];                   \
+                matrix.row_index(nz_index) = center_index;                                                             \
+                matrix.col_index(nz_index) = left_index;                                                               \
                 matrix.value(nz_index)     = left_value;                                                               \
                                                                                                                        \
-                nz_index                   = center_nz_index + CenterStencil[StencilPosition::Bottom];                     \
-                matrix.row_index(nz_index) = center_index + 1;                                                         \
-                matrix.col_index(nz_index) = bottom_index + 1;                                                         \
+                nz_index                   = center_nz_index + CenterStencil[StencilPosition::Bottom];                 \
+                matrix.row_index(nz_index) = center_index;                                                             \
+                matrix.col_index(nz_index) = bottom_index;                                                             \
                 matrix.value(nz_index)     = bottom_value;                                                             \
                                                                                                                        \
-                nz_index                   = center_nz_index + CenterStencil[StencilPosition::Top];                        \
-                matrix.row_index(nz_index) = center_index + 1;                                                         \
-                matrix.col_index(nz_index) = top_index + 1;                                                            \
+                nz_index                   = center_nz_index + CenterStencil[StencilPosition::Top];                    \
+                matrix.row_index(nz_index) = center_index;                                                             \
+                matrix.col_index(nz_index) = top_index;                                                                \
                 matrix.value(nz_index)     = top_value;                                                                \
             }                                                                                                          \
         }                                                                                                              \
