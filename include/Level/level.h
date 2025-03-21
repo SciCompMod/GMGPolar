@@ -131,11 +131,11 @@ private:
     std::vector<double> sin_theta_;
     std::vector<double> cos_theta_;
 
-    bool cache_density_profile_coefficients_;
+    bool cache_density_profile_coefficients_; // cache alpha(r_i), beta(r_i)
     std::vector<double> coeff_alpha_;
     std::vector<double> coeff_beta_;
 
-    bool cache_domain_geometry_;
+    bool cache_domain_geometry_; // cache arr, att, art, detDF
     Vector<double> arr_;
     Vector<double> att_;
     Vector<double> art_;
