@@ -6,6 +6,8 @@
 #include "../../include/DirectSolver/DirectSolverGive/directSolverGive.h"
 #include "../../include/DirectSolver/DirectSolverTake/directSolverTake.h"
 
+#include "../../include/DirectSolver/DirectSolverTakeNoMumps/directSolverTakeNoMumps.h"
+
 #include "../../include/Smoother/SmootherGive/smootherGive.h"
 #include "../../include/Smoother/SmootherTake/smootherTake.h"
 

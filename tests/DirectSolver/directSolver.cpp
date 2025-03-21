@@ -8,6 +8,7 @@
 #include "../../include/Residual/ResidualGive/residualGive.h"
 #include "../../include/DirectSolver/DirectSolverGive/directSolverGive.h"
 #include "../../include/DirectSolver/DirectSolverTake/directSolverTake.h"
+#include "../../include/DirectSolver/DirectSolverTakeNoMumps/directSolverTakeNoMumps.h"
 
 #include "../../include/InputFunctions/domainGeometry.h"
 #include "../../include/InputFunctions/densityProfileCoefficients.h"

@@ -157,9 +157,9 @@ SparseMatrixCOO<T>& SparseMatrixCOO<T>::operator=(const SparseMatrixCOO& other)
     }
     // Only allocate new memory if the sizes are different
     if (nnz_ != other.nnz_) {
-        row_indices_    = std::make_unique<int[]>(nnz_);
-        column_indices_ = std::make_unique<int[]>(nnz_);
-        values_         = std::make_unique<T[]>(nnz_);
+        row_indices_    = std::make_unique<int[]>(other.nnz_);
+        column_indices_ = std::make_unique<int[]>(other.nnz_);
+        values_         = std::make_unique<T[]>(other.nnz_);
     }
     // Copy the elements
     rows_         = other.rows_;

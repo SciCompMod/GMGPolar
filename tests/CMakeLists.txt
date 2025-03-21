@@ -20,6 +20,11 @@ target_compile_features(test_matrix PRIVATE cxx_std_17)
 target_link_libraries(test_matrix GMGPolarLib GTest::gtest_main ${MUMPS_LIBRARIES})
 add_test(NAME test_matrix COMMAND test_matrix)
 
+add_executable(test_csr_matrix LinearAlgebra/csr_matrix.cpp)
+target_compile_features(test_csr_matrix PRIVATE cxx_std_17)
+target_link_libraries(test_csr_matrix GMGPolarLib GTest::gtest_main ${MUMPS_LIBRARIES})
+add_test(NAME test_csr_matrix COMMAND test_csr_matrix)
+
 add_executable(test_tridiagonal_solver LinearAlgebra/tridiagonal_solver.cpp)
 target_compile_features(test_tridiagonal_solver PRIVATE cxx_std_17)
 target_link_libraries(test_tridiagonal_solver GMGPolarLib GTest::gtest_main ${MUMPS_LIBRARIES})
