@@ -60,7 +60,7 @@ private:
     // This modifies the system from
     //    A * solution = rhs
     // to the equivalent system
-    //    symmetric(A) * solution = rhs - applySymmetryShift(rhs).
+    //    symmetric_DBc(A) * solution = rhs - applySymmetryShift(rhs).
     // The correction modifies the rhs to account for the influence of the Dirichlet boundary conditions,
     // ensuring that the solution at the boundary is correctly adjusted and maintains the required symmetry.
     void applySymmetryShift(Vector<double>& rhs) const;

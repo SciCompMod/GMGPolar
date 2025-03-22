@@ -1,5 +1,20 @@
 #include "../../../include/ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.h"
 
+#define UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value)                                                         \
+    do {                                                                                                               \
+        if (row == column)                                                                                             \
+            matrix.main_diagonal(row) = value;                                                                         \
+        else if (row == column - 1)                                                                                    \
+            matrix.sub_diagonal(row) = value;                                                                          \
+        else if (row == 0 && column == matrix.columns() - 1)                                                           \
+            matrix.cyclic_corner_element() = value;                                                                    \
+    } while (0)
+
+#define UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value)                                                            \
+    do {                                                                                                               \
+        matrix.diagonal(row) = value;                                                                                  \
+    } while (0)
+
 #define NODE_BUILD_SMOOTHER_TAKE(i_r, i_theta, grid, DirBC_Interior, inner_boundary_circle_matrix,                     \
                                  circle_diagonal_solver, circle_tridiagonal_solver, radial_diagonal_solver,            \
                                  radial_tridiagonal_solver)                                                            \
@@ -66,34 +81,19 @@
                 value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) +                        \
                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
-                if (row == column)                                                                                     \
-                    matrix.main_diagonal(row) = value;                                                                 \
-                else if (row == column - 1)                                                                            \
-                    matrix.sub_diagonal(row) = value;                                                                  \
-                else if (row == 0 && column == matrix.columns() - 1)                                                   \
-                    matrix.cyclic_corner_element() = value;                                                            \
+                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
                                                                                                                        \
                 /* Bottom */                                                                                           \
                 row    = center_index;                                                                                 \
                 column = bottom_index;                                                                                 \
                 value  = -coeff3 * (att[center] + att[bottom]);                                                        \
-                if (row == column)                                                                                     \
-                    matrix.main_diagonal(row) = value;                                                                 \
-                else if (row == column - 1)                                                                            \
-                    matrix.sub_diagonal(row) = value;                                                                  \
-                else if (row == 0 && column == matrix.columns() - 1)                                                   \
-                    matrix.cyclic_corner_element() = value;                                                            \
+                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
                                                                                                                        \
                 /* Top */                                                                                              \
                 row    = center_index;                                                                                 \
                 column = top_index;                                                                                    \
                 value  = -coeff4 * (att[center] + att[top]);                                                           \
-                if (row == column)                                                                                     \
-                    matrix.main_diagonal(row) = value;                                                                 \
-                else if (row == column - 1)                                                                            \
-                    matrix.sub_diagonal(row) = value;                                                                  \
-                else if (row == 0 && column == matrix.columns() - 1)                                                   \
-                    matrix.cyclic_corner_element() = value;                                                            \
+                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
             }                                                                                                          \
             /* ---------------- */                                                                                     \
             /* Diagonal Section */                                                                                     \
@@ -122,16 +122,17 @@
                     value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) +                    \
                             coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                 \
                             coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                  \
-                    matrix.diagonal(row) = value;                                                                      \
+                    UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                               \
                 }                                                                                                      \
                 else { /* i_theta % 2 == 0 */                                                                          \
                     /* Center: Coarse */                                                                               \
                     auto& matrix     = circle_diagonal_solver[i_r / 2];                                                \
                     int center_index = i_theta;                                                                        \
                                                                                                                        \
-                    row                  = center_index;                                                               \
-                    column               = center_index;                                                               \
-                    matrix.diagonal(row) = 1.0;                                                                        \
+                    row    = center_index;                                                                             \
+                    column = center_index;                                                                             \
+                    value  = 1.0;                                                                                      \
+                    UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                               \
                 }                                                                                                      \
             }                                                                                                          \
         }                                                                                                              \
@@ -317,34 +318,19 @@
                 value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) +                        \
                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
-                if (row == column)                                                                                     \
-                    matrix.main_diagonal(row) = value;                                                                 \
-                else if (row == column - 1)                                                                            \
-                    matrix.sub_diagonal(row) = value;                                                                  \
-                else if (row == 0 && column == matrix.columns() - 1)                                                   \
-                    matrix.cyclic_corner_element() = value;                                                            \
+                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
                                                                                                                        \
                 /* Left */                                                                                             \
                 row    = center_index;                                                                                 \
                 column = left_index;                                                                                   \
                 value  = -coeff1 * (arr[center] + arr[left]);                                                          \
-                if (row == column)                                                                                     \
-                    matrix.main_diagonal(row) = value;                                                                 \
-                else if (row == column - 1)                                                                            \
-                    matrix.sub_diagonal(row) = value;                                                                  \
-                else if (row == 0 && column == matrix.columns() - 1)                                                   \
-                    matrix.cyclic_corner_element() = value;                                                            \
+                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
                                                                                                                        \
                 /* Right */                                                                                            \
                 row    = center_index;                                                                                 \
                 column = right_index;                                                                                  \
                 value  = -coeff2 * (arr[center] + arr[right]);                                                         \
-                if (row == column)                                                                                     \
-                    matrix.main_diagonal(row) = value;                                                                 \
-                else if (row == column - 1)                                                                            \
-                    matrix.sub_diagonal(row) = value;                                                                  \
-                else if (row == 0 && column == matrix.columns() - 1)                                                   \
-                    matrix.cyclic_corner_element() = value;                                                            \
+                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
             }                                                                                                          \
             /* ---------------- */                                                                                     \
             /* Diagonal Section */                                                                                     \
@@ -377,13 +363,14 @@
                     value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) +                    \
                             coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                 \
                             coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                  \
-                    matrix.diagonal(row) = value;                                                                      \
+                    UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                               \
                 }                                                                                                      \
                 else { /* i_r % 2 == 0 */                                                                              \
                     /* Center: Coarse */                                                                               \
-                    row                  = center_index;                                                               \
-                    column               = center_index;                                                               \
-                    matrix.diagonal(row) = 1.0;                                                                        \
+                    row    = center_index;                                                                             \
+                    column = center_index;                                                                             \
+                    value  = 1.0;                                                                                      \
+                    UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                               \
                 }                                                                                                      \
             }                                                                                                          \
         }                                                                                                              \
@@ -437,23 +424,13 @@
                 value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) +                        \
                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
-                if (row == column)                                                                                     \
-                    matrix.main_diagonal(row) = value;                                                                 \
-                else if (row == column - 1)                                                                            \
-                    matrix.sub_diagonal(row) = value;                                                                  \
-                else if (row == 0 && column == matrix.columns() - 1)                                                   \
-                    matrix.cyclic_corner_element() = value;                                                            \
+                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
                                                                                                                        \
                 /* Right */                                                                                            \
                 row    = center_index;                                                                                 \
                 column = right_index;                                                                                  \
                 value  = -coeff2 * (arr[center] + arr[right]);                                                         \
-                if (row == column)                                                                                     \
-                    matrix.main_diagonal(row) = value;                                                                 \
-                else if (row == column - 1)                                                                            \
-                    matrix.sub_diagonal(row) = value;                                                                  \
-                else if (row == 0 && column == matrix.columns() - 1)                                                   \
-                    matrix.cyclic_corner_element() = value;                                                            \
+                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
             }                                                                                                          \
             else {                                                                                                     \
                                                                                                                        \
@@ -473,7 +450,7 @@
                     value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) +                    \
                             coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                 \
                             coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                  \
-                    matrix.diagonal(row) = value;                                                                      \
+                    UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                               \
                 }                                                                                                      \
                 else {                                                                                                 \
                     /* i_theta % 2 == 0 and i_r % 2 == 0 */                                                            \
@@ -483,9 +460,10 @@
                     /* |   |   |   || -------------- */                                                                \
                     /* | O | O | O || O   O   O   O  */                                                                \
                     /* Center: Coarse */                                                                               \
-                    row                  = center_index;                                                               \
-                    column               = center_index;                                                               \
-                    matrix.diagonal(row) = 1.0;                                                                        \
+                    row    = center_index;                                                                             \
+                    column = center_index;                                                                             \
+                    value  = 1.0;                                                                                      \
+                    UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                               \
                 }                                                                                                      \
             }                                                                                                          \
         }                                                                                                              \
@@ -536,33 +514,18 @@
                 value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) +                        \
                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
-                if (row == column)                                                                                     \
-                    matrix.main_diagonal(row) = value;                                                                 \
-                else if (row == column - 1)                                                                            \
-                    matrix.sub_diagonal(row) = value;                                                                  \
-                else if (row == 0 && column == matrix.columns() - 1)                                                   \
-                    matrix.cyclic_corner_element() = value;                                                            \
+                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
                                                                                                                        \
                 /* Left */                                                                                             \
                 row    = center_index;                                                                                 \
                 column = left_index;                                                                                   \
                 value  = -coeff1 * (arr[center] + arr[left]);                                                          \
-                if (row == column)                                                                                     \
-                    matrix.main_diagonal(row) = value;                                                                 \
-                else if (row == column - 1)                                                                            \
-                    matrix.sub_diagonal(row) = value;                                                                  \
-                else if (row == 0 && column == matrix.columns() - 1)                                                   \
-                    matrix.cyclic_corner_element() = value;                                                            \
+                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
                 /* Right */                                                                                            \
                 row    = center_index;                                                                                 \
                 column = right_index;                                                                                  \
                 value  = 0.0; /* Make tridiagonal matrix symmetric */                                                  \
-                if (row == column)                                                                                     \
-                    matrix.main_diagonal(row) = value;                                                                 \
-                else if (row == column - 1)                                                                            \
-                    matrix.sub_diagonal(row) = value;                                                                  \
-                else if (row == 0 && column == matrix.columns() - 1)                                                   \
-                    matrix.cyclic_corner_element() = value;                                                            \
+                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
             }                                                                                                          \
             else {                                                                                                     \
                 /* i_theta % 2 == 0 */                                                                                 \
@@ -582,7 +545,7 @@
                 value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) +                        \
                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
-                matrix.diagonal(row) = value;                                                                          \
+                UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                                   \
             }                                                                                                          \
         }                                                                                                              \
         /* ------------------------------------------ */                                                               \
@@ -610,22 +573,12 @@
                 row    = center_index;                                                                                 \
                 column = center_index;                                                                                 \
                 value  = 1.0;                                                                                          \
-                if (row == column)                                                                                     \
-                    matrix.main_diagonal(row) = value;                                                                 \
-                else if (row == column - 1)                                                                            \
-                    matrix.sub_diagonal(row) = value;                                                                  \
-                else if (row == 0 && column == matrix.columns() - 1)                                                   \
-                    matrix.cyclic_corner_element() = value;                                                            \
+                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
                                                                                                                        \
                 row    = center_index;                                                                                 \
                 column = left_index;                                                                                   \
                 value  = 0.0; /* Make tridiagonal matrix symmetric */                                                  \
-                if (row == column)                                                                                     \
-                    matrix.main_diagonal(row) = value;                                                                 \
-                else if (row == column - 1)                                                                            \
-                    matrix.sub_diagonal(row) = value;                                                                  \
-                else if (row == 0 && column == matrix.columns() - 1)                                                   \
-                    matrix.cyclic_corner_element() = value;                                                            \
+                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
             }                                                                                                          \
             else {                                                                                                     \
                 /* i_theta % 2 == 0 */                                                                                 \
@@ -640,9 +593,10 @@
                 auto& matrix = radial_diagonal_solver[i_theta / 2];                                                    \
                                                                                                                        \
                 /* Fill matrix row of (i,j) */                                                                         \
-                row                  = center_index;                                                                   \
-                column               = center_index;                                                                   \
-                matrix.diagonal(row) = 1.0;                                                                            \
+                row    = center_index;                                                                                 \
+                column = center_index;                                                                                 \
+                value  = 1.0;                                                                                          \
+                UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                                   \
             }                                                                                                          \
         }                                                                                                              \
     } while (0)

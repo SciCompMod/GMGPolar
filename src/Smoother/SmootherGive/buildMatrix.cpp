@@ -1,5 +1,15 @@
 #include "../../../include/Smoother/SmootherGive/smootherGive.h"
 
+#define UPDATE_MATRIX_ELEMENT(matrix, row, column, value)                                                              \
+    do {                                                                                                               \
+        if (row == column)                                                                                             \
+            matrix.main_diagonal(row) += value;                                                                        \
+        else if (row == column - 1)                                                                                    \
+            matrix.sub_diagonal(row) += value;                                                                         \
+        else if (row == 0 && column == matrix.columns() - 1)                                                           \
+            matrix.cyclic_corner_element() += value;                                                                   \
+    } while (0)
+
 /* arr, att, art and detDF get computed */
 
 #define COMPUTE_JACOBIAN_ELEMENTS(domain_geometry, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDF)  \
@@ -73,84 +83,44 @@
             row    = center_index;                                                                                       \
             column = center_index;                                                                                       \
             value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */                   \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             row    = center_index;                                                                                       \
             column = bottom_index;                                                                                       \
             value  = -coeff3 * att; /* Bottom */                                                                         \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             row    = center_index;                                                                                       \
             column = top_index;                                                                                          \
             value  = -coeff4 * att; /* Top */                                                                            \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             row    = center_index;                                                                                       \
             column = center_index;                                                                                       \
             value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */         \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             /* Fill matrix row of (i,j-1) */                                                                             \
             row    = bottom_index;                                                                                       \
             column = center_index;                                                                                       \
             value  = -coeff3 * att; /* Top */                                                                            \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             row    = bottom_index;                                                                                       \
             column = bottom_index;                                                                                       \
             value  = coeff3 * att; /* Center: (Top) */                                                                   \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             /* Fill matrix row of (i,j+1) */                                                                             \
             row    = top_index;                                                                                          \
             column = center_index;                                                                                       \
             value  = -coeff4 * att; /* Bottom */                                                                         \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             row    = top_index;                                                                                          \
             column = top_index;                                                                                          \
             value  = coeff4 * att; /* Center: (Bottom) */                                                                \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             /* Fill matrix row of (i-1,j) */                                                                             \
             if (!DirBC_Interior && i_r == 1) {                                                                           \
@@ -165,24 +135,14 @@
                 row    = left_index;                                                                                     \
                 column = left_index;                                                                                     \
                 value  = coeff1 * arr; /* Center: (Right) */                                                             \
-                if (row == column)                                                                                       \
-                    left_matrix.main_diagonal(row) += value;                                                             \
-                else if (row == column - 1)                                                                              \
-                    left_matrix.sub_diagonal(row) += value;                                                              \
-                else if (row == 0 && column == left_matrix.columns() - 1)                                                \
-                    left_matrix.cyclic_corner_element() += value;                                                        \
+                UPDATE_MATRIX_ELEMENT(left_matrix, row, column, value);                                                  \
             }                                                                                                            \
                                                                                                                          \
             /* Fill matrix row of (i+1,j) */                                                                             \
             row    = right_index;                                                                                        \
             column = right_index;                                                                                        \
             value  = coeff2 * arr; /* Center: (Left) */                                                                  \
-            if (row == column)                                                                                           \
-                right_matrix.main_diagonal(row) += value;                                                                \
-            else if (row == column - 1)                                                                                  \
-                right_matrix.sub_diagonal(row) += value;                                                                 \
-            else if (row == 0 && column == right_matrix.columns() - 1)                                                   \
-                right_matrix.cyclic_corner_element() += value;                                                           \
+            UPDATE_MATRIX_ELEMENT(right_matrix, row, column, value);                                                     \
         }                                                                                                                \
         /* ------------------------------------------ */                                                                 \
         /* Node in the interior of the Radial Section */                                                                 \
@@ -214,106 +174,56 @@
             row    = center_index;                                                                                       \
             column = center_index;                                                                                       \
             value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */                   \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             row    = center_index;                                                                                       \
             column = left_index;                                                                                         \
             value  = -coeff1 * arr; /* Left */                                                                           \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             row    = center_index;                                                                                       \
             column = right_index;                                                                                        \
             value  = -coeff2 * arr; /* Right */                                                                          \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             row    = center_index;                                                                                       \
             column = center_index;                                                                                       \
             value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */         \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             /* Fill matrix row of (i-1,j) */                                                                             \
             row    = left_index;                                                                                         \
             column = center_index;                                                                                       \
             value  = -coeff1 * arr; /* Right */                                                                          \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             row    = left_index;                                                                                         \
             column = left_index;                                                                                         \
             value  = coeff1 * arr; /* Center: (Right) */                                                                 \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             /* Fill matrix row of (i+1,j) */                                                                             \
             row    = right_index;                                                                                        \
             column = center_index;                                                                                       \
             value  = -coeff2 * arr; /* Left */                                                                           \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             row    = right_index;                                                                                        \
             column = right_index;                                                                                        \
             value  = coeff2 * arr; /* Center: (Left) */                                                                  \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             /* Fill matrix row of (i,j-1) */                                                                             \
             row    = bottom_index;                                                                                       \
             column = bottom_index;                                                                                       \
             value  = coeff3 * att; /* Center: (Top) */                                                                   \
-            if (row == column)                                                                                           \
-                bottom_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                bottom_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == bottom_matrix.columns() - 1)                                                  \
-                bottom_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(bottom_matrix, row, column, value);                                                    \
                                                                                                                          \
             /* Fill matrix row of (i,j+1) */                                                                             \
             row    = top_index;                                                                                          \
             column = top_index;                                                                                          \
             value  = coeff4 * att; /* Center: (Bottom) */                                                                \
-            if (row == column)                                                                                           \
-                top_matrix.main_diagonal(row) += value;                                                                  \
-            else if (row == column - 1)                                                                                  \
-                top_matrix.sub_diagonal(row) += value;                                                                   \
-            else if (row == 0 && column == top_matrix.columns() - 1)                                                     \
-                top_matrix.cyclic_corner_element() += value;                                                             \
+            UPDATE_MATRIX_ELEMENT(top_matrix, row, column, value);                                                       \
         }                                                                                                                \
         /* ------------------------------------------ */                                                                 \
         /* Circle Section: Node in the inner boundary */                                                                 \
@@ -351,12 +261,7 @@
                 row    = right_index;                                                                                    \
                 column = right_index;                                                                                    \
                 value  = coeff2 * arr; /* Center: (Left) */                                                              \
-                if (row == column)                                                                                       \
-                    right_matrix.main_diagonal(row) += value;                                                            \
-                else if (row == column - 1)                                                                              \
-                    right_matrix.sub_diagonal(row) += value;                                                             \
-                else if (row == 0 && column == right_matrix.columns() - 1)                                               \
-                    right_matrix.cyclic_corner_element() += value;                                                       \
+                UPDATE_MATRIX_ELEMENT(right_matrix, row, column, value);                                                 \
             }                                                                                                            \
             else {                                                                                                       \
                 /* ------------------------------------------------------------- */                                      \
@@ -455,12 +360,7 @@
                 row    = right_index;                                                                                    \
                 column = right_index;                                                                                    \
                 value  = coeff2 * arr; /* Center: (Left) */                                                              \
-                if (row == column)                                                                                       \
-                    right_matrix.main_diagonal(row) += value;                                                            \
-                else if (row == column - 1)                                                                              \
-                    right_matrix.sub_diagonal(row) += value;                                                             \
-                else if (row == 0 && column == right_matrix.columns() - 1)                                               \
-                    right_matrix.cyclic_corner_element() += value;                                                       \
+                UPDATE_MATRIX_ELEMENT(right_matrix, row, column, value);                                                    \
                                                                                                                          \
                 /* Fill matrix row of (i,j-1) */                                                                         \
                 const Stencil& BottomStencil = CenterStencil;                                                            \
@@ -532,86 +432,46 @@
             row    = center_index;                                                                                       \
             column = center_index;                                                                                       \
             value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */                   \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             row    = center_index;                                                                                       \
             column = right_index;                                                                                        \
             value  = -coeff2 * arr; /* Right */                                                                          \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             row    = center_index;                                                                                       \
             column = center_index;                                                                                       \
             value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */         \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             /* Fill matrix row of (i-1,j) */                                                                             \
             row    = left_index;                                                                                         \
             column = left_index;                                                                                         \
             value  = coeff1 * arr; /* Center: (Right) */                                                                 \
-            if (row == column)                                                                                           \
-                left_matrix.main_diagonal(row) += value;                                                                 \
-            else if (row == column - 1)                                                                                  \
-                left_matrix.sub_diagonal(row) += value;                                                                  \
-            else if (row == 0 && column == left_matrix.columns() - 1)                                                    \
-                left_matrix.cyclic_corner_element() += value;                                                            \
+            UPDATE_MATRIX_ELEMENT(left_matrix, row, column, value);                                                    \
                                                                                                                          \
             /* Fill matrix row of (i+1,j) */                                                                             \
             row    = right_index;                                                                                        \
             column = center_index;                                                                                       \
             value  = -coeff2 * arr; /* Left */                                                                           \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             row    = right_index;                                                                                        \
             column = right_index;                                                                                        \
             value  = coeff2 * arr; /* Center: (Left) */                                                                  \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             /* Fill matrix row of (i,j-1) */                                                                             \
             row    = bottom_index;                                                                                       \
             column = bottom_index;                                                                                       \
             value  = coeff3 * att; /* Center: (Top) */                                                                   \
-            if (row == column)                                                                                           \
-                bottom_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                bottom_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == bottom_matrix.columns() - 1)                                                  \
-                bottom_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(bottom_matrix, row, column, value);                                                    \
                                                                                                                          \
             /* Fill matrix row of (i,j+1) */                                                                             \
             row    = top_index;                                                                                          \
             column = top_index;                                                                                          \
             value  = coeff4 * att; /* Center: (Bottom) */                                                                \
-            if (row == column)                                                                                           \
-                top_matrix.main_diagonal(row) += value;                                                                  \
-            else if (row == column - 1)                                                                                  \
-                top_matrix.sub_diagonal(row) += value;                                                                   \
-            else if (row == 0 && column == top_matrix.columns() - 1)                                                     \
-                top_matrix.cyclic_corner_element() += value;                                                             \
+            UPDATE_MATRIX_ELEMENT(top_matrix, row, column, value);                                                    \
         }                                                                                                                \
         /* ------------------------------------------- */                                                                \
         /* Radial Section: Node next to outer boundary */                                                                \
@@ -646,75 +506,40 @@
             row    = center_index;                                                                                       \
             column = center_index;                                                                                       \
             value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */                   \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             row    = center_index;                                                                                       \
             column = left_index;                                                                                         \
             value  = -coeff1 * arr; /* Left */                                                                           \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             row    = center_index;                                                                                       \
             column = center_index;                                                                                       \
             value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */         \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             /* Fill matrix row of (i-1,j) */                                                                             \
             row    = left_index;                                                                                         \
             column = center_index;                                                                                       \
             value  = -coeff1 * arr; /* Right */                                                                          \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             row    = left_index;                                                                                         \
             column = left_index;                                                                                         \
             value  = coeff1 * arr; /* Center: (Right) */                                                                 \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             /* Fill matrix row of (i,j-1) */                                                                             \
             row    = bottom_index;                                                                                       \
             column = bottom_index;                                                                                       \
             value  = coeff3 * att; /* Center: (Top) */                                                                   \
-            if (row == column)                                                                                           \
-                bottom_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                bottom_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == bottom_matrix.columns() - 1)                                                  \
-                bottom_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(bottom_matrix, row, column, value);                                                    \
                                                                                                                          \
             /* Fill matrix row of (i,j+1) */                                                                             \
             row    = top_index;                                                                                          \
             column = top_index;                                                                                          \
             value  = coeff4 * att; /* Center: (Bottom) */                                                                \
-            if (row == column)                                                                                           \
-                top_matrix.main_diagonal(row) += value;                                                                  \
-            else if (row == column - 1)                                                                                  \
-                top_matrix.sub_diagonal(row) += value;                                                                   \
-            else if (row == 0 && column == top_matrix.columns() - 1)                                                     \
-                top_matrix.cyclic_corner_element() += value;                                                             \
+            UPDATE_MATRIX_ELEMENT(top_matrix, row, column, value);                                                    \
         }                                                                                                                \
         /* ------------------------------------------ */                                                                 \
         /* Radial Section: Node on the outer boundary */                                                                 \
@@ -734,23 +559,13 @@
             row    = center_index;                                                                                       \
             column = center_index;                                                                                       \
             value  = 1.0;                                                                                                \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
                                                                                                                          \
             /* Fill matrix row of (i-1,j) */                                                                             \
             row    = left_index;                                                                                         \
             column = left_index;                                                                                         \
             value  = coeff1 * arr; /* Center: (Right) */                                                                 \
-            if (row == column)                                                                                           \
-                center_matrix.main_diagonal(row) += value;                                                               \
-            else if (row == column - 1)                                                                                  \
-                center_matrix.sub_diagonal(row) += value;                                                                \
-            else if (row == 0 && column == center_matrix.columns() - 1)                                                  \
-                center_matrix.cyclic_corner_element() += value;                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
         }                                                                                                                \
     } while (0)
 

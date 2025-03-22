@@ -345,58 +345,94 @@ SparseLUSolver<T>::SparseLUSolver(const SparseMatrixCSR<T>& A) {
 }
 
 
-/* This is slow */
 template <typename T>
 void SparseLUSolver<T>::factorize(const SparseMatrixCSR<T>& A) {
     const int n = A.rows();
-    L_row_ptr.resize(n + 1, 0);
-    U_row_ptr.resize(n + 1, 0);
+    L_row_ptr.assign(n + 1, 0);
+    U_row_ptr.assign(n + 1, 0);
 
-    // Temporary structures to store computed rows
-    std::vector<std::unordered_map<int, T>> L_map(n);
-    std::vector<std::unordered_map<int, T>> U_map(n);
-    
+    // Temporary CSR storage for L and U (per row)
+    std::vector<std::vector<std::pair<int, T>>> L_rows(n);
+    std::vector<std::vector<std::pair<int, T>>> U_rows(n);
+
+    // Temporary dense accumulator and list of indices for current row
+    std::vector<T> x(n, 0);
+    std::vector<int> pattern;
+    pattern.reserve(n); // worst-case
+
     for (int i = 0; i < n; i++) {
-        std::unordered_map<int, T> row_values;
-        
-        // Load nonzero elements of row i
+        // Clear the accumulator for the current row:
+        for (int col : pattern)
+            x[col] = 0;
+        pattern.clear();
+
+        // Load row i of A into x and record nonzero indices
         for (int idx = 0; idx < A.row_nz_size(i); idx++) {
             int j = A.row_nz_index(i, idx);
-            row_values[j] = A.row_nz_entry(i, idx);
+            x[j] = A.row_nz_entry(i, idx);
+            pattern.push_back(j);
         }
 
-        for (int j = 0; j < i; j++) {
-            if (row_values.find(j) == row_values.end()) continue;
+        // Sort pattern so we process indices in increasing order.
+        std::sort(pattern.begin(), pattern.end());
 
-            row_values[j] /= U_map[j][j];
-            L_map[i][j] = row_values[j];
+        // Process the current row: for each column j in the pattern with j < i,
+        // use it to update the row using previously computed U factors.
+        for (int pos = 0; pos < pattern.size(); pos++) {
+            int j = pattern[pos];
+            if (j >= i) break; // only process lower part
 
-            for (const auto& [k, U_val] : U_map[j]) {
-                if (k > j) {
-                    row_values[k] -= row_values[j] * U_val;
+            // Find U(j,j): it must have been computed in U_rows[j]
+            T U_diag = T(0);
+            for (const auto& entry : U_rows[j]) {
+                if (entry.first == j) {
+                    U_diag = entry.second;
+                    break;
                 }
             }
+            // It is assumed U_diag is nonzero (or factorization would break down).
+            T factor = x[j] / U_diag;
+            x[j] = factor;  // store the multiplier in place
+
+            // Save L(i,j) (the multiplier)
+            L_rows[i].push_back({j, factor});
+
+            // Update the rest of the row using U_row j.
+            // (Note: U_rows[j] only stores entries with col >= j.)
+            for (const auto& [col, U_val] : U_rows[j]) {
+                if (col > j) {
+                    // If this is a new nonzero, add it to pattern.
+                    if (x[col] == T(0))
+                        pattern.push_back(col);
+                    x[col] -= factor * U_val;
+                }
+            }
+            // After updating, it is safe to continue.
+            // (The pattern may now be unsorted, but we will re-sort later.)
+            std::sort(pattern.begin() + pos + 1, pattern.end());
         }
 
-        for (const auto& [j, val] : row_values) {
-            if (j < i)
-                L_map[i][j] = val;
-            else
-                U_map[i][j] = val;
+        // The remaining entries (with indices >= i) form the U row.
+        for (int col : pattern) {
+            if (col >= i) {
+                U_rows[i].push_back({col, x[col]});
+            }
         }
     }
 
-    // Convert L_map and U_map into CSR format
+    // Convert the row-wise L and U storage into CSR format.
     for (int i = 0; i < n; i++) {
-        for (const auto& [col, val] : L_map[i]) {
-            L_values.push_back(val);
+        // L part for row i
+        for (const auto& [col, val] : L_rows[i]) {
             L_col_idx.push_back(col);
+            L_values.push_back(val);
         }
         L_row_ptr[i + 1] = L_values.size();
 
-        for (const auto& [col, val] : U_map[i]) {
-            U_values.push_back(val);
+        // U part for row i
+        for (const auto& [col, val] : U_rows[i]) {
             U_col_idx.push_back(col);
+            U_values.push_back(val);
         }
         U_row_ptr[i + 1] = U_values.size();
     }
@@ -435,3 +471,68 @@ void SparseLUSolver<T>::solveInPlace(Vector<T>& b) const {
         b[i] /= diag;
     }
 }
+
+
+
+// /* This is 80% slower */
+// template <typename T>
+// void SparseLUSolver<T>::factorize(const SparseMatrixCSR<T>& A) {
+//     const int n = A.rows();
+//     L_row_ptr.resize(n + 1, 0);
+//     U_row_ptr.resize(n + 1, 0);
+
+//     // Temporary structures to store computed rows
+//     std::vector<std::unordered_map<int, T>> L_map(n);
+//     std::vector<std::unordered_map<int, T>> U_map(n);
+    
+//     for (int i = 0; i < n; i++) {
+//         std::unordered_map<int, T> row_values;
+        
+//         // Load nonzero elements of row i
+//         for (int idx = 0; idx < A.row_nz_size(i); idx++) {
+//             int j = A.row_nz_index(i, idx);
+//             row_values[j] = A.row_nz_entry(i, idx);
+//         }
+
+//         for (int j = 0; j < i; j++) {
+//             auto it = row_values.find(j);
+//             if (it == row_values.end()) continue;
+
+//             // Compute L(i, j) using the diagonal U(j, j)
+//             it->second /= U_map[j][j];
+//             L_map[i][j] = it->second;
+
+//             // Update the remaining values in row i using the jth row of U.
+//             for (const auto& [k, U_val] : U_map[j]) {
+//                 if (k > j) {
+//                     row_values[k] -= it->second * U_val;
+//                 }
+//             }
+//         }
+
+//         for (const auto& [j, val] : row_values) {
+//             if (j < i)
+//                 L_map[i][j] = val;
+//             else
+//                 U_map[i][j] = val;
+//         }
+//     }
+
+//     // Convert L_map and U_map into CSR format
+//     for (int i = 0; i < n; i++) {
+//         for (const auto& [col, val] : L_map[i]) {
+//             L_values.push_back(val);
+//             L_col_idx.push_back(col);
+//         }
+//         L_row_ptr[i + 1] = L_values.size();
+
+//         for (const auto& [col, val] : U_map[i]) {
+//             U_values.push_back(val);
+//             U_col_idx.push_back(col);
+//         }
+//         U_row_ptr[i + 1] = U_values.size();
+//     }
+
+//     factorized_ = true;
+// }
+
