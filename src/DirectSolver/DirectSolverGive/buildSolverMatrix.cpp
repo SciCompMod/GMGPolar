@@ -1,30 +1,6 @@
 #include "../../../include/DirectSolver/DirectSolverGive/directSolverGive.h"
 
-#define COMPUTE_JACOBIAN_ELEMENTS(domain_geometry, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDF)  \
-    do {                                                                                                               \
-        /* Calculate the elements of the Jacobian matrix for the transformation mapping */                             \
-        /* The Jacobian matrix is: */                                                                                  \
-        /* [Jrr, Jrt] */                                                                                               \
-        /* [Jtr, Jtt] */                                                                                               \
-        const double Jrr = domain_geometry.dFx_dr(r, theta, sin_theta, cos_theta);                                     \
-        const double Jtr = domain_geometry.dFy_dr(r, theta, sin_theta, cos_theta);                                     \
-        const double Jrt = domain_geometry.dFx_dt(r, theta, sin_theta, cos_theta);                                     \
-        const double Jtt = domain_geometry.dFy_dt(r, theta, sin_theta, cos_theta);                                     \
-        /* Compute the determinant of the Jacobian matrix */                                                           \
-        detDF = Jrr * Jtt - Jrt * Jtr;                                                                                 \
-        /* Compute the elements of the symmetric matrix: */                                                            \
-        /* 0.5 * alpha * DF^{-1} * DF^{-T} * |det(DF)| */                                                              \
-        /* which is represented by: */                                                                                 \
-        /* [arr, 0.5*art] */                                                                                           \
-        /* [0.5*atr, att] */                                                                                           \
-        arr = 0.5 * (Jtt * Jtt + Jrt * Jrt) * coeff_alpha / fabs(detDF);                                               \
-        att = 0.5 * (Jtr * Jtr + Jrr * Jrr) * coeff_alpha / fabs(detDF);                                               \
-        art = (-Jtt * Jtr - Jrt * Jrr) * coeff_alpha / fabs(detDF);                                                    \
-        /* Note that the inverse Jacobian matrix DF^{-1} is: */                                                        \
-        /* 1.0 / det(DF) *   */                                                                                        \
-        /* [Jtt, -Jrt] */                                                                                              \
-        /* [-Jtr, Jrr] */                                                                                              \
-    } while (0)
+#include "../../../include/common/geometry_helper.h"
 
 #define NODE_BUILD_SOLVER_MATRIX_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, grid, DirBC_Interior,                      \
                                       solver_matrix, arr, att, art, detDF, coeff_beta)                                         \
@@ -821,7 +797,7 @@ void DirectSolverGive::buildSolverMatrixCircleSection(const int i_r, SparseMatri
             detDF           = level_cache_.detDF()[index];
         }
         else {
-            COMPUTE_JACOBIAN_ELEMENTS(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art,
+            compute_jacobian_elements(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art,
                                       detDF);
         }
 
@@ -871,7 +847,7 @@ void DirectSolverGive::buildSolverMatrixRadialSection(const int i_theta, SparseM
             detDF           = level_cache_.detDF()[index];
         }
         else {
-            COMPUTE_JACOBIAN_ELEMENTS(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art,
+            compute_jacobian_elements(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art,
                                       detDF);
         }
 
@@ -880,6 +856,8 @@ void DirectSolverGive::buildSolverMatrixRadialSection(const int i_theta, SparseM
                                       solver_matrix, arr, att, art, detDF, coeff_beta);
     }
 }
+
+// clang-format off
 
 /* ------------------------------------------------------------------------ */
 /* If the indexing is not smoother-based, please adjust the access patterns */
@@ -894,12 +872,10 @@ SparseMatrixCOO<double> DirectSolverGive::buildSolverMatrix()
     SparseMatrixCOO<double> solver_matrix(n, n, nnz);
     solver_matrix.is_symmetric(false);
 
-#pragma omp parallel for if (nnz > 10'000)
+    #pragma omp parallel for if (nnz > 10'000)
     for (int i = 0; i < nnz; i++) {
         solver_matrix.value(i) = 0.0;
     }
-
-    bool use_simple_parallelism = true; // Fastest: true
 
     if (omp_get_max_threads() == 1) {
         /* Single-threaded execution */
@@ -911,180 +887,69 @@ SparseMatrixCOO<double> DirectSolverGive::buildSolverMatrix()
         }
     }
     else {
-        if (use_simple_parallelism) {
-            /*  Multi-threaded execution: For Loops */
-            const int num_circle_tasks        = grid_.numberSmootherCircles();
-            const int additional_radial_tasks = grid_.ntheta() % 3;
-            const int num_radial_tasks        = grid_.ntheta() - additional_radial_tasks;
+        /*  Multi-threaded execution: For Loops */
+        const int num_circle_tasks        = grid_.numberSmootherCircles();
+        const int additional_radial_tasks = grid_.ntheta() % 3;
+        const int num_radial_tasks        = grid_.ntheta() - additional_radial_tasks;
 
-#pragma omp parallel
-            {
-#pragma omp for
-                for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
-                    int i_r = grid_.numberSmootherCircles() - circle_task - 1;
-                    buildSolverMatrixCircleSection(i_r, solver_matrix);
-                }
-#pragma omp for
-                for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 3) {
-                    int i_r = grid_.numberSmootherCircles() - circle_task - 1;
-                    buildSolverMatrixCircleSection(i_r, solver_matrix);
-                }
-#pragma omp for nowait
-                for (int circle_task = 2; circle_task < num_circle_tasks; circle_task += 3) {
-                    int i_r = grid_.numberSmootherCircles() - circle_task - 1;
-                    buildSolverMatrixCircleSection(i_r, solver_matrix);
-                }
+        #pragma omp parallel
+        {
+            #pragma omp for
+            for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
+                int i_r = grid_.numberSmootherCircles() - circle_task - 1;
+                buildSolverMatrixCircleSection(i_r, solver_matrix);
+            }
+            #pragma omp for
+            for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 3) {
+                int i_r = grid_.numberSmootherCircles() - circle_task - 1;
+                buildSolverMatrixCircleSection(i_r, solver_matrix);
+            }
+            #pragma omp for nowait
+            for (int circle_task = 2; circle_task < num_circle_tasks; circle_task += 3) {
+                int i_r = grid_.numberSmootherCircles() - circle_task - 1;
+                buildSolverMatrixCircleSection(i_r, solver_matrix);
+            }
 
-#pragma omp for
-                for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {
-                    if (radial_task > 0) {
-                        int i_theta = radial_task + additional_radial_tasks;
-                        buildSolverMatrixRadialSection(i_theta, solver_matrix);
-                    }
-                    else {
-                        if (additional_radial_tasks == 0) {
-                            buildSolverMatrixRadialSection(0, solver_matrix);
-                        }
-                        else if (additional_radial_tasks >= 1) {
-                            buildSolverMatrixRadialSection(0, solver_matrix);
-                            buildSolverMatrixRadialSection(1, solver_matrix);
-                        }
-                    }
-                }
-#pragma omp for
-                for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 3) {
-                    if (radial_task > 1) {
-                        int i_theta = radial_task + additional_radial_tasks;
-                        buildSolverMatrixRadialSection(i_theta, solver_matrix);
-                    }
-                    else {
-                        if (additional_radial_tasks == 0) {
-                            buildSolverMatrixRadialSection(1, solver_matrix);
-                        }
-                        else if (additional_radial_tasks == 1) {
-                            buildSolverMatrixRadialSection(2, solver_matrix);
-                        }
-                        else if (additional_radial_tasks == 2) {
-                            buildSolverMatrixRadialSection(2, solver_matrix);
-                            buildSolverMatrixRadialSection(3, solver_matrix);
-                        }
-                    }
-                }
-#pragma omp for
-                for (int radial_task = 2; radial_task < num_radial_tasks; radial_task += 3) {
+            #pragma omp for
+            for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {
+                if (radial_task > 0) {
                     int i_theta = radial_task + additional_radial_tasks;
                     buildSolverMatrixRadialSection(i_theta, solver_matrix);
                 }
-            }
-        }
-        else {
-            /*  Multi-threaded execution: Task Dependencies */
-            const int num_circle_tasks        = grid_.numberSmootherCircles();
-            const int additional_radial_tasks = grid_.ntheta() % 3;
-            const int num_radial_tasks        = grid_.ntheta() - additional_radial_tasks;
-
-            assert(num_circle_tasks >= 2);
-            assert(num_radial_tasks >= 3 && num_radial_tasks % 3 == 0);
-
-            /* Make sure to deallocate at the end */
-            const int boundary_margin = 2; // Additional space to ensure safe access
-            int* circle_dep           = new int[num_circle_tasks + boundary_margin];
-            int* radial_dep           = new int[num_radial_tasks];
-
-#pragma omp parallel
-            {
-#pragma omp single
-                {
-                    /* ------------ */
-                    /* Circle Tasks */
-                    /* ------------ */
-
-                    /* Mod 0 Circles */
-                    for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
-#pragma omp task depend(out : circle_dep[circle_task])
-                        {
-                            const int i_r = grid_.numberSmootherCircles() - circle_task - 1;
-                            buildSolverMatrixCircleSection(i_r, solver_matrix);
-                        }
+                else {
+                    if (additional_radial_tasks == 0) {
+                        buildSolverMatrixRadialSection(0, solver_matrix);
                     }
-                    /* Mod 2 Circles */
-                    for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 3) {
-#pragma omp task depend(out : circle_dep[circle_task])                                                                 \
-    depend(in : circle_dep[circle_task - 1], circle_dep[circle_task + 2])
-                        {
-                            const int i_r = grid_.numberSmootherCircles() - circle_task - 1;
-                            buildSolverMatrixCircleSection(i_r, solver_matrix);
-                        }
-                    }
-                    /* Mod 2 Circles */
-                    for (int circle_task = 2; circle_task < num_circle_tasks; circle_task += 3) {
-#pragma omp task depend(out : circle_dep[circle_task])                                                                 \
-    depend(in : circle_dep[circle_task - 1], circle_dep[circle_task + 2])
-                        {
-                            const int i_r = grid_.numberSmootherCircles() - circle_task - 1;
-                            buildSolverMatrixCircleSection(i_r, solver_matrix);
-                        }
-                    }
-
-                    /* ------------ */
-                    /* Radial Tasks */
-                    /* ------------ */
-
-                    /* Mod 0 Radials */
-                    for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {
-#pragma omp task depend(out : radial_dep[radial_task]) depend(in : circle_dep[1])
-                        {
-                            if (radial_task > 2) {
-                                const int i_theta = radial_task + additional_radial_tasks;
-                                buildSolverMatrixRadialSection(i_theta, solver_matrix);
-                            }
-                            else {
-                                if (additional_radial_tasks == 0) {
-                                    buildSolverMatrixRadialSection(0, solver_matrix);
-                                }
-                                else if (additional_radial_tasks >= 1) {
-                                    buildSolverMatrixRadialSection(0, solver_matrix);
-                                    buildSolverMatrixRadialSection(1, solver_matrix);
-                                }
-                            }
-                        }
-                    }
-                    /* Mod 1 Radials */
-                    for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 3) {
-#pragma omp task depend(out : radial_dep[radial_task])                                                                 \
-    depend(in : radial_dep[radial_task - 1], radial_dep[(radial_task + 2) % num_radial_tasks])
-                        {
-                            if (radial_task > 2) {
-                                int i_theta = radial_task + additional_radial_tasks;
-                                buildSolverMatrixRadialSection(i_theta, solver_matrix);
-                            }
-                            else {
-                                if (additional_radial_tasks == 0) {
-                                    buildSolverMatrixRadialSection(1, solver_matrix);
-                                }
-                                else if (additional_radial_tasks == 1) {
-                                    buildSolverMatrixRadialSection(2, solver_matrix);
-                                }
-                                else if (additional_radial_tasks == 2) {
-                                    buildSolverMatrixRadialSection(2, solver_matrix);
-                                    buildSolverMatrixRadialSection(3, solver_matrix);
-                                }
-                            }
-                        }
-                    }
-                    /* Mod 2 Radials */
-                    for (int radial_task = 2; radial_task < num_radial_tasks; radial_task += 3) {
-#pragma omp task depend(out : radial_dep[radial_task])                                                                 \
-    depend(in : radial_dep[radial_task - 1], radial_dep[(radial_task + 2) % num_radial_tasks])
-                        {
-                            int i_theta = radial_task + additional_radial_tasks;
-                            buildSolverMatrixRadialSection(i_theta, solver_matrix);
-                        }
+                    else if (additional_radial_tasks >= 1) {
+                        buildSolverMatrixRadialSection(0, solver_matrix);
+                        buildSolverMatrixRadialSection(1, solver_matrix);
                     }
                 }
             }
-            delete[] circle_dep;
-            delete[] radial_dep;
+            #pragma omp for
+            for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 3) {
+                if (radial_task > 1) {
+                    int i_theta = radial_task + additional_radial_tasks;
+                    buildSolverMatrixRadialSection(i_theta, solver_matrix);
+                }
+                else {
+                    if (additional_radial_tasks == 0) {
+                        buildSolverMatrixRadialSection(1, solver_matrix);
+                    }
+                    else if (additional_radial_tasks == 1) {
+                        buildSolverMatrixRadialSection(2, solver_matrix);
+                    }
+                    else if (additional_radial_tasks == 2) {
+                        buildSolverMatrixRadialSection(2, solver_matrix);
+                        buildSolverMatrixRadialSection(3, solver_matrix);
+                    }
+                }
+            }
+            #pragma omp for
+            for (int radial_task = 2; radial_task < num_radial_tasks; radial_task += 3) {
+                int i_theta = radial_task + additional_radial_tasks;
+                buildSolverMatrixRadialSection(i_theta, solver_matrix);
+            }
         }
     }
 
@@ -1115,3 +980,4 @@ SparseMatrixCOO<double> DirectSolverGive::buildSolverMatrix()
 
     return symmetric_solver_matrix;
 }
+// clang-format on

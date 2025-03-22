@@ -1,5 +1,7 @@
 #include "../../../include/Smoother/SmootherGive/smootherGive.h"
 
+#include "../../../include/common/geometry_helper.h"
+
 #define UPDATE_MATRIX_ELEMENT(matrix, row, column, value)                                                              \
     do {                                                                                                               \
         if (row == column)                                                                                             \
@@ -8,34 +10,6 @@
             matrix.sub_diagonal(row) += value;                                                                         \
         else if (row == 0 && column == matrix.columns() - 1)                                                           \
             matrix.cyclic_corner_element() += value;                                                                   \
-    } while (0)
-
-/* arr, att, art and detDF get computed */
-
-#define COMPUTE_JACOBIAN_ELEMENTS(domain_geometry, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDF)  \
-    do {                                                                                                               \
-        /* Calculate the elements of the Jacobian matrix for the transformation mapping */                             \
-        /* The Jacobian matrix is: */                                                                                  \
-        /* [Jrr, Jrt] */                                                                                               \
-        /* [Jtr, Jtt] */                                                                                               \
-        const double Jrr = domain_geometry.dFx_dr(r, theta, sin_theta, cos_theta);                                     \
-        const double Jtr = domain_geometry.dFy_dr(r, theta, sin_theta, cos_theta);                                     \
-        const double Jrt = domain_geometry.dFx_dt(r, theta, sin_theta, cos_theta);                                     \
-        const double Jtt = domain_geometry.dFy_dt(r, theta, sin_theta, cos_theta);                                     \
-        /* Compute the determinant of the Jacobian matrix */                                                           \
-        detDF = Jrr * Jtt - Jrt * Jtr;                                                                                 \
-        /* Compute the elements of the symmetric matrix: */                                                            \
-        /* 0.5 * alpha * DF^{-1} * DF^{-T} * |det(DF)| */                                                              \
-        /* which is represented by: */                                                                                 \
-        /* [arr, 0.5*art] */                                                                                           \
-        /* [0.5*atr, att] */                                                                                           \
-        arr = 0.5 * (Jtt * Jtt + Jrt * Jrt) * coeff_alpha / fabs(detDF);                                               \
-        att = 0.5 * (Jtr * Jtr + Jrr * Jrr) * coeff_alpha / fabs(detDF);                                               \
-        art = (-Jtt * Jtr - Jrt * Jrr) * coeff_alpha / fabs(detDF);                                                    \
-        /* Note that the inverse Jacobian matrix DF^{-1} is: */                                                        \
-        /* 1.0 / det(DF) *   */                                                                                        \
-        /* [Jtt, -Jrt] */                                                                                              \
-        /* [-Jtr, Jrr] */                                                                                              \
     } while (0)
 
 #define NODE_BUILD_SMOOTHER_GIVE(i_r, i_theta, grid, DirBC_Interior, inner_boundary_circle_matrix,                       \
@@ -655,7 +629,7 @@ void SmootherGive::buildAscCircleSection(const int i_r)
             detDF           = level_cache_.detDF()[index];
         }
         else {
-            COMPUTE_JACOBIAN_ELEMENTS(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art,
+            compute_jacobian_elements(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art,
                                       detDF);
         }
 
@@ -705,7 +679,7 @@ void SmootherGive::buildAscRadialSection(const int i_theta)
             detDF           = level_cache_.detDF()[index];
         }
         else {
-            COMPUTE_JACOBIAN_ELEMENTS(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art,
+            compute_jacobian_elements(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art,
                                       detDF);
         }
 
@@ -791,8 +765,6 @@ void SmootherGive::buildAscMatrices()
     /* ---------------------------------- */
     /* Part 2: Fill Asc Smoother matrices */
     /* ---------------------------------- */
-
-    bool use_simple_parallelism = true; // Fastest: true
 
     if (omp_get_max_threads() == 1) {
         /* Single-threaded execution */

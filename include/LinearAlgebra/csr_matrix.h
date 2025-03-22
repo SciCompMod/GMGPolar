@@ -378,7 +378,7 @@ void SparseLUSolver<T>::factorize(const SparseMatrixCSR<T>& A) {
 
         // Process the current row: for each column j in the pattern with j < i,
         // use it to update the row using previously computed U factors.
-        for (int pos = 0; pos < pattern.size(); pos++) {
+        for (int pos = 0; pos < static_cast<int>(pattern.size()); pos++) {
             int j = pattern[pos];
             if (j >= i) break; // only process lower part
 

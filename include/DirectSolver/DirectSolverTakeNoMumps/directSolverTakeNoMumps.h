@@ -46,6 +46,7 @@ private:
     // clang-format on
 
     // Solver matrix and solver structure
+    // Important: They need to be defined below the stencils!
     SparseMatrixCSR<double> solver_matrix_;
     SparseLUSolver<double> lu_solver_;
 

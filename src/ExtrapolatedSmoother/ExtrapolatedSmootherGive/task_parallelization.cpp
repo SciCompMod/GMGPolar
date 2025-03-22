@@ -1,10 +1,11 @@
-#include "../../../include/Smoother/SmootherGive/smootherGive.h"
+#include "../../../include/ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h"
 
 /* ------------------------------------ */
 /* Parallelization Version 2: Task Loop */
 /* ------------------------------------ */
 
-void SmootherGive::smoothingTaskLoop(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
+void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskLoop(Vector<double>& x, const Vector<double>& rhs,
+                                                             Vector<double>& temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
@@ -12,10 +13,27 @@ void SmootherGive::smoothingTaskLoop(Vector<double>& x, const Vector<double>& rh
     omp_set_num_threads(num_omp_threads_);
 
     if (omp_get_max_threads() == 1) {
-        smoothingSequential(x, rhs, temp);
+        extrapolatedSmoothingSequential(x, rhs, temp);
     }
     else {
-        temp = rhs;
+
+#pragma omp parallel
+        {
+#pragma omp for nowait
+            for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
+                for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
+                    const int index = grid_.index(i_r, i_theta);
+                    temp[index]     = (i_r & 1 || i_theta & 1) ? rhs[index] : x[index];
+                }
+            }
+#pragma omp for
+            for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
+                for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
+                    const int index = grid_.index(i_r, i_theta);
+                    temp[index]     = (i_r & 1 || i_theta & 1) ? rhs[index] : x[index];
+                }
+            }
+        }
 
         /* Multi-threaded execution */
         const int num_circle_tasks = grid_.numberSmootherCircles();
@@ -188,9 +206,9 @@ void SmootherGive::smoothingTaskLoop(Vector<double>& x, const Vector<double>& rh
                     }
                 }
 
-                #pragma omp task depend(in : radial_black_Asc1) depend(out : radial_black_Asc2)
+#pragma omp task depend(in : radial_black_Asc1) depend(out : radial_black_Asc2)
                 {
-                    #pragma omp taskloop
+#pragma omp taskloop
                     for (int radial_task = 3; radial_task < num_radial_tasks; radial_task += 4) {
                         int i_theta = radial_task;
                         applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
@@ -254,7 +272,8 @@ void SmootherGive::smoothingTaskLoop(Vector<double>& x, const Vector<double>& rh
 /* Parallelization Version 3: Task Dependencies */
 /* -------------------------------------------- */
 
-void SmootherGive::smoothingTaskDependencies(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
+void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskDependencies(Vector<double>& x, const Vector<double>& rhs,
+                                                                     Vector<double>& temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
@@ -262,10 +281,27 @@ void SmootherGive::smoothingTaskDependencies(Vector<double>& x, const Vector<dou
     omp_set_num_threads(num_omp_threads_);
 
     if (omp_get_max_threads() == 1) {
-        smoothingSequential(x, rhs, temp);
+        extrapolatedSmoothingSequential(x, rhs, temp);
     }
     else {
-        temp = rhs;
+
+#pragma omp parallel
+        {
+#pragma omp for nowait
+            for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
+                for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
+                    const int index = grid_.index(i_r, i_theta);
+                    temp[index]     = (i_r & 1 || i_theta & 1) ? rhs[index] : x[index];
+                }
+            }
+#pragma omp for
+            for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
+                for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
+                    const int index = grid_.index(i_r, i_theta);
+                    temp[index]     = (i_r & 1 || i_theta & 1) ? rhs[index] : x[index];
+                }
+            }
+        }
 
         /* Multi-threaded execution */
         const int num_circle_tasks = grid_.numberSmootherCircles();

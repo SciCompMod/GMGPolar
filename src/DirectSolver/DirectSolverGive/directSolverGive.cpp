@@ -14,7 +14,9 @@ void DirectSolverGive::solveInPlace(Vector<double>& solution)
 {
     // Adjusts the right-hand side vector to account for symmetry corrections.
     // This transforms the system matrixA * solution = rhs into the equivalent system:
-    // symmetric(matrixA) * solution = rhs - applySymmetryShift(rhs).
+    // symmetric_DBc(matrixA) * solution = rhs - applySymmetryShift(rhs).
+    // The correction modifies the rhs to account for the influence of the Dirichlet boundary conditions,
+    // ensuring that the solution at the boundary is correctly adjusted and maintains the required symmetry.
     applySymmetryShift(solution);
     // Solves the adjusted system symmetric(matrixA) * solution = rhs using the MUMPS solver.
     solveWithMumps(solution);

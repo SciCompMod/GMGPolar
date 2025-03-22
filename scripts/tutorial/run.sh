@@ -7,7 +7,7 @@ verbose=1
 # Set Paraview usage flag:
 # 0 - Do not use Paraview 
 # 1 - Enable Paraview to visualize the grid, solution and error
-paraview=1
+paraview=0
 
 # OpenMP settings:
 # Maximum number of threads OpenMP can use for parallel execution
@@ -18,12 +18,12 @@ threadReductionFactor=1.0
 # Stencil distribution method:
 # 0 - CPU "Take": Each node independently applies the stencil
 # 1 - CPU "Give": The stencil operation is distributed across adjacent neighboring nodes
-stencilDistributionMethod=0
+stencilDistributionMethod=1
 # Caching behavior:
 # 0 - Recompute values on each iteration: Uses less memory but results in slower execution.
 # 1 - Reuse cached values: Consumes more memory but significantly improves performance.
 cacheDensityProfileCoefficients=1
-cacheDomainGeometry=1
+cacheDomainGeometry=0
 # Note: In the "Take" approach (stencilDistributionMethod=0), 
 # caching is required for optimal performance, 
 # so both density profile coefficients and domain geometry need to be cached.
@@ -40,7 +40,7 @@ Rmax=1.3
 nr_exp=4
 ntheta_exp=-1
 anisotropic_factor=3
-divideBy2=3
+divideBy2=6
 
 # Finest grid can be loaded from a text file
 write_grid_file=0

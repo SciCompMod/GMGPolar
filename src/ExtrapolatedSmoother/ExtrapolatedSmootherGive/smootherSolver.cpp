@@ -1,30 +1,6 @@
 #include "../../../include/ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h"
 
-#define COMPUTE_JACOBIAN_ELEMENTS(domain_geometry, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art, detDF)  \
-    do {                                                                                                               \
-        /* Calculate the elements of the Jacobian matrix for the transformation mapping */                             \
-        /* The Jacobian matrix is: */                                                                                  \
-        /* [Jrr, Jrt] */                                                                                               \
-        /* [Jtr, Jtt] */                                                                                               \
-        const double Jrr = domain_geometry.dFx_dr(r, theta, sin_theta, cos_theta);                                     \
-        const double Jtr = domain_geometry.dFy_dr(r, theta, sin_theta, cos_theta);                                     \
-        const double Jrt = domain_geometry.dFx_dt(r, theta, sin_theta, cos_theta);                                     \
-        const double Jtt = domain_geometry.dFy_dt(r, theta, sin_theta, cos_theta);                                     \
-        /* Compute the determinant of the Jacobian matrix */                                                           \
-        detDF = Jrr * Jtt - Jrt * Jtr;                                                                                 \
-        /* Compute the elements of the symmetric matrix: */                                                            \
-        /* 0.5 * alpha * DF^{-1} * DF^{-T} * |det(DF)| */                                                              \
-        /* which is represented by: */                                                                                 \
-        /*  [arr, 0.5*art]  */                                                                                         \
-        /*  [0.5*atr, att]  */                                                                                         \
-        arr = 0.5 * (Jtt * Jtt + Jrt * Jrt) * coeff_alpha / fabs(detDF);                                               \
-        att = 0.5 * (Jtr * Jtr + Jrr * Jrr) * coeff_alpha / fabs(detDF);                                               \
-        art = (-Jtt * Jtr - Jrt * Jrr) * coeff_alpha / fabs(detDF);                                                    \
-        /* Note that the inverse Jacobian matrix DF^{-1} is: */                                                        \
-        /*  1.0 / det(DF) *  */                                                                                        \
-        /*  [Jtt, -Jrt]      */                                                                                        \
-        /*  [-Jtr, Jrr]      */                                                                                        \
-    } while (0)
+#include "../../../include/common/geometry_helper.h"
 
 // The current position is marked with a ~ symbol.
 #define NODE_APPLY_ASC_ORTHO_CIRCLE_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, grid, DirBC_Interior,                         \
@@ -269,7 +245,7 @@
                 /* Case 2: Across origin discretization on the interior boundary */                                                  \
                 /* ------------------------------------------------------------- */                                                  \
                 /* h1 gets replaced with 2 * R0. */                                                                                  \
-                /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()/2)). */                                        \
+                /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()/2)). */                                         \
                 /* Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil. */                  \
                 double h1     = 2.0 * grid.radius(0);                                                                                \
                 double h2     = grid.radialSpacing(i_r);                                                                             \
@@ -291,7 +267,7 @@
                         /* -| X | O | X | */                                                                                         \
                         /* Fill temp(i,j) */                                                                                         \
                         temp[grid.index(i_r, i_theta)] -=                                                                            \
-                            (/* - coeff1 * arr * x[grid.index(i_r, i_theta + (grid.ntheta()/2))] // Left: Not in Asc_ortho */       \
+                            (/* - coeff1 * arr * x[grid.index(i_r, i_theta + (grid.ntheta()/2))] // Left: Not in Asc_ortho */        \
                              -coeff2 * arr * x[grid.index(i_r + 1, i_theta)] /* Right */                                             \
                              - coeff3 * att * x[grid.index(i_r, i_theta - 1)] /* Bottom */                                           \
                              - coeff4 * att * x[grid.index(i_r, i_theta + 1)] /* Top */                                              \
@@ -750,6 +726,7 @@
                     /* "Right" is part of the radial Asc smoother matrices, */                                         \
                     /* but is shifted over to the rhs to make the radial Asc smoother matrices symmetric. */           \
                     /* Note that the circle Asc smoother matrices are symmetric by default. */                         \
+                    /* Note that rhs[grid.index(i_r + 1, i_theta)] contains the correct boundary value of u_D. */      \
                     temp[grid.index(i_r, i_theta)] -= /* Right: Symmetry shift! */                                     \
                         -coeff2 * arr * rhs[grid.index(i_r + 1, i_theta)];                                             \
                 }                                                                                                      \
@@ -810,6 +787,7 @@
                     /* "Right" is part of the radial Asc smoother matrices, */                                         \
                     /* but is shifted over to the rhs to make the radial Asc smoother matrices symmetric. */           \
                     /* Note that the circle Asc smoother matrices are symmetric by default. */                         \
+                    /* Note that rhs[grid.index(i_r, i_theta)] contains the correct boundary value of u_D. */          \
                     temp[grid.index(i_r - 1, i_theta)] -= (-coeff1 * arr * rhs[grid.index(i_r, i_theta)] /* Right */   \
                     );                                                                                                 \
                 }                                                                                                      \
@@ -880,7 +858,7 @@ void ExtrapolatedSmootherGive::applyAscOrthoCircleSection(const int i_r, const S
             detDF           = level_cache_.detDF()[index];
         }
         else {
-            COMPUTE_JACOBIAN_ELEMENTS(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art,
+            compute_jacobian_elements(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art,
                                       detDF);
         }
 
@@ -933,7 +911,7 @@ void ExtrapolatedSmootherGive::applyAscOrthoRadialSection(const int i_theta, con
             detDF           = level_cache_.detDF()[index];
         }
         else {
-            COMPUTE_JACOBIAN_ELEMENTS(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art,
+            compute_jacobian_elements(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art,
                                       detDF);
         }
 
@@ -997,7 +975,7 @@ void ExtrapolatedSmootherGive::solveRadialSection(const int i_theta, Vector<doub
 /* ------------------ */
 
 void ExtrapolatedSmootherGive::extrapolatedSmoothingSequential(Vector<double>& x, const Vector<double>& rhs,
-                                                                      Vector<double>& temp)
+                                                               Vector<double>& temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
@@ -1060,8 +1038,9 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingSequential(Vector<double>& x
 /* Parallelization Version 1: For Loops */
 /* ------------------------------------ */
 
+// clang-format off
 void ExtrapolatedSmootherGive::extrapolatedSmoothingForLoop(Vector<double>& x, const Vector<double>& rhs,
-                                                                   Vector<double>& temp)
+                                                            Vector<double>& temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
@@ -1073,16 +1052,16 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingForLoop(Vector<double>& x, c
     }
     else {
 
-#pragma omp parallel
+        #pragma omp parallel
         {
-#pragma omp for nowait
+            #pragma omp for nowait
             for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
                 for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
                     const int index = grid_.index(i_r, i_theta);
                     temp[index]     = (i_r & 1 || i_theta & 1) ? rhs[index] : x[index];
                 }
             }
-#pragma omp for
+            #pragma omp for
             for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
                 for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
                     const int index = grid_.index(i_r, i_theta);
@@ -1095,658 +1074,137 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingForLoop(Vector<double>& x, c
         const int num_circle_tasks = grid_.numberSmootherCircles();
         const int num_radial_tasks = grid_.ntheta();
 
-#pragma omp parallel
+        #pragma omp parallel
         {
             Vector<double> circle_solver_storage_1(grid_.ntheta());
             Vector<double> circle_solver_storage_2(grid_.ntheta());
             Vector<double> radial_solver_storage(grid_.lengthSmootherRadial());
 
-/* ---------------------------- */
-/* ------ CIRCLE SECTION ------ */
-/* ---------------------------- */
+            /* ---------------------------- */
+            /* ------ CIRCLE SECTION ------ */
+            /* ---------------------------- */
 
-/* ---------------------------- */
-/* Asc ortho Black Circle Tasks */
+            /* ---------------------------- */
+            /* Asc ortho Black Circle Tasks */
 
-/* Inside Black Section */
-#pragma omp for
+            /* Inside Black Section */
+            #pragma omp for
             for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 2) {
                 int i_r = num_circle_tasks - circle_task - 1;
                 applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
             }
-/* Outside Black Section (Part 1)*/
-#pragma omp for
+            /* Outside Black Section (Part 1)*/
+            #pragma omp for
             for (int circle_task = -1; circle_task < num_circle_tasks; circle_task += 4) {
                 int i_r = num_circle_tasks - circle_task - 1;
                 applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
             }
-/* Outside Black Section (Part 2)*/
-#pragma omp for
+            /* Outside Black Section (Part 2)*/
+            #pragma omp for
             for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 4) {
                 int i_r = num_circle_tasks - circle_task - 1;
                 applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
             }
 
-/* Black Circle Smoother */
-#pragma omp for
+            /* Black Circle Smoother */
+            #pragma omp for
             for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 2) {
                 int i_r = num_circle_tasks - circle_task - 1;
                 solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
             }
 
-/* ---------------------------- */
-/* Asc ortho White Circle Tasks */
-/* Inside White Section */
-#pragma omp for nowait
+            /* ---------------------------- */
+            /* Asc ortho White Circle Tasks */
+            /* Inside White Section */
+            #pragma omp for nowait
             for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 2) {
                 int i_r = num_circle_tasks - circle_task - 1;
                 applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
             }
-/* ---------------------------- */
-/* Asc ortho Black Radial Tasks */
-/* Inside Black Section */
-#pragma omp for
+            /* ---------------------------- */
+            /* Asc ortho Black Radial Tasks */
+            /* Inside Black Section */
+            #pragma omp for
             for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 2) {
                 int i_theta = radial_task;
                 applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
             }
 
-/* ---------------------------- */
-/* Asc ortho White Circle Tasks */
-/* Outside White Section (Part 1)*/
-#pragma omp for nowait
+            /* ---------------------------- */
+            /* Asc ortho White Circle Tasks */
+            /* Outside White Section (Part 1)*/
+            #pragma omp for nowait
             for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 4) {
                 int i_r = num_circle_tasks - circle_task - 1;
                 applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
             }
-/* ---------------------------- */
-/* Asc ortho Black Radial Tasks */
-/* Outside Black Section (Part 1) */
-#pragma omp for
+            /* ---------------------------- */
+            /* Asc ortho Black Radial Tasks */
+            /* Outside Black Section (Part 1) */
+            #pragma omp for
             for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 4) {
                 int i_theta = radial_task;
                 applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
             }
 
-/* ---------------------------- */
-/* Asc ortho White Circle Tasks */
-/* Outside White Section (Part 2)*/
-#pragma omp for nowait
+            /* ---------------------------- */
+            /* Asc ortho White Circle Tasks */
+            /* Outside White Section (Part 2)*/
+            #pragma omp for nowait
             for (int circle_task = 2; circle_task < num_circle_tasks; circle_task += 4) {
                 int i_r = num_circle_tasks - circle_task - 1;
                 applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
             }
-/* ---------------------------- */
-/* Asc ortho Black Radial Tasks */
-/* Outside Black Section (Part 2) */
-#pragma omp for
+            /* ---------------------------- */
+            /* Asc ortho Black Radial Tasks */
+            /* Outside Black Section (Part 2) */
+            #pragma omp for
             for (int radial_task = 3; radial_task < num_radial_tasks; radial_task += 4) {
                 int i_theta = radial_task;
                 applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
             }
 
-/* White Circle Smoother */
-#pragma omp for nowait
+            /* White Circle Smoother */
+            #pragma omp for nowait
             for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 2) {
                 int i_r = num_circle_tasks - circle_task - 1;
                 solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
             }
-/* Black Radial Smoother */
-#pragma omp for
+            /* Black Radial Smoother */
+            #pragma omp for
             for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 2) {
                 int i_theta = radial_task;
                 solveRadialSection(i_theta, x, temp, radial_solver_storage);
             }
 
-/* ---------------------------- */
-/* Asc ortho White Circle Tasks */
+            /* ---------------------------- */
+            /* Asc ortho White Circle Tasks */
 
-/* Inside White Section */
-#pragma omp for
+            /* Inside White Section */
+            #pragma omp for
             for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 2) {
                 int i_theta = radial_task;
                 applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
             }
-/* Outside White Section (Part 1) */
-#pragma omp for
+            /* Outside White Section (Part 1) */
+            #pragma omp for
             for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 4) {
                 int i_theta = radial_task;
                 applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
             }
-/* Outside White Section (Part 2) */
-#pragma omp for
+            /* Outside White Section (Part 2) */
+            #pragma omp for
             for (int radial_task = 2; radial_task < num_radial_tasks; radial_task += 4) {
                 int i_theta = radial_task;
                 applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
             }
 
-/* White Radial Smoother */
-#pragma omp for
+            /* White Radial Smoother */
+            #pragma omp for
             for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 2) {
                 int i_theta = radial_task;
                 solveRadialSection(i_theta, x, temp, radial_solver_storage);
             }
         }
-    }
-}
-
-/* ------------------------------------ */
-/* Parallelization Version 2: Task Loop */
-/* ------------------------------------ */
-
-/* UNUSED! */
-void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskLoop(Vector<double>& x, const Vector<double>& rhs,
-                                                                    Vector<double>& temp)
-{
-    assert(x.size() == rhs.size());
-    assert(temp.size() == rhs.size());
-
-    omp_set_num_threads(num_omp_threads_);
-
-    if (omp_get_max_threads() == 1) {
-        extrapolatedSmoothingSequential(x, rhs, temp);
-    }
-    else {
-
-#pragma omp parallel
-        {
-#pragma omp for nowait
-            for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
-                for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
-                    const int index = grid_.index(i_r, i_theta);
-                    temp[index]     = (i_r & 1 || i_theta & 1) ? rhs[index] : x[index];
-                }
-            }
-#pragma omp for
-            for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
-                for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
-                    const int index = grid_.index(i_r, i_theta);
-                    temp[index]     = (i_r & 1 || i_theta & 1) ? rhs[index] : x[index];
-                }
-            }
-        }
-
-        /* Multi-threaded execution */
-        const int num_circle_tasks = grid_.numberSmootherCircles();
-        const int num_radial_tasks = grid_.ntheta();
-
-        /* Idea: Scedule first_black_circle_smoother as fast as possible to start the radial section early. */
-        int first_circle_black_Asc0, first_circle_black_Asc1, first_circle_black_Asc2;
-        int first_black_circle_smoother;
-
-        int circle_black_Asc0, circle_black_Asc1, circle_black_Asc2;
-        int black_circle_smoother;
-        int circle_white_Asc0, circle_white_Asc1, circle_white_Asc2;
-        int white_circle_smoother;
-
-        int radial_black_Asc0, radial_black_Asc1, radial_black_Asc2;
-        int black_radial_smoother;
-        int radial_white_Asc0, radial_white_Asc1, radial_white_Asc2;
-        int white_radial_smoother;
-
-#pragma omp parallel
-        {
-            Vector<double> circle_solver_storage_1(grid_.ntheta());
-            Vector<double> circle_solver_storage_2(grid_.ntheta());
-            Vector<double> radial_solver_storage(grid_.lengthSmootherRadial());
-
-#pragma omp single
-            {
-                /* ---------------------------------- */
-                /* ------ CIRCLE BLACK SECTION ------ */
-                /* ---------------------------------- */
-
-                /* --------------- */
-                /* First few lines */
-
-#pragma omp task depend(out : first_circle_black_Asc0)
-                {
-#pragma omp taskloop
-                    for (int circle_task = 0; circle_task < std::min(6, num_circle_tasks); circle_task += 2) {
-                        int i_r = num_circle_tasks - circle_task - 1;
-                        applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
-                    }
-                }
-
-#pragma omp task depend(in : first_circle_black_Asc0) depend(out : first_circle_black_Asc1)
-                {
-#pragma omp taskloop
-                    for (int circle_task = -1; circle_task < std::min(7, num_circle_tasks); circle_task += 4) {
-                        int i_r = num_circle_tasks - circle_task - 1;
-                        applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
-                    }
-                }
-
-#pragma omp task depend(in : first_circle_black_Asc1) depend(out : first_circle_black_Asc2)
-                {
-#pragma omp taskloop
-                    for (int circle_task = 1; circle_task < std::min(5, num_circle_tasks); circle_task += 4) {
-                        int i_r = num_circle_tasks - circle_task - 1;
-                        applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
-                    }
-                }
-
-#pragma omp task depend(in : first_circle_black_Asc2) depend(out : first_black_circle_smoother)
-                {
-#pragma omp taskloop
-                    for (int circle_task = 0; circle_task < std::min(2, num_circle_tasks); circle_task += 2) {
-                        int i_r = num_circle_tasks - circle_task - 1;
-                        solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
-                    }
-                }
-
-                /* -------------- */
-                /* Leftover lines */
-
-#pragma omp task depend(out : circle_black_Asc0)
-                {
-#pragma omp taskloop
-                    for (int circle_task = 6; circle_task < num_circle_tasks; circle_task += 2) {
-                        int i_r = num_circle_tasks - circle_task - 1;
-                        applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
-                    }
-                }
-
-// We don't need depend(in: first_circle_black_Asc0) since there is enough separation.
-#pragma omp task depend(in : circle_black_Asc0) depend(out : circle_black_Asc1)
-                {
-#pragma omp taskloop
-                    for (int circle_task = 7; circle_task < num_circle_tasks; circle_task += 4) {
-                        int i_r = num_circle_tasks - circle_task - 1;
-                        applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
-                    }
-                }
-
-#pragma omp task depend(in : circle_black_Asc1, first_circle_black_Asc1) depend(out : circle_black_Asc2)
-                {
-#pragma omp taskloop
-                    for (int circle_task = 5; circle_task < num_circle_tasks; circle_task += 4) {
-                        int i_r = num_circle_tasks - circle_task - 1;
-                        applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
-                    }
-                }
-
-#pragma omp task depend(in : circle_black_Asc2, first_circle_black_Asc2) depend(out : black_circle_smoother)
-                {
-#pragma omp taskloop
-                    for (int circle_task = 2; circle_task < num_circle_tasks; circle_task += 2) {
-                        int i_r = num_circle_tasks - circle_task - 1;
-                        solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
-                    }
-                }
-
-                /* ---------------------------------- */
-                /* ------ CIRCLE WHITE SECTION ------ */
-                /* ---------------------------------- */
-
-#pragma omp task depend(in : black_circle_smoother, first_black_circle_smoother) depend(out : circle_white_Asc0)
-                {
-#pragma omp taskloop
-                    for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 2) {
-                        int i_r = num_circle_tasks - circle_task - 1;
-                        applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
-                    }
-                }
-
-#pragma omp task depend(in : circle_white_Asc0) depend(out : circle_white_Asc1)
-                {
-#pragma omp taskloop
-                    for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 4) {
-                        int i_r = num_circle_tasks - circle_task - 1;
-                        applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
-                    }
-                }
-
-#pragma omp task depend(in : circle_white_Asc1) depend(out : circle_white_Asc2)
-                {
-#pragma omp taskloop
-                    for (int circle_task = 2; circle_task < num_circle_tasks; circle_task += 4) {
-                        int i_r = num_circle_tasks - circle_task - 1;
-                        applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
-                    }
-                }
-
-#pragma omp task depend(in : circle_white_Asc2)
-                {
-#pragma omp taskloop
-                    for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 2) {
-                        int i_r = num_circle_tasks - circle_task - 1;
-                        solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
-                    }
-                }
-
-                /* ---------------------------------- */
-                /* ------ RADIAL BLACK SECTION ------ */
-                /* ---------------------------------- */
-
-#pragma omp task depend(in : first_black_circle_smoother) depend(out : radial_black_Asc0)
-                {
-#pragma omp taskloop
-                    for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 2) {
-                        int i_theta = radial_task;
-                        applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
-                    }
-                }
-
-#pragma omp task depend(in : radial_black_Asc0) depend(out : radial_black_Asc1)
-                {
-#pragma omp taskloop
-                    for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 4) {
-                        int i_theta = radial_task;
-                        applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
-                    }
-                }
-
-#pragma omp task depend(in : radial_black_Asc1) depend(out : radial_black_Asc2)
-                {
-#pragma omp taskloop
-                    for (int radial_task = 3; radial_task < num_radial_tasks; radial_task += 4) {
-                        int i_theta = radial_task;
-                        applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
-                    }
-                }
-
-#pragma omp task depend(in : radial_black_Asc2) depend(out : black_radial_smoother)
-                {
-#pragma omp taskloop
-                    for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 2) {
-                        int i_theta = radial_task;
-                        solveRadialSection(i_theta, x, temp, radial_solver_storage);
-                    }
-                }
-
-                /* ---------------------------------- */
-                /* ------ RADIAL White SECTION ------ */
-                /* ---------------------------------- */
-
-#pragma omp task depend(in : black_radial_smoother) depend(out : radial_white_Asc0)
-                {
-#pragma omp taskloop
-                    for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 2) {
-                        int i_theta = radial_task;
-                        applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
-                    }
-                }
-
-#pragma omp task depend(in : radial_white_Asc0) depend(out : radial_white_Asc1)
-                {
-#pragma omp taskloop
-                    for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 4) {
-                        int i_theta = radial_task;
-                        applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
-                    }
-                }
-
-#pragma omp task depend(in : radial_white_Asc1) depend(out : radial_white_Asc2)
-                {
-#pragma omp taskloop
-                    for (int radial_task = 2; radial_task < num_radial_tasks; radial_task += 4) {
-                        int i_theta = radial_task;
-                        applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
-                    }
-                }
-
-#pragma omp task depend(in : radial_white_Asc2)
-                {
-#pragma omp taskloop
-                    for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 2) {
-                        int i_theta = radial_task;
-                        solveRadialSection(i_theta, x, temp, radial_solver_storage);
-                    }
-                }
-            }
-        }
-    }
-}
-
-/* -------------------------------------------- */
-/* Parallelization Version 2: Task Dependencies */
-/* -------------------------------------------- */
-
-/* UNUSED! */
-void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskDependencies(Vector<double>& x,
-                                                                            const Vector<double>& rhs,
-                                                                            Vector<double>& temp)
-{
-    assert(x.size() == rhs.size());
-    assert(temp.size() == rhs.size());
-
-    omp_set_num_threads(num_omp_threads_);
-
-    if (omp_get_max_threads() == 1) {
-        extrapolatedSmoothingSequential(x, rhs, temp);
-    }
-    else {
-
-#pragma omp parallel
-        {
-#pragma omp for nowait
-            for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
-                for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
-                    const int index = grid_.index(i_r, i_theta);
-                    temp[index]     = (i_r & 1 || i_theta & 1) ? rhs[index] : x[index];
-                }
-            }
-#pragma omp for
-            for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
-                for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
-                    const int index = grid_.index(i_r, i_theta);
-                    temp[index]     = (i_r & 1 || i_theta & 1) ? rhs[index] : x[index];
-                }
-            }
-        }
-
-        /* Multi-threaded execution */
-        const int num_circle_tasks = grid_.numberSmootherCircles();
-        const int num_radial_tasks = grid_.ntheta();
-
-        const int additional_radial_tasks = num_radial_tasks % 3;
-
-        assert(num_circle_tasks >= 2);
-        assert(num_radial_tasks >= 3 && num_radial_tasks % 2 == 0);
-
-        /* Make sure to deallocate at the end */
-        const int shift           = 3; // Additional space to ensure safe access
-        int* asc_ortho_circle_dep = new int[num_circle_tasks + 2 * shift]; // -1 is an additional asc_artho task!
-        int* smoother_circle_dep  = new int[num_circle_tasks + 2 * shift];
-
-        int* asc_ortho_radial_dep = new int[num_radial_tasks];
-        int* smoother_radial_dep  = new int[num_radial_tasks];
-
-#pragma omp parallel
-        {
-            Vector<double> circle_solver_storage_1(grid_.ntheta());
-            Vector<double> circle_solver_storage_2(grid_.ntheta());
-            Vector<double> radial_solver_storage(grid_.lengthSmootherRadial());
-
-#pragma omp single
-            {
-                /* ---------------------------- */
-                /* ------ CIRCLE SECTION ------ */
-
-                /* ---------------------------- */
-                /* Asc ortho Black Circle Tasks */
-                /* ---------------------------- */
-
-                /* Inside Black Section */
-                for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 2) {
-#pragma omp task depend(out : asc_ortho_circle_dep[circle_task + shift])
-                    {
-                        int i_r = num_circle_tasks - circle_task - 1;
-                        applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
-                    }
-                }
-                /* Outside Black Section (Part 1)*/
-                for (int circle_task = -1; circle_task < num_circle_tasks; circle_task += 4) {
-#pragma omp task depend(out : asc_ortho_circle_dep[circle_task + shift])                                               \
-    depend(in : asc_ortho_circle_dep[circle_task - 1 + shift], asc_ortho_circle_dep[circle_task + 1 + shift])
-                    {
-                        int i_r = num_circle_tasks - circle_task - 1;
-                        applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
-                    }
-                }
-                /* Outside Black Section (Part 2)*/
-                for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 4) {
-#pragma omp task depend(out : asc_ortho_circle_dep[circle_task + shift])                                               \
-    depend(in : asc_ortho_circle_dep[circle_task - 2 + shift], asc_ortho_circle_dep[circle_task + 2 + shift])
-                    {
-                        int i_r = num_circle_tasks - circle_task - 1;
-                        applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
-                    }
-                }
-
-                /* Black Circle Smoother */
-                for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 2) {
-#pragma omp task depend(out : smoother_circle_dep[circle_task + shift])                                                \
-    depend(in : asc_ortho_circle_dep[circle_task - 1 + shift], asc_ortho_circle_dep[circle_task + 1 + shift])
-                    {
-                        int i_r = num_circle_tasks - circle_task - 1;
-                        solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
-                    }
-                }
-
-                /* ---------------------------- */
-                /* Asc ortho White Circle Tasks */
-                /* ---------------------------- */
-
-                /* Inside White Section */
-                for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 2) {
-#pragma omp task depend(out : asc_ortho_circle_dep[circle_task + shift])                                               \
-    depend(in : smoother_circle_dep[circle_task - 1 + shift], smoother_circle_dep[circle_task + 1 + shift])
-                    {
-                        int i_r = num_circle_tasks - circle_task - 1;
-                        applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
-                    }
-                }
-                /* Outside White Section (Part 1)*/
-                for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 4) {
-#pragma omp task depend(out : asc_ortho_circle_dep[circle_task + shift])                                               \
-    depend(in : asc_ortho_circle_dep[circle_task - 1 + shift], asc_ortho_circle_dep[circle_task + 1 + shift])
-                    {
-                        int i_r = num_circle_tasks - circle_task - 1;
-                        applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
-                    }
-                }
-                /* Outside White Section (Part 2)*/
-                for (int circle_task = 2; circle_task < num_circle_tasks; circle_task += 4) {
-#pragma omp task depend(out : asc_ortho_circle_dep[circle_task + shift])                                               \
-    depend(in : asc_ortho_circle_dep[circle_task - 2 + shift], asc_ortho_circle_dep[circle_task + 2 + shift])
-                    {
-                        int i_r = num_circle_tasks - circle_task - 1;
-                        applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
-                    }
-                }
-
-                /* White Circle Smoother */
-                for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 2) {
-#pragma omp task depend(out : smoother_circle_dep[circle_task + shift])                                                \
-    depend(in : asc_ortho_circle_dep[circle_task - 1 + shift], asc_ortho_circle_dep[circle_task + 1 + shift])
-                    {
-                        int i_r = num_circle_tasks - circle_task - 1;
-                        solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
-                    }
-                }
-
-                /* ---------------------------- */
-                /* ------ RADIAL SECTION ------ */
-
-                /* ---------------------------- */
-                /* Asc ortho Black Radial Tasks */
-                /* ---------------------------- */
-
-                /* Inside Black Section */
-                for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 2) {
-#pragma omp task depend(out : asc_ortho_radial_dep[radial_task]) depend(in : smoother_circle_dep[0 + shift])
-                    {
-                        int i_theta = radial_task;
-                        applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
-                    }
-                }
-                /* Outside Black Section (Part 1) */
-                for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 4) {
-#pragma omp task depend(out : asc_ortho_radial_dep[radial_task])                                                       \
-    depend(in : asc_ortho_radial_dep[(radial_task - 1 + num_radial_tasks) % num_radial_tasks],                         \
-               asc_ortho_radial_dep[(radial_task + 1 + num_radial_tasks) % num_radial_tasks])
-                    {
-                        int i_theta = radial_task;
-                        applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
-                    }
-                }
-                /* Outside Black Section (Part 2) */
-                for (int radial_task = 3; radial_task < num_radial_tasks; radial_task += 4) {
-#pragma omp task depend(out : asc_ortho_radial_dep[radial_task])                                                       \
-    depend(in : asc_ortho_radial_dep[(radial_task - 2 + num_radial_tasks) % num_radial_tasks],                         \
-               asc_ortho_radial_dep[(radial_task + 2 + num_radial_tasks) % num_radial_tasks])
-                    {
-                        int i_theta = radial_task;
-                        applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
-                    }
-                }
-
-                /* Black Radial Smoother */
-                for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 2) {
-#pragma omp task depend(out : smoother_radial_dep[radial_task])                                                        \
-    depend(in : asc_ortho_radial_dep[(radial_task - 1 + num_radial_tasks) % num_radial_tasks],                         \
-               asc_ortho_radial_dep[(radial_task + 0 + num_radial_tasks) % num_radial_tasks],                          \
-               asc_ortho_radial_dep[(radial_task + 1 + num_radial_tasks) % num_radial_tasks])
-                    {
-                        int i_theta = radial_task;
-                        solveRadialSection(i_theta, x, temp, radial_solver_storage);
-                    }
-                }
-
-                /* ---------------------------- */
-                /* Asc ortho White Circle Tasks */
-                /* ---------------------------- */
-
-                /* Inside White Section */
-                for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 2) {
-#pragma omp task depend(out : asc_ortho_radial_dep[radial_task])                                                       \
-    depend(in : smoother_radial_dep[(radial_task - 1 + num_radial_tasks) % num_radial_tasks],                          \
-               smoother_radial_dep[(radial_task + 0 + num_radial_tasks) % num_radial_tasks],                           \
-               smoother_radial_dep[(radial_task + 1 + num_radial_tasks) % num_radial_tasks])
-                    {
-                        int i_theta = radial_task;
-                        applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
-                    }
-                }
-                /* Outside White Section (Part 1) */
-                for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 4) {
-#pragma omp task depend(out : asc_ortho_radial_dep[radial_task])                                                       \
-    depend(in : asc_ortho_radial_dep[(radial_task - 1 + num_radial_tasks) % num_radial_tasks],                         \
-               asc_ortho_radial_dep[(radial_task + 1 + num_radial_tasks) % num_radial_tasks])
-                    {
-                        int i_theta = radial_task;
-                        applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
-                    }
-                }
-                /* Outside White Section (Part 2) */
-                for (int radial_task = 2; radial_task < num_radial_tasks; radial_task += 4) {
-#pragma omp task depend(out : asc_ortho_radial_dep[radial_task])                                                       \
-    depend(in : asc_ortho_radial_dep[(radial_task - 2 + num_radial_tasks) % num_radial_tasks],                         \
-               asc_ortho_radial_dep[(radial_task + 2 + num_radial_tasks) % num_radial_tasks])
-                    {
-                        int i_theta = radial_task;
-                        applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
-                    }
-                }
-
-                /* White Radial Smoother */
-                for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 2) {
-#pragma omp task depend(out : smoother_radial_dep[radial_task])                                                        \
-    depend(in : asc_ortho_radial_dep[(radial_task - 1 + num_radial_tasks) % num_radial_tasks],                         \
-               asc_ortho_radial_dep[(radial_task + 0 + num_radial_tasks) % num_radial_tasks],                          \
-               asc_ortho_radial_dep[(radial_task + 1 + num_radial_tasks) % num_radial_tasks])
-                    {
-                        int i_theta = radial_task;
-                        solveRadialSection(i_theta, x, temp, radial_solver_storage);
-                    }
-                }
-            }
-        }
-        delete[] asc_ortho_circle_dep;
-        delete[] asc_ortho_radial_dep;
-        delete[] smoother_circle_dep;
-        delete[] smoother_radial_dep;
     }
 }

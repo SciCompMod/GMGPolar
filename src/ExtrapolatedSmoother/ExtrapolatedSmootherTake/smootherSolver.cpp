@@ -122,7 +122,7 @@
                 /* Case 2: Across origin discretization on the interior boundary */                                                         \
                 /* ------------------------------------------------------------- */                                                         \
                 /* h1 gets replaced with 2 * R0. */                                                                                         \
-                /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()/2)). */                                               \
+                /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()/2)). */                                                \
                 /* Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil. */                         \
                 double h1 = 2.0 * grid.radius(0);                                                                                           \
                 double h2 = grid.radialSpacing(i_r);                                                                                        \
@@ -389,6 +389,7 @@
                 /* "Right" is part of the radial Asc smoother matrices, */                                             \
                 /* but is shifted over to the rhs to make the radial Asc smoother matrices symmetric. */               \
                 /* Note that the circle Asc smoother matrices are symmetric by default. */                             \
+                /* Note that rhs[right] contains the correct boundary value of u_D. */                                 \
                 temp[center] =                                                                                         \
                     rhs[center] - (-coeff2 * (arr[center] + arr[right]) * rhs[right] /* Right: Symmetry shift! */      \
                                    - coeff3 * (att[center] + att[bottom]) * x[bottom] /* Bottom */                     \
@@ -534,8 +535,7 @@ void ExtrapolatedSmootherTake::solveRadialSection(const int i_theta, Vector<doub
     std::move(temp.begin() + start, temp.begin() + end, x.begin() + start);
 }
 
-void ExtrapolatedSmootherTake::extrapolatedSmoothing(Vector<double>& x, const Vector<double>& rhs,
-                                                            Vector<double>& temp)
+void ExtrapolatedSmootherTake::extrapolatedSmoothing(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());

@@ -291,6 +291,8 @@ void DirectSolverTakeNoMumps::buildSolverMatrixRadialSection(const int i_theta, 
     }
 }
 
+// clang-format off
+
 /* ------------------------------------------------------------------------ */
 /* If the indexing is not smoother-based, please adjust the access patterns */
 SparseMatrixCSR<double> DirectSolverTakeNoMumps::buildSolverMatrix()
@@ -316,16 +318,16 @@ SparseMatrixCSR<double> DirectSolverTakeNoMumps::buildSolverMatrix()
         }
     }
     else {
-/* Multi-threaded execution */
-#pragma omp parallel
+        /* Multi-threaded execution */
+        #pragma omp parallel
         {
-/* Circle Section */
-#pragma omp for nowait
+            /* Circle Section */
+            #pragma omp for nowait
             for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
                 buildSolverMatrixCircleSection(i_r, solver_matrix);
             }
-/* Radial Section */
-#pragma omp for nowait
+            /* Radial Section */
+            #pragma omp for nowait
             for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
                 buildSolverMatrixRadialSection(i_theta, solver_matrix);
             }
@@ -334,3 +336,4 @@ SparseMatrixCSR<double> DirectSolverTakeNoMumps::buildSolverMatrix()
 
     return solver_matrix;
 }
+// clang-format on
