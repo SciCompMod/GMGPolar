@@ -74,6 +74,20 @@
             const int bottom_index = i_theta_M1;                                                                         \
             const int top_index    = i_theta_P1;                                                                         \
                                                                                                                          \
+            /* Visualization of the sourrounding tridiagonal matrices. */                                                \
+            /* left_matrix, center_matrix, right_matrix */                                                               \
+            /* | O | O | O | */                                                                                          \
+            /* |   |   |   | */                                                                                          \
+            /* | O | Õ | O | */                                                                                          \
+            /* |   |   |   | */                                                                                          \
+            /* | O | O | O | */                                                                                          \
+            /* or */                                                                                                     \
+            /* left_matrix, right_matrix */                                                                              \
+            /* | O | O | O || O   O   O   O  */                                                                          \
+            /* |   |   |   || -------------- */                                                                          \
+            /* | O | O | Õ || O   O   O   O  <- right_matrix */                                                          \
+            /* |   |   |   || -------------- */                                                                          \
+            /* | O | O | O || O   O   O   O  */                                                                          \
             auto& left_matrix   = circle_tridiagonal_solver[i_r - 1];                                                    \
             auto& center_matrix = circle_tridiagonal_solver[i_r];                                                        \
             auto& right_matrix  = (i_r + 1 == numberSmootherCircles) ? radial_tridiagonal_solver[i_theta]                \
@@ -160,6 +174,13 @@
             const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                     \
             const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                     \
                                                                                                                          \
+            /* ---------- */                                                                                             \
+            /* O   O   O  <- top_matrix */                                                                               \
+            /* ---------- */                                                                                             \
+            /* O   Õ   O  <- center_matrix */                                                                            \
+            /* ---------- */                                                                                             \
+            /* O   O   O  <- bottom_matrix */                                                                            \
+            /* ---------- */                                                                                             \
             auto& bottom_matrix = radial_tridiagonal_solver[i_theta_M1];                                                 \
             auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                    \
             auto& top_matrix    = radial_tridiagonal_solver[i_theta_P1];                                                 \
@@ -279,6 +300,12 @@
                 const double coeff3 = 0.5 * (h1 + h2) / k1;                                                              \
                 const double coeff4 = 0.5 * (h1 + h2) / k2;                                                              \
                                                                                                                          \
+                /* left_matrix (across-the origin), center_matrix, right_matrix */                                       \
+                /* -| X | O | X | */                                                                                     \
+                /* -|   |   |   | */                                                                                     \
+                /* -| Õ | O | O | */                                                                                     \
+                /* -|   |   |   | */                                                                                     \
+                /* -| X | O | X | */                                                                                     \
                 auto& center_matrix = inner_boundary_circle_matrix;                                                      \
                 auto& right_matrix  = circle_tridiagonal_solver[i_r + 1];                                                \
                 auto& left_matrix   = inner_boundary_circle_matrix;                                                      \
@@ -360,7 +387,7 @@
                 row    = right_index;                                                                                    \
                 column = right_index;                                                                                    \
                 value  = coeff2 * arr; /* Center: (Left) */                                                              \
-                UPDATE_MATRIX_ELEMENT(right_matrix, row, column, value);                                                    \
+                UPDATE_MATRIX_ELEMENT(right_matrix, row, column, value);                                                 \
                                                                                                                          \
                 /* Fill matrix row of (i,j-1) */                                                                         \
                 const Stencil& BottomStencil = CenterStencil;                                                            \
@@ -417,6 +444,11 @@
             const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                     \
             const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                     \
                                                                                                                          \
+            /* | O | O | O || O   O   O   O  <- top_matrix */                                                            \
+            /* |   |   |   || -------------- */                                                                          \
+            /* | O | O | O || Õ   O   O   O  <- center_matrix */                                                         \
+            /* |   |   |   || -------------- */                                                                          \
+            /* | O | O | O || O   O   O   O  <- bottom_matrix */                                                         \
             auto& bottom_matrix = radial_tridiagonal_solver[i_theta_M1];                                                 \
             auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                    \
             auto& top_matrix    = radial_tridiagonal_solver[i_theta_P1];                                                 \
@@ -448,7 +480,7 @@
             row    = left_index;                                                                                         \
             column = left_index;                                                                                         \
             value  = coeff1 * arr; /* Center: (Right) */                                                                 \
-            UPDATE_MATRIX_ELEMENT(left_matrix, row, column, value);                                                    \
+            UPDATE_MATRIX_ELEMENT(left_matrix, row, column, value);                                                      \
                                                                                                                          \
             /* Fill matrix row of (i+1,j) */                                                                             \
             row    = right_index;                                                                                        \
@@ -471,7 +503,7 @@
             row    = top_index;                                                                                          \
             column = top_index;                                                                                          \
             value  = coeff4 * att; /* Center: (Bottom) */                                                                \
-            UPDATE_MATRIX_ELEMENT(top_matrix, row, column, value);                                                    \
+            UPDATE_MATRIX_ELEMENT(top_matrix, row, column, value);                                                       \
         }                                                                                                                \
         /* ------------------------------------------- */                                                                \
         /* Radial Section: Node next to outer boundary */                                                                \
@@ -489,6 +521,13 @@
             const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                     \
             const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                     \
                                                                                                                          \
+            /* ---------------|| */                                                                                      \
+            /* O   O   O   O  || <- top_matrix */                                                                        \
+            /* ---------------|| */                                                                                      \
+            /* O   O   Õ   O  || <- center_matrix */                                                                     \
+            /* ---------------|| */                                                                                      \
+            /* O   O   O   O  || <- bottom_matrix */                                                                     \
+            /* ---------------|| */                                                                                      \
             auto& bottom_matrix = radial_tridiagonal_solver[i_theta_M1];                                                 \
             auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                    \
             auto& top_matrix    = radial_tridiagonal_solver[i_theta_P1];                                                 \
@@ -539,7 +578,7 @@
             row    = top_index;                                                                                          \
             column = top_index;                                                                                          \
             value  = coeff4 * att; /* Center: (Bottom) */                                                                \
-            UPDATE_MATRIX_ELEMENT(top_matrix, row, column, value);                                                    \
+            UPDATE_MATRIX_ELEMENT(top_matrix, row, column, value);                                                       \
         }                                                                                                                \
         /* ------------------------------------------ */                                                                 \
         /* Radial Section: Node on the outer boundary */                                                                 \
@@ -550,6 +589,13 @@
             double k2     = grid.angularSpacing(i_theta);                                                                \
             double coeff1 = 0.5 * (k1 + k2) / h1;                                                                        \
                                                                                                                          \
+            /* -----------|| */                                                                                          \
+            /* O   O   O  || */                                                                                          \
+            /* -----------|| */                                                                                          \
+            /* O   O   Õ  || <- center_matrix*/                                                                          \
+            /* -----------|| */                                                                                          \
+            /* O   O   O  || */                                                                                          \
+            /* -----------|| */                                                                                          \
             auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                    \
                                                                                                                          \
             const int center_index = i_r - numberSmootherCircles;                                                        \
@@ -669,6 +715,7 @@ void SmootherGive::buildAscRadialSection(const int i_theta)
     }
 }
 
+// clang-format off
 void SmootherGive::buildAscMatrices()
 {
     omp_set_num_threads(num_omp_threads_);
@@ -686,13 +733,13 @@ void SmootherGive::buildAscMatrices()
     const int num_radial_nodes = length_smoother_radial;
     radial_tridiagonal_solver_.resize(grid_.ntheta());
 
-// Remark: circle_tridiagonal_solver_[0] is unitialized.
-// Please use inner_boundary_circle_matrix_ instead!
-#pragma omp parallel if (grid_.numberOfNodes() > 10'000)
+    // Remark: circle_tridiagonal_solver_[0] is unitialized.
+    // Please use inner_boundary_circle_matrix_ instead!
+    #pragma omp parallel if (grid_.numberOfNodes() > 10'000)
     {
-// ---------------- //
-// Circular Section //
-#pragma omp for nowait
+        // ---------------- //
+        // Circular Section //
+        #pragma omp for nowait
         for (int circle_Asc_index = 0; circle_Asc_index < number_smoother_circles; circle_Asc_index++) {
 
             /* Inner boundary circle */
@@ -723,9 +770,9 @@ void SmootherGive::buildAscMatrices()
             }
         }
 
-// -------------- //
-// Radial Section //
-#pragma omp for nowait
+        // -------------- //
+        // Radial Section //
+        #pragma omp for nowait
         for (int radial_Asc_index = 0; radial_Asc_index < grid_.ntheta(); radial_Asc_index++) {
             auto& solverMatrix = radial_tridiagonal_solver_[radial_Asc_index];
 
@@ -757,180 +804,69 @@ void SmootherGive::buildAscMatrices()
         }
     }
     else {
-        if (use_simple_parallelism) {
-            /*  Multi-threaded execution: For Loops */
-            const int num_circle_tasks        = grid_.numberSmootherCircles();
-            const int additional_radial_tasks = grid_.ntheta() % 3;
-            const int num_radial_tasks        = grid_.ntheta() - additional_radial_tasks;
+        /*  Multi-threaded execution: For Loops */
+        const int num_circle_tasks        = grid_.numberSmootherCircles();
+        const int additional_radial_tasks = grid_.ntheta() % 3;
+        const int num_radial_tasks        = grid_.ntheta() - additional_radial_tasks;
 
-#pragma omp parallel
-            {
-#pragma omp for
-                for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
-                    int i_r = grid_.numberSmootherCircles() - circle_task - 1;
-                    buildAscCircleSection(i_r);
-                }
-#pragma omp for
-                for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 3) {
-                    int i_r = grid_.numberSmootherCircles() - circle_task - 1;
-                    buildAscCircleSection(i_r);
-                }
-#pragma omp for nowait
-                for (int circle_task = 2; circle_task < num_circle_tasks; circle_task += 3) {
-                    int i_r = grid_.numberSmootherCircles() - circle_task - 1;
-                    buildAscCircleSection(i_r);
-                }
+        #pragma omp parallel
+        {
+            #pragma omp for
+            for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
+                int i_r = grid_.numberSmootherCircles() - circle_task - 1;
+                buildAscCircleSection(i_r);
+            }
+            #pragma omp for
+            for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 3) {
+                int i_r = grid_.numberSmootherCircles() - circle_task - 1;
+                buildAscCircleSection(i_r);
+            }
+            #pragma omp for nowait
+            for (int circle_task = 2; circle_task < num_circle_tasks; circle_task += 3) {
+                int i_r = grid_.numberSmootherCircles() - circle_task - 1;
+                buildAscCircleSection(i_r);
+            }
 
-#pragma omp for
-                for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {
-                    if (radial_task > 0) {
-                        int i_theta = radial_task + additional_radial_tasks;
-                        buildAscRadialSection(i_theta);
-                    }
-                    else {
-                        if (additional_radial_tasks == 0) {
-                            buildAscRadialSection(0);
-                        }
-                        else if (additional_radial_tasks >= 1) {
-                            buildAscRadialSection(0);
-                            buildAscRadialSection(1);
-                        }
-                    }
-                }
-#pragma omp for
-                for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 3) {
-                    if (radial_task > 1) {
-                        int i_theta = radial_task + additional_radial_tasks;
-                        buildAscRadialSection(i_theta);
-                    }
-                    else {
-                        if (additional_radial_tasks == 0) {
-                            buildAscRadialSection(1);
-                        }
-                        else if (additional_radial_tasks == 1) {
-                            buildAscRadialSection(2);
-                        }
-                        else if (additional_radial_tasks == 2) {
-                            buildAscRadialSection(2);
-                            buildAscRadialSection(3);
-                        }
-                    }
-                }
-#pragma omp for
-                for (int radial_task = 2; radial_task < num_radial_tasks; radial_task += 3) {
+            #pragma omp for
+            for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {
+                if (radial_task > 0) {
                     int i_theta = radial_task + additional_radial_tasks;
                     buildAscRadialSection(i_theta);
                 }
-            }
-        }
-        else {
-            /*  Multi-threaded execution: Task Dependencies */
-            const int num_circle_tasks        = grid_.numberSmootherCircles();
-            const int additional_radial_tasks = grid_.ntheta() % 3;
-            const int num_radial_tasks        = grid_.ntheta() - additional_radial_tasks;
-
-            assert(num_circle_tasks >= 2);
-            assert(num_radial_tasks >= 3 && num_radial_tasks % 3 == 0);
-
-            /* Make sure to deallocate at the end */
-            const int boundary_margin = 2; // Additional space to ensure safe access
-            int* circle_dep           = new int[num_circle_tasks + boundary_margin];
-            int* radial_dep           = new int[num_radial_tasks];
-
-#pragma omp parallel
-            {
-#pragma omp single
-                {
-                    /* ------------ */
-                    /* Circle Tasks */
-                    /* ------------ */
-
-                    /* Mod 0 Circles */
-                    for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
-#pragma omp task depend(out : circle_dep[circle_task])
-                        {
-                            const int i_r = grid_.numberSmootherCircles() - circle_task - 1;
-                            buildAscCircleSection(i_r);
-                        }
+                else {
+                    if (additional_radial_tasks == 0) {
+                        buildAscRadialSection(0);
                     }
-                    /* Mod 2 Circles */
-                    for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 3) {
-#pragma omp task depend(out : circle_dep[circle_task])                                                                 \
-    depend(in : circle_dep[circle_task - 1], circle_dep[circle_task + 2])
-                        {
-                            const int i_r = grid_.numberSmootherCircles() - circle_task - 1;
-                            buildAscCircleSection(i_r);
-                        }
-                    }
-                    /* Mod 2 Circles */
-                    for (int circle_task = 2; circle_task < num_circle_tasks; circle_task += 3) {
-#pragma omp task depend(out : circle_dep[circle_task])                                                                 \
-    depend(in : circle_dep[circle_task - 1], circle_dep[circle_task + 2])
-                        {
-                            const int i_r = grid_.numberSmootherCircles() - circle_task - 1;
-                            buildAscCircleSection(i_r);
-                        }
-                    }
-
-                    /* ------------ */
-                    /* Radial Tasks */
-                    /* ------------ */
-
-                    /* Mod 0 Radials */
-                    for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {
-#pragma omp task depend(out : radial_dep[radial_task]) depend(in : circle_dep[1])
-                        {
-                            if (radial_task > 2) {
-                                const int i_theta = radial_task + additional_radial_tasks;
-                                buildAscRadialSection(i_theta);
-                            }
-                            else {
-                                if (additional_radial_tasks == 0) {
-                                    buildAscRadialSection(0);
-                                }
-                                else if (additional_radial_tasks >= 1) {
-                                    buildAscRadialSection(0);
-                                    buildAscRadialSection(1);
-                                }
-                            }
-                        }
-                    }
-                    /* Mod 1 Radials */
-                    for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 3) {
-#pragma omp task depend(out : radial_dep[radial_task])                                                                 \
-    depend(in : radial_dep[radial_task - 1], radial_dep[(radial_task + 2) % num_radial_tasks])
-                        {
-                            if (radial_task > 2) {
-                                int i_theta = radial_task + additional_radial_tasks;
-                                buildAscRadialSection(i_theta);
-                            }
-                            else {
-                                if (additional_radial_tasks == 0) {
-                                    buildAscRadialSection(1);
-                                }
-                                else if (additional_radial_tasks == 1) {
-                                    buildAscRadialSection(2);
-                                }
-                                else if (additional_radial_tasks == 2) {
-                                    buildAscRadialSection(2);
-                                    buildAscRadialSection(3);
-                                }
-                            }
-                        }
-                    }
-                    /* Mod 2 Radials */
-                    for (int radial_task = 2; radial_task < num_radial_tasks; radial_task += 3) {
-#pragma omp task depend(out : radial_dep[radial_task])                                                                 \
-    depend(in : radial_dep[radial_task - 1], radial_dep[(radial_task + 2) % num_radial_tasks])
-                        {
-                            int i_theta = radial_task + additional_radial_tasks;
-                            buildAscRadialSection(i_theta);
-                        }
+                    else if (additional_radial_tasks >= 1) {
+                        buildAscRadialSection(0);
+                        buildAscRadialSection(1);
                     }
                 }
             }
-            delete[] circle_dep;
-            delete[] radial_dep;
+            #pragma omp for
+            for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 3) {
+                if (radial_task > 1) {
+                    int i_theta = radial_task + additional_radial_tasks;
+                    buildAscRadialSection(i_theta);
+                }
+                else {
+                    if (additional_radial_tasks == 0) {
+                        buildAscRadialSection(1);
+                    }
+                    else if (additional_radial_tasks == 1) {
+                        buildAscRadialSection(2);
+                    }
+                    else if (additional_radial_tasks == 2) {
+                        buildAscRadialSection(2);
+                        buildAscRadialSection(3);
+                    }
+                }
+            }
+            #pragma omp for
+            for (int radial_task = 2; radial_task < num_radial_tasks; radial_task += 3) {
+                int i_theta = radial_task + additional_radial_tasks;
+                buildAscRadialSection(i_theta);
+            }
         }
     }
 
@@ -960,3 +896,4 @@ void SmootherGive::buildAscMatrices()
         }
     }
 }
+// clang-format on

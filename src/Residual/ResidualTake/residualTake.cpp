@@ -9,6 +9,8 @@ ResidualTake::ResidualTake(const PolarGrid& grid, const LevelCache& level_cache,
 
 /* ------------------ */
 /* result = rhs - A*x */
+
+// clang-format off
 void ResidualTake::computeResidual(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const
 {
     assert(result.size() == x.size());
@@ -27,19 +29,20 @@ void ResidualTake::computeResidual(Vector<double>& result, const Vector<double>&
         }
     }
     else {
-/* Multi-threaded execution */
-#pragma omp parallel
+        /* Multi-threaded execution */
+        #pragma omp parallel
         {
-/* Circle Section */
-#pragma omp for nowait
+            /* Circle Section */
+            #pragma omp for nowait
             for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
                 applyCircleSection(i_r, result, rhs, x);
             }
-/* Radial Section */
-#pragma omp for nowait
+            /* Radial Section */
+            #pragma omp for nowait
             for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
                 applyRadialSection(i_theta, result, rhs, x);
             }
         }
     }
 }
+// clang-format on

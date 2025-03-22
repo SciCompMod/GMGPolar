@@ -47,7 +47,7 @@
                 /* Case 2: Across origin discretization on the interior boundary */                                                     \
                 /* ------------------------------------------------------------- */                                                     \
                 /* h1 gets replaced with 2 * R0. */                                                                                     \
-                /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()/2)). */                                           \
+                /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()/2)). */                                            \
                 /* Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil. */                     \
                 double h1 = 2.0 * grid.radius(0);                                                                                       \
                 double h2 = grid.radialSpacing(i_r);                                                                                    \
@@ -185,6 +185,7 @@
             /* "Right" is part of the radial Asc smoother matrices, */                                                 \
             /* but is shifted over to the rhs to make the radial Asc smoother matrices symmetric. */                   \
             /* Note that the circle Asc smoother matrices are symmetric by default. */                                 \
+            /* Note that rhs[right] contains the correct boundary value of u_D. */                                     \
             temp[center] = rhs[center] - (-coeff2 * (arr[center] + arr[right]) * rhs[right] /* Right */                \
                                           - coeff3 * (att[center] + att[bottom]) * x[bottom] /* Bottom */              \
                                           - coeff4 * (att[center] + att[top]) * x[top] /* Top */                       \
@@ -276,6 +277,10 @@ void SmootherTake::solveRadialSection(const int i_theta, Vector<double>& x, Vect
     std::move(temp.begin() + start, temp.begin() + end, x.begin() + start);
 }
 
+// clang-format off
+
+// In temp we store the vector 'rhs - A_sc^ortho u_sc^ortho' and then we solve the system
+// Asc * u_sc = temp in place and move the updated values into 'x'.
 void SmootherTake::smoothing(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
 {
     assert(x.size() == rhs.size());
@@ -284,7 +289,7 @@ void SmootherTake::smoothing(Vector<double>& x, const Vector<double>& rhs, Vecto
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
 
-#pragma omp parallel
+    #pragma omp parallel
     {
         Vector<double> circle_solver_storage_1(grid_.ntheta());
         Vector<double> circle_solver_storage_2(grid_.ntheta());
@@ -295,31 +300,32 @@ void SmootherTake::smoothing(Vector<double>& x, const Vector<double>& rhs, Vecto
         const int start_black_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 1 : 0;
         const int start_white_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 0 : 1;
 
-/* Black Circle Section */
-#pragma omp for
+        /* Black Circle Section */
+        #pragma omp for
         for (int i_r = start_black_circles; i_r < grid_.numberSmootherCircles(); i_r += 2) {
             applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
             solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
         } /* Implicit barrier */
 
-/* White Circle Section */
-#pragma omp for nowait
+        /* White Circle Section */
+        #pragma omp for nowait
         for (int i_r = start_white_circles; i_r < grid_.numberSmootherCircles(); i_r += 2) {
             applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
             solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
         }
-/* Black Radial Section */
-#pragma omp for
+        /* Black Radial Section */
+        #pragma omp for
         for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta += 2) {
             applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
             solveRadialSection(i_theta, x, temp, radial_solver_storage);
         } /* Implicit barrier */
 
-/* White Radial Section*/
-#pragma omp for
+        /* White Radial Section*/
+        #pragma omp for
         for (int i_theta = 1; i_theta < grid_.ntheta(); i_theta += 2) {
             applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
             solveRadialSection(i_theta, x, temp, radial_solver_storage);
         } /* Implicit barrier */
     }
 }
+// clang-format on

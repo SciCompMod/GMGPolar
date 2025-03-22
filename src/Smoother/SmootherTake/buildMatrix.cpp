@@ -290,7 +290,7 @@
             value  = -coeff1 * (arr[center] + arr[left]);                                                              \
             UPDATE_MATRIX_ELEMENT(matrix, row, column, value);                                                         \
                                                                                                                        \
-            /* Right */                                                                                                \
+            /* Right: NOT INCLUDED! */                                                                                 \
             row    = center_index;                                                                                     \
             column = right_index;                                                                                      \
             value  = 0.0;                                                                                              \
@@ -310,7 +310,7 @@
             value  = 1.0;                                                                                              \
             UPDATE_MATRIX_ELEMENT(matrix, row, column, value);                                                         \
                                                                                                                        \
-            /* Left */                                                                                                 \
+            /* Left: NOT INCLUDED */                                                                                   \
             row    = center_index;                                                                                     \
             column = left_index;                                                                                       \
             value  = 0.0;                                                                                              \
@@ -354,6 +354,7 @@ void SmootherTake::buildAscRadialSection(const int i_theta)
     }
 }
 
+// clang-format off
 void SmootherTake::buildAscMatrices()
 {
     omp_set_num_threads(num_omp_threads_);
@@ -371,13 +372,13 @@ void SmootherTake::buildAscMatrices()
     const int num_radial_nodes = length_smoother_radial;
     radial_tridiagonal_solver_.resize(grid_.ntheta());
 
-// Remark: circle_tridiagonal_solver_[0] is unitialized.
-// Please use inner_boundary_circle_matrix_ instead!
-#pragma omp parallel if (grid_.numberOfNodes() > 10'000)
+    // Remark: circle_tridiagonal_solver_[0] is unitialized.
+    // Please use inner_boundary_circle_matrix_ instead!
+    #pragma omp parallel if (grid_.numberOfNodes() > 10'000)
     {
-// ---------------- //
-// Circular Section //
-#pragma omp for nowait
+        // ---------------- //
+        // Circular Section //
+        #pragma omp for nowait
         for (int circle_Asc_index = 0; circle_Asc_index < number_smoother_circles; circle_Asc_index++) {
 
             /* Inner boundary circle */
@@ -396,9 +397,9 @@ void SmootherTake::buildAscMatrices()
             }
         }
 
-// -------------- //
-// Radial Section //
-#pragma omp for nowait
+        // -------------- //
+        // Radial Section //
+        #pragma omp for nowait
         for (int radial_Asc_index = 0; radial_Asc_index < grid_.ntheta(); radial_Asc_index++) {
             auto& solverMatrix = radial_tridiagonal_solver_[radial_Asc_index];
             solverMatrix       = SymmetricTridiagonalSolver<double>(num_radial_nodes);
@@ -410,14 +411,14 @@ void SmootherTake::buildAscMatrices()
     /* Part 2: Fill Asc Smoother matrices */
     /* ---------------------------------- */
 
-#pragma omp parallel
+    #pragma omp parallel
     {
-#pragma omp for nowait
+        #pragma omp for nowait
         for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
             buildAscCircleSection(i_r);
         }
 
-#pragma omp for nowait
+        #pragma omp for nowait
         for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
             buildAscRadialSection(i_theta);
         }
@@ -449,3 +450,4 @@ void SmootherTake::buildAscMatrices()
         }
     }
 }
+// clang-format on
