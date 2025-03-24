@@ -11,7 +11,7 @@
         else if (row == 0 && column == matrix.columns() - 1)                                                           \
             matrix.cyclic_corner_element() += value;                                                                   \
     } while (0)
-
+ 
 #define NODE_BUILD_SMOOTHER_GIVE(i_r, i_theta, grid, DirBC_Interior, inner_boundary_circle_matrix,                       \
                                  circle_tridiagonal_solver, radial_tridiagonal_solver)                                   \
     do {                                                                                                                 \

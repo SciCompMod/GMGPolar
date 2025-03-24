@@ -1,4 +1,4 @@
-#include "../../../include/DirectSolver/DirectSolverTakeNoMumps/directSolverTakeNoMumps.h"
+#include "../../../include/DirectSolver/DirectSolverTakeCustomLU/directSolverTakeCustomLU.h"
 
 #define NODE_BUILD_SOLVER_MATRIX_TAKE(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF,         \
                                       coeff_beta)                                                                      \
@@ -255,7 +255,7 @@
         }                                                                                                              \
     } while (0)
 
-void DirectSolverTakeNoMumps::buildSolverMatrixCircleSection(const int i_r, SparseMatrixCSR<double>& solver_matrix)
+void DirectSolverTakeCustomLU::buildSolverMatrixCircleSection(const int i_r, SparseMatrixCSR<double>& solver_matrix)
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -273,7 +273,7 @@ void DirectSolverTakeNoMumps::buildSolverMatrixCircleSection(const int i_r, Spar
     }
 }
 
-void DirectSolverTakeNoMumps::buildSolverMatrixRadialSection(const int i_theta, SparseMatrixCSR<double>& solver_matrix)
+void DirectSolverTakeCustomLU::buildSolverMatrixRadialSection(const int i_theta, SparseMatrixCSR<double>& solver_matrix)
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -295,7 +295,7 @@ void DirectSolverTakeNoMumps::buildSolverMatrixRadialSection(const int i_theta, 
 
 /* ------------------------------------------------------------------------ */
 /* If the indexing is not smoother-based, please adjust the access patterns */
-SparseMatrixCSR<double> DirectSolverTakeNoMumps::buildSolverMatrix()
+SparseMatrixCSR<double> DirectSolverTakeCustomLU::buildSolverMatrix()
 {
     omp_set_num_threads(num_omp_threads_);
 

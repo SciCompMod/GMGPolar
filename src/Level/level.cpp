@@ -6,7 +6,7 @@
 #include "../../include/DirectSolver/DirectSolverGive/directSolverGive.h"
 #include "../../include/DirectSolver/DirectSolverTake/directSolverTake.h"
 
-#include "../../include/DirectSolver/DirectSolverTakeNoMumps/directSolverTakeNoMumps.h"
+#include "../../include/DirectSolver/DirectSolverTakeCustomLU/directSolverTakeCustomLU.h"
 
 #include "../../include/Smoother/SmootherGive/smootherGive.h"
 #include "../../include/Smoother/SmootherTake/smootherTake.h"
@@ -111,7 +111,7 @@ void Level::initializeDirectSolver(const DomainGeometry& domain_geometry,
                                    const StencilDistributionMethod stencil_distribution_method)
 {
     if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
-        op_directSolver_ = std::make_unique<DirectSolverTake>(
+        op_directSolver_ = std::make_unique<DirectSolverTakeCustomLU>(
             *grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads);
     }
     else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {

@@ -3,20 +3,25 @@
 #include "../directSolver.h"
 
 #include "../../LinearAlgebra/csr_matrix.h"
+#include "../../LinearAlgebra/sparseLUSolver.h"
 
-class DirectSolverTakeNoMumps : public DirectSolver
+class DirectSolverTakeCustomLU : public DirectSolver
 {
 public:
-    explicit DirectSolverTakeNoMumps(const PolarGrid& grid, const LevelCache& level_cache,
+    explicit DirectSolverTakeCustomLU(const PolarGrid& grid, const LevelCache& level_cache,
                               const DomainGeometry& domain_geometry,
                               const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior,
                               int num_omp_threads);
 
-    ~DirectSolverTakeNoMumps() override;
+    ~DirectSolverTakeCustomLU() override;
     // Note: The rhs (right-hand side) vector gets overwritten with the solution.
     void solveInPlace(Vector<double>& solution) override;
 
 private:
+    // Solver matrix and solver structure
+    SparseMatrixCSR<double> solver_matrix_;
+    SparseLUSolver<double> lu_solver_;
+
     // clang-format off
     const Stencil stencil_interior_      = {
         7, 4, 8,
@@ -44,11 +49,6 @@ private:
         5, 3, 6
     };
     // clang-format on
-
-    // Solver matrix and solver structure
-    // Important: They need to be defined below the stencils!
-    SparseMatrixCSR<double> solver_matrix_;
-    SparseLUSolver<double> lu_solver_;
 
     SparseMatrixCSR<double> buildSolverMatrix();
     void buildSolverMatrixCircleSection(const int i_r, SparseMatrixCSR<double>& solver_matrix);

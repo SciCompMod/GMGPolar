@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "../../include/LinearAlgebra/csr_matrix.h"
+#include "../../include/LinearAlgebra/sparseLUSolver.h"
 #include "../../include/LinearAlgebra/vector.h"
 
 TEST(SparseMatrixCSR, default_construct)

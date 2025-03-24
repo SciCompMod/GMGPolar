@@ -1,6 +1,6 @@
-#include "../../../include/DirectSolver/DirectSolverTakeNoMumps/directSolverTakeNoMumps.h"
+#include "../../../include/DirectSolver/DirectSolverTakeCustomLU/directSolverTakeCustomLU.h"
 
-int DirectSolverTakeNoMumps::getStencilSize(int global_index) const
+int DirectSolverTakeCustomLU::getStencilSize(int global_index) const
 {
     int i_r, i_theta;
     grid_.multiIndex(global_index, i_r, i_theta);
@@ -30,7 +30,7 @@ int DirectSolverTakeNoMumps::getStencilSize(int global_index) const
 }
 
 
-const Stencil& DirectSolverTakeNoMumps::getStencil(int i_r) const
+const Stencil& DirectSolverTakeCustomLU::getStencil(int i_r) const
 {
     assert(0 <= i_r && i_r < grid_.nr());
     assert(grid_.nr() >= 4);
@@ -53,7 +53,7 @@ const Stencil& DirectSolverTakeNoMumps::getStencil(int i_r) const
     throw std::out_of_range("Invalid index for stencil");
 }
 
-int DirectSolverTakeNoMumps::getNonZeroCountSolverMatrix() const
+int DirectSolverTakeCustomLU::getNonZeroCountSolverMatrix() const
 {
     const int size_stencil_inner_boundary      = DirBC_Interior_ ? 1 : 7;
     const int size_stencil_next_inner_boundary = DirBC_Interior_ ? 9 : 9;

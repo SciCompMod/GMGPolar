@@ -40,7 +40,7 @@ Rmax=1.3
 nr_exp=4
 ntheta_exp=-1
 anisotropic_factor=3
-divideBy2=6
+divideBy2=7
 
 # Finest grid can be loaded from a text file
 write_grid_file=0
@@ -76,7 +76,7 @@ FMG_cycle=2 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
 # 3: Combination of both implicit extrapolation methods (May be usefull for FMG=0)
 extrapolation=1
 # Maximum number of multigrid levels:
-maxLevels=7
+maxLevels=5
 # Number of smoothing steps:
 preSmoothingSteps=1
 postSmoothingSteps=1
