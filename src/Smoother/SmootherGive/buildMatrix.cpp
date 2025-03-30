@@ -2,6 +2,7 @@
 
 #include "../../../include/common/geometry_helper.h"
 
+/* Tridiagonal matrices */
 #define UPDATE_MATRIX_ELEMENT(matrix, row, column, value)                                                              \
     do {                                                                                                               \
         if (row == column)                                                                                             \
@@ -11,582 +12,601 @@
         else if (row == 0 && column == matrix.columns() - 1)                                                           \
             matrix.cyclic_corner_element() += value;                                                                   \
     } while (0)
- 
-#define NODE_BUILD_SMOOTHER_GIVE(i_r, i_theta, grid, DirBC_Interior, inner_boundary_circle_matrix,                       \
-                                 circle_tridiagonal_solver, radial_tridiagonal_solver)                                   \
-    do {                                                                                                                 \
-        assert(i_r >= 0 && i_r < grid.nr());                                                                             \
-        assert(i_theta >= 0 && i_theta < grid.ntheta());                                                                 \
-                                                                                                                         \
-        const int numberSmootherCircles = grid.numberSmootherCircles();                                                  \
-        const int lengthSmootherRadial  = grid.lengthSmootherRadial();                                                   \
-                                                                                                                         \
-        assert(numberSmootherCircles >= 2);                                                                              \
-        assert(lengthSmootherRadial >= 3);                                                                               \
-                                                                                                                         \
-        int row, column;                                                                                                 \
-        double value;                                                                                                    \
-        /* ------------------------------------------ */                                                                 \
-        /* Node in the interior of the Circle Section */                                                                 \
-        /* ------------------------------------------ */                                                                 \
-        if (i_r > 0 && i_r < numberSmootherCircles) {                                                                    \
-            const double h1     = grid.radialSpacing(i_r - 1);                                                           \
-            const double h2     = grid.radialSpacing(i_r);                                                               \
-            const double k1     = grid.angularSpacing(i_theta - 1);                                                      \
-            const double k2     = grid.angularSpacing(i_theta);                                                          \
-            const double coeff1 = 0.5 * (k1 + k2) / h1;                                                                  \
-            const double coeff2 = 0.5 * (k1 + k2) / h2;                                                                  \
-            const double coeff3 = 0.5 * (h1 + h2) / k1;                                                                  \
-            const double coeff4 = 0.5 * (h1 + h2) / k2;                                                                  \
-                                                                                                                         \
-            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                     \
-            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                     \
-                                                                                                                         \
-            const int center_index = i_theta;                                                                            \
-            const int left_index   = i_theta;                                                                            \
-            const int right_index  = (i_r + 1 == numberSmootherCircles) ? 0 : i_theta;                                   \
-            const int bottom_index = i_theta_M1;                                                                         \
-            const int top_index    = i_theta_P1;                                                                         \
-                                                                                                                         \
-            /* Visualization of the sourrounding tridiagonal matrices. */                                                \
-            /* left_matrix, center_matrix, right_matrix */                                                               \
-            /* | O | O | O | */                                                                                          \
-            /* |   |   |   | */                                                                                          \
-            /* | O | Õ | O | */                                                                                          \
-            /* |   |   |   | */                                                                                          \
-            /* | O | O | O | */                                                                                          \
-            /* or */                                                                                                     \
-            /* left_matrix, right_matrix */                                                                              \
-            /* | O | O | O || O   O   O   O  */                                                                          \
-            /* |   |   |   || -------------- */                                                                          \
-            /* | O | O | Õ || O   O   O   O  <- right_matrix */                                                          \
-            /* |   |   |   || -------------- */                                                                          \
-            /* | O | O | O || O   O   O   O  */                                                                          \
-            auto& left_matrix   = circle_tridiagonal_solver[i_r - 1];                                                    \
-            auto& center_matrix = circle_tridiagonal_solver[i_r];                                                        \
-            auto& right_matrix  = (i_r + 1 == numberSmootherCircles) ? radial_tridiagonal_solver[i_theta]                \
-                                                                     : circle_tridiagonal_solver[i_r + 1];               \
-                                                                                                                         \
-            /* Fill matrix row of (i,j) */                                                                               \
-            row    = center_index;                                                                                       \
-            column = center_index;                                                                                       \
-            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */                   \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            row    = center_index;                                                                                       \
-            column = bottom_index;                                                                                       \
-            value  = -coeff3 * att; /* Bottom */                                                                         \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            row    = center_index;                                                                                       \
-            column = top_index;                                                                                          \
-            value  = -coeff4 * att; /* Top */                                                                            \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            row    = center_index;                                                                                       \
-            column = center_index;                                                                                       \
-            value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */         \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            /* Fill matrix row of (i,j-1) */                                                                             \
-            row    = bottom_index;                                                                                       \
-            column = center_index;                                                                                       \
-            value  = -coeff3 * att; /* Top */                                                                            \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            row    = bottom_index;                                                                                       \
-            column = bottom_index;                                                                                       \
-            value  = coeff3 * att; /* Center: (Top) */                                                                   \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            /* Fill matrix row of (i,j+1) */                                                                             \
-            row    = top_index;                                                                                          \
-            column = center_index;                                                                                       \
-            value  = -coeff4 * att; /* Bottom */                                                                         \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            row    = top_index;                                                                                          \
-            column = top_index;                                                                                          \
-            value  = coeff4 * att; /* Center: (Bottom) */                                                                \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            /* Fill matrix row of (i-1,j) */                                                                             \
-            if (!DirBC_Interior && i_r == 1) {                                                                           \
-                const Stencil& LeftStencil                       = getStencil(i_r - 1);                                  \
-                int left_nz_index                                = getCircleAscIndex(i_r - 1, i_theta);                  \
-                int nz_index                                     = left_nz_index + LeftStencil[StencilPosition::Center]; \
-                inner_boundary_circle_matrix.row_index(nz_index) = left_index;                                           \
-                inner_boundary_circle_matrix.col_index(nz_index) = left_index;                                           \
-                inner_boundary_circle_matrix.value(nz_index) += coeff1 * arr; /* Center: (Right) */                      \
-            }                                                                                                            \
-            if (i_r > 1) {                                                                                               \
-                row    = left_index;                                                                                     \
-                column = left_index;                                                                                     \
-                value  = coeff1 * arr; /* Center: (Right) */                                                             \
-                UPDATE_MATRIX_ELEMENT(left_matrix, row, column, value);                                                  \
-            }                                                                                                            \
-                                                                                                                         \
-            /* Fill matrix row of (i+1,j) */                                                                             \
-            row    = right_index;                                                                                        \
-            column = right_index;                                                                                        \
-            value  = coeff2 * arr; /* Center: (Left) */                                                                  \
-            UPDATE_MATRIX_ELEMENT(right_matrix, row, column, value);                                                     \
-        }                                                                                                                \
-        /* ------------------------------------------ */                                                                 \
-        /* Node in the interior of the Radial Section */                                                                 \
-        /* ------------------------------------------ */                                                                 \
-        else if (i_r > numberSmootherCircles && i_r < grid.nr() - 2) {                                                   \
-            const double h1     = grid.radialSpacing(i_r - 1);                                                           \
-            const double h2     = grid.radialSpacing(i_r);                                                               \
-            const double k1     = grid.angularSpacing(i_theta - 1);                                                      \
-            const double k2     = grid.angularSpacing(i_theta);                                                          \
-            const double coeff1 = 0.5 * (k1 + k2) / h1;                                                                  \
-            const double coeff2 = 0.5 * (k1 + k2) / h2;                                                                  \
-            const double coeff3 = 0.5 * (h1 + h2) / k1;                                                                  \
-            const double coeff4 = 0.5 * (h1 + h2) / k2;                                                                  \
-                                                                                                                         \
-            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                     \
-            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                     \
-                                                                                                                         \
-            /* ---------- */                                                                                             \
-            /* O   O   O  <- top_matrix */                                                                               \
-            /* ---------- */                                                                                             \
-            /* O   Õ   O  <- center_matrix */                                                                            \
-            /* ---------- */                                                                                             \
-            /* O   O   O  <- bottom_matrix */                                                                            \
-            /* ---------- */                                                                                             \
-            auto& bottom_matrix = radial_tridiagonal_solver[i_theta_M1];                                                 \
-            auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                    \
-            auto& top_matrix    = radial_tridiagonal_solver[i_theta_P1];                                                 \
-                                                                                                                         \
-            const int center_index = i_r - numberSmootherCircles;                                                        \
-            const int left_index   = i_r - numberSmootherCircles - 1;                                                    \
-            const int right_index  = i_r - numberSmootherCircles + 1;                                                    \
-            const int bottom_index = i_r - numberSmootherCircles;                                                        \
-            const int top_index    = i_r - numberSmootherCircles;                                                        \
-                                                                                                                         \
-            /* Fill matrix row of (i,j) */                                                                               \
-            row    = center_index;                                                                                       \
-            column = center_index;                                                                                       \
-            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */                   \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            row    = center_index;                                                                                       \
-            column = left_index;                                                                                         \
-            value  = -coeff1 * arr; /* Left */                                                                           \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            row    = center_index;                                                                                       \
-            column = right_index;                                                                                        \
-            value  = -coeff2 * arr; /* Right */                                                                          \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            row    = center_index;                                                                                       \
-            column = center_index;                                                                                       \
-            value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */         \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            /* Fill matrix row of (i-1,j) */                                                                             \
-            row    = left_index;                                                                                         \
-            column = center_index;                                                                                       \
-            value  = -coeff1 * arr; /* Right */                                                                          \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            row    = left_index;                                                                                         \
-            column = left_index;                                                                                         \
-            value  = coeff1 * arr; /* Center: (Right) */                                                                 \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            /* Fill matrix row of (i+1,j) */                                                                             \
-            row    = right_index;                                                                                        \
-            column = center_index;                                                                                       \
-            value  = -coeff2 * arr; /* Left */                                                                           \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            row    = right_index;                                                                                        \
-            column = right_index;                                                                                        \
-            value  = coeff2 * arr; /* Center: (Left) */                                                                  \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            /* Fill matrix row of (i,j-1) */                                                                             \
-            row    = bottom_index;                                                                                       \
-            column = bottom_index;                                                                                       \
-            value  = coeff3 * att; /* Center: (Top) */                                                                   \
-            UPDATE_MATRIX_ELEMENT(bottom_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            /* Fill matrix row of (i,j+1) */                                                                             \
-            row    = top_index;                                                                                          \
-            column = top_index;                                                                                          \
-            value  = coeff4 * att; /* Center: (Bottom) */                                                                \
-            UPDATE_MATRIX_ELEMENT(top_matrix, row, column, value);                                                       \
-        }                                                                                                                \
-        /* ------------------------------------------ */                                                                 \
-        /* Circle Section: Node in the inner boundary */                                                                 \
-        /* ------------------------------------------ */                                                                 \
-        else if (i_r == 0) {                                                                                             \
-            /* ------------------------------------------------ */                                                       \
-            /* Case 1: Dirichlet boundary on the inner boundary */                                                       \
-            /* ------------------------------------------------ */                                                       \
-            if (DirBC_Interior) {                                                                                        \
-                /* Fill result(i,j) */                                                                                   \
-                const double h2     = grid.radialSpacing(i_r);                                                           \
-                const double k1     = grid.angularSpacing(i_theta - 1);                                                  \
-                const double k2     = grid.angularSpacing(i_theta);                                                      \
-                const double coeff2 = 0.5 * (k1 + k2) / h2;                                                              \
-                                                                                                                         \
-                const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                 \
-                const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                 \
-                                                                                                                         \
-                auto& center_matrix = inner_boundary_circle_matrix;                                                      \
-                auto& right_matrix  = circle_tridiagonal_solver[i_r + 1];                                                \
-                                                                                                                         \
-                const int center_index = i_theta;                                                                        \
-                const int right_index  = i_theta;                                                                        \
-                const int bottom_index = i_theta_M1;                                                                     \
-                const int top_index    = i_theta_P1;                                                                     \
-                                                                                                                         \
-                /* Fill matrix row of (i,j) */                                                                           \
-                const Stencil& CenterStencil      = getStencil(i_r);                                                     \
-                int center_nz_index               = getCircleAscIndex(i_r, i_theta);                                     \
-                int nz_index                      = center_nz_index + CenterStencil[StencilPosition::Center];            \
-                center_matrix.row_index(nz_index) = center_index;                                                        \
-                center_matrix.col_index(nz_index) = center_index;                                                        \
-                center_matrix.value(nz_index) += 1.0;                                                                    \
-                /* Fill matrix row of (i+1,j) */                                                                         \
-                row    = right_index;                                                                                    \
-                column = right_index;                                                                                    \
-                value  = coeff2 * arr; /* Center: (Left) */                                                              \
-                UPDATE_MATRIX_ELEMENT(right_matrix, row, column, value);                                                 \
-            }                                                                                                            \
-            else {                                                                                                       \
-                /* ------------------------------------------------------------- */                                      \
-                /* Case 2: Across origin discretization on the interior boundary */                                      \
-                /* ------------------------------------------------------------- */                                      \
-                /* h1 gets replaced with 2 * R0. */                                                                      \
-                /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()>>1)). */                            \
-                /* Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil. */      \
-                const double h1     = 2 * grid.radius(0);                                                                \
-                const double h2     = grid.radialSpacing(i_r);                                                           \
-                const double k1     = grid.angularSpacing(i_theta - 1);                                                  \
-                const double k2     = grid.angularSpacing(i_theta);                                                      \
-                const double coeff1 = 0.5 * (k1 + k2) / h1;                                                              \
-                const double coeff2 = 0.5 * (k1 + k2) / h2;                                                              \
-                const double coeff3 = 0.5 * (h1 + h2) / k1;                                                              \
-                const double coeff4 = 0.5 * (h1 + h2) / k2;                                                              \
-                                                                                                                         \
-                /* left_matrix (across-the origin), center_matrix, right_matrix */                                       \
-                /* -| X | O | X | */                                                                                     \
-                /* -|   |   |   | */                                                                                     \
-                /* -| Õ | O | O | */                                                                                     \
-                /* -|   |   |   | */                                                                                     \
-                /* -| X | O | X | */                                                                                     \
-                auto& center_matrix = inner_boundary_circle_matrix;                                                      \
-                auto& right_matrix  = circle_tridiagonal_solver[i_r + 1];                                                \
-                auto& left_matrix   = inner_boundary_circle_matrix;                                                      \
-                                                                                                                         \
-                const int i_theta_M1           = grid.wrapThetaIndex(i_theta - 1);                                       \
-                const int i_theta_P1           = grid.wrapThetaIndex(i_theta + 1);                                       \
-                const int i_theta_AcrossOrigin = grid.wrapThetaIndex(i_theta + grid.ntheta() / 2);                       \
-                                                                                                                         \
-                const int center_index = i_theta;                                                                        \
-                const int left_index   = i_theta_AcrossOrigin;                                                           \
-                const int right_index  = i_theta;                                                                        \
-                const int bottom_index = i_theta_M1;                                                                     \
-                const int top_index    = i_theta_P1;                                                                     \
-                                                                                                                         \
-                const int center_nz_index = getCircleAscIndex(i_r, i_theta);                                             \
-                const int bottom_nz_index = getCircleAscIndex(i_r, i_theta_M1);                                          \
-                const int top_nz_index    = getCircleAscIndex(i_r, i_theta_P1);                                          \
-                const int left_nz_index   = getCircleAscIndex(i_r, i_theta_AcrossOrigin);                                \
-                                                                                                                         \
-                int nz_index;                                                                                            \
-                /* Fill matrix row of (i,j) */                                                                           \
-                const Stencil& CenterStencil = getStencil(i_r);                                                          \
-                                                                                                                         \
-                nz_index                          = center_nz_index + CenterStencil[StencilPosition::Center];            \
-                center_matrix.row_index(nz_index) = center_index;                                                        \
-                center_matrix.col_index(nz_index) = center_index;                                                        \
-                center_matrix.value(nz_index) +=                                                                         \
-                    0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* beta_{i,j} */                            \
-                                                                                                                         \
-                nz_index                          = center_nz_index + CenterStencil[StencilPosition::Left];              \
-                center_matrix.row_index(nz_index) = center_index;                                                        \
-                center_matrix.col_index(nz_index) = left_index;                                                          \
-                center_matrix.value(nz_index) += -coeff1 * arr; /* Left */                                               \
-                                                                                                                         \
-                nz_index                          = center_nz_index + CenterStencil[StencilPosition::Bottom];            \
-                center_matrix.row_index(nz_index) = center_index;                                                        \
-                center_matrix.col_index(nz_index) = bottom_index;                                                        \
-                center_matrix.value(nz_index) += -coeff3 * att; /* Bottom */                                             \
-                                                                                                                         \
-                nz_index                          = center_nz_index + CenterStencil[StencilPosition::Top];               \
-                center_matrix.row_index(nz_index) = center_index;                                                        \
-                center_matrix.col_index(nz_index) = top_index;                                                           \
-                center_matrix.value(nz_index) += -coeff4 * att; /* Top */                                                \
-                                                                                                                         \
-                nz_index                          = center_nz_index + CenterStencil[StencilPosition::Center];            \
-                center_matrix.row_index(nz_index) = center_index;                                                        \
-                center_matrix.col_index(nz_index) = center_index;                                                        \
-                /* Center: (Left, Right, Bottom, Top) */                                                                 \
-                center_matrix.value(nz_index) += (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att;                      \
-                                                                                                                         \
-                /* Fill matrix row of (i-1,j) */                                                                         \
-                /* From view the view of the across origin node, */                                                      \
-                /* the directions are roatated by 180 degrees in the stencil! */                                         \
-                const Stencil& LeftStencil = CenterStencil;                                                              \
-                                                                                                                         \
-                nz_index                        = left_nz_index + LeftStencil[StencilPosition::Left];                    \
-                left_matrix.row_index(nz_index) = left_index;                                                            \
-                left_matrix.col_index(nz_index) = center_index;                                                          \
-                left_matrix.value(nz_index) += -coeff1 * arr; /* Right -> Left*/                                         \
-                                                                                                                         \
-                nz_index                        = left_nz_index + LeftStencil[StencilPosition::Center];                  \
-                left_matrix.row_index(nz_index) = left_index;                                                            \
-                left_matrix.col_index(nz_index) = left_index;                                                            \
-                left_matrix.value(nz_index) += coeff1 * arr; /* Center: (Right) -> Center: (Left) */                     \
-                                                                                                                         \
-                /* Top Right -> Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                                 \
-                /* nz_index = left_nz_index + LeftStencil[StencilPosition::BottomLeft]; */                               \
-                /* left_matrix.row_index(nz_index) = left_index; */                                                      \
-                /* left_matrix.col_index(nz_index) = top_index; */                                                       \
-                /* left_matrix.value(nz_index) += - 0.25 * art; // Top Right -> Bottom Left*/                            \
-                                                                                                                         \
-                /* Bottom Right -> Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                                 \
-                /* nz_index = left_nz_index + LeftStencil[StencilPosition::TopLeft]; */                                  \
-                /* left_matrix.row_index(nz_index) = left_index; */                                                      \
-                /* left_matrix.col_index(nz_index) = bottom_index; */                                                    \
-                /* lefc_matrix.value(nz_index) += 0.25 * art; // Bottom Right -> Top Left */                             \
-                                                                                                                         \
-                /* Fill matrix row of (i+1,j) */                                                                         \
-                row    = right_index;                                                                                    \
-                column = right_index;                                                                                    \
-                value  = coeff2 * arr; /* Center: (Left) */                                                              \
-                UPDATE_MATRIX_ELEMENT(right_matrix, row, column, value);                                                 \
-                                                                                                                         \
-                /* Fill matrix row of (i,j-1) */                                                                         \
-                const Stencil& BottomStencil = CenterStencil;                                                            \
-                                                                                                                         \
-                nz_index                          = bottom_nz_index + BottomStencil[StencilPosition::Top];               \
-                center_matrix.row_index(nz_index) = bottom_index;                                                        \
-                center_matrix.col_index(nz_index) = center_index;                                                        \
-                center_matrix.value(nz_index) += -coeff3 * att; /* Top */                                                \
-                                                                                                                         \
-                nz_index                          = bottom_nz_index + BottomStencil[StencilPosition::Center];            \
-                center_matrix.row_index(nz_index) = bottom_index;                                                        \
-                center_matrix.col_index(nz_index) = bottom_index;                                                        \
-                center_matrix.value(nz_index) += coeff3 * att; /* Center: (Top) */                                       \
-                                                                                                                         \
-                /* REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                                                           \
-                /* nz_index = bottom_nz_index + BottomStencil[StencilPosition::TopLeft]; */                              \
-                /* center_matrix.row_index(nz_index) = bottom_index; */                                                  \
-                /* center_matrix.col_index(nz_index) = left_index; */                                                    \
-                /* center_matrix.value(nz_index) += 0.25 * art; // Top Left */                                           \
-                                                                                                                         \
-                /* Fill matrix row of (i,j+1) */                                                                         \
-                const Stencil& TopStencil = CenterStencil;                                                               \
-                                                                                                                         \
-                nz_index                          = top_nz_index + TopStencil[StencilPosition::Bottom];                  \
-                center_matrix.row_index(nz_index) = top_index;                                                           \
-                center_matrix.col_index(nz_index) = center_index;                                                        \
-                center_matrix.value(nz_index) += -coeff4 * att; /* Bottom */                                             \
-                                                                                                                         \
-                nz_index                          = top_nz_index + TopStencil[StencilPosition::Center];                  \
-                center_matrix.row_index(nz_index) = top_index;                                                           \
-                center_matrix.col_index(nz_index) = top_index;                                                           \
-                center_matrix.value(nz_index) += coeff4 * att; /* Center: (Bottom) */                                    \
-                                                                                                                         \
-                /* REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                                                           \
-                /* nz_index = top_nz_index + TopStencil[StencilPosition::BottomLeft]; */                                 \
-                /* center_matrix.row_index(nz_index) = top_index; */                                                     \
-                /* center_matrix.col_index(nz_index) = left_index; */                                                    \
-                /* center_matrix.value(nz_index) += - 0.25 * art; // Bottom Left */                                      \
-            }                                                                                                            \
-        }                                                                                                                \
-        /* --------------------------------------------- */                                                              \
-        /* Radial Section: Node next to circular section */                                                              \
-        /* --------------------------------------------- */                                                              \
-        else if (i_r == numberSmootherCircles) {                                                                         \
-            double h1     = grid.radialSpacing(i_r - 1);                                                                 \
-            double h2     = grid.radialSpacing(i_r);                                                                     \
-            double k1     = grid.angularSpacing(i_theta - 1);                                                            \
-            double k2     = grid.angularSpacing(i_theta);                                                                \
-            double coeff1 = 0.5 * (k1 + k2) / h1;                                                                        \
-            double coeff2 = 0.5 * (k1 + k2) / h2;                                                                        \
-            double coeff3 = 0.5 * (h1 + h2) / k1;                                                                        \
-            double coeff4 = 0.5 * (h1 + h2) / k2;                                                                        \
-                                                                                                                         \
-            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                     \
-            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                     \
-                                                                                                                         \
-            /* | O | O | O || O   O   O   O  <- top_matrix */                                                            \
-            /* |   |   |   || -------------- */                                                                          \
-            /* | O | O | O || Õ   O   O   O  <- center_matrix */                                                         \
-            /* |   |   |   || -------------- */                                                                          \
-            /* | O | O | O || O   O   O   O  <- bottom_matrix */                                                         \
-            auto& bottom_matrix = radial_tridiagonal_solver[i_theta_M1];                                                 \
-            auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                    \
-            auto& top_matrix    = radial_tridiagonal_solver[i_theta_P1];                                                 \
-            auto& left_matrix   = circle_tridiagonal_solver[i_r - 1];                                                    \
-                                                                                                                         \
-            const int center_index = i_r - numberSmootherCircles;                                                        \
-            const int left_index   = i_theta;                                                                            \
-            const int right_index  = i_r - numberSmootherCircles + 1;                                                    \
-            const int bottom_index = i_r - numberSmootherCircles;                                                        \
-            const int top_index    = i_r - numberSmootherCircles;                                                        \
-                                                                                                                         \
-            /* Fill matrix row of (i,j) */                                                                               \
-            row    = center_index;                                                                                       \
-            column = center_index;                                                                                       \
-            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */                   \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            row    = center_index;                                                                                       \
-            column = right_index;                                                                                        \
-            value  = -coeff2 * arr; /* Right */                                                                          \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            row    = center_index;                                                                                       \
-            column = center_index;                                                                                       \
-            value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */         \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            /* Fill matrix row of (i-1,j) */                                                                             \
-            row    = left_index;                                                                                         \
-            column = left_index;                                                                                         \
-            value  = coeff1 * arr; /* Center: (Right) */                                                                 \
-            UPDATE_MATRIX_ELEMENT(left_matrix, row, column, value);                                                      \
-                                                                                                                         \
-            /* Fill matrix row of (i+1,j) */                                                                             \
-            row    = right_index;                                                                                        \
-            column = center_index;                                                                                       \
-            value  = -coeff2 * arr; /* Left */                                                                           \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            row    = right_index;                                                                                        \
-            column = right_index;                                                                                        \
-            value  = coeff2 * arr; /* Center: (Left) */                                                                  \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            /* Fill matrix row of (i,j-1) */                                                                             \
-            row    = bottom_index;                                                                                       \
-            column = bottom_index;                                                                                       \
-            value  = coeff3 * att; /* Center: (Top) */                                                                   \
-            UPDATE_MATRIX_ELEMENT(bottom_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            /* Fill matrix row of (i,j+1) */                                                                             \
-            row    = top_index;                                                                                          \
-            column = top_index;                                                                                          \
-            value  = coeff4 * att; /* Center: (Bottom) */                                                                \
-            UPDATE_MATRIX_ELEMENT(top_matrix, row, column, value);                                                       \
-        }                                                                                                                \
-        /* ------------------------------------------- */                                                                \
-        /* Radial Section: Node next to outer boundary */                                                                \
-        /* ------------------------------------------- */                                                                \
-        else if (i_r == grid.nr() - 2) {                                                                                 \
-            const double h1     = grid.radialSpacing(i_r - 1);                                                           \
-            const double h2     = grid.radialSpacing(i_r);                                                               \
-            const double k1     = grid.angularSpacing(i_theta - 1);                                                      \
-            const double k2     = grid.angularSpacing(i_theta);                                                          \
-            const double coeff1 = 0.5 * (k1 + k2) / h1;                                                                  \
-            const double coeff2 = 0.5 * (k1 + k2) / h2;                                                                  \
-            const double coeff3 = 0.5 * (h1 + h2) / k1;                                                                  \
-            const double coeff4 = 0.5 * (h1 + h2) / k2;                                                                  \
-                                                                                                                         \
-            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                     \
-            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                     \
-                                                                                                                         \
-            /* ---------------|| */                                                                                      \
-            /* O   O   O   O  || <- top_matrix */                                                                        \
-            /* ---------------|| */                                                                                      \
-            /* O   O   Õ   O  || <- center_matrix */                                                                     \
-            /* ---------------|| */                                                                                      \
-            /* O   O   O   O  || <- bottom_matrix */                                                                     \
-            /* ---------------|| */                                                                                      \
-            auto& bottom_matrix = radial_tridiagonal_solver[i_theta_M1];                                                 \
-            auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                    \
-            auto& top_matrix    = radial_tridiagonal_solver[i_theta_P1];                                                 \
-                                                                                                                         \
-            const int center_index = i_r - numberSmootherCircles;                                                        \
-            const int left_index   = i_r - numberSmootherCircles - 1;                                                    \
-            const int right_index  = i_r - numberSmootherCircles + 1;                                                    \
-            const int bottom_index = i_r - numberSmootherCircles;                                                        \
-            const int top_index    = i_r - numberSmootherCircles;                                                        \
-                                                                                                                         \
-            /* ---------------------------- */                                                                           \
-            /* Give values to center matrix */                                                                           \
-            /* ---------------------------- */                                                                           \
-            /* Fill matrix row of (i,j) */                                                                               \
-            row    = center_index;                                                                                       \
-            column = center_index;                                                                                       \
-            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */                   \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            row    = center_index;                                                                                       \
-            column = left_index;                                                                                         \
-            value  = -coeff1 * arr; /* Left */                                                                           \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            row    = center_index;                                                                                       \
-            column = center_index;                                                                                       \
-            value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */         \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            /* Fill matrix row of (i-1,j) */                                                                             \
-            row    = left_index;                                                                                         \
-            column = center_index;                                                                                       \
-            value  = -coeff1 * arr; /* Right */                                                                          \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            row    = left_index;                                                                                         \
-            column = left_index;                                                                                         \
-            value  = coeff1 * arr; /* Center: (Right) */                                                                 \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            /* Fill matrix row of (i,j-1) */                                                                             \
-            row    = bottom_index;                                                                                       \
-            column = bottom_index;                                                                                       \
-            value  = coeff3 * att; /* Center: (Top) */                                                                   \
-            UPDATE_MATRIX_ELEMENT(bottom_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            /* Fill matrix row of (i,j+1) */                                                                             \
-            row    = top_index;                                                                                          \
-            column = top_index;                                                                                          \
-            value  = coeff4 * att; /* Center: (Bottom) */                                                                \
-            UPDATE_MATRIX_ELEMENT(top_matrix, row, column, value);                                                       \
-        }                                                                                                                \
-        /* ------------------------------------------ */                                                                 \
-        /* Radial Section: Node on the outer boundary */                                                                 \
-        /* ------------------------------------------ */                                                                 \
-        else if (i_r == grid.nr() - 1) {                                                                                 \
-            double h1     = grid.radialSpacing(i_r - 1);                                                                 \
-            double k1     = grid.angularSpacing(i_theta - 1);                                                            \
-            double k2     = grid.angularSpacing(i_theta);                                                                \
-            double coeff1 = 0.5 * (k1 + k2) / h1;                                                                        \
-                                                                                                                         \
-            /* -----------|| */                                                                                          \
-            /* O   O   O  || */                                                                                          \
-            /* -----------|| */                                                                                          \
-            /* O   O   Õ  || <- center_matrix*/                                                                          \
-            /* -----------|| */                                                                                          \
-            /* O   O   O  || */                                                                                          \
-            /* -----------|| */                                                                                          \
-            auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                    \
-                                                                                                                         \
-            const int center_index = i_r - numberSmootherCircles;                                                        \
-            const int left_index   = i_r - numberSmootherCircles - 1;                                                    \
-                                                                                                                         \
-            /* Fill matrix row of (i,j) */                                                                               \
-            row    = center_index;                                                                                       \
-            column = center_index;                                                                                       \
-            value  = 1.0;                                                                                                \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-                                                                                                                         \
-            /* Fill matrix row of (i-1,j) */                                                                             \
-            row    = left_index;                                                                                         \
-            column = left_index;                                                                                         \
-            value  = coeff1 * arr; /* Center: (Right) */                                                                 \
-            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                    \
-        }                                                                                                                \
+
+/* Inner Boundary COO/CSR matrix */
+#ifdef GMGPOLAR_USE_MUMPS
+    #define COO_CSR_UPDATE(matrix, ptr, offset, row, col, val)                                                         \
+        do {                                                                                                           \
+            matrix.row_index(ptr + offset) = row;                                                                      \
+            matrix.col_index(ptr + offset) = col;                                                                      \
+            matrix.value(ptr + offset) += val;                                                                         \
+        } while (0)
+#else
+    #define COO_CSR_UPDATE(matrix, ptr, offset, row, col, val)                                                         \
+        do {                                                                                                           \
+            matrix.row_nz_index(row, offset) = col;                                                                    \
+            matrix.row_nz_entry(row, offset) += val;                                                                   \
+        } while (0)
+#endif
+
+#define NODE_BUILD_SMOOTHER_GIVE(i_r, i_theta, grid, DirBC_Interior, inner_boundary_circle_matrix,                     \
+                                 circle_tridiagonal_solver, radial_tridiagonal_solver)                                 \
+    do {                                                                                                               \
+        assert(i_r >= 0 && i_r < grid.nr());                                                                           \
+        assert(i_theta >= 0 && i_theta < grid.ntheta());                                                               \
+                                                                                                                       \
+        const int numberSmootherCircles = grid.numberSmootherCircles();                                                \
+        const int lengthSmootherRadial  = grid.lengthSmootherRadial();                                                 \
+                                                                                                                       \
+        assert(numberSmootherCircles >= 2);                                                                            \
+        assert(lengthSmootherRadial >= 3);                                                                             \
+                                                                                                                       \
+        int ptr, offset;                                                                                               \
+        int row, column, col;                                                                                          \
+        double value, val;                                                                                             \
+                                                                                                                       \
+        /* ------------------------------------------ */                                                               \
+        /* Node in the interior of the Circle Section */                                                               \
+        /* ------------------------------------------ */                                                               \
+        if (i_r > 0 && i_r < numberSmootherCircles) {                                                                  \
+            const double h1     = grid.radialSpacing(i_r - 1);                                                         \
+            const double h2     = grid.radialSpacing(i_r);                                                             \
+            const double k1     = grid.angularSpacing(i_theta - 1);                                                    \
+            const double k2     = grid.angularSpacing(i_theta);                                                        \
+            const double coeff1 = 0.5 * (k1 + k2) / h1;                                                                \
+            const double coeff2 = 0.5 * (k1 + k2) / h2;                                                                \
+            const double coeff3 = 0.5 * (h1 + h2) / k1;                                                                \
+            const double coeff4 = 0.5 * (h1 + h2) / k2;                                                                \
+                                                                                                                       \
+            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                   \
+            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                   \
+                                                                                                                       \
+            const int center_index = i_theta;                                                                          \
+            const int left_index   = i_theta;                                                                          \
+            const int right_index  = (i_r + 1 == numberSmootherCircles) ? 0 : i_theta;                                 \
+            const int bottom_index = i_theta_M1;                                                                       \
+            const int top_index    = i_theta_P1;                                                                       \
+                                                                                                                       \
+            /* Visualization of the sourrounding tridiagonal matrices. */                                              \
+            /* left_matrix, center_matrix, right_matrix */                                                             \
+            /* | O | O | O | */                                                                                        \
+            /* |   |   |   | */                                                                                        \
+            /* | O | Õ | O | */                                                                                        \
+            /* |   |   |   | */                                                                                        \
+            /* | O | O | O | */                                                                                        \
+            /* or */                                                                                                   \
+            /* left_matrix, right_matrix */                                                                            \
+            /* | O | O | O || O   O   O   O  */                                                                        \
+            /* |   |   |   || -------------- */                                                                        \
+            /* | O | O | Õ || O   O   O   O  <- right_matrix */                                                        \
+            /* |   |   |   || -------------- */                                                                        \
+            /* | O | O | O || O   O   O   O  */                                                                        \
+            auto& left_matrix   = circle_tridiagonal_solver[i_r - 1];                                                  \
+            auto& center_matrix = circle_tridiagonal_solver[i_r];                                                      \
+            auto& right_matrix  = (i_r + 1 == numberSmootherCircles) ? radial_tridiagonal_solver[i_theta]              \
+                                                                     : circle_tridiagonal_solver[i_r + 1];             \
+                                                                                                                       \
+            /* Fill matrix row of (i,j) */                                                                             \
+            row    = center_index;                                                                                     \
+            column = center_index;                                                                                     \
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */                 \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            row    = center_index;                                                                                     \
+            column = bottom_index;                                                                                     \
+            value  = -coeff3 * att; /* Bottom */                                                                       \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            row    = center_index;                                                                                     \
+            column = top_index;                                                                                        \
+            value  = -coeff4 * att; /* Top */                                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            row    = center_index;                                                                                     \
+            column = center_index;                                                                                     \
+            value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */       \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            /* Fill matrix row of (i,j-1) */                                                                           \
+            row    = bottom_index;                                                                                     \
+            column = center_index;                                                                                     \
+            value  = -coeff3 * att; /* Top */                                                                          \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            row    = bottom_index;                                                                                     \
+            column = bottom_index;                                                                                     \
+            value  = coeff3 * att; /* Center: (Top) */                                                                 \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            /* Fill matrix row of (i,j+1) */                                                                           \
+            row    = top_index;                                                                                        \
+            column = center_index;                                                                                     \
+            value  = -coeff4 * att; /* Bottom */                                                                       \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            row    = top_index;                                                                                        \
+            column = top_index;                                                                                        \
+            value  = coeff4 * att; /* Center: (Bottom) */                                                              \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            /* Fill matrix row of (i-1,j) */                                                                           \
+            if (!DirBC_Interior && i_r == 1) {                                                                         \
+                row = left_index;                                                                                      \
+                ptr = getCircleAscIndex(i_r - 1, i_theta);                                                             \
+                                                                                                                       \
+                const Stencil& LeftStencil = getStencil(i_r - 1);                                                      \
+                                                                                                                       \
+                offset = LeftStencil[StencilPosition::Center];                                                         \
+                col    = left_index;                                                                                   \
+                val    = +coeff1 * arr; /* Center: (Right) */                                                          \
+                COO_CSR_UPDATE(inner_boundary_circle_matrix, ptr, offset, row, col, val);                              \
+            }                                                                                                          \
+            if (i_r > 1) {                                                                                             \
+                row    = left_index;                                                                                   \
+                column = left_index;                                                                                   \
+                value  = coeff1 * arr; /* Center: (Right) */                                                           \
+                UPDATE_MATRIX_ELEMENT(left_matrix, row, column, value);                                                \
+            }                                                                                                          \
+                                                                                                                       \
+            /* Fill matrix row of (i+1,j) */                                                                           \
+            row    = right_index;                                                                                      \
+            column = right_index;                                                                                      \
+            value  = coeff2 * arr; /* Center: (Left) */                                                                \
+            UPDATE_MATRIX_ELEMENT(right_matrix, row, column, value);                                                   \
+        }                                                                                                              \
+        /* ------------------------------------------ */                                                               \
+        /* Node in the interior of the Radial Section */                                                               \
+        /* ------------------------------------------ */                                                               \
+        else if (i_r > numberSmootherCircles && i_r < grid.nr() - 2) {                                                 \
+            const double h1     = grid.radialSpacing(i_r - 1);                                                         \
+            const double h2     = grid.radialSpacing(i_r);                                                             \
+            const double k1     = grid.angularSpacing(i_theta - 1);                                                    \
+            const double k2     = grid.angularSpacing(i_theta);                                                        \
+            const double coeff1 = 0.5 * (k1 + k2) / h1;                                                                \
+            const double coeff2 = 0.5 * (k1 + k2) / h2;                                                                \
+            const double coeff3 = 0.5 * (h1 + h2) / k1;                                                                \
+            const double coeff4 = 0.5 * (h1 + h2) / k2;                                                                \
+                                                                                                                       \
+            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                   \
+            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                   \
+                                                                                                                       \
+            /* ---------- */                                                                                           \
+            /* O   O   O  <- top_matrix */                                                                             \
+            /* ---------- */                                                                                           \
+            /* O   Õ   O  <- center_matrix */                                                                          \
+            /* ---------- */                                                                                           \
+            /* O   O   O  <- bottom_matrix */                                                                          \
+            /* ---------- */                                                                                           \
+            auto& bottom_matrix = radial_tridiagonal_solver[i_theta_M1];                                               \
+            auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                  \
+            auto& top_matrix    = radial_tridiagonal_solver[i_theta_P1];                                               \
+                                                                                                                       \
+            const int center_index = i_r - numberSmootherCircles;                                                      \
+            const int left_index   = i_r - numberSmootherCircles - 1;                                                  \
+            const int right_index  = i_r - numberSmootherCircles + 1;                                                  \
+            const int bottom_index = i_r - numberSmootherCircles;                                                      \
+            const int top_index    = i_r - numberSmootherCircles;                                                      \
+                                                                                                                       \
+            /* Fill matrix row of (i,j) */                                                                             \
+            row    = center_index;                                                                                     \
+            column = center_index;                                                                                     \
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */                 \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            row    = center_index;                                                                                     \
+            column = left_index;                                                                                       \
+            value  = -coeff1 * arr; /* Left */                                                                         \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            row    = center_index;                                                                                     \
+            column = right_index;                                                                                      \
+            value  = -coeff2 * arr; /* Right */                                                                        \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            row    = center_index;                                                                                     \
+            column = center_index;                                                                                     \
+            value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */       \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            /* Fill matrix row of (i-1,j) */                                                                           \
+            row    = left_index;                                                                                       \
+            column = center_index;                                                                                     \
+            value  = -coeff1 * arr; /* Right */                                                                        \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            row    = left_index;                                                                                       \
+            column = left_index;                                                                                       \
+            value  = coeff1 * arr; /* Center: (Right) */                                                               \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            /* Fill matrix row of (i+1,j) */                                                                           \
+            row    = right_index;                                                                                      \
+            column = center_index;                                                                                     \
+            value  = -coeff2 * arr; /* Left */                                                                         \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            row    = right_index;                                                                                      \
+            column = right_index;                                                                                      \
+            value  = coeff2 * arr; /* Center: (Left) */                                                                \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            /* Fill matrix row of (i,j-1) */                                                                           \
+            row    = bottom_index;                                                                                     \
+            column = bottom_index;                                                                                     \
+            value  = coeff3 * att; /* Center: (Top) */                                                                 \
+            UPDATE_MATRIX_ELEMENT(bottom_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            /* Fill matrix row of (i,j+1) */                                                                           \
+            row    = top_index;                                                                                        \
+            column = top_index;                                                                                        \
+            value  = coeff4 * att; /* Center: (Bottom) */                                                              \
+            UPDATE_MATRIX_ELEMENT(top_matrix, row, column, value);                                                     \
+        }                                                                                                              \
+        /* ------------------------------------------ */                                                               \
+        /* Circle Section: Node in the inner boundary */                                                               \
+        /* ------------------------------------------ */                                                               \
+        else if (i_r == 0) {                                                                                           \
+            /* ------------------------------------------------ */                                                     \
+            /* Case 1: Dirichlet boundary on the inner boundary */                                                     \
+            /* ------------------------------------------------ */                                                     \
+            if (DirBC_Interior) {                                                                                      \
+                /* Fill result(i,j) */                                                                                 \
+                const double h2     = grid.radialSpacing(i_r);                                                         \
+                const double k1     = grid.angularSpacing(i_theta - 1);                                                \
+                const double k2     = grid.angularSpacing(i_theta);                                                    \
+                const double coeff2 = 0.5 * (k1 + k2) / h2;                                                            \
+                                                                                                                       \
+                const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                               \
+                const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                               \
+                                                                                                                       \
+                auto& center_matrix = inner_boundary_circle_matrix;                                                    \
+                auto& right_matrix  = circle_tridiagonal_solver[i_r + 1];                                              \
+                                                                                                                       \
+                const int center_index = i_theta;                                                                      \
+                const int right_index  = i_theta;                                                                      \
+                const int bottom_index = i_theta_M1;                                                                   \
+                const int top_index    = i_theta_P1;                                                                   \
+                                                                                                                       \
+                /* Fill matrix row of (i,j) */                                                                         \
+                row = center_index;                                                                                    \
+                ptr = getCircleAscIndex(i_r, i_theta);                                                                 \
+                                                                                                                       \
+                const Stencil& CenterStencil = getStencil(i_r);                                                        \
+                                                                                                                       \
+                offset = CenterStencil[StencilPosition::Center];                                                       \
+                col    = center_index;                                                                                 \
+                val    = 1.0;                                                                                          \
+                COO_CSR_UPDATE(inner_boundary_circle_matrix, ptr, offset, row, col, val);                              \
+                                                                                                                       \
+                /* Fill matrix row of (i+1,j) */                                                                       \
+                row    = right_index;                                                                                  \
+                column = right_index;                                                                                  \
+                value  = coeff2 * arr; /* Center: (Left) */                                                            \
+                UPDATE_MATRIX_ELEMENT(right_matrix, row, column, value);                                               \
+            }                                                                                                          \
+            else {                                                                                                     \
+                /* ------------------------------------------------------------- */                                    \
+                /* Case 2: Across origin discretization on the interior boundary */                                    \
+                /* ------------------------------------------------------------- */                                    \
+                /* h1 gets replaced with 2 * R0. */                                                                    \
+                /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()>>1)). */                          \
+                /* Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil. */    \
+                const double h1     = 2 * grid.radius(0);                                                              \
+                const double h2     = grid.radialSpacing(i_r);                                                         \
+                const double k1     = grid.angularSpacing(i_theta - 1);                                                \
+                const double k2     = grid.angularSpacing(i_theta);                                                    \
+                const double coeff1 = 0.5 * (k1 + k2) / h1;                                                            \
+                const double coeff2 = 0.5 * (k1 + k2) / h2;                                                            \
+                const double coeff3 = 0.5 * (h1 + h2) / k1;                                                            \
+                const double coeff4 = 0.5 * (h1 + h2) / k2;                                                            \
+                                                                                                                       \
+                /* left_matrix (across-the origin), center_matrix, right_matrix */                                     \
+                /* -| X | O | X | */                                                                                   \
+                /* -|   |   |   | */                                                                                   \
+                /* -| Õ | O | O | */                                                                                   \
+                /* -|   |   |   | */                                                                                   \
+                /* -| X | O | X | */                                                                                   \
+                auto& center_matrix = inner_boundary_circle_matrix;                                                    \
+                auto& right_matrix  = circle_tridiagonal_solver[i_r + 1];                                              \
+                auto& left_matrix   = inner_boundary_circle_matrix;                                                    \
+                                                                                                                       \
+                const int i_theta_M1           = grid.wrapThetaIndex(i_theta - 1);                                     \
+                const int i_theta_P1           = grid.wrapThetaIndex(i_theta + 1);                                     \
+                const int i_theta_AcrossOrigin = grid.wrapThetaIndex(i_theta + grid.ntheta() / 2);                     \
+                                                                                                                       \
+                const int center_index = i_theta;                                                                      \
+                const int left_index   = i_theta_AcrossOrigin;                                                         \
+                const int right_index  = i_theta;                                                                      \
+                const int bottom_index = i_theta_M1;                                                                   \
+                const int top_index    = i_theta_P1;                                                                   \
+                                                                                                                       \
+                const int center_nz_index = getCircleAscIndex(i_r, i_theta);                                           \
+                const int bottom_nz_index = getCircleAscIndex(i_r, i_theta_M1);                                        \
+                const int top_nz_index    = getCircleAscIndex(i_r, i_theta_P1);                                        \
+                const int left_nz_index   = getCircleAscIndex(i_r, i_theta_AcrossOrigin);                              \
+                                                                                                                       \
+                int nz_index;                                                                                          \
+                /* Fill matrix row of (i,j) */                                                                         \
+                row = center_index;                                                                                    \
+                ptr = center_nz_index;                                                                                 \
+                                                                                                                       \
+                const Stencil& CenterStencil = getStencil(i_r);                                                        \
+                                                                                                                       \
+                offset = CenterStencil[StencilPosition::Center];                                                       \
+                col    = center_index;                                                                                 \
+                val    = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* beta_{i,j} */                     \
+                COO_CSR_UPDATE(inner_boundary_circle_matrix, ptr, offset, row, col, val);                              \
+                                                                                                                       \
+                offset = CenterStencil[StencilPosition::Left];                                                         \
+                col    = left_index;                                                                                   \
+                val    = -coeff1 * arr; /* Left */                                                                     \
+                COO_CSR_UPDATE(inner_boundary_circle_matrix, ptr, offset, row, col, val);                              \
+                                                                                                                       \
+                offset = CenterStencil[StencilPosition::Bottom];                                                       \
+                col    = bottom_index;                                                                                 \
+                val    = -coeff3 * att; /* Bottom */                                                                   \
+                COO_CSR_UPDATE(inner_boundary_circle_matrix, ptr, offset, row, col, val);                              \
+                                                                                                                       \
+                offset = CenterStencil[StencilPosition::Top];                                                          \
+                col    = top_index;                                                                                    \
+                val    = -coeff4 * att; /* Top */                                                                      \
+                COO_CSR_UPDATE(inner_boundary_circle_matrix, ptr, offset, row, col, val);                              \
+                                                                                                                       \
+                offset = CenterStencil[StencilPosition::Center];                                                       \
+                col    = center_index;                                                                                 \
+                val    = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */   \
+                COO_CSR_UPDATE(inner_boundary_circle_matrix, ptr, offset, row, col, val);                              \
+                                                                                                                       \
+                /* Fill matrix row of (i-1,j) */                                                                       \
+                /* From view the view of the across origin node, */                                                    \
+                /* the directions are roatated by 180 degrees in the stencil! */                                       \
+                row = left_index;                                                                                      \
+                ptr = left_nz_index;                                                                                   \
+                                                                                                                       \
+                const Stencil& LeftStencil = CenterStencil;                                                            \
+                                                                                                                       \
+                offset = LeftStencil[StencilPosition::Left];                                                           \
+                col    = center_index;                                                                                 \
+                val    = -coeff1 * arr; /* Right -> Left*/                                                             \
+                COO_CSR_UPDATE(inner_boundary_circle_matrix, ptr, offset, row, col, val);                              \
+                                                                                                                       \
+                offset = LeftStencil[StencilPosition::Center];                                                         \
+                col    = left_index;                                                                                   \
+                val    = +coeff1 * arr; /* Center: (Right) -> Center: (Left) */                                        \
+                COO_CSR_UPDATE(inner_boundary_circle_matrix, ptr, offset, row, col, val);                              \
+                                                                                                                       \
+                /* Top Right -> Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                               \
+                                                                                                                       \
+                /* Bottom Right -> Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                               \
+                                                                                                                       \
+                /* Fill matrix row of (i+1,j) */                                                                       \
+                row    = right_index;                                                                                  \
+                column = right_index;                                                                                  \
+                value  = coeff2 * arr; /* Center: (Left) */                                                            \
+                UPDATE_MATRIX_ELEMENT(right_matrix, row, column, value);                                               \
+                                                                                                                       \
+                /* Fill matrix row of (i,j-1) */                                                                       \
+                row = bottom_index;                                                                                    \
+                ptr = bottom_nz_index;                                                                                 \
+                                                                                                                       \
+                const Stencil& BottomStencil = CenterStencil;                                                          \
+                                                                                                                       \
+                offset = BottomStencil[StencilPosition::Top];                                                          \
+                col    = center_index;                                                                                 \
+                val    = -coeff3 * att; /* Top */                                                                      \
+                COO_CSR_UPDATE(inner_boundary_circle_matrix, ptr, offset, row, col, val);                              \
+                                                                                                                       \
+                offset = BottomStencil[StencilPosition::Center];                                                       \
+                col    = bottom_index;                                                                                 \
+                val    = +coeff3 * att; /* Center: (Top) */                                                            \
+                COO_CSR_UPDATE(inner_boundary_circle_matrix, ptr, offset, row, col, val);                              \
+                                                                                                                       \
+                /* TopLeft: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                                                \
+                                                                                                                       \
+                /* Fill matrix row of (i,j+1) */                                                                       \
+                row = top_index;                                                                                       \
+                ptr = top_nz_index;                                                                                    \
+                                                                                                                       \
+                const Stencil& TopStencil = CenterStencil;                                                             \
+                                                                                                                       \
+                offset = TopStencil[StencilPosition::Bottom];                                                          \
+                col    = center_index;                                                                                 \
+                val    = -coeff4 * att; /* Bottom */                                                                   \
+                COO_CSR_UPDATE(inner_boundary_circle_matrix, ptr, offset, row, col, val);                              \
+                                                                                                                       \
+                offset = TopStencil[StencilPosition::Center];                                                          \
+                col    = top_index;                                                                                    \
+                val    = +coeff4 * att; /* Center: (Bottom) */                                                         \
+                COO_CSR_UPDATE(inner_boundary_circle_matrix, ptr, offset, row, col, val);                              \
+                                                                                                                       \
+                /* BottomLeft: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                                             \
+            }                                                                                                          \
+        }                                                                                                              \
+        /* --------------------------------------------- */                                                            \
+        /* Radial Section: Node next to circular section */                                                            \
+        /* --------------------------------------------- */                                                            \
+        else if (i_r == numberSmootherCircles) {                                                                       \
+            double h1     = grid.radialSpacing(i_r - 1);                                                               \
+            double h2     = grid.radialSpacing(i_r);                                                                   \
+            double k1     = grid.angularSpacing(i_theta - 1);                                                          \
+            double k2     = grid.angularSpacing(i_theta);                                                              \
+            double coeff1 = 0.5 * (k1 + k2) / h1;                                                                      \
+            double coeff2 = 0.5 * (k1 + k2) / h2;                                                                      \
+            double coeff3 = 0.5 * (h1 + h2) / k1;                                                                      \
+            double coeff4 = 0.5 * (h1 + h2) / k2;                                                                      \
+                                                                                                                       \
+            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                   \
+            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                   \
+                                                                                                                       \
+            /* | O | O | O || O   O   O   O  <- top_matrix */                                                          \
+            /* |   |   |   || -------------- */                                                                        \
+            /* | O | O | O || Õ   O   O   O  <- center_matrix */                                                       \
+            /* |   |   |   || -------------- */                                                                        \
+            /* | O | O | O || O   O   O   O  <- bottom_matrix */                                                       \
+            auto& bottom_matrix = radial_tridiagonal_solver[i_theta_M1];                                               \
+            auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                  \
+            auto& top_matrix    = radial_tridiagonal_solver[i_theta_P1];                                               \
+            auto& left_matrix   = circle_tridiagonal_solver[i_r - 1];                                                  \
+                                                                                                                       \
+            const int center_index = i_r - numberSmootherCircles;                                                      \
+            const int left_index   = i_theta;                                                                          \
+            const int right_index  = i_r - numberSmootherCircles + 1;                                                  \
+            const int bottom_index = i_r - numberSmootherCircles;                                                      \
+            const int top_index    = i_r - numberSmootherCircles;                                                      \
+                                                                                                                       \
+            /* Fill matrix row of (i,j) */                                                                             \
+            row    = center_index;                                                                                     \
+            column = center_index;                                                                                     \
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */                 \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            row    = center_index;                                                                                     \
+            column = right_index;                                                                                      \
+            value  = -coeff2 * arr; /* Right */                                                                        \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            row    = center_index;                                                                                     \
+            column = center_index;                                                                                     \
+            value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */       \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            /* Fill matrix row of (i-1,j) */                                                                           \
+            row    = left_index;                                                                                       \
+            column = left_index;                                                                                       \
+            value  = coeff1 * arr; /* Center: (Right) */                                                               \
+            UPDATE_MATRIX_ELEMENT(left_matrix, row, column, value);                                                    \
+                                                                                                                       \
+            /* Fill matrix row of (i+1,j) */                                                                           \
+            row    = right_index;                                                                                      \
+            column = center_index;                                                                                     \
+            value  = -coeff2 * arr; /* Left */                                                                         \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            row    = right_index;                                                                                      \
+            column = right_index;                                                                                      \
+            value  = coeff2 * arr; /* Center: (Left) */                                                                \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            /* Fill matrix row of (i,j-1) */                                                                           \
+            row    = bottom_index;                                                                                     \
+            column = bottom_index;                                                                                     \
+            value  = coeff3 * att; /* Center: (Top) */                                                                 \
+            UPDATE_MATRIX_ELEMENT(bottom_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            /* Fill matrix row of (i,j+1) */                                                                           \
+            row    = top_index;                                                                                        \
+            column = top_index;                                                                                        \
+            value  = coeff4 * att; /* Center: (Bottom) */                                                              \
+            UPDATE_MATRIX_ELEMENT(top_matrix, row, column, value);                                                     \
+        }                                                                                                              \
+        /* ------------------------------------------- */                                                              \
+        /* Radial Section: Node next to outer boundary */                                                              \
+        /* ------------------------------------------- */                                                              \
+        else if (i_r == grid.nr() - 2) {                                                                               \
+            const double h1     = grid.radialSpacing(i_r - 1);                                                         \
+            const double h2     = grid.radialSpacing(i_r);                                                             \
+            const double k1     = grid.angularSpacing(i_theta - 1);                                                    \
+            const double k2     = grid.angularSpacing(i_theta);                                                        \
+            const double coeff1 = 0.5 * (k1 + k2) / h1;                                                                \
+            const double coeff2 = 0.5 * (k1 + k2) / h2;                                                                \
+            const double coeff3 = 0.5 * (h1 + h2) / k1;                                                                \
+            const double coeff4 = 0.5 * (h1 + h2) / k2;                                                                \
+                                                                                                                       \
+            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                   \
+            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                   \
+                                                                                                                       \
+            /* ---------------|| */                                                                                    \
+            /* O   O   O   O  || <- top_matrix */                                                                      \
+            /* ---------------|| */                                                                                    \
+            /* O   O   Õ   O  || <- center_matrix */                                                                   \
+            /* ---------------|| */                                                                                    \
+            /* O   O   O   O  || <- bottom_matrix */                                                                   \
+            /* ---------------|| */                                                                                    \
+            auto& bottom_matrix = radial_tridiagonal_solver[i_theta_M1];                                               \
+            auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                  \
+            auto& top_matrix    = radial_tridiagonal_solver[i_theta_P1];                                               \
+                                                                                                                       \
+            const int center_index = i_r - numberSmootherCircles;                                                      \
+            const int left_index   = i_r - numberSmootherCircles - 1;                                                  \
+            const int right_index  = i_r - numberSmootherCircles + 1;                                                  \
+            const int bottom_index = i_r - numberSmootherCircles;                                                      \
+            const int top_index    = i_r - numberSmootherCircles;                                                      \
+                                                                                                                       \
+            /* ---------------------------- */                                                                         \
+            /* Give values to center matrix */                                                                         \
+            /* ---------------------------- */                                                                         \
+            /* Fill matrix row of (i,j) */                                                                             \
+            row    = center_index;                                                                                     \
+            column = center_index;                                                                                     \
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */                 \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            row    = center_index;                                                                                     \
+            column = left_index;                                                                                       \
+            value  = -coeff1 * arr; /* Left */                                                                         \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            row    = center_index;                                                                                     \
+            column = center_index;                                                                                     \
+            value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */       \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            /* Fill matrix row of (i-1,j) */                                                                           \
+            row    = left_index;                                                                                       \
+            column = center_index;                                                                                     \
+            value  = -coeff1 * arr; /* Right */                                                                        \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            row    = left_index;                                                                                       \
+            column = left_index;                                                                                       \
+            value  = coeff1 * arr; /* Center: (Right) */                                                               \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            /* Fill matrix row of (i,j-1) */                                                                           \
+            row    = bottom_index;                                                                                     \
+            column = bottom_index;                                                                                     \
+            value  = coeff3 * att; /* Center: (Top) */                                                                 \
+            UPDATE_MATRIX_ELEMENT(bottom_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            /* Fill matrix row of (i,j+1) */                                                                           \
+            row    = top_index;                                                                                        \
+            column = top_index;                                                                                        \
+            value  = coeff4 * att; /* Center: (Bottom) */                                                              \
+            UPDATE_MATRIX_ELEMENT(top_matrix, row, column, value);                                                     \
+        }                                                                                                              \
+        /* ------------------------------------------ */                                                               \
+        /* Radial Section: Node on the outer boundary */                                                               \
+        /* ------------------------------------------ */                                                               \
+        else if (i_r == grid.nr() - 1) {                                                                               \
+            double h1     = grid.radialSpacing(i_r - 1);                                                               \
+            double k1     = grid.angularSpacing(i_theta - 1);                                                          \
+            double k2     = grid.angularSpacing(i_theta);                                                              \
+            double coeff1 = 0.5 * (k1 + k2) / h1;                                                                      \
+                                                                                                                       \
+            /* -----------|| */                                                                                        \
+            /* O   O   O  || */                                                                                        \
+            /* -----------|| */                                                                                        \
+            /* O   O   Õ  || <- center_matrix*/                                                                        \
+            /* -----------|| */                                                                                        \
+            /* O   O   O  || */                                                                                        \
+            /* -----------|| */                                                                                        \
+            auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                  \
+                                                                                                                       \
+            const int center_index = i_r - numberSmootherCircles;                                                      \
+            const int left_index   = i_r - numberSmootherCircles - 1;                                                  \
+                                                                                                                       \
+            /* Fill matrix row of (i,j) */                                                                             \
+            row    = center_index;                                                                                     \
+            column = center_index;                                                                                     \
+            value  = 1.0;                                                                                              \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+                                                                                                                       \
+            /* Fill matrix row of (i-1,j) */                                                                           \
+            row    = left_index;                                                                                       \
+            column = left_index;                                                                                       \
+            value  = coeff1 * arr; /* Center: (Right) */                                                               \
+            UPDATE_MATRIX_ELEMENT(center_matrix, row, column, value);                                                  \
+        }                                                                                                              \
     } while (0)
 
 void SmootherGive::buildAscCircleSection(const int i_r)
@@ -718,6 +738,7 @@ void SmootherGive::buildAscMatrices()
 
             /* Inner boundary circle */
             if (circle_Asc_index == 0) {
+                #ifdef GMGPOLAR_USE_MUMPS
                 // Although the matrix is symmetric, we need to store all its entries, so we disable the symmetry.
                 const int nnz                 = getNonZeroCountCircleAsc(circle_Asc_index);
                 inner_boundary_circle_matrix_ = SparseMatrixCOO<double>(num_circle_nodes, num_circle_nodes, nnz);
@@ -725,6 +746,15 @@ void SmootherGive::buildAscMatrices()
                 for (int i = 0; i < nnz; i++) {
                     inner_boundary_circle_matrix_.value(i) = 0.0;
                 }
+                #else
+                std::function<int(int)> nnz_per_row = [&](int i_theta) {
+                    return DirBC_Interior_? 1 : 4;
+                };
+                inner_boundary_circle_matrix_ = SparseMatrixCSR<double>(num_circle_nodes, num_circle_nodes, nnz_per_row);
+                for (int i = 0; i < inner_boundary_circle_matrix_.non_zero_size(); i++) {
+                    inner_boundary_circle_matrix_.values_data()[i] = 0.0;
+                }
+                #endif
             }
 
             /* Interior Circle Section */
@@ -842,6 +872,7 @@ void SmootherGive::buildAscMatrices()
         }
     }
 
+    #ifdef GMGPOLAR_USE_MUMPS
     /* ------------------------------------------------------------------ */
     /* Part 3: Convert inner_boundary_circle_matrix to a symmetric matrix */
     /* ------------------------------------------------------------------ */
@@ -867,5 +898,6 @@ void SmootherGive::buildAscMatrices()
             current_nz++;
         }
     }
+    #endif
 }
 // clang-format on

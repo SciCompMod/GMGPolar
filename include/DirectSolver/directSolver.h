@@ -7,9 +7,6 @@ class Level;
 #include <iostream>
 #include <vector>
 
-#include "dmumps_c.h"
-#include "mpi.h"
-
 #include "../InputFunctions/domainGeometry.h"
 #include "../Level/level.h"
 #include "../LinearAlgebra/matrix.h"

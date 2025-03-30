@@ -1,5 +1,7 @@
 #include "../../../include/DirectSolver/DirectSolverGive/directSolverGive.h"
 
+#ifdef GMGPOLAR_USE_MUMPS
+
 void DirectSolverGive::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, SparseMatrixCOO<double>& solver_matrix)
 {
     /* 
@@ -118,3 +120,5 @@ void DirectSolverGive::finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver)
     mumps_solver.job = JOB_END;
     dmumps_c(&mumps_solver);
 }
+
+#endif

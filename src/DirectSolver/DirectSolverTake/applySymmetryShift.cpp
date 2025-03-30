@@ -1,5 +1,7 @@
 #include "../../../include/DirectSolver/DirectSolverTake/directSolverTake.h"
 
+#ifdef GMGPOLAR_USE_MUMPS
+
 /* ----------------------- */
 /* Boundary Symmetry Shift */
 /* ----------------------- */
@@ -107,3 +109,5 @@ void DirectSolverTake::applySymmetryShift(Vector<double>& x) const
         }
     }
 }
+
+#endif

@@ -2,6 +2,11 @@
 
 #include "../directSolver.h"
 
+#ifdef GMGPOLAR_USE_MUMPS
+
+#include "dmumps_c.h"
+#include "mpi.h"
+
 class DirectSolverGive : public DirectSolver
 {
 public:
@@ -82,3 +87,5 @@ private:
     // Retrieves the stencil for the solver matrix at the given radial index.
     const Stencil& getStencil(int i_r) const;
 };
+
+#endif

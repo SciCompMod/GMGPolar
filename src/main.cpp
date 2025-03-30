@@ -13,9 +13,16 @@ int main(int argc, char* argv[])
 
 // Check Likwid Status
 #ifdef GMGPOLAR_USE_LIKWID
-    std::cout << "Likwid: ON\n" << std::endl;
+    std::cout << "Likwid: ON" << std::endl;
 #else
-    std::cout << "Likwid: OFF\n" << std::endl;
+    std::cout << "Likwid: OFF" << std::endl;
+#endif
+
+// Check MUMPS Status
+#ifdef GMGPOLAR_USE_MUMPS
+    std::cout << "MUMPS: ON\n" << std::endl;
+#else
+    std::cout << "MUMPS: OFF\n" << std::endl;
 #endif
 
     // Initialize solver and set parameters from command-line arguments

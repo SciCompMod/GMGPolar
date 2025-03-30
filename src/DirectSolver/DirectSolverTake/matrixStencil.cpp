@@ -1,5 +1,7 @@
 #include "../../../include/DirectSolver/DirectSolverTake/directSolverTake.h"
 
+#ifdef GMGPOLAR_USE_MUMPS
+
 const Stencil& DirectSolverTake::getStencil(int i_r) const
 {
     assert(0 <= i_r && i_r < grid_.nr());
@@ -118,3 +120,5 @@ int DirectSolverTake::getSolverMatrixIndex(const int i_r, const int i_theta) con
     }
     throw std::out_of_range("Invalid index for stencil");
 }
+
+#endif

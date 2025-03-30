@@ -5,7 +5,7 @@
 
 #include "../../include/DirectSolver/DirectSolverGive/directSolverGive.h"
 #include "../../include/DirectSolver/DirectSolverTake/directSolverTake.h"
-
+#include "../../include/DirectSolver/DirectSolverGiveCustomLU/directSolverGiveCustomLU.h"
 #include "../../include/DirectSolver/DirectSolverTakeCustomLU/directSolverTakeCustomLU.h"
 
 #include "../../include/Smoother/SmootherGive/smootherGive.h"
@@ -110,17 +110,29 @@ void Level::initializeDirectSolver(const DomainGeometry& domain_geometry,
                                    const bool DirBC_Interior, const int num_omp_threads,
                                    const StencilDistributionMethod stencil_distribution_method)
 {
+#ifdef GMGPOLAR_USE_MUMPS
     if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
-        op_directSolver_ = std::make_unique<DirectSolverTakeCustomLU>(
+        op_directSolver_ = std::make_unique<DirectSolverTake>(
             *grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads);
     }
     else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
         op_directSolver_ = std::make_unique<DirectSolverGive>(
             *grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads);
     }
+#else
+    if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
+        op_directSolver_ = std::make_unique<DirectSolverTakeCustomLU>(
+            *grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads);
+    }
+    else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
+        op_directSolver_ = std::make_unique<DirectSolverGiveCustomLU>(
+            *grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads);
+    }
+#endif
     if (!op_directSolver_)
         throw std::runtime_error("Failed to initialize Direct Solver.");
 }
+
 void Level::directSolveInPlace(Vector<double>& x) const
 {
     if (!op_directSolver_)

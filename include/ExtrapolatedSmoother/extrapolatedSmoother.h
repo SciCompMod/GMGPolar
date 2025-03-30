@@ -7,12 +7,11 @@ class Level;
 #include <iostream>
 #include <vector>
 
-#include "dmumps_c.h"
-#include "mpi.h"
-
 #include "../InputFunctions/domainGeometry.h"
 #include "../LinearAlgebra/diagonalSolver.h"
 #include "../LinearAlgebra/matrix.h"
+#include "../LinearAlgebra/csr_matrix.h"
+#include "../LinearAlgebra/sparseLUSolver.h"
 #include "../LinearAlgebra/symmetricTridiagonalSolver.h"
 #include "../LinearAlgebra/vector.h"
 #include "../LinearAlgebra/vector_operations.h"

@@ -1,5 +1,7 @@
 #include "../../../include/DirectSolver/DirectSolverTake/directSolverTake.h"
 
+#ifdef GMGPOLAR_USE_MUMPS
+
 #define UPDATE_MATRIX_ELEMENT(matrix, ptr, offset, row, col, val)                                                      \
     do {                                                                                                               \
         matrix.row_index(ptr + offset) = row;                                                                          \
@@ -548,3 +550,5 @@ SparseMatrixCOO<double> DirectSolverTake::buildSolverMatrix()
     return symmetric_solver_matrix;
 }
 // clang-format on
+
+#endif

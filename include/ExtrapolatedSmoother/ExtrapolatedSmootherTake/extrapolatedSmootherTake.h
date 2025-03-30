@@ -2,6 +2,11 @@
 
 #include "../extrapolatedSmoother.h"
 
+#ifdef GMGPOLAR_USE_MUMPS
+#include "dmumps_c.h"
+#include "mpi.h"
+#endif
+
 class ExtrapolatedSmootherTake : public ExtrapolatedSmoother
 {
 public:
@@ -15,7 +20,7 @@ public:
     void extrapolatedSmoothing(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) override;
 
 private:
-    // The A_sc matrix on i_r = 0 is defined through the COO matrix
+    // The A_sc matrix on i_r = 0 is defined through the COO/CSR matrix
     // 'inner_boundary_circle_matrix_' due to the across-origin treatment.
     // It isn't tridiagonal and thus it requires a more advanced solver.
     // Note that circle_tridiagonal_solver_[0] is thus unused!
@@ -25,8 +30,13 @@ private:
     // - 'circle_diagonal_solver_[index] refers to the circular line i_r = 2*index + 1,
     // - 'radial_tridiagonal_solver_[index] refers to the radial line i_theta = 2*index,
     // - 'radial_diagonal_solver_[index] refers to the radial line i_theta = 2*index + 1.
+#ifdef GMGPOLAR_USE_MUMPS
     SparseMatrixCOO<double> inner_boundary_circle_matrix_;
     DMUMPS_STRUC_C inner_boundary_mumps_solver_;
+#else
+    SparseMatrixCSR<double> inner_boundary_circle_matrix_;
+    SparseLUSolver<double> inner_boundary_lu_solver_;
+#endif
     std::vector<DiagonalSolver<double>> circle_diagonal_solver_;
     std::vector<DiagonalSolver<double>> radial_diagonal_solver_;
     std::vector<SymmetricTridiagonalSolver<double>> circle_tridiagonal_solver_;
@@ -65,6 +75,8 @@ private:
                             Vector<double>& solver_storage_2);
     void solveRadialSection(const int i_theta, Vector<double>& x, Vector<double>& temp, Vector<double>& solver_storage);
 
+#ifdef GMGPOLAR_USE_MUMPS
     void initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, SparseMatrixCOO<double>& solver_matrix);
     void finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver);
+#endif
 };

@@ -2,6 +2,8 @@
 
 #include "../../../include/common/geometry_helper.h"
 
+#ifdef GMGPOLAR_USE_MUMPS
+
 /* ----------------------- */
 /* Boundary Symmetry Shift */
 /* ----------------------- */
@@ -259,3 +261,5 @@ void DirectSolverGive::applySymmetryShift(Vector<double>& x) const
         }
     }
 }
+
+#endif

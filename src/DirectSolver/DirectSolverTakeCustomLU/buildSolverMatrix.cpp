@@ -1,14 +1,20 @@
 #include "../../../include/DirectSolver/DirectSolverTakeCustomLU/directSolverTakeCustomLU.h"
 
+#define UPDATE_MATRIX_ELEMENT(matrix, offset, row, col, val)                                                           \
+    do {                                                                                                               \
+        matrix.row_nz_index(row, offset) = col;                                                                        \
+        matrix.row_nz_entry(row, offset) = val;                                                                        \
+    } while (0)
+
 #define NODE_BUILD_SOLVER_MATRIX_TAKE(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF,         \
                                       coeff_beta)                                                                      \
     do {                                                                                                               \
+        int offset;                                                                                                    \
+        int row, col;                                                                                                  \
+        double val;                                                                                                    \
         /* -------------------- */                                                                                     \
         /* Node in the interior */                                                                                     \
         /* -------------------- */                                                                                     \
-        int row, col;                                                                                                  \
-        int nz_index;                                                                                                  \
-        double val;                                                                                                    \
         if (i_r > 0 && i_r < grid.nr() - 1) {                                                                          \
             const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                   \
             const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                   \
@@ -51,70 +57,54 @@
             const double top_right_value    = -0.25 * (art[right_index] + art[top_index]); /* Top Right */             \
                                                                                                                        \
             /* Fill matrix row of (i,j) */                                                                             \
+            row = center_index;                                                                                        \
+                                                                                                                       \
             const Stencil& CenterStencil = getStencil(i_r);                                                            \
                                                                                                                        \
-            nz_index                                  = CenterStencil[StencilPosition::Center];                        \
-            row                                       = center_index;                                                  \
-            col                                       = center_index;                                                  \
-            val                                       = center_value;                                                  \
-            solver_matrix.row_nz_index(row, nz_index) = col;                                                           \
-            solver_matrix.row_nz_entry(row, nz_index) = val;                                                           \
+            offset = CenterStencil[StencilPosition::Center];                                                           \
+            col    = center_index;                                                                                     \
+            val    = center_value;                                                                                     \
+            UPDATE_MATRIX_ELEMENT(solver_matrix, offset, row, col, val);                                               \
                                                                                                                        \
-            nz_index                                  = CenterStencil[StencilPosition::Left];                          \
-            row                                       = center_index;                                                  \
-            col                                       = left_index;                                                    \
-            val                                       = left_value;                                                    \
-            solver_matrix.row_nz_index(row, nz_index) = col;                                                           \
-            solver_matrix.row_nz_entry(row, nz_index) = val;                                                           \
+            offset = CenterStencil[StencilPosition::Left];                                                             \
+            col    = left_index;                                                                                       \
+            val    = left_value;                                                                                       \
+            UPDATE_MATRIX_ELEMENT(solver_matrix, offset, row, col, val);                                               \
                                                                                                                        \
-            nz_index                                  = CenterStencil[StencilPosition::Right];                         \
-            row                                       = center_index;                                                  \
-            col                                       = right_index;                                                   \
-            val                                       = right_value;                                                   \
-            solver_matrix.row_nz_index(row, nz_index) = col;                                                           \
-            solver_matrix.row_nz_entry(row, nz_index) = val;                                                           \
+            offset = CenterStencil[StencilPosition::Right];                                                            \
+            col    = right_index;                                                                                      \
+            val    = right_value;                                                                                      \
+            UPDATE_MATRIX_ELEMENT(solver_matrix, offset, row, col, val);                                               \
                                                                                                                        \
-            nz_index                                  = CenterStencil[StencilPosition::Bottom];                        \
-            row                                       = center_index;                                                  \
-            col                                       = bottom_index;                                                  \
-            val                                       = bottom_value;                                                  \
-            solver_matrix.row_nz_index(row, nz_index) = col;                                                           \
-            solver_matrix.row_nz_entry(row, nz_index) = val;                                                           \
+            offset = CenterStencil[StencilPosition::Bottom];                                                           \
+            col    = bottom_index;                                                                                     \
+            val    = bottom_value;                                                                                     \
+            UPDATE_MATRIX_ELEMENT(solver_matrix, offset, row, col, val);                                               \
                                                                                                                        \
-            nz_index                                  = CenterStencil[StencilPosition::Top];                           \
-            row                                       = center_index;                                                  \
-            col                                       = top_index;                                                     \
-            val                                       = top_value;                                                     \
-            solver_matrix.row_nz_index(row, nz_index) = col;                                                           \
-            solver_matrix.row_nz_entry(row, nz_index) = val;                                                           \
+            offset = CenterStencil[StencilPosition::Top];                                                              \
+            col    = top_index;                                                                                        \
+            val    = top_value;                                                                                        \
+            UPDATE_MATRIX_ELEMENT(solver_matrix, offset, row, col, val);                                               \
                                                                                                                        \
-            nz_index                                  = CenterStencil[StencilPosition::BottomLeft];                    \
-            row                                       = center_index;                                                  \
-            col                                       = bottom_left_index;                                             \
-            val                                       = bottom_left_value;                                             \
-            solver_matrix.row_nz_index(row, nz_index) = col;                                                           \
-            solver_matrix.row_nz_entry(row, nz_index) = val;                                                           \
+            offset = CenterStencil[StencilPosition::BottomLeft];                                                       \
+            col    = bottom_left_index;                                                                                \
+            val    = bottom_left_value;                                                                                \
+            UPDATE_MATRIX_ELEMENT(solver_matrix, offset, row, col, val);                                               \
                                                                                                                        \
-            nz_index                                  = CenterStencil[StencilPosition::BottomRight];                   \
-            row                                       = center_index;                                                  \
-            col                                       = bottom_right_index;                                            \
-            val                                       = bottom_right_value;                                            \
-            solver_matrix.row_nz_index(row, nz_index) = col;                                                           \
-            solver_matrix.row_nz_entry(row, nz_index) = val;                                                           \
+            offset = CenterStencil[StencilPosition::BottomRight];                                                      \
+            col    = bottom_right_index;                                                                               \
+            val    = bottom_right_value;                                                                               \
+            UPDATE_MATRIX_ELEMENT(solver_matrix, offset, row, col, val);                                               \
                                                                                                                        \
-            nz_index                                  = CenterStencil[StencilPosition::TopLeft];                       \
-            row                                       = center_index;                                                  \
-            col                                       = top_left_index;                                                \
-            val                                       = top_left_value;                                                \
-            solver_matrix.row_nz_index(row, nz_index) = col;                                                           \
-            solver_matrix.row_nz_entry(row, nz_index) = val;                                                           \
+            offset = CenterStencil[StencilPosition::TopLeft];                                                          \
+            col    = top_left_index;                                                                                   \
+            val    = top_left_value;                                                                                   \
+            UPDATE_MATRIX_ELEMENT(solver_matrix, offset, row, col, val);                                               \
                                                                                                                        \
-            nz_index                                  = CenterStencil[StencilPosition::TopRight];                      \
-            row                                       = center_index;                                                  \
-            col                                       = top_right_index;                                               \
-            val                                       = top_right_value;                                               \
-            solver_matrix.row_nz_index(row, nz_index) = col;                                                           \
-            solver_matrix.row_nz_entry(row, nz_index) = val;                                                           \
+            offset = CenterStencil[StencilPosition::TopRight];                                                         \
+            col    = top_right_index;                                                                                  \
+            val    = top_right_value;                                                                                  \
+            UPDATE_MATRIX_ELEMENT(solver_matrix, offset, row, col, val);                                               \
         }                                                                                                              \
         /* -------------------------- */                                                                               \
         /* Node on the inner boundary */                                                                               \
@@ -124,18 +114,17 @@
             /* Case 1: Dirichlet boundary on the inner boundary */                                                     \
             /* ------------------------------------------------ */                                                     \
             if (DirBC_Interior) {                                                                                      \
-                                                                                                                       \
                 const int center_index = grid.index(i_r, i_theta);                                                     \
                                                                                                                        \
                 /* Fill matrix row of (i,j) */                                                                         \
+                row = center_index;                                                                                    \
+                                                                                                                       \
                 const Stencil& CenterStencil = getStencil(i_r);                                                        \
                                                                                                                        \
-                nz_index                                  = CenterStencil[StencilPosition::Center];                    \
-                row                                       = center_index;                                              \
-                col                                       = center_index;                                              \
-                val                                       = 1.0;                                                       \
-                solver_matrix.row_nz_index(row, nz_index) = col;                                                       \
-                solver_matrix.row_nz_entry(row, nz_index) = val;                                                       \
+                offset = CenterStencil[StencilPosition::Center];                                                       \
+                col    = center_index;                                                                                 \
+                val    = 1.0;                                                                                          \
+                UPDATE_MATRIX_ELEMENT(solver_matrix, offset, row, col, val);                                           \
             }                                                                                                          \
             else {                                                                                                     \
                 /* ------------------------------------------------------------- */                                    \
@@ -185,56 +174,48 @@
                 const double top_right_value    = -0.25 * (art[right_index] + art[top_index]); /* Top Right */         \
                                                                                                                        \
                 /* Fill matrix row of (i,j) */                                                                         \
+                row = center_index;                                                                                    \
+                                                                                                                       \
                 const Stencil& CenterStencil = getStencil(i_r);                                                        \
                                                                                                                        \
-                nz_index                                  = CenterStencil[StencilPosition::Center];                    \
-                row                                       = center_index;                                              \
-                col                                       = center_index;                                              \
-                val                                       = center_value;                                              \
-                solver_matrix.row_nz_index(row, nz_index) = col;                                                       \
-                solver_matrix.row_nz_entry(row, nz_index) = val;                                                       \
+                offset = CenterStencil[StencilPosition::Center];                                                       \
+                col    = center_index;                                                                                 \
+                val    = center_value;                                                                                 \
+                UPDATE_MATRIX_ELEMENT(solver_matrix, offset, row, col, val);                                           \
                                                                                                                        \
-                nz_index                                  = CenterStencil[StencilPosition::Left];                      \
-                row                                       = center_index;                                              \
-                col                                       = left_index;                                                \
-                val                                       = left_value;                                                \
-                solver_matrix.row_nz_index(row, nz_index) = col;                                                       \
-                solver_matrix.row_nz_entry(row, nz_index) = val;                                                       \
+                offset = CenterStencil[StencilPosition::Left];                                                         \
+                col    = left_index;                                                                                   \
+                val    = left_value;                                                                                   \
+                UPDATE_MATRIX_ELEMENT(solver_matrix, offset, row, col, val);                                           \
                                                                                                                        \
-                nz_index                                  = CenterStencil[StencilPosition::Right];                     \
-                row                                       = center_index;                                              \
-                col                                       = right_index;                                               \
-                val                                       = right_value;                                               \
-                solver_matrix.row_nz_index(row, nz_index) = col;                                                       \
-                solver_matrix.row_nz_entry(row, nz_index) = val;                                                       \
+                offset = CenterStencil[StencilPosition::Right];                                                        \
+                col    = right_index;                                                                                  \
+                val    = right_value;                                                                                  \
+                UPDATE_MATRIX_ELEMENT(solver_matrix, offset, row, col, val);                                           \
                                                                                                                        \
-                nz_index                                  = CenterStencil[StencilPosition::Bottom];                    \
-                row                                       = center_index;                                              \
-                col                                       = bottom_index;                                              \
-                val                                       = bottom_value;                                              \
-                solver_matrix.row_nz_index(row, nz_index) = col;                                                       \
-                solver_matrix.row_nz_entry(row, nz_index) = val;                                                       \
+                offset = CenterStencil[StencilPosition::Bottom];                                                       \
+                col    = bottom_index;                                                                                 \
+                val    = bottom_value;                                                                                 \
+                UPDATE_MATRIX_ELEMENT(solver_matrix, offset, row, col, val);                                           \
                                                                                                                        \
-                nz_index                                  = CenterStencil[StencilPosition::Top];                       \
-                row                                       = center_index;                                              \
-                col                                       = top_index;                                                 \
-                val                                       = top_value;                                                 \
-                solver_matrix.row_nz_index(row, nz_index) = col;                                                       \
-                solver_matrix.row_nz_entry(row, nz_index) = val;                                                       \
+                offset = CenterStencil[StencilPosition::Top];                                                          \
+                col    = top_index;                                                                                    \
+                val    = top_value;                                                                                    \
+                UPDATE_MATRIX_ELEMENT(solver_matrix, offset, row, col, val);                                           \
                                                                                                                        \
-                nz_index                                  = CenterStencil[StencilPosition::BottomRight];               \
-                row                                       = center_index;                                              \
-                col                                       = bottom_right_index;                                        \
-                val                                       = bottom_right_value;                                        \
-                solver_matrix.row_nz_index(row, nz_index) = col;                                                       \
-                solver_matrix.row_nz_entry(row, nz_index) = val;                                                       \
+                /* BottomLeft: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                                             \
                                                                                                                        \
-                nz_index                                  = CenterStencil[StencilPosition::TopRight];                  \
-                row                                       = center_index;                                              \
-                col                                       = top_right_index;                                           \
-                val                                       = top_right_value;                                           \
-                solver_matrix.row_nz_index(row, nz_index) = col;                                                       \
-                solver_matrix.row_nz_entry(row, nz_index) = val;                                                       \
+                offset = CenterStencil[StencilPosition::BottomRight];                                                  \
+                col    = bottom_right_index;                                                                           \
+                val    = bottom_right_value;                                                                           \
+                UPDATE_MATRIX_ELEMENT(solver_matrix, offset, row, col, val);                                           \
+                                                                                                                       \
+                /* TopLeft: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */                                                \
+                                                                                                                       \
+                offset = CenterStencil[StencilPosition::TopRight];                                                     \
+                col    = top_right_index;                                                                              \
+                val    = top_right_value;                                                                              \
+                UPDATE_MATRIX_ELEMENT(solver_matrix, offset, row, col, val);                                           \
             }                                                                                                          \
         }                                                                                                              \
         /* ------------------------------------ */                                                                     \
@@ -244,14 +225,14 @@
             const int center_index = grid.index(i_r, i_theta);                                                         \
                                                                                                                        \
             /* Fill matrix row of (i,j) */                                                                             \
+            row = center_index;                                                                                        \
+                                                                                                                       \
             const Stencil& CenterStencil = getStencil(i_r);                                                            \
                                                                                                                        \
-            nz_index                                  = CenterStencil[StencilPosition::Center];                        \
-            row                                       = center_index;                                                  \
-            col                                       = center_index;                                                  \
-            val                                       = 1.0;                                                           \
-            solver_matrix.row_nz_index(row, nz_index) = col;                                                           \
-            solver_matrix.row_nz_entry(row, nz_index) = val;                                                           \
+            offset = CenterStencil[StencilPosition::Center];                                                           \
+            col    = center_index;                                                                                     \
+            val    = 1.0;                                                                                              \
+            UPDATE_MATRIX_ELEMENT(solver_matrix, offset, row, col, val);                                               \
         }                                                                                                              \
     } while (0)
 
@@ -305,7 +286,6 @@ SparseMatrixCSR<double> DirectSolverTakeCustomLU::buildSolverMatrix()
         return getStencilSize(global_index);
     };
 
-    // Although the matrix is symmetric, we need to store all its entries, so we disable the symmetry.
     SparseMatrixCSR<double> solver_matrix(n, n, nnz_per_row);
 
     if (omp_get_max_threads() == 1) {

@@ -18,12 +18,12 @@ threadReductionFactor=1.0
 # Stencil distribution method:
 # 0 - CPU "Take": Each node independently applies the stencil
 # 1 - CPU "Give": The stencil operation is distributed across adjacent neighboring nodes
-stencilDistributionMethod=1
+stencilDistributionMethod=0
 # Caching behavior:
 # 0 - Recompute values on each iteration: Uses less memory but results in slower execution.
 # 1 - Reuse cached values: Consumes more memory but significantly improves performance.
 cacheDensityProfileCoefficients=1
-cacheDomainGeometry=0
+cacheDomainGeometry=1
 # Note: In the "Take" approach (stencilDistributionMethod=0), 
 # caching is required for optimal performance, 
 # so both density profile coefficients and domain geometry need to be cached.
@@ -40,7 +40,7 @@ Rmax=1.3
 nr_exp=4
 ntheta_exp=-1
 anisotropic_factor=3
-divideBy2=7
+divideBy2=3
 
 # Finest grid can be loaded from a text file
 write_grid_file=0
@@ -76,7 +76,7 @@ FMG_cycle=2 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
 # 3: Combination of both implicit extrapolation methods (May be usefull for FMG=0)
 extrapolation=1
 # Maximum number of multigrid levels:
-maxLevels=5
+maxLevels=7
 # Number of smoothing steps:
 preSmoothingSteps=1
 postSmoothingSteps=1
@@ -91,32 +91,6 @@ maxIterations=150
 residualNormType=0 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
 absoluteTolerance=1e-8
 relativeTolerance=1e-8
-
-# Define additional geometry parameters
-kappa_eps=0.0
-delta_e=0.0
-if [ "$geometry" -eq 1 ]; then
-    kappa_eps=0.3
-    delta_e=0.2
-elif [ "$geometry" -eq 2 ]; then
-    kappa_eps=0.3
-    delta_e=1.4
-fi
-
-# Set alpha_jump based on alpha_coeff value
-# Used for anisotropic grid refinement -> refinement_radius
-if [ "$alpha_coeff" -eq 0 ]; then
-    alpha_jump=$(python3 -c "print(0.5 * float($Rmax))")
-elif [ "$alpha_coeff" -eq 1 ]; then
-    alpha_jump=$(python3 -c "print(0.66 * float($Rmax))")
-elif [ "$alpha_coeff" -eq 2 ]; then
-    alpha_jump=$(python3 -c "print(0.4837 * float($Rmax))")
-elif [ "$alpha_coeff" -eq 3 ]; then
-    alpha_jump=$(python3 -c "print(0.7081 * float($Rmax))")
-else
-    echo "Invalid value for alpha_coeff: $alpha_coeff"
-    exit 1
-fi
 
 # Define additional geometry parameters
 kappa_eps=0.0

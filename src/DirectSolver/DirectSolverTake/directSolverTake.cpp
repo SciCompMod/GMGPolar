@@ -1,5 +1,7 @@
 #include "../../../include/DirectSolver/DirectSolverTake/directSolverTake.h"
 
+#ifdef GMGPOLAR_USE_MUMPS
+
 DirectSolverTake::DirectSolverTake(const PolarGrid& grid, const LevelCache& level_cache,
                                    const DomainGeometry& domain_geometry,
                                    const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior,
@@ -26,3 +28,5 @@ DirectSolverTake::~DirectSolverTake()
 {
     finalizeMumpsSolver(mumps_solver_);
 }
+
+#endif

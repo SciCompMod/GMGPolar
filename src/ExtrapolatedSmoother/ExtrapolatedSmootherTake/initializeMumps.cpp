@@ -1,5 +1,7 @@
 #include "../../../include/ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.h"
 
+#ifdef GMGPOLAR_USE_MUMPS
+
 void ExtrapolatedSmootherTake::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver,
                                                     SparseMatrixCOO<double>& solver_matrix)
 {
@@ -106,3 +108,5 @@ void ExtrapolatedSmootherTake::finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver)
     mumps_solver.job = JOB_END;
     dmumps_c(&mumps_solver);
 }
+
+#endif

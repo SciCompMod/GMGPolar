@@ -1,5 +1,6 @@
 #include "../../../include/ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.h"
 
+/* Tridiagonal matrices */
 #define UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value)                                                         \
     do {                                                                                                               \
         if (row == column)                                                                                             \
@@ -10,10 +11,27 @@
             matrix.cyclic_corner_element() = value;                                                                    \
     } while (0)
 
+/* Diagonal matrices */
 #define UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value)                                                            \
     do {                                                                                                               \
         matrix.diagonal(row) = value;                                                                                  \
     } while (0)
+
+/* Inner Boundary COO/CSR matrix */
+#ifdef GMGPOLAR_USE_MUMPS
+    #define COO_CSR_UPDATE(matrix, ptr, offset, row, col, val)                                                         \
+        do {                                                                                                           \
+            matrix.row_index(ptr + offset) = row;                                                                      \
+            matrix.col_index(ptr + offset) = col;                                                                      \
+            matrix.value(ptr + offset)     = val;                                                                      \
+        } while (0)
+#else
+    #define COO_CSR_UPDATE(matrix, ptr, offset, row, col, val)                                                         \
+        do {                                                                                                           \
+            matrix.row_nz_index(row, offset) = col;                                                                    \
+            matrix.row_nz_entry(row, offset) = val;                                                                    \
+        } while (0)
+#endif
 
 #define NODE_BUILD_SMOOTHER_TAKE(i_r, i_theta, grid, DirBC_Interior, inner_boundary_circle_matrix,                     \
                                  circle_diagonal_solver, circle_tridiagonal_solver, radial_diagonal_solver,            \
@@ -28,8 +46,9 @@
         assert(numberSmootherCircles >= 3);                                                                            \
         assert(lengthSmootherRadial >= 3);                                                                             \
                                                                                                                        \
-        int row, column;                                                                                               \
-        double value;                                                                                                  \
+        int ptr, offset;                                                                                               \
+        int row, column, col;                                                                                          \
+        double value, val;                                                                                             \
         /* ------------------------------------------ */                                                               \
         /* Node in the interior of the Circle Section */                                                               \
         /* ------------------------------------------ */                                                               \
@@ -144,16 +163,20 @@
             /* Case 1: Dirichlet boundary on the inner boundary */                                                     \
             /* ------------------------------------------------ */                                                     \
             if (DirBC_Interior) {                                                                                      \
-                auto& matrix     = inner_boundary_circle_matrix;                                                       \
-                int center_index = i_theta;                                                                            \
+                auto& matrix              = inner_boundary_circle_matrix;                                              \
+                const int center_index    = i_theta;                                                                   \
+                const int center_nz_index = getCircleAscIndex(i_r, i_theta);                                           \
                                                                                                                        \
                 /* Fill matrix row of (i,j) */                                                                         \
+                row = center_index;                                                                                    \
+                ptr = center_nz_index;                                                                                 \
+                                                                                                                       \
                 const Stencil& CenterStencil = getStencil(i_r, i_theta);                                               \
-                int center_nz_index          = getCircleAscIndex(i_r, i_theta);                                        \
-                int nz_index                 = center_nz_index + CenterStencil[StencilPosition::Center];               \
-                matrix.row_index(nz_index)   = center_index;                                                           \
-                matrix.col_index(nz_index)   = center_index;                                                           \
-                matrix.value(nz_index)       = 1.0;                                                                    \
+                                                                                                                       \
+                offset = CenterStencil[StencilPosition::Center];                                                       \
+                col    = center_index;                                                                                 \
+                val    = 1.0;                                                                                          \
+                COO_CSR_UPDATE(matrix, ptr, offset, row, col, val);                                                    \
             }                                                                                                          \
             else {                                                                                                     \
                 /* ------------------------------------------------------------- */                                    \
@@ -186,6 +209,8 @@
                 const int top_nz_index    = getCircleAscIndex(i_r, i_theta_P1);                                        \
                 const int left_nz_index   = getCircleAscIndex(i_r, i_theta_AcrossOrigin);                              \
                                                                                                                        \
+                auto& matrix = inner_boundary_circle_matrix;                                                           \
+                                                                                                                       \
                 int nz_index;                                                                                          \
                 const Stencil& CenterStencil = getStencil(i_r, i_theta);                                               \
                                                                                                                        \
@@ -197,36 +222,11 @@
                     /* -|   |   |   | */                                                                               \
                     /* -| X | O | X | */                                                                               \
                                                                                                                        \
-                    const double h1 = 2.0 * grid.radius(0);                                                            \
-                    const double h2 = grid.radialSpacing(i_r);                                                         \
-                    const double k1 = grid.angularSpacing(i_theta - 1);                                                \
-                    const double k2 = grid.angularSpacing(i_theta);                                                    \
-                                                                                                                       \
-                    const double coeff1 = 0.5 * (k1 + k2) / h1;                                                        \
-                    const double coeff2 = 0.5 * (k1 + k2) / h2;                                                        \
-                    const double coeff3 = 0.5 * (h1 + h2) / k1;                                                        \
-                    const double coeff4 = 0.5 * (h1 + h2) / k2;                                                        \
-                                                                                                                       \
-                    const int i_theta_M1           = grid.wrapThetaIndex(i_theta - 1);                                 \
-                    const int i_theta_P1           = grid.wrapThetaIndex(i_theta + 1);                                 \
-                    const int i_theta_AcrossOrigin = grid.wrapThetaIndex(i_theta + grid.ntheta() / 2);                 \
-                                                                                                                       \
                     const int left   = grid.index(i_r, i_theta_AcrossOrigin);                                          \
                     const int bottom = grid.index(i_r, i_theta_M1);                                                    \
                     const int center = grid.index(i_r, i_theta);                                                       \
                     const int top    = grid.index(i_r, i_theta_P1);                                                    \
                     const int right  = grid.index(i_r + 1, i_theta);                                                   \
-                                                                                                                       \
-                    auto& matrix = inner_boundary_circle_matrix;                                                       \
-                                                                                                                       \
-                    const int center_index = i_theta;                                                                  \
-                    const int left_index   = i_theta_AcrossOrigin;                                                     \
-                                                                                                                       \
-                    const int center_nz_index = getCircleAscIndex(i_r, i_theta);                                       \
-                                                                                                                       \
-                    int nz_index;                                                                                      \
-                    /* Fill matrix row of (i,j) */                                                                     \
-                    const Stencil& CenterStencil = getStencil(i_r, i_theta);                                           \
                                                                                                                        \
                     const double center_value =                                                                        \
                         0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) +                         \
@@ -234,15 +234,21 @@
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
                     const double left_value = -coeff1 * (arr[center] + arr[left]);                                     \
                                                                                                                        \
-                    nz_index                   = center_nz_index + CenterStencil[StencilPosition::Center];             \
-                    matrix.row_index(nz_index) = center_index;                                                         \
-                    matrix.col_index(nz_index) = center_index;                                                         \
-                    matrix.value(nz_index)     = center_value;                                                         \
+                    /* Fill matrix row of (i,j) */                                                                     \
+                    row = center_index;                                                                                \
+                    ptr = center_nz_index;                                                                             \
                                                                                                                        \
-                    nz_index                   = center_nz_index + CenterStencil[StencilPosition::Left];               \
-                    matrix.row_index(nz_index) = center_index;                                                         \
-                    matrix.col_index(nz_index) = left_index;                                                           \
-                    matrix.value(nz_index)     = left_value;                                                           \
+                    const Stencil& CenterStencil = getStencil(i_r, i_theta);                                           \
+                                                                                                                       \
+                    offset = CenterStencil[StencilPosition::Center];                                                   \
+                    col    = center_index;                                                                             \
+                    val    = center_value;                                                                             \
+                    COO_CSR_UPDATE(matrix, ptr, offset, row, col, val);                                                \
+                                                                                                                       \
+                    offset = CenterStencil[StencilPosition::Left];                                                     \
+                    col    = left_index;                                                                               \
+                    val    = left_value;                                                                               \
+                    COO_CSR_UPDATE(matrix, ptr, offset, row, col, val);                                                \
                 }                                                                                                      \
                 else {                                                                                                 \
                     /* i_theta % 2 == 0 */                                                                             \
@@ -252,13 +258,16 @@
                     /* -|   |   |   | */                                                                               \
                     /* -| O | O | O | */                                                                               \
                                                                                                                        \
-                    auto& matrix           = inner_boundary_circle_matrix;                                             \
-                    const int center_index = i_theta;                                                                  \
                     /* Fill matrix row of (i,j) */                                                                     \
-                    nz_index                   = center_nz_index + CenterStencil[StencilPosition::Center];             \
-                    matrix.row_index(nz_index) = center_index;                                                         \
-                    matrix.col_index(nz_index) = center_index;                                                         \
-                    matrix.value(nz_index)     = 1.0;                                                                  \
+                    row = center_index;                                                                                \
+                    ptr = center_nz_index;                                                                             \
+                                                                                                                       \
+                    const Stencil& CenterStencil = getStencil(i_r, i_theta);                                           \
+                                                                                                                       \
+                    offset = CenterStencil[StencilPosition::Center];                                                   \
+                    col    = center_index;                                                                             \
+                    val    = 1.0;                                                                                      \
+                    COO_CSR_UPDATE(matrix, ptr, offset, row, col, val);                                                \
                 }                                                                                                      \
             }                                                                                                          \
         }                                                                                                              \
@@ -671,10 +680,18 @@ void ExtrapolatedSmootherTake::buildAscMatrices()
 
             /* Inner boundary circle */
             if (circle_Asc_index == 0) {
+                #ifdef GMGPOLAR_USE_MUMPS
                 // Although the matrix is symmetric, we need to store all its entries, so we disable the symmetry.
                 const int nnz                 = getNonZeroCountCircleAsc(circle_Asc_index);
                 inner_boundary_circle_matrix_ = SparseMatrixCOO<double>(num_circle_nodes, num_circle_nodes, nnz);
                 inner_boundary_circle_matrix_.is_symmetric(false);
+                #else
+                std::function<int(int)> nnz_per_row = [&](int i_theta) {
+                    if(DirBC_Interior_) return 1;
+                    else return i_theta % 2 == 0 ? 1 : 2;
+                };
+                inner_boundary_circle_matrix_ = SparseMatrixCSR<double>(num_circle_nodes, num_circle_nodes, nnz_per_row);
+                #endif
             }
 
             /* Interior Circle Section */
@@ -728,6 +745,7 @@ void ExtrapolatedSmootherTake::buildAscMatrices()
         }
     }
 
+    #ifdef GMGPOLAR_USE_MUMPS
     /* ------------------------------------------------------------------- */
     /* Part 3: Convert inner_boundary_circle_matrix_ to a symmetric matrix */
     /* ------------------------------------------------------------------- */
@@ -753,5 +771,6 @@ void ExtrapolatedSmootherTake::buildAscMatrices()
             current_nz++;
         }
     }
+    #endif
 }
 /* clang-format on */

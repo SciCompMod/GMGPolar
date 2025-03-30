@@ -927,15 +927,19 @@ void ExtrapolatedSmootherGive::solveCircleSection(const int i_r, Vector<double>&
     const int start = grid_.index(i_r, 0);
     const int end   = start + grid_.ntheta();
     if (i_r == 0) {
-        inner_boundary_mumps_solver_.job    = JOB_COMPUTE_SOLUTION;
-        inner_boundary_mumps_solver_.nrhs   = 1; // single rhs vector
-        inner_boundary_mumps_solver_.nz_rhs = grid_.ntheta(); // non-zeros in rhs
-        inner_boundary_mumps_solver_.rhs    = temp.begin() + start;
-        inner_boundary_mumps_solver_.lrhs   = grid_.ntheta(); // leading dimension of rhs
-        dmumps_c(&inner_boundary_mumps_solver_);
-        if (inner_boundary_mumps_solver_.info[0] != 0) {
-            std::cerr << "Error solving the system: " << inner_boundary_mumps_solver_.info[0] << std::endl;
-        }
+        #ifdef GMGPOLAR_USE_MUMPS
+            inner_boundary_mumps_solver_.job    = JOB_COMPUTE_SOLUTION;
+            inner_boundary_mumps_solver_.nrhs   = 1; // single rhs vector
+            inner_boundary_mumps_solver_.nz_rhs = grid_.ntheta(); // non-zeros in rhs
+            inner_boundary_mumps_solver_.rhs    = temp.begin() + start;
+            inner_boundary_mumps_solver_.lrhs   = grid_.ntheta(); // leading dimension of rhs
+            dmumps_c(&inner_boundary_mumps_solver_);
+            if (inner_boundary_mumps_solver_.info[0] != 0) {
+                std::cerr << "Error solving the system: " << inner_boundary_mumps_solver_.info[0] << std::endl;
+            }
+        #else
+            inner_boundary_lu_solver_.solveInPlace(temp.begin() + start);
+        #endif
     }
     else {
         if (i_r & 1) {
