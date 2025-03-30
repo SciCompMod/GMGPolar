@@ -1,4 +1,6 @@
 
+#pragma once
+
 #include "../InputFunctions/domainGeometry.h"
 
 #include <cmath>

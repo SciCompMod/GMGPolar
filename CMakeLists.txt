@@ -3,7 +3,7 @@ project(GMGPolar VERSION 2.0.0 LANGUAGES CXX)
 
 option(GMGPOLAR_BUILD_TESTS "Build GMGPolar unit tests." ON)
 option(GMGPOLAR_USE_LIKWID "Use LIKWID to measure code (regions)." OFF)
-option(GMGPOLAR_USE_MUMPS "Use MUMPS to solve linear systems." OFF)
+option(GMGPOLAR_USE_MUMPS "Use MUMPS to solve linear systems." ON)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -15,20 +15,20 @@ endif()
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -pedantic -Wno-unused")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -mtune=generic")
 
-# # Mumps: Sparse Matrix Solver
-# set(MUMPS_PREFIX_PATH "~/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/mumps-5.6.2-m4xrhc4mshzrxmgptzbpult3nbf6qrzk")
-# include_directories(${MUMPS_PREFIX_PATH}/include)
-# link_directories(${MUMPS_PREFIX_PATH}/lib)
+# Mumps: Sparse Matrix Solver
+set(MUMPS_PREFIX_PATH "~/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/mumps-5.6.2-m4xrhc4mshzrxmgptzbpult3nbf6qrzk")
+include_directories(${MUMPS_PREFIX_PATH}/include)
+link_directories(${MUMPS_PREFIX_PATH}/lib)
 
-# # Metis: Matrix reordering for Mumps
-# set(METIS_PREFIX_PATH "~/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/metis-5.1.0-bgoncx22w55soviybggl5ydjakvkm34v")
-# include_directories(${METIS_PREFIX_PATH}/include)
-# link_directories(${METIS_PREFIX_PATH}/lib)
+# Metis: Matrix reordering for Mumps
+set(METIS_PREFIX_PATH "~/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/metis-5.1.0-bgoncx22w55soviybggl5ydjakvkm34v")
+include_directories(${METIS_PREFIX_PATH}/include)
+link_directories(${METIS_PREFIX_PATH}/lib)
 
 # Likwid: Performance monitoring
-# set(LIKWID_PREFIX_PATH "~/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/likwid-5.3.0-6mvx2snsqnamuyhaqspd6gxkfuaso36g")
-# include_directories(${LIKWID_PREFIX_PATH}/include)
-# link_directories(${LIKWID_PREFIX_PATH}/lib)
+set(LIKWID_PREFIX_PATH "~/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/likwid-5.3.0-6mvx2snsqnamuyhaqspd6gxkfuaso36g")
+include_directories(${LIKWID_PREFIX_PATH}/include)
+link_directories(${LIKWID_PREFIX_PATH}/lib)
 
 # Include directories for the project
 include_directories(include)

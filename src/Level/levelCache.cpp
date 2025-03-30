@@ -3,18 +3,15 @@
 LevelCache::LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients,
                        const DomainGeometry& domain_geometry, const bool cache_density_profile_coefficients,
                        const bool cache_domain_geometry)
-    : sin_theta_(grid.ntheta())
+    : density_profile_coefficients_(density_profile_coefficients)
+    , domain_geometry_(domain_geometry)
+    , sin_theta_(grid.ntheta())
     , cos_theta_(grid.ntheta())
-    ,
-
-    cache_density_profile_coefficients_(cache_density_profile_coefficients)
-    ,
+    , cache_density_profile_coefficients_(cache_density_profile_coefficients)
     // If the domain geometry is cached, we don't need to cache the alpha coefficient
-    coeff_alpha_((cache_density_profile_coefficients && !cache_domain_geometry) ? grid.nr() : 0)
+    , coeff_alpha_((cache_density_profile_coefficients && !cache_domain_geometry) ? grid.nr() : 0)
     , coeff_beta_(cache_density_profile_coefficients ? grid.nr() : 0)
-    ,
-
-    cache_domain_geometry_(cache_domain_geometry)
+    , cache_domain_geometry_(cache_domain_geometry)
     , arr_(cache_domain_geometry ? grid.numberOfNodes() : 0)
     , att_(cache_domain_geometry ? grid.numberOfNodes() : 0)
     , art_(cache_domain_geometry ? grid.numberOfNodes() : 0)
@@ -41,33 +38,21 @@ LevelCache::LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& 
     if (cache_domain_geometry_) {
 #pragma omp parallel for
         for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
-            const double r = grid.radius(i_r);
+            const double r     = grid.radius(i_r);
             double coeff_alpha = density_profile_coefficients.alpha(r);
             for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
                 const double theta     = grid.theta(i_theta);
                 const double sin_theta = sin_theta_[i_theta];
                 const double cos_theta = cos_theta_[i_theta];
                 const double index     = grid.index(i_r, i_theta);
-                /* Calculate the elements of the Jacobian matrix for the transformation mapping */
-                /* The Jacobian matrix is: */
-                /* [Jrr, Jrt] */
-                /* [Jtr, Jtt] */
-                const double Jrr = domain_geometry.dFx_dr(r, theta, sin_theta, cos_theta);
-                const double Jtr = domain_geometry.dFy_dr(r, theta, sin_theta, cos_theta);
-                const double Jrt = domain_geometry.dFx_dt(r, theta, sin_theta, cos_theta);
-                const double Jtt = domain_geometry.dFy_dt(r, theta, sin_theta, cos_theta);
-                /* Compute the determinant of the Jacobian matrix */
-                detDF_[index] = Jrr * Jtt - Jrt * Jtr;
-                /* Compute the elements of the symmetric matrix: */
-                /* 0.5 * alpha * DF^{-1} * DF^{-T} * |det(DF)| */
-                /* which is represented by: */ /* [arr, 0.5*art] */ /* [0.5*atr, att] */
-                arr_[index] = 0.5 * (Jtt * Jtt + Jrt * Jrt) * coeff_alpha / fabs(detDF_[index]);
-                att_[index] = 0.5 * (Jtr * Jtr + Jrr * Jrr) * coeff_alpha / fabs(detDF_[index]);
-                art_[index] = (-Jtt * Jtr - Jrt * Jrr) * coeff_alpha / fabs(detDF_[index]);
-                /* Note that the inverse Jacobian matrix DF^{-1} is: */
-                /* 1.0 / det(DF) *   */
-                /* [Jtt, -Jrt] */
-                /* [-Jtr, Jrr] */
+
+                double arr, att, art, detDF;
+                compute_jacobian_elements(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha,
+                                      arr, att, art, detDF);
+                detDF_[index] = detDF;
+                arr_[index] = arr;
+                att_[index] = att;
+                art_[index] = art;
             }
         }
 
@@ -88,42 +73,27 @@ LevelCache::LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& 
                     coeff_alpha = density_profile_coefficients.alpha(r);
                 }
 
-                /* Calculate the elements of the Jacobian matrix for the transformation mapping */
-                /* The Jacobian matrix is: */
-                /* [Jrr, Jrt] */
-                /* [Jtr, Jtt] */
-                const double Jrr = domain_geometry.dFx_dr(r, theta, sin_theta, cos_theta);
-                const double Jtr = domain_geometry.dFy_dr(r, theta, sin_theta, cos_theta);
-                const double Jrt = domain_geometry.dFx_dt(r, theta, sin_theta, cos_theta);
-                const double Jtt = domain_geometry.dFy_dt(r, theta, sin_theta, cos_theta);
-                /* Compute the determinant of the Jacobian matrix */
-                detDF_[index] = Jrr * Jtt - Jrt * Jtr;
-                /* Compute the elements of the symmetric matrix: */
-                /* 0.5 * alpha * DF^{-1} * DF^{-T} * |det(DF)| */
-                /* which is represented by: */ /* [arr, 0.5*art] */ /* [0.5*atr, att] */
-                arr_[index] = 0.5 * (Jtt * Jtt + Jrt * Jrt) * coeff_alpha / fabs(detDF_[index]);
-                att_[index] = 0.5 * (Jtr * Jtr + Jrr * Jrr) * coeff_alpha / fabs(detDF_[index]);
-                art_[index] = (-Jtt * Jtr - Jrt * Jrr) * coeff_alpha / fabs(detDF_[index]);
-                /* Note that the inverse Jacobian matrix DF^{-1} is: */
-                /* 1.0 / det(DF) *   */
-                /* [Jtt, -Jrt] */
-                /* [-Jtr, Jrr] */
+                double arr, att, art, detDF;
+                compute_jacobian_elements(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha,
+                                      arr, att, art, detDF);
+                detDF_[index] = detDF;
+                arr_[index] = arr;
+                att_[index] = att;
+                art_[index] = art;
             }
         }
     }
 }
 
 LevelCache::LevelCache(const Level& previous_level, const PolarGrid& current_grid)
-    : sin_theta_(current_grid.ntheta())
+    : density_profile_coefficients_(previous_level.levelCache().densityProfileCoefficients())
+    , domain_geometry_(previous_level.levelCache().domainGeometry())
+    , sin_theta_(current_grid.ntheta())
     , cos_theta_(current_grid.ntheta())
-    ,
-
-    cache_density_profile_coefficients_(previous_level.levelCache().cacheDensityProfileCoefficients())
+    , cache_density_profile_coefficients_(previous_level.levelCache().cacheDensityProfileCoefficients())
     , coeff_alpha_(previous_level.levelCache().coeff_alpha().size() > 0 ? current_grid.nr() : 0)
     , coeff_beta_(previous_level.levelCache().coeff_beta().size() > 0 ? current_grid.nr() : 0)
-    ,
-
-    cache_domain_geometry_(previous_level.levelCache().cacheDomainGeometry())
+    , cache_domain_geometry_(previous_level.levelCache().cacheDomainGeometry())
     , arr_(previous_level.levelCache().arr().size() > 0 ? current_grid.numberOfNodes() : 0)
     , att_(previous_level.levelCache().att().size() > 0 ? current_grid.numberOfNodes() : 0)
     , art_(previous_level.levelCache().art().size() > 0 ? current_grid.numberOfNodes() : 0)
@@ -170,6 +140,15 @@ LevelCache::LevelCache(const Level& previous_level, const PolarGrid& current_gri
             }
         }
     }
+}
+
+const DensityProfileCoefficients& LevelCache::densityProfileCoefficients() const
+{
+    return density_profile_coefficients_;
+}
+const DomainGeometry& LevelCache::domainGeometry() const
+{
+    return domain_geometry_;
 }
 
 const std::vector<double>& LevelCache::sin_theta() const
