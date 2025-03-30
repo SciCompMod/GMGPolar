@@ -9,7 +9,7 @@ M. J. Kühn, C. Kruse, U. Rüde. Implicitly extrapolated geometric multigrid on 
 
 ## Obtaining the source code
 
-The GMGPolar Solver requires external libraries, specifically the sparse direct solver ``MUMPS``. This guide provides instructions to obtain the code and install the necessary dependencies.
+The GMGPolar Solver can run with or without the sparse direct solver ``MUMPS``, though using MUMPS is recommended for optimal performance. This guide provides instructions on obtaining the code and installing the necessary dependencies.
 
 ## Clone the GMGPolar Repository
 
@@ -58,6 +58,12 @@ With Spack set up, you can now install MUMPS. The following command installs ver
         scotch=false
         shared=true
 
+### Note on AVX / AVX-512 Compatibility
+If your system does not support AVX or AVX-512 instructions (e.g., on AMD processors), install MUMPS with the following command:
+
+    spack install mumps target=x86_64
+
+
 ## Step 3: Install Required Dependencies
 
 MUMPS relies on other packages like `Metis` for matrix ordering and `Likwid` for performance monitoring. You can install these dependencies using Spack as well:
@@ -100,7 +106,7 @@ the library, a binary is created called ``./build/gmgpolar``, it takes parameter
 
     ./build/gmgpolar
 
-    # For more details on the available parameters, see the scripts/run.sh script.
+    # For more details on the available parameters, see the scripts/tutorial/run.sh script.
   
 ## Issue tracker
 
@@ -159,6 +165,6 @@ by giving:
 - Removed the task-based approach, which did not scale well with increasing parallelization.
 - Reduced maximum usage by 61.5% by constructing symmetric matrices and utilizing the tridiagonal structure of smoother matrices.
 
-4) **Removed Features**
+4) **Updated Features**
 
-- Discontinued the in-house solver, now replaced by MUMPS for improved functionality.
+- Added a new LU decomposition solver, allowing users to choose between MUMPS and the in-house solver for greater flexibility and performance.

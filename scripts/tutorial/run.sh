@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Get the directory of the script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Set path to the GMGPolar executable
+GMGPOLAR_EXEC="${SCRIPT_DIR}/../../build/gmgpolar"
+
 # Verbosity level: 
 # 0 - No output 
 # 1 - Basic output 
@@ -118,4 +123,4 @@ else
     exit 1
 fi
 
-./../../build/gmgpolar --verbose $verbose --paraview $paraview --maxOpenMPThreads $maxOpenMPThreads --threadReductionFactor $threadReductionFactor --stencilDistributionMethod $stencilDistributionMethod --cacheDensityProfileCoefficients $cacheDensityProfileCoefficients --cacheDomainGeometry $cacheDomainGeometry --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --write_grid_file $write_grid_file --load_grid_file $load_grid_file --file_grid_radii "$file_grid_radii" --file_grid_angles "$file_grid_angles" --DirBC_Interior $DirBC_Interior --geometry $geometry --kappa_eps $kappa_eps --delta_e $delta_e --problem $problem --alpha_coeff $alpha_coeff --alpha_jump $alpha_jump --beta_coeff $beta_coeff --FMG $FMG --FMG_iterations $FMG_iterations --FMG_cycle $FMG_cycle --extrapolation $extrapolation --maxLevels $maxLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
+"$GMGPOLAR_EXEC" --verbose $verbose --paraview $paraview --maxOpenMPThreads $maxOpenMPThreads --threadReductionFactor $threadReductionFactor --stencilDistributionMethod $stencilDistributionMethod --cacheDensityProfileCoefficients $cacheDensityProfileCoefficients --cacheDomainGeometry $cacheDomainGeometry --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --write_grid_file $write_grid_file --load_grid_file $load_grid_file --file_grid_radii "$file_grid_radii" --file_grid_angles "$file_grid_angles" --DirBC_Interior $DirBC_Interior --geometry $geometry --kappa_eps $kappa_eps --delta_e $delta_e --problem $problem --alpha_coeff $alpha_coeff --alpha_jump $alpha_jump --beta_coeff $beta_coeff --FMG $FMG --FMG_iterations $FMG_iterations --FMG_cycle $FMG_cycle --extrapolation $extrapolation --maxLevels $maxLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
