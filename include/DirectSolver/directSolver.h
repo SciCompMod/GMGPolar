@@ -8,13 +8,16 @@ class Level;
 #include <vector>
 
 #include "../InputFunctions/domainGeometry.h"
+#include "../InputFunctions/densityProfileCoefficients.h"
 #include "../Level/level.h"
-#include "../LinearAlgebra/matrix.h"
+#include "../PolarGrid/polargrid.h"
+#include "../common/global_definitions.h"
 #include "../LinearAlgebra/vector.h"
 #include "../LinearAlgebra/vector_operations.h"
-#include "../PolarGrid/polargrid.h"
+#include "../LinearAlgebra/coo_matrix.h"
+#include "../LinearAlgebra/csr_matrix.h"
+#include "../LinearAlgebra/sparseLUSolver.h"
 #include "../Stencil/stencil.h"
-#include "../common/global_definitions.h"
 
 class DirectSolver
 {

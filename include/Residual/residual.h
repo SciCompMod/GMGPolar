@@ -14,7 +14,6 @@ class Level;
 #include "../InputFunctions/domainGeometry.h"
 #include "../InputFunctions/sourceTerm.h"
 #include "../Level/level.h"
-#include "../LinearAlgebra/matrix.h"
 #include "../LinearAlgebra/vector.h"
 #include "../LinearAlgebra/vector_operations.h"
 #include "../common/global_definitions.h"

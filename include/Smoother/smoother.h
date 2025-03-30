@@ -12,7 +12,7 @@ class Level;
 #include "../InputFunctions/domainGeometry.h"
 #include "../InputFunctions/sourceTerm.h"
 #include "../Level/level.h"
-#include "../LinearAlgebra/matrix.h"
+#include "../LinearAlgebra/coo_matrix.h"
 #include "../LinearAlgebra/csr_matrix.h"
 #include "../LinearAlgebra/sparseLUSolver.h"
 #include "../LinearAlgebra/symmetricTridiagonalSolver.h"

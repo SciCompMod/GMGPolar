@@ -2,6 +2,7 @@
 
 void GMGPolar::setup()
 {
+    LIKWID_START("Setup");
     auto start_setup = std::chrono::high_resolution_clock::now();
 
     resetTimings();
@@ -184,6 +185,7 @@ void GMGPolar::setup()
 
     auto end_setup = std::chrono::high_resolution_clock::now();
     t_setup_total += std::chrono::duration<double>(end_setup - start_setup).count();
+    LIKWID_STOP("Setup");
 }
 
 

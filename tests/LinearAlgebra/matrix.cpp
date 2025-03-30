@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "../../include/LinearAlgebra/matrix.h"
+#include "../../include/LinearAlgebra/coo_matrix.h"
 
 // Alias for readability
 using triplet = std::tuple<int, int, double>;

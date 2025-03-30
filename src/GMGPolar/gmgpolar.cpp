@@ -5,6 +5,9 @@
 GMGPolar::GMGPolar()
     : parser_()
 {
+    // Initialize LIKWID markers if enabled
+    LIKWID_REGISTER("Setup");
+    LIKWID_REGISTER("Solve");
     resetTimings();
     initializeGrid();
     initializeGeometry();
@@ -26,6 +29,8 @@ GMGPolar::GMGPolar(std::unique_ptr<const DomainGeometry> domain_geometry,
     , source_term_(std::move(source_term))
     , parser_()
 {
+    LIKWID_REGISTER("Setup");
+    LIKWID_REGISTER("Solve");
     resetTimings();
     initializeGrid();
     initializeGeometry();

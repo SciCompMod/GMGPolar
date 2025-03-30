@@ -2,9 +2,6 @@
 
 #include "../directSolver.h"
 
-#include "../../LinearAlgebra/csr_matrix.h"
-#include "../../LinearAlgebra/sparseLUSolver.h"
-
 class DirectSolverTakeCustomLU : public DirectSolver
 {
 public:

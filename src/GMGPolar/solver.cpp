@@ -4,6 +4,7 @@
 
 void GMGPolar::solve()
 {
+    LIKWID_START("Solve");
     auto start_solve = std::chrono::high_resolution_clock::now();
 
     /* ---------------------------- */
@@ -195,6 +196,7 @@ void GMGPolar::solve()
     auto end_solve = std::chrono::high_resolution_clock::now();
     t_solve_total += std::chrono::duration<double>(end_solve - start_solve).count();
     t_solve_total -= t_check_exact_error;
+    LIKWID_STOP("Solve");
 
     if (paraview_) {
         computeExactError(level, level.solution(), level.residual());

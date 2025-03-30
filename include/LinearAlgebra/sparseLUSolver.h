@@ -22,8 +22,6 @@
 #include "csr_matrix.h"
 #include "vector.h"
 
-#include "../common/equals.h"
-
 /* LU decomposition Solver (slower than MUMPS) */
 /* Assumes that all diagonal elements are nonzero. */
 template <typename T>

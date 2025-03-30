@@ -82,8 +82,7 @@ enum class BetaCoeff
 /* ---------------------------- */
 /* Mumps - Constant Definitions */
 /* ---------------------------- */
-// #ifdef GMGPOLAR_USE_MUMPS
-
+#ifdef GMGPOLAR_USE_MUMPS
     /* Mumps macro s.t. indices match documentation */
     #define ICNTL(I) icntl[(I) - 1]
     #define CNTL(I) cntl[(I) - 1]
@@ -112,7 +111,7 @@ enum class BetaCoeff
     #define SYM_UNSYMMETRIC 0
     #define SYM_POSITIVE_DEFINITE 1
     #define SYM_GENERAL_SYMMETRIC 2
-//#endif
+#endif
 
 // --------------------------------------- //
 // Function-like macros for LIKWID markers //
