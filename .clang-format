@@ -1,13 +1,13 @@
 BasedOnStyle: LLVM
 IndentWidth: 4
-SortIncludes:    false
-ColumnLimit:     120
+SortIncludes: false
+ColumnLimit: 120
 AlignTrailingComments: false
 AccessModifierOffset: -4
 AlignConsecutiveAssignments: true
-ReflowComments:  false
+ReflowComments: false
 BraceWrapping:   
-  AfterClass:    true
+  AfterClass: true
   AfterFunction: true
   BeforeElse: true
   BeforeCatch: true

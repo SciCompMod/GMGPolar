@@ -1,121 +1,130 @@
-cmake_minimum_required(VERSION 3.16.3)
-
-project(GMGPolar VERSION 1.0.0)
+cmake_minimum_required(VERSION 3.12)
+project(GMGPolar VERSION 2.0.0 LANGUAGES CXX)
 
 option(GMGPOLAR_BUILD_TESTS "Build GMGPolar unit tests." ON)
-option(GMGPOLAR_USE_MUMPS "Use MUMPS to compute matrix factorizations." OFF)
 option(GMGPOLAR_USE_LIKWID "Use LIKWID to measure code (regions)." OFF)
+option(GMGPOLAR_USE_MUMPS "Use MUMPS to solve linear systems." OFF)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-set(CMAKE_CXX_FLAGS "")
-set(CMAKE_LINKER_FLAGS "")
-
-add_subdirectory(src)
-
-# code coverage analysis
-# Note: this only works under linux and with make
-# Ninja creates different directory names which do not work together with this scrupt
-# as STREQUAL is case-sensitive https://github.com/TriBITSPub/TriBITS/issues/131, also allow DEBUG as accepted input
-option(GMGPOLAR_TEST_COVERAGE "Enable GCov coverage analysis (adds a 'coverage' target)" OFF)
-
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "DEBUG")
-    if(GMGPOLAR_TEST_COVERAGE)
-        message(STATUS "Coverage enabled")
-        include(CodeCoverage)
-        append_coverage_compiler_flags()
-        setup_target_for_coverage_lcov(
-            NAME coverage
-            EXECUTABLE tests/gmgpolar_tests
-            EXCLUDE "${CMAKE_SOURCE_DIR}/tests*" "${CMAKE_SOURCE_DIR}/src/test_cases*" "${CMAKE_BINARY_DIR}/*" "/usr*"
-        )
-    endif()
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
 endif()
 
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -pedantic -Wno-unused")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -mtune=generic")
 
-add_library(GMGPolar ${SOURCES_SRC})
+# # Mumps: Sparse Matrix Solver
+# set(MUMPS_PREFIX_PATH "~/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/mumps-5.6.2-m4xrhc4mshzrxmgptzbpult3nbf6qrzk")
+# include_directories(${MUMPS_PREFIX_PATH}/include)
+# link_directories(${MUMPS_PREFIX_PATH}/lib)
 
-add_executable(gmgpolar_simulation ./src/main.cpp)
+# # Metis: Matrix reordering for Mumps
+# set(METIS_PREFIX_PATH "~/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/metis-5.1.0-bgoncx22w55soviybggl5ydjakvkm34v")
+# include_directories(${METIS_PREFIX_PATH}/include)
+# link_directories(${METIS_PREFIX_PATH}/lib)
 
-configure_file(${CMAKE_SOURCE_DIR}/include/config_internal.h.in ${CMAKE_SOURCE_DIR}/include/config_internal.h)
+# # Likwid: Performance monitoring
+# set(LIKWID_PREFIX_PATH "~/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/likwid-5.3.0-6mvx2snsqnamuyhaqspd6gxkfuaso36g")
+# include_directories(${LIKWID_PREFIX_PATH}/include)
+# link_directories(${LIKWID_PREFIX_PATH}/lib)
 
-target_include_directories(gmgpolar_simulation PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/test_cases )
-target_include_directories(GMGPolar PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/test_cases )
+# Include directories for the project
+include_directories(include)
 
+# 1. Create a library target for the PolarGrid module
+file(GLOB_RECURSE POLAR_GRID_SOURCES "src/PolarGrid/*.cpp")
+add_library(PolarGrid STATIC ${POLAR_GRID_SOURCES})
+target_include_directories(PolarGrid PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/PolarGrid)
+
+# 2. Create a library target for the InputFunctions module
+file(GLOB_RECURSE INPUT_FUNCTIONS_SOURCES
+    "src/InputFunctions/DensityProfileCoefficients/*.cpp"
+    "src/InputFunctions/DomainGeometry/*.cpp"
+    "src/InputFunctions/ExactSolution/*.cpp"
+    "src/InputFunctions/BoundaryConditions/*.cpp"
+    "src/InputFunctions/SourceTerms/*.cpp"
+)
+add_library(InputFunctions STATIC ${INPUT_FUNCTIONS_SOURCES})
+target_include_directories(InputFunctions PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/InputFunctions)
+
+# 3. Collect all the common source files for GMGPolar into a library
+file(GLOB_RECURSE GMG_POLAR_SOURCES "src/GMGPolar/*.cpp")
+file(GLOB_RECURSE MULTIGRID_METHODS_SOURCES "src/GMGPolar/MultigridMethods/*.cpp")
+file(GLOB_RECURSE LEVEL_SOURCES "src/Level/*.cpp")
+file(GLOB_RECURSE STENCIL_SOURCES "src/Stencil/*.cpp")
+file(GLOB_RECURSE INTERPOLATION_SOURCES "src/Interpolation/*.cpp")
+file(GLOB_RECURSE DIRECT_SOLVER_SOURCES "src/DirectSolver/*.cpp" "src/DirectSolverGive/*.cpp" "src/DirectSolverTake/*.cpp" "src/DirectSolverGiveCustomLU/*.cpp" "src/DirectSolverTakeCustomLU/*.cpp")
+file(GLOB_RECURSE RESIDUAL_SOURCES "src/Residual/*.cpp" "src/Residual/ResidualGive/*.cpp" "src/Residual/ResidualTake/*.cpp")
+file(GLOB_RECURSE SMOOTHER_SOURCES "src/Smoother/*.cpp" "src/SmootherGive/*.cpp" "src/SmootherTake/*.cpp")
+file(GLOB_RECURSE EXTRAPOLATED_SMOOTHER_SOURCES "src/ExtrapolatedSmoother/*.cpp" "src/ExtrapolatedSmoother/ExtrapolatedSmootherGive/*.cpp" "src/ExtrapolatedSmoother/ExtrapolatedSmootherTake/*.cpp")
+
+# 4. Create the GMGPolarLib library and link PolarGrid and InputFunctions
+add_library(GMGPolarLib STATIC
+    ${GMG_POLAR_SOURCES}
+    ${MULTIGRID_METHODS_SOURCES}
+    ${LEVEL_SOURCES}
+    ${STENCIL_SOURCES}
+    ${INTERPOLATION_SOURCES}
+    ${DIRECT_SOLVER_SOURCES}
+    ${RESIDUAL_SOURCES}
+    ${SMOOTHER_SOURCES}
+    ${EXTRAPOLATED_SMOOTHER_SOURCES}
+)
+# Link PolarGrid and InputFunctions to GMGPolarLib
+target_link_libraries(GMGPolarLib PUBLIC PolarGrid InputFunctions)
+
+# Link Likwid to GMGPolarLib
 if(GMGPOLAR_USE_LIKWID)
-
-    find_package(LIKWID REQUIRED)
-
-    target_include_directories(GMGPolar PUBLIC ${LIKWID_INCLUDE_DIRS})
-    target_link_libraries(GMGPolar PUBLIC ${LIKWID_LIBRARIES})
-    target_compile_definitions(GMGPolar PUBLIC "-DLIKWID_PERFMON")
-
+    target_link_libraries(GMGPolarLib PUBLIC likwid)
+    target_compile_definitions(GMGPolarLib PUBLIC "-DLIKWID_PERFMON")
+    add_compile_definitions(GMGPOLAR_USE_LIKWID)
 endif()
 
-
-
+# Link Mumps to GMGPolarLib
 if(GMGPOLAR_USE_MUMPS)
-
-    set(INC_DIRS
-        /home/kueh_mj/.spack/rev.23.05/install/linux-rocky8-zen2/gcc-10.4.0/mumps-5.4.1-fftqkl/include
-        /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/metis-5.1.0-akhgsf/include
-    )
-
-    set(LIB_DIRS
-        /home/kueh_mj/.spack/rev.23.05/install/linux-rocky8-zen2/gcc-10.4.0/mumps-5.4.1-fftqkl/lib
-        /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/metis-5.1.0-akhgsf/lib
-    )
-
-    include_directories(
-        ${INC_DIRS}
-    )
-
-    target_link_directories(
-        GMGPolar
-        PUBLIC
-        ${LIB_DIRS}
-    )
-
-    set(LIBS
-        mpiseq
-        dmumps
+    set(MUMPS_LIBRARIES
         mumps_common
+        smumps
+        dmumps
+        mpiseq
         metis
     )
-
-    target_link_libraries(
-        GMGPolar
-        PUBLIC
-        ${LIBS}
-    ) 
+    target_link_libraries(GMGPolarLib PUBLIC ${MUMPS_LIBRARIES})
+    add_compile_definitions(GMGPOLAR_USE_MUMPS)
 endif()
 
-
-find_package(OpenMP)
-
-#currently works on GNU compiler
-if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 7))
-
-    string(APPEND CMAKE_CXX_FLAGS " -O2 -Wall -MMD -MP -Wwrite-strings")
-    string(APPEND CMAKE_LINKER_FLAGS " -O2 -Wall -MMD -MP -Wwrite-strings")
-
-    if(OPENMP_FOUND)
-        string(APPEND CMAKE_CXX_FLAGS " -fopenmp")
-        string(APPEND CMAKE_LINKER_FLAGS " -fopenmp")
-        
-    else()
-        message(FATAL_ERROR "OpenMP needed")
-    endif()
-else()
-    message(FATAL_ERROR "Please use GNU compiler or change CMakeLists manually")
+# Add OpenMP flags if available and link to GMGPolarLib
+find_package(OpenMP REQUIRED)
+if(OpenMP_CXX_FOUND)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    target_link_libraries(GMGPolarLib PUBLIC OpenMP::OpenMP_CXX)
 endif()
 
+# 5. Add the main executable target (gmgpolar)
+set(MAIN_SOURCE "src/main.cpp")
+add_executable(gmgpolar ${MAIN_SOURCE})
 
-target_link_libraries(gmgpolar_simulation PRIVATE GMGPolar)
+# 6. Add another executable target (convergence_order)
+set(CONVERGENCE_ORDER_SOURCE "src/convergence_order.cpp")
+add_executable(convergence_order ${CONVERGENCE_ORDER_SOURCE})
 
+set(WEAK_SCALING_SOURCE "src/weak_scaling.cpp")
+add_executable(weak_scaling ${WEAK_SCALING_SOURCE})
 
-include(thirdparty/CMakeLists.txt)
-add_subdirectory(tests)
+set(STRONG_SCALING_SOURCE "src/strong_scaling.cpp")
+add_executable(strong_scaling ${STRONG_SCALING_SOURCE})
 
+# 7. Link GMGPolarLib (which now includes PolarGrid and InputFunctions) to both executables
+target_link_libraries(gmgpolar PRIVATE GMGPolarLib)
+target_link_libraries(convergence_order PRIVATE GMGPolarLib)
+target_link_libraries(weak_scaling PRIVATE GMGPolarLib)
+target_link_libraries(strong_scaling PRIVATE GMGPolarLib)
+
+# 9. Enable testing and include other directories
+if(GMGPOLAR_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(third-party)
+    add_subdirectory(tests)
+endif()
