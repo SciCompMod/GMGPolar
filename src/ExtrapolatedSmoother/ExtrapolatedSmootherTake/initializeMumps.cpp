@@ -3,7 +3,7 @@
 #ifdef GMGPOLAR_USE_MUMPS
 
 void ExtrapolatedSmootherTake::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver,
-                                                    SparseMatrixCOO<double>& solver_matrix)
+                                                     SparseMatrixCOO<double>& solver_matrix)
 {
     /* 
      * MUMPS (a parallel direct solver) uses 1-based indexing, 

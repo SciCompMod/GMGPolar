@@ -36,9 +36,8 @@ public:
 
     explicit SparseMatrixCSR(int rows, int columns, std::function<int(int)> nz_per_row);
     explicit SparseMatrixCSR(int rows, int columns, const std::vector<triplet_type>& entries);
-    explicit SparseMatrixCSR(int rows, int columns, 
-        const std::vector<T>& values, const std::vector<int>& column_indices, const std::vector<int>& row_start_indices
-    );
+    explicit SparseMatrixCSR(int rows, int columns, const std::vector<T>& values,
+                             const std::vector<int>& column_indices, const std::vector<int>& row_start_indices);
 
     SparseMatrixCSR& operator=(const SparseMatrixCSR& other);
     SparseMatrixCSR& operator=(SparseMatrixCSR&& other) noexcept;
@@ -70,8 +69,6 @@ private:
     std::unique_ptr<int[]> column_indices_;
     std::unique_ptr<int[]> row_start_indices_;
 };
-
-
 
 template <typename U>
 std::ostream& operator<<(std::ostream& stream, const SparseMatrixCSR<U>& matrix)
@@ -157,15 +154,15 @@ SparseMatrixCSR<T>::SparseMatrixCSR(SparseMatrixCSR&& other) noexcept
 template <typename T>
 SparseMatrixCSR<T>& SparseMatrixCSR<T>::operator=(SparseMatrixCSR&& other) noexcept
 {
-    rows_               = other.rows_;
-    columns_            = other.columns_;
-    nnz_                = other.nnz_;
-    values_             = std::move(other.values_);
-    column_indices_     = std::move(other.column_indices_);
-    row_start_indices_  = std::move(other.row_start_indices_);
-    other.nnz_          = 0;
-    other.rows_         = 0;
-    other.columns_      = 0;
+    rows_              = other.rows_;
+    columns_           = other.columns_;
+    nnz_               = other.nnz_;
+    values_            = std::move(other.values_);
+    column_indices_    = std::move(other.column_indices_);
+    row_start_indices_ = std::move(other.row_start_indices_);
+    other.nnz_         = 0;
+    other.rows_        = 0;
+    other.columns_     = 0;
     return *this;
 }
 
@@ -178,55 +175,54 @@ SparseMatrixCSR<T>::SparseMatrixCSR(int rows, int columns, std::function<int(int
     assert(rows >= 0);
     assert(columns >= 0);
     nnz_ = 0;
-    for (int i = 0; i < rows; i++){
+    for (int i = 0; i < rows; i++) {
         row_start_indices_[i] = nnz_;
         nnz_ += nz_per_row(i);
     }
     row_start_indices_[rows] = nnz_;
-    values_ = std::make_unique<T[]>(nnz_);
-    column_indices_ = std::make_unique<int[]>(nnz_);
+    values_                  = std::make_unique<T[]>(nnz_);
+    column_indices_          = std::make_unique<int[]>(nnz_);
 }
 
-template<typename T>
-SparseMatrixCSR<T>::SparseMatrixCSR(int rows, int columns, const std::vector<triplet_type>& entries):
-    // entries: row_idx, col_idx, value
-    rows_(rows),
-    columns_(columns),
-    nnz_(entries.size()),
-    values_(std::make_unique<T[]>(nnz_)),
-    column_indices_(std::make_unique<int[]>(nnz_)),
-    row_start_indices_(std::make_unique<int[]>(rows_ + 1))
+template <typename T>
+SparseMatrixCSR<T>::SparseMatrixCSR(int rows, int columns, const std::vector<triplet_type>& entries)
+    : // entries: row_idx, col_idx, value
+    rows_(rows)
+    , columns_(columns)
+    , nnz_(entries.size())
+    , values_(std::make_unique<T[]>(nnz_))
+    , column_indices_(std::make_unique<int[]>(nnz_))
+    , row_start_indices_(std::make_unique<int[]>(rows_ + 1))
 {
     assert(rows >= 0);
     assert(columns >= 0);
     // fill values and column indexes
-    for (int i = 0; i < nnz_; i++){
+    for (int i = 0; i < nnz_; i++) {
         assert(0 <= std::get<0>(entries[i]) && std::get<0>(entries[i]) < rows);
-        values_[i] = std::get<2>(entries[i]);
+        values_[i]         = std::get<2>(entries[i]);
         column_indices_[i] = std::get<1>(entries[i]);
         assert(0 <= column_indices_[i] && column_indices_[i] < columns);
     }
     //fill row indexes
-    int count = 0;
+    int count             = 0;
     row_start_indices_[0] = 0;
-    for (int r = 0; r < rows; r++){
-        while (count < nnz_ && std::get<0>(entries[count]) == r) count++;
+    for (int r = 0; r < rows; r++) {
+        while (count < nnz_ && std::get<0>(entries[count]) == r)
+            count++;
         row_start_indices_[r + 1] = count;
     }
     assert(row_start_indices_[rows] == nnz_);
 }
 
 template <typename T>
-SparseMatrixCSR<T>::SparseMatrixCSR(
-    int rows, int columns, 
-    const std::vector<T>& values, 
-    const std::vector<int>& column_indices, 
-    const std::vector<int>& row_start_indices
-) 
-    : rows_(rows), columns_(columns), nnz_(values.size()), 
-      values_(std::make_unique<T[]>(nnz_)), 
-      column_indices_(std::make_unique<int[]>(nnz_)), 
-      row_start_indices_(std::make_unique<int[]>(rows_ + 1)) 
+SparseMatrixCSR<T>::SparseMatrixCSR(int rows, int columns, const std::vector<T>& values,
+                                    const std::vector<int>& column_indices, const std::vector<int>& row_start_indices)
+    : rows_(rows)
+    , columns_(columns)
+    , nnz_(values.size())
+    , values_(std::make_unique<T[]>(nnz_))
+    , column_indices_(std::make_unique<int[]>(nnz_))
+    , row_start_indices_(std::make_unique<int[]>(rows_ + 1))
 {
     assert(rows >= 0);
     assert(columns >= 0);
@@ -238,7 +234,6 @@ SparseMatrixCSR<T>::SparseMatrixCSR(
     std::copy(column_indices.begin(), column_indices.end(), column_indices_.get());
     std::copy(row_start_indices.begin(), row_start_indices.end(), row_start_indices_.get());
 }
-
 
 template <typename T>
 int SparseMatrixCSR<T>::rows() const
@@ -268,44 +263,51 @@ int SparseMatrixCSR<T>::row_nz_size(int row) const
 }
 
 template <typename T>
-const int& SparseMatrixCSR<T>::row_nz_index(int row, int nz_index) const {
+const int& SparseMatrixCSR<T>::row_nz_index(int row, int nz_index) const
+{
     assert(row >= 0 && row < rows_);
     assert(nz_index >= 0 && nz_index < row_nz_size(row));
     return column_indices_[row_start_indices_[row] + nz_index];
 }
 
 template <typename T>
-int& SparseMatrixCSR<T>::row_nz_index(int row, int nz_index) {
+int& SparseMatrixCSR<T>::row_nz_index(int row, int nz_index)
+{
     assert(row >= 0 && row < rows_);
     assert(nz_index >= 0 && nz_index < row_nz_size(row));
     return column_indices_[row_start_indices_[row] + nz_index];
 }
 
 template <typename T>
-const T& SparseMatrixCSR<T>::row_nz_entry(int row, int nz_index) const {
+const T& SparseMatrixCSR<T>::row_nz_entry(int row, int nz_index) const
+{
     assert(row >= 0 && row < rows_);
     assert(nz_index >= 0 && nz_index < row_nz_size(row));
     return values_[row_start_indices_[row] + nz_index];
 }
 
 template <typename T>
-T& SparseMatrixCSR<T>::row_nz_entry(int row, int nz_index) {
+T& SparseMatrixCSR<T>::row_nz_entry(int row, int nz_index)
+{
     assert(row >= 0 && row < rows_);
     assert(nz_index >= 0 && nz_index < row_nz_size(row));
     return values_[row_start_indices_[row] + nz_index];
 }
 
 template <typename T>
-T* SparseMatrixCSR<T>::values_data() const {
+T* SparseMatrixCSR<T>::values_data() const
+{
     return values_.get();
 }
 
 template <typename T>
-int* SparseMatrixCSR<T>::column_indices_data() const {
+int* SparseMatrixCSR<T>::column_indices_data() const
+{
     return column_indices_.get();
 }
 
 template <typename T>
-int* SparseMatrixCSR<T>::row_start_indices_data() const {
+int* SparseMatrixCSR<T>::row_start_indices_data() const
+{
     return row_start_indices_.get();
 }

@@ -93,16 +93,16 @@ void DirectSolverTake::applySymmetryShift(Vector<double>& x) const
         applySymmetryShiftOuterBoundary(x);
     }
     else {
-#pragma omp parallel sections
+    #pragma omp parallel sections
         {
-#pragma omp section
+    #pragma omp section
             {
                 if (DirBC_Interior_) {
                     applySymmetryShiftInnerBoundary(x);
                 }
             }
 
-#pragma omp section
+    #pragma omp section
             {
                 applySymmetryShiftOuterBoundary(x);
             }

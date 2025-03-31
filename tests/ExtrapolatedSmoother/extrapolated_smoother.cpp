@@ -194,7 +194,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior)
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
     DirectSolverGiveCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                               maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
@@ -279,7 +279,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior)
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
     DirectSolverGiveCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                               maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
@@ -364,7 +364,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin)
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
     DirectSolverGiveCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                               maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
@@ -449,7 +449,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin)
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
     DirectSolverGiveCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                               maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
@@ -533,7 +533,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior_Smal
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
     DirectSolverGiveCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                               maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
@@ -617,7 +617,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior_Smalle
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
     DirectSolverGiveCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                               maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
@@ -701,7 +701,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin_Smalle
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
     DirectSolverGiveCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                               maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
@@ -785,7 +785,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin_Smallest
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
     DirectSolverGiveCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                               maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
@@ -872,7 +872,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior)
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
     DirectSolverTakeCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                               maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualTake residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
@@ -957,7 +957,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior)
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
     DirectSolverTakeCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                               maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualTake residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
@@ -1042,7 +1042,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin)
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
     DirectSolverTakeCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                               maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualTake residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
@@ -1127,7 +1127,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin)
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
     DirectSolverTakeCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                               maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualTake residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
@@ -1211,7 +1211,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior_
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
     DirectSolverTakeCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                               maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualTake residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
@@ -1295,7 +1295,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior_Sm
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
     DirectSolverTakeCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                               maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualTake residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
@@ -1379,7 +1379,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin_Sm
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
     DirectSolverTakeCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                               maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualTake residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
@@ -1463,7 +1463,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin_Smal
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
     DirectSolverTakeCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                               maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualTake residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,

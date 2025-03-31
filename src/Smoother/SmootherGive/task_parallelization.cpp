@@ -188,9 +188,9 @@ void SmootherGive::smoothingTaskLoop(Vector<double>& x, const Vector<double>& rh
                     }
                 }
 
-                #pragma omp task depend(in : radial_black_Asc1) depend(out : radial_black_Asc2)
+#pragma omp task depend(in : radial_black_Asc1) depend(out : radial_black_Asc2)
                 {
-                    #pragma omp taskloop
+#pragma omp taskloop
                     for (int radial_task = 3; radial_task < num_radial_tasks; radial_task += 4) {
                         int i_theta = radial_task;
                         applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);

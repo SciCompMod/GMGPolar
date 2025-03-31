@@ -317,18 +317,16 @@ TEST(SparseMatrixCSR, value_construct_modify)
     EXPECT_DOUBLE_EQ(m.row_nz_entry(3, 0), dense_values[3][m.row_nz_index(3, 0)]);
 }
 
-
 TEST(SparseMatrixCSR, lu_solver_3x3)
 {
     using triplet = SparseMatrixCSR<double>::triplet_type;
 
     SparseMatrixCSR<double> matrix(3, 3,
-        {triplet{0, 0, 2.0}, triplet{0, 2, -10.0}, 
-        triplet{1, 0, -1.0}, triplet{1, 1, 2.0}, triplet{1, 2, -1.0},
-        triplet{2, 0, -7.0}, triplet{2, 2, 2.0}});
+                                   {triplet{0, 0, 2.0}, triplet{0, 2, -10.0}, triplet{1, 0, -1.0}, triplet{1, 1, 2.0},
+                                    triplet{1, 2, -1.0}, triplet{2, 0, -7.0}, triplet{2, 2, 2.0}});
 
-    Vector<double> rhs = {1.0, -5, 3.0};
-    Vector<double> exact_solution = {-16.0/33.0, -125.0/44.0, -13.0/66.0};
+    Vector<double> rhs            = {1.0, -5, 3.0};
+    Vector<double> exact_solution = {-16.0 / 33.0, -125.0 / 44.0, -13.0 / 66.0};
 
     SparseLUSolver solver(matrix);
     solver.solveInPlace(rhs);
@@ -338,21 +336,20 @@ TEST(SparseMatrixCSR, lu_solver_3x3)
     EXPECT_DOUBLE_EQ(rhs[2], exact_solution[2]);
 }
 
-
 TEST(SparseMatrixCSR, lu_solver_5x5)
 {
     using triplet = SparseMatrixCSR<double>::triplet_type;
 
     SparseMatrixCSR<double> matrix(5, 5,
-        {triplet{0, 0, 2.0}, triplet{0, 3, 7.0}, triplet{0, 4, 3.0}, 
-        triplet{1, 0, -1.0}, triplet{1, 1, -5.0}, triplet{1, 2, -1.0}, triplet{1, 3, 5.0},triplet{1, 4, 6.0},
-        triplet{2, 1, -7.0},  triplet{2, 2, 1.0},triplet{2, 3, 2.0}, triplet{2, 4, -4.0},
-        triplet{3, 2, -4.0}, triplet{3, 3, 6.0}, triplet{3, 4, 9.0},
-        triplet{4, 0, 2.0}, triplet{4, 1, 4.0}, triplet{4, 3, -4.0}, triplet{4, 4, 9.0}}
-    );
+                                   {triplet{0, 0, 2.0}, triplet{0, 3, 7.0}, triplet{0, 4, 3.0}, triplet{1, 0, -1.0},
+                                    triplet{1, 1, -5.0}, triplet{1, 2, -1.0}, triplet{1, 3, 5.0}, triplet{1, 4, 6.0},
+                                    triplet{2, 1, -7.0}, triplet{2, 2, 1.0}, triplet{2, 3, 2.0}, triplet{2, 4, -4.0},
+                                    triplet{3, 2, -4.0}, triplet{3, 3, 6.0}, triplet{3, 4, 9.0}, triplet{4, 0, 2.0},
+                                    triplet{4, 1, 4.0}, triplet{4, 3, -4.0}, triplet{4, 4, 9.0}});
 
-    Vector<double> rhs = {1.0, -5, 3.0, 7.0, 2.0};
-    Vector<double> exact_solution = {2792.0/567.0, -589.0/648.0, -7615.0/1512.0, -1013.0/1134.0, -109.0/126.0};
+    Vector<double> rhs            = {1.0, -5, 3.0, 7.0, 2.0};
+    Vector<double> exact_solution = {2792.0 / 567.0, -589.0 / 648.0, -7615.0 / 1512.0, -1013.0 / 1134.0,
+                                     -109.0 / 126.0};
 
     SparseLUSolver solver(matrix);
     solver.solveInPlace(rhs);
@@ -363,7 +360,6 @@ TEST(SparseMatrixCSR, lu_solver_5x5)
     EXPECT_DOUBLE_EQ(rhs[3], exact_solution[3]);
     EXPECT_DOUBLE_EQ(rhs[4], exact_solution[4]);
 }
-
 
 int main(int argc, char* argv[])
 {

@@ -47,12 +47,12 @@ LevelCache::LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& 
                 const double index     = grid.index(i_r, i_theta);
 
                 double arr, att, art, detDF;
-                compute_jacobian_elements(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha,
-                                      arr, att, art, detDF);
+                compute_jacobian_elements(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art,
+                                          detDF);
                 detDF_[index] = detDF;
-                arr_[index] = arr;
-                att_[index] = att;
-                art_[index] = art;
+                arr_[index]   = arr;
+                att_[index]   = att;
+                art_[index]   = art;
             }
         }
 
@@ -74,12 +74,12 @@ LevelCache::LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& 
                 }
 
                 double arr, att, art, detDF;
-                compute_jacobian_elements(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha,
-                                      arr, att, art, detDF);
+                compute_jacobian_elements(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art,
+                                          detDF);
                 detDF_[index] = detDF;
-                arr_[index] = arr;
-                att_[index] = att;
-                art_[index] = art;
+                arr_[index]   = arr;
+                att_[index]   = att;
+                art_[index]   = art;
             }
         }
     }

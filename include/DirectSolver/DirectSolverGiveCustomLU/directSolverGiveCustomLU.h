@@ -6,9 +6,9 @@ class DirectSolverGiveCustomLU : public DirectSolver
 {
 public:
     explicit DirectSolverGiveCustomLU(const PolarGrid& grid, const LevelCache& level_cache,
-                              const DomainGeometry& domain_geometry,
-                              const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior,
-                              int num_omp_threads);
+                                      const DomainGeometry& domain_geometry,
+                                      const DensityProfileCoefficients& density_profile_coefficients,
+                                      bool DirBC_Interior, int num_omp_threads);
 
     ~DirectSolverGiveCustomLU() override;
     // Note: The rhs (right-hand side) vector gets overwritten with the solution.

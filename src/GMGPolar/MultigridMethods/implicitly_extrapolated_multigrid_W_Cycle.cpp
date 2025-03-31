@@ -77,7 +77,7 @@ void GMGPolar::implicitlyExtrapolatedMultigrid_W_Cycle(const int level_depth, Ve
         // f_{l-1} - A_{l-1}* Inject(u_l)
         injection(level_depth, next_level.solution(), solution);
         next_level.computeResidual(next_level.residual(), next_level.rhs(), next_level.solution());
-        
+
         // res_ex = 4/3 * P_ex^T (f_l - A_l*u_l) - 1/3 * (f_{l-1} - A_{l-1}* Inject(u_l))
         linear_combination(next_level.error_correction(), 4.0 / 3.0, next_level.residual(), -1.0 / 3.0);
 

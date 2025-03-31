@@ -22,8 +22,7 @@ ExtrapolatedSmootherGive::~ExtrapolatedSmootherGive()
 #endif
 }
 
-void ExtrapolatedSmootherGive::extrapolatedSmoothing(Vector<double>& x, const Vector<double>& rhs,
-                                                            Vector<double>& temp)
+void ExtrapolatedSmootherGive::extrapolatedSmoothing(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
 {
     extrapolatedSmoothingForLoop(x, rhs, temp); /* This is the fastest option */
     // extrapolatedSmoothingTaskLoop(x, rhs, temp);

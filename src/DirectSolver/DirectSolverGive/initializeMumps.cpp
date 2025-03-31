@@ -85,7 +85,7 @@ void DirectSolverGive::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, Spars
     // CNTL(6) Doesn't exist
     mumps_solver.CNTL(7) = 0.0; // Defines the precision of the dropping parameter used during BLR compression
     // CNTL(8-15) Don't exist
-    
+
     mumps_solver.job = JOB_ANALYSIS_AND_FACTORIZATION;
     assert(solver_matrix.rows() == solver_matrix.columns());
     mumps_solver.n   = solver_matrix.rows();

@@ -92,13 +92,13 @@ TEST(DirectSolverTestNoMumps, directSolver_DirBC_Interior)
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, false);
 
     DirectSolverTakeCustomLU directSolverGive_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients,
-                                            DirBC_Interior, maxOpenMPThreads);
+                                                       DirBC_Interior, maxOpenMPThreads);
     DirectSolverGiveCustomLU directSolverTake_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients,
-                                            DirBC_Interior, maxOpenMPThreads);
+                                                       DirBC_Interior, maxOpenMPThreads);
 
     Vector<double> rhs = generate_random_sample_data(level.grid(), 69);
 
@@ -147,13 +147,13 @@ TEST(DirectSolverTestNoMumps, directSolver_AcrossOrigin)
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverGiveCustomLU directSolverGive_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients,
-                                            DirBC_Interior, maxOpenMPThreads);
+                                                       DirBC_Interior, maxOpenMPThreads);
     DirectSolverTakeCustomLU directSolverTake_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients,
-                                            DirBC_Interior, maxOpenMPThreads);
+                                                       DirBC_Interior, maxOpenMPThreads);
 
     Vector<double> rhs = generate_random_sample_data(level.grid(), 69);
 
@@ -203,13 +203,13 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, SequentialDirectSolverDirBC_Inter
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverGiveCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -247,13 +247,13 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, ParallelDirectSolverDirBC_Interio
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverGiveCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -291,13 +291,13 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, SequentialDirectSolverAcrossOrigi
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverGiveCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -335,13 +335,13 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, ParallelDirectSolverAcrossOrigin_
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverGiveCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -385,13 +385,13 @@ TEST(DirectSolverTestNoMumps_ShafranovGeometry, DirectSolverDirBC_Interior_Shafr
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverGiveCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -431,13 +431,13 @@ TEST(DirectSolverTestNoMumps_ShafranovGeometry, DirectSolverAcrossOrigin_Shafran
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverGiveCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -482,13 +482,13 @@ TEST(DirectSolverTestNoMumps_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGe
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverGiveCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -529,13 +529,13 @@ TEST(DirectSolverTestNoMumps_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeom
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverGiveCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -576,13 +576,13 @@ TEST(DirectSolverTestNoMumps_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGe
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverGiveCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -619,13 +619,13 @@ TEST(DirectSolverTestNoMumps_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeom
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverGiveCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -644,16 +644,16 @@ TEST(DirectSolverTestNoMumps_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeom
 TEST(DirectSolverTestNoMumps_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_CircularGeometry)
 {
     std::vector<double> radii  = {1e-5,          1.441 * 1e-5,
-                                3.8833 * 1e-5, 8.7666 * 1e-5,
-                                1.8533 * 1e-4, 3.806 * 1e-4,
-                                7.713 * 1e-4,  1.55265 * 1e-3,
-                                3.1153 * 1e-3, 6.2406 * 1e-3,
-                                0.01249125,    0.0249925,
-                                0.049995,      0.1,
-                                0.2,           0.25,
-                                0.5,           0.8,
-                                0.9,           0.95,
-                                1.2,           1.3};
+                                  3.8833 * 1e-5, 8.7666 * 1e-5,
+                                  1.8533 * 1e-4, 3.806 * 1e-4,
+                                  7.713 * 1e-4,  1.55265 * 1e-3,
+                                  3.1153 * 1e-3, 6.2406 * 1e-3,
+                                  0.01249125,    0.0249925,
+                                  0.049995,      0.1,
+                                  0.2,           0.25,
+                                  0.5,           0.8,
+                                  0.9,           0.95,
+                                  1.2,           1.3};
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
@@ -675,13 +675,13 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, DirectSolverAcrossOriginHigherPre
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverGiveCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -719,13 +719,13 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, DirectSolverAcrossOriginHigherPre
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverGiveCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -764,13 +764,13 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, SequentialDirectSolverDirBC_
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverTakeCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -808,13 +808,13 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, ParallelDirectSolverDirBC_In
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverTakeCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -852,13 +852,13 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, SequentialDirectSolverAcross
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverTakeCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -896,13 +896,13 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, ParallelDirectSolverAcrossOr
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverTakeCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -946,13 +946,13 @@ TEST(DirectSolverTakeCustomLUTest_ShafranovGeometry, DirectSolverDirBC_Interior_
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverTakeCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -992,13 +992,13 @@ TEST(DirectSolverTakeCustomLUTest_ShafranovGeometry, DirectSolverAcrossOrigin_Sh
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverTakeCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -1043,13 +1043,13 @@ TEST(DirectSolverTakeCustomLUTest_CzarnyGeometry, DirectSolverDirBC_Interior_Cza
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverTakeCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -1090,13 +1090,13 @@ TEST(DirectSolverTakeCustomLUTest_CzarnyGeometry, DirectSolverAcrossOrigin_Czarn
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverTakeCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -1137,13 +1137,13 @@ TEST(DirectSolverTakeCustomLUTest_CulhamGeometry, DirectSolverDirBC_Interior_Cul
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverTakeCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -1180,13 +1180,13 @@ TEST(DirectSolverTakeCustomLUTest_CulhamGeometry, DirectSolverAcrossOrigin_Culha
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverTakeCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -1203,16 +1203,16 @@ TEST(DirectSolverTakeCustomLUTest_CulhamGeometry, DirectSolverAcrossOrigin_Culha
 TEST(DirectSolverTakeCustomLUTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_CircularGeometry)
 {
     std::vector<double> radii  = {1e-5,          1.441 * 1e-5,
-                                3.8833 * 1e-5, 8.7666 * 1e-5,
-                                1.8533 * 1e-4, 3.806 * 1e-4,
-                                7.713 * 1e-4,  1.55265 * 1e-3,
-                                3.1153 * 1e-3, 6.2406 * 1e-3,
-                                0.01249125,    0.0249925,
-                                0.049995,      0.1,
-                                0.2,           0.25,
-                                0.5,           0.8,
-                                0.9,           0.95,
-                                1.2,           1.3};
+                                  3.8833 * 1e-5, 8.7666 * 1e-5,
+                                  1.8533 * 1e-4, 3.806 * 1e-4,
+                                  7.713 * 1e-4,  1.55265 * 1e-3,
+                                  3.1153 * 1e-3, 6.2406 * 1e-3,
+                                  0.01249125,    0.0249925,
+                                  0.049995,      0.1,
+                                  0.2,           0.25,
+                                  0.5,           0.8,
+                                  0.9,           0.95,
+                                  1.2,           1.3};
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
@@ -1234,13 +1234,13 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, DirectSolverAcrossOriginHigh
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverTakeCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -1278,13 +1278,13 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, DirectSolverAcrossOriginHigh
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                cache_density_rpofile_coefficients, cache_domain_geometry);
+                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
     Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
 
     DirectSolverTakeCustomLU solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                                       maxOpenMPThreads);
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                            maxOpenMPThreads);
+                             maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution  = rhs;
@@ -1297,7 +1297,6 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, DirectSolverAcrossOriginHigh
     ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-11);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-12);
 }
-
 
 int main(int argc, char* argv[])
 {

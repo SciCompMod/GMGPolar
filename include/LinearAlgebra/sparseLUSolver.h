@@ -215,7 +215,7 @@ template <typename T>
 void SparseLUSolver<T>::solveInPlace(double* b) const
 {
     assert(factorized_);
-    const int n = L_row_ptr.size() - 1;  // n is the number of rows in the matrix
+    const int n = L_row_ptr.size() - 1; // n is the number of rows in the matrix
 
     // Forward substitution (L * b = b) -> b now holds y
     for (int i = 0; i < n; i++) {

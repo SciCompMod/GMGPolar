@@ -3,8 +3,8 @@
 #include "../smoother.h"
 
 #ifdef GMGPOLAR_USE_MUMPS
-#include "dmumps_c.h"
-#include "mpi.h"
+    #include "dmumps_c.h"
+    #include "mpi.h"
 #endif
 
 class SmootherTake : public Smoother

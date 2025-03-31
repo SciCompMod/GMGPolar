@@ -3,8 +3,8 @@
 #include "../smoother.h"
 
 #ifdef GMGPOLAR_USE_MUMPS
-#include "dmumps_c.h"
-#include "mpi.h"
+    #include "dmumps_c.h"
+    #include "mpi.h"
 #endif
 
 class SmootherGive : public Smoother
@@ -20,7 +20,7 @@ public:
 private:
     void smoothingSequential(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
     void smoothingForLoop(Vector<double>& x, const Vector<double>& rhs,
-                                 Vector<double>& temp); /* This is the fastest option */
+                          Vector<double>& temp); /* This is the fastest option */
     void smoothingTaskLoop(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
     void smoothingTaskDependencies(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
 

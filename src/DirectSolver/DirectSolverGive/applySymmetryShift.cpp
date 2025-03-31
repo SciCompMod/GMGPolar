@@ -21,16 +21,16 @@ void DirectSolverGive::applySymmetryShiftInnerBoundary(Vector<double>& x) const
     double coeff_beta, arr, att, art, detDF;
 
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
-        const double theta     = grid_.theta(i_theta);
+        const double theta = grid_.theta(i_theta);
         /* -------------------------- */
         /* Node on the inner boundary */
         /* -------------------------- */
-        i_r = 0;
-        r   = grid_.radius(i_r);
+        i_r          = 0;
+        r            = grid_.radius(i_r);
         global_index = grid_.index(i_r, i_theta);
 
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, 
-        sin_theta, cos_theta, coeff_beta, arr, att, art, detDF);
+        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, sin_theta, cos_theta, coeff_beta, arr, att, art,
+                                  detDF);
 
         h2 = grid_.radialSpacing(i_r);
         k1 = grid_.angularSpacing(i_theta - 1);
@@ -46,12 +46,12 @@ void DirectSolverGive::applySymmetryShiftInnerBoundary(Vector<double>& x) const
         /* --------------------------- */
         /* Node next to inner boundary */
         /* --------------------------- */
-        i_r = 1;
-        r   = grid_.radius(i_r);
+        i_r          = 1;
+        r            = grid_.radius(i_r);
         global_index = grid_.index(i_r, i_theta);
 
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, 
-        sin_theta, cos_theta, coeff_beta, arr, att, art, detDF);
+        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, sin_theta, cos_theta, coeff_beta, arr, att, art,
+                                  detDF);
 
         h1 = grid_.radialSpacing(i_r - 1);
         k1 = grid_.angularSpacing(i_theta - 1);
@@ -79,16 +79,16 @@ void DirectSolverGive::applySymmetryShiftOuterBoundary(Vector<double>& x) const
     double coeff_beta, arr, att, art, detDF;
 
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
-        const double theta     = grid_.theta(i_theta);
+        const double theta = grid_.theta(i_theta);
         /* --------------------------- */
         /* Node next to outer boundary */
         /* --------------------------- */
-        i_r = grid_.nr() - 2;
-        r   = grid_.radius(i_r);
+        i_r          = grid_.nr() - 2;
+        r            = grid_.radius(i_r);
         global_index = grid_.index(i_r, i_theta);
 
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, 
-        sin_theta, cos_theta, coeff_beta, arr, att, art, detDF);
+        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, sin_theta, cos_theta, coeff_beta, arr, att, art,
+                                  detDF);
 
         h2 = grid_.radialSpacing(i_r);
         k1 = grid_.angularSpacing(i_theta - 1);
@@ -106,12 +106,12 @@ void DirectSolverGive::applySymmetryShiftOuterBoundary(Vector<double>& x) const
         /* -------------------------- */
         /* Node on the outer boundary */
         /* -------------------------- */
-        i_r = grid_.nr() - 1;
-        r   = grid_.radius(i_r);
+        i_r          = grid_.nr() - 1;
+        r            = grid_.radius(i_r);
         global_index = grid_.index(i_r, i_theta);
 
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, 
-        sin_theta, cos_theta, coeff_beta, arr, att, art, detDF);
+        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, sin_theta, cos_theta, coeff_beta, arr, att, art,
+                                  detDF);
 
         h1 = grid_.radialSpacing(i_r - 1);
         k1 = grid_.angularSpacing(i_theta - 1);

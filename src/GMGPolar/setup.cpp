@@ -47,8 +47,7 @@ void GMGPolar::setup()
     for (level_depth = 1; level_depth < number_of_levels_; level_depth++) {
         auto current_grid       = std::make_unique<PolarGrid>(coarseningGrid(levels_[level_depth - 1].grid()));
         auto current_levelCache = std::make_unique<LevelCache>(levels_[level_depth - 1], *current_grid);
-        levels_.emplace_back(level_depth, std::move(current_grid), std::move(current_levelCache), extrapolation_,
-                             FMG_);
+        levels_.emplace_back(level_depth, std::move(current_grid), std::move(current_levelCache), extrapolation_, FMG_);
     }
 
     auto end_setup_createLevels = std::chrono::high_resolution_clock::now();
@@ -63,8 +62,9 @@ void GMGPolar::setup()
     threads_per_level_.resize(number_of_levels_, max_omp_threads_);
     for (int level_depth = 0; level_depth < number_of_levels_; level_depth++) {
         threads_per_level_[level_depth] = std::max(
-            1, std::min(max_omp_threads_, static_cast<int>(std::floor(
-                                              max_omp_threads_ * std::pow(thread_reduction_factor_, level_depth)))));
+            1,
+            std::min(max_omp_threads_,
+                     static_cast<int>(std::floor(max_omp_threads_ * std::pow(thread_reduction_factor_, level_depth)))));
     }
 
     if (verbose_ > 0)
@@ -112,45 +112,44 @@ void GMGPolar::setup()
             case ExtrapolationType::NONE:
                 full_grid_smoothing_ = true;
                 levels_[level_depth].initializeSmoothing(*domain_geometry_, *density_profile_coefficients_,
-                                                       DirBC_Interior_, threads_per_level_[level_depth],
-                                                       stencil_distribution_method_);
+                                                         DirBC_Interior_, threads_per_level_[level_depth],
+                                                         stencil_distribution_method_);
                 break;
             case ExtrapolationType::IMPLICIT_EXTRAPOLATION:
                 full_grid_smoothing_ = false;
-                levels_[level_depth].initializeExtrapolatedSmoothing(
-                    *domain_geometry_, *density_profile_coefficients_, DirBC_Interior_,
-                    threads_per_level_[level_depth], stencil_distribution_method_);
+                levels_[level_depth].initializeExtrapolatedSmoothing(*domain_geometry_, *density_profile_coefficients_,
+                                                                     DirBC_Interior_, threads_per_level_[level_depth],
+                                                                     stencil_distribution_method_);
                 break;
             case ExtrapolationType::IMPLICIT_FULL_GRID_SMOOTHING:
                 full_grid_smoothing_ = true;
                 levels_[level_depth].initializeSmoothing(*domain_geometry_, *density_profile_coefficients_,
-                                                       DirBC_Interior_, threads_per_level_[level_depth],
-                                                       stencil_distribution_method_);
+                                                         DirBC_Interior_, threads_per_level_[level_depth],
+                                                         stencil_distribution_method_);
                 break;
             case ExtrapolationType::COMBINED:
                 full_grid_smoothing_ = true;
                 levels_[level_depth].initializeSmoothing(*domain_geometry_, *density_profile_coefficients_,
-                                                       DirBC_Interior_, threads_per_level_[level_depth],
-                                                       stencil_distribution_method_);
-                levels_[level_depth].initializeExtrapolatedSmoothing(
-                    *domain_geometry_, *density_profile_coefficients_, DirBC_Interior_,
-                    threads_per_level_[level_depth], stencil_distribution_method_);
+                                                         DirBC_Interior_, threads_per_level_[level_depth],
+                                                         stencil_distribution_method_);
+                levels_[level_depth].initializeExtrapolatedSmoothing(*domain_geometry_, *density_profile_coefficients_,
+                                                                     DirBC_Interior_, threads_per_level_[level_depth],
+                                                                     stencil_distribution_method_);
                 break;
             default:
                 full_grid_smoothing_ = false;
                 levels_[level_depth].initializeSmoothing(*domain_geometry_, *density_profile_coefficients_,
-                                                       DirBC_Interior_, threads_per_level_[level_depth],
-                                                       stencil_distribution_method_);
-                levels_[level_depth].initializeExtrapolatedSmoothing(
-                    *domain_geometry_, *density_profile_coefficients_, DirBC_Interior_,
-                    threads_per_level_[level_depth], stencil_distribution_method_);
+                                                         DirBC_Interior_, threads_per_level_[level_depth],
+                                                         stencil_distribution_method_);
+                levels_[level_depth].initializeExtrapolatedSmoothing(*domain_geometry_, *density_profile_coefficients_,
+                                                                     DirBC_Interior_, threads_per_level_[level_depth],
+                                                                     stencil_distribution_method_);
                 break;
             }
             auto end_setup_smoother = std::chrono::high_resolution_clock::now();
             t_setup_smoother += std::chrono::duration<double>(end_setup_smoother - start_setup_smoother).count();
-            levels_[level_depth].initializeResidual(*domain_geometry_, *density_profile_coefficients_,
-                                                    DirBC_Interior_, threads_per_level_[level_depth],
-                                                    stencil_distribution_method_);
+            levels_[level_depth].initializeResidual(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_,
+                                                    threads_per_level_[level_depth], stencil_distribution_method_);
         }
         // -------------------------- //
         // Level n-1 (coarsest Level) //
@@ -163,23 +162,20 @@ void GMGPolar::setup()
             auto end_setup_directSolver = std::chrono::high_resolution_clock::now();
             t_setup_directSolver +=
                 std::chrono::duration<double>(end_setup_directSolver - start_setup_directSolver).count();
-            levels_[level_depth].initializeResidual(*domain_geometry_, *density_profile_coefficients_,
-                                                    DirBC_Interior_, threads_per_level_[level_depth],
-                                                    stencil_distribution_method_);
+            levels_[level_depth].initializeResidual(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_,
+                                                    threads_per_level_[level_depth], stencil_distribution_method_);
         }
         // ------------------- //
         // Intermediate levels //
         // ------------------- //
         else {
             auto start_setup_smoother = std::chrono::high_resolution_clock::now();
-            levels_[level_depth].initializeSmoothing(*domain_geometry_, *density_profile_coefficients_,
-                                                     DirBC_Interior_, threads_per_level_[level_depth],
-                                                     stencil_distribution_method_);
+            levels_[level_depth].initializeSmoothing(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_,
+                                                     threads_per_level_[level_depth], stencil_distribution_method_);
             auto end_setup_smoother = std::chrono::high_resolution_clock::now();
             t_setup_smoother += std::chrono::duration<double>(end_setup_smoother - start_setup_smoother).count();
-            levels_[level_depth].initializeResidual(*domain_geometry_, *density_profile_coefficients_,
-                                                    DirBC_Interior_, threads_per_level_[level_depth],
-                                                    stencil_distribution_method_);
+            levels_[level_depth].initializeResidual(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_,
+                                                    threads_per_level_[level_depth], stencil_distribution_method_);
         }
     }
 
@@ -187,7 +183,6 @@ void GMGPolar::setup()
     t_setup_total += std::chrono::duration<double>(end_setup - start_setup).count();
     LIKWID_STOP("Setup");
 }
-
 
 PolarGrid GMGPolar::createFinestGrid()
 {
