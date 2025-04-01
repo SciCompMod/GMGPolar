@@ -8,6 +8,8 @@ option(GMGPOLAR_USE_MUMPS "Use MUMPS to solve linear systems." OFF)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
@@ -29,7 +31,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "DEBUG")
         setup_target_for_coverage_lcov(
             NAME coverage
             EXECUTABLE tests/gmgpolar_tests
-            EXCLUDE "${CMAKE_SOURCE_DIR}/tests*" "${CMAKE_SOURCE_DIR}/src/test_cases*" "${CMAKE_BINARY_DIR}/*" "/usr*"
+            EXCLUDE "${CMAKE_SOURCE_DIR}/tests*" "${CMAKE_SOURCE_DIR}/src/InputFunctions*" "${CMAKE_BINARY_DIR}/*" "/usr*"
         )
     endif()
 endif()
