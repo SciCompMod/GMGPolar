@@ -23,7 +23,7 @@ runs:
       run: |
         tar -czf build.tar.gz build
     - name: Upload build dir archive
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: build-cpp-linux-gmgpolar
         path: build.tar.gz
