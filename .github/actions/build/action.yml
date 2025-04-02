@@ -6,15 +6,15 @@ runs:
       shell: bash
       run: |
         sudo apt-get -qq update
-        sudo apt-get -qq install gcc-11
-        sudo apt-get -qq -y install g++-11
+        sudo apt-get -qq install gcc-13
+        sudo apt-get -qq -y install g++-13
         sudo apt-get -qq -y install lcov        
     - name: Build
       shell: 
       # ensure that the installed compiler version is used
       run: |
-        export CC=/usr/bin/gcc-11
-        export CXX=/usr/bin/g++-11
+        export CC=/usr/bin/gcc-13
+        export CXX=/usr/bin/g++-13
         mkdir build && cd build
         cmake -DCMAKE_BUILD_TYPE=Debug -DGMGPOLAR_TEST_COVERAGE=ON ..
         make -j4
