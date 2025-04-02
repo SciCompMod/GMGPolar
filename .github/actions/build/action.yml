@@ -8,7 +8,7 @@ runs:
         sudo apt-get -qq update
         sudo apt-get -qq install gcc-13
         sudo apt-get -qq -y install g++-13
-        sudo apt-get -qq -y install lcov2.2      
+        sudo apt-get -qq -y install lcov     
     - name: Build
       shell: 
       # ensure that the installed compiler version is used
