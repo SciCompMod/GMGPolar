@@ -456,8 +456,3 @@ TEST(VectorDoubleComplex, size_construct_modify)
     EXPECT_DOUBLE_COMPLEX_EQ(v[4], 5.0 + 10.0i);
 }
 
-int main(int argc, char* argv[])
-{
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
