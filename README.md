@@ -58,6 +58,10 @@ With Spack set up, you can now install MUMPS. The following command installs ver
         scotch=false
         shared=true
 
+ or in one line:
+
+ 	spack install mumps@5.5.1~blr_mt~complex+double+float~incfort~int64+metis~mpi+openmp~parmetis~ptscotch~scotch+shared
+
 ### Note on AVX / AVX-512 Compatibility
 If your system does not support AVX or AVX-512 instructions (e.g., on AMD processors), install MUMPS with the following command:
 
