@@ -28,9 +28,9 @@ __global__ void applyAscOrtho_Circle_kernel(
     if (i_r < 0 || i_r > grid->numberSmootherCircles() || i_theta < 0 || i_theta >= grid->ntheta()) return;
 
     /* Share expensive to compute values. */
-    __shared__ double s_arr[16][16];
-    __shared__ double s_art[16][16];
-    __shared__ double s_x[16][16];
+    __shared__ double s_arr[16][17];
+    __shared__ double s_art[16][17];
+    __shared__ double s_x[16][17];
 
     /* Indexing into shared data */
     int s_i_r = threadIdx.x;

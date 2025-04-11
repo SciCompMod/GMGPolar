@@ -18,6 +18,9 @@ void GMGPolar::setup() {
     if(verbose_ > 0) {
         std::cout << "System of size (nr x ntheta) = (" << finest_grid->nr() << " x " << finest_grid->ntheta() << ")\n";
         std::cout << "on the coordinates (r x theta): (" << R0_ << ", " << Rmax_ << ") x (" << 0 << ", " << 2 * M_PI << ")\n";
+
+        std::cout << "Anisotropy factor: " << anisotropic_factor_ << std::endl;
+        std::cout << "Dirichlet boundary (interior): " << DirBC_Interior_ << std::endl; 
     }
     if(paraview_) writeToVTK("output_finest_grid", *finest_grid);
 
