@@ -150,7 +150,7 @@ void GMGPolar::solve()
     while (number_of_iterations_ < max_iterations_) {
 
         if (verbose_ > 0) {
-            std::cout << "\nIteration: " << number_of_iterations_ << std::endl;
+            std::cout << "\n--> Iteration: " << number_of_iterations_;
         }
 
         /* ---------------------------------------------- */
@@ -172,8 +172,8 @@ void GMGPolar::solve()
                 std::chrono::duration<double>(end_check_exact_error - start_check_exact_error).count();
 
             if (verbose_ > 0) {
-                std::cout << "Exact Weighted-Euclidean Error: " << exact_error.first << std::endl;
-                std::cout << "Exact Infinity Error: " << exact_error.second << std::endl;
+                std::cout << ", Exact Weighted-Euclidean Error: " << exact_error.first;
+                std::cout << ", Exact Infinity Error: " << exact_error.second;
             }
         }
 
@@ -248,7 +248,7 @@ void GMGPolar::solve()
                 initial_residual_norm          = current_residual_norm;
                 current_relative_residual_norm = 1.0;
                 if (verbose_ > 0) {
-                    std::cout << "Residual Norm: " << current_residual_norm << std::endl;
+                    std::cout << ", Residual Norm: " << current_residual_norm;
                 }
             }
             else {
@@ -257,9 +257,9 @@ void GMGPolar::solve()
                     residual_norms_[number_of_iterations_] / residual_norms_[number_of_iterations_ - 1];
 
                 if (verbose_ > 0) {
-                    std::cout << "Residual Norm: " << current_residual_norm << std::endl;
-                    std::cout << "Relative Residual Norm: " << current_relative_residual_norm << std::endl;
-                    std::cout << "Residual Reduction Factor: " << current_residual_reduction_factor << std::endl;
+                    std::cout << ", Residual Norm: " << current_residual_norm;
+                    std::cout << ", Relative Residual Norm: " << current_relative_residual_norm;
+                    std::cout << ", Residual Reduction Factor: " << current_residual_reduction_factor;
                 }
 
                 const double convergence_factor = 0.7;
