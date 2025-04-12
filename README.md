@@ -89,10 +89,10 @@ has been successfully tested for some configurations.
 
 We use `Likwid` for performance monitoring. You can install it using Spack as well:
 
-  **Install Likwid (Performance Monitoring Tool)**:
-    ```bash
-    spack install likwid
-    ```
+**Install Likwid (Performance Monitoring Tool)**:
+```bash
+spack install likwid
+```
 
 ## Running GMGPolar
 
