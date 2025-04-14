@@ -4,12 +4,17 @@
 #include <cassert>
 #include <cmath>
 
+#include "../common/constants.h"
+
 class SourceTerm
 {
 public:
     SourceTerm();
+#ifdef GEOM_SHAFRANOV      
+    explicit SourceTerm(const double& Rmax, const double& elongation_kappa, const double& shift_delta);
+#else
     explicit SourceTerm(const double& Rmax, const double& inverse_aspect_ratio_epsilon, const double& ellipticity_e);
-
+#endif
     ~SourceTerm() = default; 
 
 
@@ -322,7 +327,8 @@ private:
     const double inverse_aspect_ratio_epsilon = 0.3;
     const double ellipticity_e = 1.4; 
     double factor_xi;
+
+    void initializeGeometry();    
 #endif
 
-    void initializeGeometry();
 };

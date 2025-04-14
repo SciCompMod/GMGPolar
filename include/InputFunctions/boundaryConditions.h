@@ -4,6 +4,8 @@
 #include <cassert>
 #include <cmath>
 
+#include "../common/constants.h"
+
 class BoundaryConditions
 {
 public:
@@ -41,8 +43,7 @@ private:
     const double inverse_aspect_ratio_epsilon = 0.3;
     const double ellipticity_e = 1.4; 
     double factor_xi;    
-#endif
-
 
     void initializeGeometry();
+#endif      
 };

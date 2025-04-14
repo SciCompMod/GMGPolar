@@ -3,6 +3,8 @@
 #include <cuda_runtime.h>
 #include <cmath>
 
+#include "../common/constants.h"
+
 class DensityProfileCoefficients
 {
 public:

@@ -1,16 +1,20 @@
 #include "../../include/InputFunctions/domainGeometry.h"
 
+#ifdef GEOM_SHAFRANOV  
 DomainGeometry::DomainGeometry()
 {
-    initializeGeometry();
 }
 
-#ifdef GEOM_SHAFRANOV   
 DomainGeometry::DomainGeometry(const double& Rmax, const double& elongation_kappa, const double& shift_delta)
     : Rmax(Rmax), elongation_kappa(elongation_kappa), shift_delta(shift_delta)
 {
 }
 #else
+DomainGeometry::DomainGeometry()
+{
+    initializeGeometry();
+}
+
 DomainGeometry::DomainGeometry(const double& Rmax, const double& inverse_aspect_ratio_epsilon, const double& ellipticity_e)
     : Rmax(Rmax), inverse_aspect_ratio_epsilon(inverse_aspect_ratio_epsilon), ellipticity_e(ellipticity_e) {
     initializeGeometry();
