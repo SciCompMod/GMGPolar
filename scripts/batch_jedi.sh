@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=gmgpolar
-#SBATCH --output=slurm-maxLevel13_GMGPolar_JEDI_profiles.out
-#SBATCH --error=slurm-maxLevel13_GMGPolar_JEDI_profiles.err
+#SBATCH --output=slurm-maxLevel13_GMGPolar_JEDI_Rmax13_ani0_DirBC.out
+#SBATCH --error=slurm-maxLevel13_GMGPolar_JEDI_Rmax13_ani0_DirBC.err
 #SBATCH -N 1
 #SBATCH -n 1
 #SBATCH -c 72
@@ -27,7 +27,7 @@ maxOpenMPThreads=72
 
 # Finest grid parameters
 R0=1e-8
-Rmax=1.0
+Rmax=1.3
 nr_exp=4
 ntheta_exp=-1
 anisotropic_factor=0
@@ -95,7 +95,7 @@ done;
 maxIterations=200
 residualNormType=0 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
 absoluteTolerance=1e-14
-relativeTolerance=1e-10
+relativeTolerance=1e-8
 
 # 0 - No output 
 # 1 - Basic output 
@@ -127,7 +127,7 @@ done;
 maxIterations=200
 residualNormType=0 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
 absoluteTolerance=1e-14
-relativeTolerance=1e-10
+relativeTolerance=1e-8
 
 # 0 - No output 
 # 1 - Basic output 
@@ -137,28 +137,33 @@ srun --cpus-per-task=$maxOpenMPThreads ./../build/gmgpolar --verbose $verbose --
 let divideBy2=divideBy2+1
 done;
 
-# profiles
-divideBy2=10
+# # profiles
+# divideBy2=10
 
-maxLevels=13
-gpuLevels=-1
-srun --cpus-per-task=1 nsys profile --trace nvtx,cuda ./../build/gmgpolar --verbose $verbose --paraview $paraview --maxOpenMPThreads 1 --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --DirBC_Interior $DirBC_Interior --FMG $FMG --FMG_iterations $FMG_iterations --FMG_cycle $FMG_cycle --extrapolation $extrapolation --maxLevels $maxLevels --gpuLevels $gpuLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
+# maxLevels=13
+# gpuLevels=-1
+# srun --cpus-per-task=1 nsys profile --trace nvtx,cuda ./../build/gmgpolar --verbose $verbose --paraview $paraview --maxOpenMPThreads 1 --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --DirBC_Interior $DirBC_Interior --FMG $FMG --FMG_iterations $FMG_iterations --FMG_cycle $FMG_cycle --extrapolation $extrapolation --maxLevels $maxLevels --gpuLevels $gpuLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
+# srun --cpus-per-task=1 ncu --set full --export full_eval.ncu-rep ./../build/gmgpolar --verbose $verbose --paraview $paraview --maxOpenMPThreads 1 --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --DirBC_Interior $DirBC_Interior --FMG $FMG --FMG_iterations $FMG_iterations --FMG_cycle $FMG_cycle --extrapolation $extrapolation --maxLevels $maxLevels --gpuLevels $gpuLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
 
-maxLevels=13
-gpuLevels=0
-srun --cpus-per-task=$maxOpenMPThreads nsys profile --trace nvtx,cuda ./../build/gmgpolar --verbose $verbose --paraview $paraview --maxOpenMPThreads $maxOpenMPThreads --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --DirBC_Interior $DirBC_Interior --FMG $FMG --FMG_iterations $FMG_iterations --FMG_cycle $FMG_cycle --extrapolation $extrapolation --maxLevels $maxLevels --gpuLevels $gpuLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
+
+# maxLevels=13
+# gpuLevels=0
+# srun --cpus-per-task=$maxOpenMPThreads nsys profile --trace nvtx,cuda ./../build/gmgpolar --verbose $verbose --paraview $paraview --maxOpenMPThreads $maxOpenMPThreads --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --DirBC_Interior $DirBC_Interior --FMG $FMG --FMG_iterations $FMG_iterations --FMG_cycle $FMG_cycle --extrapolation $extrapolation --maxLevels $maxLevels --gpuLevels $gpuLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
+
+
+
 
 # likwid
-module load likwid
+# module load likwid
 
-maxLevels=13
-gpuLevels=-1
-srun --cpus-per-task=1 likwid-perfctr -g FLOPS ./../build/gmgpolar --verbose $verbose --paraview $paraview --maxOpenMPThreads 1 --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --DirBC_Interior $DirBC_Interior --FMG $FMG --FMG_iterations $FMG_iterations --FMG_cycle $FMG_cycle --extrapolation $extrapolation --maxLevels $maxLevels --gpuLevels $gpuLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
+# maxLevels=13
+# gpuLevels=-1
+# srun --cpus-per-task=1 likwid-perfctr -g FLOPS ./../build/gmgpolar --verbose $verbose --paraview $paraview --maxOpenMPThreads 1 --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --DirBC_Interior $DirBC_Interior --FMG $FMG --FMG_iterations $FMG_iterations --FMG_cycle $FMG_cycle --extrapolation $extrapolation --maxLevels $maxLevels --gpuLevels $gpuLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
 
-srun --cpus-per-task=1 likwid-perfctr -g MEM ./../build/gmgpolar --verbose $verbose --paraview $paraview --maxOpenMPThreads 1 --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --DirBC_Interior $DirBC_Interior --FMG $FMG --FMG_iterations $FMG_iterations --FMG_cycle $FMG_cycle --extrapolation $extrapolation --maxLevels $maxLevels --gpuLevels $gpuLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
+# srun --cpus-per-task=1 likwid-perfctr -g MEM ./../build/gmgpolar --verbose $verbose --paraview $paraview --maxOpenMPThreads 1 --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --DirBC_Interior $DirBC_Interior --FMG $FMG --FMG_iterations $FMG_iterations --FMG_cycle $FMG_cycle --extrapolation $extrapolation --maxLevels $maxLevels --gpuLevels $gpuLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
 
-maxLevels=13
-gpuLevels=0
-srun --cpus-per-task=$maxOpenMPThreads likwid-perfctr -g FLOPS ./../build/gmgpolar --verbose $verbose --paraview $paraview --maxOpenMPThreads $maxOpenMPThreads --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --DirBC_Interior $DirBC_Interior --FMG $FMG --FMG_iterations $FMG_iterations --FMG_cycle $FMG_cycle --extrapolation $extrapolation --maxLevels $maxLevels --gpuLevels $gpuLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
+# maxLevels=13
+# gpuLevels=0
+# srun --cpus-per-task=$maxOpenMPThreads likwid-perfctr -g FLOPS ./../build/gmgpolar --verbose $verbose --paraview $paraview --maxOpenMPThreads $maxOpenMPThreads --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --DirBC_Interior $DirBC_Interior --FMG $FMG --FMG_iterations $FMG_iterations --FMG_cycle $FMG_cycle --extrapolation $extrapolation --maxLevels $maxLevels --gpuLevels $gpuLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
 
-srun --cpus-per-task=$maxOpenMPThreads likwid-perfctr -g MEM ./../build/gmgpolar --verbose $verbose --paraview $paraview --maxOpenMPThreads $maxOpenMPThreads --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --DirBC_Interior $DirBC_Interior --FMG $FMG --FMG_iterations $FMG_iterations --FMG_cycle $FMG_cycle --extrapolation $extrapolation --maxLevels $maxLevels --gpuLevels $gpuLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
+# srun --cpus-per-task=$maxOpenMPThreads likwid-perfctr -g MEM ./../build/gmgpolar --verbose $verbose --paraview $paraview --maxOpenMPThreads $maxOpenMPThreads --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --DirBC_Interior $DirBC_Interior --FMG $FMG --FMG_iterations $FMG_iterations --FMG_cycle $FMG_cycle --extrapolation $extrapolation --maxLevels $maxLevels --gpuLevels $gpuLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
