@@ -72,3 +72,5 @@ enum class ProcessingType {
 #define SYM_UNSYMMETRIC 0
 #define SYM_POSITIVE_DEFINITE 1
 #define SYM_GENERAL_SYMMETRIC 2
+
+//#define GEOM_SHAFRANOV
