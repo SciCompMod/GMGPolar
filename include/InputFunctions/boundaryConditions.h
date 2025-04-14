@@ -8,8 +8,13 @@ class BoundaryConditions
 {
 public:
     BoundaryConditions();
+#ifdef GEOM_SHAFRANOV
+    explicit BoundaryConditions(
+        const double& Rmax, const double& elongation_kappa, const double& shift_delta);   
+#else
     explicit BoundaryConditions(
         const double& Rmax, const double& inverse_aspect_ratio_epsilon, const double& ellipticity_e);
+#endif
 
     ~BoundaryConditions() = default;
 
@@ -26,9 +31,18 @@ public:
 
 private:
     const double Rmax = 1.3;
+    
+#ifdef GEOM_SHAFRANOV
+    // Shafranov
+    const double elongation_kappa = 0.3;
+    const double shift_delta      = 0.2; 
+#else
+    // Czarny
     const double inverse_aspect_ratio_epsilon = 0.3;
-    const double ellipticity_e = 1.4;
+    const double ellipticity_e = 1.4; 
+    double factor_xi;    
+#endif
+
 
     void initializeGeometry();
-    double factor_xi;
 };
