@@ -10,28 +10,33 @@ __global__ void extrapolated_applyAscOrtho_Circle_kernel(
     double* coeff_alpha_cache, double* coeff_beta_cache,
     double* sin_theta_cache, double* cos_theta_cache) 
 {
-    /* The stencil is computed on a 14x14 grid. */
-    /* We use a 16x16 halo block to compute the expensive values. */
-    /* This minimizes threads beeing idle. */
-    int i_r = blockIdx.x * 14 + threadIdx.x - 1;
-    int i_theta = blockIdx.y * 14 + threadIdx.y - 1;
+    /* The thread block covers a 14x14 region within a 16x16 shared memory block (1-cell halo). */
+    const int global_i_r = blockIdx.x * 14 + threadIdx.x - 1;
+    const int global_i_theta = blockIdx.y * 14 + threadIdx.y - 1;
 
     /* Adjust for across origin and periodic boundary. */
+    int i_r = global_i_r;
+    int i_theta = global_i_theta;
     if(i_r == -1 && !DirBC_Interior){
         i_r = 0;
         i_theta += grid->ntheta() / 2;
     }
     i_theta = grid->wrapThetaIndex(i_theta);
 
-    /* Node lies outside the circle section with halo. */
-    /* The halo node i_r == grid->numberSmootherCircles() lies in the radial section. */
-    if (i_r < 0 || i_r > grid->numberSmootherCircles() || i_theta < 0 || i_theta >= grid->ntheta()) return;
+    /* Define bounds for valid global indices (domain + halo). */
+    const int min_i_r = DirBC_Interior ? 0 : -1; 
+    const int max_i_r = grid->numberSmootherCircles();
+    const int min_i_theta = -1; 
+    const int max_i_theta = grid->ntheta();
 
-    /* Share expensive to compute values. */
-    __shared__ double s_arr[16][17];
-    __shared__ double s_att[16][17];
-    __shared__ double s_art[16][17];
-    __shared__ double s_x[16][17];
+    /* Exit if outside of the computational domain and halo region. */
+    if (global_i_r < min_i_r || global_i_r > max_i_r || global_i_theta < min_i_theta || global_i_theta > max_i_theta) return;
+
+    /* Allocate shared memory with padding for avoiding bank conflicts. */
+    __shared__ double s_arr[16][16 + 1];
+    __shared__ double s_att[16][16 + 1];
+    __shared__ double s_art[16][16 + 1];
+    __shared__ double s_x[16][16 + 1];
 
     /* Indexing into shared data */
     int s_i_r = threadIdx.x;
@@ -67,12 +72,13 @@ __global__ void extrapolated_applyAscOrtho_Circle_kernel(
 
     __syncthreads();
 
-    /* Node color and smoother color doesnt match. */
-    if(i_r % 2 != start_i_r) return;
     /* Node lies outside of the circle section. */
-    if(i_r < 0 || i_r >= grid->numberSmootherCircles() || i_theta < 0 || i_theta >= grid->ntheta()) return;
+    if(global_i_r < 0 || global_i_r >= grid->numberSmootherCircles() || global_i_theta < 0 || global_i_theta >= grid->ntheta()) return;
     /* Node lies on the halo. */
     if(s_i_r == 0 || s_i_r == 15 || s_i_theta == 0 || s_i_theta == 15) return;
+
+    /* Node color and smoother color doesnt match. */
+    if(i_r % 2 != start_i_r) return;
 
     /* Prepare temp for the 2nd solution in the Shermann-Morrison formula. */
     if(i_r > 0){
