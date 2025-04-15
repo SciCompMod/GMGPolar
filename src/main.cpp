@@ -12,6 +12,12 @@ int main(int argc, char* argv[]) {
         std::cout << "Build Type: Debug" << std::endl;
     #endif
 
+    #ifdef GEOM_SHAFRANOV
+        std::cout << "Geometry: Shafranov" << std::endl;
+    #else
+        std::cout << "Geometry: Czarny" << std::endl;
+    #endif
+
     auto domain_geometry = std::make_unique<DomainGeometry>();
     auto exact_solution = std::make_unique<const ExactSolution>();
     auto coefficients = std::make_unique<const DensityProfileCoefficients>();
