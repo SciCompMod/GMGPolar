@@ -73,9 +73,3 @@ TEST(ExtrapolatedProlongationTest, ExtrapolatedProlongationSmoothingRadius)
         ASSERT_DOUBLE_EQ(result1[i], result2[i]);
     }
 }
-
-int main(int argc, char** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}

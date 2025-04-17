@@ -8,12 +8,33 @@ option(GMGPOLAR_USE_MUMPS "Use MUMPS to solve linear systems." OFF)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -pedantic -Wno-unused")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -mtune=generic")
+
+# code coverage analysis
+# Note: this only works under linux and with make
+# Ninja creates different directory names which do not work together with this scrupt
+# as STREQUAL is case-sensitive https://github.com/TriBITSPub/TriBITS/issues/131, also allow DEBUG as accepted input
+option(GMGPOLAR_TEST_COVERAGE "Enable GCov coverage analysis (adds a 'coverage' target)" OFF)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "DEBUG")
+    if(GMGPOLAR_TEST_COVERAGE)
+        message(STATUS "Coverage enabled")
+        include(CodeCoverage)
+        append_coverage_compiler_flags()
+        setup_target_for_coverage_lcov(
+            NAME coverage
+            EXECUTABLE tests/gmgpolar_tests
+            EXCLUDE "${CMAKE_SOURCE_DIR}/tests*" "${CMAKE_SOURCE_DIR}/src/InputFunctions*" "${CMAKE_BINARY_DIR}/*" "/usr*"
+        )
+    endif()
+endif()
 
 # # Mumps: Sparse Matrix Solver
 # set(MUMPS_PREFIX_PATH "~/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/mumps-5.6.2-m4xrhc4mshzrxmgptzbpult3nbf6qrzk")
@@ -34,31 +55,45 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -mtune=generic")
 include_directories(include)
 
 # 1. Create a library target for the PolarGrid module
-file(GLOB_RECURSE POLAR_GRID_SOURCES "src/PolarGrid/*.cpp")
+file(GLOB_RECURSE POLAR_GRID_SOURCES ${CMAKE_SOURCE_DIR}/src/PolarGrid/*.cpp)
 add_library(PolarGrid STATIC ${POLAR_GRID_SOURCES})
 target_include_directories(PolarGrid PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/PolarGrid)
 
 # 2. Create a library target for the InputFunctions module
 file(GLOB_RECURSE INPUT_FUNCTIONS_SOURCES
-    "src/InputFunctions/DensityProfileCoefficients/*.cpp"
-    "src/InputFunctions/DomainGeometry/*.cpp"
-    "src/InputFunctions/ExactSolution/*.cpp"
-    "src/InputFunctions/BoundaryConditions/*.cpp"
-    "src/InputFunctions/SourceTerms/*.cpp"
+    ${CMAKE_SOURCE_DIR}/src/InputFunctions/DensityProfileCoefficients/*.cpp
+    ${CMAKE_SOURCE_DIR}/src/InputFunctions/DomainGeometry/*.cpp
+    ${CMAKE_SOURCE_DIR}/src/InputFunctions/ExactSolution/*.cpp
+    ${CMAKE_SOURCE_DIR}/src/InputFunctions/BoundaryConditions/*.cpp
+    ${CMAKE_SOURCE_DIR}/src/InputFunctions/SourceTerms/*.cpp
 )
 add_library(InputFunctions STATIC ${INPUT_FUNCTIONS_SOURCES})
 target_include_directories(InputFunctions PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/InputFunctions)
 
 # 3. Collect all the common source files for GMGPolar into a library
-file(GLOB_RECURSE GMG_POLAR_SOURCES "src/GMGPolar/*.cpp")
-file(GLOB_RECURSE MULTIGRID_METHODS_SOURCES "src/GMGPolar/MultigridMethods/*.cpp")
-file(GLOB_RECURSE LEVEL_SOURCES "src/Level/*.cpp")
-file(GLOB_RECURSE STENCIL_SOURCES "src/Stencil/*.cpp")
-file(GLOB_RECURSE INTERPOLATION_SOURCES "src/Interpolation/*.cpp")
-file(GLOB_RECURSE DIRECT_SOLVER_SOURCES "src/DirectSolver/*.cpp" "src/DirectSolverGive/*.cpp" "src/DirectSolverTake/*.cpp" "src/DirectSolverGiveCustomLU/*.cpp" "src/DirectSolverTakeCustomLU/*.cpp")
-file(GLOB_RECURSE RESIDUAL_SOURCES "src/Residual/*.cpp" "src/Residual/ResidualGive/*.cpp" "src/Residual/ResidualTake/*.cpp")
-file(GLOB_RECURSE SMOOTHER_SOURCES "src/Smoother/*.cpp" "src/SmootherGive/*.cpp" "src/SmootherTake/*.cpp")
-file(GLOB_RECURSE EXTRAPOLATED_SMOOTHER_SOURCES "src/ExtrapolatedSmoother/*.cpp" "src/ExtrapolatedSmoother/ExtrapolatedSmootherGive/*.cpp" "src/ExtrapolatedSmoother/ExtrapolatedSmootherTake/*.cpp")
+file(GLOB_RECURSE GMG_POLAR_SOURCES ${CMAKE_SOURCE_DIR}/src/GMGPolar/*.cpp)
+file(GLOB_RECURSE MULTIGRID_METHODS_SOURCES ${CMAKE_SOURCE_DIR}/src/GMGPolar/MultigridMethods/*.cpp)
+file(GLOB_RECURSE LEVEL_SOURCES ${CMAKE_SOURCE_DIR}/src/Level/*.cpp)
+file(GLOB_RECURSE STENCIL_SOURCES ${CMAKE_SOURCE_DIR}/src/Stencil/*.cpp)
+file(GLOB_RECURSE INTERPOLATION_SOURCES ${CMAKE_SOURCE_DIR}/src/Interpolation/*.cpp)
+file(GLOB_RECURSE DIRECT_SOLVER_SOURCES 
+    ${CMAKE_SOURCE_DIR}/src/DirectSolver/*.cpp
+    ${CMAKE_SOURCE_DIR}src/DirectSolverGive/*.cpp
+    ${CMAKE_SOURCE_DIR}src/DirectSolverTake/*.cpp
+    ${CMAKE_SOURCE_DIR}src/DirectSolverGiveCustomLU/*.cpp
+    ${CMAKE_SOURCE_DIR}src/DirectSolverTakeCustomLU/*.cpp)
+file(GLOB_RECURSE RESIDUAL_SOURCES 
+    ${CMAKE_SOURCE_DIR}/src/Residual/*.cpp
+    ${CMAKE_SOURCE_DIR}/src/Residual/ResidualGive/*.cpp
+    ${CMAKE_SOURCE_DIR}/src/Residual/ResidualTake/*.cpp)
+file(GLOB_RECURSE SMOOTHER_SOURCES 
+    ${CMAKE_SOURCE_DIR}/src/Smoother/*.cpp
+    ${CMAKE_SOURCE_DIR}src/SmootherGive/*.cpp
+    ${CMAKE_SOURCE_DIR}src/SmootherTake/*.cpp)
+file(GLOB_RECURSE EXTRAPOLATED_SMOOTHER_SOURCES 
+    ${CMAKE_SOURCE_DIR}/src/ExtrapolatedSmoother/*.cpp
+    ${CMAKE_SOURCE_DIR}src/ExtrapolatedSmoother/ExtrapolatedSmootherGive/*.cpp
+    ${CMAKE_SOURCE_DIR}src/ExtrapolatedSmoother/ExtrapolatedSmootherTake/*.cpp)
 
 # 4. Create the GMGPolarLib library and link PolarGrid and InputFunctions
 add_library(GMGPolarLib STATIC

@@ -1298,8 +1298,3 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, DirectSolverAcrossOriginHigh
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-12);
 }
 
-int main(int argc, char* argv[])
-{
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}

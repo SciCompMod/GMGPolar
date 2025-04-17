@@ -14,14 +14,14 @@ jobs:
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/build
       
   run-unit-test:
     needs: install-and-build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/test
         with:
           build-artifact: build-cpp-linux-gmgpolar
@@ -31,13 +31,13 @@ jobs:
     needs: [run-unit-test]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install dependencies
         run: |
           sudo apt-get -qq update
           sudo apt-get -qq -y install git curl
       - name: Download cpp coverage report
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: test-coverage-reports
       - name: Deploy to codecov.io
