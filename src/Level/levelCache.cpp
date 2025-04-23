@@ -3,8 +3,8 @@
 LevelCache::LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients,
                        const DomainGeometry& domain_geometry, const bool cache_density_profile_coefficients,
                        const bool cache_domain_geometry)
-    : density_profile_coefficients_(density_profile_coefficients)
-    , domain_geometry_(domain_geometry)
+    : domain_geometry_(domain_geometry)
+    , density_profile_coefficients_(density_profile_coefficients)
     , sin_theta_(grid.ntheta())
     , cos_theta_(grid.ntheta())
     , cache_density_profile_coefficients_(cache_density_profile_coefficients)
@@ -86,8 +86,8 @@ LevelCache::LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& 
 }
 
 LevelCache::LevelCache(const Level& previous_level, const PolarGrid& current_grid)
-    : density_profile_coefficients_(previous_level.levelCache().densityProfileCoefficients())
-    , domain_geometry_(previous_level.levelCache().domainGeometry())
+    : domain_geometry_(previous_level.levelCache().domainGeometry())
+    , density_profile_coefficients_(previous_level.levelCache().densityProfileCoefficients())
     , sin_theta_(current_grid.ntheta())
     , cos_theta_(current_grid.ntheta())
     , cache_density_profile_coefficients_(previous_level.levelCache().cacheDensityProfileCoefficients())

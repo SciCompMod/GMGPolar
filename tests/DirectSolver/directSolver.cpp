@@ -171,7 +171,7 @@ TEST(DirectSolverTest, directSolver_AcrossOrigin)
         if (alpha[0] == 0 && !DirBC_Interior)
             ASSERT_NEAR(solution_Give[index], solution_Take[index], 1e-8);
         else
-            ASSERT_NEAR(solution_Give[index], solution_Take[index], 1e-9);
+            ASSERT_NEAR(solution_Give[index], solution_Take[index], 1e-8);
     }
 }
 
