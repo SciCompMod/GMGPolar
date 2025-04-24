@@ -247,6 +247,6 @@ void SparseLUSolver<T>::solveInPlace(double* b) const
 template <typename T>
 void SparseLUSolver<T>::solveInPlace(Vector<T>& b) const
 {
-    assert(b.size() == static_cast<int>(L_row_ptr.size() - 1));
+    assert(b.size() == static_cast<int>(L_row_ptr.size()) - 1);
     solveInPlace(b.begin());
 }

@@ -116,8 +116,8 @@ public:
                         const bool cache_domain_geometry);
     explicit LevelCache(const Level& previous_level, const PolarGrid& current_grid);
 
-    const DensityProfileCoefficients& densityProfileCoefficients() const;
     const DomainGeometry& domainGeometry() const;
+    const DensityProfileCoefficients& densityProfileCoefficients() const;
 
     const std::vector<double>& sin_theta() const;
     const std::vector<double>& cos_theta() const;
@@ -165,8 +165,8 @@ public:
     }
 
 private:
-    const DensityProfileCoefficients& density_profile_coefficients_;
     const DomainGeometry& domain_geometry_;
+    const DensityProfileCoefficients& density_profile_coefficients_;
 
     std::vector<double> sin_theta_;
     std::vector<double> cos_theta_;

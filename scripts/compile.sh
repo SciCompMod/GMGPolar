@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# export MUMPS_DIR="$HOME/spack/opt/spack/linux-rhel9-neoverse_n1/gcc-13.3.0/mumps-5.5.1-kbe54qygn4l535vf25izhw52xlx5vyo4"
+# export METIS_DIR="$HOME/spack/opt/spack/linux-rhel9-neoverse_n1/gcc-13.3.0/metis-5.1.0-ukhsfutazbof6b2smo3t4pb24apiczgn"
+# export LIKWID_DIR="$HOME/spack/opt/spack/linux-rhel9-neoverse_n1/gcc-13.3.0/likwid-5.2.2-hyyaselv7db3bylk6so67luokavcksy2"
+
 # Function to display usage information
 usage() {
     echo "Usage: $0 [Debug|Release]"
@@ -50,7 +54,9 @@ fi
 
 if [ -n "$build_type" ]; then
     echo "Configuring with $build_type build type..."
-    cmake -S ${PWD}/.. -B ${PWD}/../build -DCMAKE_BUILD_TYPE="$build_type" -DCMAKE_PREFIX_PATH="/scratch/spack-23.2/opt/spack/linux-ubuntu20.04-x86_64_v3/gcc-12.3.0/mumps-5.5.1-afnceqpp75o4zmfmqpbvr4whi2li2r4i" .. || { echo "CMake configuration failed"; exit 1; }
+
+    cmake -S ${PWD}/.. -B ${PWD}/../build \
+        -DCMAKE_BUILD_TYPE="$build_type"  .. || { echo "CMake configuration failed"; exit 1; }
 fi
 
 cmake --build ${PWD}/../build -j 16
