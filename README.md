@@ -58,27 +58,16 @@ With Spack set up, you can now install MUMPS. The following command installs ver
         scotch=false
         shared=true
 
+ or in one line:
+
+ 	spack install mumps@5.5.1~blr_mt~complex+double+float~incfort~int64+metis~mpi+openmp~parmetis~ptscotch~scotch+shared
+
 ### Note on AVX / AVX-512 Compatibility
 If your system does not support AVX or AVX-512 instructions (e.g., on AMD processors), install MUMPS with the following command:
 
     spack install mumps target=x86_64
 
-
-## Step 3: Install Required Dependencies
-
-MUMPS relies on other packages like `Metis` for matrix ordering and `Likwid` for performance monitoring. You can install these dependencies using Spack as well:
-
-1. **Install Metis (Fill-Reducing Matrix Ordering Library)**:
-    ```bash
-    spack install metis
-    ```
-
-2. **Install Likwid (Performance Monitoring Tool)**:
-    ```bash
-    spack install likwid
-    ```
-
-## Step 4: Configure CMake for GMGPolar
+## Step 3: Configure CMake for GMGPolar
 
 After installing MUMPS and other dependencies, ensure that the paths to the libraries are correctly set in the CMakeLists.txt file.
 
@@ -95,6 +84,15 @@ After executing ./compile.sh [Debug|Release], the script will compile the solver
 
 Currently, the default build process only supports gnu compiler although Intel compiler
 has been successfully tested for some configurations.
+
+## Optional: Measuring performance
+
+We use `Likwid` for performance monitoring. You can install it using Spack as well:
+
+**Install Likwid (Performance Monitoring Tool)**:
+```bash
+spack install likwid
+```
 
 ## Running GMGPolar
 
