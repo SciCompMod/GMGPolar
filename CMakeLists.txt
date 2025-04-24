@@ -31,6 +31,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "DEBUG")
         setup_target_for_coverage_lcov(
             NAME coverage
             EXECUTABLE tests/gmgpolar_tests
+            LCOV_ARGS --ignore-errors gcov,mismatch
             EXCLUDE "${CMAKE_SOURCE_DIR}/tests*" "${CMAKE_SOURCE_DIR}/src/InputFunctions*" "${CMAKE_BINARY_DIR}/*" "/usr*"
         )
     endif()
