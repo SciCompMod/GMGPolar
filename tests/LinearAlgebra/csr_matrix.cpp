@@ -360,10 +360,3 @@ TEST(SparseMatrixCSR, lu_solver_5x5)
     EXPECT_DOUBLE_EQ(rhs[3], exact_solution[3]);
     EXPECT_DOUBLE_EQ(rhs[4], exact_solution[4]);
 }
-
-int main(int argc, char* argv[])
-{
-    testing::InitGoogleTest(&argc, argv);
-    const auto test_result_status = RUN_ALL_TESTS();
-    return test_result_status;
-}

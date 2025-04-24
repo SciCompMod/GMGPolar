@@ -233,8 +233,3 @@ TEST(SparseMatrixDouble, symmetry_check)
     ASSERT_TRUE(m.is_symmetric());
 }
 
-int main(int argc, char* argv[])
-{
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}

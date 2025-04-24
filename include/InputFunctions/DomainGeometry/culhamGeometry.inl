@@ -46,7 +46,6 @@ inline double CulhamGeometry::my_sum(std::array<double, 1001>& f, int64_t start_
     int64_t i;
     double result;
     result = 0.0;
-    #pragma omp parallel for reduction(+: result)
     for (i = start_idx; i < end_idx; i += 1)
     {
         result += f[i];

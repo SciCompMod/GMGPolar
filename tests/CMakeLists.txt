@@ -5,84 +5,33 @@ project(GMGPolarTests LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-add_executable(test_vector LinearAlgebra/vector.cpp)
-target_compile_features(test_vector PRIVATE cxx_std_17)
-target_link_libraries(test_vector GMGPolarLib GTest::gtest_main)
-add_test(NAME test_vector COMMAND test_vector)
+# Create a single test executable that includes all test sources
+add_executable(gmgpolar_tests
+    gmgpolar_tests.cpp
+    LinearAlgebra/vector.cpp
+    LinearAlgebra/vector_operations.cpp
+    LinearAlgebra/matrix.cpp
+    LinearAlgebra/csr_matrix.cpp
+    LinearAlgebra/tridiagonal_solver.cpp
+    LinearAlgebra/cyclic_tridiagonal_solver.cpp
+    PolarGrid/polargrid.cpp
+    Interpolation/prolongation.cpp
+    Interpolation/restriction.cpp
+    Interpolation/extrapolated_prolongation.cpp
+    Interpolation/extrapolated_restriction.cpp
+    Residual/residual.cpp
+    DirectSolver/directSolver.cpp
+    DirectSolver/directSolverNoMumps.cpp
+    Smoother/smoother.cpp
+    ExtrapolatedSmoother/extrapolated_smoother.cpp
+)
 
-add_executable(test_vector_operations LinearAlgebra/vector_operations.cpp)
-target_compile_features(test_vector_operations PRIVATE cxx_std_17)
-target_link_libraries(test_vector_operations GMGPolarLib GTest::gtest_main)
-add_test(NAME test_vector_operations COMMAND test_vector_operations)
+# Set the compile features and link libraries
+target_compile_features(gmgpolar_tests PRIVATE cxx_std_17)
+target_link_libraries(gmgpolar_tests GMGPolarLib GTest::gtest_main)
 
-add_executable(test_matrix LinearAlgebra/matrix.cpp)
-target_compile_features(test_matrix PRIVATE cxx_std_17)
-target_link_libraries(test_matrix GMGPolarLib GTest::gtest_main)
-add_test(NAME test_matrix COMMAND test_matrix)
-
-add_executable(test_csr_matrix LinearAlgebra/csr_matrix.cpp)
-target_compile_features(test_csr_matrix PRIVATE cxx_std_17)
-target_link_libraries(test_csr_matrix GMGPolarLib GTest::gtest_main)
-add_test(NAME test_csr_matrix COMMAND test_csr_matrix)
-
-add_executable(test_tridiagonal_solver LinearAlgebra/tridiagonal_solver.cpp)
-target_compile_features(test_tridiagonal_solver PRIVATE cxx_std_17)
-target_link_libraries(test_tridiagonal_solver GMGPolarLib GTest::gtest_main)
-add_test(NAME test_tridiagonal_solver COMMAND test_tridiagonal_solver)
-
-add_executable(test_cyclic_tridiagonal_solver LinearAlgebra/cyclic_tridiagonal_solver.cpp)
-target_compile_features(test_cyclic_tridiagonal_solver PRIVATE cxx_std_17)
-target_link_libraries(test_cyclic_tridiagonal_solver GMGPolarLib GTest::gtest_main)
-add_test(NAME test_cyclic_tridiagonal_solver COMMAND test_cyclic_tridiagonal_solver)
-
-add_executable(test_polargrid PolarGrid/polargrid.cpp)
-target_compile_features(test_polargrid PRIVATE cxx_std_17)
-target_link_libraries(test_polargrid GMGPolarLib GTest::gtest_main)
-add_test(NAME test_polargrid COMMAND test_polargrid)
-
-add_executable(test_prolongation Interpolation/prolongation.cpp)
-target_compile_features(test_prolongation PRIVATE cxx_std_17)
-target_link_libraries(test_prolongation GMGPolarLib GTest::gtest_main)
-add_test(NAME test_prolongation COMMAND test_prolongation)
-
-add_executable(test_restriction Interpolation/restriction.cpp)
-target_compile_features(test_restriction PRIVATE cxx_std_17)
-target_link_libraries(test_restriction GMGPolarLib GTest::gtest_main)
-add_test(NAME test_restriction COMMAND test_restriction)
-
-add_executable(test_extrapolated_prolongation Interpolation/extrapolated_prolongation.cpp)
-target_compile_features(test_extrapolated_prolongation PRIVATE cxx_std_17)
-target_link_libraries(test_extrapolated_prolongation GMGPolarLib GTest::gtest_main)
-add_test(NAME test_extrapolated_prolongation COMMAND test_extrapolated_prolongation)
-
-add_executable(test_extrapolated_restriction Interpolation/extrapolated_restriction.cpp)
-target_compile_features(test_extrapolated_restriction PRIVATE cxx_std_17)
-target_link_libraries(test_extrapolated_restriction GMGPolarLib GTest::gtest_main)
-add_test(NAME test_extrapolated_restriction COMMAND test_extrapolated_restriction)
-
-add_executable(test_residual Residual/residual.cpp)
-target_compile_features(test_residual PRIVATE cxx_std_17)
-target_link_libraries(test_residual GMGPolarLib GTest::gtest_main)
-add_test(NAME test_residual COMMAND test_residual)
-
-add_executable(test_directSolver DirectSolver/directSolver.cpp)
-target_compile_features(test_directSolver PRIVATE cxx_std_17)
-target_link_libraries(test_directSolver GMGPolarLib GTest::gtest_main)
-add_test(NAME test_directSolver COMMAND test_directSolver)
-
-add_executable(test_directSolverNoMumps DirectSolver/directSolverNoMumps.cpp)
-target_compile_features(test_directSolverNoMumps PRIVATE cxx_std_17)
-target_link_libraries(test_directSolverNoMumps GMGPolarLib GTest::gtest_main)
-add_test(NAME test_directSolverNoMumps COMMAND test_directSolverNoMumps)
-
-add_executable(test_smoother Smoother/smoother.cpp)
-target_compile_features(test_smoother PRIVATE cxx_std_17)
-target_link_libraries(test_smoother GMGPolarLib GTest::gtest_main)
-add_test(NAME test_smoother COMMAND test_smoother)
-
-add_executable(test_extrapolated_smoother ExtrapolatedSmoother/extrapolated_smoother.cpp)
-target_compile_features(test_extrapolated_smoother PRIVATE cxx_std_17)
-target_link_libraries(test_extrapolated_smoother GMGPolarLib GTest::gtest_main)
-add_test(NAME test_extrapolated_smoother COMMAND test_extrapolated_smoother)
+# Register the test
+add_test(NAME gmgpolar_tests COMMAND gmgpolar_tests)
 
 include(GoogleTest)
+gtest_discover_tests(gmgpolar_tests)

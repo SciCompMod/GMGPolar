@@ -110,8 +110,3 @@ TEST(VectorOperations, infinity_vector_norm)
     EXPECT_DOUBLE_EQ(infinity_norm(v), 5.0);
 }
 
-int main(int argc, char* argv[])
-{
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}

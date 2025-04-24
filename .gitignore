@@ -2,8 +2,6 @@
 
 .vscode/
 
-.github/
-
 Output/
 
 *.vtu

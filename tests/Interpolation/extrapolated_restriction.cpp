@@ -160,9 +160,3 @@ TEST(ExtrapolatedRestrictionTest, applyExtrapolatedRestriction)
         ASSERT_DOUBLE_EQ(result2[i], result3[i]);
     }
 }
-
-int main(int argc, char** argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
