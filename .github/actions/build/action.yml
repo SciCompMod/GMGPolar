@@ -16,7 +16,7 @@ runs:
         export CC=/usr/bin/gcc-13
         export CXX=/usr/bin/g++-13
         mkdir build && cd build
-        cmake -DCMAKE_BUILD_TYPE=Debug -DGMGPOLAR_TEST_COVERAGE=ON ..
+        cmake -B build -DCMAKE_BUILD_TYPE=Debug -DGMGPOLAR_TEST_COVERAGE=ON ..
         make -j4
     - name: create build dir archive
       shell: bash

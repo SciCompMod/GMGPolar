@@ -34,9 +34,8 @@ runs:
       shell: bash
       # compute code coverage
       run: |
-        cd build
-        cmake --build .
-        cmake --build . --target coverage
+        cmake --build build --parallel $(nproc)
+        cmake --build build --target coverage
     - name: Upload test report
       uses: actions/upload-artifact@v4
       with:
