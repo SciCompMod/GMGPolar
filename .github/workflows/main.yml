@@ -32,10 +32,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install dependencies
-        run: |
-          sudo apt-get -qq update
-          sudo apt-get -qq -y install git curl lcov
       - name: Download cpp coverage report
         uses: actions/download-artifact@v4
         with:
@@ -44,5 +40,5 @@ jobs:
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: build/coverage-filtered.info
+          files: coverage-filtered.info
           verbose: true          
