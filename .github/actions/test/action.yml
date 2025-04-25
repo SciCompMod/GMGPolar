@@ -34,8 +34,7 @@ runs:
       shell: bash
       # compute code coverage
       run: |
-        cd build
-        cmake --build . --target coverage/fast
+        cmake --build build --target coverage
     - name: Upload test report
       uses: actions/upload-artifact@v4
       with:
@@ -48,7 +47,7 @@ runs:
       with:
         name: test-coverage-reports
         path: |
-          build/coverage.info
+          build/coverage-filtered.info
           build/coverage
         if-no-files-found: error
         retention-days: 1       
