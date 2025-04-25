@@ -48,7 +48,7 @@ runs:
       with:
         name: test-coverage-reports
         path: |
-          build/coverage.info
+          build/coverage-filtered.info
           build/coverage
         if-no-files-found: error
         retention-days: 1       
