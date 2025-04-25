@@ -1,4 +1,4 @@
-GMGPolar
+![gmgpolar_logo](gmgpolar_small.png)
 =======
 
 GMGPolar is a performant geometric multigrid solver using implicit extrapolation to raise the convergence order. It is based on meshes in tensor- or product-format. GMGPolar's focus applications are geometries that can be described by polar or curvilinear coordinates for which suited smoothing procedures have been developed.
