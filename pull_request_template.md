@@ -6,7 +6,7 @@ As many checkboxes as possible should be ticked.
 ### Checks by code author:
 Always to be checked:
 * [ ] There is at least one issue associated with the pull request.
-* [ ] New code adheres with the [coding guidelines](https://github.com/mknaranja/GMGPolar/wiki)
+* [ ] New code adheres with the [coding guidelines](https://github.com/SciCompMod/GMGPolar/wiki)
 * [ ] No large data files have been added to the repository. Maximum size for files should be of the order of KB not MB. In particular avoid adding of pdf, word, or other files that cannot be change-tracked correctly by git.
 
 If functions were changed or functionality was added:
@@ -21,13 +21,6 @@ If new third party software is used:
 
 If new mathematical methods or epidemiological terms are used:
 * [ ] Are new methods referenced? Did you provide further documentation?
-
-[ ] The following questions are addressed in the documentation (if need be): 
-* Developers (what did you do?, how can it be maintained?)
-* For users (how to use your work?)
-* For admins (how to install and configure your work?)
-
-* For documentation: Please write or update the Readme in the current working directory!
 
 ### Checks by code reviewer(s):
 * [ ] Is the code clean of development artifacts e.g., unnecessary comments, prints, ...
