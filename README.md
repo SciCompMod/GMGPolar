@@ -1,3 +1,6 @@
+[![GMGPolarCI](https://github.com/SciCompMod/GMGPolar/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/SciCompMod/GMGPolar/actions/workflows/main.yml)
+[![codecov](https://codecov.io/gh/SciCompMod/GMGPolar/graph/badge.svg?token=D0IVLUW51J)](https://codecov.io/gh/SciCompMod/GMGPolar)
+
 GMGPolar
 =======
 

@@ -30,25 +30,25 @@ runs:
         cd build/tests
         sudo chmod a+x gmgpolar_tests
         ./gmgpolar_tests  --gtest_output="xml:testreport.xml"
-    # - name: Compute code coverage
-    #   shell: bash
-    #   # compute code coverage
-    #   run: |
-    #     cd build
-    #     cmake --build . --target coverage/fast
-    # - name: Upload test report
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: test-report
-    #     path: build/tests/testreport.xml
-    #     if-no-files-found: error
-    #     retention-days: 3
-    # - name: Upload coverage reports
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: test-coverage-reports
-    #     path: |
-    #       build/coverage.info
-    #       build/coverage
-    #     if-no-files-found: error
-    #     retention-days: 1       
+    - name: Compute code coverage
+      shell: bash
+      # compute code coverage
+      run: |
+        cd build
+        cmake --build . --target coverage
+    - name: Upload test report
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-report
+        path: build/tests/testreport.xml
+        if-no-files-found: error
+        retention-days: 3
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-coverage-reports
+        path: |
+          build/coverage-filtered.info
+          build/coverage
+        if-no-files-found: error
+        retention-days: 1       
