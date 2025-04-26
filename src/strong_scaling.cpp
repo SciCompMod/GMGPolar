@@ -94,8 +94,8 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
     const int postSmoothingSteps            = 1;
     const MultigridCycleType multigridCycle = MultigridCycleType::F_CYCLE;
 
-    const int maxIterations                 = 10;
-    const ResidualNormType residualNormType = ResidualNormType::EUCLIDEAN;
+    const int maxIterations                 = 200;
+    const ResidualNormType residualNormType = ResidualNormType::WEIGHTED_EUCLIDEAN;
     const double absoluteTolerance          = 1e-50;
     const double relativeTolerance          = 1e-50;
 
@@ -175,10 +175,10 @@ int main()
     int divideBy2 = 7; // Keeping the domain division constant
 
     // Vary only the number of threads for strong scaling
-    // std::vector<int> threadCounts = {1, 2, 4, 8, 16, 32};  // Thread counts to test strong scaling
+    std::vector<int> threadCounts = {1, 2, 4, 8, 16, 32, 64};  // Thread counts to test strong scaling
 
-    int n = 56;
-    std::vector<int> threadCounts(n);
+    // int n = 56;
+    // std::vector<int> threadCounts(n);
     std::iota(threadCounts.begin(), threadCounts.end(), 1);
 
     for (size_t i = 0; i < threadCounts.size(); i++) {

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# export MUMPS_DIR="$HOME/spack/opt/spack/linux-rhel9-neoverse_n1/gcc-13.3.0/mumps-5.5.1-kbe54qygn4l535vf25izhw52xlx5vyo4"
-# export METIS_DIR="$HOME/spack/opt/spack/linux-rhel9-neoverse_n1/gcc-13.3.0/metis-5.1.0-ukhsfutazbof6b2smo3t4pb24apiczgn"
+export MUMPS_DIR="/scratch/ws/3/kueh_mj-gmgpolar/spack/opt/spack/linux-rocky8-zen/gcc-8.5.0/mumps-5.5.1-vxpgipbhjslom2fsetshytcj5ajwqvwj"
+export METIS_DIR="/scratch/ws/3/kueh_mj-gmgpolar/spack/opt/spack/linux-rocky8-zen/gcc-8.5.0/metis-5.1.0-keirft7rdzyu7ehwgs3qtmg77sexmhvt"
 # export LIKWID_DIR="$HOME/spack/opt/spack/linux-rhel9-neoverse_n1/gcc-13.3.0/likwid-5.2.2-hyyaselv7db3bylk6so67luokavcksy2"
 
 # Function to display usage information
