@@ -116,7 +116,7 @@ void GMGPolar::solve()
                 if (current_residual_reduction_factor > convergence_factor &&
                     extrapolation_ == ExtrapolationType::COMBINED && full_grid_smoothing_) {
                     full_grid_smoothing_ = false;
-                    std::cout << "Switching from full grid smoothing to standard extrapolated smoothing." << std::endl;
+                    std::cout << "\n\nSwitching from full grid smoothing to standard extrapolated smoothing." << std::endl;
                 }
             }
 
