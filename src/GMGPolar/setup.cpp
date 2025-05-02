@@ -10,11 +10,42 @@ void GMGPolar::setup()
     auto start_setup_createLevels = std::chrono::high_resolution_clock::now();
 
     if (stencil_distribution_method_ == StencilDistributionMethod::CPU_TAKE) {
+        if(verbose_ > 0)
+        {
+            std::cout << "\nStencil version: TAKE" << std::endl;
+        }
         if (!cache_density_profile_coefficients_ || !cache_domain_geometry_) {
             throw std::runtime_error("Error: Caching must be enabled for both density profile coefficients and domain "
                                      "geometry in 'Take' implementation strategy.");
         }
+    }else{
+        if(verbose_ > 0)
+        {
+            std::cout << "\nStencil version: GIVE" << std::endl;
+        }
     }
+
+    if(verbose_ > 0)
+    {
+        std::cout << "Geometry: ";
+        if (typeid(*domain_geometry_) == typeid(CircularGeometry)) {
+            std::cout << "Circular";
+        }
+        else if (typeid(*domain_geometry_) == typeid(ShafranovGeometry)) {
+            std::cout << "Shafranov";
+        }
+        else if (typeid(*domain_geometry_) == typeid(CzarnyGeometry)) {
+            std::cout << "Czarny";
+        }
+        else if (typeid(*domain_geometry_) == typeid(CulhamGeometry)) {
+            std::cout << "Culham";
+        }
+        else {
+            std::cout << "Unknown";
+        }
+        std::cout << std::endl;
+    }
+
 
     // -------------------------------- //
     // Create the finest mesh (level 0) //
@@ -24,6 +55,9 @@ void GMGPolar::setup()
         std::cout << "System of size (nr x ntheta) = (" << finest_grid->nr() << " x " << finest_grid->ntheta() << ")\n";
         std::cout << "on the coordinates (r x theta): (" << R0_ << ", " << Rmax_ << ") x (" << 0 << ", " << 2 * M_PI
                   << ")\n";
+
+        std::cout << "Anisotropy factor: " << anisotropic_factor_ << std::endl;
+        std::cout << "Dirichlet boundary (interior): " << DirBC_Interior_ << std::endl; 
     }
     if (paraview_)
         writeToVTK("output_finest_grid", *finest_grid);
