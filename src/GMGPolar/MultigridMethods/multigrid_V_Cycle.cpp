@@ -5,7 +5,10 @@ void GMGPolar::multigrid_V_Cycle(const int level_depth, Vector<double>& solution
 {
     assert(0 <= level_depth && level_depth < number_of_levels_ - 1);
 
-    auto start_MGC = std::chrono::high_resolution_clock::now();
+    std::chrono::high_resolution_clock::time_point start_MGC;
+    if (level_depth == 0) {
+        start_MGC = std::chrono::high_resolution_clock::now();
+    }
 
     Level& level      = levels_[level_depth];
     Level& next_level = levels_[level_depth + 1];
@@ -83,6 +86,8 @@ void GMGPolar::multigrid_V_Cycle(const int level_depth, Vector<double>& solution
     auto end_MGC_postSmoothing = std::chrono::high_resolution_clock::now();
     t_avg_MGC_postSmoothing += std::chrono::duration<double>(end_MGC_postSmoothing - start_MGC_postSmoothing).count();
 
-    auto end_MGC = std::chrono::high_resolution_clock::now();
-    t_avg_MGC_total += std::chrono::duration<double>(end_MGC - start_MGC).count();
+    if (level_depth == 0) {
+        auto end_MGC = std::chrono::high_resolution_clock::now();
+        t_avg_MGC_total += std::chrono::duration<double>(end_MGC - start_MGC).count();
+    }
 }
