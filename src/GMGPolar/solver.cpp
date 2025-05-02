@@ -4,6 +4,28 @@
 
 void GMGPolar::solve()
 {
+    if(verbose_ > 0)
+    {
+        std::cout << "Cycle type: ";
+        if(multigrid_cycle_ == MultigridCycleType::V_CYCLE)
+        {
+            std::cout << "V." << std::endl;
+        }else if(multigrid_cycle_ == MultigridCycleType::W_CYCLE)
+        {
+            std::cout << "W." << std::endl; 
+        }else if(multigrid_cycle_ == MultigridCycleType::F_CYCLE)
+        {
+            std::cout << "F." << std::endl;         
+        }
+    
+        std::cout << "Extrapolation: ";    
+        if (extrapolation_ == ExtrapolationType::NONE) {
+            std::cout << "None." << std::endl;
+        }else if (extrapolation_ == ExtrapolationType::IMPLICIT_EXTRAPOLATION) {
+            std::cout << "Implicit Extrapolation." << std::endl;
+        }
+    }
+
     LIKWID_START("Solve");
     auto start_solve = std::chrono::high_resolution_clock::now();
 
@@ -116,7 +138,7 @@ void GMGPolar::solve()
                 if (current_residual_reduction_factor > convergence_factor &&
                     extrapolation_ == ExtrapolationType::COMBINED && full_grid_smoothing_) {
                     full_grid_smoothing_ = false;
-                    std::cout << "\n\nSwitching from full grid smoothing to standard extrapolated smoothing." << std::endl;
+                    std::cout << "Switching from full grid smoothing to standard extrapolated smoothing." << std::endl;
                 }
             }
 
@@ -239,6 +261,7 @@ void GMGPolar::initializeSolution()
         }
     }
     else {
+        std::cout << "Using Full Multigrid" << std::endl;
         // Start from the coarsest level
         int FMG_start_level_depth = number_of_levels_ - 1;
         Level& FMG_level          = levels_[FMG_start_level_depth];
