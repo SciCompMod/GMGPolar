@@ -4,11 +4,12 @@
 #SBATCH --error=slurm-%A-Roofline-Model.err
 #SBATCH -N 1
 #SBATCH -n 1
-#SBATCH -c 56
+#SBATCH -c 64
 #SBATCH --threads-per-core=1
-#SBATCH --nodelist="be-cpu03"
-#SBATCH -t 1440
+#SBATCH --time=0:30:00
 #SBATCH --exclusive
+#SBATCH --partition=naples128
+#SBATCH --account=2476029
 
 srun likwid-topology
 

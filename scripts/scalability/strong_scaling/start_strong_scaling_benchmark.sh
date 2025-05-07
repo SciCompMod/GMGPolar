@@ -1,15 +1,15 @@
-#!/bin/bash
 #SBATCH --job-name=gmgpolar
-#SBATCH --output=../../slurm_output/slurm-%A-Strong-Scaling-Benchmark.out
-#SBATCH --error=../../slurm_output/slurm-%A-Strong-Scaling-Benchmark.err
+#SBATCH --output=slurm-%A-convergenceorder_GMGPolar_CARA.out
+#SBATCH --error=slurm-%A-convergenceorder_GMGPolar_CARA.err
 #SBATCH -N 1
 #SBATCH -n 1
-#SBATCH -c 56
+#SBATCH -c 64
 #SBATCH --threads-per-core=1
-#SBATCH -t 1400
-# #SBATCH --nodelist="be-cpu02"
+#SBATCH --time=0:30:00
 #SBATCH --exclusive
+#SBATCH --partition=naples128
+#SBATCH --account=2476029
 
 # Adjust parameters in src/strong_scaling.cpp
 
-srun --cpus-per-task=56 ./../../../build/strong_scaling
+srun --cpus-per-task=56 ./../../../build/paper_strong_scaling

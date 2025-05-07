@@ -103,8 +103,8 @@ import matplotlib.pyplot as plt
 data = pd.read_csv('strong_scaling_results.csv')
 
 # Define the number of sockets and socket size
-sockets = 4
-socket_size = 14
+sockets = 2
+socket_size = 32
 
 # Calculate the total number of threads
 total_threads = sockets * socket_size  # 2 * 24 = 48

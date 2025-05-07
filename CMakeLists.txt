@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.12)
 project(GMGPolar VERSION 2.0.0 LANGUAGES CXX)
 
 # Options should be defined before they're used
-option(GMGPOLAR_BUILD_TESTS "Build GMGPolar unit tests." ON)
-option(GMGPOLAR_USE_LIKWID "Use LIKWID to measure code (regions)." OFF)
+option(GMGPOLAR_BUILD_TESTS "Build GMGPolar unit tests." OFF)
+option(GMGPOLAR_USE_LIKWID "Use LIKWID to measure code (regions)." ON)
 option(GMGPOLAR_USE_MUMPS "Use MUMPS to solve linear systems." ON)
 option(GMGPOLAR_ENABLE_COVERAGE "Enable code coverage reporting (requires GCC/Clang)" OFF)
 
@@ -50,6 +50,13 @@ target_link_libraries(gmgpolar PRIVATE GMGPolarLib)
 target_link_libraries(convergence_order PRIVATE GMGPolarLib)
 target_link_libraries(weak_scaling PRIVATE GMGPolarLib)
 target_link_libraries(strong_scaling PRIVATE GMGPolarLib)
+
+add_executable(paper_convergence_order src/paper_convergence_order.cpp)
+target_link_libraries(paper_convergence_order PRIVATE GMGPolarLib)
+add_executable(paper_weak_scaling src/paper_weak_scaling.cpp)
+target_link_libraries(paper_weak_scaling PRIVATE GMGPolarLib)
+add_executable(paper_strong_scaling src/paper_strong_scaling.cpp)
+target_link_libraries(paper_strong_scaling PRIVATE GMGPolarLib)
 
 if(GMGPOLAR_BUILD_TESTS)
     enable_testing()

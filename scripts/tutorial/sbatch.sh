@@ -1,14 +1,14 @@
-#!/bin/bash
 #SBATCH --job-name=gmgpolar
-#SBATCH --output=../slurm_output/slurm-%A-GMGPolar_Tutorial.out
-#SBATCH --error=../slurm_output/slurm-%A-GMGPolar_Tutorial.err
+#SBATCH --output=slurm-%A-convergenceorder_GMGPolar_CARA.out
+#SBATCH --error=slurm-%A-convergenceorder_GMGPolar_CARA.err
 #SBATCH -N 1
 #SBATCH -n 1
-#SBATCH -c 56
+#SBATCH -c 64
 #SBATCH --threads-per-core=1
-#SBATCH -t 1400
-# #SBATCH --nodelist="be-cpu01"
+#SBATCH --time=0:30:00
 #SBATCH --exclusive
+#SBATCH --partition=naples128
+#SBATCH --account=2476029
 
 # Verbosity level: 
 # 0 - No output 
