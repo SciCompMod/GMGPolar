@@ -145,8 +145,7 @@ void GMGPolar::writeToVTK(const std::filesystem::path& file_path, const Level& l
 }
 
 
-void GMGPolar::writeToVTKTorus(const std::filesystem::path& file_path, const Level& level,
-    const Vector<double>& grid_function, int n_phi, double major_radius)
+void GMGPolar::writeToVTKTorus(const std::filesystem::path& file_path, const Level& level, const Vector<double>& grid_function, int n_phi, double major_radius)
 {
 const PolarGrid& grid         = level.grid();
 const LevelCache& level_cache = level.levelCache();
