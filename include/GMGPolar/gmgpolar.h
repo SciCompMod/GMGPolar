@@ -299,4 +299,5 @@ private:
     /* Visualization */
     void writeToVTK(const std::filesystem::path& file_path, const PolarGrid& grid);
     void writeToVTK(const std::filesystem::path& file_path, const Level& level, const Vector<double>& grid_function);
+    void writeToVTKTorus(const std::filesystem::path& file_path, const Level& level, const Vector<double>& grid_function);
 };

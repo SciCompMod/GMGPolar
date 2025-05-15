@@ -222,8 +222,8 @@ void GMGPolar::solve()
 
     if (paraview_) {
         computeExactError(level, level.solution(), level.residual());
-        writeToVTK("output_solution", level, level.solution());
-        writeToVTK("output_error", level, level.residual());
+        writeToVTKTorus("output_solution", level, level.solution());
+        writeToVTKTorus("output_error", level, level.residual());
     }
 }
 
