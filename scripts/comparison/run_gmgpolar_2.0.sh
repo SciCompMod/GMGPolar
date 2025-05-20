@@ -1,4 +1,5 @@
-#SBATCH --job-name=gmgpolar
+#!/bin/bash
+#SBATCH --job-name=gmgpolar2.0
 #SBATCH --output=slurm-%A-convergenceorder_GMGPolar_CARA.out
 #SBATCH --error=slurm-%A-convergenceorder_GMGPolar_CARA.err
 #SBATCH -N 1
