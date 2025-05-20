@@ -6,7 +6,7 @@
 #SBATCH -n 1
 #SBATCH -c 64
 #SBATCH --threads-per-core=1
-#SBATCH --time=0:30:00
+#SBATCH --time=3:00:00
 #SBATCH --exclusive
 #SBATCH --partition=naples128
 #SBATCH --account=2476029
@@ -97,7 +97,7 @@ multigridCycle=0
 # Convergence criteria:
 maxIterations=300
 residualNormType=1 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
-absoluteTolerance=1e-14
+absoluteTolerance=1e-200 # ignore on comparison v1/v2 as not implemented/used in v1
 relativeTolerance=1e-8
 
 # Define additional geometry parameters
