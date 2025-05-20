@@ -29,7 +29,7 @@ alpha_coeff=0 # Poisson(3), Sonnendrucker(0), Zoni(1), Zoni-Shifted(2)
 beta_coeff=1 # Zero(0), Gyro - Alpha Inverse(1)
 
 extrapolation=1
-maxLevels=1e6
+maxLevels=30
 preSmoothingSteps=1
 postSmoothingSteps=1
 multigridCycle=0
