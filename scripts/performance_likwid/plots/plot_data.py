@@ -351,7 +351,7 @@ def main():
         x_position = i * socket_size
         plt.axvline(x=x_position, color='darkgray', linestyle='--', linewidth=1.5)
 
-    plt.ylim(bottom= 0.7 * min(solve_compact + setup_compact), top= 1.3 * max(solve_compact + setup_compact))
+    plt.ylim(bottom= 0.678 * min(solve_compact + setup_compact), top= 1.3 * max(solve_compact + setup_compact))
 
     # Labels and title
     plt.yscale('log')
