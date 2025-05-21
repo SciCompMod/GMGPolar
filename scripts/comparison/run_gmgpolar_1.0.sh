@@ -25,7 +25,7 @@ geometry=2 # Circular (0), Shafranov(1), Czarny(2), Culham (3)
 kappa_eps=0.3 # Shafranov: 0.3, Czarny = 0.3, else unused
 delta_e=1.4 # Shafranov: 0.2, Czarny = 1.4, else unused
 problem=6 # CartesianR2(5), CartesianR6(7), PolarR6(6), RefinedRadius(4)
-alpha_coeff=0 # Poisson(3), Sonnendrucker(0), Zoni(1), Zoni-Shifted(2)
+alpha_coeff=2 # Poisson(3), Sonnendrucker(0), Zoni(1), Zoni-Shifted(2)
 beta_coeff=1 # Zero(0), Gyro - Alpha Inverse(1)
 
 extrapolation=1

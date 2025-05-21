@@ -44,6 +44,51 @@ void GMGPolar::setup()
             std::cout << "Unknown";
         }
         std::cout << std::endl;
+
+        std::cout << "Coefficients: ";
+        if (typeid(*density_profile_coefficients_) == typeid(PoissonCoefficients)) {
+            std::cout << "PoissonCoefficients";
+        }
+        else if (typeid(*density_profile_coefficients_) == typeid(SonnendruckerCoefficients)) {
+            std::cout << "SonnendruckerCoefficients, Alpha: Sonnendruecker, Beta: Zero";
+        }
+        else if (typeid(*density_profile_coefficients_) == typeid(SonnendruckerGyroCoefficients)) {
+            std::cout << "SonnendruckerGyroCoefficients, Alpha: Sonnendruecker, Beta: Inverse";
+        }
+        else if (typeid(*density_profile_coefficients_) == typeid(ZoniCoefficients)) {
+            std::cout << "ZoniCoefficients, Alpha: Zoni, Beta: Zero";
+        }
+        else if (typeid(*density_profile_coefficients_) == typeid(ZoniGyroCoefficients)) {
+            std::cout << "ZoniGyroCoefficients, Alpha: Zoni, Beta: Inverse";
+        }
+        else if (typeid(*density_profile_coefficients_) == typeid(ZoniShiftedCoefficients)) {
+            std::cout << "ZoniShiftedCoefficients, Alpha: ZoniShifted, Beta: Zero";
+        }
+        else if (typeid(*density_profile_coefficients_) == typeid(ZoniShiftedGyroCoefficients)) {
+            std::cout << "ZoniShiftedGyroCoefficients, Alpha: ZoniShifted, Beta: Inverse";
+        }        
+        else {
+            std::cout << "Unknown";
+        }
+        std::cout << std::endl;
+
+        std::cout << "Problem: ";
+        if (problem_ == ProblemType::CARTESIAN_R2) {
+            std::cout << "CARTESIAN_R2";
+        }
+        else if (problem_ == ProblemType::CARTESIAN_R6) {
+            std::cout << "CARTESIAN_R6";
+        }
+        else if (problem_ == ProblemType::POLAR_R6) {
+            std::cout << "POLAR_R6";
+        }
+        else if (problem_ == ProblemType::REFINED_RADIUS) {
+            std::cout << "REFINED_RADIUS";
+        }    
+        else {
+            std::cout << "Unknown";
+        }
+        std::cout << std::endl;  
     }
 
 

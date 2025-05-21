@@ -64,7 +64,7 @@ DirBC_Interior=0
 ### Custom Test Cases ###
 geometry=2 # Circular (0), Shafranov(1), Czarny(2), Culham (3)
 problem=2 # CartesianR2(0), CartesianR6(1), PolarR6(2), RefinedRadius(3)
-alpha_coeff=1 # Poisson(0), Sonnendrucker(1), Zoni(2), Zoni-Shifted(3)
+alpha_coeff=3 # Poisson(0), Sonnendrucker(1), Zoni(2), Zoni-Shifted(3)
 beta_coeff=1 # Zero(0), Gyro - Alpha Inverse(1)
 # Remark: For RefinedRadius choose alpha_coeff=3, beta_coeff=1
 # Remark: For Culham Geometry choose geometry=3, problem=2,3, alpha_coeff=3, beta_coeff=1
