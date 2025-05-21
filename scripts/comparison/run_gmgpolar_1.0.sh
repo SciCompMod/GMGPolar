@@ -40,7 +40,7 @@ absoluteTolerance=1e-14
 relativeTolerance=1e-8
 
 # Loop over different core counts
-for cores in 1 2 4 8 16 32 64; do
+for cores in 64; do #1 2 4 8 16 32 64; do
     # Set the number of OpenMP threads
     export OMP_NUM_THREADS=$cores
     

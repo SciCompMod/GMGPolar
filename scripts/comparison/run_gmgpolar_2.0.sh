@@ -96,7 +96,7 @@ multigridCycle=0
 
 # Convergence criteria:
 maxIterations=300
-residualNormType=1 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
+residualNormType=0 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
 absoluteTolerance=1e-200 # ignore on comparison v1/v2 as not implemented/used in v1
 relativeTolerance=1e-8
 
@@ -120,7 +120,7 @@ elif [ "$alpha_coeff" -eq 1 ]; then
 elif [ "$alpha_coeff" -eq 2 ]; then
     alpha_jump=$(python3 -c "print(0.4837 * float($Rmax))")
 elif [ "$alpha_coeff" -eq 3 ]; then
-    alpha_jump=$(python3 -c "print(0.7081 * float($Rmax))")
+    alpha_jump=$(python3 -c "print(0.7 * float($Rmax))")
 else
     echo "Invalid value for alpha_coeff: $alpha_coeff"
     exit 1
@@ -146,14 +146,14 @@ elif [ "$alpha_coeff" -eq 1 ]; then
 elif [ "$alpha_coeff" -eq 2 ]; then
     alpha_jump=$(python3 -c "print(0.4837 * float($Rmax))")
 elif [ "$alpha_coeff" -eq 3 ]; then
-    alpha_jump=$(python3 -c "print(0.7081 * float($Rmax))")
+    alpha_jump=$(python3 -c "print(0.7 * float($Rmax))")
 else
     echo "Invalid value for alpha_coeff: $alpha_coeff"
     exit 1
 fi
 
 # Loop over different core counts
-for cores in 1 2 4 8 16 32 64; do
+for cores in 64; do #1 2 4 8 16 32 64; do
     # Set the number of OpenMP threads
     export OMP_NUM_THREADS=$cores
     
@@ -200,6 +200,8 @@ for cores in 1 2 4 8 16 32 64; do
         --residualNormType $residualNormType \
         --absoluteTolerance $absoluteTolerance \
         --relativeTolerance $relativeTolerance
+
+#valgrind --memcheck
     
     echo "===================================================================="
     echo "Completed run with $cores cores/threads"

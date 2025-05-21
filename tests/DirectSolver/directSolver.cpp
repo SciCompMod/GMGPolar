@@ -77,7 +77,7 @@ TEST(DirectSolverTest, directSolver_DirBC_Interior)
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    double alpha_jump = 0.7081 * Rmax;
+    double alpha_jump = 0.7 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
     std::unique_ptr<BoundaryConditions> boundary_conditions =
@@ -132,7 +132,7 @@ TEST(DirectSolverTest, directSolver_AcrossOrigin)
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    double alpha_jump = 0.7081 * Rmax;
+    double alpha_jump = 0.7 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
     std::unique_ptr<BoundaryConditions> boundary_conditions =
@@ -469,7 +469,7 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeometry)
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    double alpha_jump = 0.7081 * Rmax;
+    double alpha_jump = 0.7 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
     std::unique_ptr<BoundaryConditions> boundary_conditions =
@@ -516,7 +516,7 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometry)
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    double alpha_jump = 0.7081 * Rmax;
+    double alpha_jump = 0.7 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
     std::unique_ptr<BoundaryConditions> boundary_conditions =
@@ -565,7 +565,7 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeometry)
 
     CulhamGeometry domain_geometry(Rmax);
 
-    double alpha_jump = 0.7081 * Rmax;
+    double alpha_jump = 0.7 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
     std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<Refined_Boundary_CulhamGeometry>(Rmax);
@@ -608,7 +608,7 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometry)
 
     CulhamGeometry domain_geometry(Rmax);
 
-    double alpha_jump = 0.7081 * Rmax;
+    double alpha_jump = 0.7 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
     std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<Refined_Boundary_CulhamGeometry>(Rmax);
@@ -1030,7 +1030,7 @@ TEST(DirectSolverTakeTest_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeome
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    double alpha_jump = 0.7081 * Rmax;
+    double alpha_jump = 0.7 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
     std::unique_ptr<BoundaryConditions> boundary_conditions =
@@ -1077,7 +1077,7 @@ TEST(DirectSolverTakeTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometr
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    double alpha_jump = 0.7081 * Rmax;
+    double alpha_jump = 0.7 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
     std::unique_ptr<BoundaryConditions> boundary_conditions =
@@ -1126,7 +1126,7 @@ TEST(DirectSolverTakeTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeome
 
     CulhamGeometry domain_geometry(Rmax);
 
-    double alpha_jump = 0.7081 * Rmax;
+    double alpha_jump = 0.7 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
     std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<Refined_Boundary_CulhamGeometry>(Rmax);
@@ -1169,7 +1169,7 @@ TEST(DirectSolverTakeTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometr
 
     CulhamGeometry domain_geometry(Rmax);
 
-    double alpha_jump = 0.7081 * Rmax;
+    double alpha_jump = 0.7 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
     std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<Refined_Boundary_CulhamGeometry>(Rmax);

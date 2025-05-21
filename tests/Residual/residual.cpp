@@ -51,7 +51,7 @@ TEST(OperatorATest, applyA_DirBC_Interior)
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    double alpha_jump = 0.7081 * Rmax;
+    double alpha_jump = 0.7 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
     std::unique_ptr<BoundaryConditions> boundary_conditions =
@@ -107,7 +107,7 @@ TEST(OperatorATest, applyA_AcrossOrigin)
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    double alpha_jump = 0.7081 * Rmax;
+    double alpha_jump = 0.7 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
     std::unique_ptr<BoundaryConditions> boundary_conditions =
