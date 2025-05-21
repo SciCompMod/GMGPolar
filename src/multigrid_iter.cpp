@@ -163,7 +163,7 @@ void gmgpolar::multigrid_iter()
             }
 
             if (gyro::icntl[Param::verbose] > 1)
-                std::cout << "--> Iteration " << it << ": residual norm = " << nrm_2_res[it]
+                std::cout << "--> Iteration " << it << ": residual norm = " << nrm_2_res[it] / sqrt(v_level[0]->m) //scaling by 1/sqrt(m)
                           << ", relative residual = " << convergence_criterium << std::endl;
         }
         //Alternative extrapolation: use error instead of residual as convergence criterium

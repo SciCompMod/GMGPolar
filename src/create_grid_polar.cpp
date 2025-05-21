@@ -159,7 +159,7 @@ void level::build_r()
             // a) - ln(0.5 * (alpha(0) - alpha(Rmax))):
             //    - ln(0.5 * (np.exp(-np.tanh(-14)) - np.exp(-np.tanh(6)))) = 0.16143743821247852
             // b) r_center = Rmax * (np.arctanh(0.16143743821247852) + 14) / 20 = 0.7081431124450334 Rmax
-            r_jump = 0.7081;
+            r_jump = 0.7;
         }
         else if (gyro::icntl[Param::alpha_coeff] == POISSON) {
             r_jump = 0.5; // There is no jump for Poisson so this is an arbitrary choice

@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16.3)
 project(GMGPolar VERSION 1.0.0)
 
 option(GMGPOLAR_BUILD_TESTS "Build GMGPolar unit tests." ON)
-option(GMGPOLAR_USE_MUMPS "Use MUMPS to compute matrix factorizations." OFF)
+option(GMGPOLAR_USE_MUMPS "Use MUMPS to compute matrix factorizations." ON)
 option(GMGPOLAR_USE_LIKWID "Use LIKWID to measure code (regions)." OFF)
 
 
@@ -59,13 +59,13 @@ endif()
 if(GMGPOLAR_USE_MUMPS)
 
     set(INC_DIRS
-        /home/kueh_mj/.spack/rev.23.05/install/linux-rocky8-zen2/gcc-10.4.0/mumps-5.4.1-fftqkl/include
-        /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/metis-5.1.0-akhgsf/include
+        /scratch/ws/3/kueh_mj-gmgpolar/spack/opt/spack/linux-rocky8-zen/gcc-8.5.0/mumps-5.5.1-vxpgipbhjslom2fsetshytcj5ajwqvwj/include
+        /scratch/ws/3/kueh_mj-gmgpolar/spack/opt/spack/linux-rocky8-zen/gcc-8.5.0/metis-5.1.0-keirft7rdzyu7ehwgs3qtmg77sexmhvt/include
     )
 
     set(LIB_DIRS
-        /home/kueh_mj/.spack/rev.23.05/install/linux-rocky8-zen2/gcc-10.4.0/mumps-5.4.1-fftqkl/lib
-        /sw/rev/23.05/linux-rocky8-zen2/gcc-10.4.0/metis-5.1.0-akhgsf/lib
+        /scratch/ws/3/kueh_mj-gmgpolar/spack/opt/spack/linux-rocky8-zen/gcc-8.5.0/mumps-5.5.1-vxpgipbhjslom2fsetshytcj5ajwqvwj/lib
+        /scratch/ws/3/kueh_mj-gmgpolar/spack/opt/spack/linux-rocky8-zen/gcc-8.5.0/metis-5.1.0-keirft7rdzyu7ehwgs3qtmg77sexmhvt/lib
     )
 
     include_directories(
