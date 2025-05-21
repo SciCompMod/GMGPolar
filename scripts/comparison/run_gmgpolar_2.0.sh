@@ -96,7 +96,7 @@ multigridCycle=0
 
 # Convergence criteria:
 maxIterations=300
-residualNormType=0 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
+residualNormType=1 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
 absoluteTolerance=1e-200 # ignore on comparison v1/v2 as not implemented/used in v1
 relativeTolerance=1e-8
 
