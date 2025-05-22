@@ -9,7 +9,7 @@
 #include "../include/GMGPolar/gmgpolar.h"
 #include "../include/GMGPolar/test_cases.h"
 
-void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
+void runTest(int maxOpenMPThreads, int divideBy2, StencilDistributionMethod stencilDistributionMethodIn, bool cacheDensityProfileCoefficientsIn, bool cacheDomainGeometryIn, std::ofstream& outfile)
 {
     const double R0                           = 1e-8;
     const double Rmax                         = 1.3;
@@ -18,44 +18,11 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
     const double elongation_kappa             = 0.3;
     const double shift_delta                  = 0.2;
 
-    /* --------------------------------------------- */
-    /* Example 1: Polar Solution -> Higher Order 4.0 */
-
-    // const double alpha_jump = 0.4837 * Rmax;
-    // std::unique_ptr<DomainGeometry> domain_geometry =
-    //     std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<ExactSolution> exact_solution =
-    //     std::make_unique<PolarR6_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniGyroCoefficients>(Rmax, alpha_jump);
-    // std::unique_ptr<BoundaryConditions> boundary_conditions =
-    //     std::make_unique<PolarR6_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<SourceTerm> source_term =
-    //     std::make_unique<PolarR6_ZoniGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
 
     /* --------------------------------------------------------- */
-    /* Example 2: Cartesian Solution (Czarny) -> Lower Order 3.5 */
+    /* Example A: Polar Solution (Czarny with Zoni Gyro Shifted) */
 
-    // const double alpha_jump = 0.66 * Rmax;
-    // std::unique_ptr<DomainGeometry> domain_geometry = std::make_unique<CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    // std::unique_ptr<ExactSolution> exact_solution = std::make_unique<CartesianR6_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    // std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<SonnendruckerGyroCoefficients>(Rmax, alpha_jump);
-    // std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<CartesianR6_Boundary_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    // std::unique_ptr<SourceTerm> source_term = std::make_unique<CartesianR6_SonnendruckerGyro_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-
-    /* ---------------------------------------------- */
-    /* Example 3: Refined Solution -> Lower Order 3.5 */
-
-    // const double alpha_jump = 0.9 * Rmax; // Refinement where the solution is most complex
-    // std::unique_ptr<DomainGeometry> domain_geometry = std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<ExactSolution> exact_solution = std::make_unique<Refined_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
-    // std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<Refined_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<SourceTerm> source_term = std::make_unique<Refined_ZoniShiftedGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-
-    /* --------------------------------------------------------- */
-    /* Example 4a: Polar Solution (Czarny with Zoni Gyro Shifted) */
-
-    const double alpha_jump = (0.7 + 0.025 * std::log(std::sqrt(2) - 1)) * Rmax;
+    const double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DomainGeometry> domain_geometry =
         std::make_unique<CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
     std::unique_ptr<ExactSolution> exact_solution =
@@ -67,9 +34,9 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
         std::make_unique<PolarR6_ZoniShiftedGyro_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
 
     /* ------------------------------------------------------------- */
-    /* Example 4b: Polar Solution (Shafranov with Zoni Gyro Shifted) */
+    /* Example B: Polar Solution (Shafranov with Zoni Gyro Shifted) */
 
-    // const double alpha_jump = (0.7 + 0.025 * std::log(std::sqrt(2) - 1)) * Rmax;
+    // const double alpha_jump = 0.678 * Rmax;
     // std::unique_ptr<DomainGeometry> domain_geometry =
     //     std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
     // std::unique_ptr<ExactSolution> exact_solution =
@@ -80,25 +47,21 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
     // std::unique_ptr<SourceTerm> source_term =
     //     std::make_unique<PolarR6_ZoniShiftedGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
 
+    /* ------------------------------------------------------------- */
+    /* Example C: Polar Solution (Culham with Zoni Gyro Shifted) */
+
+    // const double alpha_jump = 0.678 * Rmax;
+    // std::unique_ptr<DomainGeometry> domain_geometry =
+    //     std::make_unique<CulhamGeometry>(Rmax);
+    // std::unique_ptr<ExactSolution> exact_solution =
+    //     std::make_unique<PolarR6_CulhamGeometry>(Rmax);
+    // std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
+    // std::unique_ptr<BoundaryConditions> boundary_conditions =
+    //     std::make_unique<PolarR6_Boundary_CulhamGeometry>(Rmax);
+    // std::unique_ptr<SourceTerm> source_term =
+    //     std::make_unique<PolarR6_ZoniShiftedGyro_CulhamGeometry>(Rmax);
+
     /* -------------------------------------------------------------- */
-    /* Example 5a: Cartesian Solution (Czarny with Zoni Gyro Shifted) */
-
-    // const double alpha_jump = (0.7 + 0.025 * std::log(std::sqrt(2) - 1)) * Rmax;
-    // std::unique_ptr<DomainGeometry> domain_geometry = std::make_unique<CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    // std::unique_ptr<ExactSolution> exact_solution = std::make_unique<CartesianR6_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    // std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
-    // std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<CartesianR6_Boundary_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    // std::unique_ptr<SourceTerm> source_term = std::make_unique<CartesianR6_ZoniShiftedGyro_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-
-    /* ----------------------------------------------------------------- */
-    /* Example 5b: Cartesian Solution (Shafranov with Zoni Gyro Shifted) */
-
-    // const double alpha_jump = (0.7 + 0.025 * std::log(std::sqrt(2) - 1)) * Rmax;
-    // std::unique_ptr<DomainGeometry> domain_geometry = std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<ExactSolution> exact_solution = std::make_unique<CartesianR6_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
-    // std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<CartesianR6_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<SourceTerm> source_term = std::make_unique<CartesianR6_ZoniShiftedGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
 
 
     std::string geometry_string = "";
@@ -128,9 +91,9 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
 
     const double threadReductionFactor = 1.0;
 
-    const StencilDistributionMethod stencilDistributionMethod = StencilDistributionMethod::CPU_GIVE;
-    const bool cacheDensityProfileCoefficients                = true;
-    const bool cacheDomainGeometry                            = false;
+    StencilDistributionMethod stencilDistributionMethod = stencilDistributionMethodIn;
+    bool cacheDensityProfileCoefficients                = cacheDensityProfileCoefficientsIn;
+    bool cacheDomainGeometry                            = cacheDomainGeometryIn;
 
     const int nr_exp             = 4;
     const int ntheta_exp         = -1;
@@ -150,7 +113,7 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
 
     const int maxIterations                 = 300;
     const ResidualNormType residualNormType = ResidualNormType::WEIGHTED_EUCLIDEAN;
-    const double absoluteTolerance          = 1e-14;
+    const double absoluteTolerance          = 1e-200 # ignore on comparison v1/v2 as not implemented/used in v1
     const double relativeTolerance          = 1e-8;
 
     solver.verbose(verbose);
@@ -216,8 +179,8 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
 
 int main()
 {
-    std::ofstream outfile("strong_scaling_results.csv");
-    outfile << "Threads,DivideBy2,nr,ntheta,geometry,"
+    std::ofstream outfile1("strong_scaling_results_give_nocache.csv");
+    outfile1 << "Threads,DivideBy2,nr,ntheta,geometry,"
             << "stencil_method,cacheDensityProfileCoefficients,cacheDomainGeometry,FMG,extrapolation_int,"
             << "TotalTime,t_setup_total,t_setup_createLevels,"
             << "t_setup_smoother,t_setup_directSolver,t_solve_total,t_solve_initial_approximation,"
@@ -226,17 +189,54 @@ int main()
             << "t_avg_MGC_residual,t_avg_MGC_directSolver\n"; // Header
 
     // Define the constant parameters for the problem size
-    int divideBy2 = 7; // Keeping the domain division constant
+    int divideBy1 = 7; // Keeping the domain division constant
 
     // Vary only the number of threads for strong scaling
     std::vector<int> threadCounts = {1, 2, 4, 8, 16, 32, 64};  // Thread counts to test strong scaling
 
     for (size_t i = 0; i < threadCounts.size(); i++) {
-        runTest(threadCounts[i], divideBy2, outfile); // Keep problem size fixed, vary threads
+        runTest(threadCounts[i], divideBy2, StencilDistributionMethod::CPU_GIVE, false, false, outfile1); // Keep problem size fixed, vary threads
     }
 
-    outfile.close();
-    std::cout << "Results written to strong_scaling_results.csv" << std::endl;
+    outfile1.close();
+    std::cout << "Results written to strong_scaling_results_give_nocache.csv" << std::endl;
+
+    ///////////////////////////////////////////////////////////////
+
+    std::ofstream outfile2("strong_scaling_results_give.csv");
+    outfile2 << "Threads,DivideBy2,nr,ntheta,geometry,"
+            << "stencil_method,cacheDensityProfileCoefficients,cacheDomainGeometry,FMG,extrapolation_int,"
+            << "TotalTime,t_setup_total,t_setup_createLevels,"
+            << "t_setup_smoother,t_setup_directSolver,t_solve_total,t_solve_initial_approximation,"
+            << "t_solve_multigrid_iterations,t_check_convergence,t_check_exact_error,"
+            << "t_avg_MGC_total,t_avg_MGC_preSmoothing,t_avg_MGC_postSmoothing,"
+            << "t_avg_MGC_residual,t_avg_MGC_directSolver\n"; // Header
+
+    for (size_t i = 0; i < threadCounts.size(); i++) {
+        runTest(threadCounts[i], divideBy2, StencilDistributionMethod::CPU_GIVE, true, false, outfile2); // Keep problem size fixed, vary threads
+    }
+
+    outfile2.close();
+    std::cout << "Results written to strong_scaling_results_give.csv" << std::endl;
+
+    ///////////////////////////////////////////////////////////////
+
+    std::ofstream outfile2("strong_scaling_results_take.csv");
+    outfile3 << "Threads,DivideBy2,nr,ntheta,geometry,"
+            << "stencil_method,cacheDensityProfileCoefficients,cacheDomainGeometry,FMG,extrapolation_int,"
+            << "TotalTime,t_setup_total,t_setup_createLevels,"
+            << "t_setup_smoother,t_setup_directSolver,t_solve_total,t_solve_initial_approximation,"
+            << "t_solve_multigrid_iterations,t_check_convergence,t_check_exact_error,"
+            << "t_avg_MGC_total,t_avg_MGC_preSmoothing,t_avg_MGC_postSmoothing,"
+            << "t_avg_MGC_residual,t_avg_MGC_directSolver\n"; // Header
+
+    for (size_t i = 0; i < threadCounts.size(); i++) {
+        runTest(threadCounts[i], divideBy2, StencilDistributionMethod::CPU_TAKE, true, true, outfile3); // Keep problem size fixed, vary threads
+    }
+
+    outfile3.close();
+    std::cout << "Results written to strong_scaling_results_take.csv" << std::endl;
+
 
     return 0;
 }

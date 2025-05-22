@@ -17,44 +17,10 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
     const double elongation_kappa             = 0.3;
     const double shift_delta                  = 0.2;
 
-    /* --------------------------------------------- */
-    /* Example 1: Polar Solution -> Higher Order 4.0 */
-
-    // const double alpha_jump = 0.4837 * Rmax;
-    // std::unique_ptr<DomainGeometry> domain_geometry =
-    //     std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<ExactSolution> exact_solution =
-    //     std::make_unique<PolarR6_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniGyroCoefficients>(Rmax, alpha_jump);
-    // std::unique_ptr<BoundaryConditions> boundary_conditions =
-    //     std::make_unique<PolarR6_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<SourceTerm> source_term =
-    //     std::make_unique<PolarR6_ZoniGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-
-    /* --------------------------------------------------------- */
-    /* Example 2: Cartesian Solution (Czarny) -> Lower Order 3.5 */
-
-    // const double alpha_jump = 0.66 * Rmax;
-    // std::unique_ptr<DomainGeometry> domain_geometry = std::make_unique<CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    // std::unique_ptr<ExactSolution> exact_solution = std::make_unique<CartesianR6_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    // std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<SonnendruckerGyroCoefficients>(Rmax, alpha_jump);
-    // std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<CartesianR6_Boundary_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    // std::unique_ptr<SourceTerm> source_term = std::make_unique<CartesianR6_SonnendruckerGyro_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-
-    /* ---------------------------------------------- */
-    /* Example 3: Refined Solution -> Lower Order 3.5 */
-
-    // const double alpha_jump = 0.9 * Rmax; // Refinement where the solution is most complex
-    // std::unique_ptr<DomainGeometry> domain_geometry = std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<ExactSolution> exact_solution = std::make_unique<Refined_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
-    // std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<Refined_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<SourceTerm> source_term = std::make_unique<Refined_ZoniShiftedGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-
     /* --------------------------------------------------------- */
     /* Example 4a: Polar Solution (Czarny with Zoni Gyro Shifted) */
 
-    const double alpha_jump = (0.7 + 0.025 * std::log(std::sqrt(2) - 1)) * Rmax;
+    const double alpha_jump = 0.678 * Rmax;
     std::cout<< "alpha_jump = " << alpha_jump << std::endl;
     std::unique_ptr<DomainGeometry> domain_geometry =
         std::make_unique<CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
@@ -67,9 +33,9 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
         std::make_unique<PolarR6_ZoniShiftedGyro_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
 
     /* ------------------------------------------------------------- */
-    /* Example 4b: Polar Solution (Shafranov with Zoni Gyro Shifted) */
+    /* Example B: Polar Solution (Shafranov with Zoni Gyro Shifted) */
 
-    // const double alpha_jump = (0.7 + 0.025 * std::log(std::sqrt(2) - 1)) * Rmax;
+    // const double alpha_jump = 0.678 * Rmax;
     // std::unique_ptr<DomainGeometry> domain_geometry =
     //     std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
     // std::unique_ptr<ExactSolution> exact_solution =
@@ -80,25 +46,21 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
     // std::unique_ptr<SourceTerm> source_term =
     //     std::make_unique<PolarR6_ZoniShiftedGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
 
+    /* ------------------------------------------------------------- */
+    /* Example C: Polar Solution (Culham with Zoni Gyro Shifted) */
+
+    // const double alpha_jump = 0.678 * Rmax;
+    // std::unique_ptr<DomainGeometry> domain_geometry =
+    //     std::make_unique<CulhamGeometry>(Rmax);
+    // std::unique_ptr<ExactSolution> exact_solution =
+    //     std::make_unique<PolarR6_CulhamGeometry>(Rmax);
+    // std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
+    // std::unique_ptr<BoundaryConditions> boundary_conditions =
+    //     std::make_unique<PolarR6_Boundary_CulhamGeometry>(Rmax);
+    // std::unique_ptr<SourceTerm> source_term =
+    //     std::make_unique<PolarR6_ZoniShiftedGyro_CulhamGeometry>(Rmax);
+
     /* -------------------------------------------------------------- */
-    /* Example 5a: Cartesian Solution (Czarny with Zoni Gyro Shifted) */
-
-    // const double alpha_jump = (0.7 + 0.025 * std::log(std::sqrt(2) - 1)) * Rmax;
-    // std::unique_ptr<DomainGeometry> domain_geometry = std::make_unique<CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    // std::unique_ptr<ExactSolution> exact_solution = std::make_unique<CartesianR6_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    // std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
-    // std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<CartesianR6_Boundary_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    // std::unique_ptr<SourceTerm> source_term = std::make_unique<CartesianR6_ZoniShiftedGyro_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-
-    /* ----------------------------------------------------------------- */
-    /* Example 5b: Cartesian Solution (Shafranov with Zoni Gyro Shifted) */
-
-    // const double alpha_jump = (0.7 + 0.025 * std::log(std::sqrt(2) - 1)) * Rmax;
-    // std::unique_ptr<DomainGeometry> domain_geometry = std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<ExactSolution> exact_solution = std::make_unique<CartesianR6_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
-    // std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<CartesianR6_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<SourceTerm> source_term = std::make_unique<CartesianR6_ZoniShiftedGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
 
 
     std::string geometry_string = "";
@@ -150,7 +112,7 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
 
     const int maxIterations                 = 300;
     const ResidualNormType residualNormType = ResidualNormType::WEIGHTED_EUCLIDEAN;
-    const double absoluteTolerance          = 1e-14;
+    const double absoluteTolerance          = 1e-200 # ignore on comparison v1/v2 as not implemented/used in v1
     const double relativeTolerance          = 1e-8;
 
     solver.verbose(verbose);
@@ -216,7 +178,7 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
 
 int main()
 {
-    std::ofstream outfile("weak_scaling_results.csv");
+    std::ofstream outfile("weak_scaling_results_czarny.csv");
     outfile << "Threads,DivideBy2,nr,ntheta,geometry,"
             << "stencil_method,cacheDensityProfileCoefficients,cacheDomainGeometry,FMG,extrapolation_int,"
             << "TotalTime,t_setup_total,t_setup_createLevels,"
@@ -234,7 +196,7 @@ int main()
     }
 
     outfile.close();
-    std::cout << "Results written to weak_scaling_results.csv" << std::endl;
+    std::cout << "Results written to weak_scaling_results_czarny.csv" << std::endl;
 
     return 0;
 }

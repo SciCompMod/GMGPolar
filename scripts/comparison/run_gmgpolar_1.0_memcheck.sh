@@ -11,6 +11,8 @@
 #SBATCH --partition=naples128
 #SBATCH --account=2476029
 
+TODO: rhs=1, deactivate MUMPS
+
 R0=1e-8
 Rmax=1.3
 nr_exp=4
@@ -34,21 +36,22 @@ preSmoothingSteps=1
 postSmoothingSteps=1
 multigridCycle=0
 
-maxIterations=300
+maxIterations=3
 residualNormType=0 # convergence_criterium: scaled L2 (0), scaled inf (1), L2 (2), inf (3)
 absoluteTolerance=1e-200 # ignore on comparison v1/v2 as not implemented/used in v1
 relativeTolerance=1e-8
 
-echo "Execute timing comparison"
+echo "Execute memcheck comparison"
 # Loop over different core counts
-for cores in 1 2 4 8 16 32 64; do
+for divideBy2 in 2 3 4 5 6 7; do
+    cores=64
     # Set the number of OpenMP threads
     export OMP_NUM_THREADS=$cores
     
     echo "Running with $cores cores/threads"
     
     # Run the simulation
-    ./../../../GMGPolar_1.0/build/gmgpolar_simulation \
+    valgrind --tool=massif ./../../../GMGPolar_1.0/build/gmgpolar_simulation \
         --verbose 2 \
         --optimized 1 \
         --matrix_free 1 \

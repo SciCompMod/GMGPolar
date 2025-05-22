@@ -11,6 +11,8 @@
 #SBATCH --partition=naples128
 #SBATCH --account=2476029
 
+TODO: rhs=1, deactivate MUMPS
+
 # Verbosity level: 
 # 0 - No output 
 # 1 - Basic output 
@@ -48,7 +50,6 @@ Rmax=1.3
 nr_exp=4
 ntheta_exp=-1
 anisotropic_factor=3
-divideBy2=6
 
 # Finest grid can be loaded from a text file
 write_grid_file=0
@@ -95,7 +96,7 @@ postSmoothingSteps=1
 multigridCycle=0
 
 # Convergence criteria:
-maxIterations=300
+maxIterations=3
 residualNormType=1 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
 absoluteTolerance=1e-200 # ignore on comparison v1/v2 as not implemented/used in v1
 relativeTolerance=1e-8
@@ -152,58 +153,67 @@ else
     exit 1
 fi
 
-echo "Execute timing comparison"
-# Loop over different core counts
-for cores in 1 2 4 8 16 32 64; do
-    # Set the number of OpenMP threads
-    export OMP_NUM_THREADS=$cores
-    
-    echo "===================================================================="
-    echo "Running with $cores cores/threads"
-    echo "===================================================================="
-    
-    # Run the simulation
-    ./../../build/gmgpolar \
-        --verbose $verbose \
-        --paraview $paraview \
-        --maxOpenMPThreads $cores \
-        --threadReductionFactor $threadReductionFactor \
-        --stencilDistributionMethod $stencilDistributionMethod \
-        --cacheDensityProfileCoefficients $cacheDensityProfileCoefficients \
-        --cacheDomainGeometry $cacheDomainGeometry \
-        --R0 $R0 \
-        --Rmax $Rmax \
-        --nr_exp $nr_exp \
-        --ntheta_exp $ntheta_exp \
-        --anisotropic_factor $anisotropic_factor \
-        --divideBy2 $divideBy2 \
-        --write_grid_file $write_grid_file \
-        --load_grid_file $load_grid_file \
-        --file_grid_radii "$file_grid_radii" \
-        --file_grid_angles "$file_grid_angles" \
-        --DirBC_Interior $DirBC_Interior \
-        --geometry $geometry \
-        --kappa_eps $kappa_eps \
-        --delta_e $delta_e \
-        --problem $problem \
-        --alpha_coeff $alpha_coeff \
-        --alpha_jump $alpha_jump \
-        --beta_coeff $beta_coeff \
-        --FMG $FMG \
-        --FMG_iterations $FMG_iterations \
-        --FMG_cycle $FMG_cycle \
-        --extrapolation $extrapolation \
-        --maxLevels $maxLevels \
-        --preSmoothingSteps $preSmoothingSteps \
-        --postSmoothingSteps $postSmoothingSteps \
-        --multigridCycle $multigridCycle \
-        --maxIterations $maxIterations \
-        --residualNormType $residualNormType \
-        --absoluteTolerance $absoluteTolerance \
-        --relativeTolerance $relativeTolerance
-    
-    echo "===================================================================="
-    echo "Completed run with $cores cores/threads"
-    echo "===================================================================="
-    echo ""
+
+echo "Execute memory comparison"
+# Loop over different geometry sizes
+for cacheDensityProfileCoefficients in 0 1; do
+    for cacheDomainGeometry in 0 1; do
+        echo "================================================================================================================="
+        echo "cacheDensityProfileCoefficients $cacheDensityProfileCoefficients, cacheDomainGeometry $cacheDomainGeometry"
+        echo "================================================================================================================="
+        for divideBy2 in 2 3; do # 4 5 6 7; do
+            cores=64
+            # Set the number of OpenMP threads
+            export OMP_NUM_THREADS=$cores
+            
+            echo "===================================================================="
+            echo "Running with $cores cores/threads"
+            echo "===================================================================="
+            
+            # Run the simulation
+            valgrind --tool=massif  ./../../build/gmgpolar \
+                --verbose $verbose \
+                --paraview $paraview \
+                --maxOpenMPThreads $cores \
+                --threadReductionFactor $threadReductionFactor \
+                --stencilDistributionMethod $stencilDistributionMethod \
+                --cacheDensityProfileCoefficients $cacheDensityProfileCoefficients \
+                --cacheDomainGeometry $cacheDomainGeometry \
+                --R0 $R0 \
+                --Rmax $Rmax \
+                --nr_exp $nr_exp \
+                --ntheta_exp $ntheta_exp \
+                --anisotropic_factor $anisotropic_factor \
+                --divideBy2 $divideBy2 \
+                --write_grid_file $write_grid_file \
+                --load_grid_file $load_grid_file \
+                --file_grid_radii "$file_grid_radii" \
+                --file_grid_angles "$file_grid_angles" \
+                --DirBC_Interior $DirBC_Interior \
+                --geometry $geometry \
+                --kappa_eps $kappa_eps \
+                --delta_e $delta_e \
+                --problem $problem \
+                --alpha_coeff $alpha_coeff \
+                --alpha_jump $alpha_jump \
+                --beta_coeff $beta_coeff \
+                --FMG $FMG \
+                --FMG_iterations $FMG_iterations \
+                --FMG_cycle $FMG_cycle \
+                --extrapolation $extrapolation \
+                --maxLevels $maxLevels \
+                --preSmoothingSteps $preSmoothingSteps \
+                --postSmoothingSteps $postSmoothingSteps \
+                --multigridCycle $multigridCycle \
+                --maxIterations $maxIterations \
+                --residualNormType $residualNormType \
+                --absoluteTolerance $absoluteTolerance \
+                --relativeTolerance $relativeTolerance
+            
+            echo "===================================================================="
+            echo "Completed run with $cores cores/threads"
+            echo "===================================================================="
+            echo ""
+        done
+    done
 done
