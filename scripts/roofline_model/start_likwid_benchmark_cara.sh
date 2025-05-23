@@ -11,12 +11,12 @@
 
 nodes=1
 ranks=1
-sockets=2
-socket_size=32
+sockets=4
+socket_size=14
 cores=($(($sockets * $socket_size)))
 
 ### Version 1: Custom core list ###
-core_list=(1 2 4 8 16 32 64)
+core_list=(56)
 
 # Verbosity level: 
 # 0 - No output 
@@ -58,7 +58,7 @@ Rmax=1.3
 nr_exp=4
 ntheta_exp=-1
 anisotropic_factor=3
-divideBy2=5
+divideBy2=7
 
 # Finest grid can be loaded from a text file
 write_grid_file=0
@@ -69,12 +69,12 @@ file_grid_angles="_angles.txt"
 # Interior boundary condition: 
 # 0: Across-origin
 # 1: u_D_Interior
-DirBC_Interior=1
+DirBC_Interior=0
 
 ### Custom Test Cases ###
 geometry=2 # Circular (0), Shafranov(1), Czarny(2), Culham (3)
-problem=1 # CartesianR2(0), CartesianR6(1), PolarR6(2), RefinedRadius(3)
-alpha_coeff=2 # Poisson(0), Sonnendrucker(1), Zoni(2), Zoni-Shifted(3)
+problem=2 # CartesianR2(0), CartesianR6(1), PolarR6(2), RefinedRadius(3)
+alpha_coeff=3 # Poisson(0), Sonnendrucker(1), Zoni(2), Zoni-Shifted(3)
 beta_coeff=1 # Zero(0), Gyro - Alpha Inverse(1)
 # Remark: For RefinedRadius choose alpha_coeff=3, beta_coeff=1
 # Remark: For Culham Geometry choose geometry=3, problem=2,3, alpha_coeff=3, beta_coeff=1
@@ -94,7 +94,7 @@ FMG_cycle=2 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
 # 3: Combination of both implicit extrapolation methods (May be usefull for FMG=0)
 extrapolation=1
 # Maximum number of multigrid levels:
-maxLevels=7
+maxLevels=-1
 # Number of smoothing steps:
 preSmoothingSteps=1
 postSmoothingSteps=1
@@ -105,10 +105,10 @@ postSmoothingSteps=1
 multigridCycle=0
 
 # Convergence criteria:
-maxIterations=150
-residualNormType=0 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
-absoluteTolerance=1e-10
-relativeTolerance=1e-10
+maxIterations=300
+residualNormType=1 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
+absoluteTolerance=1e-200 # ignore on comparison v1/v2 as not implemented/used in v1
+relativeTolerance=1e-8
 
 # Define additional geometry parameters
 kappa_eps=0.0
@@ -212,6 +212,6 @@ echo "done;" >> run_COMPACT_MEM_DP_likwid.sh
 
 ### ---------------- ###
 ### Start Benchmarks ###
-sbatch run_COMPACT_FLOPS_DP_likwid.sh
-sbatch run_COMPACT_MEM_DP_likwid.sh
+# sbatch run_COMPACT_FLOPS_DP_likwid.sh
+# sbatch run_COMPACT_MEM_DP_likwid.sh
 ### ---------------- ###
