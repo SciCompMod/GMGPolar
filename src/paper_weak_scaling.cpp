@@ -112,7 +112,7 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
 
     const int maxIterations                 = 300;
     const ResidualNormType residualNormType = ResidualNormType::WEIGHTED_EUCLIDEAN;
-    const double absoluteTolerance          = 1e-200 # ignore on comparison v1/v2 as not implemented/used in v1
+    const double absoluteTolerance          = 1e-200; // ignore on comparison v1/v2 as not implemented/used in v1
     const double relativeTolerance          = 1e-8;
 
     solver.verbose(verbose);

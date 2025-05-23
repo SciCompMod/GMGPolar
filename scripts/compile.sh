@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 export MUMPS_DIR="/scratch/ws/3/kueh_mj-gmgpolar/spack/opt/spack/linux-rocky8-zen/gcc-8.5.0/mumps-5.5.1-vxpgipbhjslom2fsetshytcj5ajwqvwj"
 export METIS_DIR="/scratch/ws/3/kueh_mj-gmgpolar/spack/opt/spack/linux-rocky8-zen/gcc-8.5.0/metis-5.1.0-keirft7rdzyu7ehwgs3qtmg77sexmhvt"
 # export LIKWID_DIR="$HOME/spack/opt/spack/linux-rhel9-neoverse_n1/gcc-13.3.0/likwid-5.2.2-hyyaselv7db3bylk6so67luokavcksy2"

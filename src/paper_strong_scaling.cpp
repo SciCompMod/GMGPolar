@@ -113,7 +113,7 @@ void runTest(int maxOpenMPThreads, int divideBy2, StencilDistributionMethod sten
 
     const int maxIterations                 = 300;
     const ResidualNormType residualNormType = ResidualNormType::WEIGHTED_EUCLIDEAN;
-    const double absoluteTolerance          = 1e-200 # ignore on comparison v1/v2 as not implemented/used in v1
+    const double absoluteTolerance          = 1e-200; // ignore on comparison v1/v2 as not implemented/used in v1
     const double relativeTolerance          = 1e-8;
 
     solver.verbose(verbose);
@@ -189,7 +189,7 @@ int main()
             << "t_avg_MGC_residual,t_avg_MGC_directSolver\n"; // Header
 
     // Define the constant parameters for the problem size
-    int divideBy1 = 7; // Keeping the domain division constant
+    int divideBy2 = 7; // Keeping the domain division constant
 
     // Vary only the number of threads for strong scaling
     std::vector<int> threadCounts = {1, 2, 4, 8, 16, 32, 64};  // Thread counts to test strong scaling
@@ -221,7 +221,7 @@ int main()
 
     ///////////////////////////////////////////////////////////////
 
-    std::ofstream outfile2("strong_scaling_results_take.csv");
+    std::ofstream outfile3("strong_scaling_results_take.csv");
     outfile3 << "Threads,DivideBy2,nr,ntheta,geometry,"
             << "stencil_method,cacheDensityProfileCoefficients,cacheDomainGeometry,FMG,extrapolation_int,"
             << "TotalTime,t_setup_total,t_setup_createLevels,"

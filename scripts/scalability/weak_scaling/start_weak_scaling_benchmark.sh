@@ -5,7 +5,7 @@
 #SBATCH -n 1
 #SBATCH -c 64
 #SBATCH --threads-per-core=1
-#SBATCH --time=0:30:00
+#SBATCH --time=3:30:00
 #SBATCH --exclusive
 #SBATCH --partition=naples128
 #SBATCH --account=2476029
