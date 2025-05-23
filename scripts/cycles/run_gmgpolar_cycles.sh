@@ -97,8 +97,6 @@ multigridCycle=0
 # Convergence criteria:
 maxIterations=300
 residualNormType=1 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
-absoluteTolerance=1e-200 # ignore on comparison v1/v2 as not implemented/used in v1
-relativeTolerance=1e-8
 
 # Define additional geometry parameters
 kappa_eps=0.0
@@ -159,11 +157,14 @@ fi
 cores=64
 export OMP_NUM_THREADS=$cores
 
+
+absoluteTolerance=1e-14 # ignore on comparison v1/v2 as not implemented/used in v1
+relativeTolerance=1e-200
 echo "Execute cycling comparison"
 # Loop over different core counts
 FMG=1
 echo "===================================================================="
-echo "Running with FMG $FMG"
+echo "Running with FMG $FMG, atol: $absoluteTolerance, rtol: relativeTolerance"
 echo "===================================================================="
 for FMG_cycle in 0 1 2; do
     echo "===================================================================="
@@ -215,9 +216,12 @@ for FMG_cycle in 0 1 2; do
     done
 done
 
+
+absoluteTolerance=1e-200 # ignore on comparison v1/v2 as not implemented/used in v1
+relativeTolerance=1e-8
 FMG=0
 echo "===================================================================="
-echo "Running with FMG $FMG"
+echo "Running with FMG $FMG, atol: $absoluteTolerance, rtol: relativeTolerance"
 echo "===================================================================="
 for multigridCycle in 0 1 2; do
     echo "===================================================================="
