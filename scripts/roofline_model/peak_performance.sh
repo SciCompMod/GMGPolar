@@ -13,24 +13,26 @@
 
 srun likwid-topology
 
-# CPU name: Intel(R) Xeon(R) Gold 6132 CPU @ 2.60GHz
-# CPU type: Intel Skylake SP processor
-# CPU stepping: 4
-# Sockets: 4
-# Cores per socket: 14
-# Threads per core: 1
+# CPU name: AMD EPYC 7601 32-Core Processor      
+# CPU type: AMD K17 (Zen) architecture
+# CPU stepping: 2
+# Sockets: 2
+# Cores per socket: 32
+# Threads per core: 2
 # Level 1: 32 kB
-# Level 2: 1 MB
-# Level 3: 19 MB
-# NUMA domains: 4
+# Level 2: 512 kB
+# Level 3: 8 MB
+# NUMA domains: 8
 
-# So we have 4 x 14 hardware threads on this machine. 
-# We use a stream size of 4 x 14 x 32 kB = 1792 kB, 
-# 32kB for each of the 56 hardware threads so that each vector chunk fits into the L1 cache of one core.
+# So we have 2 x 32 hardware threads on this machine. 
+# We use a stream size of 2 x 32 x 32 kB = 2048 kB, 
+# 32kB for each of the 64 hardware threads so that each vector chunk fits into the L1 cache of one core.
 
-# Upper Peak GFLOPS Estimate: 2.6 GHz x 32 FLOPS/cycle x 56 cores = 4659.2 GFLOPS
-srun likwid-bench -t peakflops_avx -W N:1792kB:56 # GFlops/s: 1256.6
+# Upper Peak GFLOPS Estimate: 2.2 GHz x 32 FLOPS/cycle x 64 cores = 4505.6 GFLOPS
+srun likwid-bench -t peakflops_avx -W N:2048kB:64 # GFlops/s: 1256.6
+# Upper Peak GFLOPS Estimate: 2.2 GHz x 32 FLOPS/cycle x 64 cores = 4505.6 GFLOPS
+srun likwid-bench -t peakflops_avx512 -W N:2048kB:64 # GFlops/s: 1256.6
 # Remark: peakflops_avx512 is not available
 
-# Bandwidth according to cluster documentation: GByte/s: 281.0
-srun likwid-bench -t load_avx512 -W N:2GB:56 # GByte/s: 355.6
+# Bandwidth according to cluster documentation: GByte/s: 158.95 GiB/s
+srun likwid-bench -t load_avx512 -W N:2GB:64 # GByte/s: 355.6

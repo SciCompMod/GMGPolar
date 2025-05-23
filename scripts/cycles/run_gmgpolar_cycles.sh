@@ -158,13 +158,13 @@ cores=64
 export OMP_NUM_THREADS=$cores
 
 
-absoluteTolerance=1e-14 # ignore on comparison v1/v2 as not implemented/used in v1
+absoluteTolerance=1e-16 # ignore on comparison v1/v2 as not implemented/used in v1
 relativeTolerance=1e-200
 echo "Execute cycling comparison"
 # Loop over different core counts
 FMG=1
 echo "===================================================================="
-echo "Running with FMG $FMG, atol: $absoluteTolerance, rtol: relativeTolerance"
+echo "Running with FMG $FMG, atol: $absoluteTolerance, rtol: $relativeTolerance"
 echo "===================================================================="
 for FMG_cycle in 0 1 2; do
     echo "===================================================================="
@@ -221,11 +221,11 @@ absoluteTolerance=1e-200 # ignore on comparison v1/v2 as not implemented/used in
 relativeTolerance=1e-8
 FMG=0
 echo "===================================================================="
-echo "Running with FMG $FMG, atol: $absoluteTolerance, rtol: relativeTolerance"
+echo "Running with FMG $FMG, atol: $absoluteTolerance, rtol: $relativeTolerance"
 echo "===================================================================="
 for multigridCycle in 0 1 2; do
     echo "===================================================================="
-    echo "Running with FMG_cycle $FMG_cycle"
+    echo "Running with multigridCycle $multigridCycle"
     echo "===================================================================="  
     # Run the simulation
     ./../../build/gmgpolar \
