@@ -1,3 +1,4 @@
+#!/bin/bash
 #SBATCH --job-name=gmgpolar
 #SBATCH --output=slurm-%A-convergenceorder_GMGPolar_CARA.out
 #SBATCH --error=slurm-%A-convergenceorder_GMGPolar_CARA.err
@@ -12,4 +13,4 @@
 
 # Adjust parameters in src/strong_scaling.cpp
 
-srun --cpus-per-task=56 ./../../../build/paper_strong_scaling
+srun --cpus-per-task=64 ./../../../build/paper_strong_scaling
