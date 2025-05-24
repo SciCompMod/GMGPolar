@@ -152,6 +152,7 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
     // Perform setup and solve
     solver.setup();
     solver.solve();
+    solver.printTimings();
 
     std::string stencil_string = "";
     if (solver.stencilDistributionMethod() == StencilDistributionMethod::CPU_TAKE) {

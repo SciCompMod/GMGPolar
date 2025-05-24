@@ -73,16 +73,26 @@ void GMGPolar::setup()
         std::cout << std::endl;
 
         std::cout << "Problem: ";
-        if (problem_ == ProblemType::CARTESIAN_R2) {
+        if (typeid(*exact_solution_) == typeid(CartesianR2_CircularGeometry) 
+    || typeid(*exact_solution_) == typeid(CartesianR2_CzarnyGeometry)
+    || typeid(*exact_solution_) == typeid(CartesianR2_ShafranovGeometry)) {
             std::cout << "CARTESIAN_R2";
         }
-        else if (problem_ == ProblemType::CARTESIAN_R6) {
+        else if (typeid(*exact_solution_) == typeid(CartesianR6_CircularGeometry) 
+    || typeid(*exact_solution_) == typeid(CartesianR6_CzarnyGeometry)
+    || typeid(*exact_solution_) == typeid(CartesianR6_ShafranovGeometry)) {
             std::cout << "CARTESIAN_R6";
         }
-        else if (problem_ == ProblemType::POLAR_R6) {
+        else if (typeid(*exact_solution_) == typeid(PolarR6_CircularGeometry) 
+    || typeid(*exact_solution_) == typeid(PolarR6_CulhamGeometry)
+    || typeid(*exact_solution_) == typeid(PolarR6_CzarnyGeometry)
+    || typeid(*exact_solution_) == typeid(PolarR6_ShafranovGeometry)) {
             std::cout << "POLAR_R6";
         }
-        else if (problem_ == ProblemType::REFINED_RADIUS) {
+        else if (typeid(*exact_solution_) == typeid(Refined_CircularGeometry) 
+    || typeid(*exact_solution_) == typeid(Refined_CulhamGeometry)
+    || typeid(*exact_solution_) == typeid(Refined_CzarnyGeometry)
+    || typeid(*exact_solution_) == typeid(Refined_ShafranovGeometry)) {
             std::cout << "REFINED_RADIUS";
         }    
         else {

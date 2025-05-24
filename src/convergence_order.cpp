@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
 
     solver.setSolution(std::move(exact_solution));
 
-    const int verbose   = 0;
+    const int verbose   = 1;
     const bool paraview = false;
 
     const int maxOpenMPThreads         = 16;

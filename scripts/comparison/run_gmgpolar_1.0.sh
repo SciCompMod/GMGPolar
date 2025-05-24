@@ -83,6 +83,3 @@ for cores in 1 2 4 8 16 32 64; do
     echo "Completed run with $cores cores/threads"
     echo "--------------------------------------"
 done
-
-
-echo "Execute memory comparison"
