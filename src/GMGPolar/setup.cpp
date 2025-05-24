@@ -44,6 +44,61 @@ void GMGPolar::setup()
             std::cout << "Unknown";
         }
         std::cout << std::endl;
+
+        std::cout << "Coefficients: ";
+        if (typeid(*density_profile_coefficients_) == typeid(PoissonCoefficients)) {
+            std::cout << "PoissonCoefficients";
+        }
+        else if (typeid(*density_profile_coefficients_) == typeid(SonnendruckerCoefficients)) {
+            std::cout << "SonnendruckerCoefficients, Alpha: Sonnendruecker, Beta: Zero";
+        }
+        else if (typeid(*density_profile_coefficients_) == typeid(SonnendruckerGyroCoefficients)) {
+            std::cout << "SonnendruckerGyroCoefficients, Alpha: Sonnendruecker, Beta: Inverse";
+        }
+        else if (typeid(*density_profile_coefficients_) == typeid(ZoniCoefficients)) {
+            std::cout << "ZoniCoefficients, Alpha: Zoni, Beta: Zero";
+        }
+        else if (typeid(*density_profile_coefficients_) == typeid(ZoniGyroCoefficients)) {
+            std::cout << "ZoniGyroCoefficients, Alpha: Zoni, Beta: Inverse";
+        }
+        else if (typeid(*density_profile_coefficients_) == typeid(ZoniShiftedCoefficients)) {
+            std::cout << "ZoniShiftedCoefficients, Alpha: ZoniShifted, Beta: Zero";
+        }
+        else if (typeid(*density_profile_coefficients_) == typeid(ZoniShiftedGyroCoefficients)) {
+            std::cout << "ZoniShiftedGyroCoefficients, Alpha: ZoniShifted, Beta: Inverse";
+        }        
+        else {
+            std::cout << "Unknown";
+        }
+        std::cout << std::endl;
+
+        std::cout << "Problem: ";
+        if (typeid(*exact_solution_) == typeid(CartesianR2_CircularGeometry) 
+    || typeid(*exact_solution_) == typeid(CartesianR2_CzarnyGeometry)
+    || typeid(*exact_solution_) == typeid(CartesianR2_ShafranovGeometry)) {
+            std::cout << "CARTESIAN_R2";
+        }
+        else if (typeid(*exact_solution_) == typeid(CartesianR6_CircularGeometry) 
+    || typeid(*exact_solution_) == typeid(CartesianR6_CzarnyGeometry)
+    || typeid(*exact_solution_) == typeid(CartesianR6_ShafranovGeometry)) {
+            std::cout << "CARTESIAN_R6";
+        }
+        else if (typeid(*exact_solution_) == typeid(PolarR6_CircularGeometry) 
+    || typeid(*exact_solution_) == typeid(PolarR6_CulhamGeometry)
+    || typeid(*exact_solution_) == typeid(PolarR6_CzarnyGeometry)
+    || typeid(*exact_solution_) == typeid(PolarR6_ShafranovGeometry)) {
+            std::cout << "POLAR_R6";
+        }
+        else if (typeid(*exact_solution_) == typeid(Refined_CircularGeometry) 
+    || typeid(*exact_solution_) == typeid(Refined_CulhamGeometry)
+    || typeid(*exact_solution_) == typeid(Refined_CzarnyGeometry)
+    || typeid(*exact_solution_) == typeid(Refined_ShafranovGeometry)) {
+            std::cout << "REFINED_RADIUS";
+        }    
+        else {
+            std::cout << "Unknown";
+        }
+        std::cout << std::endl;  
     }
 
 
