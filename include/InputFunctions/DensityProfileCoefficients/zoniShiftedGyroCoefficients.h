@@ -18,5 +18,5 @@ public:
 
 private:
     const double Rmax       = 1.3;
-    const double alpha_jump = 0.7081 * 1.3;
+    const double alpha_jump = 0.678 * 1.3;
 };

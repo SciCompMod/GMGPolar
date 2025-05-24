@@ -122,7 +122,7 @@ elif [ "$alpha_coeff" -eq 1 ]; then
 elif [ "$alpha_coeff" -eq 2 ]; then
     alpha_jump=$(echo "0.4837 * $Rmax" | bc)
 elif [ "$alpha_coeff" -eq 3 ]; then
-    alpha_jump=$(echo "0.7081 * $Rmax" | bc)
+    alpha_jump=$(echo "0.678 * $Rmax" | bc)
 else
     echo "Invalid value for alpha_coeff: $alpha_coeff"
     exit 1
