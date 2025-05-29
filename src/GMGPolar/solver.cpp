@@ -68,7 +68,7 @@ void GMGPolar::solve()
         /* Test solution against exact solution if given. */
         /* ---------------------------------------------- */
 
-        LIKWID_STOP("Solver");
+        LIKWID_STOP("Solve");
         if (exact_solution_ != nullptr) {
             auto start_check_exact_error = std::chrono::high_resolution_clock::now();
 
@@ -84,7 +84,7 @@ void GMGPolar::solve()
                 std::cout << ", ||u_k-u_ex||_inf: " << exact_error.second;
             }
         }
-        LIKWID_START("Solver");
+        LIKWID_START("Solve");
 
         /* ---------------------------- */
         /* Compute convergence criteria */
