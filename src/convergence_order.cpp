@@ -10,12 +10,6 @@
 
 int main(int argc, char* argv[])
 {
-#ifdef NDEBUG
-    std::cout << "Build Type: Release\n" << std::endl;
-#else
-    std::cout << "Build Type: Debug\n" << std::endl;
-#endif
-
     const double R0                           = 1e-8;
     const double Rmax                         = 1.3;
     const double inverse_aspect_ratio_epsilon = 0.3;
@@ -59,8 +53,7 @@ int main(int argc, char* argv[])
     const int verbose   = 0;
     const bool paraview = false;
 
-    const int maxOpenMPThreads         = 16;
-    const double threadReductionFactor = 1.0;
+    const int maxOpenMPThreads = 16;
 
     const StencilDistributionMethod stencilDistributionMethod = StencilDistributionMethod::CPU_GIVE;
     const bool cacheDensityProfileCoefficients                = true;
@@ -74,7 +67,7 @@ int main(int argc, char* argv[])
 
     const bool DirBC_Interior = false;
 
-    const bool FMG                     = true;
+    const bool FMG                     = false;
     const int FMG_iterations           = 3;
     const MultigridCycleType FMG_cycle = MultigridCycleType::F_CYCLE;
 
@@ -85,15 +78,14 @@ int main(int argc, char* argv[])
     const MultigridCycleType multigridCycle = MultigridCycleType::F_CYCLE;
 
     const int maxIterations                 = 150;
-    const ResidualNormType residualNormType = ResidualNormType::EUCLIDEAN;
-    const double absoluteTolerance          = 1e-10;
+    const ResidualNormType residualNormType = ResidualNormType::WEIGHTED_EUCLIDEAN;
+    const double absoluteTolerance          = 1e-14;
     const double relativeTolerance          = 1e-8;
 
     solver.verbose(verbose);
     solver.paraview(paraview);
 
     solver.maxOpenMPThreads(maxOpenMPThreads);
-    solver.threadReductionFactor(threadReductionFactor);
 
     solver.stencilDistributionMethod(stencilDistributionMethod);
     solver.cacheDensityProfileCoefficients(cacheDensityProfileCoefficients);
@@ -205,7 +197,6 @@ int main(int argc, char* argv[])
         // Print time[s]
         std::cout << std::setw(12) << table_total_time[i] << std::endl;
     }
-    std::cout << "\n";
 
     return 0;
 }

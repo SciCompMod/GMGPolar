@@ -65,4 +65,3 @@ TEST(ProlongationTest, ProlongationTest)
         ASSERT_NEAR(result1[i], result2[i], 1e-10);
     }
 }
-

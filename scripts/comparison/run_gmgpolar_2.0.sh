@@ -12,8 +12,6 @@ paraview=0
 # OpenMP settings:
 # Maximum number of threads OpenMP can use for parallel execution
 maxOpenMPThreads=32
-# Factor to reduce the number of threads OpenMP uses (e.g., 1.0 means no reduction)
-threadReductionFactor=1.0
 
 # Stencil distribution method:
 # 0 - CPU "Take": Each node independently applies the stencil
@@ -118,30 +116,4 @@ else
     exit 1
 fi
 
-# Define additional geometry parameters
-kappa_eps=0.0
-delta_e=0.0
-if [ "$geometry" -eq 1 ]; then
-    kappa_eps=0.3
-    delta_e=0.2
-elif [ "$geometry" -eq 2 ]; then
-    kappa_eps=0.3
-    delta_e=1.4
-fi
-
-# Set alpha_jump based on alpha_coeff value
-# Used for anisotropic grid refinement -> refinement_radius
-if [ "$alpha_coeff" -eq 0 ]; then
-    alpha_jump=$(python3 -c "print(0.5 * float($Rmax))")
-elif [ "$alpha_coeff" -eq 1 ]; then
-    alpha_jump=$(python3 -c "print(0.66 * float($Rmax))")
-elif [ "$alpha_coeff" -eq 2 ]; then
-    alpha_jump=$(python3 -c "print(0.4837 * float($Rmax))")
-elif [ "$alpha_coeff" -eq 3 ]; then
-    alpha_jump=$(python3 -c "print(0.7081 * float($Rmax))")
-else
-    echo "Invalid value for alpha_coeff: $alpha_coeff"
-    exit 1
-fi
-
-./../../build/gmgpolar --verbose $verbose --paraview $paraview --maxOpenMPThreads $maxOpenMPThreads --threadReductionFactor $threadReductionFactor --stencilDistributionMethod $stencilDistributionMethod --cacheDensityProfileCoefficients $cacheDensityProfileCoefficients --cacheDomainGeometry $cacheDomainGeometry --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --write_grid_file $write_grid_file --load_grid_file $load_grid_file --file_grid_radii "$file_grid_radii" --file_grid_angles "$file_grid_angles" --DirBC_Interior $DirBC_Interior --geometry $geometry --kappa_eps $kappa_eps --delta_e $delta_e --problem $problem --alpha_coeff $alpha_coeff --alpha_jump $alpha_jump --beta_coeff $beta_coeff --FMG $FMG --FMG_iterations $FMG_iterations --FMG_cycle $FMG_cycle --extrapolation $extrapolation --maxLevels $maxLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
+./../../build/gmgpolar --verbose $verbose --paraview $paraview --maxOpenMPThreads $maxOpenMPThreads --stencilDistributionMethod $stencilDistributionMethod --cacheDensityProfileCoefficients $cacheDensityProfileCoefficients --cacheDomainGeometry $cacheDomainGeometry --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --write_grid_file $write_grid_file --load_grid_file $load_grid_file --file_grid_radii "$file_grid_radii" --file_grid_angles "$file_grid_angles" --DirBC_Interior $DirBC_Interior --geometry $geometry --kappa_eps $kappa_eps --delta_e $delta_e --problem $problem --alpha_coeff $alpha_coeff --alpha_jump $alpha_jump --beta_coeff $beta_coeff --FMG $FMG --FMG_iterations $FMG_iterations --FMG_cycle $FMG_cycle --extrapolation $extrapolation --maxLevels $maxLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance

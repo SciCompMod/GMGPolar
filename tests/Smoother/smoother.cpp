@@ -1433,4 +1433,3 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin_SmallestGrid)
     ASSERT_LT(iterations, 80);
     ASSERT_NEAR(infinity_norm(error), 0.0, precision);
 }
-

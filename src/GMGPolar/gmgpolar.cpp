@@ -108,30 +108,32 @@ std::optional<double> GMGPolar::exactErrorInfinity() const
 
 void GMGPolar::printTimings() const
 {
-    std::cout << "\n------------------" << std::endl;
-    std::cout << "Timing Information" << std::endl;
-    std::cout << "------------------" << std::endl;
-    std::cout << "Setup Time: " << t_setup_total - t_setup_rhs << " seconds" << std::endl;
-    std::cout << "    Create Levels: " << t_setup_createLevels << " seconds" << std::endl;
-    std::cout << "    Smoother: " << t_setup_smoother << " seconds" << std::endl;
-    std::cout << "    Direct Solver: " << t_setup_directSolver << " seconds" << std::endl;
-    std::cout << "    (Build rhs: " << t_setup_rhs << " seconds)" << std::endl;
-    std::cout << "\nSolve Time: " << t_solve_total << " seconds" << std::endl;
-    std::cout << "    Initial Approximation: " << t_solve_initial_approximation << " seconds" << std::endl;
-    std::cout << "    Multigrid Iteration: " << t_solve_multigrid_iterations << " seconds" << std::endl;
-    std::cout << "    Check Convergence: " << t_check_convergence << " seconds" << std::endl;
-    std::cout << "    (Check Exact Error: " << t_check_exact_error << " seconds)" << std::endl;
-    std::cout << "\nAverage Multigrid Iteration: " << t_avg_MGC_total << " seconds" << std::endl;
-    std::cout << "    PreSmoothing: " << t_avg_MGC_preSmoothing << " seconds" << std::endl;
-    std::cout << "    PostSmoothing: " << t_avg_MGC_postSmoothing << " seconds" << std::endl;
-    std::cout << "    Residual: " << t_avg_MGC_residual << " seconds" << std::endl;
-    std::cout << "    DirectSolve: " << t_avg_MGC_directSolver << " seconds" << std::endl;
+    std::cout << "------------------------------\n";
+    std::cout << "----- Timing Information -----\n";
+    std::cout << "------------------------------\n";
+    std::cout << "Setup Time: " << t_setup_total - t_setup_rhs << " seconds\n";
+    std::cout << "    Create Levels: " << t_setup_createLevels << " seconds\n";
+    std::cout << "    Smoother: " << t_setup_smoother << " seconds\n";
+    std::cout << "    Direct Solver: " << t_setup_directSolver << " seconds\n";
+    std::cout << "    (Build rhs: " << t_setup_rhs << " seconds)\n";
+    std::cout << "------------------------------\n";
+    std::cout << "Solve Time: " << t_solve_total << " seconds\n";
+    std::cout << "    Initial Approximation: " << t_solve_initial_approximation << " seconds\n";
+    std::cout << "    Multigrid Iteration: " << t_solve_multigrid_iterations << " seconds\n";
+    std::cout << "    Check Convergence: " << t_check_convergence << " seconds\n";
+    std::cout << "    (Check Exact Error: " << t_check_exact_error << " seconds)\n";
+    std::cout << "------------------------------\n";
+    std::cout << "Average Multigrid Iteration: " << t_avg_MGC_total << " seconds\n";
+    std::cout << "    PreSmoothing: " << t_avg_MGC_preSmoothing << " seconds\n";
+    std::cout << "    PostSmoothing: " << t_avg_MGC_postSmoothing << " seconds\n";
+    std::cout << "    Residual: " << t_avg_MGC_residual << " seconds\n";
+    std::cout << "    DirectSolve: " << t_avg_MGC_directSolver << " seconds\n";
     std::cout << "    Other Computations: "
               << std::max(t_avg_MGC_total - t_avg_MGC_preSmoothing - t_avg_MGC_postSmoothing - t_avg_MGC_residual -
                               t_avg_MGC_directSolver,
                           0.0)
-              << " seconds" << std::endl;
-    std::cout << "\n" << std::endl;
+              << " seconds\n";
+    std::cout << "------------------------------\n";
 }
 
 /* --------------- */
@@ -420,16 +422,6 @@ int GMGPolar::maxOpenMPThreads() const
 void GMGPolar::maxOpenMPThreads(int max_omp_threads)
 {
     max_omp_threads_ = max_omp_threads;
-}
-
-double GMGPolar::threadReductionFactor() const
-{
-    return thread_reduction_factor_;
-}
-
-void GMGPolar::threadReductionFactor(double thread_reduction_factor)
-{
-    thread_reduction_factor_ = thread_reduction_factor;
 }
 
 StencilDistributionMethod GMGPolar::stencilDistributionMethod() const

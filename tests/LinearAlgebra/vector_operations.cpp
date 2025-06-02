@@ -109,4 +109,3 @@ TEST(VectorOperations, infinity_vector_norm)
     const Vector<double> v = {1, -5, 2};
     EXPECT_DOUBLE_EQ(infinity_norm(v), 5.0);
 }
-

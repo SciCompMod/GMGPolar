@@ -150,4 +150,3 @@ TEST(OperatorATest, applyA_AcrossOrigin)
             ASSERT_NEAR(result_Give[index], result_Take[index], 1e-11);
     }
 }
-

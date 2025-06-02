@@ -1,8 +1,6 @@
 #pragma once
 
-#include <chrono>
 #include <filesystem>
-#include <iostream>
 #include <memory>
 #include <omp.h>
 #include <optional>
@@ -128,14 +126,14 @@ public:
     void paraview(bool paraview);
     int maxOpenMPThreads() const;
     void maxOpenMPThreads(int max_omp_threads);
-    double threadReductionFactor() const;
-    void threadReductionFactor(double thread_reduction_factor);
     StencilDistributionMethod stencilDistributionMethod() const;
     void stencilDistributionMethod(StencilDistributionMethod stencil_distribution_method);
     bool cacheDensityProfileCoefficients() const;
     void cacheDensityProfileCoefficients(bool cache_density_profile_coefficients);
     bool cacheDomainGeometry() const;
     void cacheDomainGeometry(bool cache_domain_geometry);
+
+    void printSettings() const;
 
     /* --------*/
     /* Timings */
@@ -204,7 +202,6 @@ private:
     int verbose_;
     bool paraview_;
     int max_omp_threads_;
-    double thread_reduction_factor_;
     StencilDistributionMethod stencil_distribution_method_;
     // `cache_density_profile_coefficients_` caches alpha(r_i), beta(r_i)
     bool cache_density_profile_coefficients_;
@@ -242,7 +239,8 @@ private:
     bool converged(const double& current_residual_norm, const double& first_residual_norm);
 
     std::vector<std::pair<double, double>> exact_errors_; // Only when exact solution provided
-    std::pair<double, double> computeExactError(Level& level, const Vector<double>& solution, Vector<double>& error);
+    std::pair<double, double> computeExactError_l2_inf(Level& level, const Vector<double>& solution,
+                                                       Vector<double>& error);
 
     /* ---------------------------------------- */
     /* Parser Functions for GMGPolar Parameters */
@@ -269,6 +267,11 @@ private:
     /* --------------- */
     /* Solve Functions */
     void initializeSolution();
+    void computeExactError(Level& level);
+    void updateResidualNorms(Level& level, int iteration, double& initial_residual_norm, double& current_residual_norm,
+                             double& current_relative_residual_norm);
+    void printIterationHeader();
+    void printIterationInfo(int iteration, double current_residual_norm, double current_relative_residual_norm);
 
     /* ------------------- */
     /* Multigrid Functions */

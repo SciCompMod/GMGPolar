@@ -143,7 +143,6 @@ void GMGPolar::parseGeneral()
     paraview_        = parser_.get<int>("paraview") != 0;
     max_omp_threads_ = parser_.get<int>("maxOpenMPThreads");
     omp_set_num_threads(max_omp_threads_);
-    thread_reduction_factor_                 = parser_.get<double>("threadReductionFactor");
     const int stencilDistributionMethodValue = parser_.get<int>("stencilDistributionMethod");
     if (stencilDistributionMethodValue == static_cast<int>(StencilDistributionMethod::CPU_TAKE) ||
         stencilDistributionMethodValue == static_cast<int>(StencilDistributionMethod::CPU_GIVE)) {
@@ -238,8 +237,6 @@ void GMGPolar::initializeGeneral()
         1);
     parser_.add<int>("paraview", '\0', "Specifies whether to generate Paraview output files.", OPTIONAL, 0);
     parser_.add<int>("maxOpenMPThreads", '\0', "Defines the maximum number of OpenMP threads used.", OPTIONAL, 1);
-    parser_.add<double>("threadReductionFactor", '\0', "Reduction factor for threads at coarser levels.", OPTIONAL,
-                        1.0);
     parser_.add<int>("stencilDistributionMethod", '\0',
                      "Specifies how to distribute the stencil: CPU_Take (0), CPU_Give (1).", OPTIONAL, 0,
                      cmdline::oneof(0, 1));

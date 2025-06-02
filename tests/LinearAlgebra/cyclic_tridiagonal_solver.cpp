@@ -659,4 +659,3 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_boosted_subdiagonal_LO
                     copy_solver.cyclic_corner_element() * rhs[0],
                 copy_rhs[n - 1], precision);
 }
-

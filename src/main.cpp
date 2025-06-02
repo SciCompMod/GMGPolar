@@ -4,27 +4,6 @@
 
 int main(int argc, char* argv[])
 {
-// Display Build Type
-#ifdef NDEBUG
-    std::cout << "Build Type: Release" << std::endl;
-#else
-    std::cout << "Build Type: Debug" << std::endl;
-#endif
-
-// Check Likwid Status
-#ifdef GMGPOLAR_USE_LIKWID
-    std::cout << "Likwid: ON" << std::endl;
-#else
-    std::cout << "Likwid: OFF" << std::endl;
-#endif
-
-// Check MUMPS Status
-#ifdef GMGPOLAR_USE_MUMPS
-    std::cout << "MUMPS: ON\n" << std::endl;
-#else
-    std::cout << "MUMPS: OFF\n" << std::endl;
-#endif
-
     // Initialize LIKWID markers if enabled
     LIKWID_INIT();
 

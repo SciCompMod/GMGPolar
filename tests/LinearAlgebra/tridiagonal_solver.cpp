@@ -361,4 +361,3 @@ TEST(SymmetricTridiagonalSolver, random_tridiagonal_boosted_subdiagonal_LOW_PREC
     EXPECT_NEAR(copy_solver.sub_diagonal(n - 2) * rhs[n - 2] + copy_solver.main_diagonal(n - 1) * rhs[n - 1],
                 copy_rhs[n - 1], precision);
 }
-

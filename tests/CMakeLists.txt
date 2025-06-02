@@ -24,6 +24,7 @@ add_executable(gmgpolar_tests
     DirectSolver/directSolverNoMumps.cpp
     Smoother/smoother.cpp
     ExtrapolatedSmoother/extrapolated_smoother.cpp
+    GMGPolar/multigrid_iterations.cpp
 )
 
 # Set the compile features and link libraries

@@ -17,13 +17,6 @@
 #include <iostream>
 #include <cmath>
 
-#include <fstream>
-#include <iostream>
-
-/* The CSR matrix format is currently unused, as we use MUMPS which relies on the COO format. */
-/* Here we provide a custom LU decomposition solver, which could be replaced by different library implementation, 
-if we would decide to move away from mumps. */
-
 template <typename T>
 class SparseMatrixCSR
 {

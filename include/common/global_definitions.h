@@ -84,9 +84,9 @@ enum class BetaCoeff
 /* ---------------------------- */
 #ifdef GMGPOLAR_USE_MUMPS
     /* Mumps macro s.t. indices match documentation */
-    #define ICNTL(I) icntl[(I) - 1]
-    #define CNTL(I) cntl[(I) - 1]
-    #define INFOG(I) infog[(I) - 1]
+    #define ICNTL(I) icntl[(I)-1]
+    #define CNTL(I) cntl[(I)-1]
+    #define INFOG(I) infog[(I)-1]
 
     #define USE_COMM_WORLD -987654
     #define PAR_NOT_PARALLEL 0

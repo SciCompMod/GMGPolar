@@ -1,40 +1,21 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
 #include <chrono>
+#include <iostream>
+#include <iomanip>
 
 void GMGPolar::solve()
 {
-    if(verbose_ > 0)
-    {
-        std::cout << "Cycle type: ";
-        if(multigrid_cycle_ == MultigridCycleType::V_CYCLE)
-        {
-            std::cout << "V." << std::endl;
-        }else if(multigrid_cycle_ == MultigridCycleType::W_CYCLE)
-        {
-            std::cout << "W." << std::endl; 
-        }else if(multigrid_cycle_ == MultigridCycleType::F_CYCLE)
-        {
-            std::cout << "F." << std::endl;         
-        }
-    
-        std::cout << "Extrapolation: ";    
-        if (extrapolation_ == ExtrapolationType::NONE) {
-            std::cout << "None." << std::endl;
-        }else if (extrapolation_ == ExtrapolationType::IMPLICIT_EXTRAPOLATION) {
-            std::cout << "Implicit Extrapolation." << std::endl;
-        }
-    }
-
     LIKWID_START("Solve");
     auto start_solve = std::chrono::high_resolution_clock::now();
 
     /* ---------------------------- */
     /* Initialize starting solution */
     /* ---------------------------- */
-
     auto start_initial_approximation = std::chrono::high_resolution_clock::now();
+
     initializeSolution();
+
     auto end_initial_approximation = std::chrono::high_resolution_clock::now();
     t_solve_initial_approximation +=
         std::chrono::duration<double>(end_initial_approximation - start_initial_approximation).count();
@@ -46,109 +27,40 @@ void GMGPolar::solve()
     t_avg_MGC_residual      = 0.0;
     t_avg_MGC_directSolver  = 0.0;
 
-    /* ------------ */
-    /* Start Solver */
-    /* ------------ */
+    /* --------------------------------------- */
+    /* Start Solver at finest level (depth 0)  */
+    /* --------------------------------------- */
+    Level& level = levels_[0];
 
-    int start_level_depth = 0;
-    Level& level          = levels_[start_level_depth];
+    number_of_iterations_                 = 0;
+    double initial_residual_norm          = 1.0;
+    double current_residual_norm          = 1.0;
+    double current_relative_residual_norm = 1.0;
 
-    number_of_iterations_ = 0;
-
-    double initial_residual_norm;
-    double current_residual_norm, current_relative_residual_norm;
+    printIterationHeader();
 
     while (number_of_iterations_ < max_iterations_) {
-
-        if (verbose_ > 0) {
-            std::cout << "\nit: " << number_of_iterations_;
-        }
-
         /* ---------------------------------------------- */
         /* Test solution against exact solution if given. */
         /* ---------------------------------------------- */
-
-        LIKWID_STOP("Solver");
-        if (exact_solution_ != nullptr) {
-            auto start_check_exact_error = std::chrono::high_resolution_clock::now();
-
-            std::pair<double, double> exact_error = computeExactError(level, level.solution(), level.residual());
-            exact_errors_.push_back(exact_error);
-
-            auto end_check_exact_error = std::chrono::high_resolution_clock::now();
-            t_check_exact_error +=
-                std::chrono::duration<double>(end_check_exact_error - start_check_exact_error).count();
-
-            if (verbose_ > 0) {
-                std::cout << ", ||u_k-u_ex||_l2: " << exact_error.first;
-                std::cout << ", ||u_k-u_ex||_inf: " << exact_error.second;
-            }
-        }
-        LIKWID_START("Solver");
+        computeExactError(level);
 
         /* ---------------------------- */
         /* Compute convergence criteria */
         /* ---------------------------- */
+        auto start_check_convergence = std::chrono::high_resolution_clock::now();
         if (absolute_tolerance_.has_value() || relative_tolerance_.has_value()) {
-            auto start_check_convergence = std::chrono::high_resolution_clock::now();
-
-            level.computeResidual(level.residual(), level.rhs(), level.solution());
-
-            if (extrapolation_ != ExtrapolationType::NONE) {
-                Level& next_level = levels_[start_level_depth + 1];
-                injection(start_level_depth, next_level.solution(), level.solution());
-                next_level.computeResidual(next_level.residual(), next_level.rhs(), next_level.solution());
-                extrapolatedResidual(start_level_depth, level.residual(), next_level.residual());
-            }
-
-            switch (residual_norm_type_) {
-            case ResidualNormType::EUCLIDEAN:
-                current_residual_norm = sqrt(l2_norm_squared(level.residual()));
-                break;
-            case ResidualNormType::WEIGHTED_EUCLIDEAN:
-                current_residual_norm = sqrt(l2_norm_squared(level.residual())) / sqrt(level.grid().numberOfNodes());
-                break;
-            case ResidualNormType::INFINITY_NORM:
-                current_residual_norm = infinity_norm(level.residual());
-                break;
-            default:
-                throw std::invalid_argument("Unknown ResidualNormType");
-            }
-            residual_norms_.push_back(current_residual_norm);
-
-            if (number_of_iterations_ == 0) {
-                initial_residual_norm          = current_residual_norm;
-                current_relative_residual_norm = 1.0;
-                if (verbose_ > 0) {
-                    std::cout << ", ||r_k||: " << current_residual_norm;
-                }
-            }
-            else {
-                current_relative_residual_norm = current_residual_norm / initial_residual_norm;
-                const double current_residual_reduction_factor =
-                    residual_norms_[number_of_iterations_] / residual_norms_[number_of_iterations_ - 1];
-
-                if (verbose_ > 0) {
-                    std::cout << ", ||r_k||: " << current_residual_norm;
-                    std::cout << ", ||r_k|| / ||r_0||: " << current_relative_residual_norm;
-                    std::cout << ", ||r_k|| / ||r_{k-1}||: " << current_residual_reduction_factor;
-                }
-
-                const double convergence_factor = 0.7;
-                if (current_residual_reduction_factor > convergence_factor &&
-                    extrapolation_ == ExtrapolationType::COMBINED && full_grid_smoothing_) {
-                    full_grid_smoothing_ = false;
-                    std::cout << "Switching from full grid smoothing to standard extrapolated smoothing." << std::endl;
-                }
-            }
-
-            auto end_check_convergence = std::chrono::high_resolution_clock::now();
-            t_check_convergence +=
-                std::chrono::duration<double>(end_check_convergence - start_check_convergence).count();
-
-            if (converged(current_residual_norm, current_relative_residual_norm))
-                break;
+            updateResidualNorms(level, number_of_iterations_, initial_residual_norm, current_residual_norm,
+                                current_relative_residual_norm);
         }
+
+        printIterationInfo(number_of_iterations_, current_residual_norm, current_relative_residual_norm);
+
+        if (converged(current_residual_norm, current_relative_residual_norm))
+            break;
+
+        auto end_check_convergence = std::chrono::high_resolution_clock::now();
+        t_check_convergence += std::chrono::duration<double>(end_check_convergence - start_check_convergence).count();
 
         /* ------------------------- */
         /* Start Multigrid Iteration */
@@ -158,28 +70,28 @@ void GMGPolar::solve()
         switch (multigrid_cycle_) {
         case MultigridCycleType::V_CYCLE:
             if (extrapolation_ == ExtrapolationType::NONE) {
-                multigrid_V_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
+                multigrid_V_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
             }
             else {
-                implicitlyExtrapolatedMultigrid_V_Cycle(start_level_depth, level.solution(), level.rhs(),
+                implicitlyExtrapolatedMultigrid_V_Cycle(level.level_depth(), level.solution(), level.rhs(),
                                                         level.residual());
             }
             break;
         case MultigridCycleType::W_CYCLE:
             if (extrapolation_ == ExtrapolationType::NONE) {
-                multigrid_W_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
+                multigrid_W_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
             }
             else {
-                implicitlyExtrapolatedMultigrid_W_Cycle(start_level_depth, level.solution(), level.rhs(),
+                implicitlyExtrapolatedMultigrid_W_Cycle(level.level_depth(), level.solution(), level.rhs(),
                                                         level.residual());
             }
             break;
         case MultigridCycleType::F_CYCLE:
             if (extrapolation_ == ExtrapolationType::NONE) {
-                multigrid_F_Cycle(start_level_depth, level.solution(), level.rhs(), level.residual());
+                multigrid_F_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
             }
             else {
-                implicitlyExtrapolatedMultigrid_F_Cycle(start_level_depth, level.solution(), level.rhs(),
+                implicitlyExtrapolatedMultigrid_F_Cycle(level.level_depth(), level.solution(), level.rhs(),
                                                         level.residual());
             }
             break;
@@ -210,8 +122,9 @@ void GMGPolar::solve()
             std::pow(current_residual_norm / initial_residual_norm, 1.0 / number_of_iterations_);
 
         if (verbose_ > 0) {
-            std::cout << "\nTotal Iterations: " << number_of_iterations_ << std::endl;
-            std::cout << "Mean Residual Reduction Factor Rho: " << mean_residual_reduction_factor_ << std::endl;
+            std::cout << "------------------------------\n";
+            std::cout << "Total Iterations: " << number_of_iterations_ << "\n";
+            std::cout << "Reduction Factor: ρ = " << mean_residual_reduction_factor_ << "\n";
         }
     }
 
@@ -221,10 +134,153 @@ void GMGPolar::solve()
     LIKWID_STOP("Solve");
 
     if (paraview_) {
-        computeExactError(level, level.solution(), level.residual());
+        computeExactError_l2_inf(level, level.solution(), level.residual());
         writeToVTK("output_solution", level, level.solution());
         writeToVTK("output_error", level, level.residual());
     }
+}
+
+void GMGPolar::updateResidualNorms(Level& level, int iteration, double& initial_residual_norm,
+                                   double& current_residual_norm, double& current_relative_residual_norm)
+{
+    level.computeResidual(level.residual(), level.rhs(), level.solution());
+
+    if (extrapolation_ != ExtrapolationType::NONE) {
+        Level& next_level = levels_[level.level_depth() + 1];
+        injection(level.level_depth(), next_level.solution(), level.solution());
+        next_level.computeResidual(next_level.residual(), next_level.rhs(), next_level.solution());
+        extrapolatedResidual(level.level_depth(), level.residual(), next_level.residual());
+    }
+
+    switch (residual_norm_type_) {
+    case ResidualNormType::EUCLIDEAN:
+        current_residual_norm = l2_norm(level.residual());
+        break;
+    case ResidualNormType::WEIGHTED_EUCLIDEAN:
+        current_residual_norm = l2_norm(level.residual()) / sqrt(level.grid().numberOfNodes());
+        break;
+    case ResidualNormType::INFINITY_NORM:
+        current_residual_norm = infinity_norm(level.residual());
+        break;
+    default:
+        throw std::invalid_argument("Unknown ResidualNormType");
+    }
+    residual_norms_.push_back(current_residual_norm);
+
+    if (number_of_iterations_ == 0) {
+        if (!FMG_) {
+            initial_residual_norm = current_residual_norm;
+        }
+        else {
+            switch (residual_norm_type_) {
+            case ResidualNormType::EUCLIDEAN:
+                initial_residual_norm = l2_norm(level.rhs());
+                break;
+            case ResidualNormType::WEIGHTED_EUCLIDEAN:
+                initial_residual_norm = (l2_norm(level.rhs()) / std::sqrt(level.grid().numberOfNodes()));
+                break;
+            case ResidualNormType::INFINITY_NORM:
+                initial_residual_norm = infinity_norm(level.rhs());
+                break;
+            default:
+                throw std::invalid_argument("Unknown ResidualNormType");
+            }
+        }
+    }
+
+    current_relative_residual_norm = current_residual_norm / initial_residual_norm;
+
+    if (number_of_iterations_ > 0) {
+        const double current_residual_reduction_factor =
+            residual_norms_[number_of_iterations_] / residual_norms_[number_of_iterations_ - 1];
+
+        const double convergence_factor = 0.7;
+        if (current_residual_reduction_factor > convergence_factor && extrapolation_ == ExtrapolationType::COMBINED &&
+            full_grid_smoothing_) {
+            full_grid_smoothing_ = false;
+            if (verbose_ > 0)
+                std::cout << "Switching from full grid smoothing to standard extrapolated smoothing.\n";
+        }
+    }
+}
+
+void GMGPolar::computeExactError(Level& level)
+{
+    if (exact_solution_ == nullptr)
+        return;
+
+    LIKWID_STOP("Solver");
+    auto start = std::chrono::high_resolution_clock::now();
+    // Compute the weighted L2 norm and infinity norm of the error between the numerical and exact solution.
+    // The results are stored as a pair: (weighted L2 error, infinity error).
+    exact_errors_.push_back(computeExactError_l2_inf(level, level.solution(), level.residual()));
+    auto end = std::chrono::high_resolution_clock::now();
+    t_check_exact_error += std::chrono::duration<double>(end - start).count();
+    LIKWID_START("Solver");
+}
+
+bool GMGPolar::converged(const double& residual_norm, const double& relative_residual_norm)
+{
+    if (relative_tolerance_.has_value()) {
+        if (!(relative_residual_norm > relative_tolerance_.value())) {
+            return true;
+        }
+    }
+    if (absolute_tolerance_.has_value()) {
+        if (!(residual_norm > absolute_tolerance_.value())) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void GMGPolar::printIterationHeader()
+{
+    if (verbose_ <= 0)
+        return;
+
+    const int table_spacing = 4;
+    std::cout << "------------------------------\n";
+    std::cout << "---- Multigrid Iterations ----\n";
+    std::cout << "------------------------------\n";
+    std::cout << std::left;
+    std::cout << std::setw(3 + table_spacing) << "it";
+    if (absolute_tolerance_.has_value() || relative_tolerance_.has_value()) {
+        std::cout << std::setw(9 + table_spacing) << "||r_k||";
+        if (!FMG_)
+            std::cout << std::setw(15 + table_spacing) << "||r_k||/||r_0||";
+        else
+            std::cout << std::setw(15 + table_spacing) << "||r_k||/||rhs||";
+    }
+    if (exact_solution_ != nullptr) {
+        std::cout << std::setw(12 + table_spacing) << "||u-u_k||_l2";
+        std::cout << std::setw(13 + table_spacing) << "||u-u_k||_inf";
+    }
+    std::cout << "\n";
+    std::cout << std::right << std::setfill(' ');
+}
+
+void GMGPolar::printIterationInfo(int iteration, double current_residual_norm, double current_relative_residual_norm)
+{
+    if (verbose_ <= 0)
+        return;
+
+    const int table_spacing = 4;
+    std::cout << std::left << std::scientific << std::setprecision(2);
+    std::cout << std::setw(3 + table_spacing) << number_of_iterations_;
+    if (absolute_tolerance_.has_value() || relative_tolerance_.has_value()) {
+        std::cout << std::setw(9 + table_spacing + 2) << current_residual_norm;
+        if (!FMG_)
+            std::cout << std::setw(15 + table_spacing) << current_relative_residual_norm;
+        else
+            std::cout << std::setw(15 + table_spacing) << current_relative_residual_norm;
+    }
+    if (exact_solution_ != nullptr) {
+        std::cout << std::setw(12 + table_spacing) << exact_errors_.back().first;
+        std::cout << std::setw(13 + table_spacing) << exact_errors_.back().second;
+    }
+    std::cout << "\n";
+    std::cout << std::right << std::defaultfloat << std::setprecision(6) << std::setfill(' ');
 }
 
 void GMGPolar::initializeSolution()
@@ -261,7 +317,6 @@ void GMGPolar::initializeSolution()
         }
     }
     else {
-        std::cout << "Using Full Multigrid" << std::endl;
         // Start from the coarsest level
         int FMG_start_level_depth = number_of_levels_ - 1;
         Level& FMG_level          = levels_[FMG_start_level_depth];
@@ -331,23 +386,8 @@ void GMGPolar::initializeSolution()
     }
 }
 
-bool GMGPolar::converged(const double& residual_norm, const double& relative_residual_norm)
-{
-    if (relative_tolerance_.has_value()) {
-        if (!(relative_residual_norm > relative_tolerance_.value())) {
-            return true;
-        }
-    }
-    if (absolute_tolerance_.has_value()) {
-        if (!(residual_norm > absolute_tolerance_.value())) {
-            return true;
-        }
-    }
-    return false;
-}
-
-std::pair<double, double> GMGPolar::computeExactError(Level& level, const Vector<double>& solution,
-                                                      Vector<double>& error)
+std::pair<double, double> GMGPolar::computeExactError_l2_inf(Level& level, const Vector<double>& solution,
+                                                             Vector<double>& error)
 {
     assert(exact_solution_ != nullptr);
 
@@ -387,7 +427,7 @@ std::pair<double, double> GMGPolar::computeExactError(Level& level, const Vector
         }
     }
 
-    double weighted_euclidean_error = sqrt(l2_norm_squared(error)) / sqrt(grid.numberOfNodes());
+    double weighted_euclidean_error = l2_norm(error) / sqrt(grid.numberOfNodes());
     double infinity_error           = infinity_norm(error);
 
     return std::make_pair(weighted_euclidean_error, infinity_error);

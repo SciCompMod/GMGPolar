@@ -455,4 +455,3 @@ TEST(VectorDoubleComplex, size_construct_modify)
     EXPECT_DOUBLE_COMPLEX_EQ(v[3], 4.0 + 9.0i);
     EXPECT_DOUBLE_COMPLEX_EQ(v[4], 5.0 + 10.0i);
 }
-

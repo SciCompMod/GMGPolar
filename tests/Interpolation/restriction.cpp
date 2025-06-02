@@ -159,4 +159,3 @@ TEST(RestrictionTest, applyRestriction)
         ASSERT_DOUBLE_EQ(result2[i], result3[i]);
     }
 }
-

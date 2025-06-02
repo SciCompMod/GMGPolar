@@ -1515,5 +1515,3 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin_Smal
     ASSERT_LT(iterations, 150);
     ASSERT_NEAR(infinity_norm(error), 0.0, precision);
 }
-
-
