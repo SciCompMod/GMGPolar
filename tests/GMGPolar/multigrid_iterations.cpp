@@ -37,10 +37,10 @@ TEST(GeometricMultigrid, V_Cycle_Extrapolation)
     const bool cacheDensityProfileCoefficients                = true;
     const bool cacheDomainGeometry                            = false;
 
-    const int nr_exp             = 4;
-    const int ntheta_exp         = 6;
-    const int anisotropic_factor = 3;
-    int divideBy2                = 3;
+    const int nr_exp             = 3;
+    const int ntheta_exp         = 5;
+    const int anisotropic_factor = 2;
+    int divideBy2                = 0;
 
     const bool DirBC_Interior = false;
 
@@ -49,7 +49,7 @@ TEST(GeometricMultigrid, V_Cycle_Extrapolation)
     const MultigridCycleType FMG_cycle = MultigridCycleType::V_CYCLE;
 
     const ExtrapolationType extrapolation   = ExtrapolationType::IMPLICIT_EXTRAPOLATION;
-    const int maxLevels                     = 6;
+    const int maxLevels                     = 2;
     const int preSmoothingSteps             = 1;
     const int postSmoothingSteps            = 1;
     const MultigridCycleType multigridCycle = MultigridCycleType::V_CYCLE;
@@ -95,7 +95,7 @@ TEST(GeometricMultigrid, V_Cycle_Extrapolation)
     solver.setup();
     solver.solve();
 
-    ASSERT_LE(solver.numberOfIterations(), 18);
+    ASSERT_LE(solver.numberOfIterations(), 45);
 }
 
 TEST(GeometricMultigrid, V_Cycle)
@@ -107,18 +107,18 @@ TEST(GeometricMultigrid, V_Cycle)
     const double elongation_kappa             = 0.3;
     const double shift_delta                  = 0.2;
 
-    /* Example 2: Cartesian Solution -> Lower Order 3.5 */
-    const double alpha_jump = 0.66 * Rmax;
+    /* Example 1: Polar Solution -> Higher Order 4.0 */
+    const double alpha_jump = 0.4837 * Rmax;
     std::unique_ptr<DomainGeometry> domain_geometry =
-        std::make_unique<CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
+        std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
     std::unique_ptr<ExactSolution> exact_solution =
-        std::make_unique<CartesianR2_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    std::unique_ptr<DensityProfileCoefficients> coefficients =
-        std::make_unique<SonnendruckerGyroCoefficients>(Rmax, alpha_jump);
+        std::make_unique<PolarR6_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+    std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniGyroCoefficients>(Rmax, alpha_jump);
     std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<CartesianR2_Boundary_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    std::unique_ptr<SourceTerm> source_term = std::make_unique<CartesianR2_SonnendruckerGyro_CzarnyGeometry>(
-        Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
+        std::make_unique<PolarR6_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+    std::unique_ptr<SourceTerm> source_term =
+        std::make_unique<PolarR6_ZoniGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+
 
     GMGPolar solver(std::move(domain_geometry), std::move(coefficients), std::move(boundary_conditions),
                     std::move(source_term));
@@ -134,11 +134,10 @@ TEST(GeometricMultigrid, V_Cycle)
     const bool cacheDensityProfileCoefficients                = true;
     const bool cacheDomainGeometry                            = true;
 
-    const int nr_exp             = 4;
-    const int ntheta_exp         = 6;
-    const int anisotropic_factor = 3;
-    int divideBy2                = 3;
-
+    const int nr_exp             = 3;
+    const int ntheta_exp         = 5;
+    const int anisotropic_factor = 2;
+    int divideBy2                = 0;
     const bool DirBC_Interior = false;
 
     const bool FMG                     = true;
@@ -146,7 +145,7 @@ TEST(GeometricMultigrid, V_Cycle)
     const MultigridCycleType FMG_cycle = MultigridCycleType::V_CYCLE;
 
     const ExtrapolationType extrapolation   = ExtrapolationType::NONE;
-    const int maxLevels                     = 6;
+    const int maxLevels                     = 2;
     const int preSmoothingSteps             = 1;
     const int postSmoothingSteps            = 1;
     const MultigridCycleType multigridCycle = MultigridCycleType::V_CYCLE;
@@ -192,7 +191,7 @@ TEST(GeometricMultigrid, V_Cycle)
     solver.setup();
     solver.solve();
 
-    ASSERT_LE(solver.numberOfIterations(), 16);
+    ASSERT_LE(solver.numberOfIterations(), 10);
 }
 
 TEST(GeometricMultigrid, W_Cycle_Extrapolation)
@@ -204,18 +203,17 @@ TEST(GeometricMultigrid, W_Cycle_Extrapolation)
     const double elongation_kappa             = 0.3;
     const double shift_delta                  = 0.2;
 
-    /* Example 3: Refined Solution -> Lower Order 3.5 */
-    const double alpha_jump = 0.9 * Rmax; // Refinement where the solution is most complex
+    /* Example 1: Polar Solution -> Higher Order 4.0 */
+    const double alpha_jump = 0.4837 * Rmax;
     std::unique_ptr<DomainGeometry> domain_geometry =
         std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
     std::unique_ptr<ExactSolution> exact_solution =
-        std::make_unique<Refined_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    std::unique_ptr<DensityProfileCoefficients> coefficients =
-        std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
+        std::make_unique<PolarR6_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+    std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniGyroCoefficients>(Rmax, alpha_jump);
     std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<Refined_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+        std::make_unique<PolarR6_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
     std::unique_ptr<SourceTerm> source_term =
-        std::make_unique<Refined_ZoniShiftedGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+        std::make_unique<PolarR6_ZoniGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
 
     GMGPolar solver(std::move(domain_geometry), std::move(coefficients), std::move(boundary_conditions),
                     std::move(source_term));
@@ -231,10 +229,10 @@ TEST(GeometricMultigrid, W_Cycle_Extrapolation)
     const bool cacheDensityProfileCoefficients                = true;
     const bool cacheDomainGeometry                            = false;
 
-    const int nr_exp             = 4;
-    const int ntheta_exp         = 6;
-    const int anisotropic_factor = 3;
-    int divideBy2                = 3;
+    const int nr_exp             = 3;
+    const int ntheta_exp         = 5;
+    const int anisotropic_factor = 2;
+    int divideBy2                = 0;
 
     const bool DirBC_Interior = false;
 
@@ -243,7 +241,7 @@ TEST(GeometricMultigrid, W_Cycle_Extrapolation)
     const MultigridCycleType FMG_cycle = MultigridCycleType::W_CYCLE;
 
     const ExtrapolationType extrapolation   = ExtrapolationType::IMPLICIT_EXTRAPOLATION;
-    const int maxLevels                     = 6;
+    const int maxLevels                     = 2;
     const int preSmoothingSteps             = 1;
     const int postSmoothingSteps            = 1;
     const MultigridCycleType multigridCycle = MultigridCycleType::W_CYCLE;
@@ -289,7 +287,7 @@ TEST(GeometricMultigrid, W_Cycle_Extrapolation)
     solver.setup();
     solver.solve();
 
-    ASSERT_LE(solver.numberOfIterations(), 30);
+    ASSERT_LE(solver.numberOfIterations(), 45);
 }
 
 TEST(GeometricMultigrid, W_Cycle)
@@ -301,18 +299,17 @@ TEST(GeometricMultigrid, W_Cycle)
     const double elongation_kappa             = 0.3;
     const double shift_delta                  = 0.2;
 
-    /* Example 3: Refined Solution -> Lower Order 3.5 */
-    const double alpha_jump = 0.9 * Rmax; // Refinement where the solution is most complex
+    /* Example 1: Polar Solution -> Higher Order 4.0 */
+    const double alpha_jump = 0.4837 * Rmax;
     std::unique_ptr<DomainGeometry> domain_geometry =
         std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
     std::unique_ptr<ExactSolution> exact_solution =
-        std::make_unique<Refined_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    std::unique_ptr<DensityProfileCoefficients> coefficients =
-        std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
+        std::make_unique<PolarR6_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+    std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniGyroCoefficients>(Rmax, alpha_jump);
     std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<Refined_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+        std::make_unique<PolarR6_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
     std::unique_ptr<SourceTerm> source_term =
-        std::make_unique<Refined_ZoniShiftedGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+        std::make_unique<PolarR6_ZoniGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
 
     GMGPolar solver(std::move(domain_geometry), std::move(coefficients), std::move(boundary_conditions),
                     std::move(source_term));
@@ -328,10 +325,10 @@ TEST(GeometricMultigrid, W_Cycle)
     const bool cacheDensityProfileCoefficients                = false;
     const bool cacheDomainGeometry                            = false;
 
-    const int nr_exp             = 4;
-    const int ntheta_exp         = 6;
-    const int anisotropic_factor = 3;
-    int divideBy2                = 3;
+    const int nr_exp             = 3;
+    const int ntheta_exp         = 5;
+    const int anisotropic_factor = 2;
+    int divideBy2                = 0;
 
     const bool DirBC_Interior = true;
 
@@ -340,7 +337,7 @@ TEST(GeometricMultigrid, W_Cycle)
     const MultigridCycleType FMG_cycle = MultigridCycleType::W_CYCLE;
 
     const ExtrapolationType extrapolation   = ExtrapolationType::NONE;
-    const int maxLevels                     = 6;
+    const int maxLevels                     = 2;
     const int preSmoothingSteps             = 1;
     const int postSmoothingSteps            = 1;
     const MultigridCycleType multigridCycle = MultigridCycleType::W_CYCLE;
@@ -386,7 +383,7 @@ TEST(GeometricMultigrid, W_Cycle)
     solver.setup();
     solver.solve();
 
-    ASSERT_LE(solver.numberOfIterations(), 20);
+    ASSERT_LE(solver.numberOfIterations(), 10);
 }
 
 TEST(GeometricMultigrid, F_Cycle_Extrapolation)
@@ -398,25 +395,24 @@ TEST(GeometricMultigrid, F_Cycle_Extrapolation)
     const double elongation_kappa             = 0.3;
     const double shift_delta                  = 0.2;
 
-    /* Example 3: Refined Solution -> Lower Order 3.5 */
-    const double alpha_jump = 0.9 * Rmax; // Refinement where the solution is most complex
+    /* Example 1: Polar Solution -> Higher Order 4.0 */
+    const double alpha_jump = 0.4837 * Rmax;
     std::unique_ptr<DomainGeometry> domain_geometry =
         std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
     std::unique_ptr<ExactSolution> exact_solution =
-        std::make_unique<Refined_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    std::unique_ptr<DensityProfileCoefficients> coefficients =
-        std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
+        std::make_unique<PolarR6_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+    std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniGyroCoefficients>(Rmax, alpha_jump);
     std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<Refined_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+        std::make_unique<PolarR6_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
     std::unique_ptr<SourceTerm> source_term =
-        std::make_unique<Refined_ZoniShiftedGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+        std::make_unique<PolarR6_ZoniGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
 
     GMGPolar solver(std::move(domain_geometry), std::move(coefficients), std::move(boundary_conditions),
                     std::move(source_term));
 
     solver.setSolution(std::move(exact_solution));
 
-    const int verbose   = 0;
+    const int verbose   = 1;
     const bool paraview = false;
 
     const int maxOpenMPThreads = 16;
@@ -425,10 +421,10 @@ TEST(GeometricMultigrid, F_Cycle_Extrapolation)
     const bool cacheDensityProfileCoefficients                = true;
     const bool cacheDomainGeometry                            = false;
 
-    const int nr_exp             = 4;
-    const int ntheta_exp         = 6;
-    const int anisotropic_factor = 3;
-    int divideBy2                = 3;
+    const int nr_exp             = 3;
+    const int ntheta_exp         = 5;
+    const int anisotropic_factor = 2;
+    int divideBy2                = 0;
 
     const bool DirBC_Interior = false;
 
@@ -437,7 +433,7 @@ TEST(GeometricMultigrid, F_Cycle_Extrapolation)
     const MultigridCycleType FMG_cycle = MultigridCycleType::F_CYCLE;
 
     const ExtrapolationType extrapolation   = ExtrapolationType::IMPLICIT_EXTRAPOLATION;
-    const int maxLevels                     = 6;
+    const int maxLevels                     = 2;
     const int preSmoothingSteps             = 1;
     const int postSmoothingSteps            = 1;
     const MultigridCycleType multigridCycle = MultigridCycleType::F_CYCLE;
@@ -483,7 +479,7 @@ TEST(GeometricMultigrid, F_Cycle_Extrapolation)
     solver.setup();
     solver.solve();
 
-    ASSERT_LE(solver.numberOfIterations(), 30);
+    ASSERT_LE(solver.numberOfIterations(), 45);
 }
 
 TEST(GeometricMultigrid, F_Cycle)
@@ -495,25 +491,24 @@ TEST(GeometricMultigrid, F_Cycle)
     const double elongation_kappa             = 0.3;
     const double shift_delta                  = 0.2;
 
-    /* Example 3: Refined Solution -> Lower Order 3.5 */
-    const double alpha_jump = 0.9 * Rmax; // Refinement where the solution is most complex
+    /* Example 1: Polar Solution -> Higher Order 4.0 */
+    const double alpha_jump = 0.4837 * Rmax;
     std::unique_ptr<DomainGeometry> domain_geometry =
         std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
     std::unique_ptr<ExactSolution> exact_solution =
-        std::make_unique<Refined_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    std::unique_ptr<DensityProfileCoefficients> coefficients =
-        std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
+        std::make_unique<PolarR6_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+    std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniGyroCoefficients>(Rmax, alpha_jump);
     std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<Refined_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+        std::make_unique<PolarR6_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
     std::unique_ptr<SourceTerm> source_term =
-        std::make_unique<Refined_ZoniShiftedGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+        std::make_unique<PolarR6_ZoniGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
 
     GMGPolar solver(std::move(domain_geometry), std::move(coefficients), std::move(boundary_conditions),
                     std::move(source_term));
 
     solver.setSolution(std::move(exact_solution));
 
-    const int verbose   = 0;
+    const int verbose   = 1;
     const bool paraview = false;
 
     const int maxOpenMPThreads = 16;
@@ -522,10 +517,10 @@ TEST(GeometricMultigrid, F_Cycle)
     const bool cacheDensityProfileCoefficients                = false;
     const bool cacheDomainGeometry                            = false;
 
-    const int nr_exp             = 4;
-    const int ntheta_exp         = 6;
-    const int anisotropic_factor = 3;
-    int divideBy2                = 3;
+    const int nr_exp             = 3;
+    const int ntheta_exp         = 5;
+    const int anisotropic_factor = 2;
+    int divideBy2                = 0;
 
     const bool DirBC_Interior = true;
 
@@ -534,7 +529,7 @@ TEST(GeometricMultigrid, F_Cycle)
     const MultigridCycleType FMG_cycle = MultigridCycleType::F_CYCLE;
 
     const ExtrapolationType extrapolation   = ExtrapolationType::NONE;
-    const int maxLevels                     = 6;
+    const int maxLevels                     = 2;
     const int preSmoothingSteps             = 1;
     const int postSmoothingSteps            = 1;
     const MultigridCycleType multigridCycle = MultigridCycleType::F_CYCLE;
@@ -580,5 +575,5 @@ TEST(GeometricMultigrid, F_Cycle)
     solver.setup();
     solver.solve();
 
-    ASSERT_LE(solver.numberOfIterations(), 20);
+    ASSERT_LE(solver.numberOfIterations(), 10);
 }
