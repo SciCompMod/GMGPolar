@@ -80,6 +80,8 @@ if(GMGPOLAR_BUILD_TESTS)
                 '*/_deps/googletest-src/*'
                 '*/include/InputFunctions/*'
                 '*/src/InputFunctions/*'
+                '*/src/GMGPolar/select_test_case.cpp'
+                '*/include/Utilities/*'
                 --output-file ${CMAKE_BINARY_DIR}/coverage-filtered.info
                 --ignore-errors unused
             # Generate HTML report
