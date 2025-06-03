@@ -47,19 +47,6 @@ void add(Vector<T>& result, const Vector<T>& x)
 }
 
 template <typename T>
-void add(Vector<T>& result, const Vector<T>& x, const int m)
-{
-    if (result.size() != x.size()) {
-        throw std::invalid_argument("Vectors must be of the same size.");
-    }
-    std::size_t n = result.size();
-#pragma omp parallel for if (n > m)
-    for (std::size_t i = 0; i < n; ++i) {
-        result[i] += x[i];
-    }
-}
-
-template <typename T>
 void subtract(Vector<T>& result, const Vector<T>& x)
 {
     if (result.size() != x.size()) {
@@ -133,6 +120,12 @@ T l2_norm_squared(const Vector<T>& x)
         result += x[i] * x[i];
     }
     return result;
+}
+
+template <typename T>
+T l2_norm(const Vector<T>& x)
+{
+    return std::sqrt(l2_norm_squared(x));
 }
 
 template <typename T>

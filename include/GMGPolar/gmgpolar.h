@@ -242,7 +242,8 @@ private:
     bool converged(const double& current_residual_norm, const double& first_residual_norm);
 
     std::vector<std::pair<double, double>> exact_errors_; // Only when exact solution provided
-    std::pair<double, double> computeExactError(Level& level, const Vector<double>& solution, Vector<double>& error);
+    std::pair<double, double> computeExactError_l2_inf(Level& level, const Vector<double>& solution,
+                                                       Vector<double>& error);
 
     /* ---------------------------------------- */
     /* Parser Functions for GMGPolar Parameters */
@@ -262,6 +263,7 @@ private:
     /* Setup Functions */
     PolarGrid createFinestGrid();
     int chooseNumberOfLevels(const PolarGrid& finest_grid);
+    void printSettings() const;
 
     void build_rhs_f(const Level& level, Vector<double>& rhs_f);
     void discretize_rhs_f(const Level& level, Vector<double>& rhs_f);
@@ -269,6 +271,11 @@ private:
     /* --------------- */
     /* Solve Functions */
     void initializeSolution();
+    void computeExactError(Level& level);
+    void updateResidualNorms(Level& level, int iteration, double& initial_residual_norm, double& current_residual_norm,
+                             double& current_relative_residual_norm);
+    void printIterationHeader();
+    void printIterationInfo(int iteration, double current_residual_norm, double current_relative_residual_norm);
 
     /* ------------------- */
     /* Multigrid Functions */

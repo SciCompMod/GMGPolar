@@ -10,12 +10,6 @@
 
 int main(int argc, char* argv[])
 {
-#ifdef NDEBUG
-    std::cout << "Build Type: Release\n" << std::endl;
-#else
-    std::cout << "Build Type: Debug\n" << std::endl;
-#endif
-
     const double R0                           = 1e-8;
     const double Rmax                         = 1.3;
     const double inverse_aspect_ratio_epsilon = 0.3;
