@@ -318,7 +318,7 @@ TEST(SparseLUSolver, FiveByFiveMixedSigns)
 {
     using T = double;
     SparseMatrixCSR<T> A(
-        5, 5, {{0, 0, -2.0}, {1, 1, 3.0}, {2, 2, -4.0}, {3, 3, 5.0}, {4, 4, -6.0}, {0, 4, 1.0}, {4, 0, -1.0}});
+        5, 5, {{0, 0, -2.0}, {0, 4, 1.0}, {1, 1, 3.0}, {2, 2, -4.0}, {3, 3, 5.0}, {4, 0, -1.0}, {4, 4, -6.0}});
     Vector<T> x_true({1, -2, 3, -4, 5});
     Vector<T> b = csr_matvec(A, x_true);
     SparseLUSolver<T> solver(A);
