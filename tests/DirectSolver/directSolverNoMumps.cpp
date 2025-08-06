@@ -219,7 +219,7 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, SequentialDirectSolverDirBC_Inter
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-11);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-12);
 }
 
@@ -263,7 +263,7 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, ParallelDirectSolverDirBC_Interio
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-11);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-12);
 }
 
@@ -307,7 +307,7 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, SequentialDirectSolverAcrossOrigi
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-8);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-8);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
 }
 
@@ -351,7 +351,7 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, ParallelDirectSolverAcrossOrigin_
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-8);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-8);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
 }
 
@@ -401,7 +401,7 @@ TEST(DirectSolverTestNoMumps_ShafranovGeometry, DirectSolverDirBC_Interior_Shafr
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-12);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-12);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-12);
 }
 
@@ -447,7 +447,7 @@ TEST(DirectSolverTestNoMumps_ShafranovGeometry, DirectSolverAcrossOrigin_Shafran
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-8);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-8);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
 }
 
@@ -498,7 +498,7 @@ TEST(DirectSolverTestNoMumps_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGe
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-12);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-12);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-12);
 }
 
@@ -545,7 +545,7 @@ TEST(DirectSolverTestNoMumps_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeom
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-8);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-8);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
 }
 
@@ -592,7 +592,7 @@ TEST(DirectSolverTestNoMumps_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGe
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-11);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-11);
 }
 
@@ -635,7 +635,7 @@ TEST(DirectSolverTestNoMumps_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeom
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-7);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-7);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
 }
 
@@ -691,7 +691,7 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, DirectSolverAcrossOriginHigherPre
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-9);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-10);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-10);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-10);
 }
 
@@ -735,7 +735,7 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, DirectSolverAcrossOriginHigherPre
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-10);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-11);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-11);
 }
 
@@ -780,7 +780,7 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, SequentialDirectSolverDirBC_
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-11);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-12);
 }
 
@@ -824,7 +824,7 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, ParallelDirectSolverDirBC_In
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-11);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-12);
 }
 
@@ -868,7 +868,7 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, SequentialDirectSolverAcross
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-8);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-8);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
 }
 
@@ -912,7 +912,7 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, ParallelDirectSolverAcrossOr
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-8);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-8);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
 }
 
@@ -962,7 +962,7 @@ TEST(DirectSolverTakeCustomLUTest_ShafranovGeometry, DirectSolverDirBC_Interior_
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-12);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-12);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-12);
 }
 
@@ -1008,7 +1008,7 @@ TEST(DirectSolverTakeCustomLUTest_ShafranovGeometry, DirectSolverAcrossOrigin_Sh
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-8);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-8);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
 }
 
@@ -1059,7 +1059,7 @@ TEST(DirectSolverTakeCustomLUTest_CzarnyGeometry, DirectSolverDirBC_Interior_Cza
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-12);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-12);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-12);
 }
 
@@ -1106,7 +1106,7 @@ TEST(DirectSolverTakeCustomLUTest_CzarnyGeometry, DirectSolverAcrossOrigin_Czarn
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-8);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-8);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
 }
 
@@ -1153,7 +1153,7 @@ TEST(DirectSolverTakeCustomLUTest_CulhamGeometry, DirectSolverDirBC_Interior_Cul
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-11);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-11);
 }
 
@@ -1196,7 +1196,7 @@ TEST(DirectSolverTakeCustomLUTest_CulhamGeometry, DirectSolverAcrossOrigin_Culha
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-7);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-7);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
 }
 
@@ -1250,7 +1250,7 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, DirectSolverAcrossOriginHigh
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-9);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-10);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-10);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-10);
 }
 
@@ -1294,7 +1294,6 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, DirectSolverAcrossOriginHigh
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(sqrt(l2_norm_squared(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-11);
     ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-12);
 }
-
