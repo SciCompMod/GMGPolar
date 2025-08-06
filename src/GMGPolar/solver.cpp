@@ -4,24 +4,23 @@
 
 void GMGPolar::solve()
 {
-    if(verbose_ > 0)
-    {
+    if (verbose_ > 0) {
         std::cout << "Cycle type: ";
-        if(multigrid_cycle_ == MultigridCycleType::V_CYCLE)
-        {
+        if (multigrid_cycle_ == MultigridCycleType::V_CYCLE) {
             std::cout << "V." << std::endl;
-        }else if(multigrid_cycle_ == MultigridCycleType::W_CYCLE)
-        {
-            std::cout << "W." << std::endl; 
-        }else if(multigrid_cycle_ == MultigridCycleType::F_CYCLE)
-        {
-            std::cout << "F." << std::endl;         
         }
-    
-        std::cout << "Extrapolation: ";    
+        else if (multigrid_cycle_ == MultigridCycleType::W_CYCLE) {
+            std::cout << "W." << std::endl;
+        }
+        else if (multigrid_cycle_ == MultigridCycleType::F_CYCLE) {
+            std::cout << "F." << std::endl;
+        }
+
+        std::cout << "Extrapolation: ";
         if (extrapolation_ == ExtrapolationType::NONE) {
             std::cout << "None." << std::endl;
-        }else if (extrapolation_ == ExtrapolationType::IMPLICIT_EXTRAPOLATION) {
+        }
+        else if (extrapolation_ == ExtrapolationType::IMPLICIT_EXTRAPOLATION) {
             std::cout << "Implicit Extrapolation." << std::endl;
         }
     }
@@ -444,4 +443,50 @@ void GMGPolar::extrapolatedResidual(const int current_level, Vector<double>& res
             }
         }
     }
+}
+
+void GMGPolar::printIterationHeader()
+{
+    if (verbose_ <= 0)
+        return;
+
+    const int table_spacing = 4;
+    std::cout << "------------------------------\n";
+    std::cout << "---- Multigrid Iterations ----\n";
+    std::cout << "------------------------------\n";
+    std::cout << std::left;
+    std::cout << std::setw(3 + table_spacing) << "it";
+    if (absolute_tolerance_.has_value() || relative_tolerance_.has_value()) {
+        std::cout << std::setw(9 + table_spacing) << "||r_k||";
+        if (!FMG_)
+            std::cout << std::setw(15 + table_spacing) << "||r_k||/||r_0||";
+        else
+            std::cout << std::setw(15 + table_spacing) << "||r_k||/||rhs||";
+    }
+    if (exact_solution_ != nullptr) {
+        std::cout << std::setw(12 + table_spacing) << "||u-u_k||_l2";
+        std::cout << std::setw(13 + table_spacing) << "||u-u_k||_inf";
+    }
+    std::cout << "\n";
+    std::cout << std::right << std::setfill(' ');
+}
+
+void GMGPolar::printIterationInfo(int iteration, double current_residual_norm, double current_relative_residual_norm)
+{
+    if (verbose_ <= 0)
+        return;
+
+    const int table_spacing = 4;
+    std::cout << std::left << std::scientific << std::setprecision(2);
+    std::cout << std::setw(3 + table_spacing) << number_of_iterations_;
+    if (absolute_tolerance_.has_value() || relative_tolerance_.has_value()) {
+        std::cout << std::setw(9 + table_spacing + 2) << current_residual_norm;
+        std::cout << std::setw(15 + table_spacing) << current_relative_residual_norm;
+    }
+    if (exact_solution_ != nullptr) {
+        std::cout << std::setw(12 + table_spacing) << exact_errors_.back().first;
+        std::cout << std::setw(13 + table_spacing) << exact_errors_.back().second;
+    }
+    std::cout << "\n";
+    std::cout << std::right << std::defaultfloat << std::setprecision(6) << std::setfill(' ');
 }
