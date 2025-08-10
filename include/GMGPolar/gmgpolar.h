@@ -137,6 +137,8 @@ public:
     bool cacheDomainGeometry() const;
     void cacheDomainGeometry(bool cache_domain_geometry);
 
+    void printSettings() const;
+
     /* --------*/
     /* Timings */
     void printTimings() const;
@@ -269,6 +271,9 @@ private:
     /* --------------- */
     /* Solve Functions */
     void initializeSolution();
+
+    void printIterationHeader();
+    void printIterationInfo(int iteration, double current_residual_norm, double current_relative_residual_norm);
 
     /* ------------------- */
     /* Multigrid Functions */
