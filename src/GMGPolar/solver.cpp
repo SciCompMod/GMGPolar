@@ -102,10 +102,10 @@ void GMGPolar::solve()
 
             switch (residual_norm_type_) {
             case ResidualNormType::EUCLIDEAN:
-                current_residual_norm = sqrt(l2_norm_squared(level.residual()));
+                current_residual_norm = l2_norm(level.residual());
                 break;
             case ResidualNormType::WEIGHTED_EUCLIDEAN:
-                current_residual_norm = sqrt(l2_norm_squared(level.residual())) / sqrt(level.grid().numberOfNodes());
+                current_residual_norm = l2_norm(level.residual()) / sqrt(level.grid().numberOfNodes());
                 break;
             case ResidualNormType::INFINITY_NORM:
                 current_residual_norm = infinity_norm(level.residual());
@@ -386,7 +386,7 @@ std::pair<double, double> GMGPolar::computeExactError(Level& level, const Vector
         }
     }
 
-    double weighted_euclidean_error = sqrt(l2_norm_squared(error)) / sqrt(grid.numberOfNodes());
+    double weighted_euclidean_error = l2_norm(error) / sqrt(grid.numberOfNodes());
     double infinity_error           = infinity_norm(error);
 
     return std::make_pair(weighted_euclidean_error, infinity_error);
