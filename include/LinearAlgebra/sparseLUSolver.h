@@ -464,23 +464,33 @@ void SparseLUSolver<T>::numericFactorization(const SparseMatrixCSR<T>& A,
 
         // Compute L elements
         int L_offset = L_row_ptr[i];
-        for (int j : L_pattern[i]) {
-            T Lij               = dense[j] / U_diag[j];
+        for (const int j : L_pattern[i]) {
+            const T Lij = dense[j] / U_diag[j];
+
             L_values[L_offset]  = Lij;
             L_col_idx[L_offset] = j;
             L_offset++;
 
-            // Update dense row using U[j] elements
-            int start = U_pattern_start_upper[j];
-            for (int pos = start; pos < U_pattern[j].size(); pos++) {
-                int k          = U_pattern[j][pos];
-                int U_offset_j = U_row_ptr[j] + pos;
+            // Update dense row: dense -= Lij * U_row[j] (for columns k > j)
+            const int U_update_start_offset = U_row_ptr[j] + U_pattern_start_upper[j];
+            const int U_row_end_offset      = U_row_ptr[j + 1];
+            const int update_len            = U_row_end_offset - U_update_start_offset;
+
+            if (update_len <= 0) {
+                continue;
+            }
+            const int* p_U_col = &U_col_idx[U_update_start_offset];
+            const T* p_U_val   = &U_values[U_update_start_offset];
+
+            // This inner loop is the most performance-critical part.
+            for (int idx = 0; idx < update_len; ++idx) {
+                const int k = p_U_col[idx];
                 if (marker[k] != i) {
                     marker[k] = i;
                     dense[k]  = 0;
                     indices_used.push(k);
                 }
-                dense[k] -= Lij * U_values[U_offset_j];
+                dense[k] -= Lij * p_U_val[idx];
             }
         }
 
