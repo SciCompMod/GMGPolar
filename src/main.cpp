@@ -1,27 +1,67 @@
 #include <iostream>
 
+#include "../include/ConfigParser/config_parser.h"
 #include "../include/GMGPolar/gmgpolar.h"
 
 int main(int argc, char* argv[])
 {
-    // Initialize LIKWID markers if enabled
-    LIKWID_INIT();
+    // // Initialize LIKWID performance markers (only active if compiled with LIKWID support)
+    // LIKWID_INIT();
 
-    // Initialize solver and set parameters from command-line arguments
-    GMGPolar solver;
-    solver.setParameters(argc, argv);
-    // Run Solver Setup with optional LIKWID markers
+    // Parse command-line arguments to extract problem configuration
+    ConfigParser parser;
+    parser.parse(argc, argv);
+
+    // Create GMGPolar solver
+    GMGPolar solver(parser.grid(), parser.domainGeometry(), parser.densityProfileCoefficients());
+
+    // --- General solver output and visualization settings --- //
+    solver.verbose(parser.verbose()); // Enable/disable verbose output
+    solver.paraview(parser.paraview()); // Enable/disable ParaView output
+
+    // --- Parallelization and threading settings --- //
+    solver.maxOpenMPThreads(parser.maxOpenMPThreads()); // Maximum OpenMP threads to use
+    solver.threadReductionFactor(parser.threadReductionFactor()); // Reduce threads on coarser grids
+
+    // --- Numerical method setup --- //
+    solver.DirBC_Interior(parser.DirBC_Interior()); // Interior boundary conditions: Dirichlet, Across-the-origin,
+    solver.stencilDistributionMethod(parser.stencilDistributionMethod()); // Stencil distribution strategy: Take, Give
+    solver.cacheDensityProfileCoefficients(
+        parser.cacheDensityProfileCoefficients()); // Cache density profile coefficients: alpha, beta
+    solver.cacheDomainGeometry(parser.cacheDomainGeometry()); // Cache domain geometry data: arr, att, art, detDF
+
+    // --- Multigrid settings --- //
+    solver.extrapolation(parser.extrapolation()); // Enable/disable extrapolation
+    solver.maxLevels(parser.maxLevels()); // Max multigrid levels (-1 = use deepest possible)
+    solver.preSmoothingSteps(parser.preSmoothingSteps()); // Smoothing before coarse-grid correction
+    solver.postSmoothingSteps(parser.postSmoothingSteps()); // Smoothing after coarse-grid correction
+    solver.multigridCycle(parser.multigridCycle()); // Multigrid cycle type
+    solver.FMG(parser.FMG()); // Full Multigrid mode on/off
+    solver.FMG_iterations(parser.FMG_iterations()); // FMG iteration count
+    solver.FMG_cycle(parser.FMG_cycle()); // FMG cycle type
+
+    // --- Iterative solver controls --- //
+    solver.maxIterations(parser.maxIterations()); // Max number of iterations
+    solver.residualNormType(parser.residualNormType()); // Residual norm type (L2, weighted-L2, L∞)
+    solver.absoluteTolerance(parser.absoluteTolerance()); // Absolute residual tolerance
+    solver.relativeTolerance(parser.relativeTolerance()); // Relative residual tolerance
+
+    // Finalize solver setup (allocates internal data, prepares operators, etc.)
     solver.setup();
-    // Execute Solve Phase with optional LIKWID markers
-    solver.solve();
 
-    // Finalize LIKWID markers if enabled
-    LIKWID_CLOSE();
+    // Solve the system using the provided source term and boundary conditions.
+    // The solver supports multiple calls with different inputs.
+    // Optional: Set the exact solution. If provided, the solver will compute the exact error.
+    solver.solve(parser.boundaryConditions(), parser.sourceTerm(), &parser.exactSolution());
 
-    // Retrieve and print solution and timings
+    // Retrieve solution and associated grid (references for potential output/post-processing)
     Vector<double>& solution = solver.solution();
     const PolarGrid& grid    = solver.grid();
 
+    // Finalize LIKWID performance markers
+    LIKWID_CLOSE();
+
+    // Print timing statistics for each solver phase
     solver.printTimings();
 
     return 0;

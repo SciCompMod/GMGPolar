@@ -21,209 +21,212 @@ class LevelCache;
 #include "../LinearAlgebra/vector.h"
 #include "../LinearAlgebra/vector_operations.h"
 #include "../PolarGrid/polargrid.h"
-#include "../Utilities/cmdline.h"
 #include "../common/global_definitions.h"
-#include "test_cases.h"
+#include "../ConfigParser/test_cases.h"
 
 class GMGPolar
 {
 public:
-    /* ------------------------ */
-    /* GMGPoloar initialization */
-    GMGPolar();
-    GMGPolar(std::unique_ptr<const DomainGeometry> domain_geometry,
-             std::unique_ptr<const DensityProfileCoefficients> density_profile_coefficients,
-             std::unique_ptr<const BoundaryConditions> boundary_conditions,
-             std::unique_ptr<const SourceTerm> source_term);
+    /* ---------------------------------------------------------------------- */
+    /* Construction & Initialization                                          */
+    /* ---------------------------------------------------------------------- */
+    // Construct a polar PDE multigrid solver for the Poisson-like equation:
+    // - \nabla \cdot (\alpha \nabla u) + \beta u = rhs_f  in \Omega,
+    // with Dirichlet boundary condition        u = u_D    on \partial \Omega.
+    // Parameters:
+    // - grid: Cartesian mesh discretizing the computational domain.
+    // - domain_geometry: Mapping from the reference domain to the physical domain \Omega.
+    // - density_profile_coefficients: Coefficients \alpha and \beta defining the PDE.
+    GMGPolar(const PolarGrid& grid, const DomainGeometry& domain_geometry,
+             const DensityProfileCoefficients& density_profile_coefficients);
 
-    void setParameters(int argc, char* argv[]);
-    void setSolution(std::unique_ptr<const ExactSolution> exact_solution);
+    /* ---------------------------------------------------------------------- */
+    /* General output & visualization                                         */
+    /* ---------------------------------------------------------------------- */
+    // Verbose level (0 = silent, >0 = increasingly detailed logs).
+    int verbose() const;
+    void verbose(int verbose);
 
-    /* ---------------------- */
-    /* GMGPolar Setup & Solve */
-    void setup();
-    void solve();
+    // Enable/disable ParaView output for visualization.
+    bool paraview() const;
+    void paraview(bool paraview);
 
-    /* ----------------- */
-    /* GMGPolar Solution */
-    Vector<double>& solution();
-    const Vector<double>& solution() const;
-    const PolarGrid& grid() const;
+    /* ---------------------------------------------------------------------- */
+    /* Parallelization & threading                                             */
+    /* ---------------------------------------------------------------------- */
+    // Maximum number of OpenMP threads to use.
+    int maxOpenMPThreads() const;
+    void maxOpenMPThreads(int max_omp_threads);
 
-    /* Solve Properties */
-    int numberOfIterations() const;
-    double meanResidualReductionFactor() const;
-    // Only when exact solution provided
-    std::optional<double> exactErrorWeightedEuclidean() const;
-    std::optional<double> exactErrorInfinity() const;
+    // Thread reduction factor on coarser grids (e.g., 0.5 halves threads each level).
+    double threadReductionFactor() const;
+    void threadReductionFactor(double thread_reduction_factor);
 
-    /* --------------- */
-    /* Grid Parameters */
-    double R0() const;
-    void R0(double R0);
-    double Rmax() const;
-    void Rmax(double Rmax);
-
-    int nr_exp() const;
-    void nr_exp(int nr_exp);
-    int ntheta_exp() const;
-    void ntheta_exp(int ntheta_exp);
-
-    int anisotropic_factor() const;
-    void anisotropic_factor(int anisotropic_factor);
-    int divideBy2() const;
-    void divideBy2(int divideBy2);
-
-    bool write_grid_file() const;
-    void write_grid_file(bool write_grid_file);
-    bool load_grid_file() const;
-    void load_grid_file(bool load_grid_file);
-
-    std::string file_grid_radii() const;
-    void file_grid_radii(const std::string& file_name);
-    std::string file_grid_angles() const;
-    void file_grid_angles(const std::string& file_name);
-
-    /* ------------------- */
-    /* Geometry Parameters */
+    /* ---------------------------------------------------------------------- */
+    /* Numerical method options                                               */
+    /* ---------------------------------------------------------------------- */
+    // Treatment of the interior boundary at the origin:
+    //     true  -> use Dirichlet boundary condition
+    //     false -> use discretization across the origin
     bool DirBC_Interior() const;
     void DirBC_Interior(bool DirBC_Interior);
 
-    /* -------------------- */
-    /* Multigrid Parameters */
-    bool FMG() const;
-    void FMG(bool FMG);
-    int FMG_iterations() const;
-    void FMG_iterations(int FMG_iterations);
-    MultigridCycleType FMG_cycle() const;
-    void FMG_cycle(MultigridCycleType FMG_cycle);
+    // Strategy for distributing the stencil (Take, Give).
+    StencilDistributionMethod stencilDistributionMethod() const;
+    void stencilDistributionMethod(StencilDistributionMethod method);
 
+    // Cache density profile coefficients (alpha, beta).
+    bool cacheDensityProfileCoefficients() const;
+    void cacheDensityProfileCoefficients(bool cache);
+
+    // Cache domain geometry data (arr, att, art, detDF).
+    bool cacheDomainGeometry() const;
+    void cacheDomainGeometry(bool cache);
+
+    /* ---------------------------------------------------------------------- */
+    /* Multigrid controls                                                     */
+    /* ---------------------------------------------------------------------- */
+    // Implicit extrapolation to increase the order of convergence
     ExtrapolationType extrapolation() const;
-    void extrapolation(ExtrapolationType extrapolation);
+    void extrapolation(ExtrapolationType type);
 
+    // Maximum multigrid levels (-1 = use deepest possible).
     int maxLevels() const;
-    void maxLevels(int max_levels);
+    void maxLevels(int levels);
+
+    // Multigrid cycle type (V-cycle, W-cycle, F-cycle).
     MultigridCycleType multigridCycle() const;
-    void multigridCycle(MultigridCycleType multigrid_cycle);
+    void multigridCycle(MultigridCycleType type);
 
+    // Pre-/post-smoothing steps per level.
     int preSmoothingSteps() const;
-    void preSmoothingSteps(int pre_smoothing_steps);
+    void preSmoothingSteps(int steps);
     int postSmoothingSteps() const;
-    void postSmoothingSteps(int post_smoothing_steps);
+    void postSmoothingSteps(int steps);
 
+    // Full Multigrid (FMG) control.
+    bool FMG() const;
+    void FMG(bool enable);
+    int FMG_iterations() const;
+    void FMG_iterations(int iterations);
+    MultigridCycleType FMG_cycle() const;
+    void FMG_cycle(MultigridCycleType type);
+
+    /* ---------------------------------------------------------------------- */
+    /* Iterative solver termination                                           */
+    /* ---------------------------------------------------------------------- */
+    // Maximum number of iterations for the solver.
     int maxIterations() const;
     void maxIterations(int max_iterations);
+
+    // Type of residual norm used to check convergence.
     ResidualNormType residualNormType() const;
-    void residualNormType(ResidualNormType residual_norm_type);
-    double absoluteTolerance() const;
-    void absoluteTolerance(double absolute_tolerance);
-    double relativeTolerance() const;
-    void relativeTolerance(double relative_tolerance);
+    void residualNormType(ResidualNormType type);
+
+    // Absolute residual tolerance for convergence.
+    std::optional<double> absoluteTolerance() const;
+    void absoluteTolerance(std::optional<double> tol);
+
+    // Relative residual tolerance (relative to initial residual).
+    std::optional<double> relativeTolerance() const;
+    void relativeTolerance(std::optional<double> tol);
+
+    /* ---------------------------------------------------------------------- */
+    /* Setup & Solve                                                          */
+    /* ---------------------------------------------------------------------- */
+    // Finalize solver setup (allocate data, build operators, etc.).
+    void setup();
+
+    // Solve system with given boundary conditions and source term.
+    // Multiple solves with different inputs are supported.
+    // If an exact solution is provided, the solver will compute the exact error at each iteration.
+    void solve(const BoundaryConditions& boundary_conditions, const SourceTerm& source_term,
+               const ExactSolution* exact_solution = nullptr);
+
+    /* ---------------------------------------------------------------------- */
+    /* Solution & Grid Access                                                 */
+    /* ---------------------------------------------------------------------- */
+    // Return a reference to the computed solution vector.
+    Vector<double>& solution();
+    const Vector<double>& solution() const;
+
+    // Return the underlying cartesian mesh used for discretization.
+    const PolarGrid& grid() const;
+
+    /* ---------------------------------------------------------------------- */
+    /* Diagnostics & statistics                                               */
+    /* ---------------------------------------------------------------------- */
+    // Print timing breakdown for setup, smoothing, coarse solve, etc.
+    void printTimings() const;
+
+    // Number of iterations taken by last solve.
+    int numberOfIterations() const;
+
+    // Mean residual reduction factor per iteration.
+    double meanResidualReductionFactor() const;
+
+    // Error norms (only available if exact solution was set).
+    std::optional<double> exactErrorWeightedEuclidean() const;
+    std::optional<double> exactErrorInfinity() const;
+
+    /* ---------------------------------------------------------------------- */
+    /* Timing Statistics                                                      */
+    /* ---------------------------------------------------------------------- */
+    double timeSetupTotal() const;
+    double timeSetupCreateLevels() const;
+    double timeSetupRHS() const;
+    double timeSetupSmoother() const;
+    double timeSetupDirectSolver() const;
+
+    double timeSolveTotal() const;
+    double timeSolveInitialApproximation() const;
+    double timeSolveMultigridIterations() const;
+    double timeCheckConvergence() const;
+    double timeCheckExactError() const;
+
+    double timeAvgMGCTotal() const;
+    double timeAvgMGCPreSmoothing() const;
+    double timeAvgMGCPostSmoothing() const;
+    double timeAvgMGCResidual() const;
+    double timeAvgMGCDirectSolver() const;
+
+private:
+    /* ------------------------------------ */
+    /* Grid Configuration & Input Functions */
+    /* ------------------------------------ */
+    const PolarGrid& grid_;
+    const DomainGeometry& domain_geometry_;
+    const DensityProfileCoefficients& density_profile_coefficients_;
 
     /* ------------------ */
     /* Control Parameters */
-    int verbose() const;
-    void verbose(int verbose);
-    bool paraview() const;
-    void paraview(bool paraview);
-    int maxOpenMPThreads() const;
-    void maxOpenMPThreads(int max_omp_threads);
-    double threadReductionFactor() const;
-    void threadReductionFactor(double thread_reduction_factor);
-    StencilDistributionMethod stencilDistributionMethod() const;
-    void stencilDistributionMethod(StencilDistributionMethod stencil_distribution_method);
-    bool cacheDensityProfileCoefficients() const;
-    void cacheDensityProfileCoefficients(bool cache_density_profile_coefficients);
-    bool cacheDomainGeometry() const;
-    void cacheDomainGeometry(bool cache_domain_geometry);
-
-    void printSettings() const;
-
-    /* --------*/
-    /* Timings */
-    void printTimings() const;
-    void resetTimings();
-
-    double t_setup_total;
-    double t_setup_createLevels;
-    double t_setup_rhs;
-    double t_setup_smoother;
-    double t_setup_directSolver;
-
-    double t_solve_total;
-    double t_solve_initial_approximation;
-    double t_solve_multigrid_iterations;
-    double t_check_convergence;
-    double t_check_exact_error;
-
-    double t_avg_MGC_total;
-    double t_avg_MGC_preSmoothing;
-    double t_avg_MGC_postSmoothing;
-    double t_avg_MGC_residual;
-    double t_avg_MGC_directSolver;
-
-private:
-    /* --------------- */
-    /* Grid Parameters */
-    double R0_;
-    double Rmax_;
-    int nr_exp_;
-    int ntheta_exp_;
-    int anisotropic_factor_;
-    int divideBy2_;
-    bool write_grid_file_;
-    bool load_grid_file_;
-    std::string file_grid_radii_;
-    std::string file_grid_angles_;
-    /* ------------------- */
-    /* Geometry Parameters */
+    /* ------------------ */
+    // General solver output and visualization settings
+    int verbose_;
+    bool paraview_;
+    // Parallelization and threading settings
+    int max_omp_threads_;
+    double thread_reduction_factor_;
+    // Numerical method setup
     bool DirBC_Interior_;
-    /* ---------- */
-    /* Test Cases */
-    GeometryType geometry_;
-    double kappa_eps_;
-    double delta_e_;
-    ProblemType problem_;
-    AlphaCoeff alpha_;
-    double alpha_jump_;
-    BetaCoeff beta_;
-    /* -------------------- */
-    /* Multigrid Parameters */
-    bool FMG_;
-    int FMG_iterations_;
-    MultigridCycleType FMG_cycle_;
+    StencilDistributionMethod stencil_distribution_method_;
+    bool cache_density_profile_coefficients_;
+    bool cache_domain_geometry_;
+    // Multigrid settings
     ExtrapolationType extrapolation_;
     int max_levels_;
     int pre_smoothing_steps_;
     int post_smoothing_steps_;
     MultigridCycleType multigrid_cycle_;
+    // FMG settings
+    bool FMG_;
+    int FMG_iterations_;
+    MultigridCycleType FMG_cycle_;
+    // Convergence settings
     int max_iterations_;
     ResidualNormType residual_norm_type_;
     std::optional<double> absolute_tolerance_;
     std::optional<double> relative_tolerance_;
-    /* ------------------ */
-    /* Control Parameters */
-    int verbose_;
-    bool paraview_;
-    int max_omp_threads_;
-    double thread_reduction_factor_;
-    StencilDistributionMethod stencil_distribution_method_;
-    // `cache_density_profile_coefficients_` caches alpha(r_i), beta(r_i)
-    bool cache_density_profile_coefficients_;
-    // `cache_domain_geometry_` caches transformation coefficients (arr, att, art) used in the Jacobian of the domain geometry mapping.
-    bool cache_domain_geometry_;
-
-    /* --------------- */
-    /* Input Functions */
-    std::unique_ptr<const DomainGeometry> domain_geometry_;
-    std::unique_ptr<const DensityProfileCoefficients> density_profile_coefficients_;
-    std::unique_ptr<const BoundaryConditions> boundary_conditions_;
-    std::unique_ptr<const SourceTerm> source_term_;
-    std::unique_ptr<const ExactSolution> exact_solution_ = nullptr; // Optional exact solution for validation
-
-    /* ------------------------------ */
-    /* Parser for GMGPolar parameters */
-    cmdline::parser parser_;
 
     /* ---------------- */
     /* Multigrid levels */
@@ -231,10 +234,13 @@ private:
     std::vector<Level> levels_;
     std::vector<int> threads_per_level_;
 
+    /* ---------------------- */
+    /* Interpolation operator */
     std::unique_ptr<Interpolation> interpolation_;
 
-    /* Chooses if full grid smoothing is active on level 0 for extrapolation > 0. */
-    bool full_grid_smoothing_ = false;
+    /* ------------------------------------------------------------------------- */
+    /* Chooses if full grid smoothing is active on level 0 for extrapolation > 0 */
+    bool full_grid_smoothing_;
 
     /* -------------------- */
     /* Convergence criteria */
@@ -243,40 +249,42 @@ private:
     double mean_residual_reduction_factor_;
     bool converged(const double& current_residual_norm, const double& first_residual_norm);
 
-    std::vector<std::pair<double, double>> exact_errors_; // Only when exact solution provided
-    std::pair<double, double> computeExactError(Level& level, const Vector<double>& solution, Vector<double>& error);
+    /* ---------------------------------------------------- */
+    /* Compute exact error if an exact solution is provided */
+    // The results are stored as a pair: (weighted L2 error, infinity error).
+    std::vector<std::pair<double, double>> exact_errors_;
+    std::pair<double, double> computeExactError(Level& level, const Vector<double>& solution, Vector<double>& error,
+                                                const ExactSolution& exact_solution);
 
-    /* ---------------------------------------- */
-    /* Parser Functions for GMGPolar Parameters */
-    void initializeGrid();
-    void initializeGeometry();
-    void initializeMultigrid();
-    void initializeGeneral();
-
-    void parseGrid();
-    void parseGeometry();
-    void parseMultigrid();
-    void parseGeneral();
-
-    void selectTestCase();
+    /* ------------------------------------------------------------------------- */
+    /* Compute the extrapolated residual: res_ex = 4/3 res_fine - 1/3 res_coarse */
+    void extrapolatedResidual(const int current_level, Vector<double>& residual,
+                              const Vector<double>& residual_next_level);
 
     /* --------------- */
-    /* Setup Functions */
+    /* Setup functions */
     PolarGrid createFinestGrid();
     int chooseNumberOfLevels(const PolarGrid& finest_grid);
-
-    void build_rhs_f(const Level& level, Vector<double>& rhs_f);
+    void build_rhs_f(const Level& level, Vector<double>& rhs_f, const BoundaryConditions& boundary_conditions,
+                     const SourceTerm& source_term);
     void discretize_rhs_f(const Level& level, Vector<double>& rhs_f);
 
     /* --------------- */
-    /* Solve Functions */
-    void initializeSolution();
+    /* Solve functions */
+    void initializeSolution(const BoundaryConditions& boundary_conditions);
+    void evaluateExactError(Level& level, const ExactSolution& exact_solution);
+    void updateResidualNorms(Level& level, int iteration, double& initial_residual_norm, double& current_residual_norm,
+                             double& current_relative_residual_norm);
 
-    void printIterationHeader();
-    void printIterationInfo(int iteration, double current_residual_norm, double current_relative_residual_norm);
+    /* ----------------- */
+    /* Print information */
+    void printSettings() const;
+    void printIterationHeader(const ExactSolution* exact_solution);
+    void printIterationInfo(int iteration, double current_residual_norm, double current_relative_residual_norm,
+                            const ExactSolution* exact_solution);
 
     /* ------------------- */
-    /* Multigrid Functions */
+    /* Multigrid functions */
     void multigrid_V_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs,
                            Vector<double>& residual);
     void multigrid_W_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs,
@@ -290,6 +298,8 @@ private:
     void implicitlyExtrapolatedMultigrid_F_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs,
                                                  Vector<double>& residual);
 
+    /* ----------------------- */
+    /* Interpolation functions */
     void prolongation(const int current_level, Vector<double>& result, const Vector<double>& x) const;
     void restriction(const int current_level, Vector<double>& result, const Vector<double>& x) const;
     void injection(const int current_level, Vector<double>& result, const Vector<double>& x) const;
@@ -297,11 +307,33 @@ private:
     void extrapolatedRestriction(const int current_level, Vector<double>& result, const Vector<double>& x) const;
     void FMGInterpolation(const int current_level, Vector<double>& result, const Vector<double>& x) const;
 
-    void extrapolatedResidual(const int current_level, Vector<double>& residual,
-                              const Vector<double>& residual_next_level);
-
     /* ------------- */
     /* Visualization */
     void writeToVTK(const std::filesystem::path& file_path, const PolarGrid& grid);
     void writeToVTK(const std::filesystem::path& file_path, const Level& level, const Vector<double>& grid_function);
+
+    /* ------------------------------ */
+    /* Timing statistics for GMGPolar */
+    void resetAllTimings();
+
+    void resetSetupPhaseTimings();
+    double t_setup_total_;
+    double t_setup_createLevels_;
+    double t_setup_rhs_;
+    double t_setup_smoother_;
+    double t_setup_directSolver_;
+
+    void resetSolvePhaseTimings();
+    double t_solve_total_;
+    double t_solve_initial_approximation_;
+    double t_solve_multigrid_iterations_;
+    double t_check_convergence_;
+    double t_check_exact_error_;
+
+    void resetAvgMultigridCycleTimings();
+    double t_avg_MGC_total_;
+    double t_avg_MGC_preSmoothing_;
+    double t_avg_MGC_postSmoothing_;
+    double t_avg_MGC_residual_;
+    double t_avg_MGC_directSolver_;
 };
