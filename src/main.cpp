@@ -5,8 +5,8 @@
 
 int main(int argc, char* argv[])
 {
-    // // Initialize LIKWID performance markers (only active if compiled with LIKWID support)
-    // LIKWID_INIT();
+    // Initialize LIKWID performance markers (only active if compiled with LIKWID support)
+    LIKWID_INIT();
 
     // Parse command-line arguments to extract problem configuration
     ConfigParser parser;
