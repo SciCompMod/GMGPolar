@@ -18,8 +18,6 @@ set(GMG_POLAR_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/build_rhs_f.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/gmgpolar.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/level_interpolation.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/parser.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/select_test_case.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/setup.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/solver.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/writeToVTK.cpp
