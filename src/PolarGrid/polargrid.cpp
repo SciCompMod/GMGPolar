@@ -435,6 +435,7 @@ void PolarGrid::checkParameters(const std::vector<double>& radii, const std::vec
                        return equals(opposite, angle);
                    }) != angles.end();
         })) {
-        std::cout << "[Warning] PolarGrid: Opposite angle is not in the set." << std::endl;
+        throw std::invalid_argument("Each angle must have its opposite in the set:\n"
+                                    "Every node in the interior ring needs to have an opposite neighboring node.");
     }
 }
