@@ -117,4 +117,37 @@ else
     exit 1
 fi
 
-"$GMGPOLAR_EXEC" --verbose $verbose --paraview $paraview --maxOpenMPThreads $maxOpenMPThreads --threadReductionFactor $threadReductionFactor --stencilDistributionMethod $stencilDistributionMethod --cacheDensityProfileCoefficients $cacheDensityProfileCoefficients --cacheDomainGeometry $cacheDomainGeometry --R0 $R0 --Rmax $Rmax --nr_exp $nr_exp --ntheta_exp $ntheta_exp --anisotropic_factor $anisotropic_factor --divideBy2 $divideBy2 --DirBC_Interior $DirBC_Interior --geometry $geometry --kappa_eps $kappa_eps --delta_e $delta_e --problem $problem --alpha_coeff $alpha_coeff --alpha_jump $alpha_jump --beta_coeff $beta_coeff --FMG $FMG --FMG_iterations $FMG_iterations --FMG_cycle $FMG_cycle --extrapolation $extrapolation --maxLevels $maxLevels --preSmoothingSteps $preSmoothingSteps --postSmoothingSteps $postSmoothingSteps --multigridCycle $multigridCycle --maxIterations $maxIterations --residualNormType $residualNormType --absoluteTolerance $absoluteTolerance --relativeTolerance $relativeTolerance
+"$GMGPOLAR_EXEC" \
+    --verbose $verbose \
+    --paraview $paraview \
+    --maxOpenMPThreads $maxOpenMPThreads \
+    --threadReductionFactor $threadReductionFactor \
+    --stencilDistributionMethod $stencilDistributionMethod \
+    --cacheDensityProfileCoefficients $cacheDensityProfileCoefficients \
+    --cacheDomainGeometry $cacheDomainGeometry \
+    --R0 $R0 \
+    --Rmax $Rmax \
+    --nr_exp $nr_exp \
+    --ntheta_exp $ntheta_exp \
+    --anisotropic_factor $anisotropic_factor \
+    --divideBy2 $divideBy2 \
+    --DirBC_Interior $DirBC_Interior \
+    --geometry $geometry \
+    --kappa_eps $kappa_eps \
+    --delta_e $delta_e \
+    --problem $problem \
+    --alpha_coeff $alpha_coeff \
+    --alpha_jump $alpha_jump \
+    --beta_coeff $beta_coeff \
+    --FMG $FMG \
+    --FMG_iterations $FMG_iterations \
+    --FMG_cycle $FMG_cycle \
+    --extrapolation $extrapolation \
+    --maxLevels $maxLevels \
+    --preSmoothingSteps $preSmoothingSteps \
+    --postSmoothingSteps $postSmoothingSteps \
+    --multigridCycle $multigridCycle \
+    --maxIterations $maxIterations \
+    --residualNormType $residualNormType \
+    --absoluteTolerance $absoluteTolerance \
+    --relativeTolerance $relativeTolerance
