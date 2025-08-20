@@ -97,7 +97,7 @@
                 /* Center: (Left, Right, Bottom, Top) */                                                               \
                 row    = center_index;                                                                                 \
                 column = center_index;                                                                                 \
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] * fabs(detDF[center]) +               \
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                     \
                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
                 UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
@@ -138,7 +138,7 @@
                     /* Center: (Left, Right, Bottom, Top) */                                                           \
                     row    = center_index;                                                                             \
                     column = center_index;                                                                             \
-                    value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] * fabs(detDF[center]) +           \
+                    value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                 \
                             coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                 \
                             coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                  \
                     UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                               \
@@ -229,7 +229,7 @@
                     const int right  = grid.index(i_r + 1, i_theta);                                                   \
                                                                                                                        \
                     const double center_value =                                                                        \
-                        0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] * fabs(detDF[center]) +                \
+                        0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                      \
                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
                     const double left_value = -coeff1 * (arr[center] + arr[left]);                                     \
@@ -324,7 +324,7 @@
                 /* Center: (Left, Right, Bottom, Top) */                                                               \
                 row    = center_index;                                                                                 \
                 column = center_index;                                                                                 \
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] * fabs(detDF[center]) +               \
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                     \
                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
                 UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
@@ -369,7 +369,7 @@
                     /* Center: (Left, Right, Bottom, Top) */                                                           \
                     row    = center_index;                                                                             \
                     column = center_index;                                                                             \
-                    value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] * fabs(detDF[center]) +           \
+                    value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                 \
                             coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                 \
                             coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                  \
                     UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                               \
@@ -430,7 +430,7 @@
                 /* Center: (Left, Right, Bottom, Top) */                                                               \
                 row    = center_index;                                                                                 \
                 column = center_index;                                                                                 \
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] * fabs(detDF[center]) +               \
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                     \
                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
                 UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
@@ -456,7 +456,7 @@
                     /* Center: (Left, Right, Bottom, Top) */                                                           \
                     row    = center_index;                                                                             \
                     column = center_index;                                                                             \
-                    value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] * fabs(detDF[center]) +           \
+                    value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                 \
                             coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                 \
                             coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                  \
                     UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                               \
@@ -520,7 +520,7 @@
                 /* Center: (Left, Right, Bottom, Top) */                                                               \
                 row    = center_index;                                                                                 \
                 column = center_index;                                                                                 \
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] * fabs(detDF[center]) +               \
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                     \
                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
                 UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
@@ -551,7 +551,7 @@
                 /* Center: (Left, Right, Bottom, Top) */                                                               \
                 row    = center_index;                                                                                 \
                 column = center_index;                                                                                 \
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] * fabs(detDF[center]) +               \
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                     \
                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
                 UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                                   \
