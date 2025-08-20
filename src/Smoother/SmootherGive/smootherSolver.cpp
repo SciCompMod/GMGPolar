@@ -333,37 +333,33 @@ void SmootherGive::applyAscOrthoCircleSection(const int i_r, const SmootherColor
 
     const double r = grid_.radius(i_r);
 
-    double coeff_beta;
-    if (level_cache_.cacheDensityProfileCoefficients()) {
-        coeff_beta = level_cache_.coeff_beta()[i_r];
-    }
-    else {
-        coeff_beta = density_profile_coefficients_.beta(r);
-    }
-
-    double coeff_alpha;
-    if (!level_cache_.cacheDomainGeometry()) {
-        if (level_cache_.cacheDensityProfileCoefficients()) {
-            coeff_alpha = level_cache_.coeff_alpha()[i_r];
-        }
-        else {
-            coeff_alpha = density_profile_coefficients_.alpha(r);
-        }
-    }
-
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
-        const double theta     = grid_.theta(i_theta);
+        const double theta = grid_.theta(i_theta);
+        const int index    = grid_.index(i_r, i_theta);
+
         const double sin_theta = sin_theta_cache[i_theta];
         const double cos_theta = cos_theta_cache[i_theta];
 
-        /* Compute arr, att, art, detDF value at the current node */
+        double coeff_beta;
+        if (level_cache_.cacheDensityProfileCoefficients())
+            coeff_beta = level_cache_.coeff_beta()[index];
+        else
+            coeff_beta = density_profile_coefficients_.beta(r, theta);
+
+        double coeff_alpha;
+        if (!level_cache_.cacheDomainGeometry()) {
+            if (level_cache_.cacheDensityProfileCoefficients())
+                coeff_alpha = level_cache_.coeff_alpha()[index];
+            else
+                coeff_alpha = density_profile_coefficients_.alpha(r, theta);
+        }
+
         double arr, att, art, detDF;
         if (level_cache_.cacheDomainGeometry()) {
-            const int index = grid_.index(i_r, i_theta);
-            arr             = level_cache_.arr()[index];
-            att             = level_cache_.att()[index];
-            art             = level_cache_.art()[index];
-            detDF           = level_cache_.detDF()[index];
+            arr   = level_cache_.arr()[index];
+            att   = level_cache_.att()[index];
+            art   = level_cache_.art()[index];
+            detDF = level_cache_.detDF()[index];
         }
         else {
             compute_jacobian_elements(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art,
@@ -388,40 +384,34 @@ void SmootherGive::applyAscOrthoRadialSection(const int i_theta, const SmootherC
 
     /* !!! i_r = grid_.numberSmootherCircles()-1 !!! */
     for (int i_r = grid_.numberSmootherCircles() - 1; i_r < grid_.nr(); i_r++) {
-        const double r = grid_.radius(i_r);
+        const double r  = grid_.radius(i_r);
+        const int index = grid_.index(i_r, i_theta);
 
         double coeff_beta;
-        if (level_cache_.cacheDensityProfileCoefficients()) {
-            coeff_beta = level_cache_.coeff_beta()[i_r];
-        }
-        else {
-            coeff_beta = density_profile_coefficients_.beta(r);
-        }
+        if (level_cache_.cacheDensityProfileCoefficients())
+            coeff_beta = level_cache_.coeff_beta()[index];
+        else
+            coeff_beta = density_profile_coefficients_.beta(r, theta);
 
         double coeff_alpha;
         if (!level_cache_.cacheDomainGeometry()) {
-            if (level_cache_.cacheDensityProfileCoefficients()) {
-                coeff_alpha = level_cache_.coeff_alpha()[i_r];
-            }
-            else {
-                coeff_alpha = density_profile_coefficients_.alpha(r);
-            }
+            if (level_cache_.cacheDensityProfileCoefficients())
+                coeff_alpha = level_cache_.coeff_alpha()[index];
+            else
+                coeff_alpha = density_profile_coefficients_.alpha(r, theta);
         }
 
-        /* Compute arr, att, art, detDF value at the current node */
         double arr, att, art, detDF;
         if (level_cache_.cacheDomainGeometry()) {
-            const int index = grid_.index(i_r, i_theta);
-            arr             = level_cache_.arr()[index];
-            att             = level_cache_.att()[index];
-            art             = level_cache_.art()[index];
-            detDF           = level_cache_.detDF()[index];
+            arr   = level_cache_.arr()[index];
+            att   = level_cache_.att()[index];
+            art   = level_cache_.art()[index];
+            detDF = level_cache_.detDF()[index];
         }
         else {
             compute_jacobian_elements(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art,
                                       detDF);
         }
-
         // Apply Asc Ortho at the current node
         NODE_APPLY_ASC_ORTHO_RADIAL_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, grid_, DirBC_Interior_,
                                          smoother_color, x, rhs, temp, arr, att, art, detDF, coeff_beta);

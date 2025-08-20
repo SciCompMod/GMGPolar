@@ -6,12 +6,12 @@ ZoniGyroCoefficients::ZoniGyroCoefficients(const double& Rmax, const double& alp
 {
 }
 
-double ZoniGyroCoefficients::alpha(const double& r) const
+double ZoniGyroCoefficients::alpha(const double& r, const double& theta) const
 {
     return exp(-tanh(10.0 * (r / Rmax) - 5.0));
 }
 
-double ZoniGyroCoefficients::beta(const double& r) const
+double ZoniGyroCoefficients::beta(const double& r, const double& theta) const
 {
     return exp(tanh(10.0 * (r / Rmax) - 5.0));
 }
