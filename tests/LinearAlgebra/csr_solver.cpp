@@ -650,7 +650,7 @@ TEST(SparseLUSolver, 4x4SmallDiagonal)
     expectVectorNear(b, x_true, 1e-4);
 }
 
-// 30. Test 5x5 random symmetric positive definite (SPD) via A = M*M^T
+// 40. Test 5x5 random symmetric positive definite (SPD) via A = M*M^T
 TEST(SparseLUSolver, 5x5SPD)
 {
     int n = 5;
