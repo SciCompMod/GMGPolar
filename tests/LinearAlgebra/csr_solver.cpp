@@ -18,13 +18,10 @@ std::vector<std::tuple<int, int, T>> sort_entries(std::initializer_list<std::tup
 {
     std::vector<std::tuple<int, int, T>> sorted(entries);
     const auto compare = [](const auto& entry1, const auto& entry2) {
-        const auto local_r1 = std::get<0>(entry1);
-        const auto local_r2 = std::get<0>(entry2);
-        if (local_r1 < local_r2) {
+        const auto r1 = std::get<0>(entry1);
+        const auto r2 = std::get<0>(entry2);
+        if (r1 < r2) {
             return true;
-        }
-        else if (local_r1 == local_r2) {
-            return std::get<1>(entry1) < std::get<1>(entry2);
         }
         return false;
     };
@@ -37,13 +34,10 @@ std::vector<std::tuple<int, int, T>> sort_entries(std::vector<std::tuple<int, in
 {
     std::vector<std::tuple<int, int, T>> sorted(entries);
     const auto compare = [](const auto& entry1, const auto& entry2) {
-        const auto local_r1 = std::get<0>(entry1);
-        const auto local_r2 = std::get<0>(entry2);
-        if (local_r1 < local_r2) {
+        const auto r1 = std::get<0>(entry1);
+        const auto r2 = std::get<0>(entry2);
+        if (r1 < r2) {
             return true;
-        }
-        else if (local_r1 == local_r2) {
-            return std::get<1>(entry1) < std::get<1>(entry2);
         }
         return false;
     };
