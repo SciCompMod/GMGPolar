@@ -22,8 +22,9 @@
 #include "csr_matrix.h"
 #include "vector.h"
 
-/* LU decomposition Solver (slower than MUMPS) */
-/* Assumes that all diagonal elements are nonzero. */
+// Custom LU decomposition Solver (slower than MUMPS)
+// Uses static pivoting and is suited for symmetric positive definite matrices with nonzero diagonal.
+
 template <typename T>
 class SparseLUSolver
 {
@@ -38,7 +39,7 @@ public:
     SparseLUSolver& operator=(SparseLUSolver&& other) noexcept;
 
     void solveInPlace(Vector<T>& b) const;
-    void solveInPlace(double* b) const;
+    void solveInPlace(T* b) const;
 
 private:
     std::vector<T> L_values, U_values;
@@ -212,7 +213,7 @@ void SparseLUSolver<T>::factorizeWithHashing(const SparseMatrixCSR<T>& A)
 }
 
 template <typename T>
-void SparseLUSolver<T>::solveInPlace(double* b) const
+void SparseLUSolver<T>::solveInPlace(T* b) const
 {
     assert(factorized_);
     const int n = L_row_ptr.size() - 1; // n is the number of rows in the matrix
