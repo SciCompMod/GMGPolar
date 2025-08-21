@@ -102,8 +102,8 @@ TEST(SparseLUSolver, TwoByTwoOffDiagonal)
 {
     using T = double;
     SparseMatrixCSR<T> A(2, 2, sort_entries<T>({{0, 0, 1.0}, {0, 1, 2.0}, {1, 0, 3.0}, {1, 1, 4.0}}));
-    Vector<T> x_true({1.0, 2.0});
-    Vector<T> b = csr_matvec(A, x_true);
+    Vector<T> b({1.0, 2.0});
+    Vector<T> x_true = {0.0, 0.5};
     SparseLUSolver<T> solver(A);
     solver.solveInPlace(b);
     expect_vector_near(b, x_true);
@@ -115,8 +115,8 @@ TEST(SparseLUSolver, ThreeByThreeLowerTriangular)
     using T = double;
     SparseMatrixCSR<T> A(
         3, 3, sort_entries<T>({{0, 0, 1.0}, {1, 0, 2.0}, {1, 1, 3.0}, {2, 0, 4.0}, {2, 1, 5.0}, {2, 2, 6.0}}));
-    Vector<T> x_true({1, 2, 3});
-    Vector<T> b = csr_matvec(A, x_true);
+    Vector<T> b({1, 2, 3});
+    Vector<T> x_true = {1.0, 0.0, -1.0 / 6.0};
     SparseLUSolver<T> solver(A);
     solver.solveInPlace(b);
     expect_vector_near(b, x_true);
@@ -128,26 +128,12 @@ TEST(SparseLUSolver, ThreeByThreeUpperTriangular)
     using T = double;
     SparseMatrixCSR<T> A(
         3, 3, sort_entries<T>({{0, 0, 1.0}, {0, 1, 2.0}, {0, 2, 3.0}, {1, 1, 4.0}, {1, 2, 5.0}, {2, 2, 6.0}}));
-    Vector<T> x_true({1, 2, 3});
-    Vector<T> b = csr_matvec(A, x_true);
+    Vector<T> b({1, 2, 3});
+    Vector<T> x_true({-0.25, -0.125, 0.5});
     SparseLUSolver<T> solver(A);
     solver.solveInPlace(b);
     expect_vector_near(b, x_true);
 }
-
-// // Test 6: 3x3 with zero diagonal (static pivoting)
-// // Zero diagonal encountered!
-// TEST(SparseLUSolver, ThreeByThreeZeroDiagonal)
-// {
-//     using T = double;
-//     SparseMatrixCSR<T> A(3, 3, sort_entries<T>({{0, 0, 0.0}, {0, 1, 2.0}, {1, 1, 3.0}, {2, 2, 4.0}}));
-//     Vector<T> x_true({1, 2, 3});
-//     Vector<T> b = csr_matvec(A, x_true);
-//     SparseLUSolver<T> solver(A);
-//     solver.solveInPlace(b);
-//     Vector<T> b2 = csr_matvec(A, b);
-//     expect_vector_near(b2, csr_matvec(A, x_true), 1e-8);
-// }
 
 // Test 7: 4x4 permutation needed
 TEST(SparseLUSolver, FourByFourPermutation)
@@ -169,7 +155,7 @@ TEST(SparseLUSolver, FourByFourPermutation)
     expect_vector_near(b, x_true);
 }
 
-// Test 8: 5x5 random sparse
+// Test 8: 5x5 Sparse
 TEST(SparseLUSolver, FiveByFiveRandomSparse)
 {
     using T                                               = double;
@@ -177,8 +163,8 @@ TEST(SparseLUSolver, FiveByFiveRandomSparse)
                                                              {2, 2, 5.0}, {3, 3, 6.0}, {4, 1, 7.0}, {4, 4, 8.0}};
     auto sorted_entries                                   = sort_entries(entries);
     SparseMatrixCSR<T> A(5, 5, sorted_entries);
-    Vector<T> x_true({1, 2, 3, 4, 5});
-    Vector<T> b = csr_matvec(A, x_true);
+    Vector<T> b({1, 2, 3, 4, 5});
+    Vector<T> x_true({-0.5714285714285714, 0.5, 0.7142857142857143, 0.6666666666666667, 0.1875});
     SparseLUSolver<T> solver(A);
     solver.solveInPlace(b);
     expect_vector_near(b, x_true);
@@ -342,28 +328,6 @@ TEST(SparseLUSolver, TenByTenIllConditioned)
     expect_vector_near(b2, csr_matvec(A, x_true), 1e-6);
 }
 
-// // Test 16: 10x10 with zeros on diagonal, but invertible
-// // Zero diagonal encountered!
-// TEST(SparseLUSolver, TenByTenZeroDiagonalInvertible)
-// {
-//     using T = double;
-//     std::vector<SparseMatrixCSR<T>::triplet_type> entries;
-//     for (int i = 0; i < 10; ++i) {
-//         entries.emplace_back(i, i, 0.0);
-//         entries.emplace_back(i, (i + 1) % 10, 1.0);
-//     }
-//     auto sorted_entries = sort_entries(entries);
-//     SparseMatrixCSR<T> A(10, 10, sorted_entries);
-//     Vector<T> x_true(10);
-//     for (int i = 0; i < 10; ++i)
-//         x_true[i] = i + 1;
-//     Vector<T> b = csr_matvec(A, x_true);
-//     SparseLUSolver<T> solver(A);
-//     solver.solveInPlace(b);
-//     Vector<T> b2 = csr_matvec(A, b);
-//     expect_vector_near(b2, csr_matvec(A, x_true), 1e-6);
-// }
-
 // Test 17: 20x20 banded
 TEST(SparseLUSolver, TwentyByTwentyBanded)
 {
@@ -398,51 +362,6 @@ TEST(SparseLUSolver, FiveByFiveMixedSigns)
     solver.solveInPlace(b);
     expect_vector_near(b, x_true, 1e-8);
 }
-
-// // Test 19: 8x8 with random pattern, some zeros on diagonal
-// // Zero diagonal encountered!
-// TEST(SparseLUSolver, EightByEightRandomZeroDiagonal)
-// {
-//     using T                                               = double;
-//     std::vector<SparseMatrixCSR<T>::triplet_type> entries = {{0, 0, 0.0}, {0, 1, 2.0}, {1, 1, 0.0}, {1, 2, 3.0},
-//                                                              {2, 2, 4.0}, {3, 3, 0.0}, {3, 4, 5.0}, {4, 4, 6.0},
-//                                                              {5, 5, 0.0}, {5, 6, 7.0}, {6, 6, 8.0}, {7, 7, 9.0}};
-//     auto sorted_entries                                   = sort_entries(entries);
-//     SparseMatrixCSR<T> A(8, 8, sorted_entries);
-//     Vector<T> x_true(8);
-//     for (int i = 0; i < 8; ++i)
-//         x_true[i] = i + 1;
-//     Vector<T> b = csr_matvec(A, x_true);
-//     SparseLUSolver<T> solver(A);
-//     solver.solveInPlace(b);
-//     Vector<T> b2 = csr_matvec(A, b);
-//     expect_vector_near(b2, csr_matvec(A, x_true), 1e-6);
-// }
-
-// // Test 20: 30x30 random sparse, heavy permutation
-// // Our current SparseLUSolver performs LU factorization without pivoting,
-// // which can fail (numerical instability) for such matrices.
-// TEST(SparseLUSolver, ThirtyByThirtyHeavyPermutation)
-// {
-//     using T = double;
-//     std::vector<SparseMatrixCSR<T>::triplet_type> entries;
-//     std::mt19937 gen(321);
-//     std::uniform_real_distribution<T> dist(-2.0, 2.0);
-//     for (int i = 0; i < 30; ++i) {
-//         entries.emplace_back(i, (i * 7) % 30, 10.0 + dist(gen));
-//         entries.emplace_back(i, i, 20.0 + dist(gen));
-//         entries.emplace_back(i, (i * 13) % 30, dist(gen));
-//     }
-//     auto sorted_entries = sort_entries(entries);
-//     SparseMatrixCSR<T> A(30, 30, sorted_entries);
-//     Vector<T> x_true(30);
-//     for (int i = 0; i < 30; ++i)
-//         x_true[i] = dist(gen);
-//     Vector<T> b = csr_matvec(A, x_true);
-//     SparseLUSolver<T> solver(A);
-//     solver.solveInPlace(b);
-//     expect_vector_near(b, x_true, 1e-7);
-// }
 
 // Helper to multiply CSR matrix by vector: b = A * x
 template <typename T>
@@ -511,21 +430,6 @@ TEST(SparseLUSolver, 2x2General)
     expectVectorNear(b, x_true);
 }
 
-// // 24. Test 3x3 requiring permutation (simple symmetric)
-// // Zero diagonal encountered
-// TEST(SparseLUSolver, 3x3Permutation)
-// {
-//     // Matrix with zero at (0,0) so pivot will be permuted
-//     std::vector<SparseMatrixCSR<double>::triplet_type> triplets =
-//         sort_entries<double>({{0, 1, 1.0}, {1, 0, 1.0}, {1, 1, 2.0}, {1, 2, 1.0}, {2, 1, 1.0}, {2, 2, 3.0}});
-//     SparseMatrixCSR<double> A(3, 3, triplets);
-//     Vector<double> x_true{1.0, 2.0, -1.0};
-//     Vector<double> b = multiply(A, x_true);
-//     SparseLUSolver<double> solver(A);
-//     solver.solveInPlace(b);
-//     expectVectorNear(b, x_true);
-// }
-
 // 25. Test small sparse matrix 4x4
 TEST(SparseLUSolver, 4x4parse)
 {
@@ -538,20 +442,6 @@ TEST(SparseLUSolver, 4x4parse)
     solver.solveInPlace(b);
     expectVectorNear(b, x_true);
 }
-
-// // 26. Test with zero diagonal
-// // Zero diagonal encountered
-// TEST(SparseLUSolver, 0Diagonal)
-// {
-//     std::vector<SparseMatrixCSR<double>::triplet_type> triplets =
-//         sort_entries<double>({{0, 0, 0.0}, {0, 1, 1.0}, {1, 0, 1.0}, {1, 1, 2.0}});
-//     SparseMatrixCSR<double> A(2, 2, triplets);
-//     Vector<double> x_true{1.5, -0.5};
-//     Vector<double> b = multiply(A, x_true);
-//     SparseLUSolver<double> solver(A);
-//     solver.solveInPlace(b);
-//     expectVectorNear(b, x_true);
-// }
 
 // 27. Test 5x5 random sparse matrix
 TEST(SparseLUSolver, 5x5Random)
@@ -651,22 +541,6 @@ TEST(SparseLUSolver, 6x6Block)
     expectVectorNear(b, x_true);
 }
 
-// // 32. Test near-singular matrix
-// // Zero diagonal encountered!
-// TEST(SparseLUSolver, 3x3NearSingular)
-// {
-//     std::vector<SparseMatrixCSR<double>::triplet_type> triplets = {{0, 0, 1.0},  {0, 1, 2.0},       {0, 2, -1.0},
-//                                                                    {1, 0, 2.0},  {1, 1, 4.0000001}, {1, 2, -2.0},
-//                                                                    {2, 0, -1.0}, {2, 1, -2.0},      {2, 2, 1.0}};
-//     SparseMatrixCSR<double> A(3, 3, sort_entries(triplets));
-//     Vector<double> x_true{1.0, 0.5, -1.0};
-//     Vector<double> b = multiply(A, x_true);
-//     SparseLUSolver<double> solver(A);
-//     solver.solveInPlace(b);
-//     std::cout << b << std::endl;
-//     expectVectorNear(b, x_true, 1e-6);
-// }
-
 // 33. Test with negative and positive values mixed
 TEST(SparseLUSolver, 5x5MixedSigns)
 {
@@ -762,20 +636,6 @@ TEST(SparseLUSolver, 3x3Identity)
     solver.solveInPlace(b);
     expectVectorNear(b, x_true);
 }
-
-// // 38. Test 3x3 with one row zero (singular) expect no crash but results undefined
-// // Zero Diagonal encountered!
-// TEST(SparseLUSolver, 3x3Singular)
-// {
-//     int n                                                       = 3;
-//     std::vector<SparseMatrixCSR<double>::triplet_type> triplets = {{0, 0, 1.0}, {1, 1, 2.0}};
-//     SparseMatrixCSR<double> A(n, n, sort_entries(triplets));
-//     Vector<double> x_true{1.0, 1.0, 1.0};
-//     Vector<double> b = multiply(A, x_true);
-//     SparseLUSolver<double> solver(A);
-//     // Should not throw; behavior may be undefined, but solver should not crash
-//     EXPECT_NO_THROW(solver.solveInPlace(b));
-// }
 
 // 39. Test 4x4 with very small diagonal (near-zero pivot)
 TEST(SparseLUSolver, 4x4SmallDiagonal)
