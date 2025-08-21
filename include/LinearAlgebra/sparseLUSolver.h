@@ -73,7 +73,7 @@ SparseLUSolver<T>::SparseLUSolver(const SparseMatrixCSR<T>& A)
     // Compute RCM ordering
     perm = computeRCM(A);
     perm_inv.resize(perm.size());
-    for (int i = 0; i < perm.size(); i++) {
+    for (size_t i = 0; i < perm.size(); i++) {
         perm_inv[perm[i]] = i;
     }
 
@@ -430,7 +430,7 @@ void SparseLUSolver<T>::numericFactorization(const SparseMatrixCSR<T>& A,
     // Find start of upper triangular part in U patterns
     std::vector<int> U_pattern_start_upper(n, 0);
     for (int j = 0; j < n; j++) {
-        int pos = 0;
+        size_t pos = 0;
         while (pos < U_pattern[j].size() && U_pattern[j][pos] < j)
             pos++;
         if (pos < U_pattern[j].size() && U_pattern[j][pos] == j) {
