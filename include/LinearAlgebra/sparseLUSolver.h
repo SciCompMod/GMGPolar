@@ -22,8 +22,9 @@
 #include "csr_matrix.h"
 #include "vector.h"
 
-/* LU decomposition Solver (slower than MUMPS) */
-/* Assumes that all diagonal elements are nonzero. */
+// Custom LU decomposition Solver (slower than MUMPS)
+// Uses static pivoting and is suited for symmetric positive definite matrices with nonzero diagonal.
+
 template <typename T>
 class SparseLUSolver
 {

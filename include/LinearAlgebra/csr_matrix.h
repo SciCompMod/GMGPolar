@@ -20,9 +20,8 @@
 #include <fstream>
 #include <iostream>
 
-/* The CSR matrix format is currently unused, as we use MUMPS which relies on the COO format. */
-/* Here we provide a custom LU decomposition solver, which could be replaced by different library implementation, 
-if we would decide to move away from mumps. */
+// The CSR matrix format is used if a custom LU decomposition solver is choosen.
+// MUMPS relies on the COO format.
 
 template <typename T>
 class SparseMatrixCSR
@@ -68,6 +67,17 @@ private:
     std::unique_ptr<T[]> values_;
     std::unique_ptr<int[]> column_indices_;
     std::unique_ptr<int[]> row_start_indices_;
+
+    bool is_sorted_entries(const std::vector<std::tuple<int, int, T>>& entries)
+    {
+        for (size_t i = 1; i < entries.size(); ++i) {
+            const auto& prev = entries[i - 1];
+            const auto& curr = entries[i];
+            if (std::get<0>(prev) > std::get<0>(curr))
+                return false;
+        }
+        return true;
+    }
 };
 
 template <typename U>
@@ -196,6 +206,7 @@ SparseMatrixCSR<T>::SparseMatrixCSR(int rows, int columns, const std::vector<tri
 {
     assert(rows >= 0);
     assert(columns >= 0);
+    assert(is_sorted_entries(entries) && "Entries must be sorted by row!");
     // fill values and column indexes
     for (int i = 0; i < nnz_; i++) {
         assert(0 <= std::get<0>(entries[i]) && std::get<0>(entries[i]) < rows);
