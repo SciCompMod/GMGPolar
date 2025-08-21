@@ -11,8 +11,8 @@ public:
     explicit ZoniCoefficients(const double& Rmax, const double& alpha);
     virtual ~ZoniCoefficients() = default;
 
-    double alpha(const double& r) const override;
-    double beta(const double& r) const override;
+    double alpha(const double& r, const double& theta) const override;
+    double beta(const double& r, const double& theta) const override;
 
     double getAlphaJump() const override;
 

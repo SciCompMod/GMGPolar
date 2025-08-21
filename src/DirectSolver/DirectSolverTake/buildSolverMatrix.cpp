@@ -48,13 +48,13 @@
                 const double bottom_value = -coeff3 * (att[center_index] + att[bottom_index]); /* Bottom */             \
                 const double top_value    = -coeff4 * (att[center_index] + att[top_index]); /* Top */                   \
                                                                                                                         \
-                const double center_value =                                                                             \
-                    (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center_index]) /* beta_{i,j} */       \
-                     - left_value /* Center: (Left) */                                                                  \
-                     - right_value /* Center: (Right) */                                                                \
-                     - bottom_value /* Center: (Bottom) */                                                              \
-                     - top_value /* Center: (Top) */                                                                    \
-                    );                                                                                                  \
+                const double center_value = (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] *                 \
+                                                 fabs(detDF[center_index]) /* beta_{i,j} */                             \
+                                             - left_value /* Center: (Left) */                                          \
+                                             - right_value /* Center: (Right) */                                        \
+                                             - bottom_value /* Center: (Bottom) */                                      \
+                                             - top_value /* Center: (Top) */                                            \
+                );                                                                                                      \
                                                                                                                         \
                 const double bottom_left_value  = -0.25 * (art[left_index] + art[bottom_index]); /* Bottom Left */      \
                 const double bottom_right_value = +0.25 * (art[right_index] + art[bottom_index]); /* Bottom Right */    \
@@ -173,13 +173,13 @@
                     const double bottom_value = -coeff3 * (att[center_index] + att[bottom_index]); /* Bottom */         \
                     const double top_value    = -coeff4 * (att[center_index] + att[top_index]); /* Top */               \
                                                                                                                         \
-                    const double center_value =                                                                         \
-                        (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center_index]) /* beta_{i,j} */   \
-                         - left_value /* Center: (Left) */                                                              \
-                         - right_value /* Center: (Right) */                                                            \
-                         - bottom_value /* Center: (Bottom) */                                                          \
-                         - top_value /* Center: (Top) */                                                                \
-                        );                                                                                              \
+                    const double center_value = (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] *             \
+                                                     fabs(detDF[center_index]) /* beta_{i,j} */                         \
+                                                 - left_value /* Center: (Left) */                                      \
+                                                 - right_value /* Center: (Right) */                                    \
+                                                 - bottom_value /* Center: (Bottom) */                                  \
+                                                 - top_value /* Center: (Top) */                                        \
+                    );                                                                                                  \
                                                                                                                         \
                     const double bottom_right_value =                                                                   \
                         +0.25 * (art[right_index] + art[bottom_index]); /* Bottom Right */                              \
@@ -264,13 +264,13 @@
                 const double bottom_value = -coeff3 * (att[center_index] + att[bottom_index]); /* Bottom */             \
                 const double top_value    = -coeff4 * (att[center_index] + att[top_index]); /* Top */                   \
                                                                                                                         \
-                const double center_value =                                                                             \
-                    (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center_index]) /* beta_{i,j} */       \
-                     - left_value /* Center: (Left) */                                                                  \
-                     - right_value /* Center: (Right) */                                                                \
-                     - bottom_value /* Center: (Bottom) */                                                              \
-                     - top_value /* Center: (Top) */                                                                    \
-                    );                                                                                                  \
+                const double center_value = (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] *                 \
+                                                 fabs(detDF[center_index]) /* beta_{i,j} */                             \
+                                             - left_value /* Center: (Left) */                                          \
+                                             - right_value /* Center: (Right) */                                        \
+                                             - bottom_value /* Center: (Bottom) */                                      \
+                                             - top_value /* Center: (Top) */                                            \
+                );                                                                                                      \
                                                                                                                         \
                 const double bottom_left_value  = -0.25 * (art[left_index] + art[bottom_index]); /* Bottom Left */      \
                 const double bottom_right_value = +0.25 * (art[right_index] + art[bottom_index]); /* Bottom Right */    \
@@ -371,13 +371,13 @@
                 const double bottom_value = -coeff3 * (att[center_index] + att[bottom_index]); /* Bottom */             \
                 const double top_value    = -coeff4 * (att[center_index] + att[top_index]); /* Top */                   \
                                                                                                                         \
-                const double center_value =                                                                             \
-                    (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center_index]) /* beta_{i,j} */       \
-                     - left_value /* Center: (Left) */                                                                  \
-                     - right_value /* Center: (Right) */                                                                \
-                     - bottom_value /* Center: (Bottom) */                                                              \
-                     - top_value /* Center: (Top) */                                                                    \
-                    );                                                                                                  \
+                const double center_value = (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] *                 \
+                                                 fabs(detDF[center_index]) /* beta_{i,j} */                             \
+                                             - left_value /* Center: (Left) */                                          \
+                                             - right_value /* Center: (Right) */                                        \
+                                             - bottom_value /* Center: (Bottom) */                                      \
+                                             - top_value /* Center: (Top) */                                            \
+                );                                                                                                      \
                                                                                                                         \
                 const double bottom_left_value  = -0.25 * (art[left_index] + art[bottom_index]); /* Bottom Left */      \
                 const double bottom_right_value = +0.25 * (art[right_index] + art[bottom_index]); /* Bottom Right */    \

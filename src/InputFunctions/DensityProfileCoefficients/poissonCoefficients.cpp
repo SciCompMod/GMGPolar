@@ -6,12 +6,12 @@ PoissonCoefficients::PoissonCoefficients(const double& Rmax, const double& alpha
 {
 }
 
-double PoissonCoefficients::alpha(const double& r) const
+double PoissonCoefficients::alpha(const double& r, const double& theta) const
 {
     return 1.0;
 }
 
-double PoissonCoefficients::beta(const double& r) const
+double PoissonCoefficients::beta(const double& r, const double& theta) const
 {
     return 0.0;
 }
