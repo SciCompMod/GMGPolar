@@ -27,7 +27,7 @@ void GMGPolar::implicitlyExtrapolatedMultigrid_F_Cycle(const int level_depth, Ve
     }
 
     auto end_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
-    t_avg_MGC_preSmoothing += std::chrono::duration<double>(end_MGC_preSmoothing - start_MGC_preSmoothing).count();
+    t_avg_MGC_preSmoothing_ += std::chrono::duration<double>(end_MGC_preSmoothing - start_MGC_preSmoothing).count();
 
     /* ---------------------- */
     /* Coarse grid correction */
@@ -55,7 +55,7 @@ void GMGPolar::implicitlyExtrapolatedMultigrid_F_Cycle(const int level_depth, Ve
         linear_combination(next_level.residual(), 4.0 / 3.0, next_level.error_correction(), -1.0 / 3.0);
 
         auto end_MGC_residual = std::chrono::high_resolution_clock::now();
-        t_avg_MGC_residual += std::chrono::duration<double>(end_MGC_residual - start_MGC_residual).count();
+        t_avg_MGC_residual_ += std::chrono::duration<double>(end_MGC_residual - start_MGC_residual).count();
 
         /* Step 2: Solve for the error in place */
         auto start_MGC_directSolver = std::chrono::high_resolution_clock::now();
@@ -63,7 +63,7 @@ void GMGPolar::implicitlyExtrapolatedMultigrid_F_Cycle(const int level_depth, Ve
         next_level.directSolveInPlace(next_level.residual());
 
         auto end_MGC_directSolver = std::chrono::high_resolution_clock::now();
-        t_avg_MGC_directSolver += std::chrono::duration<double>(end_MGC_directSolver - start_MGC_directSolver).count();
+        t_avg_MGC_directSolver_ += std::chrono::duration<double>(end_MGC_directSolver - start_MGC_directSolver).count();
     }
     else {
         /* ------------------------------------------ */
@@ -85,7 +85,7 @@ void GMGPolar::implicitlyExtrapolatedMultigrid_F_Cycle(const int level_depth, Ve
         linear_combination(next_level.error_correction(), 4.0 / 3.0, next_level.residual(), -1.0 / 3.0);
 
         auto end_MGC_residual = std::chrono::high_resolution_clock::now();
-        t_avg_MGC_residual += std::chrono::duration<double>(end_MGC_residual - start_MGC_residual).count();
+        t_avg_MGC_residual_ += std::chrono::duration<double>(end_MGC_residual - start_MGC_residual).count();
 
         /* Step 2: Set starting error to zero. */
         assign(next_level.residual(), 0.0);
@@ -115,10 +115,10 @@ void GMGPolar::implicitlyExtrapolatedMultigrid_F_Cycle(const int level_depth, Ve
     }
 
     auto end_MGC_postSmoothing = std::chrono::high_resolution_clock::now();
-    t_avg_MGC_postSmoothing += std::chrono::duration<double>(end_MGC_postSmoothing - start_MGC_postSmoothing).count();
+    t_avg_MGC_postSmoothing_ += std::chrono::duration<double>(end_MGC_postSmoothing - start_MGC_postSmoothing).count();
 
     if (level_depth == 0) {
         auto end_MGC = std::chrono::high_resolution_clock::now();
-        t_avg_MGC_total += std::chrono::duration<double>(end_MGC - start_MGC).count();
+        t_avg_MGC_total_ += std::chrono::duration<double>(end_MGC - start_MGC).count();
     }
 }

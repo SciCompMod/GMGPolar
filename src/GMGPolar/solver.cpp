@@ -28,22 +28,22 @@ void GMGPolar::solve()
     LIKWID_START("Solve");
     auto start_solve = std::chrono::high_resolution_clock::now();
 
+    /* Clear solve-phase timings */
+    resetSolvePhaseTimings();
+
     /* ---------------------------- */
     /* Initialize starting solution */
     /* ---------------------------- */
-
     auto start_initial_approximation = std::chrono::high_resolution_clock::now();
+
     initializeSolution();
+
     auto end_initial_approximation = std::chrono::high_resolution_clock::now();
-    t_solve_initial_approximation +=
+    t_solve_initial_approximation_ =
         std::chrono::duration<double>(end_initial_approximation - start_initial_approximation).count();
 
     /* These times are included in the initial approximation and don't count towards the multigrid cyclces. */
-    t_avg_MGC_total         = 0.0;
-    t_avg_MGC_preSmoothing  = 0.0;
-    t_avg_MGC_postSmoothing = 0.0;
-    t_avg_MGC_residual      = 0.0;
-    t_avg_MGC_directSolver  = 0.0;
+    resetAvgMultigridCycleTimings();
 
     /* ------------ */
     /* Start Solver */
@@ -75,7 +75,7 @@ void GMGPolar::solve()
             exact_errors_.push_back(exact_error);
 
             auto end_check_exact_error = std::chrono::high_resolution_clock::now();
-            t_check_exact_error +=
+            t_check_exact_error_ +=
                 std::chrono::duration<double>(end_check_exact_error - start_check_exact_error).count();
 
             if (verbose_ > 0) {
@@ -142,7 +142,7 @@ void GMGPolar::solve()
             }
 
             auto end_check_convergence = std::chrono::high_resolution_clock::now();
-            t_check_convergence +=
+            t_check_convergence_ +=
                 std::chrono::duration<double>(end_check_convergence - start_check_convergence).count();
 
             if (converged(current_residual_norm, current_relative_residual_norm))
@@ -188,7 +188,7 @@ void GMGPolar::solve()
         number_of_iterations_++;
 
         auto end_solve_multigrid_iterations = std::chrono::high_resolution_clock::now();
-        t_solve_multigrid_iterations +=
+        t_solve_multigrid_iterations_ +=
             std::chrono::duration<double>(end_solve_multigrid_iterations - start_solve_multigrid_iterations).count();
     }
 
@@ -196,11 +196,11 @@ void GMGPolar::solve()
         /* --------------------------------------------- */
         /* Compute the average Multigrid Iteration times */
         /* --------------------------------------------- */
-        t_avg_MGC_total = t_solve_multigrid_iterations / number_of_iterations_;
-        t_avg_MGC_preSmoothing /= number_of_iterations_;
-        t_avg_MGC_postSmoothing /= number_of_iterations_;
-        t_avg_MGC_residual /= number_of_iterations_;
-        t_avg_MGC_directSolver /= number_of_iterations_;
+        t_avg_MGC_total_ = t_solve_multigrid_iterations_ / number_of_iterations_;
+        t_avg_MGC_preSmoothing_ /= number_of_iterations_;
+        t_avg_MGC_postSmoothing_ /= number_of_iterations_;
+        t_avg_MGC_residual_ /= number_of_iterations_;
+        t_avg_MGC_directSolver_ /= number_of_iterations_;
 
         /* -------------------------------- */
         /* Compute the reduction factor rho */
@@ -215,11 +215,10 @@ void GMGPolar::solve()
     }
 
     auto end_solve = std::chrono::high_resolution_clock::now();
-    t_solve_total += std::chrono::duration<double>(end_solve - start_solve).count();
-    t_solve_total -= t_check_exact_error;
+    t_solve_total_ = std::chrono::duration<double>(end_solve - start_solve).count() - t_check_exact_error_;
     LIKWID_STOP("Solve");
 
-    if (paraview_) {
+    if (paraview_ && exact_solution_ != nullptr) {
         computeExactError(level, level.solution(), level.residual());
         writeToVTK("output_solution", level, level.solution());
         writeToVTK("output_error", level, level.residual());
