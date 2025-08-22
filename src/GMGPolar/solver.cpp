@@ -218,10 +218,12 @@ void GMGPolar::solve()
     t_solve_total_ = std::chrono::duration<double>(end_solve - start_solve).count() - t_check_exact_error_;
     LIKWID_STOP("Solve");
 
-    if (paraview_ && exact_solution_ != nullptr) {
-        computeExactError(level, level.solution(), level.residual());
+    if (paraview_) {
         writeToVTK("output_solution", level, level.solution());
-        writeToVTK("output_error", level, level.residual());
+        if (exact_solution_ != nullptr) {
+            computeExactError(level, level.solution(), level.residual());
+            writeToVTK("output_error", level, level.residual());
+        }
     }
 }
 
