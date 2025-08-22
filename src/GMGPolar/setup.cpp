@@ -180,24 +180,13 @@ void GMGPolar::setup()
 
 PolarGrid GMGPolar::createFinestGrid()
 {
-    PolarGrid finest_grid;
+    // Radius of anisotropic refinement from density profile
+    double refinement_radius = density_profile_coefficients_->getAlphaJump();
+    // Smoother line splitting radius (automatic)
+    std::optional<double> splitting_radius = std::nullopt;
 
-    if (load_grid_file_) {
-        assert(!file_grid_radii_.empty() && !file_grid_angles_.empty());
-        finest_grid = PolarGrid(file_grid_radii_, file_grid_angles_);
-    }
-    else {
-        const double& refinement_radius =
-            density_profile_coefficients_->getAlphaJump(); /* Radius of anisotropic grid refinement */
-        std::optional<double> splitting_radius = std::nullopt; /* (Automatic) line splitting radius for the smoother */
-        finest_grid = PolarGrid(R0_, Rmax_, nr_exp_, ntheta_exp_, refinement_radius, anisotropic_factor_, divideBy2_,
-                                splitting_radius);
-    }
-    if (write_grid_file_) {
-        const int precision = 18;
-        finest_grid.writeToFile(file_grid_radii_, file_grid_angles_, precision);
-    }
-    return finest_grid;
+    return PolarGrid(R0_, Rmax_, nr_exp_, ntheta_exp_, refinement_radius, anisotropic_factor_, divideBy2_,
+                     splitting_radius);
 }
 
 int GMGPolar::chooseNumberOfLevels(const PolarGrid& finestGrid)

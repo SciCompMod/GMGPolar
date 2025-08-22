@@ -74,16 +74,6 @@ public:
     int divideBy2() const;
     void divideBy2(int divideBy2);
 
-    bool write_grid_file() const;
-    void write_grid_file(bool write_grid_file);
-    bool load_grid_file() const;
-    void load_grid_file(bool load_grid_file);
-
-    std::string file_grid_radii() const;
-    void file_grid_radii(const std::string& file_name);
-    std::string file_grid_angles() const;
-    void file_grid_angles(const std::string& file_name);
-
     /* ------------------- */
     /* Geometry Parameters */
     bool DirBC_Interior() const;
@@ -171,10 +161,6 @@ private:
     int ntheta_exp_;
     int anisotropic_factor_;
     int divideBy2_;
-    bool write_grid_file_;
-    bool load_grid_file_;
-    std::string file_grid_radii_;
-    std::string file_grid_angles_;
     /* ------------------- */
     /* Geometry Parameters */
     bool DirBC_Interior_;

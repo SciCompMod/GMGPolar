@@ -15,10 +15,6 @@ void GMGPolar::parseGrid()
     ntheta_exp_         = parser_.get<int>("ntheta_exp");
     anisotropic_factor_ = parser_.get<int>("anisotropic_factor");
     divideBy2_          = parser_.get<int>("divideBy2");
-    write_grid_file_    = parser_.get<int>("write_grid_file") != 0;
-    load_grid_file_     = parser_.get<int>("load_grid_file") != 0;
-    file_grid_radii_    = parser_.get<std::string>("file_grid_radii");
-    file_grid_angles_   = parser_.get<std::string>("file_grid_angles");
     DirBC_Interior_     = parser_.get<int>("DirBC_Interior") != 0;
 }
 
@@ -165,16 +161,6 @@ void GMGPolar::initializeGrid()
     parser_.add<int>("anisotropic_factor", '\0', "Defines anisotropic discretization in the radial direction.",
                      OPTIONAL, 0);
     parser_.add<int>("divideBy2", '\0', "Refines the grid globally `divideBy2` times.", OPTIONAL, 0);
-    parser_.add<int>("write_grid_file", '\0', "Enable writing the finest PolarGrid to a file.", OPTIONAL, 0,
-                     cmdline::oneof(0, 1));
-    parser_.add<int>("load_grid_file", '\0', "Enable loading the finest PolarGrid from a file.", OPTIONAL, 0,
-                     cmdline::oneof(0, 1));
-    parser_.add<std::string>("file_grid_radii", '\0',
-                             "Path to the file containing radii values for grid divisions in the radial direction.",
-                             OPTIONAL, "");
-    parser_.add<std::string>("file_grid_angles", '\0',
-                             "Path to the file containing theta values for grid divisions in the angular direction.",
-                             OPTIONAL, "");
     parser_.add<int>(
         "DirBC_Interior", '\0',
         "Defines the boundary condition on the interior circle: Across-origin (0), Dirichlet boundary (1).", OPTIONAL,
