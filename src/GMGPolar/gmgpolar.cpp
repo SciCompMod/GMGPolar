@@ -196,46 +196,6 @@ void GMGPolar::divideBy2(int divideBy2)
     divideBy2_ = divideBy2;
 }
 
-bool GMGPolar::write_grid_file() const
-{
-    return write_grid_file_;
-}
-
-void GMGPolar::write_grid_file(bool write_grid_file)
-{
-    write_grid_file_ = write_grid_file;
-}
-
-bool GMGPolar::load_grid_file() const
-{
-    return load_grid_file_;
-}
-
-void GMGPolar::load_grid_file(bool load_grid_file)
-{
-    load_grid_file_ = load_grid_file;
-}
-
-std::string GMGPolar::file_grid_radii() const
-{
-    return file_grid_radii_;
-}
-
-void GMGPolar::file_grid_radii(const std::string& file_grid_radii)
-{
-    file_grid_radii_ = file_grid_radii;
-}
-
-std::string GMGPolar::file_grid_angles() const
-{
-    return file_grid_angles_;
-}
-
-void GMGPolar::file_grid_angles(const std::string& file_grid_angles)
-{
-    file_grid_angles_ = file_grid_angles;
-}
-
 /* ------------------- */
 /* Geometry Parameters */
 bool GMGPolar::DirBC_Interior() const
