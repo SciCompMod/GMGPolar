@@ -192,6 +192,21 @@ void SparseLUSolver<T>::factorizeWithHashing(const SparseMatrixCSR<T>& A)
             else
                 U_map[i][j] = val;
         }
+
+        const T tolerance_abs = 1e-12; // minimum allowed diagonal
+        const T tolerance_rel = 1e-8; // relative to the max in the row
+
+        // Static pivoting / diagonal perturbation
+        T& diag   = U_map[i][i]; // reference to the diagonal
+        T max_val = 0;
+        for (const auto& [col, val] : U_map[i]) {
+            max_val = std::max(max_val, std::abs(val));
+        }
+
+        T threshold = std::max(tolerance_abs, tolerance_rel * max_val);
+        if (std::abs(diag) < threshold) {
+            diag = (diag >= 0) ? threshold : -threshold;
+        }
     }
 
     // Convert L_map and U_map into CSR format
@@ -237,7 +252,7 @@ void SparseLUSolver<T>::solveInPlace(T* b) const
                 b[i] -= U_values[idx] * b[col];
             }
         }
-        if (std::abs(diag) < 1e-12) {
+        if (std::abs(diag) < 1e-15) {
             std::cerr << "Zero diagonal encountered in U at row " << i << "!\n";
             std::exit(EXIT_FAILURE);
         }
