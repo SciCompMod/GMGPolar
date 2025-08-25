@@ -151,13 +151,13 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
     outfile << maxOpenMPThreads << "," << divideBy2 << "," << solver.grid().nr() << "," << solver.grid().ntheta() << ","
             << geometry_string << "," << stencil_string << "," << cacheDensityProfileCoefficients << ","
             << cacheDomainGeometry << "," << FMG << "," << extrapolation_int << ","
-            << solver.t_setup_total + solver.t_solve_total - solver.t_setup_rhs << ","
-            << solver.t_setup_total - solver.t_setup_rhs << "," << solver.t_setup_createLevels << ","
-            << solver.t_setup_smoother << "," << solver.t_setup_directSolver << "," << solver.t_solve_total << ","
-            << solver.t_solve_initial_approximation << "," << solver.t_solve_multigrid_iterations << ","
-            << solver.t_check_convergence << "," << solver.t_check_exact_error << "," << solver.t_avg_MGC_total << ","
-            << solver.t_avg_MGC_preSmoothing << "," << solver.t_avg_MGC_postSmoothing << ","
-            << solver.t_avg_MGC_residual << "," << solver.t_avg_MGC_directSolver << std::endl;
+            << solver.timeSetupTotal() + solver.timeSolveTotal() - solver.timeSetupRHS() << ","
+            << solver.timeSetupTotal() - solver.timeSetupRHS() << "," << solver.timeSetupCreateLevels() << ","
+            << solver.timeSetupSmoother() << "," << solver.timeSetupDirectSolver() << "," << solver.timeSolveTotal()
+            << "," << solver.timeSolveInitialApproximation() << "," << solver.timeSolveMultigridIterations() << ","
+            << solver.timeCheckConvergence() << "," << solver.timeCheckExactError() << "," << solver.timeAvgMGCTotal()
+            << "," << solver.timeAvgMGCPreSmoothing() << "," << solver.timeAvgMGCPostSmoothing() << ","
+            << solver.timeAvgMGCResidual() << "," << solver.timeAvgMGCDirectSolver() << std::endl;
 }
 
 int main()

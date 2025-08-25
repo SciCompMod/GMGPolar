@@ -147,7 +147,7 @@ int main(int argc, char* argv[])
         table_reduction_factor[divideBy2]               = solver.meanResidualReductionFactor();
         table_exact_error_weighted_euclidean[divideBy2] = solver.exactErrorWeightedEuclidean().value();
         table_exact_error_infinity[divideBy2]           = solver.exactErrorInfinity().value();
-        table_total_time[divideBy2]                     = solver.t_setup_total + solver.t_solve_total;
+        table_total_time[divideBy2]                     = solver.timeSetupTotal() + solver.timeSolveTotal();
     }
 
     table_exact_error_weighted_euclidean_order[0] = std::numeric_limits<double>::max();
