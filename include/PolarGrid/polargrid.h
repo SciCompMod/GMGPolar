@@ -36,10 +36,6 @@ public:
     PolarGrid(const std::vector<double>& radii, const std::vector<double>& angles,
               std::optional<double> splitting_radius = std::nullopt);
 
-    // Constructor to initialize grid using data from text files containing radii and angles.
-    PolarGrid(const std::string& file_grid_radii, const std::string& file_grid_angles,
-              std::optional<double> splitting_radius = std::nullopt);
-
     // Constructor to initialize grid using parameters from GMGPolar.
     explicit PolarGrid(const double& R0, const double& Rmax, const int nr_exp, const int ntheta_exp,
                        const double& refinement_radius, const int anisotropic_factor, const int divideBy2,
