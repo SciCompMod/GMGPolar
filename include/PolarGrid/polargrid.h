@@ -80,10 +80,6 @@ public:
     // Get the number of nodes in radial smoother.
     int numberRadialSmootherNodes() const;
 
-    // Implementation in src/PolarGrid/load_write_grid.cpp
-    // Write the grid data to files specified for radii and angles with given precision.
-    void writeToFile(const std::string& file_r, const std::string& file_theta, const int precision) const;
-
     // ------------------------------------------- //
     // Unoptimized Indexing and Neighbor Retrieval //
     // ------------------------------------------- //
@@ -189,10 +185,6 @@ private:
     // Implementation in src/PolarGrid/anisotropic_division.cpp
     void RadialAnisotropicDivision(std::vector<double>& r_temp, const double& R0, const double& R, const int nr_exp,
                                    const double& refinement_radius, const int anisotropic_factor) const;
-
-    // Implementation in src/PolarGrid/load_write_grid.cpp
-    void writeVectorToFile(const std::string& filename, const std::vector<double>& vector, const int precision) const;
-    void loadVectorFromFile(const std::string& filename, std::vector<double>& vector) const;
 };
 
 // ---------------------------------------------------- //
