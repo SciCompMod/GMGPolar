@@ -7,7 +7,6 @@ add_subdirectory(InputFunctions)
 # file(GLOB_RECURSE POLAR_GRID_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/*.cpp)
 set(POLAR_GRID_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/anisotropic_division.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/load_write_grid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/multiindex.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/point.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/polargrid.cpp
