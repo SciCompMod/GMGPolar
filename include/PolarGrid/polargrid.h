@@ -36,10 +36,6 @@ public:
     PolarGrid(const std::vector<double>& radii, const std::vector<double>& angles,
               std::optional<double> splitting_radius = std::nullopt);
 
-    // Constructor to initialize grid using data from text files containing radii and angles.
-    PolarGrid(const std::string& file_grid_radii, const std::string& file_grid_angles,
-              std::optional<double> splitting_radius = std::nullopt);
-
     // Constructor to initialize grid using parameters from GMGPolar.
     explicit PolarGrid(const double& R0, const double& Rmax, const int nr_exp, const int ntheta_exp,
                        const double& refinement_radius, const int anisotropic_factor, const int divideBy2,
@@ -83,10 +79,6 @@ public:
     int numberCircularSmootherNodes() const;
     // Get the number of nodes in radial smoother.
     int numberRadialSmootherNodes() const;
-
-    // Implementation in src/PolarGrid/load_write_grid.cpp
-    // Write the grid data to files specified for radii and angles with given precision.
-    void writeToFile(const std::string& file_r, const std::string& file_theta, const int precision) const;
 
     // ------------------------------------------- //
     // Unoptimized Indexing and Neighbor Retrieval //
@@ -193,10 +185,6 @@ private:
     // Implementation in src/PolarGrid/anisotropic_division.cpp
     void RadialAnisotropicDivision(std::vector<double>& r_temp, const double& R0, const double& R, const int nr_exp,
                                    const double& refinement_radius, const int anisotropic_factor) const;
-
-    // Implementation in src/PolarGrid/load_write_grid.cpp
-    void writeVectorToFile(const std::string& filename, const std::vector<double>& vector, const int precision) const;
-    void loadVectorFromFile(const std::string& filename, std::vector<double>& vector) const;
 };
 
 // ---------------------------------------------------- //
