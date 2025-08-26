@@ -205,7 +205,7 @@ void SparseLUSolver<T>::factorizeWithHashing(const SparseMatrixCSR<T>& A)
 
         T threshold = std::max(tolerance_abs, tolerance_rel * max_val);
         if (std::abs(diag) < threshold) {
-            diag = (diag >= 0) ? threshold : -threshold;
+            diag = copysign(threshold, diag);
         }
     }
 
