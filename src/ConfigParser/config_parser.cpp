@@ -65,6 +65,7 @@ bool ConfigParser::parse(int argc, char* argv[])
         catch (const cmdline::cmdline_error& parse_error) {
             std::cerr << "Error: " << parse_error.what() << std::endl;
             std::cerr << "Usage: " << parser_.usage() << std::endl;
+            throw std::runtime_error("Parsing failed.");
         }
     }
 
