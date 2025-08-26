@@ -14,11 +14,8 @@ class ConfigParser
 {
 public:
     /* Specifies whether user input is required */
-    enum
-    {
-        OPTIONAL = 0,
-        REQUIRED = 1
-    };
+    constexpr bool OPTIONAL = false;
+    constexpr bool REQUIRED = true;
 
     ConfigParser();
 
