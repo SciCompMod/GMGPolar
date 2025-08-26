@@ -23,15 +23,42 @@
 #include "csr_matrix.h"
 #include "vector.h"
 
-// Custom LU decomposition Solver (slower than MUMPS)
-// Uses static pivoting with perturbation and is suited for symmetric positive definite matrices.
-
+/**
+ * @brief Sparse LU decomposition solver for symmetric positive definite matrices.
+ *
+ * This solver performs a sparse LU factorization with static pivoting and
+ * diagonal perturbation to ensure numerical stability. It is slower than MUMPS,
+ * but useful when an in-house LU implementation is desired.
+ *
+ * @tparam T Numeric type (e.g. double, float).
+ */
 template <typename T>
 class SparseLUSolver
 {
 public:
+    /**
+     * @brief Construct an empty solver with given tolerances.
+     *
+     * @param tolerance_abs Minimum allowed diagonal magnitude.
+     *        Any diagonal entry smaller than this will be perturbed.
+     *        Default: 1e-12.
+     * @param tolerance_rel Relative tolerance with respect to the largest
+     *        entry in a row. Ensures diagonal is not too small compared
+     *        to other row entries. Default: 1e-8.
+     */
     explicit SparseLUSolver(T tolerance_abs = static_cast<T>(1e-12), T tolerance_rel = static_cast<T>(1e-8));
 
+    /**
+     * @brief Construct a solver from a sparse matrix and factorize it.
+     *
+     * @param A Square sparse matrix in CSR format to factorize.
+     * @param tolerance_abs Minimum allowed diagonal magnitude.
+     *        Any diagonal entry smaller than this will be perturbed.
+     *        Default: 1e-12.
+     * @param tolerance_rel Relative tolerance with respect to the largest
+     *        entry in a row. Ensures diagonal is not too small compared
+     *        to other row entries. Default: 1e-8.
+     */
     explicit SparseLUSolver(const SparseMatrixCSR<T>& A, T tolerance_abs = static_cast<T>(1e-12),
                             T tolerance_rel = static_cast<T>(1e-8));
 
@@ -41,6 +68,14 @@ public:
     SparseLUSolver& operator=(const SparseLUSolver& other);
     SparseLUSolver& operator=(SparseLUSolver&& other) noexcept;
 
+    /**
+     * @brief Solve a linear system in place.
+     *
+     * This method overwrites the input vector with the solution `x`
+     * to the system `Ax = b`, where `A` was the matrix provided at factorization.
+     *
+     * @param b Right-hand side vector (modified in place to contain the solution).
+     */
     void solveInPlace(Vector<T>& b) const;
     void solveInPlace(T* b) const;
 
@@ -66,6 +101,18 @@ SparseLUSolver<T>::SparseLUSolver(T tolerance_abs, T tolerance_rel)
     , tolerance_abs_(tolerance_abs)
     , tolerance_rel_(tolerance_rel)
 {
+}
+
+// constructor
+template <typename T>
+SparseLUSolver<T>::SparseLUSolver(const SparseMatrixCSR<T>& A, T tolerance_abs, T tolerance_rel)
+    : tolerance_abs_(tolerance_abs)
+    , tolerance_rel_(tolerance_rel)
+{
+    assert(A.rows() == A.columns());
+    if (!factorized_) {
+        factorize(A);
+    }
 }
 
 // copy construction
@@ -133,17 +180,6 @@ SparseLUSolver<T>& SparseLUSolver<T>::operator=(SparseLUSolver&& other) noexcept
     other.factorized_ = false;
 
     return *this;
-}
-
-template <typename T>
-SparseLUSolver<T>::SparseLUSolver(const SparseMatrixCSR<T>& A, T tolerance_abs, T tolerance_rel)
-    : tolerance_abs_(tolerance_abs)
-    , tolerance_rel_(tolerance_rel)
-{
-    assert(A.rows() == A.columns());
-    if (!factorized_) {
-        factorize(A);
-    }
 }
 
 template <typename T>
