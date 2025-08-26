@@ -83,8 +83,6 @@ void DirectSolverTake::applySymmetryShift(Vector<double>& x) const
     assert(x.size() == grid_.numberOfNodes());
     assert(grid_.nr() >= 4);
 
-    omp_set_num_threads(num_omp_threads_);
-
     if (num_omp_threads_ == 1) {
         /* Single-threaded execution */
         if (DirBC_Interior_) {
@@ -93,7 +91,7 @@ void DirectSolverTake::applySymmetryShift(Vector<double>& x) const
         applySymmetryShiftOuterBoundary(x);
     }
     else {
-    #pragma omp parallel sections
+    #pragma omp parallel sections num_threads(num_omp_threads_)
         {
     #pragma omp section
             {

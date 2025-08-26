@@ -807,8 +807,6 @@ void DirectSolverGive::buildSolverMatrixRadialSection(const int i_theta, SparseM
 /* If the indexing is not smoother-based, please adjust the access patterns */
 SparseMatrixCOO<double> DirectSolverGive::buildSolverMatrix()
 {
-    omp_set_num_threads(num_omp_threads_);
-
     const int n   = grid_.numberOfNodes();
     const int nnz = getNonZeroCountSolverMatrix();
 
@@ -816,12 +814,12 @@ SparseMatrixCOO<double> DirectSolverGive::buildSolverMatrix()
     SparseMatrixCOO<double> solver_matrix(n, n, nnz);
     solver_matrix.is_symmetric(false);
 
-    #pragma omp parallel for if (nnz > 10'000)
+    #pragma omp parallel for num_threads(num_omp_threads_) if (nnz > 10'000)
     for (int i = 0; i < nnz; i++) {
         solver_matrix.value(i) = 0.0;
     }
 
-    if (omp_get_max_threads() == 1) {
+    if (num_omp_threads_ == 1) {
         /* Single-threaded execution */
         for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
             buildSolverMatrixCircleSection(i_r, solver_matrix);
@@ -836,7 +834,7 @@ SparseMatrixCOO<double> DirectSolverGive::buildSolverMatrix()
         const int additional_radial_tasks = grid_.ntheta() % 3;
         const int num_radial_tasks        = grid_.ntheta() - additional_radial_tasks;
 
-        #pragma omp parallel
+        #pragma omp parallel num_threads(num_omp_threads_)
         {
             #pragma omp for
             for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {

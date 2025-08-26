@@ -4,12 +4,17 @@
 
 int main(int argc, char* argv[])
 {
+    omp_set_num_threads(omp_get_max_threads());
+    omp_set_nested(1);
+    omp_set_max_active_levels(2);
+
     // Initialize LIKWID markers if enabled
     LIKWID_INIT();
 
     // Initialize solver and set parameters from command-line arguments
     GMGPolar solver;
     solver.setParameters(argc, argv);
+
     // Run Solver Setup with optional LIKWID markers
     solver.setup();
     // Execute Solve Phase with optional LIKWID markers

@@ -11,15 +11,13 @@ void Interpolation::applyRestriction0(const Level& fromLevel, const Level& toLev
 {
     assert(toLevel.level_depth() == fromLevel.level_depth() + 1);
 
-    omp_set_num_threads(threads_per_level_[toLevel.level_depth()]);
-
     const PolarGrid& fineGrid   = fromLevel.grid();
     const PolarGrid& coarseGrid = toLevel.grid();
 
     assert(x.size() == fineGrid.numberOfNodes());
     assert(result.size() == coarseGrid.numberOfNodes());
 
-#pragma omp parallel for
+#pragma omp parallel for num_threads(threads_per_level_[toLevel.level_depth()])
     for (int index = 0; index < coarseGrid.numberOfNodes(); index++) {
         MultiIndex coarse_node = coarseGrid.multiIndex(index);
         MultiIndex fine_node(2 * coarse_node[0], 2 * coarse_node[1]);
@@ -107,8 +105,6 @@ void Interpolation::applyRestriction(const Level& fromLevel, const Level& toLeve
 {
     assert(toLevel.level_depth() == fromLevel.level_depth() + 1);
 
-    omp_set_num_threads(threads_per_level_[toLevel.level_depth()]);
-
     const PolarGrid& fineGrid   = fromLevel.grid();
     const PolarGrid& coarseGrid = toLevel.grid();
 
@@ -117,7 +113,7 @@ void Interpolation::applyRestriction(const Level& fromLevel, const Level& toLeve
 
     const int coarseNumberSmootherCircles = coarseGrid.numberSmootherCircles();
 
-#pragma omp parallel if (fineGrid.numberOfNodes() > 10'000)
+#pragma omp parallel num_threads(threads_per_level_[toLevel.level_depth()]) if (fineGrid.numberOfNodes() > 10'000)
     {
 /* For loop matches circular access pattern */
 #pragma omp for nowait

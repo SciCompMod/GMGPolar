@@ -1040,14 +1040,11 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingForLoop(Vector<double>& x, c
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
-    omp_set_num_threads(num_omp_threads_);
-
-    if (omp_get_max_threads() == 1) {
+    if (num_omp_threads_ == 1) {
         extrapolatedSmoothingSequential(x, rhs, temp);
     }
     else {
-
-        #pragma omp parallel
+        #pragma omp parallel num_threads(num_omp_threads_)
         {
             #pragma omp for nowait
             for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {

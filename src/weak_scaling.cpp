@@ -161,6 +161,10 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
 
 int main()
 {
+    omp_set_num_threads(omp_get_max_threads());
+    omp_set_nested(1);
+    omp_set_max_active_levels(2);
+
     std::ofstream outfile("weak_scaling_results.csv");
     outfile << "Threads,DivideBy2,nr,ntheta,geometry,"
             << "stencil_method,cacheDensityProfileCoefficients,cacheDomainGeometry,FMG,extrapolation_int,"

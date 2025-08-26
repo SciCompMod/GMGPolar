@@ -350,8 +350,6 @@ std::pair<double, double> GMGPolar::computeExactError(Level& level, const Vector
 {
     assert(exact_solution_ != nullptr);
 
-    omp_set_num_threads(threads_per_level_[level.level_depth()]);
-
     const PolarGrid& grid        = level.grid();
     const LevelCache& levelCache = level.levelCache();
     const auto& sin_theta_cache  = levelCache.sin_theta();
@@ -360,7 +358,7 @@ std::pair<double, double> GMGPolar::computeExactError(Level& level, const Vector
     assert(solution.size() == error.size());
     assert(solution.size() == grid.numberOfNodes());
 
-#pragma omp parallel
+#pragma omp parallel num_threads(threads_per_level_[level.level_depth()])
     {
 #pragma omp for nowait
         for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
@@ -395,15 +393,13 @@ std::pair<double, double> GMGPolar::computeExactError(Level& level, const Vector
 void GMGPolar::extrapolatedResidual(const int current_level, Vector<double>& residual,
                                     const Vector<double>& residual_next_level)
 {
-    omp_set_num_threads(threads_per_level_[current_level]);
-
     const PolarGrid& fineGrid   = levels_[current_level].grid();
     const PolarGrid& coarseGrid = levels_[current_level + 1].grid();
 
     assert(residual.size() == fineGrid.numberOfNodes());
     assert(residual_next_level.size() == coarseGrid.numberOfNodes());
 
-#pragma omp parallel
+#pragma omp parallel num_threads(threads_per_level_[current_level])
     {
 /* Circluar Indexing Section */
 /* For loop matches circular access pattern */
