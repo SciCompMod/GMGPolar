@@ -14,8 +14,8 @@ class ConfigParser
 {
 public:
     /* Specifies whether user input is required */
-    constexpr bool OPTIONAL = false;
-    constexpr bool REQUIRED = true;
+    static constexpr bool OPTIONAL = false;
+    static constexpr bool REQUIRED = true;
 
     ConfigParser();
 
