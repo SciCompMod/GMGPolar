@@ -18,6 +18,7 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 
 #include "csr_matrix.h"
 #include "vector.h"
@@ -258,10 +259,7 @@ void SparseLUSolver<T>::solveInPlace(T* b) const
                 b[i] -= U_values[idx] * b[col];
             }
         }
-        if (std::abs(diag) < 1e-15) {
-            std::cerr << "Zero diagonal encountered in U at row " << i << "!\n";
-            std::exit(EXIT_FAILURE);
-        }
+        assert(std::abs(diag) > tolerance_abs_);
         b[i] /= diag;
     }
 }
