@@ -23,17 +23,19 @@
 #include "vector.h"
 
 // Custom LU decomposition Solver (slower than MUMPS)
-// Uses static pivoting and is suited for symmetric positive definite matrices with nonzero diagonal.
+// Uses static pivoting with perturbation and is suited for symmetric positive definite matrices.
 
 template <typename T>
 class SparseLUSolver
 {
 public:
-    SparseLUSolver();
+    explicit SparseLUSolver(T tolerance_abs = static_cast<T>(1e-12), T tolerance_rel = static_cast<T>(1e-8));
+
+    explicit SparseLUSolver(const SparseMatrixCSR<T>& A, T tolerance_abs = static_cast<T>(1e-12),
+                            T tolerance_rel = static_cast<T>(1e-8));
+
     SparseLUSolver(const SparseLUSolver& other);
     SparseLUSolver(SparseLUSolver&& other) noexcept;
-
-    explicit SparseLUSolver(const SparseMatrixCSR<T>& A);
 
     SparseLUSolver& operator=(const SparseLUSolver& other);
     SparseLUSolver& operator=(SparseLUSolver&& other) noexcept;
@@ -47,6 +49,9 @@ private:
     std::vector<int> L_row_ptr, U_row_ptr;
     bool factorized_ = false;
 
+    T tolerance_abs_; // minimum allowed diagonal
+    T tolerance_rel_; // relative to the max in the row
+
     void factorize(const SparseMatrixCSR<T>& A);
 
     void factorizeAccumulateSorted(const SparseMatrixCSR<T>& A);
@@ -55,8 +60,10 @@ private:
 
 // default construction
 template <typename T>
-SparseLUSolver<T>::SparseLUSolver()
+SparseLUSolver<T>::SparseLUSolver(T tolerance_abs, T tolerance_rel)
     : factorized_(false)
+    , tolerance_abs_(tolerance_abs)
+    , tolerance_rel_(tolerance_rel)
 {
 }
 
@@ -128,7 +135,9 @@ SparseLUSolver<T>& SparseLUSolver<T>::operator=(SparseLUSolver&& other) noexcept
 }
 
 template <typename T>
-SparseLUSolver<T>::SparseLUSolver(const SparseMatrixCSR<T>& A)
+SparseLUSolver<T>::SparseLUSolver(const SparseMatrixCSR<T>& A, T tolerance_abs, T tolerance_rel)
+    : tolerance_abs_(tolerance_abs)
+    , tolerance_rel_(tolerance_rel)
 {
     assert(A.rows() == A.columns());
     if (!factorized_) {
@@ -193,9 +202,6 @@ void SparseLUSolver<T>::factorizeWithHashing(const SparseMatrixCSR<T>& A)
                 U_map[i][j] = val;
         }
 
-        const T tolerance_abs = 1e-12; // minimum allowed diagonal
-        const T tolerance_rel = 1e-8; // relative to the max in the row
-
         // Static pivoting / diagonal perturbation
         T& diag   = U_map[i][i]; // reference to the diagonal
         T max_val = 0;
@@ -203,9 +209,9 @@ void SparseLUSolver<T>::factorizeWithHashing(const SparseMatrixCSR<T>& A)
             max_val = std::max(max_val, std::abs(val));
         }
 
-        T threshold = std::max(tolerance_abs, tolerance_rel * max_val);
+        T threshold = std::max(tolerance_abs_, tolerance_rel_ * max_val);
         if (std::abs(diag) < threshold) {
-            diag = copysign(threshold, diag);
+            diag = std::copysign(threshold, diag);
         }
     }
 
