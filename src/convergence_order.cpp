@@ -17,8 +17,6 @@ int main(int argc, char* argv[])
 #endif
 
     omp_set_num_threads(omp_get_max_threads());
-    omp_set_nested(1);
-    omp_set_max_active_levels(2);
 
     const double R0                           = 1e-8;
     const double Rmax                         = 1.3;
