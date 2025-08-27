@@ -16,6 +16,8 @@ int main(int argc, char* argv[])
     std::cout << "Build Type: Debug\n" << std::endl;
 #endif
 
+    omp_set_num_threads(omp_get_max_threads());
+
     const double R0                           = 1e-8;
     const double Rmax                         = 1.3;
     const double inverse_aspect_ratio_epsilon = 0.3;

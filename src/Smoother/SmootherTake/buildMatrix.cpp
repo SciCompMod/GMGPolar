@@ -383,8 +383,6 @@ void SmootherTake::buildAscRadialSection(const int i_theta)
 // clang-format off
 void SmootherTake::buildAscMatrices()
 {
-    omp_set_num_threads(num_omp_threads_);
-
     /* -------------------------------------- */
     /* Part 1: Allocate Asc Smoother matrices */
     /* -------------------------------------- */
@@ -400,7 +398,7 @@ void SmootherTake::buildAscMatrices()
 
     // Remark: circle_tridiagonal_solver_[0] is unitialized.
     // Please use inner_boundary_circle_matrix_ instead!
-    #pragma omp parallel if (grid_.numberOfNodes() > 10'000)
+    #pragma omp parallel num_threads(num_omp_threads_) if (grid_.numberOfNodes() > 10'000)
     {
         // ---------------- //
         // Circular Section //
@@ -444,7 +442,7 @@ void SmootherTake::buildAscMatrices()
     /* Part 2: Fill Asc Smoother matrices */
     /* ---------------------------------- */
 
-    #pragma omp parallel
+    #pragma omp parallel num_threads(num_omp_threads_)
     {
         #pragma omp for nowait
         for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {

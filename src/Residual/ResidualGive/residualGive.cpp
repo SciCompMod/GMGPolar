@@ -15,11 +15,10 @@ ResidualGive::ResidualGive(const PolarGrid& grid, const LevelCache& level_cache,
 void ResidualGive::computeResidual(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const
 {
     assert(result.size() == x.size());
-    omp_set_num_threads(num_omp_threads_);
 
     result = rhs;
 
-    if (omp_get_max_threads() == 1) {
+    if (num_omp_threads_ == 1) {
         /* Single-threaded execution */
         for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
             applyCircleSection(i_r, result, x);
@@ -34,7 +33,7 @@ void ResidualGive::computeResidual(Vector<double>& result, const Vector<double>&
         const int additional_radial_tasks = grid_.ntheta() % 3;
         const int num_radial_tasks        = grid_.ntheta() - additional_radial_tasks;
 
-        #pragma omp parallel
+        #pragma omp parallel num_threads(num_omp_threads_)
         {
             /* Circle Section 0 */
             #pragma omp for

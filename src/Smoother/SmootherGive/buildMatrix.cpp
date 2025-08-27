@@ -71,14 +71,14 @@
             /* left_matrix, center_matrix, right_matrix */                                                             \
             /* | O | O | O | */                                                                                        \
             /* |   |   |   | */                                                                                        \
-            /* | O | Õ | O | */                                                                                       \
+            /* | O | Õ | O | */                                                                                        \
             /* |   |   |   | */                                                                                        \
             /* | O | O | O | */                                                                                        \
             /* or */                                                                                                   \
             /* left_matrix, right_matrix */                                                                            \
             /* | O | O | O || O   O   O   O  */                                                                        \
             /* |   |   |   || -------------- */                                                                        \
-            /* | O | O | Õ || O   O   O   O  <- right_matrix */                                                       \
+            /* | O | O | Õ || O   O   O   O  <- right_matrix */                                                        \
             /* |   |   |   || -------------- */                                                                        \
             /* | O | O | O || O   O   O   O  */                                                                        \
             auto& left_matrix   = circle_tridiagonal_solver[i_r - 1];                                                  \
@@ -173,7 +173,7 @@
             /* ---------- */                                                                                           \
             /* O   O   O  <- top_matrix */                                                                             \
             /* ---------- */                                                                                           \
-            /* O   Õ   O  <- center_matrix */                                                                         \
+            /* O   Õ   O  <- center_matrix */                                                                          \
             /* ---------- */                                                                                           \
             /* O   O   O  <- bottom_matrix */                                                                          \
             /* ---------- */                                                                                           \
@@ -303,7 +303,7 @@
                 /* left_matrix (across-the origin), center_matrix, right_matrix */                                     \
                 /* -| X | O | X | */                                                                                   \
                 /* -|   |   |   | */                                                                                   \
-                /* -| Õ | O | O | */                                                                                  \
+                /* -| Õ | O | O | */                                                                                   \
                 /* -|   |   |   | */                                                                                   \
                 /* -| X | O | X | */                                                                                   \
                 auto& center_matrix = inner_boundary_circle_matrix;                                                    \
@@ -440,7 +440,7 @@
                                                                                                                        \
             /* | O | O | O || O   O   O   O  <- top_matrix */                                                          \
             /* |   |   |   || -------------- */                                                                        \
-            /* | O | O | O || Õ   O   O   O  <- center_matrix */                                                      \
+            /* | O | O | O || Õ   O   O   O  <- center_matrix */                                                       \
             /* |   |   |   || -------------- */                                                                        \
             /* | O | O | O || O   O   O   O  <- bottom_matrix */                                                       \
             auto& bottom_matrix = radial_tridiagonal_solver[i_theta_M1];                                               \
@@ -518,7 +518,7 @@
             /* ---------------|| */                                                                                    \
             /* O   O   O   O  || <- top_matrix */                                                                      \
             /* ---------------|| */                                                                                    \
-            /* O   O   Õ   O  || <- center_matrix */                                                                  \
+            /* O   O   Õ   O  || <- center_matrix */                                                                   \
             /* ---------------|| */                                                                                    \
             /* O   O   O   O  || <- bottom_matrix */                                                                   \
             /* ---------------|| */                                                                                    \
@@ -586,7 +586,7 @@
             /* -----------|| */                                                                                        \
             /* O   O   O  || */                                                                                        \
             /* -----------|| */                                                                                        \
-            /* O   O   Õ  || <- center_matrix*/                                                                       \
+            /* O   O   Õ  || <- center_matrix*/                                                                        \
             /* -----------|| */                                                                                        \
             /* O   O   O  || */                                                                                        \
             /* -----------|| */                                                                                        \
@@ -648,8 +648,6 @@ void SmootherGive::buildAscRadialSection(const int i_theta)
 // clang-format off
 void SmootherGive::buildAscMatrices()
 {
-    omp_set_num_threads(num_omp_threads_);
-
     /* -------------------------------------- */
     /* Part 1: Allocate Asc Smoother matrices */
     /* -------------------------------------- */
@@ -665,7 +663,7 @@ void SmootherGive::buildAscMatrices()
 
     // Remark: circle_tridiagonal_solver_[0] is unitialized.
     // Please use inner_boundary_circle_matrix_ instead!
-    #pragma omp parallel if (grid_.numberOfNodes() > 10'000)
+    #pragma omp parallel num_threads(num_omp_threads_) if (grid_.numberOfNodes() > 10'000)
     {
         // ---------------- //
         // Circular Section //
@@ -732,7 +730,7 @@ void SmootherGive::buildAscMatrices()
     /* Part 2: Fill Asc Smoother matrices */
     /* ---------------------------------- */
 
-    if (omp_get_max_threads() == 1) {
+    if (num_omp_threads_ == 1) {
         /* Single-threaded execution */
         for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
             buildAscCircleSection(i_r);
@@ -747,7 +745,7 @@ void SmootherGive::buildAscMatrices()
         const int additional_radial_tasks = grid_.ntheta() % 3;
         const int num_radial_tasks        = grid_.ntheta() - additional_radial_tasks;
 
-        #pragma omp parallel
+        #pragma omp parallel num_threads(num_omp_threads_)
         {
             #pragma omp for
             for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {

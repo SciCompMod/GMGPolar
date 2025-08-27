@@ -517,9 +517,7 @@ void SmootherGive::smoothingForLoop(Vector<double>& x, const Vector<double>& rhs
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
-    omp_set_num_threads(num_omp_threads_);
-
-    if (omp_get_max_threads() == 1) {
+    if (num_omp_threads_ == 1) {
         smoothingSequential(x, rhs, temp);
     }
     else {
@@ -529,7 +527,7 @@ void SmootherGive::smoothingForLoop(Vector<double>& x, const Vector<double>& rhs
         const int num_circle_tasks = grid_.numberSmootherCircles();
         const int num_radial_tasks = grid_.ntheta();
 
-        #pragma omp parallel
+        #pragma omp parallel num_threads(num_omp_threads_)
         {
             Vector<double> circle_solver_storage_1(grid_.ntheta());
             Vector<double> circle_solver_storage_2(grid_.ntheta());

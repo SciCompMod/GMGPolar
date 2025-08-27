@@ -135,10 +135,9 @@ void GMGPolar::parseMultigrid()
 
 void GMGPolar::parseGeneral()
 {
-    verbose_         = parser_.get<int>("verbose");
-    paraview_        = parser_.get<int>("paraview") != 0;
-    max_omp_threads_ = parser_.get<int>("maxOpenMPThreads");
-    omp_set_num_threads(max_omp_threads_);
+    verbose_                                 = parser_.get<int>("verbose");
+    paraview_                                = parser_.get<int>("paraview") != 0;
+    max_omp_threads_                         = parser_.get<int>("maxOpenMPThreads");
     thread_reduction_factor_                 = parser_.get<double>("threadReductionFactor");
     const int stencilDistributionMethodValue = parser_.get<int>("stencilDistributionMethod");
     if (stencilDistributionMethodValue == static_cast<int>(StencilDistributionMethod::CPU_TAKE) ||

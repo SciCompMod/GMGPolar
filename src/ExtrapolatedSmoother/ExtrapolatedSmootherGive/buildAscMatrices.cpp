@@ -79,14 +79,14 @@
                 /* i_theta % 2 == 1 */                                                                                   \
                 /* | X | O | X | */                                                                                      \
                 /* |   |   |   | */                                                                                      \
-                /* | 0 | Õ | O | */                                                                                     \
+                /* | 0 | Õ | O | */                                                                                      \
                 /* |   |   |   | */                                                                                      \
                 /* | X | O | X | */                                                                                      \
                 /* or */                                                                                                 \
                 /* i_theta % 2 == 0 */                                                                                   \
                 /* | O | O | O | */                                                                                      \
                 /* |   |   |   | */                                                                                      \
-                /* | X | Õ | X | */                                                                                     \
+                /* | X | Õ | X | */                                                                                      \
                 /* |   |   |   | */                                                                                      \
                 /* | O | O | O | */                                                                                      \
                                                                                                                          \
@@ -141,7 +141,7 @@
                     /* i_theta % 2 == 1 */                                                                               \
                     /* | X | O | X | */                                                                                  \
                     /* |   |   |   | */                                                                                  \
-                    /* | 0 | Õ | O | */                                                                                 \
+                    /* | 0 | Õ | O | */                                                                                  \
                     /* |   |   |   | */                                                                                  \
                     /* | X | O | X | */                                                                                  \
                                                                                                                          \
@@ -181,14 +181,14 @@
                 /* i_theta % 2 == 1 */                                                                                   \
                 /* | O | X | O | */                                                                                      \
                 /* |   |   |   | */                                                                                      \
-                /* | O | Õ | O | */                                                                                     \
+                /* | O | Õ | O | */                                                                                      \
                 /* |   |   |   | */                                                                                      \
                 /* | O | X | O | */                                                                                      \
                 /* or */                                                                                                 \
                 /* i_theta % 2 == 0 */                                                                                   \
                 /* | O | O | O | */                                                                                      \
                 /* |   |   |   | */                                                                                      \
-                /* | O | X̃ | O | */                                                                                    \
+                /* | O | X̃ | O | */                                                                                      \
                 /* |   |   |   | */                                                                                      \
                 /* | O | O | O | */                                                                                      \
                                                                                                                          \
@@ -270,7 +270,7 @@
                 /* ---------- */                                                                                         \
                 /* X   O   X  */                                                                                         \
                 /* ---------- */                                                                                         \
-                /* O   Õ   O  */                                                                                        \
+                /* O   Õ   O  */                                                                                         \
                 /* ---------- */                                                                                         \
                 /* X   O   X  */                                                                                         \
                 /* ---------- */                                                                                         \
@@ -279,7 +279,7 @@
                 /* ---------- */                                                                                         \
                 /* O   X   O  */                                                                                         \
                 /* ---------- */                                                                                         \
-                /* O   Õ   O  */                                                                                        \
+                /* O   Õ   O  */                                                                                         \
                 /* ---------- */                                                                                         \
                 /* O   X   O  */                                                                                         \
                 /* ---------- */                                                                                         \
@@ -335,7 +335,7 @@
                     /* ---------- */                                                                                     \
                     /* X   O   X  */                                                                                     \
                     /* ---------- */                                                                                     \
-                    /* O   Õ   O  */                                                                                    \
+                    /* O   Õ   O  */                                                                                     \
                     /* ---------- */                                                                                     \
                     /* X   O   X  */                                                                                     \
                     /* ---------- */                                                                                     \
@@ -360,7 +360,7 @@
                 /* ---------- */                                                                                         \
                 /* O   O   O  */                                                                                         \
                 /* ---------- */                                                                                         \
-                /* X   Õ   X  */                                                                                        \
+                /* X   Õ   X  */                                                                                         \
                 /* ---------- */                                                                                         \
                 /* O   O   O  */                                                                                         \
                 /* ---------- */                                                                                         \
@@ -369,7 +369,7 @@
                 /* ---------- */                                                                                         \
                 /* O   O   O  */                                                                                         \
                 /* ---------- */                                                                                         \
-                /* O   X̃   O  */                                                                                       \
+                /* O   X̃   O  */                                                                                         \
                 /* ---------- */                                                                                         \
                 /* O   O   O  */                                                                                         \
                 /* ---------- */                                                                                         \
@@ -502,7 +502,7 @@
                     /* i_theta % 2 == 1 */                                                                               \
                     /* -| X | O | X | */                                                                                 \
                     /* -|   |   |   | */                                                                                 \
-                    /* -| Õ | O | O | */                                                                                \
+                    /* -| Õ | O | O | */                                                                                 \
                     /* -|   |   |   | */                                                                                 \
                     /* -| X | O | X | */                                                                                 \
                                                                                                                          \
@@ -556,7 +556,7 @@
                     /* i_theta % 2 == 0 */                                                                               \
                     /* -| O | O | O | */                                                                                 \
                     /* -|   |   |   | */                                                                                 \
-                    /* -| X̃ | O | X | */                                                                               \
+                    /* -| X̃ | O | X | */                                                                                 \
                     /* -|   |   |   | */                                                                                 \
                     /* -| O | O | O | */                                                                                 \
                                                                                                                          \
@@ -631,7 +631,7 @@
                     /* i_r % 2 == 1 and i_theta % 2 == 1 */                                                              \
                     /* | O | X | O || X   O   X   O  */                                                                  \
                     /* |   |   |   || -------------- */                                                                  \
-                    /* | 0 | O | Õ || O   O   O   O  */                                                                 \
+                    /* | 0 | O | Õ || O   O   O   O  */                                                                  \
                     /* |   |   |   || -------------- */                                                                  \
                     /* | O | X | O || X   O   X   O  */                                                                  \
                                                                                                                          \
@@ -699,7 +699,7 @@
                     /* i_r % 2 == 1 and i_theta % 2 == 0 */                                                              \
                     /* | O | O | O || O   O   O   O  */                                                                  \
                     /* |   |   |   || -------------- */                                                                  \
-                    /* | 0 | X | Õ || X   O   X   O  */                                                                 \
+                    /* | 0 | X | Õ || X   O   X   O  */                                                                  \
                     /* |   |   |   || -------------- */                                                                  \
                     /* | O | O | O || O   O   O   O  */                                                                  \
                                                                                                                          \
@@ -757,7 +757,7 @@
                     /* i_r % 2 == 0 and i_theta % 2 == 1 */                                                              \
                     /* | X | O | X || O   X   O   X  */                                                                  \
                     /* |   |   |   || -------------- */                                                                  \
-                    /* | 0 | O | Õ || O   O   O   O  */                                                                 \
+                    /* | 0 | O | Õ || O   O   O   O  */                                                                  \
                     /* |   |   |   || -------------- */                                                                  \
                     /* | X | O | X || O   X   O   X  */                                                                  \
                                                                                                                          \
@@ -793,7 +793,7 @@
                     /* i_r % 2 == 0 and i_theta % 2 == 0 */                                                              \
                     /* | O | O | O || O   O   O   O  */                                                                  \
                     /* |   |   |   || -------------- */                                                                  \
-                    /* | X | O | X̃ || O   X   O   X  */                                                                \
+                    /* | X | O | X̃ || O   X   O   X  */                                                                  \
                     /* |   |   |   || -------------- */                                                                  \
                     /* | O | O | O || O   O   O   O  */                                                                  \
                                                                                                                          \
@@ -860,7 +860,7 @@
                     /* i_theta % 2 == 1 and i_r % 2 == 1 */                                                              \
                     /* | X | O | X || O   X   O   X  */                                                                  \
                     /* |   |   |   || -------------- */                                                                  \
-                    /* | 0 | O | O || Õ   O   O   O  */                                                                 \
+                    /* | 0 | O | O || Õ   O   O   O  */                                                                  \
                     /* |   |   |   || -------------- */                                                                  \
                     /* | X | O | X || O   X   O   X  */                                                                  \
                                                                                                                          \
@@ -919,7 +919,7 @@
                     /* i_theta % 2 == 1 and i_r % 2 == 0 */                                                              \
                     /* | O | X | O || X   O   X   O  */                                                                  \
                     /* |   |   |   || -------------- */                                                                  \
-                    /* | 0 | O | O || Õ   O   O   O  */                                                                 \
+                    /* | 0 | O | O || Õ   O   O   O  */                                                                  \
                     /* |   |   |   || -------------- */                                                                  \
                     /* | O | X | O || X   O   X   O  */                                                                  \
                                                                                                                          \
@@ -968,7 +968,7 @@
                     /* i_theta % 2 == 0 and i_r % 2 == 1 */                                                              \
                     /* | O | O | O || O   O   O   O  */                                                                  \
                     /* |   |   |   || -------------- */                                                                  \
-                    /* | X | O | X || Õ   X   O   X  */                                                                 \
+                    /* | X | O | X || Õ   X   O   X  */                                                                  \
                     /* |   |   |   || -------------- */                                                                  \
                     /* | O | O | O || O   O   O   O  */                                                                  \
                                                                                                                          \
@@ -1005,7 +1005,7 @@
                     /* i_theta % 2 == 0 and i_r % 2 == 0 */                                                              \
                     /* | O | O | O || O   O   O   O  */                                                                  \
                     /* |   |   |   || -------------- */                                                                  \
-                    /* | O | X | O || X̃   O   X   O  */                                                                \
+                    /* | O | X | O || X̃   O   X   O  */                                                                  \
                     /* |   |   |   || -------------- */                                                                  \
                     /* | O | O | O || O   O   O   O  */                                                                  \
                                                                                                                          \
@@ -1076,7 +1076,7 @@
                 /* ---------------|| */                                                                                  \
                 /* O   X   O   X  || */                                                                                  \
                 /* ---------------|| */                                                                                  \
-                /* O   O   Õ   O  || */                                                                                 \
+                /* O   O   Õ   O  || */                                                                                  \
                 /* ---------------|| */                                                                                  \
                 /* O   X   O   X  || */                                                                                  \
                 /* ---------------|| */                                                                                  \
@@ -1132,7 +1132,7 @@
                 /* ---------------|| */                                                                                  \
                 /* O   O   O   O  || */                                                                                  \
                 /* ---------------|| */                                                                                  \
-                /* O   X   Õ   X  || */                                                                                 \
+                /* O   X   Õ   X  || */                                                                                  \
                 /* ---------------|| */                                                                                  \
                 /* O   O   O   O  || */                                                                                  \
                 /* ---------------|| */                                                                                  \
@@ -1182,7 +1182,7 @@
                 /* -----------|| */                                                                                      \
                 /* X   O   X  || */                                                                                      \
                 /* -----------|| */                                                                                      \
-                /* O   O   Õ  || */                                                                                     \
+                /* O   O   Õ  || */                                                                                      \
                 /* -----------|| */                                                                                      \
                 /* X   O   X  || */                                                                                      \
                 /* -----------|| */                                                                                      \
@@ -1205,7 +1205,7 @@
                 /* -----------|| */                                                                                      \
                 /* O   O   O  || */                                                                                      \
                 /* -----------|| */                                                                                      \
-                /* X   O   X̃  || */                                                                                    \
+                /* X   O   X̃  || */                                                                                      \
                 /* -----------|| */                                                                                      \
                 /* O   O   O  || */                                                                                      \
                 /* -----------|| */                                                                                      \
@@ -1267,8 +1267,6 @@ void ExtrapolatedSmootherGive::buildAscRadialSection(const int i_theta)
 // clang-format off
 void ExtrapolatedSmootherGive::buildAscMatrices()
 {
-    omp_set_num_threads(num_omp_threads_);
-
     /* -------------------------------------- */
     /* Part 1: Allocate Asc Smoother matrices */
     /* -------------------------------------- */
@@ -1287,7 +1285,7 @@ void ExtrapolatedSmootherGive::buildAscMatrices()
 
     // Remark: circle_diagonal_solver_[0] is undefnied.
     // Use inner_boundary_circle_matrix_ instead.
-    #pragma omp parallel if (grid_.numberOfNodes() > 10'000)
+    #pragma omp parallel num_threads(num_omp_threads_) if (grid_.numberOfNodes() > 10'000)
     {
         // ---------------- //
         // Circular Section //
@@ -1382,7 +1380,7 @@ void ExtrapolatedSmootherGive::buildAscMatrices()
     /* Part 2: Fill Asc Smoother matrices */
     /* ---------------------------------- */
 
-    if (omp_get_max_threads() == 1) {
+    if (num_omp_threads_ == 1) {
         /* Single-threaded execution */
         for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
             buildAscCircleSection(i_r);
@@ -1397,7 +1395,7 @@ void ExtrapolatedSmootherGive::buildAscMatrices()
         const int additional_radial_tasks = grid_.ntheta() % 3;
         const int num_radial_tasks        = grid_.ntheta() - additional_radial_tasks;
 
-        #pragma omp parallel
+        #pragma omp parallel num_threads(num_omp_threads_)
         {
             #pragma omp for
             for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {

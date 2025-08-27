@@ -9,9 +9,7 @@ void SmootherGive::smoothingTaskLoop(Vector<double>& x, const Vector<double>& rh
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
-    omp_set_num_threads(num_omp_threads_);
-
-    if (omp_get_max_threads() == 1) {
+    if (num_omp_threads_ == 1) {
         smoothingSequential(x, rhs, temp);
     }
     else {
@@ -35,7 +33,7 @@ void SmootherGive::smoothingTaskLoop(Vector<double>& x, const Vector<double>& rh
         int radial_white_Asc0, radial_white_Asc1, radial_white_Asc2;
         int white_radial_smoother;
 
-#pragma omp parallel
+#pragma omp parallel num_threads(num_omp_threads_)
         {
             Vector<double> circle_solver_storage_1(grid_.ntheta());
             Vector<double> circle_solver_storage_2(grid_.ntheta());
@@ -259,9 +257,7 @@ void SmootherGive::smoothingTaskDependencies(Vector<double>& x, const Vector<dou
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
-    omp_set_num_threads(num_omp_threads_);
-
-    if (omp_get_max_threads() == 1) {
+    if (num_omp_threads_ == 1) {
         smoothingSequential(x, rhs, temp);
     }
     else {
@@ -284,7 +280,7 @@ void SmootherGive::smoothingTaskDependencies(Vector<double>& x, const Vector<dou
         int* asc_ortho_radial_dep = new int[num_radial_tasks];
         int* smoother_radial_dep  = new int[num_radial_tasks];
 
-#pragma omp parallel
+#pragma omp parallel num_threads(num_omp_threads_)
         {
             Vector<double> circle_solver_storage_1(grid_.ntheta());
             Vector<double> circle_solver_storage_2(grid_.ntheta());
