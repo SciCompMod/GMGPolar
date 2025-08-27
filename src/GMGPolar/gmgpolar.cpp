@@ -1,251 +1,148 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
-#include <iomanip>
-
-GMGPolar::GMGPolar()
-    : parser_()
+/* ---------------------------------------------------------------------- */
+/* Constructor & Initialization                                           */
+/* ---------------------------------------------------------------------- */
+GMGPolar::GMGPolar(const PolarGrid& grid, const DomainGeometry& domain_geometry,
+                   const DensityProfileCoefficients& density_profile_coefficients,
+                   const BoundaryConditions& boundary_conditions, const SourceTerm& source_term)
+    : grid_(grid)
+    , domain_geometry_(domain_geometry)
+    , density_profile_coefficients_(density_profile_coefficients)
+    , boundary_conditions_(boundary_conditions)
+    , source_term_(source_term)
+    , exact_solution_(nullptr)
+    // General solver output and visualization settings
+    , verbose_(0)
+    , paraview_(false)
+    // Parallelization and threading settings
+    , max_omp_threads_(omp_get_max_threads())
+    , thread_reduction_factor_(1.0)
+    // Numerical method setup
+    , DirBC_Interior_(true)
+    , stencil_distribution_method_(StencilDistributionMethod::CPU_GIVE)
+    , cache_density_profile_coefficients_(true)
+    , cache_domain_geometry_(false)
+    // Multigrid settings
+    , extrapolation_(ExtrapolationType::IMPLICIT_EXTRAPOLATION)
+    , max_levels_(-1)
+    , pre_smoothing_steps_(1)
+    , post_smoothing_steps_(1)
+    , multigrid_cycle_(MultigridCycleType::V_CYCLE)
+    // FMG settings
+    , FMG_(false)
+    , FMG_iterations_(3)
+    , FMG_cycle_(MultigridCycleType::F_CYCLE)
+    // Convergence settings
+    , max_iterations_(300)
+    , residual_norm_type_(ResidualNormType::WEIGHTED_EUCLIDEAN)
+    , absolute_tolerance_(1e-8)
+    , relative_tolerance_(1e-8)
+    // Level management and internal solver data
+    , number_of_levels_(0)
+    , interpolation_(nullptr)
+    , full_grid_smoothing_(false)
+    , number_of_iterations_(0)
+    , mean_residual_reduction_factor_(1.0)
 {
-    // Initialize LIKWID markers if enabled
+    resetAllTimings();
     LIKWID_REGISTER("Setup");
     LIKWID_REGISTER("Solve");
-    resetAllTimings();
-    initializeGrid();
-    initializeGeometry();
-    initializeMultigrid();
-    initializeGeneral();
-
-    setParameters(0, nullptr);
 }
 
-GMGPolar::GMGPolar(std::unique_ptr<const DomainGeometry> domain_geometry,
-                   std::unique_ptr<const DensityProfileCoefficients> density_profile_coefficients,
-                   std::unique_ptr<const BoundaryConditions> boundary_conditions,
-                   std::unique_ptr<const SourceTerm> source_term)
-    :
-
-    domain_geometry_(std::move(domain_geometry))
-    , density_profile_coefficients_(std::move(density_profile_coefficients))
-    , boundary_conditions_(std::move(boundary_conditions))
-    , source_term_(std::move(source_term))
-    , parser_()
+void GMGPolar::setSolution(const ExactSolution* exact_solution)
 {
-    LIKWID_REGISTER("Setup");
-    LIKWID_REGISTER("Solve");
-    resetAllTimings();
-    initializeGrid();
-    initializeGeometry();
-    initializeMultigrid();
-    initializeGeneral();
-
-    parseGrid(); /* Removed: parseGeometry(); */
-    parseMultigrid();
-    parseGeneral();
+    exact_solution_ = exact_solution;
 }
 
-void GMGPolar::setParameters(int argc, char* argv[])
+/* ---------------------------------------------------------------------- */
+/* General output & visualization                                         */
+/* ---------------------------------------------------------------------- */
+int GMGPolar::verbose() const
 {
-    if (argc != 0) {
-        try {
-            parser_.parse_check(argc, argv);
-        }
-        catch (const cmdline::cmdline_error& parse_error) {
-            std::cerr << "Error: " << parse_error.what() << std::endl;
-            std::cerr << "Usage: " << parser_.usage() << std::endl;
-        }
-    }
-
-    parseGrid();
-    parseGeometry();
-    parseMultigrid();
-    parseGeneral();
+    return verbose_;
+}
+void GMGPolar::verbose(int verbose)
+{
+    verbose_ = verbose;
 }
 
-void GMGPolar::setSolution(std::unique_ptr<const ExactSolution> exact_solution)
+bool GMGPolar::paraview() const
 {
-    exact_solution_ = std::move(exact_solution);
+    return paraview_;
+}
+void GMGPolar::paraview(bool paraview)
+{
+    paraview_ = paraview;
 }
 
-/* ----------------- */
-/* GMGPolar Solution */
-Vector<double>& GMGPolar::solution()
+/* ---------------------------------------------------------------------- */
+/* Parallelization & threading                                            */
+/* ---------------------------------------------------------------------- */
+int GMGPolar::maxOpenMPThreads() const
 {
-    return levels_[0].solution();
+    return max_omp_threads_;
 }
-const Vector<double>& GMGPolar::solution() const
+void GMGPolar::maxOpenMPThreads(int max_omp_threads)
 {
-    return levels_[0].solution();
-}
-
-const PolarGrid& GMGPolar::grid() const
-{
-    return levels_[0].grid();
+    max_omp_threads_ = max_omp_threads;
 }
 
-/* Solve Properties */
-int GMGPolar::numberOfIterations() const
+double GMGPolar::threadReductionFactor() const
 {
-    return number_of_iterations_;
+    return thread_reduction_factor_;
 }
-double GMGPolar::meanResidualReductionFactor() const
+void GMGPolar::threadReductionFactor(double thread_reduction_factor)
 {
-    return mean_residual_reduction_factor_;
-}
-// Only when exact solution provided
-std::optional<double> GMGPolar::exactErrorWeightedEuclidean() const
-{
-    if (exact_solution_) {
-        return exact_errors_.back().first;
-    }
-    return std::nullopt;
-}
-std::optional<double> GMGPolar::exactErrorInfinity() const
-{
-    if (exact_solution_) {
-        return exact_errors_.back().second;
-    }
-    return std::nullopt;
+    thread_reduction_factor_ = thread_reduction_factor;
 }
 
-void GMGPolar::printTimings() const
-{
-    std::cout << "\n------------------" << std::endl;
-    std::cout << "Timing Information" << std::endl;
-    std::cout << "------------------" << std::endl;
-    std::cout << "Setup Time: " << t_setup_total_ - t_setup_rhs_ << " seconds" << std::endl;
-    std::cout << "    Create Levels: " << t_setup_createLevels_ << " seconds" << std::endl;
-    std::cout << "    Smoother: " << t_setup_smoother_ << " seconds" << std::endl;
-    std::cout << "    Direct Solver: " << t_setup_directSolver_ << " seconds" << std::endl;
-    std::cout << "    (Build rhs: " << t_setup_rhs_ << " seconds)" << std::endl;
-    std::cout << "\nSolve Time: " << t_solve_total_ << " seconds" << std::endl;
-    std::cout << "    Initial Approximation: " << t_solve_initial_approximation_ << " seconds" << std::endl;
-    std::cout << "    Multigrid Iteration: " << t_solve_multigrid_iterations_ << " seconds" << std::endl;
-    std::cout << "    Check Convergence: " << t_check_convergence_ << " seconds" << std::endl;
-    std::cout << "    (Check Exact Error: " << t_check_exact_error_ << " seconds)" << std::endl;
-    std::cout << "\nAverage Multigrid Iteration: " << t_avg_MGC_total_ << " seconds" << std::endl;
-    std::cout << "    PreSmoothing: " << t_avg_MGC_preSmoothing_ << " seconds" << std::endl;
-    std::cout << "    PostSmoothing: " << t_avg_MGC_postSmoothing_ << " seconds" << std::endl;
-    std::cout << "    Residual: " << t_avg_MGC_residual_ << " seconds" << std::endl;
-    std::cout << "    DirectSolve: " << t_avg_MGC_directSolver_ << " seconds" << std::endl;
-    std::cout << "    Other Computations: "
-              << std::max(t_avg_MGC_total_ - t_avg_MGC_preSmoothing_ - t_avg_MGC_postSmoothing_ - t_avg_MGC_residual_ -
-                              t_avg_MGC_directSolver_,
-                          0.0)
-              << " seconds" << std::endl;
-    std::cout << "\n" << std::endl;
-}
-
-/* --------------- */
-/* Grid Parameters */
-double GMGPolar::R0() const
-{
-    return R0_;
-}
-
-void GMGPolar::R0(double R0)
-{
-    R0_ = R0;
-}
-
-double GMGPolar::Rmax() const
-{
-    return Rmax_;
-}
-
-void GMGPolar::Rmax(double Rmax)
-{
-    Rmax_ = Rmax;
-}
-
-int GMGPolar::nr_exp() const
-{
-    return nr_exp_;
-}
-
-void GMGPolar::nr_exp(int nr_exp)
-{
-    nr_exp_ = nr_exp;
-}
-
-int GMGPolar::ntheta_exp() const
-{
-    return ntheta_exp_;
-}
-
-void GMGPolar::ntheta_exp(int ntheta_exp)
-{
-    ntheta_exp_ = ntheta_exp;
-}
-
-int GMGPolar::anisotropic_factor() const
-{
-    return anisotropic_factor_;
-}
-
-void GMGPolar::anisotropic_factor(int anisotropic_factor)
-{
-    anisotropic_factor_ = anisotropic_factor;
-}
-
-int GMGPolar::divideBy2() const
-{
-    return divideBy2_;
-}
-
-void GMGPolar::divideBy2(int divideBy2)
-{
-    divideBy2_ = divideBy2;
-}
-
-/* ------------------- */
-/* Geometry Parameters */
+/* ---------------------------------------------------------------------- */
+/* Numerical method options                                               */
+/* ---------------------------------------------------------------------- */
 bool GMGPolar::DirBC_Interior() const
 {
     return DirBC_Interior_;
 }
-
 void GMGPolar::DirBC_Interior(bool DirBC_Interior)
 {
     DirBC_Interior_ = DirBC_Interior;
 }
 
-/* -------------------- */
-/* Multigrid Parameters */
-
-bool GMGPolar::FMG() const
+StencilDistributionMethod GMGPolar::stencilDistributionMethod() const
 {
-    return FMG_;
+    return stencil_distribution_method_;
+}
+void GMGPolar::stencilDistributionMethod(StencilDistributionMethod stencil_distribution_method)
+{
+    stencil_distribution_method_ = stencil_distribution_method;
 }
 
-void GMGPolar::FMG(bool FMG)
+bool GMGPolar::cacheDensityProfileCoefficients() const
 {
-    FMG_ = FMG;
+    return cache_density_profile_coefficients_;
+}
+void GMGPolar::cacheDensityProfileCoefficients(bool cache_density_profile_coefficients)
+{
+    cache_density_profile_coefficients_ = cache_density_profile_coefficients;
 }
 
-int GMGPolar::FMG_iterations() const
+bool GMGPolar::cacheDomainGeometry() const
 {
-    return FMG_iterations_;
+    return cache_domain_geometry_;
+}
+void GMGPolar::cacheDomainGeometry(bool cache_domain_geometry)
+{
+    cache_domain_geometry_ = cache_domain_geometry;
 }
 
-void GMGPolar::FMG_iterations(int FMG_iterations)
-{
-    FMG_iterations_ = FMG_iterations;
-}
-
-MultigridCycleType GMGPolar::FMG_cycle() const
-{
-    return FMG_cycle_;
-}
-
-void GMGPolar::FMG_cycle(MultigridCycleType FMG_cycle)
-{
-    FMG_cycle_ = FMG_cycle;
-}
-
+/* ---------------------------------------------------------------------- */
+/* Multigrid controls                                                     */
+/* ---------------------------------------------------------------------- */
 ExtrapolationType GMGPolar::extrapolation() const
 {
     return extrapolation_;
 }
-
 void GMGPolar::extrapolation(ExtrapolationType extrapolation)
 {
     extrapolation_ = extrapolation;
@@ -255,7 +152,6 @@ int GMGPolar::maxLevels() const
 {
     return max_levels_;
 }
-
 void GMGPolar::maxLevels(int max_levels)
 {
     max_levels_ = max_levels;
@@ -265,7 +161,6 @@ MultigridCycleType GMGPolar::multigridCycle() const
 {
     return multigrid_cycle_;
 }
-
 void GMGPolar::multigridCycle(MultigridCycleType multigrid_cycle)
 {
     multigrid_cycle_ = multigrid_cycle;
@@ -275,7 +170,6 @@ int GMGPolar::preSmoothingSteps() const
 {
     return pre_smoothing_steps_;
 }
-
 void GMGPolar::preSmoothingSteps(int pre_smoothing_steps)
 {
     pre_smoothing_steps_ = pre_smoothing_steps;
@@ -285,17 +179,46 @@ int GMGPolar::postSmoothingSteps() const
 {
     return post_smoothing_steps_;
 }
-
 void GMGPolar::postSmoothingSteps(int post_smoothing_steps)
 {
     post_smoothing_steps_ = post_smoothing_steps;
 }
 
+bool GMGPolar::FMG() const
+{
+    return FMG_;
+}
+void GMGPolar::FMG(bool FMG)
+{
+    FMG_ = FMG;
+}
+
+int GMGPolar::FMG_iterations() const
+{
+    return FMG_iterations_;
+}
+void GMGPolar::FMG_iterations(int FMG_iterations)
+{
+    FMG_iterations_ = FMG_iterations;
+}
+
+MultigridCycleType GMGPolar::FMG_cycle() const
+{
+    return FMG_cycle_;
+}
+void GMGPolar::FMG_cycle(MultigridCycleType FMG_cycle)
+{
+    FMG_cycle_ = FMG_cycle;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Iterative solver termination                                           */
+/* ---------------------------------------------------------------------- */
+
 int GMGPolar::maxIterations() const
 {
     return max_iterations_;
 }
-
 void GMGPolar::maxIterations(int maxIterations)
 {
     max_iterations_ = maxIterations;
@@ -310,116 +233,41 @@ void GMGPolar::residualNormType(ResidualNormType residualNormType)
     residual_norm_type_ = residualNormType;
 }
 
-double GMGPolar::absoluteTolerance() const
+std::optional<double> GMGPolar::absoluteTolerance() const
 {
-    if (absolute_tolerance_.has_value()) {
-        return absolute_tolerance_.value();
-    }
-    else {
-        return -1.0;
-    }
+    return absolute_tolerance_;
+}
+void GMGPolar::absoluteTolerance(std::optional<double> tol)
+{
+    absolute_tolerance_ = tol.has_value() && tol.value() >= 0.0 ? tol : std::nullopt;
 }
 
-void GMGPolar::absoluteTolerance(double absolute_tolerance)
+std::optional<double> GMGPolar::relativeTolerance() const
 {
-    if (absolute_tolerance > 0) {
-        absolute_tolerance_ = absolute_tolerance;
-    }
-    else {
-        absolute_tolerance_ = std::nullopt;
-    }
+    return relative_tolerance_;
+}
+void GMGPolar::relativeTolerance(std::optional<double> tol)
+{
+    relative_tolerance_ = tol.has_value() && tol.value() >= 0.0 ? tol : std::nullopt;
 }
 
-double GMGPolar::relativeTolerance() const
+/* ---------------------------------------------------------------------- */
+/* Solution & Grid Access                                                 */
+/* ---------------------------------------------------------------------- */
+Vector<double>& GMGPolar::solution()
 {
-    if (relative_tolerance_.has_value()) {
-        return relative_tolerance_.value();
-    }
-    else {
-        return -1.0;
-    }
+    int level_depth = 0;
+    return levels_[level_depth].solution();
+}
+const Vector<double>& GMGPolar::solution() const
+{
+    int level_depth = 0;
+    return levels_[level_depth].solution();
 }
 
-void GMGPolar::relativeTolerance(double relative_tolerance)
+const PolarGrid& GMGPolar::grid() const
 {
-    if (relative_tolerance > 0) {
-        relative_tolerance_ = relative_tolerance;
-    }
-    else {
-        relative_tolerance_ = std::nullopt;
-    }
-}
-
-/* ------------------ */
-/* Control Parameters */
-int GMGPolar::verbose() const
-{
-    return verbose_;
-}
-
-void GMGPolar::verbose(int verbose)
-{
-    verbose_ = verbose;
-}
-
-bool GMGPolar::paraview() const
-{
-    return paraview_;
-}
-
-void GMGPolar::paraview(bool paraview)
-{
-    paraview_ = paraview;
-}
-
-int GMGPolar::maxOpenMPThreads() const
-{
-    return max_omp_threads_;
-}
-
-void GMGPolar::maxOpenMPThreads(int max_omp_threads)
-{
-    max_omp_threads_ = max_omp_threads;
-}
-
-double GMGPolar::threadReductionFactor() const
-{
-    return thread_reduction_factor_;
-}
-
-void GMGPolar::threadReductionFactor(double thread_reduction_factor)
-{
-    thread_reduction_factor_ = thread_reduction_factor;
-}
-
-StencilDistributionMethod GMGPolar::stencilDistributionMethod() const
-{
-    return stencil_distribution_method_;
-}
-
-void GMGPolar::stencilDistributionMethod(StencilDistributionMethod stencil_distribution_method)
-{
-    stencil_distribution_method_ = stencil_distribution_method;
-}
-
-bool GMGPolar::cacheDensityProfileCoefficients() const
-{
-    return cache_density_profile_coefficients_;
-}
-
-void GMGPolar::cacheDensityProfileCoefficients(bool cache_density_profile_coefficients)
-{
-    cache_density_profile_coefficients_ = cache_density_profile_coefficients;
-}
-
-bool GMGPolar::cacheDomainGeometry() const
-{
-    return cache_domain_geometry_;
-}
-
-void GMGPolar::cacheDomainGeometry(bool cache_domain_geometry)
-{
-    cache_domain_geometry_ = cache_domain_geometry;
+    return grid_;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -530,4 +378,63 @@ void GMGPolar::resetAvgMultigridCycleTimings()
     t_avg_MGC_postSmoothing_ = 0.0;
     t_avg_MGC_residual_      = 0.0;
     t_avg_MGC_directSolver_  = 0.0;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Diagnostics & statistics                                               */
+/* ---------------------------------------------------------------------- */
+// Print timing breakdown for setup, smoothing, coarse solve, etc.
+void GMGPolar::printTimings() const
+{
+    std::cout << "\n------------------" << std::endl;
+    std::cout << "Timing Information" << std::endl;
+    std::cout << "------------------" << std::endl;
+    std::cout << "Setup Time: " << t_setup_total_ - t_setup_rhs_ << " seconds" << std::endl;
+    std::cout << "    Create Levels: " << t_setup_createLevels_ << " seconds" << std::endl;
+    std::cout << "    Smoother: " << t_setup_smoother_ << " seconds" << std::endl;
+    std::cout << "    Direct Solver: " << t_setup_directSolver_ << " seconds" << std::endl;
+    std::cout << "    (Build rhs: " << t_setup_rhs_ << " seconds)" << std::endl;
+    std::cout << "\nSolve Time: " << t_solve_total_ << " seconds" << std::endl;
+    std::cout << "    Initial Approximation: " << t_solve_initial_approximation_ << " seconds" << std::endl;
+    std::cout << "    Multigrid Iteration: " << t_solve_multigrid_iterations_ << " seconds" << std::endl;
+    std::cout << "    Check Convergence: " << t_check_convergence_ << " seconds" << std::endl;
+    std::cout << "    (Check Exact Error: " << t_check_exact_error_ << " seconds)" << std::endl;
+    std::cout << "\nAverage Multigrid Iteration: " << t_avg_MGC_total_ << " seconds" << std::endl;
+    std::cout << "    PreSmoothing: " << t_avg_MGC_preSmoothing_ << " seconds" << std::endl;
+    std::cout << "    PostSmoothing: " << t_avg_MGC_postSmoothing_ << " seconds" << std::endl;
+    std::cout << "    Residual: " << t_avg_MGC_residual_ << " seconds" << std::endl;
+    std::cout << "    DirectSolve: " << t_avg_MGC_directSolver_ << " seconds" << std::endl;
+    std::cout << "    Other Computations: "
+              << std::max(t_avg_MGC_total_ - t_avg_MGC_preSmoothing_ - t_avg_MGC_postSmoothing_ - t_avg_MGC_residual_ -
+                              t_avg_MGC_directSolver_,
+                          0.0)
+              << " seconds" << std::endl;
+}
+
+// Number of iterations taken by last solve.
+int GMGPolar::numberOfIterations() const
+{
+    return number_of_iterations_;
+}
+
+// Mean residual reduction factor per iteration.
+double GMGPolar::meanResidualReductionFactor() const
+{
+    return mean_residual_reduction_factor_;
+}
+
+// Error norms (only available if exact solution was set).
+std::optional<double> GMGPolar::exactErrorWeightedEuclidean() const
+{
+    if (exact_solution_) {
+        return exact_errors_.back().first;
+    }
+    return std::nullopt;
+}
+std::optional<double> GMGPolar::exactErrorInfinity() const
+{
+    if (exact_solution_) {
+        return exact_errors_.back().second;
+    }
+    return std::nullopt;
 }
