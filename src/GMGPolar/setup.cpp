@@ -5,7 +5,7 @@ void GMGPolar::setup()
     LIKWID_START("Setup");
     auto start_setup = std::chrono::high_resolution_clock::now();
 
-    resetTimings();
+    resetSetupPhaseTimings();
 
     auto start_setup_createLevels = std::chrono::high_resolution_clock::now();
 
@@ -45,7 +45,7 @@ void GMGPolar::setup()
     }
 
     auto end_setup_createLevels = std::chrono::high_resolution_clock::now();
-    t_setup_createLevels += std::chrono::duration<double>(end_setup_createLevels - start_setup_createLevels).count();
+    t_setup_createLevels_ = std::chrono::duration<double>(end_setup_createLevels - start_setup_createLevels).count();
 
     if (paraview_)
         writeToVTK("output_coarsest_grid", levels_.back().grid());
@@ -92,7 +92,7 @@ void GMGPolar::setup()
     }
 
     auto end_setup_rhs = std::chrono::high_resolution_clock::now();
-    t_setup_rhs += std::chrono::duration<double>(end_setup_rhs - start_setup_rhs).count();
+    t_setup_rhs_       = std::chrono::duration<double>(end_setup_rhs - start_setup_rhs).count();
 
     // -------------------------------------------------------
     // Initializing various operators based on the level index
@@ -141,7 +141,7 @@ void GMGPolar::setup()
                 break;
             }
             auto end_setup_smoother = std::chrono::high_resolution_clock::now();
-            t_setup_smoother += std::chrono::duration<double>(end_setup_smoother - start_setup_smoother).count();
+            t_setup_smoother_ += std::chrono::duration<double>(end_setup_smoother - start_setup_smoother).count();
             levels_[level_depth].initializeResidual(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_,
                                                     threads_per_level_[level_depth], stencil_distribution_method_);
         }
@@ -154,7 +154,7 @@ void GMGPolar::setup()
                                                         DirBC_Interior_, threads_per_level_[level_depth],
                                                         stencil_distribution_method_);
             auto end_setup_directSolver = std::chrono::high_resolution_clock::now();
-            t_setup_directSolver +=
+            t_setup_directSolver_ +=
                 std::chrono::duration<double>(end_setup_directSolver - start_setup_directSolver).count();
             levels_[level_depth].initializeResidual(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_,
                                                     threads_per_level_[level_depth], stencil_distribution_method_);
@@ -167,14 +167,14 @@ void GMGPolar::setup()
             levels_[level_depth].initializeSmoothing(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_,
                                                      threads_per_level_[level_depth], stencil_distribution_method_);
             auto end_setup_smoother = std::chrono::high_resolution_clock::now();
-            t_setup_smoother += std::chrono::duration<double>(end_setup_smoother - start_setup_smoother).count();
+            t_setup_smoother_ += std::chrono::duration<double>(end_setup_smoother - start_setup_smoother).count();
             levels_[level_depth].initializeResidual(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_,
                                                     threads_per_level_[level_depth], stencil_distribution_method_);
         }
     }
 
     auto end_setup = std::chrono::high_resolution_clock::now();
-    t_setup_total += std::chrono::duration<double>(end_setup - start_setup).count();
+    t_setup_total_ = std::chrono::duration<double>(end_setup - start_setup).count();
     LIKWID_STOP("Setup");
 }
 
@@ -230,27 +230,6 @@ int GMGPolar::chooseNumberOfLevels(const PolarGrid& finestGrid)
     }
 
     return levels;
-}
-
-void GMGPolar::resetTimings()
-{
-    t_setup_total        = 0.0;
-    t_setup_createLevels = 0.0;
-    t_setup_rhs          = 0.0;
-    t_setup_smoother     = 0.0;
-    t_setup_directSolver = 0.0;
-
-    t_solve_total                 = 0.0;
-    t_solve_initial_approximation = 0.0;
-    t_solve_multigrid_iterations  = 0.0;
-    t_check_convergence           = 0.0;
-    t_check_exact_error           = 0.0;
-
-    t_avg_MGC_total         = 0.0;
-    t_avg_MGC_preSmoothing  = 0.0;
-    t_avg_MGC_postSmoothing = 0.0;
-    t_avg_MGC_residual      = 0.0;
-    t_avg_MGC_directSolver  = 0.0;
 }
 
 void GMGPolar::printSettings() const
