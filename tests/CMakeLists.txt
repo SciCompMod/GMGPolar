@@ -25,6 +25,7 @@ add_executable(gmgpolar_tests
     DirectSolver/directSolverNoMumps.cpp
     Smoother/smoother.cpp
     ExtrapolatedSmoother/extrapolated_smoother.cpp
+    ConfigParser/config_parser.cpp
 )
 
 # Set the compile features and link libraries
