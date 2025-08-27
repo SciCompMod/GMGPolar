@@ -33,7 +33,7 @@ std::vector<char*> make_argv(const std::vector<std::string>& args)
 
 TEST_P(ConfigParserTest, ParseAllGeometryAndProblemCombinations)
 {
-    const int verbose                          = 0;
+    const int verbose                          = (params.case_id > 0 ? 0 : 1);
     const bool paraview                        = false;
     const int maxOpenMPThreads                 = 4;
     const double threadReductionFactor         = 1.0;
