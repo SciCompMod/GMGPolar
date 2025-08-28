@@ -32,7 +32,7 @@ class ExtrapolatedSmoother;
 // The `LevelCache` class is responsible for caching auxiliary data required for solving a problem at a specific level of a multigrid method.
 // It stores essential data such as trigonometric values (e.g., `sin_theta` and `cos_theta`) and profile coefficients (e.g., `alpha`, `beta`)
 // that are frequently used in the solution process. Additionally, depending on the stencil distribution strategy, it can store transformation
-// coefficients (`arr`, `att`, `art`) related to the domain geometry. These coefficients are critical for efficient matrix-free stencil operations
+// coefficients (`arr`, `att`, `art`, `detDF`) related to the domain geometry. These coefficients are critical for efficient matrix-free stencil operations
 // and contribute to the accuracy and performance of the multigrid solver.
 
 class LevelCache;
@@ -123,8 +123,8 @@ public:
     const std::vector<double>& cos_theta() const;
 
     bool cacheDensityProfileCoefficients() const;
-    const std::vector<double>& coeff_alpha() const;
-    const std::vector<double>& coeff_beta() const;
+    const Vector<double>& coeff_alpha() const;
+    const Vector<double>& coeff_beta() const;
 
     bool cacheDomainGeometry() const;
     const Vector<double>& arr() const;
@@ -140,16 +140,16 @@ public:
         cos_theta = cos_theta_[i_theta];
 
         if (cache_density_profile_coefficients_)
-            coeff_beta = coeff_beta_[i_r];
+            coeff_beta = coeff_beta_[global_index];
         else
-            coeff_beta = density_profile_coefficients_.beta(r);
+            coeff_beta = density_profile_coefficients_.beta(r, theta);
 
         double coeff_alpha;
         if (!cache_domain_geometry_) {
             if (cache_density_profile_coefficients_)
-                coeff_alpha = coeff_alpha_[i_r];
+                coeff_alpha = coeff_alpha_[global_index];
             else
-                coeff_alpha = density_profile_coefficients_.alpha(r);
+                coeff_alpha = density_profile_coefficients_.alpha(r, theta);
         }
 
         if (cache_domain_geometry_) {
@@ -172,8 +172,8 @@ private:
     std::vector<double> cos_theta_;
 
     bool cache_density_profile_coefficients_; // cache alpha(r_i), beta(r_i)
-    std::vector<double> coeff_alpha_;
-    std::vector<double> coeff_beta_;
+    Vector<double> coeff_alpha_;
+    Vector<double> coeff_beta_;
 
     bool cache_domain_geometry_; // cache arr, att, art, detDF
     Vector<double> arr_;

@@ -6,12 +6,12 @@ ZoniShiftedCoefficients::ZoniShiftedCoefficients(const double& Rmax, const doubl
 {
 }
 
-double ZoniShiftedCoefficients::alpha(const double& r) const
+double ZoniShiftedCoefficients::alpha(const double& r, const double& theta) const
 {
     return exp(-tanh(20.0 * (r / Rmax) - 14.0));
 }
 
-double ZoniShiftedCoefficients::beta(const double& r) const
+double ZoniShiftedCoefficients::beta(const double& r, const double& theta) const
 {
     return 0.0;
 }

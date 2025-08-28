@@ -4,24 +4,23 @@
 
 void GMGPolar::solve()
 {
-    if(verbose_ > 0)
-    {
+    if (verbose_ > 0) {
         std::cout << "Cycle type: ";
-        if(multigrid_cycle_ == MultigridCycleType::V_CYCLE)
-        {
+        if (multigrid_cycle_ == MultigridCycleType::V_CYCLE) {
             std::cout << "V." << std::endl;
-        }else if(multigrid_cycle_ == MultigridCycleType::W_CYCLE)
-        {
-            std::cout << "W." << std::endl; 
-        }else if(multigrid_cycle_ == MultigridCycleType::F_CYCLE)
-        {
-            std::cout << "F." << std::endl;         
         }
-    
-        std::cout << "Extrapolation: ";    
+        else if (multigrid_cycle_ == MultigridCycleType::W_CYCLE) {
+            std::cout << "W." << std::endl;
+        }
+        else if (multigrid_cycle_ == MultigridCycleType::F_CYCLE) {
+            std::cout << "F." << std::endl;
+        }
+
+        std::cout << "Extrapolation: ";
         if (extrapolation_ == ExtrapolationType::NONE) {
             std::cout << "None." << std::endl;
-        }else if (extrapolation_ == ExtrapolationType::IMPLICIT_EXTRAPOLATION) {
+        }
+        else if (extrapolation_ == ExtrapolationType::IMPLICIT_EXTRAPOLATION) {
             std::cout << "Implicit Extrapolation." << std::endl;
         }
     }
@@ -29,22 +28,22 @@ void GMGPolar::solve()
     LIKWID_START("Solve");
     auto start_solve = std::chrono::high_resolution_clock::now();
 
+    /* Clear solve-phase timings */
+    resetSolvePhaseTimings();
+
     /* ---------------------------- */
     /* Initialize starting solution */
     /* ---------------------------- */
-
     auto start_initial_approximation = std::chrono::high_resolution_clock::now();
+
     initializeSolution();
+
     auto end_initial_approximation = std::chrono::high_resolution_clock::now();
-    t_solve_initial_approximation +=
+    t_solve_initial_approximation_ =
         std::chrono::duration<double>(end_initial_approximation - start_initial_approximation).count();
 
     /* These times are included in the initial approximation and don't count towards the multigrid cyclces. */
-    t_avg_MGC_total         = 0.0;
-    t_avg_MGC_preSmoothing  = 0.0;
-    t_avg_MGC_postSmoothing = 0.0;
-    t_avg_MGC_residual      = 0.0;
-    t_avg_MGC_directSolver  = 0.0;
+    resetAvgMultigridCycleTimings();
 
     /* ------------ */
     /* Start Solver */
@@ -76,7 +75,7 @@ void GMGPolar::solve()
             exact_errors_.push_back(exact_error);
 
             auto end_check_exact_error = std::chrono::high_resolution_clock::now();
-            t_check_exact_error +=
+            t_check_exact_error_ +=
                 std::chrono::duration<double>(end_check_exact_error - start_check_exact_error).count();
 
             if (verbose_ > 0) {
@@ -103,10 +102,10 @@ void GMGPolar::solve()
 
             switch (residual_norm_type_) {
             case ResidualNormType::EUCLIDEAN:
-                current_residual_norm = sqrt(l2_norm_squared(level.residual()));
+                current_residual_norm = l2_norm(level.residual());
                 break;
             case ResidualNormType::WEIGHTED_EUCLIDEAN:
-                current_residual_norm = sqrt(l2_norm_squared(level.residual())) / sqrt(level.grid().numberOfNodes());
+                current_residual_norm = l2_norm(level.residual()) / sqrt(level.grid().numberOfNodes());
                 break;
             case ResidualNormType::INFINITY_NORM:
                 current_residual_norm = infinity_norm(level.residual());
@@ -143,7 +142,7 @@ void GMGPolar::solve()
             }
 
             auto end_check_convergence = std::chrono::high_resolution_clock::now();
-            t_check_convergence +=
+            t_check_convergence_ +=
                 std::chrono::duration<double>(end_check_convergence - start_check_convergence).count();
 
             if (converged(current_residual_norm, current_relative_residual_norm))
@@ -189,7 +188,7 @@ void GMGPolar::solve()
         number_of_iterations_++;
 
         auto end_solve_multigrid_iterations = std::chrono::high_resolution_clock::now();
-        t_solve_multigrid_iterations +=
+        t_solve_multigrid_iterations_ +=
             std::chrono::duration<double>(end_solve_multigrid_iterations - start_solve_multigrid_iterations).count();
     }
 
@@ -197,11 +196,11 @@ void GMGPolar::solve()
         /* --------------------------------------------- */
         /* Compute the average Multigrid Iteration times */
         /* --------------------------------------------- */
-        t_avg_MGC_total = t_solve_multigrid_iterations / number_of_iterations_;
-        t_avg_MGC_preSmoothing /= number_of_iterations_;
-        t_avg_MGC_postSmoothing /= number_of_iterations_;
-        t_avg_MGC_residual /= number_of_iterations_;
-        t_avg_MGC_directSolver /= number_of_iterations_;
+        t_avg_MGC_total_ = t_solve_multigrid_iterations_ / number_of_iterations_;
+        t_avg_MGC_preSmoothing_ /= number_of_iterations_;
+        t_avg_MGC_postSmoothing_ /= number_of_iterations_;
+        t_avg_MGC_residual_ /= number_of_iterations_;
+        t_avg_MGC_directSolver_ /= number_of_iterations_;
 
         /* -------------------------------- */
         /* Compute the reduction factor rho */
@@ -216,14 +215,15 @@ void GMGPolar::solve()
     }
 
     auto end_solve = std::chrono::high_resolution_clock::now();
-    t_solve_total += std::chrono::duration<double>(end_solve - start_solve).count();
-    t_solve_total -= t_check_exact_error;
+    t_solve_total_ = std::chrono::duration<double>(end_solve - start_solve).count() - t_check_exact_error_;
     LIKWID_STOP("Solve");
 
     if (paraview_) {
-        computeExactError(level, level.solution(), level.residual());
         writeToVTK("output_solution", level, level.solution());
-        writeToVTK("output_error", level, level.residual());
+        if (exact_solution_ != nullptr) {
+            computeExactError(level, level.solution(), level.residual());
+            writeToVTK("output_error", level, level.residual());
+        }
     }
 }
 
@@ -387,7 +387,7 @@ std::pair<double, double> GMGPolar::computeExactError(Level& level, const Vector
         }
     }
 
-    double weighted_euclidean_error = sqrt(l2_norm_squared(error)) / sqrt(grid.numberOfNodes());
+    double weighted_euclidean_error = l2_norm(error) / sqrt(grid.numberOfNodes());
     double infinity_error           = infinity_norm(error);
 
     return std::make_pair(weighted_euclidean_error, infinity_error);
@@ -444,4 +444,50 @@ void GMGPolar::extrapolatedResidual(const int current_level, Vector<double>& res
             }
         }
     }
+}
+
+void GMGPolar::printIterationHeader()
+{
+    if (verbose_ <= 0)
+        return;
+
+    const int table_spacing = 4;
+    std::cout << "------------------------------\n";
+    std::cout << "---- Multigrid Iterations ----\n";
+    std::cout << "------------------------------\n";
+    std::cout << std::left;
+    std::cout << std::setw(3 + table_spacing) << "it";
+    if (absolute_tolerance_.has_value() || relative_tolerance_.has_value()) {
+        std::cout << std::setw(9 + table_spacing) << "||r_k||";
+        if (!FMG_)
+            std::cout << std::setw(15 + table_spacing) << "||r_k||/||r_0||";
+        else
+            std::cout << std::setw(15 + table_spacing) << "||r_k||/||rhs||";
+    }
+    if (exact_solution_ != nullptr) {
+        std::cout << std::setw(12 + table_spacing) << "||u-u_k||_l2";
+        std::cout << std::setw(13 + table_spacing) << "||u-u_k||_inf";
+    }
+    std::cout << "\n";
+    std::cout << std::right << std::setfill(' ');
+}
+
+void GMGPolar::printIterationInfo(int iteration, double current_residual_norm, double current_relative_residual_norm)
+{
+    if (verbose_ <= 0)
+        return;
+
+    const int table_spacing = 4;
+    std::cout << std::left << std::scientific << std::setprecision(2);
+    std::cout << std::setw(3 + table_spacing) << number_of_iterations_;
+    if (absolute_tolerance_.has_value() || relative_tolerance_.has_value()) {
+        std::cout << std::setw(9 + table_spacing + 2) << current_residual_norm;
+        std::cout << std::setw(15 + table_spacing) << current_relative_residual_norm;
+    }
+    if (exact_solution_ != nullptr) {
+        std::cout << std::setw(12 + table_spacing) << exact_errors_.back().first;
+        std::cout << std::setw(13 + table_spacing) << exact_errors_.back().second;
+    }
+    std::cout << "\n";
+    std::cout << std::right << std::defaultfloat << std::setprecision(6) << std::setfill(' ');
 }

@@ -5,115 +5,23 @@ void GMGPolar::setup()
     LIKWID_START("Setup");
     auto start_setup = std::chrono::high_resolution_clock::now();
 
-    resetTimings();
+    resetSetupPhaseTimings();
 
     auto start_setup_createLevels = std::chrono::high_resolution_clock::now();
 
+    assert(domain_geometry_ != nullptr && density_profile_coefficients_ != nullptr);
+
     if (stencil_distribution_method_ == StencilDistributionMethod::CPU_TAKE) {
-        if(verbose_ > 0)
-        {
-            std::cout << "\nStencil version: TAKE" << std::endl;
-        }
         if (!cache_density_profile_coefficients_ || !cache_domain_geometry_) {
             throw std::runtime_error("Error: Caching must be enabled for both density profile coefficients and domain "
                                      "geometry in 'Take' implementation strategy.");
         }
-    }else{
-        if(verbose_ > 0)
-        {
-            std::cout << "\nStencil version: GIVE" << std::endl;
-        }
     }
-
-    if(verbose_ > 0)
-    {
-        std::cout << "Geometry: ";
-        if (typeid(*domain_geometry_) == typeid(CircularGeometry)) {
-            std::cout << "Circular";
-        }
-        else if (typeid(*domain_geometry_) == typeid(ShafranovGeometry)) {
-            std::cout << "Shafranov";
-        }
-        else if (typeid(*domain_geometry_) == typeid(CzarnyGeometry)) {
-            std::cout << "Czarny";
-        }
-        else if (typeid(*domain_geometry_) == typeid(CulhamGeometry)) {
-            std::cout << "Culham";
-        }
-        else {
-            std::cout << "Unknown";
-        }
-        std::cout << std::endl;
-
-        std::cout << "Coefficients: ";
-        if (typeid(*density_profile_coefficients_) == typeid(PoissonCoefficients)) {
-            std::cout << "PoissonCoefficients";
-        }
-        else if (typeid(*density_profile_coefficients_) == typeid(SonnendruckerCoefficients)) {
-            std::cout << "SonnendruckerCoefficients, Alpha: Sonnendruecker, Beta: Zero";
-        }
-        else if (typeid(*density_profile_coefficients_) == typeid(SonnendruckerGyroCoefficients)) {
-            std::cout << "SonnendruckerGyroCoefficients, Alpha: Sonnendruecker, Beta: Inverse";
-        }
-        else if (typeid(*density_profile_coefficients_) == typeid(ZoniCoefficients)) {
-            std::cout << "ZoniCoefficients, Alpha: Zoni, Beta: Zero";
-        }
-        else if (typeid(*density_profile_coefficients_) == typeid(ZoniGyroCoefficients)) {
-            std::cout << "ZoniGyroCoefficients, Alpha: Zoni, Beta: Inverse";
-        }
-        else if (typeid(*density_profile_coefficients_) == typeid(ZoniShiftedCoefficients)) {
-            std::cout << "ZoniShiftedCoefficients, Alpha: ZoniShifted, Beta: Zero";
-        }
-        else if (typeid(*density_profile_coefficients_) == typeid(ZoniShiftedGyroCoefficients)) {
-            std::cout << "ZoniShiftedGyroCoefficients, Alpha: ZoniShifted, Beta: Inverse";
-        }        
-        else {
-            std::cout << "Unknown";
-        }
-        std::cout << std::endl;
-
-        std::cout << "Problem: ";
-        if (typeid(*exact_solution_) == typeid(CartesianR2_CircularGeometry) 
-    || typeid(*exact_solution_) == typeid(CartesianR2_CzarnyGeometry)
-    || typeid(*exact_solution_) == typeid(CartesianR2_ShafranovGeometry)) {
-            std::cout << "CARTESIAN_R2";
-        }
-        else if (typeid(*exact_solution_) == typeid(CartesianR6_CircularGeometry) 
-    || typeid(*exact_solution_) == typeid(CartesianR6_CzarnyGeometry)
-    || typeid(*exact_solution_) == typeid(CartesianR6_ShafranovGeometry)) {
-            std::cout << "CARTESIAN_R6";
-        }
-        else if (typeid(*exact_solution_) == typeid(PolarR6_CircularGeometry) 
-    || typeid(*exact_solution_) == typeid(PolarR6_CulhamGeometry)
-    || typeid(*exact_solution_) == typeid(PolarR6_CzarnyGeometry)
-    || typeid(*exact_solution_) == typeid(PolarR6_ShafranovGeometry)) {
-            std::cout << "POLAR_R6";
-        }
-        else if (typeid(*exact_solution_) == typeid(Refined_CircularGeometry) 
-    || typeid(*exact_solution_) == typeid(Refined_CulhamGeometry)
-    || typeid(*exact_solution_) == typeid(Refined_CzarnyGeometry)
-    || typeid(*exact_solution_) == typeid(Refined_ShafranovGeometry)) {
-            std::cout << "REFINED_RADIUS";
-        }    
-        else {
-            std::cout << "Unknown";
-        }
-        std::cout << std::endl;  
-    }
-
 
     // -------------------------------- //
     // Create the finest mesh (level 0) //
     // -------------------------------- //
     auto finest_grid = std::make_unique<PolarGrid>(createFinestGrid()); /* Implementation below */
-    if (verbose_ > 0) {
-        std::cout << "System of size (nr x ntheta) = (" << finest_grid->nr() << " x " << finest_grid->ntheta() << ")\n";
-        std::cout << "on the coordinates (r x theta): (" << R0_ << ", " << Rmax_ << ") x (" << 0 << ", " << 2 * M_PI
-                  << ")\n";
-
-        std::cout << "Anisotropy factor: " << anisotropic_factor_ << std::endl;
-        std::cout << "Dirichlet boundary (interior): " << DirBC_Interior_ << std::endl; 
-    }
     if (paraview_)
         writeToVTK("output_finest_grid", *finest_grid);
 
@@ -123,9 +31,6 @@ void GMGPolar::setup()
     number_of_levels_ = chooseNumberOfLevels(*finest_grid); /* Implementation below */
     levels_.clear();
     levels_.reserve(number_of_levels_);
-
-    if (verbose_ > 0)
-        std::cout << "Number of levels: " << number_of_levels_ << "\n";
 
     int level_depth = 0;
     auto finest_levelCache =
@@ -140,7 +45,7 @@ void GMGPolar::setup()
     }
 
     auto end_setup_createLevels = std::chrono::high_resolution_clock::now();
-    t_setup_createLevels += std::chrono::duration<double>(end_setup_createLevels - start_setup_createLevels).count();
+    t_setup_createLevels_ = std::chrono::duration<double>(end_setup_createLevels - start_setup_createLevels).count();
 
     if (paraview_)
         writeToVTK("output_coarsest_grid", levels_.back().grid());
@@ -156,10 +61,10 @@ void GMGPolar::setup()
                      static_cast<int>(std::floor(max_omp_threads_ * std::pow(thread_reduction_factor_, level_depth)))));
     }
 
-    if (verbose_ > 0)
-        std::cout << "Maximum number of threads: " << max_omp_threads_ << "\n";
-
     interpolation_ = std::make_unique<Interpolation>(threads_per_level_, DirBC_Interior_);
+
+    if (verbose_ > 0)
+        printSettings();
 
     auto start_setup_rhs = std::chrono::high_resolution_clock::now();
 
@@ -187,7 +92,7 @@ void GMGPolar::setup()
     }
 
     auto end_setup_rhs = std::chrono::high_resolution_clock::now();
-    t_setup_rhs += std::chrono::duration<double>(end_setup_rhs - start_setup_rhs).count();
+    t_setup_rhs_       = std::chrono::duration<double>(end_setup_rhs - start_setup_rhs).count();
 
     // -------------------------------------------------------
     // Initializing various operators based on the level index
@@ -236,7 +141,7 @@ void GMGPolar::setup()
                 break;
             }
             auto end_setup_smoother = std::chrono::high_resolution_clock::now();
-            t_setup_smoother += std::chrono::duration<double>(end_setup_smoother - start_setup_smoother).count();
+            t_setup_smoother_ += std::chrono::duration<double>(end_setup_smoother - start_setup_smoother).count();
             levels_[level_depth].initializeResidual(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_,
                                                     threads_per_level_[level_depth], stencil_distribution_method_);
         }
@@ -249,7 +154,7 @@ void GMGPolar::setup()
                                                         DirBC_Interior_, threads_per_level_[level_depth],
                                                         stencil_distribution_method_);
             auto end_setup_directSolver = std::chrono::high_resolution_clock::now();
-            t_setup_directSolver +=
+            t_setup_directSolver_ +=
                 std::chrono::duration<double>(end_setup_directSolver - start_setup_directSolver).count();
             levels_[level_depth].initializeResidual(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_,
                                                     threads_per_level_[level_depth], stencil_distribution_method_);
@@ -262,37 +167,26 @@ void GMGPolar::setup()
             levels_[level_depth].initializeSmoothing(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_,
                                                      threads_per_level_[level_depth], stencil_distribution_method_);
             auto end_setup_smoother = std::chrono::high_resolution_clock::now();
-            t_setup_smoother += std::chrono::duration<double>(end_setup_smoother - start_setup_smoother).count();
+            t_setup_smoother_ += std::chrono::duration<double>(end_setup_smoother - start_setup_smoother).count();
             levels_[level_depth].initializeResidual(*domain_geometry_, *density_profile_coefficients_, DirBC_Interior_,
                                                     threads_per_level_[level_depth], stencil_distribution_method_);
         }
     }
 
     auto end_setup = std::chrono::high_resolution_clock::now();
-    t_setup_total += std::chrono::duration<double>(end_setup - start_setup).count();
+    t_setup_total_ = std::chrono::duration<double>(end_setup - start_setup).count();
     LIKWID_STOP("Setup");
 }
 
 PolarGrid GMGPolar::createFinestGrid()
 {
-    PolarGrid finest_grid;
+    // Radius of anisotropic refinement from density profile
+    double refinement_radius = density_profile_coefficients_->getAlphaJump();
+    // Smoother line splitting radius (automatic)
+    std::optional<double> splitting_radius = std::nullopt;
 
-    if (load_grid_file_) {
-        assert(!file_grid_radii_.empty() && !file_grid_angles_.empty());
-        finest_grid = PolarGrid(file_grid_radii_, file_grid_angles_);
-    }
-    else {
-        const double& refinement_radius =
-            density_profile_coefficients_->getAlphaJump(); /* Radius of anisotropic grid refinement */
-        std::optional<double> splitting_radius = std::nullopt; /* (Automatic) line splitting radius for the smoother */
-        finest_grid = PolarGrid(R0_, Rmax_, nr_exp_, ntheta_exp_, refinement_radius, anisotropic_factor_, divideBy2_,
-                                splitting_radius);
-    }
-    if (write_grid_file_) {
-        const int precision = 18;
-        finest_grid.writeToFile(file_grid_radii_, file_grid_angles_, precision);
-    }
-    return finest_grid;
+    return PolarGrid(R0_, Rmax_, nr_exp_, ntheta_exp_, refinement_radius, anisotropic_factor_, divideBy2_,
+                     splitting_radius);
 }
 
 int GMGPolar::chooseNumberOfLevels(const PolarGrid& finestGrid)
@@ -338,23 +232,231 @@ int GMGPolar::chooseNumberOfLevels(const PolarGrid& finestGrid)
     return levels;
 }
 
-void GMGPolar::resetTimings()
+void GMGPolar::printSettings() const
 {
-    t_setup_total        = 0.0;
-    t_setup_createLevels = 0.0;
-    t_setup_rhs          = 0.0;
-    t_setup_smoother     = 0.0;
-    t_setup_directSolver = 0.0;
 
-    t_solve_total                 = 0.0;
-    t_solve_initial_approximation = 0.0;
-    t_solve_multigrid_iterations  = 0.0;
-    t_check_convergence           = 0.0;
-    t_check_exact_error           = 0.0;
+    std::cout << "------------------------------\n";
+    std::cout << "------- CMake Settings -------\n";
+    std::cout << "------------------------------\n";
+#ifdef NDEBUG
+    std::cout << "Build: Release\n";
+#else
+    std::cout << "Build: Debug\n";
+#endif
 
-    t_avg_MGC_total         = 0.0;
-    t_avg_MGC_preSmoothing  = 0.0;
-    t_avg_MGC_postSmoothing = 0.0;
-    t_avg_MGC_residual      = 0.0;
-    t_avg_MGC_directSolver  = 0.0;
+#ifdef GMGPOLAR_USE_MUMPS
+    std::cout << "MUMPS: ON, ";
+#else
+    std::cout << "MUMPS: OFF, ";
+#endif
+
+#ifdef GMGPOLAR_USE_LIKWID
+    std::cout << "Likwid: ON\n";
+#else
+    std::cout << "Likwid: OFF\n";
+#endif
+
+    std::cout << "------------------------------\n";
+    std::cout << "------ General Settings ------\n";
+    std::cout << "------------------------------\n";
+
+    std::cout << "Maximum number of threads: " << max_omp_threads_ << "\n";
+
+    if (DirBC_Interior_) {
+        std::cout << "Dirichlet (Interior boundary condition)\n";
+    }
+    else {
+        std::cout << "Across the origin (Interior boundary condition)\n";
+    }
+
+    if (stencil_distribution_method_ == StencilDistributionMethod::CPU_TAKE) {
+        std::cout << "A-Take (Stencil Distribution)\n";
+    }
+    else {
+        std::cout << "A-Give (Stencil Distribution)\n";
+    }
+
+    std::cout << "Domain geometry mode:" << " " << (cache_domain_geometry_ ? "Precomputed" : "On-the-fly") << "\n";
+
+    std::cout << "------------------------------\n";
+    std::cout << "------ Problem Settings ------\n";
+    std::cout << "------------------------------\n";
+
+    if (typeid(*domain_geometry_) == typeid(CircularGeometry)) {
+        std::cout << "Circular (Domain geometry)\n";
+    }
+    else if (typeid(*domain_geometry_) == typeid(ShafranovGeometry)) {
+        std::cout << "Shafranov (Domain geometry)\n";
+    }
+    else if (typeid(*domain_geometry_) == typeid(CzarnyGeometry)) {
+        std::cout << "Czarny (Domain geometry)\n";
+    }
+    else if (typeid(*domain_geometry_) == typeid(CulhamGeometry)) {
+        std::cout << "Culham (Domain geometry)\n";
+    }
+    else {
+        std::cout << "Unknown domain geometry\n";
+    }
+
+    if (exact_solution_ != nullptr) {
+        // std::cout << "Exact Solution: ";
+        if (typeid(*exact_solution_) == typeid(CartesianR2_CircularGeometry) ||
+            typeid(*exact_solution_) == typeid(CartesianR2_CzarnyGeometry) ||
+            typeid(*exact_solution_) == typeid(CartesianR2_ShafranovGeometry)) {
+            std::cout << "CartesianR2 (Exact solution)\n";
+        }
+        else if (typeid(*exact_solution_) == typeid(CartesianR6_CircularGeometry) ||
+                 typeid(*exact_solution_) == typeid(CartesianR6_CzarnyGeometry) ||
+                 typeid(*exact_solution_) == typeid(CartesianR6_ShafranovGeometry)) {
+            std::cout << "CartesianR6 (Exact solution)\n";
+        }
+        else if (typeid(*exact_solution_) == typeid(PolarR6_CircularGeometry) ||
+                 typeid(*exact_solution_) == typeid(PolarR6_CulhamGeometry) ||
+                 typeid(*exact_solution_) == typeid(PolarR6_CzarnyGeometry) ||
+                 typeid(*exact_solution_) == typeid(PolarR6_ShafranovGeometry)) {
+            std::cout << "PolarR6 (Exact solution)\n";
+        }
+        else if (typeid(*exact_solution_) == typeid(Refined_CircularGeometry) ||
+                 typeid(*exact_solution_) == typeid(Refined_CulhamGeometry) ||
+                 typeid(*exact_solution_) == typeid(Refined_CzarnyGeometry) ||
+                 typeid(*exact_solution_) == typeid(Refined_ShafranovGeometry)) {
+            std::cout << "Multi-Scale (Exact solution)\n";
+        }
+        else {
+            std::cout << "Unknown exact solution\n";
+        }
+    }
+
+    if (typeid(*density_profile_coefficients_) == typeid(PoissonCoefficients)) {
+        std::cout << "α = 1, β = 0 (Poisson)\n";
+    }
+    else if (typeid(*density_profile_coefficients_) == typeid(SonnendruckerCoefficients)) {
+        std::cout << "α = Sonnendrücker, β = 0 (Profile coefficients)\n";
+    }
+    else if (typeid(*density_profile_coefficients_) == typeid(SonnendruckerGyroCoefficients)) {
+        std::cout << "α = Sonnendrücker, β = 1/α (Profile coefficients)\n";
+    }
+    else if (typeid(*density_profile_coefficients_) == typeid(ZoniCoefficients)) {
+        std::cout << "α = Zoni, β = 0 (Profile coefficients)\n";
+    }
+    else if (typeid(*density_profile_coefficients_) == typeid(ZoniGyroCoefficients)) {
+        std::cout << "α = Zoni, β = 1/α  (Profile coefficients)\n";
+    }
+    else if (typeid(*density_profile_coefficients_) == typeid(ZoniShiftedCoefficients)) {
+        std::cout << "α = Zoni-Shifted, β = 0 (Profile coefficients)\n";
+    }
+    else if (typeid(*density_profile_coefficients_) == typeid(ZoniShiftedGyroCoefficients)) {
+        std::cout << "α = Zoni-Shifted, β = 1/α  (Profile coefficients)\n";
+    }
+    else {
+        std::cout << "Unknown profile coefficients\n";
+    }
+
+    std::cout << "------------------------------\n";
+    std::cout << "---------- PolarGrid ---------\n";
+    std::cout << "------------------------------\n";
+
+    const PolarGrid& finest_grid   = levels_.front().grid();
+    const PolarGrid& coarsest_grid = levels_.back().grid();
+
+    std::cout << "(nr × nθ) = (" << finest_grid.nr() << " × " << finest_grid.ntheta() << ") → (" << coarsest_grid.nr()
+              << " × " << coarsest_grid.ntheta() << ")\n";
+    std::cout << "r ∈ [" << finest_grid.radii().front() << ", " << finest_grid.radii().back() << "], θ ∈ [0, 2π]\n";
+    std::cout << "nr_exp = " << nr_exp_ << ", nθ_exp = " << ntheta_exp_ << "\n";
+    std::cout << "divideBy2 = " << divideBy2_ << ", anisotropy = " << anisotropic_factor_ << "\n";
+    std::cout << "Smoother: " << finest_grid.numberSmootherCircles() << " circles, "
+              << "split radius = " << finest_grid.smootherSplittingRadius() << "\n";
+
+    std::cout << "------------------------------\n";
+    std::cout << "----- Multigrid settings -----\n";
+    std::cout << "------------------------------\n";
+
+    switch (extrapolation_) {
+    case ExtrapolationType::NONE:
+        std::cout << "No Extrapolation\n";
+        break;
+    case ExtrapolationType::IMPLICIT_EXTRAPOLATION:
+        std::cout << "Implicit Extrapolation\n";
+        break;
+    case ExtrapolationType::IMPLICIT_FULL_GRID_SMOOTHING:
+        std::cout << "Implicit Extrapolation with Full Grid Smoothing\n";
+        break;
+    case ExtrapolationType::COMBINED:
+        std::cout << "Combined Implicit Extrapolation\n";
+        break;
+    default:
+        std::cout << "Unknown Extrapolation Type\n";
+        break;
+    }
+
+    std::cout << "Multigrid Cycle: ";
+    switch (multigrid_cycle_) {
+    case MultigridCycleType::V_CYCLE:
+        std::cout << "V(" << pre_smoothing_steps_ << "," << post_smoothing_steps_ << ")-Cycle\n";
+        break;
+    case MultigridCycleType::W_CYCLE:
+        std::cout << "W(" << pre_smoothing_steps_ << "," << post_smoothing_steps_ << ")-Cycle\n";
+        break;
+    case MultigridCycleType::F_CYCLE:
+        std::cout << "F(" << pre_smoothing_steps_ << "," << post_smoothing_steps_ << ")-Cycle\n";
+        break;
+    default:
+        std::cout << "Unknown Cycle Type\n";
+        break;
+    }
+
+    std::cout << "Number of levels: " << number_of_levels_ << "\n";
+
+    std::cout << "Residual Norm: ";
+    switch (residual_norm_type_) {
+    case ResidualNormType::EUCLIDEAN:
+        std::cout << "Euclidean (L2 norm)\n";
+        break;
+    case ResidualNormType::WEIGHTED_EUCLIDEAN:
+        std::cout << "Weighted Euclidean (scaled L2 norm)\n";
+        break;
+    case ResidualNormType::INFINITY_NORM:
+        std::cout << "Infinity Norm\n";
+        break;
+    default:
+        std::cout << "Unknown Residual Norm Type\n";
+        break;
+    }
+
+    std::cout << "Tolerances: abs = ";
+    if (absolute_tolerance_) {
+        std::cout << *absolute_tolerance_;
+    }
+    else {
+        std::cout << "n/a";
+    }
+    std::cout << ", rel = ";
+    if (relative_tolerance_) {
+        std::cout << *relative_tolerance_;
+    }
+    else {
+        std::cout << "n/a";
+    }
+    std::cout << ", maxiter = " << max_iterations_ << "\n";
+
+    if (FMG_) {
+        std::cout << "Full-Multigrid: " << FMG_iterations_ << "x ";
+        switch (FMG_cycle_) {
+        case MultigridCycleType::V_CYCLE:
+            std::cout << "V(" << pre_smoothing_steps_ << "," << post_smoothing_steps_ << ")-Cycle\n";
+            break;
+        case MultigridCycleType::W_CYCLE:
+            std::cout << "W(" << pre_smoothing_steps_ << "," << post_smoothing_steps_ << ")-Cycle\n";
+            break;
+        case MultigridCycleType::F_CYCLE:
+            std::cout << "F(" << pre_smoothing_steps_ << "," << post_smoothing_steps_ << ")-Cycle\n";
+            break;
+        default:
+            std::cout << "Unknown Configuration\n";
+            break;
+        }
+    }
+    else {
+        std::cout << "Full-Multigrid: Disabled\n";
+    }
 }

@@ -31,7 +31,7 @@
                                                                                                                                         \
             result[center] =                                                                                                            \
                 rhs[center] -                                                                                                           \
-                (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) * x[center] /* beta_{i,j} */                      \
+                (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) * x[center] /* beta_{i,j} */                   \
                                                                                                                                         \
                  - coeff1 * (arr[center] + arr[left]) * (x[left] - x[center]) /* Left - Center: (Left) */                               \
                  - coeff2 * (arr[center] + arr[right]) * (x[right] - x[center]) /* Right - Center: (Right) */                           \
@@ -86,7 +86,8 @@
                                                                                                                                         \
                 result[center] =                                                                                                        \
                     rhs[center] -                                                                                                       \
-                    (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) * x[center] /* beta_{i,j} */                  \
+                    (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) *                                          \
+                         x[center] /* beta_{i,j} */                                                                                     \
                                                                                                                                         \
                      - coeff1 * (arr[center] + arr[left]) * (x[left] - x[center]) /* Left - Center: (Left) */                           \
                      - coeff2 * (arr[center] + arr[right]) * (x[right] - x[center]) /* Right - Center: (Right) */                       \

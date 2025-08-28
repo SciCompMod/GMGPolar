@@ -102,6 +102,14 @@ TEST(VectorOperations, l2_vector_norm_squared)
     EXPECT_DOUBLE_EQ(l2_norm_squared(v), 30.0);
 }
 
+/* T l2_norm(const Vector<T>& x); */
+
+TEST(VectorOperations, l2_vector_norm)
+{
+    const Vector<double> v = {1, -5, 2};
+    EXPECT_DOUBLE_EQ(l2_norm(v), std::sqrt(30.0));
+}
+
 /* T infinity_norm(const Vector<T>& x); */
 
 TEST(VectorOperations, infinity_vector_norm)
@@ -109,4 +117,3 @@ TEST(VectorOperations, infinity_vector_norm)
     const Vector<double> v = {1, -5, 2};
     EXPECT_DOUBLE_EQ(infinity_norm(v), 5.0);
 }
-

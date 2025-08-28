@@ -81,14 +81,14 @@
                 /* i_theta % 2 == 1 */                                                                                 \
                 /* | X | O | X | */                                                                                    \
                 /* |   |   |   | */                                                                                    \
-                /* | 0 | Õ | O | */                                                                                   \
+                /* | 0 | Õ | O | */                                                                                    \
                 /* |   |   |   | */                                                                                    \
                 /* | X | O | X | */                                                                                    \
                 /* or */                                                                                               \
                 /* i_theta % 2 == 0 */                                                                                 \
                 /* | O | O | O | */                                                                                    \
                 /* |   |   |   | */                                                                                    \
-                /* | X | Õ | X | */                                                                                   \
+                /* | X | Õ | X | */                                                                                    \
                 /* |   |   |   | */                                                                                    \
                 /* | O | O | O | */                                                                                    \
                                                                                                                        \
@@ -97,7 +97,7 @@
                 /* Center: (Left, Right, Bottom, Top) */                                                               \
                 row    = center_index;                                                                                 \
                 column = center_index;                                                                                 \
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) +                        \
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                     \
                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
                 UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
@@ -121,14 +121,14 @@
                 /* i_theta % 2 == 1 */                                                                                 \
                 /* | O | X | O | */                                                                                    \
                 /* |   |   |   | */                                                                                    \
-                /* | O | Õ | O | */                                                                                   \
+                /* | O | Õ | O | */                                                                                    \
                 /* |   |   |   | */                                                                                    \
                 /* | O | X | O | */                                                                                    \
                 /* or */                                                                                               \
                 /* i_theta % 2 == 0 */                                                                                 \
                 /* | O | O | O | */                                                                                    \
                 /* |   |   |   | */                                                                                    \
-                /* | O | X̃ | O | */                                                                                  \
+                /* | O | X̃ | O | */                                                                                    \
                 /* |   |   |   | */                                                                                    \
                 /* | O | O | O | */                                                                                    \
                                                                                                                        \
@@ -138,7 +138,7 @@
                     /* Center: (Left, Right, Bottom, Top) */                                                           \
                     row    = center_index;                                                                             \
                     column = center_index;                                                                             \
-                    value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) +                    \
+                    value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                 \
                             coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                 \
                             coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                  \
                     UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                               \
@@ -218,7 +218,7 @@
                     /* i_theta % 2 == 1 */                                                                             \
                     /* -| X | O | X | */                                                                               \
                     /* -|   |   |   | */                                                                               \
-                    /* -| Õ | O | O | */                                                                              \
+                    /* -| Õ | O | O | */                                                                               \
                     /* -|   |   |   | */                                                                               \
                     /* -| X | O | X | */                                                                               \
                                                                                                                        \
@@ -229,7 +229,7 @@
                     const int right  = grid.index(i_r + 1, i_theta);                                                   \
                                                                                                                        \
                     const double center_value =                                                                        \
-                        0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) +                         \
+                        0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                      \
                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
                     const double left_value = -coeff1 * (arr[center] + arr[left]);                                     \
@@ -254,7 +254,7 @@
                     /* i_theta % 2 == 0 */                                                                             \
                     /* -| O | O | O | */                                                                               \
                     /* -|   |   |   | */                                                                               \
-                    /* -| X̃ | O | X | */                                                                             \
+                    /* -| X̃ | O | X | */                                                                               \
                     /* -|   |   |   | */                                                                               \
                     /* -| O | O | O | */                                                                               \
                                                                                                                        \
@@ -305,7 +305,7 @@
                 /* ---------- */                                                                                       \
                 /* X   O   X  */                                                                                       \
                 /* ---------- */                                                                                       \
-                /* O   Õ   O  */                                                                                      \
+                /* O   Õ   O  */                                                                                       \
                 /* ---------- */                                                                                       \
                 /* X   O   X  */                                                                                       \
                 /* ---------- */                                                                                       \
@@ -314,7 +314,7 @@
                 /* ---------- */                                                                                       \
                 /* O   X   O  */                                                                                       \
                 /* ---------- */                                                                                       \
-                /* O   Õ   O  */                                                                                      \
+                /* O   Õ   O  */                                                                                       \
                 /* ---------- */                                                                                       \
                 /* O   X   O  */                                                                                       \
                 /* ---------- */                                                                                       \
@@ -324,7 +324,7 @@
                 /* Center: (Left, Right, Bottom, Top) */                                                               \
                 row    = center_index;                                                                                 \
                 column = center_index;                                                                                 \
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) +                        \
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                     \
                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
                 UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
@@ -349,7 +349,7 @@
                 /* ---------- */                                                                                       \
                 /* O   O   O  */                                                                                       \
                 /* ---------- */                                                                                       \
-                /* X   Õ   X  */                                                                                      \
+                /* X   Õ   X  */                                                                                       \
                 /* ---------- */                                                                                       \
                 /* O   O   O  */                                                                                       \
                 /* ---------- */                                                                                       \
@@ -358,7 +358,7 @@
                 /* ---------- */                                                                                       \
                 /* O   O   O  */                                                                                       \
                 /* ---------- */                                                                                       \
-                /* O   X̃   O  */                                                                                     \
+                /* O   X̃   O  */                                                                                       \
                 /* ---------- */                                                                                       \
                 /* O   O   O  */                                                                                       \
                 /* ---------- */                                                                                       \
@@ -369,7 +369,7 @@
                     /* Center: (Left, Right, Bottom, Top) */                                                           \
                     row    = center_index;                                                                             \
                     column = center_index;                                                                             \
-                    value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) +                    \
+                    value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                 \
                             coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                 \
                             coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                  \
                     UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                               \
@@ -414,14 +414,14 @@
                 /* i_theta % 2 == 1 and i_r % 2 == 1 */                                                                \
                 /* | X | O | X || O   X   O   X  */                                                                    \
                 /* |   |   |   || -------------- */                                                                    \
-                /* | 0 | O | O || Õ   O   O   O  */                                                                   \
+                /* | 0 | O | O || Õ   O   O   O  */                                                                    \
                 /* |   |   |   || -------------- */                                                                    \
                 /* | X | O | X || O   X   O   X  */                                                                    \
                 /* or */                                                                                               \
                 /* i_theta % 2 == 1 and i_r % 2 == 0 */                                                                \
                 /* | O | X | O || X   O   X   O  */                                                                    \
                 /* |   |   |   || -------------- */                                                                    \
-                /* | 0 | O | O || Õ   O   O   O  */                                                                   \
+                /* | 0 | O | O || Õ   O   O   O  */                                                                    \
                 /* |   |   |   || -------------- */                                                                    \
                 /* | O | X | O || X   O   X   O  */                                                                    \
                                                                                                                        \
@@ -430,7 +430,7 @@
                 /* Center: (Left, Right, Bottom, Top) */                                                               \
                 row    = center_index;                                                                                 \
                 column = center_index;                                                                                 \
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) +                        \
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                     \
                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
                 UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
@@ -449,14 +449,14 @@
                     /* i_theta % 2 == 0 and i_r % 2 == 1 */                                                            \
                     /* | O | O | O || O   O   O   O  */                                                                \
                     /* |   |   |   || -------------- */                                                                \
-                    /* | X | O | X || Õ   X   O   X  */                                                               \
+                    /* | X | O | X || Õ   X   O   X  */                                                                \
                     /* |   |   |   || -------------- */                                                                \
                     /* | O | O | O || O   O   O   O  */                                                                \
                                                                                                                        \
                     /* Center: (Left, Right, Bottom, Top) */                                                           \
                     row    = center_index;                                                                             \
                     column = center_index;                                                                             \
-                    value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) +                    \
+                    value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                 \
                             coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                 \
                             coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                  \
                     UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                               \
@@ -465,7 +465,7 @@
                     /* i_theta % 2 == 0 and i_r % 2 == 0 */                                                            \
                     /* | O | O | O || O   O   O   O  */                                                                \
                     /* |   |   |   || -------------- */                                                                \
-                    /* | O | X | O || X̃   O   X   O  */                                                              \
+                    /* | O | X | O || X̃   O   X   O  */                                                                \
                     /* |   |   |   || -------------- */                                                                \
                     /* | O | O | O || O   O   O   O  */                                                                \
                     /* Center: Coarse */                                                                               \
@@ -510,7 +510,7 @@
                 /* ---------------|| */                                                                                \
                 /* O   X   O   X  || */                                                                                \
                 /* ---------------|| */                                                                                \
-                /* O   O   Õ   O  || */                                                                               \
+                /* O   O   Õ   O  || */                                                                                \
                 /* ---------------|| */                                                                                \
                 /* O   X   O   X  || */                                                                                \
                 /* ---------------|| */                                                                                \
@@ -520,7 +520,7 @@
                 /* Center: (Left, Right, Bottom, Top) */                                                               \
                 row    = center_index;                                                                                 \
                 column = center_index;                                                                                 \
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) +                        \
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                     \
                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
                 UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
@@ -541,7 +541,7 @@
                 /* ---------------|| */                                                                                \
                 /* O   O   O   O  || */                                                                                \
                 /* ---------------|| */                                                                                \
-                /* O   X   Õ   X  || */                                                                               \
+                /* O   X   Õ   X  || */                                                                                \
                 /* ---------------|| */                                                                                \
                 /* O   O   O   O  || */                                                                                \
                 /* ---------------|| */                                                                                \
@@ -551,7 +551,7 @@
                 /* Center: (Left, Right, Bottom, Top) */                                                               \
                 row    = center_index;                                                                                 \
                 column = center_index;                                                                                 \
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[i_r] * fabs(detDF[center]) +                        \
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                     \
                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
                 UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                                   \
@@ -571,7 +571,7 @@
                 /* -----------|| */                                                                                    \
                 /* X   O   X  || */                                                                                    \
                 /* -----------|| */                                                                                    \
-                /* O   O   Õ  || */                                                                                   \
+                /* O   O   Õ  || */                                                                                    \
                 /* -----------|| */                                                                                    \
                 /* X   O   X  || */                                                                                    \
                 /* -----------|| */                                                                                    \
@@ -594,7 +594,7 @@
                 /* -----------|| */                                                                                    \
                 /* O   O   O  || */                                                                                    \
                 /* -----------|| */                                                                                    \
-                /* X   O   X̃  || */                                                                                  \
+                /* X   O   X̃  || */                                                                                    \
                 /* -----------|| */                                                                                    \
                 /* O   O   O  || */                                                                                    \
                 /* -----------|| */                                                                                    \

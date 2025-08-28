@@ -22,7 +22,7 @@ void GMGPolar::multigrid_W_Cycle(const int level_depth, Vector<double>& solution
     }
 
     auto end_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
-    t_avg_MGC_preSmoothing += std::chrono::duration<double>(end_MGC_preSmoothing - start_MGC_preSmoothing).count();
+    t_avg_MGC_preSmoothing_ += std::chrono::duration<double>(end_MGC_preSmoothing - start_MGC_preSmoothing).count();
 
     /* ---------------------- */
     /* Coarse grid correction */
@@ -34,7 +34,7 @@ void GMGPolar::multigrid_W_Cycle(const int level_depth, Vector<double>& solution
     level.computeResidual(residual, rhs, solution);
 
     auto end_MGC_residual = std::chrono::high_resolution_clock::now();
-    t_avg_MGC_residual += std::chrono::duration<double>(end_MGC_residual - start_MGC_residual).count();
+    t_avg_MGC_residual_ += std::chrono::duration<double>(end_MGC_residual - start_MGC_residual).count();
 
     /* -------------------------- */
     /* Solve A * error = residual */
@@ -52,7 +52,7 @@ void GMGPolar::multigrid_W_Cycle(const int level_depth, Vector<double>& solution
         next_level.directSolveInPlace(next_level.residual());
 
         auto end_MGC_directSolver = std::chrono::high_resolution_clock::now();
-        t_avg_MGC_directSolver += std::chrono::duration<double>(end_MGC_directSolver - start_MGC_directSolver).count();
+        t_avg_MGC_directSolver_ += std::chrono::duration<double>(end_MGC_directSolver - start_MGC_directSolver).count();
     }
     else {
         /* ------------------------------------------ */
@@ -85,10 +85,10 @@ void GMGPolar::multigrid_W_Cycle(const int level_depth, Vector<double>& solution
     }
 
     auto end_MGC_postSmoothing = std::chrono::high_resolution_clock::now();
-    t_avg_MGC_postSmoothing += std::chrono::duration<double>(end_MGC_postSmoothing - start_MGC_postSmoothing).count();
+    t_avg_MGC_postSmoothing_ += std::chrono::duration<double>(end_MGC_postSmoothing - start_MGC_postSmoothing).count();
 
     if (level_depth == 0) {
         auto end_MGC = std::chrono::high_resolution_clock::now();
-        t_avg_MGC_total += std::chrono::duration<double>(end_MGC - start_MGC).count();
+        t_avg_MGC_total_ += std::chrono::duration<double>(end_MGC - start_MGC).count();
     }
 }

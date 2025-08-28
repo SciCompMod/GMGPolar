@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <queue>
 #include <vector>
-#include <unordered_map>
 #include <cassert>
 #include <cmath>
 #include <stack>
@@ -12,19 +11,54 @@
 #include "vector.h"
 
 /**
- * Sparse LU Decomposition Solver with Reverse Cuthill-McKee (RCM) reordering.
- * 
- * This class performs sparse LU decomposition with partial pivoting using RCM reordering 
- * to reduce fill-in. It handles zero diagonals through static pivoting and provides 
- * efficient solving capabilities for permuted systems.
+ * @brief Sparse LU decomposition solver for symmetric positive definite matrices.
+ *
+ * This solver performs a sparse LU factorization with static pivoting and
+ * diagonal perturbation to ensure numerical stability. 
+ * We utilize Reverse Cuthill-McKee (RCM) reordering to minimize fill-in during the factorization process.
+ * It is slightly slower than MUMPS, but useful when an in-house LU implementation is desired.
+ *
+ * @tparam T Numeric type (e.g. double, float).
  */
+
 template <typename T>
 class SparseLUSolver
 {
 public:
-    SparseLUSolver();
-    explicit SparseLUSolver(const SparseMatrixCSR<T>& A);
+    /**
+     * @brief Construct an empty solver with given tolerances.
+     *
+     * @param tolerance_abs Minimum allowed diagonal magnitude.
+     *        Any diagonal entry smaller than this will be perturbed.
+     *        Default: 1e-12.
+     * @param tolerance_rel Relative tolerance with respect to the largest
+     *        entry in a row. Ensures diagonal is not too small compared
+     *        to other row entries. Default: 1e-8.
+     */
+    SparseLUSolver(T tolerance_abs = static_cast<T>(1e-12), T tolerance_rel = static_cast<T>(1e-8));
 
+    /**
+     * @brief Construct a solver from a sparse matrix and factorize it.
+     *
+     * @param A Square sparse matrix in CSR format to factorize.
+     * @param tolerance_abs Minimum allowed diagonal magnitude.
+     *        Any diagonal entry smaller than this will be perturbed.
+     *        Default: 1e-12.
+     * @param tolerance_rel Relative tolerance with respect to the largest
+     *        entry in a row. Ensures diagonal is not too small compared
+     *        to other row entries. Default: 1e-8.
+     */
+    explicit SparseLUSolver(const SparseMatrixCSR<T>& A, T tolerance_abs = static_cast<T>(1e-12),
+                            T tolerance_rel = static_cast<T>(1e-8));
+
+    /**
+     * @brief Solve a linear system in place.
+     *
+     * This method overwrites the input vector with the solution `x`
+     * to the system `Ax = b`, where `A` was the matrix provided at factorization.
+     *
+     * @param b Right-hand side vector (modified in place to contain the solution).
+     */
     void solveInPlace(Vector<T>& b) const;
     void solveInPlace(T* b) const;
 
@@ -36,7 +70,9 @@ private:
     std::vector<int> perm; // Permutation vector (RCM ordering)
     std::vector<int> perm_inv; // Inverse permutation
     std::vector<T> U_diag; // Diagonal elements of U
-    bool factorized_ = false; // Factorization status flag
+    bool factorized_; // Factorization status flag
+    T tolerance_abs_; // minimum allowed diagonal
+    T tolerance_rel_; // relative to the max in the row
 
     // Core methods
     void factorize(const SparseMatrixCSR<T>& A);
@@ -56,8 +92,10 @@ private:
 
 // Default constructor
 template <typename T>
-SparseLUSolver<T>::SparseLUSolver()
+SparseLUSolver<T>::SparseLUSolver(T tolerance_abs, T tolerance_rel)
     : factorized_(false)
+    , tolerance_abs_(tolerance_abs)
+    , tolerance_rel_(tolerance_rel)
 {
 }
 
@@ -66,7 +104,10 @@ SparseLUSolver<T>::SparseLUSolver()
  * @param A - Input matrix (must be square)
  */
 template <typename T>
-SparseLUSolver<T>::SparseLUSolver(const SparseMatrixCSR<T>& A)
+SparseLUSolver<T>::SparseLUSolver(const SparseMatrixCSR<T>& A, T tolerance_abs, T tolerance_rel)
+    : factorized_(false)
+    , tolerance_abs_(tolerance_abs)
+    , tolerance_rel_(tolerance_rel)
 {
     assert(A.rows() == A.columns());
 
@@ -446,10 +487,6 @@ void SparseLUSolver<T>::numericFactorization(const SparseMatrixCSR<T>& A,
     std::vector<int> marker(n, -1);
     std::stack<int> indices_used;
 
-    // Pivoting thresholds
-    const T tolerance_abs = 1e-12;
-    const T tolerance_rel = 1e-8;
-
     for (int i = 0; i < n; i++) {
         // Initialize dense row with original matrix values
         for (int idx = 0; idx < A.row_nz_size(i); idx++) {
@@ -516,14 +553,9 @@ void SparseLUSolver<T>::numericFactorization(const SparseMatrixCSR<T>& A,
         }
 
         // Static pivoting for weak diagonals
-        T threshold_val = std::max(tolerance_abs, tolerance_rel * max_val);
+        T threshold_val = std::max(tolerance_abs_, tolerance_rel_ * max_val);
         if (std::abs(U_diag[i]) < threshold_val) {
-            if (U_diag[i] >= 0) {
-                U_diag[i] = threshold_val;
-            }
-            else {
-                U_diag[i] = -threshold_val;
-            }
+            U_diag[i] = std::copysign(threshold_val, U_diag[i]);
             if (diag_offset != -1) {
                 U_values[diag_offset] = U_diag[i];
             }

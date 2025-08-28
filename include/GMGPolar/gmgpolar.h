@@ -50,12 +50,39 @@ public:
     const Vector<double>& solution() const;
     const PolarGrid& grid() const;
 
+    /* ---------------------------------------------------------------------- */
+    /* Diagnostics & statistics                                               */
+    /* ---------------------------------------------------------------------- */
+    // Print timing breakdown for setup, smoothing, coarse solve, etc.
+    void printTimings() const;
+
     /* Solve Properties */
     int numberOfIterations() const;
     double meanResidualReductionFactor() const;
     // Only when exact solution provided
     std::optional<double> exactErrorWeightedEuclidean() const;
     std::optional<double> exactErrorInfinity() const;
+
+    /* ---------------------------------------------------------------------- */
+    /* Timing Statistics                                                      */
+    /* ---------------------------------------------------------------------- */
+    double timeSetupTotal() const;
+    double timeSetupCreateLevels() const;
+    double timeSetupRHS() const;
+    double timeSetupSmoother() const;
+    double timeSetupDirectSolver() const;
+
+    double timeSolveTotal() const;
+    double timeSolveInitialApproximation() const;
+    double timeSolveMultigridIterations() const;
+    double timeCheckConvergence() const;
+    double timeCheckExactError() const;
+
+    double timeAvgMGCTotal() const;
+    double timeAvgMGCPreSmoothing() const;
+    double timeAvgMGCPostSmoothing() const;
+    double timeAvgMGCResidual() const;
+    double timeAvgMGCDirectSolver() const;
 
     /* --------------- */
     /* Grid Parameters */
@@ -73,16 +100,6 @@ public:
     void anisotropic_factor(int anisotropic_factor);
     int divideBy2() const;
     void divideBy2(int divideBy2);
-
-    bool write_grid_file() const;
-    void write_grid_file(bool write_grid_file);
-    bool load_grid_file() const;
-    void load_grid_file(bool load_grid_file);
-
-    std::string file_grid_radii() const;
-    void file_grid_radii(const std::string& file_name);
-    std::string file_grid_angles() const;
-    void file_grid_angles(const std::string& file_name);
 
     /* ------------------- */
     /* Geometry Parameters */
@@ -137,29 +154,6 @@ public:
     bool cacheDomainGeometry() const;
     void cacheDomainGeometry(bool cache_domain_geometry);
 
-    /* --------*/
-    /* Timings */
-    void printTimings() const;
-    void resetTimings();
-
-    double t_setup_total;
-    double t_setup_createLevels;
-    double t_setup_rhs;
-    double t_setup_smoother;
-    double t_setup_directSolver;
-
-    double t_solve_total;
-    double t_solve_initial_approximation;
-    double t_solve_multigrid_iterations;
-    double t_check_convergence;
-    double t_check_exact_error;
-
-    double t_avg_MGC_total;
-    double t_avg_MGC_preSmoothing;
-    double t_avg_MGC_postSmoothing;
-    double t_avg_MGC_residual;
-    double t_avg_MGC_directSolver;
-
 private:
     /* --------------- */
     /* Grid Parameters */
@@ -169,10 +163,6 @@ private:
     int ntheta_exp_;
     int anisotropic_factor_;
     int divideBy2_;
-    bool write_grid_file_;
-    bool load_grid_file_;
-    std::string file_grid_radii_;
-    std::string file_grid_angles_;
     /* ------------------- */
     /* Geometry Parameters */
     bool DirBC_Interior_;
@@ -270,6 +260,12 @@ private:
     /* Solve Functions */
     void initializeSolution();
 
+    /* ----------------- */
+    /* Print information */
+    void printSettings() const;
+    void printIterationHeader();
+    void printIterationInfo(int iteration, double current_residual_norm, double current_relative_residual_norm);
+
     /* ------------------- */
     /* Multigrid Functions */
     void multigrid_V_Cycle(const int level_depth, Vector<double>& solution, Vector<double>& rhs,
@@ -299,4 +295,29 @@ private:
     /* Visualization */
     void writeToVTK(const std::filesystem::path& file_path, const PolarGrid& grid);
     void writeToVTK(const std::filesystem::path& file_path, const Level& level, const Vector<double>& grid_function);
+
+    /* ------------------------------ */
+    /* Timing statistics for GMGPolar */
+    void resetAllTimings();
+
+    void resetSetupPhaseTimings();
+    double t_setup_total_;
+    double t_setup_createLevels_;
+    double t_setup_rhs_;
+    double t_setup_smoother_;
+    double t_setup_directSolver_;
+
+    void resetSolvePhaseTimings();
+    double t_solve_total_;
+    double t_solve_initial_approximation_;
+    double t_solve_multigrid_iterations_;
+    double t_check_convergence_;
+    double t_check_exact_error_;
+
+    void resetAvgMultigridCycleTimings();
+    double t_avg_MGC_total_;
+    double t_avg_MGC_preSmoothing_;
+    double t_avg_MGC_postSmoothing_;
+    double t_avg_MGC_residual_;
+    double t_avg_MGC_directSolver_;
 };

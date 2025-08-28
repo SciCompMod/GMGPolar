@@ -7,7 +7,6 @@ add_subdirectory(InputFunctions)
 # file(GLOB_RECURSE POLAR_GRID_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/*.cpp)
 set(POLAR_GRID_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/anisotropic_division.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/load_write_grid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/multiindex.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/point.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/polargrid.cpp
@@ -157,6 +156,13 @@ set(EXTRAPOLATED_SMOOTHER_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/smootherStencil.cpp
 )
 
+# Gather all source files
+# file(GLOB_RECURSE CONFIG_PARSER_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ConfigParser/*.cpp)
+set(CONFIG_PARSER_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/ConfigParser/config_parser.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ConfigParser/select_test_case.cpp
+)
+
 # Create the main library
 add_library(GMGPolarLib STATIC
     ${POLAR_GRID_SOURCES}
@@ -169,6 +175,7 @@ add_library(GMGPolarLib STATIC
     ${RESIDUAL_SOURCES}
     ${SMOOTHER_SOURCES}
     ${EXTRAPOLATED_SMOOTHER_SOURCES}
+    ${CONFIG_PARSER_SOURCES}
 )
 
 # Basic library configuration

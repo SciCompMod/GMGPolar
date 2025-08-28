@@ -8,7 +8,7 @@ GMGPolar::GMGPolar()
     // Initialize LIKWID markers if enabled
     LIKWID_REGISTER("Setup");
     LIKWID_REGISTER("Solve");
-    resetTimings();
+    resetAllTimings();
     initializeGrid();
     initializeGeometry();
     initializeMultigrid();
@@ -31,7 +31,7 @@ GMGPolar::GMGPolar(std::unique_ptr<const DomainGeometry> domain_geometry,
 {
     LIKWID_REGISTER("Setup");
     LIKWID_REGISTER("Solve");
-    resetTimings();
+    resetAllTimings();
     initializeGrid();
     initializeGeometry();
     initializeMultigrid();
@@ -111,24 +111,24 @@ void GMGPolar::printTimings() const
     std::cout << "\n------------------" << std::endl;
     std::cout << "Timing Information" << std::endl;
     std::cout << "------------------" << std::endl;
-    std::cout << "Setup Time: " << t_setup_total - t_setup_rhs << " seconds" << std::endl;
-    std::cout << "    Create Levels: " << t_setup_createLevels << " seconds" << std::endl;
-    std::cout << "    Smoother: " << t_setup_smoother << " seconds" << std::endl;
-    std::cout << "    Direct Solver: " << t_setup_directSolver << " seconds" << std::endl;
-    std::cout << "    (Build rhs: " << t_setup_rhs << " seconds)" << std::endl;
-    std::cout << "\nSolve Time: " << t_solve_total << " seconds" << std::endl;
-    std::cout << "    Initial Approximation: " << t_solve_initial_approximation << " seconds" << std::endl;
-    std::cout << "    Multigrid Iteration: " << t_solve_multigrid_iterations << " seconds" << std::endl;
-    std::cout << "    Check Convergence: " << t_check_convergence << " seconds" << std::endl;
-    std::cout << "    (Check Exact Error: " << t_check_exact_error << " seconds)" << std::endl;
-    std::cout << "\nAverage Multigrid Iteration: " << t_avg_MGC_total << " seconds" << std::endl;
-    std::cout << "    PreSmoothing: " << t_avg_MGC_preSmoothing << " seconds" << std::endl;
-    std::cout << "    PostSmoothing: " << t_avg_MGC_postSmoothing << " seconds" << std::endl;
-    std::cout << "    Residual: " << t_avg_MGC_residual << " seconds" << std::endl;
-    std::cout << "    DirectSolve: " << t_avg_MGC_directSolver << " seconds" << std::endl;
+    std::cout << "Setup Time: " << t_setup_total_ - t_setup_rhs_ << " seconds" << std::endl;
+    std::cout << "    Create Levels: " << t_setup_createLevels_ << " seconds" << std::endl;
+    std::cout << "    Smoother: " << t_setup_smoother_ << " seconds" << std::endl;
+    std::cout << "    Direct Solver: " << t_setup_directSolver_ << " seconds" << std::endl;
+    std::cout << "    (Build rhs: " << t_setup_rhs_ << " seconds)" << std::endl;
+    std::cout << "\nSolve Time: " << t_solve_total_ << " seconds" << std::endl;
+    std::cout << "    Initial Approximation: " << t_solve_initial_approximation_ << " seconds" << std::endl;
+    std::cout << "    Multigrid Iteration: " << t_solve_multigrid_iterations_ << " seconds" << std::endl;
+    std::cout << "    Check Convergence: " << t_check_convergence_ << " seconds" << std::endl;
+    std::cout << "    (Check Exact Error: " << t_check_exact_error_ << " seconds)" << std::endl;
+    std::cout << "\nAverage Multigrid Iteration: " << t_avg_MGC_total_ << " seconds" << std::endl;
+    std::cout << "    PreSmoothing: " << t_avg_MGC_preSmoothing_ << " seconds" << std::endl;
+    std::cout << "    PostSmoothing: " << t_avg_MGC_postSmoothing_ << " seconds" << std::endl;
+    std::cout << "    Residual: " << t_avg_MGC_residual_ << " seconds" << std::endl;
+    std::cout << "    DirectSolve: " << t_avg_MGC_directSolver_ << " seconds" << std::endl;
     std::cout << "    Other Computations: "
-              << std::max(t_avg_MGC_total - t_avg_MGC_preSmoothing - t_avg_MGC_postSmoothing - t_avg_MGC_residual -
-                              t_avg_MGC_directSolver,
+              << std::max(t_avg_MGC_total_ - t_avg_MGC_preSmoothing_ - t_avg_MGC_postSmoothing_ - t_avg_MGC_residual_ -
+                              t_avg_MGC_directSolver_,
                           0.0)
               << " seconds" << std::endl;
     std::cout << "\n" << std::endl;
@@ -194,46 +194,6 @@ int GMGPolar::divideBy2() const
 void GMGPolar::divideBy2(int divideBy2)
 {
     divideBy2_ = divideBy2;
-}
-
-bool GMGPolar::write_grid_file() const
-{
-    return write_grid_file_;
-}
-
-void GMGPolar::write_grid_file(bool write_grid_file)
-{
-    write_grid_file_ = write_grid_file;
-}
-
-bool GMGPolar::load_grid_file() const
-{
-    return load_grid_file_;
-}
-
-void GMGPolar::load_grid_file(bool load_grid_file)
-{
-    load_grid_file_ = load_grid_file;
-}
-
-std::string GMGPolar::file_grid_radii() const
-{
-    return file_grid_radii_;
-}
-
-void GMGPolar::file_grid_radii(const std::string& file_grid_radii)
-{
-    file_grid_radii_ = file_grid_radii;
-}
-
-std::string GMGPolar::file_grid_angles() const
-{
-    return file_grid_angles_;
-}
-
-void GMGPolar::file_grid_angles(const std::string& file_grid_angles)
-{
-    file_grid_angles_ = file_grid_angles;
 }
 
 /* ------------------- */
@@ -460,4 +420,114 @@ bool GMGPolar::cacheDomainGeometry() const
 void GMGPolar::cacheDomainGeometry(bool cache_domain_geometry)
 {
     cache_domain_geometry_ = cache_domain_geometry;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Setup timings                                                          */
+/* ---------------------------------------------------------------------- */
+double GMGPolar::timeSetupTotal() const
+{
+    return t_setup_total_;
+}
+double GMGPolar::timeSetupCreateLevels() const
+{
+    return t_setup_createLevels_;
+}
+double GMGPolar::timeSetupRHS() const
+{
+    return t_setup_rhs_;
+}
+double GMGPolar::timeSetupSmoother() const
+{
+    return t_setup_smoother_;
+}
+double GMGPolar::timeSetupDirectSolver() const
+{
+    return t_setup_directSolver_;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Solve timings                                                          */
+/* ---------------------------------------------------------------------- */
+double GMGPolar::timeSolveTotal() const
+{
+    return t_solve_total_;
+}
+double GMGPolar::timeSolveInitialApproximation() const
+{
+    return t_solve_initial_approximation_;
+}
+double GMGPolar::timeSolveMultigridIterations() const
+{
+    return t_solve_multigrid_iterations_;
+}
+double GMGPolar::timeCheckConvergence() const
+{
+    return t_check_convergence_;
+}
+double GMGPolar::timeCheckExactError() const
+{
+    return t_check_exact_error_;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Average Multigrid Cycle timings                                        */
+/* ---------------------------------------------------------------------- */
+double GMGPolar::timeAvgMGCTotal() const
+{
+    return t_avg_MGC_total_;
+}
+double GMGPolar::timeAvgMGCPreSmoothing() const
+{
+    return t_avg_MGC_preSmoothing_;
+}
+double GMGPolar::timeAvgMGCPostSmoothing() const
+{
+    return t_avg_MGC_postSmoothing_;
+}
+double GMGPolar::timeAvgMGCResidual() const
+{
+    return t_avg_MGC_residual_;
+}
+double GMGPolar::timeAvgMGCDirectSolver() const
+{
+    return t_avg_MGC_directSolver_;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Reset timings                                                          */
+/* ---------------------------------------------------------------------- */
+
+void GMGPolar::resetAllTimings()
+{
+    resetSetupPhaseTimings();
+    resetSolvePhaseTimings();
+    resetAvgMultigridCycleTimings();
+}
+
+void GMGPolar::resetSetupPhaseTimings()
+{
+    t_setup_total_        = 0.0;
+    t_setup_createLevels_ = 0.0;
+    t_setup_rhs_          = 0.0;
+    t_setup_smoother_     = 0.0;
+    t_setup_directSolver_ = 0.0;
+}
+
+void GMGPolar::resetSolvePhaseTimings()
+{
+    t_solve_total_                 = 0.0;
+    t_solve_initial_approximation_ = 0.0;
+    t_solve_multigrid_iterations_  = 0.0;
+    t_check_convergence_           = 0.0;
+    t_check_exact_error_           = 0.0;
+}
+
+void GMGPolar::resetAvgMultigridCycleTimings()
+{
+    t_avg_MGC_total_         = 0.0;
+    t_avg_MGC_preSmoothing_  = 0.0;
+    t_avg_MGC_postSmoothing_ = 0.0;
+    t_avg_MGC_residual_      = 0.0;
+    t_avg_MGC_directSolver_  = 0.0;
 }

@@ -45,29 +45,12 @@ To install and set up Spack, execute the following commands in your terminal:
 
 With Spack set up, you can now install MUMPS. The following command installs version 5.5.1 of MUMPS with specific options that are recommended for GMGPolar:
 
-    spack install mumps@5.5.1
-        blr_mt=false
-        complex=false
-        double=true
-        float=true
-        incfort=false
-        int64=false
-        metis=true
-        mpi=false
-        openmp=true
-        parmetis=false
-        ptscotch=false
-        scotch=false
-        shared=true
-
- or in one line:
-
- 	spack install mumps@5.5.1~blr_mt~complex+double+float~incfort~int64+metis~mpi+openmp~parmetis~ptscotch~scotch+shared
+ 	spack install mumps@5.5.1 ~blr_mt ~complex +double +float ~incfort ~int64 +metis ~mpi +openmp ~parmetis ~ptscotch ~scotch +shared
 
 ### Note on AVX / AVX-512 Compatibility
 If your system does not support AVX or AVX-512 instructions (e.g., on AMD processors), install MUMPS with the following command:
 
-    spack install mumps target=x86_64
+    spack install mumps@5.5.1 target=x86_64 ~blr_mt ~complex +double +float ~incfort ~int64 +metis ~mpi +openmp ~parmetis ~ptscotch ~scotch +shared
 
 ## Step 3: Configure CMake for GMGPolar
 

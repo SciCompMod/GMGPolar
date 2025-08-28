@@ -22,25 +22,6 @@ PolarGrid::PolarGrid(const std::vector<double>& radii, const std::vector<double>
     initializeLineSplitting(splitting_radius);
 }
 
-// Constructor to initialize grid using data from text files containing radii and angles.
-PolarGrid::PolarGrid(const std::string& file_grid_radii, const std::string& file_grid_angles,
-                     std::optional<double> splitting_radius)
-{
-    // Construct radii_ and angles_ from text files
-    loadVectorFromFile(file_grid_radii, radii_);
-    loadVectorFromFile(file_grid_angles, angles_);
-    nr_                   = radii_.size();
-    ntheta_               = angles_.size() - 1;
-    is_ntheta_PowerOfTwo_ = (ntheta_ & (ntheta_ - 1)) == 0;
-    // Check parameter validity
-    checkParameters(radii_, angles_);
-    // Store distances to adjacent neighboring nodes.
-    // Initializes radial_spacings_, angular_spacings_
-    initializeDistances();
-    // Initializes smoothers splitting radius for circle/radial indexing.
-    initializeLineSplitting(splitting_radius);
-}
-
 // Constructor to initialize grid using parameters from GMGPolar.
 PolarGrid::PolarGrid(const double& R0, const double& Rmax, const int nr_exp, const int ntheta_exp,
                      const double& refinement_radius, const int anisotropic_factor, const int divideBy2,
