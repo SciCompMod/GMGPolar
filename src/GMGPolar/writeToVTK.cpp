@@ -26,8 +26,8 @@ void GMGPolar::writeToVTK(const std::filesystem::path& file_path, const PolarGri
         theta            = grid.theta(i_theta);
         double sin_theta = std::sin(theta);
         double cos_theta = std::cos(theta);
-        file << domain_geometry_->Fx(r, theta, sin_theta, cos_theta) << " "
-             << domain_geometry_->Fy(r, theta, sin_theta, cos_theta) << " " << 0 << "\n";
+        file << domain_geometry_.Fx(r, theta, sin_theta, cos_theta) << " "
+             << domain_geometry_.Fy(r, theta, sin_theta, cos_theta) << " " << 0 << "\n";
     }
     file << "</DataArray>\n"
          << "</Points>\n";
@@ -96,8 +96,8 @@ void GMGPolar::writeToVTK(const std::filesystem::path& file_path, const Level& l
         theta     = grid.theta(i_theta);
         sin_theta = sin_theta_cache[i_theta];
         cos_theta = cos_theta_cache[i_theta];
-        file << domain_geometry_->Fx(r, theta, sin_theta, cos_theta) << " "
-             << domain_geometry_->Fy(r, theta, sin_theta, cos_theta) << " " << 0 << "\n";
+        file << domain_geometry_.Fx(r, theta, sin_theta, cos_theta) << " "
+             << domain_geometry_.Fy(r, theta, sin_theta, cos_theta) << " " << 0 << "\n";
     }
 
     file << "</DataArray>\n"
