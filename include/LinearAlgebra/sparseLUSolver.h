@@ -35,7 +35,7 @@ public:
      *        entry in a row. Ensures diagonal is not too small compared
      *        to other row entries. Default: 1e-8.
      */
-    SparseLUSolver(T tolerance_abs = static_cast<T>(1e-12), T tolerance_rel = static_cast<T>(1e-8));
+    explicit SparseLUSolver(T tolerance_abs = static_cast<T>(1e-12), T tolerance_rel = static_cast<T>(1e-8));
 
     /**
      * @brief Construct a solver from a sparse matrix and factorize it.
