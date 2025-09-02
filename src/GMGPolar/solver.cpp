@@ -11,14 +11,14 @@ void GMGPolar::solve(const BoundaryConditions& boundary_conditions, const Source
     LIKWID_STOP("Setup");
     auto start_setup_rhs = std::chrono::high_resolution_clock::now();
 
-    // ------------------------------------- //
-    // Build rhs_f on Level 0 (finest Level) //
-    // ------------------------------------- //
+    /* ------------------------------------- */
+    /* Build rhs_f on Level 0 (finest Level) */
+    /* ------------------------------------- */
     build_rhs_f(levels_[0], levels_[0].rhs(), boundary_conditions, source_term);
 
-    // ---------------- //
-    // Discretize rhs_f //
-    // ---------------- //
+    /* ---------------- */
+    /* Discretize rhs_f */
+    /* ---------------- */
     int initial_rhs_f_levels = FMG_ ? number_of_levels_ : (extrapolation_ == ExtrapolationType::NONE ? 1 : 2);
     // Loop through the levels, injecting and discretizing rhs
     for (int level_depth = 0; level_depth < initial_rhs_f_levels; ++level_depth) {
@@ -39,12 +39,12 @@ void GMGPolar::solve(const BoundaryConditions& boundary_conditions, const Source
     LIKWID_START("Solve");
     auto start_solve = std::chrono::high_resolution_clock::now();
 
-    /* Clear solve-phase timings */
+    // Clear solve-phase timings
     resetSolvePhaseTimings();
 
-    // ---------------------------- //
-    // Initialize starting solution //
-    // ---------------------------- //
+    /* ---------------------------- */
+    /* Initialize starting solution */
+    /* ---------------------------- */
     auto start_initial_approximation = std::chrono::high_resolution_clock::now();
 
     initializeSolution(boundary_conditions);
@@ -53,7 +53,7 @@ void GMGPolar::solve(const BoundaryConditions& boundary_conditions, const Source
     t_solve_initial_approximation_ =
         std::chrono::duration<double>(end_initial_approximation - start_initial_approximation).count();
 
-    /* These times are included in the initial approximation and don't count towards the multigrid cyclces. */
+    // These times are included in the initial approximation and don't count towards the multigrid cyclces.
     resetAvgMultigridCycleTimings();
 
     /* --------------------------------------- */
