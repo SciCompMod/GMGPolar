@@ -129,6 +129,19 @@ TEST(SparseLUSolver, ThreeByThreeUpperTriangular)
     expect_vector_near(b, x_true);
 }
 
+// Test 6: 3x3 with zero diagonal
+TEST(SparseLUSolver, ThreeByThreeZeroDiagonal)
+{
+    using T = double;
+    SparseMatrixCSR<T> A(3, 3, sort_entries<T>({{0, 0, 0.0}, {0, 1, 2.0}, {1, 1, 3.0}, {2, 2, 4.0}}));
+    Vector<T> x_true({1, 2, 3});
+    Vector<T> b = csr_matvec(A, x_true);
+    SparseLUSolver<T> solver(A);
+    solver.solveInPlace(b);
+    Vector<T> b2 = csr_matvec(A, b);
+    expect_vector_near(b2, csr_matvec(A, x_true), 1e-8);
+}
+
 // Test 7: 4x4 permutation needed
 TEST(SparseLUSolver, FourByFourPermutation)
 {
@@ -424,6 +437,20 @@ TEST(SparseLUSolver, 2x2General)
     expectVectorNear(b, x_true);
 }
 
+// 24. Test 3x3 requiring permutation (simple symmetric)
+TEST(SparseLUSolver, 3x3Permutation)
+{
+    // Matrix with zero at (0,0) so pivot will be permuted
+    std::vector<SparseMatrixCSR<double>::triplet_type> triplets =
+        sort_entries<double>({{0, 1, 1.0}, {1, 0, 1.0}, {1, 1, 2.0}, {1, 2, 1.0}, {2, 1, 1.0}, {2, 2, 3.0}});
+    SparseMatrixCSR<double> A(3, 3, triplets);
+    Vector<double> x_true{1.0, 2.0, -1.0};
+    Vector<double> b = multiply(A, x_true);
+    SparseLUSolver<double> solver(A);
+    solver.solveInPlace(b);
+    expectVectorNear(b, x_true, 1e-7);
+}
+
 // 25. Test small sparse matrix 4x4
 TEST(SparseLUSolver, 4x4parse)
 {
@@ -435,6 +462,19 @@ TEST(SparseLUSolver, 4x4parse)
     SparseLUSolver<double> solver(A);
     solver.solveInPlace(b);
     expectVectorNear(b, x_true);
+}
+
+// 26. Test with zero diagonal
+TEST(SparseLUSolver, 0Diagonal)
+{
+    std::vector<SparseMatrixCSR<double>::triplet_type> triplets =
+        sort_entries<double>({{0, 0, 0.0}, {0, 1, 1.0}, {1, 0, 1.0}, {1, 1, 2.0}});
+    SparseMatrixCSR<double> A(2, 2, triplets);
+    Vector<double> x_true{1.5, -0.5};
+    Vector<double> b = multiply(A, x_true);
+    SparseLUSolver<double> solver(A);
+    solver.solveInPlace(b);
+    expectVectorNear(b, x_true, 1e-7);
 }
 
 // 27. Test 5x5 random sparse matrix

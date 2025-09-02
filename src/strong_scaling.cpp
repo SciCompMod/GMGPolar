@@ -20,54 +20,44 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
 
     /* Example 1: Polar Solution -> Higher Order 4.0 */
     // const double alpha_jump = 0.4837 * Rmax;
-    // std::unique_ptr<DomainGeometry> domain_geometry = std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<ExactSolution> exact_solution = std::make_unique<PolarR6_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniGyroCoefficients>(Rmax, alpha_jump);
-    // std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<PolarR6_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<SourceTerm> source_term = std::make_unique<PolarR6_ZoniGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+    // ShafranovGeometry domain_geometry(Rmax, elongation_kappa, shift_delta);
+    // ZoniGyroCoefficients coefficients(Rmax, alpha_jump);
+    // PolarR6_Boundary_ShafranovGeometry boundary_conditions(Rmax, elongation_kappa, shift_delta);
+    // PolarR6_ZoniGyro_ShafranovGeometry source_term(Rmax, elongation_kappa, shift_delta);
+    // PolarR6_ShafranovGeometry exact_solution(Rmax, elongation_kappa, shift_delta);
 
     /* Example 2: Cartesian Solution -> Lower Order 3.5 */
     const double alpha_jump = 0.66 * Rmax;
-    std::unique_ptr<DomainGeometry> domain_geometry =
-        std::make_unique<CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    std::unique_ptr<ExactSolution> exact_solution =
-        std::make_unique<CartesianR2_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    std::unique_ptr<DensityProfileCoefficients> coefficients =
-        std::make_unique<SonnendruckerGyroCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<CartesianR2_Boundary_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    std::unique_ptr<SourceTerm> source_term = std::make_unique<CartesianR2_SonnendruckerGyro_CzarnyGeometry>(
-        Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
+    CzarnyGeometry domain_geometry(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
+    SonnendruckerGyroCoefficients coefficients(Rmax, alpha_jump);
+    CartesianR2_Boundary_CzarnyGeometry boundary_conditions(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
+    CartesianR2_SonnendruckerGyro_CzarnyGeometry source_term(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
+    CartesianR2_CzarnyGeometry exact_solution(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
 
     /* Example 3: Refined Solution -> Lower Order 3.5 */
     // const double alpha_jump = 0.9 * Rmax; // Refinement where the solution is most complex
-    // std::unique_ptr<DomainGeometry> domain_geometry = std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<ExactSolution> exact_solution = std::make_unique<Refined_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
-    // std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<Refined_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<SourceTerm> source_term = std::make_unique<Refined_ZoniShiftedGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
+    // ShafranovGeometry domain_geometry(Rmax, elongation_kappa, shift_delta);
+    // ZoniShiftedGyroCoefficients coefficients(Rmax, alpha_jump);
+    // Refined_Boundary_ShafranovGeometry boundary_conditions(Rmax, elongation_kappa, shift_delta);
+    // Refined_ZoniShiftedGyro_ShafranovGeometry source_term(Rmax, elongation_kappa, shift_delta);
+    // Refined_ShafranovGeometry exact_solution(Rmax, elongation_kappa, shift_delta);
 
     std::string geometry_string = "";
-    if (typeid(*domain_geometry) == typeid(CircularGeometry)) {
+    if (typeid(domain_geometry) == typeid(CircularGeometry)) {
         geometry_string = "Circular";
     }
-    else if (typeid(*domain_geometry) == typeid(ShafranovGeometry)) {
+    else if (typeid(domain_geometry) == typeid(ShafranovGeometry)) {
         geometry_string = "Shafranov";
     }
-    else if (typeid(*domain_geometry) == typeid(CzarnyGeometry)) {
+    else if (typeid(domain_geometry) == typeid(CzarnyGeometry)) {
         geometry_string = "Czarny";
     }
-    else if (typeid(*domain_geometry) == typeid(CulhamGeometry)) {
+    else if (typeid(domain_geometry) == typeid(CulhamGeometry)) {
         geometry_string = "Culham";
     }
     else {
         geometry_string = "Unknown";
     }
-
-    GMGPolar solver(std::move(domain_geometry), std::move(coefficients), std::move(boundary_conditions),
-                    std::move(source_term));
-
-    solver.setSolution(std::move(exact_solution));
 
     const int verbose   = 1;
     const bool paraview = false;
@@ -99,24 +89,23 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
     const double absoluteTolerance          = 1e-50;
     const double relativeTolerance          = 1e-50;
 
+    double refinement_radius               = alpha_jump;
+    std::optional<double> splitting_radius = std::nullopt;
+    PolarGrid grid(R0, Rmax, nr_exp, ntheta_exp, refinement_radius, anisotropic_factor, divideBy2, splitting_radius);
+    GMGPolar solver(grid, domain_geometry, coefficients);
+
     solver.verbose(verbose);
     solver.paraview(paraview);
 
     solver.maxOpenMPThreads(maxOpenMPThreads);
     solver.threadReductionFactor(threadReductionFactor);
 
+    omp_set_num_threads(maxOpenMPThreads); // Global OpenMP thread limit
+
+    solver.DirBC_Interior(DirBC_Interior);
     solver.stencilDistributionMethod(stencilDistributionMethod);
     solver.cacheDensityProfileCoefficients(cacheDensityProfileCoefficients);
     solver.cacheDomainGeometry(cacheDomainGeometry);
-
-    solver.R0(R0);
-    solver.Rmax(Rmax);
-    solver.nr_exp(nr_exp);
-    solver.ntheta_exp(ntheta_exp);
-    solver.anisotropic_factor(anisotropic_factor);
-    solver.divideBy2(divideBy2);
-
-    solver.DirBC_Interior(DirBC_Interior);
 
     solver.FMG(FMG);
     solver.FMG_iterations(FMG_iterations);
@@ -135,7 +124,10 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
 
     // Perform setup and solve
     solver.setup();
-    solver.solve();
+    solver.setSolution(&exact_solution);
+    solver.solve(boundary_conditions, source_term);
+
+    solver.printTimings();
 
     std::string stencil_string = "";
     if (solver.stencilDistributionMethod() == StencilDistributionMethod::CPU_TAKE) {
@@ -151,13 +143,13 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
     outfile << maxOpenMPThreads << "," << divideBy2 << "," << solver.grid().nr() << "," << solver.grid().ntheta() << ","
             << geometry_string << "," << stencil_string << "," << cacheDensityProfileCoefficients << ","
             << cacheDomainGeometry << "," << FMG << "," << extrapolation_int << ","
-            << solver.t_setup_total + solver.t_solve_total - solver.t_setup_rhs << ","
-            << solver.t_setup_total - solver.t_setup_rhs << "," << solver.t_setup_createLevels << ","
-            << solver.t_setup_smoother << "," << solver.t_setup_directSolver << "," << solver.t_solve_total << ","
-            << solver.t_solve_initial_approximation << "," << solver.t_solve_multigrid_iterations << ","
-            << solver.t_check_convergence << "," << solver.t_check_exact_error << "," << solver.t_avg_MGC_total << ","
-            << solver.t_avg_MGC_preSmoothing << "," << solver.t_avg_MGC_postSmoothing << ","
-            << solver.t_avg_MGC_residual << "," << solver.t_avg_MGC_directSolver << std::endl;
+            << solver.timeSetupTotal() + solver.timeSolveTotal() << "," << solver.timeSetupTotal() << ","
+            << solver.timeSetupCreateLevels() << "," << solver.timeSetupSmoother() << ","
+            << solver.timeSetupDirectSolver() << "," << solver.timeSolveTotal() << ","
+            << solver.timeSolveInitialApproximation() << "," << solver.timeSolveMultigridIterations() << ","
+            << solver.timeCheckConvergence() << "," << solver.timeCheckExactError() << "," << solver.timeAvgMGCTotal()
+            << "," << solver.timeAvgMGCPreSmoothing() << "," << solver.timeAvgMGCPostSmoothing() << ","
+            << solver.timeAvgMGCResidual() << "," << solver.timeAvgMGCDirectSolver() << std::endl;
 }
 
 int main()

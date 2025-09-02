@@ -2,48 +2,55 @@
 
 #include <chrono>
 
-void GMGPolar::solve()
+void GMGPolar::solve(const BoundaryConditions& boundary_conditions, const SourceTerm& source_term)
 {
-    if (verbose_ > 0) {
-        std::cout << "Cycle type: ";
-        if (multigrid_cycle_ == MultigridCycleType::V_CYCLE) {
-            std::cout << "V." << std::endl;
-        }
-        else if (multigrid_cycle_ == MultigridCycleType::W_CYCLE) {
-            std::cout << "W." << std::endl;
-        }
-        else if (multigrid_cycle_ == MultigridCycleType::F_CYCLE) {
-            std::cout << "F." << std::endl;
-        }
+    auto start_setup_rhs = std::chrono::high_resolution_clock::now();
 
-        std::cout << "Extrapolation: ";
-        if (extrapolation_ == ExtrapolationType::NONE) {
-            std::cout << "None." << std::endl;
+    // ------------------------------------- //
+    // Build rhs_f on Level 0 (finest Level) //
+    // ------------------------------------- //
+    LIKWID_STOP("Setup");
+    build_rhs_f(levels_[0], levels_[0].rhs(), boundary_conditions, source_term);
+    LIKWID_START("Setup");
+
+    /* ---------------- */
+    /* Discretize rhs_f */
+    /* ---------------- */
+    int initial_rhs_f_levels = FMG_ ? number_of_levels_ : (extrapolation_ == ExtrapolationType::NONE ? 1 : 2);
+    // Loop through the levels, injecting and discretizing rhs
+    for (int level_depth = 0; level_depth < initial_rhs_f_levels; ++level_depth) {
+        Level& current_level = levels_[level_depth];
+        // Inject rhs if there is a next level
+        if (level_depth + 1 < initial_rhs_f_levels) {
+            Level& next_level = levels_[level_depth + 1];
+            injection(level_depth, next_level.rhs(), current_level.rhs());
         }
-        else if (extrapolation_ == ExtrapolationType::IMPLICIT_EXTRAPOLATION) {
-            std::cout << "Implicit Extrapolation." << std::endl;
-        }
+        // Discretize the rhs for the current level
+        discretize_rhs_f(current_level, current_level.rhs());
     }
+
+    auto end_setup_rhs = std::chrono::high_resolution_clock::now();
+    t_setup_rhs_       = std::chrono::duration<double>(end_setup_rhs - start_setup_rhs).count();
 
     LIKWID_START("Solve");
     auto start_solve = std::chrono::high_resolution_clock::now();
 
+    /* Clear solve-phase timings */
+    resetSolvePhaseTimings();
+
     /* ---------------------------- */
     /* Initialize starting solution */
     /* ---------------------------- */
-
     auto start_initial_approximation = std::chrono::high_resolution_clock::now();
-    initializeSolution();
+
+    initializeSolution(boundary_conditions);
+
     auto end_initial_approximation = std::chrono::high_resolution_clock::now();
-    t_solve_initial_approximation +=
+    t_solve_initial_approximation_ =
         std::chrono::duration<double>(end_initial_approximation - start_initial_approximation).count();
 
     /* These times are included in the initial approximation and don't count towards the multigrid cyclces. */
-    t_avg_MGC_total         = 0.0;
-    t_avg_MGC_preSmoothing  = 0.0;
-    t_avg_MGC_postSmoothing = 0.0;
-    t_avg_MGC_residual      = 0.0;
-    t_avg_MGC_directSolver  = 0.0;
+    resetAvgMultigridCycleTimings();
 
     /* ------------ */
     /* Start Solver */
@@ -75,7 +82,7 @@ void GMGPolar::solve()
             exact_errors_.push_back(exact_error);
 
             auto end_check_exact_error = std::chrono::high_resolution_clock::now();
-            t_check_exact_error +=
+            t_check_exact_error_ +=
                 std::chrono::duration<double>(end_check_exact_error - start_check_exact_error).count();
 
             if (verbose_ > 0) {
@@ -142,7 +149,7 @@ void GMGPolar::solve()
             }
 
             auto end_check_convergence = std::chrono::high_resolution_clock::now();
-            t_check_convergence +=
+            t_check_convergence_ +=
                 std::chrono::duration<double>(end_check_convergence - start_check_convergence).count();
 
             if (converged(current_residual_norm, current_relative_residual_norm))
@@ -188,7 +195,7 @@ void GMGPolar::solve()
         number_of_iterations_++;
 
         auto end_solve_multigrid_iterations = std::chrono::high_resolution_clock::now();
-        t_solve_multigrid_iterations +=
+        t_solve_multigrid_iterations_ +=
             std::chrono::duration<double>(end_solve_multigrid_iterations - start_solve_multigrid_iterations).count();
     }
 
@@ -196,11 +203,11 @@ void GMGPolar::solve()
         /* --------------------------------------------- */
         /* Compute the average Multigrid Iteration times */
         /* --------------------------------------------- */
-        t_avg_MGC_total = t_solve_multigrid_iterations / number_of_iterations_;
-        t_avg_MGC_preSmoothing /= number_of_iterations_;
-        t_avg_MGC_postSmoothing /= number_of_iterations_;
-        t_avg_MGC_residual /= number_of_iterations_;
-        t_avg_MGC_directSolver /= number_of_iterations_;
+        t_avg_MGC_total_ = t_solve_multigrid_iterations_ / number_of_iterations_;
+        t_avg_MGC_preSmoothing_ /= number_of_iterations_;
+        t_avg_MGC_postSmoothing_ /= number_of_iterations_;
+        t_avg_MGC_residual_ /= number_of_iterations_;
+        t_avg_MGC_directSolver_ /= number_of_iterations_;
 
         /* -------------------------------- */
         /* Compute the reduction factor rho */
@@ -215,18 +222,19 @@ void GMGPolar::solve()
     }
 
     auto end_solve = std::chrono::high_resolution_clock::now();
-    t_solve_total += std::chrono::duration<double>(end_solve - start_solve).count();
-    t_solve_total -= t_check_exact_error;
+    t_solve_total_ = std::chrono::duration<double>(end_solve - start_solve).count() - t_check_exact_error_;
     LIKWID_STOP("Solve");
 
     if (paraview_) {
-        computeExactError(level, level.solution(), level.residual());
         writeToVTK("output_solution", level, level.solution());
-        writeToVTK("output_error", level, level.residual());
+        if (exact_solution_ != nullptr) {
+            computeExactError(level, level.solution(), level.residual());
+            writeToVTK("output_error", level, level.residual());
+        }
     }
 }
 
-void GMGPolar::initializeSolution()
+void GMGPolar::initializeSolution(const BoundaryConditions& boundary_conditions)
 {
     if (!FMG_) {
         int start_level_depth = 0;
@@ -251,16 +259,15 @@ void GMGPolar::initializeSolution()
                 const double cos_theta = cos_theta_cache[i_theta];
                 if (DirBC_Interior_) { // Apply interior Dirichlet BC if enabled.
                     const int index         = grid.index(i_r_inner, i_theta);
-                    level.solution()[index] = boundary_conditions_->u_D_Interior(r_inner, theta, sin_theta, cos_theta);
+                    level.solution()[index] = boundary_conditions.u_D_Interior(r_inner, theta, sin_theta, cos_theta);
                 }
                 // Always apply outer boundary condition.
                 const int index         = grid.index(i_r_outer, i_theta);
-                level.solution()[index] = boundary_conditions_->u_D(r_outer, theta, sin_theta, cos_theta);
+                level.solution()[index] = boundary_conditions.u_D(r_outer, theta, sin_theta, cos_theta);
             }
         }
     }
     else {
-        std::cout << "Using Full Multigrid" << std::endl;
         // Start from the coarsest level
         int FMG_start_level_depth = number_of_levels_ - 1;
         Level& FMG_level          = levels_[FMG_start_level_depth];
