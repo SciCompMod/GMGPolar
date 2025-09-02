@@ -321,7 +321,7 @@ void GMGPolar::updateResidualNorms(Level& level, int iteration, double& initial_
                 initial_residual_norm = l2_norm(level.rhs());
                 break;
             case ResidualNormType::WEIGHTED_EUCLIDEAN:
-                initial_residual_norm = (l2_norm(level.rhs()) / std::sqrt(level.grid().numberOfNodes()));
+                initial_residual_norm = l2_norm(level.rhs()) / std::sqrt(level.grid().numberOfNodes());
                 break;
             case ResidualNormType::INFINITY_NORM:
                 initial_residual_norm = infinity_norm(level.rhs());
