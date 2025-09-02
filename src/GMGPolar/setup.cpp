@@ -63,34 +63,6 @@ void GMGPolar::setup()
     if (verbose_ > 0)
         printSettings();
 
-    auto start_setup_rhs = std::chrono::high_resolution_clock::now();
-
-    // ------------------------------------- //
-    // Build rhs_f on Level 0 (finest Level) //
-    // ------------------------------------- //
-    LIKWID_STOP("Setup");
-    build_rhs_f(levels_[0], levels_[0].rhs());
-    LIKWID_START("Setup");
-
-    /* ---------------- */
-    /* Discretize rhs_f */
-    /* ---------------- */
-    int initial_rhs_f_levels = FMG_ ? number_of_levels_ : (extrapolation_ == ExtrapolationType::NONE ? 1 : 2);
-    // Loop through the levels, injecting and discretizing rhs
-    for (int level_depth = 0; level_depth < initial_rhs_f_levels; ++level_depth) {
-        Level& current_level = levels_[level_depth];
-        // Inject rhs if there is a next level
-        if (level_depth + 1 < initial_rhs_f_levels) {
-            Level& next_level = levels_[level_depth + 1];
-            injection(level_depth, next_level.rhs(), current_level.rhs());
-        }
-        // Discretize the rhs for the current level
-        discretize_rhs_f(current_level, current_level.rhs());
-    }
-
-    auto end_setup_rhs = std::chrono::high_resolution_clock::now();
-    t_setup_rhs_       = std::chrono::duration<double>(end_setup_rhs - start_setup_rhs).count();
-
     // -------------------------------------------------------
     // Initializing various operators based on the level index
     for (int level_depth = 0; level_depth < number_of_levels_; level_depth++) {

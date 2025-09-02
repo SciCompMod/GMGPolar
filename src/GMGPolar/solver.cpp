@@ -2,8 +2,36 @@
 
 #include <chrono>
 
-void GMGPolar::solve()
+void GMGPolar::solve(const BoundaryConditions& boundary_conditions, const SourceTerm& source_term)
 {
+    auto start_setup_rhs = std::chrono::high_resolution_clock::now();
+
+    // ------------------------------------- //
+    // Build rhs_f on Level 0 (finest Level) //
+    // ------------------------------------- //
+    LIKWID_STOP("Setup");
+    build_rhs_f(levels_[0], levels_[0].rhs(), boundary_conditions, source_term);
+    LIKWID_START("Setup");
+
+    /* ---------------- */
+    /* Discretize rhs_f */
+    /* ---------------- */
+    int initial_rhs_f_levels = FMG_ ? number_of_levels_ : (extrapolation_ == ExtrapolationType::NONE ? 1 : 2);
+    // Loop through the levels, injecting and discretizing rhs
+    for (int level_depth = 0; level_depth < initial_rhs_f_levels; ++level_depth) {
+        Level& current_level = levels_[level_depth];
+        // Inject rhs if there is a next level
+        if (level_depth + 1 < initial_rhs_f_levels) {
+            Level& next_level = levels_[level_depth + 1];
+            injection(level_depth, next_level.rhs(), current_level.rhs());
+        }
+        // Discretize the rhs for the current level
+        discretize_rhs_f(current_level, current_level.rhs());
+    }
+
+    auto end_setup_rhs = std::chrono::high_resolution_clock::now();
+    t_setup_rhs_       = std::chrono::duration<double>(end_setup_rhs - start_setup_rhs).count();
+
     LIKWID_START("Solve");
     auto start_solve = std::chrono::high_resolution_clock::now();
 
@@ -15,7 +43,7 @@ void GMGPolar::solve()
     /* ---------------------------- */
     auto start_initial_approximation = std::chrono::high_resolution_clock::now();
 
-    initializeSolution();
+    initializeSolution(boundary_conditions);
 
     auto end_initial_approximation = std::chrono::high_resolution_clock::now();
     t_solve_initial_approximation_ =
@@ -206,7 +234,7 @@ void GMGPolar::solve()
     }
 }
 
-void GMGPolar::initializeSolution()
+void GMGPolar::initializeSolution(const BoundaryConditions& boundary_conditions)
 {
     if (!FMG_) {
         int start_level_depth = 0;
@@ -231,11 +259,11 @@ void GMGPolar::initializeSolution()
                 const double cos_theta = cos_theta_cache[i_theta];
                 if (DirBC_Interior_) { // Apply interior Dirichlet BC if enabled.
                     const int index         = grid.index(i_r_inner, i_theta);
-                    level.solution()[index] = boundary_conditions_.u_D_Interior(r_inner, theta, sin_theta, cos_theta);
+                    level.solution()[index] = boundary_conditions.u_D_Interior(r_inner, theta, sin_theta, cos_theta);
                 }
                 // Always apply outer boundary condition.
                 const int index         = grid.index(i_r_outer, i_theta);
-                level.solution()[index] = boundary_conditions_.u_D(r_outer, theta, sin_theta, cos_theta);
+                level.solution()[index] = boundary_conditions.u_D(r_outer, theta, sin_theta, cos_theta);
             }
         }
     }

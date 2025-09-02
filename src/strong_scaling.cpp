@@ -92,7 +92,7 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
     double refinement_radius               = alpha_jump;
     std::optional<double> splitting_radius = std::nullopt;
     PolarGrid grid(R0, Rmax, nr_exp, ntheta_exp, refinement_radius, anisotropic_factor, divideBy2, splitting_radius);
-    GMGPolar solver(grid, domain_geometry, coefficients, boundary_conditions, source_term);
+    GMGPolar solver(grid, domain_geometry, coefficients);
 
     solver.verbose(verbose);
     solver.paraview(paraview);
@@ -125,7 +125,7 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
     // Perform setup and solve
     solver.setup();
     solver.setSolution(&exact_solution);
-    solver.solve();
+    solver.solve(boundary_conditions, source_term);
 
     solver.printTimings();
 
@@ -143,10 +143,10 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
     outfile << maxOpenMPThreads << "," << divideBy2 << "," << solver.grid().nr() << "," << solver.grid().ntheta() << ","
             << geometry_string << "," << stencil_string << "," << cacheDensityProfileCoefficients << ","
             << cacheDomainGeometry << "," << FMG << "," << extrapolation_int << ","
-            << solver.timeSetupTotal() + solver.timeSolveTotal() - solver.timeSetupRHS() << ","
-            << solver.timeSetupTotal() - solver.timeSetupRHS() << "," << solver.timeSetupCreateLevels() << ","
-            << solver.timeSetupSmoother() << "," << solver.timeSetupDirectSolver() << "," << solver.timeSolveTotal()
-            << "," << solver.timeSolveInitialApproximation() << "," << solver.timeSolveMultigridIterations() << ","
+            << solver.timeSetupTotal() + solver.timeSolveTotal() << "," << solver.timeSetupTotal() << ","
+            << solver.timeSetupCreateLevels() << "," << solver.timeSetupSmoother() << ","
+            << solver.timeSetupDirectSolver() << "," << solver.timeSolveTotal() << ","
+            << solver.timeSolveInitialApproximation() << "," << solver.timeSolveMultigridIterations() << ","
             << solver.timeCheckConvergence() << "," << solver.timeCheckExactError() << "," << solver.timeAvgMGCTotal()
             << "," << solver.timeAvgMGCPreSmoothing() << "," << solver.timeAvgMGCPostSmoothing() << ","
             << solver.timeAvgMGCResidual() << "," << solver.timeAvgMGCDirectSolver() << std::endl;

@@ -13,8 +13,7 @@ int main(int argc, char* argv[])
     parser.parse(argc, argv);
 
     // Create GMGPolar solver
-    GMGPolar solver(parser.grid(), parser.domainGeometry(), parser.densityProfileCoefficients(),
-                    parser.boundaryConditions(), parser.sourceTerm());
+    GMGPolar solver(parser.grid(), parser.domainGeometry(), parser.densityProfileCoefficients());
 
     // --- General solver output and visualization settings --- //
     solver.verbose(parser.verbose()); // Enable/disable verbose output
@@ -55,7 +54,7 @@ int main(int argc, char* argv[])
     // --- Provide optional exact solution --- //
     solver.setSolution(&parser.exactSolution());
     // --- Solve Phase --- //
-    solver.solve();
+    solver.solve(parser.boundaryConditions(), parser.sourceTerm());
 
     // --- Retrieve solution and associated grid --- //
     Vector<double>& solution = solver.solution();
