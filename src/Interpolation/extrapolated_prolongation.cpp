@@ -5,15 +5,13 @@ void Interpolation::applyExtrapolatedProlongation0(const Level& fromLevel, const
 {
     assert(toLevel.level_depth() == fromLevel.level_depth() - 1);
 
-    omp_set_num_threads(threads_per_level_[toLevel.level_depth()]);
-
     const PolarGrid& coarseGrid = fromLevel.grid();
     const PolarGrid& fineGrid   = toLevel.grid();
 
     assert(x.size() == coarseGrid.numberOfNodes());
     assert(result.size() == fineGrid.numberOfNodes());
 
-#pragma omp parallel for
+#pragma omp parallel for num_threads(threads_per_level_[toLevel.level_depth()])
     for (int index = 0; index < fineGrid.numberOfNodes(); index++) {
         std::array<std::pair<double, double>, space_dimension> neighbor_distance;
 
@@ -108,15 +106,13 @@ void Interpolation::applyExtrapolatedProlongation(const Level& fromLevel, const 
 {
     assert(toLevel.level_depth() == fromLevel.level_depth() - 1);
 
-    omp_set_num_threads(threads_per_level_[toLevel.level_depth()]);
-
     const PolarGrid& coarseGrid = fromLevel.grid();
     const PolarGrid& fineGrid   = toLevel.grid();
 
     assert(x.size() == coarseGrid.numberOfNodes());
     assert(result.size() == fineGrid.numberOfNodes());
 
-#pragma omp parallel if (fineGrid.numberOfNodes() > 10'000)
+#pragma omp parallel num_threads(threads_per_level_[toLevel.level_depth()]) if (fineGrid.numberOfNodes() > 10'000)
     {
 /* Circluar Indexing Section */
 /* For loop matches circular access pattern */

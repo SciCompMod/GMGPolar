@@ -10,14 +10,12 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskLoop(Vector<double>& x, 
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
-    omp_set_num_threads(num_omp_threads_);
-
-    if (omp_get_max_threads() == 1) {
+    if (num_omp_threads_ == 1) {
         extrapolatedSmoothingSequential(x, rhs, temp);
     }
     else {
 
-#pragma omp parallel
+#pragma omp parallel num_threads(num_omp_threads_)
         {
 #pragma omp for nowait
             for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
@@ -53,7 +51,7 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskLoop(Vector<double>& x, 
         int radial_white_Asc0, radial_white_Asc1, radial_white_Asc2;
         int white_radial_smoother;
 
-#pragma omp parallel
+#pragma omp parallel num_threads(num_omp_threads_)
         {
             Vector<double> circle_solver_storage_1(grid_.ntheta());
             Vector<double> circle_solver_storage_2(grid_.ntheta());
@@ -278,14 +276,11 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskDependencies(Vector<doub
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
-    omp_set_num_threads(num_omp_threads_);
-
-    if (omp_get_max_threads() == 1) {
+    if (num_omp_threads_ == 1) {
         extrapolatedSmoothingSequential(x, rhs, temp);
     }
     else {
-
-#pragma omp parallel
+#pragma omp parallel num_threads(num_omp_threads_)
         {
 #pragma omp for nowait
             for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
@@ -320,7 +315,7 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskDependencies(Vector<doub
         int* asc_ortho_radial_dep = new int[num_radial_tasks];
         int* smoother_radial_dep  = new int[num_radial_tasks];
 
-#pragma omp parallel
+#pragma omp parallel num_threads(num_omp_threads_)
         {
             Vector<double> circle_solver_storage_1(grid_.ntheta());
             Vector<double> circle_solver_storage_2(grid_.ntheta());

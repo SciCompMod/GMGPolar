@@ -221,15 +221,13 @@ void Interpolation::applyFMGInterpolation(const Level& fromLevel, const Level& t
 {
     assert(toLevel.level_depth() == fromLevel.level_depth() - 1);
 
-    omp_set_num_threads(threads_per_level_[toLevel.level_depth()]);
-
     const PolarGrid& coarseGrid = fromLevel.grid();
     const PolarGrid& fineGrid   = toLevel.grid();
 
     assert(x.size() == coarseGrid.numberOfNodes());
     assert(result.size() == fineGrid.numberOfNodes());
 
-#pragma omp parallel if (fineGrid.numberOfNodes() > 10'000)
+#pragma omp parallel num_threads(threads_per_level_[toLevel.level_depth()]) if (fineGrid.numberOfNodes() > 10'000)
     {
 /* Circluar Indexing Section */
 /* For loop matches circular access pattern */

@@ -278,8 +278,6 @@ void DirectSolverTakeCustomLU::buildSolverMatrixRadialSection(const int i_theta,
 /* If the indexing is not smoother-based, please adjust the access patterns */
 SparseMatrixCSR<double> DirectSolverTakeCustomLU::buildSolverMatrix()
 {
-    omp_set_num_threads(num_omp_threads_);
-
     const int n = grid_.numberOfNodes();
 
     std::function<int(int)> nnz_per_row = [&](int global_index) {
@@ -288,7 +286,7 @@ SparseMatrixCSR<double> DirectSolverTakeCustomLU::buildSolverMatrix()
 
     SparseMatrixCSR<double> solver_matrix(n, n, nnz_per_row);
 
-    if (omp_get_max_threads() == 1) {
+    if (num_omp_threads_ == 1) {
         /* Single-threaded execution */
         for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
             buildSolverMatrixCircleSection(i_r, solver_matrix);
@@ -299,7 +297,7 @@ SparseMatrixCSR<double> DirectSolverTakeCustomLU::buildSolverMatrix()
     }
     else {
         /* Multi-threaded execution */
-        #pragma omp parallel
+        #pragma omp parallel num_threads(num_omp_threads_)
         {
             /* Circle Section */
             #pragma omp for nowait
