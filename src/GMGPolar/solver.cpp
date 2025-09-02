@@ -4,27 +4,6 @@
 
 void GMGPolar::solve()
 {
-    if (verbose_ > 0) {
-        std::cout << "Cycle type: ";
-        if (multigrid_cycle_ == MultigridCycleType::V_CYCLE) {
-            std::cout << "V." << std::endl;
-        }
-        else if (multigrid_cycle_ == MultigridCycleType::W_CYCLE) {
-            std::cout << "W." << std::endl;
-        }
-        else if (multigrid_cycle_ == MultigridCycleType::F_CYCLE) {
-            std::cout << "F." << std::endl;
-        }
-
-        std::cout << "Extrapolation: ";
-        if (extrapolation_ == ExtrapolationType::NONE) {
-            std::cout << "None." << std::endl;
-        }
-        else if (extrapolation_ == ExtrapolationType::IMPLICIT_EXTRAPOLATION) {
-            std::cout << "Implicit Extrapolation." << std::endl;
-        }
-    }
-
     LIKWID_START("Solve");
     auto start_solve = std::chrono::high_resolution_clock::now();
 
@@ -252,16 +231,15 @@ void GMGPolar::initializeSolution()
                 const double cos_theta = cos_theta_cache[i_theta];
                 if (DirBC_Interior_) { // Apply interior Dirichlet BC if enabled.
                     const int index         = grid.index(i_r_inner, i_theta);
-                    level.solution()[index] = boundary_conditions_->u_D_Interior(r_inner, theta, sin_theta, cos_theta);
+                    level.solution()[index] = boundary_conditions_.u_D_Interior(r_inner, theta, sin_theta, cos_theta);
                 }
                 // Always apply outer boundary condition.
                 const int index         = grid.index(i_r_outer, i_theta);
-                level.solution()[index] = boundary_conditions_->u_D(r_outer, theta, sin_theta, cos_theta);
+                level.solution()[index] = boundary_conditions_.u_D(r_outer, theta, sin_theta, cos_theta);
             }
         }
     }
     else {
-        std::cout << "Using Full Multigrid" << std::endl;
         // Start from the coarsest level
         int FMG_start_level_depth = number_of_levels_ - 1;
         Level& FMG_level          = levels_[FMG_start_level_depth];

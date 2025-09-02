@@ -10,61 +10,15 @@
 
 int main(int argc, char* argv[])
 {
-#ifdef NDEBUG
-    std::cout << "Build Type: Release\n" << std::endl;
-#else
-    std::cout << "Build Type: Debug\n" << std::endl;
-#endif
-
-    const double R0                           = 1e-8;
-    const double Rmax                         = 1.3;
-    const double inverse_aspect_ratio_epsilon = 0.3;
-    const double ellipticity_e                = 1.4;
-    const double elongation_kappa             = 0.3;
-    const double shift_delta                  = 0.2;
-
-    /* Example 1: Polar Solution -> Higher Order 4.0 */
-    const double alpha_jump = 0.4837 * Rmax;
-    std::unique_ptr<DomainGeometry> domain_geometry =
-        std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    std::unique_ptr<ExactSolution> exact_solution =
-        std::make_unique<PolarR6_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniGyroCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<PolarR6_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    std::unique_ptr<SourceTerm> source_term =
-        std::make_unique<PolarR6_ZoniGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-
-    /* Example 2: Cartesian Solution -> Lower Order 3.5 */
-    // const double alpha_jump = 0.66 * Rmax;
-    // std::unique_ptr<DomainGeometry> domain_geometry = std::make_unique<CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    // std::unique_ptr<ExactSolution> exact_solution = std::make_unique<CartesianR2_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    // std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<SonnendruckerGyroCoefficients>(Rmax, alpha_jump);
-    // std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<CartesianR2_Boundary_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    // std::unique_ptr<SourceTerm> source_term = std::make_unique<CartesianR2_SonnendruckerGyro_CzarnyGeometry>(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-
-    /* Example 3: Refined Solution -> Lower Order 3.5 */
-    // const double alpha_jump = 0.9 * Rmax; // Refinement where the solution is most complex
-    // std::unique_ptr<DomainGeometry> domain_geometry = std::make_unique<ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<ExactSolution> exact_solution = std::make_unique<Refined_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
-    // std::unique_ptr<BoundaryConditions> boundary_conditions = std::make_unique<Refined_Boundary_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-    // std::unique_ptr<SourceTerm> source_term = std::make_unique<Refined_ZoniShiftedGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
-
-    GMGPolar solver(std::move(domain_geometry), std::move(coefficients), std::move(boundary_conditions),
-                    std::move(source_term));
-
-    solver.setSolution(std::move(exact_solution));
-
     const int verbose   = 0;
     const bool paraview = false;
 
     const int maxOpenMPThreads         = 16;
     const double threadReductionFactor = 1.0;
 
-    const StencilDistributionMethod stencilDistributionMethod = StencilDistributionMethod::CPU_GIVE;
+    const StencilDistributionMethod stencilDistributionMethod = StencilDistributionMethod::CPU_TAKE;
     const bool cacheDensityProfileCoefficients                = true;
-    const bool cacheDomainGeometry                            = false;
+    const bool cacheDomainGeometry                            = true;
 
     const int nr_exp             = 4;
     const int ntheta_exp         = 6;
@@ -89,39 +43,36 @@ int main(int argc, char* argv[])
     const double absoluteTolerance          = 1e-10;
     const double relativeTolerance          = 1e-8;
 
-    solver.verbose(verbose);
-    solver.paraview(paraview);
+    const double R0                           = 1e-8;
+    const double Rmax                         = 1.3;
+    const double inverse_aspect_ratio_epsilon = 0.3;
+    const double ellipticity_e                = 1.4;
+    const double elongation_kappa             = 0.3;
+    const double shift_delta                  = 0.2;
 
-    solver.maxOpenMPThreads(maxOpenMPThreads);
-    solver.threadReductionFactor(threadReductionFactor);
+    /* Example 1: Polar Solution -> Higher Order 4.0 */
+    const double alpha_jump = 0.4837 * Rmax;
+    ShafranovGeometry domain_geometry(Rmax, elongation_kappa, shift_delta);
+    ZoniGyroCoefficients coefficients(Rmax, alpha_jump);
+    PolarR6_Boundary_ShafranovGeometry boundary_conditions(Rmax, elongation_kappa, shift_delta);
+    PolarR6_ZoniGyro_ShafranovGeometry source_term(Rmax, elongation_kappa, shift_delta);
+    PolarR6_ShafranovGeometry exact_solution(Rmax, elongation_kappa, shift_delta);
 
-    solver.stencilDistributionMethod(stencilDistributionMethod);
-    solver.cacheDensityProfileCoefficients(cacheDensityProfileCoefficients);
-    solver.cacheDomainGeometry(cacheDomainGeometry);
+    /* Example 2: Cartesian Solution -> Lower Order 3.5 */
+    // const double alpha_jump = 0.66 * Rmax;
+    // CzarnyGeometry domain_geometry(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
+    // SonnendruckerGyroCoefficients coefficients(Rmax, alpha_jump);
+    // CartesianR2_Boundary_CzarnyGeometry boundary_conditions(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
+    // CartesianR2_SonnendruckerGyro_CzarnyGeometry source_term(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
+    // CartesianR2_CzarnyGeometry exact_solution(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
 
-    solver.R0(R0);
-    solver.Rmax(Rmax);
-    solver.nr_exp(nr_exp);
-    solver.ntheta_exp(ntheta_exp);
-    solver.anisotropic_factor(anisotropic_factor);
-    solver.divideBy2(divideBy2);
-
-    solver.DirBC_Interior(DirBC_Interior);
-
-    solver.FMG(FMG);
-    solver.FMG_iterations(FMG_iterations);
-    solver.FMG_cycle(FMG_cycle);
-
-    solver.extrapolation(extrapolation);
-    solver.maxLevels(maxLevels);
-    solver.preSmoothingSteps(preSmoothingSteps);
-    solver.postSmoothingSteps(postSmoothingSteps);
-    solver.multigridCycle(multigridCycle);
-
-    solver.maxIterations(maxIterations);
-    solver.residualNormType(residualNormType);
-    solver.absoluteTolerance(absoluteTolerance);
-    solver.relativeTolerance(relativeTolerance);
+    /* Example 3: Refined Solution -> Lower Order 3.5 */
+    // const double alpha_jump = 0.9 * Rmax; // Refinement where the solution is most complex
+    // ShafranovGeometry domain_geometry(Rmax, elongation_kappa, shift_delta);
+    // ZoniShiftedGyroCoefficients coefficients(Rmax, alpha_jump);
+    // Refined_Boundary_ShafranovGeometry boundary_conditions(Rmax, elongation_kappa, shift_delta);
+    // Refined_ZoniShiftedGyro_ShafranovGeometry source_term(Rmax, elongation_kappa, shift_delta);
+    // Refined_ShafranovGeometry exact_solution(Rmax, elongation_kappa, shift_delta);
 
     std::vector<int> table_nr(MAX_DIVIDE_BY_2);
     std::vector<int> table_ntheta(MAX_DIVIDE_BY_2);
@@ -135,9 +86,42 @@ int main(int argc, char* argv[])
     std::vector<double> table_total_time(MAX_DIVIDE_BY_2);
 
     for (divideBy2 = 0; divideBy2 < MAX_DIVIDE_BY_2; divideBy2++) {
-        solver.divideBy2(divideBy2);
+        double refinement_radius               = alpha_jump;
+        std::optional<double> splitting_radius = std::nullopt;
+        PolarGrid grid(R0, Rmax, nr_exp, ntheta_exp, refinement_radius, anisotropic_factor, divideBy2,
+                       splitting_radius);
+        GMGPolar solver(grid, domain_geometry, coefficients, boundary_conditions, source_term);
+
+        solver.verbose(verbose);
+        solver.paraview(paraview);
+
+        solver.maxOpenMPThreads(maxOpenMPThreads);
+        solver.threadReductionFactor(threadReductionFactor);
+
+        omp_set_num_threads(maxOpenMPThreads); // Global OpenMP thread limit
+
+        solver.DirBC_Interior(DirBC_Interior);
+        solver.stencilDistributionMethod(stencilDistributionMethod);
+        solver.cacheDensityProfileCoefficients(cacheDensityProfileCoefficients);
+        solver.cacheDomainGeometry(cacheDomainGeometry);
+
+        solver.FMG(FMG);
+        solver.FMG_iterations(FMG_iterations);
+        solver.FMG_cycle(FMG_cycle);
+
+        solver.extrapolation(extrapolation);
+        solver.maxLevels(maxLevels);
+        solver.preSmoothingSteps(preSmoothingSteps);
+        solver.postSmoothingSteps(postSmoothingSteps);
+        solver.multigridCycle(multigridCycle);
+
+        solver.maxIterations(maxIterations);
+        solver.residualNormType(residualNormType);
+        solver.absoluteTolerance(absoluteTolerance);
+        solver.relativeTolerance(relativeTolerance);
 
         solver.setup();
+        solver.setSolution(&exact_solution);
         solver.solve();
 
         table_nr[divideBy2]                             = solver.grid().nr();
@@ -205,7 +189,6 @@ int main(int argc, char* argv[])
         // Print time[s]
         std::cout << std::setw(12) << table_total_time[i] << std::endl;
     }
-    std::cout << "\n";
 
     return 0;
 }

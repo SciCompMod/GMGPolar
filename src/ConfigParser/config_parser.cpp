@@ -36,8 +36,10 @@ ConfigParser::ConfigParser()
     parser_.add<int>("maxIterations", '\0', "Max solver iterations.", OPTIONAL, 150);
     parser_.add<int>("residualNormType", '\0', "Residual norm (0=Euclidean,1=Weighted,2=Infinity)", OPTIONAL, 0,
                      cmdline::oneof(0, 1, 2));
-    parser_.add<double>("absoluteTolerance", '\0', "Absolute tolerance. Negative values disable the convergence criteria.", OPTIONAL, 1e-8);
-    parser_.add<double>("relativeTolerance", '\0', "Relative tolerance. Negative values disable the convergence criteria.", OPTIONAL, 1e-8);
+    parser_.add<double>("absoluteTolerance", '\0',
+                        "Absolute tolerance. Negative values disable the convergence criteria.", OPTIONAL, 1e-8);
+    parser_.add<double>("relativeTolerance", '\0',
+                        "Relative tolerance. Negative values disable the convergence criteria.", OPTIONAL, 1e-8);
 
     // Initialize command-line options for geometry parameters
     parser_.add<int>("geometry", '\0', "Geometry type (0=Circular,1=Shafranov,2=Czarny,3=Culham)", OPTIONAL, 0,
@@ -217,7 +219,6 @@ bool ConfigParser::parse(int argc, char* argv[])
         }
 
         if (exact_solution_ != nullptr) {
-            // std::cout << "Exact Solution: ";
             if (typeid(*exact_solution_) == typeid(CartesianR2_CircularGeometry) ||
                 typeid(*exact_solution_) == typeid(CartesianR2_CzarnyGeometry) ||
                 typeid(*exact_solution_) == typeid(CartesianR2_ShafranovGeometry)) {
@@ -271,7 +272,8 @@ bool ConfigParser::parse(int argc, char* argv[])
         }
 
         std::cout << "------------------------------\n";
-
+        std::cout << "---- PolarGrid Generation ----\n";
+        std::cout << "------------------------------\n";
         std::cout << "nr_exp = " << nr_exp << ", nθ_exp = " << ntheta_exp << "\n";
         std::cout << "divideBy2 = " << divideBy2 << ", anisotropy = " << anisotropic_factor << "\n";
     }
