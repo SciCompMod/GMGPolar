@@ -10,6 +10,8 @@
 
 int main(int argc, char* argv[])
 {
+    omp_set_num_threads(omp_get_max_threads());
+    
     const int verbose   = 0;
     const bool paraview = false;
 
