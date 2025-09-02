@@ -83,13 +83,13 @@ void GMGPolar::solve(const BoundaryConditions& boundary_conditions, const Source
         }
         auto end_check_convergence = std::chrono::high_resolution_clock::now();
         t_check_convergence_ += std::chrono::duration<double>(end_check_convergence - start_check_convergence).count();
-        
+
         printIterationInfo(number_of_iterations_, current_residual_norm, current_relative_residual_norm,
                            exact_solution_);
 
         if (converged(current_residual_norm, current_relative_residual_norm))
             break;
-        
+
         /* ----------------------- */
         /* Perform Multigrid Cycle */
         /* ----------------------- */
@@ -283,11 +283,25 @@ void GMGPolar::initializeSolution(const BoundaryConditions& boundary_conditions)
 //   Residual Handling Functions
 // =============================================================================
 
+double GMGPolar::residualNorm(const ResidualNormType& norm_type, const Level& level,
+                              const Vector<double>& residual) const
+{
+    switch (norm_type) {
+    case ResidualNormType::EUCLIDEAN:
+        return l2_norm(residual);
+    case ResidualNormType::WEIGHTED_EUCLIDEAN:
+        return l2_norm(residual) / std::sqrt(level.grid().numberOfNodes());
+    case ResidualNormType::INFINITY_NORM:
+        return infinity_norm(residual);
+    default:
+        throw std::invalid_argument("Unknown ResidualNormType");
+    }
+}
+
 void GMGPolar::updateResidualNorms(Level& level, int iteration, double& initial_residual_norm,
                                    double& current_residual_norm, double& current_relative_residual_norm)
 {
     level.computeResidual(level.residual(), level.rhs(), level.solution());
-
     if (extrapolation_ != ExtrapolationType::NONE) {
         Level& next_level = levels_[level.level_depth() + 1];
         injection(level.level_depth(), next_level.solution(), level.solution());
@@ -295,49 +309,19 @@ void GMGPolar::updateResidualNorms(Level& level, int iteration, double& initial_
         extrapolatedResidual(level.level_depth(), level.residual(), next_level.residual());
     }
 
-    switch (residual_norm_type_) {
-    case ResidualNormType::EUCLIDEAN:
-        current_residual_norm = l2_norm(level.residual());
-        break;
-    case ResidualNormType::WEIGHTED_EUCLIDEAN:
-        current_residual_norm = l2_norm(level.residual()) / std::sqrt(level.grid().numberOfNodes());
-        break;
-    case ResidualNormType::INFINITY_NORM:
-        current_residual_norm = infinity_norm(level.residual());
-        break;
-    default:
-        throw std::invalid_argument("Unknown ResidualNormType");
-    }
+    current_residual_norm = residualNorm(residual_norm_type_, level, level.residual());
     residual_norms_.push_back(current_residual_norm);
 
     if (number_of_iterations_ == 0) {
-        if (!FMG_) {
-            initial_residual_norm = current_residual_norm;
-        }
-        else {
-            switch (residual_norm_type_) {
-            case ResidualNormType::EUCLIDEAN:
-                initial_residual_norm = l2_norm(level.rhs());
-                break;
-            case ResidualNormType::WEIGHTED_EUCLIDEAN:
-                initial_residual_norm = l2_norm(level.rhs()) / std::sqrt(level.grid().numberOfNodes());
-                break;
-            case ResidualNormType::INFINITY_NORM:
-                initial_residual_norm = infinity_norm(level.rhs());
-                break;
-            default:
-                throw std::invalid_argument("Unknown ResidualNormType");
-            }
-        }
+        initial_residual_norm = !FMG_ ? current_residual_norm : residualNorm(residual_norm_type_, level, level.rhs());
     }
-
     current_relative_residual_norm = current_residual_norm / initial_residual_norm;
 
+    // Combined Smoothing: If small residual reduction, turn off full grid smoothing.
     if (number_of_iterations_ > 0) {
+        const double convergence_factor = 0.7;
         const double current_residual_reduction_factor =
             residual_norms_[number_of_iterations_] / residual_norms_[number_of_iterations_ - 1];
-
-        const double convergence_factor = 0.7;
         if (current_residual_reduction_factor > convergence_factor && extrapolation_ == ExtrapolationType::COMBINED &&
             full_grid_smoothing_) {
             full_grid_smoothing_ = false;

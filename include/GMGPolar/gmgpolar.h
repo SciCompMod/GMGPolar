@@ -275,6 +275,7 @@ private:
     /* --------------- */
     /* Solve Functions */
     void initializeSolution(const BoundaryConditions& boundary_conditions);
+    double residualNorm(const ResidualNormType& norm_type, const Level& level, const Vector<double>& residual) const;
     void evaluateExactError(Level& level, const ExactSolution& exact_solution);
     void updateResidualNorms(Level& level, int iteration, double& initial_residual_norm, double& current_residual_norm,
                              double& current_relative_residual_norm);
