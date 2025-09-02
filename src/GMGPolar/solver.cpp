@@ -8,7 +8,6 @@
 
 void GMGPolar::solve(const BoundaryConditions& boundary_conditions, const SourceTerm& source_term)
 {
-    LIKWID_STOP("Setup");
     auto start_setup_rhs = std::chrono::high_resolution_clock::now();
 
     /* ------------------------------------- */
@@ -34,7 +33,6 @@ void GMGPolar::solve(const BoundaryConditions& boundary_conditions, const Source
 
     auto end_setup_rhs = std::chrono::high_resolution_clock::now();
     t_setup_rhs_       = std::chrono::duration<double>(end_setup_rhs - start_setup_rhs).count();
-    LIKWID_START("Setup");
 
     LIKWID_START("Solve");
     auto start_solve = std::chrono::high_resolution_clock::now();
