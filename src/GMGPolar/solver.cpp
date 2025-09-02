@@ -81,16 +81,15 @@ void GMGPolar::solve(const BoundaryConditions& boundary_conditions, const Source
             updateResidualNorms(level, number_of_iterations_, initial_residual_norm, current_residual_norm,
                                 current_relative_residual_norm);
         }
-
+        auto end_check_convergence = std::chrono::high_resolution_clock::now();
+        t_check_convergence_ += std::chrono::duration<double>(end_check_convergence - start_check_convergence).count();
+        
         printIterationInfo(number_of_iterations_, current_residual_norm, current_relative_residual_norm,
                            exact_solution_);
 
         if (converged(current_residual_norm, current_relative_residual_norm))
             break;
-
-        auto end_check_convergence = std::chrono::high_resolution_clock::now();
-        t_check_convergence_ += std::chrono::duration<double>(end_check_convergence - start_check_convergence).count();
-
+        
         /* ----------------------- */
         /* Perform Multigrid Cycle */
         /* ----------------------- */
