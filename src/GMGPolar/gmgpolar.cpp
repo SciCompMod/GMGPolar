@@ -4,13 +4,10 @@
 /* Constructor & Initialization                                           */
 /* ---------------------------------------------------------------------- */
 GMGPolar::GMGPolar(const PolarGrid& grid, const DomainGeometry& domain_geometry,
-                   const DensityProfileCoefficients& density_profile_coefficients,
-                   const BoundaryConditions& boundary_conditions, const SourceTerm& source_term)
+                   const DensityProfileCoefficients& density_profile_coefficients)
     : grid_(grid)
     , domain_geometry_(domain_geometry)
     , density_profile_coefficients_(density_profile_coefficients)
-    , boundary_conditions_(boundary_conditions)
-    , source_term_(source_term)
     , exact_solution_(nullptr)
     // General solver output and visualization settings
     , verbose_(0)
@@ -386,10 +383,11 @@ void GMGPolar::resetAvgMultigridCycleTimings()
 // Print timing breakdown for setup, smoothing, coarse solve, etc.
 void GMGPolar::printTimings() const
 {
+    // t_setup_rhs_ is neither included in t_setup_total_ and t_solve_total_.
     std::cout << "\n------------------" << std::endl;
     std::cout << "Timing Information" << std::endl;
     std::cout << "------------------" << std::endl;
-    std::cout << "Setup Time: " << t_setup_total_ - t_setup_rhs_ << " seconds" << std::endl;
+    std::cout << "Setup Time: " << t_setup_total_ << " seconds" << std::endl;
     std::cout << "    Create Levels: " << t_setup_createLevels_ << " seconds" << std::endl;
     std::cout << "    Smoother: " << t_setup_smoother_ << " seconds" << std::endl;
     std::cout << "    Direct Solver: " << t_setup_directSolver_ << " seconds" << std::endl;

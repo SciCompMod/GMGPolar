@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
         std::optional<double> splitting_radius = std::nullopt;
         PolarGrid grid(R0, Rmax, nr_exp, ntheta_exp, refinement_radius, anisotropic_factor, divideBy2,
                        splitting_radius);
-        GMGPolar solver(grid, domain_geometry, coefficients, boundary_conditions, source_term);
+        GMGPolar solver(grid, domain_geometry, coefficients);
 
         solver.verbose(verbose);
         solver.paraview(paraview);
@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
 
         solver.setup();
         solver.setSolution(&exact_solution);
-        solver.solve();
+        solver.solve(boundary_conditions, source_term);
 
         table_nr[divideBy2]                             = solver.grid().nr();
         table_ntheta[divideBy2]                         = solver.grid().ntheta();

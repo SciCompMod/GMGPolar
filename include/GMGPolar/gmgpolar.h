@@ -38,10 +38,8 @@ public:
     // - grid: Cartesian mesh discretizing the computational domain.
     // - domain_geometry: Mapping from the reference domain to the physical domain \Omega.
     // - density_profile_coefficients: Coefficients \alpha and \beta defining the PDE.
-    // TODO: Move boundary conditions, source term to the solve() function!
     GMGPolar(const PolarGrid& grid, const DomainGeometry& domain_geometry,
-             const DensityProfileCoefficients& density_profile_coefficients,
-             const BoundaryConditions& boundary_conditions, const SourceTerm& source_term);
+             const DensityProfileCoefficients& density_profile_coefficients);
 
     /* ---------------------------------------------------------------------- */
     /* General output & visualization                                         */
@@ -143,10 +141,9 @@ public:
     // If an exact solution is provided, the solver will compute the exact error at each iteration.
     void setSolution(const ExactSolution* exact_solution);
 
-    // TODO: Move boundary conditions, source term to the solve() function!
     // Solve system with given boundary conditions and source term.
     // Multiple solves with different inputs are supported.
-    void solve();
+    void solve(const BoundaryConditions& boundary_conditions, const SourceTerm& source_term);
 
     /* ---------------------------------------------------------------------- */
     /* Solution & Grid Access                                                 */
@@ -202,8 +199,6 @@ private:
     const PolarGrid& grid_;
     const DomainGeometry& domain_geometry_;
     const DensityProfileCoefficients& density_profile_coefficients_;
-    const BoundaryConditions& boundary_conditions_;
-    const SourceTerm& source_term_;
     const ExactSolution* exact_solution_; // Optional exact solution for validation
 
     /* ------------------ */
@@ -272,12 +267,13 @@ private:
     /* Setup Functions */
     PolarGrid createFinestGrid();
     int chooseNumberOfLevels(const PolarGrid& finest_grid);
-    void build_rhs_f(const Level& level, Vector<double>& rhs_f);
+    void build_rhs_f(const Level& level, Vector<double>& rhs_f, const BoundaryConditions& boundary_conditions,
+                     const SourceTerm& source_term);
     void discretize_rhs_f(const Level& level, Vector<double>& rhs_f);
 
     /* --------------- */
     /* Solve Functions */
-    void initializeSolution();
+    void initializeSolution(const BoundaryConditions& boundary_conditions);
 
     /* ----------------- */
     /* Print information */
