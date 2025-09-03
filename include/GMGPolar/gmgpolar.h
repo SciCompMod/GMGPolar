@@ -266,7 +266,6 @@ private:
 
     /* --------------- */
     /* Setup Functions */
-    PolarGrid createFinestGrid();
     int chooseNumberOfLevels(const PolarGrid& finest_grid);
     void build_rhs_f(const Level& level, Vector<double>& rhs_f, const BoundaryConditions& boundary_conditions,
                      const SourceTerm& source_term);
