@@ -7,8 +7,8 @@
 
 #include "../../include/Residual/ResidualGive/residualGive.h"
 #include "../../include/Residual/ResidualTake/residualTake.h"
-#include "../../include/DirectSolver/DirectSolverGiveCustomLU/directSolverGiveCustomLU.h"
-#include "../../include/DirectSolver/DirectSolverTakeCustomLU/directSolverTakeCustomLU.h"
+#include "../../include/DirectSolver/DirectSolver-CSR-LU-Give/directSolverGiveCustomLU.h"
+#include "../../include/DirectSolver/DirectSolver-CSR-LU-Take/directSolverTakeCustomLU.h"
 #include "../../include/ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h"
 #include "../../include/ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.h"
 
@@ -1515,5 +1515,3 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin_Smal
     ASSERT_LT(iterations, 150);
     ASSERT_NEAR(infinity_norm(error), 0.0, precision);
 }
-
-

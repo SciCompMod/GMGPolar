@@ -1,4 +1,4 @@
-#include "../../../include/DirectSolver/DirectSolverGiveCustomLU/directSolverGiveCustomLU.h"
+#include "../../../include/DirectSolver/DirectSolver-CSR-LU-Give/directSolverGiveCustomLU.h"
 
 int DirectSolverGiveCustomLU::getStencilSize(int global_index) const
 {
