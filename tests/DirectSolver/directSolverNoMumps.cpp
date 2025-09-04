@@ -6,10 +6,10 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
 #include "../../include/Residual/ResidualGive/residualGive.h"
-#include "../../include/DirectSolver/DirectSolverGive/directSolverGive.h"
-#include "../../include/DirectSolver/DirectSolverTake/directSolverTake.h"
-#include "../../include/DirectSolver/DirectSolverGiveCustomLU/directSolverGiveCustomLU.h"
-#include "../../include/DirectSolver/DirectSolverTakeCustomLU/directSolverTakeCustomLU.h"
+#include "../../include/DirectSolver/DirectSolver-COO-MUMPS-Give/directSolverGive.h"
+#include "../../include/DirectSolver/DirectSolver-COO-MUMPS-Take/directSolverTake.h"
+#include "../../include/DirectSolver/DirectSolver-CSR-LU-Give/directSolverGiveCustomLU.h"
+#include "../../include/DirectSolver/DirectSolver-CSR-LU-Take/directSolverTakeCustomLU.h"
 
 #include "../../include/InputFunctions/domainGeometry.h"
 #include "../../include/InputFunctions/densityProfileCoefficients.h"

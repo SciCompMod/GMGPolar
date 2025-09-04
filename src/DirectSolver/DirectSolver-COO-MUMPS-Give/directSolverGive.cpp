@@ -1,8 +1,8 @@
-#include "../../../include/DirectSolver/DirectSolverTake/directSolverTake.h"
+#include "../../../include/DirectSolver/DirectSolver-COO-MUMPS-Give/directSolverGive.h"
 
 #ifdef GMGPOLAR_USE_MUMPS
 
-DirectSolverTake::DirectSolverTake(const PolarGrid& grid, const LevelCache& level_cache,
+DirectSolverGive::DirectSolverGive(const PolarGrid& grid, const LevelCache& level_cache,
                                    const DomainGeometry& domain_geometry,
                                    const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior,
                                    int num_omp_threads)
@@ -12,7 +12,7 @@ DirectSolverTake::DirectSolverTake(const PolarGrid& grid, const LevelCache& leve
     initializeMumpsSolver(mumps_solver_, solver_matrix_);
 }
 
-void DirectSolverTake::solveInPlace(Vector<double>& solution)
+void DirectSolverGive::solveInPlace(Vector<double>& solution)
 {
     // Adjusts the right-hand side vector to account for symmetry corrections.
     // This transforms the system matrixA * solution = rhs into the equivalent system:
@@ -24,7 +24,7 @@ void DirectSolverTake::solveInPlace(Vector<double>& solution)
     solveWithMumps(solution);
 }
 
-DirectSolverTake::~DirectSolverTake()
+DirectSolverGive::~DirectSolverGive()
 {
     finalizeMumpsSolver(mumps_solver_);
 }

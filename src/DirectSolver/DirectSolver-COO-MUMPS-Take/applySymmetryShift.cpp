@@ -1,4 +1,4 @@
-#include "../../../include/DirectSolver/DirectSolverTake/directSolverTake.h"
+#include "../../../include/DirectSolver/DirectSolver-COO-MUMPS-Take/directSolverTake.h"
 
 #ifdef GMGPOLAR_USE_MUMPS
 
