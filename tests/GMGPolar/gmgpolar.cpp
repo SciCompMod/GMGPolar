@@ -319,8 +319,24 @@ TYPED_TEST(GMGPolarPaperTestCase, TestUniform)
     double euclid_order = log(euclid_error / euclid_error_refined) / log(2);
     double inf_order    = log(inf_error / inf_error_refined) / log(2);
 
-    ASSERT_GT(euclid_order, 3);
-    ASSERT_GT(inf_order, 3);
+    double expected_order;
+    switch (TestFixture::extrapolation) {
+    case ExtrapolationType::IMPLICIT_EXTRAPOLATION:
+    case ExtrapolationType::IMPLICIT_FULL_GRID_SMOOTHING: {
+        expected_order = 3;
+        break;
+    }
+    case ExtrapolationType::NONE: {
+        expected_order = 2;
+        break;
+    }
+    default: {
+        throw std::runtime_error("Expected order unknown");
+    }
+    }
+
+    ASSERT_GT(euclid_order, expected_order);
+    ASSERT_GT(inf_order, expected_order);
 }
 
 TYPED_TEST(GMGPolarPaperTestCase, TestNonUniform)
@@ -351,6 +367,22 @@ TYPED_TEST(GMGPolarPaperTestCase, TestNonUniform)
     double euclid_order = log(euclid_error / euclid_error_refined) / log(2);
     double inf_order    = log(inf_error / inf_error_refined) / log(2);
 
-    ASSERT_GT(euclid_order, 2.5);
-    ASSERT_GT(inf_order, 2.5);
+    double expected_order;
+    switch (TestFixture::extrapolation) {
+    case ExtrapolationType::IMPLICIT_EXTRAPOLATION:
+    case ExtrapolationType::IMPLICIT_FULL_GRID_SMOOTHING: {
+        expected_order = 2.5;
+        break;
+    }
+    case ExtrapolationType::NONE: {
+        expected_order = 1.5;
+        break;
+    }
+    default: {
+        throw std::runtime_error("Expected order unknown");
+    }
+    }
+
+    ASSERT_GT(euclid_order, expected_order);
+    ASSERT_GT(inf_order, expected_order);
 }
