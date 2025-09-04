@@ -30,8 +30,8 @@ using gmg_paper_types =
                               PolarR6_ZoniShiftedGyro_CzarnyGeometry, PolarR6_CzarnyGeometry>,
                    std::tuple<ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
                               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-                   std::tuple<ZoniShiftedGyroCoefficients, Refined_Boundary_CzarnyGeometry,
-                              Refined_ZoniShiftedGyro_CzarnyGeometry, Refined_CzarnyGeometry>>;
+                   std::tuple<SonnendruckerGyroCoefficients, PolarR6_Boundary_CzarnyGeometry,
+                              PolarR6_SonnendruckerGyro_CzarnyGeometry, PolarR6_CzarnyGeometry>>;
 
 TYPED_TEST_SUITE(GMGPolarPaperTestCase, gmg_paper_types);
 
