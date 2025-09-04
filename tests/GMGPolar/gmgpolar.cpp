@@ -80,15 +80,15 @@ std::tuple<double, double> get_gmgpolar_error(int n_r, int n_angles, double non_
     gmgpolar.FMG_cycle(MultigridCycleType::F_CYCLE);
 
     gmgpolar.extrapolation(ExtrapolationType::IMPLICIT_EXTRAPOLATION);
-    gmgpolar.maxLevels(2);
+    gmgpolar.maxLevels(4);
     gmgpolar.preSmoothingSteps(1);
     gmgpolar.postSmoothingSteps(1);
     gmgpolar.multigridCycle(MultigridCycleType::F_CYCLE);
 
     gmgpolar.maxIterations(150);
     gmgpolar.residualNormType(ResidualNormType::EUCLIDEAN);
-    gmgpolar.absoluteTolerance(1e-50);
-    gmgpolar.relativeTolerance(1e-50);
+    gmgpolar.absoluteTolerance(1e-10);
+    gmgpolar.relativeTolerance(1e-8);
     // ----------------------------------------------------------------
 
     // Perform setup and solve
