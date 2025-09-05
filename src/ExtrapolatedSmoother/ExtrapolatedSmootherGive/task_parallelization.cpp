@@ -53,9 +53,7 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskLoop(Vector<double>& x, 
 
 #pragma omp parallel num_threads(num_omp_threads_)
         {
-            Vector<double> circle_solver_storage_1(grid_.ntheta());
-            Vector<double> circle_solver_storage_2(grid_.ntheta());
-            Vector<double> radial_solver_storage(grid_.lengthSmootherRadial());
+            Vector<double> circle_solver_storage(grid_.ntheta());
 
 #pragma omp single
             {
@@ -98,7 +96,7 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskLoop(Vector<double>& x, 
 #pragma omp taskloop
                     for (int circle_task = 0; circle_task < std::min(2, num_circle_tasks); circle_task += 2) {
                         int i_r = num_circle_tasks - circle_task - 1;
-                        solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
+                        solveCircleSection(i_r, x, temp, circle_solver_storage);
                     }
                 }
 
@@ -138,7 +136,7 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskLoop(Vector<double>& x, 
 #pragma omp taskloop
                     for (int circle_task = 2; circle_task < num_circle_tasks; circle_task += 2) {
                         int i_r = num_circle_tasks - circle_task - 1;
-                        solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
+                        solveCircleSection(i_r, x, temp, circle_solver_storage);
                     }
                 }
 
@@ -178,7 +176,7 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskLoop(Vector<double>& x, 
 #pragma omp taskloop
                     for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 2) {
                         int i_r = num_circle_tasks - circle_task - 1;
-                        solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
+                        solveCircleSection(i_r, x, temp, circle_solver_storage);
                     }
                 }
 
@@ -218,7 +216,7 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskLoop(Vector<double>& x, 
 #pragma omp taskloop
                     for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 2) {
                         int i_theta = radial_task;
-                        solveRadialSection(i_theta, x, temp, radial_solver_storage);
+                        solveRadialSection(i_theta, x, temp);
                     }
                 }
 
@@ -258,7 +256,7 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskLoop(Vector<double>& x, 
 #pragma omp taskloop
                     for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 2) {
                         int i_theta = radial_task;
-                        solveRadialSection(i_theta, x, temp, radial_solver_storage);
+                        solveRadialSection(i_theta, x, temp);
                     }
                 }
             }
@@ -317,9 +315,7 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskDependencies(Vector<doub
 
 #pragma omp parallel num_threads(num_omp_threads_)
         {
-            Vector<double> circle_solver_storage_1(grid_.ntheta());
-            Vector<double> circle_solver_storage_2(grid_.ntheta());
-            Vector<double> radial_solver_storage(grid_.lengthSmootherRadial());
+            Vector<double> circle_solver_storage(grid_.ntheta());
 
 #pragma omp single
             {
@@ -363,7 +359,7 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskDependencies(Vector<doub
     depend(in : asc_ortho_circle_dep[circle_task - 1 + shift], asc_ortho_circle_dep[circle_task + 1 + shift])
                     {
                         int i_r = num_circle_tasks - circle_task - 1;
-                        solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
+                        solveCircleSection(i_r, x, temp, circle_solver_storage);
                     }
                 }
 
@@ -405,7 +401,7 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskDependencies(Vector<doub
     depend(in : asc_ortho_circle_dep[circle_task - 1 + shift], asc_ortho_circle_dep[circle_task + 1 + shift])
                     {
                         int i_r = num_circle_tasks - circle_task - 1;
-                        solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
+                        solveCircleSection(i_r, x, temp, circle_solver_storage);
                     }
                 }
 
@@ -453,7 +449,7 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskDependencies(Vector<doub
                asc_ortho_radial_dep[(radial_task + 1 + num_radial_tasks) % num_radial_tasks])
                     {
                         int i_theta = radial_task;
-                        solveRadialSection(i_theta, x, temp, radial_solver_storage);
+                        solveRadialSection(i_theta, x, temp);
                     }
                 }
 
@@ -501,7 +497,7 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskDependencies(Vector<doub
                asc_ortho_radial_dep[(radial_task + 1 + num_radial_tasks) % num_radial_tasks])
                     {
                         int i_theta = radial_task;
-                        solveRadialSection(i_theta, x, temp, radial_solver_storage);
+                        solveRadialSection(i_theta, x, temp);
                     }
                 }
             }

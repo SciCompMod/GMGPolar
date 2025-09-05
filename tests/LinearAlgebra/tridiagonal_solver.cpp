@@ -24,8 +24,7 @@ TEST(SymmetricTridiagonalSolver, diagonal_dominant_n_2)
     exact_solution[0] = -26.0 / 33.0;
     exact_solution[1] = -5.0 / 33.0;
 
-    Vector<double> temp(n);
-    solver.solveInPlace(rhs.begin(), temp.begin());
+    solver.solveInPlace(rhs.begin());
 
     EXPECT_NEAR(rhs[0], exact_solution[0], 1e-12);
     EXPECT_NEAR(rhs[1], exact_solution[1], 1e-12);
@@ -51,8 +50,7 @@ TEST(SymmetricTridiagonalSolver, not_diagonal_dominant_n_2)
     exact_solution[0] = -23.0 / 11364.0;
     exact_solution[1] = 17.0 / 5682.0;
 
-    Vector<double> temp(n);
-    solver.solveInPlace(rhs.begin(), temp.begin());
+    solver.solveInPlace(rhs.begin());
 
     EXPECT_NEAR(rhs[0], exact_solution[0], 1e-12);
     EXPECT_NEAR(rhs[1], exact_solution[1], 1e-12);
@@ -82,8 +80,7 @@ TEST(SymmetricTridiagonalSolver, diagonal_dominant_n_3)
     exact_solution[1] = 254.0 / 69.0;
     exact_solution[2] = 2687.0 / 690.0;
 
-    Vector<double> temp(n);
-    solver.solveInPlace(rhs.begin(), temp.begin());
+    solver.solveInPlace(rhs.begin());
 
     EXPECT_NEAR(rhs[0], exact_solution[0], 1e-12);
     EXPECT_NEAR(rhs[1], exact_solution[1], 1e-12);
@@ -114,8 +111,7 @@ TEST(SymmetricTridiagonalSolver, not_diagonal_dominant_n_3)
     exact_solution[1] = -1106500.0 / 265001.0;
     exact_solution[2] = -31772432.0 / 795003.0;
 
-    Vector<double> temp(n);
-    solver.solveInPlace(rhs.begin(), temp.begin());
+    solver.solveInPlace(rhs.begin());
 
     EXPECT_NEAR(rhs[0], exact_solution[0], 1e-12);
     EXPECT_NEAR(rhs[1], exact_solution[1], 1e-12);
@@ -159,8 +155,7 @@ TEST(SymmetricTridiagonalSolver, random_tridiagonal_n_10)
 
     const Vector<double> copy_rhs = rhs;
 
-    Vector<double> temp(n);
-    solver.solveInPlace(rhs.begin(), temp.begin());
+    solver.solveInPlace(rhs.begin());
 
     EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1], copy_rhs[0], precision);
     for (int i = 1; i < n - 1; ++i) {
@@ -206,8 +201,7 @@ TEST(SymmetricTridiagonalSolver, random_tridiagonal_n_100)
 
     const Vector<double> copy_rhs = rhs;
 
-    Vector<double> temp(n);
-    solver.solveInPlace(rhs.begin(), temp.begin());
+    solver.solveInPlace(rhs.begin());
 
     EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1], copy_rhs[0], precision);
     for (int i = 1; i < n - 1; ++i) {
@@ -253,8 +247,7 @@ TEST(SymmetricTridiagonalSolver, random_tridiagonal_n_1000)
 
     const Vector<double> copy_rhs = rhs;
 
-    Vector<double> temp(n);
-    solver.solveInPlace(rhs.begin(), temp.begin());
+    solver.solveInPlace(rhs.begin());
 
     EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1], copy_rhs[0], precision);
     for (int i = 1; i < n - 1; ++i) {
@@ -300,8 +293,7 @@ TEST(SymmetricTridiagonalSolver, random_tridiagonal_n_10000)
 
     const Vector<double> copy_rhs = rhs;
 
-    Vector<double> temp(n);
-    solver.solveInPlace(rhs.begin(), temp.begin());
+    solver.solveInPlace(rhs.begin());
 
     EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1], copy_rhs[0], precision);
     for (int i = 1; i < n - 1; ++i) {
@@ -349,8 +341,7 @@ TEST(SymmetricTridiagonalSolver, random_tridiagonal_boosted_subdiagonal_LOW_PREC
 
     const Vector<double> copy_rhs = rhs;
 
-    Vector<double> temp(n);
-    solver.solveInPlace(rhs.begin(), temp.begin());
+    solver.solveInPlace(rhs.begin());
 
     EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1], copy_rhs[0], precision);
     for (int i = 1; i < n - 1; ++i) {
@@ -361,4 +352,3 @@ TEST(SymmetricTridiagonalSolver, random_tridiagonal_boosted_subdiagonal_LOW_PREC
     EXPECT_NEAR(copy_solver.sub_diagonal(n - 2) * rhs[n - 2] + copy_solver.main_diagonal(n - 1) * rhs[n - 1],
                 copy_rhs[n - 1], precision);
 }
-

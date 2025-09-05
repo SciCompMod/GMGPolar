@@ -71,9 +71,9 @@ private:
     void applyAscOrthoRadialSection(const int i_theta, const SmootherColor smoother_color, const Vector<double>& x,
                                     const Vector<double>& rhs, Vector<double>& temp);
 
-    void solveCircleSection(const int i_r, Vector<double>& x, Vector<double>& temp, Vector<double>& solver_storage_1,
-                            Vector<double>& solver_storage_2);
-    void solveRadialSection(const int i_theta, Vector<double>& x, Vector<double>& temp, Vector<double>& solver_storage);
+    void solveCircleSection(const int i_r, Vector<double>& x, Vector<double>& temp,
+                            Vector<double>& circle_solver_storage);
+    void solveRadialSection(const int i_theta, Vector<double>& x, Vector<double>& temp);
 
 #ifdef GMGPOLAR_USE_MUMPS
     void initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, SparseMatrixCOO<double>& solver_matrix);
