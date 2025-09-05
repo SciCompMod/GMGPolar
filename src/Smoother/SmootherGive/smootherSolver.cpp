@@ -419,7 +419,7 @@ void SmootherGive::applyAscOrthoRadialSection(const int i_theta, const SmootherC
 }
 
 void SmootherGive::solveCircleSection(const int i_r, Vector<double>& x, Vector<double>& temp,
-                                      Vector<double>& solver_storage_1, Vector<double>& solver_storage_2)
+                                      Vector<double>& circle_solver_storage)
 {
     const int start = grid_.index(i_r, 0);
     const int end   = start + grid_.ntheta();
@@ -439,20 +439,18 @@ void SmootherGive::solveCircleSection(const int i_r, Vector<double>& x, Vector<d
 #endif
     }
     else {
-        circle_tridiagonal_solver_[i_r].solveInPlace(temp.begin() + start, solver_storage_1.begin(),
-                                                     solver_storage_2.begin());
+        circle_tridiagonal_solver_[i_r].solveInPlace(temp.begin() + start, circle_solver_storage.begin());
     }
     // Move updated values to x
     std::move(temp.begin() + start, temp.begin() + end, x.begin() + start);
 }
 
-void SmootherGive::solveRadialSection(const int i_theta, Vector<double>& x, Vector<double>& temp,
-                                      Vector<double>& solver_storage)
+void SmootherGive::solveRadialSection(const int i_theta, Vector<double>& x, Vector<double>& temp)
 {
     const int start = grid_.index(grid_.numberSmootherCircles(), i_theta);
     const int end   = start + grid_.lengthSmootherRadial();
 
-    radial_tridiagonal_solver_[i_theta].solveInPlace(temp.begin() + start, solver_storage.begin());
+    radial_tridiagonal_solver_[i_theta].solveInPlace(temp.begin() + start);
     // Move updated values to x
     std::move(temp.begin() + start, temp.begin() + end, x.begin() + start);
 }
@@ -469,10 +467,7 @@ void SmootherGive::smoothingSequential(Vector<double>& x, const Vector<double>& 
     temp = rhs;
 
     /* Single-threaded execution */
-    Vector<double> circle_solver_storage_1(grid_.ntheta());
-    Vector<double> circle_solver_storage_2(grid_.ntheta());
-    Vector<double> radial_solver_storage(grid_.lengthSmootherRadial());
-
+    Vector<double> circle_solver_storage(grid_.ntheta());
     /* ---------------------------- */
     /* ------ CIRCLE SECTION ------ */
 
@@ -483,14 +478,14 @@ void SmootherGive::smoothingSequential(Vector<double>& x, const Vector<double>& 
     }
     const int start_black_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 1 : 0;
     for (int i_r = start_black_circles; i_r < grid_.numberSmootherCircles(); i_r += 2) {
-        solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
+        solveCircleSection(i_r, x, temp, circle_solver_storage);
     }
     for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
         applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
     }
     const int start_white_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 0 : 1;
     for (int i_r = start_white_circles; i_r < grid_.numberSmootherCircles(); i_r += 2) {
-        solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
+        solveCircleSection(i_r, x, temp, circle_solver_storage);
     }
     /* ---------------------------- */
     /* ------ RADIAL SECTION ------ */
@@ -498,13 +493,13 @@ void SmootherGive::smoothingSequential(Vector<double>& x, const Vector<double>& 
         applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
     }
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta += 2) {
-        solveRadialSection(i_theta, x, temp, radial_solver_storage);
+        solveRadialSection(i_theta, x, temp);
     }
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
         applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
     }
     for (int i_theta = 1; i_theta < grid_.ntheta(); i_theta += 2) {
-        solveRadialSection(i_theta, x, temp, radial_solver_storage);
+        solveRadialSection(i_theta, x, temp);
     }
 }
 
@@ -529,10 +524,7 @@ void SmootherGive::smoothingForLoop(Vector<double>& x, const Vector<double>& rhs
 
         #pragma omp parallel num_threads(num_omp_threads_)
         {
-            Vector<double> circle_solver_storage_1(grid_.ntheta());
-            Vector<double> circle_solver_storage_2(grid_.ntheta());
-            Vector<double> radial_solver_storage(grid_.lengthSmootherRadial());
-
+            Vector<double> circle_solver_storage(grid_.ntheta());
             /* ---------------------------- */
             /* ------ CIRCLE SECTION ------ */
             /* ---------------------------- */
@@ -565,7 +557,7 @@ void SmootherGive::smoothingForLoop(Vector<double>& x, const Vector<double>& rhs
             #pragma omp for
             for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 2) {
                 int i_r = num_circle_tasks - circle_task - 1;
-                solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
+                solveCircleSection(i_r, x, temp, circle_solver_storage);
             }
 
             /* ---------------------------- */
@@ -623,13 +615,13 @@ void SmootherGive::smoothingForLoop(Vector<double>& x, const Vector<double>& rhs
             #pragma omp for nowait
             for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 2) {
                 int i_r = num_circle_tasks - circle_task - 1;
-                solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
+                solveCircleSection(i_r, x, temp, circle_solver_storage);
             }
             /* Black Radial Smoother */
             #pragma omp for
             for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 2) {
                 int i_theta = radial_task;
-                solveRadialSection(i_theta, x, temp, radial_solver_storage);
+                solveRadialSection(i_theta, x, temp);
             }
 
             /* ---------------------------- */
@@ -658,7 +650,7 @@ void SmootherGive::smoothingForLoop(Vector<double>& x, const Vector<double>& rhs
             #pragma omp for
             for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 2) {
                 int i_theta = radial_task;
-                solveRadialSection(i_theta, x, temp, radial_solver_storage);
+                solveRadialSection(i_theta, x, temp);
             }
         }
     }
