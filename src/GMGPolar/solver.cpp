@@ -66,7 +66,7 @@ void GMGPolar::solve(const BoundaryConditions& boundary_conditions, const Source
 
     printIterationHeader(exact_solution_);
 
-    while (number_of_iterations_ < max_iterations_) {
+    while (true) {
         /* ---------------------------------------------- */
         /* Test solution against exact solution if given. */
         /* ---------------------------------------------- */
@@ -131,6 +131,12 @@ void GMGPolar::solve(const BoundaryConditions& boundary_conditions, const Source
         auto end_solve_multigrid_iterations = std::chrono::high_resolution_clock::now();
         t_solve_multigrid_iterations_ +=
             std::chrono::duration<double>(end_solve_multigrid_iterations - start_solve_multigrid_iterations).count();
+
+        if (number_of_iterations_ >= max_iterations_) {
+            printIterationInfo(number_of_iterations_, current_residual_norm, current_relative_residual_norm,
+                               exact_solution_);
+            break;
+        }
     }
 
     /* ---------------------- */
@@ -494,7 +500,7 @@ void GMGPolar::printIterationInfo(int iteration, double current_residual_norm, d
 
     const int table_spacing = 4;
     std::cout << std::left << std::scientific << std::setprecision(2);
-    std::cout << std::setw(3 + table_spacing) << number_of_iterations_;
+    std::cout << std::setw(3 + table_spacing) << iteration;
     if (absolute_tolerance_.has_value() || relative_tolerance_.has_value()) {
         std::cout << std::setw(9 + table_spacing + 2) << current_residual_norm;
         std::cout << std::setw(15 + table_spacing) << current_relative_residual_norm;
