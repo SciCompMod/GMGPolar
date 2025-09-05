@@ -472,14 +472,9 @@ void SparseLUSolver<T>::numericFactorization(const SparseMatrixCSR<T>& A,
     std::vector<int> U_pattern_start_upper(n, 0);
     for (int j = 0; j < n; j++) {
         size_t pos = 0;
-        while (pos < U_pattern[j].size() && U_pattern[j][pos] < j)
+        while (pos < U_pattern[j].size() && U_pattern[j][pos] <= j)
             pos++;
-        if (pos < U_pattern[j].size() && U_pattern[j][pos] == j) {
-            U_pattern_start_upper[j] = pos + 1;
-        }
-        else {
-            U_pattern_start_upper[j] = U_pattern[j].size();
-        }
+        U_pattern_start_upper[j] = pos;
     }
 
     // Workspace for dense row computation
