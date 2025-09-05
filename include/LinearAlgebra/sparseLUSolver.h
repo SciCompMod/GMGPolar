@@ -448,11 +448,7 @@ void SparseLUSolver<T>::numericFactorization(const SparseMatrixCSR<T>& A,
     const int n = A.rows();
 
     // Initialize storage structures
-    L_values.clear();
-    L_col_idx.clear();
     L_row_ptr.resize(n + 1, 0);
-    U_values.clear();
-    U_col_idx.clear();
     U_row_ptr.resize(n + 1, 0);
     U_diag.resize(n, 0);
 
