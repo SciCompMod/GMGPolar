@@ -144,7 +144,9 @@ void GMGPolar::solve(const BoundaryConditions& boundary_conditions, const Source
                 if (current_residual_reduction_factor > convergence_factor &&
                     extrapolation_ == ExtrapolationType::COMBINED && full_grid_smoothing_) {
                     full_grid_smoothing_ = false;
-                    std::cout << "Switching from full grid smoothing to standard extrapolated smoothing." << std::endl;
+                    if(verbose_ > 0) {
+                        std::cout << "Switching from full grid smoothing to standard extrapolated smoothing." << std::endl;
+                    }
                 }
             }
 
