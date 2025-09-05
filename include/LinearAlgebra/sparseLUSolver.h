@@ -366,18 +366,15 @@ void SparseLUSolver<T>::symbolicFactorization(const SparseMatrixCSR<T>& A, std::
                                               std::vector<std::vector<int>>& U_pattern) const
 {
     const int n = A.rows();
-    L_pattern.clear();
-    U_pattern.clear();
     L_pattern.resize(n);
     U_pattern.resize(n);
 
-    // Marker array tracks visited columns per row
     std::vector<int> marker(n, -1);
-    std::vector<int> row_marked_indices;
     std::vector<int> stk;
 
     for (int i = 0; i < n; ++i) {
-        row_marked_indices.clear();
+        L_pattern[i].clear();
+        U_pattern[i].clear();
         stk.clear();
 
         // Process original non-zeros in row i
@@ -386,51 +383,44 @@ void SparseLUSolver<T>::symbolicFactorization(const SparseMatrixCSR<T>& A, std::
             int col = A.row_nz_index(i, idx);
             if (marker[col] != i) {
                 marker[col] = i;
-                row_marked_indices.push_back(col);
-                if (col < i) { // Lower triangular element
+                if (col < i) {
+                    L_pattern[i].push_back(col);
                     stk.push_back(col);
+                }
+                else {
+                    U_pattern[i].push_back(col);
                 }
             }
         }
 
-        // Ensure diagonal is included
+        // Ensure diagonal is included in U
         if (marker[i] != i) {
             marker[i] = i;
-            row_marked_indices.push_back(i);
+            U_pattern[i].push_back(i);
         }
 
-        // Process fill-in elements
+        // Process fill-ins
         while (!stk.empty()) {
             int j = stk.back();
             stk.pop_back();
 
-            // Process U[j] pattern
-            for (int col2 : U_pattern[j]) {
-                if (marker[col2] != i) {
-                    marker[col2] = i;
-                    row_marked_indices.push_back(col2);
-                    if (col2 < i) { // Continue for lower indices
-                        stk.push_back(col2);
+            for (int u_col : U_pattern[j]) {
+                if (marker[u_col] != i) {
+                    marker[u_col] = i;
+                    if (u_col < i) {
+                        L_pattern[i].push_back(u_col);
+                        stk.push_back(u_col);
+                    }
+                    else {
+                        U_pattern[i].push_back(u_col);
                     }
                 }
             }
         }
 
-        // Split into L and U patterns
-        auto& Li = L_pattern[i];
-        auto& Ui = U_pattern[i];
-        for (int col : row_marked_indices) {
-            if (col < i) {
-                Li.push_back(col);
-            }
-            else {
-                Ui.push_back(col);
-            }
-        }
-
         // Sort patterns for efficient access
-        std::sort(Li.begin(), Li.end());
-        std::sort(Ui.begin(), Ui.end());
+        std::sort(L_pattern[i].begin(), L_pattern[i].end());
+        std::sort(U_pattern[i].begin(), U_pattern[i].end());
     }
 }
 
