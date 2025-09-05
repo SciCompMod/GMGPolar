@@ -70,17 +70,26 @@ void GMGPolar::solve(const BoundaryConditions& boundary_conditions, const Source
         /* ---------------------------------------------- */
         /* Test solution against exact solution if given. */
         /* ---------------------------------------------- */
+        LIKWID_STOP("Solver");
+        auto start_check_exact_error = std::chrono::high_resolution_clock::now();
+
         if (exact_solution_ != nullptr)
             evaluateExactError(level, *exact_solution_);
+
+        auto end_check_exact_error = std::chrono::high_resolution_clock::now();
+        t_check_exact_error_ += std::chrono::duration<double>(end_check_exact_error - start_check_exact_error).count();
+        LIKWID_START("Solver");
 
         /* ---------------------------- */
         /* Compute convergence criteria */
         /* ---------------------------- */
         auto start_check_convergence = std::chrono::high_resolution_clock::now();
+
         if (absolute_tolerance_.has_value() || relative_tolerance_.has_value()) {
             updateResidualNorms(level, number_of_iterations_, initial_residual_norm, current_residual_norm,
                                 current_relative_residual_norm);
         }
+
         auto end_check_convergence = std::chrono::high_resolution_clock::now();
         t_check_convergence_ += std::chrono::duration<double>(end_check_convergence - start_check_convergence).count();
 
@@ -403,14 +412,9 @@ bool GMGPolar::converged(const double& residual_norm, const double& relative_res
 
 void GMGPolar::evaluateExactError(Level& level, const ExactSolution& exact_solution)
 {
-    LIKWID_STOP("Solver");
-    auto start = std::chrono::high_resolution_clock::now();
     // Compute the weighted L2 norm and infinity norm of the error between the numerical and exact solution.
     // The results are stored as a pair: (weighted L2 error, infinity error).
     exact_errors_.push_back(computeExactError(level, level.solution(), level.residual(), exact_solution));
-    auto end = std::chrono::high_resolution_clock::now();
-    t_check_exact_error_ += std::chrono::duration<double>(end - start).count();
-    LIKWID_START("Solver");
 }
 
 std::pair<double, double> GMGPolar::computeExactError(Level& level, const Vector<double>& solution,
@@ -494,7 +498,7 @@ void GMGPolar::printIterationInfo(int iteration, double current_residual_norm, d
 
     const int table_spacing = 4;
     std::cout << std::left << std::scientific << std::setprecision(2);
-    std::cout << std::setw(3 + table_spacing) << number_of_iterations_;
+    std::cout << std::setw(3 + table_spacing) << iteration;
     if (absolute_tolerance_.has_value() || relative_tolerance_.has_value()) {
         std::cout << std::setw(9 + table_spacing + 2) << current_residual_norm;
         std::cout << std::setw(15 + table_spacing) << current_relative_residual_norm;
