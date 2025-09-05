@@ -45,7 +45,7 @@ void GMGPolar::solve(const BoundaryConditions& boundary_conditions, const Source
     /* ---------------------------- */
     auto start_initial_approximation = std::chrono::high_resolution_clock::now();
 
-    initializeSolution(boundary_conditions);
+    initializeSolution();
 
     auto end_initial_approximation = std::chrono::high_resolution_clock::now();
     t_solve_initial_approximation_ =
@@ -176,7 +176,7 @@ void GMGPolar::solve(const BoundaryConditions& boundary_conditions, const Source
 //   Solution Initialization
 // =============================================================================
 
-void GMGPolar::initializeSolution(const BoundaryConditions& boundary_conditions)
+void GMGPolar::initializeSolution()
 {
     if (!FMG_) {
         int start_level_depth = 0;
