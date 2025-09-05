@@ -66,7 +66,7 @@ void GMGPolar::solve(const BoundaryConditions& boundary_conditions, const Source
 
     printIterationHeader(exact_solution_);
 
-    while (true) {
+    while (number_of_iterations_ < max_iterations_) {
         /* ---------------------------------------------- */
         /* Test solution against exact solution if given. */
         /* ---------------------------------------------- */
@@ -131,12 +131,6 @@ void GMGPolar::solve(const BoundaryConditions& boundary_conditions, const Source
         auto end_solve_multigrid_iterations = std::chrono::high_resolution_clock::now();
         t_solve_multigrid_iterations_ +=
             std::chrono::duration<double>(end_solve_multigrid_iterations - start_solve_multigrid_iterations).count();
-
-        if (number_of_iterations_ >= max_iterations_) {
-            printIterationInfo(number_of_iterations_, current_residual_norm, current_relative_residual_norm,
-                               exact_solution_);
-            break;
-        }
     }
 
     /* ---------------------- */
