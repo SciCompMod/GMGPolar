@@ -35,7 +35,7 @@ TEST(GMGPolar_NonUniformMesh, PolarR6)
         std::make_unique<PolarR6_ZoniGyro_ShafranovGeometry>(Rmax, elongation_kappa, shift_delta);
 
     /* GMGPolar settings */
-    int verbose   = 1;
+    int verbose   = 0;
     bool paraview = false;
 
     int maxOpenMPThreads         = 4;

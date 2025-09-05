@@ -32,6 +32,7 @@ add_executable(gmgpolar_tests
     GMGPolar/stencil_distribution.cpp
     GMGPolar/extrapolation.cpp
     GMGPolar/cycle_types.cpp
+    GMGPolar/verbose_test_instance.cpp
 )
 
 # Set the compile features and link libraries
