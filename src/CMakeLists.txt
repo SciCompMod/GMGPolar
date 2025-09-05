@@ -120,7 +120,6 @@ set(SMOOTHER_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/matrixStencil.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/smootherGive.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/smootherSolver.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/task_parallelization.cpp
     
     # SmootherTake
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/buildMatrix.cpp
@@ -144,7 +143,6 @@ set(EXTRAPOLATED_SMOOTHER_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/initializeMumps.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/smootherSolver.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/smootherStencil.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/task_parallelization.cpp
     
     # ExtrapolatedSmootherTake
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/buildAscMatrices.cpp
