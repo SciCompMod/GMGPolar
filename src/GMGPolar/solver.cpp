@@ -86,8 +86,8 @@ void GMGPolar::solve(const BoundaryConditions& boundary_conditions, const Source
         auto start_check_convergence = std::chrono::high_resolution_clock::now();
 
         if (absolute_tolerance_.has_value() || relative_tolerance_.has_value()) {
-            updateResidualNorms(level, number_of_iterations_, initial_residual_norm, current_residual_norm, 
-                                 current_relative_residual_norm);
+            updateResidualNorms(level, number_of_iterations_, initial_residual_norm, current_residual_norm,
+                                current_relative_residual_norm);
         }
 
         auto end_check_convergence = std::chrono::high_resolution_clock::now();
