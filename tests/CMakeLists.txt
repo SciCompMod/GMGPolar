@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Create a single test executable that includes all test sources
 add_executable(gmgpolar_tests
     gmgpolar_tests.cpp
+    GMGPolar/convergence_tests.cpp
     LinearAlgebra/vector.cpp
     LinearAlgebra/vector_operations.cpp
     LinearAlgebra/matrix.cpp
@@ -31,9 +32,6 @@ add_executable(gmgpolar_tests
 # Set the compile features and link libraries
 target_compile_features(gmgpolar_tests PRIVATE cxx_std_17)
 target_link_libraries(gmgpolar_tests GMGPolarLib GTest::gtest_main)
-
-# Register the test
-add_test(NAME gmgpolar_tests COMMAND gmgpolar_tests)
 
 include(GoogleTest)
 gtest_discover_tests(gmgpolar_tests)
