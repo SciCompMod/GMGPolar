@@ -19,10 +19,7 @@ public:
 
 private:
     void smoothingSequential(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
-    void smoothingForLoop(Vector<double>& x, const Vector<double>& rhs,
-                          Vector<double>& temp); /* This is the fastest option */
-    void smoothingTaskLoop(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
-    void smoothingTaskDependencies(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
+    void smoothingForLoop(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp);
 
     // The A_sc matrix on i_r = 0 is defined through the COO/CSR matrix
     // 'inner_boundary_circle_matrix_' due to the across-origin treatment.

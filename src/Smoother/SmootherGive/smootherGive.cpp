@@ -22,7 +22,5 @@ SmootherGive::~SmootherGive()
 
 void SmootherGive::smoothing(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
 {
-    smoothingForLoop(x, rhs, temp); /* This is the fastest option */
-    // smoothingTaskLoop(x, rhs, temp);
-    // smoothingTaskDependencies(x, rhs, temp);
+    smoothingForLoop(x, rhs, temp);
 }
