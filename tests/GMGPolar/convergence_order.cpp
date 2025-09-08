@@ -3,20 +3,36 @@
 #include <cmath>
 #include <cstdlib>
 #include <vector>
+#include <random>
 
 #include "../../include/GMGPolar/gmgpolar.h"
-
-double constexpr Rmax = 1.3;
 
 template <class T>
 class GMGPolarPaperTestCase;
 
-template <ExtrapolationType extrapolation_, class DensityProfileCoefficientsType, class BoundaryConditionsType,
-          class SourceTermType, class ExactSolutionType, double expected_order_>
-class GMGPolarPaperTestCase<std::tuple<std::integral_constant<ExtrapolationType, extrapolation_>,
-                                       DensityProfileCoefficientsType, BoundaryConditionsType, SourceTermType,
-                                       ExactSolutionType, std::integral_constant<double, expected_order_>>>
-    : public testing::Test
+// clang-format off
+template <
+    class DensityProfileCoefficientsType,
+    class BoundaryConditionsType,
+    class SourceTermType,
+    class ExactSolutionType,
+    ExtrapolationType extrapolation_,
+    double expected_l2_order_,
+    double expected_inf_order_
+>
+class GMGPolarPaperTestCase<
+    std::tuple<
+        DensityProfileCoefficientsType,
+        BoundaryConditionsType,
+        SourceTermType,
+        ExactSolutionType,
+        std::integral_constant<ExtrapolationType, extrapolation_>,
+        std::integral_constant<double, expected_l2_order_>,
+        std::integral_constant<double, expected_inf_order_>
+    >
+> : public testing::Test
+// clang-format on
+
 {
 public:
     using DensityProfileCoefficients = DensityProfileCoefficientsType;
@@ -25,44 +41,84 @@ public:
     using ExactSolution              = ExactSolutionType;
 
     static constexpr ExtrapolationType extrapolation = extrapolation_;
-    static constexpr double expected_order           = expected_order_;
+    static constexpr double expected_l2_order        = expected_l2_order_;
+    static constexpr double expected_inf_order       = expected_inf_order_;
 };
 
+// clang-format off
 using gmg_paper_types = testing::Types<
-    /* PolarR6 - NONE_EXTRAPOLATION: Order >= 1.9 */
-    std::tuple<std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, ZoniShiftedGyroCoefficients,
-               PolarR6_Boundary_CzarnyGeometry, PolarR6_ZoniShiftedGyro_CzarnyGeometry, PolarR6_CzarnyGeometry,
-               std::integral_constant<double, 1.9>>,
-    /* CartesianR6 - NONE_EXTRAPOLATION: order >= 1.9 */
-    std::tuple<std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, ZoniShiftedGyroCoefficients,
-               CartesianR6_Boundary_CzarnyGeometry, CartesianR6_ZoniShiftedGyro_CzarnyGeometry,
-               CartesianR6_CzarnyGeometry, std::integral_constant<double, 1.9>>,
-    /* PolarR6 - IMPLICIT_EXTRAPOLATION: order >= 3.9 */
-    std::tuple<std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>,
-               ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry, PolarR6_ZoniShiftedGyro_CzarnyGeometry,
-               PolarR6_CzarnyGeometry, std::integral_constant<double, 2.9>>,
-    /* CartesianR6 - IMPLICIT_EXTRAPOLATION: order >= 3.4 */
-    std::tuple<std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>,
-               ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry,
-               std::integral_constant<double, 2.4>>,
-    /* PolarR6 - COMBINED_EXTRAPOLATION: order >= 3.9 */
-    std::tuple<std::integral_constant<ExtrapolationType, ExtrapolationType::COMBINED>, ZoniShiftedGyroCoefficients,
-               PolarR6_Boundary_CzarnyGeometry, PolarR6_ZoniShiftedGyro_CzarnyGeometry, PolarR6_CzarnyGeometry,
-               std::integral_constant<double, 2.9>>,
-    /* CartesianR6 - COMBINED_EXTRAPOLATION: order >= 3.5 */
-    std::tuple<std::integral_constant<ExtrapolationType, ExtrapolationType::COMBINED>, ZoniShiftedGyroCoefficients,
-               CartesianR6_Boundary_CzarnyGeometry, CartesianR6_ZoniShiftedGyro_CzarnyGeometry,
-               CartesianR6_CzarnyGeometry, std::integral_constant<double, 2.4>>,
-    /* PolarR6 - IMPLICIT_EXTRAPOLATION_FULL_GRID_SMOOTHING: order >= 3.4 */
-    std::tuple<std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_FULL_GRID_SMOOTHING>,
-               ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry, PolarR6_ZoniShiftedGyro_CzarnyGeometry,
-               PolarR6_CzarnyGeometry, std::integral_constant<double, 2.4>>,
-    /* CartesianR6 - IMPLICIT_EXTRAPOLATION_FULL_GRID_SMOOTHING: order >= 2.9 */
-    std::tuple<std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_FULL_GRID_SMOOTHING>,
-               ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry,
-               std::integral_constant<double, 2.4>>>;
+    /* ----------------- */
+    /* Solution: PolarR6 */
+    /* ----------------- */
+    /* No Extrapolation */
+    /* Expected order: L2 = 2.0, Infinity = 2.0 */
+    std::tuple<
+        ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry,
+        PolarR6_ZoniShiftedGyro_CzarnyGeometry, PolarR6_CzarnyGeometry,
+        std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>,
+        std::integral_constant<double, 1.9>, std::integral_constant<double, 1.9>
+    >,
+    /* Implicit Extrapolation. */
+    /* Expected rder: L2 = 4.0, Infinity = 3.0 */
+    std::tuple<
+        ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry,
+        PolarR6_ZoniShiftedGyro_CzarnyGeometry, PolarR6_CzarnyGeometry,
+        std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>,
+        std::integral_constant<double, 3.9>, std::integral_constant<double, 2.9>
+    >,
+    /* Combined Extrapolation */
+    /* Expected order: L2 = 4.0, Infinity = 3.0 */
+    std::tuple<ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry,
+        PolarR6_ZoniShiftedGyro_CzarnyGeometry, PolarR6_CzarnyGeometry,
+        std::integral_constant<ExtrapolationType, ExtrapolationType::COMBINED>,
+        std::integral_constant<double, 3.9>, std::integral_constant<double, 2.9>
+    >,
+    /* Implicit Extrapolation with Fullgrid-Smoothing */
+    /* Expected order: L2 = 4.0, Infinity = 3.0 */
+    std::tuple<
+        ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry,
+        PolarR6_ZoniShiftedGyro_CzarnyGeometry, PolarR6_CzarnyGeometry,
+        std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_FULL_GRID_SMOOTHING>,
+        std::integral_constant<double, 3.0>, std::integral_constant<double, 2.5>
+    >,
+
+    /* --------------------- */
+    /* Solution: CartesianR6 */
+    /* --------------------- */
+    /* No Extrapolation */
+    /* Expected order: L2 = 2.0, Infinity = 2.0 */
+    std::tuple<
+        ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
+        CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry,
+        std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>,
+        std::integral_constant<double, 1.9>, std::integral_constant<double, 1.9>
+    >,
+    /* Implicit Extrapolation. */
+    /* Expected rder: L2 = 4.0, Infinity = 3.0 */
+    std::tuple<
+        ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
+        CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry,
+        std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>,
+        std::integral_constant<double, 3.4>, std::integral_constant<double, 2.9>
+    >,
+    /* Combined Extrapolation */
+    /* Expected order: L2 = 4.0, Infinity = 3.0 */
+    std::tuple<
+        ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
+        CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry,
+        std::integral_constant<ExtrapolationType, ExtrapolationType::COMBINED>,
+        std::integral_constant<double, 3.4>, std::integral_constant<double, 2.9>
+    >,
+    /* Implicit Extrapolation with Fullgrid-Smoothing */
+    /* Expected order: L2 = 4.0, Infinity = 3.0 */
+    std::tuple<
+        ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
+        CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry,
+        std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_FULL_GRID_SMOOTHING>,
+        std::integral_constant<double, 3.0>, std::integral_constant<double, 2.5>
+    >
+>;
+// clang-format on
 
 TYPED_TEST_SUITE(GMGPolarPaperTestCase, gmg_paper_types);
 
@@ -91,7 +147,7 @@ std::vector<double> refine(std::vector<double> const& original_points)
     refined[0] = original_points[0];
     for (std::size_t i(1); i < original_points.size(); ++i) {
         refined[2 * i - 1] = 0.5 * (original_points[i] + original_points[i - 1]);
-        refined[2 * i] = original_points[i];
+        refined[2 * i]     = original_points[i];
     }
     return refined;
 }
@@ -151,6 +207,7 @@ void test_convergence(double non_uniformity)
     int n_r      = 32;
     int n_angles = 64;
 
+    double Rmax      = 1.3;
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
@@ -159,7 +216,6 @@ void test_convergence(double non_uniformity)
     typename TestFixture::DensityProfileCoefficients coefficients(Rmax, alpha_jump);
     typename TestFixture::BoundaryConditions boundary_conditions(Rmax, kappa_eps, delta_e);
     typename TestFixture::SourceTerm source_term(Rmax, kappa_eps, delta_e);
-
     typename TestFixture::ExactSolution solution(Rmax, kappa_eps, delta_e);
 
     // For extrapolation, we need a uniform refinement
@@ -182,10 +238,8 @@ void test_convergence(double non_uniformity)
     double euclid_order = log(euclid_error / euclid_error_refined) / log(2);
     double inf_order    = log(inf_error / inf_error_refined) / log(2);
 
-    double expected_order = TestFixture::expected_order;
-
-    ASSERT_GT(euclid_order, expected_order);
-    ASSERT_GT(inf_order, expected_order);
+    ASSERT_GT(euclid_order, TestFixture::expected_l2_order);
+    ASSERT_GT(inf_order, TestFixture::expected_inf_order);
 }
 
 TYPED_TEST(GMGPolarPaperTestCase, TestUniform)
@@ -195,5 +249,5 @@ TYPED_TEST(GMGPolarPaperTestCase, TestUniform)
 
 TYPED_TEST(GMGPolarPaperTestCase, TestNonUniform)
 {
-    test_convergence<TestFixture>(0.1);
+    test_convergence<TestFixture>(0.5);
 }
