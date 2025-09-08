@@ -68,17 +68,17 @@ TYPED_TEST_SUITE(GMGPolarPaperTestCase, gmg_paper_types);
 
 std::vector<double> get_non_uniform_points(double min, double max, int n_pts, double non_uniformity = 0.1)
 {
+    // Fixed seed for reproducibility in tests
+    std::mt19937 gen(42);
+    std::uniform_real_distribution<double> dist(-0.5, 0.5);
+
     std::vector<double> points(n_pts);
-
-    std::srand(42); // Seed with a value for reproducibility
-
-    int n_cells = n_pts - 1;
-    double const delta((max - min) / double(n_cells));
+    int n_cells        = n_pts - 1;
+    double const delta = (max - min) / double(n_cells);
 
     points[0] = min;
-    for (int i(1); i < n_cells; ++i) {
-        double const random_perturbation = double(rand()) / RAND_MAX - 0.5;
-        points[i]                        = min + (i + random_perturbation * non_uniformity) * delta;
+    for (int i = 1; i < n_cells; ++i) {
+        points[i]                        = min + (i + dist(gen) * non_uniformity) * delta;
     }
     points[n_cells] = max;
 
