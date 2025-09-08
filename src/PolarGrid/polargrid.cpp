@@ -410,13 +410,8 @@ void PolarGrid::checkParameters(const std::vector<double>& radii, const std::vec
     }
 
     // Additional constraint for our stencil. Not needed in general.
-    if (!std::all_of(angles.begin(), angles.end(), [&angles](double theta) {
-            double opposite = theta + M_PI >= 2 * M_PI ? theta - M_PI : theta + M_PI;
-            return std::find_if(angles.begin(), angles.end(), [&opposite](double angle) {
-                       return equals(opposite, angle);
-                   }) != angles.end();
-        })) {
-        throw std::invalid_argument("Each angle must have its opposite in the set:\n"
-                                    "Every node in the interior ring needs to have an opposite neighboring node.");
+    if (ntheta() % 2 != 0) {
+        throw std::invalid_argument(
+            "ntheta must be divisible by 2.");
     }
 }
