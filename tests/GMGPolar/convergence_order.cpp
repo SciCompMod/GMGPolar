@@ -2,7 +2,6 @@
 
 #include <cmath>
 #include <cstdlib>
-#include <ctime>
 #include <vector>
 
 #include "../../include/GMGPolar/gmgpolar.h"
@@ -71,7 +70,7 @@ std::vector<double> get_non_uniform_points(double min, double max, int n_pts, do
 {
     std::vector<double> points(n_pts);
 
-    std::srand(std::time(nullptr)); // Seed with random value (the time)
+    std::srand(42); // Seed with a value for reproducibility
 
     int n_cells = n_pts - 1;
     double const delta((max - min) / double(n_cells));
