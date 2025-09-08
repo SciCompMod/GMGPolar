@@ -12,13 +12,12 @@ double constexpr Rmax = 1.3;
 template <class T>
 class GMGPolarPaperTestCase;
 
-template <MultigridCycleType cycle_, ExtrapolationType extrapolation_, bool FMG_, bool DirBC_,
-          class DensityProfileCoefficientsType, class BoundaryConditionsType, class SourceTermType,
-          class ExactSolutionType>
-class GMGPolarPaperTestCase<std::tuple<
-    std::integral_constant<MultigridCycleType, cycle_>, std::integral_constant<ExtrapolationType, extrapolation_>,
-    std::integral_constant<bool, FMG_>, std::integral_constant<bool, DirBC_>, DensityProfileCoefficientsType,
-    BoundaryConditionsType, SourceTermType, ExactSolutionType>> : public testing::Test
+template <ExtrapolationType extrapolation_, class DensityProfileCoefficientsType, class BoundaryConditionsType,
+          class SourceTermType, class ExactSolutionType, double expected_order_>
+class GMGPolarPaperTestCase<std::tuple<std::integral_constant<ExtrapolationType, extrapolation_>,
+                                       DensityProfileCoefficientsType, BoundaryConditionsType, SourceTermType,
+                                       ExactSolutionType, std::integral_constant<double, expected_order_>>>
+    : public testing::Test
 {
 public:
     using DensityProfileCoefficients = DensityProfileCoefficientsType;
@@ -26,205 +25,45 @@ public:
     using SourceTerm                 = SourceTermType;
     using ExactSolution              = ExactSolutionType;
 
-    static constexpr MultigridCycleType cycle        = cycle_;
     static constexpr ExtrapolationType extrapolation = extrapolation_;
-    static constexpr bool FMG                        = FMG_;
-    static constexpr bool DirBC                      = DirBC_;
+    static constexpr double expected_order           = expected_order_;
 };
 
 using gmg_paper_types = testing::Types<
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::true_type, std::true_type,
+    /* PolarR6 - NONE_EXTRAPOLATION: Order >= 1.9 */
+    std::tuple<std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, ZoniShiftedGyroCoefficients,
+               PolarR6_Boundary_CzarnyGeometry, PolarR6_ZoniShiftedGyro_CzarnyGeometry, PolarR6_CzarnyGeometry,
+               std::integral_constant<double, 1.9>>,
+    /* CartesianR6 - NONE_EXTRAPOLATION: order >= 1.9 */
+    std::tuple<std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, ZoniShiftedGyroCoefficients,
+               CartesianR6_Boundary_CzarnyGeometry, CartesianR6_ZoniShiftedGyro_CzarnyGeometry,
+               CartesianR6_CzarnyGeometry, std::integral_constant<double, 1.9>>,
+    /* PolarR6 - IMPLICIT_EXTRAPOLATION: order >= 3.9 */
+    std::tuple<std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>,
                ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry, PolarR6_ZoniShiftedGyro_CzarnyGeometry,
-               PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::true_type, std::false_type,
+               PolarR6_CzarnyGeometry, std::integral_constant<double, 3.9>>,
+    /* CartesianR6 - IMPLICIT_EXTRAPOLATION: order >= 3.4 */
+    std::tuple<std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>,
+               ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
+               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry,
+               std::integral_constant<double, 3.4>>,
+    /* PolarR6 - COMBINED_EXTRAPOLATION: order >= 3.9 */
+    std::tuple<std::integral_constant<ExtrapolationType, ExtrapolationType::COMBINED>, ZoniShiftedGyroCoefficients,
+               PolarR6_Boundary_CzarnyGeometry, PolarR6_ZoniShiftedGyro_CzarnyGeometry, PolarR6_CzarnyGeometry,
+               std::integral_constant<double, 3.9>>,
+    /* CartesianR6 - COMBINED_EXTRAPOLATION: order >= 3.5 */
+    std::tuple<std::integral_constant<ExtrapolationType, ExtrapolationType::COMBINED>, ZoniShiftedGyroCoefficients,
+               CartesianR6_Boundary_CzarnyGeometry, CartesianR6_ZoniShiftedGyro_CzarnyGeometry,
+               CartesianR6_CzarnyGeometry, std::integral_constant<double, 3.5>>,
+    /* PolarR6 - IMPLICIT_EXTRAPOLATION_FULL_GRID_SMOOTHING: order >= 3.4 */
+    std::tuple<std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_FULL_GRID_SMOOTHING>,
                ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry, PolarR6_ZoniShiftedGyro_CzarnyGeometry,
-               PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::false_type, std::true_type,
-               ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry, PolarR6_ZoniShiftedGyro_CzarnyGeometry,
-               PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::false_type, std::false_type,
-               ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry, PolarR6_ZoniShiftedGyro_CzarnyGeometry,
-               PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::true_type,
-               std::true_type, ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry,
-               PolarR6_ZoniShiftedGyro_CzarnyGeometry, PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::true_type,
-               std::false_type, ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry,
-               PolarR6_ZoniShiftedGyro_CzarnyGeometry, PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::false_type,
-               std::true_type, ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry,
-               PolarR6_ZoniShiftedGyro_CzarnyGeometry, PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::false_type,
-               std::false_type, ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry,
-               PolarR6_ZoniShiftedGyro_CzarnyGeometry, PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::true_type, std::true_type,
-               ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry, PolarR6_ZoniShiftedGyro_CzarnyGeometry,
-               PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::true_type, std::false_type,
-               ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry, PolarR6_ZoniShiftedGyro_CzarnyGeometry,
-               PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::false_type, std::true_type,
-               ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry, PolarR6_ZoniShiftedGyro_CzarnyGeometry,
-               PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::false_type, std::false_type,
-               ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry, PolarR6_ZoniShiftedGyro_CzarnyGeometry,
-               PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::true_type,
-               std::true_type, ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry,
-               PolarR6_ZoniShiftedGyro_CzarnyGeometry, PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::true_type,
-               std::false_type, ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry,
-               PolarR6_ZoniShiftedGyro_CzarnyGeometry, PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::false_type,
-               std::true_type, ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry,
-               PolarR6_ZoniShiftedGyro_CzarnyGeometry, PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::false_type,
-               std::false_type, ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry,
-               PolarR6_ZoniShiftedGyro_CzarnyGeometry, PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::true_type, std::true_type,
-               ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry, PolarR6_ZoniShiftedGyro_CzarnyGeometry,
-               PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::true_type, std::false_type,
-               ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry, PolarR6_ZoniShiftedGyro_CzarnyGeometry,
-               PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::false_type, std::true_type,
-               ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry, PolarR6_ZoniShiftedGyro_CzarnyGeometry,
-               PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::false_type, std::false_type,
-               ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry, PolarR6_ZoniShiftedGyro_CzarnyGeometry,
-               PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::true_type,
-               std::true_type, ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry,
-               PolarR6_ZoniShiftedGyro_CzarnyGeometry, PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::true_type,
-               std::false_type, ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry,
-               PolarR6_ZoniShiftedGyro_CzarnyGeometry, PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::false_type,
-               std::true_type, ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry,
-               PolarR6_ZoniShiftedGyro_CzarnyGeometry, PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::false_type,
-               std::false_type, ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry,
-               PolarR6_ZoniShiftedGyro_CzarnyGeometry, PolarR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::true_type, std::true_type,
+               PolarR6_CzarnyGeometry, std::integral_constant<double, 3.4>>,
+    /* CartesianR6 - IMPLICIT_EXTRAPOLATION_FULL_GRID_SMOOTHING: order >= 2.9 */
+    std::tuple<std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_FULL_GRID_SMOOTHING>,
                ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::true_type, std::false_type,
-               ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::false_type, std::true_type,
-               ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::false_type, std::false_type,
-               ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::true_type,
-               std::true_type, ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::true_type,
-               std::false_type, ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::false_type,
-               std::true_type, ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::false_type,
-               std::false_type, ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::true_type, std::true_type,
-               ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::true_type, std::false_type,
-               ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::false_type, std::true_type,
-               ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::false_type, std::false_type,
-               ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::true_type,
-               std::true_type, ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::true_type,
-               std::false_type, ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::false_type,
-               std::true_type, ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::false_type,
-               std::false_type, ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::true_type, std::true_type,
-               ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::true_type, std::false_type,
-               ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::false_type, std::true_type,
-               ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, std::false_type, std::false_type,
-               ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::true_type,
-               std::true_type, ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::true_type,
-               std::false_type, ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::false_type,
-               std::true_type, ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>,
-    std::tuple<std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>,
-               std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, std::false_type,
-               std::false_type, ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
-               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry>>;
+               CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry,
+               std::integral_constant<double, 2.9>>>;
 
 TYPED_TEST_SUITE(GMGPolarPaperTestCase, gmg_paper_types);
 
@@ -250,8 +89,7 @@ std::vector<double> get_non_uniform_points(double min, double max, int n_pts, do
 std::tuple<double, double>
 get_gmgpolar_error(int n_r, int n_angles, double non_uniformity, CzarnyGeometry const& domain_geometry,
                    DensityProfileCoefficients const& coefficients, BoundaryConditions const& boundary_conditions,
-                   SourceTerm const& source_term, ExactSolution const& solution, MultigridCycleType cycle,
-                   ExtrapolationType extrapolation, bool FMG, bool DirBC)
+                   SourceTerm const& source_term, ExactSolution const& solution, ExtrapolationType extrapolation)
 {
     std::vector<double> radii  = get_non_uniform_points(1e-8, Rmax, n_r - 1, non_uniformity); // remove central point
     std::vector<double> angles = get_non_uniform_points(0.0, M_PI, n_angles / 2 + 1, non_uniformity);
@@ -264,19 +102,19 @@ get_gmgpolar_error(int n_r, int n_angles, double non_uniformity, CzarnyGeometry 
     GMGPolar gmgpolar(grid, domain_geometry, coefficients);
     gmgpolar.setSolution(&solution);
 
-    gmgpolar.DirBC_Interior(DirBC); // Use across-origin calculation
+    gmgpolar.DirBC_Interior(false); // Use across-origin calculation
 
     // ----------------------------------------------------------------
     // Parameters to be identified and values confirmed
-    gmgpolar.FMG(FMG);
+    gmgpolar.FMG(true);
     gmgpolar.FMG_iterations(3);
-    gmgpolar.FMG_cycle(cycle);
+    gmgpolar.FMG_cycle(MultigridCycleType::F_CYCLE);
 
     gmgpolar.extrapolation(extrapolation);
     gmgpolar.maxLevels(4);
     gmgpolar.preSmoothingSteps(1);
     gmgpolar.postSmoothingSteps(1);
-    gmgpolar.multigridCycle(cycle);
+    gmgpolar.multigridCycle(MultigridCycleType::V_CYCLE);
 
     gmgpolar.maxIterations(150);
     gmgpolar.residualNormType(ResidualNormType::EUCLIDEAN);
@@ -309,31 +147,17 @@ TYPED_TEST(GMGPolarPaperTestCase, TestUniform)
 
     typename TestFixture::ExactSolution solution(Rmax, kappa_eps, delta_e);
 
-    auto [euclid_error, inf_error] = get_gmgpolar_error(
-        n_r, n_angles, 0.0, domain_geometry, coefficients, boundary_conditions, source_term, solution,
-        TestFixture::cycle, TestFixture::extrapolation, TestFixture::FMG, TestFixture::DirBC);
-    auto [euclid_error_refined, inf_error_refined] = get_gmgpolar_error(
-        n_r * 2, n_angles * 2, 0.0, domain_geometry, coefficients, boundary_conditions, source_term, solution,
-        TestFixture::cycle, TestFixture::extrapolation, TestFixture::FMG, TestFixture::DirBC);
+    auto [euclid_error, inf_error] =
+        get_gmgpolar_error(n_r, n_angles, 0.0, domain_geometry, coefficients, boundary_conditions, source_term,
+                           solution, TestFixture::extrapolation);
+    auto [euclid_error_refined, inf_error_refined] =
+        get_gmgpolar_error(n_r * 2, n_angles * 2, 0.0, domain_geometry, coefficients, boundary_conditions, source_term,
+                           solution, TestFixture::extrapolation);
 
     double euclid_order = log(euclid_error / euclid_error_refined) / log(2);
     double inf_order    = log(inf_error / inf_error_refined) / log(2);
 
-    double expected_order;
-    switch (TestFixture::extrapolation) {
-    case ExtrapolationType::IMPLICIT_EXTRAPOLATION:
-    case ExtrapolationType::IMPLICIT_FULL_GRID_SMOOTHING: {
-        expected_order = 3;
-        break;
-    }
-    case ExtrapolationType::NONE: {
-        expected_order = 2;
-        break;
-    }
-    default: {
-        throw std::runtime_error("Expected order unknown");
-    }
-    }
+    double expected_order = TestFixture::expected_order;
 
     ASSERT_GT(euclid_order, expected_order);
     ASSERT_GT(inf_order, expected_order);
@@ -357,31 +181,17 @@ TYPED_TEST(GMGPolarPaperTestCase, TestNonUniform)
 
     double non_uniformity = 0.1;
 
-    auto [euclid_error, inf_error] = get_gmgpolar_error(
-        n_r, n_angles, non_uniformity, domain_geometry, coefficients, boundary_conditions, source_term, solution,
-        TestFixture::cycle, TestFixture::extrapolation, TestFixture::FMG, TestFixture::DirBC);
-    auto [euclid_error_refined, inf_error_refined] = get_gmgpolar_error(
-        n_r * 2, n_angles * 2, non_uniformity, domain_geometry, coefficients, boundary_conditions, source_term,
-        solution, TestFixture::cycle, TestFixture::extrapolation, TestFixture::FMG, TestFixture::DirBC);
+    auto [euclid_error, inf_error] =
+        get_gmgpolar_error(n_r, n_angles, non_uniformity, domain_geometry, coefficients, boundary_conditions,
+                           source_term, solution, TestFixture::extrapolation);
+    auto [euclid_error_refined, inf_error_refined] =
+        get_gmgpolar_error(n_r * 2, n_angles * 2, non_uniformity, domain_geometry, coefficients, boundary_conditions,
+                           source_term, solution, TestFixture::extrapolation);
 
     double euclid_order = log(euclid_error / euclid_error_refined) / log(2);
     double inf_order    = log(inf_error / inf_error_refined) / log(2);
 
-    double expected_order;
-    switch (TestFixture::extrapolation) {
-    case ExtrapolationType::IMPLICIT_EXTRAPOLATION:
-    case ExtrapolationType::IMPLICIT_FULL_GRID_SMOOTHING: {
-        expected_order = 2.5;
-        break;
-    }
-    case ExtrapolationType::NONE: {
-        expected_order = 1.5;
-        break;
-    }
-    default: {
-        throw std::runtime_error("Expected order unknown");
-    }
-    }
+    double expected_order = TestFixture::expected_order;
 
     ASSERT_GT(euclid_order, expected_order);
     ASSERT_GT(inf_order, expected_order);
