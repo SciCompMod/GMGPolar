@@ -86,19 +86,26 @@ std::vector<double> get_non_uniform_points(double min, double max, int n_pts, do
     return points;
 }
 
-std::tuple<double, double>
-get_gmgpolar_error(int n_r, int n_angles, double non_uniformity, CzarnyGeometry const& domain_geometry,
-                   DensityProfileCoefficients const& coefficients, BoundaryConditions const& boundary_conditions,
-                   SourceTerm const& source_term, ExactSolution const& solution, ExtrapolationType extrapolation)
+std::vector<double> refine(std::vector<double> const& original_points, double non_uniformity)
 {
-    std::vector<double> radii  = get_non_uniform_points(1e-8, Rmax, n_r + 1, non_uniformity); // remove central point
-    std::vector<double> angles = get_non_uniform_points(0.0, M_PI, n_angles / 2 + 1, non_uniformity);
-    // Every node in the interior ring needs to have an opposite neighboring node
-    for (int i(1); i < n_angles / 2 + 1; ++i) {
-        angles.push_back(angles[i] + M_PI);
-    }
-    PolarGrid grid(radii, angles);
+    std::vector<double> refined(2 * original_points.size() - 1);
+    refined[0] = original_points[0];
+    for (std::size_t i(1); i < original_points.size(); ++i) {
+        double const random_perturbation = double(rand()) / RAND_MAX - 0.5;
 
+        refined[2 * i - 1] = original_points[i - 1] + 0.5 * (1 + random_perturbation * non_uniformity) *
+                                                          (original_points[i] - original_points[i - 1]);
+        refined[2 * i] = original_points[i];
+    }
+    return refined;
+}
+
+std::tuple<double, double> get_gmgpolar_error(PolarGrid const& grid, CzarnyGeometry const& domain_geometry,
+                                              DensityProfileCoefficients const& coefficients,
+                                              BoundaryConditions const& boundary_conditions,
+                                              SourceTerm const& source_term, ExactSolution const& solution,
+                                              ExtrapolationType extrapolation)
+{
     GMGPolar gmgpolar(grid, domain_geometry, coefficients);
     gmgpolar.setSolution(&solution);
 
@@ -131,7 +138,7 @@ get_gmgpolar_error(int n_r, int n_angles, double non_uniformity, CzarnyGeometry 
     return std::make_tuple(euclid_error, inf_error);
 }
 
-template<class TestFixture>
+template <class TestFixture>
 void test_convergence(double non_uniformity)
 {
     int n_r      = 32;
@@ -148,11 +155,20 @@ void test_convergence(double non_uniformity)
 
     typename TestFixture::ExactSolution solution(Rmax, kappa_eps, delta_e);
 
+    std::vector<double> radii  = get_non_uniform_points(1e-8, Rmax, n_r + 1, non_uniformity); // remove central point
+    std::vector<double> angles = get_non_uniform_points(0.0, M_PI, n_angles / 2 + 1, non_uniformity);
+    // Every node in the interior ring needs to have an opposite neighboring node
+    for (int i(1); i < n_angles / 2 + 1; ++i) {
+        angles.push_back(angles[i] + M_PI);
+    }
+    std::vector<double> radii_refined  = refine(radii, non_uniformity);
+    std::vector<double> angles_refined = refine(angles, non_uniformity);
+
     auto [euclid_error, inf_error] =
-        get_gmgpolar_error(n_r, n_angles, non_uniformity, domain_geometry, coefficients, boundary_conditions,
-                           source_term, solution, TestFixture::extrapolation);
+        get_gmgpolar_error(PolarGrid(radii, angles), domain_geometry, coefficients, boundary_conditions, source_term,
+                           solution, TestFixture::extrapolation);
     auto [euclid_error_refined, inf_error_refined] =
-        get_gmgpolar_error(n_r * 2, n_angles * 2, non_uniformity, domain_geometry, coefficients, boundary_conditions,
+        get_gmgpolar_error(PolarGrid(radii_refined, angles_refined), domain_geometry, coefficients, boundary_conditions,
                            source_term, solution, TestFixture::extrapolation);
 
     double euclid_order = log(euclid_error / euclid_error_refined) / log(2);
