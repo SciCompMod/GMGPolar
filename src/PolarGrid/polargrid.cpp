@@ -412,7 +412,6 @@ void PolarGrid::checkParameters(const std::vector<double>& radii, const std::vec
     // Additional constraint for our stencil. Not needed in general.
     if (ntheta() % 2 != 0) {
         throw std::invalid_argument(
-            "Every node in the interior ring needs to have a unique opposite neighboring node.\n"
-            "For this, ntheta must be divisible by 2.");
+            "ntheta must be divisible by 2.");
     }
 }
