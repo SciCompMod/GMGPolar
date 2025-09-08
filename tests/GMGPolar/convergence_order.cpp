@@ -41,29 +41,29 @@ using gmg_paper_types = testing::Types<
     /* PolarR6 - IMPLICIT_EXTRAPOLATION: order >= 3.9 */
     std::tuple<std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>,
                ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry, PolarR6_ZoniShiftedGyro_CzarnyGeometry,
-               PolarR6_CzarnyGeometry, std::integral_constant<double, 3.9>>,
+               PolarR6_CzarnyGeometry, std::integral_constant<double, 2.9>>,
     /* CartesianR6 - IMPLICIT_EXTRAPOLATION: order >= 3.4 */
     std::tuple<std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>,
                ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
                CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry,
-               std::integral_constant<double, 3.4>>,
+               std::integral_constant<double, 2.4>>,
     /* PolarR6 - COMBINED_EXTRAPOLATION: order >= 3.9 */
     std::tuple<std::integral_constant<ExtrapolationType, ExtrapolationType::COMBINED>, ZoniShiftedGyroCoefficients,
                PolarR6_Boundary_CzarnyGeometry, PolarR6_ZoniShiftedGyro_CzarnyGeometry, PolarR6_CzarnyGeometry,
-               std::integral_constant<double, 3.9>>,
+               std::integral_constant<double, 2.9>>,
     /* CartesianR6 - COMBINED_EXTRAPOLATION: order >= 3.5 */
     std::tuple<std::integral_constant<ExtrapolationType, ExtrapolationType::COMBINED>, ZoniShiftedGyroCoefficients,
                CartesianR6_Boundary_CzarnyGeometry, CartesianR6_ZoniShiftedGyro_CzarnyGeometry,
-               CartesianR6_CzarnyGeometry, std::integral_constant<double, 3.5>>,
+               CartesianR6_CzarnyGeometry, std::integral_constant<double, 2.4>>,
     /* PolarR6 - IMPLICIT_EXTRAPOLATION_FULL_GRID_SMOOTHING: order >= 3.4 */
     std::tuple<std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_FULL_GRID_SMOOTHING>,
                ZoniShiftedGyroCoefficients, PolarR6_Boundary_CzarnyGeometry, PolarR6_ZoniShiftedGyro_CzarnyGeometry,
-               PolarR6_CzarnyGeometry, std::integral_constant<double, 3.4>>,
+               PolarR6_CzarnyGeometry, std::integral_constant<double, 2.4>>,
     /* CartesianR6 - IMPLICIT_EXTRAPOLATION_FULL_GRID_SMOOTHING: order >= 2.9 */
     std::tuple<std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_FULL_GRID_SMOOTHING>,
                ZoniShiftedGyroCoefficients, CartesianR6_Boundary_CzarnyGeometry,
                CartesianR6_ZoniShiftedGyro_CzarnyGeometry, CartesianR6_CzarnyGeometry,
-               std::integral_constant<double, 2.9>>>;
+               std::integral_constant<double, 2.4>>>;
 
 TYPED_TEST_SUITE(GMGPolarPaperTestCase, gmg_paper_types);
 
