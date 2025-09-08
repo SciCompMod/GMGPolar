@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Create a single test executable that includes all test sources
 add_executable(gmgpolar_tests
     gmgpolar_tests.cpp
-    GMGPolar/convergence_tests.cpp
+    GMGPolar/convergence_order.cpp
     LinearAlgebra/vector.cpp
     LinearAlgebra/vector_operations.cpp
     LinearAlgebra/matrix.cpp
