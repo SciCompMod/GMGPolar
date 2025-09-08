@@ -1,8 +1,8 @@
-#include "../../../include/DirectSolver/DirectSolverTake/directSolverTake.h"
+#include "../../../include/DirectSolver/DirectSolver-COO-MUMPS-Give/directSolverGive.h"
 
 #ifdef GMGPOLAR_USE_MUMPS
 
-void DirectSolverTake::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, SparseMatrixCOO<double>& solver_matrix)
+void DirectSolverGive::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, SparseMatrixCOO<double>& solver_matrix)
 {
     /* 
      * MUMPS (a parallel direct solver) uses 1-based indexing, 
@@ -102,7 +102,7 @@ void DirectSolverTake::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, Spars
     }
 }
 
-void DirectSolverTake::solveWithMumps(Vector<double>& result_rhs)
+void DirectSolverGive::solveWithMumps(Vector<double>& result_rhs)
 {
     mumps_solver_.job    = JOB_COMPUTE_SOLUTION;
     mumps_solver_.nrhs   = 1;
@@ -115,7 +115,7 @@ void DirectSolverTake::solveWithMumps(Vector<double>& result_rhs)
     }
 }
 
-void DirectSolverTake::finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver)
+void DirectSolverGive::finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver)
 {
     mumps_solver.job = JOB_END;
     dmumps_c(&mumps_solver);

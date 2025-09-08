@@ -56,37 +56,37 @@ set(INTERPOLATION_SOURCES
 
 # file(GLOB_RECURSE DIRECT_SOLVER_SOURCES 
 #     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/*.cpp
-#     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolverGive/*.cpp
-#     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolverTake/*.cpp
-#     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolverGiveCustomLU/*.cpp
-#     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolverTakeCustomLU/*.cpp)
+#     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Give/*.cpp
+#     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Take/*.cpp
+#     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-CSR-LU-Give/*.cpp
+#     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-CSR-LU-Take/*.cpp)
 set(DIRECT_SOLVER_SOURCES
     # Main DirectSolver files
     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/directSolver.cpp
     
     # DirectSolverGive
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolverGive/applySymmetryShift.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolverGive/buildSolverMatrix.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolverGive/directSolverGive.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolverGive/initializeMumps.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolverGive/matrixStencil.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Give/applySymmetryShift.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Give/buildSolverMatrix.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Give/directSolverGive.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Give/initializeMumps.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Give/matrixStencil.cpp
     
     # DirectSolverGiveCustomLU
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolverGiveCustomLU/buildSolverMatrix.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolverGiveCustomLU/directSolverGive.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolverGiveCustomLU/matrixStencil.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-CSR-LU-Give/buildSolverMatrix.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-CSR-LU-Give/directSolverGive.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-CSR-LU-Give/matrixStencil.cpp
     
     # DirectSolverTake
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolverTake/applySymmetryShift.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolverTake/buildSolverMatrix.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolverTake/directSolverTake.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolverTake/initializeMumps.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolverTake/matrixStencil.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Take/applySymmetryShift.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Take/buildSolverMatrix.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Take/directSolverTake.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Take/initializeMumps.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Take/matrixStencil.cpp
     
     # DirectSolverTakeCustomLU
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolverTakeCustomLU/buildSolverMatrix.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolverTakeCustomLU/directSolverTake.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolverTakeCustomLU/matrixStencil.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-CSR-LU-Take/buildSolverMatrix.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-CSR-LU-Take/directSolverTake.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-CSR-LU-Take/matrixStencil.cpp
 )
 
 # file(GLOB_RECURSE RESIDUAL_SOURCES 
@@ -120,7 +120,6 @@ set(SMOOTHER_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/matrixStencil.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/smootherGive.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/smootherSolver.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/task_parallelization.cpp
     
     # SmootherTake
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/buildMatrix.cpp
@@ -144,7 +143,6 @@ set(EXTRAPOLATED_SMOOTHER_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/initializeMumps.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/smootherSolver.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/smootherStencil.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/task_parallelization.cpp
     
     # ExtrapolatedSmootherTake
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/buildAscMatrices.cpp

@@ -1,4 +1,4 @@
-#include "../../../include/DirectSolver/DirectSolverTakeCustomLU/directSolverTakeCustomLU.h"
+#include "../../../include/DirectSolver/DirectSolver-CSR-LU-Take/directSolverTakeCustomLU.h"
 
 #define UPDATE_MATRIX_ELEMENT(matrix, offset, row, col, val)                                                           \
     do {                                                                                                               \
