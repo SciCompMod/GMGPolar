@@ -109,24 +109,35 @@ std::tuple<double, double> get_gmgpolar_error(PolarGrid const& grid, CzarnyGeome
     GMGPolar gmgpolar(grid, domain_geometry, coefficients);
     gmgpolar.setSolution(&solution);
 
-    gmgpolar.DirBC_Interior(false); // Use across-origin calculation
+    // --- General solver output and visualization settings --- //
+    gmgpolar.verbose(0);
+    gmgpolar.paraview(false);
 
-    // ----------------------------------------------------------------
-    // Parameters to be identified and values confirmed
+    // --- Parallelization and threading settings --- //
+    gmgpolar.maxOpenMPThreads(1);
+    gmgpolar.threadReductionFactor(1.0);
+
+    // --- Discretization and method settings --- //
+    gmgpolar.DirBC_Interior(false); // Use across-origin calculation
+    gmgpolar.stencilDistributionMethod(StencilDistributionMethod::CPU_TAKE);
+    gmgpolar.cacheDensityProfileCoefficients(true);
+    gmgpolar.cacheDomainGeometry(true);
+
+    // --- Multigrid settings --- //
     gmgpolar.FMG(true);
     gmgpolar.FMG_iterations(3);
     gmgpolar.FMG_cycle(MultigridCycleType::F_CYCLE);
-
     gmgpolar.extrapolation(extrapolation);
-    gmgpolar.maxLevels(4);
+    gmgpolar.maxLevels(-1);
     gmgpolar.preSmoothingSteps(1);
     gmgpolar.postSmoothingSteps(1);
     gmgpolar.multigridCycle(MultigridCycleType::V_CYCLE);
 
-    gmgpolar.maxIterations(150);
+    // --- Iterative gmgpolar controls --- //
+    gmgpolar.maxIterations(25);
     gmgpolar.residualNormType(ResidualNormType::EUCLIDEAN);
-    gmgpolar.absoluteTolerance(1e-10);
-    gmgpolar.relativeTolerance(1e-8);
+    gmgpolar.absoluteTolerance(1e-7);
+    gmgpolar.relativeTolerance(1e-6);
     // ----------------------------------------------------------------
 
     // Perform setup and solve
