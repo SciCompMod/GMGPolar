@@ -162,12 +162,13 @@ void test_convergence(double non_uniformity)
 
     typename TestFixture::ExactSolution solution(Rmax, kappa_eps, delta_e);
 
-    std::vector<double> radii  = get_non_uniform_points(1e-8, Rmax, n_r + 1, non_uniformity); // remove central point
-    std::vector<double> angles = get_non_uniform_points(0.0, M_PI, n_angles / 2 + 1, non_uniformity);
-    // Every node in the interior ring needs to have an opposite neighboring node
-    for (int i(1); i < n_angles / 2 + 1; ++i) {
-        angles.push_back(angles[i] + M_PI);
-    }
+    // For extrapolation, we need a uniform refinement
+    std::vector<double> non_uniform_radii  = get_non_uniform_points(1e-8, Rmax, n_r / 2 + 1, non_uniformity);
+    std::vector<double> non_uniform_angles = get_non_uniform_points(0.0, 2*M_PI, n_angles / 2 + 1, non_uniformity);
+    // Extrapolation requires at least one uniform refinement
+    std::vector<double> radii  = refine(non_uniform_radii);
+    std::vector<double> angles = refine(non_uniform_angles);
+    // Get refined points
     std::vector<double> radii_refined  = refine(radii);
     std::vector<double> angles_refined = refine(angles);
 
