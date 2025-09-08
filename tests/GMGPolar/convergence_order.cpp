@@ -85,15 +85,12 @@ std::vector<double> get_non_uniform_points(double min, double max, int n_pts, do
     return points;
 }
 
-std::vector<double> refine(std::vector<double> const& original_points, double non_uniformity)
+std::vector<double> refine(std::vector<double> const& original_points)
 {
     std::vector<double> refined(2 * original_points.size() - 1);
     refined[0] = original_points[0];
     for (std::size_t i(1); i < original_points.size(); ++i) {
-        double const random_perturbation = double(rand()) / RAND_MAX - 0.5;
-
-        refined[2 * i - 1] = original_points[i - 1] + 0.5 * (1 + random_perturbation * non_uniformity) *
-                                                          (original_points[i] - original_points[i - 1]);
+        refined[2 * i - 1] = 0.5 * (original_points[i] + original_points[i - 1]);
         refined[2 * i] = original_points[i];
     }
     return refined;
@@ -171,8 +168,8 @@ void test_convergence(double non_uniformity)
     for (int i(1); i < n_angles / 2 + 1; ++i) {
         angles.push_back(angles[i] + M_PI);
     }
-    std::vector<double> radii_refined  = refine(radii, non_uniformity);
-    std::vector<double> angles_refined = refine(angles, non_uniformity);
+    std::vector<double> radii_refined  = refine(radii);
+    std::vector<double> angles_refined = refine(angles);
 
     auto [euclid_error, inf_error] =
         get_gmgpolar_error(PolarGrid(radii, angles), domain_geometry, coefficients, boundary_conditions, source_term,
