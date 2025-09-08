@@ -45,7 +45,7 @@ void GMGPolar::solve(const BoundaryConditions& boundary_conditions, const Source
     /* ---------------------------- */
     auto start_initial_approximation = std::chrono::high_resolution_clock::now();
 
-    initializeSolution(boundary_conditions);
+    initializeSolution();
 
     auto end_initial_approximation = std::chrono::high_resolution_clock::now();
     t_solve_initial_approximation_ =
@@ -185,38 +185,12 @@ void GMGPolar::solve(const BoundaryConditions& boundary_conditions, const Source
 //   Solution Initialization
 // =============================================================================
 
-void GMGPolar::initializeSolution(const BoundaryConditions& boundary_conditions)
+void GMGPolar::initializeSolution()
 {
     if (!FMG_) {
         int start_level_depth = 0;
         Level& level          = levels_[start_level_depth];
         assign(level.solution(), 0.0); // Assign zero initial guess if not using FMG
-
-        /* Consider setting the boundary conditions u_D and u_D_Interior if DirBC_Interior to the initial solution */
-        bool use_boundary_condition = false;
-        if (use_boundary_condition) {
-            const auto& grid            = level.grid();
-            const auto& sin_theta_cache = level.levelCache().sin_theta();
-            const auto& cos_theta_cache = level.levelCache().cos_theta();
-
-            const int i_r_inner  = 0;
-            const int i_r_outer  = grid.nr() - 1;
-            const double r_inner = grid.radius(i_r_inner);
-            const double r_outer = grid.radius(i_r_outer);
-
-            for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                const double theta     = grid.theta(i_theta);
-                const double sin_theta = sin_theta_cache[i_theta];
-                const double cos_theta = cos_theta_cache[i_theta];
-                if (DirBC_Interior_) { // Apply interior Dirichlet BC if enabled.
-                    const int index         = grid.index(i_r_inner, i_theta);
-                    level.solution()[index] = boundary_conditions.u_D_Interior(r_inner, theta, sin_theta, cos_theta);
-                }
-                // Always apply outer boundary condition.
-                const int index         = grid.index(i_r_outer, i_theta);
-                level.solution()[index] = boundary_conditions.u_D(r_outer, theta, sin_theta, cos_theta);
-            }
-        }
     }
     else {
         // Start from the coarsest level
