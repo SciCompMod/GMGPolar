@@ -91,7 +91,7 @@ get_gmgpolar_error(int n_r, int n_angles, double non_uniformity, CzarnyGeometry 
                    DensityProfileCoefficients const& coefficients, BoundaryConditions const& boundary_conditions,
                    SourceTerm const& source_term, ExactSolution const& solution, ExtrapolationType extrapolation)
 {
-    std::vector<double> radii  = get_non_uniform_points(1e-8, Rmax, n_r - 1, non_uniformity); // remove central point
+    std::vector<double> radii  = get_non_uniform_points(1e-8, Rmax, n_r + 1, non_uniformity); // remove central point
     std::vector<double> angles = get_non_uniform_points(0.0, M_PI, n_angles / 2 + 1, non_uniformity);
     // Every node in the interior ring needs to have an opposite neighboring node
     for (int i(1); i < n_angles / 2 + 1; ++i) {
@@ -134,8 +134,8 @@ get_gmgpolar_error(int n_r, int n_angles, double non_uniformity, CzarnyGeometry 
 template<class TestFixture>
 void test_convergence(double non_uniformity)
 {
-    int n_r      = 16;
-    int n_angles = 32;
+    int n_r      = 32;
+    int n_angles = 64;
 
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
