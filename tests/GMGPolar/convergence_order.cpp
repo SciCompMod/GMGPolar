@@ -131,7 +131,8 @@ get_gmgpolar_error(int n_r, int n_angles, double non_uniformity, CzarnyGeometry 
     return std::make_tuple(euclid_error, inf_error);
 }
 
-TYPED_TEST(GMGPolarPaperTestCase, TestUniform)
+template<class TestFixture>
+void test_convergence(double non_uniformity)
 {
     int n_r      = 16;
     int n_angles = 32;
@@ -146,40 +147,6 @@ TYPED_TEST(GMGPolarPaperTestCase, TestUniform)
     typename TestFixture::SourceTerm source_term(Rmax, kappa_eps, delta_e);
 
     typename TestFixture::ExactSolution solution(Rmax, kappa_eps, delta_e);
-
-    auto [euclid_error, inf_error] =
-        get_gmgpolar_error(n_r, n_angles, 0.0, domain_geometry, coefficients, boundary_conditions, source_term,
-                           solution, TestFixture::extrapolation);
-    auto [euclid_error_refined, inf_error_refined] =
-        get_gmgpolar_error(n_r * 2, n_angles * 2, 0.0, domain_geometry, coefficients, boundary_conditions, source_term,
-                           solution, TestFixture::extrapolation);
-
-    double euclid_order = log(euclid_error / euclid_error_refined) / log(2);
-    double inf_order    = log(inf_error / inf_error_refined) / log(2);
-
-    double expected_order = TestFixture::expected_order;
-
-    ASSERT_GT(euclid_order, expected_order);
-    ASSERT_GT(inf_order, expected_order);
-}
-
-TYPED_TEST(GMGPolarPaperTestCase, TestNonUniform)
-{
-    int n_r      = 16;
-    int n_angles = 32;
-
-    double kappa_eps = 0.3;
-    double delta_e   = 1.4;
-    CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
-
-    const double alpha_jump = 0.0; // Unused value
-    typename TestFixture::DensityProfileCoefficients coefficients(Rmax, alpha_jump);
-    typename TestFixture::BoundaryConditions boundary_conditions(Rmax, kappa_eps, delta_e);
-    typename TestFixture::SourceTerm source_term(Rmax, kappa_eps, delta_e);
-
-    typename TestFixture::ExactSolution solution(Rmax, kappa_eps, delta_e);
-
-    double non_uniformity = 0.1;
 
     auto [euclid_error, inf_error] =
         get_gmgpolar_error(n_r, n_angles, non_uniformity, domain_geometry, coefficients, boundary_conditions,
@@ -195,4 +162,14 @@ TYPED_TEST(GMGPolarPaperTestCase, TestNonUniform)
 
     ASSERT_GT(euclid_order, expected_order);
     ASSERT_GT(inf_order, expected_order);
+}
+
+TYPED_TEST(GMGPolarPaperTestCase, TestUniform)
+{
+    test_convergence<TestFixture>(0.0);
+}
+
+TYPED_TEST(GMGPolarPaperTestCase, TestNonUniform)
+{
+    test_convergence<TestFixture>(0.1);
 }
