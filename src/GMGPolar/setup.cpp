@@ -23,6 +23,31 @@ void GMGPolar::setup()
     if (paraview_)
         writeToVTK("output_finest_grid", *finest_grid);
 
+    if (extrapolation_ != ExtrapolationType::NONE) {
+        // Check if grid comes from a single uniform refinement
+        bool is_uniform_refinement = true;
+
+        for (int i_r = 1; i_r < finest_grid->nr() - 1; i_r += 2) {
+            double mid = 0.5 * (finest_grid->radius(i_r - 1) + finest_grid->radius(i_r + 1));
+            if (std::abs(mid - finest_grid->radius(i_r)) > 1e-12) {
+                is_uniform_refinement = false;
+                break;
+            }
+        }
+        for (int i_theta = 1; i_theta < finest_grid->ntheta(); i_theta += 2) {
+            double mid = 0.5 * (finest_grid->theta(i_theta - 1) + finest_grid->theta(i_theta + 1));
+            if (std::abs(mid - finest_grid->theta(i_theta)) > 1e-12) {
+                is_uniform_refinement = false;
+                break;
+            }
+        }
+
+        if (!is_uniform_refinement) {
+            throw std::runtime_error(
+                "Extrapolation Error: Finest PolarGrid does not originate from a single uniform refinement.");
+        }
+    }
+
     // ---------------------------------------------------------- //
     // Building PolarGrid and LevelCache for all multigrid levels //
     // ---------------------------------------------------------- //

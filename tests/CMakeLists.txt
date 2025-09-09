@@ -27,6 +27,7 @@ add_executable(gmgpolar_tests
     Smoother/smoother.cpp
     ExtrapolatedSmoother/extrapolated_smoother.cpp
     ConfigParser/config_parser.cpp
+    GMGPolar/solve_tests.cpp
 )
 
 # Set the compile features and link libraries
