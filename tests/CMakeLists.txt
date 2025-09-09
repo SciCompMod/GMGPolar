@@ -26,13 +26,7 @@ add_executable(gmgpolar_tests
     Smoother/smoother.cpp
     ExtrapolatedSmoother/extrapolated_smoother.cpp
     ConfigParser/config_parser.cpp
-    GMGPolar/polarR6.cpp
-    GMGPolar/cartesianR2.cpp
-    GMGPolar/non_uniform.cpp
-    GMGPolar/stencil_distribution.cpp
-    GMGPolar/extrapolation.cpp
-    GMGPolar/cycle_types.cpp
-    GMGPolar/verbose_test_instance.cpp
+    GMGPolar/solve_tests.cpp
 )
 
 # Set the compile features and link libraries
