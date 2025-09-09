@@ -613,11 +613,6 @@ void run_gmgpolar()
     std::optional<double> exact_infinity_error           = solver.exactErrorInfinity();
     double reductionFactor                               = solver.meanResidualReductionFactor();
 
-    std::cout << number_of_iterations << std::endl;
-    std::cout << exact_error_weighted_euclidean.value() << std::endl;
-    std::cout << exact_infinity_error.value() << std::endl;
-    std::cout << reductionFactor << std::endl;
-
     ASSERT_TRUE(exact_error_weighted_euclidean.has_value());
     ASSERT_TRUE(exact_infinity_error.has_value());
 
