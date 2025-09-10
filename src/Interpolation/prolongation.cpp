@@ -6,8 +6,9 @@
 // P = 1/4 * |2  4  2|
 //           |1  2  1|
 
-void Interpolation::applyProlongation0(const Level& fromLevel, const Level& toLevel, Vector<double>& result,
-                                       const Vector<double>& x) const
+void Interpolation::applyProlongation0(const Level& fromLevel, const Level& toLevel,
+                                       Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
+                                       const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const
 {
     assert(toLevel.level_depth() == fromLevel.level_depth() - 1);
 
@@ -150,8 +151,9 @@ void Interpolation::applyProlongation0(const Level& fromLevel, const Level& toLe
         }                                                                                                                   \
     } while (0)
 
-void Interpolation::applyProlongation(const Level& fromLevel, const Level& toLevel, Vector<double>& result,
-                                      const Vector<double>& x) const
+void Interpolation::applyProlongation(const Level& fromLevel, const Level& toLevel,
+                                      Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
+                                      const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const
 {
     assert(toLevel.level_depth() == fromLevel.level_depth() - 1);
 
