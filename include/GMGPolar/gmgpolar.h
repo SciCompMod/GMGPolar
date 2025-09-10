@@ -21,7 +21,6 @@ class LevelCache;
 #include "../LinearAlgebra/vector.h"
 #include "../LinearAlgebra/vector_operations.h"
 #include "../PolarGrid/polargrid.h"
-#include "../Utilities/cmdline.h"
 #include "../common/global_definitions.h"
 #include "test_cases.h"
 
