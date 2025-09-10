@@ -5,7 +5,6 @@
 #include <initializer_list>
 #include <iostream>
 #include <memory>
-#include <sstream>
 #include <vector>
 
 template <typename T>
@@ -16,17 +15,19 @@ public:
     Vector(const Vector& other);
     Vector(Vector&& other) noexcept;
 
-    explicit Vector(int size);
+    explicit Vector(std::size_t size);
     Vector(const std::initializer_list<T>& init);
     Vector(const std::vector<T>& init);
 
     Vector& operator=(const Vector& other);
     Vector& operator=(Vector&& other) noexcept;
 
-    int size() const noexcept;
+    ~Vector() = default;
 
-    inline const T& operator[](int index) const;
-    inline T& operator[](int index);
+    std::size_t size() const noexcept;
+
+    inline const T& operator[](std::size_t index) const;
+    inline T& operator[](std::size_t index);
 
     T* begin() noexcept;
     T* end() noexcept;
@@ -37,7 +38,7 @@ public:
     friend std::ostream& operator<<(std::ostream& stream, const Vector<U>& vector);
 
 private:
-    int size_;
+    std::size_t size_;
     std::unique_ptr<T[]> values_;
 };
 
@@ -45,12 +46,12 @@ template <typename U>
 std::ostream& operator<<(std::ostream& stream, const Vector<U>& vector)
 {
     stream << "[";
-    for (int i = 0; i < vector.size(); ++i) {
+    for (std::size_t i = 0; i < vector.size(); ++i) {
         stream << vector[i];
-        if (i != vector.size() - 1)
+        if (i + 1 != vector.size())
             stream << ", ";
     }
-    stream << "]\n";
+    stream << "]";
     return stream;
 }
 
@@ -58,7 +59,7 @@ std::ostream& operator<<(std::ostream& stream, const Vector<U>& vector)
 template <typename T>
 Vector<T>::Vector()
     : size_(0)
-    , values_(nullptr)
+    , values_(std::make_unique<T[]>(0))
 {
 }
 
@@ -69,7 +70,7 @@ Vector<T>::Vector(const Vector& other)
     , values_(std::make_unique<T[]>(size_))
 {
 #pragma omp parallel for if (size_ > 10'000)
-    for (int i = 0; i < size_; ++i) {
+    for (std::size_t i = 0; i < size_; ++i) {
         values_[i] = other.values_[i];
     }
 }
@@ -79,18 +80,16 @@ template <typename T>
 Vector<T>& Vector<T>::operator=(const Vector& other)
 {
     if (this == &other) {
-        /* Self-assignment, no work needed */
         return *this;
     }
 
-    /* Allocate new memory if necessary */
     if (size_ != other.size_) {
         size_   = other.size_;
         values_ = std::make_unique<T[]>(size_);
     }
 
 #pragma omp parallel for if (size_ > 10'000)
-    for (int i = 0; i < size_; ++i) {
+    for (std::size_t i = 0; i < size_; ++i) {
         values_[i] = other.values_[i];
     }
 
@@ -118,51 +117,51 @@ Vector<T>& Vector<T>::operator=(Vector&& other) noexcept
     return *this;
 }
 
-// constrcutor with size
+// constructor with size
 template <typename T>
-Vector<T>::Vector(int size)
+Vector<T>::Vector(std::size_t size)
     : size_(size)
     , values_(std::make_unique<T[]>(size_))
 {
 }
 
-// constructor with initialization
+// constructor with initializer list
 template <typename T>
 Vector<T>::Vector(const std::initializer_list<T>& init)
-    : size_(static_cast<int>(init.size()))
+    : size_(init.size())
     , values_(std::make_unique<T[]>(size_))
 {
     std::copy(init.begin(), init.end(), values_.get());
 }
-// constructor with std::vector initialization
+
+// constructor with std::vector
 template <typename T>
 Vector<T>::Vector(const std::vector<T>& init)
-    : size_(static_cast<int>(init.size()))
+    : size_(init.size())
     , values_(std::make_unique<T[]>(size_))
 {
-    assert(!init.empty());
     std::copy(init.begin(), init.end(), values_.get());
 }
 
 // getter []
 template <typename T>
-inline const T& Vector<T>::operator[](int index) const
+inline const T& Vector<T>::operator[](std::size_t index) const
 {
-    assert(index >= 0);
     assert(index < size_);
     return values_[index];
 }
+
 // setter []
 template <typename T>
-inline T& Vector<T>::operator[](int index)
+inline T& Vector<T>::operator[](std::size_t index)
 {
-    assert(index >= 0);
     assert(index < size_);
     return values_[index];
 }
+
 // get vector's size
 template <typename T>
-int Vector<T>::size() const noexcept
+std::size_t Vector<T>::size() const noexcept
 {
     return size_;
 }
@@ -183,7 +182,6 @@ const T* Vector<T>::begin() const noexcept
 {
     return values_.get();
 }
-
 template <typename T>
 const T* Vector<T>::end() const noexcept
 {
