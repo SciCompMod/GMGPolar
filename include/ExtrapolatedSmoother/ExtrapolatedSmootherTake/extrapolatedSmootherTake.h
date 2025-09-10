@@ -17,7 +17,9 @@ public:
 
     ~ExtrapolatedSmootherTake() override;
 
-    void extrapolatedSmoothing(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) override;
+    void extrapolatedSmoothing(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
+                               const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
+                               Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp) override;
 
 private:
     // The A_sc matrix on i_r = 0 is defined through the COO/CSR matrix
@@ -66,14 +68,22 @@ private:
     void buildAscCircleSection(const int i_r);
     void buildAscRadialSection(const int i_theta);
 
-    void applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color, const Vector<double>& x,
-                                    const Vector<double>& rhs, Vector<double>& temp);
-    void applyAscOrthoRadialSection(const int i_theta, const SmootherColor smoother_color, const Vector<double>& x,
-                                    const Vector<double>& rhs, Vector<double>& temp);
+    void applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color,
+                                    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
+                                    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
+                                    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp);
+    void applyAscOrthoRadialSection(const int i_theta, const SmootherColor smoother_color,
+                                    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
+                                    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
+                                    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp);
 
-    void solveCircleSection(const int i_r, Vector<double>& x, Vector<double>& temp, Vector<double>& solver_storage_1,
-                            Vector<double>& solver_storage_2);
-    void solveRadialSection(const int i_theta, Vector<double>& x, Vector<double>& temp, Vector<double>& solver_storage);
+    void solveCircleSection(const int i_r, Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
+                            Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp,
+                            Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solver_storage_1,
+                            Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solver_storage_2);
+    void solveRadialSection(const int i_theta, Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
+                            Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp,
+                            Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solver_storage);
 
 #ifdef GMGPOLAR_USE_MUMPS
     void initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, SparseMatrixCOO<double>& solver_matrix);
