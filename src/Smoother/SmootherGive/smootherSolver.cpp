@@ -324,7 +324,9 @@
     } while (0)
 
 void SmootherGive::applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color,
-                                              const Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
+                                              const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
+                                              const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
+                                              Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp)
 {
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles() + 1);
 
@@ -373,7 +375,9 @@ void SmootherGive::applyAscOrthoCircleSection(const int i_r, const SmootherColor
 }
 
 void SmootherGive::applyAscOrthoRadialSection(const int i_theta, const SmootherColor smoother_color,
-                                              const Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
+                                              const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
+                                              const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
+                                              Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp)
 {
     const auto& sin_theta_cache = level_cache_.sin_theta();
     const auto& cos_theta_cache = level_cache_.cos_theta();
@@ -418,8 +422,10 @@ void SmootherGive::applyAscOrthoRadialSection(const int i_theta, const SmootherC
     }
 }
 
-void SmootherGive::solveCircleSection(const int i_r, Vector<double>& x, Vector<double>& temp,
-                                      Vector<double>& solver_storage_1, Vector<double>& solver_storage_2)
+void SmootherGive::solveCircleSection(const int i_r, Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
+                                      Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp,
+                                      Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solver_storage_1,
+                                      Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solver_storage_2)
 {
     const int start = grid_.index(i_r, 0);
     const int end   = start + grid_.ntheta();
@@ -446,8 +452,10 @@ void SmootherGive::solveCircleSection(const int i_r, Vector<double>& x, Vector<d
     std::move(temp.begin() + start, temp.begin() + end, x.begin() + start);
 }
 
-void SmootherGive::solveRadialSection(const int i_theta, Vector<double>& x, Vector<double>& temp,
-                                      Vector<double>& solver_storage)
+void SmootherGive::solveRadialSection(const int i_theta,
+                                      Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
+                                      Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp,
+                                      Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solver_storage)
 {
     const int start = grid_.index(grid_.numberSmootherCircles(), i_theta);
     const int end   = start + grid_.lengthSmootherRadial();
@@ -461,7 +469,9 @@ void SmootherGive::solveRadialSection(const int i_theta, Vector<double>& x, Vect
 /* Sequential Version */
 /* ------------------ */
 
-void SmootherGive::smoothingSequential(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
+void SmootherGive::smoothingSequential(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
+                                       const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
+                                       Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
@@ -512,7 +522,7 @@ void SmootherGive::smoothingSequential(Vector<double>& x, const Vector<double>& 
 /* Parallelization Version 1: For Loops */
 /* ------------------------------------ */
 // clang-format off
-void SmootherGive::smoothingForLoop(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
+void SmootherGive::smoothingForLoop(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x, const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs, Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());

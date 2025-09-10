@@ -4,7 +4,9 @@
 /* Parallelization Version 2: Task Loop */
 /* ------------------------------------ */
 
-void SmootherGive::smoothingTaskLoop(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
+void SmootherGive::smoothingTaskLoop(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
+                                     const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
+                                     Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
@@ -252,7 +254,9 @@ void SmootherGive::smoothingTaskLoop(Vector<double>& x, const Vector<double>& rh
 /* Parallelization Version 3: Task Dependencies */
 /* -------------------------------------------- */
 
-void SmootherGive::smoothingTaskDependencies(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp)
+void SmootherGive::smoothingTaskDependencies(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
+                                             const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
+                                             Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
@@ -305,8 +309,10 @@ void SmootherGive::smoothingTaskDependencies(Vector<double>& x, const Vector<dou
                 }
                 /* Outside Black Section (Part 1)*/
                 for (int circle_task = -1; circle_task < num_circle_tasks; circle_task += 4) {
-#pragma omp task depend(out : asc_ortho_circle_dep[circle_task + shift])                                               \
-    depend(in : asc_ortho_circle_dep[circle_task - 1 + shift], asc_ortho_circle_dep[circle_task + 1 + shift])
+#pragma omp task depend(out                                                                                            \
+                        : asc_ortho_circle_dep[circle_task + shift])                                                   \
+    depend(in                                                                                                          \
+           : asc_ortho_circle_dep[circle_task - 1 + shift], asc_ortho_circle_dep[circle_task + 1 + shift])
                     {
                         int i_r = num_circle_tasks - circle_task - 1;
                         applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
@@ -314,8 +320,10 @@ void SmootherGive::smoothingTaskDependencies(Vector<double>& x, const Vector<dou
                 }
                 /* Outside Black Section (Part 2)*/
                 for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 4) {
-#pragma omp task depend(out : asc_ortho_circle_dep[circle_task + shift])                                               \
-    depend(in : asc_ortho_circle_dep[circle_task - 2 + shift], asc_ortho_circle_dep[circle_task + 2 + shift])
+#pragma omp task depend(out                                                                                            \
+                        : asc_ortho_circle_dep[circle_task + shift])                                                   \
+    depend(in                                                                                                          \
+           : asc_ortho_circle_dep[circle_task - 2 + shift], asc_ortho_circle_dep[circle_task + 2 + shift])
                     {
                         int i_r = num_circle_tasks - circle_task - 1;
                         applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
@@ -324,8 +332,10 @@ void SmootherGive::smoothingTaskDependencies(Vector<double>& x, const Vector<dou
 
                 /* Black Circle Smoother */
                 for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 2) {
-#pragma omp task depend(out : smoother_circle_dep[circle_task + shift])                                                \
-    depend(in : asc_ortho_circle_dep[circle_task - 1 + shift], asc_ortho_circle_dep[circle_task + 1 + shift])
+#pragma omp task depend(out                                                                                            \
+                        : smoother_circle_dep[circle_task + shift])                                                    \
+    depend(in                                                                                                          \
+           : asc_ortho_circle_dep[circle_task - 1 + shift], asc_ortho_circle_dep[circle_task + 1 + shift])
                     {
                         int i_r = num_circle_tasks - circle_task - 1;
                         solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
@@ -338,8 +348,10 @@ void SmootherGive::smoothingTaskDependencies(Vector<double>& x, const Vector<dou
 
                 /* Inside White Section */
                 for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 2) {
-#pragma omp task depend(out : asc_ortho_circle_dep[circle_task + shift])                                               \
-    depend(in : smoother_circle_dep[circle_task - 1 + shift], smoother_circle_dep[circle_task + 1 + shift])
+#pragma omp task depend(out                                                                                            \
+                        : asc_ortho_circle_dep[circle_task + shift])                                                   \
+    depend(in                                                                                                          \
+           : smoother_circle_dep[circle_task - 1 + shift], smoother_circle_dep[circle_task + 1 + shift])
                     {
                         int i_r = num_circle_tasks - circle_task - 1;
                         applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
@@ -347,8 +359,10 @@ void SmootherGive::smoothingTaskDependencies(Vector<double>& x, const Vector<dou
                 }
                 /* Outside White Section (Part 1)*/
                 for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 4) {
-#pragma omp task depend(out : asc_ortho_circle_dep[circle_task + shift])                                               \
-    depend(in : asc_ortho_circle_dep[circle_task - 1 + shift], asc_ortho_circle_dep[circle_task + 1 + shift])
+#pragma omp task depend(out                                                                                            \
+                        : asc_ortho_circle_dep[circle_task + shift])                                                   \
+    depend(in                                                                                                          \
+           : asc_ortho_circle_dep[circle_task - 1 + shift], asc_ortho_circle_dep[circle_task + 1 + shift])
                     {
                         int i_r = num_circle_tasks - circle_task - 1;
                         applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
@@ -356,8 +370,10 @@ void SmootherGive::smoothingTaskDependencies(Vector<double>& x, const Vector<dou
                 }
                 /* Outside White Section (Part 2)*/
                 for (int circle_task = 2; circle_task < num_circle_tasks; circle_task += 4) {
-#pragma omp task depend(out : asc_ortho_circle_dep[circle_task + shift])                                               \
-    depend(in : asc_ortho_circle_dep[circle_task - 2 + shift], asc_ortho_circle_dep[circle_task + 2 + shift])
+#pragma omp task depend(out                                                                                            \
+                        : asc_ortho_circle_dep[circle_task + shift])                                                   \
+    depend(in                                                                                                          \
+           : asc_ortho_circle_dep[circle_task - 2 + shift], asc_ortho_circle_dep[circle_task + 2 + shift])
                     {
                         int i_r = num_circle_tasks - circle_task - 1;
                         applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
@@ -366,8 +382,10 @@ void SmootherGive::smoothingTaskDependencies(Vector<double>& x, const Vector<dou
 
                 /* White Circle Smoother */
                 for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 2) {
-#pragma omp task depend(out : smoother_circle_dep[circle_task + shift])                                                \
-    depend(in : asc_ortho_circle_dep[circle_task - 1 + shift], asc_ortho_circle_dep[circle_task + 1 + shift])
+#pragma omp task depend(out                                                                                            \
+                        : smoother_circle_dep[circle_task + shift])                                                    \
+    depend(in                                                                                                          \
+           : asc_ortho_circle_dep[circle_task - 1 + shift], asc_ortho_circle_dep[circle_task + 1 + shift])
                     {
                         int i_r = num_circle_tasks - circle_task - 1;
                         solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
@@ -391,9 +409,11 @@ void SmootherGive::smoothingTaskDependencies(Vector<double>& x, const Vector<dou
                 }
                 /* Outside Black Section (Part 1) */
                 for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 4) {
-#pragma omp task depend(out : asc_ortho_radial_dep[radial_task])                                                       \
-    depend(in : asc_ortho_radial_dep[(radial_task - 1 + num_radial_tasks) % num_radial_tasks],                         \
-               asc_ortho_radial_dep[(radial_task + 1 + num_radial_tasks) % num_radial_tasks])
+#pragma omp task depend(out                                                                                            \
+                        : asc_ortho_radial_dep[radial_task])                                                           \
+    depend(in                                                                                                          \
+           : asc_ortho_radial_dep[(radial_task - 1 + num_radial_tasks) % num_radial_tasks],                            \
+             asc_ortho_radial_dep[(radial_task + 1 + num_radial_tasks) % num_radial_tasks])
                     {
                         int i_theta = radial_task;
                         applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
@@ -401,9 +421,11 @@ void SmootherGive::smoothingTaskDependencies(Vector<double>& x, const Vector<dou
                 }
                 /* Outside Black Section (Part 2) */
                 for (int radial_task = 3; radial_task < num_radial_tasks; radial_task += 4) {
-#pragma omp task depend(out : asc_ortho_radial_dep[radial_task])                                                       \
-    depend(in : asc_ortho_radial_dep[(radial_task - 2 + num_radial_tasks) % num_radial_tasks],                         \
-               asc_ortho_radial_dep[(radial_task + 2 + num_radial_tasks) % num_radial_tasks])
+#pragma omp task depend(out                                                                                            \
+                        : asc_ortho_radial_dep[radial_task])                                                           \
+    depend(in                                                                                                          \
+           : asc_ortho_radial_dep[(radial_task - 2 + num_radial_tasks) % num_radial_tasks],                            \
+             asc_ortho_radial_dep[(radial_task + 2 + num_radial_tasks) % num_radial_tasks])
                     {
                         int i_theta = radial_task;
                         applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
@@ -412,10 +434,12 @@ void SmootherGive::smoothingTaskDependencies(Vector<double>& x, const Vector<dou
 
                 /* Black Radial Smoother */
                 for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 2) {
-#pragma omp task depend(out : smoother_radial_dep[radial_task])                                                        \
-    depend(in : asc_ortho_radial_dep[(radial_task - 1 + num_radial_tasks) % num_radial_tasks],                         \
-               asc_ortho_radial_dep[(radial_task + 0 + num_radial_tasks) % num_radial_tasks],                          \
-               asc_ortho_radial_dep[(radial_task + 1 + num_radial_tasks) % num_radial_tasks])
+#pragma omp task depend(out                                                                                            \
+                        : smoother_radial_dep[radial_task])                                                            \
+    depend(in                                                                                                          \
+           : asc_ortho_radial_dep[(radial_task - 1 + num_radial_tasks) % num_radial_tasks],                            \
+             asc_ortho_radial_dep[(radial_task + 0 + num_radial_tasks) % num_radial_tasks],                            \
+             asc_ortho_radial_dep[(radial_task + 1 + num_radial_tasks) % num_radial_tasks])
                     {
                         int i_theta = radial_task;
                         solveRadialSection(i_theta, x, temp, radial_solver_storage);
@@ -428,10 +452,12 @@ void SmootherGive::smoothingTaskDependencies(Vector<double>& x, const Vector<dou
 
                 /* Inside White Section */
                 for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 2) {
-#pragma omp task depend(out : asc_ortho_radial_dep[radial_task])                                                       \
-    depend(in : smoother_radial_dep[(radial_task - 1 + num_radial_tasks) % num_radial_tasks],                          \
-               smoother_radial_dep[(radial_task + 0 + num_radial_tasks) % num_radial_tasks],                           \
-               smoother_radial_dep[(radial_task + 1 + num_radial_tasks) % num_radial_tasks])
+#pragma omp task depend(out                                                                                            \
+                        : asc_ortho_radial_dep[radial_task])                                                           \
+    depend(in                                                                                                          \
+           : smoother_radial_dep[(radial_task - 1 + num_radial_tasks) % num_radial_tasks],                             \
+             smoother_radial_dep[(radial_task + 0 + num_radial_tasks) % num_radial_tasks],                             \
+             smoother_radial_dep[(radial_task + 1 + num_radial_tasks) % num_radial_tasks])
                     {
                         int i_theta = radial_task;
                         applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
@@ -439,9 +465,11 @@ void SmootherGive::smoothingTaskDependencies(Vector<double>& x, const Vector<dou
                 }
                 /* Outside White Section (Part 1) */
                 for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 4) {
-#pragma omp task depend(out : asc_ortho_radial_dep[radial_task])                                                       \
-    depend(in : asc_ortho_radial_dep[(radial_task - 1 + num_radial_tasks) % num_radial_tasks],                         \
-               asc_ortho_radial_dep[(radial_task + 1 + num_radial_tasks) % num_radial_tasks])
+#pragma omp task depend(out                                                                                            \
+                        : asc_ortho_radial_dep[radial_task])                                                           \
+    depend(in                                                                                                          \
+           : asc_ortho_radial_dep[(radial_task - 1 + num_radial_tasks) % num_radial_tasks],                            \
+             asc_ortho_radial_dep[(radial_task + 1 + num_radial_tasks) % num_radial_tasks])
                     {
                         int i_theta = radial_task;
                         applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
@@ -449,9 +477,11 @@ void SmootherGive::smoothingTaskDependencies(Vector<double>& x, const Vector<dou
                 }
                 /* Outside White Section (Part 2) */
                 for (int radial_task = 2; radial_task < num_radial_tasks; radial_task += 4) {
-#pragma omp task depend(out : asc_ortho_radial_dep[radial_task])                                                       \
-    depend(in : asc_ortho_radial_dep[(radial_task - 2 + num_radial_tasks) % num_radial_tasks],                         \
-               asc_ortho_radial_dep[(radial_task + 2 + num_radial_tasks) % num_radial_tasks])
+#pragma omp task depend(out                                                                                            \
+                        : asc_ortho_radial_dep[radial_task])                                                           \
+    depend(in                                                                                                          \
+           : asc_ortho_radial_dep[(radial_task - 2 + num_radial_tasks) % num_radial_tasks],                            \
+             asc_ortho_radial_dep[(radial_task + 2 + num_radial_tasks) % num_radial_tasks])
                     {
                         int i_theta = radial_task;
                         applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
@@ -460,10 +490,12 @@ void SmootherGive::smoothingTaskDependencies(Vector<double>& x, const Vector<dou
 
                 /* White Radial Smoother */
                 for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 2) {
-#pragma omp task depend(out : smoother_radial_dep[radial_task])                                                        \
-    depend(in : asc_ortho_radial_dep[(radial_task - 1 + num_radial_tasks) % num_radial_tasks],                         \
-               asc_ortho_radial_dep[(radial_task + 0 + num_radial_tasks) % num_radial_tasks],                          \
-               asc_ortho_radial_dep[(radial_task + 1 + num_radial_tasks) % num_radial_tasks])
+#pragma omp task depend(out                                                                                            \
+                        : smoother_radial_dep[radial_task])                                                            \
+    depend(in                                                                                                          \
+           : asc_ortho_radial_dep[(radial_task - 1 + num_radial_tasks) % num_radial_tasks],                            \
+             asc_ortho_radial_dep[(radial_task + 0 + num_radial_tasks) % num_radial_tasks],                            \
+             asc_ortho_radial_dep[(radial_task + 1 + num_radial_tasks) % num_radial_tasks])
                     {
                         int i_theta = radial_task;
                         solveRadialSection(i_theta, x, temp, radial_solver_storage);
