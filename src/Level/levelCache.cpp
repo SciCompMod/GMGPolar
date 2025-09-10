@@ -29,8 +29,8 @@ LevelCache::LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& 
         for (int i_r = 0; i_r < grid.nr(); i_r++) {
             const double r = grid.radius(i_r);
             for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                const double theta = grid.theta(i_theta);
-                const double index = grid.index(i_r, i_theta);
+                const int theta = grid.theta(i_theta);
+                const int index = grid.index(i_r, i_theta);
                 if (!cache_domain_geometry_) {
                     coeff_alpha_[index] = density_profile_coefficients.alpha(r, theta);
                 }
@@ -47,7 +47,7 @@ LevelCache::LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& 
                 const double theta     = grid.theta(i_theta);
                 const double sin_theta = sin_theta_[i_theta];
                 const double cos_theta = cos_theta_[i_theta];
-                const double index     = grid.index(i_r, i_theta);
+                const int index     = grid.index(i_r, i_theta);
 
                 double coeff_alpha = density_profile_coefficients.alpha(r, theta);
 
@@ -68,7 +68,7 @@ LevelCache::LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& 
             const double cos_theta = cos_theta_[i_theta];
             for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
                 const double r     = grid.radius(i_r);
-                const double index = grid.index(i_r, i_theta);
+                const int index = grid.index(i_r, i_theta);
 
                 double coeff_alpha;
                 if (cache_density_profile_coefficients_ && !cache_domain_geometry_) {
