@@ -29,7 +29,7 @@ public:
     virtual ~DirectSolver() = default;
 
     // Note: The rhs (right-hand side) vector gets overwritten during the solution process.
-    virtual void solveInPlace(Vector<double>& solution) = 0;
+    virtual void solveInPlace(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solution) = 0;
 
 protected:
     const PolarGrid& grid_;

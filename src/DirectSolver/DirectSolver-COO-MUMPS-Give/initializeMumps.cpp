@@ -102,7 +102,7 @@ void DirectSolverGive::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, Spars
     }
 }
 
-void DirectSolverGive::solveWithMumps(Vector<double>& result_rhs)
+void DirectSolverGive::solveWithMumps(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result_rhs)
 {
     mumps_solver_.job    = JOB_COMPUTE_SOLUTION;
     mumps_solver_.nrhs   = 1;

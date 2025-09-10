@@ -12,7 +12,7 @@ public:
 
     ~DirectSolverTakeCustomLU() override;
     // Note: The rhs (right-hand side) vector gets overwritten with the solution.
-    void solveInPlace(Vector<double>& solution) override;
+    void solveInPlace(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solution) override;
 
 private:
     // Solver matrix and solver structure

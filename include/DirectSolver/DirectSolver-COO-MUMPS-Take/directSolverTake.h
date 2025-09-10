@@ -17,7 +17,7 @@ public:
 
     ~DirectSolverTake() override;
     // Note: The rhs (right-hand side) vector gets overwritten during the solution process.
-    void solveInPlace(Vector<double>& solution) override;
+    void solveInPlace(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solution) override;
 
 private:
     // Solver matrix and MUMPS solver structure
@@ -68,12 +68,12 @@ private:
     //    symmetric_DBc(A) * solution = rhs - applySymmetryShift(rhs).
     // The correction modifies the rhs to account for the influence of the Dirichlet boundary conditions,
     // ensuring that the solution at the boundary is correctly adjusted and maintains the required symmetry.
-    void applySymmetryShift(Vector<double>& rhs) const;
-    void applySymmetryShiftInnerBoundary(Vector<double>& x) const;
-    void applySymmetryShiftOuterBoundary(Vector<double>& x) const;
+    void applySymmetryShift(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs) const;
+    void applySymmetryShiftInnerBoundary(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const;
+    void applySymmetryShiftOuterBoundary(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const;
 
     // Solves the adjusted system symmetric(matrixA) * solution = rhs using the MUMPS solver.
-    void solveWithMumps(Vector<double>& solution);
+    void solveWithMumps(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solution);
 
     // Finalizes the MUMPS solver, releasing any allocated resources.
     void finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver);
