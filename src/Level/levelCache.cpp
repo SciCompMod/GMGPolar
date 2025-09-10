@@ -5,23 +5,24 @@ LevelCache::LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& 
                        const bool cache_domain_geometry)
     : domain_geometry_(domain_geometry)
     , density_profile_coefficients_(density_profile_coefficients)
-    , sin_theta_(grid.ntheta())
-    , cos_theta_(grid.ntheta())
+    , sin_theta_("sin_theta", grid.ntheta())
+    , cos_theta_("cos_theta", grid.ntheta())
     , cache_density_profile_coefficients_(cache_density_profile_coefficients)
     // If the domain geometry is cached, we don't need to cache the alpha coefficient
-    , coeff_alpha_((cache_density_profile_coefficients && !cache_domain_geometry) ? grid.numberOfNodes() : 0)
-    , coeff_beta_(cache_density_profile_coefficients ? grid.numberOfNodes() : 0)
+    , coeff_alpha_("coeff_alpha",
+                   (cache_density_profile_coefficients && !cache_domain_geometry) ? grid.numberOfNodes() : 0)
+    , coeff_beta_("coeff_beta", cache_density_profile_coefficients ? grid.numberOfNodes() : 0)
     , cache_domain_geometry_(cache_domain_geometry)
-    , arr_(cache_domain_geometry ? grid.numberOfNodes() : 0)
-    , att_(cache_domain_geometry ? grid.numberOfNodes() : 0)
-    , art_(cache_domain_geometry ? grid.numberOfNodes() : 0)
-    , detDF_(cache_domain_geometry ? grid.numberOfNodes() : 0)
+    , arr_("arr", cache_domain_geometry ? grid.numberOfNodes() : 0)
+    , att_("att", cache_domain_geometry ? grid.numberOfNodes() : 0)
+    , art_("art", cache_domain_geometry ? grid.numberOfNodes() : 0)
+    , detDF_("detDF", cache_domain_geometry ? grid.numberOfNodes() : 0)
 {
 #pragma omp parallel for
     for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
         const double theta  = grid.theta(i_theta);
-        sin_theta_[i_theta] = sin(theta);
-        cos_theta_[i_theta] = cos(theta);
+        sin_theta_(i_theta) = sin(theta);
+        cos_theta_(i_theta) = cos(theta);
     }
 
     if (cache_density_profile_coefficients_) {
@@ -30,11 +31,11 @@ LevelCache::LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& 
             const double r = grid.radius(i_r);
             for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
                 const double theta = grid.theta(i_theta);
-                const double index = grid.index(i_r, i_theta);
+                const int index    = grid.index(i_r, i_theta);
                 if (!cache_domain_geometry_) {
-                    coeff_alpha_[index] = density_profile_coefficients.alpha(r, theta);
+                    coeff_alpha_(index) = density_profile_coefficients.alpha(r, theta);
                 }
-                coeff_beta_[index] = density_profile_coefficients.beta(r, theta);
+                coeff_beta_(index) = density_profile_coefficients.beta(r, theta);
             }
         }
     }
@@ -45,34 +46,34 @@ LevelCache::LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& 
             const double r = grid.radius(i_r);
             for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
                 const double theta     = grid.theta(i_theta);
-                const double sin_theta = sin_theta_[i_theta];
-                const double cos_theta = cos_theta_[i_theta];
-                const double index     = grid.index(i_r, i_theta);
+                const double sin_theta = sin_theta_(i_theta);
+                const double cos_theta = cos_theta_(i_theta);
+                const int index        = grid.index(i_r, i_theta);
 
                 double coeff_alpha = density_profile_coefficients.alpha(r, theta);
 
                 double arr, att, art, detDF;
                 compute_jacobian_elements(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art,
                                           detDF);
-                detDF_[index] = detDF;
-                arr_[index]   = arr;
-                att_[index]   = att;
-                art_[index]   = art;
+                detDF_(index) = detDF;
+                arr_(index)   = arr;
+                att_(index)   = att;
+                art_(index)   = art;
             }
         }
 
 #pragma omp parallel for
         for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
             const double theta     = grid.theta(i_theta);
-            const double sin_theta = sin_theta_[i_theta];
-            const double cos_theta = cos_theta_[i_theta];
+            const double sin_theta = sin_theta_(i_theta);
+            const double cos_theta = cos_theta_(i_theta);
             for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
-                const double r     = grid.radius(i_r);
-                const double index = grid.index(i_r, i_theta);
+                const double r  = grid.radius(i_r);
+                const int index = grid.index(i_r, i_theta);
 
                 double coeff_alpha;
                 if (cache_density_profile_coefficients_ && !cache_domain_geometry_) {
-                    coeff_alpha = coeff_alpha_[index];
+                    coeff_alpha = coeff_alpha_(index);
                 }
                 else {
                     coeff_alpha = density_profile_coefficients.alpha(r, theta);
@@ -81,10 +82,10 @@ LevelCache::LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& 
                 double arr, att, art, detDF;
                 compute_jacobian_elements(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art,
                                           detDF);
-                detDF_[index] = detDF;
-                arr_[index]   = arr;
-                att_[index]   = att;
-                art_[index]   = art;
+                detDF_(index) = detDF;
+                arr_(index)   = arr;
+                att_(index)   = att;
+                art_(index)   = art;
             }
         }
     }
@@ -93,23 +94,24 @@ LevelCache::LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& 
 LevelCache::LevelCache(const Level& previous_level, const PolarGrid& current_grid)
     : domain_geometry_(previous_level.levelCache().domainGeometry())
     , density_profile_coefficients_(previous_level.levelCache().densityProfileCoefficients())
-    , sin_theta_(current_grid.ntheta())
-    , cos_theta_(current_grid.ntheta())
+    , sin_theta_("sin_theta", current_grid.ntheta())
+    , cos_theta_("cos_theta", current_grid.ntheta())
     , cache_density_profile_coefficients_(previous_level.levelCache().cacheDensityProfileCoefficients())
-    , coeff_alpha_(previous_level.levelCache().coeff_alpha().size() > 0 ? current_grid.numberOfNodes() : 0)
-    , coeff_beta_(previous_level.levelCache().coeff_beta().size() > 0 ? current_grid.numberOfNodes() : 0)
+    , coeff_alpha_("coeff_alpha",
+                   previous_level.levelCache().coeff_alpha().size() > 0 ? current_grid.numberOfNodes() : 0)
+    , coeff_beta_("coeff_beta", previous_level.levelCache().coeff_beta().size() > 0 ? current_grid.numberOfNodes() : 0)
     , cache_domain_geometry_(previous_level.levelCache().cacheDomainGeometry())
-    , arr_(previous_level.levelCache().arr().size() > 0 ? current_grid.numberOfNodes() : 0)
-    , att_(previous_level.levelCache().att().size() > 0 ? current_grid.numberOfNodes() : 0)
-    , art_(previous_level.levelCache().art().size() > 0 ? current_grid.numberOfNodes() : 0)
-    , detDF_(previous_level.levelCache().detDF().size() > 0 ? current_grid.numberOfNodes() : 0)
+    , arr_("arr", previous_level.levelCache().arr().size() > 0 ? current_grid.numberOfNodes() : 0)
+    , att_("att", previous_level.levelCache().att().size() > 0 ? current_grid.numberOfNodes() : 0)
+    , art_("art", previous_level.levelCache().art().size() > 0 ? current_grid.numberOfNodes() : 0)
+    , detDF_("detDF", previous_level.levelCache().detDF().size() > 0 ? current_grid.numberOfNodes() : 0)
 {
     const auto& previous_level_cache = previous_level.levelCache();
 
     for (int i_theta = 0; i_theta < current_grid.ntheta(); i_theta++) {
         const double theta  = current_grid.theta(i_theta);
-        sin_theta_[i_theta] = previous_level_cache.sin_theta()[2 * i_theta];
-        cos_theta_[i_theta] = previous_level_cache.cos_theta()[2 * i_theta];
+        sin_theta_(i_theta) = previous_level_cache.sin_theta()[2 * i_theta];
+        cos_theta_(i_theta) = previous_level_cache.cos_theta()[2 * i_theta];
     }
 
     if (previous_level_cache.cacheDensityProfileCoefficients()) {
@@ -162,11 +164,11 @@ const DomainGeometry& LevelCache::domainGeometry() const
     return domain_geometry_;
 }
 
-const std::vector<double>& LevelCache::sin_theta() const
+const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> LevelCache::sin_theta() const
 {
     return sin_theta_;
 }
-const std::vector<double>& LevelCache::cos_theta() const
+const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> LevelCache::cos_theta() const
 {
     return cos_theta_;
 }
@@ -175,11 +177,11 @@ bool LevelCache::cacheDensityProfileCoefficients() const
 {
     return cache_density_profile_coefficients_;
 }
-const Vector<double>& LevelCache::coeff_alpha() const
+const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> LevelCache::coeff_alpha() const
 {
     return coeff_alpha_;
 }
-const Vector<double>& LevelCache::coeff_beta() const
+const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> LevelCache::coeff_beta() const
 {
     return coeff_beta_;
 }
@@ -188,19 +190,19 @@ bool LevelCache::cacheDomainGeometry() const
 {
     return cache_domain_geometry_;
 }
-const Vector<double>& LevelCache::arr() const
+const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> LevelCache::arr() const
 {
     return arr_;
 }
-const Vector<double>& LevelCache::att() const
+const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> LevelCache::att() const
 {
     return att_;
 }
-const Vector<double>& LevelCache::art() const
+const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> LevelCache::art() const
 {
     return art_;
 }
-const Vector<double>& LevelCache::detDF() const
+const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> LevelCache::detDF() const
 {
     return detDF_;
 }

@@ -57,8 +57,8 @@ int main(int argc, char* argv[])
     solver.solve(parser.boundaryConditions(), parser.sourceTerm());
 
     // --- Retrieve solution and associated grid --- //
-    Vector<double>& solution = solver.solution();
-    const PolarGrid& grid    = solver.grid();
+    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solution = solver.solution();
+    const PolarGrid& grid                                                  = solver.grid();
 
     // Finalize LIKWID performance markers
     LIKWID_CLOSE();
