@@ -7,7 +7,7 @@ option(GMGPOLAR_USE_LIKWID "Use LIKWID to measure code (regions)." OFF)
 option(GMGPOLAR_USE_MUMPS "Use MUMPS to solve linear systems." OFF)
 option(GMGPOLAR_ENABLE_COVERAGE "Enable code coverage reporting (requires GCC/Clang)" OFF)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
