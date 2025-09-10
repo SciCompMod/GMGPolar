@@ -112,8 +112,10 @@
         }                                                                                                                               \
     } while (0)
 
-void ResidualTake::applyCircleSection(const int i_r, Vector<double>& result, const Vector<double>& rhs,
-                                      const Vector<double>& x) const
+void ResidualTake::applyCircleSection(const int i_r,
+                                      Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
+                                      const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
+                                      const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -130,8 +132,10 @@ void ResidualTake::applyCircleSection(const int i_r, Vector<double>& result, con
     }
 }
 
-void ResidualTake::applyRadialSection(const int i_theta, Vector<double>& result, const Vector<double>& rhs,
-                                      const Vector<double>& x) const
+void ResidualTake::applyRadialSection(const int i_theta,
+                                      Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
+                                      const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
+                                      const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());

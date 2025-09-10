@@ -10,11 +10,15 @@ public:
                           const int num_omp_threads);
     ~ResidualTake() override = default;
 
-    void computeResidual(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const override;
+    void computeResidual(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
+                         const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
+                         const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const override;
 
 private:
-    void applyCircleSection(const int i_r, Vector<double>& result, const Vector<double>& rhs,
-                            const Vector<double>& x) const;
-    void applyRadialSection(const int i_theta, Vector<double>& result, const Vector<double>& rhs,
-                            const Vector<double>& x) const;
+    void applyCircleSection(const int i_r, Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
+                            const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
+                            const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const;
+    void applyRadialSection(const int i_theta, Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
+                            const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
+                            const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const;
 };

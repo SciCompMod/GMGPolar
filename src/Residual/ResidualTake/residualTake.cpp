@@ -11,7 +11,7 @@ ResidualTake::ResidualTake(const PolarGrid& grid, const LevelCache& level_cache,
 /* result = rhs - A*x */
 
 // clang-format off
-void ResidualTake::computeResidual(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const
+void ResidualTake::computeResidual(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result, const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs, const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const
 {
     assert(result.size() == x.size());
 

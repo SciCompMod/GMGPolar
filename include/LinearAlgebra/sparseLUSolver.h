@@ -22,6 +22,7 @@
 
 #include "csr_matrix.h"
 #include "vector.h"
+#include <Kokkos_Core.hpp>
 
 /**
  * @brief Sparse LU decomposition solver for symmetric positive definite matrices.
@@ -76,7 +77,7 @@ public:
      *
      * @param b Right-hand side vector (modified in place to contain the solution).
      */
-    void solveInPlace(Vector<T>& b) const;
+    void solveInPlace(Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> b) const;
     void solveInPlace(T* b) const;
 
 private:
@@ -301,8 +302,8 @@ void SparseLUSolver<T>::solveInPlace(T* b) const
 }
 
 template <typename T>
-void SparseLUSolver<T>::solveInPlace(Vector<T>& b) const
+void SparseLUSolver<T>::solveInPlace(Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> b) const
 {
-    assert(b.size() == static_cast<int>(L_row_ptr.size()) - 1);
-    solveInPlace(b.begin());
+    assert(b.extent(0) == static_cast<int>(L_row_ptr.size()) - 1);
+    solveInPlace(b.data());
 }
