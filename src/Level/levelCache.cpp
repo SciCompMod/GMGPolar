@@ -164,11 +164,11 @@ const DomainGeometry& LevelCache::domainGeometry() const
     return domain_geometry_;
 }
 
-const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> LevelCache::sin_theta() const
+const Vector<double> LevelCache::sin_theta() const
 {
     return sin_theta_;
 }
-const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> LevelCache::cos_theta() const
+const Vector<double> LevelCache::cos_theta() const
 {
     return cos_theta_;
 }
@@ -177,11 +177,11 @@ bool LevelCache::cacheDensityProfileCoefficients() const
 {
     return cache_density_profile_coefficients_;
 }
-const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> LevelCache::coeff_alpha() const
+const Vector<double> LevelCache::coeff_alpha() const
 {
     return coeff_alpha_;
 }
-const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> LevelCache::coeff_beta() const
+const Vector<double> LevelCache::coeff_beta() const
 {
     return coeff_beta_;
 }
@@ -190,19 +190,19 @@ bool LevelCache::cacheDomainGeometry() const
 {
     return cache_domain_geometry_;
 }
-const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> LevelCache::arr() const
+const Vector<double> LevelCache::arr() const
 {
     return arr_;
 }
-const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> LevelCache::att() const
+const Vector<double> LevelCache::att() const
 {
     return att_;
 }
-const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> LevelCache::art() const
+const Vector<double> LevelCache::art() const
 {
     return art_;
 }
-const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> LevelCache::detDF() const
+const Vector<double> LevelCache::detDF() const
 {
     return detDF_;
 }

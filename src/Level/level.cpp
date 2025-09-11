@@ -47,35 +47,35 @@ const LevelCache& Level::levelCache() const
     return *level_cache_;
 }
 
-Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> Level::rhs()
+Vector<double> Level::rhs()
 {
     return rhs_;
 }
-const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> Level::rhs() const
+const Vector<double> Level::rhs() const
 {
     return rhs_;
 }
-Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> Level::solution()
+Vector<double> Level::solution()
 {
     return solution_;
 }
-const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> Level::solution() const
+const Vector<double> Level::solution() const
 {
     return solution_;
 }
-Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> Level::residual()
+Vector<double> Level::residual()
 {
     return residual_;
 }
-const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> Level::residual() const
+const Vector<double> Level::residual() const
 {
     return residual_;
 }
-Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> Level::error_correction()
+Vector<double> Level::error_correction()
 {
     return error_correction_;
 }
-const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> Level::error_correction() const
+const Vector<double> Level::error_correction() const
 {
     return error_correction_;
 }
@@ -98,9 +98,7 @@ void Level::initializeResidual(const DomainGeometry& domain_geometry,
     if (!op_residual_)
         throw std::runtime_error("Failed to initialize Residual.");
 }
-void Level::computeResidual(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
-                            const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
-                            const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const
+void Level::computeResidual(Vector<double> result, const Vector<double> rhs, const Vector<double> x) const
 {
     if (!op_residual_)
         throw std::runtime_error("Residual not initialized.");
@@ -137,7 +135,7 @@ void Level::initializeDirectSolver(const DomainGeometry& domain_geometry,
         throw std::runtime_error("Failed to initialize Direct Solver.");
 }
 
-void Level::directSolveInPlace(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const
+void Level::directSolveInPlace(Vector<double> x) const
 {
     if (!op_directSolver_)
         throw std::runtime_error("Coarse Solver not initialized.");
@@ -162,9 +160,7 @@ void Level::initializeSmoothing(const DomainGeometry& domain_geometry,
     if (!op_smoother_)
         throw std::runtime_error("Failed to initialize Smoother.");
 }
-void Level::smoothing(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
-                      const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
-                      Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp) const
+void Level::smoothing(Vector<double> x, const Vector<double> rhs, Vector<double> temp) const
 {
     if (!op_smoother_)
         throw std::runtime_error("Smoother not initialized.");
@@ -189,9 +185,7 @@ void Level::initializeExtrapolatedSmoothing(const DomainGeometry& domain_geometr
     if (!op_extrapolated_smoother_)
         throw std::runtime_error("Failed to initialize Extrapolated Smoother.");
 }
-void Level::extrapolatedSmoothing(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
-                                  const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
-                                  Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp) const
+void Level::extrapolatedSmoothing(Vector<double> x, const Vector<double> rhs, Vector<double> temp) const
 {
     if (!op_extrapolated_smoother_)
         throw std::runtime_error("Extrapolated Smoother not initialized.");
