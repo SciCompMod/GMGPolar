@@ -26,9 +26,9 @@ public:
                       const int num_omp_threads);
     virtual ~Residual() = default;
 
-    virtual void computeResidual(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
-                                 const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
-                                 const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const = 0;
+    virtual void computeResidual(Vector<double> result,
+                                 const Vector<double> rhs,
+                                 const Vector<double> x) const = 0;
 
 protected:
     /* ------------------- */
