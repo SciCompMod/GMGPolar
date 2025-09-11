@@ -23,9 +23,9 @@ ExtrapolatedSmootherGive::~ExtrapolatedSmootherGive()
 }
 
 void ExtrapolatedSmootherGive::extrapolatedSmoothing(
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
-    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp)
+    Vector<double> x,
+    const Vector<double> rhs,
+    Vector<double> temp)
 {
     extrapolatedSmoothingForLoop(x, rhs, temp); /* This is the fastest option */
     // extrapolatedSmoothingTaskLoop(x, rhs, temp);

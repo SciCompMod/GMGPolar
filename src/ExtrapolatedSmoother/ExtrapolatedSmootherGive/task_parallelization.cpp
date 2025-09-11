@@ -5,9 +5,9 @@
 /* ------------------------------------ */
 
 void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskLoop(
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
-    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp)
+    Vector<double> x,
+    const Vector<double> rhs,
+    Vector<double> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
@@ -55,9 +55,9 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskLoop(
 
 #pragma omp parallel num_threads(num_omp_threads_)
         {
-            Vector<double> circle_solver_storage_1(grid_.ntheta());
-            Vector<double> circle_solver_storage_2(grid_.ntheta());
-            Vector<double> radial_solver_storage(grid_.lengthSmootherRadial());
+            Vector<double> circle_solver_storage_1("circle_solver_storage_1",grid_.ntheta());
+            Vector<double> circle_solver_storage_2("circle_solver_storage_2",grid_.ntheta());
+            Vector<double> radial_solver_storage("radial_solver_storage",grid_.lengthSmootherRadial());
 
 #pragma omp single
             {
@@ -273,9 +273,9 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskLoop(
 /* -------------------------------------------- */
 
 void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskDependencies(
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
-    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp)
+    Vector<double> x,
+    const Vector<double> rhs,
+    Vector<double> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
@@ -321,9 +321,9 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingTaskDependencies(
 
 #pragma omp parallel num_threads(num_omp_threads_)
         {
-            Vector<double> circle_solver_storage_1(grid_.ntheta());
-            Vector<double> circle_solver_storage_2(grid_.ntheta());
-            Vector<double> radial_solver_storage(grid_.lengthSmootherRadial());
+            Vector<double> circle_solver_storage_1("circle_solver_storage_1",grid_.ntheta());
+            Vector<double> circle_solver_storage_2("circle_solver_storage_2",grid_.ntheta());
+            Vector<double> radial_solver_storage("radial_solver_storage",grid_.lengthSmootherRadial());
 
 #pragma omp single
             {
