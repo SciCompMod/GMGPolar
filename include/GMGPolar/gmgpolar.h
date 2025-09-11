@@ -21,7 +21,6 @@ class LevelCache;
 #include "../LinearAlgebra/vector.h"
 #include "../LinearAlgebra/vector_operations.h"
 #include "../PolarGrid/polargrid.h"
-#include "../Utilities/cmdline.h"
 #include "../common/global_definitions.h"
 #include "test_cases.h"
 
@@ -255,10 +254,9 @@ private:
     /* ---------------------------------------------------- */
     /* Compute exact error if an exact solution is provided */
     // The results are stored as a pair: (weighted L2 error, infinity error).
-    std::vector<std::pair<double, double>> exact_errors_; // Only when exact solution provided
-    std::pair<double, double>
-    computeExactError(Level& level, const Vector<double> solution,
-                      Vector<double> error);
+    std::vector<std::pair<double, double>> exact_errors_;
+    std::pair<double, double> computeExactError(Level& level, const Vector<double>& solution, Vector<double> error,
+                                                const ExactSolution& exact_solution);
 
     /* ------------------------------------------------------------------------- */
     /* Compute the extrapolated residual: res_ex = 4/3 res_fine - 1/3 res_coarse */
@@ -268,7 +266,6 @@ private:
 
     /* --------------- */
     /* Setup Functions */
-    PolarGrid createFinestGrid();
     int chooseNumberOfLevels(const PolarGrid& finest_grid);
     void build_rhs_f(const Level& level, Vector<double> rhs_f,
                      const BoundaryConditions& boundary_conditions, const SourceTerm& source_term);
@@ -276,13 +273,18 @@ private:
 
     /* --------------- */
     /* Solve Functions */
-    void initializeSolution(const BoundaryConditions& boundary_conditions);
+    void initializeSolution();
+    double residualNorm(const ResidualNormType& norm_type, const Level& level, const Vector<double>& residual) const;
+    void evaluateExactError(Level& level, const ExactSolution& exact_solution);
+    void updateResidualNorms(Level& level, int iteration, double& initial_residual_norm, double& current_residual_norm,
+                             double& current_relative_residual_norm);
 
     /* ----------------- */
     /* Print information */
     void printSettings() const;
-    void printIterationHeader();
-    void printIterationInfo(int iteration, double current_residual_norm, double current_relative_residual_norm);
+    void printIterationHeader(const ExactSolution* exact_solution);
+    void printIterationInfo(int iteration, double current_residual_norm, double current_relative_residual_norm,
+                            const ExactSolution* exact_solution);
 
     /* ------------------- */
     /* Multigrid Functions */
