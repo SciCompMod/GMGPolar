@@ -11,9 +11,8 @@ runs:
     - name: Install Dependencies
       shell: bash
       run: |
-        sudo apt-get -qq update
-        sudo apt-get -qq -y install lcov
-        sudo apt-get -qq update  
+        apt-get -qq update
+        apt-get -qq -y install lcov
     - name: Download build test directory
       uses: actions/download-artifact@v4
       with:
@@ -28,7 +27,7 @@ runs:
       # does not return an error if a test fails
       run: |
         cd build/tests
-        sudo chmod a+x gmgpolar_tests
+        chmod a+x gmgpolar_tests
         ./gmgpolar_tests  --gtest_output="xml:testreport.xml"
     - name: Compute code coverage
       shell: bash
@@ -51,4 +50,4 @@ runs:
           build/coverage-filtered.info
           build/coverage
         if-no-files-found: error
-        retention-days: 1       
+        retention-days: 1

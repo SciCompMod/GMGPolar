@@ -70,7 +70,7 @@ if(GMGPOLAR_BUILD_TESTS)
             # Capture coverage data
             COMMAND ${LCOV_PATH} --directory ${CMAKE_BINARY_DIR} --capture 
                 --output-file ${CMAKE_BINARY_DIR}/coverage.info
-                --ignore-errors mismatch,unused
+                --ignore-errors gcov
                 --rc geninfo_unexecuted_blocks=1
             # Filter out system and unwanted directories
             COMMAND ${LCOV_PATH} --remove ${CMAKE_BINARY_DIR}/coverage.info
