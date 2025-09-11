@@ -27,9 +27,8 @@ Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int s
 /* In src/Interpolation/restriction.cpp the Restriction Operator is implemented with "Take". */
 /* Here we test against the "Give" version. */
 
-void applyExtrapolatedRestrictionGive0(const Level& fromLevel, const Level& toLevel,
-                                       Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
-                                       const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x)
+void applyExtrapolatedRestrictionGive0(const Level& fromLevel, const Level& toLevel, Vector<double> result,
+                                       const Vector<double> x)
 {
     assert(toLevel.level_depth() == fromLevel.level_depth() + 1);
 

@@ -327,21 +327,21 @@ TEST(SparseMatrixCSR, lu_solver_3x3)
                                    {triplet{0, 0, 2.0}, triplet{0, 2, -10.0}, triplet{1, 0, -1.0}, triplet{1, 1, 2.0},
                                     triplet{1, 2, -1.0}, triplet{2, 0, -7.0}, triplet{2, 2, 2.0}});
 
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs("rhs,3");
+    Vector<double> rhs("rhs,3");
     rhs(0)  = 1.0;
     rhs(1)  = -5;
     rhs(20) = 3.0;
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> exact_solution("exact solution", 3);
+    Vector<double> exact_solution("exact solution", 3);
     exact_solution(0) = -16.0 / 33.0;
     exact_solution(1) = -125.0 / 44.0;
     exact_solution(2) = -13.0 / 66.0;
 
     SparseLUSolver solver(matrix);
-    //solver.solveInPlace(rhs);
+    solver.solveInPlace(rhs);
 
-    /*EXPECT_DOUBLE_EQ(rhs[0], exact_solution[0]);
+    EXPECT_DOUBLE_EQ(rhs[0], exact_solution[0]);
     EXPECT_DOUBLE_EQ(rhs[1], exact_solution[1]);
-    EXPECT_DOUBLE_EQ(rhs[2], exact_solution[2]);*/
+    EXPECT_DOUBLE_EQ(rhs[2], exact_solution[2]);
 }
 
 TEST(SparseMatrixCSR, lu_solver_5x5)
@@ -355,25 +355,25 @@ TEST(SparseMatrixCSR, lu_solver_5x5)
                                     triplet{3, 2, -4.0}, triplet{3, 3, 6.0}, triplet{3, 4, 9.0}, triplet{4, 0, 2.0},
                                     triplet{4, 1, 4.0}, triplet{4, 3, -4.0}, triplet{4, 4, 9.0}});
 
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs("rhs", 5);
+    Vector<double> rhs("rhs", 5);
     rhs(0) = 1.0;
     rhs(1) = -5;
     rhs(2) = 3.0;
     rhs(3) = 7.0;
     rhs(4) = 2.0;
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> exact_solution("exact_solution", 5);
+    Vector<double> exact_solution("exact_solution", 5);
     exact_solution(0) = 2792.0 / 567.0;
     exact_solution(1) = -589.0 / 648.0;
     exact_solution(2) = -7615.0 / 1512.0;
     exact_solution(3) = -1013.0 / 1134.0;
     exact_solution(4) = -109.0 / 126.0;
 
-    /*SparseLUSolver solver(matrix);
+    SparseLUSolver solver(matrix);
     solver.solveInPlace(rhs);
 
-    EXPECT_DOUBLE_EQ(rhs[0], exact_solution[0]);
-    EXPECT_DOUBLE_EQ(rhs[1], exact_solution[1]);
-    EXPECT_DOUBLE_EQ(rhs[2], exact_solution[2]);
-    EXPECT_DOUBLE_EQ(rhs[3], exact_solution[3]);
-    EXPECT_DOUBLE_EQ(rhs[4], exact_solution[4]);*/
+    EXPECT_DOUBLE_EQ(rhs(0), exact_solution[0]);
+    EXPECT_DOUBLE_EQ(rhs(1), exact_solution[1]);
+    EXPECT_DOUBLE_EQ(rhs(2), exact_solution[2]);
+    EXPECT_DOUBLE_EQ(rhs(3), exact_solution[3]);
+    EXPECT_DOUBLE_EQ(rhs(4), exact_solution[4]);
 }

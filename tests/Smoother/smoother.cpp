@@ -28,7 +28,7 @@ namespace SmootherTest
 {
 Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed)
 {
-    Vector<double> x(grid.numberOfNodes());
+    Vector<double> x("x", grid.numberOfNodes());
     std::mt19937 gen(seed);
     std::uniform_real_distribution<double> dist(-100.0, 100.0);
     for (int i = 0; i < x.size(); ++i) {
@@ -202,9 +202,9 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior)
     Vector<double> discrete_solution = rhs;
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
 
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
@@ -282,9 +282,9 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior)
     Vector<double> discrete_solution = rhs;
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> smoother_solution("somoother_sol", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
 
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
@@ -362,9 +362,9 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin)
     Vector<double> discrete_solution = rhs;
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
 
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
@@ -442,9 +442,9 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin)
     Vector<double> discrete_solution = rhs;
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
 
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
@@ -521,9 +521,9 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior_SmallestGrid)
     Vector<double> discrete_solution = rhs;
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
 
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
@@ -600,9 +600,9 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior_SmallestGrid)
     Vector<double> discrete_solution = rhs;
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
 
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
@@ -679,9 +679,9 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin_SmallestGrid)
     Vector<double> discrete_solution = rhs;
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
 
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
@@ -758,9 +758,9 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin_SmallestGrid)
     Vector<double> discrete_solution = rhs;
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
 
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
@@ -840,9 +840,9 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior)
     Vector<double> discrete_solution = rhs;
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
 
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
@@ -920,9 +920,9 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior)
     Vector<double> discrete_solution = rhs;
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
 
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
@@ -1000,9 +1000,9 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin)
     Vector<double> discrete_solution = rhs;
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
 
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
@@ -1080,9 +1080,9 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin)
     Vector<double> discrete_solution = rhs;
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
 
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
@@ -1159,9 +1159,9 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior_SmallestGrid)
     Vector<double> discrete_solution = rhs;
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
 
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
@@ -1238,9 +1238,9 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior_SmallestGrid)
     Vector<double> discrete_solution = rhs;
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
 
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
@@ -1317,9 +1317,9 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin_SmallestGrid)
     Vector<double> discrete_solution = rhs;
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
 
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 
@@ -1396,9 +1396,9 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin_SmallestGrid)
     Vector<double> discrete_solution = rhs;
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
 
     smoother_solution = generate_random_sample_data(level.grid(), 69);
 

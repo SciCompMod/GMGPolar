@@ -48,11 +48,11 @@ namespace DirectSolverTestNoMumps
 {
 Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed)
 {
-    Vector<double> x(grid.numberOfNodes());
+    Vector<double> x("x", grid.numberOfNodes());
     std::mt19937 gen(seed);
     std::uniform_real_distribution<double> dist(-100.0, 100.0);
     for (int i = 0; i < x.size(); ++i) {
-        x[i] = dist(gen);
+        x(i) = dist(gen);
     }
     return x;
 }
@@ -215,7 +215,7 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, SequentialDirectSolverDirBC_Inter
     Vector<double> solution  = rhs;
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
@@ -259,7 +259,7 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, ParallelDirectSolverDirBC_Interio
     Vector<double> solution  = rhs;
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
@@ -303,7 +303,7 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, SequentialDirectSolverAcrossOrigi
     Vector<double> solution  = rhs;
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
@@ -347,7 +347,7 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, ParallelDirectSolverAcrossOrigin_
     Vector<double> solution  = rhs;
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
@@ -397,7 +397,7 @@ TEST(DirectSolverTestNoMumps_ShafranovGeometry, DirectSolverDirBC_Interior_Shafr
     Vector<double> solution  = rhs;
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
@@ -443,7 +443,7 @@ TEST(DirectSolverTestNoMumps_ShafranovGeometry, DirectSolverAcrossOrigin_Shafran
     Vector<double> solution  = rhs;
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
@@ -494,7 +494,7 @@ TEST(DirectSolverTestNoMumps_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGe
     Vector<double> solution  = rhs;
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
@@ -541,7 +541,7 @@ TEST(DirectSolverTestNoMumps_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeom
     Vector<double> solution  = rhs;
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
@@ -588,7 +588,7 @@ TEST(DirectSolverTestNoMumps_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGe
     Vector<double> solution  = rhs;
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
@@ -631,7 +631,7 @@ TEST(DirectSolverTestNoMumps_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeom
     Vector<double> solution  = rhs;
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
@@ -644,16 +644,16 @@ TEST(DirectSolverTestNoMumps_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeom
 TEST(DirectSolverTestNoMumps_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_CircularGeometry)
 {
     std::vector<double> radii  = {1e-5,          1.441 * 1e-5,
-                                  3.8833 * 1e-5, 8.7666 * 1e-5,
-                                  1.8533 * 1e-4, 3.806 * 1e-4,
-                                  7.713 * 1e-4,  1.55265 * 1e-3,
-                                  3.1153 * 1e-3, 6.2406 * 1e-3,
-                                  0.01249125,    0.0249925,
-                                  0.049995,      0.1,
-                                  0.2,           0.25,
-                                  0.5,           0.8,
-                                  0.9,           0.95,
-                                  1.2,           1.3};
+                                 3.8833 * 1e-5, 8.7666 * 1e-5,
+                                 1.8533 * 1e-4, 3.806 * 1e-4,
+                                 7.713 * 1e-4,  1.55265 * 1e-3,
+                                 3.1153 * 1e-3, 6.2406 * 1e-3,
+                                 0.01249125,    0.0249925,
+                                 0.049995,      0.1,
+                                 0.2,           0.25,
+                                 0.5,           0.8,
+                                 0.9,           0.95,
+                                 1.2,           1.3};
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
@@ -687,7 +687,7 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, DirectSolverAcrossOriginHigherPre
     Vector<double> solution  = rhs;
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-9);
@@ -731,7 +731,7 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, DirectSolverAcrossOriginHigherPre
     Vector<double> solution  = rhs;
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-10);
@@ -773,10 +773,10 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, SequentialDirectSolverDirBC_
                              maxOpenMPThreads);
 
     const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    Vector<double> solution(rhs);
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
@@ -820,7 +820,7 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, ParallelDirectSolverDirBC_In
     Vector<double> solution  = rhs;
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
@@ -864,7 +864,7 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, SequentialDirectSolverAcross
     Vector<double> solution  = rhs;
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
@@ -908,7 +908,7 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, ParallelDirectSolverAcrossOr
     Vector<double> solution  = rhs;
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
@@ -958,7 +958,7 @@ TEST(DirectSolverTakeCustomLUTest_ShafranovGeometry, DirectSolverDirBC_Interior_
     Vector<double> solution  = rhs;
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
@@ -1004,7 +1004,7 @@ TEST(DirectSolverTakeCustomLUTest_ShafranovGeometry, DirectSolverAcrossOrigin_Sh
     Vector<double> solution  = rhs;
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
@@ -1055,7 +1055,7 @@ TEST(DirectSolverTakeCustomLUTest_CzarnyGeometry, DirectSolverDirBC_Interior_Cza
     Vector<double> solution  = rhs;
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
@@ -1102,7 +1102,7 @@ TEST(DirectSolverTakeCustomLUTest_CzarnyGeometry, DirectSolverAcrossOrigin_Czarn
     Vector<double> solution  = rhs;
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
@@ -1149,7 +1149,7 @@ TEST(DirectSolverTakeCustomLUTest_CulhamGeometry, DirectSolverDirBC_Interior_Cul
     Vector<double> solution  = rhs;
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
@@ -1192,7 +1192,7 @@ TEST(DirectSolverTakeCustomLUTest_CulhamGeometry, DirectSolverAcrossOrigin_Culha
     Vector<double> solution  = rhs;
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
@@ -1203,16 +1203,16 @@ TEST(DirectSolverTakeCustomLUTest_CulhamGeometry, DirectSolverAcrossOrigin_Culha
 TEST(DirectSolverTakeCustomLUTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_CircularGeometry)
 {
     std::vector<double> radii  = {1e-5,          1.441 * 1e-5,
-                                  3.8833 * 1e-5, 8.7666 * 1e-5,
-                                  1.8533 * 1e-4, 3.806 * 1e-4,
-                                  7.713 * 1e-4,  1.55265 * 1e-3,
-                                  3.1153 * 1e-3, 6.2406 * 1e-3,
-                                  0.01249125,    0.0249925,
-                                  0.049995,      0.1,
-                                  0.2,           0.25,
-                                  0.5,           0.8,
-                                  0.9,           0.95,
-                                  1.2,           1.3};
+                                 3.8833 * 1e-5, 8.7666 * 1e-5,
+                                 1.8533 * 1e-4, 3.806 * 1e-4,
+                                 7.713 * 1e-4,  1.55265 * 1e-3,
+                                 3.1153 * 1e-3, 6.2406 * 1e-3,
+                                 0.01249125,    0.0249925,
+                                 0.049995,      0.1,
+                                 0.2,           0.25,
+                                 0.5,           0.8,
+                                 0.9,           0.95,
+                                 1.2,           1.3};
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
@@ -1246,7 +1246,7 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, DirectSolverAcrossOriginHigh
     Vector<double> solution  = rhs;
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-9);
@@ -1290,7 +1290,7 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, DirectSolverAcrossOriginHigh
     Vector<double> solution  = rhs;
     solver_op.solveInPlace(solution);
 
-    Vector<double> residuum(level.grid().numberOfNodes());
+    Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
