@@ -1,8 +1,8 @@
 #include "../../include/Interpolation/interpolation.h"
 
 void Interpolation::applyExtrapolatedProlongation0(
-    const Level& fromLevel, const Level& toLevel, Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
-    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const
+    const Level& fromLevel, const Level& toLevel, Vector<double> result,
+    const Vector<double> x) const
 {
     assert(toLevel.level_depth() == fromLevel.level_depth() - 1);
 
@@ -103,8 +103,8 @@ void Interpolation::applyExtrapolatedProlongation0(
     } while (0)
 
 void Interpolation::applyExtrapolatedProlongation(
-    const Level& fromLevel, const Level& toLevel, Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
-    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const
+    const Level& fromLevel, const Level& toLevel, Vector<double> result,
+    const Vector<double> x) const
 {
     assert(toLevel.level_depth() == fromLevel.level_depth() - 1);
 
