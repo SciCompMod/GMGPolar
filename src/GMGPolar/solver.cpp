@@ -353,8 +353,8 @@ bool GMGPolar::converged(const double& residual_norm, const double& relative_res
 }
 
 std::pair<double, double>
-GMGPolar::computeExactError(Level& level, const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solution,
-                            Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> error)
+GMGPolar::computeExactError(Level& level, const Vector<double> solution,
+                            Vector<double> error)
 {
     assert(exact_solution_ != nullptr);
 
@@ -399,8 +399,8 @@ GMGPolar::computeExactError(Level& level, const Kokkos::View<double*, Kokkos::La
 }
 
 void GMGPolar::extrapolatedResidual(
-    const int current_level, Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> residual,
-    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> residual_next_level)
+    const int current_level, Vector<double> residual,
+    const Vector<double> residual_next_level)
 {
     const PolarGrid& fineGrid   = levels_[current_level].grid();
     const PolarGrid& coarseGrid = levels_[current_level + 1].grid();

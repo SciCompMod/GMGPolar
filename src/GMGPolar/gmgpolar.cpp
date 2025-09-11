@@ -251,12 +251,12 @@ void GMGPolar::relativeTolerance(std::optional<double> tol)
 /* ---------------------------------------------------------------------- */
 /* Solution & Grid Access                                                 */
 /* ---------------------------------------------------------------------- */
-Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> GMGPolar::solution()
+Vector<double> GMGPolar::solution()
 {
     int level_depth = 0;
     return levels_[level_depth].solution();
 }
-const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> GMGPolar::solution() const
+const Vector<double> GMGPolar::solution() const
 {
     int level_depth = 0;
     return levels_[level_depth].solution();

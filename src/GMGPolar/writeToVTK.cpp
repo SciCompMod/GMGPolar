@@ -62,15 +62,15 @@ void GMGPolar::writeToVTK(const std::filesystem::path& file_path, const PolarGri
 }
 
 void GMGPolar::writeToVTK(const std::filesystem::path& file_path, const Level& level,
-                          const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> grid_function)
+                          const Vector<double> grid_function)
 {
     const PolarGrid& grid         = level.grid();
     const LevelCache& level_cache = level.levelCache();
 
     assert(grid.numberOfNodes() == grid_function.size());
 
-    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> sin_theta_cache = level_cache.sin_theta();
-    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> cos_theta_cache = level_cache.cos_theta();
+    const Vector<double> sin_theta_cache = level_cache.sin_theta();
+    const Vector<double> cos_theta_cache = level_cache.cos_theta();
 
     const auto filename = file_path.stem().string() + ".vtu";
 

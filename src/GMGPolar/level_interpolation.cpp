@@ -1,8 +1,8 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
 void GMGPolar::prolongation(const int current_level,
-                            Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
-                            const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const
+                            Vector<double> result,
+                            const Vector<double> x) const
 {
     assert(current_level < number_of_levels_ && 1 <= current_level);
     if (!interpolation_)
@@ -12,8 +12,8 @@ void GMGPolar::prolongation(const int current_level,
 }
 
 void GMGPolar::restriction(const int current_level,
-                           Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
-                           const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const
+                           Vector<double> result,
+                           const Vector<double> x) const
 {
     assert(current_level < number_of_levels_ - 1 && 0 <= current_level);
     if (!interpolation_)
@@ -22,8 +22,8 @@ void GMGPolar::restriction(const int current_level,
     interpolation_->applyRestriction(levels_[current_level], levels_[current_level + 1], result, x);
 }
 
-void GMGPolar::injection(const int current_level, Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
-                         const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const
+void GMGPolar::injection(const int current_level, Vector<double> result,
+                         const Vector<double> x) const
 {
     assert(current_level < number_of_levels_ - 1 && 0 <= current_level);
     if (!interpolation_)
@@ -33,8 +33,8 @@ void GMGPolar::injection(const int current_level, Kokkos::View<double*, Kokkos::
 }
 
 void GMGPolar::extrapolatedProlongation(const int current_level,
-                                        Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
-                                        const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const
+                                        Vector<double> result,
+                                        const Vector<double> x) const
 {
     assert(current_level < number_of_levels_ && 1 <= current_level);
     if (!interpolation_)
@@ -44,8 +44,8 @@ void GMGPolar::extrapolatedProlongation(const int current_level,
 }
 
 void GMGPolar::extrapolatedRestriction(const int current_level,
-                                       Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
-                                       const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const
+                                       Vector<double> result,
+                                       const Vector<double> x) const
 {
     assert(current_level < number_of_levels_ - 1 && 0 <= current_level);
     if (!interpolation_)
@@ -55,8 +55,8 @@ void GMGPolar::extrapolatedRestriction(const int current_level,
 }
 
 void GMGPolar::FMGInterpolation(const int current_level,
-                                Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
-                                const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const
+                                Vector<double> result,
+                                const Vector<double> x) const
 {
     assert(current_level < number_of_levels_ && 1 <= current_level);
     if (!interpolation_)

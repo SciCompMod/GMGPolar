@@ -1,6 +1,6 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
-void GMGPolar::build_rhs_f(const Level& level, Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs_f,
+void GMGPolar::build_rhs_f(const Level& level, Vector<double> rhs_f,
                            const BoundaryConditions& boundary_conditions, const SourceTerm& source_term)
 {
     const PolarGrid& grid = level.grid();
@@ -59,7 +59,7 @@ void GMGPolar::build_rhs_f(const Level& level, Kokkos::View<double*, Kokkos::Lay
     }
 }
 
-void GMGPolar::discretize_rhs_f(const Level& level, Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs_f)
+void GMGPolar::discretize_rhs_f(const Level& level, Vector<double> rhs_f)
 {
     const PolarGrid& grid = level.grid();
     assert(rhs_f.size() == grid.numberOfNodes());

@@ -149,8 +149,8 @@ public:
     /* Solution & Grid Access                                                 */
     /* ---------------------------------------------------------------------- */
     // Return a reference to the computed solution vector.
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solution();
-    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solution() const;
+    Vector<double> solution();
+    const Vector<double> solution() const;
 
     // Return the underlying cartesian mesh used for discretization.
     const PolarGrid& grid() const;
@@ -257,22 +257,22 @@ private:
     // The results are stored as a pair: (weighted L2 error, infinity error).
     std::vector<std::pair<double, double>> exact_errors_; // Only when exact solution provided
     std::pair<double, double>
-    computeExactError(Level& level, const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solution,
-                      Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> error);
+    computeExactError(Level& level, const Vector<double> solution,
+                      Vector<double> error);
 
     /* ------------------------------------------------------------------------- */
     /* Compute the extrapolated residual: res_ex = 4/3 res_fine - 1/3 res_coarse */
     void extrapolatedResidual(const int current_level,
-                              Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> residual,
-                              const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> residual_next_level);
+                              Vector<double> residual,
+                              const Vector<double> residual_next_level);
 
     /* --------------- */
     /* Setup Functions */
     PolarGrid createFinestGrid();
     int chooseNumberOfLevels(const PolarGrid& finest_grid);
-    void build_rhs_f(const Level& level, Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs_f,
+    void build_rhs_f(const Level& level, Vector<double> rhs_f,
                      const BoundaryConditions& boundary_conditions, const SourceTerm& source_term);
-    void discretize_rhs_f(const Level& level, Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs_f);
+    void discretize_rhs_f(const Level& level, Vector<double> rhs_f);
 
     /* --------------- */
     /* Solve Functions */
@@ -287,55 +287,55 @@ private:
     /* ------------------- */
     /* Multigrid Functions */
     void multigrid_V_Cycle(const int level_depth,
-                           Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solution,
-                           Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
-                           Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> residual);
+                           Vector<double> solution,
+                           Vector<double> rhs,
+                           Vector<double> residual);
     void multigrid_W_Cycle(const int level_depth,
-                           Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solution,
-                           Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
-                           Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> residual);
+                           Vector<double> solution,
+                           Vector<double> rhs,
+                           Vector<double> residual);
     void multigrid_F_Cycle(const int level_depth,
-                           Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solution,
-                           Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
-                           Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> residual);
+                           Vector<double> solution,
+                           Vector<double> rhs,
+                           Vector<double> residual);
     void
     implicitlyExtrapolatedMultigrid_V_Cycle(const int level_depth,
-                                            Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solution,
-                                            Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
-                                            Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> residual);
+                                            Vector<double> solution,
+                                            Vector<double> rhs,
+                                            Vector<double> residual);
     void
     implicitlyExtrapolatedMultigrid_W_Cycle(const int level_depth,
-                                            Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solution,
-                                            Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
-                                            Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> residual);
+                                            Vector<double> solution,
+                                            Vector<double> rhs,
+                                            Vector<double> residual);
     void
     implicitlyExtrapolatedMultigrid_F_Cycle(const int level_depth,
-                                            Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solution,
-                                            Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
-                                            Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> residual);
+                                            Vector<double> solution,
+                                            Vector<double> rhs,
+                                            Vector<double> residual);
 
     /* ----------------------- */
     /* Interpolation functions */
-    void prolongation(const int current_level, Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
-                      const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const;
-    void restriction(const int current_level, Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
-                     const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const;
-    void injection(const int current_level, Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
-                   const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const;
+    void prolongation(const int current_level, Vector<double> result,
+                      const Vector<double> x) const;
+    void restriction(const int current_level, Vector<double> result,
+                     const Vector<double> x) const;
+    void injection(const int current_level, Vector<double> result,
+                   const Vector<double> x) const;
     void extrapolatedProlongation(const int current_level,
-                                  Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
-                                  const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const;
+                                  Vector<double> result,
+                                  const Vector<double> x) const;
     void extrapolatedRestriction(const int current_level,
-                                 Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
-                                 const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const;
-    void FMGInterpolation(const int current_level, Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
-                          const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const;
+                                 Vector<double> result,
+                                 const Vector<double> x) const;
+    void FMGInterpolation(const int current_level, Vector<double> result,
+                          const Vector<double> x) const;
 
     /* ------------- */
     /* Visualization */
     void writeToVTK(const std::filesystem::path& file_path, const PolarGrid& grid);
     void writeToVTK(const std::filesystem::path& file_path, const Level& level,
-                    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> grid_function);
+                    const Vector<double> grid_function);
 
     /* ------------------------------ */
     /* Timing statistics for GMGPolar */
