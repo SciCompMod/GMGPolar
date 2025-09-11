@@ -309,8 +309,6 @@ T& SymmetricTridiagonalSolver<T>::cyclic_corner_element()
 template <typename T>
 void SymmetricTridiagonalSolver<T>::solveInPlace(T* sol_rhs, T* temp1, T* temp2)
 {
-        std::cout<<" ENTER in SOLVEINPLACE  SymmetricTridiagonalSolve "<<std::endl;
-
     assert(matrix_dimension_ >= 2);
     assert(sol_rhs != nullptr);
     assert(temp1 != nullptr);
