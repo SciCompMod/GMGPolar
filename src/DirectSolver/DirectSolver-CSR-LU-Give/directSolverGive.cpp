@@ -10,9 +10,16 @@ DirectSolverGiveCustomLU::DirectSolverGiveCustomLU(const PolarGrid& grid, const 
     lu_solver_     = SparseLUSolver<double>(solver_matrix_);
 }
 
-void DirectSolverGiveCustomLU::solveInPlace(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solution)
+void DirectSolverGiveCustomLU::solveInPlace(Vector<double> solution)
 {
+            std::cout<<" ENTER in SOLVEINPLACE  DirectSolverGiveCustomLU "<<std::endl;
+ std::cout<<" solution(0) before  "<< solution(0)<<std::endl;
+ std::cout<<" solution(1) before "<< solution(1)<<std::endl;
+
+
     lu_solver_.solveInPlace(solution);
+    std::cout<<" solution(0) AFTER  "<< solution(0)<<std::endl;
+ std::cout<<" solution(1) AFTER "<< solution(1)<<std::endl;
 }
 
 DirectSolverGiveCustomLU::~DirectSolverGiveCustomLU()

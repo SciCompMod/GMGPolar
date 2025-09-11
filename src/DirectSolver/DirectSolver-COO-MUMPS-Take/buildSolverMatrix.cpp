@@ -43,23 +43,23 @@
                 const int top_left_index     = grid.index(i_r - 1, i_theta_P1);                                         \
                 const int top_right_index    = grid.index(i_r + 1, i_theta_P1);                                         \
                                                                                                                         \
-                const double left_value   = -coeff1 * (arr[center_index] + arr[left_index]); /* Left */                 \
-                const double right_value  = -coeff2 * (arr[center_index] + arr[right_index]); /* Right */               \
-                const double bottom_value = -coeff3 * (att[center_index] + att[bottom_index]); /* Bottom */             \
-                const double top_value    = -coeff4 * (att[center_index] + att[top_index]); /* Top */                   \
+                const double left_value   = -coeff1 * (arr(center_index) + arr(left_index)); /* Left */                 \
+                const double right_value  = -coeff2 * (arr(center_index) + arr(right_index)); /* Right */               \
+                const double bottom_value = -coeff3 * (att(center_index) + att(bottom_index)); /* Bottom */             \
+                const double top_value    = -coeff4 * (att(center_index) + att(top_index)); /* Top */                   \
                                                                                                                         \
                 const double center_value = (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] *                 \
-                                                 fabs(detDF[center_index]) /* beta_{i,j} */                             \
+                                                 fabs(detDF(center_index]) /* beta_{i,j} */                             \
                                              - left_value /* Center: (Left) */                                          \
                                              - right_value /* Center: (Right) */                                        \
                                              - bottom_value /* Center: (Bottom) */                                      \
                                              - top_value /* Center: (Top) */                                            \
                 );                                                                                                      \
                                                                                                                         \
-                const double bottom_left_value  = -0.25 * (art[left_index] + art[bottom_index]); /* Bottom Left */      \
-                const double bottom_right_value = +0.25 * (art[right_index] + art[bottom_index]); /* Bottom Right */    \
-                const double top_left_value     = +0.25 * (art[left_index] + art[top_index]); /* Top Left */            \
-                const double top_right_value    = -0.25 * (art[right_index] + art[top_index]); /* Top Right */          \
+                const double bottom_left_value  = -0.25 * (art(left_index) + art(bottom_index)); /* Bottom Left */      \
+                const double bottom_right_value = +0.25 * (art(right_index) + art(bottom_index)); /* Bottom Right */    \
+                const double top_left_value     = +0.25 * (art(left_index) + art(top_index)); /* Top Left */            \
+                const double top_right_value    = -0.25 * (art(right_index) + art(top_index)); /* Top Right */          \
                                                                                                                         \
                 /* Fill matrix row of (i,j) */                                                                          \
                 row = center_index;                                                                                     \
@@ -168,13 +168,13 @@
                     const int bottom_right_index = grid.index(i_r + 1, i_theta_M1);                                     \
                     const int top_right_index    = grid.index(i_r + 1, i_theta_P1);                                     \
                                                                                                                         \
-                    const double left_value   = -coeff1 * (arr[center_index] + arr[left_index]); /* Left */             \
-                    const double right_value  = -coeff2 * (arr[center_index] + arr[right_index]); /* Right */           \
-                    const double bottom_value = -coeff3 * (att[center_index] + att[bottom_index]); /* Bottom */         \
-                    const double top_value    = -coeff4 * (att[center_index] + att[top_index]); /* Top */               \
+                    const double left_value   = -coeff1 * (arr(center_index) + arr(left_index)); /* Left */             \
+                    const double right_value  = -coeff2 * (arr(center_index) + arr(right_index)); /* Right */           \
+                    const double bottom_value = -coeff3 * (att(center_index) + att(bottom_index)); /* Bottom */         \
+                    const double top_value    = -coeff4 * (att(center_index) + att(top_index)); /* Top */               \
                                                                                                                         \
                     const double center_value = (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] *             \
-                                                     fabs(detDF[center_index]) /* beta_{i,j} */                         \
+                                                     fabs(detDF(center_index)) /* beta_{i,j} */                         \
                                                  - left_value /* Center: (Left) */                                      \
                                                  - right_value /* Center: (Right) */                                    \
                                                  - bottom_value /* Center: (Bottom) */                                  \
@@ -182,8 +182,8 @@
                     );                                                                                                  \
                                                                                                                         \
                     const double bottom_right_value =                                                                   \
-                        +0.25 * (art[right_index] + art[bottom_index]); /* Bottom Right */                              \
-                    const double top_right_value = -0.25 * (art[right_index] + art[top_index]); /* Top Right */         \
+                        +0.25 * (art(right_index) + art(bottom_index)); /* Bottom Right */                              \
+                    const double top_right_value = -0.25 * (art(right_index) + art(top_index)); /* Top Right */         \
                                                                                                                         \
                     /* Fill matrix row of (i,j) */                                                                      \
                     row = center_index;                                                                                 \
@@ -259,23 +259,23 @@
                 const int top_left_index     = grid.index(i_r - 1, i_theta_P1);                                         \
                 const int top_right_index    = grid.index(i_r + 1, i_theta_P1);                                         \
                                                                                                                         \
-                const double left_value   = -coeff1 * (arr[center_index] + arr[left_index]); /* Left */                 \
-                const double right_value  = -coeff2 * (arr[center_index] + arr[right_index]); /* Right */               \
-                const double bottom_value = -coeff3 * (att[center_index] + att[bottom_index]); /* Bottom */             \
-                const double top_value    = -coeff4 * (att[center_index] + att[top_index]); /* Top */                   \
+                const double left_value   = -coeff1 * (arr(center_index) + arr(left_index)); /* Left */                 \
+                const double right_value  = -coeff2 * (arr(center_index) + arr(right_index)); /* Right */               \
+                const double bottom_value = -coeff3 * (att(center_index) + att(bottom_index)); /* Bottom */             \
+                const double top_value    = -coeff4 * (att(center_index) + att(top_index)); /* Top */                   \
                                                                                                                         \
                 const double center_value = (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] *                 \
-                                                 fabs(detDF[center_index]) /* beta_{i,j} */                             \
+                                                 fabs(detDF(center_index)) /* beta_{i,j} */                             \
                                              - left_value /* Center: (Left) */                                          \
                                              - right_value /* Center: (Right) */                                        \
                                              - bottom_value /* Center: (Bottom) */                                      \
                                              - top_value /* Center: (Top) */                                            \
                 );                                                                                                      \
                                                                                                                         \
-                const double bottom_left_value  = -0.25 * (art[left_index] + art[bottom_index]); /* Bottom Left */      \
-                const double bottom_right_value = +0.25 * (art[right_index] + art[bottom_index]); /* Bottom Right */    \
-                const double top_left_value     = +0.25 * (art[left_index] + art[top_index]); /* Top Left */            \
-                const double top_right_value    = -0.25 * (art[right_index] + art[top_index]); /* Top Right */          \
+                const double bottom_left_value  = -0.25 * (art(left_index) + art(bottom_index)); /* Bottom Left */      \
+                const double bottom_right_value = +0.25 * (art(right_index) + art(bottom_index)); /* Bottom Right */    \
+                const double top_left_value     = +0.25 * (art(left_index) + art(top_index)); /* Top Left */            \
+                const double top_right_value    = -0.25 * (art(right_index) + art(top_index)); /* Top Right */          \
                                                                                                                         \
                 /* Fill matrix row of (i,j) */                                                                          \
                 row = center_index;                                                                                     \
@@ -366,23 +366,23 @@
                 const int top_left_index     = grid.index(i_r - 1, i_theta_P1);                                         \
                 const int top_right_index    = grid.index(i_r + 1, i_theta_P1);                                         \
                                                                                                                         \
-                const double left_value   = -coeff1 * (arr[center_index] + arr[left_index]); /* Left */                 \
-                const double right_value  = -coeff2 * (arr[center_index] + arr[right_index]); /* Right */               \
-                const double bottom_value = -coeff3 * (att[center_index] + att[bottom_index]); /* Bottom */             \
-                const double top_value    = -coeff4 * (att[center_index] + att[top_index]); /* Top */                   \
+                const double left_value   = -coeff1 * (arr(center_index) + arr(left_index)); /* Left */                 \
+                const double right_value  = -coeff2 * (arr(center_index) + arr(right_index)); /* Right */               \
+                const double bottom_value = -coeff3 * (att(center_index) + att(bottom_index)); /* Bottom */             \
+                const double top_value    = -coeff4 * (att(center_index) + att(top_index)); /* Top */                   \
                                                                                                                         \
                 const double center_value = (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] *                 \
-                                                 fabs(detDF[center_index]) /* beta_{i,j} */                             \
+                                                 fabs(detDF(center_index)) /* beta_{i,j} */                             \
                                              - left_value /* Center: (Left) */                                          \
                                              - right_value /* Center: (Right) */                                        \
                                              - bottom_value /* Center: (Bottom) */                                      \
                                              - top_value /* Center: (Top) */                                            \
                 );                                                                                                      \
                                                                                                                         \
-                const double bottom_left_value  = -0.25 * (art[left_index] + art[bottom_index]); /* Bottom Left */      \
-                const double bottom_right_value = +0.25 * (art[right_index] + art[bottom_index]); /* Bottom Right */    \
-                const double top_left_value     = +0.25 * (art[left_index] + art[top_index]); /* Top Left */            \
-                const double top_right_value    = -0.25 * (art[right_index] + art[top_index]); /* Top Right */          \
+                const double bottom_left_value  = -0.25 * (art(left_index) + art(bottom_index)); /* Bottom Left */      \
+                const double bottom_right_value = +0.25 * (art(right_index) + art(bottom_index)); /* Bottom Right */    \
+                const double top_left_value     = +0.25 * (art(left_index) + art(top_index)); /* Top Left */            \
+                const double top_right_value    = -0.25 * (art(right_index) + art(top_index)); /* Top Right */          \
                                                                                                                         \
                 /* Fill matrix row of (i,j) */                                                                          \
                 row = center_index;                                                                                     \

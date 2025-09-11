@@ -10,7 +10,7 @@ DirectSolverTakeCustomLU::DirectSolverTakeCustomLU(const PolarGrid& grid, const 
     lu_solver_     = SparseLUSolver<double>(solver_matrix_);
 }
 
-void DirectSolverTakeCustomLU::solveInPlace(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solution)
+void DirectSolverTakeCustomLU::solveInPlace(Vector<double> solution)
 {
     lu_solver_.solveInPlace(solution);
 }
