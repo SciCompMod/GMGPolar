@@ -52,23 +52,23 @@ public:
     const PolarGrid& grid() const;
     const LevelCache& levelCache() const;
 
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs();
-    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs() const;
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solution();
-    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solution() const;
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> residual();
-    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> residual() const;
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> error_correction();
-    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> error_correction() const;
+    Vector<double> rhs();
+    const Vector<double> rhs() const;
+    Vector<double> solution();
+    const Vector<double> solution() const;
+    Vector<double> residual();
+    const Vector<double> residual() const;
+    Vector<double> error_correction();
+    const Vector<double> error_correction() const;
 
     // -------------- //
     // Apply Residual //
     void initializeResidual(const DomainGeometry& domain_geometry,
                             const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior,
                             const int num_omp_threads, const StencilDistributionMethod stencil_distribution_method);
-    void computeResidual(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
-                         const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
-                         const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const;
+    void computeResidual(Vector<double> result,
+                         const Vector<double> rhs,
+                         const Vector<double> x) const;
 
     // ------------------- //
     // Solve coarse System //
@@ -77,16 +77,16 @@ public:
                                 const bool DirBC_Interior, const int num_omp_threads,
                                 const StencilDistributionMethod stencil_distribution_method);
     // Note: The rhs (right-hand side) vector gets overwritten by the solution.
-    void directSolveInPlace(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x) const;
+    void directSolveInPlace(Vector<double> x) const;
 
     // --------------- //
     // Apply Smoothing //
     void initializeSmoothing(const DomainGeometry& domain_geometry,
                              const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior,
                              const int num_omp_threads, const StencilDistributionMethod stencil_distribution_method);
-    void smoothing(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
-                   const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
-                   Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp) const;
+    void smoothing(Vector<double> x,
+                   const Vector<double> rhs,
+                   Vector<double> temp) const;
 
     // ---------------------------- //
     // Apply Extrapolated Smoothing //
@@ -94,9 +94,9 @@ public:
                                          const DensityProfileCoefficients& density_profile_coefficients,
                                          const bool DirBC_Interior, const int num_omp_threads,
                                          const StencilDistributionMethod stencil_distribution_method);
-    void extrapolatedSmoothing(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
-                               const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
-                               Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp) const;
+    void extrapolatedSmoothing(Vector<double> x,
+                               const Vector<double> rhs,
+                               Vector<double> temp) const;
 
 private:
     const int level_depth_;
@@ -108,10 +108,10 @@ private:
     std::unique_ptr<Smoother> op_smoother_;
     std::unique_ptr<ExtrapolatedSmoother> op_extrapolated_smoother_;
 
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> const rhs_;
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solution_;
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> residual_;
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> error_correction_;
+    Vector<double> const rhs_;
+    Vector<double> solution_;
+    Vector<double> residual_;
+    Vector<double> error_correction_;
 };
 
 class LevelCache
@@ -125,18 +125,18 @@ public:
     const DomainGeometry& domainGeometry() const;
     const DensityProfileCoefficients& densityProfileCoefficients() const;
 
-    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> sin_theta() const;
-    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> cos_theta() const;
+    const Vector<double> sin_theta() const;
+    const Vector<double> cos_theta() const;
 
     bool cacheDensityProfileCoefficients() const;
-    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> coeff_alpha() const;
-    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> coeff_beta() const;
+    const Vector<double> coeff_alpha() const;
+    const Vector<double> coeff_beta() const;
 
     bool cacheDomainGeometry() const;
-    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> arr() const;
-    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> att() const;
-    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> art() const;
-    const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> detDF() const;
+    const Vector<double> arr() const;
+    const Vector<double> att() const;
+    const Vector<double> art() const;
+    const Vector<double> detDF() const;
 
     inline void obtainValues(const int i_r, const int i_theta, const int global_index, const double& r,
                              const double& theta, double& sin_theta, double& cos_theta, double& coeff_beta, double& arr,
@@ -174,16 +174,16 @@ private:
     const DomainGeometry& domain_geometry_;
     const DensityProfileCoefficients& density_profile_coefficients_;
 
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> sin_theta_;
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> cos_theta_;
+    Vector<double> sin_theta_;
+    Vector<double> cos_theta_;
 
     bool cache_density_profile_coefficients_; // cache alpha(r_i), beta(r_i)
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> coeff_alpha_;
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> coeff_beta_;
+    Vector<double> coeff_alpha_;
+    Vector<double> coeff_beta_;
 
     bool cache_domain_geometry_; // cache arr, att, art, detDF
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> arr_;
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> att_;
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> art_;
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> detDF_;
+    Vector<double> arr_;
+    Vector<double> att_;
+    Vector<double> art_;
+    Vector<double> detDF_;
 };
