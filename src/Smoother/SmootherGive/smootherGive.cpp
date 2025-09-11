@@ -20,9 +20,7 @@ SmootherGive::~SmootherGive()
 #endif
 }
 
-void SmootherGive::smoothing(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
-                             const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
-                             Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp)
+void SmootherGive::smoothing(Vector<double> x, const Vector<double> rhs, Vector<double> temp)
 {
     smoothingForLoop(x, rhs, temp); /* This is the fastest option */
     // smoothingTaskLoop(x, rhs, temp);

@@ -323,10 +323,8 @@
         }                                                                                                              \
     } while (0)
 
-void SmootherGive::applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color,
-                                              const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
-                                              const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
-                                              Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp)
+void SmootherGive::applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color, const Vector<double> x,
+                                              const Vector<double> rhs, Vector<double> temp)
 {
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles() + 1);
 
@@ -375,9 +373,7 @@ void SmootherGive::applyAscOrthoCircleSection(const int i_r, const SmootherColor
 }
 
 void SmootherGive::applyAscOrthoRadialSection(const int i_theta, const SmootherColor smoother_color,
-                                              const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
-                                              const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
-                                              Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp)
+                                              const Vector<double> x, const Vector<double> rhs, Vector<double> temp)
 {
     const auto& sin_theta_cache = level_cache_.sin_theta();
     const auto& cos_theta_cache = level_cache_.cos_theta();
@@ -422,10 +418,8 @@ void SmootherGive::applyAscOrthoRadialSection(const int i_theta, const SmootherC
     }
 }
 
-void SmootherGive::solveCircleSection(const int i_r, Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
-                                      Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp,
-                                      Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solver_storage_1,
-                                      Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solver_storage_2)
+void SmootherGive::solveCircleSection(const int i_r, Vector<double> x, Vector<double> temp,
+                                      Vector<double> solver_storage_1, Vector<double> solver_storage_2)
 {
     const int start = grid_.index(i_r, 0);
     const int end   = start + grid_.ntheta();
@@ -441,37 +435,32 @@ void SmootherGive::solveCircleSection(const int i_r, Kokkos::View<double*, Kokko
             std::cerr << "Error solving the system: " << inner_boundary_mumps_solver_.info[0] << std::endl;
         }
 #else
-        inner_boundary_lu_solver_.solveInPlace(temp.begin() + start);
+        inner_boundary_lu_solver_.solveInPlace(temp.data());
 #endif
     }
     else {
-        circle_tridiagonal_solver_[i_r].solveInPlace(temp.begin() + start, solver_storage_1.begin(),
-                                                     solver_storage_2.begin());
+        circle_tridiagonal_solver_[i_r].solveInPlace(temp.data(), solver_storage_1.data(), solver_storage_2.data());
     }
     // Move updated values to x
-    std::move(temp.begin() + start, temp.begin() + end, x.begin() + start);
+    Kokkos::deep_copy(x, temp);
 }
 
-void SmootherGive::solveRadialSection(const int i_theta,
-                                      Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
-                                      Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp,
-                                      Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> solver_storage)
+void SmootherGive::solveRadialSection(const int i_theta, Vector<double> x, Vector<double> temp,
+                                      Vector<double> solver_storage)
 {
     const int start = grid_.index(grid_.numberSmootherCircles(), i_theta);
     const int end   = start + grid_.lengthSmootherRadial();
 
-    radial_tridiagonal_solver_[i_theta].solveInPlace(temp.begin() + start, solver_storage.begin());
+    radial_tridiagonal_solver_[i_theta].solveInPlace(temp.data(), solver_storage.data());
     // Move updated values to x
-    std::move(temp.begin() + start, temp.begin() + end, x.begin() + start);
+    Kokkos::deep_copy(x, temp);
 }
 
 /* ------------------ */
 /* Sequential Version */
 /* ------------------ */
 
-void SmootherGive::smoothingSequential(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
-                                       const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
-                                       Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp)
+void SmootherGive::smoothingSequential(Vector<double> x, const Vector<double> rhs, Vector<double> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
@@ -479,9 +468,9 @@ void SmootherGive::smoothingSequential(Kokkos::View<double*, Kokkos::LayoutRight
     temp = rhs;
 
     /* Single-threaded execution */
-    Vector<double> circle_solver_storage_1(grid_.ntheta());
-    Vector<double> circle_solver_storage_2(grid_.ntheta());
-    Vector<double> radial_solver_storage(grid_.lengthSmootherRadial());
+    Vector<double> circle_solver_storage_1("circle_solver_storage_1", grid_.ntheta());
+    Vector<double> circle_solver_storage_2("circle_solver_storage_2", grid_.ntheta());
+    Vector<double> radial_solver_storage("radial_solver_storage", grid_.lengthSmootherRadial());
 
     /* ---------------------------- */
     /* ------ CIRCLE SECTION ------ */
@@ -522,7 +511,7 @@ void SmootherGive::smoothingSequential(Kokkos::View<double*, Kokkos::LayoutRight
 /* Parallelization Version 1: For Loops */
 /* ------------------------------------ */
 // clang-format off
-void SmootherGive::smoothingForLoop(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x, const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs, Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp)
+void SmootherGive::smoothingForLoop(Vector<double> x, const Vector<double> rhs, Vector<double> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
@@ -539,9 +528,9 @@ void SmootherGive::smoothingForLoop(Kokkos::View<double*, Kokkos::LayoutRight, K
 
         #pragma omp parallel num_threads(num_omp_threads_)
         {
-            Vector<double> circle_solver_storage_1(grid_.ntheta());
-            Vector<double> circle_solver_storage_2(grid_.ntheta());
-            Vector<double> radial_solver_storage(grid_.lengthSmootherRadial());
+            Vector<double> circle_solver_storage_1("circle_solver_storage_1",grid_.ntheta());
+            Vector<double> circle_solver_storage_2("circle_solver_storage_2",grid_.ntheta());
+            Vector<double> radial_solver_storage("radial_solver_storage",grid_.lengthSmootherRadial());
 
             /* ---------------------------- */
             /* ------ CIRCLE SECTION ------ */

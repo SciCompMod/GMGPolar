@@ -4,9 +4,7 @@
 /* Parallelization Version 2: Task Loop */
 /* ------------------------------------ */
 
-void SmootherGive::smoothingTaskLoop(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
-                                     const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
-                                     Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp)
+void SmootherGive::smoothingTaskLoop(Vector<double> x, const Vector<double> rhs, Vector<double> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
@@ -37,9 +35,9 @@ void SmootherGive::smoothingTaskLoop(Kokkos::View<double*, Kokkos::LayoutRight, 
 
 #pragma omp parallel num_threads(num_omp_threads_)
         {
-            Vector<double> circle_solver_storage_1(grid_.ntheta());
-            Vector<double> circle_solver_storage_2(grid_.ntheta());
-            Vector<double> radial_solver_storage(grid_.lengthSmootherRadial());
+            Vector<double> circle_solver_storage_1("circle_solver_storage_1", grid_.ntheta());
+            Vector<double> circle_solver_storage_2("circle_solver_storage_2", grid_.ntheta());
+            Vector<double> radial_solver_storage("radial_solver_storage", grid_.lengthSmootherRadial());
 
 #pragma omp single
             {
@@ -254,9 +252,7 @@ void SmootherGive::smoothingTaskLoop(Kokkos::View<double*, Kokkos::LayoutRight, 
 /* Parallelization Version 3: Task Dependencies */
 /* -------------------------------------------- */
 
-void SmootherGive::smoothingTaskDependencies(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
-                                             const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
-                                             Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp)
+void SmootherGive::smoothingTaskDependencies(Vector<double> x, const Vector<double> rhs, Vector<double> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
@@ -286,9 +282,9 @@ void SmootherGive::smoothingTaskDependencies(Kokkos::View<double*, Kokkos::Layou
 
 #pragma omp parallel num_threads(num_omp_threads_)
         {
-            Vector<double> circle_solver_storage_1(grid_.ntheta());
-            Vector<double> circle_solver_storage_2(grid_.ntheta());
-            Vector<double> radial_solver_storage(grid_.lengthSmootherRadial());
+            Vector<double> circle_solver_storage_1("circle_solver_storage_1", grid_.ntheta());
+            Vector<double> circle_solver_storage_2("circle_solver_storage_2", grid_.ntheta());
+            Vector<double> radial_solver_storage("radial_solver_storage", grid_.lengthSmootherRadial());
 
 #pragma omp single
             {

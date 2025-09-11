@@ -30,9 +30,9 @@ public:
                       int num_omp_threads);
     virtual ~Smoother() = default;
 
-    virtual void smoothing(Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> x,
-                           const Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs,
-                           Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::HostSpace> temp) = 0;
+    virtual void smoothing(Vector<double> x,
+                           const Vector<double> rhs,
+                           Vector<double> temp) = 0;
 
 protected:
     const PolarGrid& grid_;
