@@ -327,10 +327,10 @@ TEST(SparseMatrixCSR, lu_solver_3x3)
                                    {triplet{0, 0, 2.0}, triplet{0, 2, -10.0}, triplet{1, 0, -1.0}, triplet{1, 1, 2.0},
                                     triplet{1, 2, -1.0}, triplet{2, 0, -7.0}, triplet{2, 2, 2.0}});
 
-    Vector<double> rhs("rhs,3");
-    rhs(0)  = 1.0;
-    rhs(1)  = -5;
-    rhs(20) = 3.0;
+    Vector<double> rhs("rhs", 3);
+    rhs(0) = 1.0;
+    rhs(1) = -5;
+    rhs(2) = 3.0;
     Vector<double> exact_solution("exact solution", 3);
     exact_solution(0) = -16.0 / 33.0;
     exact_solution(1) = -125.0 / 44.0;
