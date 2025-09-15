@@ -11,7 +11,7 @@ namespace RestrictionTest
 // Function to generate sample data for vector x using random values with seed
 Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed)
 {
-    Vector<double> x(grid.numberOfNodes());
+    Vector<double> x("x", grid.numberOfNodes());
     std::mt19937 gen(seed); // Standard mersenne_twister_engine seeded with seed
     std::uniform_real_distribution<double> dist(0.0, 1.0); // Generate random double between 0 and 1
     for (int i = 0; i < x.size(); ++i) {
@@ -139,9 +139,9 @@ TEST(RestrictionTest, applyRestriction)
     Vector<double> x = generate_random_sample_data(finest_level.grid(), 42);
 
     // Apply prolongation to both functions
-    Vector<double> result1(coarse_level.grid().numberOfNodes());
-    Vector<double> result2(coarse_level.grid().numberOfNodes());
-    Vector<double> result3(coarse_level.grid().numberOfNodes());
+    Vector<double> result1("result1", coarse_level.grid().numberOfNodes());
+    Vector<double> result2("result2", coarse_level.grid().numberOfNodes());
+    Vector<double> result3("result3", coarse_level.grid().numberOfNodes());
 
     interpolation_operator.applyRestriction0(finest_level, coarse_level, result1, x);
     interpolation_operator.applyRestriction(finest_level, coarse_level, result2, x);
