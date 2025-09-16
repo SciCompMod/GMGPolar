@@ -435,14 +435,16 @@ void SmootherGive::solveCircleSection(const int i_r, Vector<double> x, Vector<do
             std::cerr << "Error solving the system: " << inner_boundary_mumps_solver_.info[0] << std::endl;
         }
 #else
-        inner_boundary_lu_solver_.solveInPlace(temp.data());
+        inner_boundary_lu_solver_.solveInPlace(temp.data() + start);
 #endif
     }
     else {
-        circle_tridiagonal_solver_[i_r].solveInPlace(temp.data(), solver_storage_1.data(), solver_storage_2.data());
+        circle_tridiagonal_solver_[i_r].solveInPlace(temp.data() + start, solver_storage_1.data(),
+                                                     solver_storage_2.data());
     }
     // Move updated values to x
-    Kokkos::deep_copy(x, temp);
+    Kokkos::deep_copy(Kokkos::subview(x, Kokkos::make_pair(start, end)),
+                      Kokkos::subview(temp, Kokkos::make_pair(start, end)));
 }
 
 void SmootherGive::solveRadialSection(const int i_theta, Vector<double> x, Vector<double> temp,
@@ -451,9 +453,10 @@ void SmootherGive::solveRadialSection(const int i_theta, Vector<double> x, Vecto
     const int start = grid_.index(grid_.numberSmootherCircles(), i_theta);
     const int end   = start + grid_.lengthSmootherRadial();
 
-    radial_tridiagonal_solver_[i_theta].solveInPlace(temp.data(), solver_storage.data());
+    radial_tridiagonal_solver_[i_theta].solveInPlace(temp.data() + start, solver_storage.data());
     // Move updated values to x
-    Kokkos::deep_copy(x, temp);
+    Kokkos::deep_copy(Kokkos::subview(x, Kokkos::make_pair(start, end)),
+                      Kokkos::subview(temp, Kokkos::make_pair(start, end)));
 }
 
 /* ------------------ */
@@ -465,7 +468,7 @@ void SmootherGive::smoothingSequential(Vector<double> x, const Vector<double> rh
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
-    temp = rhs;
+    Kokkos::deep_copy(temp, rhs);
 
     /* Single-threaded execution */
     Vector<double> circle_solver_storage_1("circle_solver_storage_1", grid_.ntheta());
@@ -520,8 +523,8 @@ void SmootherGive::smoothingForLoop(Vector<double> x, const Vector<double> rhs, 
         smoothingSequential(x, rhs, temp);
     }
     else {
-        temp = rhs;
-
+        Kokkos::deep_copy(temp,rhs);
+        
         /* Multi-threaded execution */
         const int num_circle_tasks = grid_.numberSmootherCircles();
         const int num_radial_tasks = grid_.ntheta();
