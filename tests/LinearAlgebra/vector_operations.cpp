@@ -7,15 +7,33 @@
 
 TEST(VectorOperations, equals_vector_vector)
 {
-    const Vector<double> v  = {1, 2, 3};
-    const Vector<double> v1 = {1, 2, 3};
-    const Vector<double> v2 = {1, 2, 3, 4};
-    const Vector<double> v3 = {1, 2};
-    const Vector<double> v4 = {1, 3, 3};
+    const Vector<double> v("v", 3);
+    const Vector<double> v1("v1", 3);
+    const Vector<double> v2("v2", 4);
+    const Vector<double> v3("v3", 2);
+    const Vector<double> v4("v4", 3);
+    v(0) = 1;
+    v(1) = 2;
+    v(2) = 3;
+
+    v1(0) = 1;
+    v1(1) = 2;
+    v1(2) = 3;
+
+    v2(0) = 1;
+    v2(1) = 2;
+    v2(2) = 3;
+    v2(3) = 4;
+
+    v3(0) = 1;
+    v3(1) = 2;
+
+    v4(0) = 1;
+    v4(1) = 3;
+    v4(2) = 3;
 
     EXPECT_TRUE(equals(v, v));
     EXPECT_TRUE(equals(v, v1));
-
     EXPECT_FALSE(equals(v, v2));
     EXPECT_FALSE(equals(v, v3));
     EXPECT_FALSE(equals(v, v4));
@@ -25,9 +43,13 @@ TEST(VectorOperations, equals_vector_vector)
 
 TEST(VectorOperations, assign_vector_scalar)
 {
-    Vector<double> v = {1, 2, 3};
+    Vector<double> v("v", 3);
+    v(0) = 1;
+    v(1) = 2;
+    v(2) = 3;
     assign(v, 5.0);
-    const Vector<double> expected_result = {5, 5, 5};
+    const Vector<double> expected_result("expected_result", 3);
+    Kokkos::deep_copy(expected_result, 5);
     EXPECT_TRUE(equals(v, expected_result));
 }
 
@@ -35,10 +57,21 @@ TEST(VectorOperations, assign_vector_scalar)
 
 TEST(VectorOperations, add_vector_vector)
 {
-    Vector<double> v1       = {1, 2, 3};
-    const Vector<double> v2 = {-1, -5, 2};
+    Vector<double> v1("v1", 3);
+    const Vector<double> v2("v2", 3);
+    v1(0) = 1;
+    v1(1) = 2;
+    v1(2) = 3;
+
+    v2(0) = -1;
+    v2(1) = -5;
+    v2(2) = 2;
     add(v1, v2);
-    const Vector<double> expected_result = {0, -3, 5};
+
+    const Vector<double> expected_result("expected_result", 3);
+    expected_result(0) = 0;
+    expected_result(1) = -3;
+    expected_result(2) = 5;
     EXPECT_TRUE(equals(v1, expected_result));
 }
 
@@ -46,10 +79,21 @@ TEST(VectorOperations, add_vector_vector)
 
 TEST(VectorOperations, subtract_vector_vector)
 {
-    Vector<double> v1       = {1, 2, 3};
-    const Vector<double> v2 = {-1, -5, 2};
+    Vector<double> v1("v1", 3);
+    const Vector<double> v2("v2", 3);
+    v1(0) = 1;
+    v1(1) = 2;
+    v1(2) = 3;
+
+    v2(0) = -1;
+    v2(1) = -5;
+    v2(2) = 2;
     subtract(v1, v2);
-    const Vector<double> expected_result = {2, 7, 1};
+
+    const Vector<double> expected_result("expected_result", 3);
+    expected_result(0) = 2;
+    expected_result(1) = 7;
+    expected_result(2) = 1;
     EXPECT_TRUE(equals(v1, expected_result));
 }
 
@@ -57,12 +101,22 @@ TEST(VectorOperations, subtract_vector_vector)
 
 TEST(VectorOperations, linear_combination)
 {
-    Vector<double> v1       = {1, 2, 3};
-    const Vector<double> v2 = {-1, -5, 2};
-    const double alpha      = -3.0;
-    const double beta       = 2.0;
+    Vector<double> v1("v1", 3);
+    const Vector<double> v2("v2", 3);
+    v1(0) = 1;
+    v1(1) = 2;
+    v1(2) = 3;
+
+    v2(0)              = -1;
+    v2(1)              = -5;
+    v2(2)              = 2;
+    const double alpha = -3.0;
+    const double beta  = 2.0;
     linear_combination(v1, alpha, v2, beta);
-    const Vector<double> expected_result = {-5.0, -16.0, -5.0};
+    const Vector<double> expected_result("expected_result", 3);
+    expected_result(0) = -5.;
+    expected_result(1) = -16.;
+    expected_result(2) = -5.;
     EXPECT_TRUE(equals(v1, expected_result));
 }
 
@@ -70,10 +124,16 @@ TEST(VectorOperations, linear_combination)
 
 TEST(VectorOperations, multiply_vector_scalar)
 {
-    Vector<double> v1  = {1, -2, 3};
+    Vector<double> v1("v1", 3);
+    v1(0)              = 1;
+    v1(1)              = -2;
+    v1(2)              = 3;
     const double alpha = -3.0;
     multiply(v1, alpha);
-    const Vector<double> expected_result = {-3.0, 6.0, -9.0};
+    const Vector<double> expected_result("expected_result", 3);
+    expected_result(0) = -3.;
+    expected_result(1) = 6.;
+    expected_result(2) = -9.;
     EXPECT_TRUE(equals(v1, expected_result));
 }
 
@@ -81,8 +141,14 @@ TEST(VectorOperations, multiply_vector_scalar)
 
 TEST(VectorOperations, dot_product)
 {
-    const Vector<double> v1 = {1, 2, 3};
-    const Vector<double> v2 = {1, 5, 2};
+    const Vector<double> v1("v1", 3);
+    v1(0) = 1;
+    v1(1) = 2;
+    v1(2) = 3;
+    const Vector<double> v2("v2", 3);
+    v2(0) = 1;
+    v2(1) = 5;
+    v2(2) = 2;
     EXPECT_DOUBLE_EQ(dot_product(v1, v2), 17.0);
 }
 
@@ -90,7 +156,10 @@ TEST(VectorOperations, dot_product)
 
 TEST(VectorOperations, l1_vector_norm)
 {
-    const Vector<double> v = {1, -5, 2};
+    const Vector<double> v("v", 3);
+    v(0) = 1;
+    v(1) = -5;
+    v(2) = 2;
     EXPECT_DOUBLE_EQ(l1_norm(v), 8.0);
 }
 
@@ -98,7 +167,10 @@ TEST(VectorOperations, l1_vector_norm)
 
 TEST(VectorOperations, l2_vector_norm_squared)
 {
-    const Vector<double> v = {1, -5, 2};
+    const Vector<double> v("v", 3);
+    v(0) = 1;
+    v(1) = -5;
+    v(2) = 2;
     EXPECT_DOUBLE_EQ(l2_norm_squared(v), 30.0);
 }
 
@@ -106,7 +178,10 @@ TEST(VectorOperations, l2_vector_norm_squared)
 
 TEST(VectorOperations, l2_vector_norm)
 {
-    const Vector<double> v = {1, -5, 2};
+    const Vector<double> v("v", 3);
+    v(0) = 1;
+    v(1) = -5;
+    v(2) = 2;
     EXPECT_DOUBLE_EQ(l2_norm(v), std::sqrt(30.0));
 }
 
@@ -114,6 +189,9 @@ TEST(VectorOperations, l2_vector_norm)
 
 TEST(VectorOperations, infinity_vector_norm)
 {
-    const Vector<double> v = {1, -5, 2};
+    const Vector<double> v("v", 3);
+    v(0) = 1;
+    v(1) = -5;
+    v(2) = 2;
     EXPECT_DOUBLE_EQ(infinity_norm(v), 5.0);
 }
