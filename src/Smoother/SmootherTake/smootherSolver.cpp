@@ -267,7 +267,8 @@ void SmootherTake::solveCircleSection(const int i_r, Vector<double> x, Vector<do
                                                      solver_storage_2.data());
     }
     // Move updated values to x
-    Kokkos::deep_copy(x, temp);
+    Kokkos::deep_copy(Kokkos::subview(x, Kokkos::make_pair(start, end)),
+                      Kokkos::subview(temp, Kokkos::make_pair(start, end)));
 }
 
 void SmootherTake::solveRadialSection(const int i_theta, Vector<double> x, Vector<double> temp,
@@ -278,7 +279,8 @@ void SmootherTake::solveRadialSection(const int i_theta, Vector<double> x, Vecto
 
     radial_tridiagonal_solver_[i_theta].solveInPlace(temp.data() + start, solver_storage.data());
     // Move updated values to x
-    Kokkos::deep_copy(x, temp);
+    Kokkos::deep_copy(Kokkos::subview(x, Kokkos::make_pair(start, end)),
+                      Kokkos::subview(temp, Kokkos::make_pair(start, end)));
 }
 
 // clang-format off

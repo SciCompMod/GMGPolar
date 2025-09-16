@@ -814,11 +814,9 @@
         }                                                                                                              \
     } while (0)
 
-void ExtrapolatedSmootherGive::applyAscOrthoCircleSection(
-    const int i_r, const SmootherColor smoother_color,
-    const Vector<double> x,
-    const Vector<double> rhs,
-    Vector<double> temp)
+void ExtrapolatedSmootherGive::applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color,
+                                                          const Vector<double> x, const Vector<double> rhs,
+                                                          Vector<double> temp)
 {
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles() + 1);
 
@@ -866,11 +864,9 @@ void ExtrapolatedSmootherGive::applyAscOrthoCircleSection(
     }
 }
 
-void ExtrapolatedSmootherGive::applyAscOrthoRadialSection(
-    const int i_theta, const SmootherColor smoother_color,
-    const Vector<double> x,
-    const Vector<double> rhs,
-    Vector<double> temp)
+void ExtrapolatedSmootherGive::applyAscOrthoRadialSection(const int i_theta, const SmootherColor smoother_color,
+                                                          const Vector<double> x, const Vector<double> rhs,
+                                                          Vector<double> temp)
 {
     const auto& sin_theta_cache = level_cache_.sin_theta();
     const auto& cos_theta_cache = level_cache_.cos_theta();
@@ -916,11 +912,8 @@ void ExtrapolatedSmootherGive::applyAscOrthoRadialSection(
     }
 }
 
-void ExtrapolatedSmootherGive::solveCircleSection(
-    const int i_r, Vector<double> x,
-    Vector<double> temp,
-    Vector<double> solver_storage_1,
-    Vector<double> solver_storage_2)
+void ExtrapolatedSmootherGive::solveCircleSection(const int i_r, Vector<double> x, Vector<double> temp,
+                                                  Vector<double> solver_storage_1, Vector<double> solver_storage_2)
 {
     const int start = grid_.index(i_r, 0);
     const int end   = start + grid_.ntheta();
@@ -941,32 +934,32 @@ void ExtrapolatedSmootherGive::solveCircleSection(
     }
     else {
         if (i_r & 1) {
-            circle_tridiagonal_solver_[i_r / 2].solveInPlace(temp.data(), solver_storage_1.data(),
+            circle_tridiagonal_solver_[i_r / 2].solveInPlace(temp.data() + start, solver_storage_1.data(),
                                                              solver_storage_2.data());
         }
         else {
-            circle_diagonal_solver_[i_r / 2].solveInPlace(temp.data());
+            circle_diagonal_solver_[i_r / 2].solveInPlace(temp.data() + start);
         }
     }
     // Move updated values to x
-    Kokkos::deep_copy(x,temp);
+    Kokkos::deep_copy(Kokkos::subview(x, Kokkos::make_pair(start, end)),
+                      Kokkos::subview(temp, Kokkos::make_pair(start, end)));
 }
 
-void ExtrapolatedSmootherGive::solveRadialSection(
-    const int i_theta, Vector<double> x,
-    Vector<double> temp,
-    Vector<double> solver_storage)
+void ExtrapolatedSmootherGive::solveRadialSection(const int i_theta, Vector<double> x, Vector<double> temp,
+                                                  Vector<double> solver_storage)
 {
     const int start = grid_.index(grid_.numberSmootherCircles(), i_theta);
     const int end   = start + grid_.lengthSmootherRadial();
     if (i_theta & 1) {
-        radial_tridiagonal_solver_[i_theta / 2].solveInPlace(temp.data(), solver_storage.data());
+        radial_tridiagonal_solver_[i_theta / 2].solveInPlace(temp.data() + start, solver_storage.data());
     }
     else {
-        radial_diagonal_solver_[i_theta / 2].solveInPlace(temp.data());
+        radial_diagonal_solver_[i_theta / 2].solveInPlace(temp.data() + start);
     }
     // Move updated values to x
-    Kokkos::deep_copy(x,temp);
+    Kokkos::deep_copy(Kokkos::subview(x, Kokkos::make_pair(start, end)),
+                      Kokkos::subview(temp, Kokkos::make_pair(start, end)));
 }
 
 // Quick overview:
@@ -978,10 +971,8 @@ void ExtrapolatedSmootherGive::solveRadialSection(
 /* Sequential Version */
 /* ------------------ */
 
-void ExtrapolatedSmootherGive::extrapolatedSmoothingSequential(
-    Vector<double> x,
-    const Vector<double> rhs,
-    Vector<double> temp)
+void ExtrapolatedSmootherGive::extrapolatedSmoothingSequential(Vector<double> x, const Vector<double> rhs,
+                                                               Vector<double> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
@@ -1001,12 +992,9 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingSequential(
     }
 
     /* Single-threaded execution */
-    Vector<double> circle_solver_storage_1("circle_solver_storage1",
-                                                                                          grid_.ntheta());
-    Vector<double> circle_solver_storage_2("circle_solver_storage1",
-                                                                                          grid_.ntheta());
-    Vector<double> radial_solver_storage("radial_solver_storage",
-                                                                                        grid_.lengthSmootherRadial());
+    Vector<double> circle_solver_storage_1("circle_solver_storage1", grid_.ntheta());
+    Vector<double> circle_solver_storage_2("circle_solver_storage1", grid_.ntheta());
+    Vector<double> radial_solver_storage("radial_solver_storage", grid_.lengthSmootherRadial());
 
     /* ---------------------------- */
     /* ------ CIRCLE SECTION ------ */
