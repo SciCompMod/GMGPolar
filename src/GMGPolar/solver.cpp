@@ -201,7 +201,7 @@ void GMGPolar::initializeSolution()
         coarsest_level.solution() = coarsest_level.rhs();
         coarsest_level.directSolveInPlace(coarsest_level.solution()); // Direct solve on coarsest grid
 
-        // Prolongate the solution from coarse to fine, applying multigrid cycles
+        // Prolongate the solution from the coarsest level up to the finest, while applying Multigrid Cycles on each level
         for (int depth = coarsest_depth; depth > 0; --depth) {
             Level& coarse_level = levels_[depth]; // Current coarse level
             Level& fine_level   = levels_[depth - 1]; // Next finer level
