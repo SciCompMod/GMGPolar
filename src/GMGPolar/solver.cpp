@@ -207,7 +207,7 @@ void GMGPolar::initializeSolution()
             Level& next_FMG_level = levels_[current_depth - 1]; // The finer level
 
             // The bi-cubic FMG interpolation is of higher order
-            FMGInterpolation(current_depth, next_FMG_level.solution(), FMG_level.solution());
+            FMGInterpolation(FMG_level.level_depth(), next_FMG_level.solution(), FMG_level.solution());
 
             // Apply some FMG iterations
             for (int i = 0; i < FMG_iterations_; i++) {
