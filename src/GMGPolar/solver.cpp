@@ -202,29 +202,29 @@ void GMGPolar::initializeSolution()
         FMG_level.directSolveInPlace(FMG_level.solution()); // Direct solve on coarsest grid
 
         // Prolongate the solution from the coarsest level up to the finest, while applying Multigrid Cycles on each level
-        for (int current_level = FMG_start_level_depth; current_level > 0; --current_level) {
-            Level& FMG_level      = levels_[current_level]; // The current level
-            Level& next_FMG_level = levels_[current_level - 1]; // The finer level
+        for (int current_depth = FMG_start_level_depth; current_depth > 0; --current_depth) {
+            Level& FMG_level      = levels_[current_depth]; // The current level
+            Level& next_FMG_level = levels_[current_depth - 1]; // The finer level
 
             // The bi-cubic FMG interpolation is of higher order
-            FMGInterpolation(current_level, next_FMG_level.solution(), FMG_level.solution());
+            FMGInterpolation(current_depth, next_FMG_level.solution(), FMG_level.solution());
 
             // Apply some FMG iterations
             for (int i = 0; i < FMG_iterations_; i++) {
-                if (current_level - 1 == 0 && (extrapolation_ != ExtrapolationType::NONE)) {
+                if (next_FMG_level.level_depth() == 0 && (extrapolation_ != ExtrapolationType::NONE)) {
                     switch (FMG_cycle_) {
                     case MultigridCycleType::V_CYCLE:
-                        implicitlyExtrapolatedMultigrid_V_Cycle(current_level - 1, next_FMG_level.solution(),
+                        implicitlyExtrapolatedMultigrid_V_Cycle(next_FMG_level.level_depth(), next_FMG_level.solution(),
                                                                 next_FMG_level.rhs(), next_FMG_level.residual());
                         break;
 
                     case MultigridCycleType::W_CYCLE:
-                        implicitlyExtrapolatedMultigrid_W_Cycle(current_level - 1, next_FMG_level.solution(),
+                        implicitlyExtrapolatedMultigrid_W_Cycle(next_FMG_level.level_depth(), next_FMG_level.solution(),
                                                                 next_FMG_level.rhs(), next_FMG_level.residual());
                         break;
 
                     case MultigridCycleType::F_CYCLE:
-                        implicitlyExtrapolatedMultigrid_F_Cycle(current_level - 1, next_FMG_level.solution(),
+                        implicitlyExtrapolatedMultigrid_F_Cycle(next_FMG_level.level_depth(), next_FMG_level.solution(),
                                                                 next_FMG_level.rhs(), next_FMG_level.residual());
                         break;
 
@@ -237,17 +237,17 @@ void GMGPolar::initializeSolution()
                 else {
                     switch (FMG_cycle_) {
                     case MultigridCycleType::V_CYCLE:
-                        multigrid_V_Cycle(current_level - 1, next_FMG_level.solution(), next_FMG_level.rhs(),
+                        multigrid_V_Cycle(next_FMG_level.level_depth(), next_FMG_level.solution(), next_FMG_level.rhs(),
                                           next_FMG_level.residual());
                         break;
 
                     case MultigridCycleType::W_CYCLE:
-                        multigrid_W_Cycle(current_level - 1, next_FMG_level.solution(), next_FMG_level.rhs(),
+                        multigrid_W_Cycle(next_FMG_level.level_depth(), next_FMG_level.solution(), next_FMG_level.rhs(),
                                           next_FMG_level.residual());
                         break;
 
                     case MultigridCycleType::F_CYCLE:
-                        multigrid_F_Cycle(current_level - 1, next_FMG_level.solution(), next_FMG_level.rhs(),
+                        multigrid_F_Cycle(next_FMG_level.level_depth(), next_FMG_level.solution(), next_FMG_level.rhs(),
                                           next_FMG_level.residual());
                         break;
 
