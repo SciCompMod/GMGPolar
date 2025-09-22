@@ -202,7 +202,7 @@ void GMGPolar::initializeSolution()
         FMG_level.directSolveInPlace(FMG_level.solution()); // Direct solve on coarsest grid
 
         // Prolongate the solution from the coarsest level up to the finest, while applying Multigrid Cycles on each level
-        for (int current_level = FMG_start_level_depth - 1; current_level > 0; --current_level) {
+        for (int current_level = FMG_start_level_depth; current_level > 0; --current_level) {
             Level& FMG_level      = levels_[current_level]; // The current level
             Level& next_FMG_level = levels_[current_level - 1]; // The finer level
 
