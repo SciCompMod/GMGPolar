@@ -18,7 +18,7 @@ bool equals(const Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> lhs,
 
     const std::size_t n = lhs.extent(0);
     for (std::size_t i = 0; i < n; ++i) {
-        if (!equals(lhs[i], rhs[i])) {
+        if (!equals(lhs(i), rhs(i))) {
             return false;
         }
     }
@@ -31,7 +31,7 @@ void assign(Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> lhs, const 
     std::size_t n = lhs.extent(0);
 #pragma omp parallel for if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
-        lhs[i] = value;
+        lhs(i) = value;
     }
 }
 
@@ -99,7 +99,7 @@ T dot_product(const Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> lhs
     std::size_t n = lhs.extent(0);
 #pragma omp parallel for reduction(+ : result) if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
-        result += lhs[i] * rhs[i];
+        result += lhs(i) * rhs(i);
     }
     return result;
 }
