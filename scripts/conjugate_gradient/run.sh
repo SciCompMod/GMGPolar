@@ -53,9 +53,9 @@ divideBy2=5
 DirBC_Interior=0
 
 ### Custom Test Cases ###
-geometry=3 # Circular (0), Shafranov(1), Czarny(2), Culham (3)
-problem=3 # CartesianR2(0), CartesianR6(1), PolarR6(2), RefinedRadius(3)
-alpha_coeff=3 # Poisson(0), Sonnendrucker(1), Zoni(2), Zoni-Shifted(3)
+geometry=2 # Circular (0), Shafranov(1), Czarny(2), Culham (3)
+problem=1 # CartesianR2(0), CartesianR6(1), PolarR6(2), RefinedRadius(3)
+alpha_coeff=1 # Poisson(0), Sonnendrucker(1), Zoni(2), Zoni-Shifted(3)
 beta_coeff=1 # Zero(0), Gyro - Alpha Inverse(1)
 # Remark: For RefinedRadius choose alpha_coeff=3, beta_coeff=1
 # Remark: For Culham Geometry choose geometry=3, problem=2,3, alpha_coeff=3, beta_coeff=1
@@ -64,7 +64,7 @@ beta_coeff=1 # Zero(0), Gyro - Alpha Inverse(1)
 # Full Multigrid Method:
 # 0: Initial approximation is set to zero
 # 1: Initial approximation obtained by nested iteration (recommended)
-FMG=1
+FMG=0
 FMG_iterations=3
 FMG_cycle=2 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
 
@@ -92,7 +92,7 @@ postSmoothingSteps=1
 multigridCycle=0
 
 # Convergence criteria:
-maxIterations=50
+maxIterations=150
 residualNormType=1 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
 absoluteTolerance=1e-14
 relativeTolerance=1e-10

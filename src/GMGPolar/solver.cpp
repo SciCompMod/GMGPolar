@@ -47,8 +47,6 @@ void GMGPolar::solve(const BoundaryConditions& boundary_conditions, const Source
 
     initializeSolution();
 
-    std::cout << levels_[0].solution() << std::endl;
-
     auto end_initial_approximation = std::chrono::high_resolution_clock::now();
     t_solve_initial_approximation_ =
         std::chrono::duration<double>(end_initial_approximation - start_initial_approximation).count();

@@ -171,9 +171,6 @@ void GMGPolar::solvePCG(const BoundaryConditions& boundary_conditions, const Sou
     /* ---------------------------- */
     auto start_cg_solve = std::chrono::high_resolution_clock::now();
 
-    // For CG iteration timings
-    double t_cg_iterations_total = 0.0;
-
     preconditioner.solve(level_0.residual());
     z_0 = preconditioner.solution();
     p_0 = z_0;
@@ -243,9 +240,8 @@ void GMGPolar::solvePCG(const BoundaryConditions& boundary_conditions, const Sou
               << "    CG Iteration: " << t_solve_cg << " seconds\n";
 
     if (number_of_iterations_ > 0) {
-        std::cout << "Average CG Iteration: " << (t_solve_cg / number_of_iterations_) << " seconds";
+        std::cout << "Average CG Iteration: " << (t_solve_cg / number_of_iterations_) << " seconds\n";
     }
-    std::cout << std::endl;
 }
 
 void GMGPolar::solve(const Vector<double>& rhs_f)

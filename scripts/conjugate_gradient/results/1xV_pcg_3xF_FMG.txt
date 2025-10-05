@@ -1,0 +1,64 @@
+------------------------------
+------ Problem Settings ------
+------------------------------
+Czarny (Domain geometry)
+CartesianR6 (Exact solution)
+α = Sonnendrücker, β = 1/α (Profile coefficients)
+------------------------------
+---- PolarGrid Generation ----
+------------------------------
+nr_exp = 4, nθ_exp = -1
+divideBy2 = 5, anisotropy = 3
+------------------------------
+------- CMake Settings -------
+------------------------------
+Build: Debug
+MUMPS: OFF, Likwid: OFF
+------------------------------
+------ General Settings ------
+------------------------------
+Maximum number of threads: 16
+Across the origin (Interior boundary condition)
+A-Take (Stencil Distribution)
+Domain geometry mode: Precomputed
+Density profile mode: Precomputed
+------------------------------
+---------- PolarGrid ---------
+------------------------------
+r ∈ [1e-08, 1.3], θ ∈ [0, 2π]
+(nr × nθ) = (1537 × 2048) → (7 × 8)
+Smoother: 321 circles
+Splitting radius = 0.722786
+------------------------------
+----- Multigrid settings -----
+------------------------------
+Implicit Extrapolation
+Multigrid Cycle: V(1,1)-Cycle
+Number of levels: 9
+Residual Norm: Weighted Euclidean (scaled L2 norm)
+Tolerances: abs = 1e-14, rel = 1e-10, maxiter = 150
+Full-Multigrid: 3x F(1,1)-Cycle
+------------------------------
+---- Preconditioner (CG) -----
+------------------------------
+No Extrapolation
+Full-Multigrid: 1x V(1,1)-Cycle
+------------------------------
+---- Multigrid Iterations ----
+------------------------------
+it     ||r_k||      ||r_k||/||rhs||    ||u-u_k||_l2    ||u-u_k||_inf    
+0      7.45e-10       8.43e-05           1.92e-09        8.79e-08         
+1      1.58e-10       1.79e-05           2.03e-09        8.82e-08         
+2      3.82e-11       4.32e-06           2.03e-09        8.82e-08         
+3      6.77e-12       7.66e-07           2.03e-09        8.82e-08         
+4      1.67e-12       1.89e-07           2.03e-09        8.82e-08         
+5      2.07e-13       2.34e-08           2.03e-09        8.82e-08         
+6      2.60e-14       2.94e-09           2.03e-09        8.82e-08         
+7      2.00e-15       2.27e-10           2.03e-09        8.82e-08         
+------------------
+Timing Information
+------------------
+Solve Time: 8.78017 seconds
+    Initial Approximation: 2.54452 seconds
+    CG Iteration: 6.04654 seconds
+Average CG Iteration: 0.863791 seconds

@@ -1,0 +1,103 @@
+------------------------------
+------ Problem Settings ------
+------------------------------
+Czarny (Domain geometry)
+CartesianR6 (Exact solution)
+α = Sonnendrücker, β = 1/α (Profile coefficients)
+------------------------------
+---- PolarGrid Generation ----
+------------------------------
+nr_exp = 4, nθ_exp = -1
+divideBy2 = 5, anisotropy = 3
+------------------------------
+------- CMake Settings -------
+------------------------------
+Build: Debug
+MUMPS: OFF, Likwid: OFF
+------------------------------
+------ General Settings ------
+------------------------------
+Maximum number of threads: 16
+Across the origin (Interior boundary condition)
+A-Take (Stencil Distribution)
+Domain geometry mode: Precomputed
+Density profile mode: Precomputed
+------------------------------
+---------- PolarGrid ---------
+------------------------------
+r ∈ [1e-08, 1.3], θ ∈ [0, 2π]
+(nr × nθ) = (1537 × 2048) → (7 × 8)
+Smoother: 321 circles
+Splitting radius = 0.722786
+------------------------------
+----- Multigrid settings -----
+------------------------------
+Implicit Extrapolation
+Multigrid Cycle: V(1,1)-Cycle
+Number of levels: 9
+Residual Norm: Weighted Euclidean (scaled L2 norm)
+Tolerances: abs = 1e-14, rel = 1e-10, maxiter = 150
+Full-Multigrid: 1x F(1,1)-Cycle
+------------------------------
+---- Multigrid Iterations ----
+------------------------------
+it     ||r_k||      ||r_k||/||rhs||    ||u-u_k||_l2    ||u-u_k||_inf    
+0      2.72e-09       3.08e-04           2.37e-08        5.66e-07         
+1      1.49e-09       1.68e-04           1.11e-08        3.20e-07         
+2      9.43e-10       1.07e-04           5.53e-09        1.88e-07         
+3      6.23e-10       7.05e-05           3.16e-09        1.13e-07         
+4      4.20e-10       4.75e-05           2.32e-09        8.80e-08         
+5      2.85e-10       3.23e-05           2.10e-09        8.81e-08         
+6      1.95e-10       2.21e-05           2.04e-09        8.82e-08         
+7      1.33e-10       1.51e-05           2.03e-09        8.82e-08         
+8      9.14e-11       1.03e-05           2.03e-09        8.82e-08         
+9      6.26e-11       7.08e-06           2.03e-09        8.82e-08         
+10     4.29e-11       4.85e-06           2.03e-09        8.82e-08         
+11     2.94e-11       3.32e-06           2.03e-09        8.82e-08         
+12     2.01e-11       2.27e-06           2.03e-09        8.82e-08         
+13     1.37e-11       1.56e-06           2.03e-09        8.82e-08         
+14     9.40e-12       1.06e-06           2.03e-09        8.82e-08         
+15     6.43e-12       7.27e-07           2.03e-09        8.82e-08         
+16     4.39e-12       4.97e-07           2.03e-09        8.82e-08         
+17     3.00e-12       3.40e-07           2.03e-09        8.82e-08         
+18     2.05e-12       2.32e-07           2.03e-09        8.82e-08         
+19     1.40e-12       1.59e-07           2.03e-09        8.82e-08         
+20     9.57e-13       1.08e-07           2.03e-09        8.82e-08         
+21     6.54e-13       7.40e-08           2.03e-09        8.82e-08         
+22     4.47e-13       5.06e-08           2.03e-09        8.82e-08         
+23     3.05e-13       3.46e-08           2.03e-09        8.82e-08         
+24     2.09e-13       2.36e-08           2.03e-09        8.82e-08         
+25     1.43e-13       1.62e-08           2.03e-09        8.82e-08         
+26     9.77e-14       1.11e-08           2.03e-09        8.82e-08         
+27     6.69e-14       7.57e-09           2.03e-09        8.82e-08         
+28     4.59e-14       5.19e-09           2.03e-09        8.82e-08         
+29     3.14e-14       3.56e-09           2.03e-09        8.82e-08         
+30     2.16e-14       2.44e-09           2.03e-09        8.82e-08         
+31     1.48e-14       1.68e-09           2.03e-09        8.82e-08         
+32     1.02e-14       1.15e-09           2.03e-09        8.82e-08         
+33     7.01e-15       7.94e-10           2.03e-09        8.82e-08         
+------------------------------
+Total Iterations: 33
+Reduction Factor: ρ = 0.529948
+
+------------------
+Timing Information
+------------------
+Setup Time: 0.396102 seconds
+    Create Levels: 0.227438 seconds
+    Smoother: 0.167899 seconds
+    Direct Solver: 0.000662267 seconds
+    (Build rhs: 1.70244 seconds)
+
+Solve Time: 20.6226 seconds
+    Initial Approximation: 0.881621 seconds
+    Multigrid Iteration: 14.6019 seconds
+    Check Convergence: 5.13778 seconds
+    (Check Exact Error: 1.13689 seconds)
+
+Average Multigrid Iteration: 0.442481 seconds
+    PreSmoothing: 0.11141 seconds
+    PostSmoothing: 0.111866 seconds
+    Residual: 0.185038 seconds
+    DirectSolve: 1.12862e-05 seconds
+    Other Computations: 0.0341563 seconds

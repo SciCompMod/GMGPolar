@@ -73,7 +73,7 @@ FMG_cycle=2 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
 # 1: Implicit extrapolation (recommended)
 # 2: Implicit extrapolation with full grid smoothing (residuals cannot be used as convergence criteria)
 # 3: Combination of both implicit extrapolation methods (May be usefull for FMG=0)
-extrapolation=
+extrapolation=1
 # Maximum number of multigrid levels:
 maxLevels=7
 # Number of smoothing steps:
