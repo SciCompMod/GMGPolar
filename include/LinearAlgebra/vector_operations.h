@@ -135,6 +135,9 @@ T l2_norm(const Vector<T>& x)
             scale = abs_val;
         }
     }
+    if (equals(scale, 0.0)) {
+        return 0.0;
+    }
     // 2) accumulate sum of squares of scaled entries
     T sum = 0.0;
 #pragma omp parallel for reduction(+ : sum) if (n > 10'000)
