@@ -125,25 +125,7 @@ T l2_norm_squared(const Vector<T>& x)
 template <typename T>
 T l2_norm(const Vector<T>& x)
 {
-    const std::size_t n = x.size();
-    // 1) find the largest absolute value
-    T scale = 0.0;
-#pragma omp parallel for reduction(max : scale) if (n > 10'000)
-    for (std::size_t i = 0; i < n; ++i) {
-        T abs_val = std::abs(x[i]);
-        if (abs_val > scale) {
-            scale = abs_val;
-        }
-    }
-    // 2) accumulate sum of squares of scaled entries
-    T sum = 0.0;
-#pragma omp parallel for reduction(+ : sum) if (n > 10'000)
-    for (std::size_t i = 0; i < n; ++i) {
-        T value = x[i] / scale;
-        sum += value * value;
-    }
-    // 3) rescale
-    return scale * std::sqrt(sum);
+    return std::sqrt(l2_norm_squared(x));
 }
 
 template <typename T>
