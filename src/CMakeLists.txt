@@ -19,6 +19,7 @@ set(GMG_POLAR_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/level_interpolation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/setup.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/solver.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/pcg.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/writeToVTK.cpp
 )
 
@@ -159,6 +160,19 @@ set(CONFIG_PARSER_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/ConfigParser/select_test_case.cpp
 )
 
+set(SYSTEM_OPERATOR_SOURCES
+    # Main SystemOperator files
+    ${CMAKE_CURRENT_SOURCE_DIR}/SystemOperator/system_operator.cpp
+    
+    # SystemOperatorGive
+    ${CMAKE_CURRENT_SOURCE_DIR}/SystemOperator/SystemOperatorGive/apply.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/SystemOperator/SystemOperatorGive/system_operator.cpp
+    
+    # SystemOperatorTake
+    ${CMAKE_CURRENT_SOURCE_DIR}/SystemOperator/SystemOperatorTake/apply.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/SystemOperator/SystemOperatorTake/system_operator.cpp
+)
+
 # Create the main library
 add_library(GMGPolarLib STATIC
     ${POLAR_GRID_SOURCES}
@@ -172,6 +186,7 @@ add_library(GMGPolarLib STATIC
     ${SMOOTHER_SOURCES}
     ${EXTRAPOLATED_SMOOTHER_SOURCES}
     ${CONFIG_PARSER_SOURCES}
+    ${SYSTEM_OPERATOR_SOURCES}
 )
 
 # Basic library configuration

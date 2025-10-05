@@ -53,6 +53,11 @@ ConfigParser::ConfigParser()
                      OPTIONAL, 1, cmdline::oneof(0, 1, 2, 3));
     parser_.add<int>("beta_coeff", '\0', "Beta coefficient (0=Zero,1=1/alpha)", OPTIONAL, 0, cmdline::oneof(0, 1));
 
+    parser_.add<int>("PCG", '\0', "Conjugate Gradient Method (0=Off,1=On)", OPTIONAL, 0, cmdline::oneof(0, 1));
+    parser_.add<int>("PCG_FMG_iterations", '\0', "PCG-FMG iteration count", OPTIONAL, 0);
+    parser_.add<int>("PCG_FMG_cycle", '\0', "PCG-FMG cycle type (0=V,1=W,2=F)", OPTIONAL, 0, cmdline::oneof(0, 1, 2));
+    parser_.add<int>("PCG_extrapolation", '\0', "PCG Extrapolation method)", OPTIONAL, 0);
+
     parse(0, nullptr);
 }
 
@@ -69,6 +74,19 @@ bool ConfigParser::parse(int argc, char* argv[])
             std::cerr << "Usage: " << parser_.usage() << std::endl;
             throw std::runtime_error("Parsing failed.");
         }
+    }
+
+    PCG_                         = parser_.get<int>("PCG") != 0;
+    PCG_FMG_iterations_          = parser_.get<int>("PCG_FMG_iterations");
+    PCG_extrapolation_           = static_cast<ExtrapolationType>(parser_.get<int>("PCG_extrapolation"));
+    const int PCG_FMG_cycleValue = parser_.get<int>("PCG_FMG_cycle");
+    if (PCG_FMG_cycleValue == static_cast<int>(MultigridCycleType::V_CYCLE) ||
+        PCG_FMG_cycleValue == static_cast<int>(MultigridCycleType::W_CYCLE) ||
+        PCG_FMG_cycleValue == static_cast<int>(MultigridCycleType::F_CYCLE)) {
+        PCG_FMG_cycle_ = static_cast<MultigridCycleType>(PCG_FMG_cycleValue);
+    }
+    else {
+        throw std::runtime_error("Invalid FMG cycle type.");
     }
 
     // Parse general parameters from command-line arguments
@@ -396,4 +414,22 @@ const SourceTerm& ConfigParser::sourceTerm() const
 const ExactSolution& ConfigParser::exactSolution() const
 {
     return *exact_solution_.get();
+}
+
+bool ConfigParser::PCG() const
+{
+    return PCG_;
+}
+int ConfigParser::PCG_FMG_iterations() const
+{
+    return PCG_FMG_iterations_;
+}
+MultigridCycleType ConfigParser::PCG_FMG_cycle() const
+{
+    return PCG_FMG_cycle_;
+}
+
+ExtrapolationType ConfigParser::PCG_extrapolation() const
+{
+    return PCG_extrapolation_;
 }

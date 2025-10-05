@@ -5,6 +5,7 @@ class DirectSolver;
 class Residual;
 class Smoother;
 class ExtrapolatedSmoother;
+class SystemOperator;
 
 #include <memory>
 #include <omp.h>
@@ -21,6 +22,7 @@ class ExtrapolatedSmoother;
 #include "../ExtrapolatedSmoother/extrapolatedSmoother.h"
 #include "../Residual/residual.h"
 #include "../Smoother/smoother.h"
+#include "../SystemOperator/system_operator.h"
 
 #include "../common/geometry_helper.h"
 
@@ -92,6 +94,14 @@ public:
                                          const StencilDistributionMethod stencil_distribution_method);
     void extrapolatedSmoothing(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const;
 
+    // -------------------- //
+    // Apply SystemOperator //
+    void initializeSystemOperator(const DomainGeometry& domain_geometry,
+                                  const DensityProfileCoefficients& density_profile_coefficients,
+                                  const bool DirBC_Interior, const int num_omp_threads,
+                                  const StencilDistributionMethod stencil_distribution_method);
+    void applySystemOperator(Vector<double>& result, const Vector<double>& x) const;
+
 private:
     const int level_depth_;
     std::unique_ptr<const PolarGrid> grid_;
@@ -101,6 +111,7 @@ private:
     std::unique_ptr<Residual> op_residual_;
     std::unique_ptr<Smoother> op_smoother_;
     std::unique_ptr<ExtrapolatedSmoother> op_extrapolated_smoother_;
+    std::unique_ptr<SystemOperator> op_system_operator_;
 
     Vector<double> rhs_;
     Vector<double> solution_;

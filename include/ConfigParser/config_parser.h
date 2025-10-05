@@ -54,6 +54,11 @@ public:
     std::optional<double> absoluteTolerance() const;
     std::optional<double> relativeTolerance() const;
 
+    bool PCG() const;
+    int PCG_FMG_iterations() const;
+    MultigridCycleType PCG_FMG_cycle() const;
+    ExtrapolationType PCG_extrapolation() const;
+
 private:
     // Parse command-line arguments to extract problem configuration
     cmdline::parser parser_;
@@ -90,6 +95,11 @@ private:
     ResidualNormType residual_norm_type_;
     std::optional<double> absolute_tolerance_;
     std::optional<double> relative_tolerance_;
+
+    bool PCG_;
+    int PCG_FMG_iterations_;
+    MultigridCycleType PCG_FMG_cycle_;
+    ExtrapolationType PCG_extrapolation_;
 
     void selectTestCase(GeometryType geometry_type, ProblemType problem_type, AlphaCoeff alpha_type,
                         BetaCoeff beta_type, double Rmax, double kappa_eps, double delta_e, double alpha_jump);

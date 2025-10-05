@@ -138,6 +138,9 @@ void GMGPolar::setup()
             t_setup_smoother_ += std::chrono::duration<double>(end_setup_smoother - start_setup_smoother).count();
             levels_[level_depth].initializeResidual(domain_geometry_, density_profile_coefficients_, DirBC_Interior_,
                                                     threads_per_level_[level_depth], stencil_distribution_method_);
+            levels_[level_depth].initializeSystemOperator(domain_geometry_, density_profile_coefficients_,
+                                                          DirBC_Interior_, threads_per_level_[level_depth],
+                                                          stencil_distribution_method_);
         }
         // -------------------------- //
         // Level n-1 (coarsest Level) //
@@ -152,6 +155,9 @@ void GMGPolar::setup()
                 std::chrono::duration<double>(end_setup_directSolver - start_setup_directSolver).count();
             levels_[level_depth].initializeResidual(domain_geometry_, density_profile_coefficients_, DirBC_Interior_,
                                                     threads_per_level_[level_depth], stencil_distribution_method_);
+            levels_[level_depth].initializeSystemOperator(domain_geometry_, density_profile_coefficients_,
+                                                          DirBC_Interior_, threads_per_level_[level_depth],
+                                                          stencil_distribution_method_);
         }
         // ------------------- //
         // Intermediate levels //
@@ -164,6 +170,9 @@ void GMGPolar::setup()
             t_setup_smoother_ += std::chrono::duration<double>(end_setup_smoother - start_setup_smoother).count();
             levels_[level_depth].initializeResidual(domain_geometry_, density_profile_coefficients_, DirBC_Interior_,
                                                     threads_per_level_[level_depth], stencil_distribution_method_);
+            levels_[level_depth].initializeSystemOperator(domain_geometry_, density_profile_coefficients_,
+                                                          DirBC_Interior_, threads_per_level_[level_depth],
+                                                          stencil_distribution_method_);
         }
     }
 

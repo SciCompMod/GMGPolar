@@ -45,11 +45,13 @@ add_executable(gmgpolar src/main.cpp)
 add_executable(convergence_order src/convergence_order.cpp)
 add_executable(weak_scaling src/weak_scaling.cpp)
 add_executable(strong_scaling src/strong_scaling.cpp)
+add_executable(conjugate_gradient src/conjugate_gradient.cpp)
 
 target_link_libraries(gmgpolar PRIVATE GMGPolarLib)
 target_link_libraries(convergence_order PRIVATE GMGPolarLib)
 target_link_libraries(weak_scaling PRIVATE GMGPolarLib)
 target_link_libraries(strong_scaling PRIVATE GMGPolarLib)
+target_link_libraries(conjugate_gradient PRIVATE GMGPolarLib)
 
 if(GMGPOLAR_BUILD_TESTS)
     enable_testing()

@@ -143,6 +143,9 @@ public:
     // Solve system with given boundary conditions and source term.
     // Multiple solves with different inputs are supported.
     void solve(const BoundaryConditions& boundary_conditions, const SourceTerm& source_term);
+    void solve(const Vector<double>& rhs_f);
+    void solvePCG(const BoundaryConditions& boundary_conditions, const SourceTerm& source_term, int PCG_FMG_iterations,
+                  MultigridCycleType PCG_FMG_cycle, ExtrapolationType PCG_extrapolation);
 
     /* ---------------------------------------------------------------------- */
     /* Solution & Grid Access                                                 */

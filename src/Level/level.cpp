@@ -3,6 +3,9 @@
 #include "../../include/Residual/ResidualGive/residualGive.h"
 #include "../../include/Residual/ResidualTake/residualTake.h"
 
+#include "../../include/SystemOperator/SystemOperatorGive/system_operator.h"
+#include "../../include/SystemOperator/SystemOperatorTake/system_operator.h"
+
 #include "../../include/DirectSolver/DirectSolver-COO-MUMPS-Give/directSolverGive.h"
 #include "../../include/DirectSolver/DirectSolver-COO-MUMPS-Take/directSolverTake.h"
 #include "../../include/DirectSolver/DirectSolver-CSR-LU-Give/directSolverGiveCustomLU.h"
@@ -190,4 +193,29 @@ void Level::extrapolatedSmoothing(Vector<double>& x, const Vector<double>& rhs, 
     if (!op_extrapolated_smoother_)
         throw std::runtime_error("Extrapolated Smoother not initialized.");
     op_extrapolated_smoother_->extrapolatedSmoothing(x, rhs, temp);
+}
+
+// -------------- //
+// Apply SystemOperator //
+void Level::initializeSystemOperator(const DomainGeometry& domain_geometry,
+                                     const DensityProfileCoefficients& density_profile_coefficients,
+                                     const bool DirBC_Interior, const int num_omp_threads,
+                                     const StencilDistributionMethod stencil_distribution_method)
+{
+    if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
+        op_system_operator_ = std::make_unique<SystemOperatorTake>(
+            *grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads);
+    }
+    else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
+        op_system_operator_ = std::make_unique<SystemOperatorGive>(
+            *grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads);
+    }
+    if (!op_residual_)
+        throw std::runtime_error("Failed to initialize Residual.");
+}
+void Level::applySystemOperator(Vector<double>& result, const Vector<double>& x) const
+{
+    if (!op_system_operator_)
+        throw std::runtime_error("Residual not initialized.");
+    op_system_operator_->apply(result, x);
 }
