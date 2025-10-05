@@ -3,7 +3,6 @@
 
 #include <random>
 
-// clang-format off
 void GMGPolar::solvePCG(const BoundaryConditions& boundary_conditions, const SourceTerm& source_term,
                         int PCG_FMG_iterations, MultigridCycleType PCG_FMG_cycle, ExtrapolationType PCG_extrapolation)
 {
@@ -97,7 +96,7 @@ void GMGPolar::solvePCG(const BoundaryConditions& boundary_conditions, const Sou
     preconditioner.FMG(true);
     preconditioner.FMG_iterations(PCG_FMG_iterations); // FMG iteration count
     preconditioner.FMG_cycle(PCG_FMG_cycle); // FMG cycle type
-    preconditioner.maxIterations(10); // Max number of iterations
+    preconditioner.maxIterations(0); // Max number of iterations
     preconditioner.residualNormType(residual_norm_type_); // Residual norm type (L2, weighted-L2, L∞)
     preconditioner.absoluteTolerance(absolute_tolerance_); // Absolute residual tolerance
     preconditioner.relativeTolerance(relative_tolerance_); // Relative residual tolerance
@@ -124,78 +123,36 @@ void GMGPolar::solvePCG(const BoundaryConditions& boundary_conditions, const Sou
     // Clear solve-phase timings
     resetSolvePhaseTimings();
 
-/* ---------------------------- */
-/* Initialize starting solution */
-/* ---------------------------- */
-auto start_initial_approximation = std::chrono::high_resolution_clock::now();
+    /* ---------------------------- */
+    /* Initialize starting solution */
+    /* ---------------------------- */
+    auto start_initial_approximation = std::chrono::high_resolution_clock::now();
 
-initializeSolution();
+    initializeSolution();
 
-auto end_initial_approximation = std::chrono::high_resolution_clock::now();
-t_solve_initial_approximation_ =
-    std::chrono::duration<double>(end_initial_approximation - start_initial_approximation).count();
+    auto end_initial_approximation = std::chrono::high_resolution_clock::now();
+    t_solve_initial_approximation_ =
+        std::chrono::duration<double>(end_initial_approximation - start_initial_approximation).count();
 
-// These times are included in the initial approximation and don't count towards the multigrid cyclces.
-resetAvgMultigridCycleTimings();
+    // These times are included in the initial approximation and don't count towards the multigrid cyclces.
+    resetAvgMultigridCycleTimings();
 
-printIterationHeader(exact_solution_);
+    printIterationHeader(exact_solution_);
 
-// Compute Residual for the initial guess
-level_0.computeResidual(level_0.residual(), level_0.rhs(), level_0.solution());
-if (extrapolation_ != ExtrapolationType::NONE) {
-    injection(0, level_1.solution(), level_0.solution());
-    level_1.computeResidual(level_1.residual(), level_1.rhs(), level_1.solution());
-    extrapolatedResidual(0, level_0.residual(), level_1.residual());
-}
-
-current_residual_norm = residualNorm(residual_norm_type_, level_0, level_0.residual());
-residual_norms_.push_back(current_residual_norm);
-if (number_of_iterations_ == 0) {
-    initial_residual_norm = !FMG_ ? current_residual_norm : residualNorm(residual_norm_type_, level_0, level_0.rhs());
-}
-current_relative_residual_norm = current_residual_norm / initial_residual_norm;
-
-// --- Check exact error, excluded from timings
-auto start_check_exact_error = std::chrono::high_resolution_clock::now();
-if (exact_solution_ != nullptr)
-    exact_errors_.push_back(computeExactError(level_0, level_0.solution(), error, *exact_solution_));
-auto end_check_exact_error = std::chrono::high_resolution_clock::now();
-t_check_exact_error_ += std::chrono::duration<double>(end_check_exact_error - start_check_exact_error).count();
-
-LIKWID_START("Solver");
-
-printIterationInfo(number_of_iterations_, current_residual_norm, current_relative_residual_norm, exact_solution_);
-
-/* ---------------------------- */
-/* Start solver timing (CG part)*/
-/* ---------------------------- */
-auto start_cg_solve = std::chrono::high_resolution_clock::now();
-
-// For CG iteration timings
-double t_cg_iterations_total = 0.0;
-
-preconditioner.solve(level_0.residual());
-z_0 = preconditioner.solution();
-p_0 = z_0;
-
-double r_z = dot_product(level_0.residual(), z_0);
-
-while (number_of_iterations_ < max_iterations_) {
-    // A_p = A * p
-    level_0.applySystemOperator(A_p_0, p_0);
+    // Compute Residual for the initial guess
+    level_0.computeResidual(level_0.residual(), level_0.rhs(), level_0.solution());
     if (extrapolation_ != ExtrapolationType::NONE) {
-        injection(0, p_1, p_0);
-        level_1.applySystemOperator(A_p_1, p_1);
-        extrapolatedResidual(0, A_p_0, A_p_1);
+        injection(0, level_1.solution(), level_0.solution());
+        level_1.computeResidual(level_1.residual(), level_1.rhs(), level_1.solution());
+        extrapolatedResidual(0, level_0.residual(), level_1.residual());
     }
-
-    double alpha = r_z / dot_product(p_0, A_p_0);
-
-    linear_combination(level_0.solution(), 1.0, p_0, alpha);
-    linear_combination(level_0.residual(), 1.0, A_p_0, -alpha);
 
     current_residual_norm = residualNorm(residual_norm_type_, level_0, level_0.residual());
     residual_norms_.push_back(current_residual_norm);
+    if (number_of_iterations_ == 0) {
+        initial_residual_norm =
+            !FMG_ ? current_residual_norm : residualNorm(residual_norm_type_, level_0, level_0.rhs());
+    }
     current_relative_residual_norm = current_residual_norm / initial_residual_norm;
 
     // --- Check exact error, excluded from timings
@@ -205,199 +162,224 @@ while (number_of_iterations_ < max_iterations_) {
     auto end_check_exact_error = std::chrono::high_resolution_clock::now();
     t_check_exact_error_ += std::chrono::duration<double>(end_check_exact_error - start_check_exact_error).count();
 
-    number_of_iterations_++;
+    LIKWID_START("Solver");
 
     printIterationInfo(number_of_iterations_, current_residual_norm, current_relative_residual_norm, exact_solution_);
 
-    if (converged(current_residual_norm, current_relative_residual_norm))
-        break;
+    /* ---------------------------- */
+    /* Start solver timing (CG part)*/
+    /* ---------------------------- */
+    auto start_cg_solve = std::chrono::high_resolution_clock::now();
+
+    // For CG iteration timings
+    double t_cg_iterations_total = 0.0;
 
     preconditioner.solve(level_0.residual());
     z_0 = preconditioner.solution();
+    p_0 = z_0;
 
-    double r_z_new = dot_product(level_0.residual(), z_0);
-    double beta    = r_z_new / r_z;
+    double r_z = dot_product(level_0.residual(), z_0);
 
-    r_z = r_z_new;
+    while (number_of_iterations_ < max_iterations_) {
+        // A_p = A * p
+        level_0.applySystemOperator(A_p_0, p_0);
+        if (extrapolation_ != ExtrapolationType::NONE) {
+            injection(0, p_1, p_0);
+            level_1.applySystemOperator(A_p_1, p_1);
+            extrapolatedResidual(0, A_p_0, A_p_1);
+        }
 
-    multiply(p_0, beta);
-    add(p_0, z_0);
+        double alpha = r_z / dot_product(p_0, A_p_0);
 
-}
+        linear_combination(level_0.solution(), 1.0, p_0, alpha);
+        linear_combination(level_0.residual(), 1.0, A_p_0, -alpha);
 
-auto end_solve = std::chrono::high_resolution_clock::now();
-auto end_cg_solve = std::chrono::high_resolution_clock::now();
-t_solve_total_ = std::chrono::duration<double>(end_solve - start_solve).count() - t_check_exact_error_;
-double t_solve_cg = std::chrono::duration<double>(end_cg_solve - start_cg_solve).count() - t_check_exact_error_;
+        current_residual_norm = residualNorm(residual_norm_type_, level_0, level_0.residual());
+        residual_norms_.push_back(current_residual_norm);
+        current_relative_residual_norm = current_residual_norm / initial_residual_norm;
 
-LIKWID_STOP("Solve");
+        // --- Check exact error, excluded from timings
+        auto start_check_exact_error = std::chrono::high_resolution_clock::now();
+        if (exact_solution_ != nullptr)
+            exact_errors_.push_back(computeExactError(level_0, level_0.solution(), error, *exact_solution_));
+        auto end_check_exact_error = std::chrono::high_resolution_clock::now();
+        t_check_exact_error_ += std::chrono::duration<double>(end_check_exact_error - start_check_exact_error).count();
 
-/* ---------------------- */
-/* Print Timing Summary   */
-/* ---------------------- */
-std::cout << "------------------\n"
-          << "Timing Information\n"
-          << "------------------\n"
-          << "Solve Time: " << t_solve_total_ << " seconds\n"
-          << "    Initial Approximation: " << t_solve_initial_approximation_ << " seconds\n"
-          << "    CG Iteration: " << t_solve_cg << " seconds\n";
+        number_of_iterations_++;
 
-if (number_of_iterations_ > 0) {
-    std::cout << "Average CG Iteration: "
-              << (t_solve_cg / number_of_iterations_) << " seconds";
-}
-std::cout << std::endl;
+        printIterationInfo(number_of_iterations_, current_residual_norm, current_relative_residual_norm,
+                           exact_solution_);
 
+        if (converged(current_residual_norm, current_relative_residual_norm))
+            break;
 
+        preconditioner.solve(level_0.residual());
+        z_0 = preconditioner.solution();
 
+        double r_z_new = dot_product(level_0.residual(), z_0);
+        double beta    = r_z_new / r_z;
+
+        r_z = r_z_new;
+
+        multiply(p_0, beta);
+        add(p_0, z_0);
+    }
+
+    auto end_solve    = std::chrono::high_resolution_clock::now();
+    auto end_cg_solve = std::chrono::high_resolution_clock::now();
+    t_solve_total_    = std::chrono::duration<double>(end_solve - start_solve).count() - t_check_exact_error_;
+    double t_solve_cg = std::chrono::duration<double>(end_cg_solve - start_cg_solve).count() - t_check_exact_error_;
+
+    LIKWID_STOP("Solve");
+
+    /* ---------------------- */
+    /* Print Timing Summary   */
+    /* ---------------------- */
+    std::cout << "------------------\n"
+              << "Timing Information\n"
+              << "------------------\n"
+              << "Solve Time: " << t_solve_total_ << " seconds\n"
+              << "    Initial Approximation: " << t_solve_initial_approximation_ << " seconds\n"
+              << "    CG Iteration: " << t_solve_cg << " seconds\n";
+
+    if (number_of_iterations_ > 0) {
+        std::cout << "Average CG Iteration: " << (t_solve_cg / number_of_iterations_) << " seconds";
+    }
+    std::cout << std::endl;
 }
 
 //ENDDWADDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
 
-    // Vector<double> f_ex = level_0.rhs();
-    // if (extrapolation_ != ExtrapolationType::NONE) {
-    //     extrapolatedResidual(0, f_ex, level_1.rhs());
-    // }
+// Vector<double> f_ex = level_0.rhs();
+// if (extrapolation_ != ExtrapolationType::NONE) {
+//     extrapolatedResidual(0, f_ex, level_1.rhs());
+// }
 
-    // Vector<double> u_ex = level_0.solution();
+// Vector<double> u_ex = level_0.solution();
 
-    // Vector<double> A_u_ex(n_0);
-    
-    // level_0.applySystemOperator(A_u_ex, u_ex);
-    // if (extrapolation_ != ExtrapolationType::NONE) {
-    //     Vector<double> u_1(n_1);
-    //     Vector<double> A_u_1(n_1);
-    //     injection(0, u_1, u_ex);
-    //     level_1.applySystemOperator(A_u_1, u_1);
-    //     extrapolatedResidual(0, A_u_ex, A_u_1);
-    // }
+// Vector<double> A_u_ex(n_0);
 
+// level_0.applySystemOperator(A_u_ex, u_ex);
+// if (extrapolation_ != ExtrapolationType::NONE) {
+//     Vector<double> u_1(n_1);
+//     Vector<double> A_u_1(n_1);
+//     injection(0, u_1, u_ex);
+//     level_1.applySystemOperator(A_u_1, u_1);
+//     extrapolatedResidual(0, A_u_ex, A_u_1);
+// }
 
+// std::mt19937 gen(42);
+// std::normal_distribution<> dist(0.0, 1.0);
 
-    // std::mt19937 gen(42);
-    // std::normal_distribution<> dist(0.0, 1.0);
+// Vector<double> v(n_0);
+// for (int i = 0; i < n_0; ++i) v[i] = dist(gen);
 
-    // Vector<double> v(n_0);
-    // for (int i = 0; i < n_0; ++i) v[i] = dist(gen);
+// // Normalize
+// double nrm = l2_norm(v);
+// for (int i = 0; i < n_0; ++i) v[i] /= nrm;
 
-    // // Normalize
-    // double nrm = l2_norm(v);
-    // for (int i = 0; i < n_0; ++i) v[i] /= nrm;
+// Vector<double> Av(n_0);
 
-    // Vector<double> Av(n_0);
+// double lambda_min = 1e100;
+// int max_iterations = 100;
+// for (int iter = 0; iter < max_iterations; ++iter) {
+//     // Apply operator
+//     // level_0.applySystemOperator(Av, v);
 
-    // double lambda_min = 1e100;
-    // int max_iterations = 100;
-    // for (int iter = 0; iter < max_iterations; ++iter) {
-    //     // Apply operator
-    //     // level_0.applySystemOperator(Av, v);
+//     level_0.applySystemOperator(Av, v);
+//     if (extrapolation_ != ExtrapolationType::NONE) {
+//         Vector<double> u_1(n_1);
+//         Vector<double> A_u_1(n_1);
+//         injection(0, u_1, v);
+//         level_1.applySystemOperator(A_u_1, u_1);
+//         extrapolatedResidual(0, Av, A_u_1);
+//     }
 
+//     // Rayleigh quotient: (v^T A v) / (v^T v)
+//     double rq = dot_product(v, Av) / dot_product(v, v);
 
-    //     level_0.applySystemOperator(Av, v);
-    //     if (extrapolation_ != ExtrapolationType::NONE) {
-    //         Vector<double> u_1(n_1);
-    //         Vector<double> A_u_1(n_1);
-    //         injection(0, u_1, v);
-    //         level_1.applySystemOperator(A_u_1, u_1);
-    //         extrapolatedResidual(0, Av, A_u_1);
-    //     }
+//     if (rq < lambda_min) lambda_min = rq;
 
-    //     // Rayleigh quotient: (v^T A v) / (v^T v)
-    //     double rq = dot_product(v, Av) / dot_product(v, v);
+//     // Re-normalize for stability
+//     nrm = l2_norm(Av);
+//     for (int i = 0; i < n_0; ++i) v[i] = Av[i] / nrm;
+// }
 
-    //     if (rq < lambda_min) lambda_min = rq;
+// std::cout<<lambda_min<<std::endl;
 
-    //     // Re-normalize for stability
-    //     nrm = l2_norm(Av);
-    //     for (int i = 0; i < n_0; ++i) v[i] = Av[i] / nrm;
-    // }
+// // Entdiscrtisiere A_u_ex. Danach injection und discretisiere wieder.
+// Vector<double> A_u_ex_not_discr = A_u_ex;
+// for (int i_theta = 0; i_theta < level_0.grid().ntheta(); i_theta++) {
+//     double theta = level_0.grid().theta(i_theta);
+//     for (int i_r = 0; i_r < level_0.grid().nr(); i_r++) {
+//         double r = level_0.grid().radius(i_r);
+//         if ((0 < i_r && i_r < level_0.grid().nr() - 1) || (i_r == 0 && !DirBC_Interior_)) {
+//             double h1          = (i_r == 0) ? 2.0 * level_0.grid().radius(0) : level_0.grid().radialSpacing(i_r - 1);
+//             double h2          = level_0.grid().radialSpacing(i_r);
+//             double k1          = level_0.grid().angularSpacing(i_theta - 1);
+//             double k2          = level_0.grid().angularSpacing(i_theta);
+//             const double detDF = level_0.levelCache().detDF()[level_0.grid().index(i_r, i_theta)];
+//             A_u_ex_not_discr[level_0.grid().index(i_r, i_theta)] /= 0.25 * (h1 + h2) * (k1 + k2) * fabs(detDF);
+//         }
+//     }
+// }
 
-    // std::cout<<lambda_min<<std::endl;
+// Vector<double> A_u_1(n_1);
+// injection(0, A_u_1, A_u_ex_not_discr);
+// discretize_rhs_f(level_1, A_u_1);
 
+// // Vector<double> u_1(n_1);
+// // Vector<double> A_u_1(n_1);
 
-    // // Entdiscrtisiere A_u_ex. Danach injection und discretisiere wieder.
-    // Vector<double> A_u_ex_not_discr = A_u_ex;
-    // for (int i_theta = 0; i_theta < level_0.grid().ntheta(); i_theta++) {
-    //     double theta = level_0.grid().theta(i_theta);
-    //     for (int i_r = 0; i_r < level_0.grid().nr(); i_r++) {
-    //         double r = level_0.grid().radius(i_r);
-    //         if ((0 < i_r && i_r < level_0.grid().nr() - 1) || (i_r == 0 && !DirBC_Interior_)) {
-    //             double h1          = (i_r == 0) ? 2.0 * level_0.grid().radius(0) : level_0.grid().radialSpacing(i_r - 1);
-    //             double h2          = level_0.grid().radialSpacing(i_r);
-    //             double k1          = level_0.grid().angularSpacing(i_theta - 1);
-    //             double k2          = level_0.grid().angularSpacing(i_theta);
-    //             const double detDF = level_0.levelCache().detDF()[level_0.grid().index(i_r, i_theta)];
-    //             A_u_ex_not_discr[level_0.grid().index(i_r, i_theta)] /= 0.25 * (h1 + h2) * (k1 + k2) * fabs(detDF);
-    //         }
-    //     }
-    // }
+// // injection(0, u_1, u_ex);
+// // level_1.applySystemOperator(A_u_1, u_1);
 
-    // Vector<double> A_u_1(n_1);
-    // injection(0, A_u_1, A_u_ex_not_discr);
-    // discretize_rhs_f(level_1, A_u_1);
+// preconditioner.solve_ex(A_u_ex, A_u_1);
 
-    // // Vector<double> u_1(n_1);
-    // // Vector<double> A_u_1(n_1);
+// Vector<double> z = preconditioner.solution();
+// subtract(z, level_0.solution());
 
-    // // injection(0, u_1, u_ex);
-    // // level_1.applySystemOperator(A_u_1, u_1);
+// END
 
-    // preconditioner.solve_ex(A_u_ex, A_u_1);
-    
-    // Vector<double> z = preconditioner.solution();
-    // subtract(z, level_0.solution());
+// std::cout<<"Circle Section!"<<std::endl;
+// for (int i_theta = level_0.grid().ntheta(); i_theta>0; i_theta--){
+//     for (int i_r = 0; i_r < level_0.grid().numberSmootherCircles(); i_r++)
+//     {
+//         std::cout<<z[level_0.grid().index(i_r, i_theta)]<<" ";
+//     }
+//     std::cout<<std::endl;
+// }
 
-    // END
+// std::cout<<"Radial Section!"<<std::endl;
+// for (int i_theta = level_0.grid().ntheta(); i_theta>0; i_theta--){
+//     for (int i_r = level_0.grid().numberSmootherCircles(); i_r < level_0.grid().nr(); i_r++)
+//     {
+//         std::cout<<z[level_0.grid().index(i_r, i_theta)]<<" ";
+//     }
+//     std::cout<<std::endl;
+// }
 
-    // std::cout<<"Circle Section!"<<std::endl;
-    // for (int i_theta = level_0.grid().ntheta(); i_theta>0; i_theta--){
-    //     for (int i_r = 0; i_r < level_0.grid().numberSmootherCircles(); i_r++)
-    //     {
-    //         std::cout<<z[level_0.grid().index(i_r, i_theta)]<<" ";
-    //     }
-    //     std::cout<<std::endl;
-    // }
-    
+// std::cout<<l2_norm(z)<<std::endl;
 
-    // std::cout<<"Radial Section!"<<std::endl;
-    // for (int i_theta = level_0.grid().ntheta(); i_theta>0; i_theta--){
-    //     for (int i_r = level_0.grid().numberSmootherCircles(); i_r < level_0.grid().nr(); i_r++)
-    //     {
-    //         std::cout<<z[level_0.grid().index(i_r, i_theta)]<<" ";
-    //     }
-    //     std::cout<<std::endl;
-    // }
+// Vector<double> res_ex = f_ex;
+// subtract(res_ex, A_u_ex);
 
-        // std::cout<<l2_norm(z)<<std::endl;
+// std::cout<<l2_norm(res_ex)<<std::endl;
 
+// Vector<double> u_ex = level_0    // std::cout<<f_ex<<std::endl;.solution();
 
+// Vector<double> A_ex_u_ex(n_0);
 
-    // Vector<double> res_ex = f_ex;
-    // subtract(res_ex, A_u_ex);
+// level_0.applySystemOperator(A_ex_u_ex, u_ex);
+// if (extrapolation_ != ExtrapolationType::NONE) {
+//     Vector<double> u_1(n_1);
+//     Vector<double> A_u_1(n_1);
+//     injection(0, u_1, u_ex);
+//     level_0.applySystemOperator(A_u_1, u_1);
+//     extrapolatedResidual(0, A_ex_u_ex, A_u_1);
+// }
 
-    // std::cout<<l2_norm(res_ex)<<std::endl;
-
-
-
-    // Vector<double> u_ex = level_0    // std::cout<<f_ex<<std::endl;.solution();
-
-    // Vector<double> A_ex_u_ex(n_0);
-
-    // level_0.applySystemOperator(A_ex_u_ex, u_ex);
-    // if (extrapolation_ != ExtrapolationType::NONE) {
-    //     Vector<double> u_1(n_1);
-    //     Vector<double> A_u_1(n_1);
-    //     injection(0, u_1, u_ex);
-    //     level_0.applySystemOperator(A_u_1, u_1);
-    //     extrapolatedResidual(0, A_ex_u_ex, A_u_1);
-    // }
-
-    // subtract(f_ex, A_ex_u_ex);
-
-
-
-
-
+// subtract(f_ex, A_ex_u_ex);
 
 // // A_p = A * p   (fine grid only)
 // level_0.applySystemOperator(A_p_0, p_0);
@@ -412,18 +394,17 @@ std::cout << std::endl;
 //     injection(0, level_1.solution(), level_0.solution());
 //     level_1.computeResidual(level_1.residual(), level_1.rhs(), level_1.solution());
 
-//     double sum_before = l2_norm(level_0.residual()); 
+//     double sum_before = l2_norm(level_0.residual());
 //    // std::cout << "sum before extrap: " << sum_before << std::endl;
-//     extrapolatedResidual(0, level_0.residual(), level_1.residual()); 
-//     double sum_after = l2_norm(level_0.residual()); 
-//  //   std::cout << "sum after extrap: " << sum_after << std::endl; 
+//     extrapolatedResidual(0, level_0.residual(), level_1.residual());
+//     double sum_after = l2_norm(level_0.residual());
+//  //   std::cout << "sum after extrap: " << sum_after << std::endl;
 //     if (sum_after > 0.0) {
 //          double scale = sum_before / sum_after;
 //            multiply(level_0.residual(), scale);
-//          //std::cout << "residual scaled by factor " << scale << std::endl; 
+//          //std::cout << "residual scaled by factor " << scale << std::endl;
 //     }
 // }
-
 
 //     preconditioner.solve(level_0.residual());
 //     z_0 = preconditioner.solution();
@@ -446,15 +427,15 @@ std::cout << std::endl;
 // //     injection(0, level_1.solution(), level_0.solution());
 // //     level_1.computeResidual(level_1.residual(), level_1.rhs(), level_1.solution());
 
-// //     double sum_before = l2_norm(level_0.residual()); 
+// //     double sum_before = l2_norm(level_0.residual());
 // //    // std::cout << "sum before extrap: " << sum_before << std::endl;
-// //     extrapolatedResidual(0, level_0.residual(), level_1.residual()); 
-// //     double sum_after = l2_norm(level_0.residual()); 
-// //  //   std::cout << "sum after extrap: " << sum_after << std::endl; 
+// //     extrapolatedResidual(0, level_0.residual(), level_1.residual());
+// //     double sum_after = l2_norm(level_0.residual());
+// //  //   std::cout << "sum after extrap: " << sum_after << std::endl;
 // //     if (sum_after > 0.0) {
 // //          double scale = sum_before / sum_after;
 // //            multiply(level_0.residual(), scale);
-// //          //std::cout << "residual scaled by factor " << scale << std::endl; 
+// //          //std::cout << "residual scaled by factor " << scale << std::endl;
 // //     }
 // // }
 
@@ -468,7 +449,6 @@ std::cout << std::endl;
 // // std::cout << "||res - A_p||_2 = " << l2_norm(diff)
 // //           << "   ||res - A_p||_inf = " << infinity_norm(diff) << std::endl;
 
-
 //     // A_p = A * p
 //     level_0.applySystemOperator(A_p_0, p_0);
 //     if (extrapolation_ != ExtrapolationType::NONE) {
@@ -476,7 +456,6 @@ std::cout << std::endl;
 //         level_1.applySystemOperator(A_p_1, p_1);
 //         extrapolatedResidual(0, A_p_0, A_p_1);
 //     }
-
 
 //     std::cout<<"A_p_0: "<<l2_norm(A_p_0)<<std::endl;
 
@@ -490,7 +469,6 @@ std::cout << std::endl;
 //     //     }
 //     //     std::cout<<std::endl;
 //     // }
-    
 
 //     // std::cout<<"Radial Section!"<<std::endl;
 //     // for (int i_theta = level_0.grid().ntheta(); i_theta>0; i_theta--){
@@ -688,7 +666,6 @@ std::cout << std::endl;
 //     // auto end_solve = std::chrono::high_resolution_clock::now();
 //     // t_solve_total_ = std::chrono::duration<double>(end_solve - start_solve).count() - t_check_exact_error_;
 //     // LIKWID_STOP("Solve");
-
 
 void GMGPolar::solve(const Vector<double>& rhs_f)
 {
