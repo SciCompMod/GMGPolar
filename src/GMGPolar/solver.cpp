@@ -267,7 +267,7 @@ void GMGPolar::initializeSolution()
 // =============================================================================
 
 double GMGPolar::residualNorm(const ResidualNormType& norm_type, const Level& level,
-                              const Vector<double>& residual) const
+                              const Vector<double> residual) const
 {
     switch (norm_type) {
     case ResidualNormType::EUCLIDEAN:
@@ -314,9 +314,8 @@ void GMGPolar::updateResidualNorms(Level& level, int iteration, double& initial_
     }
 }
 
-void GMGPolar::extrapolatedResidual(
-    const int current_level, Vector<double> residual,
-    const Vector<double> residual_next_level)
+void GMGPolar::extrapolatedResidual(const int current_level, Vector<double> residual,
+                                    const Vector<double> residual_next_level)
 {
     const PolarGrid& fineGrid   = levels_[current_level].grid();
     const PolarGrid& coarseGrid = levels_[current_level + 1].grid();
@@ -392,8 +391,8 @@ void GMGPolar::evaluateExactError(Level& level, const ExactSolution& exact_solut
     exact_errors_.push_back(computeExactError(level, level.solution(), level.residual(), exact_solution));
 }
 
-std::pair<double, double> GMGPolar::computeExactError(Level& level, const Vector<double>& solution,
-                                                      Vector<double> error, const ExactSolution& exact_solution)
+std::pair<double, double> GMGPolar::computeExactError(Level& level, const Vector<double> solution, Vector<double> error,
+                                                      const ExactSolution& exact_solution)
 {
     const PolarGrid& grid        = level.grid();
     const LevelCache& levelCache = level.levelCache();
