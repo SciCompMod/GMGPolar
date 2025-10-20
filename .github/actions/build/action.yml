@@ -7,15 +7,13 @@ runs:
       run: |
         apt-get -qq update
         apt-get -qq -y install lcov
-    - name: specify kokkos install
-      shell: bash
-      run: export Kokkos_DIR=/opt/serial/kokkos/lib/cmake/Kokkos/
+      run: export 
     - name: Build
       shell: 
       # ensure that the installed compiler version is used
       run: |
         mkdir build && cd build
-        cmake -DCMAKE_BUILD_TYPE=Debug -DGMGPOLAR_ENABLE_COVERAGE=ON ..
+        cmake -DCMAKE_BUILD_TYPE=Debug -DKokkos_DIR=/opt/serial/kokkos/lib/cmake/Kokkos/ -DGMGPOLAR_ENABLE_COVERAGE=ON ..
         make -j4
     - name: create build dir archive
       shell: bash
