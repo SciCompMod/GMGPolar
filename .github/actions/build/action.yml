@@ -9,7 +9,7 @@ runs:
         apt-get -qq -y install lcov
     - name: specify kokkos install
       shell: bash
-      run: export CMAKE_PREFIX_PATH=/opt/serial/kokkos/lib/cmake/Kokkos/
+      run: export Kokkos_DIR=/opt/serial/kokkos/lib/cmake/Kokkos/
     - name: Build
       shell: 
       # ensure that the installed compiler version is used
