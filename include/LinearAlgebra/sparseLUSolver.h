@@ -60,7 +60,7 @@ public:
      *
      * @param b Right-hand side vector (modified in place to contain the solution).
      */
-    void solveInPlace(Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> b) const;
+    void solveInPlace(Vector<T> b) const;
     void solveInPlace(T* b) const;
 
 private:
@@ -148,7 +148,7 @@ void SparseLUSolver<T>::solveInPlace(T* b) const
         return;
 
     // Permute RHS: b_perm = P * b
-    Vector<T> b_perm("b_perm",n);
+    Vector<T> b_perm("b_perm", n);
     for (int i = 0; i < n; i++) {
         b_perm[i] = b[perm[i]];
     }

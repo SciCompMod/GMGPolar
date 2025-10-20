@@ -9,8 +9,7 @@
 #include <Kokkos_Core.hpp>
 
 template <typename T>
-bool equals(const Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> lhs,
-            const Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs)
+bool equals(const Vector<T> lhs, const Vector<T> rhs)
 {
     if (lhs.extent(0) != rhs.extent(0)) {
         return false;
@@ -26,7 +25,7 @@ bool equals(const Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> lhs,
 }
 
 template <typename T>
-void assign(Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> lhs, const T& value)
+void assign(Vector<T> lhs, const T& value)
 {
     std::size_t n = lhs.extent(0);
 #pragma omp parallel for if (n > 10'000)
@@ -36,8 +35,7 @@ void assign(Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> lhs, const 
 }
 
 template <typename T>
-void add(Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
-         const Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> x)
+void add(Vector<T> result, const Vector<T> x)
 {
     if (result.extent(0) != x.extent(0)) {
         throw std::invalid_argument("Vectors must be of the same size.");
@@ -50,8 +48,7 @@ void add(Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
 }
 
 template <typename T>
-void subtract(Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
-              const Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> x)
+void subtract(Vector<T> result, const Vector<T> x)
 {
     if (result.extent(0) != x.extent(0)) {
         throw std::invalid_argument("Vectors must be of the same size.");
@@ -64,8 +61,7 @@ void subtract(Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> result,
 }
 
 template <typename T>
-void linear_combination(Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> x, const T& alpha,
-                        const Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> y, const T& beta)
+void linear_combination(Vector<T> x, const T& alpha, const Vector<T> y, const T& beta)
 {
     if (x.extent(0) != y.extent(0)) {
         throw std::invalid_argument("Vectors must be of the same size.");
@@ -78,7 +74,7 @@ void linear_combination(Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace>
 }
 
 template <typename T>
-void multiply(Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> x, const T& alpha)
+void multiply(Vector<T> x, const T& alpha)
 {
     std::size_t n = x.extent(0);
 #pragma omp parallel for if (n > 10'000)
@@ -88,8 +84,7 @@ void multiply(Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> x, const 
 }
 
 template <typename T>
-T dot_product(const Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> lhs,
-              const Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> rhs)
+T dot_product(const Vector<T> lhs, const Vector<T> rhs)
 {
     if (lhs.extent(0) != rhs.extent(0)) {
         throw std::invalid_argument("Vectors must be of the same size.");
@@ -105,7 +100,7 @@ T dot_product(const Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> lhs
 }
 
 template <typename T>
-T l1_norm(const Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> x)
+T l1_norm(const Vector<T> x)
 {
     T result      = 0.0;
     std::size_t n = x.extent(0);
@@ -117,7 +112,7 @@ T l1_norm(const Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> x)
 }
 
 template <typename T>
-T l2_norm_squared(const Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> x)
+T l2_norm_squared(const Vector<T> x)
 {
     T result      = 0.0;
     std::size_t n = x.extent(0);
@@ -129,7 +124,7 @@ T l2_norm_squared(const Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace>
 }
 
 template <typename T>
-T l2_norm(const Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> x)
+T l2_norm(const Vector<T> x)
 {
     const std::size_t n = x.extent(0);
     // 1) find the largest absolute value
@@ -146,14 +141,14 @@ T l2_norm(const Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> x)
 #pragma omp parallel for reduction(+ : sum) if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
         T value = x(i) / scale;
-        sum +=value * value;
+        sum += value * value;
     }
     // 3) rescale
-    return  scale *std::sqrt(sum);
+    return scale * std::sqrt(sum);
 }
 
 template <typename T>
-T infinity_norm(const Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> x)
+T infinity_norm(const Vector<T> x)
 {
     T result      = 0.0;
     std::size_t n = x.extent(0);
