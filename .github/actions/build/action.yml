@@ -10,6 +10,7 @@ runs:
     - name: Build
       shell: 
       # ensure that the installed compiler version is used
+      run: export CMAKE_PREFIX_PATH=/opt/serial/kokkos/
       run: |
         mkdir build && cd build
         cmake -DCMAKE_BUILD_TYPE=Debug -DGMGPOLAR_ENABLE_COVERAGE=ON ..
