@@ -6,8 +6,7 @@
 /* Boundary Symmetry Shift */
 /* ----------------------- */
 
-void DirectSolverTake::applySymmetryShiftInnerBoundary(
-    Vector<double> x) const
+void DirectSolverTake::applySymmetryShiftInnerBoundary(Vector<double> x) const
 {
     assert(DirBC_Interior_);
 
@@ -44,8 +43,7 @@ void DirectSolverTake::applySymmetryShiftInnerBoundary(
     }
 }
 
-void DirectSolverTake::applySymmetryShiftOuterBoundary(
-    Vector<double> x) const
+void DirectSolverTake::applySymmetryShiftOuterBoundary(Vector<double> x) const
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -82,7 +80,7 @@ void DirectSolverTake::applySymmetryShiftOuterBoundary(
 
 void DirectSolverTake::applySymmetryShift(Vector<double> x) const
 {
-    assert(x.extent(0) == grid_.numberOfNodes());
+    assert(x.size() == grid_.numberOfNodes());
     assert(grid_.nr() >= 4);
 
     if (num_omp_threads_ == 1) {

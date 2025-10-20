@@ -11,11 +11,11 @@
 template <typename T>
 bool equals(const Vector<T> lhs, const Vector<T> rhs)
 {
-    if (lhs.extent(0) != rhs.extent(0)) {
+    if (lhs.size() != rhs.size()) {
         return false;
     }
 
-    const std::size_t n = lhs.extent(0);
+    const std::size_t n = lhs.size();
     for (std::size_t i = 0; i < n; ++i) {
         if (!equals(lhs(i), rhs(i))) {
             return false;
@@ -27,7 +27,7 @@ bool equals(const Vector<T> lhs, const Vector<T> rhs)
 template <typename T>
 void assign(Vector<T> lhs, const T& value)
 {
-    std::size_t n = lhs.extent(0);
+    std::size_t n = lhs.size();
 #pragma omp parallel for if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
         lhs(i) = value;
@@ -37,10 +37,10 @@ void assign(Vector<T> lhs, const T& value)
 template <typename T>
 void add(Vector<T> result, const Vector<T> x)
 {
-    if (result.extent(0) != x.extent(0)) {
+    if (result.size() != x.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
     }
-    std::size_t n = result.extent(0);
+    std::size_t n = result.size();
 #pragma omp parallel for if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
         result[i] += x(i);
@@ -50,10 +50,10 @@ void add(Vector<T> result, const Vector<T> x)
 template <typename T>
 void subtract(Vector<T> result, const Vector<T> x)
 {
-    if (result.extent(0) != x.extent(0)) {
+    if (result.size() != x.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
     }
-    std::size_t n = result.extent(0);
+    std::size_t n = result.size();
 #pragma omp parallel for if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
         result[i] -= x(i);
@@ -63,10 +63,10 @@ void subtract(Vector<T> result, const Vector<T> x)
 template <typename T>
 void linear_combination(Vector<T> x, const T& alpha, const Vector<T> y, const T& beta)
 {
-    if (x.extent(0) != y.extent(0)) {
+    if (x.size() != y.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
     }
-    std::size_t n = x.extent(0);
+    std::size_t n = x.size();
 #pragma omp parallel for if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
         x(i) = alpha * x(i) + beta * y[i];
@@ -76,7 +76,7 @@ void linear_combination(Vector<T> x, const T& alpha, const Vector<T> y, const T&
 template <typename T>
 void multiply(Vector<T> x, const T& alpha)
 {
-    std::size_t n = x.extent(0);
+    std::size_t n = x.size();
 #pragma omp parallel for if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
         x(i) *= alpha;
@@ -86,12 +86,12 @@ void multiply(Vector<T> x, const T& alpha)
 template <typename T>
 T dot_product(const Vector<T> lhs, const Vector<T> rhs)
 {
-    if (lhs.extent(0) != rhs.extent(0)) {
+    if (lhs.size() != rhs.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
     }
 
     T result      = 0.0;
-    std::size_t n = lhs.extent(0);
+    std::size_t n = lhs.size();
 #pragma omp parallel for reduction(+ : result) if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
         result += lhs(i) * rhs(i);
@@ -103,7 +103,7 @@ template <typename T>
 T l1_norm(const Vector<T> x)
 {
     T result      = 0.0;
-    std::size_t n = x.extent(0);
+    std::size_t n = x.size();
 #pragma omp parallel for reduction(+ : result) if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
         result += std::abs(x(i));
@@ -115,7 +115,7 @@ template <typename T>
 T l2_norm_squared(const Vector<T> x)
 {
     T result      = 0.0;
-    std::size_t n = x.extent(0);
+    std::size_t n = x.size();
 #pragma omp parallel for reduction(+ : result) if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
         result += x(i) * x(i);
@@ -126,7 +126,7 @@ T l2_norm_squared(const Vector<T> x)
 template <typename T>
 T l2_norm(const Vector<T> x)
 {
-    const std::size_t n = x.extent(0);
+    const std::size_t n = x.size();
     // 1) find the largest absolute value
     T scale = 0.0;
 #pragma omp parallel for reduction(max : scale) if (n > 10'000)
@@ -151,7 +151,7 @@ template <typename T>
 T infinity_norm(const Vector<T> x)
 {
     T result      = 0.0;
-    std::size_t n = x.extent(0);
+    std::size_t n = x.size();
 #pragma omp parallel for reduction(max : result) if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
         T abs_value = std::abs(x(i));
