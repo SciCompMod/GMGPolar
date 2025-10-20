@@ -13,7 +13,8 @@ runs:
       # ensure that the installed compiler version is used
       run: |
         mkdir build && cd build
-        cmake -DCMAKE_BUILD_TYPE=Debug -DKokkos_DIR=/opt/serial/kokkos/lib/cmake/Kokkos/ -DGMGPOLAR_ENABLE_COVERAGE=ON ..
+        export CMAKE_PREFIX_PATH=/opt/serial/kokkos/lib/cmake/Kokkos/
+        cmake -DCMAKE_BUILD_TYPE=Debug -DGMGPOLAR_ENABLE_COVERAGE=ON ..
         make -j4
     - name: create build dir archive
       shell: bash
