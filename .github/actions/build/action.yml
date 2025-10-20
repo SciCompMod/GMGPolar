@@ -7,7 +7,6 @@ runs:
       run: |
         apt-get -qq update
         apt-get -qq -y install lcov
-      run: export 
     - name: Build
       shell: 
       # ensure that the installed compiler version is used
