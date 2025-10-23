@@ -28,7 +28,7 @@ Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int s
 /* Here we test against the "Give" version. */
 
 void applyExtrapolatedRestrictionGive0(const Level& fromLevel, const Level& toLevel, Vector<double> result,
-                                       const Vector<double> x)
+                                       ConstVector<double> x)
 {
     assert(toLevel.level_depth() == fromLevel.level_depth() + 1);
 

@@ -213,8 +213,8 @@ TEST(DirectSolverTest_CircularGeometry, SequentialDirectSolverDirBC_Interior_Cir
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -257,8 +257,8 @@ TEST(DirectSolverTest_CircularGeometry, ParallelDirectSolverDirBC_Interior_Circu
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -301,8 +301,8 @@ TEST(DirectSolverTest_CircularGeometry, SequentialDirectSolverAcrossOrigin_Circu
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -345,8 +345,8 @@ TEST(DirectSolverTest_CircularGeometry, ParallelDirectSolverAcrossOrigin_Circula
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -395,8 +395,8 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverDirBC_Interior_ShafranovGeo
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -441,8 +441,8 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovGeome
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -492,8 +492,8 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeometry)
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -539,8 +539,8 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometry)
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -586,8 +586,8 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeometry)
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -629,8 +629,8 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometry)
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -685,8 +685,8 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -729,8 +729,8 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision2
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -774,8 +774,8 @@ TEST(DirectSolverTakeTest_CircularGeometry, SequentialDirectSolverDirBC_Interior
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -818,8 +818,8 @@ TEST(DirectSolverTakeTest_CircularGeometry, ParallelDirectSolverDirBC_Interior_C
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -862,8 +862,8 @@ TEST(DirectSolverTakeTest_CircularGeometry, SequentialDirectSolverAcrossOrigin_C
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -906,8 +906,8 @@ TEST(DirectSolverTakeTest_CircularGeometry, ParallelDirectSolverAcrossOrigin_Cir
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -956,8 +956,8 @@ TEST(DirectSolverTakeTest_ShafranovGeometry, DirectSolverDirBC_Interior_Shafrano
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -1002,8 +1002,8 @@ TEST(DirectSolverTakeTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovG
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -1053,8 +1053,8 @@ TEST(DirectSolverTakeTest_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeome
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -1100,8 +1100,8 @@ TEST(DirectSolverTakeTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometr
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -1147,8 +1147,8 @@ TEST(DirectSolverTakeTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeome
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -1190,8 +1190,8 @@ TEST(DirectSolverTakeTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometr
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -1244,8 +1244,8 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecis
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -1288,8 +1288,8 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecis
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution  = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution = rhs;
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());

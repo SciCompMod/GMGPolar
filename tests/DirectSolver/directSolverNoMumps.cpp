@@ -211,17 +211,17 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, SequentialDirectSolverDirBC_Inter
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-    Kokkos::deep_copy(solution,rhs);
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-12);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-12);
 }
 
 TEST(DirectSolverTestNoMumps_CircularGeometry, ParallelDirectSolverDirBC_Interior_CircularGeometry)
@@ -256,17 +256,17 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, ParallelDirectSolverDirBC_Interio
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-Kokkos::deep_copy(solution,rhs);
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-12);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-12);
 }
 
 TEST(DirectSolverTestNoMumps_CircularGeometry, SequentialDirectSolverAcrossOrigin_CircularGeometry)
@@ -301,17 +301,17 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, SequentialDirectSolverAcrossOrigi
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-Kokkos::deep_copy(solution,rhs);
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-8);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-7);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-8);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-8);
 }
 
 TEST(DirectSolverTestNoMumps_CircularGeometry, ParallelDirectSolverAcrossOrigin_CircularGeometry)
@@ -346,17 +346,17 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, ParallelDirectSolverAcrossOrigin_
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-Kokkos::deep_copy(solution,rhs);
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-8);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-7);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-8);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-8);
 }
 
 /* --------- */
@@ -397,17 +397,17 @@ TEST(DirectSolverTestNoMumps_ShafranovGeometry, DirectSolverDirBC_Interior_Shafr
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-Kokkos::deep_copy(solution,rhs);
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-12);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-12);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-12);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-12);
 }
 
 TEST(DirectSolverTestNoMumps_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovGeometry)
@@ -444,17 +444,17 @@ TEST(DirectSolverTestNoMumps_ShafranovGeometry, DirectSolverAcrossOrigin_Shafran
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-Kokkos::deep_copy(solution,rhs);
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-8);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-7);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-8);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-8);
 }
 
 /* ------ */
@@ -496,17 +496,17 @@ TEST(DirectSolverTestNoMumps_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGe
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-Kokkos::deep_copy(solution,rhs);
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-12);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-12);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-12);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-12);
 }
 
 TEST(DirectSolverTestNoMumps_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometry)
@@ -544,17 +544,17 @@ TEST(DirectSolverTestNoMumps_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeom
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-Kokkos::deep_copy(solution,rhs);
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-8);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-7);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-8);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-8);
 }
 
 /* ------ */
@@ -592,17 +592,17 @@ TEST(DirectSolverTestNoMumps_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGe
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-Kokkos::deep_copy(solution,rhs);
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-11);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
 }
 
 TEST(DirectSolverTestNoMumps_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometry)
@@ -636,17 +636,17 @@ TEST(DirectSolverTestNoMumps_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeom
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-Kokkos::deep_copy(solution,rhs);
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-7);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-7);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-7);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-8);
 }
 
 /* We adjust the PolarGrid to increase the precision */
@@ -693,17 +693,17 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, DirectSolverAcrossOriginHigherPre
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-Kokkos::deep_copy(solution,rhs);
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-9);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-10);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-10);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-9);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-10);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-10);
 }
 
 TEST(DirectSolverTestNoMumps_CircularGeometry, DirectSolverAcrossOriginHigherPrecision2_CircularGeometry)
@@ -738,17 +738,17 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, DirectSolverAcrossOriginHigherPre
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-Kokkos::deep_copy(solution,rhs);
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-10);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-11);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-10);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
 }
 
 /* Same test now using Take */
@@ -784,17 +784,17 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, SequentialDirectSolverDirBC_
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-    Kokkos::deep_copy(solution,rhs);
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-12);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-12);
 }
 
 TEST(DirectSolverTakeCustomLUTest_CircularGeometry, ParallelDirectSolverDirBC_Interior_CircularGeometry)
@@ -829,17 +829,17 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, ParallelDirectSolverDirBC_In
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-    Kokkos::deep_copy(solution,rhs);
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-12);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-12);
 }
 
 TEST(DirectSolverTakeCustomLUTest_CircularGeometry, SequentialDirectSolverAcrossOrigin_CircularGeometry)
@@ -874,17 +874,17 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, SequentialDirectSolverAcross
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-Kokkos::deep_copy(solution,rhs);
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-8);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-7);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-8);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-8);
 }
 
 TEST(DirectSolverTakeCustomLUTest_CircularGeometry, ParallelDirectSolverAcrossOrigin_CircularGeometry)
@@ -919,17 +919,17 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, ParallelDirectSolverAcrossOr
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-Kokkos::deep_copy(solution,rhs);
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-8);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-7);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-8);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-8);
 }
 
 /* --------- */
@@ -970,17 +970,17 @@ TEST(DirectSolverTakeCustomLUTest_ShafranovGeometry, DirectSolverDirBC_Interior_
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-Kokkos::deep_copy(solution,rhs);
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-12);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-12);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-12);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-12);
 }
 
 TEST(DirectSolverTakeCustomLUTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovGeometry)
@@ -1017,17 +1017,17 @@ TEST(DirectSolverTakeCustomLUTest_ShafranovGeometry, DirectSolverAcrossOrigin_Sh
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-Kokkos::deep_copy(solution,rhs);
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-8);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-7);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-8);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-8);
 }
 
 /* ------ */
@@ -1069,17 +1069,17 @@ TEST(DirectSolverTakeCustomLUTest_CzarnyGeometry, DirectSolverDirBC_Interior_Cza
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-    Kokkos::deep_copy(solution,rhs);
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-12);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-12);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-12);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-12);
 }
 
 TEST(DirectSolverTakeCustomLUTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometry)
@@ -1117,17 +1117,17 @@ TEST(DirectSolverTakeCustomLUTest_CzarnyGeometry, DirectSolverAcrossOrigin_Czarn
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-    Kokkos::deep_copy(solution,rhs);
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-8);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-7);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-8);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-8);
 }
 
 /* ------ */
@@ -1165,18 +1165,17 @@ TEST(DirectSolverTakeCustomLUTest_CulhamGeometry, DirectSolverDirBC_Interior_Cul
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-    Kokkos::deep_copy(solution,rhs);
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
-
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-11);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
 }
 
 TEST(DirectSolverTakeCustomLUTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometry)
@@ -1210,18 +1209,17 @@ TEST(DirectSolverTakeCustomLUTest_CulhamGeometry, DirectSolverAcrossOrigin_Culha
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-    Kokkos::deep_copy(solution,rhs);
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
-;
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-7);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-7);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-8);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-7);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-7);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-8);
 }
 
 TEST(DirectSolverTakeCustomLUTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_CircularGeometry)
@@ -1266,18 +1264,17 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, DirectSolverAcrossOriginHigh
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-    Kokkos::deep_copy(solution,rhs);
-
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-9);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-10);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-10);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-9);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-10);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-10);
 }
 
 TEST(DirectSolverTakeCustomLUTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision2_CircularGeometry)
@@ -1312,16 +1309,15 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, DirectSolverAcrossOriginHigh
     ResidualGive residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> solution("solution",rhs.size());
-    Kokkos::deep_copy(solution,rhs);
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> solution("solution", rhs.size());
+    Kokkos::deep_copy(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
     residual_op.computeResidual(residuum, rhs, solution);
 
-
-    ASSERT_NEAR(l1_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(l2_norm(residuum), 0.0, 1e-11);
-    ASSERT_NEAR(infinity_norm(residuum), 0.0, 1e-12);
+    ASSERT_NEAR(l1_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(l2_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-12);
 }
