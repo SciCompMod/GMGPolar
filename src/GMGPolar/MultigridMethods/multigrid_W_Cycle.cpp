@@ -1,8 +1,6 @@
 #include "../../../include/GMGPolar/gmgpolar.h"
 
-void GMGPolar::multigrid_W_Cycle(const int level_depth,
-                                 Vector<double> solution,
-                                 Vector<double> rhs,
+void GMGPolar::multigrid_W_Cycle(const int level_depth, Vector<double> solution, Vector<double> rhs,
                                  Vector<double> residual)
 {
     assert(0 <= level_depth && level_depth < number_of_levels_ - 1);
@@ -76,7 +74,7 @@ void GMGPolar::multigrid_W_Cycle(const int level_depth,
     prolongation(level_depth + 1, residual, next_level.residual());
 
     /* Compute the corrected approximation: u = u + error */
-    add(solution, residual);
+    add(solution, ConstVector<double>(residual));
 
     auto start_MGC_postSmoothing = std::chrono::high_resolution_clock::now();
 

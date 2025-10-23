@@ -9,7 +9,7 @@
 #include <Kokkos_Core.hpp>
 
 template <typename T>
-bool equals(const Vector<T> lhs, const Vector<T> rhs)
+bool equals(ConstVector<T> lhs, ConstVector<T> rhs)
 {
     if (lhs.size() != rhs.size()) {
         return false;
@@ -35,7 +35,7 @@ void assign(Vector<T> lhs, const T& value)
 }
 
 template <typename T>
-void add(Vector<T> result, const Vector<T> x)
+void add(Vector<T> result, ConstVector<T> x)
 {
     if (result.size() != x.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
@@ -48,7 +48,7 @@ void add(Vector<T> result, const Vector<T> x)
 }
 
 template <typename T>
-void subtract(Vector<T> result, const Vector<T> x)
+void subtract(Vector<T> result, ConstVector<T> x)
 {
     if (result.size() != x.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
@@ -61,7 +61,7 @@ void subtract(Vector<T> result, const Vector<T> x)
 }
 
 template <typename T>
-void linear_combination(Vector<T> x, const T& alpha, const Vector<T> y, const T& beta)
+void linear_combination(Vector<T> x, const T& alpha, ConstVector<T> y, const T& beta)
 {
     if (x.size() != y.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
@@ -84,7 +84,7 @@ void multiply(Vector<T> x, const T& alpha)
 }
 
 template <typename T>
-T dot_product(const Vector<T> lhs, const Vector<T> rhs)
+T dot_product(ConstVector<T> lhs, ConstVector<T> rhs)
 {
     if (lhs.size() != rhs.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");

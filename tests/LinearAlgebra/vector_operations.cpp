@@ -32,11 +32,11 @@ TEST(VectorOperations, equals_vector_vector)
     v4(1) = 3;
     v4(2) = 3;
 
-    EXPECT_TRUE(equals(v, v));
-    EXPECT_TRUE(equals(v, v1));
-    EXPECT_FALSE(equals(v, v2));
-    EXPECT_FALSE(equals(v, v3));
-    EXPECT_FALSE(equals(v, v4));
+    EXPECT_TRUE(equals(ConstVector<double>(v), ConstVector<double>(v)));
+    EXPECT_TRUE(equals(ConstVector<double>(v), ConstVector<double>(v1)));
+    EXPECT_FALSE(equals(ConstVector<double>(v), ConstVector<double>(v2)));
+    EXPECT_FALSE(equals(ConstVector<double>(v), ConstVector<double>(v3)));
+    EXPECT_FALSE(equals(ConstVector<double>(v), ConstVector<double>(v4)));
 }
 
 /* void assign(Vector<T>& lhs, const T& value); */
@@ -50,10 +50,10 @@ TEST(VectorOperations, assign_vector_scalar)
     assign(v, 5.0);
     Vector<double> expected_result("expected_result", 3);
     Kokkos::deep_copy(expected_result, 5);
-    EXPECT_TRUE(equals(v, expected_result));
+    EXPECT_TRUE(equals(ConstVector<double>(v), ConstVector<double>(expected_result)));
 }
 
-/* void add(Vector<T>& result, const Vector<T>& x); */
+/* void add(Vector<T> result, ConstVector<T> x); */
 
 TEST(VectorOperations, add_vector_vector)
 {
@@ -66,13 +66,13 @@ TEST(VectorOperations, add_vector_vector)
     v2(0) = -1;
     v2(1) = -5;
     v2(2) = 2;
-    add(v1, v2);
+    add(v1, ConstVector<double>(v2));
 
     Vector<double> expected_result("expected_result", 3);
     expected_result(0) = 0;
     expected_result(1) = -3;
     expected_result(2) = 5;
-    EXPECT_TRUE(equals(v1, expected_result));
+    EXPECT_TRUE(equals(ConstVector<double>(v1), ConstVector<double>(expected_result)));
 }
 
 /* void subtract(Vector<T>& result, const Vector<T>& x) */
@@ -88,13 +88,13 @@ TEST(VectorOperations, subtract_vector_vector)
     v2(0) = -1;
     v2(1) = -5;
     v2(2) = 2;
-    subtract(v1, v2);
+    subtract(v1, ConstVector<double>(v2));
 
     Vector<double> expected_result("expected_result", 3);
     expected_result(0) = 2;
     expected_result(1) = 7;
     expected_result(2) = 1;
-    EXPECT_TRUE(equals(v1, expected_result));
+    EXPECT_TRUE(equals(ConstVector<double>(v1), ConstVector<double>(expected_result)));
 }
 
 /* void linear_combination(Vector<T>& x, const T& alpha, const Vector<T>& y, const T& beta); */
@@ -112,12 +112,12 @@ TEST(VectorOperations, linear_combination)
     v2(2)              = 2;
     const double alpha = -3.0;
     const double beta  = 2.0;
-    linear_combination(v1, alpha, v2, beta);
+    linear_combination(v1, alpha, ConstVector<double>(v2), beta);
     Vector<double> expected_result("expected_result", 3);
     expected_result(0) = -5.;
     expected_result(1) = -16.;
     expected_result(2) = -5.;
-    EXPECT_TRUE(equals(v1, expected_result));
+    EXPECT_TRUE(equals(ConstVector<double>(v1), ConstVector<double>(expected_result)));
 }
 
 /* void multiply(Vector<T>& x, const T& alpha); */
@@ -134,7 +134,7 @@ TEST(VectorOperations, multiply_vector_scalar)
     expected_result(0) = -3.;
     expected_result(1) = 6.;
     expected_result(2) = -9.;
-    EXPECT_TRUE(equals(v1, expected_result));
+    EXPECT_TRUE(equals(ConstVector<double>(v1), ConstVector<double>(expected_result)));
 }
 
 /* T dot_product(const Vector<T>& lhs, const Vector<T>& rhs); */
@@ -149,7 +149,7 @@ TEST(VectorOperations, dot_product)
     v2(0) = 1;
     v2(1) = 5;
     v2(2) = 2;
-    EXPECT_DOUBLE_EQ(dot_product(v1, v2), 17.0);
+    EXPECT_DOUBLE_EQ(dot_product(ConstVector<double>(v1), ConstVector<double>(v2)), 17.0);
 }
 
 /* T l1_norm(const Vector<T>& x); */

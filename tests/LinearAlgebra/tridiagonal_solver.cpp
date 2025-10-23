@@ -30,7 +30,7 @@ TEST(SymmetricTridiagonalSolver, diagonal_dominant_n_2)
     EXPECT_NEAR(rhs[0], exact_solution[0], 1e-12);
     EXPECT_NEAR(rhs[1], exact_solution[1], 1e-12);
 
-    EXPECT_TRUE(equals(rhs, exact_solution));
+    EXPECT_TRUE(equals(ConstVector<double>(rhs), ConstVector<double>(exact_solution)));
 }
 
 TEST(SymmetricTridiagonalSolver, not_diagonal_dominant_n_2)
@@ -57,7 +57,7 @@ TEST(SymmetricTridiagonalSolver, not_diagonal_dominant_n_2)
     EXPECT_NEAR(rhs[0], exact_solution[0], 1e-12);
     EXPECT_NEAR(rhs[1], exact_solution[1], 1e-12);
 
-    EXPECT_TRUE(equals(rhs, exact_solution));
+    EXPECT_TRUE(equals(ConstVector<double>(rhs), ConstVector<double>(exact_solution)));
 }
 
 TEST(SymmetricTridiagonalSolver, diagonal_dominant_n_3)
@@ -89,7 +89,7 @@ TEST(SymmetricTridiagonalSolver, diagonal_dominant_n_3)
     EXPECT_NEAR(rhs[1], exact_solution[1], 1e-12);
     EXPECT_NEAR(rhs[2], exact_solution[2], 1e-12);
 
-    EXPECT_TRUE(equals(rhs, exact_solution));
+    EXPECT_TRUE(equals(ConstVector<double>(rhs), ConstVector<double>(exact_solution)));
 }
 
 TEST(SymmetricTridiagonalSolver, not_diagonal_dominant_n_3)
@@ -123,7 +123,7 @@ TEST(SymmetricTridiagonalSolver, not_diagonal_dominant_n_3)
 
     EXPECT_DOUBLE_EQ(rhs[0], exact_solution[0]);
 
-    EXPECT_TRUE(equals(rhs, exact_solution));
+    EXPECT_TRUE(equals(ConstVector<double>(rhs), ConstVector<double>(exact_solution)));
 }
 
 TEST(SymmetricTridiagonalSolver, random_tridiagonal_n_10)
