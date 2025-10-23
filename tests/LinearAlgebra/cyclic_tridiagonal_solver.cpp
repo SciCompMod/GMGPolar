@@ -111,7 +111,7 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10)
         rhs[i] = dis(gen);
     }
 
-    const Vector<double> copy_rhs("copy_rhs", rhs.size());
+    Vector<double> copy_rhs("copy_rhs", rhs.size());
     Kokkos::deep_copy(copy_rhs, rhs);
 
     Vector<double> temp1("temp1", n);
@@ -161,7 +161,7 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_100)
         rhs[i] = dis(gen);
     }
 
-    const Vector<double> copy_rhs("copy_rhs", rhs.size());
+    Vector<double> copy_rhs("copy_rhs", rhs.size());
     Kokkos::deep_copy(copy_rhs, rhs);
 
     Vector<double> temp1("temp1", n);
@@ -211,7 +211,7 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_1000)
         rhs[i] = dis(gen);
     }
 
-    const Vector<double> copy_rhs("copy_rhs", rhs.size());
+    Vector<double> copy_rhs("copy_rhs", rhs.size());
     Kokkos::deep_copy(copy_rhs, rhs);
 
     Vector<double> temp1("temp1", n);
@@ -261,7 +261,7 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10000)
         rhs[i] = dis(gen);
     }
 
-    const Vector<double> copy_rhs("copy_rhs", rhs.size());
+    Vector<double> copy_rhs("copy_rhs", rhs.size());
     Kokkos::deep_copy(copy_rhs, rhs);
 
     Vector<double> temp1("temp1", n);
@@ -313,7 +313,7 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_boosted_subdiagona
         rhs[i] = dis(gen);
     }
 
-    const Vector<double> copy_rhs("copy_rhs", rhs.size());
+    Vector<double> copy_rhs("copy_rhs", rhs.size());
     Kokkos::deep_copy(copy_rhs, rhs);
 
     Vector<double> temp1("temp1", n);
@@ -436,7 +436,7 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10)
         rhs[i] = dis(gen);
     }
 
-    const Vector<double> copy_rhs("copy_rhs", rhs.size());
+    Vector<double> copy_rhs("copy_rhs", rhs.size());
     Kokkos::deep_copy(copy_rhs, rhs);
 
     Vector<double> temp1("temp1", n);
@@ -489,7 +489,7 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_100)
         rhs[i] = dis(gen);
     }
 
-    const Vector<double> copy_rhs("copy_rhs", rhs.size());
+    Vector<double> copy_rhs("copy_rhs", rhs.size());
     Kokkos::deep_copy(copy_rhs, rhs);
 
     Vector<double> temp1("temp1", n);
@@ -542,7 +542,7 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_1000)
         rhs[i] = dis(gen);
     }
 
-    const Vector<double> copy_rhs("copy_rhs", rhs.size());
+    Vector<double> copy_rhs("copy_rhs", rhs.size());
     Kokkos::deep_copy(copy_rhs, rhs);
 
     Vector<double> temp1("temp1", n);
@@ -595,7 +595,7 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10000)
         rhs[i] = dis(gen);
     }
 
-    const Vector<double> copy_rhs("copy_rhs", rhs.size());
+    Vector<double> copy_rhs("copy_rhs", rhs.size());
     Kokkos::deep_copy(copy_rhs, rhs);
 
     Vector<double> temp1("temp1", n);
@@ -650,7 +650,7 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_boosted_subdiagonal_LO
         rhs[i] = dis(gen);
     }
 
-    const Vector<double> copy_rhs("copy_rhs", rhs.size());
+    Vector<double> copy_rhs("copy_rhs", rhs.size());
     Kokkos::deep_copy(copy_rhs, rhs);
 
     Vector<double> temp1("temp1", n);
