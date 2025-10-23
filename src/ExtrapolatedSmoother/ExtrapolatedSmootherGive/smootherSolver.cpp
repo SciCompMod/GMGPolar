@@ -815,7 +815,7 @@
     } while (0)
 
 void ExtrapolatedSmootherGive::applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color,
-                                                          const Vector<double> x, const Vector<double> rhs,
+                                                          ConstVector<double> x, ConstVector<double> rhs,
                                                           Vector<double> temp)
 {
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles() + 1);
@@ -865,7 +865,7 @@ void ExtrapolatedSmootherGive::applyAscOrthoCircleSection(const int i_r, const S
 }
 
 void ExtrapolatedSmootherGive::applyAscOrthoRadialSection(const int i_theta, const SmootherColor smoother_color,
-                                                          const Vector<double> x, const Vector<double> rhs,
+                                                          ConstVector<double> x, ConstVector<double> rhs,
                                                           Vector<double> temp)
 {
     const auto& sin_theta_cache = level_cache_.sin_theta();
@@ -971,7 +971,7 @@ void ExtrapolatedSmootherGive::solveRadialSection(const int i_theta, Vector<doub
 /* Sequential Version */
 /* ------------------ */
 
-void ExtrapolatedSmootherGive::extrapolatedSmoothingSequential(Vector<double> x, const Vector<double> rhs,
+void ExtrapolatedSmootherGive::extrapolatedSmoothingSequential(Vector<double> x, ConstVector<double> rhs,
                                                                Vector<double> temp)
 {
     assert(x.size() == rhs.size());
@@ -1036,7 +1036,7 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingSequential(Vector<double> x,
 /* ------------------------------------ */
 
 // clang-format off
-void ExtrapolatedSmootherGive::extrapolatedSmoothingForLoop(Vector<double> x, const Vector<double> rhs,
+void ExtrapolatedSmootherGive::extrapolatedSmoothingForLoop(Vector<double> x, ConstVector<double> rhs,
                                                             Vector<double> temp)
 {
     assert(x.size() == rhs.size());

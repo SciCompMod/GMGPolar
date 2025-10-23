@@ -51,7 +51,7 @@ Vector<double> Level::rhs()
 {
     return rhs_;
 }
-const Vector<double> Level::rhs() const
+ConstVector<double> Level::rhs() const
 {
     return rhs_;
 }
@@ -59,7 +59,7 @@ Vector<double> Level::solution()
 {
     return solution_;
 }
-const Vector<double> Level::solution() const
+ConstVector<double> Level::solution() const
 {
     return solution_;
 }
@@ -67,7 +67,7 @@ Vector<double> Level::residual()
 {
     return residual_;
 }
-const Vector<double> Level::residual() const
+ConstVector<double> Level::residual() const
 {
     return residual_;
 }
@@ -75,7 +75,7 @@ Vector<double> Level::error_correction()
 {
     return error_correction_;
 }
-const Vector<double> Level::error_correction() const
+ConstVector<double> Level::error_correction() const
 {
     return error_correction_;
 }
@@ -98,7 +98,7 @@ void Level::initializeResidual(const DomainGeometry& domain_geometry,
     if (!op_residual_)
         throw std::runtime_error("Failed to initialize Residual.");
 }
-void Level::computeResidual(Vector<double> result, const Vector<double> rhs, const Vector<double> x) const
+void Level::computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const
 {
     if (!op_residual_)
         throw std::runtime_error("Residual not initialized.");
@@ -160,7 +160,7 @@ void Level::initializeSmoothing(const DomainGeometry& domain_geometry,
     if (!op_smoother_)
         throw std::runtime_error("Failed to initialize Smoother.");
 }
-void Level::smoothing(Vector<double> x, const Vector<double> rhs, Vector<double> temp) const
+void Level::smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) const
 {
     if (!op_smoother_)
         throw std::runtime_error("Smoother not initialized.");
@@ -185,7 +185,7 @@ void Level::initializeExtrapolatedSmoothing(const DomainGeometry& domain_geometr
     if (!op_extrapolated_smoother_)
         throw std::runtime_error("Failed to initialize Extrapolated Smoother.");
 }
-void Level::extrapolatedSmoothing(Vector<double> x, const Vector<double> rhs, Vector<double> temp) const
+void Level::extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) const
 {
     if (!op_extrapolated_smoother_)
         throw std::runtime_error("Extrapolated Smoother not initialized.");

@@ -164,11 +164,11 @@ const DomainGeometry& LevelCache::domainGeometry() const
     return domain_geometry_;
 }
 
-const Vector<double> LevelCache::sin_theta() const
+ConstVector<double> LevelCache::sin_theta() const
 {
     return sin_theta_;
 }
-const Vector<double> LevelCache::cos_theta() const
+ConstVector<double> LevelCache::cos_theta() const
 {
     return cos_theta_;
 }
@@ -177,11 +177,11 @@ bool LevelCache::cacheDensityProfileCoefficients() const
 {
     return cache_density_profile_coefficients_;
 }
-const Vector<double> LevelCache::coeff_alpha() const
+ConstVector<double> LevelCache::coeff_alpha() const
 {
     return coeff_alpha_;
 }
-const Vector<double> LevelCache::coeff_beta() const
+ConstVector<double> LevelCache::coeff_beta() const
 {
     return coeff_beta_;
 }
@@ -190,19 +190,19 @@ bool LevelCache::cacheDomainGeometry() const
 {
     return cache_domain_geometry_;
 }
-const Vector<double> LevelCache::arr() const
+ConstVector<double> LevelCache::arr() const
 {
     return arr_;
 }
-const Vector<double> LevelCache::att() const
+ConstVector<double> LevelCache::att() const
 {
     return att_;
 }
-const Vector<double> LevelCache::art() const
+ConstVector<double> LevelCache::art() const
 {
     return art_;
 }
-const Vector<double> LevelCache::detDF() const
+ConstVector<double> LevelCache::detDF() const
 {
     return detDF_;
 }

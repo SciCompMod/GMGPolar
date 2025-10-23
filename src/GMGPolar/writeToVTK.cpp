@@ -61,16 +61,15 @@ void GMGPolar::writeToVTK(const std::filesystem::path& file_path, const PolarGri
          << "</VTKFile>\n";
 }
 
-void GMGPolar::writeToVTK(const std::filesystem::path& file_path, const Level& level,
-                          const Vector<double> grid_function)
+void GMGPolar::writeToVTK(const std::filesystem::path& file_path, const Level& level, ConstVector<double> grid_function)
 {
     const PolarGrid& grid         = level.grid();
     const LevelCache& level_cache = level.levelCache();
 
     assert(grid.numberOfNodes() == grid_function.size());
 
-    const Vector<double> sin_theta_cache = level_cache.sin_theta();
-    const Vector<double> cos_theta_cache = level_cache.cos_theta();
+    ConstVector<double> sin_theta_cache = level_cache.sin_theta();
+    ConstVector<double> cos_theta_cache = level_cache.cos_theta();
 
     const auto filename = file_path.stem().string() + ".vtu";
 

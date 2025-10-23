@@ -216,9 +216,8 @@
         }                                                                                                              \
     } while (0)
 
-void Interpolation::applyFMGInterpolation(const Level& fromLevel, const Level& toLevel,
-                                          Vector<double> result,
-                                          const Vector<double> x) const
+void Interpolation::applyFMGInterpolation(const Level& fromLevel, const Level& toLevel, Vector<double> result,
+                                          ConstVector<double> x) const
 {
     assert(toLevel.level_depth() == fromLevel.level_depth() - 1);
 

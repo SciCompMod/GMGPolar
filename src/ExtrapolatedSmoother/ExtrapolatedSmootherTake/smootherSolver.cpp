@@ -450,7 +450,7 @@
     } while (0)
 
 void ExtrapolatedSmootherTake::applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color,
-                                                          const Vector<double> x, const Vector<double> rhs,
+                                                          ConstVector<double> x, ConstVector<double> rhs,
                                                           Vector<double> temp)
 {
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles());
@@ -471,7 +471,7 @@ void ExtrapolatedSmootherTake::applyAscOrthoCircleSection(const int i_r, const S
 }
 
 void ExtrapolatedSmootherTake::applyAscOrthoRadialSection(const int i_theta, const SmootherColor smoother_color,
-                                                          const Vector<double> x, const Vector<double> rhs,
+                                                          ConstVector<double> x, ConstVector<double> rhs,
                                                           Vector<double> temp)
 {
     assert(i_theta >= 0 && i_theta < grid_.ntheta());
@@ -541,7 +541,7 @@ void ExtrapolatedSmootherTake::solveRadialSection(const int i_theta, Vector<doub
                       Kokkos::subview(temp, Kokkos::make_pair(start, end)));
 }
 
-void ExtrapolatedSmootherTake::extrapolatedSmoothing(Vector<double> x, const Vector<double> rhs, Vector<double> temp)
+void ExtrapolatedSmootherTake::extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());

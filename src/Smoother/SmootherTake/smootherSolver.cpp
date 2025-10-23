@@ -202,8 +202,8 @@
         }                                                                                                              \
     } while (0)
 
-void SmootherTake::applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color, const Vector<double> x,
-                                              const Vector<double> rhs, Vector<double> temp)
+void SmootherTake::applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color, ConstVector<double> x,
+                                              ConstVector<double> rhs, Vector<double> temp)
 {
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles());
 
@@ -223,7 +223,7 @@ void SmootherTake::applyAscOrthoCircleSection(const int i_r, const SmootherColor
 }
 
 void SmootherTake::applyAscOrthoRadialSection(const int i_theta, const SmootherColor smoother_color,
-                                              const Vector<double> x, const Vector<double> rhs, Vector<double> temp)
+                                              ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp)
 {
     assert(i_theta >= 0 && i_theta < grid_.ntheta());
 
@@ -287,7 +287,7 @@ void SmootherTake::solveRadialSection(const int i_theta, Vector<double> x, Vecto
 
 // In temp we store the vector 'rhs - A_sc^ortho u_sc^ortho' and then we solve the system
 // Asc * u_sc = temp in place and move the updated values into 'x'.
-void SmootherTake::smoothing(Vector<double> x, const Vector<double> rhs, Vector<double> temp)
+void SmootherTake::smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());

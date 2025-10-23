@@ -2,9 +2,8 @@
 
 /* For the restriction we use R_ex = P_ex^T */
 
-void Interpolation::applyExtrapolatedRestriction0(
-    const Level& fromLevel, const Level& toLevel, Vector<double> result,
-    const Vector<double> x) const
+void Interpolation::applyExtrapolatedRestriction0(const Level& fromLevel, const Level& toLevel, Vector<double> result,
+                                                  ConstVector<double> x) const
 {
     assert(toLevel.level_depth() == fromLevel.level_depth() + 1);
 
@@ -66,9 +65,8 @@ void Interpolation::applyExtrapolatedRestriction0(
 // Optimized version of applyRestriction0 //
 // -------------------------------------- //
 
-void Interpolation::applyExtrapolatedRestriction(
-    const Level& fromLevel, const Level& toLevel, Vector<double> result,
-    const Vector<double> x) const
+void Interpolation::applyExtrapolatedRestriction(const Level& fromLevel, const Level& toLevel, Vector<double> result,
+                                                 ConstVector<double> x) const
 {
     assert(toLevel.level_depth() == fromLevel.level_depth() + 1);
 

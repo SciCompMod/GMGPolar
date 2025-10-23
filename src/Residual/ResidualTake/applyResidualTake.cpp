@@ -112,8 +112,8 @@
         }                                                                                                                               \
     } while (0)
 
-void ResidualTake::applyCircleSection(const int i_r, Vector<double> result, const Vector<double> rhs,
-                                      const Vector<double> x) const
+void ResidualTake::applyCircleSection(const int i_r, Vector<double> result, ConstVector<double> rhs,
+                                      ConstVector<double> x) const
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -130,8 +130,8 @@ void ResidualTake::applyCircleSection(const int i_r, Vector<double> result, cons
     }
 }
 
-void ResidualTake::applyRadialSection(const int i_theta, Vector<double> result, const Vector<double> rhs,
-                                      const Vector<double> x) const
+void ResidualTake::applyRadialSection(const int i_theta, Vector<double> result, ConstVector<double> rhs,
+                                      ConstVector<double> x) const
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());

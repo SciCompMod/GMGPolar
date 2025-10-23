@@ -1,8 +1,6 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
-void GMGPolar::prolongation(const int current_level,
-                            Vector<double> result,
-                            const Vector<double> x) const
+void GMGPolar::prolongation(const int current_level, Vector<double> result, ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ && 1 <= current_level);
     if (!interpolation_)
@@ -11,9 +9,7 @@ void GMGPolar::prolongation(const int current_level,
     interpolation_->applyProlongation(levels_[current_level], levels_[current_level - 1], result, x);
 }
 
-void GMGPolar::restriction(const int current_level,
-                           Vector<double> result,
-                           const Vector<double> x) const
+void GMGPolar::restriction(const int current_level, Vector<double> result, ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ - 1 && 0 <= current_level);
     if (!interpolation_)
@@ -22,8 +18,7 @@ void GMGPolar::restriction(const int current_level,
     interpolation_->applyRestriction(levels_[current_level], levels_[current_level + 1], result, x);
 }
 
-void GMGPolar::injection(const int current_level, Vector<double> result,
-                         const Vector<double> x) const
+void GMGPolar::injection(const int current_level, Vector<double> result, ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ - 1 && 0 <= current_level);
     if (!interpolation_)
@@ -32,9 +27,7 @@ void GMGPolar::injection(const int current_level, Vector<double> result,
     interpolation_->applyInjection(levels_[current_level], levels_[current_level + 1], result, x);
 }
 
-void GMGPolar::extrapolatedProlongation(const int current_level,
-                                        Vector<double> result,
-                                        const Vector<double> x) const
+void GMGPolar::extrapolatedProlongation(const int current_level, Vector<double> result, ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ && 1 <= current_level);
     if (!interpolation_)
@@ -43,9 +36,7 @@ void GMGPolar::extrapolatedProlongation(const int current_level,
     interpolation_->applyExtrapolatedProlongation(levels_[current_level], levels_[current_level - 1], result, x);
 }
 
-void GMGPolar::extrapolatedRestriction(const int current_level,
-                                       Vector<double> result,
-                                       const Vector<double> x) const
+void GMGPolar::extrapolatedRestriction(const int current_level, Vector<double> result, ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ - 1 && 0 <= current_level);
     if (!interpolation_)
@@ -54,9 +45,7 @@ void GMGPolar::extrapolatedRestriction(const int current_level,
     interpolation_->applyExtrapolatedRestriction(levels_[current_level], levels_[current_level + 1], result, x);
 }
 
-void GMGPolar::FMGInterpolation(const int current_level,
-                                Vector<double> result,
-                                const Vector<double> x) const
+void GMGPolar::FMGInterpolation(const int current_level, Vector<double> result, ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ && 1 <= current_level);
     if (!interpolation_)
