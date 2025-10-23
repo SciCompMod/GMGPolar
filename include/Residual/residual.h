@@ -26,9 +26,7 @@ public:
                       const int num_omp_threads);
     virtual ~Residual() = default;
 
-    virtual void computeResidual(Vector<double> result,
-                                 const Vector<double> rhs,
-                                 const Vector<double> x) const = 0;
+    virtual void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const = 0;
 
 protected:
     /* ------------------- */

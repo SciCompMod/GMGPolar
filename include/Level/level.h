@@ -53,22 +53,20 @@ public:
     const LevelCache& levelCache() const;
 
     Vector<double> rhs();
-    const Vector<double> rhs() const;
+    ConstVector<double> rhs() const;
     Vector<double> solution();
-    const Vector<double> solution() const;
+    ConstVector<double> solution() const;
     Vector<double> residual();
-    const Vector<double> residual() const;
+    ConstVector<double> residual() const;
     Vector<double> error_correction();
-    const Vector<double> error_correction() const;
+    ConstVector<double> error_correction() const;
 
     // -------------- //
     // Apply Residual //
     void initializeResidual(const DomainGeometry& domain_geometry,
                             const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior,
                             const int num_omp_threads, const StencilDistributionMethod stencil_distribution_method);
-    void computeResidual(Vector<double> result,
-                         const Vector<double> rhs,
-                         const Vector<double> x) const;
+    void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const;
 
     // ------------------- //
     // Solve coarse System //
@@ -84,9 +82,7 @@ public:
     void initializeSmoothing(const DomainGeometry& domain_geometry,
                              const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior,
                              const int num_omp_threads, const StencilDistributionMethod stencil_distribution_method);
-    void smoothing(Vector<double> x,
-                   const Vector<double> rhs,
-                   Vector<double> temp) const;
+    void smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) const;
 
     // ---------------------------- //
     // Apply Extrapolated Smoothing //
@@ -94,9 +90,7 @@ public:
                                          const DensityProfileCoefficients& density_profile_coefficients,
                                          const bool DirBC_Interior, const int num_omp_threads,
                                          const StencilDistributionMethod stencil_distribution_method);
-    void extrapolatedSmoothing(Vector<double> x,
-                               const Vector<double> rhs,
-                               Vector<double> temp) const;
+    void extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) const;
 
 private:
     const int level_depth_;
@@ -125,18 +119,18 @@ public:
     const DomainGeometry& domainGeometry() const;
     const DensityProfileCoefficients& densityProfileCoefficients() const;
 
-    const Vector<double> sin_theta() const;
-    const Vector<double> cos_theta() const;
+    ConstVector<double> sin_theta() const;
+    ConstVector<double> cos_theta() const;
 
     bool cacheDensityProfileCoefficients() const;
-    const Vector<double> coeff_alpha() const;
-    const Vector<double> coeff_beta() const;
+    ConstVector<double> coeff_alpha() const;
+    ConstVector<double> coeff_beta() const;
 
     bool cacheDomainGeometry() const;
-    const Vector<double> arr() const;
-    const Vector<double> att() const;
-    const Vector<double> art() const;
-    const Vector<double> detDF() const;
+    ConstVector<double> arr() const;
+    ConstVector<double> att() const;
+    ConstVector<double> art() const;
+    ConstVector<double> detDF() const;
 
     inline void obtainValues(const int i_r, const int i_theta, const int global_index, const double& r,
                              const double& theta, double& sin_theta, double& cos_theta, double& coeff_beta, double& arr,

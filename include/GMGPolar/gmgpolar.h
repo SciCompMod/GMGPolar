@@ -149,7 +149,7 @@ public:
     /* ---------------------------------------------------------------------- */
     // Return a reference to the computed solution vector.
     Vector<double> solution();
-    const Vector<double> solution() const;
+    ConstVector<double> solution() const;
 
     // Return the underlying cartesian mesh used for discretization.
     const PolarGrid& grid() const;
@@ -255,13 +255,13 @@ private:
     /* Compute exact error if an exact solution is provided */
     // The results are stored as a pair: (weighted L2 error, infinity error).
     std::vector<std::pair<double, double>> exact_errors_;
-    std::pair<double, double> computeExactError(Level& level, const Vector<double> solution, Vector<double> error,
+    std::pair<double, double> computeExactError(Level& level, ConstVector<double> solution, Vector<double> error,
                                                 const ExactSolution& exact_solution);
 
     /* ------------------------------------------------------------------------- */
     /* Compute the extrapolated residual: res_ex = 4/3 res_fine - 1/3 res_coarse */
     void extrapolatedResidual(const int current_level, Vector<double> residual,
-                              const Vector<double> residual_next_level);
+                              ConstVector<double> residual_next_level);
 
     /* --------------- */
     /* Setup Functions */
@@ -273,7 +273,7 @@ private:
     /* --------------- */
     /* Solve Functions */
     void initializeSolution();
-    double residualNorm(const ResidualNormType& norm_type, const Level& level, const Vector<double> residual) const;
+    double residualNorm(const ResidualNormType& norm_type, const Level& level, ConstVector<double> residual) const;
     void evaluateExactError(Level& level, const ExactSolution& exact_solution);
     void updateResidualNorms(Level& level, int iteration, double& initial_residual_norm, double& current_residual_norm,
                              double& current_relative_residual_norm);
@@ -299,17 +299,17 @@ private:
 
     /* ----------------------- */
     /* Interpolation functions */
-    void prolongation(const int current_level, Vector<double> result, const Vector<double> x) const;
-    void restriction(const int current_level, Vector<double> result, const Vector<double> x) const;
-    void injection(const int current_level, Vector<double> result, const Vector<double> x) const;
-    void extrapolatedProlongation(const int current_level, Vector<double> result, const Vector<double> x) const;
-    void extrapolatedRestriction(const int current_level, Vector<double> result, const Vector<double> x) const;
-    void FMGInterpolation(const int current_level, Vector<double> result, const Vector<double> x) const;
+    void prolongation(const int current_level, Vector<double> result, ConstVector<double> x) const;
+    void restriction(const int current_level, Vector<double> result, ConstVector<double> x) const;
+    void injection(const int current_level, Vector<double> result, ConstVector<double> x) const;
+    void extrapolatedProlongation(const int current_level, Vector<double> result, ConstVector<double> x) const;
+    void extrapolatedRestriction(const int current_level, Vector<double> result, ConstVector<double> x) const;
+    void FMGInterpolation(const int current_level, Vector<double> result, ConstVector<double> x) const;
 
     /* ------------- */
     /* Visualization */
     void writeToVTK(const std::filesystem::path& file_path, const PolarGrid& grid);
-    void writeToVTK(const std::filesystem::path& file_path, const Level& level, const Vector<double> grid_function);
+    void writeToVTK(const std::filesystem::path& file_path, const Level& level, ConstVector<double> grid_function);
 
     /* ------------------------------ */
     /* Timing statistics for GMGPolar */
