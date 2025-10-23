@@ -100,7 +100,7 @@ T dot_product(const Vector<T> lhs, const Vector<T> rhs)
 }
 
 template <typename T>
-T l1_norm(const Vector<T> x)
+T l1_norm(ConstVector<T> x)
 {
     T result      = 0.0;
     std::size_t n = x.size();
@@ -112,7 +112,7 @@ T l1_norm(const Vector<T> x)
 }
 
 template <typename T>
-T l2_norm_squared(const Vector<T> x)
+T l2_norm_squared(ConstVector<T> x)
 {
     T result      = 0.0;
     std::size_t n = x.size();
@@ -124,7 +124,7 @@ T l2_norm_squared(const Vector<T> x)
 }
 
 template <typename T>
-T l2_norm(const Vector<T> x)
+T l2_norm(ConstVector<T> x)
 {
     const std::size_t n = x.size();
     // 1) find the largest absolute value
@@ -151,7 +151,7 @@ T l2_norm(const Vector<T> x)
 }
 
 template <typename T>
-T infinity_norm(const Vector<T> x)
+T infinity_norm(ConstVector<T> x)
 {
     T result      = 0.0;
     std::size_t n = x.size();
