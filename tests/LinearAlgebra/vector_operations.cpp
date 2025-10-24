@@ -3,7 +3,7 @@
 #include "../../include/LinearAlgebra/vector.h"
 #include "../../include/LinearAlgebra/vector_operations.h"
 
-/* bool equals(const Vector<T>& lhs, const Vector<T>& rhs); */
+/* bool equals(ConstVector<T>& lhs, ConstVector<T>& rhs); */
 
 TEST(VectorOperations, equals_vector_vector)
 {
@@ -75,7 +75,7 @@ TEST(VectorOperations, add_vector_vector)
     EXPECT_TRUE(equals(ConstVector<double>(v1), ConstVector<double>(expected_result)));
 }
 
-/* void subtract(Vector<T>& result, const Vector<T>& x) */
+/* void subtract(Vector<T>& result, ConstVector<T>& x) */
 
 TEST(VectorOperations, subtract_vector_vector)
 {
@@ -97,7 +97,7 @@ TEST(VectorOperations, subtract_vector_vector)
     EXPECT_TRUE(equals(ConstVector<double>(v1), ConstVector<double>(expected_result)));
 }
 
-/* void linear_combination(Vector<T>& x, const T& alpha, const Vector<T>& y, const T& beta); */
+/* void linear_combination(Vector<T>& x, const T& alpha, ConstVector<T>& y, const T& beta); */
 
 TEST(VectorOperations, linear_combination)
 {
@@ -137,7 +137,7 @@ TEST(VectorOperations, multiply_vector_scalar)
     EXPECT_TRUE(equals(ConstVector<double>(v1), ConstVector<double>(expected_result)));
 }
 
-/* T dot_product(const Vector<T>& lhs, const Vector<T>& rhs); */
+/* T dot_product(ConstVector<T>& lhs, ConstVector<T>& rhs); */
 
 TEST(VectorOperations, dot_product)
 {
@@ -152,7 +152,7 @@ TEST(VectorOperations, dot_product)
     EXPECT_DOUBLE_EQ(dot_product(ConstVector<double>(v1), ConstVector<double>(v2)), 17.0);
 }
 
-/* T l1_norm(const Vector<T>& x); */
+/* T l1_norm(ConstVector<T>& x); */
 
 TEST(VectorOperations, l1_vector_norm)
 {
@@ -163,7 +163,7 @@ TEST(VectorOperations, l1_vector_norm)
     EXPECT_DOUBLE_EQ(l1_norm(ConstVector<double>(v)), 8.0);
 }
 
-/* T l2_norm_squared(const Vector<T>& x); */
+/* T l2_norm_squared(ConstVector<T>& x); */
 
 TEST(VectorOperations, l2_vector_norm_squared)
 {
@@ -175,7 +175,7 @@ TEST(VectorOperations, l2_vector_norm_squared)
     EXPECT_DOUBLE_EQ(l2_norm_squared(const_v), 30.0);
 }
 
-/* T l2_norm(const Vector<T>& x); */
+/* T l2_norm(ConstVector<T>& x); */
 
 TEST(VectorOperations, l2_vector_norm)
 {
@@ -187,7 +187,7 @@ TEST(VectorOperations, l2_vector_norm)
     EXPECT_DOUBLE_EQ(l2_norm(ConstVector<double>(const_v)), std::sqrt(30.0));
 }
 
-/* T infinity_norm(const Vector<T>& x); */
+/* T infinity_norm(ConstVector<T>& x); */
 
 TEST(VectorOperations, infinity_vector_norm)
 {
