@@ -25,14 +25,13 @@ add_executable(gmgpolar_tests
     Smoother/smoother.cpp
     ExtrapolatedSmoother/extrapolated_smoother.cpp
     ConfigParser/config_parser.cpp
+    GMGPolar/solve_tests.cpp
+    GMGPolar/convergence_order.cpp
 )
 
 # Set the compile features and link libraries
 target_compile_features(gmgpolar_tests PRIVATE cxx_std_17)
 target_link_libraries(gmgpolar_tests GMGPolarLib GTest::gtest_main)
-
-# Register the test
-add_test(NAME gmgpolar_tests COMMAND gmgpolar_tests)
 
 include(GoogleTest)
 gtest_discover_tests(gmgpolar_tests)
