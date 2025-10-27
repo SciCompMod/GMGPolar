@@ -39,6 +39,7 @@
                                  circle_diagonal_solver, circle_tridiagonal_solver, radial_diagonal_solver,              \
                                  radial_tridiagonal_solver)                                                              \
     do {                                                                                                                 \
+        /* test */                                                                                                       \
         assert(i_r >= 0 && i_r < grid.nr());                                                                             \
         assert(i_theta >= 0 && i_theta < grid.ntheta());                                                                 \
                                                                                                                          \
