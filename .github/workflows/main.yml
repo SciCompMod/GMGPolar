@@ -48,3 +48,14 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage-filtered.info
           verbose: true          
+
+  clang-format:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/gyselax/gyselalibxx_env:latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          find -name *.cpp -o -name *.hpp -o -name *.h | clang-format --dry-run -Werror
+        shell: bash
