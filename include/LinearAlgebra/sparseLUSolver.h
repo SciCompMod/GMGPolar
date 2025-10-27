@@ -9,7 +9,6 @@
 
 #include "csr_matrix.h"
 #include "vector.h"
-#include <Kokkos_Core.hpp>
 
 /**
  * @brief Sparse LU decomposition solver for symmetric positive definite matrices.
