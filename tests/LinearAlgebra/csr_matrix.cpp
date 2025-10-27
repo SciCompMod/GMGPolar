@@ -3,12 +3,11 @@
 #include "../../include/LinearAlgebra/csr_matrix.h"
 #include "../../include/LinearAlgebra/sparseLUSolver.h"
 #include "../../include/LinearAlgebra/vector.h"
-#include <Kokkos_Core.hpp>
 
 TEST(SparseMatrixCSR, default_construct)
 {
     const SparseMatrixCSR<double> v;
-    Kokkos::View<double*, Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace> test("test_view", 10);
+    Vector<double> test("test_view", 10);
     (void)v;
 }
 
