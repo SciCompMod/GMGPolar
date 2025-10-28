@@ -198,7 +198,7 @@ void GMGPolar::initializeSolution()
         Level& coarsest_level = levels_[coarsest_depth];
 
         // Solve directly on the coarsest level
-        coarsest_level.solution() = coarsest_level.rhs();
+        Kokkos::deep_copy(coarsest_level.solution(), coarsest_level.rhs());
         coarsest_level.directSolveInPlace(coarsest_level.solution()); // Direct solve on coarsest grid
 
         // Prolongate the solution from the coarsest level up to the finest, while applying Multigrid Cycles on each level
