@@ -102,7 +102,7 @@ private:
     std::unique_ptr<Smoother> op_smoother_;
     std::unique_ptr<ExtrapolatedSmoother> op_extrapolated_smoother_;
 
-    Vector<double> const rhs_;
+    Vector<double> rhs_;
     Vector<double> solution_;
     Vector<double> residual_;
     Vector<double> error_correction_;
