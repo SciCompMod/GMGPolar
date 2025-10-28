@@ -30,7 +30,7 @@ public:
                       int num_omp_threads);
     virtual ~Smoother() = default;
 
-    virtual void smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) = 0;
+    virtual void smoothing(Vector<double> const x, ConstVector<double> rhs, Vector<double> const temp) = 0;
 
 protected:
     const PolarGrid& grid_;

@@ -203,7 +203,7 @@
     } while (0)
 
 void SmootherTake::applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color, ConstVector<double> x,
-                                              ConstVector<double> rhs, Vector<double> temp)
+                                              ConstVector<double> rhs, Vector<double> const temp)
 {
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles());
 
@@ -223,7 +223,7 @@ void SmootherTake::applyAscOrthoCircleSection(const int i_r, const SmootherColor
 }
 
 void SmootherTake::applyAscOrthoRadialSection(const int i_theta, const SmootherColor smoother_color,
-                                              ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp)
+                                              ConstVector<double> x, ConstVector<double> rhs, Vector<double> const temp)
 {
     assert(i_theta >= 0 && i_theta < grid_.ntheta());
 
@@ -242,8 +242,8 @@ void SmootherTake::applyAscOrthoRadialSection(const int i_theta, const SmootherC
     }
 }
 
-void SmootherTake::solveCircleSection(const int i_r, Vector<double> x, Vector<double> temp,
-                                      Vector<double> solver_storage_1, Vector<double> solver_storage_2)
+void SmootherTake::solveCircleSection(const int i_r, Vector<double> const x, Vector<double> const temp,
+                                      Vector<double> const solver_storage_1, Vector<double> const solver_storage_2)
 {
     const int start = grid_.index(i_r, 0);
     const int end   = start + grid_.ntheta();
@@ -271,8 +271,8 @@ void SmootherTake::solveCircleSection(const int i_r, Vector<double> x, Vector<do
                       Kokkos::subview(temp, Kokkos::make_pair(start, end)));
 }
 
-void SmootherTake::solveRadialSection(const int i_theta, Vector<double> x, Vector<double> temp,
-                                      Vector<double> solver_storage)
+void SmootherTake::solveRadialSection(const int i_theta, Vector<double> const x, Vector<double> const temp,
+                                      Vector<double> const solver_storage)
 {
     const int start = grid_.index(grid_.numberSmootherCircles(), i_theta);
     const int end   = start + grid_.lengthSmootherRadial();
@@ -287,7 +287,7 @@ void SmootherTake::solveRadialSection(const int i_theta, Vector<double> x, Vecto
 
 // In temp we store the vector 'rhs - A_sc^ortho u_sc^ortho' and then we solve the system
 // Asc * u_sc = temp in place and move the updated values into 'x'.
-void SmootherTake::smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp)
+void SmootherTake::smoothing(Vector<double> const x, ConstVector<double> rhs, Vector<double> const temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());

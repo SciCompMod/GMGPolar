@@ -135,7 +135,7 @@ void Level::initializeDirectSolver(const DomainGeometry& domain_geometry,
         throw std::runtime_error("Failed to initialize Direct Solver.");
 }
 
-void Level::directSolveInPlace(Vector<double> x) const
+void Level::directSolveInPlace(Vector<double> const x) const
 {
     if (!op_directSolver_)
         throw std::runtime_error("Coarse Solver not initialized.");
@@ -160,7 +160,7 @@ void Level::initializeSmoothing(const DomainGeometry& domain_geometry,
     if (!op_smoother_)
         throw std::runtime_error("Failed to initialize Smoother.");
 }
-void Level::smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) const
+void Level::smoothing(Vector<double> const x, ConstVector<double> rhs, Vector<double> const temp) const
 {
     if (!op_smoother_)
         throw std::runtime_error("Smoother not initialized.");
@@ -185,7 +185,7 @@ void Level::initializeExtrapolatedSmoothing(const DomainGeometry& domain_geometr
     if (!op_extrapolated_smoother_)
         throw std::runtime_error("Failed to initialize Extrapolated Smoother.");
 }
-void Level::extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) const
+void Level::extrapolatedSmoothing(Vector<double> const x, ConstVector<double> rhs, Vector<double> const temp) const
 {
     if (!op_extrapolated_smoother_)
         throw std::runtime_error("Extrapolated Smoother not initialized.");

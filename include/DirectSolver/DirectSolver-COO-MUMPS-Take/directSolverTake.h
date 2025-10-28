@@ -68,9 +68,9 @@ private:
     //    symmetric_DBc(A) * solution = rhs - applySymmetryShift(rhs).
     // The correction modifies the rhs to account for the influence of the Dirichlet boundary conditions,
     // ensuring that the solution at the boundary is correctly adjusted and maintains the required symmetry.
-    void applySymmetryShift(Vector<double> rhs) const;
-    void applySymmetryShiftInnerBoundary(Vector<double> x) const;
-    void applySymmetryShiftOuterBoundary(Vector<double> x) const;
+    void applySymmetryShift(Vector<double> const rhs) const;
+    void applySymmetryShiftInnerBoundary(Vector<double> const x) const;
+    void applySymmetryShiftOuterBoundary(Vector<double> const x) const;
 
     // Solves the adjusted system symmetric(matrixA) * solution = rhs using the MUMPS solver.
     void solveWithMumps(Vector<double> solution);
