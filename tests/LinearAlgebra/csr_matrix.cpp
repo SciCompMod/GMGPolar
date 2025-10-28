@@ -7,7 +7,6 @@
 TEST(SparseMatrixCSR, default_construct)
 {
     const SparseMatrixCSR<double> v;
-    Vector<double> test("test_view", 10);
     (void)v;
 }
 
