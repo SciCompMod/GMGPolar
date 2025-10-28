@@ -43,7 +43,7 @@ void add(Vector<T> result, ConstVector<T> x)
     std::size_t n = result.size();
 #pragma omp parallel for if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
-        result[i] += x(i);
+        result(i) += x(i);
     }
 }
 
@@ -56,7 +56,7 @@ void subtract(Vector<T> result, ConstVector<T> x)
     std::size_t n = result.size();
 #pragma omp parallel for if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
-        result[i] -= x(i);
+        result(i) -= x(i);
     }
 }
 
@@ -69,7 +69,7 @@ void linear_combination(Vector<T> x, const T& alpha, ConstVector<T> y, const T& 
     std::size_t n = x.size();
 #pragma omp parallel for if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
-        x(i) = alpha * x(i) + beta * y[i];
+        x(i) = alpha * x(i) + beta * y(i);
     }
 }
 
