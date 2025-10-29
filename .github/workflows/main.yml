@@ -56,9 +56,15 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: test-coverage-reports
+          path: coverage
+      - name: Download mumps cpp coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: test-coverage-reports-mumps
+          path: coverage-mumps
       - name: Deploy to codecov.io
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage-filtered.info
+          files: coverage/coverage-filtered.info,coverage-mumps/coverage-filtered.info
           verbose: true          
