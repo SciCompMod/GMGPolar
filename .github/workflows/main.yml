@@ -13,6 +13,9 @@ jobs:
   install-and-build:
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        USE_MUMPS: [0, 1]
     container:
       image: ghcr.io/gyselax/gyselalibxx_env:latest
       options: --user root
@@ -23,14 +26,22 @@ jobs:
   run-unit-test:
     needs: install-and-build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        USE_MUMPS: [0, 1]
     container:
       image: ghcr.io/gyselax/gyselalibxx_env:latest
       options: --user root
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/test
+        if: USE_MUMPS == 0
         with:
           build-artifact: build-cpp-linux-gmgpolar
+      - uses: ./.github/actions/test
+        if: USE_MUMPS == 1
+        with:
+          build-artifact: build-cpp-linux-gmgpolar-mumps
 
   codecov:
     if: github.event.pull_request.draft == false

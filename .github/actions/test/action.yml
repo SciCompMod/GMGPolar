@@ -13,6 +13,11 @@ runs:
       run: |
         apt-get -qq update
         apt-get -qq -y install lcov
+    - name: Install MUMPS
+      shell: bash
+      if: inputs.use_mumps == 'true'
+      run:
+        spack install mumps@5.5.1 ~blr_mt ~complex +double +float ~incfort ~int64 +metis ~mpi +openmp ~parmetis ~ptscotch ~scotch +shared
     - name: Download build test directory
       uses: actions/download-artifact@v4
       with:

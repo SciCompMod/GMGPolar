@@ -1,4 +1,11 @@
 name: "Linux Build"
+
+inputs:
+  use_mumps:
+    description: 'Indicates if GMGPolar should be built with mumps support'
+    type: bool
+    required: true
+
 runs:
   using: "composite"
   steps:
@@ -7,18 +14,31 @@ runs:
       run: |
         apt-get -qq update
         apt-get -qq -y install lcov
+    - name: Install MUMPS
+      shell: bash
+      if: inputs.use_mumps == 'true'
+      run:
+        spack install mumps@5.5.1 ~blr_mt ~complex +double +float ~incfort ~int64 +metis ~mpi +openmp ~parmetis ~ptscotch ~scotch +shared
     - name: Build
-      shell: 
+      shell: bash
       # ensure that the installed compiler version is used
       run: |
         mkdir build && cd build
-        cmake -DCMAKE_BUILD_TYPE=Debug -DGMGPOLAR_ENABLE_COVERAGE=ON ..
+        cmake -DCMAKE_BUILD_TYPE=Debug -DGMGPOLAR_ENABLE_COVERAGE=ON -DGMGPOLAR_USE_MUMPS=${{ inputs.use_mumps }} ..
         make -j4
     - name: create build dir archive
       shell: bash
       run: |
         tar -czf build.tar.gz build
     - name: Upload build dir archive
+      if: inputs.use_mumps == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-cpp-linux-gmgpolar-mumps
+        path: build.tar.gz
+        retention-days: 1
+    - name: Upload build dir archive
+      if: inputs.use_mumps != 'true'
       uses: actions/upload-artifact@v4
       with:
         name: build-cpp-linux-gmgpolar
