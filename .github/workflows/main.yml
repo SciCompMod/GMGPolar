@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/build
         with:
-          use_mumps: matrix.USE_MUMPS
+          use_mumps: ${{ matrix.USE_MUMPS }}
       
   run-unit-test:
     needs: install-and-build
