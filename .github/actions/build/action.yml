@@ -1,7 +1,7 @@
 name: "Linux Build"
 
 inputs:
-  use_mumps:
+  use-mumps:
     description: 'Indicates if GMGPolar should be built with mumps support'
     type: bool
     required: true
@@ -14,11 +14,11 @@ runs:
       run: |
         apt-get -qq update
         apt-get -qq -y install lcov
-        echo "${{ inputs.use_mumps }}"
-        echo "${{ inputs.use_mumps == 'true'}}"
+        echo "${{ inputs.use-mumps }}"
+        echo "${{ inputs.use-mumps == 'true'}}"
     - name: Install MUMPS
       shell: bash
-      if: inputs.use_mumps == 'true'
+      if: inputs.use-mumps == 'true'
       run: |
         apt-get -qq -y install gfortran
         git clone -b v5.1.0.4 https://github.com/scivision/METIS.git
@@ -55,21 +55,21 @@ runs:
       # ensure that the installed compiler version is used
       run: |
         mkdir build && cd build
-        cmake -DCMAKE_BUILD_TYPE=Debug -DGMGPOLAR_ENABLE_COVERAGE=ON -DGMGPOLAR_USE_MUMPS=${{ inputs.use_mumps }} ..
+        cmake -DCMAKE_BUILD_TYPE=Debug -DGMGPOLAR_ENABLE_COVERAGE=ON -DGMGPOLAR_USE_MUMPS=${{ inputs.use-mumps }} ..
         make -j4
     - name: create build dir archive
       shell: bash
       run: |
         tar -czf build.tar.gz build
     - name: Upload build dir archive
-      if: inputs.use_mumps == 'true'
+      if: inputs.use-mumps == 'true'
       uses: actions/upload-artifact@v4
       with:
         name: build-cpp-linux-gmgpolar-mumps
         path: build.tar.gz
         retention-days: 1
     - name: Upload build dir archive
-      if: inputs.use_mumps != 'true'
+      if: inputs.use-mumps != 'true'
       uses: actions/upload-artifact@v4
       with:
         name: build-cpp-linux-gmgpolar
