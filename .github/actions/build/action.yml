@@ -20,7 +20,7 @@ runs:
       shell: bash
       if: inputs.use_mumps == 'true'
       run: |
-        apt-get -qq -y install gfortran
+        apt-get -qq -y install build-essential
         git clone -b v5.1.0.4 https://github.com/scivision/METIS.git
         cd METIS
         cmake -Bbuild
