@@ -22,10 +22,10 @@ runs:
       run: |
         git clone -b v5.1.0.4 https://github.com/scivision/METIS.git
         cd METIS
-        make config prefix=$(pwd)/install
-        make install
-        ls install
-        ls install/*
+        cmake -Bbuild
+        cmake --build build
+        ls build
+        ls build/*
         cd ..
         git clone https://github.com/cfwen/mumps.git
         cd mumps
@@ -33,8 +33,8 @@ runs:
         sed -i 's/^OPTF.*/& -fopenmp/g' Makefile.inc
         sed -i 's/^OPTC.*/& -fopenmp/g' Makefile.inc
         sed -i 's/^OPTL.*/& -fopenmp/g' Makefile.inc
-        sed -i 's/^#LMETISDIR.*/LMETISDIR = $(topdir)\/..\/metis\/install\/lib/g' Makefile.inc
-        sed -i 's/^#IMETIS.*/IMETIS = $(topdir)\/..\/metis\/install\/include/g' Makefile.inc
+        sed -i 's/^#LMETISDIR.*/LMETISDIR = $(topdir)\/..\/metis\/build\/lib/g' Makefile.inc
+        sed -i 's/^#IMETIS.*/IMETIS = $(topdir)\/..\/metis\/include/g' Makefile.inc
         sed -i 's/^ORDERINGSF.*/ORDERINGSF = -Dpord -Dmetis/g' Makefile.inc
         make s
         make d
