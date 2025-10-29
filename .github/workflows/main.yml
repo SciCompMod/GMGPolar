@@ -16,6 +16,7 @@ jobs:
     strategy:
       matrix:
         USE_MUMPS: [0, 1]
+    name: 'install-and-build (USE_MUMPS=${{matrix.USE_MUMPS}})'
     container:
       image: ghcr.io/gyselax/gyselalibxx_env:latest
       options: --user root
