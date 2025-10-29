@@ -20,7 +20,7 @@ runs:
       shell: bash
       if: inputs.use_mumps == 'true'
       run: |
-        apt-get -qq -y install build-essential
+        apt-get -qq -y install gfortran
         git clone -b v5.1.0.4 https://github.com/scivision/METIS.git
         cd METIS
         cmake -Bbuild
@@ -42,6 +42,7 @@ runs:
         sed -i 's|^FC.*|FC = gfortran|g' Makefile.inc
         sed -i 's|^FL.*|FL = gfortran|g' Makefile.inc
         sed -i "s|\$(topdir)|$(pwd)|g" Makefile.inc
+        sed -i "s|topdir = .|topdir = $(pwd)|g" Makefile
         make s
         make d
         ls
