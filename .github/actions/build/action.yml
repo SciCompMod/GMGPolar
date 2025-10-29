@@ -36,6 +36,9 @@ runs:
         sed -i 's/^#LMETISDIR.*/LMETISDIR = $(topdir)\/..\/metis\/build\/lib/g' Makefile.inc
         sed -i 's/^#IMETIS.*/IMETIS = $(topdir)\/..\/metis\/include/g' Makefile.inc
         sed -i 's/^ORDERINGSF.*/ORDERINGSF = -Dpord -Dmetis/g' Makefile.inc
+        sed -i 's/^CC.*/CC = gcc/g' Makefile.inc
+        sed -i 's/^FC.*/FC = gfortran/g' Makefile.inc
+        sed -i 's/^FL.*/FL = gfortran/g' Makefile.inc
         make s
         make d
         ls
