@@ -226,10 +226,14 @@ if(GMGPOLAR_USE_MUMPS)
             mpiseq
         )
         target_compile_definitions(GMGPolarLib PUBLIC GMGPOLAR_USE_MUMPS)
+    else()
+        message(SEND_ERROR "MUMPS not found")
     endif()
 
     if(METIS_FOUND)
         target_link_libraries(GMGPolarLib PUBLIC metis)
+    else()
+        message(SEND_ERROR "METIS not found")
     endif()
 endif()
 
