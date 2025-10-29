@@ -28,6 +28,7 @@ runs:
         cmake --install build
         ls build
         ls build/*
+        echo "METIS_DIR=$(pwd)/install" >> $GITHUB_ENV
         cd ..
         git clone https://github.com/cfwen/mumps.git
         cd mumps
@@ -48,8 +49,8 @@ runs:
         make d
         ls
         echo $LD_LIBRARY_PATH
-        echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$(pwd)/lib"
-        #spack install mumps@5.5.1 ~blr_mt ~complex +double +float ~incfort ~int64 +metis ~mpi +openmp ~parmetis ~ptscotch ~scotch +shared
+        echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$(pwd)/lib" >> $GITHUB_ENV
+        echo "MUMPS_DIR=$(pwd)" >> $GITHUB_ENV
     - name: Build
       shell: bash
       # ensure that the installed compiler version is used
