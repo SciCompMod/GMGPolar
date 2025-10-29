@@ -48,6 +48,8 @@ runs:
         make s
         make d
         ls
+        ls lib
+        ls libseq
         echo $LD_LIBRARY_PATH
         echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$(pwd)/lib" >> $GITHUB_ENV
         echo "MUMPS_DIR=$(pwd)" >> $GITHUB_ENV
