@@ -23,8 +23,9 @@ runs:
         apt-get -qq -y install gfortran
         git clone -b v5.1.0.4 https://github.com/scivision/METIS.git
         cd METIS
-        cmake -Bbuild
+        cmake -Bbuild -DCMAKE_INSTALL_PREFIX=$(pwd)/install
         cmake --build build
+        cmake --install build
         ls build
         ls build/*
         cd ..
@@ -34,8 +35,8 @@ runs:
         sed -i 's|^OPTF.*|& -fopenmp -fallow-argument-mismatch|g' Makefile.inc
         sed -i 's|^OPTC.*|& -fopenmp|g' Makefile.inc
         sed -i 's|^OPTL.*|& -fopenmp|g' Makefile.inc
-        sed -i "s|^#LMETISDIR.*|LMETISDIR = $(pwd)/../metis/build/lib|g" Makefile.inc
-        sed -i "s|^#IMETIS.*|IMETIS = $(pwd)/../metis/include|g" Makefile.inc
+        sed -i "s|^#LMETISDIR.*|LMETISDIR = $(pwd)/../METIS/install/lib|g" Makefile.inc
+        sed -i "s|^#IMETIS.*|IMETIS = -I$(pwd)/../METIS/install/include|g" Makefile.inc
         sed -i 's|^#LMETIS *= -L$(LMETISDIR) -lmetis|LMETIS = -L$(LMETISDIR) -lmetis|g' Makefile.inc
         sed -i 's|^ORDERINGSF.*|ORDERINGSF = -Dpord -Dmetis|g' Makefile.inc
         sed -i 's|^CC.*|CC = gcc|g' Makefile.inc
