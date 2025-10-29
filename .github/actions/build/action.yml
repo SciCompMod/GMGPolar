@@ -62,16 +62,8 @@ runs:
       run: |
         tar -czf build.tar.gz build
     - name: Upload build dir archive
-      if: inputs.use-mumps == 'true'
       uses: actions/upload-artifact@v4
       with:
-        name: build-cpp-linux-gmgpolar-mumps
-        path: build.tar.gz
-        retention-days: 1
-    - name: Upload build dir archive
-      if: inputs.use-mumps != 'true'
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-cpp-linux-gmgpolar
+        name: build-cpp-linux-gmgpolar${{ inputs.use-mumps && '-mumps' || ''}}
         path: build.tar.gz
         retention-days: 1
