@@ -30,7 +30,7 @@ public:
                                   int num_omp_threads);
     virtual ~ExtrapolatedSmoother() = default;
 
-    virtual void extrapolatedSmoothing(Vector<double> const x, ConstVector<double> rhs, Vector<double> const temp) = 0;
+    virtual void extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) = 0;
 
 protected:
     const PolarGrid& grid_;

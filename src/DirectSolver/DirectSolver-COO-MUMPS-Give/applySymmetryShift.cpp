@@ -8,7 +8,8 @@
 /* Boundary Symmetry Shift */
 /* ----------------------- */
 
-void DirectSolverGive::applySymmetryShiftInnerBoundary(Vector<double> const x) const
+void DirectSolverGive::applySymmetryShiftInnerBoundary(
+    Vector<double> x) const
 {
     assert(DirBC_Interior_);
 
@@ -68,7 +69,8 @@ void DirectSolverGive::applySymmetryShiftInnerBoundary(Vector<double> const x) c
     }
 }
 
-void DirectSolverGive::applySymmetryShiftOuterBoundary(Vector<double> const x) const
+void DirectSolverGive::applySymmetryShiftOuterBoundary(
+    Vector<double> x) const
 {
     int i_r;
     double r;
@@ -127,7 +129,7 @@ void DirectSolverGive::applySymmetryShiftOuterBoundary(Vector<double> const x) c
 }
 
 // clang-format off
-void DirectSolverGive::applySymmetryShift(Vector<double> const x) const
+void DirectSolverGive::applySymmetryShift(Vector<double> x) const
 {
     assert(x.size() == grid_.numberOfNodes());
     assert(grid_.nr() >= 4);

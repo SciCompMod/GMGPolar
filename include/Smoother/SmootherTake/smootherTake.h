@@ -15,7 +15,7 @@ public:
                           int num_omp_threads);
     ~SmootherTake() override;
 
-    void smoothing(Vector<double> const x, ConstVector<double> rhs, Vector<double> const temp) override;
+    void smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) override;
 
 private:
     // The A_sc matrix on i_r = 0 is defined through the COO/CSR matrix
@@ -81,14 +81,13 @@ private:
     void buildAscRadialSection(const int i_theta);
 
     void applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color, ConstVector<double> x,
-                                    ConstVector<double> rhs, Vector<double> const temp);
+                                    ConstVector<double> rhs, Vector<double> temp);
     void applyAscOrthoRadialSection(const int i_theta, const SmootherColor smoother_color, ConstVector<double> x,
-                                    ConstVector<double> rhs, Vector<double> const temp);
+                                    ConstVector<double> rhs, Vector<double> temp);
 
-    void solveCircleSection(const int i_r, Vector<double> const x, Vector<double> const temp,
-                            Vector<double> const solver_storage_1, Vector<double> const solver_storage_2);
-    void solveRadialSection(const int i_theta, Vector<double> const x, Vector<double> const temp,
-                            Vector<double> const solver_storage);
+    void solveCircleSection(const int i_r, Vector<double> x, Vector<double> temp, Vector<double> solver_storage_1,
+                            Vector<double> solver_storage_2);
+    void solveRadialSection(const int i_theta, Vector<double> x, Vector<double> temp, Vector<double> solver_storage);
 
 #ifdef GMGPOLAR_USE_MUMPS
     void initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, SparseMatrixCOO<double>& solver_matrix);

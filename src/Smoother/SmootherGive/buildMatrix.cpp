@@ -71,14 +71,14 @@
             /* left_matrix, center_matrix, right_matrix */                                                             \
             /* | O | O | O | */                                                                                        \
             /* |   |   |   | */                                                                                        \
-            /* | O | Õ | O | */                                                                                       \
+            /* | O | Õ | O | */                                                                                        \
             /* |   |   |   | */                                                                                        \
             /* | O | O | O | */                                                                                        \
             /* or */                                                                                                   \
             /* left_matrix, right_matrix */                                                                            \
             /* | O | O | O || O   O   O   O  */                                                                        \
             /* |   |   |   || -------------- */                                                                        \
-            /* | O | O | Õ || O   O   O   O  <- right_matrix */                                                       \
+            /* | O | O | Õ || O   O   O   O  <- right_matrix */                                                        \
             /* |   |   |   || -------------- */                                                                        \
             /* | O | O | O || O   O   O   O  */                                                                        \
             auto& left_matrix   = circle_tridiagonal_solver[i_r - 1];                                                  \
@@ -173,7 +173,7 @@
             /* ---------- */                                                                                           \
             /* O   O   O  <- top_matrix */                                                                             \
             /* ---------- */                                                                                           \
-            /* O   Õ   O  <- center_matrix */                                                                         \
+            /* O   Õ   O  <- center_matrix */                                                                          \
             /* ---------- */                                                                                           \
             /* O   O   O  <- bottom_matrix */                                                                          \
             /* ---------- */                                                                                           \
@@ -303,7 +303,7 @@
                 /* left_matrix (across-the origin), center_matrix, right_matrix */                                     \
                 /* -| X | O | X | */                                                                                   \
                 /* -|   |   |   | */                                                                                   \
-                /* -| Õ | O | O | */                                                                                  \
+                /* -| Õ | O | O | */                                                                                   \
                 /* -|   |   |   | */                                                                                   \
                 /* -| X | O | X | */                                                                                   \
                 auto& center_matrix = inner_boundary_circle_matrix;                                                    \
@@ -440,7 +440,7 @@
                                                                                                                        \
             /* | O | O | O || O   O   O   O  <- top_matrix */                                                          \
             /* |   |   |   || -------------- */                                                                        \
-            /* | O | O | O || Õ   O   O   O  <- center_matrix */                                                      \
+            /* | O | O | O || Õ   O   O   O  <- center_matrix */                                                       \
             /* |   |   |   || -------------- */                                                                        \
             /* | O | O | O || O   O   O   O  <- bottom_matrix */                                                       \
             auto& bottom_matrix = radial_tridiagonal_solver[i_theta_M1];                                               \
@@ -518,7 +518,7 @@
             /* ---------------|| */                                                                                    \
             /* O   O   O   O  || <- top_matrix */                                                                      \
             /* ---------------|| */                                                                                    \
-            /* O   O   Õ   O  || <- center_matrix */                                                                  \
+            /* O   O   Õ   O  || <- center_matrix */                                                                   \
             /* ---------------|| */                                                                                    \
             /* O   O   O   O  || <- bottom_matrix */                                                                   \
             /* ---------------|| */                                                                                    \
@@ -586,7 +586,7 @@
             /* -----------|| */                                                                                        \
             /* O   O   O  || */                                                                                        \
             /* -----------|| */                                                                                        \
-            /* O   O   Õ  || <- center_matrix*/                                                                       \
+            /* O   O   Õ  || <- center_matrix*/                                                                        \
             /* -----------|| */                                                                                        \
             /* O   O   O  || */                                                                                        \
             /* -----------|| */                                                                                        \

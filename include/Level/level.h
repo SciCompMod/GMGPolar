@@ -75,14 +75,14 @@ public:
                                 const bool DirBC_Interior, const int num_omp_threads,
                                 const StencilDistributionMethod stencil_distribution_method);
     // Note: The rhs (right-hand side) vector gets overwritten by the solution.
-    void directSolveInPlace(Vector<double> const x) const;
+    void directSolveInPlace(Vector<double> x) const;
 
     // --------------- //
     // Apply Smoothing //
     void initializeSmoothing(const DomainGeometry& domain_geometry,
                              const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior,
                              const int num_omp_threads, const StencilDistributionMethod stencil_distribution_method);
-    void smoothing(Vector<double> const x, ConstVector<double> rhs, Vector<double> const temp) const;
+    void smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) const;
 
     // ---------------------------- //
     // Apply Extrapolated Smoothing //
@@ -90,7 +90,7 @@ public:
                                          const DensityProfileCoefficients& density_profile_coefficients,
                                          const bool DirBC_Interior, const int num_omp_threads,
                                          const StencilDistributionMethod stencil_distribution_method);
-    void extrapolatedSmoothing(Vector<double> const x, ConstVector<double> rhs, Vector<double> const temp) const;
+    void extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) const;
 
 private:
     const int level_depth_;

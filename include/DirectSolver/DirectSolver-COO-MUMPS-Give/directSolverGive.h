@@ -17,7 +17,7 @@ public:
 
     ~DirectSolverGive() override;
     // Note: The rhs (right-hand side) vector gets overwritten during the solution process.
-    void solveInPlace(Vector<double> const solution) override;
+    void solveInPlace(Vector<double> solution) override;
 
 private:
     // Solver matrix and MUMPS solver structure
@@ -68,12 +68,12 @@ private:
     //    symmetric_DBc(A) * solution = rhs - applySymmetryShift(rhs).
     // The correction modifies the rhs to account for the influence of the Dirichlet boundary conditions,
     // ensuring that the solution at the boundary is correctly adjusted and maintains the required symmetry.
-    void applySymmetryShift(Vector<double> const rhs) const;
-    void applySymmetryShiftInnerBoundary(Vector<double> const x) const;
-    void applySymmetryShiftOuterBoundary(Vector<double> const x) const;
+    void applySymmetryShift(Vector<double> rhs) const;
+    void applySymmetryShiftInnerBoundary(Vector<double> x) const;
+    void applySymmetryShiftOuterBoundary(Vector<double> x) const;
 
     // Solves the adjusted system symmetric(matrixA) * solution = rhs using the MUMPS solver.
-    void solveWithMumps(Vector<double> const solution);
+    void solveWithMumps(Vector<double> solution);
 
     // Finalizes the MUMPS solver, releasing any allocated resources.
     void finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver);

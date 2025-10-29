@@ -816,7 +816,7 @@
 
 void ExtrapolatedSmootherGive::applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color,
                                                           ConstVector<double> x, ConstVector<double> rhs,
-                                                          Vector<double> const temp)
+                                                          Vector<double> temp)
 {
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles() + 1);
 
@@ -866,7 +866,7 @@ void ExtrapolatedSmootherGive::applyAscOrthoCircleSection(const int i_r, const S
 
 void ExtrapolatedSmootherGive::applyAscOrthoRadialSection(const int i_theta, const SmootherColor smoother_color,
                                                           ConstVector<double> x, ConstVector<double> rhs,
-                                                          Vector<double> const temp)
+                                                          Vector<double> temp)
 {
     const auto& sin_theta_cache = level_cache_.sin_theta();
     const auto& cos_theta_cache = level_cache_.cos_theta();
@@ -912,8 +912,8 @@ void ExtrapolatedSmootherGive::applyAscOrthoRadialSection(const int i_theta, con
     }
 }
 
-void ExtrapolatedSmootherGive::solveCircleSection(const int i_r, Vector<double> const x, Vector<double> const temp,
-                                                  Vector<double> const solver_storage_1, Vector<double> const solver_storage_2)
+void ExtrapolatedSmootherGive::solveCircleSection(const int i_r, Vector<double> x, Vector<double> temp,
+                                                  Vector<double> solver_storage_1, Vector<double> solver_storage_2)
 {
     const int start = grid_.index(i_r, 0);
     const int end   = start + grid_.ntheta();
@@ -946,8 +946,8 @@ void ExtrapolatedSmootherGive::solveCircleSection(const int i_r, Vector<double> 
                       Kokkos::subview(temp, Kokkos::make_pair(start, end)));
 }
 
-void ExtrapolatedSmootherGive::solveRadialSection(const int i_theta, Vector<double> const x, Vector<double> const temp,
-                                                  Vector<double> const solver_storage)
+void ExtrapolatedSmootherGive::solveRadialSection(const int i_theta, Vector<double> x, Vector<double> temp,
+                                                  Vector<double> solver_storage)
 {
     const int start = grid_.index(grid_.numberSmootherCircles(), i_theta);
     const int end   = start + grid_.lengthSmootherRadial();
@@ -971,8 +971,8 @@ void ExtrapolatedSmootherGive::solveRadialSection(const int i_theta, Vector<doub
 /* Sequential Version */
 /* ------------------ */
 
-void ExtrapolatedSmootherGive::extrapolatedSmoothingSequential(Vector<double> const x, ConstVector<double> rhs,
-                                                               Vector<double> const temp)
+void ExtrapolatedSmootherGive::extrapolatedSmoothingSequential(Vector<double> x, ConstVector<double> rhs,
+                                                               Vector<double> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
@@ -1036,8 +1036,8 @@ void ExtrapolatedSmootherGive::extrapolatedSmoothingSequential(Vector<double> co
 /* ------------------------------------ */
 
 // clang-format off
-void ExtrapolatedSmootherGive::extrapolatedSmoothingForLoop(Vector<double> const x, ConstVector<double> rhs,
-                                                            Vector<double> const temp)
+void ExtrapolatedSmootherGive::extrapolatedSmoothingForLoop(Vector<double> x, ConstVector<double> rhs,
+                                                            Vector<double> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());

@@ -287,18 +287,15 @@ private:
 
     /* ------------------- */
     /* Multigrid Functions */
-    void multigrid_V_Cycle(const int level_depth, Vector<double> solution, Vector<double> const rhs,
-                           Vector<double> residual);
-    void multigrid_W_Cycle(const int level_depth, Vector<double> solution, Vector<double> const rhs,
-                           Vector<double> residual);
-    void multigrid_F_Cycle(const int level_depth, Vector<double> solution, Vector<double> const rhs,
-                           Vector<double> residual);
-    void implicitlyExtrapolatedMultigrid_V_Cycle(const int level_depth, Vector<double> solution,
-                                                 Vector<double> const rhs, Vector<double> residual);
-    void implicitlyExtrapolatedMultigrid_W_Cycle(const int level_depth, Vector<double> solution,
-                                                 Vector<double> const rhs, Vector<double> residual);
-    void implicitlyExtrapolatedMultigrid_F_Cycle(const int level_depth, Vector<double> solution,
-                                                 Vector<double> const rhs, Vector<double> residual);
+    void multigrid_V_Cycle(const int level_depth, Vector<double> solution, Vector<double> rhs, Vector<double> residual);
+    void multigrid_W_Cycle(const int level_depth, Vector<double> solution, Vector<double> rhs, Vector<double> residual);
+    void multigrid_F_Cycle(const int level_depth, Vector<double> solution, Vector<double> rhs, Vector<double> residual);
+    void implicitlyExtrapolatedMultigrid_V_Cycle(const int level_depth, Vector<double> solution, Vector<double> rhs,
+                                                 Vector<double> residual);
+    void implicitlyExtrapolatedMultigrid_W_Cycle(const int level_depth, Vector<double> solution, Vector<double> rhs,
+                                                 Vector<double> residual);
+    void implicitlyExtrapolatedMultigrid_F_Cycle(const int level_depth, Vector<double> solution, Vector<double> rhs,
+                                                 Vector<double> residual);
 
     /* ----------------------- */
     /* Interpolation functions */

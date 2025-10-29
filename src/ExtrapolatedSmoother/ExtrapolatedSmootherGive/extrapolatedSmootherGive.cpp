@@ -22,7 +22,7 @@ ExtrapolatedSmootherGive::~ExtrapolatedSmootherGive()
 #endif
 }
 
-void ExtrapolatedSmootherGive::extrapolatedSmoothing(Vector<double> const x, ConstVector<double> rhs, Vector<double> const temp)
+void ExtrapolatedSmootherGive::extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp)
 {
     extrapolatedSmoothingForLoop(x, rhs, temp);
 }

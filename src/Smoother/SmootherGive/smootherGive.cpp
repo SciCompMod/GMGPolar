@@ -20,7 +20,7 @@ SmootherGive::~SmootherGive()
 #endif
 }
 
-void SmootherGive::smoothing(Vector<double> const x, ConstVector<double> rhs, Vector<double> const temp)
+void SmootherGive::smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp)
 {
     smoothingForLoop(x, rhs, temp);
 }
