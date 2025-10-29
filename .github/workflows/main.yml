@@ -22,6 +22,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/build
+        with:
+          use_mumps: matrix.USE_MUMPS
       
   run-unit-test:
     needs: install-and-build
@@ -35,11 +37,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/test
-        if: USE_MUMPS == 0
+        if: matrix.USE_MUMPS == 0
         with:
           build-artifact: build-cpp-linux-gmgpolar
       - uses: ./.github/actions/test
-        if: USE_MUMPS == 1
+        if: matrix.USE_MUMPS == 1
         with:
           build-artifact: build-cpp-linux-gmgpolar-mumps
 
