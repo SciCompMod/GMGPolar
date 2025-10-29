@@ -203,6 +203,7 @@ if(GMGPOLAR_USE_MUMPS)
             target_link_directories(GMGPolarLib PUBLIC ${MUMPS_LIBRARY_DIR})
 
             if (EXISTS "${MUMPS_DIR}/libseq")
+              target_include_directories(GMGPolarLib PUBLIC "${MUMPS_DIR}/libseq")
               target_link_directories(GMGPolarLib PUBLIC "${MUMPS_DIR}/libseq")
             endif()
 
