@@ -42,14 +42,14 @@ runs:
     - name: Upload test report
       uses: actions/upload-artifact@v4
       with:
-        name: test-report${{ inputs.use-mumps && '-mumps' || ''}}
+        name: test-report${{ inputs.use-mumps == 'true' && '-mumps' || ''}}
         path: build/tests/testreport.xml
         if-no-files-found: error
         retention-days: 3
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
       with:
-        name: test-coverage-reports${{ inputs.use-mumps && '-mumps' || ''}}
+        name: test-coverage-reports${{ inputs.use-mumps == 'true' && '-mumps' || ''}}
         path: |
           build/coverage-filtered.info
           build/coverage
