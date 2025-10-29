@@ -42,7 +42,7 @@ runs:
         sed -i 's|^FC.*|FC = gfortran|g' Makefile.inc
         sed -i 's|^FL.*|FL = gfortran|g' Makefile.inc
         sed -i "s|\$(topdir)|$(pwd)|g" Makefile.inc
-        sed -i "s|topdir = .|topdir = $(pwd)|g" Makefile
+        mkdir lib
         make s
         make d
         ls
