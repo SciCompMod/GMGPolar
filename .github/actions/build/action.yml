@@ -20,6 +20,8 @@ runs:
       shell: bash
       if: inputs.use_mumps == 'true'
       run:
+        git clone https://github.com/spack/spack.git
+        source spack/share/spack/setup-env.sh
         spack install mumps@5.5.1 ~blr_mt ~complex +double +float ~incfort ~int64 +metis ~mpi +openmp ~parmetis ~ptscotch ~scotch +shared
     - name: Build
       shell: bash
