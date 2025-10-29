@@ -20,9 +20,28 @@ runs:
       shell: bash
       if: inputs.use_mumps == 'true'
       run: |
-        git clone https://github.com/spack/spack.git
-        source spack/share/spack/setup-env.sh
-        spack install mumps@5.5.1 ~blr_mt ~complex +double +float ~incfort ~int64 +metis ~mpi +openmp ~parmetis ~ptscotch ~scotch +shared
+        git clone -b v5.1.0.4 https://github.com/scivision/METIS.git
+        cd METIS
+        make config prefix=$(pwd)/install
+        make install
+        ls install
+        ls install/*
+        cd ..
+        git clone https://github.com/cfwen/mumps.git
+        cd mumps
+        cp Make.inc/Makefile.inc.generic.SEQ ./Makefile.inc
+        sed -i 's/^OPTF.*/& -fopenmp/g' Makefile.inc
+        sed -i 's/^OPTC.*/& -fopenmp/g' Makefile.inc
+        sed -i 's/^OPTL.*/& -fopenmp/g' Makefile.inc
+        sed -i 's/^#LMETISDIR.*/LMETISDIR = $(topdir)\/..\/metis\/install\/lib/g' Makefile.inc
+        sed -i 's/^#IMETIS.*/IMETIS = $(topdir)\/..\/metis\/install\/include/g' Makefile.inc
+        sed -i 's/^ORDERINGSF.*/ORDERINGSF = -Dpord -Dmetis/g' Makefile.inc
+        make s
+        make d
+        ls
+        echo $LD_LIBRARY_PATH
+        echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$(pwd)/lib"
+        #spack install mumps@5.5.1 ~blr_mt ~complex +double +float ~incfort ~int64 +metis ~mpi +openmp ~parmetis ~ptscotch ~scotch +shared
     - name: Build
       shell: bash
       # ensure that the installed compiler version is used
