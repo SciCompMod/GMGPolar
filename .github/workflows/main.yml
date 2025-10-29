@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        USE_MUMPS: [0, 1]
+        USE_MUMPS: [false, true]
     name: 'install-and-build (USE_MUMPS=${{matrix.USE_MUMPS}})'
     container:
       image: ghcr.io/gyselax/gyselalibxx_env:latest
@@ -31,18 +31,18 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        USE_MUMPS: [0, 1]
+        USE_MUMPS: [false, true]
     container:
       image: ghcr.io/gyselax/gyselalibxx_env:latest
       options: --user root
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/test
-        if: matrix.USE_MUMPS == 0
+        if: matrix.USE_MUMPS
         with:
           build-artifact: build-cpp-linux-gmgpolar
       - uses: ./.github/actions/test
-        if: matrix.USE_MUMPS == 1
+        if: matrix.USE_MUMPS
         with:
           build-artifact: build-cpp-linux-gmgpolar-mumps
 
