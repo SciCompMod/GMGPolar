@@ -209,10 +209,8 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -295,10 +293,8 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -381,10 +377,10 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
+
     Vector<double> error("error", level.grid().numberOfNodes());
 
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -467,10 +463,10 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
+
     Vector<double> error("error", level.grid().numberOfNodes());
 
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -552,10 +548,10 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior_Smal
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
+
     Vector<double> error("error", level.grid().numberOfNodes());
 
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -637,10 +633,10 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior_Smalle
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
+
     Vector<double> error("error", level.grid().numberOfNodes());
 
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -722,10 +718,8 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin_Smalle
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -807,10 +801,8 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin_Smallest
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -895,10 +887,10 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
+
     Vector<double> error("error", level.grid().numberOfNodes());
 
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -981,10 +973,8 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -1067,10 +1057,8 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -1153,10 +1141,8 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -1238,10 +1224,8 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior_
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -1323,10 +1307,8 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior_Sm
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -1408,10 +1390,8 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin_Sm
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -1493,10 +1473,8 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin_Smal
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];

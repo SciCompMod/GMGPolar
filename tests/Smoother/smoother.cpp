@@ -204,10 +204,8 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
@@ -285,10 +283,8 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("somoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
@@ -366,10 +362,8 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
@@ -447,10 +441,8 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
@@ -527,10 +519,8 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior_SmallestGrid)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
@@ -607,10 +597,8 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior_SmallestGrid)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
@@ -687,10 +675,8 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin_SmallestGrid)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
@@ -767,10 +753,8 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin_SmallestGrid)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
@@ -850,10 +834,8 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
@@ -931,10 +913,8 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
@@ -1012,10 +992,8 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
@@ -1093,10 +1071,8 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
@@ -1173,10 +1149,8 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior_SmallestGrid)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
@@ -1253,10 +1227,8 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior_SmallestGrid)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
@@ -1333,10 +1305,8 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin_SmallestGrid)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
@@ -1413,10 +1383,8 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin_SmallestGrid)
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> smoother_solution("smoother_sol", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
