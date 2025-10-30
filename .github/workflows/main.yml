@@ -13,16 +13,25 @@ jobs:
   install-and-build:
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        USE_MUMPS: [false, true]
+    name: 'install-and-build (USE_MUMPS=${{matrix.USE_MUMPS}})'
     container:
       image: ghcr.io/gyselax/gyselalibxx_env:latest
       options: --user root
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/build
+        with:
+          use-mumps: ${{ matrix.USE_MUMPS }}
       
   run-unit-test:
     needs: install-and-build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        USE_MUMPS: [false, true]
     container:
       image: ghcr.io/gyselax/gyselalibxx_env:latest
       options: --user root
@@ -31,6 +40,7 @@ jobs:
       - uses: ./.github/actions/test
         with:
           build-artifact: build-cpp-linux-gmgpolar
+          use-mumps: ${{ matrix.USE_MUMPS }}
 
   codecov:
     if: github.event.pull_request.draft == false
@@ -42,9 +52,15 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: test-coverage-reports
+          path: coverage
+      - name: Download mumps cpp coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: test-coverage-reports-mumps
+          path: coverage-mumps
       - name: Deploy to codecov.io
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage-filtered.info
+          files: coverage/coverage-filtered.info,coverage-mumps/coverage-filtered.info
           verbose: true          

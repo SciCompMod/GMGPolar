@@ -1,4 +1,11 @@
 name: "Linux Build"
+
+inputs:
+  use-mumps:
+    description: 'Indicates if GMGPolar should be built with mumps support'
+    type: bool
+    required: true
+
 runs:
   using: "composite"
   steps:
@@ -7,13 +14,37 @@ runs:
       run: |
         apt-get -qq update
         apt-get -qq -y install lcov
+    - name: Install METIS
+      shell: bash
+      if: inputs.use-mumps == 'true'
+      run: |
+        apt-get -qq -y install gfortran
+        git clone -b v5.1.0.4 https://github.com/scivision/METIS.git
+        cd METIS
+        cmake -Bbuild -DCMAKE_INSTALL_PREFIX=$(pwd)/install -DCMAKE_BUILD_TYPE=Release
+        cmake --build build
+        cmake --install build
+        ls install/*
+        echo "METIS_DIR=$(pwd)/install" >> $GITHUB_ENV
+        echo "METIS_ROOT=$(pwd)/install" >> $GITHUB_ENV
+    - name: Install MUMPS
+      shell: bash
+      if: inputs.use-mumps == 'true'
+      run: |
+        git clone -b v5.5.1.11 https://github.com/scivision/mumps.git
+        cd mumps
+        cmake -Bbuild -DBUILD_SINGLE=on -DBUILD_DOUBLE=on -Dmetis=on -Dopenmp=on -Dparallel=off -DCMAKE_INSTALL_PREFIX=$(pwd)/install -DCMAKE_BUILD_TYPE=Release -S .
+        cmake --build build
+        cmake --install build
+        ls install/*
+        echo "MUMPS_DIR=$(pwd)/install" >> $GITHUB_ENV
     - name: Build
-      shell: 
+      shell: bash
       # ensure that the installed compiler version is used
       run: |
         mkdir build && cd build
         export CMAKE_PREFIX_PATH=/opt/openmp
-        cmake -DCMAKE_BUILD_TYPE=Debug -DGMGPOLAR_ENABLE_COVERAGE=ON ..
+        cmake -DCMAKE_BUILD_TYPE=Debug -DGMGPOLAR_ENABLE_COVERAGE=ON -DGMGPOLAR_USE_MUMPS=${{ inputs.use-mumps }} ..
         make -j4
     - name: create build dir archive
       shell: bash
@@ -22,6 +53,6 @@ runs:
     - name: Upload build dir archive
       uses: actions/upload-artifact@v4
       with:
-        name: build-cpp-linux-gmgpolar
+        name: build-cpp-linux-gmgpolar${{ inputs.use-mumps == 'true' && '-mumps' || ''}}
         path: build.tar.gz
         retention-days: 1
