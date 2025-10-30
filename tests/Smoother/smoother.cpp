@@ -236,7 +236,7 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior)
         }
     }
 
-    std::cout << "Convergence reached after " << iterations << " iterations. " << std::endl;
+    std::cout << "Convergence reached after " << iterations << " iterations." << std::endl;
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 300);
