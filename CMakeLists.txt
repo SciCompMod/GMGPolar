@@ -1,11 +1,16 @@
 cmake_minimum_required(VERSION 3.12)
-project(GMGPolar VERSION 2.0.0 LANGUAGES CXX)
 
 # Options should be defined before they're used
 option(GMGPOLAR_BUILD_TESTS "Build GMGPolar unit tests." ON)
 option(GMGPOLAR_USE_LIKWID "Use LIKWID to measure code (regions)." OFF)
 option(GMGPOLAR_USE_MUMPS "Use MUMPS to solve linear systems." OFF)
 option(GMGPOLAR_ENABLE_COVERAGE "Enable code coverage reporting (requires GCC/Clang)" OFF)
+
+if (${GMGPOLAR_USE_MUMPS})
+    project(GMGPolar VERSION 2.0.0 LANGUAGES CXX Fortran)
+else()
+project(GMGPolar VERSION 2.0.0 LANGUAGES CXX)
+endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
