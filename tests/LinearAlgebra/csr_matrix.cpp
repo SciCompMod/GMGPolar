@@ -337,9 +337,9 @@ TEST(SparseMatrixCSR, lu_solver_3x3)
     SparseLUSolver solver(matrix);
     solver.solveInPlace(rhs);
 
-    EXPECT_DOUBLE_EQ(rhs[0], exact_solution[0]);
-    EXPECT_DOUBLE_EQ(rhs[1], exact_solution[1]);
-    EXPECT_DOUBLE_EQ(rhs[2], exact_solution[2]);
+    EXPECT_DOUBLE_EQ(rhs(0), exact_solution(0));
+    EXPECT_DOUBLE_EQ(rhs(1), exact_solution(1));
+    EXPECT_DOUBLE_EQ(rhs(2), exact_solution(2));
 }
 
 TEST(SparseMatrixCSR, lu_solver_5x5)
@@ -369,9 +369,9 @@ TEST(SparseMatrixCSR, lu_solver_5x5)
     SparseLUSolver solver(matrix);
     solver.solveInPlace(rhs);
 
-    EXPECT_DOUBLE_EQ(rhs(0), exact_solution[0]);
-    EXPECT_DOUBLE_EQ(rhs(1), exact_solution[1]);
-    EXPECT_DOUBLE_EQ(rhs(2), exact_solution[2]);
-    EXPECT_DOUBLE_EQ(rhs(3), exact_solution[3]);
-    EXPECT_DOUBLE_EQ(rhs(4), exact_solution[4]);
+    EXPECT_DOUBLE_EQ(rhs(0), exact_solution(0));
+    EXPECT_DOUBLE_EQ(rhs(1), exact_solution(1));
+    EXPECT_DOUBLE_EQ(rhs(2), exact_solution(2));
+    EXPECT_DOUBLE_EQ(rhs(3), exact_solution(3));
+    EXPECT_DOUBLE_EQ(rhs(4), exact_solution(4));
 }
