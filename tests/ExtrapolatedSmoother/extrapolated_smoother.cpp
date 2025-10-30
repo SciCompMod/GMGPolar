@@ -147,9 +147,11 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_AcossOrigin)
     Vector<double> temp  = generate_random_sample_data(level.grid(), 8);
 
     Vector<double> solution_Give("solution_Give", start.size());
+    Kokkos::deep_copy(solution_Give, start);
     smootherGive_operator.extrapolatedSmoothing(solution_Give, rhs, temp);
 
     Vector<double> solution_Take("solution_Take", start.size());
+    Kokkos::deep_copy(solution_Take, start);
     smootherTake_operator.extrapolatedSmoothing(solution_Take, rhs, temp);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
