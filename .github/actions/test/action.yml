@@ -4,6 +4,10 @@ inputs:
   build-artifact:
     description: "Name of the build artifact that contains the unit test"
     required: true
+  use-mumps:
+    description: 'Indicates if GMGPolar should be built with mumps support'
+    type: bool
+    required: true
 
 runs:
   using: "composite"
@@ -13,10 +17,14 @@ runs:
       run: |
         apt-get -qq update
         apt-get -qq -y install lcov
+    - name: Install MUMPS Dependencies
+      shell: bash
+      run: |
+        apt-get -qq -y install gfortran
     - name: Download build test directory
       uses: actions/download-artifact@v4
       with:
-        name: ${{ inputs.build-artifact }}
+        name: ${{ inputs.build-artifact }}${{ inputs.use-mumps == 'true' && '-mumps' || ''}}
     - name: extract build archive
       shell: bash
       run: |
@@ -38,14 +46,14 @@ runs:
     - name: Upload test report
       uses: actions/upload-artifact@v4
       with:
-        name: test-report
+        name: test-report${{ inputs.use-mumps == 'true' && '-mumps' || ''}}
         path: build/tests/testreport.xml
         if-no-files-found: error
         retention-days: 3
     - name: Upload coverage reports
       uses: actions/upload-artifact@v4
       with:
-        name: test-coverage-reports
+        name: test-coverage-reports${{ inputs.use-mumps == 'true' && '-mumps' || ''}}
         path: |
           build/coverage-filtered.info
           build/coverage
