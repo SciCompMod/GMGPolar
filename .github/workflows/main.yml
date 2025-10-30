@@ -11,12 +11,11 @@ on :
 
 jobs:
   install-and-build:
-    #if: github.event.pull_request.draft == false
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        #USE_MUMPS: [false, true]
-        USE_MUMPS: [true]
+        USE_MUMPS: [false, true]
     name: 'install-and-build (USE_MUMPS=${{matrix.USE_MUMPS}})'
     container:
       image: ghcr.io/gyselax/gyselalibxx_env:latest
@@ -32,8 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        #USE_MUMPS: [false, true]
-        USE_MUMPS: [true]
+        USE_MUMPS: [false, true]
     container:
       image: ghcr.io/gyselax/gyselalibxx_env:latest
       options: --user root
