@@ -20,7 +20,7 @@ runs:
     - name: Download build test directory
       uses: actions/download-artifact@v4
       with:
-        name: ${{ inputs.build-artifact }}
+        name: ${{ inputs.build-artifact }}${{ inputs.use-mumps == 'true' && '-mumps' || ''}}
     - name: extract build archive
       shell: bash
       run: |
