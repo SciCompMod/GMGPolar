@@ -14,7 +14,7 @@ runs:
       run: |
         apt-get -qq update
         apt-get -qq -y install lcov
-    - name: Install MUMPS
+    - name: Install METIS
       shell: bash
       if: inputs.use-mumps == 'true'
       run: |
@@ -27,8 +27,10 @@ runs:
         ls install/*
         echo "METIS_DIR=$(pwd)/install" >> $GITHUB_ENV
         echo "METIS_ROOT=$(pwd)/install" >> $GITHUB_ENV
-        export METIS_ROOT=$(pwd)/install
-        cd ..
+    - name: Install MUMPS
+      shell: bash
+      if: inputs.use-mumps == 'true'
+      run: |
         git clone -b v5.5.1.11 https://github.com/scivision/mumps.git
         cd mumps
         cmake -Bbuild -DBUILD_SINGLE=on -DBUILD_DOUBLE=on -Dmetis=on -Dopenmp=on -Dparallel=off -DCMAKE_INSTALL_PREFIX=$(pwd)/install -DCMAKE_BUILD_TYPE=Release -S .
