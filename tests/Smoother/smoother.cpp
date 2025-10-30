@@ -864,8 +864,8 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior)
 
     std::cout << "Convergence reached after " << iterations << " iterations." << std::endl;
 
-    // ASSERT_TRUE(!max_iterations_reached);
-    // ASSERT_LT(iterations, 300);
+    ASSERT_TRUE(!max_iterations_reached);
+    ASSERT_LT(iterations, 300);
     ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
