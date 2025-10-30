@@ -1,4 +1,5 @@
 #include "../../../include/DirectSolver/DirectSolver-COO-MUMPS-Take/directSolverTake.h"
+#include <Kokkos_StdAlgorithms.hpp>
 
 #ifdef GMGPOLAR_USE_MUMPS
 
@@ -107,7 +108,7 @@ void DirectSolverTake::solveWithMumps(Vector<double> result_rhs)
     mumps_solver_.job    = JOB_COMPUTE_SOLUTION;
     mumps_solver_.nrhs   = 1;
     mumps_solver_.nz_rhs = result_rhs.size();
-    mumps_solver_.rhs    = Kokkos::experimental::begin(result_rhs);
+    mumps_solver_.rhs    = Kokkos::Experimental::begin(result_rhs);
     mumps_solver_.lrhs   = result_rhs.size();
     dmumps_c(&mumps_solver_);
     if (mumps_solver_.info[0] != 0) {
