@@ -14,8 +14,6 @@ runs:
       run: |
         apt-get -qq update
         apt-get -qq -y install lcov
-        echo "${{ inputs.use-mumps }}"
-        echo "${{ inputs.use-mumps == 'true'}}"
     - name: Install MUMPS
       shell: bash
       if: inputs.use-mumps == 'true'
