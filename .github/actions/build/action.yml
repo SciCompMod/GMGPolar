@@ -23,36 +23,20 @@ runs:
         apt-get -qq -y install gfortran
         git clone -b v5.1.0.4 https://github.com/scivision/METIS.git
         cd METIS
-        cmake -Bbuild -DCMAKE_INSTALL_PREFIX=$(pwd)/install
+        cmake -Bbuild -DCMAKE_INSTALL_PREFIX=$(pwd)/install -DCMAKE_BUILD_TYPE=Release
         cmake --build build
         cmake --install build
-        ls build
-        ls build/*
+        ls install/*
         echo "METIS_DIR=$(pwd)/install" >> $GITHUB_ENV
+        echo "METIS_ROOT=$(pwd)/install" >> $GITHUB_ENV
         cd ..
-        git clone https://github.com/cfwen/mumps.git
+        git clone -b v5.5.1.11 https://github.com/scivision/mumps.git
         cd mumps
-        cp Make.inc/Makefile.inc.generic.SEQ ./Makefile.inc
-        sed -i 's|^OPTF.*|& -fopenmp -fallow-argument-mismatch|g' Makefile.inc
-        sed -i 's|^OPTC.*|& -fopenmp|g' Makefile.inc
-        sed -i 's|^OPTL.*|& -fopenmp|g' Makefile.inc
-        sed -i "s|^#LMETISDIR.*|LMETISDIR = $(pwd)/../METIS/install/lib|g" Makefile.inc
-        sed -i "s|^#IMETIS.*|IMETIS = -I$(pwd)/../METIS/install/include|g" Makefile.inc
-        sed -i 's|^#LMETIS *= -L$(LMETISDIR) -lmetis|LMETIS = -L$(LMETISDIR) -lmetis|g' Makefile.inc
-        sed -i 's|^ORDERINGSF.*|ORDERINGSF = -Dpord -Dmetis|g' Makefile.inc
-        sed -i 's|^CC.*|CC = gcc|g' Makefile.inc
-        sed -i 's|^FC.*|FC = gfortran|g' Makefile.inc
-        sed -i 's|^FL.*|FL = gfortran|g' Makefile.inc
-        sed -i "s|\$(topdir)|$(pwd)|g" Makefile.inc
-        mkdir lib
-        make s
-        make d
-        ls
-        ls lib
-        ls libseq
-        echo $LD_LIBRARY_PATH
-        echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$(pwd)/lib" >> $GITHUB_ENV
-        echo "MUMPS_DIR=$(pwd)" >> $GITHUB_ENV
+        cmake -Bbuild -DBUILD_SINGLE=on -DBUILD_DOUBLE=on -Dmetis=on -Dopenmp=on -Dparallel=off -DCMAKE_INSTALL_PREFIX=$(pwd)/install -DCMAKE_BUILD_TYPE=Release -S .
+        cmake --build build
+        cmake --install build
+        ls install/*
+        echo "MUMPS_DIR=$(pwd)/install" >> $GITHUB_ENV
     - name: Build
       shell: bash
       # ensure that the installed compiler version is used
