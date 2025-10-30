@@ -7,9 +7,10 @@ option(GMGPOLAR_USE_MUMPS "Use MUMPS to solve linear systems." OFF)
 option(GMGPOLAR_ENABLE_COVERAGE "Enable code coverage reporting (requires GCC/Clang)" OFF)
 
 if (${GMGPOLAR_USE_MUMPS})
+    # MUMPS does not automatically provide Fortran libraries
     project(GMGPolar VERSION 2.0.0 LANGUAGES CXX Fortran)
 else()
-project(GMGPolar VERSION 2.0.0 LANGUAGES CXX)
+    project(GMGPolar VERSION 2.0.0 LANGUAGES CXX)
 endif()
 
 set(CMAKE_CXX_STANDARD 20)
