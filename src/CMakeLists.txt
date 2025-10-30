@@ -196,56 +196,54 @@ if(GMGPOLAR_USE_MUMPS)
     if (${MUMPS_FOUND})
       target_link_libraries(GMGPolarLib PUBLIC MUMPS::MUMPS)
       target_compile_definitions(GMGPolarLib PUBLIC GMGPOLAR_USE_MUMPS)
-    else()
-      if(DEFINED ENV{MUMPS_DIR})
-          set(MUMPS_DIR $ENV{MUMPS_DIR})
-          
-          if(EXISTS "${MUMPS_DIR}/include" AND EXISTS "${MUMPS_DIR}/lib")
-              set(MUMPS_INCLUDE_DIR "${MUMPS_DIR}/include")
-              set(MUMPS_LIBRARY_DIR "${MUMPS_DIR}/lib")
-              
-              target_include_directories(GMGPolarLib PUBLIC ${MUMPS_INCLUDE_DIR})
-              target_link_directories(GMGPolarLib PUBLIC ${MUMPS_LIBRARY_DIR})
+    elseif(DEFINED ENV{MUMPS_DIR})
+        set(MUMPS_DIR $ENV{MUMPS_DIR})
 
-              if (EXISTS "${MUMPS_DIR}/libseq")
-                target_include_directories(GMGPolarLib PUBLIC "${MUMPS_DIR}/libseq")
-                target_link_directories(GMGPolarLib PUBLIC "${MUMPS_DIR}/libseq")
-              endif()
+        if(EXISTS "${MUMPS_DIR}/include" AND EXISTS "${MUMPS_DIR}/lib")
+            set(MUMPS_INCLUDE_DIR "${MUMPS_DIR}/include")
+            set(MUMPS_LIBRARY_DIR "${MUMPS_DIR}/lib")
 
-              set(MUMPS_FOUND TRUE)
-          endif()
-      endif()
+            target_include_directories(GMGPolarLib PUBLIC ${MUMPS_INCLUDE_DIR})
+            target_link_directories(GMGPolarLib PUBLIC ${MUMPS_LIBRARY_DIR})
 
-      if(DEFINED ENV{METIS_DIR})
-          set(METIS_DIR $ENV{METIS_DIR})
+            if (EXISTS "${MUMPS_DIR}/libseq")
+              target_include_directories(GMGPolarLib PUBLIC "${MUMPS_DIR}/libseq")
+              target_link_directories(GMGPolarLib PUBLIC "${MUMPS_DIR}/libseq")
+            endif()
 
-          if(EXISTS "${METIS_DIR}/include" AND EXISTS "${METIS_DIR}/lib")
-              set(METIS_INCLUDE_DIR "${METIS_DIR}/include")
-              set(METIS_LIBRARY_DIR "${METIS_DIR}/lib")
-              
-              target_include_directories(GMGPolarLib PUBLIC ${METIS_INCLUDE_DIR})
-              target_link_directories(GMGPolarLib PUBLIC ${METIS_LIBRARY_DIR})
-              set(METIS_FOUND TRUE)
-          endif()
-      endif()
+            set(MUMPS_FOUND TRUE)
+        endif()
 
-      if(MUMPS_FOUND)
-          target_link_libraries(GMGPolarLib PUBLIC
-              mumps_common
-              smumps
-              dmumps
-              mpiseq
-          )
-          target_compile_definitions(GMGPolarLib PUBLIC GMGPOLAR_USE_MUMPS)
-      else()
-          message(SEND_ERROR "MUMPS not found")
-      endif()
+        if(MUMPS_FOUND)
+            target_link_libraries(GMGPolarLib PUBLIC
+                mumps_common
+                smumps
+                dmumps
+                mpiseq
+            )
+            target_compile_definitions(GMGPolarLib PUBLIC GMGPOLAR_USE_MUMPS)
+        else()
+            message(SEND_ERROR "MUMPS not found")
+        endif()
+    endif()
 
-      if(METIS_FOUND)
-          target_link_libraries(GMGPolarLib PUBLIC metis)
-      else()
-          message(SEND_ERROR "METIS not found")
-      endif()
+    if(DEFINED ENV{METIS_DIR})
+        set(METIS_DIR $ENV{METIS_DIR})
+
+        if(EXISTS "${METIS_DIR}/include" AND EXISTS "${METIS_DIR}/lib")
+            set(METIS_INCLUDE_DIR "${METIS_DIR}/include")
+            set(METIS_LIBRARY_DIR "${METIS_DIR}/lib")
+
+            target_include_directories(GMGPolarLib PUBLIC ${METIS_INCLUDE_DIR})
+            target_link_directories(GMGPolarLib PUBLIC ${METIS_LIBRARY_DIR})
+            set(METIS_FOUND TRUE)
+        endif()
+
+        if(METIS_FOUND)
+            target_link_libraries(GMGPolarLib PUBLIC metis)
+        else()
+            message(SEND_ERROR "METIS not found")
+        endif()
     endif()
 endif()
 
