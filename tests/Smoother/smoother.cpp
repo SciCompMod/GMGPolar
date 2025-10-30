@@ -84,10 +84,12 @@ TEST(SmootherTest, smoother_DirBC_Interior)
     Vector<double> start = generate_random_sample_data(level.grid(), 24);
     Vector<double> temp  = generate_random_sample_data(level.grid(), 8);
 
-    Vector<double> solution_Give(start);
+    Vector<double> solution_Give("solution_Give", start.size());
+    Kokkos::deep_copy(solution_Give, start);
     smootherGive_operator.smoothing(solution_Give, rhs, temp);
 
-    Vector<double> solution_Take(start);
+    Vector<double> solution_Take("solution_Take", start.size());
+    Kokkos::deep_copy(solution_Take, start);
     smootherTake_operator.smoothing(solution_Take, rhs, temp);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
@@ -141,10 +143,12 @@ TEST(SmootherTest, smoother_AcrossOrigin)
     Vector<double> start = generate_random_sample_data(level.grid(), 24);
     Vector<double> temp  = generate_random_sample_data(level.grid(), 8);
 
-    Vector<double> solution_Give(start);
+    Vector<double> solution_Give("solution_Give", start.size());
+    Kokkos::deep_copy(solution_Give, start);
     smootherGive_operator.smoothing(solution_Give, rhs, temp);
 
-    Vector<double> solution_Take(start);
+    Vector<double> solution_Take("solution_Take", start.size());
+    Kokkos::deep_copy(solution_Take, start);
     smootherTake_operator.smoothing(solution_Take, rhs, temp);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
