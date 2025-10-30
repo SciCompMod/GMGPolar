@@ -28,6 +28,7 @@ runs:
         cmake --install build
         ls install/*
         echo "METIS_DIR=$(pwd)/install" >> $GITHUB_ENV
+        echo "METIS_ROOT=$(pwd)/install" >> $GITHUB_ENV
         export METIS_ROOT=$(pwd)/install
         cd ..
         git clone -b v5.5.1.11 https://github.com/scivision/mumps.git
