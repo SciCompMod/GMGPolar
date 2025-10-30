@@ -41,7 +41,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/test
         with:
-          build-artifact: build-cpp-linux-gmgpolar${{ inputs.use-mumps == 'true' && '-mumps' || ''}}
+          build-artifact: build-cpp-linux-gmgpolar${{ matrix.USE_MUMPS == 'true' && '-mumps' || ''}}
           use-mumps: ${{ matrix.USE_MUMPS }}
 
   codecov:
