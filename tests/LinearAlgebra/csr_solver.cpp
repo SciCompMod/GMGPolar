@@ -597,7 +597,7 @@ TEST(SparseLUSolver, 4x4Hilbert)
     SparseMatrixCSR<double> A(n, n, sort_entries(triplets));
     Vector<double> x_true("x_true", 4);
     x_true(0)        = 1.0;
-    x_true(1)        = -2.0;
+    x_true(1)        = 2.0;
     x_true(2)        = 3.0;
     x_true(3)        = 4.0;
     Vector<double> b = multiply(A, x_true);
@@ -746,7 +746,7 @@ TEST(SparseLUSolver, 3x3Identity)
     SparseMatrixCSR<double> A(n, n, sort_entries(triplets));
     Vector<double> x_true("x_true", 3);
     x_true(0)        = 5.0;
-    x_true(1)        = 3.0;
+    x_true(1)        = -3.0;
     x_true(2)        = 2.0;
     Vector<double> b = multiply(A, x_true);
     SparseLUSolver<double> solver(A);
@@ -798,8 +798,8 @@ TEST(SparseLUSolver, 5x5SPD)
     x_true(0)        = 1.0;
     x_true(1)        = 2.0;
     x_true(2)        = 3.0;
-    x_true(3)        = 4;
-    x_true(4)        = 4;
+    x_true(3)        = 4.0;
+    x_true(4)        = 5.0;
     Vector<double> b = multiply(A, x_true);
     SparseLUSolver<double> solver(A);
     solver.solveInPlace(b);
