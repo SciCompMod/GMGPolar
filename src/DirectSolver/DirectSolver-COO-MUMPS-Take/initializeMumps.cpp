@@ -1,5 +1,4 @@
 #include "../../../include/DirectSolver/DirectSolver-COO-MUMPS-Take/directSolverTake.h"
-#include <Kokkos_StdAlgorithms.hpp>
 
 #ifdef GMGPOLAR_USE_MUMPS
 
