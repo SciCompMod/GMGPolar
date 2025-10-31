@@ -10,7 +10,7 @@ namespace ProlongationTest
 {
 Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed)
 {
-    Vector<double> x(grid.numberOfNodes());
+    Vector<double> x("x", grid.numberOfNodes());
     std::mt19937 gen(seed);
     std::uniform_real_distribution<double> dist(-100.0, 100.0);
     for (int i = 0; i < x.size(); ++i) {
@@ -54,8 +54,8 @@ TEST(ProlongationTest, ProlongationTest)
     Vector<double> x = generate_random_sample_data(coarse_level.grid(), 42);
 
     // Apply prolongation to both functions
-    Vector<double> result1(finest_level.grid().numberOfNodes());
-    Vector<double> result2(finest_level.grid().numberOfNodes());
+    Vector<double> result1("result1", finest_level.grid().numberOfNodes());
+    Vector<double> result2("result2", finest_level.grid().numberOfNodes());
 
     interpolation_operator.applyProlongation0(coarse_level, finest_level, result1, x);
     interpolation_operator.applyProlongation(coarse_level, finest_level, result2, x);
@@ -65,4 +65,3 @@ TEST(ProlongationTest, ProlongationTest)
         ASSERT_NEAR(result1[i], result2[i], 1e-10);
     }
 }
-

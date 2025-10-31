@@ -6,8 +6,8 @@
 // R = 1/4 * |2  4  2| = P^T
 //           |1  2  1|
 
-void Interpolation::applyRestriction0(const Level& fromLevel, const Level& toLevel, Vector<double>& result,
-                                      const Vector<double>& x) const
+void Interpolation::applyRestriction0(const Level& fromLevel, const Level& toLevel, Vector<double> result,
+                                      ConstVector<double> x) const
 {
     assert(toLevel.level_depth() == fromLevel.level_depth() + 1);
 
@@ -100,8 +100,8 @@ void Interpolation::applyRestriction0(const Level& fromLevel, const Level& toLev
 // Optimized version of applyRestriction0 //
 // -------------------------------------- //
 
-void Interpolation::applyRestriction(const Level& fromLevel, const Level& toLevel, Vector<double>& result,
-                                     const Vector<double>& x) const
+void Interpolation::applyRestriction(const Level& fromLevel, const Level& toLevel, Vector<double> result,
+                                     ConstVector<double> x) const
 {
     assert(toLevel.level_depth() == fromLevel.level_depth() + 1);
 

@@ -23,25 +23,25 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, diagonal_dominant_n_3)
     solver.sub_diagonal(0)         = 1.0;
     solver.sub_diagonal(1)         = -9.0;
 
-    Vector<double> rhs(n);
+    Vector<double> rhs("rhs", n);
     rhs[0] = 65.0;
     rhs[1] = -10.5;
     rhs[2] = 13.6;
 
-    Vector<double> exact_solution(n);
+    Vector<double> exact_solution("exact_solution", n);
     exact_solution[0] = -4231.0 / 345.0;
     exact_solution[1] = 254.0 / 69.0;
     exact_solution[2] = 2687.0 / 690.0;
 
-    Vector<double> temp1(n);
-    Vector<double> temp2(n);
-    solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
+    Vector<double> temp1("temp1", n);
+    Vector<double> temp2("temp2", n);
+    solver.solveInPlace(rhs.data(), temp1.data(), temp2.data());
 
     EXPECT_NEAR(rhs[0], exact_solution[0], 1e-12);
     EXPECT_NEAR(rhs[1], exact_solution[1], 1e-12);
     EXPECT_NEAR(rhs[2], exact_solution[2], 1e-12);
 
-    EXPECT_TRUE(equals(rhs, exact_solution));
+    EXPECT_TRUE(equals(ConstVector<double>(rhs), ConstVector<double>(exact_solution)));
 }
 
 TEST(ZeroCyclicSymmetricTridiagonalSolver, not_diagonal_dominant_n_3)
@@ -57,19 +57,19 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, not_diagonal_dominant_n_3)
     solver.sub_diagonal(0)         = -20.0;
     solver.sub_diagonal(1)         = -9.0;
 
-    Vector<double> rhs(n);
+    Vector<double> rhs("rhs", n);
     rhs[0] = 65.0;
     rhs[1] = -10.5;
     rhs[2] = 13.6;
 
-    Vector<double> exact_solution(n);
+    Vector<double> exact_solution("exact_solution", n);
     exact_solution[0] = 4904935.0 / 265001.0;
     exact_solution[1] = -1106500.0 / 265001.0;
     exact_solution[2] = -31772432.0 / 795003.0;
 
-    Vector<double> temp1(n);
-    Vector<double> temp2(n);
-    solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
+    Vector<double> temp1("temp1", n);
+    Vector<double> temp2("temp2", n);
+    solver.solveInPlace(rhs.data(), temp1.data(), temp2.data());
 
     EXPECT_NEAR(rhs[0], exact_solution[0], 1e-12);
     EXPECT_NEAR(rhs[1], exact_solution[1], 1e-12);
@@ -77,7 +77,7 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, not_diagonal_dominant_n_3)
 
     EXPECT_DOUBLE_EQ(rhs[0], exact_solution[0]);
 
-    EXPECT_TRUE(equals(rhs, exact_solution));
+    EXPECT_TRUE(equals(ConstVector<double>(rhs), ConstVector<double>(exact_solution)));
 }
 
 TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10)
@@ -106,16 +106,17 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10)
     const SymmetricTridiagonalSolver<double> copy_solver = solver;
 
     // Fill rhs with random values
-    Vector<double> rhs(n);
+    Vector<double> rhs("rhs", n);
     for (int i = 0; i < n; ++i) {
         rhs[i] = dis(gen);
     }
 
-    const Vector<double> copy_rhs = rhs;
+    Vector<double> copy_rhs("copy_rhs", rhs.size());
+    Kokkos::deep_copy(copy_rhs, rhs);
 
-    Vector<double> temp1(n);
-    Vector<double> temp2(n);
-    solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
+    Vector<double> temp1("temp1", n);
+    Vector<double> temp2("temp2", n);
+    solver.solveInPlace(rhs.data(), temp1.data(), temp2.data());
 
     EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1], copy_rhs[0], precision);
     for (int i = 1; i < n - 1; ++i) {
@@ -155,16 +156,17 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_100)
     const SymmetricTridiagonalSolver<double> copy_solver = solver;
 
     // Fill rhs with random values
-    Vector<double> rhs(n);
+    Vector<double> rhs("rhs", n);
     for (int i = 0; i < n; ++i) {
         rhs[i] = dis(gen);
     }
 
-    const Vector<double> copy_rhs = rhs;
+    Vector<double> copy_rhs("copy_rhs", rhs.size());
+    Kokkos::deep_copy(copy_rhs, rhs);
 
-    Vector<double> temp1(n);
-    Vector<double> temp2(n);
-    solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
+    Vector<double> temp1("temp1", n);
+    Vector<double> temp2("temp2", n);
+    solver.solveInPlace(rhs.data(), temp1.data(), temp2.data());
 
     EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1], copy_rhs[0], precision);
     for (int i = 1; i < n - 1; ++i) {
@@ -204,16 +206,17 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_1000)
     const SymmetricTridiagonalSolver<double> copy_solver = solver;
 
     // Fill rhs with random values
-    Vector<double> rhs(n);
+    Vector<double> rhs("rhs", n);
     for (int i = 0; i < n; ++i) {
         rhs[i] = dis(gen);
     }
 
-    const Vector<double> copy_rhs = rhs;
+    Vector<double> copy_rhs("copy_rhs", rhs.size());
+    Kokkos::deep_copy(copy_rhs, rhs);
 
-    Vector<double> temp1(n);
-    Vector<double> temp2(n);
-    solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
+    Vector<double> temp1("temp1", n);
+    Vector<double> temp2("temp2", n);
+    solver.solveInPlace(rhs.data(), temp1.data(), temp2.data());
 
     EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1], copy_rhs[0], precision);
     for (int i = 1; i < n - 1; ++i) {
@@ -253,16 +256,17 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10000)
     const SymmetricTridiagonalSolver<double> copy_solver = solver;
 
     // Fill rhs with random values
-    Vector<double> rhs(n);
+    Vector<double> rhs("rhs", n);
     for (int i = 0; i < n; ++i) {
         rhs[i] = dis(gen);
     }
 
-    const Vector<double> copy_rhs = rhs;
+    Vector<double> copy_rhs("copy_rhs", rhs.size());
+    Kokkos::deep_copy(copy_rhs, rhs);
 
-    Vector<double> temp1(n);
-    Vector<double> temp2(n);
-    solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
+    Vector<double> temp1("temp1", n);
+    Vector<double> temp2("temp2", n);
+    solver.solveInPlace(rhs.data(), temp1.data(), temp2.data());
 
     EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1], copy_rhs[0], precision);
     for (int i = 1; i < n - 1; ++i) {
@@ -304,16 +308,17 @@ TEST(ZeroCyclicSymmetricTridiagonalSolver, random_tridiagonal_boosted_subdiagona
     const SymmetricTridiagonalSolver<double> copy_solver = solver;
 
     // Fill rhs with random values
-    Vector<double> rhs(n);
+    Vector<double> rhs("rhs", n);
     for (int i = 0; i < n; ++i) {
         rhs[i] = dis(gen);
     }
 
-    const Vector<double> copy_rhs = rhs;
+    Vector<double> copy_rhs("copy_rhs", rhs.size());
+    Kokkos::deep_copy(copy_rhs, rhs);
 
-    Vector<double> temp1(n);
-    Vector<double> temp2(n);
-    solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
+    Vector<double> temp1("temp1", n);
+    Vector<double> temp2("temp2", n);
+    solver.solveInPlace(rhs.data(), temp1.data(), temp2.data());
 
     EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1], copy_rhs[0], precision);
     for (int i = 1; i < n - 1; ++i) {
@@ -342,25 +347,25 @@ TEST(CyclicSymmetricTridiagonalSolver, diagonal_dominant_n_3)
     solver.sub_diagonal(0)         = 1.0;
     solver.sub_diagonal(1)         = -9.0;
 
-    Vector<double> rhs(n);
+    Vector<double> rhs("rhs", n);
     rhs[0] = 65.0;
     rhs[1] = -10.5;
     rhs[2] = 13.6;
 
-    Vector<double> exact_solution(n);
+    Vector<double> exact_solution("exact_solution", n);
     exact_solution[0] = -2959.0 / 270.0;
     exact_solution[1] = -1163.0 / 270.0;
     exact_solution[2] = -653 / 135.0;
 
-    Vector<double> temp1(n);
-    Vector<double> temp2(n);
-    solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
+    Vector<double> temp1("temp1", n);
+    Vector<double> temp2("temp2", n);
+    solver.solveInPlace(rhs.data(), temp1.data(), temp2.data());
 
     EXPECT_NEAR(rhs[0], exact_solution[0], 1e-12);
     EXPECT_NEAR(rhs[1], exact_solution[1], 1e-12);
     EXPECT_NEAR(rhs[2], exact_solution[2], 1e-12);
 
-    EXPECT_TRUE(equals(rhs, exact_solution));
+    EXPECT_TRUE(equals(ConstVector<double>(rhs), ConstVector<double>(exact_solution)));
 }
 
 TEST(CyclicSymmetricTridiagonalSolver, not_diagonal_dominant_n_3)
@@ -376,19 +381,19 @@ TEST(CyclicSymmetricTridiagonalSolver, not_diagonal_dominant_n_3)
     solver.sub_diagonal(0)         = -20.0;
     solver.sub_diagonal(1)         = -9.0;
 
-    Vector<double> rhs(n);
+    Vector<double> rhs("rhs", n);
     rhs[0] = 65.0;
     rhs[1] = -10.5;
     rhs[2] = 13.6;
 
-    Vector<double> exact_solution(n);
+    Vector<double> exact_solution("exact_solution", n);
     exact_solution[0] = -3960071.0 / 3334939.0;
     exact_solution[1] = -6833500.0 / 3334939.0;
     exact_solution[2] = 38070482.0 / 10004817.0;
 
-    Vector<double> temp1(n);
-    Vector<double> temp2(n);
-    solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
+    Vector<double> temp1("temp1", n);
+    Vector<double> temp2("temp2", n);
+    solver.solveInPlace(rhs.data(), temp1.data(), temp2.data());
 
     EXPECT_NEAR(rhs[0], exact_solution[0], 1e-12);
     EXPECT_NEAR(rhs[1], exact_solution[1], 1e-12);
@@ -396,7 +401,7 @@ TEST(CyclicSymmetricTridiagonalSolver, not_diagonal_dominant_n_3)
 
     EXPECT_DOUBLE_EQ(rhs[0], exact_solution[0]);
 
-    EXPECT_TRUE(equals(rhs, exact_solution));
+    EXPECT_TRUE(equals(ConstVector<double>(rhs), ConstVector<double>(exact_solution)));
 }
 
 TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10)
@@ -426,16 +431,17 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10)
     const SymmetricTridiagonalSolver<double> copy_solver = solver;
 
     // Fill rhs with random values
-    Vector<double> rhs(n);
+    Vector<double> rhs("rhs", n);
     for (int i = 0; i < n; ++i) {
         rhs[i] = dis(gen);
     }
 
-    const Vector<double> copy_rhs = rhs;
+    Vector<double> copy_rhs("copy_rhs", rhs.size());
+    Kokkos::deep_copy(copy_rhs, rhs);
 
-    Vector<double> temp1(n);
-    Vector<double> temp2(n);
-    solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
+    Vector<double> temp1("temp1", n);
+    Vector<double> temp2("temp2", n);
+    solver.solveInPlace(rhs.data(), temp1.data(), temp2.data());
 
     EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1] +
                     copy_solver.cyclic_corner_element() * rhs[n - 1],
@@ -478,16 +484,17 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_100)
     const SymmetricTridiagonalSolver<double> copy_solver = solver;
 
     // Fill rhs with random values
-    Vector<double> rhs(n);
+    Vector<double> rhs("rhs", n);
     for (int i = 0; i < n; ++i) {
         rhs[i] = dis(gen);
     }
 
-    const Vector<double> copy_rhs = rhs;
+    Vector<double> copy_rhs("copy_rhs", rhs.size());
+    Kokkos::deep_copy(copy_rhs, rhs);
 
-    Vector<double> temp1(n);
-    Vector<double> temp2(n);
-    solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
+    Vector<double> temp1("temp1", n);
+    Vector<double> temp2("temp2", n);
+    solver.solveInPlace(rhs.data(), temp1.data(), temp2.data());
 
     EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1] +
                     copy_solver.cyclic_corner_element() * rhs[n - 1],
@@ -530,16 +537,17 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_1000)
     const SymmetricTridiagonalSolver<double> copy_solver = solver;
 
     // Fill rhs with random values
-    Vector<double> rhs(n);
+    Vector<double> rhs("rhs", n);
     for (int i = 0; i < n; ++i) {
         rhs[i] = dis(gen);
     }
 
-    const Vector<double> copy_rhs = rhs;
+    Vector<double> copy_rhs("copy_rhs", rhs.size());
+    Kokkos::deep_copy(copy_rhs, rhs);
 
-    Vector<double> temp1(n);
-    Vector<double> temp2(n);
-    solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
+    Vector<double> temp1("temp1", n);
+    Vector<double> temp2("temp2", n);
+    solver.solveInPlace(rhs.data(), temp1.data(), temp2.data());
 
     EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1] +
                     copy_solver.cyclic_corner_element() * rhs[n - 1],
@@ -582,16 +590,17 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_n_10000)
     const SymmetricTridiagonalSolver<double> copy_solver = solver;
 
     // Fill rhs with random values
-    Vector<double> rhs(n);
+    Vector<double> rhs("rhs", n);
     for (int i = 0; i < n; ++i) {
         rhs[i] = dis(gen);
     }
 
-    const Vector<double> copy_rhs = rhs;
+    Vector<double> copy_rhs("copy_rhs", rhs.size());
+    Kokkos::deep_copy(copy_rhs, rhs);
 
-    Vector<double> temp1(n);
-    Vector<double> temp2(n);
-    solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
+    Vector<double> temp1("temp1", n);
+    Vector<double> temp2("temp2", n);
+    solver.solveInPlace(rhs.data(), temp1.data(), temp2.data());
 
     EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1] +
                     copy_solver.cyclic_corner_element() * rhs[n - 1],
@@ -636,16 +645,17 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_boosted_subdiagonal_LO
     const SymmetricTridiagonalSolver<double> copy_solver = solver;
 
     // Fill rhs with random values
-    Vector<double> rhs(n);
+    Vector<double> rhs("rhs", n);
     for (int i = 0; i < n; ++i) {
         rhs[i] = dis(gen);
     }
 
-    const Vector<double> copy_rhs = rhs;
+    Vector<double> copy_rhs("copy_rhs", rhs.size());
+    Kokkos::deep_copy(copy_rhs, rhs);
 
-    Vector<double> temp1(n);
-    Vector<double> temp2(n);
-    solver.solveInPlace(rhs.begin(), temp1.begin(), temp2.begin());
+    Vector<double> temp1("temp1", n);
+    Vector<double> temp2("temp2", n);
+    solver.solveInPlace(rhs.data(), temp1.data(), temp2.data());
 
     EXPECT_NEAR(copy_solver.main_diagonal(0) * rhs[0] + copy_solver.sub_diagonal(0) * rhs[1] +
                     copy_solver.cyclic_corner_element() * rhs[n - 1],
@@ -659,4 +669,3 @@ TEST(CyclicSymmetricTridiagonalSolver, random_tridiagonal_boosted_subdiagonal_LO
                     copy_solver.cyclic_corner_element() * rhs[0],
                 copy_rhs[n - 1], precision);
 }
-

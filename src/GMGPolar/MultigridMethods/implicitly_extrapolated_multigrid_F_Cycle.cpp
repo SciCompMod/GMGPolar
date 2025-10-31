@@ -1,7 +1,7 @@
 #include "../../../include/GMGPolar/gmgpolar.h"
 
-void GMGPolar::implicitlyExtrapolatedMultigrid_F_Cycle(const int level_depth, Vector<double>& solution,
-                                                       Vector<double>& rhs, Vector<double>& residual)
+void GMGPolar::implicitlyExtrapolatedMultigrid_F_Cycle(const int level_depth, Vector<double> solution,
+                                                       Vector<double> rhs, Vector<double> residual)
 {
     assert(0 <= level_depth && level_depth < number_of_levels_ - 1);
 
@@ -52,7 +52,8 @@ void GMGPolar::implicitlyExtrapolatedMultigrid_F_Cycle(const int level_depth, Ve
         next_level.computeResidual(next_level.error_correction(), next_level.rhs(), next_level.solution());
 
         // res_ex = 4/3 * P_ex^T (f_l - A_l*u_l) - 1/3 * (f_{l-1} - A_{l-1}* Inject(u_l))
-        linear_combination(next_level.residual(), 4.0 / 3.0, next_level.error_correction(), -1.0 / 3.0);
+        linear_combination(next_level.residual(), 4.0 / 3.0, ConstVector<double>(next_level.error_correction()),
+                           -1.0 / 3.0);
 
         auto end_MGC_residual = std::chrono::high_resolution_clock::now();
         t_avg_MGC_residual_ += std::chrono::duration<double>(end_MGC_residual - start_MGC_residual).count();
@@ -82,7 +83,8 @@ void GMGPolar::implicitlyExtrapolatedMultigrid_F_Cycle(const int level_depth, Ve
         next_level.computeResidual(next_level.residual(), next_level.rhs(), next_level.solution());
 
         // res_ex = 4/3 * P_ex^T (f_l - A_l*u_l) - 1/3 * (f_{l-1} - A_{l-1}* Inject(u_l))
-        linear_combination(next_level.error_correction(), 4.0 / 3.0, next_level.residual(), -1.0 / 3.0);
+        linear_combination(next_level.error_correction(), 4.0 / 3.0, ConstVector<double>(next_level.residual()),
+                           -1.0 / 3.0);
 
         auto end_MGC_residual = std::chrono::high_resolution_clock::now();
         t_avg_MGC_residual_ += std::chrono::duration<double>(end_MGC_residual - start_MGC_residual).count();
@@ -99,7 +101,7 @@ void GMGPolar::implicitlyExtrapolatedMultigrid_F_Cycle(const int level_depth, Ve
     extrapolatedProlongation(level_depth + 1, residual, next_level.residual());
 
     /* Compute the corrected approximation: u = u + error */
-    add(solution, residual);
+    add(solution, ConstVector<double>(residual));
 
     auto start_MGC_postSmoothing = std::chrono::high_resolution_clock::now();
 

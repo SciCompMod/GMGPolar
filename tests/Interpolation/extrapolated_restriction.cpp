@@ -15,7 +15,7 @@ namespace ExtrapolatedRestrictionTest
 // Function to generate sample data for vector x using random values with seed
 Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed)
 {
-    Vector<double> x(grid.numberOfNodes());
+    Vector<double> x("x", grid.numberOfNodes());
     std::mt19937 gen(seed); // Standard mersenne_twister_engine seeded with seed
     std::uniform_real_distribution<double> dist(0.0, 1.0); // Generate random double between 0 and 1
     for (int i = 0; i < x.size(); ++i) {
@@ -27,8 +27,8 @@ Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int s
 /* In src/Interpolation/restriction.cpp the Restriction Operator is implemented with "Take". */
 /* Here we test against the "Give" version. */
 
-void applyExtrapolatedRestrictionGive0(const Level& fromLevel, const Level& toLevel, Vector<double>& result,
-                                       const Vector<double>& x)
+void applyExtrapolatedRestrictionGive0(const Level& fromLevel, const Level& toLevel, Vector<double> result,
+                                       ConstVector<double> x)
 {
     assert(toLevel.level_depth() == fromLevel.level_depth() + 1);
 
@@ -142,9 +142,9 @@ TEST(ExtrapolatedRestrictionTest, applyExtrapolatedRestriction)
     Vector<double> x  = generate_random_sample_data(finest_level.grid(), seed);
 
     // Apply prolongation to both functions
-    Vector<double> result1(coarse_level.grid().numberOfNodes());
-    Vector<double> result2(coarse_level.grid().numberOfNodes());
-    Vector<double> result3(coarse_level.grid().numberOfNodes());
+    Vector<double> result1("result1", coarse_level.grid().numberOfNodes());
+    Vector<double> result2("result2", coarse_level.grid().numberOfNodes());
+    Vector<double> result3("result3", coarse_level.grid().numberOfNodes());
 
     interpolation_operator.applyExtrapolatedRestriction0(finest_level, coarse_level, result1, x);
     interpolation_operator.applyExtrapolatedRestriction(finest_level, coarse_level, result2, x);

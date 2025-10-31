@@ -28,11 +28,11 @@ namespace SmootherTest
 {
 Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed)
 {
-    Vector<double> x(grid.numberOfNodes());
+    Vector<double> x("x", grid.numberOfNodes());
     std::mt19937 gen(seed);
     std::uniform_real_distribution<double> dist(-100.0, 100.0);
     for (int i = 0; i < x.size(); ++i) {
-        x[i] = dist(gen);
+        x(i) = dist(gen);
     }
     return x;
 }
@@ -84,10 +84,12 @@ TEST(SmootherTest, smoother_DirBC_Interior)
     Vector<double> start = generate_random_sample_data(level.grid(), 24);
     Vector<double> temp  = generate_random_sample_data(level.grid(), 8);
 
-    Vector<double> solution_Give = start;
+    Vector<double> solution_Give("solution_Give", start.size());
+    Kokkos::deep_copy(solution_Give, start);
     smootherGive_operator.smoothing(solution_Give, rhs, temp);
 
-    Vector<double> solution_Take = start;
+    Vector<double> solution_Take("solution_Take", start.size());
+    Kokkos::deep_copy(solution_Take, start);
     smootherTake_operator.smoothing(solution_Take, rhs, temp);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
@@ -141,10 +143,12 @@ TEST(SmootherTest, smoother_AcrossOrigin)
     Vector<double> start = generate_random_sample_data(level.grid(), 24);
     Vector<double> temp  = generate_random_sample_data(level.grid(), 8);
 
-    Vector<double> solution_Give = start;
+    Vector<double> solution_Give("solution_Give", start.size());
+    Kokkos::deep_copy(solution_Give, start);
     smootherGive_operator.smoothing(solution_Give, rhs, temp);
 
-    Vector<double> solution_Take = start;
+    Vector<double> solution_Take("solution_Take", start.size());
+    Kokkos::deep_copy(solution_Take, start);
     smootherTake_operator.smoothing(solution_Take, rhs, temp);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
@@ -198,19 +202,18 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior)
     SmootherGive smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
-        error[i] = discrete_solution[i] - smoother_solution[i];
+        error(i) = discrete_solution(i) - smoother_solution(i);
     }
 
     int iterations              = 0;
@@ -218,12 +221,12 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior)
     const int max_iterations    = 10000;
     const double precision      = 1e-12;
 
-    while (infinity_norm(error) > precision) {
+    while (infinity_norm(ConstVector<double>(error)) > precision) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
-            error[i] = discrete_solution[i] - smoother_solution[i];
+            error(i) = discrete_solution(i) - smoother_solution(i);
         }
         iterations++;
         if (iterations >= max_iterations) {
@@ -237,7 +240,7 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 300);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(SmootherTest, ParallelSmootherDirBC_Interior)
@@ -278,19 +281,18 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior)
     SmootherGive smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
-        error[i] = discrete_solution[i] - smoother_solution[i];
+        error(i) = discrete_solution(i) - smoother_solution(i);
     }
 
     int iterations              = 0;
@@ -298,12 +300,12 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior)
     const int max_iterations    = 10000;
     const double precision      = 1e-12;
 
-    while (infinity_norm(error) > precision) {
+    while (infinity_norm(ConstVector<double>(error)) > precision) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
-            error[i] = discrete_solution[i] - smoother_solution[i];
+            error(i) = discrete_solution(i) - smoother_solution(i);
         }
         iterations++;
         if (iterations >= max_iterations) {
@@ -317,7 +319,7 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 300);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(SmootherTest, SequentialSmootherAcrossOrigin)
@@ -358,19 +360,18 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin)
     SmootherGive smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
-        error[i] = discrete_solution[i] - smoother_solution[i];
+        error(i) = discrete_solution(i) - smoother_solution(i);
     }
 
     int iterations              = 0;
@@ -378,12 +379,12 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin)
     const int max_iterations    = 10000;
     const double precision      = 1e-8;
 
-    while (infinity_norm(error) > precision) {
+    while (infinity_norm(ConstVector<double>(error)) > precision) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
-            error[i] = discrete_solution[i] - smoother_solution[i];
+            error(i) = discrete_solution(i) - smoother_solution(i);
         }
         iterations++;
         if (iterations >= max_iterations) {
@@ -397,7 +398,7 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 600);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(SmootherTest, ParallelSmootherAcrossOrigin)
@@ -438,19 +439,18 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin)
     SmootherGive smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
-        error[i] = discrete_solution[i] - smoother_solution[i];
+        error(i) = discrete_solution(i) - smoother_solution(i);
     }
 
     int iterations              = 0;
@@ -458,12 +458,12 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin)
     const int max_iterations    = 10000;
     const double precision      = 1e-8;
 
-    while (infinity_norm(error) > 1e-8) {
+    while (infinity_norm(ConstVector<double>(error)) > 1e-8) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
-            error[i] = discrete_solution[i] - smoother_solution[i];
+            error(i) = discrete_solution(i) - smoother_solution(i);
         }
         iterations++;
         if (iterations >= max_iterations) {
@@ -477,7 +477,7 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 600);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(SmootherTest, SequentialSmootherDirBC_Interior_SmallestGrid)
@@ -517,19 +517,18 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior_SmallestGrid)
     SmootherGive smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
-        error[i] = discrete_solution[i] - smoother_solution[i];
+        error(i) = discrete_solution(i) - smoother_solution(i);
     }
 
     int iterations              = 0;
@@ -537,12 +536,12 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior_SmallestGrid)
     const int max_iterations    = 10000;
     const double precision      = 1e-12;
 
-    while (infinity_norm(error) > 1e-12) {
+    while (infinity_norm(ConstVector<double>(error)) > 1e-12) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
-            error[i] = discrete_solution[i] - smoother_solution[i];
+            error(i) = discrete_solution(i) - smoother_solution(i);
         }
         iterations++;
         if (iterations >= max_iterations) {
@@ -556,7 +555,7 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior_SmallestGrid)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 30);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(SmootherTest, ParallelSmootherDirBC_Interior_SmallestGrid)
@@ -596,19 +595,18 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior_SmallestGrid)
     SmootherGive smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
-        error[i] = discrete_solution[i] - smoother_solution[i];
+        error(i) = discrete_solution(i) - smoother_solution(i);
     }
 
     int iterations              = 0;
@@ -616,12 +614,12 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior_SmallestGrid)
     const int max_iterations    = 10000;
     double precision            = 1e-12;
 
-    while (infinity_norm(error) > precision) {
+    while (infinity_norm(ConstVector<double>(error)) > precision) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
-            error[i] = discrete_solution[i] - smoother_solution[i];
+            error(i) = discrete_solution(i) - smoother_solution(i);
         }
         iterations++;
         if (iterations >= max_iterations) {
@@ -635,7 +633,7 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior_SmallestGrid)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 30);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(SmootherTest, SequentialSmootherAcrossOrigin_SmallestGrid)
@@ -675,19 +673,18 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin_SmallestGrid)
     SmootherGive smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
-        error[i] = discrete_solution[i] - smoother_solution[i];
+        error(i) = discrete_solution(i) - smoother_solution(i);
     }
 
     int iterations              = 0;
@@ -695,12 +692,12 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin_SmallestGrid)
     const int max_iterations    = 10000;
     const double precision      = 1e-8;
 
-    while (infinity_norm(error) > 1e-8) {
+    while (infinity_norm(ConstVector<double>(error)) > 1e-8) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
-            error[i] = discrete_solution[i] - smoother_solution[i];
+            error(i) = discrete_solution(i) - smoother_solution(i);
         }
         iterations++;
         if (iterations >= max_iterations) {
@@ -714,7 +711,7 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin_SmallestGrid)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 80);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(SmootherTest, ParallelSmootherAcrossOrigin_SmallestGrid)
@@ -754,19 +751,18 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin_SmallestGrid)
     SmootherGive smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
-        error[i] = discrete_solution[i] - smoother_solution[i];
+        error(i) = discrete_solution(i) - smoother_solution(i);
     }
 
     int iterations              = 0;
@@ -774,12 +770,12 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin_SmallestGrid)
     const int max_iterations    = 10000;
     const double precision      = 1e-8;
 
-    while (infinity_norm(error) > 1e-8) {
+    while (infinity_norm(ConstVector<double>(error)) > 1e-8) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
-            error[i] = discrete_solution[i] - smoother_solution[i];
+            error(i) = discrete_solution(i) - smoother_solution(i);
         }
         iterations++;
         if (iterations >= max_iterations) {
@@ -793,7 +789,7 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin_SmallestGrid)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 80);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 /* Using "Take" */
@@ -836,19 +832,18 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior)
     SmootherTake smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
-        error[i] = discrete_solution[i] - smoother_solution[i];
+        error(i) = discrete_solution(i) - smoother_solution(i);
     }
 
     int iterations              = 0;
@@ -856,12 +851,12 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior)
     const int max_iterations    = 10000;
     const double precision      = 1e-12;
 
-    while (infinity_norm(error) > precision) {
+    while (infinity_norm(ConstVector<double>(error)) > precision) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
-            error[i] = discrete_solution[i] - smoother_solution[i];
+            error(i) = discrete_solution(i) - smoother_solution(i);
         }
         iterations++;
         if (iterations >= max_iterations) {
@@ -875,7 +870,7 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 300);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior)
@@ -916,19 +911,18 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior)
     SmootherTake smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
-        error[i] = discrete_solution[i] - smoother_solution[i];
+        error(i) = discrete_solution(i) - smoother_solution(i);
     }
 
     int iterations              = 0;
@@ -936,12 +930,12 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior)
     const int max_iterations    = 10000;
     const double precision      = 1e-12;
 
-    while (infinity_norm(error) > precision) {
+    while (infinity_norm(ConstVector<double>(error)) > precision) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
-            error[i] = discrete_solution[i] - smoother_solution[i];
+            error(i) = discrete_solution(i) - smoother_solution(i);
         }
         iterations++;
         if (iterations >= max_iterations) {
@@ -955,7 +949,7 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 300);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin)
@@ -996,19 +990,18 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin)
     SmootherTake smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
-        error[i] = discrete_solution[i] - smoother_solution[i];
+        error(i) = discrete_solution(i) - smoother_solution(i);
     }
 
     int iterations              = 0;
@@ -1016,12 +1009,12 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin)
     const int max_iterations    = 10000;
     const double precision      = 1e-8;
 
-    while (infinity_norm(error) > precision) {
+    while (infinity_norm(ConstVector<double>(error)) > precision) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
-            error[i] = discrete_solution[i] - smoother_solution[i];
+            error(i) = discrete_solution(i) - smoother_solution(i);
         }
         iterations++;
         if (iterations >= max_iterations) {
@@ -1035,7 +1028,7 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 600);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin)
@@ -1076,19 +1069,18 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin)
     SmootherTake smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
-        error[i] = discrete_solution[i] - smoother_solution[i];
+        error(i) = discrete_solution(i) - smoother_solution(i);
     }
 
     int iterations              = 0;
@@ -1096,12 +1088,12 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin)
     const int max_iterations    = 10000;
     const double precision      = 1e-8;
 
-    while (infinity_norm(error) > 1e-8) {
+    while (infinity_norm(ConstVector<double>(error)) > 1e-8) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
-            error[i] = discrete_solution[i] - smoother_solution[i];
+            error(i) = discrete_solution(i) - smoother_solution(i);
         }
         iterations++;
         if (iterations >= max_iterations) {
@@ -1115,7 +1107,7 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 600);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior_SmallestGrid)
@@ -1155,19 +1147,18 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior_SmallestGrid)
     SmootherTake smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
-        error[i] = discrete_solution[i] - smoother_solution[i];
+        error(i) = discrete_solution(i) - smoother_solution(i);
     }
 
     int iterations              = 0;
@@ -1175,12 +1166,12 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior_SmallestGrid)
     const int max_iterations    = 10000;
     const double precision      = 1e-12;
 
-    while (infinity_norm(error) > 1e-12) {
+    while (infinity_norm(ConstVector<double>(error)) > 1e-12) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
-            error[i] = discrete_solution[i] - smoother_solution[i];
+            error(i) = discrete_solution(i) - smoother_solution(i);
         }
         iterations++;
         if (iterations >= max_iterations) {
@@ -1194,7 +1185,7 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior_SmallestGrid)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 30);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior_SmallestGrid)
@@ -1234,19 +1225,18 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior_SmallestGrid)
     SmootherTake smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
-        error[i] = discrete_solution[i] - smoother_solution[i];
+        error(i) = discrete_solution(i) - smoother_solution(i);
     }
 
     int iterations              = 0;
@@ -1254,12 +1244,12 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior_SmallestGrid)
     const int max_iterations    = 10000;
     double precision            = 1e-12;
 
-    while (infinity_norm(error) > precision) {
+    while (infinity_norm(ConstVector<double>(error)) > precision) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
-            error[i] = discrete_solution[i] - smoother_solution[i];
+            error(i) = discrete_solution(i) - smoother_solution(i);
         }
         iterations++;
         if (iterations >= max_iterations) {
@@ -1273,7 +1263,7 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior_SmallestGrid)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 30);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin_SmallestGrid)
@@ -1313,19 +1303,18 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin_SmallestGrid)
     SmootherTake smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
-        error[i] = discrete_solution[i] - smoother_solution[i];
+        error(i) = discrete_solution(i) - smoother_solution(i);
     }
 
     int iterations              = 0;
@@ -1333,12 +1322,12 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin_SmallestGrid)
     const int max_iterations    = 10000;
     const double precision      = 1e-8;
 
-    while (infinity_norm(error) > 1e-8) {
+    while (infinity_norm(ConstVector<double>(error)) > 1e-8) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
-            error[i] = discrete_solution[i] - smoother_solution[i];
+            error(i) = discrete_solution(i) - smoother_solution(i);
         }
         iterations++;
         if (iterations >= max_iterations) {
@@ -1352,7 +1341,7 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin_SmallestGrid)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 80);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin_SmallestGrid)
@@ -1392,19 +1381,18 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin_SmallestGrid)
     SmootherTake smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
 
 #pragma omp parallel for
     for (int i = 0; i < error.size(); i++) {
-        error[i] = discrete_solution[i] - smoother_solution[i];
+        error(i) = discrete_solution(i) - smoother_solution(i);
     }
 
     int iterations              = 0;
@@ -1412,12 +1400,12 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin_SmallestGrid)
     const int max_iterations    = 10000;
     const double precision      = 1e-8;
 
-    while (infinity_norm(error) > 1e-8) {
+    while (infinity_norm(ConstVector<double>(error)) > 1e-8) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
         for (int i = 0; i < error.size(); i++) {
-            error[i] = discrete_solution[i] - smoother_solution[i];
+            error(i) = discrete_solution(i) - smoother_solution(i);
         }
         iterations++;
         if (iterations >= max_iterations) {
@@ -1431,5 +1419,5 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin_SmallestGrid)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 80);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }

@@ -12,7 +12,7 @@ DirectSolverTake::DirectSolverTake(const PolarGrid& grid, const LevelCache& leve
     initializeMumpsSolver(mumps_solver_, solver_matrix_);
 }
 
-void DirectSolverTake::solveInPlace(Vector<double>& solution)
+void DirectSolverTake::solveInPlace(Vector<double> solution)
 {
     // Adjusts the right-hand side vector to account for symmetry corrections.
     // This transforms the system matrixA * solution = rhs into the equivalent system:

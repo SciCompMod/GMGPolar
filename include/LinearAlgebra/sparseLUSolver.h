@@ -59,7 +59,7 @@ public:
      *
      * @param b Right-hand side vector (modified in place to contain the solution).
      */
-    void solveInPlace(Vector<T>& b) const;
+    void solveInPlace(Vector<T> b) const;
     void solveInPlace(T* b) const;
 
 private:
@@ -129,9 +129,9 @@ SparseLUSolver<T>::SparseLUSolver(const SparseMatrixCSR<T>& A, T tolerance_abs, 
  * @param b - Right-hand side vector (overwritten with solution)
  */
 template <typename T>
-void SparseLUSolver<T>::solveInPlace(Vector<T>& b) const
+void SparseLUSolver<T>::solveInPlace(Vector<T> b) const
 {
-    solveInPlace(b.begin());
+    solveInPlace(b.data());
 }
 
 /**
@@ -147,13 +147,13 @@ void SparseLUSolver<T>::solveInPlace(T* b) const
         return;
 
     // Permute RHS: b_perm = P * b
-    Vector<T> b_perm(n);
+    Vector<T> b_perm("b_perm", n);
     for (int i = 0; i < n; i++) {
         b_perm[i] = b[perm[i]];
     }
 
     // Solve permuted system
-    solveInPlacePermuted(b_perm.begin());
+    solveInPlacePermuted(b_perm.data());
 
     // Unpermute solution: x = P^T * x_perm
     for (int i = 0; i < n; i++) {
