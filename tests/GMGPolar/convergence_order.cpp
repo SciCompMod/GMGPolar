@@ -134,7 +134,7 @@ std::vector<double> get_non_uniform_points(double min, double max, int n_pts, do
 
     points[0] = min;
     for (int i = 1; i < n_cells; ++i) {
-        points[i]                        = min + (i + dist(gen) * non_uniformity) * delta;
+        points[i] = min + (i + dist(gen) * non_uniformity) * delta;
     }
     points[n_cells] = max;
 
@@ -220,7 +220,7 @@ void test_convergence(double non_uniformity)
 
     // For extrapolation, we need a uniform refinement
     std::vector<double> non_uniform_radii  = get_non_uniform_points(1e-8, Rmax, n_r / 2 + 1, non_uniformity);
-    std::vector<double> non_uniform_angles = get_non_uniform_points(0.0, 2*M_PI, n_angles / 2 + 1, non_uniformity);
+    std::vector<double> non_uniform_angles = get_non_uniform_points(0.0, 2 * M_PI, n_angles / 2 + 1, non_uniformity);
     // Extrapolation requires at least one uniform refinement
     std::vector<double> radii  = refine(non_uniform_radii);
     std::vector<double> angles = refine(non_uniform_angles);

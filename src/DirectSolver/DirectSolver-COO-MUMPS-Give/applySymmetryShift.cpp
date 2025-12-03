@@ -8,8 +8,7 @@
 /* Boundary Symmetry Shift */
 /* ----------------------- */
 
-void DirectSolverGive::applySymmetryShiftInnerBoundary(
-    Vector<double> x) const
+void DirectSolverGive::applySymmetryShiftInnerBoundary(Vector<double> x) const
 {
     assert(DirBC_Interior_);
 
@@ -69,8 +68,7 @@ void DirectSolverGive::applySymmetryShiftInnerBoundary(
     }
 }
 
-void DirectSolverGive::applySymmetryShiftOuterBoundary(
-    Vector<double> x) const
+void DirectSolverGive::applySymmetryShiftOuterBoundary(Vector<double> x) const
 {
     int i_r;
     double r;

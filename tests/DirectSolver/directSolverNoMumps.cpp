@@ -654,16 +654,16 @@ TEST(DirectSolverTestNoMumps_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeom
 TEST(DirectSolverTestNoMumps_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_CircularGeometry)
 {
     std::vector<double> radii  = {1e-5,          1.441 * 1e-5,
-                                 3.8833 * 1e-5, 8.7666 * 1e-5,
-                                 1.8533 * 1e-4, 3.806 * 1e-4,
-                                 7.713 * 1e-4,  1.55265 * 1e-3,
-                                 3.1153 * 1e-3, 6.2406 * 1e-3,
-                                 0.01249125,    0.0249925,
-                                 0.049995,      0.1,
-                                 0.2,           0.25,
-                                 0.5,           0.8,
-                                 0.9,           0.95,
-                                 1.2,           1.3};
+                                  3.8833 * 1e-5, 8.7666 * 1e-5,
+                                  1.8533 * 1e-4, 3.806 * 1e-4,
+                                  7.713 * 1e-4,  1.55265 * 1e-3,
+                                  3.1153 * 1e-3, 6.2406 * 1e-3,
+                                  0.01249125,    0.0249925,
+                                  0.049995,      0.1,
+                                  0.2,           0.25,
+                                  0.5,           0.8,
+                                  0.9,           0.95,
+                                  1.2,           1.3};
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
@@ -1225,16 +1225,16 @@ TEST(DirectSolverTakeCustomLUTest_CulhamGeometry, DirectSolverAcrossOrigin_Culha
 TEST(DirectSolverTakeCustomLUTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_CircularGeometry)
 {
     std::vector<double> radii  = {1e-5,          1.441 * 1e-5,
-                                 3.8833 * 1e-5, 8.7666 * 1e-5,
-                                 1.8533 * 1e-4, 3.806 * 1e-4,
-                                 7.713 * 1e-4,  1.55265 * 1e-3,
-                                 3.1153 * 1e-3, 6.2406 * 1e-3,
-                                 0.01249125,    0.0249925,
-                                 0.049995,      0.1,
-                                 0.2,           0.25,
-                                 0.5,           0.8,
-                                 0.9,           0.95,
-                                 1.2,           1.3};
+                                  3.8833 * 1e-5, 8.7666 * 1e-5,
+                                  1.8533 * 1e-4, 3.806 * 1e-4,
+                                  7.713 * 1e-4,  1.55265 * 1e-3,
+                                  3.1153 * 1e-3, 6.2406 * 1e-3,
+                                  0.01249125,    0.0249925,
+                                  0.049995,      0.1,
+                                  0.2,           0.25,
+                                  0.5,           0.8,
+                                  0.9,           0.95,
+                                  1.2,           1.3};
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 

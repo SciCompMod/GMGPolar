@@ -232,4 +232,3 @@ TEST(SparseMatrixDouble, symmetry_check)
     m.is_symmetric(true);
     ASSERT_TRUE(m.is_symmetric());
 }
-
