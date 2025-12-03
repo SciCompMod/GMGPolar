@@ -57,5 +57,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          find -name *.cpp -o -name *.hpp -o -name *.h | clang-format-14 --dry-run -Werror
+          find -name *.cpp -o -name *.hpp -o -name *.h | xargs clang-format-14 --dry-run -Werror
         shell: bash
