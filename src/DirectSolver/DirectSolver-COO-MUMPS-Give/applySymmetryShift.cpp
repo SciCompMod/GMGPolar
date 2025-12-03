@@ -8,7 +8,8 @@
 /* Boundary Symmetry Shift */
 /* ----------------------- */
 
-void DirectSolverGive::applySymmetryShiftInnerBoundary(Vector<double>& x) const
+void DirectSolverGive::applySymmetryShiftInnerBoundary(
+    Vector<double> x) const
 {
     assert(DirBC_Interior_);
 
@@ -39,9 +40,9 @@ void DirectSolverGive::applySymmetryShiftInnerBoundary(Vector<double>& x) const
         coeff2 = 0.5 * (k1 + k2) / h2;
 
         /* Fill x(i+1,j) */
-        x[grid_.index(i_r + 1, i_theta)] -= -coeff2 * arr * x[grid_.index(i_r, i_theta)] /* Left */
-                                            + 0.25 * art * x[grid_.index(i_r, i_theta + 1)] /* Top Left */
-                                            - 0.25 * art * x[grid_.index(i_r, i_theta - 1)]; /* Bottom Left */
+        x(grid_.index(i_r + 1, i_theta)) -= -coeff2 * arr * x(grid_.index(i_r, i_theta)) /* Left */
+                                            + 0.25 * art * x(grid_.index(i_r, i_theta + 1)) /* Top Left */
+                                            - 0.25 * art * x(grid_.index(i_r, i_theta - 1)); /* Bottom Left */
 
         /* --------------------------- */
         /* Node next to inner boundary */
@@ -60,15 +61,16 @@ void DirectSolverGive::applySymmetryShiftInnerBoundary(Vector<double>& x) const
         coeff1 = 0.5 * (k1 + k2) / h1;
 
         /* Fill x(i,j) */
-        x[grid_.index(i_r, i_theta)] -= -coeff1 * arr * x[grid_.index(i_r - 1, i_theta)]; /* Left */
+        x(grid_.index(i_r, i_theta)) -= -coeff1 * arr * x(grid_.index(i_r - 1, i_theta)); /* Left */
         /* Fill x(i,j-1) */
-        x[grid_.index(i_r, i_theta - 1)] -= +0.25 * art * x[grid_.index(i_r - 1, i_theta)]; /* Top Left */
+        x(grid_.index(i_r, i_theta - 1)) -= +0.25 * art * x(grid_.index(i_r - 1, i_theta)); /* Top Left */
         /* Fill x(i,j+1) */
-        x[grid_.index(i_r, i_theta + 1)] -= -0.25 * art * x[grid_.index(i_r - 1, i_theta)]; /* Bottom Left */
+        x(grid_.index(i_r, i_theta + 1)) -= -0.25 * art * x(grid_.index(i_r - 1, i_theta)); /* Bottom Left */
     }
 }
 
-void DirectSolverGive::applySymmetryShiftOuterBoundary(Vector<double>& x) const
+void DirectSolverGive::applySymmetryShiftOuterBoundary(
+    Vector<double> x) const
 {
     int i_r;
     double r;
@@ -97,11 +99,11 @@ void DirectSolverGive::applySymmetryShiftOuterBoundary(Vector<double>& x) const
         coeff2 = 0.5 * (k1 + k2) / h2;
 
         /* Fill result(i,j) */
-        x[grid_.index(i_r, i_theta)] -= -coeff2 * arr * x[grid_.index(i_r + 1, i_theta)]; /* Right */
+        x(grid_.index(i_r, i_theta)) -= -coeff2 * arr * x(grid_.index(i_r + 1, i_theta)); /* Right */
         /* Fill result(i,j-1) */
-        x[grid_.index(i_r, i_theta - 1)] -= -0.25 * art * x[grid_.index(i_r + 1, i_theta)]; /* Top Right */
+        x(grid_.index(i_r, i_theta - 1)) -= -0.25 * art * x(grid_.index(i_r + 1, i_theta)); /* Top Right */
         /* Fill result(i,j+1) */
-        x[grid_.index(i_r, i_theta + 1)] -= +0.25 * art * x[grid_.index(i_r + 1, i_theta)]; /* Bottom Right */
+        x(grid_.index(i_r, i_theta + 1)) -= +0.25 * art * x(grid_.index(i_r + 1, i_theta)); /* Bottom Right */
 
         /* -------------------------- */
         /* Node on the outer boundary */
@@ -120,14 +122,14 @@ void DirectSolverGive::applySymmetryShiftOuterBoundary(Vector<double>& x) const
         coeff1 = 0.5 * (k1 + k2) / h1;
 
         /* Fill result(i-1,j) */
-        x[grid_.index(i_r - 1, i_theta)] -= -coeff1 * arr * x[grid_.index(i_r, i_theta)] /* Right */
-                                            - 0.25 * art * x[grid_.index(i_r, i_theta + 1)] /* Top Right */
-                                            + 0.25 * art * x[grid_.index(i_r, i_theta - 1)]; /* Bottom Right */
+        x(grid_.index(i_r - 1, i_theta)) -= -coeff1 * arr * x(grid_.index(i_r, i_theta)) /* Right */
+                                            - 0.25 * art * x(grid_.index(i_r, i_theta + 1)) /* Top Right */
+                                            + 0.25 * art * x(grid_.index(i_r, i_theta - 1)); /* Bottom Right */
     }
 }
 
 // clang-format off
-void DirectSolverGive::applySymmetryShift(Vector<double>& x) const
+void DirectSolverGive::applySymmetryShift(Vector<double> x) const
 {
     assert(x.size() == grid_.numberOfNodes());
     assert(grid_.nr() >= 4);

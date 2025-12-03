@@ -30,11 +30,11 @@ namespace ExtrapolatedExtrapolatedSmootherTest
 {
 Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed)
 {
-    Vector<double> x(grid.numberOfNodes());
+    Vector<double> x("x", grid.numberOfNodes());
     std::mt19937 gen(seed);
     std::uniform_real_distribution<double> dist(-100.0, 100.0);
     for (int i = 0; i < x.size(); ++i) {
-        x[i] = dist(gen);
+        x(i) = dist(gen);
     }
     return x;
 }
@@ -86,10 +86,13 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_DirBC_Interior)
     Vector<double> start = generate_random_sample_data(level.grid(), 24);
     Vector<double> temp  = generate_random_sample_data(level.grid(), 8);
 
-    Vector<double> solution_Give = start;
+    Vector<double> solution_Give("solution_Give", start.size());
+    Kokkos::deep_copy(solution_Give, start);
     smootherGive_operator.extrapolatedSmoothing(solution_Give, rhs, temp);
 
-    Vector<double> solution_Take = start;
+    Vector<double> solution_Take("solution_Take", start.size());
+    Kokkos::deep_copy(solution_Take, start);
+
     smootherTake_operator.extrapolatedSmoothing(solution_Take, rhs, temp);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
@@ -143,10 +146,12 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_AcossOrigin)
     Vector<double> start = generate_random_sample_data(level.grid(), 24);
     Vector<double> temp  = generate_random_sample_data(level.grid(), 8);
 
-    Vector<double> solution_Give = start;
+    Vector<double> solution_Give("solution_Give", start.size());
+    Kokkos::deep_copy(solution_Give, start);
     smootherGive_operator.extrapolatedSmoothing(solution_Give, rhs, temp);
 
-    Vector<double> solution_Take = start;
+    Vector<double> solution_Take("solution_Take", start.size());
+    Kokkos::deep_copy(solution_Take, start);
     smootherTake_operator.extrapolatedSmoothing(solution_Take, rhs, temp);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
@@ -200,15 +205,14 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior)
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
                                                       DirBC_Interior, maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -225,7 +229,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior)
     const int max_iterations    = 10000;
     const double precision      = 1e-12;
 
-    while (infinity_norm(error) > precision) {
+    while (infinity_norm(ConstVector<double>(error)) > precision) {
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
@@ -244,7 +248,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 300);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior)
@@ -285,15 +289,14 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior)
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
                                                       DirBC_Interior, maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -310,7 +313,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior)
     const int max_iterations    = 10000;
     const double precision      = 1e-12;
 
-    while (infinity_norm(error) > precision) {
+    while (infinity_norm(ConstVector<double>(error)) > precision) {
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
@@ -329,7 +332,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 300);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin)
@@ -370,15 +373,16 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin)
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
                                                       DirBC_Interior, maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
+    Vector<double> temp("temp", level.grid().numberOfNodes());
 
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> error("error", level.grid().numberOfNodes());
+
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -395,7 +399,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin)
     const int max_iterations    = 10000;
     const double precision      = 1e-8;
 
-    while (infinity_norm(error) > precision) {
+    while (infinity_norm(ConstVector<double>(error)) > precision) {
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
@@ -414,7 +418,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 600);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin)
@@ -455,15 +459,16 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin)
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
                                                       DirBC_Interior, maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
+    Vector<double> temp("temp", level.grid().numberOfNodes());
 
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> error("error", level.grid().numberOfNodes());
+
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -480,7 +485,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin)
     const int max_iterations    = 10000;
     const double precision      = 1e-8;
 
-    while (infinity_norm(error) > 1e-8) {
+    while (infinity_norm(ConstVector<double>(error)) > 1e-8) {
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
@@ -499,7 +504,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 600);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior_SmallestGrid)
@@ -539,15 +544,16 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior_Smal
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
                                                       DirBC_Interior, maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
+    Vector<double> temp("temp", level.grid().numberOfNodes());
 
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> error("error", level.grid().numberOfNodes());
+
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -564,7 +570,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior_Smal
     const int max_iterations    = 10000;
     const double precision      = 1e-12;
 
-    while (infinity_norm(error) > 1e-12) {
+    while (infinity_norm(ConstVector<double>(error)) > 1e-12) {
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
@@ -583,7 +589,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior_Smal
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 200);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior_SmallestGrid)
@@ -623,15 +629,16 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior_Smalle
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
                                                       DirBC_Interior, maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
+    Vector<double> temp("temp", level.grid().numberOfNodes());
 
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> error("error", level.grid().numberOfNodes());
+
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -648,7 +655,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior_Smalle
     const int max_iterations    = 10000;
     double precision            = 1e-12;
 
-    while (infinity_norm(error) > precision) {
+    while (infinity_norm(ConstVector<double>(error)) > precision) {
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
@@ -667,7 +674,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior_Smalle
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 200);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin_SmallestGrid)
@@ -707,15 +714,14 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin_Smalle
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
                                                       DirBC_Interior, maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -732,7 +738,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin_Smalle
     const int max_iterations    = 10000;
     const double precision      = 1e-8;
 
-    while (infinity_norm(error) > 1e-8) {
+    while (infinity_norm(ConstVector<double>(error)) > 1e-8) {
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
@@ -751,7 +757,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin_Smalle
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 150);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin_SmallestGrid)
@@ -791,15 +797,14 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin_Smallest
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
                                                       DirBC_Interior, maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -816,7 +821,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin_Smallest
     const int max_iterations    = 10000;
     const double precision      = 1e-8;
 
-    while (infinity_norm(error) > 1e-8) {
+    while (infinity_norm(ConstVector<double>(error)) > 1e-8) {
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
@@ -835,7 +840,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin_Smallest
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 150);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 /* We now test using "Take" */
@@ -878,15 +883,16 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior)
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
                                                       DirBC_Interior, maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
+    Vector<double> temp("temp", level.grid().numberOfNodes());
 
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> error("error", level.grid().numberOfNodes());
+
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -903,7 +909,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior)
     const int max_iterations    = 10000;
     const double precision      = 1e-12;
 
-    while (infinity_norm(error) > precision) {
+    while (infinity_norm(ConstVector<double>(error)) > precision) {
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
@@ -922,7 +928,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 300);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior)
@@ -963,15 +969,14 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior)
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
                                                       DirBC_Interior, maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -988,7 +993,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior)
     const int max_iterations    = 10000;
     const double precision      = 1e-12;
 
-    while (infinity_norm(error) > precision) {
+    while (infinity_norm(ConstVector<double>(error)) > precision) {
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
@@ -1007,7 +1012,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 300);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin)
@@ -1048,15 +1053,14 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin)
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
                                                       DirBC_Interior, maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -1073,7 +1077,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin)
     const int max_iterations    = 10000;
     const double precision      = 1e-8;
 
-    while (infinity_norm(error) > precision) {
+    while (infinity_norm(ConstVector<double>(error)) > precision) {
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
@@ -1092,7 +1096,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 600);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin)
@@ -1133,15 +1137,14 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin)
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
                                                       DirBC_Interior, maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -1158,7 +1161,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin)
     const int max_iterations    = 10000;
     const double precision      = 1e-8;
 
-    while (infinity_norm(error) > 1e-8) {
+    while (infinity_norm(ConstVector<double>(error)) > 1e-8) {
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
@@ -1177,7 +1180,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 600);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior_SmallestGrid)
@@ -1217,15 +1220,14 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior_
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
                                                       DirBC_Interior, maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -1242,7 +1244,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior_
     const int max_iterations    = 10000;
     const double precision      = 1e-12;
 
-    while (infinity_norm(error) > 1e-12) {
+    while (infinity_norm(ConstVector<double>(error)) > 1e-12) {
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
@@ -1261,7 +1263,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior_
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 200);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior_SmallestGrid)
@@ -1301,15 +1303,14 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior_Sm
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
                                                       DirBC_Interior, maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -1326,7 +1327,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior_Sm
     const int max_iterations    = 10000;
     double precision            = 1e-12;
 
-    while (infinity_norm(error) > precision) {
+    while (infinity_norm(ConstVector<double>(error)) > precision) {
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
@@ -1345,7 +1346,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior_Sm
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 200);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin_SmallestGrid)
@@ -1385,15 +1386,14 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin_Sm
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
                                                       DirBC_Interior, maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -1410,7 +1410,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin_Sm
     const int max_iterations    = 10000;
     const double precision      = 1e-8;
 
-    while (infinity_norm(error) > 1e-8) {
+    while (infinity_norm(ConstVector<double>(error)) > 1e-8) {
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
@@ -1429,7 +1429,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin_Sm
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 150);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 
 TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin_SmallestGrid)
@@ -1469,15 +1469,14 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin_Smal
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
                                                       DirBC_Interior, maxOpenMPThreads);
 
-    const Vector<double> rhs         = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution = rhs;
+    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp(level.grid().numberOfNodes());
-    Vector<double> smoother_solution(level.grid().numberOfNodes());
-    Vector<double> error(level.grid().numberOfNodes());
-
-    smoother_solution = generate_random_sample_data(level.grid(), 69);
+    Vector<double> temp("temp", level.grid().numberOfNodes());
+    Vector<double> error("error", level.grid().numberOfNodes());
+    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -1494,7 +1493,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin_Smal
     const int max_iterations    = 10000;
     const double precision      = 1e-8;
 
-    while (infinity_norm(error) > 1e-8) {
+    while (infinity_norm(ConstVector<double>(error)) > 1e-8) {
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
@@ -1513,5 +1512,5 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin_Smal
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 150);
-    ASSERT_NEAR(infinity_norm(error), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }

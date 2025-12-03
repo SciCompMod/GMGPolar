@@ -21,12 +21,12 @@ Level::Level(const int level_depth, std::unique_ptr<const PolarGrid> grid,
     : level_depth_(level_depth)
     , grid_(std::move(grid))
     , level_cache_(std::move(level_cache))
-    , rhs_((FMG || level_depth == 0 || (level_depth == 1 && extrapolation != ExtrapolationType::NONE))
-               ? grid_->numberOfNodes()
-               : 0)
-    , solution_(grid_->numberOfNodes())
-    , residual_(grid_->numberOfNodes())
-    , error_correction_((level_depth > 0) ? grid_->numberOfNodes() : 0)
+    , rhs_("rhs", (FMG || level_depth == 0 || (level_depth == 1 && extrapolation != ExtrapolationType::NONE))
+                      ? grid_->numberOfNodes()
+                      : 0)
+    , solution_("solution", grid_->numberOfNodes())
+    , residual_("residual", grid_->numberOfNodes())
+    , error_correction_("err_correction", (level_depth > 0) ? grid_->numberOfNodes() : 0)
 {
 }
 
@@ -47,35 +47,35 @@ const LevelCache& Level::levelCache() const
     return *level_cache_;
 }
 
-Vector<double>& Level::rhs()
+Vector<double> Level::rhs()
 {
     return rhs_;
 }
-const Vector<double>& Level::rhs() const
+ConstVector<double> Level::rhs() const
 {
     return rhs_;
 }
-Vector<double>& Level::solution()
+Vector<double> Level::solution()
 {
     return solution_;
 }
-const Vector<double>& Level::solution() const
+ConstVector<double> Level::solution() const
 {
     return solution_;
 }
-Vector<double>& Level::residual()
+Vector<double> Level::residual()
 {
     return residual_;
 }
-const Vector<double>& Level::residual() const
+ConstVector<double> Level::residual() const
 {
     return residual_;
 }
-Vector<double>& Level::error_correction()
+Vector<double> Level::error_correction()
 {
     return error_correction_;
 }
-const Vector<double>& Level::error_correction() const
+ConstVector<double> Level::error_correction() const
 {
     return error_correction_;
 }
@@ -98,7 +98,7 @@ void Level::initializeResidual(const DomainGeometry& domain_geometry,
     if (!op_residual_)
         throw std::runtime_error("Failed to initialize Residual.");
 }
-void Level::computeResidual(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const
+void Level::computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const
 {
     if (!op_residual_)
         throw std::runtime_error("Residual not initialized.");
@@ -135,7 +135,7 @@ void Level::initializeDirectSolver(const DomainGeometry& domain_geometry,
         throw std::runtime_error("Failed to initialize Direct Solver.");
 }
 
-void Level::directSolveInPlace(Vector<double>& x) const
+void Level::directSolveInPlace(Vector<double> x) const
 {
     if (!op_directSolver_)
         throw std::runtime_error("Coarse Solver not initialized.");
@@ -160,7 +160,7 @@ void Level::initializeSmoothing(const DomainGeometry& domain_geometry,
     if (!op_smoother_)
         throw std::runtime_error("Failed to initialize Smoother.");
 }
-void Level::smoothing(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const
+void Level::smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) const
 {
     if (!op_smoother_)
         throw std::runtime_error("Smoother not initialized.");
@@ -185,7 +185,7 @@ void Level::initializeExtrapolatedSmoothing(const DomainGeometry& domain_geometr
     if (!op_extrapolated_smoother_)
         throw std::runtime_error("Failed to initialize Extrapolated Smoother.");
 }
-void Level::extrapolatedSmoothing(Vector<double>& x, const Vector<double>& rhs, Vector<double>& temp) const
+void Level::extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) const
 {
     if (!op_extrapolated_smoother_)
         throw std::runtime_error("Extrapolated Smoother not initialized.");

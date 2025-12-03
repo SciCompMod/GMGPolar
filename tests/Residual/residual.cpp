@@ -24,11 +24,11 @@ namespace ResidualTest
 {
 Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed)
 {
-    Vector<double> x(grid.numberOfNodes());
+    Vector<double> x("x", grid.numberOfNodes());
     std::mt19937 gen(seed);
     std::uniform_real_distribution<double> dist(-100.0, 100.0);
     for (int i = 0; i < x.size(); ++i) {
-        x[i] = dist(gen);
+        x(i) = dist(gen);
     }
     return x;
 }
@@ -79,10 +79,10 @@ TEST(OperatorATest, applyA_DirBC_Interior)
     Vector<double> x   = generate_random_sample_data(level.grid(), 42);
     Vector<double> rhs = generate_random_sample_data(level.grid(), 69);
 
-    Vector<double> result_Give(level.grid().numberOfNodes());
+    Vector<double> result_Give("result_Give", level.grid().numberOfNodes());
     residualGive_operator.computeResidual(result_Give, rhs, x);
 
-    Vector<double> result_Take(level.grid().numberOfNodes());
+    Vector<double> result_Take("result_Take", level.grid().numberOfNodes());
     residualTake_operator.computeResidual(result_Take, rhs, x);
 
     ASSERT_EQ(result_Give.size(), result_Take.size());
@@ -135,10 +135,10 @@ TEST(OperatorATest, applyA_AcrossOrigin)
     Vector<double> x   = generate_random_sample_data(level.grid(), 42);
     Vector<double> rhs = generate_random_sample_data(level.grid(), 69);
 
-    Vector<double> result_Give(level.grid().numberOfNodes());
+    Vector<double> result_Give("result_Give", level.grid().numberOfNodes());
     residualGive_operator.computeResidual(result_Give, rhs, x);
 
-    Vector<double> result_Take(level.grid().numberOfNodes());
+    Vector<double> result_Take("result_Take", level.grid().numberOfNodes());
     residualTake_operator.computeResidual(result_Take, rhs, x);
 
     ASSERT_EQ(result_Give.size(), result_Take.size());
@@ -150,4 +150,3 @@ TEST(OperatorATest, applyA_AcrossOrigin)
             ASSERT_NEAR(result_Give[index], result_Take[index], 1e-11);
     }
 }
-

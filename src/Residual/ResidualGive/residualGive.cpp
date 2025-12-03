@@ -12,11 +12,11 @@ ResidualGive::ResidualGive(const PolarGrid& grid, const LevelCache& level_cache,
 /* result = rhs - A*x */
 
 // clang-format off
-void ResidualGive::computeResidual(Vector<double>& result, const Vector<double>& rhs, const Vector<double>& x) const
+void ResidualGive::computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const
 {
     assert(result.size() == x.size());
 
-    result = rhs;
+    Kokkos::deep_copy(result, rhs);
 
     if (num_omp_threads_ == 1) {
         /* Single-threaded execution */

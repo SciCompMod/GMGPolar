@@ -5,6 +5,7 @@
 
 int main(int argc, char* argv[])
 {
+    Kokkos::ScopeGuard kokkos_scope(argc, argv);
     // Initialize LIKWID markers if enabled
     LIKWID_INIT();
 
@@ -57,8 +58,8 @@ int main(int argc, char* argv[])
     solver.solve(parser.boundaryConditions(), parser.sourceTerm());
 
     // --- Retrieve solution and associated grid --- //
-    Vector<double>& solution = solver.solution();
-    const PolarGrid& grid    = solver.grid();
+    Vector<double> solution = solver.solution();
+    const PolarGrid& grid   = solver.grid();
 
     // Finalize LIKWID performance markers
     LIKWID_CLOSE();

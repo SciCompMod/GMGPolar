@@ -102,12 +102,12 @@ void DirectSolverGive::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, Spars
     }
 }
 
-void DirectSolverGive::solveWithMumps(Vector<double>& result_rhs)
+void DirectSolverGive::solveWithMumps(Vector<double> result_rhs)
 {
     mumps_solver_.job    = JOB_COMPUTE_SOLUTION;
     mumps_solver_.nrhs   = 1;
     mumps_solver_.nz_rhs = result_rhs.size();
-    mumps_solver_.rhs    = result_rhs.begin();
+    mumps_solver_.rhs    = result_rhs.data();
     mumps_solver_.lrhs   = result_rhs.size();
     dmumps_c(&mumps_solver_);
     if (mumps_solver_.info[0] != 0) {

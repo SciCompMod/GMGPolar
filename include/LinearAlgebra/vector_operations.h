@@ -6,9 +6,10 @@
 
 #include "../common/equals.h"
 #include "vector.h"
+#include <Kokkos_Core.hpp>
 
 template <typename T>
-bool equals(const Vector<T>& lhs, const Vector<T>& rhs)
+bool equals(ConstVector<T> lhs, ConstVector<T> rhs)
 {
     if (lhs.size() != rhs.size()) {
         return false;
@@ -16,7 +17,7 @@ bool equals(const Vector<T>& lhs, const Vector<T>& rhs)
 
     const std::size_t n = lhs.size();
     for (std::size_t i = 0; i < n; ++i) {
-        if (!equals(lhs[i], rhs[i])) {
+        if (!equals(lhs(i), rhs(i))) {
             return false;
         }
     }
@@ -24,17 +25,17 @@ bool equals(const Vector<T>& lhs, const Vector<T>& rhs)
 }
 
 template <typename T>
-void assign(Vector<T>& lhs, const T& value)
+void assign(Vector<T> lhs, const T& value)
 {
     std::size_t n = lhs.size();
 #pragma omp parallel for if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
-        lhs[i] = value;
+        lhs(i) = value;
     }
 }
 
 template <typename T>
-void add(Vector<T>& result, const Vector<T>& x)
+void add(Vector<T> result, ConstVector<T> x)
 {
     if (result.size() != x.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
@@ -42,12 +43,12 @@ void add(Vector<T>& result, const Vector<T>& x)
     std::size_t n = result.size();
 #pragma omp parallel for if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
-        result[i] += x[i];
+        result(i) += x(i);
     }
 }
 
 template <typename T>
-void subtract(Vector<T>& result, const Vector<T>& x)
+void subtract(Vector<T> result, ConstVector<T> x)
 {
     if (result.size() != x.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
@@ -55,12 +56,12 @@ void subtract(Vector<T>& result, const Vector<T>& x)
     std::size_t n = result.size();
 #pragma omp parallel for if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
-        result[i] -= x[i];
+        result(i) -= x(i);
     }
 }
 
 template <typename T>
-void linear_combination(Vector<T>& x, const T& alpha, const Vector<T>& y, const T& beta)
+void linear_combination(Vector<T> x, const T& alpha, ConstVector<T> y, const T& beta)
 {
     if (x.size() != y.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
@@ -68,22 +69,22 @@ void linear_combination(Vector<T>& x, const T& alpha, const Vector<T>& y, const 
     std::size_t n = x.size();
 #pragma omp parallel for if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
-        x[i] = alpha * x[i] + beta * y[i];
+        x(i) = alpha * x(i) + beta * y(i);
     }
 }
 
 template <typename T>
-void multiply(Vector<T>& x, const T& alpha)
+void multiply(Vector<T> x, const T& alpha)
 {
     std::size_t n = x.size();
 #pragma omp parallel for if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
-        x[i] *= alpha;
+        x(i) *= alpha;
     }
 }
 
 template <typename T>
-T dot_product(const Vector<T>& lhs, const Vector<T>& rhs)
+T dot_product(ConstVector<T> lhs, ConstVector<T> rhs)
 {
     if (lhs.size() != rhs.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
@@ -93,53 +94,56 @@ T dot_product(const Vector<T>& lhs, const Vector<T>& rhs)
     std::size_t n = lhs.size();
 #pragma omp parallel for reduction(+ : result) if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
-        result += lhs[i] * rhs[i];
+        result += lhs(i) * rhs(i);
     }
     return result;
 }
 
 template <typename T>
-T l1_norm(const Vector<T>& x)
+T l1_norm(ConstVector<T> x)
 {
     T result      = 0.0;
     std::size_t n = x.size();
 #pragma omp parallel for reduction(+ : result) if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
-        result += std::abs(x[i]);
+        result += std::abs(x(i));
     }
     return result;
 }
 
 template <typename T>
-T l2_norm_squared(const Vector<T>& x)
+T l2_norm_squared(ConstVector<T> x)
 {
     T result      = 0.0;
     std::size_t n = x.size();
 #pragma omp parallel for reduction(+ : result) if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
-        result += x[i] * x[i];
+        result += x(i) * x(i);
     }
     return result;
 }
 
 template <typename T>
-T l2_norm(const Vector<T>& x)
+T l2_norm(ConstVector<T> x)
 {
     const std::size_t n = x.size();
     // 1) find the largest absolute value
     T scale = 0.0;
 #pragma omp parallel for reduction(max : scale) if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
-        T abs_val = std::abs(x[i]);
+        T abs_val = std::abs(x(i));
         if (abs_val > scale) {
             scale = abs_val;
         }
+    }
+    if (equals(scale, T{0})) {
+        return T{0};
     }
     // 2) accumulate sum of squares of scaled entries
     T sum = 0.0;
 #pragma omp parallel for reduction(+ : sum) if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
-        T value = x[i] / scale;
+        T value = x(i) / scale;
         sum += value * value;
     }
     // 3) rescale
@@ -147,13 +151,13 @@ T l2_norm(const Vector<T>& x)
 }
 
 template <typename T>
-T infinity_norm(const Vector<T>& x)
+T infinity_norm(ConstVector<T> x)
 {
     T result      = 0.0;
     std::size_t n = x.size();
 #pragma omp parallel for reduction(max : result) if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
-        T abs_value = std::abs(x[i]);
+        T abs_value = std::abs(x(i));
         if (abs_value > result) {
             result = abs_value;
         }

@@ -15,7 +15,7 @@ namespace ExtrapolatedProlongationTest
 // Function to generate sample data for vector x using random values with seed
 Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed)
 {
-    Vector<double> x(grid.numberOfNodes());
+    Vector<double> x("x", grid.numberOfNodes());
     std::mt19937 gen(seed); // Standard mersenne_twister_engine seeded with seed
     std::uniform_real_distribution<double> dist(0.0, 1.0); // Generate random double between 0 and 1
     for (int i = 0; i < x.size(); ++i) {
@@ -62,8 +62,8 @@ TEST(ExtrapolatedProlongationTest, ExtrapolatedProlongationSmoothingRadius)
     Vector<double> x  = generate_random_sample_data(coarse_level.grid(), seed);
 
     // Apply prolongation to both functions
-    Vector<double> result1(finest_level.grid().numberOfNodes());
-    Vector<double> result2(finest_level.grid().numberOfNodes());
+    Vector<double> result1("result1", finest_level.grid().numberOfNodes());
+    Vector<double> result2("result2", finest_level.grid().numberOfNodes());
 
     interpolation_operator.applyExtrapolatedProlongation0(coarse_level, finest_level, result1, x);
     interpolation_operator.applyExtrapolatedProlongation(coarse_level, finest_level, result2, x);

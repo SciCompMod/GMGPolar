@@ -243,7 +243,7 @@
         }                                                                                                                                 \
     } while (0)
 
-void ResidualGive::applyCircleSection(const int i_r, Vector<double>& result, const Vector<double>& x) const
+void ResidualGive::applyCircleSection(const int i_r, Vector<double> result, ConstVector<double> x) const
 {
     const double r = grid_.radius(i_r);
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
@@ -260,7 +260,7 @@ void ResidualGive::applyCircleSection(const int i_r, Vector<double>& result, con
     }
 }
 
-void ResidualGive::applyRadialSection(const int i_theta, Vector<double>& result, const Vector<double>& x) const
+void ResidualGive::applyRadialSection(const int i_theta, Vector<double> result, ConstVector<double> x) const
 {
     const double theta = grid_.theta(i_theta);
     for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
