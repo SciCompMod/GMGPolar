@@ -73,8 +73,12 @@ jobs:
       options: --user root
     steps:
       - uses: actions/checkout@v4
-      - run: |
+      - name: Install clang-format v20
+        run: |
           apt-get -qq update
-          apt-get -qq -y install clang-format-18
-          find -name *.cpp -o -name *.hpp -o -name *.h | xargs clang-format-18 --dry-run -Werror
+          apt-get -qq -y install clang-format-20
+        shell: bash
+      - name: Check for clang-formatting
+        run: |
+          find -name *.cpp -o -name *.hpp -o -name *.h | xargs clang-format-20 --dry-run -Werror
         shell: bash
