@@ -73,5 +73,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          find -name *.cpp -o -name *.hpp -o -name *.h | xargs clang-format-14 --dry-run -Werror
+          apt-get -qq update
+          apt-get -qq -y install clang-format-18
+          find -name *.cpp -o -name *.hpp -o -name *.h | xargs clang-format-18 --dry-run -Werror
         shell: bash
