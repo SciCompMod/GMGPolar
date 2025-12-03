@@ -19,9 +19,10 @@ double CartesianR6_Boundary_ShafranovGeometry::u_D(const double& r, const double
                        2.0 * elongation_kappa * (r / Rmax) * cos_theta + 2.0 * (r / Rmax) * cos_theta));
 }
 
-double CartesianR6_Boundary_ShafranovGeometry::u_D_Interior(const double& r, const double& theta,
-                                                            const double& sin_theta, const double& cos_theta) const
+double CartesianR6_Boundary_ShafranovGeometry::u_D_Interior(const double& r, const double& theta) const
 {
+    double sin_theta = std::sin(theta);
+    double cos_theta = std::cos(theta);
     return 0.4096 * pow(((r / Rmax) - 1.0), 6.0) * pow(((r / Rmax) + 1.0), 6.0) *
            sin(M_PI * (2.0 * elongation_kappa * (r / Rmax) * sin_theta + 2.0 * (r / Rmax) * sin_theta)) *
            cos(M_PI * ((-2.0) * shift_delta * ((r / Rmax) * (r / Rmax)) -
