@@ -5,9 +5,10 @@ CartesianR2_SonnendruckerGyro_CircularGeometry::CartesianR2_SonnendruckerGyro_Ci
 {
 }
 
-double CartesianR2_SonnendruckerGyro_CircularGeometry::rhs_f(const double& r, const double& theta,
-                                                             const double& sin_theta, const double& cos_theta) const
+double CartesianR2_SonnendruckerGyro_CircularGeometry::rhs_f(const double& r, const double& theta)const
 {
+    double sin_theta = std::sin(theta);
+    double cos_theta = std::cos(theta);
     return (1.0 - (r / Rmax) * (r / Rmax)) * sin(2.0 * M_PI * (r / Rmax) * sin_theta) *
                cos(2.0 * M_PI * (r / Rmax) * cos_theta) /
                (0.452961672473868 - 0.348432055749129 * atan(14.4444444444444 * (r / Rmax) - 11.1111111111111)) -

@@ -18,7 +18,6 @@ void DirectSolverGive::applySymmetryShiftInnerBoundary(
     int global_index;
     double h1, h2, k1, k2;
     double coeff1, coeff2;
-    double sin_theta, cos_theta;
     double coeff_beta, arr, att, art, detDF;
 
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
@@ -30,7 +29,7 @@ void DirectSolverGive::applySymmetryShiftInnerBoundary(
         r            = grid_.radius(i_r);
         global_index = grid_.index(i_r, i_theta);
 
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, sin_theta, cos_theta, coeff_beta, arr, att, art,
+        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art,
                                   detDF);
 
         h2 = grid_.radialSpacing(i_r);
@@ -51,7 +50,7 @@ void DirectSolverGive::applySymmetryShiftInnerBoundary(
         r            = grid_.radius(i_r);
         global_index = grid_.index(i_r, i_theta);
 
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, sin_theta, cos_theta, coeff_beta, arr, att, art,
+        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art,
                                   detDF);
 
         h1 = grid_.radialSpacing(i_r - 1);
@@ -77,7 +76,6 @@ void DirectSolverGive::applySymmetryShiftOuterBoundary(
     int global_index;
     double h1, h2, k1, k2;
     double coeff1, coeff2;
-    double sin_theta, cos_theta;
     double coeff_beta, arr, att, art, detDF;
 
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
@@ -89,7 +87,7 @@ void DirectSolverGive::applySymmetryShiftOuterBoundary(
         r            = grid_.radius(i_r);
         global_index = grid_.index(i_r, i_theta);
 
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, sin_theta, cos_theta, coeff_beta, arr, att, art,
+        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art,
                                   detDF);
 
         h2 = grid_.radialSpacing(i_r);
@@ -112,7 +110,7 @@ void DirectSolverGive::applySymmetryShiftOuterBoundary(
         r            = grid_.radius(i_r);
         global_index = grid_.index(i_r, i_theta);
 
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, sin_theta, cos_theta, coeff_beta, arr, att, art,
+        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art,
                                   detDF);
 
         h1 = grid_.radialSpacing(i_r - 1);
