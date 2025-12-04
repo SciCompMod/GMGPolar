@@ -1,11 +1,11 @@
 #include "../include/InputFunctions/BoundaryConditions/cartesianR2_Boundary_CircularGeometry.h"
 
-CartesianR2_Boundary_CircularGeometry::CartesianR2_Boundary_CircularGeometry(const double& Rmax)
+CartesianR2_Boundary_CircularGeometry::CartesianR2_Boundary_CircularGeometry(double Rmax)
     : Rmax(Rmax)
 {
 }
 
-double CartesianR2_Boundary_CircularGeometry::u_D(const double& r, const double& theta) const
+double CartesianR2_Boundary_CircularGeometry::u_D(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
@@ -13,7 +13,7 @@ double CartesianR2_Boundary_CircularGeometry::u_D(const double& r, const double&
            cos(2.0 * M_PI * (r / Rmax) * cos_theta);
 }
 
-double CartesianR2_Boundary_CircularGeometry::u_D_Interior(const double& r, const double& theta) const
+double CartesianR2_Boundary_CircularGeometry::u_D_Interior(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

@@ -8,11 +8,11 @@ class PoissonCoefficients : public DensityProfileCoefficients
 {
 public:
     PoissonCoefficients() = default;
-    explicit PoissonCoefficients(const double& Rmax, const double& alpha);
+    explicit PoissonCoefficients(double Rmax, double alpha);
     virtual ~PoissonCoefficients() = default;
 
-    double alpha(const double& r, const double& theta) const override;
-    double beta(const double& r, const double& theta) const override;
+    double alpha(double r, double theta) const override;
+    double beta(double r, double theta) const override;
 
     double getAlphaJump() const override;
 

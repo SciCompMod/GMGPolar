@@ -1,17 +1,17 @@
 #include "../include/InputFunctions/DensityProfileCoefficients/zoniShiftedGyroCoefficients.h"
 
-ZoniShiftedGyroCoefficients::ZoniShiftedGyroCoefficients(const double& Rmax, const double& alpha_jump)
+ZoniShiftedGyroCoefficients::ZoniShiftedGyroCoefficients(double Rmax, double alpha_jump)
     : Rmax(Rmax)
     , alpha_jump(alpha_jump)
 {
 }
 
-double ZoniShiftedGyroCoefficients::alpha(const double& r, const double& theta) const
+double ZoniShiftedGyroCoefficients::alpha(double r, double theta) const
 {
     return exp(-tanh(20.0 * (r / Rmax) - 14.0));
 }
 
-double ZoniShiftedGyroCoefficients::beta(const double& r, const double& theta) const
+double ZoniShiftedGyroCoefficients::beta(double r, double theta) const
 {
     return exp(tanh(20.0 * (r / Rmax) - 14.0));
 }

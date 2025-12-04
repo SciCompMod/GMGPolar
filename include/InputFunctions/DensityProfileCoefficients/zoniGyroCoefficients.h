@@ -8,11 +8,11 @@ class ZoniGyroCoefficients : public DensityProfileCoefficients
 {
 public:
     ZoniGyroCoefficients() = default;
-    explicit ZoniGyroCoefficients(const double& Rmax, const double& alpha);
+    explicit ZoniGyroCoefficients(double Rmax, double alpha);
     virtual ~ZoniGyroCoefficients() = default;
 
-    double alpha(const double& r, const double& theta) const override;
-    double beta(const double& r, const double& theta) const override;
+    double alpha(double r, double theta) const override;
+    double beta(double r, double theta) const override;
 
     double getAlphaJump() const override;
 

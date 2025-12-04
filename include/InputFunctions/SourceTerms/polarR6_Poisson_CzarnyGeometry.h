@@ -8,11 +8,10 @@ class PolarR6_Poisson_CzarnyGeometry : public SourceTerm
 {
 public:
     PolarR6_Poisson_CzarnyGeometry() = default;
-    explicit PolarR6_Poisson_CzarnyGeometry(const double& Rmax, const double& inverse_aspect_ratio_epsilon,
-                                            const double& ellipticity_e);
+    explicit PolarR6_Poisson_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon, double ellipticity_e);
     virtual ~PolarR6_Poisson_CzarnyGeometry() = default;
 
-    double rhs_f(const double& r, const double& theta) const override;
+    double rhs_f(double r, double theta) const override;
 
 private:
     const double Rmax                         = 1.3;

@@ -3,7 +3,7 @@
 #include "culhamGeometry.h"
 
 // In earlier versions denoted by 'x'
-inline double CulhamGeometry::Fx(const double& r, const double& theta) const {
+inline double CulhamGeometry::Fx(double r, double theta) const {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
     const double cos_two_theta = 1.0 - sin_theta * sin_theta;
@@ -11,7 +11,7 @@ inline double CulhamGeometry::Fx(const double& r, const double& theta) const {
 }
 
 // In earlier versions denoted by 'y'
-inline double CulhamGeometry::Fy(const double& r, const double& theta) const {
+inline double CulhamGeometry::Fy(double r, double theta) const {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
     const double sin_two_theta = 2.0 * sin_theta * cos_theta;
@@ -20,7 +20,7 @@ inline double CulhamGeometry::Fy(const double& r, const double& theta) const {
 
 
 // In earlier versions denoted by 'Jrr'
-inline double CulhamGeometry::dFx_dr(const double& r, const double& theta) const {
+inline double CulhamGeometry::dFx_dr(double r, double theta) const {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
     const double cos_two_theta = 1.0 - sin_theta * sin_theta;
@@ -28,7 +28,7 @@ inline double CulhamGeometry::dFx_dr(const double& r, const double& theta) const
 }
 
 // In earlier versions denoted by 'Jtr'
-inline double CulhamGeometry::dFy_dr(const double& r, const double& theta) const {
+inline double CulhamGeometry::dFy_dr(double r, double theta) const {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
     const double sin_two_theta = 2.0 * sin_theta * cos_theta;
@@ -36,7 +36,7 @@ inline double CulhamGeometry::dFy_dr(const double& r, const double& theta) const
 }
 
 // In earlier versions denoted by 'Jrt'
-inline double CulhamGeometry::dFx_dt(const double& r, const double& theta) const {
+inline double CulhamGeometry::dFx_dt(double r, double theta) const {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
     const double sin_two_theta = 2.0 * sin_theta * cos_theta;
@@ -44,7 +44,7 @@ inline double CulhamGeometry::dFx_dt(const double& r, const double& theta) const
 }
 
 // In earlier versions denoted by 'Jtt'
-inline double CulhamGeometry::dFy_dt(const double& r, const double& theta) const {
+inline double CulhamGeometry::dFy_dt(double r, double theta) const {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
     const double cos_two_theta = 1.0 - sin_theta * sin_theta;

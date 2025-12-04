@@ -16,13 +16,13 @@ inline int PolarGrid::numberOfNodes() const
     return nr() * ntheta();
 }
 
-inline const double& PolarGrid::radius(const int r_index) const
+inline double PolarGrid::radius(const int r_index) const
 {
     assert(r_index >= 0 && static_cast<size_t>(r_index) < radii_.size());
     return radii_[r_index];
 }
 
-inline const double& PolarGrid::theta(const int theta_index) const
+inline double PolarGrid::theta(const int theta_index) const
 {
     assert(theta_index >= 0 && static_cast<size_t>(theta_index) < angles_.size());
     return angles_[theta_index];
@@ -50,13 +50,13 @@ inline int PolarGrid::numberRadialSmootherNodes() const
     return number_radial_smoother_nodes_;
 }
 
-inline const double& PolarGrid::radialSpacing(const int r_index) const
+inline double PolarGrid::radialSpacing(const int r_index) const
 {
     assert(r_index >= 0 && static_cast<size_t>(r_index) < radial_spacings_.size());
     return radial_spacings_[r_index];
 }
 
-inline const double& PolarGrid::angularSpacing(const int unwrapped_theta_index) const
+inline double PolarGrid::angularSpacing(const int unwrapped_theta_index) const
 {
     // unwrapped_theta_index may be negative or larger than ntheta() to allow for periodicity.
     const int theta_index = wrapThetaIndex(unwrapped_theta_index);

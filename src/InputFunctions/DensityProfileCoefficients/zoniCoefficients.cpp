@@ -1,17 +1,17 @@
 #include "../include/InputFunctions/DensityProfileCoefficients/zoniCoefficients.h"
 
-ZoniCoefficients::ZoniCoefficients(const double& Rmax, const double& alpha_jump)
+ZoniCoefficients::ZoniCoefficients(double Rmax, double alpha_jump)
     : Rmax(Rmax)
     , alpha_jump(alpha_jump)
 {
 }
 
-double ZoniCoefficients::alpha(const double& r, const double& theta) const
+double ZoniCoefficients::alpha(double r, double theta) const
 {
     return exp(-tanh(10.0 * (r / Rmax) - 5.0));
 }
 
-double ZoniCoefficients::beta(const double& r, const double& theta) const
+double ZoniCoefficients::beta(double r, double theta) const
 {
     return 0.0;
 }
