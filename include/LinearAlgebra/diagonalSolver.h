@@ -15,6 +15,8 @@
 #include <fstream>
 #include <iostream>
 
+#include "vector.h"
+
 template <typename T>
 class DiagonalSolver
 {
@@ -41,7 +43,7 @@ public:
 
 private:
     int matrix_dimension_;
-    std::unique_ptr<T[]> diagonal_values_;
+    AllocatableVector<T> diagonal_values_;
 };
 
 template <typename U>
@@ -64,7 +66,6 @@ std::ostream& operator<<(std::ostream& stream, const DiagonalSolver<U>& solver)
 template <typename T>
 DiagonalSolver<T>::DiagonalSolver()
     : matrix_dimension_(0)
-    , diagonal_values_(nullptr)
 {
 }
 
@@ -72,10 +73,9 @@ DiagonalSolver<T>::DiagonalSolver()
 template <typename T>
 DiagonalSolver<T>::DiagonalSolver(const DiagonalSolver& other)
     : matrix_dimension_(other.matrix_dimension_)
-    , diagonal_values_(std::make_unique<T[]>(matrix_dimension_))
+    , diagonal_values_("Diagonal matrix values", matrix_dimension_)
 {
-    // Consider using a parllized OpenMP For-Loop instead
-    std::copy(other.diagonal_values_.get(), other.diagonal_values_.get() + matrix_dimension_, diagonal_values_.get());
+    Kokkos::deep_copy(diagonal_values_, other.diagonal_values_);
 }
 
 // copy assignment
@@ -89,10 +89,9 @@ DiagonalSolver<T>& DiagonalSolver<T>::operator=(const DiagonalSolver& other)
     // Only allocate new memory if the sizes are different
     if (matrix_dimension_ != other.matrix_dimension_) {
         matrix_dimension_ = other.matrix_dimension_;
-        diagonal_values_  = std::make_unique<T[]>(matrix_dimension_);
+        diagonal_values_  = Vector<T>("Diagonal matrix values", matrix_dimension_);
     }
-    // Consider using a parllized OpenMP For-Loop instead
-    std::copy(other.diagonal_values_.get(), other.diagonal_values_.get() + matrix_dimension_, diagonal_values_.get());
+    Kokkos::deep_copy(diagonal_values_, other.diagonal_values_);
     return *this;
 }
 
@@ -118,38 +117,38 @@ DiagonalSolver<T>& DiagonalSolver<T>::operator=(DiagonalSolver&& other) noexcept
 template <typename T>
 DiagonalSolver<T>::DiagonalSolver(const int matrix_dimension)
     : matrix_dimension_(matrix_dimension)
-    , diagonal_values_(std::make_unique<T[]>(matrix_dimension_))
+    , diagonal_values_("Diagonal matrix values", matrix_dimension_)
 {
     assert(matrix_dimension_ >= 1);
-    std::fill(diagonal_values_.get(), diagonal_values_.get() + matrix_dimension_, T(0));
+    Kokkos::deep_copy(diagonal_values_, T(0));
 }
 
 template <typename T>
 int DiagonalSolver<T>::rows() const
 {
-    assert(this->matrix_dimension_ >= 0);
-    return this->matrix_dimension_;
+    assert(matrix_dimension_ >= 0);
+    return matrix_dimension_;
 }
 template <typename T>
 int DiagonalSolver<T>::columns() const
 {
-    assert(this->matrix_dimension_ >= 0);
-    return this->matrix_dimension_;
+    assert(matrix_dimension_ >= 0);
+    return matrix_dimension_;
 }
 
 template <typename T>
 const T& DiagonalSolver<T>::diagonal(const int index) const
 {
     assert(index >= 0);
-    assert(index < this->matrix_dimension_);
-    return this->diagonal_values_[index];
+    assert(index < matrix_dimension_);
+    return diagonal_values_(index);
 }
 template <typename T>
 T& DiagonalSolver<T>::diagonal(const int index)
 {
     assert(index >= 0);
-    assert(index < this->matrix_dimension_);
-    return this->diagonal_values_[index];
+    assert(index < matrix_dimension_);
+    return diagonal_values_(index);
 }
 
 // --------------- //
