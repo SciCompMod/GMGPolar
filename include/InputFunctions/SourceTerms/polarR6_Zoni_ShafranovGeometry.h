@@ -12,7 +12,7 @@ public:
                                             const double& shift_delta);
     virtual ~PolarR6_Zoni_ShafranovGeometry() = default;
 
-    double rhs_f(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const override;
+    double rhs_f(const double& r, const double& theta) const override;
 
 private:
     const double Rmax             = 1.3;

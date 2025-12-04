@@ -9,9 +9,10 @@ Refined_ZoniShiftedGyro_ShafranovGeometry::Refined_ZoniShiftedGyro_ShafranovGeom
 {
 }
 
-double Refined_ZoniShiftedGyro_ShafranovGeometry::rhs_f(const double& r, const double& theta, const double& sin_theta,
-                                                        const double& cos_theta) const
+double Refined_ZoniShiftedGyro_ShafranovGeometry::rhs_f(const double& r, const double& theta)const
 {
+    double sin_theta = std::sin(theta);
+    double cos_theta = std::cos(theta);
     return 1.0 *
                (((-3.33823779536505e-15) * ((r / Rmax) * (r / Rmax)) - 0.0 * (r / Rmax) - 0.0 +
                  exp((-3333.33333333333) * pow(((r / Rmax) - 0.9), 2.0))) *

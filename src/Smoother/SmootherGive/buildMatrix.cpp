@@ -616,9 +616,8 @@ void SmootherGive::buildAscCircleSection(const int i_r)
         const int global_index = grid_.index(i_r, i_theta);
         const double theta     = grid_.theta(i_theta);
 
-        double sin_theta, cos_theta;
         double coeff_beta, arr, att, art, detDF;
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, sin_theta, cos_theta, coeff_beta, arr, att, art,
+        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art,
                                   detDF);
 
         // Build Asc at the current node
@@ -634,9 +633,8 @@ void SmootherGive::buildAscRadialSection(const int i_theta)
         const int global_index = grid_.index(i_r, i_theta);
         const double r         = grid_.radius(i_r);
 
-        double sin_theta, cos_theta;
         double coeff_beta, arr, att, art, detDF;
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, sin_theta, cos_theta, coeff_beta, arr, att, art,
+        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art,
                                   detDF);
 
         // Build Asc at the current node

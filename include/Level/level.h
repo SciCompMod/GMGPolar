@@ -30,7 +30,7 @@ class ExtrapolatedSmoother;
 // It holds information for the solution, residuals, right-hand side, and error corrections used in the multigrid method.
 
 // The `LevelCache` class is responsible for caching auxiliary data required for solving a problem at a specific level of a multigrid method.
-// It stores essential data such as trigonometric values (e.g., `sin_theta` and `cos_theta`) and profile coefficients (e.g., `alpha`, `beta`)
+// It stores essential data such as profile coefficients (e.g., `alpha`, `beta`)
 // that are frequently used in the solution process. Additionally, depending on the stencil distribution strategy, it can store transformation
 // coefficients (`arr`, `att`, `art`, `detDF`) related to the domain geometry. These coefficients are critical for efficient matrix-free stencil operations
 // and contribute to the accuracy and performance of the multigrid solver.
@@ -119,9 +119,6 @@ public:
     const DomainGeometry& domainGeometry() const;
     const DensityProfileCoefficients& densityProfileCoefficients() const;
 
-    ConstVector<double> sin_theta() const;
-    ConstVector<double> cos_theta() const;
-
     bool cacheDensityProfileCoefficients() const;
     ConstVector<double> coeff_alpha() const;
     ConstVector<double> coeff_beta() const;
@@ -133,12 +130,9 @@ public:
     ConstVector<double> detDF() const;
 
     inline void obtainValues(const int i_r, const int i_theta, const int global_index, const double& r,
-                             const double& theta, double& sin_theta, double& cos_theta, double& coeff_beta, double& arr,
+                             const double& theta, double& coeff_beta, double& arr,
                              double& att, double& art, double& detDF) const
     {
-        sin_theta = sin_theta_[i_theta];
-        cos_theta = cos_theta_[i_theta];
-
         if (cache_density_profile_coefficients_)
             coeff_beta = coeff_beta_[global_index];
         else
@@ -159,7 +153,7 @@ public:
             detDF = detDF_[global_index];
         }
         else {
-            compute_jacobian_elements(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art,
+            compute_jacobian_elements(domain_geometry_, r, theta, coeff_alpha, arr, att, art,
                                       detDF);
         }
     }
@@ -167,9 +161,6 @@ public:
 private:
     const DomainGeometry& domain_geometry_;
     const DensityProfileCoefficients& density_profile_coefficients_;
-
-    Vector<double> sin_theta_;
-    Vector<double> cos_theta_;
 
     bool cache_density_profile_coefficients_; // cache alpha(r_i), beta(r_i)
     Vector<double> coeff_alpha_;
