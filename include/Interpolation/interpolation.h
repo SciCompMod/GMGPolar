@@ -7,7 +7,6 @@
 #include <omp.h>
 
 #include "../PolarGrid/polargrid.h"
-#include "../Level/level.h"
 
 #include "../LinearAlgebra/vector.h"
 #include "../LinearAlgebra/vector_operations.h"
@@ -20,6 +19,7 @@ public:
     explicit Interpolation(const std::vector<int>& threads_per_level, const bool DirBC_Interior);
 
     /* Remark: This injection is not scaled. */
+    template<class Level>
     void applyInjection(const Level& fromLevel, const Level& toLevel, Vector<double> result,
                         ConstVector<double> x) const
     {
@@ -28,18 +28,21 @@ public:
     }
 
     /* Bilinear interpolation operator */
+    template<class Level>
     void applyProlongation0(const Level& fromLevel, const Level& toLevel, Vector<double> result,
                             ConstVector<double> x) const
     {
         assert(toLevel.level_depth() == fromLevel.level_depth() - 1);
         applyProlongation0_(fromLevel.grid(), toLevel.grid(), result, x, threads_per_level_[toLevel.level_depth()]);
     }
+    template<class Level>
     void applyProlongation(const Level& fromLevel, const Level& toLevel, Vector<double> result,
                            ConstVector<double> x) const
     {
         assert(toLevel.level_depth() == fromLevel.level_depth() - 1);
         applyProlongation_(fromLevel.grid(), toLevel.grid(), result, x, threads_per_level_[toLevel.level_depth()]);
     }
+    template<class Level>
     void applyExtrapolatedProlongation0(const Level& fromLevel, const Level& toLevel, Vector<double> result,
                                         ConstVector<double> x) const
     {
@@ -47,6 +50,7 @@ public:
         applyExtrapolatedProlongation0_(fromLevel.grid(), toLevel.grid(), result, x,
                                         threads_per_level_[toLevel.level_depth()]);
     }
+    template<class Level>
     void applyExtrapolatedProlongation(const Level& fromLevel, const Level& toLevel, Vector<double> result,
                                        ConstVector<double> x) const
     {
@@ -56,18 +60,21 @@ public:
     }
 
     /* Scaled full weighting (FW) restriction operator. */
+    template<class Level>
     void applyRestriction0(const Level& fromLevel, const Level& toLevel, Vector<double> result,
                            ConstVector<double> x) const
     {
         assert(toLevel.level_depth() == fromLevel.level_depth() - 1);
         applyRestriction0_(fromLevel.grid(), toLevel.grid(), result, x, threads_per_level_[toLevel.level_depth()]);
     }
+    template<class Level>
     void applyRestriction(const Level& fromLevel, const Level& toLevel, Vector<double> result,
                           ConstVector<double> x) const
     {
         assert(toLevel.level_depth() == fromLevel.level_depth() - 1);
         applyRestriction_(fromLevel.grid(), toLevel.grid(), result, x, threads_per_level_[toLevel.level_depth()]);
     }
+    template<class Level>
     void applyExtrapolatedRestriction0(const Level& fromLevel, const Level& toLevel, Vector<double> result,
                                        ConstVector<double> x) const
     {
@@ -75,6 +82,7 @@ public:
         applyExtrapolatedRestriction0_(fromLevel.grid(), toLevel.grid(), result, x,
                                        threads_per_level_[toLevel.level_depth()]);
     }
+    template<class Level>
     void applyExtrapolatedRestriction(const Level& fromLevel, const Level& toLevel, Vector<double> result,
                                       ConstVector<double> x) const
     {
@@ -84,6 +92,7 @@ public:
     }
 
     /* Bicubic FMG interpolator 1/16 * [-1, 9, 9, -1] */
+    template<class Level>
     void applyFMGInterpolation(const Level& fromLevel, const Level& toLevel, Vector<double> result,
                                ConstVector<double> x) const
     {
