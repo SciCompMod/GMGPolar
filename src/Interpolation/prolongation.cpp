@@ -14,8 +14,8 @@ void Interpolation::applyProlongation0(const Level& fromLevel, const Level& toLe
     const PolarGrid& coarseGrid = fromLevel.grid();
     const PolarGrid& fineGrid   = toLevel.grid();
 
-    assert(x.size() == coarseGrid.numberOfNodes());
-    assert(result.size() == fineGrid.numberOfNodes());
+    assert(x.size() == static_cast<uint>(coarseGrid.numberOfNodes()));
+    assert(result.size() == static_cast<uint>(fineGrid.numberOfNodes()));
 
 #pragma omp parallel for num_threads(threads_per_level_[toLevel.level_depth()])
     for (int index = 0; index < fineGrid.numberOfNodes(); index++) {
@@ -158,8 +158,8 @@ void Interpolation::applyProlongation(const Level& fromLevel, const Level& toLev
     const PolarGrid& coarseGrid = fromLevel.grid();
     const PolarGrid& fineGrid   = toLevel.grid();
 
-    assert(x.size() == coarseGrid.numberOfNodes());
-    assert(result.size() == fineGrid.numberOfNodes());
+    assert(x.size() == static_cast<uint>(coarseGrid.numberOfNodes()));
+    assert(result.size() == static_cast<uint>(fineGrid.numberOfNodes()));
 
 #pragma omp parallel num_threads(threads_per_level_[toLevel.level_depth()]) if (fineGrid.numberOfNodes() > 10'000)
     {

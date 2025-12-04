@@ -51,7 +51,7 @@ Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int s
     Vector<double> x("x", grid.numberOfNodes());
     std::mt19937 gen(seed);
     std::uniform_real_distribution<double> dist(-100.0, 100.0);
-    for (int i = 0; i < x.size(); ++i) {
+    for (uint i = 0; i < x.size(); ++i) {
         x(i) = dist(gen);
     }
     return x;
@@ -111,7 +111,7 @@ TEST(DirectSolverTest, directSolver_DirBC_Interior)
     directSolverTake_operator.solveInPlace(solution_Take);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
-    for (int index = 0; index < solution_Give.size(); index++) {
+    for (uint index = 0; index < solution_Give.size(); index++) {
         MultiIndex alpha = level.grid().multiIndex(index);
         if (alpha[0] == 0 && !DirBC_Interior)
             ASSERT_NEAR(solution_Give(index), solution_Take(index), 1e-11);
@@ -166,7 +166,7 @@ TEST(DirectSolverTest, directSolver_AcrossOrigin)
     directSolverTake_operator.solveInPlace(solution_Take);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
-    for (int index = 0; index < solution_Give.size(); index++) {
+    for (uint index = 0; index < solution_Give.size(); index++) {
         MultiIndex alpha = level.grid().multiIndex(index);
         if (alpha[0] == 0 && !DirBC_Interior)
             ASSERT_NEAR(solution_Give(index), solution_Take(index), 1e-8);
