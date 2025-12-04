@@ -5,7 +5,7 @@ CartesianR6_Boundary_CircularGeometry::CartesianR6_Boundary_CircularGeometry(con
 {
 }
 
-double CartesianR6_Boundary_CircularGeometry::u_D(const double& r, const double& theta)const
+double CartesianR6_Boundary_CircularGeometry::u_D(const double& r, const double& theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

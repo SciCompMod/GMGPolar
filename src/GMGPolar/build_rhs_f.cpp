@@ -1,7 +1,7 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
-void GMGPolar::build_rhs_f(const Level& level, Vector<double> rhs_f,
-                           const BoundaryConditions& boundary_conditions, const SourceTerm& source_term)
+void GMGPolar::build_rhs_f(const Level& level, Vector<double> rhs_f, const BoundaryConditions& boundary_conditions,
+                           const SourceTerm& source_term)
 {
     const PolarGrid& grid = level.grid();
     assert(rhs_f.size() == grid.numberOfNodes());
@@ -15,7 +15,7 @@ void GMGPolar::build_rhs_f(const Level& level, Vector<double> rhs_f,
         for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
             double r = grid.radius(i_r);
             for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                double theta     = grid.theta(i_theta);
+                double theta = grid.theta(i_theta);
 
                 if ((0 < i_r && i_r < grid.nr() - 1) || (i_r == 0 && !DirBC_Interior_)) {
                     rhs_f[grid.index(i_r, i_theta)] = source_term.rhs_f(r, theta);
@@ -34,7 +34,7 @@ void GMGPolar::build_rhs_f(const Level& level, Vector<double> rhs_f,
 // --------------------------------------- //
 #pragma omp for
         for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-            double theta     = grid.theta(i_theta);
+            double theta = grid.theta(i_theta);
 
             for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
                 double r = grid.radius(i_r);
@@ -125,7 +125,7 @@ void GMGPolar::discretize_rhs_f(const Level& level, Vector<double> rhs_f)
             for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
                 double r = grid.radius(i_r);
                 for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                    double theta     = grid.theta(i_theta);
+                    double theta = grid.theta(i_theta);
 
                     if ((0 < i_r && i_r < grid.nr() - 1) || (i_r == 0 && !DirBC_Interior_)) {
                         double h1 = (i_r == 0) ? 2.0 * grid.radius(0) : grid.radialSpacing(i_r - 1);
@@ -158,7 +158,7 @@ void GMGPolar::discretize_rhs_f(const Level& level, Vector<double> rhs_f)
 // -------------------------------------------- //
 #pragma omp for nowait
             for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                double theta     = grid.theta(i_theta);
+                double theta = grid.theta(i_theta);
 
                 for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
                     double r = grid.radius(i_r);

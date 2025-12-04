@@ -5,7 +5,7 @@ PolarR6_Zoni_CircularGeometry::PolarR6_Zoni_CircularGeometry(const double& Rmax)
 {
 }
 
-double PolarR6_Zoni_CircularGeometry::rhs_f(const double& r, const double& theta)const
+double PolarR6_Zoni_CircularGeometry::rhs_f(const double& r, const double& theta) const
 {
     return (-pow((r / Rmax), 4.0)) *
            ((r / Rmax) *

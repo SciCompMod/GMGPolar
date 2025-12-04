@@ -8,7 +8,7 @@ PolarR6_Poisson_ShafranovGeometry::PolarR6_Poisson_ShafranovGeometry(const doubl
 {
 }
 
-double PolarR6_Poisson_ShafranovGeometry::rhs_f(const double& r, const double& theta)const
+double PolarR6_Poisson_ShafranovGeometry::rhs_f(const double& r, const double& theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

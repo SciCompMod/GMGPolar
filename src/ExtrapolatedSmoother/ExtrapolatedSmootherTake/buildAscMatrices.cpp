@@ -79,18 +79,18 @@
             /* i_r % 2 == 1               */                                                                           \
             if (i_r & 1) {                                                                                             \
                 /* i_theta % 2 == 1 */                                                                                 \
-                /* | X | O | X | */                                                                                    \
+                /* | x | o | x | */                                                                                    \
                 /* |   |   |   | */                                                                                    \
-                /* | 0 | Õ | O | */                                                                                   \
+                /* | o | O | o | */                                                                                    \
                 /* |   |   |   | */                                                                                    \
-                /* | X | O | X | */                                                                                    \
+                /* | x | o | x | */                                                                                    \
                 /* or */                                                                                               \
                 /* i_theta % 2 == 0 */                                                                                 \
-                /* | O | O | O | */                                                                                    \
+                /* | o | o | o | */                                                                                    \
                 /* |   |   |   | */                                                                                    \
-                /* | X | Õ | X | */                                                                                   \
+                /* | x | O | x | */                                                                                    \
                 /* |   |   |   | */                                                                                    \
-                /* | O | O | O | */                                                                                    \
+                /* | o | o | o | */                                                                                    \
                                                                                                                        \
                 auto& matrix = circle_tridiagonal_solver[i_r / 2];                                                     \
                                                                                                                        \
@@ -119,18 +119,18 @@
             /* i_r % 2 == 0     */                                                                                     \
             else {                                                                                                     \
                 /* i_theta % 2 == 1 */                                                                                 \
-                /* | O | X | O | */                                                                                    \
+                /* | o | x | o | */                                                                                    \
                 /* |   |   |   | */                                                                                    \
-                /* | O | Õ | O | */                                                                                   \
+                /* | o | O | o | */                                                                                    \
                 /* |   |   |   | */                                                                                    \
-                /* | O | X | O | */                                                                                    \
+                /* | o | x | o | */                                                                                    \
                 /* or */                                                                                               \
                 /* i_theta % 2 == 0 */                                                                                 \
-                /* | O | O | O | */                                                                                    \
+                /* | o | o | o | */                                                                                    \
                 /* |   |   |   | */                                                                                    \
-                /* | O | X̃ | O | */                                                                                  \
+                /* | o | X | o | */                                                                                    \
                 /* |   |   |   | */                                                                                    \
-                /* | O | O | O | */                                                                                    \
+                /* | o | o | o | */                                                                                    \
                                                                                                                        \
                 auto& matrix = circle_diagonal_solver[i_r / 2];                                                        \
                                                                                                                        \
@@ -216,11 +216,11 @@
                                                                                                                        \
                 if (i_theta & 1) {                                                                                     \
                     /* i_theta % 2 == 1 */                                                                             \
-                    /* -| X | O | X | */                                                                               \
+                    /* -| x | o | x | */                                                                               \
                     /* -|   |   |   | */                                                                               \
-                    /* -| Õ | O | O | */                                                                              \
+                    /* -| O | o | o | */                                                                               \
                     /* -|   |   |   | */                                                                               \
-                    /* -| X | O | X | */                                                                               \
+                    /* -| x | o | x | */                                                                               \
                                                                                                                        \
                     const int left   = grid.index(i_r, i_theta_AcrossOrigin);                                          \
                     const int bottom = grid.index(i_r, i_theta_M1);                                                    \
@@ -252,11 +252,11 @@
                 }                                                                                                      \
                 else {                                                                                                 \
                     /* i_theta % 2 == 0 */                                                                             \
-                    /* -| O | O | O | */                                                                               \
+                    /* -| o | o | o | */                                                                               \
                     /* -|   |   |   | */                                                                               \
-                    /* -| X̃ | O | X | */                                                                             \
+                    /* -| X | o | x | */                                                                               \
                     /* -|   |   |   | */                                                                               \
-                    /* -| O | O | O | */                                                                               \
+                    /* -| o | o | o | */                                                                               \
                                                                                                                        \
                     /* Fill matrix row of (i,j) */                                                                     \
                     row = center_index;                                                                                \
@@ -303,20 +303,20 @@
             if (i_theta & 1) {                                                                                         \
                 /* i_r % 2 == 1 */                                                                                     \
                 /* ---------- */                                                                                       \
-                /* X   O   X  */                                                                                       \
+                /* x   o   x  */                                                                                       \
                 /* ---------- */                                                                                       \
-                /* O   Õ   O  */                                                                                      \
+                /* o   O   o  */                                                                                       \
                 /* ---------- */                                                                                       \
-                /* X   O   X  */                                                                                       \
+                /* x   o   x  */                                                                                       \
                 /* ---------- */                                                                                       \
                 /* or */                                                                                               \
                 /* i_r % 2 == 0 */                                                                                     \
                 /* ---------- */                                                                                       \
-                /* O   X   O  */                                                                                       \
+                /* o   x   o  */                                                                                       \
                 /* ---------- */                                                                                       \
-                /* O   Õ   O  */                                                                                      \
+                /* o   O   o  */                                                                                       \
                 /* ---------- */                                                                                       \
-                /* O   X   O  */                                                                                       \
+                /* o   x   o  */                                                                                       \
                 /* ---------- */                                                                                       \
                                                                                                                        \
                 auto& matrix = radial_tridiagonal_solver[i_theta / 2];                                                 \
@@ -347,20 +347,20 @@
             else {                                                                                                     \
                 /* i_r % 2 == 1 */                                                                                     \
                 /* ---------- */                                                                                       \
-                /* O   O   O  */                                                                                       \
+                /* o   o   o  */                                                                                       \
                 /* ---------- */                                                                                       \
-                /* X   Õ   X  */                                                                                      \
+                /* x   O   x  */                                                                                       \
                 /* ---------- */                                                                                       \
-                /* O   O   O  */                                                                                       \
+                /* o   o   o  */                                                                                       \
                 /* ---------- */                                                                                       \
                 /* or */                                                                                               \
                 /* i_r % 2 == 0 */                                                                                     \
                 /* ---------- */                                                                                       \
-                /* O   O   O  */                                                                                       \
+                /* o   o   o  */                                                                                       \
                 /* ---------- */                                                                                       \
-                /* O   X̃   O  */                                                                                     \
+                /* o   X   o  */                                                                                       \
                 /* ---------- */                                                                                       \
-                /* O   O   O  */                                                                                       \
+                /* o   o   o  */                                                                                       \
                 /* ---------- */                                                                                       \
                                                                                                                        \
                 auto& matrix = radial_diagonal_solver[i_theta / 2];                                                    \
@@ -412,18 +412,18 @@
                                                                                                                        \
             if (i_theta & 1) {                                                                                         \
                 /* i_theta % 2 == 1 and i_r % 2 == 1 */                                                                \
-                /* | X | O | X || O   X   O   X  */                                                                    \
+                /* | x | o | x || o   x   o   x  */                                                                    \
                 /* |   |   |   || -------------- */                                                                    \
-                /* | 0 | O | O || Õ   O   O   O  */                                                                   \
+                /* | o | o | o || O   o   o   o  */                                                                    \
                 /* |   |   |   || -------------- */                                                                    \
-                /* | X | O | X || O   X   O   X  */                                                                    \
+                /* | x | o | x || o   x   o   x  */                                                                    \
                 /* or */                                                                                               \
                 /* i_theta % 2 == 1 and i_r % 2 == 0 */                                                                \
-                /* | O | X | O || X   O   X   O  */                                                                    \
+                /* | o | x | o || x   o   x   o  */                                                                    \
                 /* |   |   |   || -------------- */                                                                    \
-                /* | 0 | O | O || Õ   O   O   O  */                                                                   \
+                /* | o | o | o || O   o   o   o  */                                                                    \
                 /* |   |   |   || -------------- */                                                                    \
-                /* | O | X | O || X   O   X   O  */                                                                    \
+                /* | o | x | o || x   o   x   o  */                                                                    \
                                                                                                                        \
                 auto& matrix = radial_tridiagonal_solver[i_theta / 2];                                                 \
                                                                                                                        \
@@ -447,11 +447,11 @@
                                                                                                                        \
                 if (i_r & 1) {                                                                                         \
                     /* i_theta % 2 == 0 and i_r % 2 == 1 */                                                            \
-                    /* | O | O | O || O   O   O   O  */                                                                \
+                    /* | o | o | o || o   o   o   o  */                                                                \
                     /* |   |   |   || -------------- */                                                                \
-                    /* | X | O | X || Õ   X   O   X  */                                                               \
+                    /* | x | o | x || O   x   o   x  */                                                                \
                     /* |   |   |   || -------------- */                                                                \
-                    /* | O | O | O || O   O   O   O  */                                                                \
+                    /* | o | o | o || o   o   o   o  */                                                                \
                                                                                                                        \
                     /* Center: (Left, Right, Bottom, Top) */                                                           \
                     row    = center_index;                                                                             \
@@ -463,11 +463,11 @@
                 }                                                                                                      \
                 else {                                                                                                 \
                     /* i_theta % 2 == 0 and i_r % 2 == 0 */                                                            \
-                    /* | O | O | O || O   O   O   O  */                                                                \
+                    /* | o | o | o || o   o   o   o  */                                                                \
                     /* |   |   |   || -------------- */                                                                \
-                    /* | O | X | O || X̃   O   X   O  */                                                              \
+                    /* | o | x | o || X   o   x   o  */                                                                \
                     /* |   |   |   || -------------- */                                                                \
-                    /* | O | O | O || O   O   O   O  */                                                                \
+                    /* | o | o | o || o   o   o   o  */                                                                \
                     /* Center: Coarse */                                                                               \
                     row    = center_index;                                                                             \
                     column = center_index;                                                                             \
@@ -508,11 +508,11 @@
             if (i_theta & 1) {                                                                                         \
                 /* i_theta % 2 == 1 */                                                                                 \
                 /* ---------------|| */                                                                                \
-                /* O   X   O   X  || */                                                                                \
+                /* o   x   o   x  || */                                                                                \
                 /* ---------------|| */                                                                                \
-                /* O   O   Õ   O  || */                                                                               \
+                /* o   o   O   o  || */                                                                                \
                 /* ---------------|| */                                                                                \
-                /* O   X   O   X  || */                                                                                \
+                /* o   x   o   x  || */                                                                                \
                 /* ---------------|| */                                                                                \
                                                                                                                        \
                 auto& matrix = radial_tridiagonal_solver[i_theta / 2];                                                 \
@@ -539,11 +539,11 @@
             else {                                                                                                     \
                 /* i_theta % 2 == 0 */                                                                                 \
                 /* ---------------|| */                                                                                \
-                /* O   O   O   O  || */                                                                                \
+                /* o   o   o   o  || */                                                                                \
                 /* ---------------|| */                                                                                \
-                /* O   X   Õ   X  || */                                                                               \
+                /* o   x   O   x  || */                                                                                \
                 /* ---------------|| */                                                                                \
-                /* O   O   O   O  || */                                                                                \
+                /* o   o   o   o  || */                                                                                \
                 /* ---------------|| */                                                                                \
                                                                                                                        \
                 auto& matrix = radial_diagonal_solver[i_theta / 2];                                                    \
@@ -569,11 +569,11 @@
             if (i_theta & 1) {                                                                                         \
                 /* i_theta % 2 == 1 */                                                                                 \
                 /* -----------|| */                                                                                    \
-                /* X   O   X  || */                                                                                    \
+                /* x   o   x  || */                                                                                    \
                 /* -----------|| */                                                                                    \
-                /* O   O   Õ  || */                                                                                   \
+                /* o   o   O  || */                                                                                    \
                 /* -----------|| */                                                                                    \
-                /* X   O   X  || */                                                                                    \
+                /* x   o   x  || */                                                                                    \
                 /* -----------|| */                                                                                    \
                                                                                                                        \
                 auto& matrix = radial_tridiagonal_solver[i_theta / 2];                                                 \
@@ -592,11 +592,11 @@
             else {                                                                                                     \
                 /* i_theta % 2 == 0 */                                                                                 \
                 /* -----------|| */                                                                                    \
-                /* O   O   O  || */                                                                                    \
+                /* o   o   o  || */                                                                                    \
                 /* -----------|| */                                                                                    \
-                /* X   O   X̃  || */                                                                                  \
+                /* x   o   X  || */                                                                                    \
                 /* -----------|| */                                                                                    \
-                /* O   O   O  || */                                                                                    \
+                /* o   o   o  || */                                                                                    \
                 /* -----------|| */                                                                                    \
                                                                                                                        \
                 auto& matrix = radial_diagonal_solver[i_theta / 2];                                                    \

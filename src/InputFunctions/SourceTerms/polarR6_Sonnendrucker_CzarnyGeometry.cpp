@@ -15,7 +15,7 @@ PolarR6_Sonnendrucker_CzarnyGeometry::PolarR6_Sonnendrucker_CzarnyGeometry(const
     initializeGeometry();
 }
 
-double PolarR6_Sonnendrucker_CzarnyGeometry::rhs_f(const double& r, const double& theta)const
+double PolarR6_Sonnendrucker_CzarnyGeometry::rhs_f(const double& r, const double& theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

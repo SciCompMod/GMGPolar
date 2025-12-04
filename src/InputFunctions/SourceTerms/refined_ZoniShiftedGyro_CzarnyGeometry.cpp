@@ -14,7 +14,7 @@ Refined_ZoniShiftedGyro_CzarnyGeometry::Refined_ZoniShiftedGyro_CzarnyGeometry(
     initializeGeometry();
 }
 
-double Refined_ZoniShiftedGyro_CzarnyGeometry::rhs_f(const double& r, const double& theta)const
+double Refined_ZoniShiftedGyro_CzarnyGeometry::rhs_f(const double& r, const double& theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

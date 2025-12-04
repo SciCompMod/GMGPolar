@@ -14,7 +14,7 @@ PolarR6_Zoni_CzarnyGeometry::PolarR6_Zoni_CzarnyGeometry(const double& Rmax, con
     initializeGeometry();
 }
 
-double PolarR6_Zoni_CzarnyGeometry::rhs_f(const double& r, const double& theta)const
+double PolarR6_Zoni_CzarnyGeometry::rhs_f(const double& r, const double& theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
