@@ -9,9 +9,10 @@ CartesianR6_Poisson_ShafranovGeometry::CartesianR6_Poisson_ShafranovGeometry(con
 {
 }
 
-double CartesianR6_Poisson_ShafranovGeometry::rhs_f(const double& r, const double& theta, const double& sin_theta,
-                                                    const double& cos_theta) const
+double CartesianR6_Poisson_ShafranovGeometry::rhs_f(const double& r, const double& theta) const
 {
+    double sin_theta = std::sin(theta);
+    double cos_theta = std::cos(theta);
     return (-(2.0 * shift_delta * (r / Rmax) * (elongation_kappa - 1.0) *
                   ((-0.4096) * M_PI * (2.0 * elongation_kappa - 2.0) * pow(((r / Rmax) - 1.0), 6.0) *
                        pow(((r / Rmax) + 1.0), 6.0) * sin_theta *

@@ -8,8 +8,8 @@
         matrix.row_nz_entry(row, offset) += val;                                                                       \
     } while (0)
 
-#define NODE_BUILD_SOLVER_MATRIX_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, grid, DirBC_Interior,              \
-                                      solver_matrix, arr, att, art, detDF, coeff_beta)                                 \
+#define NODE_BUILD_SOLVER_MATRIX_GIVE(i_r, i_theta, r, theta, grid, DirBC_Interior, solver_matrix, arr, att, art,      \
+                                      detDF, coeff_beta)                                                               \
     do {                                                                                                               \
         int offset;                                                                                                    \
         int row, col;                                                                                                  \
@@ -737,14 +737,12 @@ void DirectSolverGiveCustomLU::buildSolverMatrixCircleSection(const int i_r, Spa
         const int global_index = grid_.index(i_r, i_theta);
         const double theta     = grid_.theta(i_theta);
 
-        double sin_theta, cos_theta;
         double coeff_beta, arr, att, art, detDF;
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, sin_theta, cos_theta, coeff_beta, arr, att, art,
-                                  detDF);
+        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Build solver matrix at the current node
-        NODE_BUILD_SOLVER_MATRIX_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, grid_, DirBC_Interior_,
-                                      solver_matrix, arr, att, art, detDF, coeff_beta);
+        NODE_BUILD_SOLVER_MATRIX_GIVE(i_r, i_theta, r, theta, grid_, DirBC_Interior_, solver_matrix, arr, att, art,
+                                      detDF, coeff_beta);
     }
 }
 
@@ -755,14 +753,12 @@ void DirectSolverGiveCustomLU::buildSolverMatrixRadialSection(const int i_theta,
         const int global_index = grid_.index(i_r, i_theta);
         const double r         = grid_.radius(i_r);
 
-        double sin_theta, cos_theta;
         double coeff_beta, arr, att, art, detDF;
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, sin_theta, cos_theta, coeff_beta, arr, att, art,
-                                  detDF);
+        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Build solver matrix at the current node
-        NODE_BUILD_SOLVER_MATRIX_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, grid_, DirBC_Interior_,
-                                      solver_matrix, arr, att, art, detDF, coeff_beta);
+        NODE_BUILD_SOLVER_MATRIX_GIVE(i_r, i_theta, r, theta, grid_, DirBC_Interior_, solver_matrix, arr, att, art,
+                                      detDF, coeff_beta);
     }
 }
 

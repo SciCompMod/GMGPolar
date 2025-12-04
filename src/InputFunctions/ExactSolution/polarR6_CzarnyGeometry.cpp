@@ -14,8 +14,7 @@ PolarR6_CzarnyGeometry::PolarR6_CzarnyGeometry(const double& Rmax, const double&
     initializeGeometry();
 }
 
-double PolarR6_CzarnyGeometry::exact_solution(const double& r, const double& theta, const double& sin_theta,
-                                              const double& cos_theta) const
+double PolarR6_CzarnyGeometry::exact_solution(const double& r, const double& theta) const
 {
     return 0.4096 * pow((r / Rmax), 6.0) * pow(((r / Rmax) - 1.0), 6.0) * cos(11.0 * theta);
 }

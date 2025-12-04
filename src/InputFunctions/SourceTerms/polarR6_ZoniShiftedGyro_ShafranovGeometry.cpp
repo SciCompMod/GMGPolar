@@ -9,9 +9,10 @@ PolarR6_ZoniShiftedGyro_ShafranovGeometry::PolarR6_ZoniShiftedGyro_ShafranovGeom
 {
 }
 
-double PolarR6_ZoniShiftedGyro_ShafranovGeometry::rhs_f(const double& r, const double& theta, const double& sin_theta,
-                                                        const double& cos_theta) const
+double PolarR6_ZoniShiftedGyro_ShafranovGeometry::rhs_f(const double& r, const double& theta) const
 {
+    double sin_theta = std::sin(theta);
+    double cos_theta = std::cos(theta);
     return 0.4096 * pow((r / Rmax), 6.0) * pow(((r / Rmax) - 1.0), 6.0) * exp(tanh(20.0 * (r / Rmax) - 14.0)) *
                cos(11.0 * theta) -
            pow((r / Rmax), 4.0) *

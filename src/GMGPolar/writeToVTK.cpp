@@ -22,12 +22,9 @@ void GMGPolar::writeToVTK(const std::filesystem::path& file_path, const PolarGri
     double r, theta;
     for (int index = 0; index < grid.numberOfNodes(); index++) {
         grid.multiIndex(index, i_r, i_theta);
-        r                = grid.radius(i_r);
-        theta            = grid.theta(i_theta);
-        double sin_theta = std::sin(theta);
-        double cos_theta = std::cos(theta);
-        file << domain_geometry_.Fx(r, theta, sin_theta, cos_theta) << " "
-             << domain_geometry_.Fy(r, theta, sin_theta, cos_theta) << " " << 0 << "\n";
+        r     = grid.radius(i_r);
+        theta = grid.theta(i_theta);
+        file << domain_geometry_.Fx(r, theta) << " " << domain_geometry_.Fy(r, theta) << " " << 0 << "\n";
     }
     file << "</DataArray>\n"
          << "</Points>\n";
@@ -68,9 +65,6 @@ void GMGPolar::writeToVTK(const std::filesystem::path& file_path, const Level& l
 
     assert(static_cast<uint>(grid.numberOfNodes()) == grid_function.size());
 
-    ConstVector<double> sin_theta_cache = level_cache.sin_theta();
-    ConstVector<double> cos_theta_cache = level_cache.cos_theta();
-
     const auto filename = file_path.stem().string() + ".vtu";
 
     std::ofstream file(file_path.parent_path() / filename);
@@ -88,15 +82,11 @@ void GMGPolar::writeToVTK(const std::filesystem::path& file_path, const Level& l
          << "<DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\">\n";
     int i_r, i_theta;
     double r, theta;
-    double sin_theta, cos_theta;
     for (int index = 0; index < grid.numberOfNodes(); index++) {
         grid.multiIndex(index, i_r, i_theta);
-        r         = grid.radius(i_r);
-        theta     = grid.theta(i_theta);
-        sin_theta = sin_theta_cache[i_theta];
-        cos_theta = cos_theta_cache[i_theta];
-        file << domain_geometry_.Fx(r, theta, sin_theta, cos_theta) << " "
-             << domain_geometry_.Fy(r, theta, sin_theta, cos_theta) << " " << 0 << "\n";
+        r     = grid.radius(i_r);
+        theta = grid.theta(i_theta);
+        file << domain_geometry_.Fx(r, theta) << " " << domain_geometry_.Fy(r, theta) << " " << 0 << "\n";
     }
 
     file << "</DataArray>\n"

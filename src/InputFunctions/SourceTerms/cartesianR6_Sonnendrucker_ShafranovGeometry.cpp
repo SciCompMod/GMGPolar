@@ -9,9 +9,10 @@ CartesianR6_Sonnendrucker_ShafranovGeometry::CartesianR6_Sonnendrucker_Shafranov
 {
 }
 
-double CartesianR6_Sonnendrucker_ShafranovGeometry::rhs_f(const double& r, const double& theta, const double& sin_theta,
-                                                          const double& cos_theta) const
+double CartesianR6_Sonnendrucker_ShafranovGeometry::rhs_f(const double& r, const double& theta) const
 {
+    double sin_theta = std::sin(theta);
+    double cos_theta = std::cos(theta);
     return (-(2.0 * shift_delta * (r / Rmax) *
                   (0.452961672473868 - 0.348432055749129 * atan(14.4444444444444 * (r / Rmax) - 11.1111111111111)) *
                   (elongation_kappa - 1.0) *
