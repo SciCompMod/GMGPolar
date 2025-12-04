@@ -10,7 +10,7 @@ DirectSolverGiveCustomLU::DirectSolverGiveCustomLU(const PolarGrid& grid, const 
     lu_solver_     = SparseLUSolver<double>(solver_matrix_);
 }
 
-void DirectSolverGiveCustomLU::solveInPlace(Vector<double> solution)
+void DirectSolverGiveCustomLU::solveInPlace(Vector<double> solution) const
 {
     lu_solver_.solveInPlace(solution);
 }

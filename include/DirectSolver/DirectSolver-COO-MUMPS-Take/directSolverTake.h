@@ -17,7 +17,7 @@ public:
 
     ~DirectSolverTake() override;
     // Note: The rhs (right-hand side) vector gets overwritten during the solution process.
-    void solveInPlace(Vector<double> solution) override;
+    void solveInPlace(Vector<double> solution) const override;
 
 private:
     // Solver matrix and MUMPS solver structure

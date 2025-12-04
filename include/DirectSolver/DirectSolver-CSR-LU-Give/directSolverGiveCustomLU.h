@@ -13,7 +13,7 @@ public:
 
     ~DirectSolverGiveCustomLU() override;
     // Note: The rhs (right-hand side) vector gets overwritten with the solution.
-    void solveInPlace(Vector<double> solution) override;
+    void solveInPlace(Vector<double> solution) const override;
 
 private:
     // Solver matrix and solver structure
