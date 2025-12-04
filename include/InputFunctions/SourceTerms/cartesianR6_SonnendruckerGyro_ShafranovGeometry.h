@@ -8,8 +8,7 @@ class CartesianR6_SonnendruckerGyro_ShafranovGeometry : public SourceTerm
 {
 public:
     CartesianR6_SonnendruckerGyro_ShafranovGeometry() = default;
-    explicit CartesianR6_SonnendruckerGyro_ShafranovGeometry(double Rmax, double elongation_kappa,
-                                                             double shift_delta);
+    explicit CartesianR6_SonnendruckerGyro_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
     virtual ~CartesianR6_SonnendruckerGyro_ShafranovGeometry() = default;
 
     double rhs_f(double r, double theta) const override;

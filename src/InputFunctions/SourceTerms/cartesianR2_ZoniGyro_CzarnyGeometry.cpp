@@ -15,7 +15,7 @@ CartesianR2_ZoniGyro_CzarnyGeometry::CartesianR2_ZoniGyro_CzarnyGeometry(double 
     initializeGeometry();
 }
 
-double CartesianR2_ZoniGyro_CzarnyGeometry::rhs_f(double r, double theta)const
+double CartesianR2_ZoniGyro_CzarnyGeometry::rhs_f(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

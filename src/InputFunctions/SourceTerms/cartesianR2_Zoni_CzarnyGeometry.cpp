@@ -5,8 +5,7 @@ void CartesianR2_Zoni_CzarnyGeometry::initializeGeometry()
     factor_xi = 1.0 / sqrt(1.0 - inverse_aspect_ratio_epsilon * inverse_aspect_ratio_epsilon / 4.0);
 }
 
-CartesianR2_Zoni_CzarnyGeometry::CartesianR2_Zoni_CzarnyGeometry(double Rmax,
-                                                                 double inverse_aspect_ratio_epsilon,
+CartesianR2_Zoni_CzarnyGeometry::CartesianR2_Zoni_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon,
                                                                  double ellipticity_e)
     : Rmax(Rmax)
     , inverse_aspect_ratio_epsilon(inverse_aspect_ratio_epsilon)
@@ -15,7 +14,7 @@ CartesianR2_Zoni_CzarnyGeometry::CartesianR2_Zoni_CzarnyGeometry(double Rmax,
     initializeGeometry();
 }
 
-double CartesianR2_Zoni_CzarnyGeometry::rhs_f(double r, double theta)const
+double CartesianR2_Zoni_CzarnyGeometry::rhs_f(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

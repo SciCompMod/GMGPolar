@@ -1,7 +1,6 @@
 #include "../include/InputFunctions/SourceTerms/polarR6_Sonnendrucker_ShafranovGeometry.h"
 
-PolarR6_Sonnendrucker_ShafranovGeometry::PolarR6_Sonnendrucker_ShafranovGeometry(double Rmax,
-                                                                                 double elongation_kappa,
+PolarR6_Sonnendrucker_ShafranovGeometry::PolarR6_Sonnendrucker_ShafranovGeometry(double Rmax, double elongation_kappa,
                                                                                  double shift_delta)
     : Rmax(Rmax)
     , elongation_kappa(elongation_kappa)
@@ -9,7 +8,7 @@ PolarR6_Sonnendrucker_ShafranovGeometry::PolarR6_Sonnendrucker_ShafranovGeometry
 {
 }
 
-double PolarR6_Sonnendrucker_ShafranovGeometry::rhs_f(double r, double theta)const
+double PolarR6_Sonnendrucker_ShafranovGeometry::rhs_f(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

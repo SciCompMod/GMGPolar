@@ -8,8 +8,7 @@ class PolarR6_Boundary_ShafranovGeometry : public BoundaryConditions
 {
 public:
     PolarR6_Boundary_ShafranovGeometry() = default;
-    explicit PolarR6_Boundary_ShafranovGeometry(double Rmax, double elongation_kappa,
-                                                double shift_delta);
+    explicit PolarR6_Boundary_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
     virtual ~PolarR6_Boundary_ShafranovGeometry() = default;
 
     double u_D(double r, double theta) const override;

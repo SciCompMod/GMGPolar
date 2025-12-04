@@ -8,8 +8,7 @@ class CartesianR6_CzarnyGeometry : public ExactSolution
 {
 public:
     explicit CartesianR6_CzarnyGeometry();
-    explicit CartesianR6_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon,
-                                        double ellipticity_e);
+    explicit CartesianR6_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon, double ellipticity_e);
 
     virtual ~CartesianR6_CzarnyGeometry() = default;
 

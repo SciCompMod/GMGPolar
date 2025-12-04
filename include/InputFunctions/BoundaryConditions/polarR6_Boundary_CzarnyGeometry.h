@@ -8,8 +8,7 @@ class PolarR6_Boundary_CzarnyGeometry : public BoundaryConditions
 {
 public:
     explicit PolarR6_Boundary_CzarnyGeometry();
-    explicit PolarR6_Boundary_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon,
-                                             double ellipticity_e);
+    explicit PolarR6_Boundary_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon, double ellipticity_e);
 
     virtual ~PolarR6_Boundary_CzarnyGeometry() = default;
 

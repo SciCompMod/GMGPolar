@@ -37,8 +37,8 @@ public:
               std::optional<double> splitting_radius = std::nullopt);
 
     // Constructor to initialize grid using parameters from GMGPolar.
-    explicit PolarGrid(double R0, double Rmax, const int nr_exp, const int ntheta_exp,
-                       double refinement_radius, const int anisotropic_factor, const int divideBy2,
+    explicit PolarGrid(double R0, double Rmax, const int nr_exp, const int ntheta_exp, double refinement_radius,
+                       const int anisotropic_factor, const int divideBy2,
                        std::optional<double> splitting_radius = std::nullopt);
 
     // Optimized, inlined indexing.

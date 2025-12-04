@@ -8,8 +8,7 @@ class CartesianR6_Poisson_CzarnyGeometry : public SourceTerm
 {
 public:
     CartesianR6_Poisson_CzarnyGeometry() = default;
-    explicit CartesianR6_Poisson_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon,
-                                                double ellipticity_e);
+    explicit CartesianR6_Poisson_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon, double ellipticity_e);
     virtual ~CartesianR6_Poisson_CzarnyGeometry() = default;
 
     double rhs_f(double r, double theta) const override;

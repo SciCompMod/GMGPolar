@@ -8,8 +8,7 @@ class CartesianR2_Boundary_ShafranovGeometry : public BoundaryConditions
 {
 public:
     CartesianR2_Boundary_ShafranovGeometry() = default;
-    explicit CartesianR2_Boundary_ShafranovGeometry(double Rmax, double elongation_kappa,
-                                                    double shift_delta);
+    explicit CartesianR2_Boundary_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
     virtual ~CartesianR2_Boundary_ShafranovGeometry() = default;
 
     double u_D(double r, double theta) const override;

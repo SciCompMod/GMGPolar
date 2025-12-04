@@ -8,8 +8,7 @@ class Refined_CzarnyGeometry : public ExactSolution
 {
 public:
     explicit Refined_CzarnyGeometry();
-    explicit Refined_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon,
-                                    double ellipticity_e);
+    explicit Refined_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon, double ellipticity_e);
 
     virtual ~Refined_CzarnyGeometry() = default;
 

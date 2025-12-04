@@ -129,9 +129,8 @@ public:
     ConstVector<double> art() const;
     ConstVector<double> detDF() const;
 
-    inline void obtainValues(const int i_r, const int i_theta, const int global_index, double r,
-                             double theta, double& coeff_beta, double& arr,
-                             double& att, double& art, double& detDF) const
+    inline void obtainValues(const int i_r, const int i_theta, const int global_index, double r, double theta,
+                             double& coeff_beta, double& arr, double& att, double& art, double& detDF) const
     {
         if (cache_density_profile_coefficients_)
             coeff_beta = coeff_beta_[global_index];

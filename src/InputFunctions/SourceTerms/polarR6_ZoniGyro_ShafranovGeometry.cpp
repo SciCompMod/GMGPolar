@@ -1,7 +1,6 @@
 #include "../include/InputFunctions/SourceTerms/polarR6_ZoniGyro_ShafranovGeometry.h"
 
-PolarR6_ZoniGyro_ShafranovGeometry::PolarR6_ZoniGyro_ShafranovGeometry(double Rmax,
-                                                                       double elongation_kappa,
+PolarR6_ZoniGyro_ShafranovGeometry::PolarR6_ZoniGyro_ShafranovGeometry(double Rmax, double elongation_kappa,
                                                                        double shift_delta)
     : Rmax(Rmax)
     , elongation_kappa(elongation_kappa)
@@ -9,7 +8,7 @@ PolarR6_ZoniGyro_ShafranovGeometry::PolarR6_ZoniGyro_ShafranovGeometry(double Rm
 {
 }
 
-double PolarR6_ZoniGyro_ShafranovGeometry::rhs_f(double r, double theta)const
+double PolarR6_ZoniGyro_ShafranovGeometry::rhs_f(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

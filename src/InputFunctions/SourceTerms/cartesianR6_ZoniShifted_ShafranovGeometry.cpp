@@ -9,7 +9,7 @@ CartesianR6_ZoniShifted_ShafranovGeometry::CartesianR6_ZoniShifted_ShafranovGeom
 {
 }
 
-double CartesianR6_ZoniShifted_ShafranovGeometry::rhs_f(double r, double theta)const
+double CartesianR6_ZoniShifted_ShafranovGeometry::rhs_f(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

@@ -1,7 +1,6 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR6_Poisson_ShafranovGeometry.h"
 
-CartesianR6_Poisson_ShafranovGeometry::CartesianR6_Poisson_ShafranovGeometry(double Rmax,
-                                                                             double elongation_kappa,
+CartesianR6_Poisson_ShafranovGeometry::CartesianR6_Poisson_ShafranovGeometry(double Rmax, double elongation_kappa,
                                                                              double shift_delta)
     : Rmax(Rmax)
     , elongation_kappa(elongation_kappa)
@@ -9,7 +8,7 @@ CartesianR6_Poisson_ShafranovGeometry::CartesianR6_Poisson_ShafranovGeometry(dou
 {
 }
 
-double CartesianR6_Poisson_ShafranovGeometry::rhs_f(double r, double theta)const
+double CartesianR6_Poisson_ShafranovGeometry::rhs_f(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

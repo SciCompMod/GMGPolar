@@ -10,8 +10,7 @@ class CzarnyGeometry : public DomainGeometry
 {
 public:
     explicit CzarnyGeometry();
-    explicit CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon,
-                            double ellipticity_e);
+    explicit CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon, double ellipticity_e);
 
     virtual ~CzarnyGeometry() = default;
 

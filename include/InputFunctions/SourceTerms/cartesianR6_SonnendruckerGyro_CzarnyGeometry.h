@@ -8,8 +8,7 @@ class CartesianR6_SonnendruckerGyro_CzarnyGeometry : public SourceTerm
 {
 public:
     CartesianR6_SonnendruckerGyro_CzarnyGeometry() = default;
-    explicit CartesianR6_SonnendruckerGyro_CzarnyGeometry(double Rmax,
-                                                          double inverse_aspect_ratio_epsilon,
+    explicit CartesianR6_SonnendruckerGyro_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon,
                                                           double ellipticity_e);
     virtual ~CartesianR6_SonnendruckerGyro_CzarnyGeometry() = default;
 

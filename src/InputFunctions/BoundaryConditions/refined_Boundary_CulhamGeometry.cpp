@@ -5,12 +5,12 @@ Refined_Boundary_CulhamGeometry::Refined_Boundary_CulhamGeometry(double Rmax)
 {
 }
 
-double Refined_Boundary_CulhamGeometry::u_D(double r, double theta)const
+double Refined_Boundary_CulhamGeometry::u_D(double r, double theta) const
 {
     return 0.0;
 }
 
-double Refined_Boundary_CulhamGeometry::u_D_Interior(double r, double theta)const
+double Refined_Boundary_CulhamGeometry::u_D_Interior(double r, double theta) const
 {
     return 0.0;
 }

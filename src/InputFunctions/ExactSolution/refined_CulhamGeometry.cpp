@@ -5,7 +5,7 @@ Refined_CulhamGeometry::Refined_CulhamGeometry(double Rmax)
 {
 }
 
-double Refined_CulhamGeometry::exact_solution(double r, double theta)const
+double Refined_CulhamGeometry::exact_solution(double r, double theta) const
 {
     return 0.0;
 }

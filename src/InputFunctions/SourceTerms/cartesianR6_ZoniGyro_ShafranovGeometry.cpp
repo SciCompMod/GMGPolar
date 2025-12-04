@@ -1,7 +1,6 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR6_ZoniGyro_ShafranovGeometry.h"
 
-CartesianR6_ZoniGyro_ShafranovGeometry::CartesianR6_ZoniGyro_ShafranovGeometry(double Rmax,
-                                                                               double elongation_kappa,
+CartesianR6_ZoniGyro_ShafranovGeometry::CartesianR6_ZoniGyro_ShafranovGeometry(double Rmax, double elongation_kappa,
                                                                                double shift_delta)
     : Rmax(Rmax)
     , elongation_kappa(elongation_kappa)
@@ -9,7 +8,7 @@ CartesianR6_ZoniGyro_ShafranovGeometry::CartesianR6_ZoniGyro_ShafranovGeometry(d
 {
 }
 
-double CartesianR6_ZoniGyro_ShafranovGeometry::rhs_f(double r, double theta)const
+double CartesianR6_ZoniGyro_ShafranovGeometry::rhs_f(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

@@ -1,7 +1,6 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR2_Zoni_ShafranovGeometry.h"
 
-CartesianR2_Zoni_ShafranovGeometry::CartesianR2_Zoni_ShafranovGeometry(double Rmax,
-                                                                       double elongation_kappa,
+CartesianR2_Zoni_ShafranovGeometry::CartesianR2_Zoni_ShafranovGeometry(double Rmax, double elongation_kappa,
                                                                        double shift_delta)
     : Rmax(Rmax)
     , elongation_kappa(elongation_kappa)
@@ -9,7 +8,7 @@ CartesianR2_Zoni_ShafranovGeometry::CartesianR2_Zoni_ShafranovGeometry(double Rm
 {
 }
 
-double CartesianR2_Zoni_ShafranovGeometry::rhs_f(double r, double theta)const
+double CartesianR2_Zoni_ShafranovGeometry::rhs_f(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

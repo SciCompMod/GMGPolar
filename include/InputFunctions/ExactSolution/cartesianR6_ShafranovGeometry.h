@@ -8,8 +8,7 @@ class CartesianR6_ShafranovGeometry : public ExactSolution
 {
 public:
     CartesianR6_ShafranovGeometry() = default;
-    explicit CartesianR6_ShafranovGeometry(double Rmax, double elongation_kappa,
-                                           double shift_delta);
+    explicit CartesianR6_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
     virtual ~CartesianR6_ShafranovGeometry() = default;
 
     double exact_solution(double r, double theta) const override;

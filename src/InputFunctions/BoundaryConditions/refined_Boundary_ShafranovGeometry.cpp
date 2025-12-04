@@ -1,7 +1,6 @@
 #include "../include/InputFunctions/BoundaryConditions/refined_Boundary_ShafranovGeometry.h"
 
-Refined_Boundary_ShafranovGeometry::Refined_Boundary_ShafranovGeometry(double Rmax,
-                                                                       double elongation_kappa,
+Refined_Boundary_ShafranovGeometry::Refined_Boundary_ShafranovGeometry(double Rmax, double elongation_kappa,
                                                                        double shift_delta)
     : Rmax(Rmax)
     , elongation_kappa(elongation_kappa)
@@ -9,7 +8,7 @@ Refined_Boundary_ShafranovGeometry::Refined_Boundary_ShafranovGeometry(double Rm
 {
 }
 
-double Refined_Boundary_ShafranovGeometry::u_D(double r, double theta)const
+double Refined_Boundary_ShafranovGeometry::u_D(double r, double theta) const
 {
     return ((-3.33823779536505e-15) * ((r / Rmax) * (r / Rmax)) - 0.0 * (r / Rmax) - 0.0 +
             exp((-3333.33333333333) * pow(((r / Rmax) - 0.9), 2.0))) *
@@ -19,7 +18,7 @@ double Refined_Boundary_ShafranovGeometry::u_D(double r, double theta)const
                cos(9.0 * theta);
 }
 
-double Refined_Boundary_ShafranovGeometry::u_D_Interior(double r, double theta)const
+double Refined_Boundary_ShafranovGeometry::u_D_Interior(double r, double theta) const
 {
     return ((-3.33823779536505e-15) * ((r / Rmax) * (r / Rmax)) - 0.0 * (r / Rmax) - 0.0 +
             exp((-3333.33333333333) * pow(((r / Rmax) - 0.9), 2.0))) *

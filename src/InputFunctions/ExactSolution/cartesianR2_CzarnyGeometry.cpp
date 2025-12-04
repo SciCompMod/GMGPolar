@@ -14,7 +14,7 @@ CartesianR2_CzarnyGeometry::CartesianR2_CzarnyGeometry(double Rmax, double inver
     initializeGeometry();
 }
 
-double CartesianR2_CzarnyGeometry::exact_solution(double r, double theta)const
+double CartesianR2_CzarnyGeometry::exact_solution(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

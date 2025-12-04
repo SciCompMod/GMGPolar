@@ -8,8 +8,7 @@ class Refined_Boundary_CzarnyGeometry : public BoundaryConditions
 {
 public:
     explicit Refined_Boundary_CzarnyGeometry();
-    explicit Refined_Boundary_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon,
-                                             double ellipticity_e);
+    explicit Refined_Boundary_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon, double ellipticity_e);
 
     virtual ~Refined_Boundary_CzarnyGeometry() = default;
 

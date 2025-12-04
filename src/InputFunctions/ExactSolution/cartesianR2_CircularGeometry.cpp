@@ -5,7 +5,7 @@ CartesianR2_CircularGeometry::CartesianR2_CircularGeometry(double Rmax)
 {
 }
 
-double CartesianR2_CircularGeometry::exact_solution(double r, double theta)const
+double CartesianR2_CircularGeometry::exact_solution(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

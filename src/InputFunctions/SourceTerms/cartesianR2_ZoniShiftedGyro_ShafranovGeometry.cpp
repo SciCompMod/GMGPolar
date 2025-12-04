@@ -1,14 +1,15 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR2_ZoniShiftedGyro_ShafranovGeometry.h"
 
-CartesianR2_ZoniShiftedGyro_ShafranovGeometry::CartesianR2_ZoniShiftedGyro_ShafranovGeometry(
-    double Rmax, double elongation_kappa, double shift_delta)
+CartesianR2_ZoniShiftedGyro_ShafranovGeometry::CartesianR2_ZoniShiftedGyro_ShafranovGeometry(double Rmax,
+                                                                                             double elongation_kappa,
+                                                                                             double shift_delta)
     : Rmax(Rmax)
     , elongation_kappa(elongation_kappa)
     , shift_delta(shift_delta)
 {
 }
 
-double CartesianR2_ZoniShiftedGyro_ShafranovGeometry::rhs_f(double r, double theta)const
+double CartesianR2_ZoniShiftedGyro_ShafranovGeometry::rhs_f(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

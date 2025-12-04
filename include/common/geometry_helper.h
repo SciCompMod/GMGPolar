@@ -5,8 +5,8 @@
 
 #include <cmath>
 
-inline void compute_jacobian_elements(const DomainGeometry& domain_geometry, double r, double theta,
-                                      double coeff_alpha, double& arr, double& att, double& art, double& detDF)
+inline void compute_jacobian_elements(const DomainGeometry& domain_geometry, double r, double theta, double coeff_alpha,
+                                      double& arr, double& att, double& art, double& detDF)
 {
     /* Calculate the elements of the Jacobian matrix for the transformation mapping */
     /* The Jacobian matrix is: */

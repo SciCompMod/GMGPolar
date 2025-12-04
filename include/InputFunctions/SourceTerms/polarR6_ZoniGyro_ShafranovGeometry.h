@@ -8,8 +8,7 @@ class PolarR6_ZoniGyro_ShafranovGeometry : public SourceTerm
 {
 public:
     PolarR6_ZoniGyro_ShafranovGeometry() = default;
-    explicit PolarR6_ZoniGyro_ShafranovGeometry(double Rmax, double elongation_kappa,
-                                                double shift_delta);
+    explicit PolarR6_ZoniGyro_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
     virtual ~PolarR6_ZoniGyro_ShafranovGeometry() = default;
 
     double rhs_f(double r, double theta) const override;
