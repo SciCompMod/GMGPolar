@@ -64,3 +64,21 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage/coverage-filtered.info,coverage-mumps/coverage-filtered.info
           verbose: true          
+
+  clang-format:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/gyselax/gyselalibxx_env:latest
+      options: --user root
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install clang-format v18
+        run: |
+          apt-get -qq update
+          apt-get -qq -y install clang-format-18
+        shell: bash
+      - name: Check for clang-formatting
+        run: |
+          find -name *.cpp -o -name *.hpp -o -name *.h | xargs clang-format-18 --dry-run -Werror
+        shell: bash

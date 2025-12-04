@@ -153,8 +153,7 @@ public:
             detDF = detDF_[global_index];
         }
         else {
-            compute_jacobian_elements(domain_geometry_, r, theta, coeff_alpha, arr, att, art,
-                                      detDF);
+            compute_jacobian_elements(domain_geometry_, r, theta, coeff_alpha, arr, att, art, detDF);
         }
     }
 

@@ -36,14 +36,13 @@ LevelCache::LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& 
         for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
             const double r = grid.radius(i_r);
             for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                const double theta     = grid.theta(i_theta);
-                const int index        = grid.index(i_r, i_theta);
+                const double theta = grid.theta(i_theta);
+                const int index    = grid.index(i_r, i_theta);
 
                 double coeff_alpha = density_profile_coefficients.alpha(r, theta);
 
                 double arr, att, art, detDF;
-                compute_jacobian_elements(domain_geometry_, r, theta, coeff_alpha, arr, att, art,
-                                          detDF);
+                compute_jacobian_elements(domain_geometry_, r, theta, coeff_alpha, arr, att, art, detDF);
                 detDF_(index) = detDF;
                 arr_(index)   = arr;
                 att_(index)   = att;
@@ -53,7 +52,7 @@ LevelCache::LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& 
 
 #pragma omp parallel for
         for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-            const double theta     = grid.theta(i_theta);
+            const double theta = grid.theta(i_theta);
             for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
                 const double r  = grid.radius(i_r);
                 const int index = grid.index(i_r, i_theta);
@@ -67,8 +66,7 @@ LevelCache::LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& 
                 }
 
                 double arr, att, art, detDF;
-                compute_jacobian_elements(domain_geometry_, r, theta, coeff_alpha, arr, att, art,
-                                          detDF);
+                compute_jacobian_elements(domain_geometry_, r, theta, coeff_alpha, arr, att, art, detDF);
                 detDF_(index) = detDF;
                 arr_(index)   = arr;
                 att_(index)   = att;

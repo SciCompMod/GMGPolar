@@ -22,10 +22,9 @@ void GMGPolar::writeToVTK(const std::filesystem::path& file_path, const PolarGri
     double r, theta;
     for (int index = 0; index < grid.numberOfNodes(); index++) {
         grid.multiIndex(index, i_r, i_theta);
-        r                = grid.radius(i_r);
-        theta            = grid.theta(i_theta);
-        file << domain_geometry_.Fx(r, theta) << " "
-             << domain_geometry_.Fy(r, theta) << " " << 0 << "\n";
+        r     = grid.radius(i_r);
+        theta = grid.theta(i_theta);
+        file << domain_geometry_.Fx(r, theta) << " " << domain_geometry_.Fy(r, theta) << " " << 0 << "\n";
     }
     file << "</DataArray>\n"
          << "</Points>\n";
@@ -85,10 +84,9 @@ void GMGPolar::writeToVTK(const std::filesystem::path& file_path, const Level& l
     double r, theta;
     for (int index = 0; index < grid.numberOfNodes(); index++) {
         grid.multiIndex(index, i_r, i_theta);
-        r         = grid.radius(i_r);
-        theta     = grid.theta(i_theta);
-        file << domain_geometry_.Fx(r, theta) << " "
-             << domain_geometry_.Fy(r, theta) << " " << 0 << "\n";
+        r     = grid.radius(i_r);
+        theta = grid.theta(i_theta);
+        file << domain_geometry_.Fx(r, theta) << " " << domain_geometry_.Fy(r, theta) << " " << 0 << "\n";
     }
 
     file << "</DataArray>\n"

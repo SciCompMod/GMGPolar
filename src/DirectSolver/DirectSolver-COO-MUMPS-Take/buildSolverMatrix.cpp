@@ -49,7 +49,7 @@
                 const double top_value    = -coeff4 * (att(center_index) + att(top_index)); /* Top */                   \
                                                                                                                         \
                 const double center_value = (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] *                 \
-                                                 fabs(detDF(center_index)) /* beta_{i,j} */                            \
+                                                 fabs(detDF(center_index)) /* beta_{i,j} */                             \
                                              - left_value /* Center: (Left) */                                          \
                                              - right_value /* Center: (Right) */                                        \
                                              - bottom_value /* Center: (Bottom) */                                      \
