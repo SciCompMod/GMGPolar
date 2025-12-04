@@ -130,9 +130,9 @@ SparseMatrixCSR<T>& SparseMatrixCSR<T>::operator=(const SparseMatrixCSR& other)
     }
     // Only allocate new memory if the sizes are different
     if (nnz_ != other.nnz_ || rows_ != other.rows_) {
-        values_            = Vector<T>("CSR values", nnz_);
-        column_indices_    = Vector<int>("CSR column indices", nnz_);
-        row_start_indices_ = Vector<int>("CSR row start indices", rows_ + 1);
+        values_            = Vector<T>("CSR values", other.nnz_);
+        column_indices_    = Vector<int>("CSR column indices", other.nnz_);
+        row_start_indices_ = Vector<int>("CSR row start indices", other.rows_ + 1);
     }
     // Copy the elements
     rows_    = other.rows_;
