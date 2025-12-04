@@ -33,7 +33,7 @@ Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int s
     Vector<double> x("x", grid.numberOfNodes());
     std::mt19937 gen(seed);
     std::uniform_real_distribution<double> dist(-100.0, 100.0);
-    for (int i = 0; i < x.size(); ++i) {
+    for (uint i = 0; i < x.size(); ++i) {
         x(i) = dist(gen);
     }
     return x;
@@ -96,7 +96,7 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_DirBC_Interior)
     smootherTake_operator.extrapolatedSmoothing(solution_Take, rhs, temp);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
-    for (int index = 0; index < solution_Give.size(); index++) {
+    for (uint index = 0; index < solution_Give.size(); index++) {
         MultiIndex alpha = level.grid().multiIndex(index);
         if (alpha[0] == 0 && !DirBC_Interior)
             ASSERT_NEAR(solution_Give[index], solution_Take[index], 1e-11);
@@ -155,7 +155,7 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_AcossOrigin)
     smootherTake_operator.extrapolatedSmoothing(solution_Take, rhs, temp);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
-    for (int index = 0; index < solution_Give.size(); index++) {
+    for (uint index = 0; index < solution_Give.size(); index++) {
         MultiIndex alpha = level.grid().multiIndex(index);
         if (alpha[0] == 0 && !DirBC_Interior)
             ASSERT_NEAR(solution_Give[index], solution_Take[index], 1e-8);
@@ -220,7 +220,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior)
     }
 
 #pragma omp parallel for
-    for (int i = 0; i < error.size(); i++) {
+    for (uint i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -233,7 +233,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior)
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
-        for (int i = 0; i < error.size(); i++) {
+        for (uint i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -304,7 +304,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior)
     }
 
 #pragma omp parallel for
-    for (int i = 0; i < error.size(); i++) {
+    for (uint i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -317,7 +317,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior)
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
-        for (int i = 0; i < error.size(); i++) {
+        for (uint i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -390,7 +390,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin)
     }
 
 #pragma omp parallel for
-    for (int i = 0; i < error.size(); i++) {
+    for (uint i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -403,7 +403,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin)
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
-        for (int i = 0; i < error.size(); i++) {
+        for (uint i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -476,7 +476,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin)
     }
 
 #pragma omp parallel for
-    for (int i = 0; i < error.size(); i++) {
+    for (uint i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -489,7 +489,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin)
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
-        for (int i = 0; i < error.size(); i++) {
+        for (uint i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -561,7 +561,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior_Smal
     }
 
 #pragma omp parallel for
-    for (int i = 0; i < error.size(); i++) {
+    for (uint i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -574,7 +574,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior_Smal
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
-        for (int i = 0; i < error.size(); i++) {
+        for (uint i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -646,7 +646,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior_Smalle
     }
 
 #pragma omp parallel for
-    for (int i = 0; i < error.size(); i++) {
+    for (uint i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -659,7 +659,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior_Smalle
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
-        for (int i = 0; i < error.size(); i++) {
+        for (uint i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -729,7 +729,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin_Smalle
     }
 
 #pragma omp parallel for
-    for (int i = 0; i < error.size(); i++) {
+    for (uint i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -742,7 +742,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin_Smalle
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
-        for (int i = 0; i < error.size(); i++) {
+        for (uint i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -812,7 +812,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin_Smallest
     }
 
 #pragma omp parallel for
-    for (int i = 0; i < error.size(); i++) {
+    for (uint i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -825,7 +825,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin_Smallest
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
-        for (int i = 0; i < error.size(); i++) {
+        for (uint i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -900,7 +900,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior)
     }
 
 #pragma omp parallel for
-    for (int i = 0; i < error.size(); i++) {
+    for (uint i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -913,7 +913,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior)
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
-        for (int i = 0; i < error.size(); i++) {
+        for (uint i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -984,7 +984,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior)
     }
 
 #pragma omp parallel for
-    for (int i = 0; i < error.size(); i++) {
+    for (uint i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -997,7 +997,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior)
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
-        for (int i = 0; i < error.size(); i++) {
+        for (uint i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -1068,7 +1068,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin)
     }
 
 #pragma omp parallel for
-    for (int i = 0; i < error.size(); i++) {
+    for (uint i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -1081,7 +1081,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin)
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
-        for (int i = 0; i < error.size(); i++) {
+        for (uint i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -1152,7 +1152,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin)
     }
 
 #pragma omp parallel for
-    for (int i = 0; i < error.size(); i++) {
+    for (uint i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -1165,7 +1165,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin)
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
-        for (int i = 0; i < error.size(); i++) {
+        for (uint i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -1235,7 +1235,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior_
     }
 
 #pragma omp parallel for
-    for (int i = 0; i < error.size(); i++) {
+    for (uint i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -1248,7 +1248,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior_
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
-        for (int i = 0; i < error.size(); i++) {
+        for (uint i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -1318,7 +1318,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior_Sm
     }
 
 #pragma omp parallel for
-    for (int i = 0; i < error.size(); i++) {
+    for (uint i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -1331,7 +1331,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior_Sm
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
-        for (int i = 0; i < error.size(); i++) {
+        for (uint i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -1401,7 +1401,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin_Sm
     }
 
 #pragma omp parallel for
-    for (int i = 0; i < error.size(); i++) {
+    for (uint i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -1414,7 +1414,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin_Sm
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
-        for (int i = 0; i < error.size(); i++) {
+        for (uint i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;
@@ -1484,7 +1484,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin_Smal
     }
 
 #pragma omp parallel for
-    for (int i = 0; i < error.size(); i++) {
+    for (uint i = 0; i < error.size(); i++) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     }
 
@@ -1497,7 +1497,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin_Smal
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
 #pragma omp parallel for
-        for (int i = 0; i < error.size(); i++) {
+        for (uint i = 0; i < error.size(); i++) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         }
         iterations++;

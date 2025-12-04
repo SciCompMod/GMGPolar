@@ -27,7 +27,7 @@ Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int s
     Vector<double> x("x", grid.numberOfNodes());
     std::mt19937 gen(seed);
     std::uniform_real_distribution<double> dist(-100.0, 100.0);
-    for (int i = 0; i < x.size(); ++i) {
+    for (uint i = 0; i < x.size(); ++i) {
         x(i) = dist(gen);
     }
     return x;
@@ -86,7 +86,7 @@ TEST(OperatorATest, applyA_DirBC_Interior)
     residualTake_operator.computeResidual(result_Take, rhs, x);
 
     ASSERT_EQ(result_Give.size(), result_Take.size());
-    for (int index = 0; index < result_Give.size(); index++) {
+    for (uint index = 0; index < result_Give.size(); index++) {
         MultiIndex alpha = level.grid().multiIndex(index);
         if (alpha[0] == 0 && !DirBC_Interior)
             ASSERT_NEAR(result_Give[index], result_Take[index], 1e-8);
@@ -142,7 +142,7 @@ TEST(OperatorATest, applyA_AcrossOrigin)
     residualTake_operator.computeResidual(result_Take, rhs, x);
 
     ASSERT_EQ(result_Give.size(), result_Take.size());
-    for (int index = 0; index < result_Give.size(); index++) {
+    for (uint index = 0; index < result_Give.size(); index++) {
         MultiIndex alpha = level.grid().multiIndex(index);
         if (alpha[0] == 0 && !DirBC_Interior)
             ASSERT_NEAR(result_Give[index], result_Take[index], 1e-8);
