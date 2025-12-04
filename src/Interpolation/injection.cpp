@@ -2,18 +2,13 @@
 
 /* Remark: This injection is not scaled. */
 
-void Interpolation::applyInjection(const Level& fromLevel, const Level& toLevel, Vector<double> result,
-                                   ConstVector<double> x) const
+void Interpolation::applyInjection_(const PolarGrid& coarseGrid, const PolarGrid& fineGrid, Vector<double> result,
+                                   ConstVector<double> x, int nthreads) const
 {
-    assert(toLevel.level_depth() == fromLevel.level_depth() + 1);
-
-    const PolarGrid& fineGrid   = fromLevel.grid();
-    const PolarGrid& coarseGrid = toLevel.grid();
-
     assert(x.size() == static_cast<uint>(fineGrid.numberOfNodes()));
     assert(result.size() == static_cast<uint>(coarseGrid.numberOfNodes()));
 
-#pragma omp parallel num_threads(threads_per_level_[toLevel.level_depth()]) if (fineGrid.numberOfNodes() > 10'000)
+#pragma omp parallel num_threads(nthreads) if (fineGrid.numberOfNodes() > 10'000)
     {
 /* For loop matches circular access pattern */
 #pragma omp for nowait

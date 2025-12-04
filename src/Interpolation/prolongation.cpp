@@ -6,18 +6,13 @@
 // P = 1/4 * |2  4  2|
 //           |1  2  1|
 
-void Interpolation::applyProlongation0(const Level& fromLevel, const Level& toLevel, Vector<double> result,
-                                       ConstVector<double> x) const
+void Interpolation::applyProlongation0_(const PolarGrid& coarseGrid, const PolarGrid& fineGrid, Vector<double> result,
+                                       ConstVector<double> x, int nthreads) const
 {
-    assert(toLevel.level_depth() == fromLevel.level_depth() - 1);
-
-    const PolarGrid& coarseGrid = fromLevel.grid();
-    const PolarGrid& fineGrid   = toLevel.grid();
-
     assert(x.size() == static_cast<uint>(coarseGrid.numberOfNodes()));
     assert(result.size() == static_cast<uint>(fineGrid.numberOfNodes()));
 
-#pragma omp parallel for num_threads(threads_per_level_[toLevel.level_depth()])
+#pragma omp parallel for num_threads(nthreads)
     for (int index = 0; index < fineGrid.numberOfNodes(); index++) {
         std::array<std::pair<double, double>, space_dimension> neighbor_distance;
 
@@ -150,18 +145,13 @@ void Interpolation::applyProlongation0(const Level& fromLevel, const Level& toLe
         }                                                                                                                   \
     } while (0)
 
-void Interpolation::applyProlongation(const Level& fromLevel, const Level& toLevel, Vector<double> result,
-                                      ConstVector<double> x) const
+void Interpolation::applyProlongation_(const PolarGrid& coarseGrid, const PolarGrid& fineGrid, Vector<double> result,
+                                      ConstVector<double> x, int nthreads) const
 {
-    assert(toLevel.level_depth() == fromLevel.level_depth() - 1);
-
-    const PolarGrid& coarseGrid = fromLevel.grid();
-    const PolarGrid& fineGrid   = toLevel.grid();
-
     assert(x.size() == static_cast<uint>(coarseGrid.numberOfNodes()));
     assert(result.size() == static_cast<uint>(fineGrid.numberOfNodes()));
 
-#pragma omp parallel num_threads(threads_per_level_[toLevel.level_depth()]) if (fineGrid.numberOfNodes() > 10'000)
+#pragma omp parallel num_threads(nthreads) if (fineGrid.numberOfNodes() > 10'000)
     {
 /* Circluar Indexing Section */
 /* For loop matches circular access pattern */

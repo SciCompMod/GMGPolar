@@ -6,18 +6,13 @@
 // R = 1/4 * |2  4  2| = P^T
 //           |1  2  1|
 
-void Interpolation::applyRestriction0(const Level& fromLevel, const Level& toLevel, Vector<double> result,
-                                      ConstVector<double> x) const
+void Interpolation::applyRestriction0_(const PolarGrid& coarseGrid, const PolarGrid& fineGrid, Vector<double> result,
+                                      ConstVector<double> x, int nthreads) const
 {
-    assert(toLevel.level_depth() == fromLevel.level_depth() + 1);
-
-    const PolarGrid& fineGrid   = fromLevel.grid();
-    const PolarGrid& coarseGrid = toLevel.grid();
-
     assert(x.size() == static_cast<uint>(fineGrid.numberOfNodes()));
     assert(result.size() == static_cast<uint>(coarseGrid.numberOfNodes()));
 
-#pragma omp parallel for num_threads(threads_per_level_[toLevel.level_depth()])
+#pragma omp parallel for num_threads(nthreads)
     for (int index = 0; index < coarseGrid.numberOfNodes(); index++) {
         MultiIndex coarse_node = coarseGrid.multiIndex(index);
         MultiIndex fine_node(2 * coarse_node[0], 2 * coarse_node[1]);
@@ -100,20 +95,15 @@ void Interpolation::applyRestriction0(const Level& fromLevel, const Level& toLev
 // Optimized version of applyRestriction0 //
 // -------------------------------------- //
 
-void Interpolation::applyRestriction(const Level& fromLevel, const Level& toLevel, Vector<double> result,
-                                     ConstVector<double> x) const
+void Interpolation::applyRestriction_(const PolarGrid& coarseGrid, const PolarGrid& fineGrid, Vector<double> result,
+                                     ConstVector<double> x, int nthreads) const
 {
-    assert(toLevel.level_depth() == fromLevel.level_depth() + 1);
-
-    const PolarGrid& fineGrid   = fromLevel.grid();
-    const PolarGrid& coarseGrid = toLevel.grid();
-
     assert(x.size() == static_cast<uint>(fineGrid.numberOfNodes()));
     assert(result.size() == static_cast<uint>(coarseGrid.numberOfNodes()));
 
     const int coarseNumberSmootherCircles = coarseGrid.numberSmootherCircles();
 
-#pragma omp parallel num_threads(threads_per_level_[toLevel.level_depth()]) if (fineGrid.numberOfNodes() > 10'000)
+#pragma omp parallel num_threads(nthreads) if (fineGrid.numberOfNodes() > 10'000)
     {
 /* For loop matches circular access pattern */
 #pragma omp for nowait
