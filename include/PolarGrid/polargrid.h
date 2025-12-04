@@ -37,8 +37,8 @@ public:
               std::optional<double> splitting_radius = std::nullopt);
 
     // Constructor to initialize grid using parameters from GMGPolar.
-    explicit PolarGrid(const double& R0, const double& Rmax, const int nr_exp, const int ntheta_exp,
-                       const double& refinement_radius, const int anisotropic_factor, const int divideBy2,
+    explicit PolarGrid(double R0, double Rmax, const int nr_exp, const int ntheta_exp, double refinement_radius,
+                       const int anisotropic_factor, const int divideBy2,
                        std::optional<double> splitting_radius = std::nullopt);
 
     // Optimized, inlined indexing.
@@ -55,18 +55,18 @@ public:
     // Get the number of angular divisions
     int ntheta() const;
     // Get the radius at a specific radial index
-    const double& radius(const int r_index) const;
+    double radius(const int r_index) const;
     // Get the angle at a specific angular index
-    const double& theta(const int theta_index) const;
+    double theta(const int theta_index) const;
     // Get all radii and angles available which define the grid
     const std::vector<double>& radii() const;
     const std::vector<double>& angles() const;
 
     // Grid distances
     // Get the radial distance to the next consecutive radial node at a specified radial index.
-    const double& radialSpacing(const int r_index) const;
+    double radialSpacing(const int r_index) const;
     // Get the angular distance to the next consecutive angular node at a specified unwrapped angular index.
-    const double& angularSpacing(const int unwrapped_theta_index) const;
+    double angularSpacing(const int unwrapped_theta_index) const;
 
     // Circle/radial smoother division
     // Get the radius which splits the grid into circular and radial smoothing
@@ -172,7 +172,7 @@ private:
     void initializeLineSplitting(std::optional<double> splitting_radius);
 
     // Construct radial divisions for grid generation.
-    void constructRadialDivisions(const double& R0, const double& R, const int nr_exp, const double& refinement_radius,
+    void constructRadialDivisions(double R0, double R, const int nr_exp, double refinement_radius,
                                   const int anisotropic_factor);
     // Construct angular divisions for grid generation.
     void constructAngularDivisions(const int ntheta_exp, const int nr);
@@ -183,8 +183,8 @@ private:
 
     // Help constrcut radii_ when an anisotropic radial division is requested
     // Implementation in src/PolarGrid/anisotropic_division.cpp
-    void RadialAnisotropicDivision(std::vector<double>& r_temp, const double& R0, const double& R, const int nr_exp,
-                                   const double& refinement_radius, const int anisotropic_factor) const;
+    void RadialAnisotropicDivision(std::vector<double>& r_temp, double R0, double R, const int nr_exp,
+                                   double refinement_radius, const int anisotropic_factor) const;
 };
 
 // ---------------------------------------------------- //

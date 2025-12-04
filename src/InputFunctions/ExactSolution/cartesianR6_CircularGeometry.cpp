@@ -1,11 +1,11 @@
 #include "../include/InputFunctions/ExactSolution/cartesianR6_CircularGeometry.h"
 
-CartesianR6_CircularGeometry::CartesianR6_CircularGeometry(const double& Rmax)
+CartesianR6_CircularGeometry::CartesianR6_CircularGeometry(double Rmax)
     : Rmax(Rmax)
 {
 }
 
-double CartesianR6_CircularGeometry::exact_solution(const double& r, const double& theta) const
+double CartesianR6_CircularGeometry::exact_solution(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

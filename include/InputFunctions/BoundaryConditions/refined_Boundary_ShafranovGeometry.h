@@ -8,12 +8,11 @@ class Refined_Boundary_ShafranovGeometry : public BoundaryConditions
 {
 public:
     Refined_Boundary_ShafranovGeometry() = default;
-    explicit Refined_Boundary_ShafranovGeometry(const double& Rmax, const double& elongation_kappa,
-                                                const double& shift_delta);
+    explicit Refined_Boundary_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
     virtual ~Refined_Boundary_ShafranovGeometry() = default;
 
-    double u_D(const double& r, const double& theta) const override;
-    double u_D_Interior(const double& r, const double& theta) const override;
+    double u_D(double r, double theta) const override;
+    double u_D_Interior(double r, double theta) const override;
 
 private:
     const double Rmax             = 1.3;

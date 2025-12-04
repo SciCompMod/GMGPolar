@@ -11,16 +11,16 @@ class CulhamGeometry : public DomainGeometry
 {
 public:
     CulhamGeometry();
-    explicit CulhamGeometry(const double& Rmax);
+    explicit CulhamGeometry(double Rmax);
 
     virtual ~CulhamGeometry() = default;
 
-    double Fx(const double& r, const double& theta) const override;
-    double Fy(const double& r, const double& theta) const override;
-    double dFx_dr(const double& r, const double& theta) const override;
-    double dFy_dr(const double& r, const double& theta) const override;
-    double dFx_dt(const double& r, const double& theta) const override;
-    double dFy_dt(const double& r, const double& theta) const override;
+    double Fx(double r, double theta) const override;
+    double Fy(double r, double theta) const override;
+    double dFx_dr(double r, double theta) const override;
+    double dFy_dr(double r, double theta) const override;
+    double dFx_dt(double r, double theta) const override;
+    double dFy_dt(double r, double theta) const override;
 
 private:
     const double Rmax = 1.3;

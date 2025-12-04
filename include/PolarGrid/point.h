@@ -29,7 +29,7 @@ public:
     int size() const;
 
     //! Returns the `i`th coordinate value of the point.
-    const double& operator[](int i) const;
+    double operator[](int i) const;
 
     //! Returns a mutable reference to the `i`th coordinate value of the point.
     double& operator[](int i);
@@ -42,4 +42,4 @@ bool equals(const Point& lhs, const Point& rhs);
 double norm(const Point& point);
 void add(Point& result, const Point& lhs, const Point& rhs);
 void subtract(Point& result, const Point& lhs, const Point& rhs);
-void multiply(Point& result, const double& scalar, const Point& lhs);
+void multiply(Point& result, double scalar, const Point& lhs);

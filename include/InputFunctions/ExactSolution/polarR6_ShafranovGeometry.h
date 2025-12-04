@@ -8,10 +8,10 @@ class PolarR6_ShafranovGeometry : public ExactSolution
 {
 public:
     PolarR6_ShafranovGeometry() = default;
-    explicit PolarR6_ShafranovGeometry(const double& Rmax, const double& elongation_kappa, const double& shift_delta);
+    explicit PolarR6_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
     virtual ~PolarR6_ShafranovGeometry() = default;
 
-    double exact_solution(const double& r, const double& theta) const override;
+    double exact_solution(double r, double theta) const override;
 
 private:
     const double Rmax             = 1.3;

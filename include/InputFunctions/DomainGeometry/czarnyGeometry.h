@@ -10,17 +10,16 @@ class CzarnyGeometry : public DomainGeometry
 {
 public:
     explicit CzarnyGeometry();
-    explicit CzarnyGeometry(const double& Rmax, const double& inverse_aspect_ratio_epsilon,
-                            const double& ellipticity_e);
+    explicit CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon, double ellipticity_e);
 
     virtual ~CzarnyGeometry() = default;
 
-    double Fx(const double& r, const double& theta) const override;
-    double Fy(const double& r, const double& theta) const override;
-    double dFx_dr(const double& r, const double& theta) const override;
-    double dFy_dr(const double& r, const double& theta) const override;
-    double dFx_dt(const double& r, const double& theta) const override;
-    double dFy_dt(const double& r, const double& theta) const override;
+    double Fx(double r, double theta) const override;
+    double Fy(double r, double theta) const override;
+    double dFx_dr(double r, double theta) const override;
+    double dFy_dr(double r, double theta) const override;
+    double dFx_dt(double r, double theta) const override;
+    double dFy_dt(double r, double theta) const override;
 
 private:
     const double Rmax                         = 1.3;

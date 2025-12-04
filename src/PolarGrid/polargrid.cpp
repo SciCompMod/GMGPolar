@@ -23,9 +23,8 @@ PolarGrid::PolarGrid(const std::vector<double>& radii, const std::vector<double>
 }
 
 // Constructor to initialize grid using parameters from GMGPolar.
-PolarGrid::PolarGrid(const double& R0, const double& Rmax, const int nr_exp, const int ntheta_exp,
-                     const double& refinement_radius, const int anisotropic_factor, const int divideBy2,
-                     std::optional<double> splitting_radius)
+PolarGrid::PolarGrid(double R0, double Rmax, const int nr_exp, const int ntheta_exp, double refinement_radius,
+                     const int anisotropic_factor, const int divideBy2, std::optional<double> splitting_radius)
 {
     assert(R0 > 0.0 && Rmax > R0 && !equals(R0, Rmax));
     // Construct radii_ and angles_
@@ -46,8 +45,8 @@ PolarGrid::PolarGrid(const double& R0, const double& Rmax, const int nr_exp, con
 // ------------------- //
 
 // Construct radial divisions for grid generation.
-void PolarGrid::constructRadialDivisions(const double& R0, const double& R, const int nr_exp,
-                                         const double& refinement_radius, const int anisotropic_factor)
+void PolarGrid::constructRadialDivisions(double R0, double R, const int nr_exp, double refinement_radius,
+                                         const int anisotropic_factor)
 {
     // r_temp contains the values before we refine one last time for extrapolation.
     // Therefore we first consider 2^(nr_exp-1) points.

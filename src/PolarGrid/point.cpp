@@ -26,7 +26,7 @@ int Point::size() const
     return space_dimension;
 }
 
-const double& Point::operator[](int i) const
+double Point::operator[](int i) const
 {
     assert(i >= 0);
     assert(i < space_dimension);
@@ -76,7 +76,7 @@ void subtract(Point& result, const Point& lhs, const Point& rhs)
     }
 }
 
-void multiply(Point& result, const double& scalar, const Point& lhs)
+void multiply(Point& result, double scalar, const Point& lhs)
 {
     assert(result.size() == lhs.size());
     for (int i = 0; i < space_dimension; i++) {

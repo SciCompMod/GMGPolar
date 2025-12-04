@@ -8,12 +8,11 @@ class CartesianR2_CzarnyGeometry : public ExactSolution
 {
 public:
     explicit CartesianR2_CzarnyGeometry();
-    explicit CartesianR2_CzarnyGeometry(const double& Rmax, const double& inverse_aspect_ratio_epsilon,
-                                        const double& ellipticity_e);
+    explicit CartesianR2_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon, double ellipticity_e);
 
     virtual ~CartesianR2_CzarnyGeometry() = default;
 
-    double exact_solution(const double& r, const double& theta) const override;
+    double exact_solution(double r, double theta) const override;
 
 private:
     const double Rmax                         = 1.3;
