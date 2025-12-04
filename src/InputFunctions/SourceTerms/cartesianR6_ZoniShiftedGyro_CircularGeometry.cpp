@@ -1,11 +1,11 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR6_ZoniShiftedGyro_CircularGeometry.h"
 
-CartesianR6_ZoniShiftedGyro_CircularGeometry::CartesianR6_ZoniShiftedGyro_CircularGeometry(const double& Rmax)
+CartesianR6_ZoniShiftedGyro_CircularGeometry::CartesianR6_ZoniShiftedGyro_CircularGeometry(double Rmax)
     : Rmax(Rmax)
 {
 }
 
-double CartesianR6_ZoniShiftedGyro_CircularGeometry::rhs_f(const double& r, const double& theta)const
+double CartesianR6_ZoniShiftedGyro_CircularGeometry::rhs_f(double r, double theta)const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

@@ -8,10 +8,10 @@ class Refined_ZoniShiftedGyro_CulhamGeometry : public SourceTerm
 {
 public:
     Refined_ZoniShiftedGyro_CulhamGeometry() = default;
-    explicit Refined_ZoniShiftedGyro_CulhamGeometry(const double& Rmax);
+    explicit Refined_ZoniShiftedGyro_CulhamGeometry(double Rmax);
     virtual ~Refined_ZoniShiftedGyro_CulhamGeometry() = default;
 
-    double rhs_f(const double& r, const double& theta) const override;
+    double rhs_f(double r, double theta) const override;
 
 private:
     const double Rmax = 1.3;

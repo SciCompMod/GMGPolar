@@ -8,10 +8,10 @@ class PolarR6_Poisson_CircularGeometry : public SourceTerm
 {
 public:
     PolarR6_Poisson_CircularGeometry() = default;
-    explicit PolarR6_Poisson_CircularGeometry(const double& Rmax);
+    explicit PolarR6_Poisson_CircularGeometry(double Rmax);
     virtual ~PolarR6_Poisson_CircularGeometry() = default;
 
-    double rhs_f(const double& r, const double& theta) const override;
+    double rhs_f(double r, double theta) const override;
 
 private:
     const double Rmax = 1.3;

@@ -1,11 +1,11 @@
 #include "../include/InputFunctions/SourceTerms/polarR6_ZoniShifted_CircularGeometry.h"
 
-PolarR6_ZoniShifted_CircularGeometry::PolarR6_ZoniShifted_CircularGeometry(const double& Rmax)
+PolarR6_ZoniShifted_CircularGeometry::PolarR6_ZoniShifted_CircularGeometry(double Rmax)
     : Rmax(Rmax)
 {
 }
 
-double PolarR6_ZoniShifted_CircularGeometry::rhs_f(const double& r, const double& theta)const
+double PolarR6_ZoniShifted_CircularGeometry::rhs_f(double r, double theta)const
 {
     return (-pow((r / Rmax), 4.0)) *
            ((r / Rmax) *

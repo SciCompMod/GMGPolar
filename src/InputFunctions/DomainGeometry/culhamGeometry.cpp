@@ -1,6 +1,6 @@
 #include "../include/InputFunctions/DomainGeometry/culhamGeometry.h"
 
-CulhamGeometry::CulhamGeometry(const double& Rmax)
+CulhamGeometry::CulhamGeometry(double Rmax)
     : Rmax(Rmax)
 {
     initializeGeometry();

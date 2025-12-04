@@ -8,10 +8,10 @@ class PolarR6_ZoniShiftedGyro_CulhamGeometry : public SourceTerm
 {
 public:
     PolarR6_ZoniShiftedGyro_CulhamGeometry() = default;
-    explicit PolarR6_ZoniShiftedGyro_CulhamGeometry(const double& Rmax);
+    explicit PolarR6_ZoniShiftedGyro_CulhamGeometry(double Rmax);
     virtual ~PolarR6_ZoniShiftedGyro_CulhamGeometry() = default;
 
-    double rhs_f(const double& r, const double& theta) const override;
+    double rhs_f(double r, double theta) const override;
 
 private:
     const double Rmax = 1.3;

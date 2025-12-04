@@ -5,9 +5,9 @@ void Refined_Boundary_CzarnyGeometry::initializeGeometry()
     factor_xi = 1.0 / sqrt(1.0 - inverse_aspect_ratio_epsilon * inverse_aspect_ratio_epsilon / 4.0);
 }
 
-Refined_Boundary_CzarnyGeometry::Refined_Boundary_CzarnyGeometry(const double& Rmax,
-                                                                 const double& inverse_aspect_ratio_epsilon,
-                                                                 const double& ellipticity_e)
+Refined_Boundary_CzarnyGeometry::Refined_Boundary_CzarnyGeometry(double Rmax,
+                                                                 double inverse_aspect_ratio_epsilon,
+                                                                 double ellipticity_e)
     : Rmax(Rmax)
     , inverse_aspect_ratio_epsilon(inverse_aspect_ratio_epsilon)
     , ellipticity_e(ellipticity_e)
@@ -15,7 +15,7 @@ Refined_Boundary_CzarnyGeometry::Refined_Boundary_CzarnyGeometry(const double& R
     initializeGeometry();
 }
 
-double Refined_Boundary_CzarnyGeometry::u_D(const double& r, const double& theta)const
+double Refined_Boundary_CzarnyGeometry::u_D(double r, double theta)const
 {
     return ((-3.33823779536505e-15) * ((r / Rmax) * (r / Rmax)) - 0.0 * (r / Rmax) - 0.0 +
             exp((-3333.33333333333) * pow(((r / Rmax) - 0.9), 2.0))) *
@@ -25,7 +25,7 @@ double Refined_Boundary_CzarnyGeometry::u_D(const double& r, const double& theta
                cos(9.0 * theta);
 }
 
-double Refined_Boundary_CzarnyGeometry::u_D_Interior(const double& r, const double& theta)const
+double Refined_Boundary_CzarnyGeometry::u_D_Interior(double r, double theta)const
 {
     return ((-3.33823779536505e-15) * ((r / Rmax) * (r / Rmax)) - 0.0 * (r / Rmax) - 0.0 +
             exp((-3333.33333333333) * pow(((r / Rmax) - 0.9), 2.0))) *

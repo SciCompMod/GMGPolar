@@ -8,11 +8,11 @@ class CartesianR2_ZoniShiftedGyro_ShafranovGeometry : public SourceTerm
 {
 public:
     CartesianR2_ZoniShiftedGyro_ShafranovGeometry() = default;
-    explicit CartesianR2_ZoniShiftedGyro_ShafranovGeometry(const double& Rmax, const double& elongation_kappa,
-                                                           const double& shift_delta);
+    explicit CartesianR2_ZoniShiftedGyro_ShafranovGeometry(double Rmax, double elongation_kappa,
+                                                           double shift_delta);
     virtual ~CartesianR2_ZoniShiftedGyro_ShafranovGeometry() = default;
 
-    double rhs_f(const double& r, const double& theta) const override;
+    double rhs_f(double r, double theta) const override;
 
 private:
     const double Rmax             = 1.3;

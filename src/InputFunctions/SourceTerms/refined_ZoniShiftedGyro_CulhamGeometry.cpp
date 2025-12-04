@@ -1,11 +1,11 @@
 #include "../include/InputFunctions/SourceTerms/refined_ZoniShiftedGyro_CulhamGeometry.h"
 
-Refined_ZoniShiftedGyro_CulhamGeometry::Refined_ZoniShiftedGyro_CulhamGeometry(const double& Rmax)
+Refined_ZoniShiftedGyro_CulhamGeometry::Refined_ZoniShiftedGyro_CulhamGeometry(double Rmax)
     : Rmax(Rmax)
 {
 }
 
-double Refined_ZoniShiftedGyro_CulhamGeometry::rhs_f(const double& r, const double& theta)const
+double Refined_ZoniShiftedGyro_CulhamGeometry::rhs_f(double r, double theta)const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

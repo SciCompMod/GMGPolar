@@ -8,11 +8,11 @@ class SonnendruckerGyroCoefficients : public DensityProfileCoefficients
 {
 public:
     SonnendruckerGyroCoefficients() = default;
-    explicit SonnendruckerGyroCoefficients(const double& Rmax, const double& alpha);
+    explicit SonnendruckerGyroCoefficients(double Rmax, double alpha);
     virtual ~SonnendruckerGyroCoefficients() = default;
 
-    double alpha(const double& r, const double& theta) const override;
-    double beta(const double& r, const double& theta) const override;
+    double alpha(double r, double theta) const override;
+    double beta(double r, double theta) const override;
 
     double getAlphaJump() const override;
 

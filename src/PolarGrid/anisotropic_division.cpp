@@ -1,7 +1,7 @@
 #include "../../include/PolarGrid/polargrid.h"
 
-void PolarGrid::RadialAnisotropicDivision(std::vector<double>& r_temp, const double& R0, const double& R,
-                                          const int nr_exp, const double& refinement_radius,
+void PolarGrid::RadialAnisotropicDivision(std::vector<double>& r_temp, double R0, double R,
+                                          const int nr_exp, double refinement_radius,
                                           const int anisotropic_factor) const
 {
     // Calculate the percentage of refinement_radius.

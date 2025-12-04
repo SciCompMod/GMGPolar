@@ -6,7 +6,7 @@ void PolarR6_ZoniShiftedGyro_CzarnyGeometry::initializeGeometry()
 }
 
 PolarR6_ZoniShiftedGyro_CzarnyGeometry::PolarR6_ZoniShiftedGyro_CzarnyGeometry(
-    const double& Rmax, const double& inverse_aspect_ratio_epsilon, const double& ellipticity_e)
+    double Rmax, double inverse_aspect_ratio_epsilon, double ellipticity_e)
     : Rmax(Rmax)
     , inverse_aspect_ratio_epsilon(inverse_aspect_ratio_epsilon)
     , ellipticity_e(ellipticity_e)
@@ -14,7 +14,7 @@ PolarR6_ZoniShiftedGyro_CzarnyGeometry::PolarR6_ZoniShiftedGyro_CzarnyGeometry(
     initializeGeometry();
 }
 
-double PolarR6_ZoniShiftedGyro_CzarnyGeometry::rhs_f(const double& r, const double& theta)const
+double PolarR6_ZoniShiftedGyro_CzarnyGeometry::rhs_f(double r, double theta)const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

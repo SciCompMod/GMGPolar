@@ -249,7 +249,7 @@ private:
     int number_of_iterations_;
     std::vector<double> residual_norms_;
     double mean_residual_reduction_factor_;
-    bool converged(const double& current_residual_norm, const double& first_residual_norm);
+    bool converged(double current_residual_norm, double first_residual_norm);
 
     /* ---------------------------------------------------- */
     /* Compute exact error if an exact solution is provided */

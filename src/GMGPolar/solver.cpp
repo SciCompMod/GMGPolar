@@ -368,7 +368,7 @@ void GMGPolar::extrapolatedResidual(const int current_level, Vector<double> resi
 //   Convergence and Error Analysis Functions
 // =============================================================================
 
-bool GMGPolar::converged(const double& residual_norm, const double& relative_residual_norm)
+bool GMGPolar::converged(double residual_norm, double relative_residual_norm)
 {
     if (relative_tolerance_.has_value()) {
         if (!(relative_residual_norm > relative_tolerance_.value())) {

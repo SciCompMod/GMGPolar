@@ -1,6 +1,6 @@
 #include "../include/InputFunctions/DomainGeometry/circularGeometry.h"
 
-CircularGeometry::CircularGeometry(const double& Rmax)
+CircularGeometry::CircularGeometry(double Rmax)
     : Rmax(Rmax)
 {
 }

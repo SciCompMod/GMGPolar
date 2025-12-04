@@ -1,11 +1,11 @@
 #include "../include/InputFunctions/SourceTerms/polarR6_ZoniGyro_CircularGeometry.h"
 
-PolarR6_ZoniGyro_CircularGeometry::PolarR6_ZoniGyro_CircularGeometry(const double& Rmax)
+PolarR6_ZoniGyro_CircularGeometry::PolarR6_ZoniGyro_CircularGeometry(double Rmax)
     : Rmax(Rmax)
 {
 }
 
-double PolarR6_ZoniGyro_CircularGeometry::rhs_f(const double& r, const double& theta)const
+double PolarR6_ZoniGyro_CircularGeometry::rhs_f(double r, double theta)const
 {
     return 0.4096 * pow((r / Rmax), 6.0) * pow(((r / Rmax) - 1.0), 6.0) * exp(tanh(10.0 * (r / Rmax) - 5.0)) *
                cos(11.0 * theta) -

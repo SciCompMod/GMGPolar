@@ -8,11 +8,11 @@ class CartesianR6_Poisson_ShafranovGeometry : public SourceTerm
 {
 public:
     CartesianR6_Poisson_ShafranovGeometry() = default;
-    explicit CartesianR6_Poisson_ShafranovGeometry(const double& Rmax, const double& elongation_kappa,
-                                                   const double& shift_delta);
+    explicit CartesianR6_Poisson_ShafranovGeometry(double Rmax, double elongation_kappa,
+                                                   double shift_delta);
     virtual ~CartesianR6_Poisson_ShafranovGeometry() = default;
 
-    double rhs_f(const double& r, const double& theta) const override;
+    double rhs_f(double r, double theta) const override;
 
 private:
     const double Rmax             = 1.3;

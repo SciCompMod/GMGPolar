@@ -8,10 +8,10 @@ class Refined_ShafranovGeometry : public ExactSolution
 {
 public:
     Refined_ShafranovGeometry() = default;
-    explicit Refined_ShafranovGeometry(const double& Rmax, const double& elongation_kappa, const double& shift_delta);
+    explicit Refined_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
     virtual ~Refined_ShafranovGeometry() = default;
 
-    double exact_solution(const double& r, const double& theta) const override;
+    double exact_solution(double r, double theta) const override;
 
 private:
     const double Rmax             = 1.3;

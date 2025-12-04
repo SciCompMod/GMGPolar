@@ -8,13 +8,13 @@ class CartesianR2_Boundary_CzarnyGeometry : public BoundaryConditions
 {
 public:
     explicit CartesianR2_Boundary_CzarnyGeometry();
-    explicit CartesianR2_Boundary_CzarnyGeometry(const double& Rmax, const double& inverse_aspect_ratio_epsilon,
-                                                 const double& ellipticity_e);
+    explicit CartesianR2_Boundary_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon,
+                                                 double ellipticity_e);
 
     virtual ~CartesianR2_Boundary_CzarnyGeometry() = default;
 
-    double u_D(const double& r, const double& theta) const override;
-    double u_D_Interior(const double& r, const double& theta) const override;
+    double u_D(double r, double theta) const override;
+    double u_D_Interior(double r, double theta) const override;
 
 private:
     const double Rmax                         = 1.3;
