@@ -4,7 +4,7 @@ void GMGPolar::build_rhs_f(const Level& level, Vector<double> rhs_f,
                            const BoundaryConditions& boundary_conditions, const SourceTerm& source_term)
 {
     const PolarGrid& grid = level.grid();
-    assert(rhs_f.size() == grid.numberOfNodes());
+    assert(rhs_f.size() == static_cast<uint>(grid.numberOfNodes()));
 
     const auto& sin_theta_cache = level.levelCache().sin_theta();
     const auto& cos_theta_cache = level.levelCache().cos_theta();
@@ -62,7 +62,7 @@ void GMGPolar::build_rhs_f(const Level& level, Vector<double> rhs_f,
 void GMGPolar::discretize_rhs_f(const Level& level, Vector<double> rhs_f)
 {
     const PolarGrid& grid = level.grid();
-    assert(rhs_f.size() == grid.numberOfNodes());
+    assert(rhs_f.size() == static_cast<uint>(grid.numberOfNodes()));
 
     if (level.levelCache().cacheDomainGeometry()) {
         /* DomainGeometry is cached */

@@ -35,8 +35,8 @@ void applyExtrapolatedRestrictionGive0(const Level& fromLevel, const Level& toLe
     const PolarGrid& fineGrid   = fromLevel.grid();
     const PolarGrid& coarseGrid = toLevel.grid();
 
-    assert(x.size() == fineGrid.numberOfNodes());
-    assert(result.size() == coarseGrid.numberOfNodes());
+    assert(x.size() == static_cast<uint>(fineGrid.numberOfNodes()));
+    assert(result.size() == static_cast<uint>(coarseGrid.numberOfNodes()));
 
     assign(result, 0.0);
 

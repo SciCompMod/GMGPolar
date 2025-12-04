@@ -319,8 +319,8 @@ void GMGPolar::extrapolatedResidual(const int current_level, Vector<double> resi
     const PolarGrid& fineGrid   = levels_[current_level].grid();
     const PolarGrid& coarseGrid = levels_[current_level + 1].grid();
 
-    assert(residual.size() == fineGrid.numberOfNodes());
-    assert(residual_next_level.size() == coarseGrid.numberOfNodes());
+    assert(residual.size() == static_cast<uint>(fineGrid.numberOfNodes()));
+    assert(residual_next_level.size() == static_cast<uint>(coarseGrid.numberOfNodes()));
 
 #pragma omp parallel num_threads(threads_per_level_[current_level])
     {
@@ -399,7 +399,7 @@ std::pair<double, double> GMGPolar::computeExactError(Level& level, ConstVector<
     const auto& cos_theta_cache  = levelCache.cos_theta();
 
     assert(solution.size() == error.size());
-    assert(solution.size() == grid.numberOfNodes());
+    assert(solution.size() == static_cast<uint>(grid.numberOfNodes()));
 
 #pragma omp parallel num_threads(threads_per_level_[level.level_depth()])
     {
