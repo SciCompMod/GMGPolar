@@ -15,6 +15,8 @@
 #include <fstream>
 #include <iostream>
 
+#include "vector.h"
+
 template <typename T>
 class SparseMatrixCOO
 {
@@ -60,9 +62,9 @@ private:
     int rows_;
     int columns_;
     int nnz_;
-    std::unique_ptr<int[]> row_indices_;
-    std::unique_ptr<int[]> column_indices_;
-    std::unique_ptr<T[]> values_;
+    AllocatableVector<int> row_indices_;
+    AllocatableVector<int> column_indices_;
+    AllocatableVector<T> values_;
     bool is_symmetric_ = false;
 };
 
@@ -76,7 +78,7 @@ std::ostream& operator<<(std::ostream& stream, const SparseMatrixCOO<U>& matrix)
     }
     stream << "Non-zero elements (row, column, value):\n";
     for (int i = 0; i < matrix.nnz_; ++i) {
-        stream << "(" << matrix.row_indices_[i] << ", " << matrix.column_indices_[i] << ", " << matrix.values_[i]
+        stream << "(" << matrix.row_indices_(i) << ", " << matrix.column_indices_(i) << ", " << matrix.values_(i)
                << ")\n";
     }
     return stream;
@@ -96,7 +98,7 @@ void SparseMatrixCOO<T>::write_to_file(const std::string& filename) const
     }
     file << "Non-zero elements (row, column, value):\n";
     for (int i = 0; i < nnz_; ++i) {
-        file << "(" << row_indices_[i] << ", " << column_indices_[i] << ", " << values_[i] << ")\n";
+        file << "(" << row_indices_(i) << ", " << column_indices_(i) << ", " << values_(i) << ")\n";
     }
     file.close();
 }
@@ -124,9 +126,6 @@ SparseMatrixCOO<T>::SparseMatrixCOO()
     : rows_(0)
     , columns_(0)
     , nnz_(0)
-    , row_indices_(nullptr)
-    , column_indices_(nullptr)
-    , values_(nullptr)
     , is_symmetric_(false)
 {
 }
@@ -137,14 +136,14 @@ SparseMatrixCOO<T>::SparseMatrixCOO(const SparseMatrixCOO& other)
     : rows_(other.rows_)
     , columns_(other.columns_)
     , nnz_(other.nnz_)
-    , row_indices_(std::make_unique<int[]>(nnz_))
-    , column_indices_(std::make_unique<int[]>(nnz_))
-    , values_(std::make_unique<T[]>(nnz_))
+    , row_indices_("COO row indices", nnz_)
+    , column_indices_("COO column indices", nnz_)
+    , values_("COO values", nnz_)
     , is_symmetric_(other.is_symmetric_)
 {
-    std::copy(other.row_indices_.get(), other.row_indices_.get() + nnz_, row_indices_.get());
-    std::copy(other.column_indices_.get(), other.column_indices_.get() + nnz_, column_indices_.get());
-    std::copy(other.values_.get(), other.values_.get() + nnz_, values_.get());
+    Kokkos::deep_copy(row_indices_, other.row_indices_);
+    Kokkos::deep_copy(column_indices_, other.column_indices_);
+    Kokkos::deep_copy(values_, other.values_);
 }
 
 // copy assignment
@@ -157,18 +156,18 @@ SparseMatrixCOO<T>& SparseMatrixCOO<T>::operator=(const SparseMatrixCOO& other)
     }
     // Only allocate new memory if the sizes are different
     if (nnz_ != other.nnz_) {
-        row_indices_    = std::make_unique<int[]>(other.nnz_);
-        column_indices_ = std::make_unique<int[]>(other.nnz_);
-        values_         = std::make_unique<T[]>(other.nnz_);
+        row_indices_    = Vector<int>("COO row indices", other.nnz_);
+        column_indices_ = Vector<int>("COO column indices", other.nnz_);
+        values_         = Vector<T>("COO values", other.nnz_);
     }
     // Copy the elements
     rows_         = other.rows_;
     columns_      = other.columns_;
     nnz_          = other.nnz_;
     is_symmetric_ = other.is_symmetric_;
-    std::copy(other.row_indices_.get(), other.row_indices_.get() + nnz_, row_indices_.get());
-    std::copy(other.column_indices_.get(), other.column_indices_.get() + nnz_, column_indices_.get());
-    std::copy(other.values_.get(), other.values_.get() + nnz_, values_.get());
+    Kokkos::deep_copy(row_indices_, other.row_indices_);
+    Kokkos::deep_copy(column_indices_, other.column_indices_);
+    Kokkos::deep_copy(values_, other.values_);
     return *this;
 }
 
@@ -212,9 +211,9 @@ SparseMatrixCOO<T>::SparseMatrixCOO(int rows, int columns, int nnz)
     : rows_(rows)
     , columns_(columns)
     , nnz_(nnz)
-    , row_indices_(std::make_unique<int[]>(nnz))
-    , column_indices_(std::make_unique<int[]>(nnz))
-    , values_(std::make_unique<T[]>(nnz))
+    , row_indices_("COO row indices", nnz)
+    , column_indices_("COO column indices", nnz)
+    , values_("COO values", nnz)
     , is_symmetric_(false)
 {
     assert(rows >= 0);
@@ -228,9 +227,9 @@ SparseMatrixCOO<T>::SparseMatrixCOO(int rows, int columns, const std::vector<tri
     rows_(rows)
     , columns_(columns)
     , nnz_(entries.size())
-    , row_indices_(std::make_unique<int[]>(nnz_))
-    , column_indices_(std::make_unique<int[]>(nnz_))
-    , values_(std::make_unique<T[]>(nnz_))
+    , row_indices_("COO row indices", nnz_)
+    , column_indices_("COO column indices", nnz_)
+    , values_("COO values", nnz_)
     , is_symmetric_(false)
 {
     assert(rows_ >= 0);
@@ -240,9 +239,9 @@ SparseMatrixCOO<T>::SparseMatrixCOO(int rows, int columns, const std::vector<tri
     for (int i = 0; i < nnz_; i++) {
         assert(0 <= std::get<0>(entries[i]) && std::get<0>(entries[i]) < rows_);
         assert(0 <= std::get<1>(entries[i]) && std::get<1>(entries[i]) < columns_);
-        row_indices_[i]    = std::get<0>(entries[i]);
-        column_indices_[i] = std::get<1>(entries[i]);
-        values_[i]         = std::get<2>(entries[i]);
+        row_indices_(i)    = std::get<0>(entries[i]);
+        column_indices_(i) = std::get<1>(entries[i]);
+        values_(i)         = std::get<2>(entries[i]);
     }
 }
 
@@ -271,44 +270,44 @@ int& SparseMatrixCOO<T>::row_index(int nz_index)
 {
     assert(nz_index >= 0);
     assert(nz_index < this->nnz_);
-    return this->row_indices_[nz_index];
+    return row_indices_(nz_index);
 }
 template <typename T>
 const int& SparseMatrixCOO<T>::row_index(int nz_index) const
 {
     assert(nz_index >= 0);
     assert(nz_index < this->nnz_);
-    return this->row_indices_[nz_index];
+    return row_indices_(nz_index);
 }
 
 template <typename T>
 int& SparseMatrixCOO<T>::col_index(int nz_index)
 {
     assert(nz_index >= 0);
-    assert(nz_index < this->nnz_);
-    return this->column_indices_[nz_index];
+    assert(nz_index < nnz_);
+    return column_indices_(nz_index);
 }
 template <typename T>
 const int& SparseMatrixCOO<T>::col_index(int nz_index) const
 {
     assert(nz_index >= 0);
-    assert(nz_index < this->nnz_);
-    return this->column_indices_[nz_index];
+    assert(nz_index < nnz_);
+    return column_indices_(nz_index);
 }
 
 template <typename T>
 T& SparseMatrixCOO<T>::value(int nz_index)
 {
     assert(nz_index >= 0);
-    assert(nz_index < this->nnz_);
-    return this->values_[nz_index];
+    assert(nz_index < nnz_);
+    return values_(nz_index);
 }
 template <typename T>
 const T& SparseMatrixCOO<T>::value(int nz_index) const
 {
     assert(nz_index >= 0);
-    assert(nz_index < this->nnz_);
-    return this->values_[nz_index];
+    assert(nz_index < nnz_);
+    return values_(nz_index);
 }
 
 template <typename T>
@@ -325,17 +324,17 @@ void SparseMatrixCOO<T>::is_symmetric(bool value)
 template <typename T>
 int* SparseMatrixCOO<T>::row_indices_data() const
 {
-    return row_indices_.get();
+    return row_indices_.data();
 }
 
 template <typename T>
 int* SparseMatrixCOO<T>::column_indices_data() const
 {
-    return column_indices_.get();
+    return column_indices_.data();
 }
 
 template <typename T>
 T* SparseMatrixCOO<T>::values_data() const
 {
-    return values_.get();
+    return values_.data();
 }
