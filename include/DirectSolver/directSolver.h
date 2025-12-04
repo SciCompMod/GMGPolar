@@ -39,3 +39,9 @@ protected:
     const bool DirBC_Interior_;
     const int num_omp_threads_;
 };
+
+template<typename T>
+concept DirectSolverType = requires(const T obj, Vector<double> solution)
+{
+    { obj.solveInPlace(solution) };
+};
