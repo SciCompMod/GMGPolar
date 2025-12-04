@@ -8,7 +8,7 @@ CartesianR6_ShafranovGeometry::CartesianR6_ShafranovGeometry(const double& Rmax,
 {
 }
 
-double CartesianR6_ShafranovGeometry::exact_solution(const double& r, const double& theta)const
+double CartesianR6_ShafranovGeometry::exact_solution(const double& r, const double& theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

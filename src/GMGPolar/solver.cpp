@@ -405,14 +405,14 @@ std::pair<double, double> GMGPolar::computeExactError(Level& level, ConstVector<
         for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
             double r = grid.radius(i_r);
             for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                double theta     = grid.theta(i_theta);
+                double theta = grid.theta(i_theta);
                 error[grid.index(i_r, i_theta)] =
                     exact_solution.exact_solution(r, theta) - solution[grid.index(i_r, i_theta)];
             }
         }
 #pragma omp for nowait
         for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-            double theta     = grid.theta(i_theta);
+            double theta = grid.theta(i_theta);
             for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
                 double r = grid.radius(i_r);
                 error[grid.index(i_r, i_theta)] =

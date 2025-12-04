@@ -28,8 +28,7 @@ void DirectSolverGive::applySymmetryShiftInnerBoundary(Vector<double> x) const
         r            = grid_.radius(i_r);
         global_index = grid_.index(i_r, i_theta);
 
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art,
-                                  detDF);
+        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
 
         h2 = grid_.radialSpacing(i_r);
         k1 = grid_.angularSpacing(i_theta - 1);
@@ -49,8 +48,7 @@ void DirectSolverGive::applySymmetryShiftInnerBoundary(Vector<double> x) const
         r            = grid_.radius(i_r);
         global_index = grid_.index(i_r, i_theta);
 
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art,
-                                  detDF);
+        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
 
         h1 = grid_.radialSpacing(i_r - 1);
         k1 = grid_.angularSpacing(i_theta - 1);
@@ -85,8 +83,7 @@ void DirectSolverGive::applySymmetryShiftOuterBoundary(Vector<double> x) const
         r            = grid_.radius(i_r);
         global_index = grid_.index(i_r, i_theta);
 
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art,
-                                  detDF);
+        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
 
         h2 = grid_.radialSpacing(i_r);
         k1 = grid_.angularSpacing(i_theta - 1);
@@ -108,8 +105,7 @@ void DirectSolverGive::applySymmetryShiftOuterBoundary(Vector<double> x) const
         r            = grid_.radius(i_r);
         global_index = grid_.index(i_r, i_theta);
 
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art,
-                                  detDF);
+        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
 
         h1 = grid_.radialSpacing(i_r - 1);
         k1 = grid_.angularSpacing(i_theta - 1);

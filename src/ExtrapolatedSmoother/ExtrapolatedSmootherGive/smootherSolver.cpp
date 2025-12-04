@@ -3,8 +3,8 @@
 #include "../../../include/common/geometry_helper.h"
 
 // The current position is marked with a ~ symbol.
-#define NODE_APPLY_ASC_ORTHO_CIRCLE_GIVE(i_r, i_theta, r, theta, grid, DirBC_Interior,                         \
-                                         smoother_color, x, rhs, temp, arr, att, art, detDF, coeff_beta)                             \
+#define NODE_APPLY_ASC_ORTHO_CIRCLE_GIVE(i_r, i_theta, r, theta, grid, DirBC_Interior, smoother_color, x, rhs, temp,                 \
+                                         arr, att, art, detDF, coeff_beta)                                                           \
     do {                                                                                                                             \
         assert(i_r >= 0 && i_r <= grid_.numberSmootherCircles());                                                                    \
         bool isOddNumberSmootherCircles = (grid.numberSmootherCircles() & 1);                                                        \
@@ -364,8 +364,8 @@
         }                                                                                                                            \
     } while (0)
 
-#define NODE_APPLY_ASC_ORTHO_RADIAL_GIVE(i_r, i_theta, r, theta, grid, DirBC_Interior,           \
-                                         smoother_color, x, rhs, temp, arr, att, art, detDF, coeff_beta)               \
+#define NODE_APPLY_ASC_ORTHO_RADIAL_GIVE(i_r, i_theta, r, theta, grid, DirBC_Interior, smoother_color, x, rhs, temp,   \
+                                         arr, att, art, detDF, coeff_beta)                                             \
     do {                                                                                                               \
         assert(i_r >= grid.numberSmootherCircles() - 1 && i_r < grid.nr());                                            \
         SmootherColor node_color = (i_theta & 1) ? SmootherColor::White : SmootherColor::Black;                        \
@@ -848,13 +848,12 @@ void ExtrapolatedSmootherGive::applyAscOrthoCircleSection(const int i_r, const S
             detDF = level_cache_.detDF()[index];
         }
         else {
-            compute_jacobian_elements(domain_geometry_, r, theta, coeff_alpha, arr, att, art,
-                                      detDF);
+            compute_jacobian_elements(domain_geometry_, r, theta, coeff_alpha, arr, att, art, detDF);
         }
 
         // Apply Asc Ortho at the current node
-        NODE_APPLY_ASC_ORTHO_CIRCLE_GIVE(i_r, i_theta, r, theta, grid_, DirBC_Interior_,
-                                         smoother_color, x, rhs, temp, arr, att, art, detDF, coeff_beta);
+        NODE_APPLY_ASC_ORTHO_CIRCLE_GIVE(i_r, i_theta, r, theta, grid_, DirBC_Interior_, smoother_color, x, rhs, temp,
+                                         arr, att, art, detDF, coeff_beta);
     }
 }
 
@@ -862,7 +861,7 @@ void ExtrapolatedSmootherGive::applyAscOrthoRadialSection(const int i_theta, con
                                                           ConstVector<double> x, ConstVector<double> rhs,
                                                           Vector<double> temp)
 {
-    const double theta     = grid_.theta(i_theta);
+    const double theta = grid_.theta(i_theta);
 
     /* !!! i_r = grid_.numberSmootherCircles()-1 !!! */
     for (int i_r = grid_.numberSmootherCircles() - 1; i_r < grid_.nr(); i_r++) {
@@ -891,13 +890,12 @@ void ExtrapolatedSmootherGive::applyAscOrthoRadialSection(const int i_theta, con
             detDF = level_cache_.detDF()[index];
         }
         else {
-            compute_jacobian_elements(domain_geometry_, r, theta, coeff_alpha, arr, att, art,
-                                      detDF);
+            compute_jacobian_elements(domain_geometry_, r, theta, coeff_alpha, arr, att, art, detDF);
         }
 
         // Apply Asc Ortho at the current node
-        NODE_APPLY_ASC_ORTHO_RADIAL_GIVE(i_r, i_theta, r, theta, grid_, DirBC_Interior_,
-                                         smoother_color, x, rhs, temp, arr, att, art, detDF, coeff_beta);
+        NODE_APPLY_ASC_ORTHO_RADIAL_GIVE(i_r, i_theta, r, theta, grid_, DirBC_Interior_, smoother_color, x, rhs, temp,
+                                         arr, att, art, detDF, coeff_beta);
     }
 }
 

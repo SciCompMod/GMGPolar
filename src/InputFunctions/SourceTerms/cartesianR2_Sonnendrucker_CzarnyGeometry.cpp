@@ -14,7 +14,7 @@ CartesianR2_Sonnendrucker_CzarnyGeometry::CartesianR2_Sonnendrucker_CzarnyGeomet
     initializeGeometry();
 }
 
-double CartesianR2_Sonnendrucker_CzarnyGeometry::rhs_f(const double& r, const double& theta)const
+double CartesianR2_Sonnendrucker_CzarnyGeometry::rhs_f(const double& r, const double& theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

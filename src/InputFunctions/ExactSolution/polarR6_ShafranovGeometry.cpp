@@ -8,7 +8,7 @@ PolarR6_ShafranovGeometry::PolarR6_ShafranovGeometry(const double& Rmax, const d
 {
 }
 
-double PolarR6_ShafranovGeometry::exact_solution(const double& r, const double& theta)const
+double PolarR6_ShafranovGeometry::exact_solution(const double& r, const double& theta) const
 {
     return 0.4096 * pow((r / Rmax), 6.0) * pow(((r / Rmax) - 1.0), 6.0) * cos(11.0 * theta);
 }

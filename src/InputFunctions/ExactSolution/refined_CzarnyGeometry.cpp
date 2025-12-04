@@ -14,7 +14,7 @@ Refined_CzarnyGeometry::Refined_CzarnyGeometry(const double& Rmax, const double&
     initializeGeometry();
 }
 
-double Refined_CzarnyGeometry::exact_solution(const double& r, const double& theta)const
+double Refined_CzarnyGeometry::exact_solution(const double& r, const double& theta) const
 {
     return ((-3.33823779536505e-15) * ((r / Rmax) * (r / Rmax)) - 0.0 * (r / Rmax) - 0.0 +
             exp((-3333.33333333333) * pow(((r / Rmax) - 0.9), 2.0))) *

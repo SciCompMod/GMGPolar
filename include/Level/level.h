@@ -130,8 +130,8 @@ public:
     ConstVector<double> detDF() const;
 
     inline void obtainValues(const int i_r, const int i_theta, const int global_index, const double& r,
-                             const double& theta, double& coeff_beta, double& arr,
-                             double& att, double& art, double& detDF) const
+                             const double& theta, double& coeff_beta, double& arr, double& att, double& art,
+                             double& detDF) const
     {
         if (cache_density_profile_coefficients_)
             coeff_beta = coeff_beta_[global_index];
@@ -153,8 +153,7 @@ public:
             detDF = detDF_[global_index];
         }
         else {
-            compute_jacobian_elements(domain_geometry_, r, theta, coeff_alpha, arr, att, art,
-                                      detDF);
+            compute_jacobian_elements(domain_geometry_, r, theta, coeff_alpha, arr, att, art, detDF);
         }
     }
 
