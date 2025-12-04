@@ -64,7 +64,7 @@ template <typename T>
 void expect_vector_near(const Vector<T>& a, const Vector<T>& b, double tol = 1e-8)
 {
     ASSERT_EQ(a.size(), b.size());
-    for (int i = 0; i < a.size(); ++i)
+    for (uint i = 0; i < a.size(); ++i)
         EXPECT_NEAR(a(i), b(i), tol);
 }
 
@@ -437,7 +437,7 @@ template <typename T>
 void expectVectorNear(const Vector<T>& a, const Vector<T>& b, double tol = 1e-8)
 {
     ASSERT_EQ(a.size(), b.size());
-    for (int i = 0; i < a.size(); ++i) {
+    for (uint i = 0; i < a.size(); ++i) {
         EXPECT_NEAR(a(i), b(i), tol);
     }
 }

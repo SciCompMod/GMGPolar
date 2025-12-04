@@ -10,8 +10,8 @@ void Interpolation::applyExtrapolatedRestriction0(const Level& fromLevel, const 
     const PolarGrid& fineGrid   = fromLevel.grid();
     const PolarGrid& coarseGrid = toLevel.grid();
 
-    assert(x.size() == fineGrid.numberOfNodes());
-    assert(result.size() == coarseGrid.numberOfNodes());
+    assert(x.size() == static_cast<uint>(fineGrid.numberOfNodes()));
+    assert(result.size() == static_cast<uint>(coarseGrid.numberOfNodes()));
 
 #pragma omp parallel for num_threads(threads_per_level_[toLevel.level_depth()])
     for (int index = 0; index < coarseGrid.numberOfNodes(); index++) {
@@ -73,8 +73,8 @@ void Interpolation::applyExtrapolatedRestriction(const Level& fromLevel, const L
     const PolarGrid& fineGrid   = fromLevel.grid();
     const PolarGrid& coarseGrid = toLevel.grid();
 
-    assert(x.size() == fineGrid.numberOfNodes());
-    assert(result.size() == coarseGrid.numberOfNodes());
+    assert(x.size() == static_cast<uint>(fineGrid.numberOfNodes()));
+    assert(result.size() == static_cast<uint>(coarseGrid.numberOfNodes()));
 
     const int coarseNumberSmootherCircles = coarseGrid.numberSmootherCircles();
 

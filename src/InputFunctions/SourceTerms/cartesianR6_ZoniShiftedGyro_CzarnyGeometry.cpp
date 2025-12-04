@@ -14,9 +14,10 @@ CartesianR6_ZoniShiftedGyro_CzarnyGeometry::CartesianR6_ZoniShiftedGyro_CzarnyGe
     initializeGeometry();
 }
 
-double CartesianR6_ZoniShiftedGyro_CzarnyGeometry::rhs_f(const double& r, const double& theta, const double& sin_theta,
-                                                         const double& cos_theta) const
+double CartesianR6_ZoniShiftedGyro_CzarnyGeometry::rhs_f(const double& r, const double& theta) const
 {
+    double sin_theta = std::sin(theta);
+    double cos_theta = std::cos(theta);
     double temp =
         sqrt(inverse_aspect_ratio_epsilon * (inverse_aspect_ratio_epsilon + 2.0 * (r / Rmax) * cos_theta) + 1.0);
     double sin_theta_pow2 = pow(sin_theta, 2.0);

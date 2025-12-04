@@ -14,9 +14,10 @@ CartesianR6_CzarnyGeometry::CartesianR6_CzarnyGeometry(const double& Rmax, const
     initializeGeometry();
 }
 
-double CartesianR6_CzarnyGeometry::exact_solution(const double& r, const double& theta, const double& sin_theta,
-                                                  const double& cos_theta) const
+double CartesianR6_CzarnyGeometry::exact_solution(const double& r, const double& theta) const
 {
+    double sin_theta = std::sin(theta);
+    double cos_theta = std::cos(theta);
     double temp =
         sqrt(inverse_aspect_ratio_epsilon * (2.0 * (r / Rmax) * cos_theta + inverse_aspect_ratio_epsilon) + 1.0);
     return 0.4096 * pow(((r / Rmax) - 1.0), 6.0) * pow(((r / Rmax) + 1.0), 6.0) *

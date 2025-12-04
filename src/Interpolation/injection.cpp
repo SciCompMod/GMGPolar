@@ -10,8 +10,8 @@ void Interpolation::applyInjection(const Level& fromLevel, const Level& toLevel,
     const PolarGrid& fineGrid   = fromLevel.grid();
     const PolarGrid& coarseGrid = toLevel.grid();
 
-    assert(x.size() == fineGrid.numberOfNodes());
-    assert(result.size() == coarseGrid.numberOfNodes());
+    assert(x.size() == static_cast<uint>(fineGrid.numberOfNodes()));
+    assert(result.size() == static_cast<uint>(coarseGrid.numberOfNodes()));
 
 #pragma omp parallel num_threads(threads_per_level_[toLevel.level_depth()]) if (fineGrid.numberOfNodes() > 10'000)
     {

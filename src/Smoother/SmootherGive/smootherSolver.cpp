@@ -2,8 +2,8 @@
 
 #include "../../../include/common/geometry_helper.h"
 
-#define NODE_APPLY_ASC_ORTHO_CIRCLE_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, grid, DirBC_Interior,                     \
-                                         smoother_color, x, rhs, temp, arr, att, art, detDF, coeff_beta)                         \
+#define NODE_APPLY_ASC_ORTHO_CIRCLE_GIVE(i_r, i_theta, r, theta, grid, DirBC_Interior, smoother_color, x, rhs, temp,             \
+                                         arr, att, art, detDF, coeff_beta)                                                       \
     do {                                                                                                                         \
         assert(i_r >= 0 && i_r <= grid_.numberSmootherCircles());                                                                \
         bool isOddNumberSmootherCircles = (grid.numberSmootherCircles() & 1);                                                    \
@@ -146,8 +146,8 @@
         }                                                                                                                        \
     } while (0)
 
-#define NODE_APPLY_ASC_ORTHO_RADIAL_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, grid, DirBC_Interior,           \
-                                         smoother_color, x, rhs, temp, arr, att, art, detDF, coeff_beta)               \
+#define NODE_APPLY_ASC_ORTHO_RADIAL_GIVE(i_r, i_theta, r, theta, grid, DirBC_Interior, smoother_color, x, rhs, temp,   \
+                                         arr, att, art, detDF, coeff_beta)                                             \
     do {                                                                                                               \
         assert(i_r >= grid.numberSmootherCircles() - 1 && i_r < grid.nr());                                            \
         SmootherColor node_color = (i_theta & 1) ? SmootherColor::White : SmootherColor::Black;                        \
@@ -328,17 +328,11 @@ void SmootherGive::applyAscOrthoCircleSection(const int i_r, const SmootherColor
 {
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles() + 1);
 
-    const auto& sin_theta_cache = level_cache_.sin_theta();
-    const auto& cos_theta_cache = level_cache_.cos_theta();
-
     const double r = grid_.radius(i_r);
 
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
         const double theta = grid_.theta(i_theta);
         const int index    = grid_.index(i_r, i_theta);
-
-        const double sin_theta = sin_theta_cache[i_theta];
-        const double cos_theta = cos_theta_cache[i_theta];
 
         double coeff_beta;
         if (level_cache_.cacheDensityProfileCoefficients())
@@ -362,25 +356,19 @@ void SmootherGive::applyAscOrthoCircleSection(const int i_r, const SmootherColor
             detDF = level_cache_.detDF()[index];
         }
         else {
-            compute_jacobian_elements(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art,
-                                      detDF);
+            compute_jacobian_elements(domain_geometry_, r, theta, coeff_alpha, arr, att, art, detDF);
         }
 
         // Apply Asc Ortho at the current node
-        NODE_APPLY_ASC_ORTHO_CIRCLE_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, grid_, DirBC_Interior_,
-                                         smoother_color, x, rhs, temp, arr, att, art, detDF, coeff_beta);
+        NODE_APPLY_ASC_ORTHO_CIRCLE_GIVE(i_r, i_theta, r, theta, grid_, DirBC_Interior_, smoother_color, x, rhs, temp,
+                                         arr, att, art, detDF, coeff_beta);
     }
 }
 
 void SmootherGive::applyAscOrthoRadialSection(const int i_theta, const SmootherColor smoother_color,
                                               ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp)
 {
-    const auto& sin_theta_cache = level_cache_.sin_theta();
-    const auto& cos_theta_cache = level_cache_.cos_theta();
-
-    const double theta     = grid_.theta(i_theta);
-    const double sin_theta = sin_theta_cache[i_theta];
-    const double cos_theta = cos_theta_cache[i_theta];
+    const double theta = grid_.theta(i_theta);
 
     /* !!! i_r = grid_.numberSmootherCircles()-1 !!! */
     for (int i_r = grid_.numberSmootherCircles() - 1; i_r < grid_.nr(); i_r++) {
@@ -409,12 +397,11 @@ void SmootherGive::applyAscOrthoRadialSection(const int i_theta, const SmootherC
             detDF = level_cache_.detDF()[index];
         }
         else {
-            compute_jacobian_elements(domain_geometry_, r, theta, sin_theta, cos_theta, coeff_alpha, arr, att, art,
-                                      detDF);
+            compute_jacobian_elements(domain_geometry_, r, theta, coeff_alpha, arr, att, art, detDF);
         }
         // Apply Asc Ortho at the current node
-        NODE_APPLY_ASC_ORTHO_RADIAL_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, grid_, DirBC_Interior_,
-                                         smoother_color, x, rhs, temp, arr, att, art, detDF, coeff_beta);
+        NODE_APPLY_ASC_ORTHO_RADIAL_GIVE(i_r, i_theta, r, theta, grid_, DirBC_Interior_, smoother_color, x, rhs, temp,
+                                         arr, att, art, detDF, coeff_beta);
     }
 }
 

@@ -319,8 +319,8 @@ void GMGPolar::extrapolatedResidual(const int current_level, Vector<double> resi
     const PolarGrid& fineGrid   = levels_[current_level].grid();
     const PolarGrid& coarseGrid = levels_[current_level + 1].grid();
 
-    assert(residual.size() == fineGrid.numberOfNodes());
-    assert(residual_next_level.size() == coarseGrid.numberOfNodes());
+    assert(residual.size() == static_cast<uint>(fineGrid.numberOfNodes()));
+    assert(residual_next_level.size() == static_cast<uint>(coarseGrid.numberOfNodes()));
 
 #pragma omp parallel num_threads(threads_per_level_[current_level])
     {
@@ -395,11 +395,9 @@ std::pair<double, double> GMGPolar::computeExactError(Level& level, ConstVector<
 {
     const PolarGrid& grid        = level.grid();
     const LevelCache& levelCache = level.levelCache();
-    const auto& sin_theta_cache  = levelCache.sin_theta();
-    const auto& cos_theta_cache  = levelCache.cos_theta();
 
     assert(solution.size() == error.size());
-    assert(solution.size() == grid.numberOfNodes());
+    assert(solution.size() == static_cast<uint>(grid.numberOfNodes()));
 
 #pragma omp parallel num_threads(threads_per_level_[level.level_depth()])
     {
@@ -407,22 +405,18 @@ std::pair<double, double> GMGPolar::computeExactError(Level& level, ConstVector<
         for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
             double r = grid.radius(i_r);
             for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                double theta     = grid.theta(i_theta);
-                double sin_theta = sin_theta_cache[i_theta];
-                double cos_theta = cos_theta_cache[i_theta];
+                double theta = grid.theta(i_theta);
                 error[grid.index(i_r, i_theta)] =
-                    exact_solution.exact_solution(r, theta, sin_theta, cos_theta) - solution[grid.index(i_r, i_theta)];
+                    exact_solution.exact_solution(r, theta) - solution[grid.index(i_r, i_theta)];
             }
         }
 #pragma omp for nowait
         for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-            double theta     = grid.theta(i_theta);
-            double sin_theta = sin_theta_cache[i_theta];
-            double cos_theta = cos_theta_cache[i_theta];
+            double theta = grid.theta(i_theta);
             for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
                 double r = grid.radius(i_r);
                 error[grid.index(i_r, i_theta)] =
-                    exact_solution.exact_solution(r, theta, sin_theta, cos_theta) - solution[grid.index(i_r, i_theta)];
+                    exact_solution.exact_solution(r, theta) - solution[grid.index(i_r, i_theta)];
             }
         }
     }

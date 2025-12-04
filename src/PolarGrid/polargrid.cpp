@@ -411,7 +411,6 @@ void PolarGrid::checkParameters(const std::vector<double>& radii, const std::vec
 
     // Additional constraint for our stencil. Not needed in general.
     if (ntheta() % 2 != 0) {
-        throw std::invalid_argument(
-            "ntheta must be divisible by 2.");
+        throw std::invalid_argument("ntheta must be divisible by 2.");
     }
 }

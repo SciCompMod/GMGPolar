@@ -5,8 +5,7 @@ PolarR6_Poisson_CircularGeometry::PolarR6_Poisson_CircularGeometry(const double&
 {
 }
 
-double PolarR6_Poisson_CircularGeometry::rhs_f(const double& r, const double& theta, const double& sin_theta,
-                                               const double& cos_theta) const
+double PolarR6_Poisson_CircularGeometry::rhs_f(const double& r, const double& theta) const
 {
     return (-pow((r / Rmax), 4.0)) * (14.7456 * (r / Rmax) * pow(((r / Rmax) - 1.0), 5.0) * cos(11.0 * theta) +
                                       1.0 * (r / Rmax) *

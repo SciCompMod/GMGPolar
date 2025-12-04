@@ -11,7 +11,7 @@ public:
     explicit CartesianR6_Zoni_CircularGeometry(const double& Rmax);
     virtual ~CartesianR6_Zoni_CircularGeometry() = default;
 
-    double rhs_f(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const override;
+    double rhs_f(const double& r, const double& theta) const override;
 
 private:
     const double Rmax = 1.3;

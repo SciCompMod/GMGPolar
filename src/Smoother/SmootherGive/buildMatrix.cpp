@@ -69,18 +69,18 @@
                                                                                                                        \
             /* Visualization of the sourrounding tridiagonal matrices. */                                              \
             /* left_matrix, center_matrix, right_matrix */                                                             \
-            /* | O | O | O | */                                                                                        \
+            /* | o | o | o | */                                                                                        \
             /* |   |   |   | */                                                                                        \
-            /* | O | Õ | O | */                                                                                        \
+            /* | o | O | o | */                                                                                        \
             /* |   |   |   | */                                                                                        \
-            /* | O | O | O | */                                                                                        \
+            /* | o | o | o | */                                                                                        \
             /* or */                                                                                                   \
             /* left_matrix, right_matrix */                                                                            \
-            /* | O | O | O || O   O   O   O  */                                                                        \
+            /* | o | o | o || o   o   o   o  */                                                                        \
             /* |   |   |   || -------------- */                                                                        \
-            /* | O | O | Õ || O   O   O   O  <- right_matrix */                                                        \
+            /* | o | o | O || o   o   o   o  <- right_matrix */                                                        \
             /* |   |   |   || -------------- */                                                                        \
-            /* | O | O | O || O   O   O   O  */                                                                        \
+            /* | o | o | o || o   o   o   o  */                                                                        \
             auto& left_matrix   = circle_tridiagonal_solver[i_r - 1];                                                  \
             auto& center_matrix = circle_tridiagonal_solver[i_r];                                                      \
             auto& right_matrix  = (i_r + 1 == numberSmootherCircles) ? radial_tridiagonal_solver[i_theta]              \
@@ -171,11 +171,11 @@
             const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                   \
                                                                                                                        \
             /* ---------- */                                                                                           \
-            /* O   O   O  <- top_matrix */                                                                             \
+            /* o   o   o  <- top_matrix */                                                                             \
             /* ---------- */                                                                                           \
-            /* O   Õ   O  <- center_matrix */                                                                          \
+            /* o   O   o  <- center_matrix */                                                                          \
             /* ---------- */                                                                                           \
-            /* O   O   O  <- bottom_matrix */                                                                          \
+            /* o   o   o  <- bottom_matrix */                                                                          \
             /* ---------- */                                                                                           \
             auto& bottom_matrix = radial_tridiagonal_solver[i_theta_M1];                                               \
             auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                  \
@@ -301,11 +301,11 @@
                 const double coeff4 = 0.5 * (h1 + h2) / k2;                                                            \
                                                                                                                        \
                 /* left_matrix (across-the origin), center_matrix, right_matrix */                                     \
-                /* -| X | O | X | */                                                                                   \
+                /* -| x | o | x | */                                                                                   \
                 /* -|   |   |   | */                                                                                   \
-                /* -| Õ | O | O | */                                                                                   \
+                /* -| O | o | o | */                                                                                   \
                 /* -|   |   |   | */                                                                                   \
-                /* -| X | O | X | */                                                                                   \
+                /* -| x | o | x | */                                                                                   \
                 auto& center_matrix = inner_boundary_circle_matrix;                                                    \
                 auto& right_matrix  = circle_tridiagonal_solver[i_r + 1];                                              \
                 auto& left_matrix   = inner_boundary_circle_matrix;                                                    \
@@ -438,11 +438,11 @@
             const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                   \
             const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                   \
                                                                                                                        \
-            /* | O | O | O || O   O   O   O  <- top_matrix */                                                          \
+            /* | o | o | o || o   o   o   o  <- top_matrix */                                                          \
             /* |   |   |   || -------------- */                                                                        \
-            /* | O | O | O || Õ   O   O   O  <- center_matrix */                                                       \
+            /* | o | o | o || O   o   o   o  <- center_matrix */                                                       \
             /* |   |   |   || -------------- */                                                                        \
-            /* | O | O | O || O   O   O   O  <- bottom_matrix */                                                       \
+            /* | o | o | o || o   o   o   o  <- bottom_matrix */                                                       \
             auto& bottom_matrix = radial_tridiagonal_solver[i_theta_M1];                                               \
             auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                  \
             auto& top_matrix    = radial_tridiagonal_solver[i_theta_P1];                                               \
@@ -516,11 +516,11 @@
             const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                   \
                                                                                                                        \
             /* ---------------|| */                                                                                    \
-            /* O   O   O   O  || <- top_matrix */                                                                      \
+            /* o   o   o   o  || <- top_matrix */                                                                      \
             /* ---------------|| */                                                                                    \
-            /* O   O   Õ   O  || <- center_matrix */                                                                   \
+            /* o   o   O   o  || <- center_matrix */                                                                   \
             /* ---------------|| */                                                                                    \
-            /* O   O   O   O  || <- bottom_matrix */                                                                   \
+            /* o   o   o   o  || <- bottom_matrix */                                                                   \
             /* ---------------|| */                                                                                    \
             auto& bottom_matrix = radial_tridiagonal_solver[i_theta_M1];                                               \
             auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                  \
@@ -584,11 +584,11 @@
             double coeff1 = 0.5 * (k1 + k2) / h1;                                                                      \
                                                                                                                        \
             /* -----------|| */                                                                                        \
-            /* O   O   O  || */                                                                                        \
+            /* o   o   o  || */                                                                                        \
             /* -----------|| */                                                                                        \
-            /* O   O   Õ  || <- center_matrix*/                                                                        \
+            /* o   o   O  || <- center_matrix*/                                                                        \
             /* -----------|| */                                                                                        \
-            /* O   O   O  || */                                                                                        \
+            /* o   o   o  || */                                                                                        \
             /* -----------|| */                                                                                        \
             auto& center_matrix = radial_tridiagonal_solver[i_theta];                                                  \
                                                                                                                        \
@@ -616,10 +616,8 @@ void SmootherGive::buildAscCircleSection(const int i_r)
         const int global_index = grid_.index(i_r, i_theta);
         const double theta     = grid_.theta(i_theta);
 
-        double sin_theta, cos_theta;
         double coeff_beta, arr, att, art, detDF;
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, sin_theta, cos_theta, coeff_beta, arr, att, art,
-                                  detDF);
+        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Build Asc at the current node
         NODE_BUILD_SMOOTHER_GIVE(i_r, i_theta, grid_, DirBC_Interior_, inner_boundary_circle_matrix_,
@@ -634,10 +632,8 @@ void SmootherGive::buildAscRadialSection(const int i_theta)
         const int global_index = grid_.index(i_r, i_theta);
         const double r         = grid_.radius(i_r);
 
-        double sin_theta, cos_theta;
         double coeff_beta, arr, att, art, detDF;
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, sin_theta, cos_theta, coeff_beta, arr, att, art,
-                                  detDF);
+        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Build Asc at the current node
         NODE_BUILD_SMOOTHER_GIVE(i_r, i_theta, grid_, DirBC_Interior_, inner_boundary_circle_matrix_,

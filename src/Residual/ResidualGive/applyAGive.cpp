@@ -2,8 +2,7 @@
 
 #include "../../../include/common/geometry_helper.h"
 
-#define NODE_APPLY_A_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, grid, DirBC_Interior, result, x, arr, att,                        \
-                          art, detDF, coeff_beta)                                                                                         \
+#define NODE_APPLY_A_GIVE(i_r, i_theta, r, theta, grid, DirBC_Interior, result, x, arr, att, art, detDF, coeff_beta)                      \
     do {                                                                                                                                  \
         /* -------------------- */                                                                                                        \
         /* Node in the interior */                                                                                                        \
@@ -250,13 +249,10 @@ void ResidualGive::applyCircleSection(const int i_r, Vector<double> result, Cons
         const int global_index = grid_.index(i_r, i_theta);
         const double theta     = grid_.theta(i_theta);
 
-        double sin_theta, cos_theta;
         double coeff_beta, arr, att, art, detDF;
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, sin_theta, cos_theta, coeff_beta, arr, att, art,
-                                  detDF);
+        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
 
-        NODE_APPLY_A_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, grid_, DirBC_Interior_, result, x, arr, att,
-                          art, detDF, coeff_beta);
+        NODE_APPLY_A_GIVE(i_r, i_theta, r, theta, grid_, DirBC_Interior_, result, x, arr, att, art, detDF, coeff_beta);
     }
 }
 
@@ -267,12 +263,9 @@ void ResidualGive::applyRadialSection(const int i_theta, Vector<double> result, 
         const int global_index = grid_.index(i_r, i_theta);
         const double r         = grid_.radius(i_r);
 
-        double sin_theta, cos_theta;
         double coeff_beta, arr, att, art, detDF;
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, sin_theta, cos_theta, coeff_beta, arr, att, art,
-                                  detDF);
+        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
 
-        NODE_APPLY_A_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, grid_, DirBC_Interior_, result, x, arr, att,
-                          art, detDF, coeff_beta);
+        NODE_APPLY_A_GIVE(i_r, i_theta, r, theta, grid_, DirBC_Interior_, result, x, arr, att, art, detDF, coeff_beta);
     }
 }

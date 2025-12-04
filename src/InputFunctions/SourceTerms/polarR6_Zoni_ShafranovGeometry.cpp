@@ -8,9 +8,10 @@ PolarR6_Zoni_ShafranovGeometry::PolarR6_Zoni_ShafranovGeometry(const double& Rma
 {
 }
 
-double PolarR6_Zoni_ShafranovGeometry::rhs_f(const double& r, const double& theta, const double& sin_theta,
-                                             const double& cos_theta) const
+double PolarR6_Zoni_ShafranovGeometry::rhs_f(const double& r, const double& theta) const
 {
+    double sin_theta = std::sin(theta);
+    double cos_theta = std::cos(theta);
     return (-pow((r / Rmax), 4.0)) *
            ((-9.0112) * shift_delta * (r / Rmax) * (elongation_kappa - 1.0) * pow(((r / Rmax) - 1.0), 6.0) *
                 exp(-tanh(10.0 * (r / Rmax) - 5.0)) * sin_theta * sin(11.0 * theta) /

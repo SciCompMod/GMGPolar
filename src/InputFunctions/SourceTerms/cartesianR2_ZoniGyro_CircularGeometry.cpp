@@ -5,9 +5,10 @@ CartesianR2_ZoniGyro_CircularGeometry::CartesianR2_ZoniGyro_CircularGeometry(con
 {
 }
 
-double CartesianR2_ZoniGyro_CircularGeometry::rhs_f(const double& r, const double& theta, const double& sin_theta,
-                                                    const double& cos_theta) const
+double CartesianR2_ZoniGyro_CircularGeometry::rhs_f(const double& r, const double& theta) const
 {
+    double sin_theta = std::sin(theta);
+    double cos_theta = std::cos(theta);
     return (1.0 - (r / Rmax) * (r / Rmax)) * exp(tanh(10.0 * (r / Rmax) - 5.0)) *
                sin(2.0 * M_PI * (r / Rmax) * sin_theta) * cos(2.0 * M_PI * (r / Rmax) * cos_theta) -
            ((r / Rmax) * (10.0 * pow(tanh(10.0 * (r / Rmax) - 5.0), 2.0) - 10.0) *
