@@ -11,7 +11,7 @@
             matrix.value(ptr + offset) += val;                                                                         \
         } while (0)
 
-    #define NODE_BUILD_SOLVER_MATRIX_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, grid, DirBC_Interior,            \
+    #define NODE_BUILD_SOLVER_MATRIX_GIVE(i_r, i_theta, r, theta, grid, DirBC_Interior,            \
                                           solver_matrix, arr, att, art, detDF, coeff_beta)                               \
         do {                                                                                                             \
             int ptr, offset;                                                                                             \
@@ -772,13 +772,12 @@ void DirectSolverGive::buildSolverMatrixCircleSection(const int i_r, SparseMatri
         const int global_index = grid_.index(i_r, i_theta);
         const double theta     = grid_.theta(i_theta);
 
-        double sin_theta, cos_theta;
         double coeff_beta, arr, att, art, detDF;
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, sin_theta, cos_theta, coeff_beta, arr, att, art,
+        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art,
                                   detDF);
 
         // Build solver matrix at the current node
-        NODE_BUILD_SOLVER_MATRIX_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, grid_, DirBC_Interior_,
+        NODE_BUILD_SOLVER_MATRIX_GIVE(i_r, i_theta, r, theta, grid_, DirBC_Interior_,
                                       solver_matrix, arr, att, art, detDF, coeff_beta);
     }
 }
@@ -790,13 +789,12 @@ void DirectSolverGive::buildSolverMatrixRadialSection(const int i_theta, SparseM
         const int global_index = grid_.index(i_r, i_theta);
         const double r         = grid_.radius(i_r);
 
-        double sin_theta, cos_theta;
         double coeff_beta, arr, att, art, detDF;
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, sin_theta, cos_theta, coeff_beta, arr, att, art,
+        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art,
                                   detDF);
 
         // Build solver matrix at the current node
-        NODE_BUILD_SOLVER_MATRIX_GIVE(i_r, i_theta, r, theta, sin_theta, cos_theta, grid_, DirBC_Interior_,
+        NODE_BUILD_SOLVER_MATRIX_GIVE(i_r, i_theta, r, theta, grid_, DirBC_Interior_,
                                       solver_matrix, arr, att, art, detDF, coeff_beta);
     }
 }

@@ -12,8 +12,7 @@ public:
                                            const double& shift_delta);
     virtual ~CartesianR6_ShafranovGeometry() = default;
 
-    double exact_solution(const double& r, const double& theta, const double& sin_theta,
-                          const double& cos_theta) const override;
+    double exact_solution(const double& r, const double& theta) const override;
 
 private:
     const double Rmax             = 1.3;

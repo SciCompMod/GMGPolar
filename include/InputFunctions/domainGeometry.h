@@ -20,16 +20,12 @@ public:
     virtual ~DomainGeometry() = default;
 
     // In earlier versions denoted by 'x' and 'y'.
-    virtual double Fx(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const = 0;
-    virtual double Fy(const double& r, const double& theta, const double& sin_theta, const double& cos_theta) const = 0;
+    virtual double Fx(const double& r, const double& theta) const = 0;
+    virtual double Fy(const double& r, const double& theta) const = 0;
 
     // In earlier versions denoted by 'Jrr', 'Jtr', 'Jrt' and 'Jtt'.
-    virtual double dFx_dr(const double& r, const double& theta, const double& sin_theta,
-                          const double& cos_theta) const = 0;
-    virtual double dFy_dr(const double& r, const double& theta, const double& sin_theta,
-                          const double& cos_theta) const = 0;
-    virtual double dFx_dt(const double& r, const double& theta, const double& sin_theta,
-                          const double& cos_theta) const = 0;
-    virtual double dFy_dt(const double& r, const double& theta, const double& sin_theta,
-                          const double& cos_theta) const = 0;
+    virtual double dFx_dr(const double& r, const double& theta) const = 0;
+    virtual double dFy_dr(const double& r, const double& theta) const = 0;
+    virtual double dFx_dt(const double& r, const double& theta) const = 0;
+    virtual double dFy_dt(const double& r, const double& theta) const = 0;
 };

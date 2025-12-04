@@ -15,9 +15,10 @@ CartesianR2_Boundary_CzarnyGeometry::CartesianR2_Boundary_CzarnyGeometry(const d
     initializeGeometry();
 }
 
-double CartesianR2_Boundary_CzarnyGeometry::u_D(const double& r, const double& theta, const double& sin_theta,
-                                                const double& cos_theta) const
+double CartesianR2_Boundary_CzarnyGeometry::u_D(const double& r, const double& theta)const
 {
+    double sin_theta = std::sin(theta);
+    double cos_theta = std::cos(theta);
     double temp =
         sqrt(inverse_aspect_ratio_epsilon * (2.0 * (r / Rmax) * cos_theta + inverse_aspect_ratio_epsilon) + 1.0);
     return (1.0 - (r / Rmax) * (r / Rmax)) *
@@ -25,9 +26,10 @@ double CartesianR2_Boundary_CzarnyGeometry::u_D(const double& r, const double& t
            cos(2.0 * M_PI * (1.0 - temp) / inverse_aspect_ratio_epsilon);
 }
 
-double CartesianR2_Boundary_CzarnyGeometry::u_D_Interior(const double& r, const double& theta, const double& sin_theta,
-                                                         const double& cos_theta) const
+double CartesianR2_Boundary_CzarnyGeometry::u_D_Interior(const double& r, const double& theta)const
 {
+    double sin_theta = std::sin(theta);
+    double cos_theta = std::cos(theta);
     double temp =
         sqrt(inverse_aspect_ratio_epsilon * (2.0 * (r / Rmax) * cos_theta + inverse_aspect_ratio_epsilon) + 1.0);
     return (1.0 - (r / Rmax) * (r / Rmax)) *

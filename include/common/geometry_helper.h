@@ -6,17 +6,16 @@
 #include <cmath>
 
 inline void compute_jacobian_elements(const DomainGeometry& domain_geometry, const double& r, const double& theta,
-                                      const double& sin_theta, const double& cos_theta, const double& coeff_alpha,
-                                      double& arr, double& att, double& art, double& detDF)
+                                      const double& coeff_alpha, double& arr, double& att, double& art, double& detDF)
 {
     /* Calculate the elements of the Jacobian matrix for the transformation mapping */
     /* The Jacobian matrix is: */
     /* [Jrr, Jrt] */
     /* [Jtr, Jtt] */
-    const double Jrr = domain_geometry.dFx_dr(r, theta, sin_theta, cos_theta);
-    const double Jtr = domain_geometry.dFy_dr(r, theta, sin_theta, cos_theta);
-    const double Jrt = domain_geometry.dFx_dt(r, theta, sin_theta, cos_theta);
-    const double Jtt = domain_geometry.dFy_dt(r, theta, sin_theta, cos_theta);
+    const double Jrr = domain_geometry.dFx_dr(r, theta);
+    const double Jtr = domain_geometry.dFy_dr(r, theta);
+    const double Jrt = domain_geometry.dFx_dt(r, theta);
+    const double Jtt = domain_geometry.dFy_dt(r, theta);
     /* Compute the determinant of the Jacobian matrix */
     detDF = Jrr * Jtt - Jrt * Jtr;
     /* Compute the elements of the symmetric matrix: */
