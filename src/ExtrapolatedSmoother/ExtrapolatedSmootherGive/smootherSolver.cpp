@@ -29,11 +29,11 @@
                 if (i_r & 1) {                                                                                                       \
                     if (i_theta & 1) {                                                                                               \
                         /* i_r % 2 == 1 and i_theta % 2 == 1 */                                                                      \
-                        /* | X | O | X | */                                                                                          \
+                        /* | x | o | x | */                                                                                          \
                         /* |   |   |   | */                                                                                          \
-                        /* | O | Õ | O | */                                                                                         \
+                        /* | o | O | o | */                                                                                          \
                         /* |   |   |   | */                                                                                          \
-                        /* | X | O | X | */                                                                                          \
+                        /* | x | o | x | */                                                                                          \
                                                                                                                                      \
                         /* Fill temp(i,j) */                                                                                         \
                         temp[grid.index(i_r, i_theta)] -=                                                                            \
@@ -51,11 +51,11 @@
                     }                                                                                                                \
                     else {                                                                                                           \
                         /* i_r % 2 == 1 and i_theta % 2 == 0 */                                                                      \
-                        /* | O | O | O | */                                                                                          \
+                        /* | o | o | o | */                                                                                          \
                         /* |   |   |   | */                                                                                          \
-                        /* | X | Õ | X | */                                                                                         \
+                        /* | x | O | x | */                                                                                          \
                         /* |   |   |   | */                                                                                          \
-                        /* | O | O | O | */                                                                                          \
+                        /* | o | o | o | */                                                                                          \
                         /* Fill temp(i,j) */                                                                                         \
                         temp[grid.index(i_r, i_theta)] -=                                                                            \
                             (-coeff1 * arr * x[grid.index(i_r - 1, i_theta)] /* Left */                                              \
@@ -74,11 +74,11 @@
                 else {                                                                                                               \
                     if (i_theta & 1) {                                                                                               \
                         /* i_r % 2 == 0 and i_theta % 2 == 1 */                                                                      \
-                        /* | O | X | O | */                                                                                          \
+                        /* | o | x | o | */                                                                                          \
                         /* |   |   |   | */                                                                                          \
-                        /* | O | Õ | O | */                                                                                         \
+                        /* | o | O | o | */                                                                                          \
                         /* |   |   |   | */                                                                                          \
-                        /* | O | X | O | */                                                                                          \
+                        /* | o | x | o | */                                                                                          \
                         /* Fill temp(i,j) */                                                                                         \
                         temp[grid.index(i_r, i_theta)] -=                                                                            \
                             (-coeff1 * arr * x[grid.index(i_r - 1, i_theta)] /* Left */                                              \
@@ -89,11 +89,11 @@
                     }                                                                                                                \
                     else {                                                                                                           \
                         /* i_r % 2 == 0 and i_theta % 2 == 0 */                                                                      \
-                        /* | O | O | O | */                                                                                          \
+                        /* | o | o | o | */                                                                                          \
                         /* |   |   |   | */                                                                                          \
-                        /* | O | X̃ | O | */                                                                                        \
+                        /* | o | X | o | */                                                                                          \
                         /* |   |   |   | */                                                                                          \
-                        /* | O | O | O | */                                                                                          \
+                        /* | o | o | o | */                                                                                          \
                                                                                                                                      \
                         /* Fill temp(i,j-1) */                                                                                       \
                         temp[grid.index(i_r, i_theta - 1)] -=                                                                        \
@@ -114,11 +114,11 @@
                 if (i_r & 1) {                                                                                                       \
                     if (i_theta & 1) {                                                                                               \
                         /* i_r % 2 == 1 and i_theta % 2 == 1 */                                                                      \
-                        /* | X | O | X | */                                                                                          \
+                        /* | x | o | x | */                                                                                          \
                         /* |   |   |   | */                                                                                          \
-                        /* | O | Õ | O | */                                                                                         \
+                        /* | o | O | o | */                                                                                          \
                         /* |   |   |   | */                                                                                          \
-                        /* | X | O | X | */                                                                                          \
+                        /* | x | o | x | */                                                                                          \
                                                                                                                                      \
                         /* Fill temp(i-1,j) */                                                                                       \
                         if (i_r > 1 || !DirBC_Interior) {                                                                            \
@@ -137,11 +137,11 @@
                     }                                                                                                                \
                     else {                                                                                                           \
                         /* i_r % 2 == 1 and i_theta % 2 == 0 */                                                                      \
-                        /* | O | O | O | */                                                                                          \
+                        /* | o | o | o | */                                                                                          \
                         /* |   |   |   | */                                                                                          \
-                        /* | X | Õ | X | */                                                                                         \
+                        /* | x | O | x | */                                                                                          \
                         /* |   |   |   | */                                                                                          \
-                        /* | O | O | O | */                                                                                          \
+                        /* | o | o | o | */                                                                                          \
                                                                                                                                      \
                         /* Nothing to do! */                                                                                         \
                     }                                                                                                                \
@@ -149,11 +149,11 @@
                 else {                                                                                                               \
                     if (i_theta & 1) {                                                                                               \
                         /* i_r % 2 == 0 and i_theta % 2 == 1 */                                                                      \
-                        /* | O | X | O | */                                                                                          \
+                        /* | o | x | o | */                                                                                          \
                         /* |   |   |   | */                                                                                          \
-                        /* | O | Õ | O | */                                                                                         \
+                        /* | o | O | o | */                                                                                          \
                         /* |   |   |   | */                                                                                          \
-                        /* | O | X | O | */                                                                                          \
+                        /* | o | x | o | */                                                                                          \
                                                                                                                                      \
                         /* Fill temp(i-1,j) */                                                                                       \
                         if (i_r > 1 || !DirBC_Interior) {                                                                            \
@@ -172,11 +172,11 @@
                     }                                                                                                                \
                     else {                                                                                                           \
                         /* i_r % 2 == 0 and i_theta % 2 == 0 */                                                                      \
-                        /* | O | O | O | */                                                                                          \
+                        /* | o | o | o | */                                                                                          \
                         /* |   |   |   | */                                                                                          \
-                        /* | O | X̃ | O | */                                                                                        \
+                        /* | o | X | o | */                                                                                          \
                         /* |   |   |   | */                                                                                          \
-                        /* | O | O | O | */                                                                                          \
+                        /* | o | o | o | */                                                                                          \
                                                                                                                                      \
                         /* Fill temp(i-1,j) */                                                                                       \
                         if (i_r > 1 || !DirBC_Interior) {                                                                            \
@@ -213,20 +213,20 @@
                 if (node_color == smoother_color) {                                                                                  \
                     if (i_theta & 1) {                                                                                               \
                         /* i_theta % 2 == 1 */                                                                                       \
-                        /* || X | O | X | */                                                                                         \
+                        /* || x | o | x | */                                                                                         \
                         /* ||   |   |   | */                                                                                         \
-                        /* || Õ | O | O | */                                                                                        \
+                        /* || O | o | o | */                                                                                         \
                         /* ||   |   |   | */                                                                                         \
-                        /* || X | O | X | */                                                                                         \
+                        /* || x | o | x | */                                                                                         \
                         /* Nothing to do! */                                                                                         \
                     }                                                                                                                \
                     else {                                                                                                           \
                         /* i_theta % 2 == 0 */                                                                                       \
-                        /* || O | O | O | */                                                                                         \
+                        /* || o | o | o | */                                                                                         \
                         /* ||   |   |   | */                                                                                         \
-                        /* || X̃ | O | X | */                                                                                       \
+                        /* || X | o | x | */                                                                                         \
                         /* ||   |   |   | */                                                                                         \
-                        /* || O | O | O | */                                                                                         \
+                        /* || o | o | o | */                                                                                         \
                         /* Nothing to do! */                                                                                         \
                     }                                                                                                                \
                 }                                                                                                                    \
@@ -260,11 +260,11 @@
                 if (node_color == smoother_color) {                                                                                  \
                     if (i_theta & 1) {                                                                                               \
                         /* i_theta % 2 == 1 */                                                                                       \
-                        /* -| X | O | X | */                                                                                         \
+                        /* -| x | o | x | */                                                                                         \
                         /* -|   |   |   | */                                                                                         \
-                        /* -| Õ | O | O | */                                                                                        \
+                        /* -| O | o | o | */                                                                                         \
                         /* -|   |   |   | */                                                                                         \
-                        /* -| X | O | X | */                                                                                         \
+                        /* -| x | o | x | */                                                                                         \
                         /* Fill temp(i,j) */                                                                                         \
                         temp[grid.index(i_r, i_theta)] -=                                                                            \
                             (/* - coeff1 * arr * x[grid.index(i_r, i_theta + (grid.ntheta()/2))] // Left: Not in Asc_ortho */        \
@@ -275,11 +275,11 @@
                     }                                                                                                                \
                     else {                                                                                                           \
                         /* i_theta % 2 == 0 */                                                                                       \
-                        /* -| O | O | O | */                                                                                         \
+                        /* -| o | o | o | */                                                                                         \
                         /* -|   |   |   | */                                                                                         \
-                        /* -| X̃ | O | X | */                                                                                       \
+                        /* -| X | o | x | */                                                                                         \
                         /* -|   |   |   | */                                                                                         \
-                        /* -| O | O | O | */                                                                                         \
+                        /* -| o | o | o | */                                                                                         \
                                                                                                                                      \
                         /* Fill temp(i,j-1) */                                                                                       \
                         temp[grid.index(i_r, i_theta - 1)] -=                                                                        \
@@ -320,35 +320,35 @@
                 double coeff4 = 0.5 * (h1 + h2) / k2;                                                                                \
                                                                                                                                      \
                 /* i_theta % 2 == 1 and i_r % 2 == 1 */                                                                              \
-                /* | X | O | X || O   X   O   X  */                                                                                  \
+                /* | x | o | x || o   x   o   x  */                                                                                  \
                 /* |   |   |   || -------------- */                                                                                  \
-                /* | 0 | O | O || Õ   O   O   O  */                                                                                 \
+                /* | o | o | o || O   o   o   o  */                                                                                  \
                 /* |   |   |   || -------------- */                                                                                  \
-                /* | X | O | X || O   X   O   X  */                                                                                  \
+                /* | x | o | x || o   x   o   x  */                                                                                  \
                 /* -> Give Left */                                                                                                   \
                                                                                                                                      \
                 /* i_theta % 2 == 1 and i_r % 2 == 0 */                                                                              \
-                /* | O | X | O || X   O   X   O  */                                                                                  \
+                /* | o | x | o || x   o   x   o  */                                                                                  \
                 /* |   |   |   || -------------- */                                                                                  \
-                /* | 0 | O | O || Õ   O   O   O  */                                                                                 \
+                /* | o | o | o || O   o   o   o  */                                                                                  \
                 /* |   |   |   || -------------- */                                                                                  \
-                /* | O | X | O || X   O   X   O  */                                                                                  \
+                /* | o | x | o || x   o   x   o  */                                                                                  \
                 /* -> Give Left */                                                                                                   \
                                                                                                                                      \
                 /* i_theta % 2 == 0 and i_r % 2 == 1 */                                                                              \
-                /* | O | O | O || O   O   O   O  */                                                                                  \
+                /* | o | o | o || o   o   o   o  */                                                                                  \
                 /* |   |   |   || -------------- */                                                                                  \
-                /* | X | O | X || Õ   X   O   X  */                                                                                 \
+                /* | x | o | x || O   x   o   x  */                                                                                  \
                 /* |   |   |   || -------------- */                                                                                  \
-                /* | O | O | O || O   O   O   O  */                                                                                  \
+                /* | o | o | o || o   o   o   o  */                                                                                  \
                 /* -> Don't give to the Left! */                                                                                     \
                                                                                                                                      \
                 /* i_theta % 2 == 0 and i_r % 2 == 0 */                                                                              \
-                /* | O | O | O || O   O   O   O  */                                                                                  \
+                /* | o | o | o || o   o   o   o  */                                                                                  \
                 /* |   |   |   || -------------- */                                                                                  \
-                /* | O | X | O || X̃   O   X   O  */                                                                                \
+                /* | o | x | o || X   o   x   o  */                                                                                  \
                 /* |   |   |   || -------------- */                                                                                  \
-                /* | O | O | O || O   O   O   O  */                                                                                  \
+                /* | o | o | o || o   o   o   o  */                                                                                  \
                 /* -> Give Left */                                                                                                   \
                                                                                                                                      \
                 if (i_theta & 1 || !(i_r & 1)) {                                                                                     \
@@ -388,11 +388,11 @@
                     if (i_r & 1) {                                                                                     \
                         /* i_theta % 2 == 1 and i_r % 2 == 1 */                                                        \
                         /* ---------- */                                                                               \
-                        /* X   O   X  */                                                                               \
+                        /* x   o   x  */                                                                               \
                         /* ---------- */                                                                               \
-                        /* O   Õ   O  */                                                                              \
+                        /* o   O   o  */                                                                               \
                         /* ---------- */                                                                               \
-                        /* X   O   X  */                                                                               \
+                        /* x   o   x  */                                                                               \
                         /* ---------- */                                                                               \
                         /* Fill temp(i,j) */                                                                           \
                         temp[grid.index(i_r, i_theta)] -=                                                              \
@@ -411,11 +411,11 @@
                     else {                                                                                             \
                         /* i_theta % 2 == 1 and i_r % 2 == 0 */                                                        \
                         /* ---------- */                                                                               \
-                        /* O   X   O  */                                                                               \
+                        /* o   x   o  */                                                                               \
                         /* ---------- */                                                                               \
-                        /* O   Õ   O  */                                                                              \
+                        /* o   O   o  */                                                                               \
                         /* ---------- */                                                                               \
-                        /* O   X   O  */                                                                               \
+                        /* o   x   o  */                                                                               \
                         /* ---------- */                                                                               \
                         /* Fill temp(i,j) */                                                                           \
                         temp[grid.index(i_r, i_theta)] -=                                                              \
@@ -436,11 +436,11 @@
                     if (i_r & 1) {                                                                                     \
                         /* i_theta % 2 == 0 and i_r % 2 == 1 */                                                        \
                         /* ---------- */                                                                               \
-                        /* O   O   O  */                                                                               \
+                        /* o   o   o  */                                                                               \
                         /* ---------- */                                                                               \
-                        /* X   Õ   X  */                                                                              \
+                        /* x   O   x  */                                                                               \
                         /* ---------- */                                                                               \
-                        /* O   O   O  */                                                                               \
+                        /* o   o   o  */                                                                               \
                         /* ---------- */                                                                               \
                         /* Fill temp(i,j) */                                                                           \
                         temp[grid.index(i_r, i_theta)] -=                                                              \
@@ -453,11 +453,11 @@
                     else {                                                                                             \
                         /* i_theta % 2 == 0 and i_r % 2 == 0 */                                                        \
                         /* ---------- */                                                                               \
-                        /* O   O   O  */                                                                               \
+                        /* o   o   o  */                                                                               \
                         /* ---------- */                                                                               \
-                        /* O   X̃   O  */                                                                             \
+                        /* o   X   o  */                                                                               \
                         /* ---------- */                                                                               \
-                        /* O   O   O  */                                                                               \
+                        /* o   o   o  */                                                                               \
                         /* ---------- */                                                                               \
                         /* Fill temp(i-1,j) */                                                                         \
                         temp[grid.index(i_r - 1, i_theta)] -=                                                          \
@@ -479,11 +479,11 @@
                     if (i_r & 1) {                                                                                     \
                         /* i_theta % 2 == 1 and i_r % 2 == 1 */                                                        \
                         /* ---------- */                                                                               \
-                        /* X   O   X  */                                                                               \
+                        /* x   o   x  */                                                                               \
                         /* ---------- */                                                                               \
-                        /* O   Õ   O  */                                                                              \
+                        /* o   O   o  */                                                                               \
                         /* ---------- */                                                                               \
-                        /* X   O   X  */                                                                               \
+                        /* x   o   x  */                                                                               \
                         /* ---------- */                                                                               \
                         /* Fill temp(i,j-1) */                                                                         \
                         temp[grid.index(i_r, i_theta - 1)] -=                                                          \
@@ -499,11 +499,11 @@
                     else {                                                                                             \
                         /* i_theta % 2 == 1 and i_r % 2 == 0 */                                                        \
                         /* ---------- */                                                                               \
-                        /* O   X   O  */                                                                               \
+                        /* o   x   o  */                                                                               \
                         /* ---------- */                                                                               \
-                        /* O   Õ   O  */                                                                              \
+                        /* o   O   o  */                                                                               \
                         /* ---------- */                                                                               \
-                        /* O   X   O  */                                                                               \
+                        /* o   x   o  */                                                                               \
                         /* ---------- */                                                                               \
                                                                                                                        \
                         /* Nothing to do! */                                                                           \
@@ -513,11 +513,11 @@
                     if (i_r & 1) {                                                                                     \
                         /* i_theta % 2 == 0 and i_r % 2 == 1 */                                                        \
                         /* ---------- */                                                                               \
-                        /* O   O   O  */                                                                               \
+                        /* o   o   o  */                                                                               \
                         /* ---------- */                                                                               \
-                        /* X   Õ   X  */                                                                              \
+                        /* x   O   x  */                                                                               \
                         /* ---------- */                                                                               \
-                        /* O   O   O  */                                                                               \
+                        /* o   o   o  */                                                                               \
                         /* ---------- */                                                                               \
                         /* Fill temp(i,j-1) */                                                                         \
                         temp[grid.index(i_r, i_theta - 1)] -=                                                          \
@@ -533,11 +533,11 @@
                     else {                                                                                             \
                         /* i_theta % 2 == 0 and i_r % 2 == 0 */                                                        \
                         /* ---------- */                                                                               \
-                        /* O   O   O  */                                                                               \
+                        /* o   o   o  */                                                                               \
                         /* ---------- */                                                                               \
-                        /* O   X̃   O  */                                                                             \
+                        /* o   X   o  */                                                                               \
                         /* ---------- */                                                                               \
-                        /* O   O   O  */                                                                               \
+                        /* o   o   o  */                                                                               \
                         /* ---------- */                                                                               \
                         /* Fill temp(i,j-1) */                                                                         \
                         temp[grid.index(i_r, i_theta - 1)] -=                                                          \
@@ -567,11 +567,11 @@
             if (node_color == smoother_color) {                                                                        \
                 /* Dont give to the right when this case occurs! */                                                    \
                 /* i_theta % 2 = 0 and i_r % 2 == 1 */                                                                 \
-                /* | O | O | O || O   O   O   O  */                                                                    \
+                /* | o | o | o || o   o   o   o  */                                                                    \
                 /* |   |   |   || -------------- */                                                                    \
-                /* | 0 | X | Õ || X   O   X   O  */                                                                   \
+                /* | o | x | O || x   o   x   o  */                                                                    \
                 /* |   |   |   || -------------- */                                                                    \
-                /* | O | O | O || O   O   O   O  */                                                                    \
+                /* | o | o | o || o   o   o   o  */                                                                    \
                 if ((!(i_r & 1) || (i_theta & 1))) {                                                                   \
                     /* Fill temp(i+1,j) */                                                                             \
                     temp[grid.index(i_r + 1, i_theta)] -=                                                              \
@@ -601,11 +601,11 @@
                 if (i_theta & 1) {                                                                                     \
                     if (i_r & 1) {                                                                                     \
                         /* i_theta % 2 == 1 and i_r % 2 == 1 */                                                        \
-                        /* | X | O | X || O   X   O   X  */                                                            \
+                        /* | x | o | x || o   x   o   x  */                                                            \
                         /* |   |   |   || -------------- */                                                            \
-                        /* | 0 | O | O || Õ   O   O   O  */                                                           \
+                        /* | o | o | o || O   o   o   o  */                                                            \
                         /* |   |   |   || -------------- */                                                            \
-                        /* | X | O | X || O   X   O   X  */                                                            \
+                        /* | x | o | x || o   x   o   x  */                                                            \
                         /* Fill temp(i,j) */                                                                           \
                         temp[grid.index(i_r, i_theta)] -=                                                              \
                             (-coeff1 * arr * x[grid.index(i_r - 1, i_theta)] /* Left */                                \
@@ -619,11 +619,11 @@
                     }                                                                                                  \
                     else {                                                                                             \
                         /* i_theta % 2 == 1 and i_r % 2 == 0 */                                                        \
-                        /* | O | X | O || X   O   X   O  */                                                            \
+                        /* | o | x | o || x   o   x   o  */                                                            \
                         /* |   |   |   || -------------- */                                                            \
-                        /* | 0 | O | O || Õ   O   O   O  */                                                           \
+                        /* | o | o | o || O   o   o   o  */                                                            \
                         /* |   |   |   || -------------- */                                                            \
-                        /* | O | X | O || X   O   X   O  */                                                            \
+                        /* | o | x | o || x   o   x   o  */                                                            \
                         /* Fill temp(i,j) */                                                                           \
                         temp[grid.index(i_r, i_theta)] -=                                                              \
                             (-coeff1 * arr * x[grid.index(i_r - 1, i_theta)] /* Left */                                \
@@ -639,11 +639,11 @@
                 else {                                                                                                 \
                     if (i_r & 1) {                                                                                     \
                         /* i_theta % 2 == 0 and i_r % 2 == 1 */                                                        \
-                        /* | O | O | O || O   O   O   O  */                                                            \
+                        /* | o | o | o || o   o   o   o  */                                                            \
                         /* |   |   |   || -------------- */                                                            \
-                        /* | X | O | X || Õ   X   O   X  */                                                           \
+                        /* | x | o | x || O   x   o   x  */                                                            \
                         /* |   |   |   || -------------- */                                                            \
-                        /* | O | O | O || O   O   O   O  */                                                            \
+                        /* | o | o | o || o   o   o   o  */                                                            \
                         /* Fill temp(i,j) */                                                                           \
                         temp[grid.index(i_r, i_theta)] -=                                                              \
                             (-coeff1 * arr * x[grid.index(i_r - 1, i_theta)] /* Left */                                \
@@ -654,11 +654,11 @@
                     }                                                                                                  \
                     else {                                                                                             \
                         /* i_theta % 2 == 0 and i_r % 2 == 0 */                                                        \
-                        /* | O | O | O || O   O   O   O  */                                                            \
+                        /* | o | o | o || o   o   o   o  */                                                            \
                         /* |   |   |   || -------------- */                                                            \
-                        /* | O | X | O || X̃   O   X   O  */                                                          \
+                        /* | o | x | o || X   o   x   o  */                                                            \
                         /* |   |   |   || -------------- */                                                            \
-                        /* | O | O | O || O   O   O   O  */                                                            \
+                        /* | o | o | o || o   o   o   o  */                                                            \
                         /* Fill temp(i+1,j) */                                                                         \
                         temp[grid.index(i_r + 1, i_theta)] -=                                                          \
                             (-coeff2 * arr * x[grid.index(i_r, i_theta)] /* Left */                                    \
@@ -672,11 +672,11 @@
             else if (node_color != smoother_color) {                                                                   \
                 /* Dont give to bottom and up when this case occurs! */                                                \
                 /* i_theta % 2 == 1 and i_r % 2 == 0 */                                                                \
-                /* | O | X | O || X   O   X   O  */                                                                    \
+                /* | o | x | o || x   o   x   o  */                                                                    \
                 /* |   |   |   || -------------- */                                                                    \
-                /* | 0 | O | O || Õ   O   O   O  */                                                                   \
+                /* | o | o | o || O   o   o   o  */                                                                   \
                 /* |   |   |   || -------------- */                                                                    \
-                /* | O | X | O || X   O   X   O  */                                                                    \
+                /* | o | x | o || x   o   x   o  */                                                                    \
                 if (i_r & 1 || !(i_theta & 1)) {                                                                       \
                     /* Fill temp(i,j-1) */                                                                             \
                     temp[grid.index(i_r, i_theta - 1)] -=                                                              \
@@ -708,11 +708,11 @@
                 if (i_theta & 1) {                                                                                     \
                     /* i_theta % 2 == 1 */                                                                             \
                     /* ---------------|| */                                                                            \
-                    /* O   X   O   X  || */                                                                            \
+                    /* o   x   o   x  || */                                                                            \
                     /* ---------------|| */                                                                            \
-                    /* O   O   Õ   O  || */                                                                           \
+                    /* o   o   O   o  || */                                                                            \
                     /* ---------------|| */                                                                            \
-                    /* O   X   O   X  || */                                                                            \
+                    /* o   x   o   x  || */                                                                            \
                     /* ---------------|| */                                                                            \
                     /* Fill temp(i,j) */                                                                               \
                     temp[grid.index(i_r, i_theta)] -= (-coeff3 * att * x[grid.index(i_r, i_theta - 1)] /* Bottom */    \
@@ -732,11 +732,11 @@
                 }                                                                                                      \
                 else {                                                                                                 \
                     /* ---------------|| */                                                                            \
-                    /* O   O   O   O  || */                                                                            \
+                    /* o   o   o   o  || */                                                                            \
                     /* ---------------|| */                                                                            \
-                    /* O   X   Õ   X  || */                                                                           \
+                    /* o   x   O   x  || */                                                                            \
                     /* ---------------|| */                                                                            \
-                    /* O   O   O   O  || */                                                                            \
+                    /* o   o   o   o  || */                                                                            \
                     /* ---------------|| */                                                                            \
                     /* Fill temp(i,j) */                                                                               \
                     temp[grid.index(i_r, i_theta)] -= (-coeff1 * arr * x[grid.index(i_r - 1, i_theta)] /* Left */      \
@@ -773,11 +773,11 @@
                 if (i_theta & 1) {                                                                                     \
                     /* i_theta % 2 == 1 */                                                                             \
                     /* -----------|| */                                                                                \
-                    /* X   O   X  || */                                                                                \
+                    /* x   o   x  || */                                                                                \
                     /* -----------|| */                                                                                \
-                    /* O   O   Õ  || */                                                                               \
+                    /* o   o   O  || */                                                                                \
                     /* -----------|| */                                                                                \
-                    /* X   O   X  || */                                                                                \
+                    /* x   o   x  || */                                                                                \
                     /* -----------|| */                                                                                \
                     /* Fill temp(i-1,j) */                                                                             \
                     temp[grid.index(i_r - 1, i_theta)] -=                                                              \
@@ -793,11 +793,11 @@
                 }                                                                                                      \
                 else {                                                                                                 \
                     /* -----------|| */                                                                                \
-                    /* O   O   O  || */                                                                                \
+                    /* o   o   o  || */                                                                                \
                     /* -----------|| */                                                                                \
-                    /* X   O   X̃  || */                                                                              \
+                    /* x   o   X  || */                                                                                \
                     /* -----------|| */                                                                                \
-                    /* O   O   O  || */                                                                                \
+                    /* o   o   o  || */                                                                                \
                     /* -----------|| */                                                                                \
                     /* Fill temp(i-1,j) */                                                                             \
                     temp[grid.index(i_r - 1, i_theta)] -=                                                              \
