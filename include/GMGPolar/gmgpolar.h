@@ -24,6 +24,7 @@ class LevelCache;
 #include "../common/global_definitions.h"
 #include "test_cases.h"
 
+template<DomainGeometryConcept DomainGeometry>
 class GMGPolar
 {
 public:
