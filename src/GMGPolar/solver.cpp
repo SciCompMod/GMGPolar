@@ -1,12 +1,11 @@
-#include "../../include/GMGPolar/gmgpolar.h"
-
 #include <chrono>
 
 // =============================================================================
 //   Main Solver Routine
 // =============================================================================
 
-void GMGPolar::solve(const BoundaryConditions& boundary_conditions, const SourceTerm& source_term)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::solve(const BoundaryConditions& boundary_conditions, const SourceTerm& source_term)
 {
     auto start_setup_rhs = std::chrono::high_resolution_clock::now();
 
@@ -185,7 +184,8 @@ void GMGPolar::solve(const BoundaryConditions& boundary_conditions, const Source
 //   Solution Initialization
 // =============================================================================
 
-void GMGPolar::initializeSolution()
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::initializeSolution()
 {
     if (!FMG_) {
         int start_level_depth = 0;
@@ -266,7 +266,8 @@ void GMGPolar::initializeSolution()
 //   Residual Handling Functions
 // =============================================================================
 
-double GMGPolar::residualNorm(const ResidualNormType& norm_type, const Level& level, ConstVector<double> residual) const
+template<DomainGeometryConcept DomainGeometry>
+double GMGPolar<DomainGeometry>::residualNorm(const ResidualNormType& norm_type, const Level& level, ConstVector<double> residual) const
 {
     switch (norm_type) {
     case ResidualNormType::EUCLIDEAN:
@@ -280,7 +281,8 @@ double GMGPolar::residualNorm(const ResidualNormType& norm_type, const Level& le
     }
 }
 
-void GMGPolar::updateResidualNorms(Level& level, int iteration, double& initial_residual_norm,
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::updateResidualNorms(Level& level, int iteration, double& initial_residual_norm,
                                    double& current_residual_norm, double& current_relative_residual_norm)
 {
     level.computeResidual(level.residual(), level.rhs(), level.solution());
@@ -313,7 +315,8 @@ void GMGPolar::updateResidualNorms(Level& level, int iteration, double& initial_
     }
 }
 
-void GMGPolar::extrapolatedResidual(const int current_level, Vector<double> residual,
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::extrapolatedResidual(const int current_level, Vector<double> residual,
                                     ConstVector<double> residual_next_level)
 {
     const PolarGrid& fineGrid   = levels_[current_level].grid();
@@ -368,7 +371,8 @@ void GMGPolar::extrapolatedResidual(const int current_level, Vector<double> resi
 //   Convergence and Error Analysis Functions
 // =============================================================================
 
-bool GMGPolar::converged(double residual_norm, double relative_residual_norm)
+template<DomainGeometryConcept DomainGeometry>
+bool GMGPolar<DomainGeometry>::converged(double residual_norm, double relative_residual_norm)
 {
     if (relative_tolerance_.has_value()) {
         if (!(relative_residual_norm > relative_tolerance_.value())) {
@@ -383,14 +387,16 @@ bool GMGPolar::converged(double residual_norm, double relative_residual_norm)
     return false;
 }
 
-void GMGPolar::evaluateExactError(Level& level, const ExactSolution& exact_solution)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::evaluateExactError(Level& level, const ExactSolution& exact_solution)
 {
     // Compute the weighted L2 norm and infinity norm of the error between the numerical and exact solution.
     // The results are stored as a pair: (weighted L2 error, infinity error).
     exact_errors_.push_back(computeExactError(level, level.solution(), level.residual(), exact_solution));
 }
 
-std::pair<double, double> GMGPolar::computeExactError(Level& level, ConstVector<double> solution, Vector<double> error,
+template<DomainGeometryConcept DomainGeometry>
+std::pair<double, double> GMGPolar<DomainGeometry>::computeExactError(Level& level, ConstVector<double> solution, Vector<double> error,
                                                       const ExactSolution& exact_solution)
 {
     const PolarGrid& grid        = level.grid();
@@ -431,7 +437,8 @@ std::pair<double, double> GMGPolar::computeExactError(Level& level, ConstVector<
 //   Output and Logging Functions
 // =============================================================================
 
-void GMGPolar::printIterationHeader(const ExactSolution* exact_solution)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::printIterationHeader(const ExactSolution* exact_solution)
 {
     if (verbose_ <= 0)
         return;
@@ -457,7 +464,8 @@ void GMGPolar::printIterationHeader(const ExactSolution* exact_solution)
     std::cout << std::right << std::setfill(' ');
 }
 
-void GMGPolar::printIterationInfo(int iteration, double current_residual_norm, double current_relative_residual_norm,
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::printIterationInfo(int iteration, double current_residual_norm, double current_relative_residual_norm,
                                   const ExactSolution* exact_solution)
 {
     if (verbose_ <= 0)

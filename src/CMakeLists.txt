@@ -12,26 +12,6 @@ set(POLAR_GRID_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/polargrid.cpp
 )
 
-# file(GLOB_RECURSE GMG_POLAR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/*.cpp)
-set(GMG_POLAR_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/build_rhs_f.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/gmgpolar.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/level_interpolation.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/setup.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/solver.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/writeToVTK.cpp
-)
-
-# file(GLOB_RECURSE MULTIGRID_METHODS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/*.cpp)
-set(MULTIGRID_METHODS_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/implicitly_extrapolated_multigrid_F_Cycle.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/implicitly_extrapolated_multigrid_V_Cycle.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/implicitly_extrapolated_multigrid_W_Cycle.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/multigrid_F_Cycle.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/multigrid_V_Cycle.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/multigrid_W_Cycle.cpp
-)
-
 #file(GLOB_RECURSE LEVEL_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Level/*.cpp)
 set(LEVEL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Level/level.cpp
@@ -162,8 +142,6 @@ set(CONFIG_PARSER_SOURCES
 # Create the main library
 add_library(GMGPolarLib STATIC
     ${POLAR_GRID_SOURCES}
-    ${GMG_POLAR_SOURCES}
-    ${MULTIGRID_METHODS_SOURCES}
     ${LEVEL_SOURCES}
     ${STENCIL_SOURCES}
     ${INTERPOLATION_SOURCES}

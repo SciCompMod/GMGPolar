@@ -337,3 +337,16 @@ private:
     double t_avg_MGC_residual_;
     double t_avg_MGC_directSolver_;
 };
+
+#include "build_rhs_f.h"
+#include "gmgpolar_methods.h"
+#include "level_interpolation.h"
+#include "setup.h"
+#include "solver.h"
+#include "writeToVTK.h"
+#include "MultigridMethods/implicitly_extrapolated_multigrid_F_Cycle.h"
+#include "MultigridMethods/implicitly_extrapolated_multigrid_V_Cycle.h"
+#include "MultigridMethods/implicitly_extrapolated_multigrid_W_Cycle.h"
+#include "MultigridMethods/multigrid_F_Cycle.h"
+#include "MultigridMethods/multigrid_V_Cycle.h"
+#include "MultigridMethods/multigrid_W_Cycle.h"

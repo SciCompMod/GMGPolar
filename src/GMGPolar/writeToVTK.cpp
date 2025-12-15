@@ -1,6 +1,6 @@
-#include "../../include/GMGPolar/gmgpolar.h"
 
-void GMGPolar::writeToVTK(const std::filesystem::path& file_path, const PolarGrid& grid)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::writeToVTK(const std::filesystem::path& file_path, const PolarGrid& grid)
 {
     const auto filename = file_path.stem().string() + ".vtu";
 
@@ -58,7 +58,8 @@ void GMGPolar::writeToVTK(const std::filesystem::path& file_path, const PolarGri
          << "</VTKFile>\n";
 }
 
-void GMGPolar::writeToVTK(const std::filesystem::path& file_path, const Level& level, ConstVector<double> grid_function)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::writeToVTK(const std::filesystem::path& file_path, const Level& level, ConstVector<double> grid_function)
 {
     const PolarGrid& grid         = level.grid();
     const LevelCache& level_cache = level.levelCache();

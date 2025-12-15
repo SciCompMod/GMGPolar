@@ -1,6 +1,6 @@
-#include "../../include/GMGPolar/gmgpolar.h"
 
-void GMGPolar::setup()
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::setup()
 {
     LIKWID_START("Setup");
     auto start_setup = std::chrono::high_resolution_clock::now();
@@ -172,7 +172,8 @@ void GMGPolar::setup()
     LIKWID_STOP("Setup");
 }
 
-int GMGPolar::chooseNumberOfLevels(const PolarGrid& finestGrid)
+template<DomainGeometryConcept DomainGeometry>
+int GMGPolar<DomainGeometry>::chooseNumberOfLevels(const PolarGrid& finestGrid)
 {
     const int minRadialNodes      = 5;
     const int minAngularDivisions = 4;
@@ -215,7 +216,8 @@ int GMGPolar::chooseNumberOfLevels(const PolarGrid& finestGrid)
     return levels;
 }
 
-void GMGPolar::printSettings() const
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::printSettings() const
 {
 
     std::cout << "------------------------------\n";

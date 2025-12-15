@@ -1,6 +1,6 @@
-#include "../../include/GMGPolar/gmgpolar.h"
 
-void GMGPolar::build_rhs_f(const Level& level, Vector<double> rhs_f, const BoundaryConditions& boundary_conditions,
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::build_rhs_f(const Level& level, Vector<double> rhs_f, const BoundaryConditions& boundary_conditions,
                            const SourceTerm& source_term)
 {
     const PolarGrid& grid = level.grid();
@@ -52,7 +52,8 @@ void GMGPolar::build_rhs_f(const Level& level, Vector<double> rhs_f, const Bound
     }
 }
 
-void GMGPolar::discretize_rhs_f(const Level& level, Vector<double> rhs_f)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::discretize_rhs_f(const Level& level, Vector<double> rhs_f)
 {
     const PolarGrid& grid = level.grid();
     assert(rhs_f.size() == static_cast<uint>(grid.numberOfNodes()));

@@ -1,9 +1,9 @@
-#include "../../include/GMGPolar/gmgpolar.h"
 
 /* ---------------------------------------------------------------------- */
 /* Constructor & Initialization                                           */
 /* ---------------------------------------------------------------------- */
-GMGPolar::GMGPolar(const PolarGrid& grid, const DomainGeometry& domain_geometry,
+template<DomainGeometryConcept DomainGeometry>
+GMGPolar<DomainGeometry>::GMGPolar(const PolarGrid& grid, const DomainGeometry& domain_geometry,
                    const DensityProfileCoefficients& density_profile_coefficients)
     : grid_(grid)
     , domain_geometry_(domain_geometry)
@@ -47,7 +47,8 @@ GMGPolar::GMGPolar(const PolarGrid& grid, const DomainGeometry& domain_geometry,
     LIKWID_REGISTER("Solve");
 }
 
-void GMGPolar::setSolution(const ExactSolution* exact_solution)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::setSolution(const ExactSolution* exact_solution)
 {
     exact_solution_ = exact_solution;
 }
@@ -55,20 +56,24 @@ void GMGPolar::setSolution(const ExactSolution* exact_solution)
 /* ---------------------------------------------------------------------- */
 /* General output & visualization                                         */
 /* ---------------------------------------------------------------------- */
-int GMGPolar::verbose() const
+template<DomainGeometryConcept DomainGeometry>
+int GMGPolar<DomainGeometry>::verbose() const
 {
     return verbose_;
 }
-void GMGPolar::verbose(int verbose)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::verbose(int verbose)
 {
     verbose_ = verbose;
 }
 
-bool GMGPolar::paraview() const
+template<DomainGeometryConcept DomainGeometry>
+bool GMGPolar<DomainGeometry>::paraview() const
 {
     return paraview_;
 }
-void GMGPolar::paraview(bool paraview)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::paraview(bool paraview)
 {
     paraview_ = paraview;
 }
@@ -76,20 +81,24 @@ void GMGPolar::paraview(bool paraview)
 /* ---------------------------------------------------------------------- */
 /* Parallelization & threading                                            */
 /* ---------------------------------------------------------------------- */
-int GMGPolar::maxOpenMPThreads() const
+template<DomainGeometryConcept DomainGeometry>
+int GMGPolar<DomainGeometry>::maxOpenMPThreads() const
 {
     return max_omp_threads_;
 }
-void GMGPolar::maxOpenMPThreads(int max_omp_threads)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::maxOpenMPThreads(int max_omp_threads)
 {
     max_omp_threads_ = max_omp_threads;
 }
 
-double GMGPolar::threadReductionFactor() const
+template<DomainGeometryConcept DomainGeometry>
+double GMGPolar<DomainGeometry>::threadReductionFactor() const
 {
     return thread_reduction_factor_;
 }
-void GMGPolar::threadReductionFactor(double thread_reduction_factor)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::threadReductionFactor(double thread_reduction_factor)
 {
     thread_reduction_factor_ = thread_reduction_factor;
 }
@@ -97,38 +106,46 @@ void GMGPolar::threadReductionFactor(double thread_reduction_factor)
 /* ---------------------------------------------------------------------- */
 /* Numerical method options                                               */
 /* ---------------------------------------------------------------------- */
-bool GMGPolar::DirBC_Interior() const
+template<DomainGeometryConcept DomainGeometry>
+bool GMGPolar<DomainGeometry>::DirBC_Interior() const
 {
     return DirBC_Interior_;
 }
-void GMGPolar::DirBC_Interior(bool DirBC_Interior)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::DirBC_Interior(bool DirBC_Interior)
 {
     DirBC_Interior_ = DirBC_Interior;
 }
 
-StencilDistributionMethod GMGPolar::stencilDistributionMethod() const
+template<DomainGeometryConcept DomainGeometry>
+StencilDistributionMethod GMGPolar<DomainGeometry>::stencilDistributionMethod() const
 {
     return stencil_distribution_method_;
 }
-void GMGPolar::stencilDistributionMethod(StencilDistributionMethod stencil_distribution_method)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::stencilDistributionMethod(StencilDistributionMethod stencil_distribution_method)
 {
     stencil_distribution_method_ = stencil_distribution_method;
 }
 
-bool GMGPolar::cacheDensityProfileCoefficients() const
+template<DomainGeometryConcept DomainGeometry>
+bool GMGPolar<DomainGeometry>::cacheDensityProfileCoefficients() const
 {
     return cache_density_profile_coefficients_;
 }
-void GMGPolar::cacheDensityProfileCoefficients(bool cache_density_profile_coefficients)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::cacheDensityProfileCoefficients(bool cache_density_profile_coefficients)
 {
     cache_density_profile_coefficients_ = cache_density_profile_coefficients;
 }
 
-bool GMGPolar::cacheDomainGeometry() const
+template<DomainGeometryConcept DomainGeometry>
+bool GMGPolar<DomainGeometry>::cacheDomainGeometry() const
 {
     return cache_domain_geometry_;
 }
-void GMGPolar::cacheDomainGeometry(bool cache_domain_geometry)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::cacheDomainGeometry(bool cache_domain_geometry)
 {
     cache_domain_geometry_ = cache_domain_geometry;
 }
@@ -136,74 +153,90 @@ void GMGPolar::cacheDomainGeometry(bool cache_domain_geometry)
 /* ---------------------------------------------------------------------- */
 /* Multigrid controls                                                     */
 /* ---------------------------------------------------------------------- */
-ExtrapolationType GMGPolar::extrapolation() const
+template<DomainGeometryConcept DomainGeometry>
+ExtrapolationType GMGPolar<DomainGeometry>::extrapolation() const
 {
     return extrapolation_;
 }
-void GMGPolar::extrapolation(ExtrapolationType extrapolation)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::extrapolation(ExtrapolationType extrapolation)
 {
     extrapolation_ = extrapolation;
 }
 
-int GMGPolar::maxLevels() const
+template<DomainGeometryConcept DomainGeometry>
+int GMGPolar<DomainGeometry>::maxLevels() const
 {
     return max_levels_;
 }
-void GMGPolar::maxLevels(int max_levels)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::maxLevels(int max_levels)
 {
     max_levels_ = max_levels;
 }
 
-MultigridCycleType GMGPolar::multigridCycle() const
+template<DomainGeometryConcept DomainGeometry>
+MultigridCycleType GMGPolar<DomainGeometry>::multigridCycle() const
 {
     return multigrid_cycle_;
 }
-void GMGPolar::multigridCycle(MultigridCycleType multigrid_cycle)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::multigridCycle(MultigridCycleType multigrid_cycle)
 {
     multigrid_cycle_ = multigrid_cycle;
 }
 
-int GMGPolar::preSmoothingSteps() const
+template<DomainGeometryConcept DomainGeometry>
+int GMGPolar<DomainGeometry>::preSmoothingSteps() const
 {
     return pre_smoothing_steps_;
 }
-void GMGPolar::preSmoothingSteps(int pre_smoothing_steps)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::preSmoothingSteps(int pre_smoothing_steps)
 {
     pre_smoothing_steps_ = pre_smoothing_steps;
 }
 
-int GMGPolar::postSmoothingSteps() const
+template<DomainGeometryConcept DomainGeometry>
+int GMGPolar<DomainGeometry>::postSmoothingSteps() const
 {
     return post_smoothing_steps_;
 }
-void GMGPolar::postSmoothingSteps(int post_smoothing_steps)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::postSmoothingSteps(int post_smoothing_steps)
 {
     post_smoothing_steps_ = post_smoothing_steps;
 }
 
-bool GMGPolar::FMG() const
+template<DomainGeometryConcept DomainGeometry>
+bool GMGPolar<DomainGeometry>::FMG() const
 {
     return FMG_;
 }
-void GMGPolar::FMG(bool FMG)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::FMG(bool FMG)
 {
     FMG_ = FMG;
 }
 
-int GMGPolar::FMG_iterations() const
+template<DomainGeometryConcept DomainGeometry>
+int GMGPolar<DomainGeometry>::FMG_iterations() const
 {
     return FMG_iterations_;
 }
-void GMGPolar::FMG_iterations(int FMG_iterations)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::FMG_iterations(int FMG_iterations)
 {
     FMG_iterations_ = FMG_iterations;
 }
 
-MultigridCycleType GMGPolar::FMG_cycle() const
+template<DomainGeometryConcept DomainGeometry>
+MultigridCycleType GMGPolar<DomainGeometry>::FMG_cycle() const
 {
     return FMG_cycle_;
 }
-void GMGPolar::FMG_cycle(MultigridCycleType FMG_cycle)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::FMG_cycle(MultigridCycleType FMG_cycle)
 {
     FMG_cycle_ = FMG_cycle;
 }
@@ -212,38 +245,46 @@ void GMGPolar::FMG_cycle(MultigridCycleType FMG_cycle)
 /* Iterative solver termination                                           */
 /* ---------------------------------------------------------------------- */
 
-int GMGPolar::maxIterations() const
+template<DomainGeometryConcept DomainGeometry>
+int GMGPolar<DomainGeometry>::maxIterations() const
 {
     return max_iterations_;
 }
-void GMGPolar::maxIterations(int maxIterations)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::maxIterations(int maxIterations)
 {
     max_iterations_ = maxIterations;
 }
 
-ResidualNormType GMGPolar::residualNormType() const
+template<DomainGeometryConcept DomainGeometry>
+ResidualNormType GMGPolar<DomainGeometry>::residualNormType() const
 {
     return residual_norm_type_;
 }
-void GMGPolar::residualNormType(ResidualNormType residualNormType)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::residualNormType(ResidualNormType residualNormType)
 {
     residual_norm_type_ = residualNormType;
 }
 
-std::optional<double> GMGPolar::absoluteTolerance() const
+template<DomainGeometryConcept DomainGeometry>
+std::optional<double> GMGPolar<DomainGeometry>::absoluteTolerance() const
 {
     return absolute_tolerance_;
 }
-void GMGPolar::absoluteTolerance(std::optional<double> tol)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::absoluteTolerance(std::optional<double> tol)
 {
     absolute_tolerance_ = tol.has_value() && tol.value() >= 0.0 ? tol : std::nullopt;
 }
 
-std::optional<double> GMGPolar::relativeTolerance() const
+template<DomainGeometryConcept DomainGeometry>
+std::optional<double> GMGPolar<DomainGeometry>::relativeTolerance() const
 {
     return relative_tolerance_;
 }
-void GMGPolar::relativeTolerance(std::optional<double> tol)
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::relativeTolerance(std::optional<double> tol)
 {
     relative_tolerance_ = tol.has_value() && tol.value() >= 0.0 ? tol : std::nullopt;
 }
@@ -251,18 +292,21 @@ void GMGPolar::relativeTolerance(std::optional<double> tol)
 /* ---------------------------------------------------------------------- */
 /* Solution & Grid Access                                                 */
 /* ---------------------------------------------------------------------- */
-Vector<double> GMGPolar::solution()
+template<DomainGeometryConcept DomainGeometry>
+Vector<double> GMGPolar<DomainGeometry>::solution()
 {
     int level_depth = 0;
     return levels_[level_depth].solution();
 }
-ConstVector<double> GMGPolar::solution() const
+template<DomainGeometryConcept DomainGeometry>
+ConstVector<double> GMGPolar<DomainGeometry>::solution() const
 {
     int level_depth = 0;
     return levels_[level_depth].solution();
 }
 
-const PolarGrid& GMGPolar::grid() const
+template<DomainGeometryConcept DomainGeometry>
+const PolarGrid& GMGPolar<DomainGeometry>::grid() const
 {
     return grid_;
 }
@@ -270,23 +314,28 @@ const PolarGrid& GMGPolar::grid() const
 /* ---------------------------------------------------------------------- */
 /* Setup timings                                                          */
 /* ---------------------------------------------------------------------- */
-double GMGPolar::timeSetupTotal() const
+template<DomainGeometryConcept DomainGeometry>
+double GMGPolar<DomainGeometry>::timeSetupTotal() const
 {
     return t_setup_total_;
 }
-double GMGPolar::timeSetupCreateLevels() const
+template<DomainGeometryConcept DomainGeometry>
+double GMGPolar<DomainGeometry>::timeSetupCreateLevels() const
 {
     return t_setup_createLevels_;
 }
-double GMGPolar::timeSetupRHS() const
+template<DomainGeometryConcept DomainGeometry>
+double GMGPolar<DomainGeometry>::timeSetupRHS() const
 {
     return t_setup_rhs_;
 }
-double GMGPolar::timeSetupSmoother() const
+template<DomainGeometryConcept DomainGeometry>
+double GMGPolar<DomainGeometry>::timeSetupSmoother() const
 {
     return t_setup_smoother_;
 }
-double GMGPolar::timeSetupDirectSolver() const
+template<DomainGeometryConcept DomainGeometry>
+double GMGPolar<DomainGeometry>::timeSetupDirectSolver() const
 {
     return t_setup_directSolver_;
 }
@@ -294,23 +343,28 @@ double GMGPolar::timeSetupDirectSolver() const
 /* ---------------------------------------------------------------------- */
 /* Solve timings                                                          */
 /* ---------------------------------------------------------------------- */
-double GMGPolar::timeSolveTotal() const
+template<DomainGeometryConcept DomainGeometry>
+double GMGPolar<DomainGeometry>::timeSolveTotal() const
 {
     return t_solve_total_;
 }
-double GMGPolar::timeSolveInitialApproximation() const
+template<DomainGeometryConcept DomainGeometry>
+double GMGPolar<DomainGeometry>::timeSolveInitialApproximation() const
 {
     return t_solve_initial_approximation_;
 }
-double GMGPolar::timeSolveMultigridIterations() const
+template<DomainGeometryConcept DomainGeometry>
+double GMGPolar<DomainGeometry>::timeSolveMultigridIterations() const
 {
     return t_solve_multigrid_iterations_;
 }
-double GMGPolar::timeCheckConvergence() const
+template<DomainGeometryConcept DomainGeometry>
+double GMGPolar<DomainGeometry>::timeCheckConvergence() const
 {
     return t_check_convergence_;
 }
-double GMGPolar::timeCheckExactError() const
+template<DomainGeometryConcept DomainGeometry>
+double GMGPolar<DomainGeometry>::timeCheckExactError() const
 {
     return t_check_exact_error_;
 }
@@ -318,23 +372,28 @@ double GMGPolar::timeCheckExactError() const
 /* ---------------------------------------------------------------------- */
 /* Average Multigrid Cycle timings                                        */
 /* ---------------------------------------------------------------------- */
-double GMGPolar::timeAvgMGCTotal() const
+template<DomainGeometryConcept DomainGeometry>
+double GMGPolar<DomainGeometry>::timeAvgMGCTotal() const
 {
     return t_avg_MGC_total_;
 }
-double GMGPolar::timeAvgMGCPreSmoothing() const
+template<DomainGeometryConcept DomainGeometry>
+double GMGPolar<DomainGeometry>::timeAvgMGCPreSmoothing() const
 {
     return t_avg_MGC_preSmoothing_;
 }
-double GMGPolar::timeAvgMGCPostSmoothing() const
+template<DomainGeometryConcept DomainGeometry>
+double GMGPolar<DomainGeometry>::timeAvgMGCPostSmoothing() const
 {
     return t_avg_MGC_postSmoothing_;
 }
-double GMGPolar::timeAvgMGCResidual() const
+template<DomainGeometryConcept DomainGeometry>
+double GMGPolar<DomainGeometry>::timeAvgMGCResidual() const
 {
     return t_avg_MGC_residual_;
 }
-double GMGPolar::timeAvgMGCDirectSolver() const
+template<DomainGeometryConcept DomainGeometry>
+double GMGPolar<DomainGeometry>::timeAvgMGCDirectSolver() const
 {
     return t_avg_MGC_directSolver_;
 }
@@ -343,14 +402,16 @@ double GMGPolar::timeAvgMGCDirectSolver() const
 /* Reset timings                                                          */
 /* ---------------------------------------------------------------------- */
 
-void GMGPolar::resetAllTimings()
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::resetAllTimings()
 {
     resetSetupPhaseTimings();
     resetSolvePhaseTimings();
     resetAvgMultigridCycleTimings();
 }
 
-void GMGPolar::resetSetupPhaseTimings()
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::resetSetupPhaseTimings()
 {
     t_setup_total_        = 0.0;
     t_setup_createLevels_ = 0.0;
@@ -359,7 +420,8 @@ void GMGPolar::resetSetupPhaseTimings()
     t_setup_directSolver_ = 0.0;
 }
 
-void GMGPolar::resetSolvePhaseTimings()
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::resetSolvePhaseTimings()
 {
     t_solve_total_                 = 0.0;
     t_solve_initial_approximation_ = 0.0;
@@ -368,7 +430,8 @@ void GMGPolar::resetSolvePhaseTimings()
     t_check_exact_error_           = 0.0;
 }
 
-void GMGPolar::resetAvgMultigridCycleTimings()
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::resetAvgMultigridCycleTimings()
 {
     t_avg_MGC_total_         = 0.0;
     t_avg_MGC_preSmoothing_  = 0.0;
@@ -381,7 +444,8 @@ void GMGPolar::resetAvgMultigridCycleTimings()
 /* Diagnostics & statistics                                               */
 /* ---------------------------------------------------------------------- */
 // Print timing breakdown for setup, smoothing, coarse solve, etc.
-void GMGPolar::printTimings() const
+template<DomainGeometryConcept DomainGeometry>
+void GMGPolar<DomainGeometry>::printTimings() const
 {
     // t_setup_rhs_ is neither included in t_setup_total_ and t_solve_total_.
     std::cout << "\n------------------" << std::endl;
@@ -410,26 +474,30 @@ void GMGPolar::printTimings() const
 }
 
 // Number of iterations taken by last solve.
-int GMGPolar::numberOfIterations() const
+template<DomainGeometryConcept DomainGeometry>
+int GMGPolar<DomainGeometry>::numberOfIterations() const
 {
     return number_of_iterations_;
 }
 
 // Mean residual reduction factor per iteration.
-double GMGPolar::meanResidualReductionFactor() const
+template<DomainGeometryConcept DomainGeometry>
+double GMGPolar<DomainGeometry>::meanResidualReductionFactor() const
 {
     return mean_residual_reduction_factor_;
 }
 
 // Error norms (only available if exact solution was set).
-std::optional<double> GMGPolar::exactErrorWeightedEuclidean() const
+template<DomainGeometryConcept DomainGeometry>
+std::optional<double> GMGPolar<DomainGeometry>::exactErrorWeightedEuclidean() const
 {
     if (exact_solution_) {
         return exact_errors_.back().first;
     }
     return std::nullopt;
 }
-std::optional<double> GMGPolar::exactErrorInfinity() const
+template<DomainGeometryConcept DomainGeometry>
+std::optional<double> GMGPolar<DomainGeometry>::exactErrorInfinity() const
 {
     if (exact_solution_) {
         return exact_errors_.back().second;
