@@ -35,8 +35,7 @@ public:
     // with Dirichlet boundary condition        u = u_D    on \partial \Omega.
     // Parameters:
     // - grid: Cartesian mesh discretizing the computational domain.
-    // - density_profile_coefficients: Coefficients \alpha and \beta defining the PDE.
-    IGMGPolar(const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients);
+    IGMGPolar(const PolarGrid& grid);
 
     /* ---------------------------------------------------------------------- */
     /* General output & visualization                                         */
@@ -194,7 +193,6 @@ protected:
     /* Grid Configuration & Input Functions */
     /* ------------------------------------ */
     const PolarGrid& grid_;
-    const DensityProfileCoefficients& density_profile_coefficients_;
     const ExactSolution* exact_solution_; // Optional exact solution for validation
 
     /* ------------------ */

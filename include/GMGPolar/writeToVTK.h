@@ -1,7 +1,7 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
-template <concepts::DomainGeometry DomainGeometry>
-void GMGPolar<DomainGeometry>::writeToVTK(const std::filesystem::path& file_path, const PolarGrid& grid)
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(const std::filesystem::path& file_path, const PolarGrid& grid)
 {
     const auto filename = file_path.stem().string() + ".vtu";
 
@@ -59,8 +59,8 @@ void GMGPolar<DomainGeometry>::writeToVTK(const std::filesystem::path& file_path
          << "</VTKFile>\n";
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-void GMGPolar<DomainGeometry>::writeToVTK(const std::filesystem::path& file_path, const Level& level,
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(const std::filesystem::path& file_path, const Level& level,
                                           ConstVector<double> grid_function)
 {
     const PolarGrid& grid         = level.grid();

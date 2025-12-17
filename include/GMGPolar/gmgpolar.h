@@ -41,8 +41,9 @@ public:
     // - density_profile_coefficients: Coefficients \alpha and \beta defining the PDE.
     GMGPolar(const PolarGrid& grid, const DomainGeometry& domain_geometry,
              const DensityProfileCoefficients& density_profile_coefficients)
-        : IGMGPolar(grid, density_profile_coefficients)
+        : IGMGPolar(grid)
         , domain_geometry_(domain_geometry)
+        , density_profile_coefficients_(density_profile_coefficients)
     {
     }
 
@@ -57,6 +58,7 @@ private:
     /* Grid Configuration & Input Functions */
     /* ------------------------------------ */
     const DomainGeometry& domain_geometry_;
+    const DensityProfileCoefficients& density_profile_coefficients_;
 
     /* --------------- */
     /* Setup Functions */
