@@ -16,7 +16,7 @@ PolarR6_Poisson_CzarnyGeometry::PolarR6_Poisson_CzarnyGeometry(PolarGrid const& 
     initializeGeometry();
 }
 
-double PolarR6_Poisson_CzarnyGeometry::operator()(int i_r, int i_theta) const
+double PolarR6_Poisson_CzarnyGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
 {
     double r         = grid_.radius(i_r);
     double theta     = grid_.theta(i_theta);

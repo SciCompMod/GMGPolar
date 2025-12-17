@@ -6,7 +6,7 @@ PolarR6_Sonnendrucker_CircularGeometry::PolarR6_Sonnendrucker_CircularGeometry(P
 {
 }
 
-double PolarR6_Sonnendrucker_CircularGeometry::operator()(int i_r, int i_theta) const
+double PolarR6_Sonnendrucker_CircularGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
 {
     double r     = grid_.radius(i_r);
     double theta = grid_.theta(i_theta);

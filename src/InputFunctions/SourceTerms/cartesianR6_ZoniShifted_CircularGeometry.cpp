@@ -6,7 +6,7 @@ CartesianR6_ZoniShifted_CircularGeometry::CartesianR6_ZoniShifted_CircularGeomet
 {
 }
 
-double CartesianR6_ZoniShifted_CircularGeometry::operator()(int i_r, int i_theta) const
+double CartesianR6_ZoniShifted_CircularGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
 {
     double r         = grid_.radius(i_r);
     double theta     = grid_.theta(i_theta);

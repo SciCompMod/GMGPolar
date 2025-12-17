@@ -10,7 +10,7 @@ PolarR6_ZoniShifted_ShafranovGeometry::PolarR6_ZoniShifted_ShafranovGeometry(Pol
 {
 }
 
-double PolarR6_ZoniShifted_ShafranovGeometry::operator()(int i_r, int i_theta) const
+double PolarR6_ZoniShifted_ShafranovGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
 {
     double r         = grid_.radius(i_r);
     double theta     = grid_.theta(i_theta);

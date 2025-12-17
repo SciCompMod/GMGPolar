@@ -9,7 +9,7 @@ CartesianR2_Zoni_ShafranovGeometry::CartesianR2_Zoni_ShafranovGeometry(PolarGrid
 {
 }
 
-double CartesianR2_Zoni_ShafranovGeometry::operator()(int i_r, int i_theta) const
+double CartesianR2_Zoni_ShafranovGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
 {
     double r         = grid_.radius(i_r);
     double theta     = grid_.theta(i_theta);

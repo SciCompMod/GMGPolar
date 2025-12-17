@@ -13,7 +13,7 @@ public:
                                              double ellipticity_e);
     virtual ~CartesianR2_Zoni_CzarnyGeometry() = default;
 
-    double operator()(int i_r, int i_theta) const override;
+    double operator()(std::size_t i_r, std::size_t i_theta) const override;
 
 private:
     PolarGrid const& grid_;

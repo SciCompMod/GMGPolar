@@ -13,7 +13,7 @@ public:
                                                 double shift_delta);
     virtual ~PolarR6_ZoniGyro_ShafranovGeometry() = default;
 
-    double operator()(int i_r, int i_theta) const override;
+    double operator()(std::size_t i_r, std::size_t i_theta) const override;
 
 private:
     PolarGrid const& grid_;

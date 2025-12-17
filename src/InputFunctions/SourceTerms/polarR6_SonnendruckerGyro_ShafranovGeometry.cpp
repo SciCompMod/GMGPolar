@@ -11,7 +11,7 @@ PolarR6_SonnendruckerGyro_ShafranovGeometry::PolarR6_SonnendruckerGyro_Shafranov
 {
 }
 
-double PolarR6_SonnendruckerGyro_ShafranovGeometry::operator()(int i_r, int i_theta) const
+double PolarR6_SonnendruckerGyro_ShafranovGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
 {
     double r         = grid_.radius(i_r);
     double theta     = grid_.theta(i_theta);
