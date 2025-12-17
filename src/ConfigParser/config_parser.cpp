@@ -378,7 +378,7 @@ const DomainGeometryVariant& ConfigParser::domainGeometry() const
     return *domain_geometry_.get();
 }
 
-const DensityProfileCoefficients& ConfigParser::densityProfileCoefficients() const
+const DensityProfileCoefficientsVariant& ConfigParser::densityProfileCoefficients() const
 {
     return *density_profile_coefficients_.get();
 }

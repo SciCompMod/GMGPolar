@@ -3,15 +3,17 @@
 
 std::unique_ptr<IGMGPolar> ConfigParser::solver() const
 {
-    const PolarGrid& grid                                          = grid_;
-    const DensityProfileCoefficients& density_profile_coefficients = *density_profile_coefficients_;
+    const PolarGrid& grid = grid_;
     return std::visit(
-        [&grid, &density_profile_coefficients](auto const& domain_geometry) {
-            using DomainGeomType = std::decay_t<decltype(domain_geometry)>;
+        [&grid](auto const& domain_geometry, auto const& density_profile_coefficients) {
+            using DomainGeomType                 = std::decay_t<decltype(domain_geometry)>;
+            using DensityProfileCoefficientsType = std::decay_t<decltype(density_profile_coefficients)>;
+
             return static_cast<std::unique_ptr<IGMGPolar>>(
-                std::make_unique<GMGPolar<DomainGeomType>>(grid, domain_geometry, density_profile_coefficients));
+                std::make_unique<GMGPolar<DomainGeomType, DensityProfileCoefficientsType>>(
+                    grid, domain_geometry, density_profile_coefficients));
         },
-        *domain_geometry_);
+        *domain_geometry_, *density_profile_coefficients_);
 }
 
 void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType problem_type, AlphaCoeff alpha_type,
@@ -44,16 +46,19 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
     /* Density Profile Coefficients */
     switch (alpha_type) {
     case AlphaCoeff::POISSON:
-        density_profile_coefficients_ = std::make_unique<PoissonCoefficients>(Rmax, alpha_jump);
+        density_profile_coefficients_ =
+            std::make_unique<DensityProfileCoefficientsVariant>(PoissonCoefficients(Rmax, alpha_jump));
         break;
 
     case AlphaCoeff::SONNENDRUCKER:
         switch (beta_type) {
         case BetaCoeff::ZERO:
-            density_profile_coefficients_ = std::make_unique<SonnendruckerCoefficients>(Rmax, alpha_jump);
+            density_profile_coefficients_ =
+                std::make_unique<DensityProfileCoefficientsVariant>(SonnendruckerCoefficients(Rmax, alpha_jump));
             break;
         case BetaCoeff::ALPHA_INVERSE:
-            density_profile_coefficients_ = std::make_unique<SonnendruckerGyroCoefficients>(Rmax, alpha_jump);
+            density_profile_coefficients_ =
+                std::make_unique<DensityProfileCoefficientsVariant>(SonnendruckerGyroCoefficients(Rmax, alpha_jump));
             break;
         default:
             throw std::runtime_error("Invalid beta.\n");
@@ -63,10 +68,12 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
     case AlphaCoeff::ZONI:
         switch (beta_type) {
         case BetaCoeff::ZERO:
-            density_profile_coefficients_ = std::make_unique<ZoniCoefficients>(Rmax, alpha_jump);
+            density_profile_coefficients_ =
+                std::make_unique<DensityProfileCoefficientsVariant>(ZoniCoefficients(Rmax, alpha_jump));
             break;
         case BetaCoeff::ALPHA_INVERSE:
-            density_profile_coefficients_ = std::make_unique<ZoniGyroCoefficients>(Rmax, alpha_jump);
+            density_profile_coefficients_ =
+                std::make_unique<DensityProfileCoefficientsVariant>(ZoniGyroCoefficients(Rmax, alpha_jump));
             break;
         default:
             throw std::runtime_error("Invalid beta.\n");
@@ -76,10 +83,12 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
     case AlphaCoeff::ZONI_SHIFTED:
         switch (beta_type) {
         case BetaCoeff::ZERO:
-            density_profile_coefficients_ = std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
+            density_profile_coefficients_ =
+                std::make_unique<DensityProfileCoefficientsVariant>(ZoniShiftedCoefficients(Rmax, alpha_jump));
             break;
         case BetaCoeff::ALPHA_INVERSE:
-            density_profile_coefficients_ = std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
+            density_profile_coefficients_ =
+                std::make_unique<DensityProfileCoefficientsVariant>(ZoniShiftedGyroCoefficients(Rmax, alpha_jump));
             break;
         default:
             throw std::runtime_error("Invalid beta.\n");
