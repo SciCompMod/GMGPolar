@@ -7,7 +7,7 @@
 class Refined_ZoniShiftedGyro_CulhamGeometry : public SourceTerm
 {
 public:
-    Refined_ZoniShiftedGyro_CulhamGeometry() = default;
+
     explicit Refined_ZoniShiftedGyro_CulhamGeometry(double Rmax);
     virtual ~Refined_ZoniShiftedGyro_CulhamGeometry() = default;
 

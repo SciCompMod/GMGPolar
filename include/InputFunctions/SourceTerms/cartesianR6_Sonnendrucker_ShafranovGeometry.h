@@ -7,7 +7,7 @@
 class CartesianR6_Sonnendrucker_ShafranovGeometry : public SourceTerm
 {
 public:
-    CartesianR6_Sonnendrucker_ShafranovGeometry() = default;
+
     explicit CartesianR6_Sonnendrucker_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
     virtual ~CartesianR6_Sonnendrucker_ShafranovGeometry() = default;
 

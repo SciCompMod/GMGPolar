@@ -7,7 +7,7 @@
 class PolarR6_SonnendruckerGyro_ShafranovGeometry : public SourceTerm
 {
 public:
-    PolarR6_SonnendruckerGyro_ShafranovGeometry() = default;
+
     explicit PolarR6_SonnendruckerGyro_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
     virtual ~PolarR6_SonnendruckerGyro_ShafranovGeometry() = default;
 

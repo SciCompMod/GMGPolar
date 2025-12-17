@@ -7,7 +7,7 @@
 class PolarR6_SonnendruckerGyro_CzarnyGeometry : public SourceTerm
 {
 public:
-    PolarR6_SonnendruckerGyro_CzarnyGeometry() = default;
+
     explicit PolarR6_SonnendruckerGyro_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon,
                                                       double ellipticity_e);
     virtual ~PolarR6_SonnendruckerGyro_CzarnyGeometry() = default;

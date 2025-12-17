@@ -7,7 +7,6 @@
 class CartesianR2_Poisson_CircularGeometry : public SourceTerm
 {
 public:
-    CartesianR2_Poisson_CircularGeometry() = default;
     explicit CartesianR2_Poisson_CircularGeometry(double Rmax);
     virtual ~CartesianR2_Poisson_CircularGeometry() = default;
 

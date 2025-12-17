@@ -7,7 +7,7 @@
 class PolarR6_Zoni_CircularGeometry : public SourceTerm
 {
 public:
-    PolarR6_Zoni_CircularGeometry() = default;
+
     explicit PolarR6_Zoni_CircularGeometry(double Rmax);
     virtual ~PolarR6_Zoni_CircularGeometry() = default;
 

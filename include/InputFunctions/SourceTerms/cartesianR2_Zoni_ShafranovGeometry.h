@@ -7,7 +7,7 @@
 class CartesianR2_Zoni_ShafranovGeometry : public SourceTerm
 {
 public:
-    CartesianR2_Zoni_ShafranovGeometry() = default;
+
     explicit CartesianR2_Zoni_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
     virtual ~CartesianR2_Zoni_ShafranovGeometry() = default;
 

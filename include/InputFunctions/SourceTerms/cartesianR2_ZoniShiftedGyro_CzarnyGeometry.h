@@ -7,7 +7,7 @@
 class CartesianR2_ZoniShiftedGyro_CzarnyGeometry : public SourceTerm
 {
 public:
-    CartesianR2_ZoniShiftedGyro_CzarnyGeometry() = default;
+
     explicit CartesianR2_ZoniShiftedGyro_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon,
                                                         double ellipticity_e);
     virtual ~CartesianR2_ZoniShiftedGyro_CzarnyGeometry() = default;

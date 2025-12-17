@@ -7,7 +7,7 @@
 class CartesianR6_Sonnendrucker_CircularGeometry : public SourceTerm
 {
 public:
-    CartesianR6_Sonnendrucker_CircularGeometry() = default;
+
     explicit CartesianR6_Sonnendrucker_CircularGeometry(double Rmax);
     virtual ~CartesianR6_Sonnendrucker_CircularGeometry() = default;
 

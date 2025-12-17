@@ -7,7 +7,7 @@
 class CartesianR2_ZoniShiftedGyro_ShafranovGeometry : public SourceTerm
 {
 public:
-    CartesianR2_ZoniShiftedGyro_ShafranovGeometry() = default;
+
     explicit CartesianR2_ZoniShiftedGyro_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
     virtual ~CartesianR2_ZoniShiftedGyro_ShafranovGeometry() = default;
 

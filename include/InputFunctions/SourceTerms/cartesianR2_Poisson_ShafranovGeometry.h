@@ -7,7 +7,7 @@
 class CartesianR2_Poisson_ShafranovGeometry : public SourceTerm
 {
 public:
-    CartesianR2_Poisson_ShafranovGeometry() = default;
+
     explicit CartesianR2_Poisson_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
     virtual ~CartesianR2_Poisson_ShafranovGeometry() = default;
 

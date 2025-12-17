@@ -7,7 +7,7 @@
 class CartesianR6_ZoniGyro_CzarnyGeometry : public SourceTerm
 {
 public:
-    CartesianR6_ZoniGyro_CzarnyGeometry() = default;
+
     explicit CartesianR6_ZoniGyro_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon,
                                                  double ellipticity_e);
     virtual ~CartesianR6_ZoniGyro_CzarnyGeometry() = default;

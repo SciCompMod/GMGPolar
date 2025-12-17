@@ -7,7 +7,7 @@
 class PolarR6_Poisson_ShafranovGeometry : public SourceTerm
 {
 public:
-    PolarR6_Poisson_ShafranovGeometry() = default;
+
     explicit PolarR6_Poisson_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
     virtual ~PolarR6_Poisson_ShafranovGeometry() = default;
 

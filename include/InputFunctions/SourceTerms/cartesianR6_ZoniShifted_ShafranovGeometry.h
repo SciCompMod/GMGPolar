@@ -7,7 +7,7 @@
 class CartesianR6_ZoniShifted_ShafranovGeometry : public SourceTerm
 {
 public:
-    CartesianR6_ZoniShifted_ShafranovGeometry() = default;
+
     explicit CartesianR6_ZoniShifted_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
     virtual ~CartesianR6_ZoniShifted_ShafranovGeometry() = default;
 

@@ -7,7 +7,7 @@
 class CartesianR2_ZoniGyro_CircularGeometry : public SourceTerm
 {
 public:
-    CartesianR2_ZoniGyro_CircularGeometry() = default;
+
     explicit CartesianR2_ZoniGyro_CircularGeometry(double Rmax);
     virtual ~CartesianR2_ZoniGyro_CircularGeometry() = default;
 

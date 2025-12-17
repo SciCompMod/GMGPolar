@@ -7,7 +7,7 @@
 class PolarR6_ZoniShiftedGyro_CzarnyGeometry : public SourceTerm
 {
 public:
-    PolarR6_ZoniShiftedGyro_CzarnyGeometry() = default;
+
     explicit PolarR6_ZoniShiftedGyro_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon,
                                                     double ellipticity_e);
     virtual ~PolarR6_ZoniShiftedGyro_CzarnyGeometry() = default;

@@ -7,7 +7,7 @@
 class CartesianR2_Sonnendrucker_CzarnyGeometry : public SourceTerm
 {
 public:
-    CartesianR2_Sonnendrucker_CzarnyGeometry() = default;
+
     explicit CartesianR2_Sonnendrucker_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon,
                                                       double ellipticity_e);
     virtual ~CartesianR2_Sonnendrucker_CzarnyGeometry() = default;

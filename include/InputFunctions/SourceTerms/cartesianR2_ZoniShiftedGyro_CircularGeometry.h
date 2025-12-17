@@ -7,7 +7,7 @@
 class CartesianR2_ZoniShiftedGyro_CircularGeometry : public SourceTerm
 {
 public:
-    CartesianR2_ZoniShiftedGyro_CircularGeometry() = default;
+
     explicit CartesianR2_ZoniShiftedGyro_CircularGeometry(double Rmax);
     virtual ~CartesianR2_ZoniShiftedGyro_CircularGeometry() = default;
 

@@ -7,7 +7,7 @@
 class Refined_ZoniShiftedGyro_CircularGeometry : public SourceTerm
 {
 public:
-    Refined_ZoniShiftedGyro_CircularGeometry() = default;
+
     explicit Refined_ZoniShiftedGyro_CircularGeometry(double Rmax);
     virtual ~Refined_ZoniShiftedGyro_CircularGeometry() = default;
 

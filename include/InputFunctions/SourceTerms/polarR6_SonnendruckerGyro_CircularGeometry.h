@@ -7,7 +7,7 @@
 class PolarR6_SonnendruckerGyro_CircularGeometry : public SourceTerm
 {
 public:
-    PolarR6_SonnendruckerGyro_CircularGeometry() = default;
+
     explicit PolarR6_SonnendruckerGyro_CircularGeometry(double Rmax);
     virtual ~PolarR6_SonnendruckerGyro_CircularGeometry() = default;
 
