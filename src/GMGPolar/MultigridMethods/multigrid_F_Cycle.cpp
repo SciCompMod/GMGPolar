@@ -1,7 +1,7 @@
 
-template<DomainGeometryConcept DomainGeometry>
+template <DomainGeometryConcept DomainGeometry>
 void GMGPolar<DomainGeometry>::multigrid_F_Cycle(const int level_depth, Vector<double> solution, Vector<double> rhs,
-                                 Vector<double> residual)
+                                                 Vector<double> residual)
 {
     assert(0 <= level_depth && level_depth < number_of_levels_ - 1);
 
