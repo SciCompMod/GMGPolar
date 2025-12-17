@@ -373,7 +373,7 @@ std::optional<double> ConfigParser::relativeTolerance() const
     return relative_tolerance_;
 }
 
-const DomainGeometry& ConfigParser::domainGeometry() const
+const DomainGeometryVariant& ConfigParser::domainGeometry() const
 {
     return *domain_geometry_.get();
 }

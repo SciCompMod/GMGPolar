@@ -9,6 +9,8 @@
 #include "../../include/common/global_definitions.h"
 #include "../../include/PolarGrid/polargrid.h"
 #include "../../include/GMGPolar/test_cases.h"
+#include "../../include/GMGPolar/igmgpolar.h"
+#include "test_selection.h"
 
 class ConfigParser
 {
@@ -22,11 +24,12 @@ public:
     bool parse(int argc, char* argv[]);
 
     // Test Case
-    const DomainGeometry& domainGeometry() const;
+    const DomainGeometryVariant& domainGeometry() const;
     const DensityProfileCoefficients& densityProfileCoefficients() const;
     const BoundaryConditions& boundaryConditions() const;
     const SourceTerm& sourceTerm() const;
     const ExactSolution& exactSolution() const;
+    std::unique_ptr<IGMGPolar> solver() const;
 
     // Control Parameters
     int verbose() const;
@@ -58,7 +61,7 @@ private:
     // Parse command-line arguments to extract problem configuration
     cmdline::parser parser_;
     // Input Functions
-    std::unique_ptr<const DomainGeometry> domain_geometry_;
+    std::unique_ptr<const DomainGeometryVariant> domain_geometry_;
     std::unique_ptr<const DensityProfileCoefficients> density_profile_coefficients_;
     std::unique_ptr<const BoundaryConditions> boundary_conditions_;
     std::unique_ptr<const SourceTerm> source_term_;

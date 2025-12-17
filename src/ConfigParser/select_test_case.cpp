@@ -1,4 +1,18 @@
 #include "../include/ConfigParser/config_parser.h"
+#include "../../include/GMGPolar/gmgpolar.h"
+
+std::unique_ptr<IGMGPolar> ConfigParser::solver() const
+{
+    const PolarGrid& grid                                          = grid_;
+    const DensityProfileCoefficients& density_profile_coefficients = *density_profile_coefficients_;
+    return std::visit(
+        [&grid, &density_profile_coefficients](auto const& domain_geometry) {
+            using DomainGeomType = std::decay_t<decltype(domain_geometry)>;
+            return static_cast<std::unique_ptr<IGMGPolar>>(
+                std::make_unique<GMGPolar<DomainGeomType>>(grid, domain_geometry, density_profile_coefficients));
+        },
+        *domain_geometry_);
+}
 
 void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType problem_type, AlphaCoeff alpha_type,
                                   BetaCoeff beta_type, double Rmax, double kappa_eps, double delta_e, double alpha_jump)
@@ -7,19 +21,19 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
     /* Domain Geometry */
     switch (geometry_type) {
     case GeometryType::CIRCULAR:
-        domain_geometry_ = std::make_unique<CircularGeometry>(Rmax);
+        domain_geometry_ = std::make_unique<DomainGeometryVariant>(CircularGeometry(Rmax));
         break;
 
     case GeometryType::SHAFRANOV:
-        domain_geometry_ = std::make_unique<ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+        domain_geometry_ = std::make_unique<DomainGeometryVariant>(ShafranovGeometry(Rmax, kappa_eps, delta_e));
         break;
 
     case GeometryType::CZARNY:
-        domain_geometry_ = std::make_unique<CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+        domain_geometry_ = std::make_unique<DomainGeometryVariant>(CzarnyGeometry(Rmax, kappa_eps, delta_e));
         break;
 
     case GeometryType::CULHAM:
-        domain_geometry_ = std::make_unique<CulhamGeometry>(Rmax);
+        domain_geometry_ = std::make_unique<DomainGeometryVariant>(CulhamGeometry(Rmax));
         break;
 
     default:
