@@ -1,7 +1,7 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR6_SonnendruckerGyro_ShafranovGeometry.h"
 
 CartesianR6_SonnendruckerGyro_ShafranovGeometry::CartesianR6_SonnendruckerGyro_ShafranovGeometry(
-    double Rmax, double elongation_kappa, double shift_delta)
+    PolarGrid const& grid, double Rmax, double elongation_kappa, double shift_delta)
     : grid_(grid)
     , Rmax(Rmax)
     , elongation_kappa(elongation_kappa)
