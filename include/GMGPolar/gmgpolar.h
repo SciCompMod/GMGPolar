@@ -25,7 +25,7 @@ class LevelCache;
 #include "test_cases.h"
 #include "igmgpolar.h"
 
-template <DomainGeometryConcept DomainGeometry>
+template <concepts::DomainGeometry DomainGeometry>
 class GMGPolar : public IGMGPolar
 {
 public:

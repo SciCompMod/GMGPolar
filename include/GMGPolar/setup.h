@@ -1,5 +1,5 @@
 
-template <DomainGeometryConcept DomainGeometry>
+template <concepts::DomainGeometry DomainGeometry>
 void GMGPolar<DomainGeometry>::setup()
 {
     LIKWID_START("Setup");

@@ -1,6 +1,6 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
-template <DomainGeometryConcept DomainGeometry>
+template <concepts::DomainGeometry DomainGeometry>
 void GMGPolar<DomainGeometry>::discretize_rhs_f(const Level& level, Vector<double> rhs_f)
 {
     const PolarGrid& grid = level.grid();
