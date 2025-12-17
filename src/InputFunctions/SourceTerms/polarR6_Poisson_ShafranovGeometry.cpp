@@ -8,7 +8,7 @@ PolarR6_Poisson_ShafranovGeometry::PolarR6_Poisson_ShafranovGeometry(PolarGrid c
 {
 }
 
-double PolarR6_Poisson_ShafranovGeometry::operator()(double r, double theta) const
+double PolarR6_Poisson_ShafranovGeometry::operator()(int i_r, int i_theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

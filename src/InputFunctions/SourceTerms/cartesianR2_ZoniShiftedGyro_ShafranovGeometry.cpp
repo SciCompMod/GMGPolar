@@ -9,7 +9,7 @@ CartesianR2_ZoniShiftedGyro_ShafranovGeometry::CartesianR2_ZoniShiftedGyro_Shafr
 {
 }
 
-double CartesianR2_ZoniShiftedGyro_ShafranovGeometry::operator()(double r, double theta) const
+double CartesianR2_ZoniShiftedGyro_ShafranovGeometry::operator()(int i_r, int i_theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

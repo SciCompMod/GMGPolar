@@ -14,7 +14,7 @@ CartesianR2_Zoni_CzarnyGeometry::CartesianR2_Zoni_CzarnyGeometry(PolarGrid const
     initializeGeometry();
 }
 
-double CartesianR2_Zoni_CzarnyGeometry::operator()(double r, double theta) const
+double CartesianR2_Zoni_CzarnyGeometry::operator()(int i_r, int i_theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

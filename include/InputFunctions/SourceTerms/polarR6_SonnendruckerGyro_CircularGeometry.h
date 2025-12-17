@@ -11,7 +11,7 @@ public:
     explicit PolarR6_SonnendruckerGyro_CircularGeometry(PolarGrid const& grid, double Rmax);
     virtual ~PolarR6_SonnendruckerGyro_CircularGeometry() = default;
 
-    double operator()(double r, double theta) const override;
+    double operator()(int i_r, int i_theta) const override;
 
 private:
     PolarGrid const& grid_;

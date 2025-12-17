@@ -9,7 +9,7 @@ CartesianR2_Sonnendrucker_ShafranovGeometry::CartesianR2_Sonnendrucker_Shafranov
 {
 }
 
-double CartesianR2_Sonnendrucker_ShafranovGeometry::operator()(double r, double theta) const
+double CartesianR2_Sonnendrucker_ShafranovGeometry::operator()(int i_r, int i_theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

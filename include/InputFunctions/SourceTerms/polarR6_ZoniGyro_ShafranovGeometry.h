@@ -11,7 +11,7 @@ public:
     explicit PolarR6_ZoniGyro_ShafranovGeometry(PolarGrid const& grid, double Rmax, double elongation_kappa, double shift_delta);
     virtual ~PolarR6_ZoniGyro_ShafranovGeometry() = default;
 
-    double operator()(double r, double theta) const override;
+    double operator()(int i_r, int i_theta) const override;
 
 private:
     PolarGrid const& grid_;

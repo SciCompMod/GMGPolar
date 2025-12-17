@@ -5,7 +5,7 @@ CartesianR2_ZoniShifted_CircularGeometry::CartesianR2_ZoniShifted_CircularGeomet
 {
 }
 
-double CartesianR2_ZoniShifted_CircularGeometry::operator()(double r, double theta) const
+double CartesianR2_ZoniShifted_CircularGeometry::operator()(int i_r, int i_theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

@@ -11,7 +11,7 @@ public:
     explicit CartesianR2_Zoni_CircularGeometry(PolarGrid const& grid, double Rmax);
     virtual ~CartesianR2_Zoni_CircularGeometry() = default;
 
-    double operator()(double r, double theta) const override;
+    double operator()(int i_r, int i_theta) const override;
 
 private:
     PolarGrid const& grid_;

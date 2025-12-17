@@ -15,7 +15,7 @@ CartesianR6_ZoniShifted_CzarnyGeometry::CartesianR6_ZoniShifted_CzarnyGeometry(P
     initializeGeometry();
 }
 
-double CartesianR6_ZoniShifted_CzarnyGeometry::operator()(double r, double theta) const
+double CartesianR6_ZoniShifted_CzarnyGeometry::operator()(int i_r, int i_theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

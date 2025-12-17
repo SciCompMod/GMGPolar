@@ -14,7 +14,7 @@ CartesianR6_Poisson_CzarnyGeometry::CartesianR6_Poisson_CzarnyGeometry(PolarGrid
     initializeGeometry();
 }
 
-double CartesianR6_Poisson_CzarnyGeometry::operator()(double r, double theta) const
+double CartesianR6_Poisson_CzarnyGeometry::operator()(int i_r, int i_theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

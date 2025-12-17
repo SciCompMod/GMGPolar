@@ -5,7 +5,7 @@ PolarR6_ZoniShiftedGyro_CircularGeometry::PolarR6_ZoniShiftedGyro_CircularGeomet
 {
 }
 
-double PolarR6_ZoniShiftedGyro_CircularGeometry::operator()(double r, double theta) const
+double PolarR6_ZoniShiftedGyro_CircularGeometry::operator()(int i_r, int i_theta) const
 {
     return 0.4096 * pow((r / Rmax), 6.0) * pow(((r / Rmax) - 1.0), 6.0) * exp(tanh(20.0 * (r / Rmax) - 14.0)) *
                cos(11.0 * theta) -

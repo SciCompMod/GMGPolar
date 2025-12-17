@@ -11,7 +11,7 @@ public:
     explicit PolarR6_Poisson_CzarnyGeometry(PolarGrid const& grid, double Rmax, double inverse_aspect_ratio_epsilon, double ellipticity_e);
     virtual ~PolarR6_Poisson_CzarnyGeometry() = default;
 
-    double operator()(double r, double theta) const override;
+    double operator()(int i_r, int i_theta) const override;
 
 private:
     PolarGrid const& grid_;
