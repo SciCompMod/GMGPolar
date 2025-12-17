@@ -31,7 +31,7 @@ public:
 };
 
 template <typename T>
-concept DomainGeometryConcept = requires(const T geom, double r, double theta) {
+concept DomainGeometryConcept = !std::same_as<T, DomainGeometry> && requires(const T geom, double r, double theta) {
     { geom.Fx(r, theta) } -> std::convertible_to<double>;
     { geom.Fy(r, theta) } -> std::convertible_to<double>;
     { geom.dFx_dr(r, theta) } -> std::convertible_to<double>;
