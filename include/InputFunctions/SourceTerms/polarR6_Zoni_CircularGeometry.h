@@ -8,11 +8,12 @@ class PolarR6_Zoni_CircularGeometry : public SourceTerm
 {
 public:
 
-    explicit PolarR6_Zoni_CircularGeometry(double Rmax);
+    explicit PolarR6_Zoni_CircularGeometry(PolarGrid const& grid, double Rmax);
     virtual ~PolarR6_Zoni_CircularGeometry() = default;
 
     double rhs_f(double r, double theta) const override;
 
 private:
+    PolarGrid const& grid_;
     const double Rmax = 1.3;
 };
