@@ -266,7 +266,8 @@ void IGMGPolar::initializeSolution()
 //   Residual Handling Functions
 // =============================================================================
 
-double IGMGPolar::residualNorm(const ResidualNormType& norm_type, const Level& level, ConstVector<double> residual) const
+double IGMGPolar::residualNorm(const ResidualNormType& norm_type, const Level& level,
+                               ConstVector<double> residual) const
 {
     switch (norm_type) {
     case ResidualNormType::EUCLIDEAN:
@@ -281,7 +282,7 @@ double IGMGPolar::residualNorm(const ResidualNormType& norm_type, const Level& l
 }
 
 void IGMGPolar::updateResidualNorms(Level& level, int iteration, double& initial_residual_norm,
-                                   double& current_residual_norm, double& current_relative_residual_norm)
+                                    double& current_residual_norm, double& current_relative_residual_norm)
 {
     level.computeResidual(level.residual(), level.rhs(), level.solution());
     if (extrapolation_ != ExtrapolationType::NONE) {
@@ -314,7 +315,7 @@ void IGMGPolar::updateResidualNorms(Level& level, int iteration, double& initial
 }
 
 void IGMGPolar::extrapolatedResidual(const int current_level, Vector<double> residual,
-                                    ConstVector<double> residual_next_level)
+                                     ConstVector<double> residual_next_level)
 {
     const PolarGrid& fineGrid   = levels_[current_level].grid();
     const PolarGrid& coarseGrid = levels_[current_level + 1].grid();
@@ -391,7 +392,7 @@ void IGMGPolar::evaluateExactError(Level& level, const ExactSolution& exact_solu
 }
 
 std::pair<double, double> IGMGPolar::computeExactError(Level& level, ConstVector<double> solution, Vector<double> error,
-                                                      const ExactSolution& exact_solution)
+                                                       const ExactSolution& exact_solution)
 {
     const PolarGrid& grid        = level.grid();
     const LevelCache& levelCache = level.levelCache();
@@ -458,7 +459,7 @@ void IGMGPolar::printIterationHeader(const ExactSolution* exact_solution)
 }
 
 void IGMGPolar::printIterationInfo(int iteration, double current_residual_norm, double current_relative_residual_norm,
-                                  const ExactSolution* exact_solution)
+                                   const ExactSolution* exact_solution)
 {
     if (verbose_ <= 0)
         return;

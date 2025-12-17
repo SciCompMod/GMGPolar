@@ -3,8 +3,7 @@
 /* ---------------------------------------------------------------------- */
 /* Constructor & Initialization                                           */
 /* ---------------------------------------------------------------------- */
-IGMGPolar::IGMGPolar(const PolarGrid& grid,
-                   const DensityProfileCoefficients& density_profile_coefficients)
+IGMGPolar::IGMGPolar(const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients)
     : grid_(grid)
     , density_profile_coefficients_(density_profile_coefficients)
     , exact_solution_(nullptr)

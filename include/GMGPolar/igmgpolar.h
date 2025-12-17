@@ -36,8 +36,7 @@ public:
     // Parameters:
     // - grid: Cartesian mesh discretizing the computational domain.
     // - density_profile_coefficients: Coefficients \alpha and \beta defining the PDE.
-    IGMGPolar(const PolarGrid& grid,
-             const DensityProfileCoefficients& density_profile_coefficients);
+    IGMGPolar(const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients);
 
     /* ---------------------------------------------------------------------- */
     /* General output & visualization                                         */
@@ -307,7 +306,8 @@ protected:
     /* ------------- */
     /* Visualization */
     virtual void writeToVTK(const std::filesystem::path& file_path, const PolarGrid& grid) = 0;
-    virtual void writeToVTK(const std::filesystem::path& file_path, const Level& level, ConstVector<double> grid_function) = 0;
+    virtual void writeToVTK(const std::filesystem::path& file_path, const Level& level,
+                            ConstVector<double> grid_function)                             = 0;
 
     /* ------------------------------ */
     /* Timing statistics for GMGPolar */
