@@ -1,12 +1,15 @@
 #include "../include/InputFunctions/SourceTerms/refined_ZoniShiftedGyro_CircularGeometry.h"
 
 Refined_ZoniShiftedGyro_CircularGeometry::Refined_ZoniShiftedGyro_CircularGeometry(PolarGrid const& grid, double Rmax)
-    : grid_(grid) , Rmax(Rmax)
+    : grid_(grid)
+    , Rmax(Rmax)
 {
 }
 
 double Refined_ZoniShiftedGyro_CircularGeometry::operator()(int i_r, int i_theta) const
 {
+    double r     = grid_.radius(i_r);
+    double theta = grid_.theta(i_theta);
     return 1.0 *
                (((-3.33823779536505e-15) * ((r / Rmax) * (r / Rmax)) - 0.0 * (r / Rmax) - 0.0 +
                  exp((-3333.33333333333) * pow(((r / Rmax) - 0.9), 2.0))) *

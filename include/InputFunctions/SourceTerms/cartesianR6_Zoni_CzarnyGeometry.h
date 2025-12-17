@@ -7,8 +7,8 @@
 class CartesianR6_Zoni_CzarnyGeometry : public SourceTerm
 {
 public:
-
-    explicit CartesianR6_Zoni_CzarnyGeometry(PolarGrid const& grid, double Rmax, double inverse_aspect_ratio_epsilon, double ellipticity_e);
+    explicit CartesianR6_Zoni_CzarnyGeometry(PolarGrid const& grid, double Rmax, double inverse_aspect_ratio_epsilon,
+                                             double ellipticity_e);
     virtual ~CartesianR6_Zoni_CzarnyGeometry() = default;
 
     double operator()(int i_r, int i_theta) const override;

@@ -8,7 +8,8 @@ void CartesianR2_ZoniShifted_CzarnyGeometry::initializeGeometry()
 CartesianR2_ZoniShifted_CzarnyGeometry::CartesianR2_ZoniShifted_CzarnyGeometry(PolarGrid const& grid, double Rmax,
                                                                                double inverse_aspect_ratio_epsilon,
                                                                                double ellipticity_e)
-    : grid_(grid) , Rmax(Rmax)
+    : grid_(grid)
+    , Rmax(Rmax)
     , inverse_aspect_ratio_epsilon(inverse_aspect_ratio_epsilon)
     , ellipticity_e(ellipticity_e)
 {
@@ -17,6 +18,8 @@ CartesianR2_ZoniShifted_CzarnyGeometry::CartesianR2_ZoniShifted_CzarnyGeometry(P
 
 double CartesianR2_ZoniShifted_CzarnyGeometry::operator()(int i_r, int i_theta) const
 {
+    double r         = grid_.radius(i_r);
+    double theta     = grid_.theta(i_theta);
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
     double temp =

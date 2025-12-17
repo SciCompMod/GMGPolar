@@ -1,12 +1,15 @@
 #include "../include/InputFunctions/SourceTerms/polarR6_Sonnendrucker_CircularGeometry.h"
 
 PolarR6_Sonnendrucker_CircularGeometry::PolarR6_Sonnendrucker_CircularGeometry(PolarGrid const& grid, double Rmax)
-    : grid_(grid) , Rmax(Rmax)
+    : grid_(grid)
+    , Rmax(Rmax)
 {
 }
 
 double PolarR6_Sonnendrucker_CircularGeometry::operator()(int i_r, int i_theta) const
 {
+    double r     = grid_.radius(i_r);
+    double theta = grid_.theta(i_theta);
     return (-pow((r / Rmax), 4.0)) *
            ((r / Rmax) *
                 (0.452961672473868 - 0.348432055749129 * atan(14.4444444444444 * (r / Rmax) - 11.1111111111111)) *

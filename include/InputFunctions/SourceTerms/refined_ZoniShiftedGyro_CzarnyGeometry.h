@@ -7,9 +7,8 @@
 class Refined_ZoniShiftedGyro_CzarnyGeometry : public SourceTerm
 {
 public:
-
-    explicit Refined_ZoniShiftedGyro_CzarnyGeometry(PolarGrid const& grid, double Rmax, double inverse_aspect_ratio_epsilon,
-                                                    double ellipticity_e);
+    explicit Refined_ZoniShiftedGyro_CzarnyGeometry(PolarGrid const& grid, double Rmax,
+                                                    double inverse_aspect_ratio_epsilon, double ellipticity_e);
     virtual ~Refined_ZoniShiftedGyro_CzarnyGeometry() = default;
 
     double operator()(int i_r, int i_theta) const override;

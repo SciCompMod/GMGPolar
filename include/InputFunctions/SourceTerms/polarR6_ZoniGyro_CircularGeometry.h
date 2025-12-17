@@ -7,7 +7,6 @@
 class PolarR6_ZoniGyro_CircularGeometry : public SourceTerm
 {
 public:
-
     explicit PolarR6_ZoniGyro_CircularGeometry(PolarGrid const& grid, double Rmax);
     virtual ~PolarR6_ZoniGyro_CircularGeometry() = default;
 

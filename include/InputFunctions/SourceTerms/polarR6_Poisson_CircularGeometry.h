@@ -7,7 +7,6 @@
 class PolarR6_Poisson_CircularGeometry : public SourceTerm
 {
 public:
-
     explicit PolarR6_Poisson_CircularGeometry(PolarGrid const& grid, double Rmax);
     virtual ~PolarR6_Poisson_CircularGeometry() = default;
 

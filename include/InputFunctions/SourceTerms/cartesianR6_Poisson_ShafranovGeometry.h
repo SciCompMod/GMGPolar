@@ -7,8 +7,8 @@
 class CartesianR6_Poisson_ShafranovGeometry : public SourceTerm
 {
 public:
-
-    explicit CartesianR6_Poisson_ShafranovGeometry(PolarGrid const& grid, double Rmax, double elongation_kappa, double shift_delta);
+    explicit CartesianR6_Poisson_ShafranovGeometry(PolarGrid const& grid, double Rmax, double elongation_kappa,
+                                                   double shift_delta);
     virtual ~CartesianR6_Poisson_ShafranovGeometry() = default;
 
     double operator()(int i_r, int i_theta) const override;

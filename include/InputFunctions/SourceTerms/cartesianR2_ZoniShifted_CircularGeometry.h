@@ -7,7 +7,6 @@
 class CartesianR2_ZoniShifted_CircularGeometry : public SourceTerm
 {
 public:
-
     explicit CartesianR2_ZoniShifted_CircularGeometry(PolarGrid const& grid, double Rmax);
     virtual ~CartesianR2_ZoniShifted_CircularGeometry() = default;
 

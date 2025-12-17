@@ -1,12 +1,15 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR2_ZoniShifted_CircularGeometry.h"
 
 CartesianR2_ZoniShifted_CircularGeometry::CartesianR2_ZoniShifted_CircularGeometry(PolarGrid const& grid, double Rmax)
-    : grid_(grid) , Rmax(Rmax)
+    : grid_(grid)
+    , Rmax(Rmax)
 {
 }
 
 double CartesianR2_ZoniShifted_CircularGeometry::operator()(int i_r, int i_theta) const
 {
+    double r         = grid_.radius(i_r);
+    double theta     = grid_.theta(i_theta);
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
     return (-((r / Rmax) * (20.0 * pow(tanh(20.0 * (r / Rmax) - 14.0), 2.0) - 20.0) *

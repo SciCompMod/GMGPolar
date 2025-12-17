@@ -1,12 +1,15 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR2_ZoniGyro_CircularGeometry.h"
 
 CartesianR2_ZoniGyro_CircularGeometry::CartesianR2_ZoniGyro_CircularGeometry(PolarGrid const& grid, double Rmax)
-    : grid_(grid) , Rmax(Rmax)
+    : grid_(grid)
+    , Rmax(Rmax)
 {
 }
 
 double CartesianR2_ZoniGyro_CircularGeometry::operator()(int i_r, int i_theta) const
 {
+    double r         = grid_.radius(i_r);
+    double theta     = grid_.theta(i_theta);
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
     return (1.0 - (r / Rmax) * (r / Rmax)) * exp(tanh(10.0 * (r / Rmax) - 5.0)) *

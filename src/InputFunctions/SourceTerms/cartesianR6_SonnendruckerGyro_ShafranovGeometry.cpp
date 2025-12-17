@@ -2,7 +2,8 @@
 
 CartesianR6_SonnendruckerGyro_ShafranovGeometry::CartesianR6_SonnendruckerGyro_ShafranovGeometry(
     double Rmax, double elongation_kappa, double shift_delta)
-    : grid_(grid) , Rmax(Rmax)
+    : grid_(grid)
+    , Rmax(Rmax)
     , elongation_kappa(elongation_kappa)
     , shift_delta(shift_delta)
 {
@@ -10,6 +11,8 @@ CartesianR6_SonnendruckerGyro_ShafranovGeometry::CartesianR6_SonnendruckerGyro_S
 
 double CartesianR6_SonnendruckerGyro_ShafranovGeometry::operator()(int i_r, int i_theta) const
 {
+    double r         = grid_.radius(i_r);
+    double theta     = grid_.theta(i_theta);
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
     return 0.4096 * pow(((r / Rmax) - 1.0), 6.0) * pow(((r / Rmax) + 1.0), 6.0) *

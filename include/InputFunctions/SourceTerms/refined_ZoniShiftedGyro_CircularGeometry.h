@@ -7,7 +7,6 @@
 class Refined_ZoniShiftedGyro_CircularGeometry : public SourceTerm
 {
 public:
-
     explicit Refined_ZoniShiftedGyro_CircularGeometry(PolarGrid const& grid, double Rmax);
     virtual ~Refined_ZoniShiftedGyro_CircularGeometry() = default;
 

@@ -7,8 +7,8 @@
 class PolarR6_Poisson_CzarnyGeometry : public SourceTerm
 {
 public:
-
-    explicit PolarR6_Poisson_CzarnyGeometry(PolarGrid const& grid, double Rmax, double inverse_aspect_ratio_epsilon, double ellipticity_e);
+    explicit PolarR6_Poisson_CzarnyGeometry(PolarGrid const& grid, double Rmax, double inverse_aspect_ratio_epsilon,
+                                            double ellipticity_e);
     virtual ~PolarR6_Poisson_CzarnyGeometry() = default;
 
     double operator()(int i_r, int i_theta) const override;

@@ -1,9 +1,11 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR6_ZoniShiftedGyro_ShafranovGeometry.h"
 
-CartesianR6_ZoniShiftedGyro_ShafranovGeometry::CartesianR6_ZoniShiftedGyro_ShafranovGeometry(PolarGrid const& grid, double Rmax,
+CartesianR6_ZoniShiftedGyro_ShafranovGeometry::CartesianR6_ZoniShiftedGyro_ShafranovGeometry(PolarGrid const& grid,
+                                                                                             double Rmax,
                                                                                              double elongation_kappa,
                                                                                              double shift_delta)
-    : grid_(grid) , Rmax(Rmax)
+    : grid_(grid)
+    , Rmax(Rmax)
     , elongation_kappa(elongation_kappa)
     , shift_delta(shift_delta)
 {
@@ -11,6 +13,8 @@ CartesianR6_ZoniShiftedGyro_ShafranovGeometry::CartesianR6_ZoniShiftedGyro_Shafr
 
 double CartesianR6_ZoniShiftedGyro_ShafranovGeometry::operator()(int i_r, int i_theta) const
 {
+    double r         = grid_.radius(i_r);
+    double theta     = grid_.theta(i_theta);
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
     return 0.4096 * pow(((r / Rmax) - 1.0), 6.0) * pow(((r / Rmax) + 1.0), 6.0) * exp(tanh(20.0 * (r / Rmax) - 14.0)) *

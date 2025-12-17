@@ -1,8 +1,9 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR2_Zoni_ShafranovGeometry.h"
 
-CartesianR2_Zoni_ShafranovGeometry::CartesianR2_Zoni_ShafranovGeometry(PolarGrid const& grid, double Rmax, double elongation_kappa,
-                                                                       double shift_delta)
-    : grid_(grid) , Rmax(Rmax)
+CartesianR2_Zoni_ShafranovGeometry::CartesianR2_Zoni_ShafranovGeometry(PolarGrid const& grid, double Rmax,
+                                                                       double elongation_kappa, double shift_delta)
+    : grid_(grid)
+    , Rmax(Rmax)
     , elongation_kappa(elongation_kappa)
     , shift_delta(shift_delta)
 {
@@ -10,6 +11,8 @@ CartesianR2_Zoni_ShafranovGeometry::CartesianR2_Zoni_ShafranovGeometry(PolarGrid
 
 double CartesianR2_Zoni_ShafranovGeometry::operator()(int i_r, int i_theta) const
 {
+    double r         = grid_.radius(i_r);
+    double theta     = grid_.theta(i_theta);
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
     return (-(2.0 * shift_delta * (r / Rmax) * (elongation_kappa - 1.0) *

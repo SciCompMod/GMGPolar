@@ -7,9 +7,8 @@
 class CartesianR6_SonnendruckerGyro_CzarnyGeometry : public SourceTerm
 {
 public:
-
-    explicit CartesianR6_SonnendruckerGyro_CzarnyGeometry(PolarGrid const& grid, double Rmax, double inverse_aspect_ratio_epsilon,
-                                                          double ellipticity_e);
+    explicit CartesianR6_SonnendruckerGyro_CzarnyGeometry(PolarGrid const& grid, double Rmax,
+                                                          double inverse_aspect_ratio_epsilon, double ellipticity_e);
     virtual ~CartesianR6_SonnendruckerGyro_CzarnyGeometry() = default;
 
     double operator()(int i_r, int i_theta) const override;

@@ -7,7 +7,6 @@
 class CartesianR6_Poisson_CircularGeometry : public SourceTerm
 {
 public:
-
     explicit CartesianR6_Poisson_CircularGeometry(PolarGrid const& grid, double Rmax);
     virtual ~CartesianR6_Poisson_CircularGeometry() = default;
 

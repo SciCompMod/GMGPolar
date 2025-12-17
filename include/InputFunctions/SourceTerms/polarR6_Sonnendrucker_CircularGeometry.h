@@ -7,7 +7,6 @@
 class PolarR6_Sonnendrucker_CircularGeometry : public SourceTerm
 {
 public:
-
     explicit PolarR6_Sonnendrucker_CircularGeometry(PolarGrid const& grid, double Rmax);
     virtual ~PolarR6_Sonnendrucker_CircularGeometry() = default;
 

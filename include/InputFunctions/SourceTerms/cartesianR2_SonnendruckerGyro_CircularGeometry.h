@@ -7,7 +7,6 @@
 class CartesianR2_SonnendruckerGyro_CircularGeometry : public SourceTerm
 {
 public:
-
     explicit CartesianR2_SonnendruckerGyro_CircularGeometry(PolarGrid const& grid, double Rmax);
     virtual ~CartesianR2_SonnendruckerGyro_CircularGeometry() = default;
 
