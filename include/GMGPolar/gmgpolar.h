@@ -1,28 +1,13 @@
 #pragma once
 
-#include <chrono>
 #include <filesystem>
 #include <iostream>
-#include <memory>
 #include <omp.h>
-#include <optional>
 #include <utility>
 
-class Level;
-class LevelCache;
-
-#include "../InputFunctions/boundaryConditions.h"
 #include "../InputFunctions/densityProfileCoefficients.h"
 #include "../InputFunctions/domainGeometry.h"
-#include "../InputFunctions/exactSolution.h"
-#include "../InputFunctions/sourceTerm.h"
-#include "../Interpolation/interpolation.h"
-#include "../Level/level.h"
-#include "../LinearAlgebra/vector.h"
-#include "../LinearAlgebra/vector_operations.h"
-#include "../PolarGrid/polargrid.h"
-#include "../common/global_definitions.h"
-#include "test_cases.h"
+
 #include "igmgpolar.h"
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
