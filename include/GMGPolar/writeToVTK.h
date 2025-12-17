@@ -1,3 +1,4 @@
+#include "../../include/GMGPolar/gmgpolar.h"
 
 template<DomainGeometryConcept DomainGeometry>
 void GMGPolar<DomainGeometry>::writeToVTK(const std::filesystem::path& file_path, const PolarGrid& grid)

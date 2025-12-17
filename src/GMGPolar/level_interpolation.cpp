@@ -1,6 +1,6 @@
+#include "../../include/GMGPolar/gmgpolar.h"
 
-template<DomainGeometryConcept DomainGeometry>
-void GMGPolar<DomainGeometry>::prolongation(const int current_level, Vector<double> result, ConstVector<double> x) const
+void IGMGPolar::prolongation(const int current_level, Vector<double> result, ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ && 1 <= current_level);
     if (!interpolation_)
@@ -9,8 +9,7 @@ void GMGPolar<DomainGeometry>::prolongation(const int current_level, Vector<doub
     interpolation_->applyProlongation(levels_[current_level], levels_[current_level - 1], result, x);
 }
 
-template<DomainGeometryConcept DomainGeometry>
-void GMGPolar<DomainGeometry>::restriction(const int current_level, Vector<double> result, ConstVector<double> x) const
+void IGMGPolar::restriction(const int current_level, Vector<double> result, ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ - 1 && 0 <= current_level);
     if (!interpolation_)
@@ -19,8 +18,7 @@ void GMGPolar<DomainGeometry>::restriction(const int current_level, Vector<doubl
     interpolation_->applyRestriction(levels_[current_level], levels_[current_level + 1], result, x);
 }
 
-template<DomainGeometryConcept DomainGeometry>
-void GMGPolar<DomainGeometry>::injection(const int current_level, Vector<double> result, ConstVector<double> x) const
+void IGMGPolar::injection(const int current_level, Vector<double> result, ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ - 1 && 0 <= current_level);
     if (!interpolation_)
@@ -29,8 +27,7 @@ void GMGPolar<DomainGeometry>::injection(const int current_level, Vector<double>
     interpolation_->applyInjection(levels_[current_level], levels_[current_level + 1], result, x);
 }
 
-template<DomainGeometryConcept DomainGeometry>
-void GMGPolar<DomainGeometry>::extrapolatedProlongation(const int current_level, Vector<double> result, ConstVector<double> x) const
+void IGMGPolar::extrapolatedProlongation(const int current_level, Vector<double> result, ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ && 1 <= current_level);
     if (!interpolation_)
@@ -39,8 +36,7 @@ void GMGPolar<DomainGeometry>::extrapolatedProlongation(const int current_level,
     interpolation_->applyExtrapolatedProlongation(levels_[current_level], levels_[current_level - 1], result, x);
 }
 
-template<DomainGeometryConcept DomainGeometry>
-void GMGPolar<DomainGeometry>::extrapolatedRestriction(const int current_level, Vector<double> result, ConstVector<double> x) const
+void IGMGPolar::extrapolatedRestriction(const int current_level, Vector<double> result, ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ - 1 && 0 <= current_level);
     if (!interpolation_)
@@ -49,8 +45,7 @@ void GMGPolar<DomainGeometry>::extrapolatedRestriction(const int current_level, 
     interpolation_->applyExtrapolatedRestriction(levels_[current_level], levels_[current_level + 1], result, x);
 }
 
-template<DomainGeometryConcept DomainGeometry>
-void GMGPolar<DomainGeometry>::FMGInterpolation(const int current_level, Vector<double> result, ConstVector<double> x) const
+void IGMGPolar::FMGInterpolation(const int current_level, Vector<double> result, ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ && 1 <= current_level);
     if (!interpolation_)
