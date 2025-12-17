@@ -232,12 +232,11 @@ void test_convergence(double non_uniformity)
     typename TestFixture::SourceTerm source_term_refined(grid_refined, Rmax, kappa_eps, delta_e);
     typename TestFixture::ExactSolution solution(Rmax, kappa_eps, delta_e);
 
-    auto [euclid_error, inf_error] =
-        get_gmgpolar_error(grid, domain_geometry, coefficients, boundary_conditions, source_term,
-                           solution, TestFixture::extrapolation);
+    auto [euclid_error, inf_error] = get_gmgpolar_error(grid, domain_geometry, coefficients, boundary_conditions,
+                                                        source_term, solution, TestFixture::extrapolation);
     auto [euclid_error_refined, inf_error_refined] =
-        get_gmgpolar_error(grid_refined, domain_geometry, coefficients, boundary_conditions,
-                           source_term_refined, solution, TestFixture::extrapolation);
+        get_gmgpolar_error(grid_refined, domain_geometry, coefficients, boundary_conditions, source_term_refined,
+                           solution, TestFixture::extrapolation);
 
     double euclid_order = log(euclid_error / euclid_error_refined) / log(2);
     double inf_order    = log(inf_error / inf_error_refined) / log(2);

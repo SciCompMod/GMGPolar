@@ -57,7 +57,7 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_DirBC_Interior)
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
@@ -118,7 +118,7 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_AcossOrigin)
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
@@ -181,7 +181,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior)
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
@@ -266,7 +266,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior)
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
@@ -351,7 +351,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin)
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
@@ -438,7 +438,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin)
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
@@ -524,7 +524,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior_Smal
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
@@ -610,7 +610,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior_Smalle
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
@@ -696,7 +696,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin_Smalle
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
@@ -780,7 +780,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin_Smallest
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
@@ -867,7 +867,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior)
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
@@ -954,7 +954,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior)
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
@@ -1039,7 +1039,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin)
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
@@ -1124,7 +1124,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin)
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
@@ -1208,7 +1208,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior_
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
@@ -1292,7 +1292,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior_Sm
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
@@ -1376,7 +1376,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin_Sm
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
@@ -1460,7 +1460,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin_Smal
 
     CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
