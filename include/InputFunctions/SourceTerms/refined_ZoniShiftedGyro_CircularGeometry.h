@@ -4,6 +4,8 @@
 
 #include "../sourceTerm.h"
 
+#include "../../PolarGrid/polargrid.h"
+
 class Refined_ZoniShiftedGyro_CircularGeometry : public SourceTerm
 {
 public:

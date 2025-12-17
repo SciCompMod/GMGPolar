@@ -4,6 +4,8 @@
 
 #include "../sourceTerm.h"
 
+#include "../../PolarGrid/polargrid.h"
+
 class PolarR6_ZoniShifted_CzarnyGeometry : public SourceTerm
 {
 public:

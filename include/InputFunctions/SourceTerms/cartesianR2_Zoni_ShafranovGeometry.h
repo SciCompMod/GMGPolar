@@ -4,6 +4,8 @@
 
 #include "../sourceTerm.h"
 
+#include "../../PolarGrid/polargrid.h"
+
 class CartesianR2_Zoni_ShafranovGeometry : public SourceTerm
 {
 public:

@@ -4,6 +4,8 @@
 
 #include "../sourceTerm.h"
 
+#include "../../PolarGrid/polargrid.h"
+
 class PolarR6_Sonnendrucker_ShafranovGeometry : public SourceTerm
 {
 public:

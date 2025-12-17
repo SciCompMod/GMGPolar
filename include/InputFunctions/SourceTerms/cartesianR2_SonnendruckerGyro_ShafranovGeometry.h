@@ -4,6 +4,8 @@
 
 #include "../sourceTerm.h"
 
+#include "../../PolarGrid/polargrid.h"
+
 class CartesianR2_SonnendruckerGyro_ShafranovGeometry : public SourceTerm
 {
 public:
