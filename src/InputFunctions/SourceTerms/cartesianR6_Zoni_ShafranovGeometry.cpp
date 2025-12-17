@@ -1,8 +1,8 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR6_Zoni_ShafranovGeometry.h"
 
-CartesianR6_Zoni_ShafranovGeometry::CartesianR6_Zoni_ShafranovGeometry(double Rmax, double elongation_kappa,
+CartesianR6_Zoni_ShafranovGeometry::CartesianR6_Zoni_ShafranovGeometry(PolarGrid const& grid, double Rmax, double elongation_kappa,
                                                                        double shift_delta)
-    : Rmax(Rmax)
+    : grid_(grid) , Rmax(Rmax)
     , elongation_kappa(elongation_kappa)
     , shift_delta(shift_delta)
 {

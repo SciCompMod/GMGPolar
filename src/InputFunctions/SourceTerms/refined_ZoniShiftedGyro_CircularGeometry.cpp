@@ -1,7 +1,7 @@
 #include "../include/InputFunctions/SourceTerms/refined_ZoniShiftedGyro_CircularGeometry.h"
 
-Refined_ZoniShiftedGyro_CircularGeometry::Refined_ZoniShiftedGyro_CircularGeometry(double Rmax)
-    : Rmax(Rmax)
+Refined_ZoniShiftedGyro_CircularGeometry::Refined_ZoniShiftedGyro_CircularGeometry(PolarGrid const& grid, double Rmax)
+    : grid_(grid) , Rmax(Rmax)
 {
 }
 

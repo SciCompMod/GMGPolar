@@ -1,9 +1,9 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR6_Sonnendrucker_ShafranovGeometry.h"
 
-CartesianR6_Sonnendrucker_ShafranovGeometry::CartesianR6_Sonnendrucker_ShafranovGeometry(double Rmax,
+CartesianR6_Sonnendrucker_ShafranovGeometry::CartesianR6_Sonnendrucker_ShafranovGeometry(PolarGrid const& grid, double Rmax,
                                                                                          double elongation_kappa,
                                                                                          double shift_delta)
-    : Rmax(Rmax)
+    : grid_(grid) , Rmax(Rmax)
     , elongation_kappa(elongation_kappa)
     , shift_delta(shift_delta)
 {

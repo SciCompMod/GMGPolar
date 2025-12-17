@@ -1,7 +1,7 @@
 #include "../include/InputFunctions/SourceTerms/refined_ZoniShiftedGyro_CulhamGeometry.h"
 
-Refined_ZoniShiftedGyro_CulhamGeometry::Refined_ZoniShiftedGyro_CulhamGeometry(double Rmax)
-    : Rmax(Rmax)
+Refined_ZoniShiftedGyro_CulhamGeometry::Refined_ZoniShiftedGyro_CulhamGeometry(PolarGrid const& grid, double Rmax)
+    : grid_(grid) , Rmax(Rmax)
 {
 }
 

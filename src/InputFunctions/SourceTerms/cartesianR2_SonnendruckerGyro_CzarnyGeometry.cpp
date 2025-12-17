@@ -7,7 +7,7 @@ void CartesianR2_SonnendruckerGyro_CzarnyGeometry::initializeGeometry()
 
 CartesianR2_SonnendruckerGyro_CzarnyGeometry::CartesianR2_SonnendruckerGyro_CzarnyGeometry(
     double Rmax, double inverse_aspect_ratio_epsilon, double ellipticity_e)
-    : Rmax(Rmax)
+    : grid_(grid) , Rmax(Rmax)
     , inverse_aspect_ratio_epsilon(inverse_aspect_ratio_epsilon)
     , ellipticity_e(ellipticity_e)
 {

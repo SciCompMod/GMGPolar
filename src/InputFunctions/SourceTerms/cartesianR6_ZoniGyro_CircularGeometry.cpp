@@ -1,7 +1,7 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR6_ZoniGyro_CircularGeometry.h"
 
-CartesianR6_ZoniGyro_CircularGeometry::CartesianR6_ZoniGyro_CircularGeometry(double Rmax)
-    : Rmax(Rmax)
+CartesianR6_ZoniGyro_CircularGeometry::CartesianR6_ZoniGyro_CircularGeometry(PolarGrid const& grid, double Rmax)
+    : grid_(grid) , Rmax(Rmax)
 {
 }
 

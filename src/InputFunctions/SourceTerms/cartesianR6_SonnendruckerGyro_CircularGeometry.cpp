@@ -1,7 +1,7 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR6_SonnendruckerGyro_CircularGeometry.h"
 
-CartesianR6_SonnendruckerGyro_CircularGeometry::CartesianR6_SonnendruckerGyro_CircularGeometry(double Rmax)
-    : Rmax(Rmax)
+CartesianR6_SonnendruckerGyro_CircularGeometry::CartesianR6_SonnendruckerGyro_CircularGeometry(PolarGrid const& grid, double Rmax)
+    : grid_(grid) , Rmax(Rmax)
 {
 }
 

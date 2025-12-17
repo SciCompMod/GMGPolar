@@ -1,7 +1,7 @@
 #include "../include/InputFunctions/SourceTerms/polarR6_Poisson_CircularGeometry.h"
 
-PolarR6_Poisson_CircularGeometry::PolarR6_Poisson_CircularGeometry(double Rmax)
-    : Rmax(Rmax)
+PolarR6_Poisson_CircularGeometry::PolarR6_Poisson_CircularGeometry(PolarGrid const& grid, double Rmax)
+    : grid_(grid) , Rmax(Rmax)
 {
 }
 

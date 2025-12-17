@@ -2,7 +2,7 @@
 
 CartesianR2_SonnendruckerGyro_ShafranovGeometry::CartesianR2_SonnendruckerGyro_ShafranovGeometry(
     double Rmax, double elongation_kappa, double shift_delta)
-    : Rmax(Rmax)
+    : grid_(grid) , Rmax(Rmax)
     , elongation_kappa(elongation_kappa)
     , shift_delta(shift_delta)
 {

@@ -5,9 +5,9 @@ void CartesianR6_Poisson_CzarnyGeometry::initializeGeometry()
     factor_xi = 1.0 / sqrt(1.0 - inverse_aspect_ratio_epsilon * inverse_aspect_ratio_epsilon / 4.0);
 }
 
-CartesianR6_Poisson_CzarnyGeometry::CartesianR6_Poisson_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon,
+CartesianR6_Poisson_CzarnyGeometry::CartesianR6_Poisson_CzarnyGeometry(PolarGrid const& grid, double Rmax, double inverse_aspect_ratio_epsilon,
                                                                        double ellipticity_e)
-    : Rmax(Rmax)
+    : grid_(grid) , Rmax(Rmax)
     , inverse_aspect_ratio_epsilon(inverse_aspect_ratio_epsilon)
     , ellipticity_e(ellipticity_e)
 {

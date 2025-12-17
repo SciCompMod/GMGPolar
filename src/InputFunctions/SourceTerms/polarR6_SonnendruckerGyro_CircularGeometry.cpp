@@ -1,7 +1,7 @@
 #include "../include/InputFunctions/SourceTerms/polarR6_SonnendruckerGyro_CircularGeometry.h"
 
-PolarR6_SonnendruckerGyro_CircularGeometry::PolarR6_SonnendruckerGyro_CircularGeometry(double Rmax)
-    : Rmax(Rmax)
+PolarR6_SonnendruckerGyro_CircularGeometry::PolarR6_SonnendruckerGyro_CircularGeometry(PolarGrid const& grid, double Rmax)
+    : grid_(grid) , Rmax(Rmax)
 {
 }
 

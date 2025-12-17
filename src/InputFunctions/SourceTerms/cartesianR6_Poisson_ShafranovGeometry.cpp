@@ -1,8 +1,8 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR6_Poisson_ShafranovGeometry.h"
 
-CartesianR6_Poisson_ShafranovGeometry::CartesianR6_Poisson_ShafranovGeometry(double Rmax, double elongation_kappa,
+CartesianR6_Poisson_ShafranovGeometry::CartesianR6_Poisson_ShafranovGeometry(PolarGrid const& grid, double Rmax, double elongation_kappa,
                                                                              double shift_delta)
-    : Rmax(Rmax)
+    : grid_(grid) , Rmax(Rmax)
     , elongation_kappa(elongation_kappa)
     , shift_delta(shift_delta)
 {

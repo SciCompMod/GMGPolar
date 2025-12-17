@@ -1,9 +1,9 @@
 #include "../include/InputFunctions/SourceTerms/refined_ZoniShiftedGyro_ShafranovGeometry.h"
 
-Refined_ZoniShiftedGyro_ShafranovGeometry::Refined_ZoniShiftedGyro_ShafranovGeometry(double Rmax,
+Refined_ZoniShiftedGyro_ShafranovGeometry::Refined_ZoniShiftedGyro_ShafranovGeometry(PolarGrid const& grid, double Rmax,
                                                                                      double elongation_kappa,
                                                                                      double shift_delta)
-    : Rmax(Rmax)
+    : grid_(grid) , Rmax(Rmax)
     , elongation_kappa(elongation_kappa)
     , shift_delta(shift_delta)
 {
