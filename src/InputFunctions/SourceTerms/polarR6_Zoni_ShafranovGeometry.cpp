@@ -7,7 +7,7 @@ PolarR6_Zoni_ShafranovGeometry::PolarR6_Zoni_ShafranovGeometry(double Rmax, doub
 {
 }
 
-double PolarR6_Zoni_ShafranovGeometry::rhs_f(double r, double theta) const
+double PolarR6_Zoni_ShafranovGeometry::operator()(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

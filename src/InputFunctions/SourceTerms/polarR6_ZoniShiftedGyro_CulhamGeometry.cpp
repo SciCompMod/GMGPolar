@@ -5,7 +5,7 @@ PolarR6_ZoniShiftedGyro_CulhamGeometry::PolarR6_ZoniShiftedGyro_CulhamGeometry(d
 {
 }
 
-double PolarR6_ZoniShiftedGyro_CulhamGeometry::rhs_f(double r, double theta) const
+double PolarR6_ZoniShiftedGyro_CulhamGeometry::operator()(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

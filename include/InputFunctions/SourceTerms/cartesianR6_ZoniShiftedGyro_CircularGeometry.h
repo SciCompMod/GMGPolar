@@ -11,7 +11,7 @@ public:
     explicit CartesianR6_ZoniShiftedGyro_CircularGeometry(PolarGrid const& grid, double Rmax);
     virtual ~CartesianR6_ZoniShiftedGyro_CircularGeometry() = default;
 
-    double rhs_f(double r, double theta) const override;
+    double operator()(double r, double theta) const override;
 
 private:
     PolarGrid const& grid_;

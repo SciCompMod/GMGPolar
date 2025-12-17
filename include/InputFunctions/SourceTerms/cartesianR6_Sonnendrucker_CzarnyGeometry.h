@@ -12,7 +12,7 @@ public:
                                                       double ellipticity_e);
     virtual ~CartesianR6_Sonnendrucker_CzarnyGeometry() = default;
 
-    double rhs_f(double r, double theta) const override;
+    double operator()(double r, double theta) const override;
 
 private:
     PolarGrid const& grid_;

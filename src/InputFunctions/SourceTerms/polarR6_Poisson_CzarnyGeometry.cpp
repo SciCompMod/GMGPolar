@@ -14,7 +14,7 @@ PolarR6_Poisson_CzarnyGeometry::PolarR6_Poisson_CzarnyGeometry(double Rmax, doub
     initializeGeometry();
 }
 
-double PolarR6_Poisson_CzarnyGeometry::rhs_f(double r, double theta) const
+double PolarR6_Poisson_CzarnyGeometry::operator()(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

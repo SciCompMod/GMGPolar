@@ -5,7 +5,7 @@ PolarR6_Sonnendrucker_CircularGeometry::PolarR6_Sonnendrucker_CircularGeometry(d
 {
 }
 
-double PolarR6_Sonnendrucker_CircularGeometry::rhs_f(double r, double theta) const
+double PolarR6_Sonnendrucker_CircularGeometry::operator()(double r, double theta) const
 {
     return (-pow((r / Rmax), 4.0)) *
            ((r / Rmax) *

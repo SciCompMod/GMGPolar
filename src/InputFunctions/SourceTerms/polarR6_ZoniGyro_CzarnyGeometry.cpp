@@ -14,7 +14,7 @@ PolarR6_ZoniGyro_CzarnyGeometry::PolarR6_ZoniGyro_CzarnyGeometry(double Rmax, do
     initializeGeometry();
 }
 
-double PolarR6_ZoniGyro_CzarnyGeometry::rhs_f(double r, double theta) const
+double PolarR6_ZoniGyro_CzarnyGeometry::operator()(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

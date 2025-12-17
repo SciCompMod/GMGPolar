@@ -14,7 +14,7 @@ CartesianR6_Zoni_CzarnyGeometry::CartesianR6_Zoni_CzarnyGeometry(double Rmax, do
     initializeGeometry();
 }
 
-double CartesianR6_Zoni_CzarnyGeometry::rhs_f(double r, double theta) const
+double CartesianR6_Zoni_CzarnyGeometry::operator()(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

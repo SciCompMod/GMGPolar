@@ -8,7 +8,7 @@ CartesianR2_ZoniGyro_ShafranovGeometry::CartesianR2_ZoniGyro_ShafranovGeometry(d
 {
 }
 
-double CartesianR2_ZoniGyro_ShafranovGeometry::rhs_f(double r, double theta) const
+double CartesianR2_ZoniGyro_ShafranovGeometry::operator()(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

@@ -5,7 +5,7 @@ Refined_ZoniShiftedGyro_CircularGeometry::Refined_ZoniShiftedGyro_CircularGeomet
 {
 }
 
-double Refined_ZoniShiftedGyro_CircularGeometry::rhs_f(double r, double theta) const
+double Refined_ZoniShiftedGyro_CircularGeometry::operator()(double r, double theta) const
 {
     return 1.0 *
                (((-3.33823779536505e-15) * ((r / Rmax) * (r / Rmax)) - 0.0 * (r / Rmax) - 0.0 +

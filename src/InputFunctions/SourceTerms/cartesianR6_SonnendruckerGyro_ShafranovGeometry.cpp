@@ -8,7 +8,7 @@ CartesianR6_SonnendruckerGyro_ShafranovGeometry::CartesianR6_SonnendruckerGyro_S
 {
 }
 
-double CartesianR6_SonnendruckerGyro_ShafranovGeometry::rhs_f(double r, double theta) const
+double CartesianR6_SonnendruckerGyro_ShafranovGeometry::operator()(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

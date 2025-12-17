@@ -6,5 +6,5 @@ public:
     SourceTerm()          = default;
     virtual ~SourceTerm() = default;
 
-    virtual double rhs_f(double r, double theta) const = 0;
+    virtual double operator()(double r, double theta) const = 0;
 };

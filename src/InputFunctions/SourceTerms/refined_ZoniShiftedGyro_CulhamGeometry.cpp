@@ -5,7 +5,7 @@ Refined_ZoniShiftedGyro_CulhamGeometry::Refined_ZoniShiftedGyro_CulhamGeometry(d
 {
 }
 
-double Refined_ZoniShiftedGyro_CulhamGeometry::rhs_f(double r, double theta) const
+double Refined_ZoniShiftedGyro_CulhamGeometry::operator()(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

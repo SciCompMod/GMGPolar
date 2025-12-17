@@ -8,7 +8,7 @@ CartesianR6_Poisson_ShafranovGeometry::CartesianR6_Poisson_ShafranovGeometry(dou
 {
 }
 
-double CartesianR6_Poisson_ShafranovGeometry::rhs_f(double r, double theta) const
+double CartesianR6_Poisson_ShafranovGeometry::operator()(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

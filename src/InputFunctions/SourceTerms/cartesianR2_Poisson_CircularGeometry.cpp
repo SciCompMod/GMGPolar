@@ -5,7 +5,7 @@ CartesianR2_Poisson_CircularGeometry::CartesianR2_Poisson_CircularGeometry(doubl
 {
 }
 
-double CartesianR2_Poisson_CircularGeometry::rhs_f(double r, double theta) const
+double CartesianR2_Poisson_CircularGeometry::operator()(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

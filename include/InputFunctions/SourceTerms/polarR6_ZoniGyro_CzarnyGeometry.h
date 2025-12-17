@@ -11,7 +11,7 @@ public:
     explicit PolarR6_ZoniGyro_CzarnyGeometry(PolarGrid const& grid, double Rmax, double inverse_aspect_ratio_epsilon, double ellipticity_e);
     virtual ~PolarR6_ZoniGyro_CzarnyGeometry() = default;
 
-    double rhs_f(double r, double theta) const override;
+    double operator()(double r, double theta) const override;
 
 private:
     PolarGrid const& grid_;
