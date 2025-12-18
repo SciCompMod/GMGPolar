@@ -80,7 +80,7 @@ void DirectSolverTake::applySymmetryShiftOuterBoundary(Vector<double> x) const
 
 void DirectSolverTake::applySymmetryShift(Vector<double> x) const
 {
-    assert(x.size() == grid_.numberOfNodes());
+    assert(x.size() == static_cast<uint>(grid_.numberOfNodes()));
     assert(grid_.nr() >= 4);
 
     if (num_omp_threads_ == 1) {
