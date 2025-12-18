@@ -198,6 +198,31 @@ TEST_P(ConfigParserTest, ParseAllGeometryAndProblemCombinations)
     EXPECT_DOUBLE_EQ(parser.absoluteTolerance().value(), absoluteTolerance);
     ASSERT_TRUE(parser.relativeTolerance().has_value());
     EXPECT_DOUBLE_EQ(parser.relativeTolerance().value(), relativeTolerance);
+
+    // Solver
+    std::unique_ptr<IGMGPolar> solver = parser.solver();
+    EXPECT_EQ(solver->verbose(), verbose);
+    EXPECT_EQ(solver->paraview(), paraview);
+    EXPECT_EQ(solver->maxOpenMPThreads(), maxOpenMPThreads);
+    EXPECT_DOUBLE_EQ(solver->threadReductionFactor(), threadReductionFactor);
+    EXPECT_EQ(solver->DirBC_Interior(), DirBC_Interior);
+    EXPECT_EQ(solver->stencilDistributionMethod(), static_cast<StencilDistributionMethod>(stencilDistributionMethod));
+    EXPECT_EQ(solver->cacheDensityProfileCoefficients(), cacheDensityProfileCoefficients);
+    EXPECT_EQ(solver->cacheDomainGeometry(), cacheDomainGeometry);
+    EXPECT_EQ(solver->FMG(), FMG);
+    EXPECT_EQ(solver->FMG_iterations(), FMG_iterations);
+    EXPECT_EQ(solver->FMG_cycle(), static_cast<MultigridCycleType>(FMG_cycle));
+    EXPECT_EQ(solver->extrapolation(), static_cast<ExtrapolationType>(extrapolation));
+    EXPECT_EQ(solver->maxLevels(), maxLevels);
+    EXPECT_EQ(solver->preSmoothingSteps(), preSmoothingSteps);
+    EXPECT_EQ(solver->postSmoothingSteps(), postSmoothingSteps);
+    EXPECT_EQ(solver->multigridCycle(), static_cast<MultigridCycleType>(multigridCycle));
+    EXPECT_EQ(solver->maxIterations(), maxIterations);
+    EXPECT_EQ(solver->residualNormType(), static_cast<ResidualNormType>(residualNormType));
+    ASSERT_TRUE(solver->absoluteTolerance().has_value());
+    EXPECT_DOUBLE_EQ(solver->absoluteTolerance().value(), absoluteTolerance);
+    ASSERT_TRUE(solver->relativeTolerance().has_value());
+    EXPECT_DOUBLE_EQ(solver->relativeTolerance().value(), relativeTolerance);
 }
 
 // Define test cases covering all combinations
