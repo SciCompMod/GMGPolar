@@ -114,8 +114,8 @@ void PolarGrid::refineGrid(const int divideBy2)
 std::vector<double> PolarGrid::divideVector(const std::vector<double>& vec, const int divideBy2) const
 {
     const int powerOfTwo = 1 << divideBy2;
-    size_t vecSize          = vec.size();
-    size_t resultSize       = vecSize + (vecSize - 1) * (powerOfTwo - 1);
+    size_t vecSize       = vec.size();
+    size_t resultSize    = vecSize + (vecSize - 1) * (powerOfTwo - 1);
     std::vector<double> result(resultSize);
 
     for (size_t i = 0; i < vecSize - 1; ++i) {

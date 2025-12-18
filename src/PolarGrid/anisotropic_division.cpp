@@ -13,7 +13,7 @@ void PolarGrid::RadialAnisotropicDivision(std::vector<double>& r_temp, double R0
     // very ugly anisotropy hack.... dividing recursively smaller and smaller number of cells
 
     /* uniform division of r in 2^nr_exp - 2^aniso */
-    int dummy_lognr  = nr_exp;
+    int dummy_lognr = nr_exp;
     // n_elems_equi = 2**dummy_lognr - 2**anisotropic_factor
     int n_elems_equi = (1 << dummy_lognr) - (1 << anisotropic_factor);
     if (anisotropic_factor < 0 || n_elems_equi <= 0) {
@@ -39,7 +39,7 @@ void PolarGrid::RadialAnisotropicDivision(std::vector<double>& r_temp, double R0
 
     // Added by Allan Kuhn to fix a memory error
     if (floor(nr * percentage) > nr - (n_elems_refined / 2)) {
-        int new_aniso   = static_cast<int>(log2(nr - floor(nr * percentage)) + 1);
+        int new_aniso = static_cast<int>(log2(nr - floor(nr * percentage)) + 1);
         // n_elems_refined = 2**new_aniso
         n_elems_refined = (1 << new_aniso);
     }
