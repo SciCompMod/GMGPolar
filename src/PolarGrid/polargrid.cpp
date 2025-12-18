@@ -52,7 +52,8 @@ void PolarGrid::constructRadialDivisions(double R0, double R, const int nr_exp, 
     // Therefore we first consider 2^(nr_exp-1) points.
     std::vector<double> r_temp;
     if (anisotropic_factor == 0) {
-        int nr                  = pow(2, nr_exp - 1) + 1;
+        // nr = 2**(nr_exp-1) + 1
+        int nr                  = (1 << (nr_exp - 1)) + 1;
         double uniform_distance = (R - R0) / (nr - 1);
         assert(uniform_distance > 0.0);
         r_temp.resize(nr);
@@ -82,11 +83,13 @@ void PolarGrid::constructAngularDivisions(const int ntheta_exp, const int nr)
 {
     if (ntheta_exp < 0) {
         // Choose number of theta divisions similar to radial divisions.
-        ntheta_ = pow(2, ceil(log2(nr)));
-        // ntheta_ = pow(2, ceil(log2(nr-1)));
+        // ntheta_ = 2**ceil(log2(nr))
+        ntheta_ = 1 << static_cast<int>(ceil(log2(nr)));
+        // ntheta_ = 1 << static_cast<int>(ceil(log2(nr-1)));
     }
     else {
-        ntheta_ = pow(2, ntheta_exp);
+        // ntheta_ = 2**ntheta_exp
+        ntheta_ = 1 << ntheta_exp;
     }
     is_ntheta_PowerOfTwo_ = (ntheta_ & (ntheta_ - 1)) == 0;
     // Note that currently ntheta_ = 2^k which allows us to do some optimizations when indexing.
@@ -110,7 +113,7 @@ void PolarGrid::refineGrid(const int divideBy2)
 
 std::vector<double> PolarGrid::divideVector(const std::vector<double>& vec, const int divideBy2) const
 {
-    const double powerOfTwo = 1 << divideBy2;
+    const int powerOfTwo = 1 << divideBy2;
     size_t vecSize          = vec.size();
     size_t resultSize       = vecSize + (vecSize - 1) * (powerOfTwo - 1);
     std::vector<double> result(resultSize);
@@ -119,7 +122,7 @@ std::vector<double> PolarGrid::divideVector(const std::vector<double>& vec, cons
         size_t baseIndex  = i * powerOfTwo;
         result[baseIndex] = vec[i]; // Add the original value
         for (int j = 1; j < powerOfTwo; ++j) {
-            double interpolated_value = vec[i] + j * (vec[i + 1] - vec[i]) / powerOfTwo;
+            double interpolated_value = vec[i] + j * (vec[i + 1] - vec[i]) / static_cast<double>(powerOfTwo);
             result[baseIndex + j]     = interpolated_value;
         }
     }
