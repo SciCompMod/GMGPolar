@@ -83,7 +83,7 @@ void GMGPolar<DomainGeometry>::setup()
                      static_cast<int>(std::floor(max_omp_threads_ * std::pow(thread_reduction_factor_, level_depth)))));
     }
 
-    interpolation_ = std::make_unique<Interpolation>(threads_per_level_, DirBC_Interior_);
+    interpolation_ = std::make_unique<Interpolation>(max_omp_threads_, DirBC_Interior_);
 
     if (verbose_ > 0)
         printSettings();

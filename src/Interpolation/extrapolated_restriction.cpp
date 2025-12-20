@@ -2,62 +2,57 @@
 
 /* For the restriction we use R_ex = P_ex^T */
 
-void Interpolation::applyExtrapolatedRestriction0(const Level& fromLevel, const Level& toLevel, Vector<double> result,
-                                                  ConstVector<double> x) const
+void Interpolation::applyExtrapolatedRestriction0(const PolarGrid& fine_grid, const PolarGrid& coarse_grid,
+                                                  Vector<double> coarse_result, ConstVector<double> fine_values) const
 {
-    assert(toLevel.level_depth() == fromLevel.level_depth() + 1);
+    assert(fine_values.size() == static_cast<uint>(fine_grid.numberOfNodes()));
+    assert(coarse_result.size() == static_cast<uint>(coarse_grid.numberOfNodes()));
 
-    const PolarGrid& fineGrid   = fromLevel.grid();
-    const PolarGrid& coarseGrid = toLevel.grid();
-
-    assert(x.size() == static_cast<uint>(fineGrid.numberOfNodes()));
-    assert(result.size() == static_cast<uint>(coarseGrid.numberOfNodes()));
-
-#pragma omp parallel for num_threads(threads_per_level_[toLevel.level_depth()])
-    for (int index = 0; index < coarseGrid.numberOfNodes(); index++) {
-        MultiIndex coarse_node = coarseGrid.multiIndex(index);
+#pragma omp parallel for num_threads(max_omp_threads_)
+    for (int index = 0; index < coarse_grid.numberOfNodes(); index++) {
+        MultiIndex coarse_node = coarse_grid.multiIndex(index);
         MultiIndex fine_node(2 * coarse_node[0], 2 * coarse_node[1]);
 
         std::array<std::pair<int, int>, space_dimension> neighbors;
 
         // Center
-        double value = x[fineGrid.index(fine_node)];
+        double value = fine_values[fine_grid.index(fine_node)];
 
-        fineGrid.adjacentNeighborsOf(fine_node, neighbors);
+        fine_grid.adjacentNeighborsOf(fine_node, neighbors);
 
         // Left
         if (neighbors[0].first != -1) {
-            value += 0.5 * x[neighbors[0].first];
+            value += 0.5 * fine_values[neighbors[0].first];
         }
 
         // Right
         if (neighbors[0].second != -1) {
-            value += 0.5 * x[neighbors[0].second];
+            value += 0.5 * fine_values[neighbors[0].second];
         }
 
         // Bottom
         if (neighbors[1].first != -1) {
-            value += 0.5 * x[neighbors[1].first];
+            value += 0.5 * fine_values[neighbors[1].first];
         }
 
         // Top
         if (neighbors[1].second != -1) {
-            value += 0.5 * x[neighbors[1].second];
+            value += 0.5 * fine_values[neighbors[1].second];
         }
 
-        fineGrid.diagonalNeighborsOf(fine_node, neighbors);
+        fine_grid.diagonalNeighborsOf(fine_node, neighbors);
 
         // Bottom Right
         if (neighbors[0].second != -1) {
-            value += 0.5 * x[neighbors[0].second];
+            value += 0.5 * fine_values[neighbors[0].second];
         }
 
         // Top Left
         if (neighbors[1].first != -1) {
-            value += 0.5 * x[neighbors[1].first];
+            value += 0.5 * fine_values[neighbors[1].first];
         }
 
-        result[index] = value;
+        coarse_result[index] = value;
     }
 }
 
@@ -65,102 +60,105 @@ void Interpolation::applyExtrapolatedRestriction0(const Level& fromLevel, const 
 // Optimized version of applyRestriction0 //
 // -------------------------------------- //
 
-void Interpolation::applyExtrapolatedRestriction(const Level& fromLevel, const Level& toLevel, Vector<double> result,
-                                                 ConstVector<double> x) const
+void Interpolation::applyExtrapolatedRestriction(const PolarGrid& fine_grid, const PolarGrid& coarse_grid,
+                                                 Vector<double> coarse_result, ConstVector<double> fine_values) const
 {
-    assert(toLevel.level_depth() == fromLevel.level_depth() + 1);
+    assert(fine_values.size() == static_cast<uint>(fine_grid.numberOfNodes()));
+    assert(coarse_result.size() == static_cast<uint>(coarse_grid.numberOfNodes()));
 
-    const PolarGrid& fineGrid   = fromLevel.grid();
-    const PolarGrid& coarseGrid = toLevel.grid();
+    const int coarseNumberSmootherCircles = coarse_grid.numberSmootherCircles();
 
-    assert(x.size() == static_cast<uint>(fineGrid.numberOfNodes()));
-    assert(result.size() == static_cast<uint>(coarseGrid.numberOfNodes()));
-
-    const int coarseNumberSmootherCircles = coarseGrid.numberSmootherCircles();
-
-#pragma omp parallel num_threads(threads_per_level_[toLevel.level_depth()]) if (fineGrid.numberOfNodes() > 10'000)
+#pragma omp parallel num_threads(max_omp_threads_)
     {
 /* For loop matches circular access pattern */
 #pragma omp for nowait
         for (int i_r_coarse = 0; i_r_coarse < coarseNumberSmootherCircles; i_r_coarse++) {
             int i_r = i_r_coarse * 2;
-            for (int i_theta_coarse = 0; i_theta_coarse < coarseGrid.ntheta(); i_theta_coarse++) {
+            for (int i_theta_coarse = 0; i_theta_coarse < coarse_grid.ntheta(); i_theta_coarse++) {
                 int i_theta = i_theta_coarse * 2;
 
                 if (0 < i_r_coarse && i_r_coarse < coarseNumberSmootherCircles - 1) {
-                    int i_theta_M1 = fineGrid.wrapThetaIndex(i_theta - 1);
-                    int i_theta_P1 = fineGrid.wrapThetaIndex(i_theta + 1);
+                    int i_theta_M1 = fine_grid.wrapThetaIndex(i_theta - 1);
+                    int i_theta_P1 = fine_grid.wrapThetaIndex(i_theta + 1);
 
-                    result[coarseGrid.index(i_r_coarse, i_theta_coarse)] =
+                    coarse_result[coarse_grid.index(i_r_coarse, i_theta_coarse)] =
                         // Center
-                        x[fineGrid.index(i_r, i_theta)] +
+                        fine_values[fine_grid.index(i_r, i_theta)] +
                         // Left, Right, Bottom, Top
-                        0.5 * x[fineGrid.index(i_r - 1, i_theta)] + 0.5 * x[fineGrid.index(i_r + 1, i_theta)] +
-                        0.5 * x[fineGrid.index(i_r, i_theta_M1)] + 0.5 * x[fineGrid.index(i_r, i_theta_P1)] +
+                        0.5 * fine_values[fine_grid.index(i_r - 1, i_theta)] +
+                        0.5 * fine_values[fine_grid.index(i_r + 1, i_theta)] +
+                        0.5 * fine_values[fine_grid.index(i_r, i_theta_M1)] +
+                        0.5 * fine_values[fine_grid.index(i_r, i_theta_P1)] +
                         // Bottom Right, Top Left
-                        0.5 * x[fineGrid.index(i_r + 1, i_theta_M1)] + 0.5 * x[fineGrid.index(i_r - 1, i_theta_P1)];
+                        0.5 * fine_values[fine_grid.index(i_r + 1, i_theta_M1)] +
+                        0.5 * fine_values[fine_grid.index(i_r - 1, i_theta_P1)];
                 }
                 else {
                     /* First and Last Circle have to be checked for domain boundary */
-                    int i_theta_M1 = fineGrid.wrapThetaIndex(i_theta - 1);
-                    int i_theta_P1 = fineGrid.wrapThetaIndex(i_theta + 1);
+                    int i_theta_M1 = fine_grid.wrapThetaIndex(i_theta - 1);
+                    int i_theta_P1 = fine_grid.wrapThetaIndex(i_theta + 1);
                     // Center, Bottom, Top
-                    double value = x[fineGrid.index(i_r, i_theta)] + 0.5 * x[fineGrid.index(i_r, i_theta_M1)] +
-                                   0.5 * x[fineGrid.index(i_r, i_theta_P1)];
+                    double value = fine_values[fine_grid.index(i_r, i_theta)] +
+                                   0.5 * fine_values[fine_grid.index(i_r, i_theta_M1)] +
+                                   0.5 * fine_values[fine_grid.index(i_r, i_theta_P1)];
 
                     if (i_r_coarse > 0) {
                         // Left, Top Left
-                        value +=
-                            0.5 * x[fineGrid.index(i_r - 1, i_theta)] + 0.5 * x[fineGrid.index(i_r - 1, i_theta_P1)];
+                        value += 0.5 * fine_values[fine_grid.index(i_r - 1, i_theta)] +
+                                 0.5 * fine_values[fine_grid.index(i_r - 1, i_theta_P1)];
                     }
-                    if (i_r_coarse < coarseGrid.nr() - 1) {
+                    if (i_r_coarse < coarse_grid.nr() - 1) {
                         // Right, Bottom Right
-                        value +=
-                            0.5 * x[fineGrid.index(i_r + 1, i_theta)] + 0.5 * x[fineGrid.index(i_r + 1, i_theta_M1)];
+                        value += 0.5 * fine_values[fine_grid.index(i_r + 1, i_theta)] +
+                                 0.5 * fine_values[fine_grid.index(i_r + 1, i_theta_M1)];
                     }
-                    result[coarseGrid.index(i_r_coarse, i_theta_coarse)] = value;
+                    coarse_result[coarse_grid.index(i_r_coarse, i_theta_coarse)] = value;
                 }
             }
         }
 
-/* For loop matches circular access pattern */
+/* For loop matches radial access pattern */
 #pragma omp for nowait
-        for (int i_theta_coarse = 0; i_theta_coarse < coarseGrid.ntheta(); i_theta_coarse++) {
+        for (int i_theta_coarse = 0; i_theta_coarse < coarse_grid.ntheta(); i_theta_coarse++) {
             int i_theta = i_theta_coarse * 2;
-            for (int i_r_coarse = coarseNumberSmootherCircles; i_r_coarse < coarseGrid.nr(); i_r_coarse++) {
+            for (int i_r_coarse = coarseNumberSmootherCircles; i_r_coarse < coarse_grid.nr(); i_r_coarse++) {
                 int i_r = i_r_coarse * 2;
 
-                if (coarseGrid.numberSmootherCircles() < i_r_coarse && i_r_coarse < coarseGrid.nr() - 1) {
-                    int i_theta_M1 = fineGrid.wrapThetaIndex(i_theta - 1);
-                    int i_theta_P1 = fineGrid.wrapThetaIndex(i_theta + 1);
+                if (coarse_grid.numberSmootherCircles() < i_r_coarse && i_r_coarse < coarse_grid.nr() - 1) {
+                    int i_theta_M1 = fine_grid.wrapThetaIndex(i_theta - 1);
+                    int i_theta_P1 = fine_grid.wrapThetaIndex(i_theta + 1);
 
-                    result[coarseGrid.index(i_r_coarse, i_theta_coarse)] =
+                    coarse_result[coarse_grid.index(i_r_coarse, i_theta_coarse)] =
                         // Center
-                        x[fineGrid.index(i_r, i_theta)] +
+                        fine_values[fine_grid.index(i_r, i_theta)] +
                         // Left, Right, Bottom, Top
-                        0.5 * x[fineGrid.index(i_r - 1, i_theta)] + 0.5 * x[fineGrid.index(i_r + 1, i_theta)] +
-                        0.5 * x[fineGrid.index(i_r, i_theta_M1)] + 0.5 * x[fineGrid.index(i_r, i_theta_P1)] +
+                        0.5 * fine_values[fine_grid.index(i_r - 1, i_theta)] +
+                        0.5 * fine_values[fine_grid.index(i_r + 1, i_theta)] +
+                        0.5 * fine_values[fine_grid.index(i_r, i_theta_M1)] +
+                        0.5 * fine_values[fine_grid.index(i_r, i_theta_P1)] +
                         // Bottom Right, Top Left
-                        0.5 * x[fineGrid.index(i_r + 1, i_theta_M1)] + 0.5 * x[fineGrid.index(i_r - 1, i_theta_P1)];
+                        0.5 * fine_values[fine_grid.index(i_r + 1, i_theta_M1)] +
+                        0.5 * fine_values[fine_grid.index(i_r - 1, i_theta_P1)];
                 }
                 else {
                     /* First and Last radial nodes have to be checked for domain boundary */
-                    int i_theta_M1 = fineGrid.wrapThetaIndex(i_theta - 1);
-                    int i_theta_P1 = fineGrid.wrapThetaIndex(i_theta + 1);
+                    int i_theta_M1 = fine_grid.wrapThetaIndex(i_theta - 1);
+                    int i_theta_P1 = fine_grid.wrapThetaIndex(i_theta + 1);
                     // Center, Bottom, Top
-                    double value = x[fineGrid.index(i_r, i_theta)] + 0.5 * x[fineGrid.index(i_r, i_theta_M1)] +
-                                   0.5 * x[fineGrid.index(i_r, i_theta_P1)];
+                    double value = fine_values[fine_grid.index(i_r, i_theta)] +
+                                   0.5 * fine_values[fine_grid.index(i_r, i_theta_M1)] +
+                                   0.5 * fine_values[fine_grid.index(i_r, i_theta_P1)];
                     if (i_r_coarse > 0) {
                         // Left, Top Left
-                        value +=
-                            0.5 * x[fineGrid.index(i_r - 1, i_theta)] + 0.5 * x[fineGrid.index(i_r - 1, i_theta_P1)];
+                        value += 0.5 * fine_values[fine_grid.index(i_r - 1, i_theta)] +
+                                 0.5 * fine_values[fine_grid.index(i_r - 1, i_theta_P1)];
                     }
-                    if (i_r_coarse < coarseGrid.nr() - 1) {
+                    if (i_r_coarse < coarse_grid.nr() - 1) {
                         // Right, Bottom Right
-                        value +=
-                            0.5 * x[fineGrid.index(i_r + 1, i_theta)] + 0.5 * x[fineGrid.index(i_r + 1, i_theta_M1)];
+                        value += 0.5 * fine_values[fine_grid.index(i_r + 1, i_theta)] +
+                                 0.5 * fine_values[fine_grid.index(i_r + 1, i_theta_M1)];
                     }
-                    result[coarseGrid.index(i_r_coarse, i_theta_coarse)] = value;
+                    coarse_result[coarse_grid.index(i_r_coarse, i_theta_coarse)] = value;
                 }
             }
         }
