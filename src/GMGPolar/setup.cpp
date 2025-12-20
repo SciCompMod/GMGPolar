@@ -1,6 +1,5 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
-
 int IGMGPolar::chooseNumberOfLevels(const PolarGrid& finestGrid)
 {
     const int minRadialNodes      = 5;
