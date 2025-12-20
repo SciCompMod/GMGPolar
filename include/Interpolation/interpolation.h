@@ -7,7 +7,6 @@
 #include <omp.h>
 
 #include "../PolarGrid/polargrid.h"
-#include "../Level/level.h"
 
 #include "../LinearAlgebra/vector.h"
 #include "../LinearAlgebra/vector_operations.h"
@@ -17,37 +16,37 @@
 class Interpolation
 {
 public:
-    explicit Interpolation(const std::vector<int>& threads_per_level, const bool DirBC_Interior);
+    explicit Interpolation(int max_omp_threads, bool DirBC_Interior);
 
     /* Remark: This injection is not scaled. */
-    void applyInjection(const Level& fromLevel, const Level& toLevel, Vector<double> result,
-                        ConstVector<double> x) const;
+    void applyInjection(const PolarGrid& fine_grid, const PolarGrid& coarse_grid, Vector<double> coarse_result,
+                        ConstVector<double> fine_values) const;
 
     /* Bilinear interpolation operator */
-    void applyProlongation0(const Level& fromLevel, const Level& toLevel, Vector<double> result,
-                            ConstVector<double> x) const;
-    void applyProlongation(const Level& fromLevel, const Level& toLevel, Vector<double> result,
-                           ConstVector<double> x) const;
-    void applyExtrapolatedProlongation0(const Level& fromLevel, const Level& toLevel, Vector<double> result,
-                                        ConstVector<double> x) const;
-    void applyExtrapolatedProlongation(const Level& fromLevel, const Level& toLevel, Vector<double> result,
-                                       ConstVector<double> x) const;
+    void applyProlongation0(const PolarGrid& coarse_grid, const PolarGrid& fine_grid, Vector<double> fine_result,
+                            ConstVector<double> coarse_values) const;
+    void applyProlongation(const PolarGrid& coarse_grid, const PolarGrid& fine_grid, Vector<double> fine_result,
+                           ConstVector<double> coarse_values) const;
+    void applyExtrapolatedProlongation0(const PolarGrid& coarse_grid, const PolarGrid& fine_grid,
+                                        Vector<double> fine_result, ConstVector<double> coarse_values) const;
+    void applyExtrapolatedProlongation(const PolarGrid& coarse_grid, const PolarGrid& fine_grid,
+                                       Vector<double> fine_result, ConstVector<double> coarse_values) const;
 
     /* Scaled full weighting (FW) restriction operator. */
-    void applyRestriction0(const Level& fromLevel, const Level& toLevel, Vector<double> result,
-                           ConstVector<double> x) const;
-    void applyRestriction(const Level& fromLevel, const Level& toLevel, Vector<double> result,
-                          ConstVector<double> x) const;
-    void applyExtrapolatedRestriction0(const Level& fromLevel, const Level& toLevel, Vector<double> result,
-                                       ConstVector<double> x) const;
-    void applyExtrapolatedRestriction(const Level& fromLevel, const Level& toLevel, Vector<double> result,
-                                      ConstVector<double> x) const;
+    void applyRestriction0(const PolarGrid& fine_grid, const PolarGrid& coarse_grid, Vector<double> coarse_result,
+                           ConstVector<double> fine_values) const;
+    void applyRestriction(const PolarGrid& fine_grid, const PolarGrid& coarse_grid, Vector<double> coarse_result,
+                          ConstVector<double> fine_values) const;
+    void applyExtrapolatedRestriction0(const PolarGrid& fine_grid, const PolarGrid& coarse_grid,
+                                       Vector<double> coarse_result, ConstVector<double> fine_values) const;
+    void applyExtrapolatedRestriction(const PolarGrid& fine_grid, const PolarGrid& coarse_grid,
+                                      Vector<double> coarse_result, ConstVector<double> fine_values) const;
 
     /* Bicubic FMG interpolator 1/16 * [-1, 9, 9, -1] */
-    void applyFMGInterpolation(const Level& fromLevel, const Level& toLevel, Vector<double> result,
-                               ConstVector<double> x) const;
+    void applyFMGInterpolation(const PolarGrid& coarse_grid, const PolarGrid& fine_grid, Vector<double> fine_result,
+                               ConstVector<double> coarse_values) const;
 
 private:
-    const std::vector<int>& threads_per_level_;
+    const int max_omp_threads_;
     const bool DirBC_Interior_;
 };
