@@ -94,8 +94,9 @@ TEST(SmootherTest, smoother_DirBC_Interior)
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
     for (uint index = 0; index < solution_Give.size(); index++) {
-        MultiIndex alpha = level.grid().multiIndex(index);
-        if (alpha[0] == 0 && !DirBC_Interior)
+        int i_r, i_theta;
+        level.grid().multiIndex(index, i_r, i_theta);
+        if (i_r == 0 && !DirBC_Interior)
             ASSERT_NEAR(solution_Give[index], solution_Take[index], 1e-11);
         else
             ASSERT_NEAR(solution_Give[index], solution_Take[index], 1e-11);
@@ -153,8 +154,9 @@ TEST(SmootherTest, smoother_AcrossOrigin)
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
     for (uint index = 0; index < solution_Give.size(); index++) {
-        MultiIndex alpha = level.grid().multiIndex(index);
-        if (alpha[0] == 0 && !DirBC_Interior)
+        int i_r, i_theta;
+        level.grid().multiIndex(index, i_r, i_theta);
+        if (i_r == 0 && !DirBC_Interior)
             ASSERT_NEAR(solution_Give[index], solution_Take[index], 1e-8);
         else
             ASSERT_NEAR(solution_Give[index], solution_Take[index], 1e-10);

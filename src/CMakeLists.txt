@@ -6,10 +6,8 @@ add_subdirectory(InputFunctions)
 # Gather all source files
 # file(GLOB_RECURSE POLAR_GRID_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/*.cpp)
 set(POLAR_GRID_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/anisotropic_division.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/multiindex.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/point.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/polargrid.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/anisotropic_division.cpp
 )
 
 # file(GLOB_RECURSE GMG_POLAR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/*.cpp)

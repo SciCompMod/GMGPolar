@@ -271,7 +271,8 @@ void GMGPolar::printSettings() const
     const PolarGrid& finest_grid   = levels_.front().grid();
     const PolarGrid& coarsest_grid = levels_.back().grid();
 
-    std::cout << "r ∈ [" << finest_grid.radii().front() << ", " << finest_grid.radii().back() << "], θ ∈ [0, 2π]\n";
+    std::cout << "r ∈ [" << finest_grid.radius(0) << ", " << finest_grid.radius(finest_grid.nr() - 1)
+              << "], θ ∈ [0, 2π]\n";
     std::cout << "(nr × nθ) = (" << finest_grid.nr() << " × " << finest_grid.ntheta() << ") → (" << coarsest_grid.nr()
               << " × " << coarsest_grid.ntheta() << ")\n";
     std::cout << "Smoother: " << finest_grid.numberSmootherCircles() << " circles\n";

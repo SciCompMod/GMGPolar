@@ -87,8 +87,9 @@ TEST(OperatorATest, applyA_DirBC_Interior)
 
     ASSERT_EQ(result_Give.size(), result_Take.size());
     for (uint index = 0; index < result_Give.size(); index++) {
-        MultiIndex alpha = level.grid().multiIndex(index);
-        if (alpha[0] == 0 && !DirBC_Interior)
+        int i_r, i_theta;
+        level.grid().multiIndex(index, i_r, i_theta);
+        if (i_r == 0 && !DirBC_Interior)
             ASSERT_NEAR(result_Give[index], result_Take[index], 1e-8);
         else
             ASSERT_NEAR(result_Give[index], result_Take[index], 1e-11);
@@ -143,8 +144,9 @@ TEST(OperatorATest, applyA_AcrossOrigin)
 
     ASSERT_EQ(result_Give.size(), result_Take.size());
     for (uint index = 0; index < result_Give.size(); index++) {
-        MultiIndex alpha = level.grid().multiIndex(index);
-        if (alpha[0] == 0 && !DirBC_Interior)
+        int i_r, i_theta;
+        level.grid().multiIndex(index, i_r, i_theta);
+        if (i_r == 0 && !DirBC_Interior)
             ASSERT_NEAR(result_Give[index], result_Take[index], 1e-8);
         else
             ASSERT_NEAR(result_Give[index], result_Take[index], 1e-11);
