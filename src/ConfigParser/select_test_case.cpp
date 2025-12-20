@@ -14,8 +14,10 @@ std::unique_ptr<IGMGPolar> ConfigParser::solver() const
             // Deduce the concrete geometry type
             using DomainGeomType = std::decay_t<decltype(domain_geometry)>;
             // Construct the solver specialized for this geometry type.
-            return static_cast<std::unique_ptr<IGMGPolar>>(
-                std::make_unique<GMGPolar<DomainGeomType>>(grid, domain_geometry, density_profile_coefficients));
+            std::unique_ptr<IGMGPolar> solver =
+                std::make_unique<GMGPolar<DomainGeomType>>(grid, domain_geometry, density_profile_coefficients);
+            // The lambdas must return objects of identical type
+            return solver;
         },
         *domain_geometry_);
 }
