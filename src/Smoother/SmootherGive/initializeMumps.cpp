@@ -67,7 +67,7 @@ void SmootherGive::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, SparseMat
     mumps_solver.ICNTL(38) = 600; // Estimates compression rate of LU factors
     mumps_solver.ICNTL(39) = 500; // Estimates compression rate of contribution blocks
     // ICNTL(40-47) Don't exist
-    mumps_solver.ICNTL(48) = 1; // Multithreading with tree parallelism
+    mumps_solver.ICNTL(48) = 0; // Multithreading with tree parallelism
     mumps_solver.ICNTL(49) = 0; // Compact workarray id%S at the end of factorization phase
     // ICNTL(50-55) Don't exist
     mumps_solver.ICNTL(56) =
