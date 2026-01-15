@@ -4,7 +4,7 @@ void GMGPolar::build_rhs_f(const Level& level, Vector<double> rhs_f, const Bound
                            const SourceTerm& source_term)
 {
     const PolarGrid& grid = level.grid();
-    assert(rhs_f.size() == static_cast<uint>(grid.numberOfNodes()));
+    assert(std::ssize(rhs_f) == grid.numberOfNodes());
 
 #pragma omp parallel
     {
@@ -55,7 +55,7 @@ void GMGPolar::build_rhs_f(const Level& level, Vector<double> rhs_f, const Bound
 void GMGPolar::discretize_rhs_f(const Level& level, Vector<double> rhs_f)
 {
     const PolarGrid& grid = level.grid();
-    assert(rhs_f.size() == static_cast<uint>(grid.numberOfNodes()));
+    assert(std::ssize(rhs_f) == grid.numberOfNodes());
 
     if (level.levelCache().cacheDomainGeometry()) {
         /* DomainGeometry is cached */

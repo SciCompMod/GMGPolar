@@ -1,5 +1,7 @@
 #include "../../../include/DirectSolver/DirectSolver-COO-MUMPS-Take/directSolverTake.h"
 
+#include <iterator>
+
 #ifdef GMGPOLAR_USE_MUMPS
 
 /* ----------------------- */
@@ -80,7 +82,7 @@ void DirectSolverTake::applySymmetryShiftOuterBoundary(Vector<double> x) const
 
 void DirectSolverTake::applySymmetryShift(Vector<double> x) const
 {
-    assert(x.size() == grid_.numberOfNodes());
+    assert(std::ssize(x) == grid_.numberOfNodes());
     assert(grid_.nr() >= 4);
 
     if (num_omp_threads_ == 1) {

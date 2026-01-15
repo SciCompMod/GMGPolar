@@ -84,8 +84,8 @@
 void Interpolation::applyExtrapolatedProlongation(const PolarGrid& coarse_grid, const PolarGrid& fine_grid,
                                                   Vector<double> fine_result, ConstVector<double> coarse_values) const
 {
-    assert(coarse_values.size() == static_cast<uint>(coarse_grid.numberOfNodes()));
-    assert(fine_result.size() == static_cast<uint>(fine_grid.numberOfNodes()));
+    assert(std::ssize(coarse_values) == coarse_grid.numberOfNodes());
+    assert(std::ssize(fine_result) == fine_grid.numberOfNodes());
 
     /* We split the loops into two regions to better respect the */
     /* access patterns of the smoother and improve cache locality. */
