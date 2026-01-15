@@ -45,7 +45,7 @@ void GMGPolar::implicitlyExtrapolatedMultigrid_F_Cycle(const int level_depth, Ve
 
         // P_ex^T (f_l - A_l*u_l)
         level.computeResidual(residual, rhs, solution);
-        extrapolatedRestriction(level_depth, next_level.residual(), residual);
+        restriction(level_depth, next_level.residual(), residual);
 
         // f_{l-1} - A_{l-1}* Inject(u_l)
         injection(level_depth, next_level.solution(), solution);
@@ -76,7 +76,7 @@ void GMGPolar::implicitlyExtrapolatedMultigrid_F_Cycle(const int level_depth, Ve
 
         // P_ex^T (f_l - A_l*u_l)
         level.computeResidual(residual, rhs, solution);
-        extrapolatedRestriction(level_depth, next_level.error_correction(), residual);
+        restriction(level_depth, next_level.error_correction(), residual);
 
         // f_{l-1} - A_{l-1}* Inject(u_l)
         injection(level_depth, next_level.solution(), solution);
@@ -98,7 +98,7 @@ void GMGPolar::implicitlyExtrapolatedMultigrid_F_Cycle(const int level_depth, Ve
     }
 
     /* Interpolate the correction */
-    extrapolatedProlongation(level_depth + 1, residual, next_level.residual());
+    prolongation(level_depth + 1, residual, next_level.residual());
 
     /* Compute the corrected approximation: u = u + error */
     add(solution, ConstVector<double>(residual));
