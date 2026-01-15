@@ -1,20 +1,11 @@
 #include <gtest/gtest.h>
 #include <random>
 
+#include "../test_tools.h"
+
+#include "../../include/GMGPolar/gmgpolar.h"
 #include "../../include/Interpolation/interpolation.h"
 #include "../../include/InputFunctions/DensityProfileCoefficients/poissonCoefficients.h"
-
-static Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed)
-{
-    Vector<double> vec("vec", grid.numberOfNodes());
-    std::mt19937 gen(seed);
-    std::uniform_real_distribution<double> dist(-20.0, 20.0);
-
-    for (uint i = 0; i < vec.size(); ++i)
-        vec[i] = dist(gen);
-
-    return vec;
-}
 
 // Helper that computes the mathematically expected extrapolated prolongation value
 static double expected_extrapolated_value(const PolarGrid& coarse, const PolarGrid& fine,
@@ -59,7 +50,7 @@ TEST(ExtrapolatedProlongationTest, ExtrapolatedProlongationMatchesStencil)
 
     Interpolation I(/*threads*/ 16, /*DirBC*/ true);
 
-    Vector<double> coarse_values = generate_random_sample_data(coarse_grid, 1234);
+    Vector<double> coarse_values = generate_random_sample_data(coarse_grid, 1234, 0.0, 1.0);
     Vector<double> fine_result("fine_result", fine_grid.numberOfNodes());
 
     I.applyExtrapolatedProlongation(coarse_grid, fine_grid, fine_result, coarse_values);
