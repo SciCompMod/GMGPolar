@@ -7,7 +7,6 @@
 #include "../../include/Interpolation/interpolation.h"
 #include "../../include/InputFunctions/DensityProfileCoefficients/poissonCoefficients.h"
 
-
 // Helper that computes the mathematically expected extrapolated restriction value
 static double expected_extrapolated_restriction_value(const PolarGrid& fine, const PolarGrid& coarse,
                                                       ConstVector<double> fine_vals, int i_r_coarse, int i_theta_coarse)
