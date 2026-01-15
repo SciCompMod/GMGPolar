@@ -1,101 +1,82 @@
 #include "../../include/Interpolation/interpolation.h"
 
-void Interpolation::applyExtrapolatedProlongation0(const PolarGrid& coarse_grid, const PolarGrid& fine_grid,
-                                                   Vector<double> fine_result, ConstVector<double> coarse_values) const
-{
-    assert(coarse_values.size() == static_cast<uint>(coarse_grid.numberOfNodes()));
-    assert(fine_result.size() == static_cast<uint>(fine_grid.numberOfNodes()));
-
-#pragma omp parallel for num_threads(max_omp_threads_)
-    for (int index = 0; index < fine_grid.numberOfNodes(); index++) {
-        std::array<std::pair<double, double>, space_dimension> neighbor_distance;
-
-        MultiIndex fine_node = fine_grid.multiIndex(index);
-        MultiIndex coarse_node(fine_node[0] / 2, fine_node[1] / 2); // Nearest lower left coarse node in the fine grid.
-
-        if (fine_node[0] % 2 == 0 && fine_node[1] % 2 == 0) {
-            // Fine node appears in coarse grid
-            fine_result[index] = coarse_values[coarse_grid.index(coarse_node)];
-        }
-
-        if (fine_node[0] % 2 == 0 && fine_node[1] % 2 == 1) {
-            // Fine node between two coarse nodes in theta direction
-            // X
-            // |
-            // O
-            // |
-            // X
-            MultiIndex bottomNeighbor(coarse_node[0], coarse_node[1]);
-            MultiIndex topNeighbor(coarse_node[0], (coarse_node[1] + 1) % coarse_grid.ntheta());
-            fine_result[index] = 0.5 * (coarse_values[coarse_grid.index(bottomNeighbor)] +
-                                        coarse_values[coarse_grid.index(topNeighbor)]);
-        }
-
-        if (fine_node[0] % 2 == 1 && fine_node[1] % 2 == 0) {
-            // Fine node between two coarse nodes in radial direction
-            // X -- O -- X
-            MultiIndex leftNeighbor(coarse_node[0], coarse_node[1]);
-            MultiIndex rightNeighbor(coarse_node[0] + 1, coarse_node[1]);
-            fine_result[index] = 0.5 * (coarse_values[coarse_grid.index(leftNeighbor)] +
-                                        coarse_values[coarse_grid.index(rightNeighbor)]);
-        }
-
-        if (fine_node[0] % 2 == 1 && fine_node[1] % 2 == 1) {
-            // Interpolates a fine node value based on two neighboring coarse nodes.
-            // Fine node lies in the center of four coarse nodes forming a cross shape:
-            //
-            //           X
-            /*            \                             */
-            //              O <-- Fine Node (i_r, i_theta)
-            /*                \                         */
-            //                 X
-            //
-            MultiIndex bottom_right_neighbor(coarse_node[0] + 1, coarse_node[1]);
-            MultiIndex top_left_neighbor(coarse_node[0], (coarse_node[1] + 1) % coarse_grid.ntheta());
-            fine_result[index] = 0.5 * (coarse_values[coarse_grid.index(bottom_right_neighbor)] +
-                                        coarse_values[coarse_grid.index(top_left_neighbor)]);
-        }
-    }
-}
-
-// --------------------------------------- //
-// Optimized version of applyProlongation0 //
-// --------------------------------------- //
+/*
+ * Extrapolated Prolongation Operator
+ * ----------------------------------
+ *
+ * Extrapolated prolongation is used between the finest most grids in the multigrid hierarchy.
+ * It assumes the fine grid comes from a uniform refinement of the coarse grid, so all spacings are equal.
+ * Thus fine values can be computed simply by averaging the neighboring coarse nodes.
+ *
+ * A fine node is classified by the parity of its (i_r, i_theta) indices:
+ *
+ * 1) (even, even)
+ *    Fine node coincides with a coarse node
+ *    -> copy value
+ *
+ * 2) (odd, even)
+ *    Node lies between two coarse nodes in radial direction
+ *
+ *        X ---- O ---- X
+ *
+ *    -> arithmetic mean of left + right coarse node
+ *
+ * 3) (even, odd)
+ *    Node lies between two coarse nodes in angular direction
+ *
+ *        X
+ *        |
+ *        O
+ *        |
+ *        X
+ *
+ *    -> arithmetic mean of bottom + top coarse node
+ *
+ * 4) (odd, odd)
+ *    Node lies inside a coarse cell
+ *    We extrapolate/average across the diagonal:
+ *
+ *          X      
+ *            \   
+ *              O
+ *                \
+ *                 X
+ * 
+ *   -> arithmetic mean of bottom right + top left coarse node
+ *
+ */
 
 #define FINE_NODE_EXTRAPOLATED_PROLONGATION()                                                                          \
     do {                                                                                                               \
         if (i_r & 1) {                                                                                                 \
             if (i_theta & 1) {                                                                                         \
-                /* i_r % 2 == 1, i_theta % 2 == 1 */                                                                   \
-                /* Fine node in the center of four coarse nodes */                                                     \
-                fine_result[fine_grid.index(i_r, i_theta)] =                                                           \
+                /* (odd, odd) -> node in center of coarse cell */                                                      \
+                double value =                                                                                         \
                     0.5 * (coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse)] + /* Bottom right */       \
                            coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse + 1)] /* Top left */             \
                           );                                                                                           \
+                fine_result[fine_grid.index(i_r, i_theta)] = value;                                                    \
             }                                                                                                          \
             else {                                                                                                     \
-                /* i_r % 2 == 1, i_theta % 2 == 0 */                                                                   \
-                /* Fine node between coarse nodes in radial direction */                                               \
-                fine_result[fine_grid.index(i_r, i_theta)] =                                                           \
-                    0.5 * (coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)] + /* left */                   \
-                           coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse)] /* right */                \
-                          );                                                                                           \
+                /* (odd, even) -> between coarse nodes in radial direction */                                          \
+                double value = 0.5 * (coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)] + /* Left */        \
+                                      coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse)] /* Right */     \
+                                     );                                                                                \
+                fine_result[fine_grid.index(i_r, i_theta)] = value;                                                    \
             }                                                                                                          \
         }                                                                                                              \
         else {                                                                                                         \
             if (i_theta & 1) {                                                                                         \
-                /* i_r % 2 == 0, i_theta % 2 == 1 */                                                                   \
-                /* Fine node between coarse nodes in theta direction */                                                \
-                fine_result[fine_grid.index(i_r, i_theta)] =                                                           \
-                    0.5 * (coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)] + /* bottom */                 \
-                           coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse + 1)] /* top */                  \
-                          );                                                                                           \
+                /* (even, odd) -> between coarse nodes in angular direction */                                         \
+                double value = 0.5 * (coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)] + /* Bottom */      \
+                                      coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse + 1)] /* Top */       \
+                                     );                                                                                \
+                fine_result[fine_grid.index(i_r, i_theta)] = value;                                                    \
             }                                                                                                          \
             else {                                                                                                     \
-                /* i_r % 2 == 0, i_theta % 2 == 0 */                                                                   \
-                /* Fine node appears in coarse grid */                                                                 \
+                /* (even, even) -> node lies exactly on coarse grid */                                                 \
                 fine_result[fine_grid.index(i_r, i_theta)] =                                                           \
-                    coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)]; /* center */                         \
+                    coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)]; /* Center */                         \
             }                                                                                                          \
         }                                                                                                              \
     } while (0)
@@ -106,10 +87,12 @@ void Interpolation::applyExtrapolatedProlongation(const PolarGrid& coarse_grid, 
     assert(coarse_values.size() == static_cast<uint>(coarse_grid.numberOfNodes()));
     assert(fine_result.size() == static_cast<uint>(fine_grid.numberOfNodes()));
 
+    /* We split the loops into two regions to better respect the */
+    /* access patterns of the smoother and improve cache locality. */
+
 #pragma omp parallel num_threads(max_omp_threads_)
     {
-/* Circluar Indexing Section */
-/* For loop matches circular access pattern */
+        /* Circular Indexing Section */
 #pragma omp for nowait
         for (int i_r = 0; i_r < fine_grid.numberSmootherCircles(); i_r++) {
             int i_r_coarse = i_r / 2;
@@ -119,8 +102,7 @@ void Interpolation::applyExtrapolatedProlongation(const PolarGrid& coarse_grid, 
             }
         }
 
-/* Radial Indexing Section */
-/* For loop matches radial access pattern */
+        /* Radial Indexing Section */
 #pragma omp for nowait
         for (int i_theta = 0; i_theta < fine_grid.ntheta(); i_theta++) {
             int i_theta_coarse = i_theta / 2;
