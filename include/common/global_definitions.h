@@ -88,29 +88,29 @@ enum class BetaCoeff
     #define CNTL(I) cntl[(I) - 1]
     #define INFOG(I) infog[(I) - 1]
 
-    #define USE_COMM_WORLD -987654
-    #define PAR_NOT_PARALLEL 0
-    #define PAR_PARALLEL 1
+    constexpr int USE_COMM_WORLD -987654
+    constexpr int PAR_NOT_PARALLEL 0
+    constexpr int PAR_PARALLEL 1
 
-    #define JOB_INIT -1
-    #define JOB_END -2
-    #define JOB_REMOVE_SAVED_DATA -3
-    #define JOB_FREE_INTERNAL_DATA -4
-    #define JOB_SUPPRESS_OOC_FILES -200
+    constexpr int JOB_INIT -1
+    constexpr int JOB_END -2
+    constexpr int JOB_REMOVE_SAVED_DATA -3
+    constexpr int JOB_FREE_INTERNAL_DATA -4
+    constexpr int JOB_SUPPRESS_OOC_FILES -200
 
-    #define JOB_ANALYSIS_PHASE 1
-    #define JOB_FACTORIZATION_PHASE 2
-    #define JOB_COMPUTE_SOLUTION 3
-    #define JOB_ANALYSIS_AND_FACTORIZATION 4
-    #define JOB_FACTORIZATION_AND_SOLUTION 5
-    #define JOB_ANALYSIS_FACTORIZATION_SOLUTION 6
-    #define JOB_SAVE_INTERNAL_DATA 7
-    #define JOB_RESTORE_INTERNAL_DATA 8
-    #define JOB_DISTRIBUTE_RHS 9
+    constexpr int JOB_ANALYSIS_PHASE 1
+    constexpr int JOB_FACTORIZATION_PHASE 2
+    constexpr int JOB_COMPUTE_SOLUTION 3
+    constexpr int JOB_ANALYSIS_AND_FACTORIZATION 4
+    constexpr int JOB_FACTORIZATION_AND_SOLUTION 5
+    constexpr int JOB_ANALYSIS_FACTORIZATION_SOLUTION 6
+    constexpr int JOB_SAVE_INTERNAL_DATA 7
+    constexpr int JOB_RESTORE_INTERNAL_DATA 8
+    constexpr int JOB_DISTRIBUTE_RHS 9
 
-    #define SYM_UNSYMMETRIC 0
-    #define SYM_POSITIVE_DEFINITE 1
-    #define SYM_GENERAL_SYMMETRIC 2
+    constexpr int SYM_UNSYMMETRIC 0
+    constexpr int SYM_POSITIVE_DEFINITE 1
+    constexpr int SYM_GENERAL_SYMMETRIC 2
 #endif
 
 // --------------------------------------- //
