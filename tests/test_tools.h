@@ -14,4 +14,3 @@ Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int s
     }
     return x;
 }
-
