@@ -48,13 +48,7 @@ class SymmetricTridiagonalSolver
 {
 public:
     SymmetricTridiagonalSolver();
-    SymmetricTridiagonalSolver(const SymmetricTridiagonalSolver& other);
-    SymmetricTridiagonalSolver(SymmetricTridiagonalSolver&& other) noexcept;
-
     explicit SymmetricTridiagonalSolver(const int matrix_dimension);
-
-    SymmetricTridiagonalSolver& operator=(const SymmetricTridiagonalSolver& other);
-    SymmetricTridiagonalSolver& operator=(SymmetricTridiagonalSolver&& other) noexcept;
 
     void is_cyclic(bool value);
     bool is_cyclic() const;
@@ -81,11 +75,10 @@ private:
     int matrix_dimension_;
     std::unique_ptr<T[]> main_diagonal_values_;
     std::unique_ptr<T[]> sub_diagonal_values_;
-    T cyclic_corner_element_ = 0.0;
-    bool is_cyclic_          = true;
-
-    bool factorized_ = false;
-    T gamma_         = 0.0; // Used in Shermann-Morrison factorization A = B + u*v^T
+    T cyclic_corner_element_;
+    bool is_cyclic_;
+    bool factorized_;
+    T gamma_; // Used in Shermann-Morrison factorization A = B + u*v^T
 
     // Solve methods:
     // The notation 'u' and 'scratch' is directly taken from the implementation
@@ -156,74 +149,9 @@ SymmetricTridiagonalSolver<T>::SymmetricTridiagonalSolver()
     , sub_diagonal_values_(nullptr)
     , cyclic_corner_element_(0.0)
     , is_cyclic_(true)
+    , factorized_(false)
+    , gamma_(0.0)
 {
-}
-
-// copy construction
-template <typename T>
-SymmetricTridiagonalSolver<T>::SymmetricTridiagonalSolver(const SymmetricTridiagonalSolver& other)
-    : matrix_dimension_(other.matrix_dimension_)
-    , main_diagonal_values_(std::make_unique<T[]>(matrix_dimension_))
-    , sub_diagonal_values_(std::make_unique<T[]>(matrix_dimension_ - 1))
-    , cyclic_corner_element_(other.cyclic_corner_element_)
-    , is_cyclic_(other.is_cyclic_)
-{
-    std::copy(other.main_diagonal_values_.get(), other.main_diagonal_values_.get() + matrix_dimension_,
-              main_diagonal_values_.get());
-    std::copy(other.sub_diagonal_values_.get(), other.sub_diagonal_values_.get() + matrix_dimension_ - 1,
-              sub_diagonal_values_.get());
-}
-
-// copy assignment
-template <typename T>
-SymmetricTridiagonalSolver<T>& SymmetricTridiagonalSolver<T>::operator=(const SymmetricTridiagonalSolver& other)
-{
-    if (this == &other) {
-        // Self-assignment, no work needed
-        return *this;
-    }
-    // Only allocate new memory if the sizes are different
-    if (matrix_dimension_ != other.matrix_dimension_) {
-        matrix_dimension_     = other.matrix_dimension_;
-        main_diagonal_values_ = std::make_unique<T[]>(matrix_dimension_);
-        sub_diagonal_values_  = std::make_unique<T[]>(matrix_dimension_ - 1);
-    }
-    cyclic_corner_element_ = other.cyclic_corner_element_;
-    is_cyclic_             = other.is_cyclic_;
-    std::copy(other.main_diagonal_values_.get(), other.main_diagonal_values_.get() + matrix_dimension_,
-              main_diagonal_values_.get());
-    std::copy(other.sub_diagonal_values_.get(), other.sub_diagonal_values_.get() + matrix_dimension_ - 1,
-              sub_diagonal_values_.get());
-    return *this;
-}
-
-// move construction
-template <typename T>
-SymmetricTridiagonalSolver<T>::SymmetricTridiagonalSolver(SymmetricTridiagonalSolver&& other) noexcept
-    : matrix_dimension_(other.matrix_dimension_)
-    , main_diagonal_values_(std::move(other.main_diagonal_values_))
-    , sub_diagonal_values_(std::move(other.sub_diagonal_values_))
-    , cyclic_corner_element_(other.cyclic_corner_element_)
-    , is_cyclic_(other.is_cyclic_)
-{
-    other.matrix_dimension_      = 0;
-    other.cyclic_corner_element_ = 0.0;
-    other.is_cyclic_             = true;
-}
-
-// move assignment
-template <typename T>
-SymmetricTridiagonalSolver<T>& SymmetricTridiagonalSolver<T>::operator=(SymmetricTridiagonalSolver&& other) noexcept
-{
-    matrix_dimension_            = other.matrix_dimension_;
-    main_diagonal_values_        = std::move(other.main_diagonal_values_);
-    sub_diagonal_values_         = std::move(other.sub_diagonal_values_);
-    cyclic_corner_element_       = other.cyclic_corner_element_;
-    is_cyclic_                   = other.is_cyclic_;
-    other.matrix_dimension_      = 0;
-    other.cyclic_corner_element_ = 0.0;
-    other.is_cyclic_             = true;
-    return *this;
 }
 
 template <typename T>
@@ -233,6 +161,8 @@ SymmetricTridiagonalSolver<T>::SymmetricTridiagonalSolver(const int matrix_dimen
     , sub_diagonal_values_(std::make_unique<T[]>(matrix_dimension_ - 1))
     , cyclic_corner_element_(0.0)
     , is_cyclic_(true)
+    , factorized_(false)
+    , gamma_(0.0)
 {
     assert(matrix_dimension_ >= 1);
     std::fill(main_diagonal_values_.get(), main_diagonal_values_.get() + matrix_dimension_, T(0));
@@ -253,57 +183,51 @@ bool SymmetricTridiagonalSolver<T>::is_cyclic() const
 template <typename T>
 int SymmetricTridiagonalSolver<T>::rows() const
 {
-    assert(this->matrix_dimension_ >= 0);
-    return this->matrix_dimension_;
+    return matrix_dimension_;
 }
 template <typename T>
 int SymmetricTridiagonalSolver<T>::columns() const
 {
-    assert(this->matrix_dimension_ >= 0);
-    return this->matrix_dimension_;
+    return matrix_dimension_;
 }
 
 template <typename T>
 const T& SymmetricTridiagonalSolver<T>::main_diagonal(const int index) const
 {
-    assert(index >= 0);
-    assert(index < this->matrix_dimension_);
-    return this->main_diagonal_values_[index];
+    assert(0 <= index && index < matrix_dimension_);
+    return main_diagonal_values_[index];
 }
 template <typename T>
 T& SymmetricTridiagonalSolver<T>::main_diagonal(const int index)
 {
-    assert(index >= 0);
-    assert(index < this->matrix_dimension_);
-    return this->main_diagonal_values_[index];
+    assert(0 <= index && index < matrix_dimension_);
+    return main_diagonal_values_[index];
 }
 
 template <typename T>
 const T& SymmetricTridiagonalSolver<T>::sub_diagonal(const int index) const
 {
-    assert(index >= 0);
-    assert(index < this->matrix_dimension_ - 1);
-    return this->sub_diagonal_values_[index];
+    assert(0 <= index && index < matrix_dimension_ - 1);
+    return sub_diagonal_values_[index];
 }
 template <typename T>
 T& SymmetricTridiagonalSolver<T>::sub_diagonal(const int index)
 {
-    assert(index >= 0);
-    assert(index < this->matrix_dimension_ - 1);
-    return this->sub_diagonal_values_[index];
+    assert(0 <= index && index < matrix_dimension_ - 1);
+    return sub_diagonal_values_[index];
 }
 
 template <typename T>
 const T& SymmetricTridiagonalSolver<T>::cyclic_corner_element() const
 {
     assert(is_cyclic_);
-    return this->cyclic_corner_element_;
+    return cyclic_corner_element_;
 }
 template <typename T>
 T& SymmetricTridiagonalSolver<T>::cyclic_corner_element()
 {
     assert(is_cyclic_);
-    return this->cyclic_corner_element_;
+    return cyclic_corner_element_;
 }
 
 template <typename T>
@@ -331,18 +255,6 @@ void SymmetricTridiagonalSolver<T>::solveInPlace(T* sol_rhs, T* temp1, T* temp2)
 template <typename T>
 void SymmetricTridiagonalSolver<T>::solveSymmetricTridiagonal(T* x, T* scratch)
 {
-    /* ---------------------------------------------------------- */
-    /* Based on Cholesky Decomposition: A = L * D * L^T
-    *
-    * This function performs Cholesky decomposition on a 
-    * symmetric tridiagonal matrix, factorizing it into 
-    * a lower triangular matrix (L) and a diagonal matrix (D).
-    *
-    * By storing the decomposition, this approach enhances 
-    * efficiency for repeated solutions, as matrix factorizations 
-    * need not be recalculated each time.
-    * ---------------------------------------------------------- */
-
     // Cholesky Decomposition
     if (!factorized_) {
         for (int i = 1; i < matrix_dimension_; i++) {
@@ -365,64 +277,15 @@ void SymmetricTridiagonalSolver<T>::solveSymmetricTridiagonal(T* x, T* scratch)
     for (int i = matrix_dimension_ - 2; i >= 0; i--) {
         x[i] -= sub_diagonal(i) * x[i + 1];
     }
-
-    /* --------------------------------------------------------------- */
-    /* Thomas Algorithm: An alternative approach for solving 
-     * tridiagonal systems that does not overwrite the matrix data. 
-     * The algorithm is more stable than the previous approach. 
-     * We enhances numerical stability by performing division directly 
-     * rather than multiplying by the inverse. 
-     * This reduces the risk of precision errors during computation.
-     * Requires additional 'scratch' storage. 
-     * --------------------------------------------------------------- */
-
-    // assert(!equals(main_diagonal(0), 0.0));
-    // scratch[0] = sub_diagonal(0) / main_diagonal(0);
-    // x[0] /= main_diagonal(0);
-
-    // for (int i = 1; i < matrix_dimension_ - 1; i++)
-    // {
-    //     const double divisor = main_diagonal(i) - sub_diagonal(i - 1) * scratch[i - 1];
-    //     assert(!equals(divisor, 0.0));
-    //     scratch[i] = sub_diagonal(i) / divisor;
-    //     x[i] = (x[i] - sub_diagonal(i - 1) * x[i - 1]) / divisor;
-    // }
-
-    // const int i = matrix_dimension_ - 1;
-    // const double divisor = main_diagonal(i) - sub_diagonal(i - 1) * scratch[i - 1];
-    // assert(!equals(divisor, 0.0));
-    // x[i] = (x[i] - sub_diagonal(i - 1) * x[i - 1]) / divisor;
-
-    // for (int i = matrix_dimension_ - 2; i >= 0; i--)
-    // {
-    //     x[i] -= scratch[i] * x[i + 1];
-    // }
 }
 
 // ------------------------- //
 // Cyclic Tridiagonal Solver //
 // ------------------------- //
 
-/* 
- * This algorithm implements the Tridiagonal Matrix Algorithm (TDMA) for solving 
- * symmetric tridiagonal systems of equations, specifically designed to handle 
- * cyclic boundary conditions. The implementation is based on principles outlined 
- * in the following resource: 
- * https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm.
- */
-
 template <typename T>
 void SymmetricTridiagonalSolver<T>::solveSymmetricCyclicTridiagonal(T* x, T* u, T* scratch)
 {
-    /* ---------------------------------------------------------- */
-    /* Cholesky Decomposition: A = L * D * L^T 
-     * This step factorizes the tridiagonal matrix into lower 
-     * triangular (L) and diagonal (D) matrices. While this 
-     * approach may be slightly less stable, it can offer improved 
-     * performance for repeated solves due to the factorization 
-     * being stored internally.
-     * ---------------------------------------------------------- */
-
     // Cholesky Decomposition
     if (!factorized_) {
         // Shermann-Morrison Adjustment
@@ -463,50 +326,4 @@ void SymmetricTridiagonalSolver<T>::solveSymmetricCyclicTridiagonal(T* x, T* u, 
     for (int i = 0; i < matrix_dimension_; i++) {
         x[i] -= factor * u[i];
     }
-
-    /* --------------------------------------------------------------- */
-    /* Thomas Algorithm: An alternative approach for solving 
-     * tridiagonal systems that does not overwrite the matrix data. 
-     * The algorithm is more stable than the previous approach. 
-     * We enhances numerical stability by performing division directly 
-     * rather than multiplying by the inverse. 
-     * This reduces the risk of precision errors during computation.
-     * Requires additional storage in scratch. 
-     * --------------------------------------------------------------- */
-
-    // const double gamma = -main_diagonal(0);
-    // const double first_main_diagonal = main_diagonal(0) - gamma;
-    // const double last_main_diagonal = main_diagonal(matrix_dimension_ - 1) - cyclic_corner_element() * cyclic_corner_element() / gamma;
-
-    // scratch[0] = sub_diagonal(0) / first_main_diagonal;
-    // x[0] /= first_main_diagonal;
-    // u[0] = gamma / first_main_diagonal;
-
-    // for (int i = 1; i < matrix_dimension_ - 1; i++)
-    // {
-    //     const double divisor = main_diagonal(i) - sub_diagonal(i - 1) * scratch[i - 1];
-    //     scratch[i] = sub_diagonal(i) / divisor;
-    //     x[i] = (x[i] - sub_diagonal(i - 1) * x[i - 1]) / divisor;
-    //     u[i] = (0.0 - sub_diagonal(i - 1) * u[i - 1]) / divisor;
-    // }
-
-    // const int i = matrix_dimension_ - 1;
-    // const double divisor = last_main_diagonal - sub_diagonal(i - 1) * scratch[i - 1];
-    // x[i] = (x[i] - sub_diagonal(i - 1) * x[i - 1]) / divisor;
-    // u[i] = (cyclic_corner_element() - sub_diagonal(i - 1) * u[i - 1]) / divisor;
-
-    // for (int i = matrix_dimension_ - 2; i >= 0; i--)
-    // {
-    //     x[i] -= scratch[i] * x[i + 1];
-    //     u[i] -= scratch[i] * u[i + 1];
-    // }
-
-    // const double dot_product_x_v = x[0] + cyclic_corner_element() / gamma * x[matrix_dimension_ - 1];
-    // const double dot_product_u_v = u[0] + cyclic_corner_element() / gamma * u[matrix_dimension_ - 1];
-    // const double factor = dot_product_x_v / (1.0 + dot_product_u_v);
-
-    // for (int i = 0; i < matrix_dimension_; i++)
-    // {
-    //     x[i] -= factor * u[i];
-    // }
 }
