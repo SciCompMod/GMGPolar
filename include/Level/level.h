@@ -114,7 +114,6 @@ public:
     explicit LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients,
                         const DomainGeometry& domain_geometry, const bool cache_density_profile_coefficients,
                         const bool cache_domain_geometry);
-    explicit LevelCache(const Level& previous_level, const PolarGrid& current_grid);
 
     const DomainGeometry& domainGeometry() const;
     const DensityProfileCoefficients& densityProfileCoefficients() const;
@@ -132,18 +131,8 @@ public:
     inline void obtainValues(const int i_r, const int i_theta, const int global_index, double r, double theta,
                              double& coeff_beta, double& arr, double& att, double& art, double& detDF) const
     {
-        if (cache_density_profile_coefficients_)
-            coeff_beta = coeff_beta_[global_index];
-        else
-            coeff_beta = density_profile_coefficients_.beta(r, theta);
-
-        double coeff_alpha;
-        if (!cache_domain_geometry_) {
-            if (cache_density_profile_coefficients_)
-                coeff_alpha = coeff_alpha_[global_index];
-            else
-                coeff_alpha = density_profile_coefficients_.alpha(r, theta);
-        }
+        coeff_beta = cache_density_profile_coefficients_ ? coeff_beta_[global_index]
+                                                         : density_profile_coefficients_.beta(r, theta);
 
         if (cache_domain_geometry_) {
             arr   = arr_[global_index];
@@ -152,6 +141,9 @@ public:
             detDF = detDF_[global_index];
         }
         else {
+            double coeff_alpha = cache_density_profile_coefficients_ ? coeff_alpha_[global_index]
+                                                                     : density_profile_coefficients_.alpha(r, theta);
+
             compute_jacobian_elements(domain_geometry_, r, theta, coeff_alpha, arr, att, art, detDF);
         }
     }
@@ -160,7 +152,7 @@ private:
     const DomainGeometry& domain_geometry_;
     const DensityProfileCoefficients& density_profile_coefficients_;
 
-    bool cache_density_profile_coefficients_; // cache alpha(r_i), beta(r_i)
+    bool cache_density_profile_coefficients_; // cache alpha(r, theta), beta(r, theta)
     Vector<double> coeff_alpha_;
     Vector<double> coeff_beta_;
 
