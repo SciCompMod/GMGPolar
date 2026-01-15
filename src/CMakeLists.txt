@@ -43,8 +43,6 @@ set(STENCIL_SOURCES
 
 # file(GLOB_RECURSE INTERPOLATION_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Interpolation/*.cpp)
 set(INTERPOLATION_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/Interpolation/extrapolated_prolongation.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Interpolation/extrapolated_restriction.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Interpolation/fmg_interpolation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Interpolation/injection.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Interpolation/interpolation.cpp
