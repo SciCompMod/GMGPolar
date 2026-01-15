@@ -13,8 +13,9 @@ void PolarGrid::RadialAnisotropicDivision(std::vector<double>& r_temp, double R0
     // very ugly anisotropy hack.... dividing recursively smaller and smaller number of cells
 
     /* uniform division of r in 2^nr_exp - 2^aniso */
-    int dummy_lognr  = nr_exp;
-    int n_elems_equi = pow(2, dummy_lognr) - pow(2, anisotropic_factor);
+    int dummy_lognr = nr_exp;
+    // n_elems_equi = 2**dummy_lognr - 2**anisotropic_factor
+    int n_elems_equi = (1 << dummy_lognr) - (1 << anisotropic_factor);
     if (anisotropic_factor < 0 || n_elems_equi <= 0) {
         throw std::runtime_error("Please choose anisotropy factor a such that 2^fac_ani < 2^nr_exp.\n");
     }
@@ -30,22 +31,24 @@ void PolarGrid::RadialAnisotropicDivision(std::vector<double>& r_temp, double R0
     r_temp2[nr - 1] = R;
 
     /* refine around 2/3 of r */
-    int n_elems_refined = pow(2, anisotropic_factor);
+    // n_elems_refined = 2**anisotropic_factor
+    int n_elems_refined = (1 << anisotropic_factor);
 
     // edge
     int se;
 
     // Added by Allan Kuhn to fix a memory error
     if (floor(nr * percentage) > nr - (n_elems_refined / 2)) {
-        int new_aniso   = log2(nr - floor(nr * percentage)) + 1;
-        n_elems_refined = pow(2, new_aniso);
+        int new_aniso = static_cast<int>(log2(nr - floor(nr * percentage)) + 1);
+        // n_elems_refined = 2**new_aniso
+        n_elems_refined = (1 << new_aniso);
     }
 
-    se     = floor(nr * percentage) - n_elems_refined / 2;
+    se     = static_cast<int>(floor(nr * percentage)) - n_elems_refined / 2;
     int ee = se + n_elems_refined;
     // takeout
-    int st = ceil((double)n_elems_refined / 4.0 + 1) - 1;
-    int et = floor(3 * ((double)n_elems_refined / 4.0));
+    int st = static_cast<int>(ceil((double)n_elems_refined / 4.0 + 1) - 1);
+    int et = static_cast<int>(floor(3 * ((double)n_elems_refined / 4.0)));
 
     std::set<double> r_set;
     std::set<double> r_set_p1;

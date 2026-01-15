@@ -1,20 +1,10 @@
 #include <gtest/gtest.h>
 #include <random>
 
+#include "../test_tools.h"
+
 #include "../../include/Interpolation/interpolation.h"
 #include "../../include/InputFunctions/DensityProfileCoefficients/poissonCoefficients.h"
-
-static Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed)
-{
-    Vector<double> vec("vec", grid.numberOfNodes());
-    std::mt19937 gen(seed);
-    std::uniform_real_distribution<double> dist(-20.0, 20.0);
-
-    for (uint i = 0; i < vec.size(); ++i)
-        vec[i] = dist(gen);
-
-    return vec;
-}
 
 // Helper that computes the mathematically expected prolongation value
 static double expected_value(const PolarGrid& coarse, const PolarGrid& fine, ConstVector<double> coarse_vals, int i_r,
