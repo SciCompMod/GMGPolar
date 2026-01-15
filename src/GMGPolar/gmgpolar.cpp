@@ -14,7 +14,6 @@ GMGPolar::GMGPolar(const PolarGrid& grid, const DomainGeometry& domain_geometry,
     , paraview_(false)
     // Parallelization and threading settings
     , max_omp_threads_(omp_get_max_threads())
-    , thread_reduction_factor_(1.0)
     // Numerical method setup
     , DirBC_Interior_(true)
     , stencil_distribution_method_(StencilDistributionMethod::CPU_GIVE)
@@ -74,7 +73,7 @@ void GMGPolar::paraview(bool paraview)
 }
 
 /* ---------------------------------------------------------------------- */
-/* Parallelization & threading                                            */
+/* Parallelization                                                        */
 /* ---------------------------------------------------------------------- */
 int GMGPolar::maxOpenMPThreads() const
 {
@@ -83,15 +82,6 @@ int GMGPolar::maxOpenMPThreads() const
 void GMGPolar::maxOpenMPThreads(int max_omp_threads)
 {
     max_omp_threads_ = max_omp_threads;
-}
-
-double GMGPolar::threadReductionFactor() const
-{
-    return thread_reduction_factor_;
-}
-void GMGPolar::threadReductionFactor(double thread_reduction_factor)
-{
-    thread_reduction_factor_ = thread_reduction_factor;
 }
 
 /* ---------------------------------------------------------------------- */

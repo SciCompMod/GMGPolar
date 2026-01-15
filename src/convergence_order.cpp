@@ -15,8 +15,7 @@ int main(int argc, char* argv[])
     const int verbose   = 0;
     const bool paraview = false;
 
-    const int maxOpenMPThreads         = 16;
-    const double threadReductionFactor = 1.0;
+    const int maxOpenMPThreads = 16;
 
     const StencilDistributionMethod stencilDistributionMethod = StencilDistributionMethod::CPU_TAKE;
     const bool cacheDensityProfileCoefficients                = true;
@@ -98,8 +97,6 @@ int main(int argc, char* argv[])
         solver.paraview(paraview);
 
         solver.maxOpenMPThreads(maxOpenMPThreads);
-        solver.threadReductionFactor(threadReductionFactor);
-
         omp_set_num_threads(maxOpenMPThreads); // Global OpenMP thread limit
 
         solver.DirBC_Interior(DirBC_Interior);

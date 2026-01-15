@@ -322,7 +322,7 @@ void GMGPolar::extrapolatedResidual(const int current_level, Vector<double> resi
     assert(residual.size() == static_cast<uint>(fineGrid.numberOfNodes()));
     assert(residual_next_level.size() == static_cast<uint>(coarseGrid.numberOfNodes()));
 
-#pragma omp parallel num_threads(threads_per_level_[current_level])
+#pragma omp parallel num_threads(max_omp_threads_)
     {
 /* Circluar Indexing Section */
 /* For loop matches circular access pattern */
@@ -399,7 +399,7 @@ std::pair<double, double> GMGPolar::computeExactError(Level& level, ConstVector<
     assert(solution.size() == error.size());
     assert(solution.size() == static_cast<uint>(grid.numberOfNodes()));
 
-#pragma omp parallel num_threads(threads_per_level_[level.level_depth()])
+#pragma omp parallel num_threads(max_omp_threads_)
     {
 #pragma omp for nowait
         for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
