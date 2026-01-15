@@ -83,11 +83,12 @@ enum class BetaCoeff
 /* Mumps - Constant Definitions */
 /* ---------------------------- */
 #ifdef GMGPOLAR_USE_MUMPS
+#include "dmumps_c.h"
     /* Mumps inline functions s.t. indices match documentation */
     inline int& ICNTL(DMUMPS_STRUC_C& mumps_solver, int I) {
         return mumps_solver.icntl[(I) - 1];
     }
-    inline int& CNTL(DMUMPS_STRUC_C& mumps_solver, int I) {
+    inline double& CNTL(DMUMPS_STRUC_C& mumps_solver, int I) {
         return mumps_solver.cntl[(I) - 1];
     }
     inline int& INFOG(DMUMPS_STRUC_C& mumps_solver, int I) {
