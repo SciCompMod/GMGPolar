@@ -1,20 +1,11 @@
 #include <gtest/gtest.h>
 #include <random>
 
+#include "../test_tools.h"
+
+#include "../../include/GMGPolar/gmgpolar.h"
 #include "../../include/Interpolation/interpolation.h"
 #include "../../include/InputFunctions/DensityProfileCoefficients/poissonCoefficients.h"
-
-static Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed)
-{
-    Vector<double> vec("vec", grid.numberOfNodes());
-    std::mt19937 gen(seed);
-    std::uniform_real_distribution<double> dist(-20.0, 20.0);
-
-    for (uint i = 0; i < vec.size(); ++i)
-        vec[i] = dist(gen);
-
-    return vec;
-}
 
 // Helper that computes the mathematically expected extrapolated restriction value
 static double expected_extrapolated_restriction_value(const PolarGrid& fine, const PolarGrid& coarse,
@@ -57,7 +48,7 @@ TEST(ExtrapolatedRestrictionTest, ExtrapolatedRestrictionMatchesStencil)
 
     Interpolation I(/*threads*/ 16, /*DirBC*/ true);
 
-    Vector<double> fine_values = generate_random_sample_data(fine_grid, 9012);
+    Vector<double> fine_values = generate_random_sample_data(fine_grid, 9012, 0.0, 1.0);
     Vector<double> coarse_result("coarse_result", coarse_grid.numberOfNodes());
 
     I.applyExtrapolatedRestriction(fine_grid, coarse_grid, coarse_result, fine_values);

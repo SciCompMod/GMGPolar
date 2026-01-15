@@ -91,7 +91,7 @@ bool ConfigParser::parse(int argc, char* argv[])
     // Parse grid parameters from command-line arguments
     double R0              = parser_.get<double>("R0");
     double Rmax            = parser_.get<double>("Rmax");
-    double nr_exp          = parser_.get<int>("nr_exp");
+    int nr_exp             = parser_.get<int>("nr_exp");
     int ntheta_exp         = parser_.get<int>("ntheta_exp");
     int anisotropic_factor = parser_.get<int>("anisotropic_factor");
     int divideBy2          = parser_.get<int>("divideBy2");

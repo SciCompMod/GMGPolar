@@ -200,8 +200,8 @@ int GMGPolar::chooseNumberOfLevels(const PolarGrid& finestGrid)
     }
 
     /* Currently unused: Number of levels which guarantee linear scalability */
-    const int linear_complexity_levels = std::ceil(
-        (2.0 * std::log(static_cast<double>(finestGrid.numberOfNodes())) - std::log(3.0)) / (3.0 * std::log(4.0)));
+    const int linear_complexity_levels = static_cast<int>(std::ceil(
+        (2.0 * std::log(static_cast<double>(finestGrid.numberOfNodes())) - std::log(3.0)) / (3.0 * std::log(4.0))));
 
     // Determine the number of levels as the minimum of radial maximum level, angular maximum level,
     // and the maximum levels specified.
