@@ -27,7 +27,7 @@ TEST(ExtrapolatedProlongationTest, ExtrapolatedProlongationSmoothingRadius)
     Interpolation interpolation_operator(maxOpenMPThreads, DirBC_Interior);
 
     unsigned int seed = 42;
-    Vector<double> x  = generate_random_sample_data(coarse_grid, seed);
+    Vector<double> x  = generate_random_sample_data(coarse_grid, seed, 0.0, 1.0);
 
     // Apply prolongation to both functions
     Vector<double> result1("result1", finest_grid.numberOfNodes());

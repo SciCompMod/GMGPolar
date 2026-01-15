@@ -109,7 +109,7 @@ TEST(RestrictionTest, applyRestriction)
 
     Interpolation interpolation_operator(maxOpenMPThreads, DirBC_Interior);
 
-    Vector<double> x = generate_random_sample_data(finest_grid, 42);
+    Vector<double> x = generate_random_sample_data(finest_grid, 42, 0.0, 1.0);
 
     // Apply prolongation to both functions
     Vector<double> result1("result1", coarse_grid.numberOfNodes());
