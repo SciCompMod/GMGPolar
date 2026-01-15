@@ -2,25 +2,11 @@
 
 #include <random>
 
+#include "../test_tools.h"
+
 #include "../../include/GMGPolar/gmgpolar.h"
 #include "../../include/Interpolation/interpolation.h"
 #include "../../include/InputFunctions/DensityProfileCoefficients/poissonCoefficients.h"
-
-namespace ProlongationTest
-{
-Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed)
-{
-    Vector<double> vector("vector", grid.numberOfNodes());
-    std::mt19937 gen(seed);
-    std::uniform_real_distribution<double> dist(-100.0, 100.0);
-    for (uint i = 0; i < vector.size(); ++i) {
-        vector[i] = dist(gen);
-    }
-    return vector;
-}
-} // namespace ProlongationTest
-
-using namespace ProlongationTest;
 
 TEST(ProlongationTest, ProlongationTest)
 {

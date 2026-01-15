@@ -2,6 +2,8 @@
 
 #include <random>
 
+#include "../test_tools.h"
+
 #include "../../include/GMGPolar/gmgpolar.h"
 #include "../../include/Interpolation/interpolation.h"
 #include "../../include/InputFunctions/domainGeometry.h"
@@ -9,23 +11,6 @@
 
 #include "../../include/InputFunctions/DomainGeometry/circularGeometry.h"
 #include "../../include/InputFunctions/DensityProfileCoefficients/poissonCoefficients.h"
-
-namespace ExtrapolatedProlongationTest
-{
-// Function to generate sample data for vector x using random values with seed
-Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed)
-{
-    Vector<double> vector("vector", grid.numberOfNodes());
-    std::mt19937 gen(seed); // Standard mersenne_twister_engine seeded with seed
-    std::uniform_real_distribution<double> dist(0.0, 1.0); // Generate random double between 0 and 1
-    for (uint i = 0; i < vector.size(); ++i) {
-        vector[i] = dist(gen);
-    }
-    return vector;
-}
-} // namespace ExtrapolatedProlongationTest
-
-using namespace ExtrapolatedProlongationTest;
 
 TEST(ExtrapolatedProlongationTest, ExtrapolatedProlongationSmoothingRadius)
 {
@@ -42,7 +27,7 @@ TEST(ExtrapolatedProlongationTest, ExtrapolatedProlongationSmoothingRadius)
     Interpolation interpolation_operator(maxOpenMPThreads, DirBC_Interior);
 
     unsigned int seed = 42;
-    Vector<double> x  = generate_random_sample_data(coarse_grid, seed);
+    Vector<double> x  = generate_random_sample_data(coarse_grid, seed, 0.0, 1.0);
 
     // Apply prolongation to both functions
     Vector<double> result1("result1", finest_grid.numberOfNodes());
