@@ -10,7 +10,7 @@ inline Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigne
     Vector<double> x("x", grid.numberOfNodes());
     std::mt19937 gen(seed);
     std::uniform_real_distribution<double> dist(min_val, max_val);
-    for (uint i = 0; i < x.size(); ++i) {
+    for (std::size_t i = 0; i < x.size(); ++i) {
         x(i) = dist(gen);
     }
     return x;

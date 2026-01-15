@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
     // Print the table rows with data
     for (int i = 0; i < MAX_DIVIDE_BY_2; i++) {
         // Start the row
-        std::cout << std::setw(6) << table_nr[i] << " x " << table_ntheta[i] << std::setw(7.5) << table_iterations[i]
+        std::cout << std::setw(6) << table_nr[i] << " x " << table_ntheta[i] << std::setw(7) << table_iterations[i]
                   << std::setw(9) << table_reduction_factor[i];
 
         // Print ||err||_2/sqrt(m) in scientific notation
