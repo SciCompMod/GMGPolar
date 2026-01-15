@@ -2,23 +2,14 @@
 
 #include <random>
 
+#include "../test_tools.h"
+
 #include "../../include/GMGPolar/gmgpolar.h"
 #include "../../include/Interpolation/interpolation.h"
 #include "../../include/InputFunctions/DensityProfileCoefficients/poissonCoefficients.h"
 
 namespace RestrictionTest
 {
-// Function to generate sample data for vector x using random values with seed
-Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed)
-{
-    Vector<double> vector("vector", grid.numberOfNodes());
-    std::mt19937 gen(seed); // Standard mersenne_twister_engine seeded with seed
-    std::uniform_real_distribution<double> dist(0.0, 1.0); // Generate random double between 0 and 1
-    for (uint i = 0; i < vector.size(); ++i) {
-        vector[i] = dist(gen);
-    }
-    return vector;
-}
 
 /* In src/Interpolation/restriction.cpp the Restriction Operator is implemented with "Take". */
 /* Here we test against the "Give" version. */

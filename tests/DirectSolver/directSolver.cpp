@@ -3,6 +3,8 @@
 #include <random>
 #include <vector>
 
+#include "../test_tools.h"
+
 #include "../../include/GMGPolar/gmgpolar.h"
 
 #include "../../include/Residual/ResidualGive/residualGive.h"
@@ -43,22 +45,6 @@
 #include "../include/InputFunctions/BoundaryConditions/refined_Boundary_CulhamGeometry.h"
 #include "../include/InputFunctions/DensityProfileCoefficients/zoniShiftedGyroCoefficients.h"
 #include "../include/InputFunctions/SourceTerms/refined_ZoniShiftedGyro_CulhamGeometry.h"
-
-namespace DirectSolverTest
-{
-Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed)
-{
-    Vector<double> x("x", grid.numberOfNodes());
-    std::mt19937 gen(seed);
-    std::uniform_real_distribution<double> dist(-100.0, 100.0);
-    for (uint i = 0; i < x.size(); ++i) {
-        x(i) = dist(gen);
-    }
-    return x;
-}
-} // namespace DirectSolverTest
-
-using namespace DirectSolverTest;
 
 #ifdef GMGPOLAR_USE_MUMPS
 

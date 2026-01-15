@@ -3,6 +3,8 @@
 #include <random>
 #include <vector>
 
+#include "../test_tools.h"
+
 #include "../../include/GMGPolar/gmgpolar.h"
 
 #include "../../include/Residual/ResidualGive/residualGive.h"
@@ -25,22 +27,6 @@
 #include "../include/InputFunctions/SourceTerms/polarR6_ZoniShifted_CzarnyGeometry.h"
 
 #include <random>
-
-namespace ExtrapolatedExtrapolatedSmootherTest
-{
-Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed)
-{
-    Vector<double> x("x", grid.numberOfNodes());
-    std::mt19937 gen(seed);
-    std::uniform_real_distribution<double> dist(-100.0, 100.0);
-    for (uint i = 0; i < x.size(); ++i) {
-        x(i) = dist(gen);
-    }
-    return x;
-}
-} // namespace ExtrapolatedExtrapolatedSmootherTest
-
-using namespace ExtrapolatedExtrapolatedSmootherTest;
 
 /* Test 1/2: */
 /* Does the Take and Give Implementation match up? */
