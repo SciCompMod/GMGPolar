@@ -62,8 +62,6 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
     const int verbose   = 1;
     const bool paraview = false;
 
-    const double threadReductionFactor = 1.0;
-
     const StencilDistributionMethod stencilDistributionMethod = StencilDistributionMethod::CPU_GIVE;
     const bool cacheDensityProfileCoefficients                = true;
     const bool cacheDomainGeometry                            = false;
@@ -98,8 +96,6 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
     solver.paraview(paraview);
 
     solver.maxOpenMPThreads(maxOpenMPThreads);
-    solver.threadReductionFactor(threadReductionFactor);
-
     omp_set_num_threads(maxOpenMPThreads); // Global OpenMP thread limit
 
     solver.DirBC_Interior(DirBC_Interior);

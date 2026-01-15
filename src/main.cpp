@@ -22,8 +22,6 @@ int main(int argc, char* argv[])
 
     // --- Parallelization and threading settings --- //
     solver.maxOpenMPThreads(parser.maxOpenMPThreads()); // Maximum OpenMP threads to use
-    solver.threadReductionFactor(parser.threadReductionFactor()); // Reduce threads on coarser grids
-
     omp_set_num_threads(parser.maxOpenMPThreads()); // Global OpenMP thread limit
 
     // --- Numerical method setup --- //

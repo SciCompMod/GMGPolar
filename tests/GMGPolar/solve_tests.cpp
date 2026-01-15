@@ -534,17 +534,15 @@ void run_gmgpolar()
 
     GMGPolar solver(grid, domain, profile_coefficients);
 
-    bool paraview                = false;
-    double threadReductionFactor = 1.0;
-    int preSmoothingSteps        = 1;
-    int postSmoothingSteps       = 1;
+    bool paraview          = false;
+    int preSmoothingSteps  = 1;
+    int postSmoothingSteps = 1;
 
     // --- General solver output and visualization settings --- //
     solver.verbose(TestFixture::verbose);
     solver.paraview(paraview);
     // --- Parallelization and threading settings --- //
     solver.maxOpenMPThreads(TestFixture::maxOpenMPThreads);
-    solver.threadReductionFactor(threadReductionFactor);
     omp_set_num_threads(TestFixture::maxOpenMPThreads);
     // --- Numerical method setup --- //
     solver.DirBC_Interior(TestFixture::DirBC_Interior);
@@ -585,7 +583,6 @@ void run_gmgpolar()
     EXPECT_EQ(solver.verbose(), TestFixture::verbose);
     EXPECT_EQ(solver.paraview(), paraview);
     EXPECT_EQ(solver.maxOpenMPThreads(), TestFixture::maxOpenMPThreads);
-    EXPECT_DOUBLE_EQ(solver.threadReductionFactor(), threadReductionFactor);
     EXPECT_EQ(solver.DirBC_Interior(), TestFixture::DirBC_Interior);
     EXPECT_EQ(solver.stencilDistributionMethod(), TestFixture::stencilDistributionMethod);
     EXPECT_EQ(solver.cacheDensityProfileCoefficients(), TestFixture::cacheDensityProfileCoefficients);
