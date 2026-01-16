@@ -1,6 +1,6 @@
 #include "../../../include/DirectSolver/DirectSolver-CSR-LU-Give/directSolverGiveCustomLU.h"
 
-DirectSolverGiveCustomLU::DirectSolverGiveCustomLU(const PolarGrid& grid, const LevelCache& level_cache,
+DirectSolver_CSR_LU_Give::DirectSolver_CSR_LU_Give(const PolarGrid& grid, const LevelCache& level_cache,
                                                    const DomainGeometry& domain_geometry,
                                                    const DensityProfileCoefficients& density_profile_coefficients,
                                                    bool DirBC_Interior, int num_omp_threads)
@@ -10,11 +10,11 @@ DirectSolverGiveCustomLU::DirectSolverGiveCustomLU(const PolarGrid& grid, const 
     lu_solver_     = SparseLUSolver<double>(solver_matrix_);
 }
 
-void DirectSolverGiveCustomLU::solveInPlace(Vector<double> solution)
+void DirectSolver_CSR_LU_Give::solveInPlace(Vector<double> solution)
 {
     lu_solver_.solveInPlace(solution);
 }
 
-DirectSolverGiveCustomLU::~DirectSolverGiveCustomLU()
+DirectSolver_CSR_LU_Give::~DirectSolver_CSR_LU_Give()
 {
 }

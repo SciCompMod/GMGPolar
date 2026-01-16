@@ -765,7 +765,7 @@
             }                                                                                                            \
         } while (0)
 
-void DirectSolverGive::buildSolverMatrixCircleSection(const int i_r, SparseMatrixCOO<double>& solver_matrix)
+void DirectSolver_COO_MUMPS_Give::buildSolverMatrixCircleSection(const int i_r, SparseMatrixCOO<double>& solver_matrix)
 {
     const double r = grid_.radius(i_r);
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
@@ -781,7 +781,8 @@ void DirectSolverGive::buildSolverMatrixCircleSection(const int i_r, SparseMatri
     }
 }
 
-void DirectSolverGive::buildSolverMatrixRadialSection(const int i_theta, SparseMatrixCOO<double>& solver_matrix)
+void DirectSolver_COO_MUMPS_Give::buildSolverMatrixRadialSection(const int i_theta,
+                                                                 SparseMatrixCOO<double>& solver_matrix)
 {
     const double theta = grid_.theta(i_theta);
     for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
@@ -801,7 +802,7 @@ void DirectSolverGive::buildSolverMatrixRadialSection(const int i_theta, SparseM
 
 /* ------------------------------------------------------------------------ */
 /* If the indexing is not smoother-based, please adjust the access patterns */
-SparseMatrixCOO<double> DirectSolverGive::buildSolverMatrix()
+SparseMatrixCOO<double> DirectSolver_COO_MUMPS_Give::buildSolverMatrix()
 {
     const int n   = grid_.numberOfNodes();
     const int nnz = getNonZeroCountSolverMatrix();

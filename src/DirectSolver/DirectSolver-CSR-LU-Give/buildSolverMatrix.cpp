@@ -730,7 +730,7 @@
         }                                                                                                              \
     } while (0)
 
-void DirectSolverGiveCustomLU::buildSolverMatrixCircleSection(const int i_r, SparseMatrixCSR<double>& solver_matrix)
+void DirectSolver_CSR_LU_Give::buildSolverMatrixCircleSection(const int i_r, SparseMatrixCSR<double>& solver_matrix)
 {
     const double r = grid_.radius(i_r);
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
@@ -746,7 +746,7 @@ void DirectSolverGiveCustomLU::buildSolverMatrixCircleSection(const int i_r, Spa
     }
 }
 
-void DirectSolverGiveCustomLU::buildSolverMatrixRadialSection(const int i_theta, SparseMatrixCSR<double>& solver_matrix)
+void DirectSolver_CSR_LU_Give::buildSolverMatrixRadialSection(const int i_theta, SparseMatrixCSR<double>& solver_matrix)
 {
     const double theta = grid_.theta(i_theta);
     for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
@@ -766,7 +766,7 @@ void DirectSolverGiveCustomLU::buildSolverMatrixRadialSection(const int i_theta,
 
 /* ------------------------------------------------------------------------ */
 /* If the indexing is not smoother-based, please adjust the access patterns */
-SparseMatrixCSR<double> DirectSolverGiveCustomLU::buildSolverMatrix()
+SparseMatrixCSR<double> DirectSolver_CSR_LU_Give::buildSolverMatrix()
 {
     const int n = grid_.numberOfNodes();
 

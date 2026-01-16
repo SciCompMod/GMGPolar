@@ -447,7 +447,7 @@
             }                                                                                                           \
         } while (0)
 
-void DirectSolverTake::buildSolverMatrixCircleSection(const int i_r, SparseMatrixCOO<double>& solver_matrix)
+void DirectSolver_COO_MUMPS_Take::buildSolverMatrixCircleSection(const int i_r, SparseMatrixCOO<double>& solver_matrix)
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -465,7 +465,8 @@ void DirectSolverTake::buildSolverMatrixCircleSection(const int i_r, SparseMatri
     }
 }
 
-void DirectSolverTake::buildSolverMatrixRadialSection(const int i_theta, SparseMatrixCOO<double>& solver_matrix)
+void DirectSolver_COO_MUMPS_Take::buildSolverMatrixRadialSection(const int i_theta,
+                                                                 SparseMatrixCOO<double>& solver_matrix)
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -487,7 +488,7 @@ void DirectSolverTake::buildSolverMatrixRadialSection(const int i_theta, SparseM
 
 /* ------------------------------------------------------------------------ */
 /* If the indexing is not smoother-based, please adjust the access patterns */
-SparseMatrixCOO<double> DirectSolverTake::buildSolverMatrix()
+SparseMatrixCOO<double> DirectSolver_COO_MUMPS_Take::buildSolverMatrix()
 {
     const int n   = grid_.numberOfNodes();
     const int nnz = getNonZeroCountSolverMatrix();

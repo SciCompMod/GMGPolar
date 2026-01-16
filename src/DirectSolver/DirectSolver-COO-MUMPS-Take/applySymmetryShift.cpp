@@ -8,7 +8,7 @@
 /* Boundary Symmetry Shift */
 /* ----------------------- */
 
-void DirectSolverTake::applySymmetryShiftInnerBoundary(Vector<double> x) const
+void DirectSolver_COO_MUMPS_Take::applySymmetryShiftInnerBoundary(Vector<double> x) const
 {
     assert(DirBC_Interior_);
 
@@ -45,7 +45,7 @@ void DirectSolverTake::applySymmetryShiftInnerBoundary(Vector<double> x) const
     }
 }
 
-void DirectSolverTake::applySymmetryShiftOuterBoundary(Vector<double> x) const
+void DirectSolver_COO_MUMPS_Take::applySymmetryShiftOuterBoundary(Vector<double> x) const
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -80,7 +80,7 @@ void DirectSolverTake::applySymmetryShiftOuterBoundary(Vector<double> x) const
     }
 }
 
-void DirectSolverTake::applySymmetryShift(Vector<double> x) const
+void DirectSolver_COO_MUMPS_Take::applySymmetryShift(Vector<double> x) const
 {
     assert(std::ssize(x) == grid_.numberOfNodes());
     assert(grid_.nr() >= 4);

@@ -114,20 +114,20 @@ void Level::initializeDirectSolver(const DomainGeometry& domain_geometry,
 {
 #ifdef GMGPOLAR_USE_MUMPS
     if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
-        op_directSolver_ = std::make_unique<DirectSolverTake>(
+        op_directSolver_ = std::make_unique<DirectSolver_COO_MUMPS_Take>(
             *grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads);
     }
     else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
-        op_directSolver_ = std::make_unique<DirectSolverGive>(
+        op_directSolver_ = std::make_unique<DirectSolver_COO_MUMPS_Give>(
             *grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads);
     }
 #else
     if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
-        op_directSolver_ = std::make_unique<DirectSolverTakeCustomLU>(
+        op_directSolver_ = std::make_unique<DirectSolver_CSR_LU_Take>(
             *grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads);
     }
     else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
-        op_directSolver_ = std::make_unique<DirectSolverGiveCustomLU>(
+        op_directSolver_ = std::make_unique<DirectSolver_CSR_LU_Give>(
             *grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads);
     }
 #endif

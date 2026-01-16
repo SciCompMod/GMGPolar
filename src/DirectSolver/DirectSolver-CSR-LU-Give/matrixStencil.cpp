@@ -1,6 +1,6 @@
 #include "../../../include/DirectSolver/DirectSolver-CSR-LU-Give/directSolverGiveCustomLU.h"
 
-int DirectSolverGiveCustomLU::getStencilSize(int global_index) const
+int DirectSolver_CSR_LU_Give::getStencilSize(int global_index) const
 {
     int i_r, i_theta;
     grid_.multiIndex(global_index, i_r, i_theta);
@@ -29,7 +29,7 @@ int DirectSolverGiveCustomLU::getStencilSize(int global_index) const
     throw std::out_of_range("Invalid index for stencil");
 }
 
-const Stencil& DirectSolverGiveCustomLU::getStencil(int i_r) const
+const Stencil& DirectSolver_CSR_LU_Give::getStencil(int i_r) const
 {
     assert(0 <= i_r && i_r < grid_.nr());
     assert(grid_.nr() >= 4);
@@ -52,7 +52,7 @@ const Stencil& DirectSolverGiveCustomLU::getStencil(int i_r) const
     throw std::out_of_range("Invalid index for stencil");
 }
 
-int DirectSolverGiveCustomLU::getNonZeroCountSolverMatrix() const
+int DirectSolver_CSR_LU_Give::getNonZeroCountSolverMatrix() const
 {
     const int size_stencil_inner_boundary      = DirBC_Interior_ ? 1 : 7;
     const int size_stencil_next_inner_boundary = DirBC_Interior_ ? 9 : 9;
