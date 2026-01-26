@@ -19,18 +19,15 @@ inline void node_apply_residual_take(int i_r, int i_theta, const PolarGrid& grid
         double coeff3 = 0.5 * (h1 + h2) / k1;
         double coeff4 = 0.5 * (h1 + h2) / k2;
 
-        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
-
-        const int bottom_left  = grid.index(i_r - 1, i_theta_M1);
+        const int bottom_left  = grid.index(i_r - 1, i_theta - 1);
         const int left         = grid.index(i_r - 1, i_theta);
-        const int top_left     = grid.index(i_r - 1, i_theta_P1);
-        const int bottom       = grid.index(i_r, i_theta_M1);
+        const int top_left     = grid.index(i_r - 1, i_theta + 1);
+        const int bottom       = grid.index(i_r, i_theta - 1);
         const int center       = grid.index(i_r, i_theta);
-        const int top          = grid.index(i_r, i_theta_P1);
-        const int bottom_right = grid.index(i_r + 1, i_theta_M1);
+        const int top          = grid.index(i_r, i_theta + 1);
+        const int bottom_right = grid.index(i_r + 1, i_theta - 1);
         const int right        = grid.index(i_r + 1, i_theta);
-        const int top_right    = grid.index(i_r + 1, i_theta_P1);
+        const int top_right    = grid.index(i_r + 1, i_theta + 1);
 
         result[center] =
             rhs[center] -
@@ -46,10 +43,10 @@ inline void node_apply_residual_take(int i_r, int i_theta, const PolarGrid& grid
              + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
              - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
             );
-        /* -------------------------- */
-        /* Node on the inner boundary */
-        /* -------------------------- */
     }
+    /* -------------------------- */
+    /* Node on the inner boundary */
+    /* -------------------------- */
     else if (i_r == 0) {
         /* ------------------------------------------------ */
         /* Case 1: Dirichlet boundary on the inner boundary */
@@ -75,17 +72,13 @@ inline void node_apply_residual_take(int i_r, int i_theta, const PolarGrid& grid
             double coeff3 = 0.5 * (h1 + h2) / k1;
             double coeff4 = 0.5 * (h1 + h2) / k2;
 
-            const int i_theta_M1     = grid.wrapThetaIndex(i_theta - 1);
-            const int i_theta_P1     = grid.wrapThetaIndex(i_theta + 1);
-            const int i_theta_Across = grid.wrapThetaIndex(i_theta + grid.ntheta() / 2);
-
-            const int left         = grid.index(i_r, i_theta_Across);
-            const int bottom       = grid.index(i_r, i_theta_M1);
+            const int left         = grid.index(i_r, i_theta + (grid.ntheta() / 2));
+            const int bottom       = grid.index(i_r, i_theta - 1);
             const int center       = grid.index(i_r, i_theta);
-            const int top          = grid.index(i_r, i_theta_P1);
-            const int bottom_right = grid.index(i_r + 1, i_theta_M1);
+            const int top          = grid.index(i_r, i_theta + 1);
+            const int bottom_right = grid.index(i_r + 1, i_theta - 1);
             const int right        = grid.index(i_r + 1, i_theta);
-            const int top_right    = grid.index(i_r + 1, i_theta_P1);
+            const int top_right    = grid.index(i_r + 1, i_theta + 1);
 
             result[center] =
                 rhs[center] -
@@ -98,15 +91,14 @@ inline void node_apply_residual_take(int i_r, int i_theta, const PolarGrid& grid
 
                  /* - 0.25 * (art[left] + art[bottom]) * x[bottom_left] // Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
                  + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
-
                  /* + 0.25 * (art[left] + art[top]) * x[top_left] // Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
                  - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
                 );
         }
-        /* ----------------------------- */
-        /* Node on to the outer boundary */
-        /* ----------------------------- */
     }
+    /* ----------------------------- */
+    /* Node on to the outer boundary */
+    /* ----------------------------- */
     else if (i_r == grid.nr() - 1) {
         /* Fill result of (i,j) */
         const int center = grid.index(i_r, i_theta);
