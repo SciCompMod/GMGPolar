@@ -31,7 +31,7 @@ inline void node_apply_a_give(int i_r, int i_theta, double r, double theta, cons
         const int top    = grid.index(i_r, i_theta + 1);
 
         /* Fill result(i,j) */
-        result[center] -= (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF) * x[center] /* beta_{i,j} */
+        result[center] -= (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
                            - coeff1 * arr * x[left] /* Left */
                            - coeff2 * arr * x[right] /* Right */
                            - coeff3 * att * x[bottom] /* Bottom */
@@ -110,7 +110,7 @@ inline void node_apply_a_give(int i_r, int i_theta, double r, double theta, cons
             const int top    = grid.index(i_r, i_theta + 1);
 
             /* Fill result(i,j) */
-            result[center] -= (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF) * x[center] /* beta_{i,j} */
+            result[center] -= (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
                                - coeff1 * arr * x[left] /* Left */
                                - coeff2 * arr * x[right] /* Right */
                                - coeff3 * att * x[bottom] /* Bottom */
@@ -160,7 +160,7 @@ inline void node_apply_a_give(int i_r, int i_theta, double r, double theta, cons
         const int top    = grid.index(i_r, i_theta + 1);
 
         /* Fill result(i,j) */
-        result[center] -= (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF) * x[center] /* beta_{i,j} */
+        result[center] -= (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
                            - coeff1 * arr * x[left] /* Left */
                            - coeff2 * arr * x[right] /* Right */
                            - coeff3 * att * x[bottom] /* Bottom */
@@ -210,7 +210,7 @@ inline void node_apply_a_give(int i_r, int i_theta, double r, double theta, cons
         const int top    = grid.index(i_r, i_theta + 1);
 
         /* Fill result(i,j) */
-        result[center] -= (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF) * x[center] /* beta_{i,j} */
+        result[center] -= (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
                            - coeff1 * arr * x[left] /* Left */
                            - coeff2 * arr * x[right] /* Right */
                            - coeff3 * att * x[bottom] /* Bottom */
