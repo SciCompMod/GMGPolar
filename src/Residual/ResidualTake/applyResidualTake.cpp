@@ -82,7 +82,8 @@ inline void node_apply_residual_take(int i_r, int i_theta, const PolarGrid& grid
 
             result[center] =
                 rhs[center] -
-                (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) * x[center] /* beta_{i,j} */
+                (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) *
+                     x[center] /* beta_{i,j} */
 
                  - coeff1 * (arr[center] + arr[left]) * (x[left] - x[center]) /* Left - Center: (Left) */
                  - coeff2 * (arr[center] + arr[right]) * (x[right] - x[center]) /* Right - Center: (Right) */
