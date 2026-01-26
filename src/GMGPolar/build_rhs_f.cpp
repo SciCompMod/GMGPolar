@@ -4,7 +4,7 @@ void IGMGPolar::build_rhs_f(const Level& level, Vector<double> rhs_f, const Boun
                             const SourceTerm& source_term)
 {
     const PolarGrid& grid = level.grid();
-    assert(rhs_f.size() == static_cast<uint>(grid.numberOfNodes()));
+    assert(std::ssize(rhs_f) == grid.numberOfNodes());
 
 #pragma omp parallel
     {

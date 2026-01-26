@@ -1,7 +1,7 @@
 #include "../../include/Interpolation/interpolation.h"
 
-Interpolation::Interpolation(const std::vector<int>& threads_per_level, const bool DirBC_Interior)
-    : threads_per_level_(threads_per_level)
+Interpolation::Interpolation(int max_omp_threads, bool DirBC_Interior)
+    : max_omp_threads_(max_omp_threads)
     , DirBC_Interior_(DirBC_Interior)
 {
 }

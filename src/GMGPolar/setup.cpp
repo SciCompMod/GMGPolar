@@ -26,8 +26,8 @@ int IGMGPolar::chooseNumberOfLevels(const PolarGrid& finestGrid)
     }
 
     /* Currently unused: Number of levels which guarantee linear scalability */
-    const int linear_complexity_levels = std::ceil(
-        (2.0 * std::log(static_cast<double>(finestGrid.numberOfNodes())) - std::log(3.0)) / (3.0 * std::log(4.0)));
+    const int linear_complexity_levels = static_cast<int>(std::ceil(
+        (2.0 * std::log(static_cast<double>(finestGrid.numberOfNodes())) - std::log(3.0)) / (3.0 * std::log(4.0))));
 
     // Determine the number of levels as the minimum of radial maximum level, angular maximum level,
     // and the maximum levels specified.
@@ -99,7 +99,8 @@ void IGMGPolar::printSettings() const
     const PolarGrid& finest_grid   = levels_.front().grid();
     const PolarGrid& coarsest_grid = levels_.back().grid();
 
-    std::cout << "r ∈ [" << finest_grid.radii().front() << ", " << finest_grid.radii().back() << "], θ ∈ [0, 2π]\n";
+    std::cout << "r ∈ [" << finest_grid.radius(0) << ", " << finest_grid.radius(finest_grid.nr() - 1)
+              << "], θ ∈ [0, 2π]\n";
     std::cout << "(nr × nθ) = (" << finest_grid.nr() << " × " << finest_grid.ntheta() << ") → (" << coarsest_grid.nr()
               << " × " << coarsest_grid.ntheta() << ")\n";
     std::cout << "Smoother: " << finest_grid.numberSmootherCircles() << " circles\n";

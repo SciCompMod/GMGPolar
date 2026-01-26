@@ -19,13 +19,6 @@
 
 #include "../common/equals.h"
 
-#include "../PolarGrid/multiindex.h"
-#include "../PolarGrid/point.h"
-
-// The PolarGrid class implements a donut-shaped 2D grid.
-// It is designed to handle polar coordinates, providing functionalities
-// for storing data points and performing operations on them.
-
 class PolarGrid
 {
 public:
@@ -44,12 +37,11 @@ public:
     // Optimized, inlined indexing.
     int wrapThetaIndex(const int unwrapped_theta_index) const;
     int index(const int r_index, const int unwrapped_theta_index) const;
-    int fastIndex(const int r_index, const int theta_index) const;
     void multiIndex(const int node_index, int& r_index, int& theta_index) const;
 
+    // Grid Parameters
     // Number of grid nodes
     int numberOfNodes() const;
-    // Grid Parameters
     // Get the number of grid points in radial direction
     int nr() const;
     // Get the number of angular divisions
@@ -58,9 +50,6 @@ public:
     double radius(const int r_index) const;
     // Get the angle at a specific angular index
     double theta(const int theta_index) const;
-    // Get all radii and angles available which define the grid
-    const std::vector<double>& radii() const;
-    const std::vector<double>& angles() const;
 
     // Grid distances
     // Get the radial distance to the next consecutive radial node at a specified radial index.
@@ -80,48 +69,8 @@ public:
     // Get the number of nodes in radial smoother.
     int numberRadialSmootherNodes() const;
 
-    // ------------------------------------------- //
-    // Unoptimized Indexing and Neighbor Retrieval //
-    // ------------------------------------------- //
-    // Node Indexing (based on the combined circle-radial smoother)
-    // Get the index of a node based on its position.
-    int index(const MultiIndex& position) const;
-    // Get the position of a node based on its index.
-    MultiIndex multiIndex(const int node_index) const;
-    // Get the polar coordinates of a node based on its position.
-    Point polarCoordinates(const MultiIndex& position) const;
-    // Get adjacent neighbors of a node.
-    // If the neighbor index is -1, then there is no neighboring node in that direction.
-    // - The first entry (neighbors[0]) represents the radial direction (r):
-    //   - First: inward neighbor (r - 1)
-    //   - Second: outward neighbor (r + 1)
-    // - The second entry (neighbors[1]) represents the angular direction (theta):
-    //   - First: counterclockwise neighbor (theta - 1)
-    //   - Second: clockwise neighbor (theta + 1)
-    void adjacentNeighborsOf(const MultiIndex& position,
-                             std::array<std::pair<int, int>, space_dimension>& neighbors) const;
-    // Get diagonal neighbors of a node.
-    // If the neighbor index is -1, then there is no neighboring node in that direction.
-    // - The first entry (neighbors[0]) represents:
-    //   - First: bottom left neighbor (r - 1, theta - 1)
-    //   - Second: bottom right neighbor (r + 1, theta - 1)
-    // - The second entry (neighbors[1]) represents:
-    //   - First: top left neighbor (r - 1, theta + 1)
-    //   - Second: top right neighbor (r + 1, theta + 1)
-    void diagonalNeighborsOf(const MultiIndex& position,
-                             std::array<std::pair<int, int>, space_dimension>& neighbors) const;
-    // Neighbor distances
-    // Get distances to adjacent neighbors of a node.
-    // If there is no neighboring node in that direction, then the neighbor distance is 0.
-    void adjacentNeighborDistances(const MultiIndex& position,
-                                   std::array<std::pair<double, double>, space_dimension>& neighbor_distances) const;
-
 private:
-    // --------------- //
-    // Private members //
-    // --------------- //
-
-    // We will use the convention:
+    // We use the convention:
     // radii = [R0, ..., R], angles = [0, ..., 2*pi]
     // Note that ntheta will be one less than the size of angles since 0 and 2pi are the same point.
     int nr_; // number of nodes in radial direction
@@ -155,15 +104,11 @@ private:
      * - numberCircularSmootherNodes + numberRadialSmootherNodes = number_of_nodes()
      */
 
-    // ------------------------ //
-    // Private Helper Functions //
-    // ------------------------ //
-
     // Check parameter validity
     void checkParameters(const std::vector<double>& radii, const std::vector<double>& angles) const;
+
     // Initialize radial_spacings_, angular_spacings_
     void initializeDistances();
-
     // Initializes line splitting parameters for Circle/radial indexing.
     // splitting_radius: The radius value used for dividing the smoother into a circular and radial section.
     //      If std::nullopt, automatic line-splitting is enabled.

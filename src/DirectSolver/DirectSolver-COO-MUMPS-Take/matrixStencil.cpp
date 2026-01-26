@@ -2,7 +2,7 @@
 
 #ifdef GMGPOLAR_USE_MUMPS
 
-const Stencil& DirectSolverTake::getStencil(int i_r) const
+const Stencil& DirectSolver_COO_MUMPS_Take::getStencil(int i_r) const
 {
     assert(0 <= i_r && i_r < grid_.nr());
     assert(grid_.nr() >= 4);
@@ -25,7 +25,7 @@ const Stencil& DirectSolverTake::getStencil(int i_r) const
     throw std::out_of_range("Invalid index for stencil");
 }
 
-int DirectSolverTake::getNonZeroCountSolverMatrix() const
+int DirectSolver_COO_MUMPS_Take::getNonZeroCountSolverMatrix() const
 {
     const int size_stencil_inner_boundary      = DirBC_Interior_ ? 1 : 7;
     const int size_stencil_next_inner_boundary = DirBC_Interior_ ? 6 : 9;
@@ -42,7 +42,7 @@ int DirectSolverTake::getNonZeroCountSolverMatrix() const
 
 /* ----------------------------------------------------------------- */
 /* If the indexing is not smoother-based, please adjust the indexing */
-int DirectSolverTake::getSolverMatrixIndex(const int i_r, const int i_theta) const
+int DirectSolver_COO_MUMPS_Take::getSolverMatrixIndex(const int i_r, const int i_theta) const
 {
     const int size_stencil_inner_boundary      = DirBC_Interior_ ? 1 : 7;
     const int size_stencil_next_inner_boundary = DirBC_Interior_ ? 6 : 9;

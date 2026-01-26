@@ -4,7 +4,7 @@ template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoeff
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(const Level& level, Vector<double> rhs_f)
 {
     const PolarGrid& grid = level.grid();
-    assert(rhs_f.size() == static_cast<uint>(grid.numberOfNodes()));
+    assert(std::ssize(rhs_f) == grid.numberOfNodes());
 
     if (level.levelCache().cacheDomainGeometry()) {
         /* DomainGeometry is cached */

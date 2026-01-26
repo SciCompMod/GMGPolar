@@ -20,6 +20,8 @@
 #include <fstream>
 #include <iostream>
 
+#include "vector.h"
+
 // The CSR matrix format is used if a custom LU decomposition solver is choosen.
 // MUMPS relies on the COO format.
 
@@ -64,9 +66,9 @@ private:
     int rows_;
     int columns_;
     int nnz_;
-    std::unique_ptr<T[]> values_;
-    std::unique_ptr<int[]> column_indices_;
-    std::unique_ptr<int[]> row_start_indices_;
+    AllocatableVector<T> values_;
+    AllocatableVector<int> column_indices_;
+    AllocatableVector<int> row_start_indices_;
 
     bool is_sorted_entries(const std::vector<std::tuple<int, int, T>>& entries)
     {
@@ -87,8 +89,8 @@ std::ostream& operator<<(std::ostream& stream, const SparseMatrixCSR<U>& matrix)
     stream << "Number of non-zeros (nnz): " << matrix.nnz_ << "\n";
     stream << "Non-zero elements (row, column, value):\n";
     for (int row = 0; row < matrix.rows_; ++row) {
-        for (int nnz = matrix.row_start_indices_[row]; nnz < matrix.row_start_indices_[row + 1]; ++nnz) {
-            stream << "(" << row << ", " << matrix.column_indices_[nnz] << ", " << matrix.values_[nnz] << ")\n";
+        for (int nnz = matrix.row_start_indices_(row); nnz < matrix.row_start_indices_(row + 1); ++nnz) {
+            stream << "(" << row << ", " << matrix.column_indices_(nnz) << ", " << matrix.values_(nnz) << ")\n";
         }
     }
     return stream;
@@ -100,9 +102,6 @@ SparseMatrixCSR<T>::SparseMatrixCSR()
     : rows_(0)
     , columns_(0)
     , nnz_(0)
-    , values_(nullptr)
-    , column_indices_(nullptr)
-    , row_start_indices_(nullptr)
 {
 }
 
@@ -112,13 +111,13 @@ SparseMatrixCSR<T>::SparseMatrixCSR(const SparseMatrixCSR& other)
     : rows_(other.rows_)
     , columns_(other.columns_)
     , nnz_(other.nnz_)
-    , values_(std::make_unique<T[]>(nnz_))
-    , column_indices_(std::make_unique<int[]>(nnz_))
-    , row_start_indices_(std::make_unique<int[]>(rows_ + 1))
+    , values_("CSR values", nnz_)
+    , column_indices_("CSR column indices", nnz_)
+    , row_start_indices_("CSR row start indices", rows_ + 1)
 {
-    std::copy(other.values_.get(), other.values_.get() + nnz_, values_.get());
-    std::copy(other.column_indices_.get(), other.column_indices_.get() + nnz_, column_indices_.get());
-    std::copy(other.row_start_indices_.get(), other.row_start_indices_.get() + rows_ + 1, row_start_indices_.get());
+    Kokkos::deep_copy(values_, other.values_);
+    Kokkos::deep_copy(column_indices_, other.column_indices_);
+    Kokkos::deep_copy(row_start_indices_, other.row_start_indices_);
 }
 
 // copy assignment
@@ -131,17 +130,17 @@ SparseMatrixCSR<T>& SparseMatrixCSR<T>::operator=(const SparseMatrixCSR& other)
     }
     // Only allocate new memory if the sizes are different
     if (nnz_ != other.nnz_ || rows_ != other.rows_) {
-        values_            = std::make_unique<T[]>(other.nnz_);
-        column_indices_    = std::make_unique<int[]>(other.nnz_);
-        row_start_indices_ = std::make_unique<int[]>(other.rows_ + 1);
+        values_            = Vector<T>("CSR values", other.nnz_);
+        column_indices_    = Vector<int>("CSR column indices", other.nnz_);
+        row_start_indices_ = Vector<int>("CSR row start indices", other.rows_ + 1);
     }
     // Copy the elements
     rows_    = other.rows_;
     columns_ = other.columns_;
     nnz_     = other.nnz_;
-    std::copy(other.values_.get(), other.values_.get() + nnz_, values_.get());
-    std::copy(other.column_indices_.get(), other.column_indices_.get() + nnz_, column_indices_.get());
-    std::copy(other.row_start_indices_.get(), other.row_start_indices_.get() + rows_ + 1, row_start_indices_.get());
+    Kokkos::deep_copy(values_, other.values_);
+    Kokkos::deep_copy(column_indices_, other.column_indices_);
+    Kokkos::deep_copy(row_start_indices_, other.row_start_indices_);
     return *this;
 }
 
@@ -180,18 +179,18 @@ template <typename T>
 SparseMatrixCSR<T>::SparseMatrixCSR(int rows, int columns, std::function<int(int)> nz_per_row)
     : rows_(rows)
     , columns_(columns)
-    , row_start_indices_(std::make_unique<int[]>(rows_ + 1))
+    , row_start_indices_("CSR row start indices", rows_ + 1)
 {
     assert(rows >= 0);
     assert(columns >= 0);
     nnz_ = 0;
     for (int i = 0; i < rows; i++) {
-        row_start_indices_[i] = nnz_;
+        row_start_indices_(i) = nnz_;
         nnz_ += nz_per_row(i);
     }
-    row_start_indices_[rows] = nnz_;
-    values_                  = std::make_unique<T[]>(nnz_);
-    column_indices_          = std::make_unique<int[]>(nnz_);
+    row_start_indices_(rows) = nnz_;
+    values_                  = Vector<T>("CSR values", nnz_);
+    column_indices_          = Vector<int>("CSR column indices", nnz_);
 }
 
 template <typename T>
@@ -200,9 +199,9 @@ SparseMatrixCSR<T>::SparseMatrixCSR(int rows, int columns, const std::vector<tri
     rows_(rows)
     , columns_(columns)
     , nnz_(entries.size())
-    , values_(std::make_unique<T[]>(nnz_))
-    , column_indices_(std::make_unique<int[]>(nnz_))
-    , row_start_indices_(std::make_unique<int[]>(rows_ + 1))
+    , values_("CSR values", nnz_)
+    , column_indices_("CSR column indices", nnz_)
+    , row_start_indices_("CSR row start indices", rows_ + 1)
 {
     assert(rows >= 0);
     assert(columns >= 0);
@@ -210,19 +209,19 @@ SparseMatrixCSR<T>::SparseMatrixCSR(int rows, int columns, const std::vector<tri
     // fill values and column indexes
     for (int i = 0; i < nnz_; i++) {
         assert(0 <= std::get<0>(entries[i]) && std::get<0>(entries[i]) < rows);
-        values_[i]         = std::get<2>(entries[i]);
-        column_indices_[i] = std::get<1>(entries[i]);
-        assert(0 <= column_indices_[i] && column_indices_[i] < columns);
+        values_(i)         = std::get<2>(entries[i]);
+        column_indices_(i) = std::get<1>(entries[i]);
+        assert(0 <= column_indices_(i) && column_indices_(i) < columns);
     }
     //fill row indexes
     int count             = 0;
-    row_start_indices_[0] = 0;
+    row_start_indices_(0) = 0;
     for (int r = 0; r < rows; r++) {
         while (count < nnz_ && std::get<0>(entries[count]) == r)
             count++;
-        row_start_indices_[r + 1] = count;
+        row_start_indices_(r + 1) = count;
     }
-    assert(row_start_indices_[rows] == nnz_);
+    assert(row_start_indices_(rows) == nnz_);
 }
 
 template <typename T>
@@ -231,9 +230,9 @@ SparseMatrixCSR<T>::SparseMatrixCSR(int rows, int columns, const std::vector<T>&
     : rows_(rows)
     , columns_(columns)
     , nnz_(values.size())
-    , values_(std::make_unique<T[]>(nnz_))
-    , column_indices_(std::make_unique<int[]>(nnz_))
-    , row_start_indices_(std::make_unique<int[]>(rows_ + 1))
+    , values_("CSR values", nnz_)
+    , column_indices_("CSR column indices", nnz_)
+    , row_start_indices_("CSR row start indices", rows_ + 1)
 {
     assert(rows >= 0);
     assert(columns >= 0);
@@ -241,9 +240,9 @@ SparseMatrixCSR<T>::SparseMatrixCSR(int rows, int columns, const std::vector<T>&
     assert(values.size() == column_indices.size());
 
     // Copy data to internal storage
-    std::copy(values.begin(), values.end(), values_.get());
-    std::copy(column_indices.begin(), column_indices.end(), column_indices_.get());
-    std::copy(row_start_indices.begin(), row_start_indices.end(), row_start_indices_.get());
+    std::copy(values.begin(), values.end(), values_.data());
+    std::copy(column_indices.begin(), column_indices.end(), column_indices_.data());
+    std::copy(row_start_indices.begin(), row_start_indices.end(), row_start_indices_.data());
 }
 
 template <typename T>
@@ -270,7 +269,7 @@ template <typename T>
 int SparseMatrixCSR<T>::row_nz_size(int row) const
 {
     assert(row >= 0 && row < rows_);
-    return row_start_indices_[row + 1] - row_start_indices_[row];
+    return row_start_indices_(row + 1) - row_start_indices_(row);
 }
 
 template <typename T>
@@ -278,7 +277,7 @@ const int& SparseMatrixCSR<T>::row_nz_index(int row, int nz_index) const
 {
     assert(row >= 0 && row < rows_);
     assert(nz_index >= 0 && nz_index < row_nz_size(row));
-    return column_indices_[row_start_indices_[row] + nz_index];
+    return column_indices_(row_start_indices_(row) + nz_index);
 }
 
 template <typename T>
@@ -286,7 +285,7 @@ int& SparseMatrixCSR<T>::row_nz_index(int row, int nz_index)
 {
     assert(row >= 0 && row < rows_);
     assert(nz_index >= 0 && nz_index < row_nz_size(row));
-    return column_indices_[row_start_indices_[row] + nz_index];
+    return column_indices_(row_start_indices_(row) + nz_index);
 }
 
 template <typename T>
@@ -294,7 +293,7 @@ const T& SparseMatrixCSR<T>::row_nz_entry(int row, int nz_index) const
 {
     assert(row >= 0 && row < rows_);
     assert(nz_index >= 0 && nz_index < row_nz_size(row));
-    return values_[row_start_indices_[row] + nz_index];
+    return values_(row_start_indices_(row) + nz_index);
 }
 
 template <typename T>
@@ -302,23 +301,23 @@ T& SparseMatrixCSR<T>::row_nz_entry(int row, int nz_index)
 {
     assert(row >= 0 && row < rows_);
     assert(nz_index >= 0 && nz_index < row_nz_size(row));
-    return values_[row_start_indices_[row] + nz_index];
+    return values_(row_start_indices_(row) + nz_index);
 }
 
 template <typename T>
 T* SparseMatrixCSR<T>::values_data() const
 {
-    return values_.get();
+    return values_.data();
 }
 
 template <typename T>
 int* SparseMatrixCSR<T>::column_indices_data() const
 {
-    return column_indices_.get();
+    return column_indices_.data();
 }
 
 template <typename T>
 int* SparseMatrixCSR<T>::row_start_indices_data() const
 {
-    return row_start_indices_.get();
+    return row_start_indices_.data();
 }

@@ -3,15 +3,22 @@
 
 std::unique_ptr<IGMGPolar> ConfigParser::solver() const
 {
+    // Create local aliases so the class doesn't need to be captured by the lamda
+    // These are references, not copies.
     const PolarGrid& grid = grid_;
+
+    // Create a solver specialized to the active domain geometry.
     return std::visit(
         [&grid](auto const& domain_geometry, auto const& density_profile_coefficients) {
             using DomainGeomType                 = std::decay_t<decltype(domain_geometry)>;
             using DensityProfileCoefficientsType = std::decay_t<decltype(density_profile_coefficients)>;
 
-            return static_cast<std::unique_ptr<IGMGPolar>>(
-                std::make_unique<GMGPolar<DomainGeomType, DensityProfileCoefficientsType>>(
-                    grid, domain_geometry, density_profile_coefficients));
+            // Construct the solver specialized for this geometry type.
+            std::unique_ptr<IGMGPolar> solver =
+                std::make_unique<GMGPolar<DomainGeomType>>(grid, domain_geometry, density_profile_coefficients);
+
+            // The lambdas must return objects of identical type
+            return solver;
         },
         *domain_geometry_, *density_profile_coefficients_);
 }
