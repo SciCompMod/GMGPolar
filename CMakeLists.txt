@@ -26,9 +26,6 @@ endif()
 # Set compiler flags
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -pedantic -Wno-unused -Wno-psabi -Wfloat-conversion")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -mtune=generic -Wno-psabi")
-if (CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} --param max-inline-insns-single=1500")
-endif()
 
 # Set coverage compiler flags - must come before any targets are defined
 if(GMGPOLAR_ENABLE_COVERAGE)
