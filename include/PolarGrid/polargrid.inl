@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iterator>
+
 #include "polargrid.h"
 
 inline int PolarGrid::nr() const
@@ -18,14 +20,19 @@ inline int PolarGrid::numberOfNodes() const
 
 inline double PolarGrid::radius(const int r_index) const
 {
-    assert(r_index >= 0 && static_cast<size_t>(r_index) < radii_.size());
+    assert(r_index >= 0 && r_index < std::ssize(radii_));
     return radii_[r_index];
 }
 
 inline double PolarGrid::theta(const int theta_index) const
 {
-    assert(theta_index >= 0 && static_cast<size_t>(theta_index) < angles_.size());
+    assert(theta_index >= 0 && theta_index < std::ssize(angles_));
     return angles_[theta_index];
+}
+
+inline double PolarGrid::smootherSplittingRadius() const
+{
+    return smoother_splitting_radius_;
 }
 
 // Get the number of circles in the circular smoother.
@@ -52,7 +59,7 @@ inline int PolarGrid::numberRadialSmootherNodes() const
 
 inline double PolarGrid::radialSpacing(const int r_index) const
 {
-    assert(r_index >= 0 && static_cast<size_t>(r_index) < radial_spacings_.size());
+    assert(r_index >= 0 && r_index < std::ssize(radial_spacings_));
     return radial_spacings_[r_index];
 }
 
@@ -60,13 +67,8 @@ inline double PolarGrid::angularSpacing(const int unwrapped_theta_index) const
 {
     // unwrapped_theta_index may be negative or larger than ntheta() to allow for periodicity.
     const int theta_index = wrapThetaIndex(unwrapped_theta_index);
-    assert(theta_index >= 0 && theta_index < ntheta());
     return angular_spacings_[theta_index];
 }
-
-// ------------------ //
-// Optimized indexing //
-// ------------------ //
 
 inline int PolarGrid::wrapThetaIndex(const int unwrapped_theta_index) const
 {
@@ -80,40 +82,34 @@ inline int PolarGrid::wrapThetaIndex(const int unwrapped_theta_index) const
     //   This effectively computes unwrapped_theta_index % ntheta(), because it discards all higher bits.
     //
     // If ntheta is not a power of two, we use the standard modulo approach to handle wrapping.
-    return is_ntheta_PowerOfTwo_ ? unwrapped_theta_index & (ntheta() - 1) : (unwrapped_theta_index % ntheta() + ntheta()) % ntheta();
+    int theta_index = is_ntheta_PowerOfTwo_ ? unwrapped_theta_index & (ntheta() - 1)
+                                            : (unwrapped_theta_index % ntheta() + ntheta()) % ntheta();
+    assert(0 <= theta_index && theta_index < ntheta());
+    return theta_index;
 }
 
 inline int PolarGrid::index(const int r_index, const int unwrapped_theta_index) const
 {
     // unwrapped_theta_index may be negative or larger than ntheta() to allow for periodicity.
     assert(0 <= r_index && r_index < nr());
-    const int theta_index = wrapThetaIndex(unwrapped_theta_index);
-    assert(0 <= theta_index && theta_index < ntheta());
-    return r_index < numberSmootherCircles()
-               ? theta_index + ntheta() * r_index
-               : numberCircularSmootherNodes() + r_index - numberSmootherCircles() + lengthSmootherRadial() * theta_index;
-}
-
-inline int PolarGrid::fastIndex(const int r_index, const int theta_index) const
-{
-    assert(0 <= r_index && r_index < nr());
-    assert(0 <= theta_index && theta_index < ntheta());
-    return r_index < numberSmootherCircles()
-               ? theta_index + ntheta() * r_index
-               : numberCircularSmootherNodes() + r_index - numberSmootherCircles() + lengthSmootherRadial() * theta_index;
+    int theta_index = wrapThetaIndex(unwrapped_theta_index);
+    int global_index =
+        r_index < numberSmootherCircles()
+            ? theta_index + ntheta() * r_index
+            : numberCircularSmootherNodes() + r_index - numberSmootherCircles() + lengthSmootherRadial() * theta_index;
+    assert(0 <= global_index && global_index < numberOfNodes());
+    return global_index;
 }
 
 inline void PolarGrid::multiIndex(const int node_index, int& r_index, int& theta_index) const
 {
     assert(0 <= node_index && node_index < numberOfNodes());
-    if (node_index < numberCircularSmootherNodes())
-    {
-        r_index = node_index / ntheta();
-        theta_index = is_ntheta_PowerOfTwo_ ? node_index & (ntheta() - 1) : node_index % ntheta();
+    if (node_index < numberCircularSmootherNodes()) {
+        r_index     = node_index / ntheta();
+        theta_index = wrapThetaIndex(node_index);
     }
-    else
-    {
+    else {
         theta_index = (node_index - numberCircularSmootherNodes()) / lengthSmootherRadial();
-        r_index = numberSmootherCircles() + (node_index - numberCircularSmootherNodes()) % lengthSmootherRadial();
+        r_index     = numberSmootherCircles() + (node_index - numberCircularSmootherNodes()) % lengthSmootherRadial();
     }
 }

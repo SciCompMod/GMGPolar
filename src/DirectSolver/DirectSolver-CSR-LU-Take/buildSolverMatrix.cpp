@@ -236,7 +236,7 @@
         }                                                                                                              \
     } while (0)
 
-void DirectSolverTakeCustomLU::buildSolverMatrixCircleSection(const int i_r, SparseMatrixCSR<double>& solver_matrix)
+void DirectSolver_CSR_LU_Take::buildSolverMatrixCircleSection(const int i_r, SparseMatrixCSR<double>& solver_matrix)
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -254,7 +254,7 @@ void DirectSolverTakeCustomLU::buildSolverMatrixCircleSection(const int i_r, Spa
     }
 }
 
-void DirectSolverTakeCustomLU::buildSolverMatrixRadialSection(const int i_theta, SparseMatrixCSR<double>& solver_matrix)
+void DirectSolver_CSR_LU_Take::buildSolverMatrixRadialSection(const int i_theta, SparseMatrixCSR<double>& solver_matrix)
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -276,7 +276,7 @@ void DirectSolverTakeCustomLU::buildSolverMatrixRadialSection(const int i_theta,
 
 /* ------------------------------------------------------------------------ */
 /* If the indexing is not smoother-based, please adjust the access patterns */
-SparseMatrixCSR<double> DirectSolverTakeCustomLU::buildSolverMatrix()
+SparseMatrixCSR<double> DirectSolver_CSR_LU_Take::buildSolverMatrix()
 {
     const int n = grid_.numberOfNodes();
 

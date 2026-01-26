@@ -17,8 +17,6 @@ paraview=0
 # OpenMP settings:
 # Maximum number of threads OpenMP can use for parallel execution
 maxOpenMPThreads=32
-# Factor to reduce the number of threads OpenMP uses (e.g., 1.0 means no reduction)
-threadReductionFactor=1.0
 
 # Stencil distribution method:
 # 0 - CPU "Take": Each node independently applies the stencil
@@ -121,7 +119,6 @@ fi
     --verbose $verbose \
     --paraview $paraview \
     --maxOpenMPThreads $maxOpenMPThreads \
-    --threadReductionFactor $threadReductionFactor \
     --stencilDistributionMethod $stencilDistributionMethod \
     --cacheDensityProfileCoefficients $cacheDensityProfileCoefficients \
     --cacheDomainGeometry $cacheDomainGeometry \

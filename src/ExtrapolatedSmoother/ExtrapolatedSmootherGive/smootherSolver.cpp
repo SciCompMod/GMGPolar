@@ -826,30 +826,8 @@ void ExtrapolatedSmootherGive::applyAscOrthoCircleSection(const int i_r, const S
         const double theta = grid_.theta(i_theta);
         const int index    = grid_.index(i_r, i_theta);
 
-        double coeff_beta;
-        if (level_cache_.cacheDensityProfileCoefficients())
-            coeff_beta = level_cache_.coeff_beta()[index];
-        else
-            coeff_beta = density_profile_coefficients_.beta(r, theta);
-
-        double coeff_alpha;
-        if (!level_cache_.cacheDomainGeometry()) {
-            if (level_cache_.cacheDensityProfileCoefficients())
-                coeff_alpha = level_cache_.coeff_alpha()[index];
-            else
-                coeff_alpha = density_profile_coefficients_.alpha(r, theta);
-        }
-
-        double arr, att, art, detDF;
-        if (level_cache_.cacheDomainGeometry()) {
-            arr   = level_cache_.arr()[index];
-            att   = level_cache_.att()[index];
-            art   = level_cache_.art()[index];
-            detDF = level_cache_.detDF()[index];
-        }
-        else {
-            compute_jacobian_elements(domain_geometry_, r, theta, coeff_alpha, arr, att, art, detDF);
-        }
+        double coeff_beta, arr, att, art, detDF;
+        level_cache_.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Apply Asc Ortho at the current node
         NODE_APPLY_ASC_ORTHO_CIRCLE_GIVE(i_r, i_theta, r, theta, grid_, DirBC_Interior_, smoother_color, x, rhs, temp,
@@ -868,30 +846,8 @@ void ExtrapolatedSmootherGive::applyAscOrthoRadialSection(const int i_theta, con
         const double r  = grid_.radius(i_r);
         const int index = grid_.index(i_r, i_theta);
 
-        double coeff_beta;
-        if (level_cache_.cacheDensityProfileCoefficients())
-            coeff_beta = level_cache_.coeff_beta()[index];
-        else
-            coeff_beta = density_profile_coefficients_.beta(r, theta);
-
-        double coeff_alpha;
-        if (!level_cache_.cacheDomainGeometry()) {
-            if (level_cache_.cacheDensityProfileCoefficients())
-                coeff_alpha = level_cache_.coeff_alpha()[index];
-            else
-                coeff_alpha = density_profile_coefficients_.alpha(r, theta);
-        }
-
-        double arr, att, art, detDF;
-        if (level_cache_.cacheDomainGeometry()) {
-            arr   = level_cache_.arr()[index];
-            att   = level_cache_.att()[index];
-            art   = level_cache_.art()[index];
-            detDF = level_cache_.detDF()[index];
-        }
-        else {
-            compute_jacobian_elements(domain_geometry_, r, theta, coeff_alpha, arr, att, art, detDF);
-        }
+        double coeff_beta, arr, att, art, detDF;
+        level_cache_.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Apply Asc Ortho at the current node
         NODE_APPLY_ASC_ORTHO_RADIAL_GIVE(i_r, i_theta, r, theta, grid_, DirBC_Interior_, smoother_color, x, rhs, temp,

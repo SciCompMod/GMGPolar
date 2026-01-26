@@ -2,36 +2,33 @@
 
 /* Remark: This injection is not scaled. */
 
-void Interpolation::applyInjection(const Level& fromLevel, const Level& toLevel, Vector<double> result,
-                                   ConstVector<double> x) const
+void Interpolation::applyInjection(const PolarGrid& fine_grid, const PolarGrid& coarse_grid,
+                                   Vector<double> coarse_result, ConstVector<double> fine_values) const
 {
-    assert(toLevel.level_depth() == fromLevel.level_depth() + 1);
+    assert(std::ssize(fine_values) == fine_grid.numberOfNodes());
+    assert(std::ssize(coarse_result) == coarse_grid.numberOfNodes());
 
-    const PolarGrid& fineGrid   = fromLevel.grid();
-    const PolarGrid& coarseGrid = toLevel.grid();
-
-    assert(x.size() == static_cast<uint>(fineGrid.numberOfNodes()));
-    assert(result.size() == static_cast<uint>(coarseGrid.numberOfNodes()));
-
-#pragma omp parallel num_threads(threads_per_level_[toLevel.level_depth()]) if (fineGrid.numberOfNodes() > 10'000)
+#pragma omp parallel num_threads(max_omp_threads_)
     {
 /* For loop matches circular access pattern */
 #pragma omp for nowait
-        for (int i_r_coarse = 0; i_r_coarse < coarseGrid.numberSmootherCircles(); i_r_coarse++) {
+        for (int i_r_coarse = 0; i_r_coarse < coarse_grid.numberSmootherCircles(); i_r_coarse++) {
             int i_r = i_r_coarse * 2;
-            for (int i_theta_coarse = 0; i_theta_coarse < coarseGrid.ntheta(); i_theta_coarse++) {
-                int i_theta                                          = i_theta_coarse * 2;
-                result[coarseGrid.index(i_r_coarse, i_theta_coarse)] = x[fineGrid.index(i_r, i_theta)];
+            for (int i_theta_coarse = 0; i_theta_coarse < coarse_grid.ntheta(); i_theta_coarse++) {
+                int i_theta = i_theta_coarse * 2;
+                coarse_result[coarse_grid.index(i_r_coarse, i_theta_coarse)] =
+                    fine_values[fine_grid.index(i_r, i_theta)];
             }
         }
 
-/* For loop matches circular access pattern */
+/* For loop matches radial access pattern */
 #pragma omp for nowait
-        for (int i_theta_coarse = 0; i_theta_coarse < coarseGrid.ntheta(); i_theta_coarse++) {
+        for (int i_theta_coarse = 0; i_theta_coarse < coarse_grid.ntheta(); i_theta_coarse++) {
             int i_theta = i_theta_coarse * 2;
-            for (int i_r_coarse = coarseGrid.numberSmootherCircles(); i_r_coarse < coarseGrid.nr(); i_r_coarse++) {
-                int i_r                                              = i_r_coarse * 2;
-                result[coarseGrid.index(i_r_coarse, i_theta_coarse)] = x[fineGrid.index(i_r, i_theta)];
+            for (int i_r_coarse = coarse_grid.numberSmootherCircles(); i_r_coarse < coarse_grid.nr(); i_r_coarse++) {
+                int i_r = i_r_coarse * 2;
+                coarse_result[coarse_grid.index(i_r_coarse, i_theta_coarse)] =
+                    fine_values[fine_grid.index(i_r, i_theta)];
             }
         }
     }

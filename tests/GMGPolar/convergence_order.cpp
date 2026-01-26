@@ -165,9 +165,8 @@ std::tuple<double, double> get_gmgpolar_error(PolarGrid const& grid, CzarnyGeome
     gmgpolar.verbose(0);
     gmgpolar.paraview(false);
 
-    // --- Parallelization and threading settings --- //
+    // --- Parallelization settings --- //
     gmgpolar.maxOpenMPThreads(1);
-    gmgpolar.threadReductionFactor(1.0);
 
     // --- Discretization and method settings --- //
     gmgpolar.DirBC_Interior(false); // Use across-origin calculation

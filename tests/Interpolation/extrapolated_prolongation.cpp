@@ -1,75 +1,65 @@
 #include <gtest/gtest.h>
-
 #include <random>
+
+#include "../test_tools.h"
 
 #include "../../include/GMGPolar/gmgpolar.h"
 #include "../../include/Interpolation/interpolation.h"
-#include "../../include/InputFunctions/domainGeometry.h"
-#include "../../include/InputFunctions/densityProfileCoefficients.h"
-
-#include "../../include/InputFunctions/DomainGeometry/circularGeometry.h"
 #include "../../include/InputFunctions/DensityProfileCoefficients/poissonCoefficients.h"
 
-namespace ExtrapolatedProlongationTest
+// Helper that computes the mathematically expected extrapolated prolongation value
+static double expected_extrapolated_value(const PolarGrid& coarse, const PolarGrid& fine,
+                                          ConstVector<double> coarse_vals, int i_r, int i_theta)
 {
-// Function to generate sample data for vector x using random values with seed
-Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed)
-{
-    Vector<double> x("x", grid.numberOfNodes());
-    std::mt19937 gen(seed); // Standard mersenne_twister_engine seeded with seed
-    std::uniform_real_distribution<double> dist(0.0, 1.0); // Generate random double between 0 and 1
-    for (uint i = 0; i < x.size(); ++i) {
-        x[i] = dist(gen);
+    int i_r_coarse     = i_r / 2;
+    int i_theta_coarse = i_theta / 2;
+
+    bool r_even = (i_r % 2 == 0);
+    bool t_even = (i_theta % 2 == 0);
+
+    if (r_even && t_even) {
+        // Node coincides with a coarse node
+        return coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)];
     }
-    return x;
+
+    if (!r_even && t_even) {
+        // Radial midpoint - arithmetic mean of left and right
+        return 0.5 * (coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)] +
+                      coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse)]);
+    }
+
+    if (r_even && !t_even) {
+        // Angular midpoint - arithmetic mean of bottom and top
+        return 0.5 * (coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)] +
+                      coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)]);
+    }
+
+    // Center of coarse cell - arithmetic mean of diagonal nodes (bottom-right + top-left)
+    return 0.5 * (coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse)] +
+                  coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)]);
 }
-} // namespace ExtrapolatedProlongationTest
 
-using namespace ExtrapolatedProlongationTest;
-
-TEST(ExtrapolatedProlongationTest, ExtrapolatedProlongationSmoothingRadius)
+TEST(ExtrapolatedProlongationTest, ExtrapolatedProlongationMatchesStencil)
 {
     std::vector<double> fine_radii  = {0.1, 0.2, 0.25, 0.5, 0.8, 0.9, 1.3, 1.4, 2.0};
     std::vector<double> fine_angles = {
-        0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
+        0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, 2 * M_PI};
 
-    double Rmax = fine_radii.back();
-    CircularGeometry domain_geometry(Rmax);
-    bool DirBC_Interior                     = true;
-    bool cache_density_rpofile_coefficients = true;
-    bool cache_domain_geometry              = false;
+    PolarGrid fine_grid(fine_radii, fine_angles);
+    PolarGrid coarse_grid = coarseningGrid(fine_grid);
 
-    auto finest_grid = std::make_unique<PolarGrid>(fine_radii, fine_angles);
-    auto coarse_grid = std::make_unique<PolarGrid>(coarseningGrid(*finest_grid));
+    Interpolation I(/*threads*/ 16, /*DirBC*/ true);
 
-    std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<PoissonCoefficients>();
-    auto finest_levelCache = std::make_unique<LevelCache>(*finest_grid, *coefficients, domain_geometry,
-                                                          cache_density_rpofile_coefficients, cache_domain_geometry);
-    auto coarse_levelCache = std::make_unique<LevelCache>(*coarse_grid, *coefficients, domain_geometry,
-                                                          cache_density_rpofile_coefficients, cache_domain_geometry);
+    Vector<double> coarse_values = generate_random_sample_data(coarse_grid, 1234, 0.0, 1.0);
+    Vector<double> fine_result("fine_result", fine_grid.numberOfNodes());
 
-    Level finest_level(0, std::move(finest_grid), std::move(finest_levelCache),
-                       ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
-    Level coarse_level(1, std::move(coarse_grid), std::move(coarse_levelCache),
-                       ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
+    I.applyExtrapolatedProlongation(coarse_grid, fine_grid, fine_result, coarse_values);
 
-    const int maxOpenMPThreads               = 16;
-    const std::vector<int> threads_per_level = {maxOpenMPThreads, maxOpenMPThreads};
-
-    Interpolation interpolation_operator(threads_per_level, DirBC_Interior);
-
-    unsigned int seed = 42;
-    Vector<double> x  = generate_random_sample_data(coarse_level.grid(), seed);
-
-    // Apply prolongation to both functions
-    Vector<double> result1("result1", finest_level.grid().numberOfNodes());
-    Vector<double> result2("result2", finest_level.grid().numberOfNodes());
-
-    interpolation_operator.applyExtrapolatedProlongation0(coarse_level, finest_level, result1, x);
-    interpolation_operator.applyExtrapolatedProlongation(coarse_level, finest_level, result2, x);
-
-    ASSERT_EQ(result1.size(), result2.size());
-    for (uint i = 0; i < result1.size(); ++i) {
-        ASSERT_DOUBLE_EQ(result1[i], result2[i]);
+    for (int i_r = 0; i_r < fine_grid.nr(); ++i_r) {
+        for (int i_theta = 0; i_theta < fine_grid.ntheta(); ++i_theta) {
+            double expected = expected_extrapolated_value(coarse_grid, fine_grid, coarse_values, i_r, i_theta);
+            double got      = fine_result[fine_grid.index(i_r, i_theta)];
+            ASSERT_NEAR(expected, got, 1e-10) << "Mismatch at (" << i_r << ", " << i_theta << ")";
+        }
     }
 }

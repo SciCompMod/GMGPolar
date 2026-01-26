@@ -36,7 +36,6 @@ TEST_P(ConfigParserTest, ParseAllGeometryAndProblemCombinations)
     const int verbose                          = (params.case_id > 0 ? 0 : 1);
     const bool paraview                        = false;
     const int maxOpenMPThreads                 = 4;
-    const double threadReductionFactor         = 1.0;
     const bool DirBC_Interior                  = false;
     const int stencilDistributionMethod        = params.case_id % 2;
     const bool cacheDensityProfileCoefficients = true;
@@ -93,8 +92,6 @@ TEST_P(ConfigParserTest, ParseAllGeometryAndProblemCombinations)
                                      paraview ? "1" : "0",
                                      "--maxOpenMPThreads",
                                      std::to_string(maxOpenMPThreads),
-                                     "--threadReductionFactor",
-                                     double_to_string(threadReductionFactor),
                                      "--DirBC_Interior",
                                      DirBC_Interior ? "1" : "0",
                                      "--stencilDistributionMethod",
@@ -171,7 +168,6 @@ TEST_P(ConfigParserTest, ParseAllGeometryAndProblemCombinations)
     EXPECT_EQ(parser.verbose(), verbose);
     EXPECT_EQ(parser.paraview(), paraview);
     EXPECT_EQ(parser.maxOpenMPThreads(), maxOpenMPThreads);
-    EXPECT_DOUBLE_EQ(parser.threadReductionFactor(), threadReductionFactor);
     EXPECT_EQ(parser.DirBC_Interior(), DirBC_Interior);
     EXPECT_EQ(parser.stencilDistributionMethod(), static_cast<StencilDistributionMethod>(stencilDistributionMethod));
     EXPECT_EQ(parser.cacheDensityProfileCoefficients(), cacheDensityProfileCoefficients);
