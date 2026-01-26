@@ -15,8 +15,7 @@ int main(int argc, char* argv[])
     const int verbose   = 0;
     const bool paraview = false;
 
-    const int maxOpenMPThreads         = 16;
-    const double threadReductionFactor = 1.0;
+    const int maxOpenMPThreads = 16;
 
     const StencilDistributionMethod stencilDistributionMethod = StencilDistributionMethod::CPU_TAKE;
     const bool cacheDensityProfileCoefficients                = true;
@@ -98,8 +97,6 @@ int main(int argc, char* argv[])
         solver.paraview(paraview);
 
         solver.maxOpenMPThreads(maxOpenMPThreads);
-        solver.threadReductionFactor(threadReductionFactor);
-
         omp_set_num_threads(maxOpenMPThreads); // Global OpenMP thread limit
 
         solver.DirBC_Interior(DirBC_Interior);
@@ -161,7 +158,7 @@ int main(int argc, char* argv[])
     // Print the table rows with data
     for (int i = 0; i < MAX_DIVIDE_BY_2; i++) {
         // Start the row
-        std::cout << std::setw(6) << table_nr[i] << " x " << table_ntheta[i] << std::setw(7.5) << table_iterations[i]
+        std::cout << std::setw(6) << table_nr[i] << " x " << table_ntheta[i] << std::setw(7) << table_iterations[i]
                   << std::setw(9) << table_reduction_factor[i];
 
         // Print ||err||_2/sqrt(m) in scientific notation

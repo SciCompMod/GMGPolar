@@ -2,13 +2,15 @@
 
 #include "../../../include/common/geometry_helper.h"
 
+#include <iterator>
+
 #ifdef GMGPOLAR_USE_MUMPS
 
 /* ----------------------- */
 /* Boundary Symmetry Shift */
 /* ----------------------- */
 
-void DirectSolverGive::applySymmetryShiftInnerBoundary(Vector<double> x) const
+void DirectSolver_COO_MUMPS_Give::applySymmetryShiftInnerBoundary(Vector<double> x) const
 {
     assert(DirBC_Interior_);
 
@@ -65,7 +67,7 @@ void DirectSolverGive::applySymmetryShiftInnerBoundary(Vector<double> x) const
     }
 }
 
-void DirectSolverGive::applySymmetryShiftOuterBoundary(Vector<double> x) const
+void DirectSolver_COO_MUMPS_Give::applySymmetryShiftOuterBoundary(Vector<double> x) const
 {
     int i_r;
     double r;
@@ -121,9 +123,9 @@ void DirectSolverGive::applySymmetryShiftOuterBoundary(Vector<double> x) const
 }
 
 // clang-format off
-void DirectSolverGive::applySymmetryShift(Vector<double> x) const
+void DirectSolver_COO_MUMPS_Give::applySymmetryShift(Vector<double> x) const
 {
-    assert(x.size() == grid_.numberOfNodes());
+    assert(std::ssize(x) == grid_.numberOfNodes());
     assert(grid_.nr() >= 4);
 
     if (num_omp_threads_ == 1) {

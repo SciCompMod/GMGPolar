@@ -52,7 +52,8 @@ void PolarGrid::constructRadialDivisions(double R0, double R, const int nr_exp, 
     // Therefore we first consider 2^(nr_exp-1) points.
     std::vector<double> r_temp;
     if (anisotropic_factor == 0) {
-        int nr                  = pow(2, nr_exp - 1) + 1;
+        // nr = 2**(nr_exp-1) + 1
+        int nr                  = (1 << (nr_exp - 1)) + 1;
         double uniform_distance = (R - R0) / (nr - 1);
         assert(uniform_distance > 0.0);
         r_temp.resize(nr);
@@ -82,11 +83,13 @@ void PolarGrid::constructAngularDivisions(const int ntheta_exp, const int nr)
 {
     if (ntheta_exp < 0) {
         // Choose number of theta divisions similar to radial divisions.
-        ntheta_ = pow(2, ceil(log2(nr)));
-        // ntheta_ = pow(2, ceil(log2(nr-1)));
+        // ntheta_ = 2**ceil(log2(nr))
+        ntheta_ = 1 << static_cast<int>(ceil(log2(nr)));
+        // ntheta_ = 1 << static_cast<int>(ceil(log2(nr-1)));
     }
     else {
-        ntheta_ = pow(2, ntheta_exp);
+        // ntheta_ = 2**ntheta_exp
+        ntheta_ = 1 << ntheta_exp;
     }
     is_ntheta_PowerOfTwo_ = (ntheta_ & (ntheta_ - 1)) == 0;
     // Note that currently ntheta_ = 2^k which allows us to do some optimizations when indexing.
@@ -110,16 +113,16 @@ void PolarGrid::refineGrid(const int divideBy2)
 
 std::vector<double> PolarGrid::divideVector(const std::vector<double>& vec, const int divideBy2) const
 {
-    const double powerOfTwo = 1 << divideBy2;
-    size_t vecSize          = vec.size();
-    size_t resultSize       = vecSize + (vecSize - 1) * (powerOfTwo - 1);
+    const int powerOfTwo = 1 << divideBy2;
+    size_t vecSize       = vec.size();
+    size_t resultSize    = vecSize + (vecSize - 1) * (powerOfTwo - 1);
     std::vector<double> result(resultSize);
 
     for (size_t i = 0; i < vecSize - 1; ++i) {
         size_t baseIndex  = i * powerOfTwo;
         result[baseIndex] = vec[i]; // Add the original value
         for (int j = 1; j < powerOfTwo; ++j) {
-            double interpolated_value = vec[i] + j * (vec[i + 1] - vec[i]) / powerOfTwo;
+            double interpolated_value = vec[i] + j * (vec[i + 1] - vec[i]) / static_cast<double>(powerOfTwo);
             result[baseIndex + j]     = interpolated_value;
         }
     }
@@ -232,143 +235,9 @@ PolarGrid coarseningGrid(const PolarGrid& fineGrid)
     }
 }
 
-// ---------------- //
-// Getter Functions //
-// ---------------- //
-
-const std::vector<double>& PolarGrid::radii() const
-{
-    return radii_;
-}
-const std::vector<double>& PolarGrid::angles() const
-{
-    return angles_;
-}
-
-// Get the radius at which the grid is split into circular and radial smoothing
-double PolarGrid::smootherSplittingRadius() const
-{
-    return smoother_splitting_radius_;
-}
-
-// ------------------------------------- //
-// Definition of node indexing.          //
-// Based on the circular-radial smoother //
-// ------------------------------------- //
-
-/* OPTIMIZED INDEXING IS DEFINED IN include/PolarGrid/polargrid.inl */
-
-int PolarGrid::index(const MultiIndex& position) const
-{
-    assert(position[0] >= 0 && position[0] < nr());
-    assert(position[1] >= 0 && position[1] < ntheta());
-    if (position[0] < numberSmootherCircles()) {
-        return position[1] + ntheta() * position[0];
-    }
-    else {
-        return numberCircularSmootherNodes() +
-               (position[0] - numberSmootherCircles() + lengthSmootherRadial() * position[1]);
-    }
-}
-
-MultiIndex PolarGrid::multiIndex(const int node_index) const
-{
-    assert(0 <= node_index && node_index < numberOfNodes());
-    if (node_index < numberCircularSmootherNodes()) {
-        auto result = std::div(node_index, ntheta());
-        return MultiIndex(result.quot, result.rem);
-    }
-    else {
-        auto result = std::div(node_index - numberCircularSmootherNodes(), lengthSmootherRadial());
-        return MultiIndex(numberSmootherCircles() + result.rem, result.quot);
-    }
-}
-
-Point PolarGrid::polarCoordinates(const MultiIndex& position) const
-{
-    assert(position[0] >= 0 && position[0] < nr());
-    assert(position[1] >= 0 && position[1] < ntheta());
-    return Point(radii_[position[0]], angles_[(position[1])]);
-}
-
-void PolarGrid::adjacentNeighborDistances(
-    const MultiIndex& position, std::array<std::pair<double, double>, space_dimension>& neighbor_distance) const
-{
-    assert(position[0] >= 0 && position[0] < nr());
-    assert(position[1] >= 0 && position[1] < ntheta());
-
-    neighbor_distance[0].first  = (position[0] <= 0) ? 0.0 : radialSpacing(position[0] - 1);
-    neighbor_distance[0].second = (position[0] >= nr() - 1) ? 0.0 : radialSpacing(position[0]);
-
-    neighbor_distance[1].first  = angularSpacing(position[1] - 1);
-    neighbor_distance[1].second = angularSpacing(position[1]);
-}
-
-void PolarGrid::adjacentNeighborsOf(const MultiIndex& position,
-                                    std::array<std::pair<int, int>, space_dimension>& neighbors) const
-{
-    assert(position[0] >= 0 && position[0] < nr());
-    assert(position[1] >= 0 && position[1] < ntheta());
-
-    MultiIndex neigbor_position = position;
-    neigbor_position[0] -= 1;
-    neighbors[0].first = (neigbor_position[0] < 0) ? -1 : index(neigbor_position);
-
-    neigbor_position = position;
-    neigbor_position[0] += 1;
-    neighbors[0].second = (neigbor_position[0] >= nr()) ? -1 : index(neigbor_position);
-
-    neigbor_position = position;
-    neigbor_position[1] -= 1;
-    if (neigbor_position[1] < 0)
-        neigbor_position[1] += ntheta();
-    neighbors[1].first = index(neigbor_position);
-
-    neigbor_position = position;
-    neigbor_position[1] += 1;
-    if (neigbor_position[1] >= ntheta())
-        neigbor_position[1] -= ntheta();
-    neighbors[1].second = index(neigbor_position);
-}
-
-void PolarGrid::diagonalNeighborsOf(const MultiIndex& position,
-                                    std::array<std::pair<int, int>, space_dimension>& neighbors) const
-{
-    assert(position[0] >= 0 && position[0] < nr());
-    assert(position[1] >= 0 && position[1] < ntheta());
-
-    MultiIndex neigbor_position = position;
-    neigbor_position[0] -= 1;
-    neigbor_position[1] -= 1;
-    if (neigbor_position[1] < 0)
-        neigbor_position[1] += ntheta();
-    neighbors[0].first = (neigbor_position[0] < 0) ? -1 : index(neigbor_position);
-
-    neigbor_position = position;
-    neigbor_position[0] += 1;
-    neigbor_position[1] -= 1;
-    if (neigbor_position[1] < 0)
-        neigbor_position[1] += ntheta();
-    neighbors[0].second = (neigbor_position[0] >= nr()) ? -1 : index(neigbor_position);
-
-    neigbor_position = position;
-    neigbor_position[0] -= 1;
-    neigbor_position[1] += 1;
-    if (neigbor_position[1] >= ntheta())
-        neigbor_position[1] -= ntheta();
-    neighbors[1].first = (neigbor_position[0] < 0) ? -1 : index(neigbor_position);
-
-    neigbor_position = position;
-    neigbor_position[0] += 1;
-    neigbor_position[1] += 1;
-    if (neigbor_position[1] >= ntheta())
-        neigbor_position[1] -= ntheta();
-    neighbors[1].second = (neigbor_position[0] >= nr()) ? -1 : index(neigbor_position);
-}
-
 // ------------------------ //
 // Check parameter validity //
-// ---------------------..- //
+// ------------------------ //
 
 void PolarGrid::checkParameters(const std::vector<double>& radii, const std::vector<double>& angles) const
 {

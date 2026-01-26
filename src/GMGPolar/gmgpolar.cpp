@@ -12,7 +12,6 @@ IGMGPolar::IGMGPolar(const PolarGrid& grid, const DensityProfileCoefficients& de
     , paraview_(false)
     // Parallelization and threading settings
     , max_omp_threads_(omp_get_max_threads())
-    , thread_reduction_factor_(1.0)
     // Numerical method setup
     , DirBC_Interior_(true)
     , stencil_distribution_method_(StencilDistributionMethod::CPU_GIVE)
@@ -72,7 +71,7 @@ void IGMGPolar::paraview(bool paraview)
 }
 
 /* ---------------------------------------------------------------------- */
-/* Parallelization & threading                                            */
+/* Parallelization                                                        */
 /* ---------------------------------------------------------------------- */
 int IGMGPolar::maxOpenMPThreads() const
 {
@@ -81,15 +80,6 @@ int IGMGPolar::maxOpenMPThreads() const
 void IGMGPolar::maxOpenMPThreads(int max_omp_threads)
 {
     max_omp_threads_ = max_omp_threads;
-}
-
-double IGMGPolar::threadReductionFactor() const
-{
-    return thread_reduction_factor_;
-}
-void IGMGPolar::threadReductionFactor(double thread_reduction_factor)
-{
-    thread_reduction_factor_ = thread_reduction_factor;
 }
 
 /* ---------------------------------------------------------------------- */

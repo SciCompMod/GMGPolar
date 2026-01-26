@@ -6,7 +6,6 @@ ConfigParser::ConfigParser()
     parser_.add<int>("verbose", '\0', "Verbosity level.", OPTIONAL, 1);
     parser_.add<int>("paraview", '\0', "Generate ParaView output (0/1).", OPTIONAL, 0);
     parser_.add<int>("maxOpenMPThreads", '\0', "Max OpenMP threads.", OPTIONAL, 1);
-    parser_.add<double>("threadReductionFactor", '\0', "Thread reduction factor.", OPTIONAL, 1.0);
     parser_.add<int>("DirBC_Interior", '\0', "Interior BC type (0=Across-origin, 1=Dirichlet).", OPTIONAL, 0,
                      cmdline::oneof(0, 1));
     parser_.add<int>("stencilDistributionMethod", '\0', "Stencil distribution (0=CPU_Take,1=CPU_Give)", OPTIONAL, 0,
@@ -72,12 +71,11 @@ bool ConfigParser::parse(int argc, char* argv[])
     }
 
     // Parse general parameters from command-line arguments
-    verbose_                 = parser_.get<int>("verbose");
-    paraview_                = parser_.get<int>("paraview") != 0;
-    max_omp_threads_         = parser_.get<int>("maxOpenMPThreads");
-    thread_reduction_factor_ = parser_.get<double>("threadReductionFactor");
-    DirBC_Interior_          = parser_.get<int>("DirBC_Interior") != 0;
-    const int methodValue    = parser_.get<int>("stencilDistributionMethod");
+    verbose_              = parser_.get<int>("verbose");
+    paraview_             = parser_.get<int>("paraview") != 0;
+    max_omp_threads_      = parser_.get<int>("maxOpenMPThreads");
+    DirBC_Interior_       = parser_.get<int>("DirBC_Interior") != 0;
+    const int methodValue = parser_.get<int>("stencilDistributionMethod");
     if (methodValue == static_cast<int>(StencilDistributionMethod::CPU_TAKE) ||
         methodValue == static_cast<int>(StencilDistributionMethod::CPU_GIVE)) {
         stencil_distribution_method_ = static_cast<StencilDistributionMethod>(methodValue);
@@ -91,7 +89,7 @@ bool ConfigParser::parse(int argc, char* argv[])
     // Parse grid parameters from command-line arguments
     double R0              = parser_.get<double>("R0");
     double Rmax            = parser_.get<double>("Rmax");
-    double nr_exp          = parser_.get<int>("nr_exp");
+    int nr_exp             = parser_.get<int>("nr_exp");
     int ntheta_exp         = parser_.get<int>("ntheta_exp");
     int anisotropic_factor = parser_.get<int>("anisotropic_factor");
     int divideBy2          = parser_.get<int>("divideBy2");
@@ -294,10 +292,6 @@ bool ConfigParser::paraview() const
 int ConfigParser::maxOpenMPThreads() const
 {
     return max_omp_threads_;
-}
-double ConfigParser::threadReductionFactor() const
-{
-    return thread_reduction_factor_;
 }
 
 bool ConfigParser::DirBC_Interior() const

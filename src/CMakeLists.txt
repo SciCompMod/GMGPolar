@@ -1,15 +1,19 @@
 cmake_minimum_required(VERSION 3.12)
 
+if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE STREQUAL "Release")
+    # If using GNU increase maximum number of instructions considered for inlining
+    # in Release mode in this folder and sub-folders
+    add_compile_options(--param max-inline-insns-single=1500)
+endif()
+
 # Add subdirectories for components
 add_subdirectory(InputFunctions)
 
 # Gather all source files
 # file(GLOB_RECURSE POLAR_GRID_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/*.cpp)
 set(POLAR_GRID_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/anisotropic_division.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/multiindex.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/point.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/polargrid.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/anisotropic_division.cpp
 )
 
 # file(GLOB_RECURSE GMG_POLAR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/*.cpp)

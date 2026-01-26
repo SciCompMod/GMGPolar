@@ -1,140 +1,64 @@
 #include <gtest/gtest.h>
-
 #include <random>
+
+#include "../test_tools.h"
 
 #include "../../include/GMGPolar/gmgpolar.h"
 #include "../../include/Interpolation/interpolation.h"
-#include "../../include/InputFunctions/domainGeometry.h"
-#include "../../include/InputFunctions/densityProfileCoefficients.h"
-
-#include "../../include/InputFunctions/DomainGeometry/circularGeometry.h"
 #include "../../include/InputFunctions/DensityProfileCoefficients/poissonCoefficients.h"
 
-namespace ExtrapolatedRestrictionTest
+// Helper that computes the mathematically expected extrapolated restriction value
+static double expected_extrapolated_restriction_value(const PolarGrid& fine, const PolarGrid& coarse,
+                                                      ConstVector<double> fine_vals, int i_r_coarse, int i_theta_coarse)
 {
-// Function to generate sample data for vector x using random values with seed
-Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed)
-{
-    Vector<double> vector("vector", grid.numberOfNodes());
-    std::mt19937 gen(seed); // Standard mersenne_twister_engine seeded with seed
-    std::uniform_real_distribution<double> dist(0.0, 1.0); // Generate random double between 0 and 1
-    for (uint i = 0; i < vector.size(); ++i) {
-        vector[i] = dist(gen);
+    int i_r     = i_r_coarse * 2;
+    int i_theta = i_theta_coarse * 2;
+
+    // Angular indices with periodic wrapping
+    int i_theta_M1 = fine.wrapThetaIndex(i_theta - 1);
+    int i_theta_P1 = fine.wrapThetaIndex(i_theta + 1);
+
+    // Center + Angular contributions (always present)
+    double value = fine_vals[fine.index(i_r, i_theta)] + 0.5 * fine_vals[fine.index(i_r, i_theta_M1)] +
+                   0.5 * fine_vals[fine.index(i_r, i_theta_P1)];
+
+    // Left contributions (if not at inner boundary)
+    if (i_r_coarse > 0) {
+        value += 0.5 * fine_vals[fine.index(i_r - 1, i_theta)] +
+                 0.5 * fine_vals[fine.index(i_r - 1, i_theta_P1)]; // Top-Left diagonal
     }
-    return vector;
+
+    // Right contributions (if not at outer boundary)
+    if (i_r_coarse < coarse.nr() - 1) {
+        value += 0.5 * fine_vals[fine.index(i_r + 1, i_theta)] +
+                 0.5 * fine_vals[fine.index(i_r + 1, i_theta_M1)]; // Bottom-Right diagonal
+    }
+
+    return value;
 }
 
-/* In src/Interpolation/restriction.cpp the Restriction Operator is implemented with "Take". */
-/* Here we test against the "Give" version. */
-
-void applyExtrapolatedRestrictionGive0(const PolarGrid& fine_grid, const PolarGrid& coarse_grid,
-                                       Vector<double> coarse_result, ConstVector<double> fine_values)
-{
-    assert(fine_values.size() == static_cast<uint>(fine_grid.numberOfNodes()));
-    assert(coarse_result.size() == static_cast<uint>(coarse_grid.numberOfNodes()));
-
-    assign(coarse_result, 0.0);
-
-    for (int index = 0; index < fine_grid.numberOfNodes(); index++) {
-        std::array<std::pair<double, double>, space_dimension> neighbor_distance;
-        std::array<std::pair<int, int>, space_dimension> neighbors;
-
-        MultiIndex fine_node = fine_grid.multiIndex(index);
-
-        // Fine node appears in coarse grid
-        if (fine_node[0] % 2 == 0 && fine_node[1] % 2 == 0) {
-            // Input x needs a fine grid index: fine_values[FINE_INDEX]
-            // Result needs a coarse grid index: coarse_result[COARSE_INDEX]
-            MultiIndex coarse_node(fine_node[0] / 2, fine_node[1] / 2);
-            coarse_result[coarse_grid.index(coarse_node)] += fine_values[index];
-        }
-
-        // Fine node between coarse nodes in theta direction
-        if (fine_node[0] % 2 == 0 && fine_node[1] % 2 == 1) {
-            fine_grid.adjacentNeighborDistances(fine_node, neighbor_distance);
-            double k1 = neighbor_distance[1].first;
-            double k2 = neighbor_distance[1].second;
-
-            fine_grid.adjacentNeighborsOf(fine_node, neighbors);
-
-            MultiIndex bottom_coarse_node(fine_node[0] / 2, fine_node[1] / 2);
-            MultiIndex top_coarse_node(fine_node[0] / 2, (fine_node[1] / 2 + 1) % coarse_grid.ntheta());
-
-            coarse_result[coarse_grid.index(bottom_coarse_node)] += fine_values[index] / 2.0;
-            coarse_result[coarse_grid.index(top_coarse_node)] += fine_values[index] / 2.0;
-        }
-
-        // Fine node between coarse nodes in radial direction
-        if (fine_node[0] % 2 == 1 && fine_node[1] % 2 == 0) {
-            fine_grid.adjacentNeighborDistances(fine_node, neighbor_distance);
-            double h1 = neighbor_distance[0].first;
-            double h2 = neighbor_distance[0].second;
-
-            fine_grid.adjacentNeighborsOf(fine_node, neighbors);
-
-            MultiIndex left_coarse_node(fine_node[0] / 2, fine_node[1] / 2);
-            MultiIndex right_coarse_node(fine_node[0] / 2 + 1, fine_node[1] / 2);
-
-            coarse_result[coarse_grid.index(left_coarse_node)] += fine_values[index] / 2.0;
-            coarse_result[coarse_grid.index(right_coarse_node)] += fine_values[index] / 2.0;
-        }
-
-        //Fine node in the center of four coarse nodes
-        if (fine_node[0] % 2 == 1 && fine_node[1] % 2 == 1) {
-
-            fine_grid.adjacentNeighborDistances(fine_node, neighbor_distance);
-            double h1 = neighbor_distance[0].first;
-            double h2 = neighbor_distance[0].second;
-            double k1 = neighbor_distance[1].first;
-            double k2 = neighbor_distance[1].second;
-
-            fine_grid.adjacentNeighborsOf(fine_node, neighbors);
-
-            MultiIndex bottom_right_coarse_node(fine_node[0] / 2 + 1, fine_node[1] / 2);
-            MultiIndex top_left_coarse_node(fine_node[0] / 2, (fine_node[1] / 2 + 1) % coarse_grid.ntheta());
-
-            coarse_result[coarse_grid.index(bottom_right_coarse_node)] += fine_values[index] / 2.0;
-            coarse_result[coarse_grid.index(top_left_coarse_node)] += fine_values[index] / 2.0;
-        }
-    }
-}
-} // namespace ExtrapolatedRestrictionTest
-
-using namespace ExtrapolatedRestrictionTest;
-
-TEST(ExtrapolatedRestrictionTest, applyExtrapolatedRestriction)
+TEST(ExtrapolatedRestrictionTest, ExtrapolatedRestrictionMatchesStencil)
 {
     std::vector<double> fine_radii  = {0.1, 0.2, 0.25, 0.5, 0.8, 0.9, 1.3, 1.4, 2.0};
     std::vector<double> fine_angles = {
-        0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
+        0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, 2 * M_PI};
 
-    int maxOpenMPThreads = 16;
-    bool DirBC_Interior  = true;
+    PolarGrid fine_grid(fine_radii, fine_angles);
+    PolarGrid coarse_grid = coarseningGrid(fine_grid);
 
-    PolarGrid finest_grid(fine_radii, fine_angles);
-    PolarGrid coarse_grid = coarseningGrid(finest_grid);
+    Interpolation I(/*threads*/ 16, /*DirBC*/ true);
 
-    Interpolation interpolation_operator(maxOpenMPThreads, DirBC_Interior);
+    Vector<double> fine_values = generate_random_sample_data(fine_grid, 9012, 0.0, 1.0);
+    Vector<double> coarse_result("coarse_result", coarse_grid.numberOfNodes());
 
-    unsigned int seed = 42;
-    Vector<double> x  = generate_random_sample_data(finest_grid, seed);
+    I.applyExtrapolatedRestriction(fine_grid, coarse_grid, coarse_result, fine_values);
 
-    // Apply prolongation to both functions
-    Vector<double> result1("result1", coarse_grid.numberOfNodes());
-    Vector<double> result2("result2", coarse_grid.numberOfNodes());
-    Vector<double> result3("result3", coarse_grid.numberOfNodes());
-
-    interpolation_operator.applyExtrapolatedRestriction0(finest_grid, coarse_grid, result1, x);
-    interpolation_operator.applyExtrapolatedRestriction(finest_grid, coarse_grid, result2, x);
-
-    applyExtrapolatedRestrictionGive0(finest_grid, coarse_grid, result3, x);
-
-    ASSERT_EQ(result1.size(), result2.size());
-    for (uint i = 0; i < result1.size(); ++i) {
-        ASSERT_DOUBLE_EQ(result1[i], result2[i]);
-    }
-    ASSERT_EQ(result2.size(), result3.size());
-    for (uint i = 0; i < result2.size(); ++i) {
-        ASSERT_DOUBLE_EQ(result2[i], result3[i]);
+    for (int i_r_coarse = 0; i_r_coarse < coarse_grid.nr(); ++i_r_coarse) {
+        for (int i_theta_coarse = 0; i_theta_coarse < coarse_grid.ntheta(); ++i_theta_coarse) {
+            double expected = expected_extrapolated_restriction_value(fine_grid, coarse_grid, fine_values, i_r_coarse,
+                                                                      i_theta_coarse);
+            double got      = coarse_result[coarse_grid.index(i_r_coarse, i_theta_coarse)];
+            ASSERT_NEAR(expected, got, 1e-10) << "Mismatch at (" << i_r_coarse << ", " << i_theta_coarse << ")";
+        }
     }
 }

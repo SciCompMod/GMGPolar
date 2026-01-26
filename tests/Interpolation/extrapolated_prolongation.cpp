@@ -1,58 +1,65 @@
 #include <gtest/gtest.h>
-
 #include <random>
+
+#include "../test_tools.h"
 
 #include "../../include/GMGPolar/gmgpolar.h"
 #include "../../include/Interpolation/interpolation.h"
-#include "../../include/InputFunctions/domainGeometry.h"
-#include "../../include/InputFunctions/densityProfileCoefficients.h"
-
-#include "../../include/InputFunctions/DomainGeometry/circularGeometry.h"
 #include "../../include/InputFunctions/DensityProfileCoefficients/poissonCoefficients.h"
 
-namespace ExtrapolatedProlongationTest
+// Helper that computes the mathematically expected extrapolated prolongation value
+static double expected_extrapolated_value(const PolarGrid& coarse, const PolarGrid& fine,
+                                          ConstVector<double> coarse_vals, int i_r, int i_theta)
 {
-// Function to generate sample data for vector x using random values with seed
-Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed)
-{
-    Vector<double> vector("vector", grid.numberOfNodes());
-    std::mt19937 gen(seed); // Standard mersenne_twister_engine seeded with seed
-    std::uniform_real_distribution<double> dist(0.0, 1.0); // Generate random double between 0 and 1
-    for (uint i = 0; i < vector.size(); ++i) {
-        vector[i] = dist(gen);
+    int i_r_coarse     = i_r / 2;
+    int i_theta_coarse = i_theta / 2;
+
+    bool r_even = (i_r % 2 == 0);
+    bool t_even = (i_theta % 2 == 0);
+
+    if (r_even && t_even) {
+        // Node coincides with a coarse node
+        return coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)];
     }
-    return vector;
+
+    if (!r_even && t_even) {
+        // Radial midpoint - arithmetic mean of left and right
+        return 0.5 * (coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)] +
+                      coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse)]);
+    }
+
+    if (r_even && !t_even) {
+        // Angular midpoint - arithmetic mean of bottom and top
+        return 0.5 * (coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)] +
+                      coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)]);
+    }
+
+    // Center of coarse cell - arithmetic mean of diagonal nodes (bottom-right + top-left)
+    return 0.5 * (coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse)] +
+                  coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)]);
 }
-} // namespace ExtrapolatedProlongationTest
 
-using namespace ExtrapolatedProlongationTest;
-
-TEST(ExtrapolatedProlongationTest, ExtrapolatedProlongationSmoothingRadius)
+TEST(ExtrapolatedProlongationTest, ExtrapolatedProlongationMatchesStencil)
 {
     std::vector<double> fine_radii  = {0.1, 0.2, 0.25, 0.5, 0.8, 0.9, 1.3, 1.4, 2.0};
     std::vector<double> fine_angles = {
-        0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
+        0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, 2 * M_PI};
 
-    int maxOpenMPThreads = 16;
-    bool DirBC_Interior  = true;
+    PolarGrid fine_grid(fine_radii, fine_angles);
+    PolarGrid coarse_grid = coarseningGrid(fine_grid);
 
-    PolarGrid finest_grid(fine_radii, fine_angles);
-    PolarGrid coarse_grid = coarseningGrid(finest_grid);
+    Interpolation I(/*threads*/ 16, /*DirBC*/ true);
 
-    Interpolation interpolation_operator(maxOpenMPThreads, DirBC_Interior);
+    Vector<double> coarse_values = generate_random_sample_data(coarse_grid, 1234, 0.0, 1.0);
+    Vector<double> fine_result("fine_result", fine_grid.numberOfNodes());
 
-    unsigned int seed = 42;
-    Vector<double> x  = generate_random_sample_data(coarse_grid, seed);
+    I.applyExtrapolatedProlongation(coarse_grid, fine_grid, fine_result, coarse_values);
 
-    // Apply prolongation to both functions
-    Vector<double> result1("result1", finest_grid.numberOfNodes());
-    Vector<double> result2("result2", finest_grid.numberOfNodes());
-
-    interpolation_operator.applyExtrapolatedProlongation0(coarse_grid, finest_grid, result1, x);
-    interpolation_operator.applyExtrapolatedProlongation(coarse_grid, finest_grid, result2, x);
-
-    ASSERT_EQ(result1.size(), result2.size());
-    for (uint i = 0; i < result1.size(); ++i) {
-        ASSERT_DOUBLE_EQ(result1[i], result2[i]);
+    for (int i_r = 0; i_r < fine_grid.nr(); ++i_r) {
+        for (int i_theta = 0; i_theta < fine_grid.ntheta(); ++i_theta) {
+            double expected = expected_extrapolated_value(coarse_grid, fine_grid, coarse_values, i_r, i_theta);
+            double got      = fine_result[fine_grid.index(i_r, i_theta)];
+            ASSERT_NEAR(expected, got, 1e-10) << "Mismatch at (" << i_r << ", " << i_theta << ")";
+        }
     }
 }

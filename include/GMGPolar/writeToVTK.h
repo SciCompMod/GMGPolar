@@ -66,7 +66,7 @@ void GMGPolar<DomainGeometry>::writeToVTK(const std::filesystem::path& file_path
     const PolarGrid& grid         = level.grid();
     const LevelCache& level_cache = level.levelCache();
 
-    assert(static_cast<uint>(grid.numberOfNodes()) == grid_function.size());
+    assert(std::ssize(grid_function) == grid.numberOfNodes());
 
     const auto filename = file_path.stem().string() + ".vtu";
 

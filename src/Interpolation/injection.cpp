@@ -5,8 +5,8 @@
 void Interpolation::applyInjection(const PolarGrid& fine_grid, const PolarGrid& coarse_grid,
                                    Vector<double> coarse_result, ConstVector<double> fine_values) const
 {
-    assert(fine_values.size() == static_cast<uint>(fine_grid.numberOfNodes()));
-    assert(coarse_result.size() == static_cast<uint>(coarse_grid.numberOfNodes()));
+    assert(std::ssize(fine_values) == fine_grid.numberOfNodes());
+    assert(std::ssize(coarse_result) == coarse_grid.numberOfNodes());
 
 #pragma omp parallel num_threads(max_omp_threads_)
     {

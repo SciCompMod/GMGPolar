@@ -3,6 +3,8 @@
 #include <vector>
 #include <random>
 
+#include "../test_tools.h"
+
 #include "../../include/GMGPolar/gmgpolar.h"
 
 #include "../../include/Residual/ResidualGive/residualGive.h"
@@ -19,22 +21,6 @@
 #include "../include/InputFunctions/BoundaryConditions/polarR6_Boundary_CzarnyGeometry.h"
 #include "../include/InputFunctions/DensityProfileCoefficients/zoniShiftedCoefficients.h"
 #include "../include/InputFunctions/SourceTerms/polarR6_ZoniShifted_CzarnyGeometry.h"
-
-namespace ResidualTest
-{
-Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed)
-{
-    Vector<double> x("x", grid.numberOfNodes());
-    std::mt19937 gen(seed);
-    std::uniform_real_distribution<double> dist(-100.0, 100.0);
-    for (uint i = 0; i < x.size(); ++i) {
-        x(i) = dist(gen);
-    }
-    return x;
-}
-} // namespace ResidualTest
-
-using namespace ResidualTest;
 
 /* Test 1/1: */
 /* Does the Take and Give Implementation match up? */
@@ -87,8 +73,9 @@ TEST(OperatorATest, applyA_DirBC_Interior)
 
     ASSERT_EQ(result_Give.size(), result_Take.size());
     for (uint index = 0; index < result_Give.size(); index++) {
-        MultiIndex alpha = level.grid().multiIndex(index);
-        if (alpha[0] == 0 && !DirBC_Interior)
+        int i_r, i_theta;
+        level.grid().multiIndex(index, i_r, i_theta);
+        if (i_r == 0 && !DirBC_Interior)
             ASSERT_NEAR(result_Give[index], result_Take[index], 1e-8);
         else
             ASSERT_NEAR(result_Give[index], result_Take[index], 1e-11);
@@ -143,8 +130,9 @@ TEST(OperatorATest, applyA_AcrossOrigin)
 
     ASSERT_EQ(result_Give.size(), result_Take.size());
     for (uint index = 0; index < result_Give.size(); index++) {
-        MultiIndex alpha = level.grid().multiIndex(index);
-        if (alpha[0] == 0 && !DirBC_Interior)
+        int i_r, i_theta;
+        level.grid().multiIndex(index, i_r, i_theta);
+        if (i_r == 0 && !DirBC_Interior)
             ASSERT_NEAR(result_Give[index], result_Take[index], 1e-8);
         else
             ASSERT_NEAR(result_Give[index], result_Take[index], 1e-11);

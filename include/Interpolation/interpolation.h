@@ -23,22 +23,16 @@ public:
                         ConstVector<double> fine_values) const;
 
     /* Bilinear interpolation operator */
-    void applyProlongation0(const PolarGrid& coarse_grid, const PolarGrid& fine_grid, Vector<double> fine_result,
-                            ConstVector<double> coarse_values) const;
     void applyProlongation(const PolarGrid& coarse_grid, const PolarGrid& fine_grid, Vector<double> fine_result,
                            ConstVector<double> coarse_values) const;
-    void applyExtrapolatedProlongation0(const PolarGrid& coarse_grid, const PolarGrid& fine_grid,
-                                        Vector<double> fine_result, ConstVector<double> coarse_values) const;
+
     void applyExtrapolatedProlongation(const PolarGrid& coarse_grid, const PolarGrid& fine_grid,
                                        Vector<double> fine_result, ConstVector<double> coarse_values) const;
 
     /* Scaled full weighting (FW) restriction operator. */
-    void applyRestriction0(const PolarGrid& fine_grid, const PolarGrid& coarse_grid, Vector<double> coarse_result,
-                           ConstVector<double> fine_values) const;
     void applyRestriction(const PolarGrid& fine_grid, const PolarGrid& coarse_grid, Vector<double> coarse_result,
                           ConstVector<double> fine_values) const;
-    void applyExtrapolatedRestriction0(const PolarGrid& fine_grid, const PolarGrid& coarse_grid,
-                                       Vector<double> coarse_result, ConstVector<double> fine_values) const;
+
     void applyExtrapolatedRestriction(const PolarGrid& fine_grid, const PolarGrid& coarse_grid,
                                       Vector<double> coarse_result, ConstVector<double> fine_values) const;
 

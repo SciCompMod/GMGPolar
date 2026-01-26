@@ -50,15 +50,11 @@ public:
     void paraview(bool paraview);
 
     /* ---------------------------------------------------------------------- */
-    /* Parallelization & threading                                            */
+    /* Parallelization                                                        */
     /* ---------------------------------------------------------------------- */
     // Maximum number of OpenMP threads to use.
     int maxOpenMPThreads() const;
     void maxOpenMPThreads(int max_omp_threads);
-
-    // Thread reduction factor on coarser grids (e.g., 0.5 halves threads each level).
-    double threadReductionFactor() const;
-    void threadReductionFactor(double thread_reduction_factor);
 
     /* ---------------------------------------------------------------------- */
     /* Numerical method options                                               */
@@ -205,7 +201,6 @@ protected:
     bool paraview_;
     // Parallelization and threading settings
     int max_omp_threads_;
-    double thread_reduction_factor_;
     // Numerical method setup
     bool DirBC_Interior_;
     StencilDistributionMethod stencil_distribution_method_;
@@ -231,7 +226,6 @@ protected:
     /* Multigrid levels */
     int number_of_levels_;
     std::vector<Level> levels_;
-    std::vector<int> threads_per_level_;
 
     /* ---------------------- */
     /* Interpolation operator */
