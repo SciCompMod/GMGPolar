@@ -1,15 +1,18 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR2_SonnendruckerGyro_ShafranovGeometry.h"
 
 CartesianR2_SonnendruckerGyro_ShafranovGeometry::CartesianR2_SonnendruckerGyro_ShafranovGeometry(
-    double Rmax, double elongation_kappa, double shift_delta)
-    : Rmax(Rmax)
+    PolarGrid const& grid, double Rmax, double elongation_kappa, double shift_delta)
+    : grid_(grid)
+    , Rmax(Rmax)
     , elongation_kappa(elongation_kappa)
     , shift_delta(shift_delta)
 {
 }
 
-double CartesianR2_SonnendruckerGyro_ShafranovGeometry::rhs_f(double r, double theta) const
+double CartesianR2_SonnendruckerGyro_ShafranovGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
 {
+    double r         = grid_.radius(i_r);
+    double theta     = grid_.theta(i_theta);
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
     return (1.0 - (r / Rmax) * (r / Rmax)) *

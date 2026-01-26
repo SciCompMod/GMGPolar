@@ -529,7 +529,7 @@ void run_gmgpolar()
     typename TestFixture::DensityProfileCoefficients profile_coefficients(TestFixture::Rmax, 0.0);
     typename TestFixture::BoundaryConditions boundary_conditions(TestFixture::Rmax, inverse_aspect_ratio_epsilon,
                                                                  ellipticity_e);
-    typename TestFixture::SourceTerm source_term(TestFixture::Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
+    typename TestFixture::SourceTerm source_term(grid, TestFixture::Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
     typename TestFixture::ExactSolution exact_solution(TestFixture::Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
 
     GMGPolar solver(grid, domain, profile_coefficients);

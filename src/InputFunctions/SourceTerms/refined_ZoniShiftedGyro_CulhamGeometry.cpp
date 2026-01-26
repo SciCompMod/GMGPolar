@@ -1,12 +1,15 @@
 #include "../include/InputFunctions/SourceTerms/refined_ZoniShiftedGyro_CulhamGeometry.h"
 
-Refined_ZoniShiftedGyro_CulhamGeometry::Refined_ZoniShiftedGyro_CulhamGeometry(double Rmax)
-    : Rmax(Rmax)
+Refined_ZoniShiftedGyro_CulhamGeometry::Refined_ZoniShiftedGyro_CulhamGeometry(PolarGrid const& grid, double Rmax)
+    : grid_(grid)
+    , Rmax(Rmax)
 {
 }
 
-double Refined_ZoniShiftedGyro_CulhamGeometry::rhs_f(double r, double theta) const
+double Refined_ZoniShiftedGyro_CulhamGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
 {
+    double r         = grid_.radius(i_r);
+    double theta     = grid_.theta(i_theta);
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
     return ((-3.33823779536505e-15) * ((r / Rmax) * (r / Rmax)) - 0.0 * (r / Rmax) - 0.0 +

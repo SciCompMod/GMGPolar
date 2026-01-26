@@ -1,12 +1,16 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR2_SonnendruckerGyro_CircularGeometry.h"
 
-CartesianR2_SonnendruckerGyro_CircularGeometry::CartesianR2_SonnendruckerGyro_CircularGeometry(double Rmax)
-    : Rmax(Rmax)
+CartesianR2_SonnendruckerGyro_CircularGeometry::CartesianR2_SonnendruckerGyro_CircularGeometry(PolarGrid const& grid,
+                                                                                               double Rmax)
+    : grid_(grid)
+    , Rmax(Rmax)
 {
 }
 
-double CartesianR2_SonnendruckerGyro_CircularGeometry::rhs_f(double r, double theta) const
+double CartesianR2_SonnendruckerGyro_CircularGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
 {
+    double r         = grid_.radius(i_r);
+    double theta     = grid_.theta(i_theta);
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
     return (1.0 - (r / Rmax) * (r / Rmax)) * sin(2.0 * M_PI * (r / Rmax) * sin_theta) *
