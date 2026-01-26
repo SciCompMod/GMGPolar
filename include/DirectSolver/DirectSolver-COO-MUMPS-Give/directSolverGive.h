@@ -7,15 +7,15 @@
     #include "dmumps_c.h"
     #include "mpi.h"
 
-class DirectSolverGive : public DirectSolver
+class DirectSolver_COO_MUMPS_Give : public DirectSolver
 {
 public:
-    explicit DirectSolverGive(const PolarGrid& grid, const LevelCache& level_cache,
-                              const DomainGeometry& domain_geometry,
-                              const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior,
-                              int num_omp_threads);
+    explicit DirectSolver_COO_MUMPS_Give(const PolarGrid& grid, const LevelCache& level_cache,
+                                         const DomainGeometry& domain_geometry,
+                                         const DensityProfileCoefficients& density_profile_coefficients,
+                                         bool DirBC_Interior, int num_omp_threads);
 
-    ~DirectSolverGive() override;
+    ~DirectSolver_COO_MUMPS_Give() override;
     // Note: The rhs (right-hand side) vector gets overwritten during the solution process.
     void solveInPlace(Vector<double> solution) override;
 

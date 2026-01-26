@@ -2,7 +2,8 @@
 
 #ifdef GMGPOLAR_USE_MUMPS
 
-void DirectSolverTake::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, SparseMatrixCOO<double>& solver_matrix)
+void DirectSolver_COO_MUMPS_Take::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver,
+                                                        SparseMatrixCOO<double>& solver_matrix)
 {
     /* 
      * MUMPS (a parallel direct solver) uses 1-based indexing, 
@@ -67,7 +68,7 @@ void DirectSolverTake::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, Spars
     ICNTL(mumps_solver, 38) = 600; // Estimates compression rate of LU factors
     ICNTL(mumps_solver, 39) = 500; // Estimates compression rate of contribution blocks
     // ICNTL(40-47) Don't exist
-    ICNTL(mumps_solver, 48) = 1; // Multithreading with tree parallelism
+    ICNTL(mumps_solver, 48) = 0; // Multithreading with tree parallelism
     ICNTL(mumps_solver, 49) = 0; // Compact workarray id%S at the end of factorization phase
     // ICNTL(50-55) Don't exist
     ICNTL(mumps_solver, 56) =
@@ -102,7 +103,7 @@ void DirectSolverTake::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, Spars
     }
 }
 
-void DirectSolverTake::solveWithMumps(Vector<double> result_rhs)
+void DirectSolver_COO_MUMPS_Take::solveWithMumps(Vector<double> result_rhs)
 {
     mumps_solver_.job    = JOB_COMPUTE_SOLUTION;
     mumps_solver_.nrhs   = 1;
@@ -115,7 +116,7 @@ void DirectSolverTake::solveWithMumps(Vector<double> result_rhs)
     }
 }
 
-void DirectSolverTake::finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver)
+void DirectSolver_COO_MUMPS_Take::finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver)
 {
     mumps_solver.job = JOB_END;
     dmumps_c(&mumps_solver);

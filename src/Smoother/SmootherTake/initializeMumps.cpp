@@ -67,7 +67,7 @@ void SmootherTake::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, SparseMat
     ICNTL(mumps_solver, 38) = 600; // Estimates compression rate of LU factors
     ICNTL(mumps_solver, 39) = 500; // Estimates compression rate of contribution blocks
     // ICNTL(40-47) Don't exist
-    ICNTL(mumps_solver, 48) = 1; // Multithreading with tree parallelism
+    ICNTL(mumps_solver, 48) = 0; // Multithreading with tree parallelism
     ICNTL(mumps_solver, 49) = 0; // Compact workarray id%S at the end of factorization phase
     // ICNTL(50-55) Don't exist
     ICNTL(mumps_solver, 56) =

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iterator>
+
 #include "polargrid.h"
 
 inline int PolarGrid::nr() const
@@ -18,13 +20,13 @@ inline int PolarGrid::numberOfNodes() const
 
 inline double PolarGrid::radius(const int r_index) const
 {
-    assert(r_index >= 0 && static_cast<size_t>(r_index) < radii_.size());
+    assert(r_index >= 0 && r_index < std::ssize(radii_));
     return radii_[r_index];
 }
 
 inline double PolarGrid::theta(const int theta_index) const
 {
-    assert(theta_index >= 0 && static_cast<size_t>(theta_index) < angles_.size());
+    assert(theta_index >= 0 && theta_index < std::ssize(angles_));
     return angles_[theta_index];
 }
 
@@ -57,7 +59,7 @@ inline int PolarGrid::numberRadialSmootherNodes() const
 
 inline double PolarGrid::radialSpacing(const int r_index) const
 {
-    assert(r_index >= 0 && static_cast<size_t>(r_index) < radial_spacings_.size());
+    assert(r_index >= 0 && r_index < std::ssize(radial_spacings_));
     return radial_spacings_[r_index];
 }
 

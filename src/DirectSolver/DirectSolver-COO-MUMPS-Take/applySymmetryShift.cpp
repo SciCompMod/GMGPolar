@@ -1,12 +1,14 @@
 #include "../../../include/DirectSolver/DirectSolver-COO-MUMPS-Take/directSolverTake.h"
 
+#include <iterator>
+
 #ifdef GMGPOLAR_USE_MUMPS
 
 /* ----------------------- */
 /* Boundary Symmetry Shift */
 /* ----------------------- */
 
-void DirectSolverTake::applySymmetryShiftInnerBoundary(Vector<double> x) const
+void DirectSolver_COO_MUMPS_Take::applySymmetryShiftInnerBoundary(Vector<double> x) const
 {
     assert(DirBC_Interior_);
 
@@ -43,7 +45,7 @@ void DirectSolverTake::applySymmetryShiftInnerBoundary(Vector<double> x) const
     }
 }
 
-void DirectSolverTake::applySymmetryShiftOuterBoundary(Vector<double> x) const
+void DirectSolver_COO_MUMPS_Take::applySymmetryShiftOuterBoundary(Vector<double> x) const
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -78,9 +80,9 @@ void DirectSolverTake::applySymmetryShiftOuterBoundary(Vector<double> x) const
     }
 }
 
-void DirectSolverTake::applySymmetryShift(Vector<double> x) const
+void DirectSolver_COO_MUMPS_Take::applySymmetryShift(Vector<double> x) const
 {
-    assert(x.size() == grid_.numberOfNodes());
+    assert(std::ssize(x) == grid_.numberOfNodes());
     assert(grid_.nr() >= 4);
 
     if (num_omp_threads_ == 1) {
