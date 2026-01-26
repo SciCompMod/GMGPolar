@@ -15,7 +15,8 @@ std::unique_ptr<IGMGPolar> ConfigParser::solver() const
 
             // Construct the solver specialized for this geometry type.
             std::unique_ptr<IGMGPolar> solver =
-                std::make_unique<GMGPolar<DomainGeomType>>(grid, domain_geometry, density_profile_coefficients);
+                std::make_unique<GMGPolar<DomainGeomType, DensityProfileCoefficientsType>>(
+                    grid, domain_geometry, density_profile_coefficients);
 
             // The lambdas must return objects of identical type
             return solver;
