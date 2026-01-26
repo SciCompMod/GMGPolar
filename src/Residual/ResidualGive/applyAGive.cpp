@@ -2,8 +2,9 @@
 
 #include "../../../include/common/geometry_helper.h"
 
-inline void node_apply_a_give(int i_r, int i_theta, double r, double theta, const PolarGrid& grid, const LevelCache& level_cache, bool DirBC_Interior,
-                              Vector<double>& result, ConstVector<double>& x)
+inline void node_apply_a_give(int i_r, int i_theta, double r, double theta, const PolarGrid& grid,
+                              const LevelCache& level_cache, bool DirBC_Interior, Vector<double>& result,
+                              ConstVector<double>& x)
 {
     const int global_index = grid.index(i_r, i_theta);
     double coeff_beta, arr, att, art, detDF;

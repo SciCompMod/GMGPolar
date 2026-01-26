@@ -83,41 +83,44 @@ enum class BetaCoeff
 /* Mumps - Constant Definitions */
 /* ---------------------------- */
 #ifdef GMGPOLAR_USE_MUMPS
-#include "dmumps_c.h"
-    /* Mumps inline functions s.t. indices match documentation */
-    inline int& ICNTL(DMUMPS_STRUC_C& mumps_solver, int I) {
-        return mumps_solver.icntl[(I) - 1];
-    }
-    inline double& CNTL(DMUMPS_STRUC_C& mumps_solver, int I) {
-        return mumps_solver.cntl[(I) - 1];
-    }
-    inline int& INFOG(DMUMPS_STRUC_C& mumps_solver, int I) {
-        return mumps_solver.infog[(I) - 1];
-    }
+    #include "dmumps_c.h"
+/* Mumps inline functions s.t. indices match documentation */
+inline int& ICNTL(DMUMPS_STRUC_C& mumps_solver, int I)
+{
+    return mumps_solver.icntl[(I)-1];
+}
+inline double& CNTL(DMUMPS_STRUC_C& mumps_solver, int I)
+{
+    return mumps_solver.cntl[(I)-1];
+}
+inline int& INFOG(DMUMPS_STRUC_C& mumps_solver, int I)
+{
+    return mumps_solver.infog[(I)-1];
+}
 
-    constexpr int USE_COMM_WORLD = -987654;
-    constexpr int PAR_NOT_PARALLEL = 0;
-    constexpr int PAR_PARALLEL = 1;
+constexpr int USE_COMM_WORLD   = -987654;
+constexpr int PAR_NOT_PARALLEL = 0;
+constexpr int PAR_PARALLEL     = 1;
 
-    constexpr int JOB_INIT = -1;
-    constexpr int JOB_END = -2;
-    constexpr int JOB_REMOVE_SAVED_DATA = -3;
-    constexpr int JOB_FREE_INTERNAL_DATA = -4;
-    constexpr int JOB_SUPPRESS_OOC_FILES = -200;
+constexpr int JOB_INIT               = -1;
+constexpr int JOB_END                = -2;
+constexpr int JOB_REMOVE_SAVED_DATA  = -3;
+constexpr int JOB_FREE_INTERNAL_DATA = -4;
+constexpr int JOB_SUPPRESS_OOC_FILES = -200;
 
-    constexpr int JOB_ANALYSIS_PHASE = 1;
-    constexpr int JOB_FACTORIZATION_PHASE = 2;
-    constexpr int JOB_COMPUTE_SOLUTION = 3;
-    constexpr int JOB_ANALYSIS_AND_FACTORIZATION = 4;
-    constexpr int JOB_FACTORIZATION_AND_SOLUTION = 5;
-    constexpr int JOB_ANALYSIS_FACTORIZATION_SOLUTION = 6;
-    constexpr int JOB_SAVE_INTERNAL_DATA = 7;
-    constexpr int JOB_RESTORE_INTERNAL_DATA = 8;
-    constexpr int JOB_DISTRIBUTE_RHS = 9;
+constexpr int JOB_ANALYSIS_PHASE                  = 1;
+constexpr int JOB_FACTORIZATION_PHASE             = 2;
+constexpr int JOB_COMPUTE_SOLUTION                = 3;
+constexpr int JOB_ANALYSIS_AND_FACTORIZATION      = 4;
+constexpr int JOB_FACTORIZATION_AND_SOLUTION      = 5;
+constexpr int JOB_ANALYSIS_FACTORIZATION_SOLUTION = 6;
+constexpr int JOB_SAVE_INTERNAL_DATA              = 7;
+constexpr int JOB_RESTORE_INTERNAL_DATA           = 8;
+constexpr int JOB_DISTRIBUTE_RHS                  = 9;
 
-    constexpr int SYM_UNSYMMETRIC = 0;
-    constexpr int SYM_POSITIVE_DEFINITE = 1;
-    constexpr int SYM_GENERAL_SYMMETRIC = 2;
+constexpr int SYM_UNSYMMETRIC       = 0;
+constexpr int SYM_POSITIVE_DEFINITE = 1;
+constexpr int SYM_GENERAL_SYMMETRIC = 2;
 #endif
 
 // --------------------------------------- //
