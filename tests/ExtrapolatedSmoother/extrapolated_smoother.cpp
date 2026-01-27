@@ -16,13 +16,11 @@
 
 #include "../../include/InputFunctions/domainGeometry.h"
 #include "../../include/InputFunctions/densityProfileCoefficients.h"
-#include "../../include/InputFunctions/boundaryConditions.h"
 #include "../../include/InputFunctions/sourceTerm.h"
 /* --------- */
 /* Test Case */
 /* --------- */
 #include "../include/InputFunctions/DomainGeometry/czarnyGeometry.h"
-#include "../include/InputFunctions/BoundaryConditions/polarR6_Boundary_CzarnyGeometry.h"
 #include "../include/InputFunctions/DensityProfileCoefficients/zoniShiftedCoefficients.h"
 #include "../include/InputFunctions/SourceTerms/polarR6_ZoniShifted_CzarnyGeometry.h"
 
@@ -48,8 +46,6 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_DirBC_Interior)
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<PolarR6_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
 
     bool DirBC_Interior  = true;
     int maxOpenMPThreads = 16;
@@ -110,8 +106,6 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_AcossOrigin)
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<PolarR6_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
 
     bool DirBC_Interior  = false;
     int maxOpenMPThreads = 16;
@@ -174,8 +168,6 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior)
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<PolarR6_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
 
     bool DirBC_Interior  = true;
     int maxOpenMPThreads = 1;
@@ -259,8 +251,6 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior)
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<PolarR6_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
 
     bool DirBC_Interior  = true;
     int maxOpenMPThreads = 16;
@@ -344,8 +334,6 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin)
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<PolarR6_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
 
     bool DirBC_Interior  = false;
     int maxOpenMPThreads = 1;
@@ -431,8 +419,6 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin)
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<PolarR6_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
 
     bool DirBC_Interior  = false;
     int maxOpenMPThreads = 16;
@@ -517,8 +503,6 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior_Smal
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<PolarR6_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
 
     bool DirBC_Interior  = true;
     int maxOpenMPThreads = 1;
@@ -603,8 +587,6 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior_Smalle
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<PolarR6_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
 
     bool DirBC_Interior  = true;
     int maxOpenMPThreads = 16;
@@ -689,8 +671,6 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin_Smalle
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<PolarR6_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
 
     bool DirBC_Interior  = false;
     int maxOpenMPThreads = 1;
@@ -773,8 +753,6 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin_Smallest
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<PolarR6_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
 
     bool DirBC_Interior  = false;
     int maxOpenMPThreads = 16;
@@ -860,8 +838,6 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior)
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<PolarR6_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
 
     bool DirBC_Interior  = true;
     int maxOpenMPThreads = 1;
@@ -947,8 +923,6 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior)
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<PolarR6_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
 
     bool DirBC_Interior  = true;
     int maxOpenMPThreads = 16;
@@ -1032,8 +1006,6 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin)
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<PolarR6_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
 
     bool DirBC_Interior  = false;
     int maxOpenMPThreads = 1;
@@ -1117,8 +1089,6 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin)
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<PolarR6_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
 
     bool DirBC_Interior  = false;
     int maxOpenMPThreads = 16;
@@ -1201,8 +1171,6 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior_
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<PolarR6_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
 
     bool DirBC_Interior  = true;
     int maxOpenMPThreads = 1;
@@ -1285,8 +1253,6 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior_Sm
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<PolarR6_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
 
     bool DirBC_Interior  = true;
     int maxOpenMPThreads = 16;
@@ -1369,8 +1335,6 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin_Sm
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<PolarR6_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
 
     bool DirBC_Interior  = false;
     int maxOpenMPThreads = 1;
@@ -1453,8 +1417,6 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin_Smal
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<PolarR6_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
 
     bool DirBC_Interior  = false;
     int maxOpenMPThreads = 16;
