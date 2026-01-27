@@ -314,8 +314,7 @@ void IGMGPolar::updateResidualNorms(Level& level, int iteration, double& initial
     }
 }
 
-void IGMGPolar::extrapolatedResidual(const int current_level, Vector<double> residual,
-                                     ConstVector<double> residual_next_level)
+void IGMGPolar::extrapolatedResidual(int current_level, Vector<double> residual, ConstVector<double> residual_next_level)
 {
     const PolarGrid& fineGrid   = levels_[current_level].grid();
     const PolarGrid& coarseGrid = levels_[current_level + 1].grid();
