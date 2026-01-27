@@ -19,15 +19,18 @@ inline void node_apply_residual_take(int i_r, int i_theta, const PolarGrid& grid
         double coeff3 = 0.5 * (h1 + h2) / k1;
         double coeff4 = 0.5 * (h1 + h2) / k2;
 
-        const int bottom_left  = grid.index(i_r - 1, i_theta - 1);
+        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
+
+        const int bottom_left  = grid.index(i_r - 1, i_theta_M1);
         const int left         = grid.index(i_r - 1, i_theta);
-        const int top_left     = grid.index(i_r - 1, i_theta + 1);
-        const int bottom       = grid.index(i_r, i_theta - 1);
+        const int top_left     = grid.index(i_r - 1, i_theta_P1);
+        const int bottom       = grid.index(i_r, i_theta_M1);
         const int center       = grid.index(i_r, i_theta);
-        const int top          = grid.index(i_r, i_theta + 1);
-        const int bottom_right = grid.index(i_r + 1, i_theta - 1);
+        const int top          = grid.index(i_r, i_theta_P1);
+        const int bottom_right = grid.index(i_r + 1, i_theta_M1);
         const int right        = grid.index(i_r + 1, i_theta);
-        const int top_right    = grid.index(i_r + 1, i_theta + 1);
+        const int top_right    = grid.index(i_r + 1, i_theta_P1);
 
         result[center] =
             rhs[center] -
@@ -72,13 +75,17 @@ inline void node_apply_residual_take(int i_r, int i_theta, const PolarGrid& grid
             double coeff3 = 0.5 * (h1 + h2) / k1;
             double coeff4 = 0.5 * (h1 + h2) / k2;
 
-            const int left         = grid.index(i_r, i_theta + (grid.ntheta() / 2));
-            const int bottom       = grid.index(i_r, i_theta - 1);
+            const int i_theta_M1     = grid.wrapThetaIndex(i_theta - 1);
+            const int i_theta_P1     = grid.wrapThetaIndex(i_theta + 1);
+            const int i_theta_Across = grid.wrapThetaIndex(i_theta + grid.ntheta() / 2);
+
+            const int left         = grid.index(i_r, i_theta_Across);
+            const int bottom       = grid.index(i_r, i_theta_M1);
             const int center       = grid.index(i_r, i_theta);
-            const int top          = grid.index(i_r, i_theta + 1);
-            const int bottom_right = grid.index(i_r + 1, i_theta - 1);
+            const int top          = grid.index(i_r, i_theta_P1);
+            const int bottom_right = grid.index(i_r + 1, i_theta_M1);
             const int right        = grid.index(i_r + 1, i_theta);
-            const int top_right    = grid.index(i_r + 1, i_theta + 1);
+            const int top_right    = grid.index(i_r + 1, i_theta_P1);
 
             result[center] =
                 rhs[center] -

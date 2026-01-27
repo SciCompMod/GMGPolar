@@ -25,10 +25,13 @@ inline void node_apply_a_give(int i_r, int i_theta, double r, double theta, cons
         double coeff3 = 0.5 * (h1 + h2) / k1;
         double coeff4 = 0.5 * (h1 + h2) / k2;
 
+        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
+
         const int left   = grid.index(i_r - 1, i_theta);
         const int right  = grid.index(i_r + 1, i_theta);
-        const int bottom = grid.index(i_r, i_theta - 1);
-        const int top    = grid.index(i_r, i_theta + 1);
+        const int bottom = grid.index(i_r, i_theta_M1);
+        const int top    = grid.index(i_r, i_theta_P1);
 
         /* Fill result(i,j) */
         result[center] -= (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
@@ -77,9 +80,12 @@ inline void node_apply_a_give(int i_r, int i_theta, double r, double theta, cons
 
             double coeff2 = 0.5 * (k1 + k2) / h2;
 
+            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
+
             const int right  = grid.index(i_r + 1, i_theta);
-            const int bottom = grid.index(i_r, i_theta - 1);
-            const int top    = grid.index(i_r, i_theta + 1);
+            const int bottom = grid.index(i_r, i_theta_M1);
+            const int top    = grid.index(i_r, i_theta_P1);
 
             /* Fill result(i+1,j) */
             result[right] -= (-coeff2 * arr * x[center] /* Left */
@@ -104,10 +110,14 @@ inline void node_apply_a_give(int i_r, int i_theta, double r, double theta, cons
             double coeff3 = 0.5 * (h1 + h2) / k1;
             double coeff4 = 0.5 * (h1 + h2) / k2;
 
-            const int left   = grid.index(i_r, i_theta + (grid.ntheta() / 2));
+            const int i_theta_M1     = grid.wrapThetaIndex(i_theta - 1);
+            const int i_theta_P1     = grid.wrapThetaIndex(i_theta + 1);
+            const int i_theta_Across = grid.wrapThetaIndex(i_theta + grid.ntheta() / 2);
+
+            const int left   = grid.index(i_r, i_theta_Across);
             const int right  = grid.index(i_r + 1, i_theta);
-            const int bottom = grid.index(i_r, i_theta - 1);
-            const int top    = grid.index(i_r, i_theta + 1);
+            const int bottom = grid.index(i_r, i_theta_M1);
+            const int top    = grid.index(i_r, i_theta_P1);
 
             /* Fill result(i,j) */
             result[center] -= (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
@@ -154,10 +164,13 @@ inline void node_apply_a_give(int i_r, int i_theta, double r, double theta, cons
         double coeff3 = 0.5 * (h1 + h2) / k1;
         double coeff4 = 0.5 * (h1 + h2) / k2;
 
+        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
+
         const int left   = grid.index(i_r - 1, i_theta);
         const int right  = grid.index(i_r + 1, i_theta);
-        const int bottom = grid.index(i_r, i_theta - 1);
-        const int top    = grid.index(i_r, i_theta + 1);
+        const int bottom = grid.index(i_r, i_theta_M1);
+        const int top    = grid.index(i_r, i_theta_P1);
 
         /* Fill result(i,j) */
         result[center] -= (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
@@ -204,10 +217,13 @@ inline void node_apply_a_give(int i_r, int i_theta, double r, double theta, cons
         double coeff3 = 0.5 * (h1 + h2) / k1;
         double coeff4 = 0.5 * (h1 + h2) / k2;
 
+        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
+
         const int left   = grid.index(i_r - 1, i_theta);
         const int right  = grid.index(i_r + 1, i_theta);
-        const int bottom = grid.index(i_r, i_theta - 1);
-        const int top    = grid.index(i_r, i_theta + 1);
+        const int bottom = grid.index(i_r, i_theta_M1);
+        const int top    = grid.index(i_r, i_theta_P1);
 
         /* Fill result(i,j) */
         result[center] -= (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
@@ -254,9 +270,12 @@ inline void node_apply_a_give(int i_r, int i_theta, double r, double theta, cons
 
         double coeff1 = 0.5 * (k1 + k2) / h1;
 
+        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
+
         const int left   = grid.index(i_r - 1, i_theta);
-        const int bottom = grid.index(i_r, i_theta - 1);
-        const int top    = grid.index(i_r, i_theta + 1);
+        const int bottom = grid.index(i_r, i_theta_M1);
+        const int top    = grid.index(i_r, i_theta_P1);
 
         /* Fill result(i-1,j) */
         result[left] -= (-coeff1 * arr * x[center] /* Right */
