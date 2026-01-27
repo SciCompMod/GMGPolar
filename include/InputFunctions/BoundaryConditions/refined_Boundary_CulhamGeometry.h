@@ -7,7 +7,6 @@
 class Refined_Boundary_CulhamGeometry
 {
 public:
-    Refined_Boundary_CulhamGeometry() = default;
     explicit Refined_Boundary_CulhamGeometry(double Rmax);
 
     double u_D(double r, double theta) const;

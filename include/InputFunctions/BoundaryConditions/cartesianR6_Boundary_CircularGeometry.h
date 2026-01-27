@@ -7,7 +7,6 @@
 class CartesianR6_Boundary_CircularGeometry
 {
 public:
-    CartesianR6_Boundary_CircularGeometry() = default;
     explicit CartesianR6_Boundary_CircularGeometry(double Rmax);
 
     double u_D(double r, double theta) const;

@@ -7,7 +7,6 @@
 class PolarR6_Boundary_ShafranovGeometry
 {
 public:
-    PolarR6_Boundary_ShafranovGeometry() = default;
     explicit PolarR6_Boundary_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
 
     double u_D(double r, double theta) const;

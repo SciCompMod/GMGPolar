@@ -7,7 +7,6 @@
 class PolarR6_Boundary_CircularGeometry
 {
 public:
-    PolarR6_Boundary_CircularGeometry() = default;
     explicit PolarR6_Boundary_CircularGeometry(double Rmax);
 
     double u_D(double r, double theta) const;

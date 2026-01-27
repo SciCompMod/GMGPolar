@@ -7,7 +7,6 @@
 class PolarR6_Boundary_CulhamGeometry
 {
 public:
-    PolarR6_Boundary_CulhamGeometry() = default;
     explicit PolarR6_Boundary_CulhamGeometry(double Rmax);
 
     double u_D(double r, double theta) const;

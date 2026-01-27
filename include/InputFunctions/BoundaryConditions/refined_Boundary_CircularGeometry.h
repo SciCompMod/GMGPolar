@@ -7,7 +7,6 @@
 class Refined_Boundary_CircularGeometry
 {
 public:
-    Refined_Boundary_CircularGeometry() = default;
     explicit Refined_Boundary_CircularGeometry(double Rmax);
 
     double u_D(double r, double theta) const;

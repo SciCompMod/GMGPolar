@@ -7,7 +7,6 @@
 class Refined_Boundary_ShafranovGeometry
 {
 public:
-    Refined_Boundary_ShafranovGeometry() = default;
     explicit Refined_Boundary_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
 
     double u_D(double r, double theta) const;

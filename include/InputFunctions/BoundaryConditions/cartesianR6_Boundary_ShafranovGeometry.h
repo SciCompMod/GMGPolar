@@ -7,7 +7,6 @@
 class CartesianR6_Boundary_ShafranovGeometry
 {
 public:
-    CartesianR6_Boundary_ShafranovGeometry() = default;
     explicit CartesianR6_Boundary_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
 
     double u_D(double r, double theta) const;
