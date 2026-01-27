@@ -3,10 +3,8 @@
 /* ---------------------------------------------------------------------- */
 /* Constructor & Initialization                                           */
 /* ---------------------------------------------------------------------- */
-GMGPolar::GMGPolar(const PolarGrid& grid, const DomainGeometry& domain_geometry,
-                   const DensityProfileCoefficients& density_profile_coefficients)
+IGMGPolar::IGMGPolar(const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients)
     : grid_(grid)
-    , domain_geometry_(domain_geometry)
     , density_profile_coefficients_(density_profile_coefficients)
     , exact_solution_(nullptr)
     // General solver output and visualization settings
@@ -46,7 +44,7 @@ GMGPolar::GMGPolar(const PolarGrid& grid, const DomainGeometry& domain_geometry,
     LIKWID_REGISTER("Solve");
 }
 
-void GMGPolar::setSolution(const ExactSolution* exact_solution)
+void IGMGPolar::setSolution(const ExactSolution* exact_solution)
 {
     exact_solution_ = exact_solution;
 }
@@ -54,20 +52,20 @@ void GMGPolar::setSolution(const ExactSolution* exact_solution)
 /* ---------------------------------------------------------------------- */
 /* General output & visualization                                         */
 /* ---------------------------------------------------------------------- */
-int GMGPolar::verbose() const
+int IGMGPolar::verbose() const
 {
     return verbose_;
 }
-void GMGPolar::verbose(int verbose)
+void IGMGPolar::verbose(int verbose)
 {
     verbose_ = verbose;
 }
 
-bool GMGPolar::paraview() const
+bool IGMGPolar::paraview() const
 {
     return paraview_;
 }
-void GMGPolar::paraview(bool paraview)
+void IGMGPolar::paraview(bool paraview)
 {
     paraview_ = paraview;
 }
@@ -75,11 +73,11 @@ void GMGPolar::paraview(bool paraview)
 /* ---------------------------------------------------------------------- */
 /* Parallelization                                                        */
 /* ---------------------------------------------------------------------- */
-int GMGPolar::maxOpenMPThreads() const
+int IGMGPolar::maxOpenMPThreads() const
 {
     return max_omp_threads_;
 }
-void GMGPolar::maxOpenMPThreads(int max_omp_threads)
+void IGMGPolar::maxOpenMPThreads(int max_omp_threads)
 {
     max_omp_threads_ = max_omp_threads;
 }
@@ -87,38 +85,38 @@ void GMGPolar::maxOpenMPThreads(int max_omp_threads)
 /* ---------------------------------------------------------------------- */
 /* Numerical method options                                               */
 /* ---------------------------------------------------------------------- */
-bool GMGPolar::DirBC_Interior() const
+bool IGMGPolar::DirBC_Interior() const
 {
     return DirBC_Interior_;
 }
-void GMGPolar::DirBC_Interior(bool DirBC_Interior)
+void IGMGPolar::DirBC_Interior(bool DirBC_Interior)
 {
     DirBC_Interior_ = DirBC_Interior;
 }
 
-StencilDistributionMethod GMGPolar::stencilDistributionMethod() const
+StencilDistributionMethod IGMGPolar::stencilDistributionMethod() const
 {
     return stencil_distribution_method_;
 }
-void GMGPolar::stencilDistributionMethod(StencilDistributionMethod stencil_distribution_method)
+void IGMGPolar::stencilDistributionMethod(StencilDistributionMethod stencil_distribution_method)
 {
     stencil_distribution_method_ = stencil_distribution_method;
 }
 
-bool GMGPolar::cacheDensityProfileCoefficients() const
+bool IGMGPolar::cacheDensityProfileCoefficients() const
 {
     return cache_density_profile_coefficients_;
 }
-void GMGPolar::cacheDensityProfileCoefficients(bool cache_density_profile_coefficients)
+void IGMGPolar::cacheDensityProfileCoefficients(bool cache_density_profile_coefficients)
 {
     cache_density_profile_coefficients_ = cache_density_profile_coefficients;
 }
 
-bool GMGPolar::cacheDomainGeometry() const
+bool IGMGPolar::cacheDomainGeometry() const
 {
     return cache_domain_geometry_;
 }
-void GMGPolar::cacheDomainGeometry(bool cache_domain_geometry)
+void IGMGPolar::cacheDomainGeometry(bool cache_domain_geometry)
 {
     cache_domain_geometry_ = cache_domain_geometry;
 }
@@ -126,74 +124,74 @@ void GMGPolar::cacheDomainGeometry(bool cache_domain_geometry)
 /* ---------------------------------------------------------------------- */
 /* Multigrid controls                                                     */
 /* ---------------------------------------------------------------------- */
-ExtrapolationType GMGPolar::extrapolation() const
+ExtrapolationType IGMGPolar::extrapolation() const
 {
     return extrapolation_;
 }
-void GMGPolar::extrapolation(ExtrapolationType extrapolation)
+void IGMGPolar::extrapolation(ExtrapolationType extrapolation)
 {
     extrapolation_ = extrapolation;
 }
 
-int GMGPolar::maxLevels() const
+int IGMGPolar::maxLevels() const
 {
     return max_levels_;
 }
-void GMGPolar::maxLevels(int max_levels)
+void IGMGPolar::maxLevels(int max_levels)
 {
     max_levels_ = max_levels;
 }
 
-MultigridCycleType GMGPolar::multigridCycle() const
+MultigridCycleType IGMGPolar::multigridCycle() const
 {
     return multigrid_cycle_;
 }
-void GMGPolar::multigridCycle(MultigridCycleType multigrid_cycle)
+void IGMGPolar::multigridCycle(MultigridCycleType multigrid_cycle)
 {
     multigrid_cycle_ = multigrid_cycle;
 }
 
-int GMGPolar::preSmoothingSteps() const
+int IGMGPolar::preSmoothingSteps() const
 {
     return pre_smoothing_steps_;
 }
-void GMGPolar::preSmoothingSteps(int pre_smoothing_steps)
+void IGMGPolar::preSmoothingSteps(int pre_smoothing_steps)
 {
     pre_smoothing_steps_ = pre_smoothing_steps;
 }
 
-int GMGPolar::postSmoothingSteps() const
+int IGMGPolar::postSmoothingSteps() const
 {
     return post_smoothing_steps_;
 }
-void GMGPolar::postSmoothingSteps(int post_smoothing_steps)
+void IGMGPolar::postSmoothingSteps(int post_smoothing_steps)
 {
     post_smoothing_steps_ = post_smoothing_steps;
 }
 
-bool GMGPolar::FMG() const
+bool IGMGPolar::FMG() const
 {
     return FMG_;
 }
-void GMGPolar::FMG(bool FMG)
+void IGMGPolar::FMG(bool FMG)
 {
     FMG_ = FMG;
 }
 
-int GMGPolar::FMG_iterations() const
+int IGMGPolar::FMG_iterations() const
 {
     return FMG_iterations_;
 }
-void GMGPolar::FMG_iterations(int FMG_iterations)
+void IGMGPolar::FMG_iterations(int FMG_iterations)
 {
     FMG_iterations_ = FMG_iterations;
 }
 
-MultigridCycleType GMGPolar::FMG_cycle() const
+MultigridCycleType IGMGPolar::FMG_cycle() const
 {
     return FMG_cycle_;
 }
-void GMGPolar::FMG_cycle(MultigridCycleType FMG_cycle)
+void IGMGPolar::FMG_cycle(MultigridCycleType FMG_cycle)
 {
     FMG_cycle_ = FMG_cycle;
 }
@@ -202,38 +200,38 @@ void GMGPolar::FMG_cycle(MultigridCycleType FMG_cycle)
 /* Iterative solver termination                                           */
 /* ---------------------------------------------------------------------- */
 
-int GMGPolar::maxIterations() const
+int IGMGPolar::maxIterations() const
 {
     return max_iterations_;
 }
-void GMGPolar::maxIterations(int maxIterations)
+void IGMGPolar::maxIterations(int maxIterations)
 {
     max_iterations_ = maxIterations;
 }
 
-ResidualNormType GMGPolar::residualNormType() const
+ResidualNormType IGMGPolar::residualNormType() const
 {
     return residual_norm_type_;
 }
-void GMGPolar::residualNormType(ResidualNormType residualNormType)
+void IGMGPolar::residualNormType(ResidualNormType residualNormType)
 {
     residual_norm_type_ = residualNormType;
 }
 
-std::optional<double> GMGPolar::absoluteTolerance() const
+std::optional<double> IGMGPolar::absoluteTolerance() const
 {
     return absolute_tolerance_;
 }
-void GMGPolar::absoluteTolerance(std::optional<double> tol)
+void IGMGPolar::absoluteTolerance(std::optional<double> tol)
 {
     absolute_tolerance_ = tol.has_value() && tol.value() >= 0.0 ? tol : std::nullopt;
 }
 
-std::optional<double> GMGPolar::relativeTolerance() const
+std::optional<double> IGMGPolar::relativeTolerance() const
 {
     return relative_tolerance_;
 }
-void GMGPolar::relativeTolerance(std::optional<double> tol)
+void IGMGPolar::relativeTolerance(std::optional<double> tol)
 {
     relative_tolerance_ = tol.has_value() && tol.value() >= 0.0 ? tol : std::nullopt;
 }
@@ -241,18 +239,18 @@ void GMGPolar::relativeTolerance(std::optional<double> tol)
 /* ---------------------------------------------------------------------- */
 /* Solution & Grid Access                                                 */
 /* ---------------------------------------------------------------------- */
-Vector<double> GMGPolar::solution()
+Vector<double> IGMGPolar::solution()
 {
     int level_depth = 0;
     return levels_[level_depth].solution();
 }
-ConstVector<double> GMGPolar::solution() const
+ConstVector<double> IGMGPolar::solution() const
 {
     int level_depth = 0;
     return levels_[level_depth].solution();
 }
 
-const PolarGrid& GMGPolar::grid() const
+const PolarGrid& IGMGPolar::grid() const
 {
     return grid_;
 }
@@ -260,23 +258,23 @@ const PolarGrid& GMGPolar::grid() const
 /* ---------------------------------------------------------------------- */
 /* Setup timings                                                          */
 /* ---------------------------------------------------------------------- */
-double GMGPolar::timeSetupTotal() const
+double IGMGPolar::timeSetupTotal() const
 {
     return t_setup_total_;
 }
-double GMGPolar::timeSetupCreateLevels() const
+double IGMGPolar::timeSetupCreateLevels() const
 {
     return t_setup_createLevels_;
 }
-double GMGPolar::timeSetupRHS() const
+double IGMGPolar::timeSetupRHS() const
 {
     return t_setup_rhs_;
 }
-double GMGPolar::timeSetupSmoother() const
+double IGMGPolar::timeSetupSmoother() const
 {
     return t_setup_smoother_;
 }
-double GMGPolar::timeSetupDirectSolver() const
+double IGMGPolar::timeSetupDirectSolver() const
 {
     return t_setup_directSolver_;
 }
@@ -284,23 +282,23 @@ double GMGPolar::timeSetupDirectSolver() const
 /* ---------------------------------------------------------------------- */
 /* Solve timings                                                          */
 /* ---------------------------------------------------------------------- */
-double GMGPolar::timeSolveTotal() const
+double IGMGPolar::timeSolveTotal() const
 {
     return t_solve_total_;
 }
-double GMGPolar::timeSolveInitialApproximation() const
+double IGMGPolar::timeSolveInitialApproximation() const
 {
     return t_solve_initial_approximation_;
 }
-double GMGPolar::timeSolveMultigridIterations() const
+double IGMGPolar::timeSolveMultigridIterations() const
 {
     return t_solve_multigrid_iterations_;
 }
-double GMGPolar::timeCheckConvergence() const
+double IGMGPolar::timeCheckConvergence() const
 {
     return t_check_convergence_;
 }
-double GMGPolar::timeCheckExactError() const
+double IGMGPolar::timeCheckExactError() const
 {
     return t_check_exact_error_;
 }
@@ -308,23 +306,23 @@ double GMGPolar::timeCheckExactError() const
 /* ---------------------------------------------------------------------- */
 /* Average Multigrid Cycle timings                                        */
 /* ---------------------------------------------------------------------- */
-double GMGPolar::timeAvgMGCTotal() const
+double IGMGPolar::timeAvgMGCTotal() const
 {
     return t_avg_MGC_total_;
 }
-double GMGPolar::timeAvgMGCPreSmoothing() const
+double IGMGPolar::timeAvgMGCPreSmoothing() const
 {
     return t_avg_MGC_preSmoothing_;
 }
-double GMGPolar::timeAvgMGCPostSmoothing() const
+double IGMGPolar::timeAvgMGCPostSmoothing() const
 {
     return t_avg_MGC_postSmoothing_;
 }
-double GMGPolar::timeAvgMGCResidual() const
+double IGMGPolar::timeAvgMGCResidual() const
 {
     return t_avg_MGC_residual_;
 }
-double GMGPolar::timeAvgMGCDirectSolver() const
+double IGMGPolar::timeAvgMGCDirectSolver() const
 {
     return t_avg_MGC_directSolver_;
 }
@@ -333,14 +331,14 @@ double GMGPolar::timeAvgMGCDirectSolver() const
 /* Reset timings                                                          */
 /* ---------------------------------------------------------------------- */
 
-void GMGPolar::resetAllTimings()
+void IGMGPolar::resetAllTimings()
 {
     resetSetupPhaseTimings();
     resetSolvePhaseTimings();
     resetAvgMultigridCycleTimings();
 }
 
-void GMGPolar::resetSetupPhaseTimings()
+void IGMGPolar::resetSetupPhaseTimings()
 {
     t_setup_total_        = 0.0;
     t_setup_createLevels_ = 0.0;
@@ -349,7 +347,7 @@ void GMGPolar::resetSetupPhaseTimings()
     t_setup_directSolver_ = 0.0;
 }
 
-void GMGPolar::resetSolvePhaseTimings()
+void IGMGPolar::resetSolvePhaseTimings()
 {
     t_solve_total_                 = 0.0;
     t_solve_initial_approximation_ = 0.0;
@@ -358,7 +356,7 @@ void GMGPolar::resetSolvePhaseTimings()
     t_check_exact_error_           = 0.0;
 }
 
-void GMGPolar::resetAvgMultigridCycleTimings()
+void IGMGPolar::resetAvgMultigridCycleTimings()
 {
     t_avg_MGC_total_         = 0.0;
     t_avg_MGC_preSmoothing_  = 0.0;
@@ -371,7 +369,7 @@ void GMGPolar::resetAvgMultigridCycleTimings()
 /* Diagnostics & statistics                                               */
 /* ---------------------------------------------------------------------- */
 // Print timing breakdown for setup, smoothing, coarse solve, etc.
-void GMGPolar::printTimings() const
+void IGMGPolar::printTimings() const
 {
     // t_setup_rhs_ is neither included in t_setup_total_ and t_solve_total_.
     std::cout << "\n------------------" << std::endl;
@@ -400,26 +398,26 @@ void GMGPolar::printTimings() const
 }
 
 // Number of iterations taken by last solve.
-int GMGPolar::numberOfIterations() const
+int IGMGPolar::numberOfIterations() const
 {
     return number_of_iterations_;
 }
 
 // Mean residual reduction factor per iteration.
-double GMGPolar::meanResidualReductionFactor() const
+double IGMGPolar::meanResidualReductionFactor() const
 {
     return mean_residual_reduction_factor_;
 }
 
 // Error norms (only available if exact solution was set).
-std::optional<double> GMGPolar::exactErrorWeightedEuclidean() const
+std::optional<double> IGMGPolar::exactErrorWeightedEuclidean() const
 {
     if (exact_solution_) {
         return exact_errors_.back().first;
     }
     return std::nullopt;
 }
-std::optional<double> GMGPolar::exactErrorInfinity() const
+std::optional<double> IGMGPolar::exactErrorInfinity() const
 {
     if (exact_solution_) {
         return exact_errors_.back().second;

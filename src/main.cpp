@@ -14,56 +14,56 @@ int main(int argc, char* argv[])
     parser.parse(argc, argv);
 
     // Create GMGPolar solver
-    GMGPolar solver(parser.grid(), parser.domainGeometry(), parser.densityProfileCoefficients());
+    std::unique_ptr<IGMGPolar> solver(parser.solver());
 
     // --- General solver output and visualization settings --- //
-    solver.verbose(parser.verbose()); // Enable/disable verbose output
-    solver.paraview(parser.paraview()); // Enable/disable ParaView output
+    solver->verbose(parser.verbose()); // Enable/disable verbose output
+    solver->paraview(parser.paraview()); // Enable/disable ParaView output
 
     // --- Parallelization and threading settings --- //
-    solver.maxOpenMPThreads(parser.maxOpenMPThreads()); // Maximum OpenMP threads to use
+    solver->maxOpenMPThreads(parser.maxOpenMPThreads()); // Maximum OpenMP threads to use
     omp_set_num_threads(parser.maxOpenMPThreads()); // Global OpenMP thread limit
 
     // --- Numerical method setup --- //
-    solver.DirBC_Interior(parser.DirBC_Interior()); // Interior boundary conditions: Dirichlet, Across-the-origin,
-    solver.stencilDistributionMethod(parser.stencilDistributionMethod()); // Stencil distribution strategy: Take, Give
-    solver.cacheDensityProfileCoefficients(
+    solver->DirBC_Interior(parser.DirBC_Interior()); // Interior boundary conditions: Dirichlet, Across-the-origin,
+    solver->stencilDistributionMethod(parser.stencilDistributionMethod()); // Stencil distribution strategy: Take, Give
+    solver->cacheDensityProfileCoefficients(
         parser.cacheDensityProfileCoefficients()); // Cache density profile coefficients: alpha, beta
-    solver.cacheDomainGeometry(parser.cacheDomainGeometry()); // Cache domain geometry data: arr, att, art, detDF
+    solver->cacheDomainGeometry(parser.cacheDomainGeometry()); // Cache domain geometry data: arr, att, art, detDF
 
     // --- Multigrid settings --- //
-    solver.extrapolation(parser.extrapolation()); // Enable/disable extrapolation
-    solver.maxLevels(parser.maxLevels()); // Max multigrid levels (-1 = use deepest possible)
-    solver.preSmoothingSteps(parser.preSmoothingSteps()); // Smoothing before coarse-grid correction
-    solver.postSmoothingSteps(parser.postSmoothingSteps()); // Smoothing after coarse-grid correction
-    solver.multigridCycle(parser.multigridCycle()); // Multigrid cycle type
-    solver.FMG(parser.FMG()); // Full Multigrid mode on/off
-    solver.FMG_iterations(parser.FMG_iterations()); // FMG iteration count
-    solver.FMG_cycle(parser.FMG_cycle()); // FMG cycle type
+    solver->extrapolation(parser.extrapolation()); // Enable/disable extrapolation
+    solver->maxLevels(parser.maxLevels()); // Max multigrid levels (-1 = use deepest possible)
+    solver->preSmoothingSteps(parser.preSmoothingSteps()); // Smoothing before coarse-grid correction
+    solver->postSmoothingSteps(parser.postSmoothingSteps()); // Smoothing after coarse-grid correction
+    solver->multigridCycle(parser.multigridCycle()); // Multigrid cycle type
+    solver->FMG(parser.FMG()); // Full Multigrid mode on/off
+    solver->FMG_iterations(parser.FMG_iterations()); // FMG iteration count
+    solver->FMG_cycle(parser.FMG_cycle()); // FMG cycle type
 
     // --- Iterative solver controls --- //
-    solver.maxIterations(parser.maxIterations()); // Max number of iterations
-    solver.residualNormType(parser.residualNormType()); // Residual norm type (L2, weighted-L2, L∞)
-    solver.absoluteTolerance(parser.absoluteTolerance()); // Absolute residual tolerance
-    solver.relativeTolerance(parser.relativeTolerance()); // Relative residual tolerance
+    solver->maxIterations(parser.maxIterations()); // Max number of iterations
+    solver->residualNormType(parser.residualNormType()); // Residual norm type (L2, weighted-L2, L∞)
+    solver->absoluteTolerance(parser.absoluteTolerance()); // Absolute residual tolerance
+    solver->relativeTolerance(parser.relativeTolerance()); // Relative residual tolerance
 
     // --- Finalize solver setup --- //
-    solver.setup(); // (allocates internal data, prepares operators, etc.)
+    solver->setup(); // (allocates internal data, prepares operators, etc.)
 
     // --- Provide optional exact solution --- //
-    solver.setSolution(&parser.exactSolution());
+    solver->setSolution(&parser.exactSolution());
     // --- Solve Phase --- //
-    solver.solve(parser.boundaryConditions(), parser.sourceTerm());
+    solver->solve(parser.boundaryConditions(), parser.sourceTerm());
 
     // --- Retrieve solution and associated grid --- //
-    Vector<double> solution = solver.solution();
-    const PolarGrid& grid   = solver.grid();
+    Vector<double> solution = solver->solution();
+    const PolarGrid& grid   = solver->grid();
 
     // Finalize LIKWID performance markers
     LIKWID_CLOSE();
 
     // Print timing statistics for each solver phase
-    solver.printTimings();
+    solver->printTimings();
 
     return 0;
 }

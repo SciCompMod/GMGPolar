@@ -29,3 +29,18 @@ public:
     virtual double dFx_dt(double r, double theta) const = 0;
     virtual double dFy_dt(double r, double theta) const = 0;
 };
+
+namespace concepts
+{
+
+template <typename T>
+concept DomainGeometry = !std::same_as<T, DomainGeometry> && requires(const T geom, double r, double theta) {
+    { geom.Fx(r, theta) } -> std::convertible_to<double>;
+    { geom.Fy(r, theta) } -> std::convertible_to<double>;
+    { geom.dFx_dr(r, theta) } -> std::convertible_to<double>;
+    { geom.dFy_dr(r, theta) } -> std::convertible_to<double>;
+    { geom.dFx_dt(r, theta) } -> std::convertible_to<double>;
+    { geom.dFy_dt(r, theta) } -> std::convertible_to<double>;
+};
+
+} // namespace concepts

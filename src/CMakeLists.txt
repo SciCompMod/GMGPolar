@@ -23,7 +23,6 @@ set(GMG_POLAR_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/level_interpolation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/setup.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/solver.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/writeToVTK.cpp
 )
 
 # file(GLOB_RECURSE MULTIGRID_METHODS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/*.cpp)
