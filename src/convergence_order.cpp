@@ -10,6 +10,7 @@
 
 int main(int argc, char* argv[])
 {
+    Kokkos::ScopeGuard kokkos_scope(argc, argv);
     omp_set_num_threads(omp_get_max_threads());
 
     const int verbose   = 0;

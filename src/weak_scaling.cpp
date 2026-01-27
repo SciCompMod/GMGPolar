@@ -146,8 +146,9 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
             << solver.timeAvgMGCResidual() << "," << solver.timeAvgMGCDirectSolver() << std::endl;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+    Kokkos::ScopeGuard kokkos_scope(argc, argv);
     omp_set_num_threads(omp_get_max_threads());
 
     std::ofstream outfile("weak_scaling_results.csv");
