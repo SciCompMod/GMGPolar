@@ -18,8 +18,8 @@ void ResidualGive::computeResidual(Vector<double> result, ConstVector<double> rh
 
     Kokkos::deep_copy(result, rhs);
 
+    /* Single-threaded execution */
     if (num_omp_threads_ == 1) {
-        /* Single-threaded execution */
         for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
             applyCircleSection(i_r, result, x);
         }
@@ -27,8 +27,8 @@ void ResidualGive::computeResidual(Vector<double> result, ConstVector<double> rh
             applyRadialSection(i_theta, result, x);
         }
     }
+    /* Multi-threaded execution */
     else {
-        /* Multi-threaded execution */
         const int num_circle_tasks        = grid_.numberSmootherCircles();
         const int additional_radial_tasks = grid_.ntheta() % 3;
         const int num_radial_tasks        = grid_.ntheta() - additional_radial_tasks;

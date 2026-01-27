@@ -4,15 +4,17 @@
 
 #include "../sourceTerm.h"
 
+#include "../../PolarGrid/polargrid.h"
+
 class PolarR6_ZoniShiftedGyro_CulhamGeometry : public SourceTerm
 {
 public:
-    PolarR6_ZoniShiftedGyro_CulhamGeometry() = default;
-    explicit PolarR6_ZoniShiftedGyro_CulhamGeometry(double Rmax);
+    explicit PolarR6_ZoniShiftedGyro_CulhamGeometry(PolarGrid const& grid, double Rmax);
     virtual ~PolarR6_ZoniShiftedGyro_CulhamGeometry() = default;
 
-    double rhs_f(double r, double theta) const override;
+    double operator()(std::size_t i_r, std::size_t i_theta) const override;
 
 private:
+    PolarGrid const& grid_;
     const double Rmax = 1.3;
 };

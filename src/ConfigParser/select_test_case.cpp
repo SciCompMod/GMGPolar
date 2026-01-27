@@ -208,15 +208,15 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
 
             switch (alpha_type) {
             case AlphaCoeff::POISSON:
-                source_term_ = std::make_unique<CartesianR2_Poisson_CircularGeometry>(Rmax);
+                source_term_ = std::make_unique<CartesianR2_Poisson_CircularGeometry>(grid_, Rmax);
                 break;
             case AlphaCoeff::SONNENDRUCKER:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
-                    source_term_ = std::make_unique<CartesianR2_Sonnendrucker_CircularGeometry>(Rmax);
+                    source_term_ = std::make_unique<CartesianR2_Sonnendrucker_CircularGeometry>(grid_, Rmax);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ = std::make_unique<CartesianR2_SonnendruckerGyro_CircularGeometry>(Rmax);
+                    source_term_ = std::make_unique<CartesianR2_SonnendruckerGyro_CircularGeometry>(grid_, Rmax);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -225,10 +225,10 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
             case AlphaCoeff::ZONI:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
-                    source_term_ = std::make_unique<CartesianR2_Zoni_CircularGeometry>(Rmax);
+                    source_term_ = std::make_unique<CartesianR2_Zoni_CircularGeometry>(grid_, Rmax);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ = std::make_unique<CartesianR2_ZoniGyro_CircularGeometry>(Rmax);
+                    source_term_ = std::make_unique<CartesianR2_ZoniGyro_CircularGeometry>(grid_, Rmax);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -237,10 +237,10 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
             case AlphaCoeff::ZONI_SHIFTED:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
-                    source_term_ = std::make_unique<CartesianR2_ZoniShifted_CircularGeometry>(Rmax);
+                    source_term_ = std::make_unique<CartesianR2_ZoniShifted_CircularGeometry>(grid_, Rmax);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ = std::make_unique<CartesianR2_ZoniShiftedGyro_CircularGeometry>(Rmax);
+                    source_term_ = std::make_unique<CartesianR2_ZoniShiftedGyro_CircularGeometry>(grid_, Rmax);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -255,17 +255,17 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
 
             switch (alpha_type) {
             case AlphaCoeff::POISSON:
-                source_term_ = std::make_unique<CartesianR2_Poisson_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+                source_term_ = std::make_unique<CartesianR2_Poisson_ShafranovGeometry>(grid_, Rmax, kappa_eps, delta_e);
                 break;
             case AlphaCoeff::SONNENDRUCKER:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
                     source_term_ =
-                        std::make_unique<CartesianR2_Sonnendrucker_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+                        std::make_unique<CartesianR2_Sonnendrucker_ShafranovGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ =
-                        std::make_unique<CartesianR2_SonnendruckerGyro_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ = std::make_unique<CartesianR2_SonnendruckerGyro_ShafranovGeometry>(
+                        grid_, Rmax, kappa_eps, delta_e);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -274,10 +274,12 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
             case AlphaCoeff::ZONI:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
-                    source_term_ = std::make_unique<CartesianR2_Zoni_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ =
+                        std::make_unique<CartesianR2_Zoni_ShafranovGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ = std::make_unique<CartesianR2_ZoniGyro_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ =
+                        std::make_unique<CartesianR2_ZoniGyro_ShafranovGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -287,11 +289,11 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
                     source_term_ =
-                        std::make_unique<CartesianR2_ZoniShifted_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+                        std::make_unique<CartesianR2_ZoniShifted_ShafranovGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ =
-                        std::make_unique<CartesianR2_ZoniShiftedGyro_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ = std::make_unique<CartesianR2_ZoniShiftedGyro_ShafranovGeometry>(grid_, Rmax,
+                                                                                                   kappa_eps, delta_e);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -306,16 +308,17 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
 
             switch (alpha_type) {
             case AlphaCoeff::POISSON:
-                source_term_ = std::make_unique<CartesianR2_Poisson_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+                source_term_ = std::make_unique<CartesianR2_Poisson_CzarnyGeometry>(grid_, Rmax, kappa_eps, delta_e);
                 break;
             case AlphaCoeff::SONNENDRUCKER:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
-                    source_term_ = std::make_unique<CartesianR2_Sonnendrucker_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ =
+                        std::make_unique<CartesianR2_Sonnendrucker_CzarnyGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
                     source_term_ =
-                        std::make_unique<CartesianR2_SonnendruckerGyro_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+                        std::make_unique<CartesianR2_SonnendruckerGyro_CzarnyGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -324,10 +327,11 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
             case AlphaCoeff::ZONI:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
-                    source_term_ = std::make_unique<CartesianR2_Zoni_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ = std::make_unique<CartesianR2_Zoni_CzarnyGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ = std::make_unique<CartesianR2_ZoniGyro_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ =
+                        std::make_unique<CartesianR2_ZoniGyro_CzarnyGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -336,11 +340,12 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
             case AlphaCoeff::ZONI_SHIFTED:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
-                    source_term_ = std::make_unique<CartesianR2_ZoniShifted_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ =
+                        std::make_unique<CartesianR2_ZoniShifted_CzarnyGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
                     source_term_ =
-                        std::make_unique<CartesianR2_ZoniShiftedGyro_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+                        std::make_unique<CartesianR2_ZoniShiftedGyro_CzarnyGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -363,15 +368,15 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
 
             switch (alpha_type) {
             case AlphaCoeff::POISSON:
-                source_term_ = std::make_unique<CartesianR6_Poisson_CircularGeometry>(Rmax);
+                source_term_ = std::make_unique<CartesianR6_Poisson_CircularGeometry>(grid_, Rmax);
                 break;
             case AlphaCoeff::SONNENDRUCKER:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
-                    source_term_ = std::make_unique<CartesianR6_Sonnendrucker_CircularGeometry>(Rmax);
+                    source_term_ = std::make_unique<CartesianR6_Sonnendrucker_CircularGeometry>(grid_, Rmax);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ = std::make_unique<CartesianR6_SonnendruckerGyro_CircularGeometry>(Rmax);
+                    source_term_ = std::make_unique<CartesianR6_SonnendruckerGyro_CircularGeometry>(grid_, Rmax);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -380,10 +385,10 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
             case AlphaCoeff::ZONI:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
-                    source_term_ = std::make_unique<CartesianR6_Zoni_CircularGeometry>(Rmax);
+                    source_term_ = std::make_unique<CartesianR6_Zoni_CircularGeometry>(grid_, Rmax);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ = std::make_unique<CartesianR6_ZoniGyro_CircularGeometry>(Rmax);
+                    source_term_ = std::make_unique<CartesianR6_ZoniGyro_CircularGeometry>(grid_, Rmax);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -392,10 +397,10 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
             case AlphaCoeff::ZONI_SHIFTED:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
-                    source_term_ = std::make_unique<CartesianR6_ZoniShifted_CircularGeometry>(Rmax);
+                    source_term_ = std::make_unique<CartesianR6_ZoniShifted_CircularGeometry>(grid_, Rmax);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ = std::make_unique<CartesianR6_ZoniShiftedGyro_CircularGeometry>(Rmax);
+                    source_term_ = std::make_unique<CartesianR6_ZoniShiftedGyro_CircularGeometry>(grid_, Rmax);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -410,17 +415,17 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
 
             switch (alpha_type) {
             case AlphaCoeff::POISSON:
-                source_term_ = std::make_unique<CartesianR6_Poisson_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+                source_term_ = std::make_unique<CartesianR6_Poisson_ShafranovGeometry>(grid_, Rmax, kappa_eps, delta_e);
                 break;
             case AlphaCoeff::SONNENDRUCKER:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
                     source_term_ =
-                        std::make_unique<CartesianR6_Sonnendrucker_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+                        std::make_unique<CartesianR6_Sonnendrucker_ShafranovGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ =
-                        std::make_unique<CartesianR6_SonnendruckerGyro_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ = std::make_unique<CartesianR6_SonnendruckerGyro_ShafranovGeometry>(
+                        grid_, Rmax, kappa_eps, delta_e);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -429,10 +434,12 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
             case AlphaCoeff::ZONI:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
-                    source_term_ = std::make_unique<CartesianR6_Zoni_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ =
+                        std::make_unique<CartesianR6_Zoni_ShafranovGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ = std::make_unique<CartesianR6_ZoniGyro_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ =
+                        std::make_unique<CartesianR6_ZoniGyro_ShafranovGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -442,11 +449,11 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
                     source_term_ =
-                        std::make_unique<CartesianR6_ZoniShifted_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+                        std::make_unique<CartesianR6_ZoniShifted_ShafranovGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ =
-                        std::make_unique<CartesianR6_ZoniShiftedGyro_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ = std::make_unique<CartesianR6_ZoniShiftedGyro_ShafranovGeometry>(grid_, Rmax,
+                                                                                                   kappa_eps, delta_e);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -461,16 +468,17 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
 
             switch (alpha_type) {
             case AlphaCoeff::POISSON:
-                source_term_ = std::make_unique<CartesianR6_Poisson_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+                source_term_ = std::make_unique<CartesianR6_Poisson_CzarnyGeometry>(grid_, Rmax, kappa_eps, delta_e);
                 break;
             case AlphaCoeff::SONNENDRUCKER:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
-                    source_term_ = std::make_unique<CartesianR6_Sonnendrucker_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ =
+                        std::make_unique<CartesianR6_Sonnendrucker_CzarnyGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
                     source_term_ =
-                        std::make_unique<CartesianR6_SonnendruckerGyro_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+                        std::make_unique<CartesianR6_SonnendruckerGyro_CzarnyGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -479,10 +487,11 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
             case AlphaCoeff::ZONI:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
-                    source_term_ = std::make_unique<CartesianR6_Zoni_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ = std::make_unique<CartesianR6_Zoni_CzarnyGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ = std::make_unique<CartesianR6_ZoniGyro_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ =
+                        std::make_unique<CartesianR6_ZoniGyro_CzarnyGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -491,11 +500,12 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
             case AlphaCoeff::ZONI_SHIFTED:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
-                    source_term_ = std::make_unique<CartesianR6_ZoniShifted_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ =
+                        std::make_unique<CartesianR6_ZoniShifted_CzarnyGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
                     source_term_ =
-                        std::make_unique<CartesianR6_ZoniShiftedGyro_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+                        std::make_unique<CartesianR6_ZoniShiftedGyro_CzarnyGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -518,15 +528,15 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
 
             switch (alpha_type) {
             case AlphaCoeff::POISSON:
-                source_term_ = std::make_unique<PolarR6_Poisson_CircularGeometry>(Rmax);
+                source_term_ = std::make_unique<PolarR6_Poisson_CircularGeometry>(grid_, Rmax);
                 break;
             case AlphaCoeff::SONNENDRUCKER:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
-                    source_term_ = std::make_unique<PolarR6_Sonnendrucker_CircularGeometry>(Rmax);
+                    source_term_ = std::make_unique<PolarR6_Sonnendrucker_CircularGeometry>(grid_, Rmax);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ = std::make_unique<PolarR6_SonnendruckerGyro_CircularGeometry>(Rmax);
+                    source_term_ = std::make_unique<PolarR6_SonnendruckerGyro_CircularGeometry>(grid_, Rmax);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -535,10 +545,10 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
             case AlphaCoeff::ZONI:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
-                    source_term_ = std::make_unique<PolarR6_Zoni_CircularGeometry>(Rmax);
+                    source_term_ = std::make_unique<PolarR6_Zoni_CircularGeometry>(grid_, Rmax);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ = std::make_unique<PolarR6_ZoniGyro_CircularGeometry>(Rmax);
+                    source_term_ = std::make_unique<PolarR6_ZoniGyro_CircularGeometry>(grid_, Rmax);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -547,10 +557,10 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
             case AlphaCoeff::ZONI_SHIFTED:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
-                    source_term_ = std::make_unique<PolarR6_ZoniShifted_CircularGeometry>(Rmax);
+                    source_term_ = std::make_unique<PolarR6_ZoniShifted_CircularGeometry>(grid_, Rmax);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ = std::make_unique<PolarR6_ZoniShiftedGyro_CircularGeometry>(Rmax);
+                    source_term_ = std::make_unique<PolarR6_ZoniShiftedGyro_CircularGeometry>(grid_, Rmax);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -565,16 +575,17 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
 
             switch (alpha_type) {
             case AlphaCoeff::POISSON:
-                source_term_ = std::make_unique<PolarR6_Poisson_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+                source_term_ = std::make_unique<PolarR6_Poisson_ShafranovGeometry>(grid_, Rmax, kappa_eps, delta_e);
                 break;
             case AlphaCoeff::SONNENDRUCKER:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
-                    source_term_ = std::make_unique<PolarR6_Sonnendrucker_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ =
+                        std::make_unique<PolarR6_Sonnendrucker_ShafranovGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
                     source_term_ =
-                        std::make_unique<PolarR6_SonnendruckerGyro_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+                        std::make_unique<PolarR6_SonnendruckerGyro_ShafranovGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -583,10 +594,11 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
             case AlphaCoeff::ZONI:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
-                    source_term_ = std::make_unique<PolarR6_Zoni_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ = std::make_unique<PolarR6_Zoni_ShafranovGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ = std::make_unique<PolarR6_ZoniGyro_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ =
+                        std::make_unique<PolarR6_ZoniGyro_ShafranovGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -595,11 +607,12 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
             case AlphaCoeff::ZONI_SHIFTED:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
-                    source_term_ = std::make_unique<PolarR6_ZoniShifted_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ =
+                        std::make_unique<PolarR6_ZoniShifted_ShafranovGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
                     source_term_ =
-                        std::make_unique<PolarR6_ZoniShiftedGyro_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+                        std::make_unique<PolarR6_ZoniShiftedGyro_ShafranovGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -614,15 +627,17 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
 
             switch (alpha_type) {
             case AlphaCoeff::POISSON:
-                source_term_ = std::make_unique<PolarR6_Poisson_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+                source_term_ = std::make_unique<PolarR6_Poisson_CzarnyGeometry>(grid_, Rmax, kappa_eps, delta_e);
                 break;
             case AlphaCoeff::SONNENDRUCKER:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
-                    source_term_ = std::make_unique<PolarR6_Sonnendrucker_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ =
+                        std::make_unique<PolarR6_Sonnendrucker_CzarnyGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ = std::make_unique<PolarR6_SonnendruckerGyro_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ =
+                        std::make_unique<PolarR6_SonnendruckerGyro_CzarnyGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -631,10 +646,10 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
             case AlphaCoeff::ZONI:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
-                    source_term_ = std::make_unique<PolarR6_Zoni_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ = std::make_unique<PolarR6_Zoni_CzarnyGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ = std::make_unique<PolarR6_ZoniGyro_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ = std::make_unique<PolarR6_ZoniGyro_CzarnyGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -643,10 +658,12 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
             case AlphaCoeff::ZONI_SHIFTED:
                 switch (beta_type) {
                 case BetaCoeff::ZERO:
-                    source_term_ = std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ =
+                        std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ = std::make_unique<PolarR6_ZoniShiftedGyro_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ =
+                        std::make_unique<PolarR6_ZoniShiftedGyro_CzarnyGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta.\n");
@@ -662,7 +679,7 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
             case AlphaCoeff::ZONI_SHIFTED:
                 switch (beta_type) {
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ = std::make_unique<PolarR6_ZoniShiftedGyro_CulhamGeometry>(Rmax);
+                    source_term_ = std::make_unique<PolarR6_ZoniShiftedGyro_CulhamGeometry>(grid_, Rmax);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta for configuration.\n");
@@ -687,7 +704,7 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
             case AlphaCoeff::ZONI_SHIFTED:
                 switch (beta_type) {
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ = std::make_unique<Refined_ZoniShiftedGyro_CircularGeometry>(Rmax);
+                    source_term_ = std::make_unique<Refined_ZoniShiftedGyro_CircularGeometry>(grid_, Rmax);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta for configuration.\n");
@@ -705,7 +722,7 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
                 switch (beta_type) {
                 case BetaCoeff::ALPHA_INVERSE:
                     source_term_ =
-                        std::make_unique<Refined_ZoniShiftedGyro_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+                        std::make_unique<Refined_ZoniShiftedGyro_ShafranovGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta for configuration.\n");
@@ -722,7 +739,8 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
             case AlphaCoeff::ZONI_SHIFTED:
                 switch (beta_type) {
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ = std::make_unique<Refined_ZoniShiftedGyro_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+                    source_term_ =
+                        std::make_unique<Refined_ZoniShiftedGyro_CzarnyGeometry>(grid_, Rmax, kappa_eps, delta_e);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta for configuration.\n");
@@ -739,7 +757,7 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
             case AlphaCoeff::ZONI_SHIFTED:
                 switch (beta_type) {
                 case BetaCoeff::ALPHA_INVERSE:
-                    source_term_ = std::make_unique<Refined_ZoniShiftedGyro_CulhamGeometry>(Rmax);
+                    source_term_ = std::make_unique<Refined_ZoniShiftedGyro_CulhamGeometry>(grid_, Rmax);
                     break;
                 default:
                     throw std::runtime_error("Invalid beta for configuration.\n");

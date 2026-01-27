@@ -18,7 +18,7 @@ void IGMGPolar::build_rhs_f(const Level& level, Vector<double> rhs_f, const Boun
                 double theta = grid.theta(i_theta);
 
                 if ((0 < i_r && i_r < grid.nr() - 1) || (i_r == 0 && !DirBC_Interior_)) {
-                    rhs_f[grid.index(i_r, i_theta)] = source_term.rhs_f(r, theta);
+                    rhs_f[grid.index(i_r, i_theta)] = source_term(i_r, i_theta);
                 }
                 else if (i_r == 0 && DirBC_Interior_) {
                     rhs_f[grid.index(i_r, i_theta)] = boundary_conditions.u_D_Interior(r, theta);
@@ -39,7 +39,7 @@ void IGMGPolar::build_rhs_f(const Level& level, Vector<double> rhs_f, const Boun
             for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
                 double r = grid.radius(i_r);
                 if ((0 < i_r && i_r < grid.nr() - 1) || (i_r == 0 && !DirBC_Interior_)) {
-                    rhs_f[grid.index(i_r, i_theta)] = source_term.rhs_f(r, theta);
+                    rhs_f[grid.index(i_r, i_theta)] = source_term(i_r, i_theta);
                 }
                 else if (i_r == 0 && DirBC_Interior_) {
                     rhs_f[grid.index(i_r, i_theta)] = boundary_conditions.u_D_Interior(r, theta);

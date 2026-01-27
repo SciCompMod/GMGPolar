@@ -34,7 +34,7 @@ inline void node_apply_residual_take(int i_r, int i_theta, const PolarGrid& grid
 
         result[center] =
             rhs[center] -
-            (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) * x[center] /* beta_{i,j} */
+            (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) * x[center] /* beta_{i,j} */
 
              - coeff1 * (arr[center] + arr[left]) * (x[left] - x[center]) /* Left - Center: (Left) */
              - coeff2 * (arr[center] + arr[right]) * (x[right] - x[center]) /* Right - Center: (Right) */
@@ -46,10 +46,10 @@ inline void node_apply_residual_take(int i_r, int i_theta, const PolarGrid& grid
              + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
              - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
             );
-        /* -------------------------- */
-        /* Node on the inner boundary */
-        /* -------------------------- */
     }
+    /* -------------------------- */
+    /* Node on the inner boundary */
+    /* -------------------------- */
     else if (i_r == 0) {
         /* ------------------------------------------------ */
         /* Case 1: Dirichlet boundary on the inner boundary */
@@ -89,7 +89,8 @@ inline void node_apply_residual_take(int i_r, int i_theta, const PolarGrid& grid
 
             result[center] =
                 rhs[center] -
-                (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) * x[center] /* beta_{i,j} */
+                (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) *
+                     x[center] /* beta_{i,j} */
 
                  - coeff1 * (arr[center] + arr[left]) * (x[left] - x[center]) /* Left - Center: (Left) */
                  - coeff2 * (arr[center] + arr[right]) * (x[right] - x[center]) /* Right - Center: (Right) */
@@ -98,15 +99,14 @@ inline void node_apply_residual_take(int i_r, int i_theta, const PolarGrid& grid
 
                  /* - 0.25 * (art[left] + art[bottom]) * x[bottom_left] // Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
                  + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
-
                  /* + 0.25 * (art[left] + art[top]) * x[top_left] // Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
                  - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
                 );
         }
-        /* ----------------------------- */
-        /* Node on to the outer boundary */
-        /* ----------------------------- */
     }
+    /* ----------------------------- */
+    /* Node on to the outer boundary */
+    /* ----------------------------- */
     else if (i_r == grid.nr() - 1) {
         /* Fill result of (i,j) */
         const int center = grid.index(i_r, i_theta);
