@@ -1,31 +1,16 @@
 #pragma once
 
-#include <chrono>
 #include <filesystem>
 #include <iostream>
-#include <memory>
 #include <omp.h>
-#include <optional>
 #include <utility>
 
-class Level;
-class LevelCache;
-
-#include "../InputFunctions/boundaryConditions.h"
 #include "../InputFunctions/densityProfileCoefficients.h"
 #include "../InputFunctions/domainGeometry.h"
-#include "../InputFunctions/exactSolution.h"
-#include "../InputFunctions/sourceTerm.h"
-#include "../Interpolation/interpolation.h"
-#include "../Level/level.h"
-#include "../LinearAlgebra/vector.h"
-#include "../LinearAlgebra/vector_operations.h"
-#include "../PolarGrid/polargrid.h"
-#include "../common/global_definitions.h"
-#include "test_cases.h"
+
 #include "igmgpolar.h"
 
-template <concepts::DomainGeometry DomainGeometry>
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 class GMGPolar : public IGMGPolar
 {
 public:
@@ -41,8 +26,9 @@ public:
     // - density_profile_coefficients: Coefficients \alpha and \beta defining the PDE.
     GMGPolar(const PolarGrid& grid, const DomainGeometry& domain_geometry,
              const DensityProfileCoefficients& density_profile_coefficients)
-        : IGMGPolar(grid, density_profile_coefficients)
+        : IGMGPolar(grid)
         , domain_geometry_(domain_geometry)
+        , density_profile_coefficients_(density_profile_coefficients)
     {
     }
 
@@ -57,6 +43,7 @@ private:
     /* Grid Configuration & Input Functions */
     /* ------------------------------------ */
     const DomainGeometry& domain_geometry_;
+    const DensityProfileCoefficients& density_profile_coefficients_;
 
     /* --------------- */
     /* Setup Functions */

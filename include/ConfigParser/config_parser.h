@@ -25,7 +25,7 @@ public:
 
     // Test Case
     const DomainGeometryVariant& domainGeometry() const;
-    const DensityProfileCoefficients& densityProfileCoefficients() const;
+    const DensityProfileCoefficientsVariant& densityProfileCoefficients() const;
     const BoundaryConditions& boundaryConditions() const;
     const SourceTerm& sourceTerm() const;
     const ExactSolution& exactSolution() const;
@@ -61,7 +61,7 @@ private:
     cmdline::parser parser_;
     // Input Functions
     std::unique_ptr<const DomainGeometryVariant> domain_geometry_;
-    std::unique_ptr<const DensityProfileCoefficients> density_profile_coefficients_;
+    std::unique_ptr<const DensityProfileCoefficientsVariant> density_profile_coefficients_;
     std::unique_ptr<const BoundaryConditions> boundary_conditions_;
     std::unique_ptr<const SourceTerm> source_term_;
     std::unique_ptr<const ExactSolution> exact_solution_;

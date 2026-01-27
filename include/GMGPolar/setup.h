@@ -1,6 +1,6 @@
 
-template <concepts::DomainGeometry DomainGeometry>
-void GMGPolar<DomainGeometry>::setup()
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
 {
     LIKWID_START("Setup");
     auto start_setup = std::chrono::high_resolution_clock::now();

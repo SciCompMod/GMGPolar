@@ -194,6 +194,10 @@ TEST_P(ConfigParserTest, ParseAllGeometryAndProblemCombinations)
     EXPECT_DOUBLE_EQ(parser.absoluteTolerance().value(), absoluteTolerance);
     ASSERT_TRUE(parser.relativeTolerance().has_value());
     EXPECT_DOUBLE_EQ(parser.relativeTolerance().value(), relativeTolerance);
+
+    // Solver
+    std::unique_ptr<IGMGPolar> solver = parser.solver();
+    EXPECT_EQ(&solver->grid(), &parser.grid());
 }
 
 // Define test cases covering all combinations

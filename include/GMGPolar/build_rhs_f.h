@@ -1,7 +1,7 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
-template <concepts::DomainGeometry DomainGeometry>
-void GMGPolar<DomainGeometry>::discretize_rhs_f(const Level& level, Vector<double> rhs_f)
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(const Level& level, Vector<double> rhs_f)
 {
     const PolarGrid& grid = level.grid();
     assert(std::ssize(rhs_f) == grid.numberOfNodes());
