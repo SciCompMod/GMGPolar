@@ -5,18 +5,21 @@ void CartesianR6_ZoniGyro_CzarnyGeometry::initializeGeometry()
     factor_xi = 1.0 / sqrt(1.0 - inverse_aspect_ratio_epsilon * inverse_aspect_ratio_epsilon / 4.0);
 }
 
-CartesianR6_ZoniGyro_CzarnyGeometry::CartesianR6_ZoniGyro_CzarnyGeometry(double Rmax,
+CartesianR6_ZoniGyro_CzarnyGeometry::CartesianR6_ZoniGyro_CzarnyGeometry(PolarGrid const& grid, double Rmax,
                                                                          double inverse_aspect_ratio_epsilon,
                                                                          double ellipticity_e)
-    : Rmax(Rmax)
+    : grid_(grid)
+    , Rmax(Rmax)
     , inverse_aspect_ratio_epsilon(inverse_aspect_ratio_epsilon)
     , ellipticity_e(ellipticity_e)
 {
     initializeGeometry();
 }
 
-double CartesianR6_ZoniGyro_CzarnyGeometry::rhs_f(double r, double theta) const
+double CartesianR6_ZoniGyro_CzarnyGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
 {
+    double r         = grid_.radius(i_r);
+    double theta     = grid_.theta(i_theta);
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
     double temp =

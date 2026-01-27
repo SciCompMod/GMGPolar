@@ -1,15 +1,19 @@
 #include "../include/InputFunctions/SourceTerms/polarR6_ZoniShifted_ShafranovGeometry.h"
 
-PolarR6_ZoniShifted_ShafranovGeometry::PolarR6_ZoniShifted_ShafranovGeometry(double Rmax, double elongation_kappa,
+PolarR6_ZoniShifted_ShafranovGeometry::PolarR6_ZoniShifted_ShafranovGeometry(PolarGrid const& grid, double Rmax,
+                                                                             double elongation_kappa,
                                                                              double shift_delta)
-    : Rmax(Rmax)
+    : grid_(grid)
+    , Rmax(Rmax)
     , elongation_kappa(elongation_kappa)
     , shift_delta(shift_delta)
 {
 }
 
-double PolarR6_ZoniShifted_ShafranovGeometry::rhs_f(double r, double theta) const
+double PolarR6_ZoniShifted_ShafranovGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
 {
+    double r         = grid_.radius(i_r);
+    double theta     = grid_.theta(i_theta);
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
     return (-pow((r / Rmax), 4.0)) *

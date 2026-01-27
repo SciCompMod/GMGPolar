@@ -1,12 +1,15 @@
 #include "../include/InputFunctions/SourceTerms/polarR6_Zoni_CircularGeometry.h"
 
-PolarR6_Zoni_CircularGeometry::PolarR6_Zoni_CircularGeometry(double Rmax)
-    : Rmax(Rmax)
+PolarR6_Zoni_CircularGeometry::PolarR6_Zoni_CircularGeometry(PolarGrid const& grid, double Rmax)
+    : grid_(grid)
+    , Rmax(Rmax)
 {
 }
 
-double PolarR6_Zoni_CircularGeometry::rhs_f(double r, double theta) const
+double PolarR6_Zoni_CircularGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
 {
+    double r     = grid_.radius(i_r);
+    double theta = grid_.theta(i_theta);
     return (-pow((r / Rmax), 4.0)) *
            ((r / Rmax) *
                 (12.288 * (r / Rmax) * pow(((r / Rmax) - 1.0), 4.0) * cos(11.0 * theta) +

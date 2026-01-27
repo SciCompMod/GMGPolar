@@ -5,17 +5,20 @@ void PolarR6_Zoni_CzarnyGeometry::initializeGeometry()
     factor_xi = 1.0 / sqrt(1.0 - inverse_aspect_ratio_epsilon * inverse_aspect_ratio_epsilon / 4.0);
 }
 
-PolarR6_Zoni_CzarnyGeometry::PolarR6_Zoni_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon,
-                                                         double ellipticity_e)
-    : Rmax(Rmax)
+PolarR6_Zoni_CzarnyGeometry::PolarR6_Zoni_CzarnyGeometry(PolarGrid const& grid, double Rmax,
+                                                         double inverse_aspect_ratio_epsilon, double ellipticity_e)
+    : grid_(grid)
+    , Rmax(Rmax)
     , inverse_aspect_ratio_epsilon(inverse_aspect_ratio_epsilon)
     , ellipticity_e(ellipticity_e)
 {
     initializeGeometry();
 }
 
-double PolarR6_Zoni_CzarnyGeometry::rhs_f(double r, double theta) const
+double PolarR6_Zoni_CzarnyGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
 {
+    double r         = grid_.radius(i_r);
+    double theta     = grid_.theta(i_theta);
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
     double temp =

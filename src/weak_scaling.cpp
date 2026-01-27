@@ -22,7 +22,6 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
     // ShafranovGeometry domain_geometry(Rmax, elongation_kappa, shift_delta);
     // ZoniGyroCoefficients coefficients(Rmax, alpha_jump);
     // PolarR6_Boundary_ShafranovGeometry boundary_conditions(Rmax, elongation_kappa, shift_delta);
-    // PolarR6_ZoniGyro_ShafranovGeometry source_term(Rmax, elongation_kappa, shift_delta);
     // PolarR6_ShafranovGeometry exact_solution(Rmax, elongation_kappa, shift_delta);
 
     /* Example 2: Cartesian Solution -> Lower Order 3.5 */
@@ -30,7 +29,6 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
     CzarnyGeometry domain_geometry(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
     SonnendruckerGyroCoefficients coefficients(Rmax, alpha_jump);
     CartesianR2_Boundary_CzarnyGeometry boundary_conditions(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    CartesianR2_SonnendruckerGyro_CzarnyGeometry source_term(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
     CartesianR2_CzarnyGeometry exact_solution(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
 
     /* Example 3: Refined Solution -> Lower Order 3.5 */
@@ -38,7 +36,6 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
     // ShafranovGeometry domain_geometry(Rmax, elongation_kappa, shift_delta);
     // ZoniShiftedGyroCoefficients coefficients(Rmax, alpha_jump);
     // Refined_Boundary_ShafranovGeometry boundary_conditions(Rmax, elongation_kappa, shift_delta);
-    // Refined_ZoniShiftedGyro_ShafranovGeometry source_term(Rmax, elongation_kappa, shift_delta);
     // Refined_ShafranovGeometry exact_solution(Rmax, elongation_kappa, shift_delta);
 
     std::string geometry_string = "";
@@ -90,6 +87,10 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
     std::optional<double> splitting_radius = std::nullopt;
     PolarGrid grid(R0, Rmax, nr_exp, ntheta_exp, refinement_radius, anisotropic_factor, divideBy2, splitting_radius);
     GMGPolar solver(grid, domain_geometry, coefficients);
+
+    // PolarR6_ZoniGyro_ShafranovGeometry source_term(grid, Rmax, elongation_kappa, shift_delta);
+    CartesianR2_SonnendruckerGyro_CzarnyGeometry source_term(grid, Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
+    // Refined_ZoniShiftedGyro_ShafranovGeometry source_term(grid, Rmax, elongation_kappa, shift_delta);
 
     solver.verbose(verbose);
     solver.paraview(paraview);
@@ -145,8 +146,9 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
             << solver.timeAvgMGCResidual() << "," << solver.timeAvgMGCDirectSolver() << std::endl;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+    Kokkos::ScopeGuard kokkos_scope(argc, argv);
     omp_set_num_threads(omp_get_max_threads());
 
     std::ofstream outfile("weak_scaling_results.csv");

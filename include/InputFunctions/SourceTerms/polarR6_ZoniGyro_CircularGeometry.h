@@ -4,15 +4,17 @@
 
 #include "../sourceTerm.h"
 
+#include "../../PolarGrid/polargrid.h"
+
 class PolarR6_ZoniGyro_CircularGeometry : public SourceTerm
 {
 public:
-    PolarR6_ZoniGyro_CircularGeometry() = default;
-    explicit PolarR6_ZoniGyro_CircularGeometry(double Rmax);
+    explicit PolarR6_ZoniGyro_CircularGeometry(PolarGrid const& grid, double Rmax);
     virtual ~PolarR6_ZoniGyro_CircularGeometry() = default;
 
-    double rhs_f(double r, double theta) const override;
+    double operator()(std::size_t i_r, std::size_t i_theta) const override;
 
 private:
+    PolarGrid const& grid_;
     const double Rmax = 1.3;
 };
