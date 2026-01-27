@@ -140,7 +140,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(cons
     }
 }
 
-template<concepts::BoundaryConditions BoundaryConditions>
+template <concepts::BoundaryConditions BoundaryConditions>
 void IGMGPolar::build_rhs_f(const Level& level, Vector<double> rhs_f, const BoundaryConditions& boundary_conditions,
                             const SourceTerm& source_term)
 {

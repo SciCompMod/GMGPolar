@@ -550,10 +550,10 @@ TEST(DirectSolverTestNoMumps_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGe
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
-    bool DirBC_Interior                                     = true;
-    int maxOpenMPThreads                                    = 16;
-    bool cache_density_rpofile_coefficients                 = true;
-    bool cache_domain_geometry                              = false;
+    bool DirBC_Interior                     = true;
+    int maxOpenMPThreads                    = 16;
+    bool cache_density_rpofile_coefficients = true;
+    bool cache_domain_geometry              = false;
 
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);
@@ -594,10 +594,10 @@ TEST(DirectSolverTestNoMumps_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeom
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
-    bool DirBC_Interior                                     = false;
-    int maxOpenMPThreads                                    = 16;
-    bool cache_density_rpofile_coefficients                 = true;
-    bool cache_domain_geometry                              = false;
+    bool DirBC_Interior                     = false;
+    int maxOpenMPThreads                    = 16;
+    bool cache_density_rpofile_coefficients = true;
+    bool cache_domain_geometry              = false;
 
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);
@@ -1113,10 +1113,10 @@ TEST(DirectSolverTakeCustomLUTest_CulhamGeometry, DirectSolverDirBC_Interior_Cul
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
-    bool DirBC_Interior                                     = true;
-    int maxOpenMPThreads                                    = 16;
-    bool cache_density_rpofile_coefficients                 = true;
-    bool cache_domain_geometry                              = true;
+    bool DirBC_Interior                     = true;
+    int maxOpenMPThreads                    = 16;
+    bool cache_density_rpofile_coefficients = true;
+    bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);
@@ -1157,10 +1157,10 @@ TEST(DirectSolverTakeCustomLUTest_CulhamGeometry, DirectSolverAcrossOrigin_Culha
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedGyroCoefficients>(Rmax, alpha_jump);
-    bool DirBC_Interior                                     = false;
-    int maxOpenMPThreads                                    = 16;
-    bool cache_density_rpofile_coefficients                 = true;
-    bool cache_domain_geometry                              = true;
+    bool DirBC_Interior                     = false;
+    int maxOpenMPThreads                    = 16;
+    bool cache_density_rpofile_coefficients = true;
+    bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);

@@ -2,7 +2,7 @@
 // =============================================================================
 //   Main Solver Routine
 // =============================================================================
-template<concepts::BoundaryConditions BoundaryConditions>
+template <concepts::BoundaryConditions BoundaryConditions>
 void IGMGPolar::solve(const BoundaryConditions& boundary_conditions, const SourceTerm& source_term)
 {
     auto start_setup_rhs = std::chrono::high_resolution_clock::now();
