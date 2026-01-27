@@ -10,10 +10,8 @@ public:
     explicit PolarR6_Boundary_CzarnyGeometry();
     explicit PolarR6_Boundary_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon, double ellipticity_e);
 
-    virtual ~PolarR6_Boundary_CzarnyGeometry() = default;
-
-    double u_D(double r, double theta) const ;
-    double u_D_Interior(double r, double theta) const ;
+    double u_D(double r, double theta) const;
+    double u_D_Interior(double r, double theta) const;
 
 private:
     const double Rmax                         = 1.3;
