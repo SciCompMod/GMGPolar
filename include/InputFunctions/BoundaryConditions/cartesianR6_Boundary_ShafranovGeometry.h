@@ -4,18 +4,20 @@
 
 #include "../boundaryConditions.h"
 
-class CartesianR6_Boundary_ShafranovGeometry : public BoundaryConditions
+class CartesianR6_Boundary_ShafranovGeometry
 {
 public:
     CartesianR6_Boundary_ShafranovGeometry() = default;
     explicit CartesianR6_Boundary_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
     virtual ~CartesianR6_Boundary_ShafranovGeometry() = default;
 
-    double u_D(double r, double theta) const override;
-    double u_D_Interior(double r, double theta) const override;
+    double u_D(double r, double theta) const ;
+    double u_D_Interior(double r, double theta) const ;
 
 private:
     const double Rmax             = 1.3;
     const double elongation_kappa = 0.3;
     const double shift_delta      = 0.2;
 };
+
+static_assert(concepts::BoundaryConditions<CartesianR6_Boundary_ShafranovGeometry>);

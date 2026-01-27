@@ -4,7 +4,7 @@
 
 #include "../boundaryConditions.h"
 
-class CartesianR2_Boundary_CzarnyGeometry : public BoundaryConditions
+class CartesianR2_Boundary_CzarnyGeometry
 {
 public:
     explicit CartesianR2_Boundary_CzarnyGeometry();
@@ -13,8 +13,8 @@ public:
 
     virtual ~CartesianR2_Boundary_CzarnyGeometry() = default;
 
-    double u_D(double r, double theta) const override;
-    double u_D_Interior(double r, double theta) const override;
+    double u_D(double r, double theta) const ;
+    double u_D_Interior(double r, double theta) const ;
 
 private:
     const double Rmax                         = 1.3;
@@ -24,3 +24,5 @@ private:
     void initializeGeometry();
     double factor_xi;
 };
+
+static_assert(concepts::BoundaryConditions<CartesianR2_Boundary_CzarnyGeometry>);
