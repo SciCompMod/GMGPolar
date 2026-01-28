@@ -113,16 +113,19 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
     case ProblemType::CARTESIAN_R2:
         switch (geometry_type) {
         case GeometryType::CIRCULAR:
-            exact_solution_      = std::make_unique<CartesianR2_CircularGeometry>(Rmax);
-            boundary_conditions_ = std::make_unique<CartesianR2_Boundary_CircularGeometry>(Rmax);
+            exact_solution_ = std::make_unique<CartesianR2_CircularGeometry>(Rmax);
+            boundary_conditions_ =
+                std::make_unique<BoundaryConditionsVariant>(CartesianR2_Boundary_CircularGeometry(Rmax));
             break;
         case GeometryType::SHAFRANOV:
             exact_solution_      = std::make_unique<CartesianR2_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
-            boundary_conditions_ = std::make_unique<CartesianR2_Boundary_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+            boundary_conditions_ = std::make_unique<BoundaryConditionsVariant>(
+                CartesianR2_Boundary_ShafranovGeometry(Rmax, kappa_eps, delta_e));
             break;
         case GeometryType::CZARNY:
             exact_solution_      = std::make_unique<CartesianR2_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
-            boundary_conditions_ = std::make_unique<CartesianR2_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+            boundary_conditions_ = std::make_unique<BoundaryConditionsVariant>(
+                CartesianR2_Boundary_CzarnyGeometry(Rmax, kappa_eps, delta_e));
             break;
         default:
             throw std::runtime_error("Invalid geometry for configuration.\n");
@@ -132,16 +135,19 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
     case ProblemType::CARTESIAN_R6:
         switch (geometry_type) {
         case GeometryType::CIRCULAR:
-            exact_solution_      = std::make_unique<CartesianR6_CircularGeometry>(Rmax);
-            boundary_conditions_ = std::make_unique<CartesianR6_Boundary_CircularGeometry>(Rmax);
+            exact_solution_ = std::make_unique<CartesianR6_CircularGeometry>(Rmax);
+            boundary_conditions_ =
+                std::make_unique<BoundaryConditionsVariant>(CartesianR6_Boundary_CircularGeometry(Rmax));
             break;
         case GeometryType::SHAFRANOV:
             exact_solution_      = std::make_unique<CartesianR6_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
-            boundary_conditions_ = std::make_unique<CartesianR6_Boundary_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+            boundary_conditions_ = std::make_unique<BoundaryConditionsVariant>(
+                CartesianR6_Boundary_ShafranovGeometry(Rmax, kappa_eps, delta_e));
             break;
         case GeometryType::CZARNY:
             exact_solution_      = std::make_unique<CartesianR6_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
-            boundary_conditions_ = std::make_unique<CartesianR6_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+            boundary_conditions_ = std::make_unique<BoundaryConditionsVariant>(
+                CartesianR6_Boundary_CzarnyGeometry(Rmax, kappa_eps, delta_e));
             break;
         default:
             throw std::runtime_error("Invalid geometry for configuration.\n");
@@ -152,19 +158,21 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
         switch (geometry_type) {
         case GeometryType::CIRCULAR:
             exact_solution_      = std::make_unique<PolarR6_CircularGeometry>(Rmax);
-            boundary_conditions_ = std::make_unique<PolarR6_Boundary_CircularGeometry>(Rmax);
+            boundary_conditions_ = std::make_unique<BoundaryConditionsVariant>(PolarR6_Boundary_CircularGeometry(Rmax));
             break;
         case GeometryType::SHAFRANOV:
             exact_solution_      = std::make_unique<PolarR6_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
-            boundary_conditions_ = std::make_unique<PolarR6_Boundary_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+            boundary_conditions_ = std::make_unique<BoundaryConditionsVariant>(
+                PolarR6_Boundary_ShafranovGeometry(Rmax, kappa_eps, delta_e));
             break;
         case GeometryType::CZARNY:
-            exact_solution_      = std::make_unique<PolarR6_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
-            boundary_conditions_ = std::make_unique<PolarR6_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+            exact_solution_ = std::make_unique<PolarR6_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+            boundary_conditions_ =
+                std::make_unique<BoundaryConditionsVariant>(PolarR6_Boundary_CzarnyGeometry(Rmax, kappa_eps, delta_e));
             break;
         case GeometryType::CULHAM:
             exact_solution_      = std::make_unique<PolarR6_CulhamGeometry>(Rmax);
-            boundary_conditions_ = std::make_unique<PolarR6_Boundary_CulhamGeometry>(Rmax);
+            boundary_conditions_ = std::make_unique<BoundaryConditionsVariant>(PolarR6_Boundary_CulhamGeometry(Rmax));
             break;
         default:
             throw std::runtime_error("Invalid geometry for configuration.\n");
@@ -175,19 +183,21 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
         switch (geometry_type) {
         case GeometryType::CIRCULAR:
             exact_solution_      = std::make_unique<Refined_CircularGeometry>(Rmax);
-            boundary_conditions_ = std::make_unique<Refined_Boundary_CircularGeometry>(Rmax);
+            boundary_conditions_ = std::make_unique<BoundaryConditionsVariant>(Refined_Boundary_CircularGeometry(Rmax));
             break;
         case GeometryType::SHAFRANOV:
             exact_solution_      = std::make_unique<Refined_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
-            boundary_conditions_ = std::make_unique<Refined_Boundary_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+            boundary_conditions_ = std::make_unique<BoundaryConditionsVariant>(
+                Refined_Boundary_ShafranovGeometry(Rmax, kappa_eps, delta_e));
             break;
         case GeometryType::CZARNY:
-            exact_solution_      = std::make_unique<Refined_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
-            boundary_conditions_ = std::make_unique<Refined_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+            exact_solution_ = std::make_unique<Refined_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+            boundary_conditions_ =
+                std::make_unique<BoundaryConditionsVariant>(Refined_Boundary_CzarnyGeometry(Rmax, kappa_eps, delta_e));
             break;
         case GeometryType::CULHAM:
             exact_solution_      = std::make_unique<Refined_CulhamGeometry>(Rmax);
-            boundary_conditions_ = std::make_unique<Refined_Boundary_CulhamGeometry>(Rmax);
+            boundary_conditions_ = std::make_unique<BoundaryConditionsVariant>(Refined_Boundary_CulhamGeometry(Rmax));
             break;
         default:
             throw std::runtime_error("Invalid geometry for configuration.\n");

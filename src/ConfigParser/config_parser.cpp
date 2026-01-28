@@ -377,7 +377,7 @@ const DensityProfileCoefficientsVariant& ConfigParser::densityProfileCoefficient
     return *density_profile_coefficients_.get();
 }
 
-const BoundaryConditions& ConfigParser::boundaryConditions() const
+const BoundaryConditionsVariant& ConfigParser::boundaryConditions() const
 {
     return *boundary_conditions_.get();
 }

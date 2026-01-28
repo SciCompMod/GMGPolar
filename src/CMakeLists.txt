@@ -18,7 +18,6 @@ set(POLAR_GRID_SOURCES
 
 # file(GLOB_RECURSE GMG_POLAR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/*.cpp)
 set(GMG_POLAR_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/build_rhs_f.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/gmgpolar.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/level_interpolation.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/setup.cpp
