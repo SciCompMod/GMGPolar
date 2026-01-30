@@ -110,8 +110,7 @@ void IGMGPolar::solve(const BoundaryConditions& boundary_conditions, const Sourc
                 multigrid_V_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
             }
             else {
-                implicitlyExtrapolatedMultigrid_V_Cycle(level.level_depth(), level.solution(), level.rhs(),
-                                                        level.residual());
+                extrapolated_multigrid_V_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
             }
             break;
         case MultigridCycleType::W_CYCLE:
@@ -119,8 +118,7 @@ void IGMGPolar::solve(const BoundaryConditions& boundary_conditions, const Sourc
                 multigrid_W_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
             }
             else {
-                implicitlyExtrapolatedMultigrid_W_Cycle(level.level_depth(), level.solution(), level.rhs(),
-                                                        level.residual());
+                extrapolated_multigrid_W_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
             }
             break;
         case MultigridCycleType::F_CYCLE:
@@ -128,8 +126,7 @@ void IGMGPolar::solve(const BoundaryConditions& boundary_conditions, const Sourc
                 multigrid_F_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
             }
             else {
-                implicitlyExtrapolatedMultigrid_F_Cycle(level.level_depth(), level.solution(), level.rhs(),
-                                                        level.residual());
+                extrapolated_multigrid_F_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
             }
             break;
         default:
@@ -214,18 +211,18 @@ void IGMGPolar::initializeSolution()
                 if (fine_level.level_depth() == 0 && (extrapolation_ != ExtrapolationType::NONE)) {
                     switch (FMG_cycle_) {
                     case MultigridCycleType::V_CYCLE:
-                        implicitlyExtrapolatedMultigrid_V_Cycle(fine_level.level_depth(), fine_level.solution(),
-                                                                fine_level.rhs(), fine_level.residual());
+                        extrapolated_multigrid_V_Cycle(fine_level.level_depth(), fine_level.solution(),
+                                                       fine_level.rhs(), fine_level.residual());
                         break;
 
                     case MultigridCycleType::W_CYCLE:
-                        implicitlyExtrapolatedMultigrid_W_Cycle(fine_level.level_depth(), fine_level.solution(),
-                                                                fine_level.rhs(), fine_level.residual());
+                        extrapolated_multigrid_W_Cycle(fine_level.level_depth(), fine_level.solution(),
+                                                       fine_level.rhs(), fine_level.residual());
                         break;
 
                     case MultigridCycleType::F_CYCLE:
-                        implicitlyExtrapolatedMultigrid_F_Cycle(fine_level.level_depth(), fine_level.solution(),
-                                                                fine_level.rhs(), fine_level.residual());
+                        extrapolated_multigrid_F_Cycle(fine_level.level_depth(), fine_level.solution(),
+                                                       fine_level.rhs(), fine_level.residual());
                         break;
 
                     default:
