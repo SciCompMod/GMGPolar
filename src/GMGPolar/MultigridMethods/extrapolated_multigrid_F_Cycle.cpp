@@ -1,6 +1,6 @@
 #include "../../../include/GMGPolar/gmgpolar.h"
 
-void IGMGPolar : extrapolated_multigrid_F_Cycle(int level_depth, Vector<double> solution, Vector<double> rhs,
+void IGMGPolar::extrapolated_multigrid_F_Cycle(int level_depth, Vector<double> solution, Vector<double> rhs,
                                                 Vector<double> residual)
 {
     assert(0 <= level_depth && level_depth < number_of_levels_ - 1);
