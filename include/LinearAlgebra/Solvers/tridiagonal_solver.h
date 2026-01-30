@@ -131,7 +131,7 @@ public:
         }
         else {
             SetupCyclic functor{matrix_dimension_, main_diagonal_, sub_diagonal_, gamma_};
-            Kokkos::parallel_for("SetupNonCyclic", batch_count_, functor);
+            Kokkos::parallel_for("SetupCyclic", batch_count_, functor);
         }
         Kokkos::fence();
         is_factorized_ = true;
