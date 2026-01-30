@@ -152,7 +152,7 @@ std::vector<double> refine(std::vector<double> const& original_points)
     return refined;
 }
 
-template <class DensityProfileCoefficients>
+template <class DensityProfileCoefficients, concepts::BoundaryConditions BoundaryConditions>
 std::tuple<double, double>
 get_gmgpolar_error(PolarGrid const& grid, CzarnyGeometry const& domain_geometry,
                    DensityProfileCoefficients const& coefficients, BoundaryConditions const& boundary_conditions,

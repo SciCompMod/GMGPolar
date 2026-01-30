@@ -18,7 +18,6 @@
 /* Test Case */
 /* --------- */
 #include "../include/InputFunctions/DomainGeometry/czarnyGeometry.h"
-#include "../include/InputFunctions/BoundaryConditions/polarR6_Boundary_CzarnyGeometry.h"
 #include "../include/InputFunctions/DensityProfileCoefficients/zoniShiftedCoefficients.h"
 #include "../include/InputFunctions/SourceTerms/polarR6_ZoniShifted_CzarnyGeometry.h"
 
@@ -40,8 +39,6 @@ TEST(OperatorATest, applyA_DirBC_Interior)
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<PolarR6_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
 
     bool DirBC_Interior  = true;
     int maxOpenMPThreads = 16;
@@ -97,8 +94,6 @@ TEST(OperatorATest, applyA_AcrossOrigin)
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
         std::make_unique<ZoniShiftedCoefficients>(Rmax, alpha_jump);
-    std::unique_ptr<BoundaryConditions> boundary_conditions =
-        std::make_unique<PolarR6_Boundary_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
 
     bool DirBC_Interior  = false;
     int maxOpenMPThreads = 16;

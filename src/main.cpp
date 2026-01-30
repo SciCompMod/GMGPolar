@@ -53,7 +53,11 @@ int main(int argc, char* argv[])
     // --- Provide optional exact solution --- //
     solver->setSolution(&parser.exactSolution());
     // --- Solve Phase --- //
-    solver->solve(parser.boundaryConditions(), parser.sourceTerm());
+    std::visit(
+        [&](auto const& boundary_condition) {
+            solver->solve(boundary_condition, parser.sourceTerm());
+        },
+        parser.boundaryConditions());
 
     // --- Retrieve solution and associated grid --- //
     Vector<double> solution = solver->solution();

@@ -4,16 +4,16 @@
 
 #include "../boundaryConditions.h"
 
-class PolarR6_Boundary_CircularGeometry : public BoundaryConditions
+class PolarR6_Boundary_CircularGeometry
 {
 public:
-    PolarR6_Boundary_CircularGeometry() = default;
     explicit PolarR6_Boundary_CircularGeometry(double Rmax);
-    virtual ~PolarR6_Boundary_CircularGeometry() = default;
 
-    double u_D(double r, double theta) const override;
-    double u_D_Interior(double r, double theta) const override;
+    double u_D(double r, double theta) const;
+    double u_D_Interior(double r, double theta) const;
 
 private:
     const double Rmax = 1.3;
 };
+
+static_assert(concepts::BoundaryConditions<PolarR6_Boundary_CircularGeometry>);
