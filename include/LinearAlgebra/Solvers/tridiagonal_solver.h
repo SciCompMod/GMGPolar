@@ -151,12 +151,12 @@ public:
         int m_batch_offset;
         int m_batch_stride;
 
-        void operator()(const int batch_idx) const
+        void operator()(const int k) const
         {
             // ----------------------------------- //
             // Obtain offset for the current batch //
-            int solve_batch = m_batch_stride * batch_idx + m_batch_offset;
-            int offset      = solve_batch * m_matrix_dimension;
+            int batch_idx = m_batch_stride * k + m_batch_offset;
+            int offset    = batch_idx * m_matrix_dimension;
 
             // -------------------- //
             // Forward Substitution //
@@ -186,12 +186,12 @@ public:
         int m_batch_offset;
         int m_batch_stride;
 
-        void operator()(const int batch_idx) const
+        void operator()(const int k) const
         {
             // ----------------------------------- //
             // Obtain offset for the current batch //
-            int solve_batch = m_batch_stride * batch_idx + m_batch_offset;
-            int offset      = solve_batch * m_matrix_dimension;
+            int batch_idx = m_batch_stride * k + m_batch_offset;
+            int offset    = batch_idx * m_matrix_dimension;
 
             // -------------------- //
             // Forward Substitution //
@@ -266,12 +266,12 @@ public:
         int m_batch_offset;
         int m_batch_stride;
 
-        void operator()(const int batch_idx) const
+        void operator()(const int k) const
         {
             // ----------------------------------- //
             // Obtain offset for the current batch //
-            int solve_batch = m_batch_stride * batch_idx + m_batch_offset;
-            int offset      = solve_batch * m_matrix_dimension;
+            int batch_idx = m_batch_stride * k + m_batch_offset;
+            int offset    = batch_idx * m_matrix_dimension;
 
             // ---------------- //
             // Diagonal Scaling //
