@@ -259,7 +259,7 @@ public:
     // It is useful when the matrix has a non-zero diagonal but zero off-diagonal entries.
     // Note that .setup() doesn't modify the main diagonal in this case.
 
-    struct SolveDiagonal {
+    struct SolveDiagonalNonCyclic {
         int m_matrix_dimension;
         Vector<T> m_main_diagonal;
         Vector<T> m_rhs;
@@ -281,6 +281,30 @@ public:
         }
     };
 
+    struct SolveDiagonalCyclic {
+        int m_matrix_dimension;
+        Vector<T> m_main_diagonal;
+        Vector<T> m_gamma;
+        Vector<T> m_rhs;
+        int m_batch_offset;
+        int m_batch_stride;
+
+        void operator()(const int k) const
+        {
+            // ----------------------------------- //
+            // Obtain offset for the current batch //
+            int batch_idx = m_batch_stride * k + m_batch_offset;
+            int offset    = batch_idx * m_matrix_dimension;
+
+            // ---------------- //
+            // Diagonal Scaling //
+            m_rhs(offset + 0) /= m_main_diagonal(offset + 0) + m_gamma(batch_idx);
+            for (int i = 1; i < m_matrix_dimension; i++) {
+                m_rhs(offset + i) /= m_main_diagonal(offset + i);
+            }
+        }
+    };
+
     void solve_diagonal(Vector<T> rhs, int batch_offset = 0, int batch_stride = 1)
     {
         if (!is_factorized_) {
@@ -290,9 +314,14 @@ public:
         // Compute the effective number of batches to solve
         int effective_batch_count = (batch_count_ - batch_offset + batch_stride - 1) / batch_stride;
 
-        SolveDiagonal functor{matrix_dimension_, main_diagonal_, rhs, batch_offset, batch_stride};
-        Kokkos::parallel_for("SolveDiagonal", effective_batch_count, functor);
-
+        if (!is_cyclic_) {
+            SolveDiagonalNonCyclic functor{matrix_dimension_, main_diagonal_, rhs, batch_offset, batch_stride};
+            Kokkos::parallel_for("SolveDiagonalNonCyclic", effective_batch_count, functor);
+        }
+        else {
+            SolveDiagonalCyclic functor{matrix_dimension_, main_diagonal_, gamma_, rhs, batch_offset, batch_stride};
+            Kokkos::parallel_for("SolveDiagonalCyclic", effective_batch_count, functor);
+        }
         Kokkos::fence();
     }
 
