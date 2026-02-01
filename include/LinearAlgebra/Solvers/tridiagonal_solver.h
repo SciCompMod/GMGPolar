@@ -257,7 +257,7 @@ public:
     /* ---------------------------- */
     // This step performs only the diagonal scaling part of the solve process.
     // It is useful when the matrix has a non-zero diagonal but zero off-diagonal entries.
-    // Note that .setup() doesn't modify the main diagonal in this case.
+    // Note that .setup() modifies main_diagonal(0) in the cyclic case.
 
     struct SolveDiagonalNonCyclic {
         int m_matrix_dimension;
