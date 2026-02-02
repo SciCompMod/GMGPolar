@@ -157,11 +157,13 @@ public:
                     for (int i = 1; i < matrix_dimension; i++) {
                         rhs(offset + i) -= sub_diagonal(offset + i - 1) * rhs(offset + i - 1);
                     }
+
                     // ---------------- //
                     // Diagonal Scaling //
                     for (int i = 0; i < matrix_dimension; i++) {
                         rhs(offset + i) /= main_diagonal(offset + i);
                     }
+
                     // --------------------- //
                     // Backward Substitution //
                     for (int i = matrix_dimension - 2; i >= 0; i--) {
