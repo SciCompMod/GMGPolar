@@ -24,6 +24,7 @@ private:
     // Note that circle_tridiagonal_solver_[0] is thus unused!
     // Additionally 'circle_tridiagonal_solver_[index]' will refer to the circular line i_r = index and
     // 'radial_tridiagonal_solver_[index] will refer to the radial line i_theta = index.
+
 #ifdef GMGPOLAR_USE_MUMPS
     SparseMatrixCOO<double> inner_boundary_circle_matrix_;
     DMUMPS_STRUC_C inner_boundary_mumps_solver_;
@@ -31,6 +32,7 @@ private:
     SparseMatrixCSR<double> inner_boundary_circle_matrix_;
     SparseLUSolver<double> inner_boundary_lu_solver_;
 #endif
+
     std::vector<SymmetricTridiagonalSolver<double>> circle_tridiagonal_solver_;
     std::vector<SymmetricTridiagonalSolver<double>> radial_tridiagonal_solver_;
 
@@ -93,4 +95,12 @@ private:
     void initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, SparseMatrixCOO<double>& solver_matrix);
     void finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver);
 #endif
+
+    template <class MatrixType>
+    void nodeBuildAscOrthoCircleTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+                                     MatrixType& inner_boundary_circle_matrix,
+                                     std::vector<SymmetricTridiagonalSolver<double>>& circle_tridiagonal_solver,
+                                     std::vector<SymmetricTridiagonalSolver<double>>& radial_tridiagonal_solver,
+                                     ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art,
+                                     ConstVector<double>& detDF, ConstVector<double>& coeff_beta);
 };
