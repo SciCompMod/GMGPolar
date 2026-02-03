@@ -442,7 +442,8 @@ inline void nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& g
             /* -----------|| */
             result[center] = rhs[center];
         }
-        else { /* -----------|| */
+        else {
+            /* -----------|| */
             /* o   o   o  || */
             /* -----------|| */
             /* x   o   X  || */
