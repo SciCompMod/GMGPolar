@@ -62,10 +62,11 @@ void ExtrapolatedSmootherGive::nodeBuildSmootherGive(
     /* Node in the interior of the Circle Section */
     /* ------------------------------------------ */
     if (i_r > 0 && i_r < numberSmootherCircles - 1) {
-        double h1     = grid.radialSpacing(i_r - 1);
-        double h2     = grid.radialSpacing(i_r);
-        double k1     = grid.angularSpacing(i_theta - 1);
-        double k2     = grid.angularSpacing(i_theta);
+        double h1 = grid.radialSpacing(i_r - 1);
+        double h2 = grid.radialSpacing(i_r);
+        double k1 = grid.angularSpacing(i_theta - 1);
+        double k2 = grid.angularSpacing(i_theta);
+
         double coeff1 = 0.5 * (k1 + k2) / h1;
         double coeff2 = 0.5 * (k1 + k2) / h2;
         double coeff3 = 0.5 * (h1 + h2) / k1;
@@ -251,10 +252,11 @@ void ExtrapolatedSmootherGive::nodeBuildSmootherGive(
     /* Node in the interior of the Radial Section */
     /* ------------------------------------------ */
     else if (i_r > numberSmootherCircles && i_r < grid.nr() - 2) {
-        double h1     = grid.radialSpacing(i_r - 1);
-        double h2     = grid.radialSpacing(i_r);
-        double k1     = grid.angularSpacing(i_theta - 1);
-        double k2     = grid.angularSpacing(i_theta);
+        double h1 = grid.radialSpacing(i_r - 1);
+        double h2 = grid.radialSpacing(i_r);
+        double k1 = grid.angularSpacing(i_theta - 1);
+        double k2 = grid.angularSpacing(i_theta);
+
         double coeff1 = 0.5 * (k1 + k2) / h1;
         double coeff2 = 0.5 * (k1 + k2) / h2;
         double coeff3 = 0.5 * (h1 + h2) / k1;
@@ -436,9 +438,10 @@ void ExtrapolatedSmootherGive::nodeBuildSmootherGive(
         /* ------------------------------------------------ */
         if (DirBC_Interior) {
             /* Fill result(i,j) */
-            double h2     = grid.radialSpacing(i_r);
-            double k1     = grid.angularSpacing(i_theta - 1);
-            double k2     = grid.angularSpacing(i_theta);
+            double h2 = grid.radialSpacing(i_r);
+            double k1 = grid.angularSpacing(i_theta - 1);
+            double k2 = grid.angularSpacing(i_theta);
+
             double coeff2 = 0.5 * (k1 + k2) / h2;
 
             int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
@@ -841,10 +844,11 @@ void ExtrapolatedSmootherGive::nodeBuildSmootherGive(
     /* Radial Section: Node next to circular section */
     /* --------------------------------------------- */
     else if (i_r == numberSmootherCircles) {
-        double h1     = grid.radialSpacing(i_r - 1);
-        double h2     = grid.radialSpacing(i_r);
-        double k1     = grid.angularSpacing(i_theta - 1);
-        double k2     = grid.angularSpacing(i_theta);
+        double h1 = grid.radialSpacing(i_r - 1);
+        double h2 = grid.radialSpacing(i_r);
+        double k1 = grid.angularSpacing(i_theta - 1);
+        double k2 = grid.angularSpacing(i_theta);
+
         double coeff1 = 0.5 * (k1 + k2) / h1;
         double coeff2 = 0.5 * (k1 + k2) / h2;
         double coeff3 = 0.5 * (h1 + h2) / k1;
@@ -1054,10 +1058,11 @@ void ExtrapolatedSmootherGive::nodeBuildSmootherGive(
     else if (i_r == grid.nr() - 2) {
         assert(i_r % 2 == 1);
 
-        double h1     = grid.radialSpacing(i_r - 1);
-        double h2     = grid.radialSpacing(i_r);
-        double k1     = grid.angularSpacing(i_theta - 1);
-        double k2     = grid.angularSpacing(i_theta);
+        double h1 = grid.radialSpacing(i_r - 1);
+        double h2 = grid.radialSpacing(i_r);
+        double k1 = grid.angularSpacing(i_theta - 1);
+        double k2 = grid.angularSpacing(i_theta);
+
         double coeff1 = 0.5 * (k1 + k2) / h1;
         double coeff2 = 0.5 * (k1 + k2) / h2;
         double coeff3 = 0.5 * (h1 + h2) / k1;
@@ -1170,9 +1175,10 @@ void ExtrapolatedSmootherGive::nodeBuildSmootherGive(
     else if (i_r == grid.nr() - 1) {
         assert(!i_r % 2 == 0);
 
-        double h1     = grid.radialSpacing(i_r - 1);
-        double k1     = grid.angularSpacing(i_theta - 1);
-        double k2     = grid.angularSpacing(i_theta);
+        double h1 = grid.radialSpacing(i_r - 1);
+        double k1 = grid.angularSpacing(i_theta - 1);
+        double k2 = grid.angularSpacing(i_theta);
+
         double coeff1 = 0.5 * (k1 + k2) / h1;
 
         int center_index = i_r - numberSmootherCircles;
