@@ -7,7 +7,7 @@ inline void nodeApplyAscOrthoCircleGive(int i_r, int i_theta, const PolarGrid& g
                                         Vector<double>& result, double arr, double att, double art, double detDF,
                                         double coeff_beta)
 {
-    assert(i_r >= 0 && i_r <= grid_.numberSmootherCircles());
+    assert(i_r >= 0 && i_r <= grid.numberSmootherCircles());
 
     bool isOddNumberSmootherCircles = (grid.numberSmootherCircles() & 1);
     bool isOddRadialIndex           = (i_r & 1);
