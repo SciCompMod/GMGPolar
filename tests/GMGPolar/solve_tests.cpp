@@ -510,6 +510,40 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<double, 5e-6>, // expected_l2_error
         std::integral_constant<double, 2e-5>, // expected_inf_error
         std::integral_constant<double, 0.2> // expected_residual_reduction
+    >,
+    std::tuple<
+        CzarnyGeometry,
+        SonnendruckerGyroCoefficients,
+        PolarR6_Boundary_CzarnyGeometry,
+        PolarR6_Sonnendrucker_CzarnyGeometry,
+        PolarR6_CzarnyGeometry,
+        std::integral_constant<double, 1e-8>, // R0
+        std::integral_constant<double, 1.2>, // Rmax
+        std::integral_constant<int, 4>, // nrExp
+        std::integral_constant<int, 4>, // nthetaExp
+        std::integral_constant<double, 0.66 * 1.2>, // refinementRadius
+        std::integral_constant<int, 0>, // anisotropicFactor
+        std::integral_constant<int, 2>, // divideBy2
+        std::integral_constant<int, 0>, // verbose
+        std::integral_constant<int, 1>, // maxOpenMPThreads
+        std::integral_constant<bool, false>, // DirBC_Interior
+        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
+        std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
+        std::integral_constant<bool, false>, // cacheDomainGeometry
+        std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, // extrapolation
+        std::integral_constant<int, 3>, // maxLevels
+        std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>, // multigridCycle
+        std::integral_constant<bool, false>, // FMG
+        std::integral_constant<int, 1>, // FMG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>, // FMG_cycle
+        std::integral_constant<int, 50>, // maxIterations
+        std::integral_constant<ResidualNormType, ResidualNormType::EUCLIDEAN>, // residualNormType
+        std::integral_constant<double, 1e-9>, // absoluteTolerance
+        std::integral_constant<double, 1e-8>, // relativeTolerance
+        std::integral_constant<int, 7>, // expected_iterations
+        std::integral_constant<double, 5e-6>, // expected_l2_error
+        std::integral_constant<double, 2e-5>, // expected_inf_error
+        std::integral_constant<double, 0.2> // expected_residual_reduction
     >
 >;
 // clang-format on
