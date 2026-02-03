@@ -6,7 +6,7 @@ inline void nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const PolarGrid& g
                                         ConstVector<double>& art, ConstVector<double>& detDF,
                                         ConstVector<double>& coeff_beta)
 {
-    assert(i_r >= 0 && i_r <= grid_.numberSmootherCircles());
+    assert(i_r >= 0 && i_r <= grid.numberSmootherCircles());
 
     /* -------------------- */
     /* Node in the interior */
