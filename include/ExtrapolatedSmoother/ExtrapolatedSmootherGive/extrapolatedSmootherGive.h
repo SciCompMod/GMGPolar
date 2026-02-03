@@ -82,4 +82,13 @@ private:
     void initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, SparseMatrixCOO<double>& solver_matrix);
     void finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver);
 #endif
+
+    template <class MatrixType>
+    void nodeBuildSmootherGive(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+                               MatrixType& inner_boundary_circle_matrix,
+                               std::vector<DiagonalSolver<double>>& circle_diagonal_solver,
+                               std::vector<DiagonalSolver<double>>& radial_diagonal_solver,
+                               std::vector<SymmetricTridiagonalSolver<double>>& circle_tridiagonal_solver,
+                               std::vector<SymmetricTridiagonalSolver<double>>& radial_tridiagonal_solver, double arr,
+                               double att, double art, double detDF, double coeff_beta);
 };
