@@ -364,9 +364,8 @@ void SmootherTake::buildAscCircleSection(const int i_r)
 
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
         // Build Asc at the current node
-        nodeBuildAscOrthoCircleTake(i_r, i_theta, grid_, DirBC_Interior_, inner_boundary_circle_matrix_,
-                                    circle_tridiagonal_solver_, radial_tridiagonal_solver_, arr, att, art, detDF,
-                                    coeff_beta);
+        nodeBuildSmootherTake(i_r, i_theta, grid_, DirBC_Interior_, inner_boundary_circle_matrix_,
+                              circle_tridiagonal_solver_, radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
     }
 }
 
@@ -383,9 +382,8 @@ void SmootherTake::buildAscRadialSection(const int i_theta)
 
     for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
         // Build Asc at the current node
-        nodeBuildAscOrthoCircleTake(i_r, i_theta, grid_, DirBC_Interior_, inner_boundary_circle_matrix_,
-                                    circle_tridiagonal_solver_, radial_tridiagonal_solver_, arr, att, art, detDF,
-                                    coeff_beta);
+        nodeBuildSmootherTake(i_r, i_theta, grid_, DirBC_Interior_, inner_boundary_circle_matrix_,
+                              circle_tridiagonal_solver_, radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
     }
 }
 
