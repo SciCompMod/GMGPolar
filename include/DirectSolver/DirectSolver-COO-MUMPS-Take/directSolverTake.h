@@ -88,7 +88,7 @@ private:
     const Stencil& getStencil(int i_r) const;
 
     void nodeBuildSolverMatrixTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                   SparseMatrixCSR<double>& solver_matrix, ConstVector<double>& arr,
+                                   SparseMatrixCOO<double>& solver_matrix, ConstVector<double>& arr,
                                    ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF,
                                    ConstVector<double>& coeff_beta);
 };

@@ -10,7 +10,7 @@ inline void updateMatrixElement(SparseMatrixCOO<double>& matrix, int ptr, int of
 }
 
 void DirectSolver_COO_MUMPS_Take::nodeBuildSolverMatrixTake(int i_r, int i_theta, const PolarGrid& grid,
-                                                            bool DirBC_Interior, SparseMatrixCSR<double>& solver_matrix,
+                                                            bool DirBC_Interior, SparseMatrixCOO<double>& solver_matrix,
                                                             ConstVector<double>& arr, ConstVector<double>& att,
                                                             ConstVector<double>& art, ConstVector<double>& detDF,
                                                             ConstVector<double>& coeff_beta)
