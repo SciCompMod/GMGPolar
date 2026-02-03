@@ -9,10 +9,11 @@ inline void nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const PolarGrid& g
     assert(i_r >= 0 && i_r < grid.numberSmootherCircles());
 
     if (i_r > 0 && i_r < grid.numberSmootherCircles()) {
-        double h1     = grid.radialSpacing(i_r - 1);
-        double h2     = grid.radialSpacing(i_r);
-        double k1     = grid.angularSpacing(i_theta - 1);
-        double k2     = grid.angularSpacing(i_theta);
+        double h1 = grid.radialSpacing(i_r - 1);
+        double h2 = grid.radialSpacing(i_r);
+        double k1 = grid.angularSpacing(i_theta - 1);
+        double k2 = grid.angularSpacing(i_theta);
+
         double coeff1 = 0.5 * (k1 + k2) / h1;
         double coeff2 = 0.5 * (k1 + k2) / h2;
         double coeff3 = 0.5 * (h1 + h2) / k1;
