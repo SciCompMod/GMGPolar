@@ -568,8 +568,6 @@ void run_gmgpolar()
 
     GMGPolar solver(grid, domain, profile_coefficients);
 
-    std::cout << grid.lengthSmootherRadial() << std::endl;
-
     bool paraview          = false;
     int preSmoothingSteps  = 1;
     int postSmoothingSteps = 1;
