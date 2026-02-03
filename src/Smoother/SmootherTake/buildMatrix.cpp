@@ -30,11 +30,12 @@ inline void updateCOOCSRMatrixElement(SparseMatrixCSR<double>& matrix, int ptr, 
 #endif
 
 template <class MatrixType>
-void SmootherTake::nodeBuildAscOrthoCircleTake(
-    int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior, MatrixType& inner_boundary_circle_matrix,
-    std::vector<SymmetricTridiagonalSolver<double>>& circle_tridiagonal_solver,
-    std::vector<SymmetricTridiagonalSolver<double>>& radial_tridiagonal_solver, ConstVector<double>& arr,
-    ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
+void SmootherTake::nodeBuildSmootherTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+                                         MatrixType& inner_boundary_circle_matrix,
+                                         std::vector<SymmetricTridiagonalSolver<double>>& circle_tridiagonal_solver,
+                                         std::vector<SymmetricTridiagonalSolver<double>>& radial_tridiagonal_solver,
+                                         ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art,
+                                         ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
 {
     assert(i_r >= 0 && i_r < grid.nr());
     assert(i_theta >= 0 && i_theta < grid.ntheta());
