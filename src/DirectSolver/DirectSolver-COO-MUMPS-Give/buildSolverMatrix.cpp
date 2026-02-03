@@ -588,10 +588,11 @@ void DirectSolver_COO_MUMPS_Give::nodeBuildSolverMatrixGive(int i_r, int i_theta
     /* Node next to the outer boundary */
     /* ------------------------------- */
     else if (i_r == grid.nr() - 2) {
-        const double h1     = grid.radialSpacing(i_r - 1);
-        const double h2     = grid.radialSpacing(i_r);
-        const double k1     = grid.angularSpacing(i_theta - 1);
-        const double k2     = grid.angularSpacing(i_theta);
+        const double h1 = grid.radialSpacing(i_r - 1);
+        const double h2 = grid.radialSpacing(i_r);
+        const double k1 = grid.angularSpacing(i_theta - 1);
+        const double k2 = grid.angularSpacing(i_theta);
+
         const double coeff1 = 0.5 * (k1 + k2) / h1;
         const double coeff2 = 0.5 * (k1 + k2) / h2;
         const double coeff3 = 0.5 * (h1 + h2) / k1;
@@ -724,9 +725,10 @@ void DirectSolver_COO_MUMPS_Give::nodeBuildSolverMatrixGive(int i_r, int i_theta
     /* Node on the outer dirichlet boundary */
     /* ------------------------------------ */
     else if (i_r == grid.nr() - 1) {
-        double h1     = grid.radialSpacing(i_r - 1);
-        double k1     = grid.angularSpacing(i_theta - 1);
-        double k2     = grid.angularSpacing(i_theta);
+        double h1 = grid.radialSpacing(i_r - 1);
+        double k1 = grid.angularSpacing(i_theta - 1);
+        double k2 = grid.angularSpacing(i_theta);
+
         double coeff1 = 0.5 * (k1 + k2) / h1;
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
