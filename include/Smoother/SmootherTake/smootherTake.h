@@ -2,6 +2,8 @@
 
 #include "../smoother.h"
 
+#include "../../LinearAlgebra/Solvers/tridiagonal_solver.h"
+
 #ifdef GMGPOLAR_USE_MUMPS
     #include "dmumps_c.h"
     #include "mpi.h"
@@ -21,7 +23,7 @@ private:
     // The A_sc matrix on i_r = 0 is defined through the COO/CSR matrix
     // 'inner_boundary_circle_matrix_' due to the across-origin treatment.
     // It isn't tridiagonal and thus it requires a more advanced solver.
-    // Note that circle_tridiagonal_solver_[0] is thus unused!
+    // Note that circle_tridiagonal_solver_[index=0] is thus unused!
     // Additionally 'circle_tridiagonal_solver_[index]' will refer to the circular line i_r = index and
     // 'radial_tridiagonal_solver_[index] will refer to the radial line i_theta = index.
 #ifdef GMGPOLAR_USE_MUMPS
@@ -33,8 +35,8 @@ private:
 #endif
     MatrixType inner_boundary_circle_matrix_;
 
-    std::vector<SymmetricTridiagonalSolver<double>> circle_tridiagonal_solver_;
-    std::vector<SymmetricTridiagonalSolver<double>> radial_tridiagonal_solver_;
+    BatchedTridiagonalSolver<double> circle_tridiagonal_solver_;
+    BatchedTridiagonalSolver<double> radial_tridiagonal_solver_;
 
     // clang-format off
     const Stencil stencil_DB_ = {
@@ -87,9 +89,10 @@ private:
     void applyAscOrthoRadialSection(const int i_theta, const SmootherColor smoother_color, ConstVector<double> x,
                                     ConstVector<double> rhs, Vector<double> temp);
 
-    void solveCircleSection(const int i_r, Vector<double> x, Vector<double> temp, Vector<double> solver_storage_1,
-                            Vector<double> solver_storage_2);
-    void solveRadialSection(const int i_theta, Vector<double> x, Vector<double> temp, Vector<double> solver_storage);
+    void solveEvenCircleSection(Vector<double> x, Vector<double> temp);
+    void solveOddCircleSection(Vector<double> x, Vector<double> temp);
+    void solveEvenRadialSection(Vector<double> x, Vector<double> temp);
+    void solveOddRadialSection(Vector<double> x, Vector<double> temp);
 
 #ifdef GMGPOLAR_USE_MUMPS
     void initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, SparseMatrixCOO<double>& solver_matrix);
@@ -98,8 +101,8 @@ private:
 
     void nodeBuildSmootherTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                MatrixType& inner_boundary_circle_matrix,
-                               std::vector<SymmetricTridiagonalSolver<double>>& circle_tridiagonal_solver,
-                               std::vector<SymmetricTridiagonalSolver<double>>& radial_tridiagonal_solver,
-                               ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art,
-                               ConstVector<double>& detDF, ConstVector<double>& coeff_beta);
+                               BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
+                               BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, ConstVector<double>& arr,
+                               ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF,
+                               ConstVector<double>& coeff_beta);
 };

@@ -4,6 +4,8 @@ SmootherTake::SmootherTake(const PolarGrid& grid, const LevelCache& level_cache,
                            const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior,
                            int num_omp_threads)
     : Smoother(grid, level_cache, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads)
+    , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
+    , radial_tridiagonal_solver_(grid.lengthSmootherRadial(), grid.ntheta(), false)
 {
     buildAscMatrices();
 #ifdef GMGPOLAR_USE_MUMPS

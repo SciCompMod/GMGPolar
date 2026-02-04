@@ -249,51 +249,91 @@ void SmootherTake::applyAscOrthoRadialSection(const int i_theta, const SmootherC
     }
 }
 
-void SmootherTake::solveCircleSection(const int i_r, Vector<double> x, Vector<double> temp,
-                                      Vector<double> solver_storage_1, Vector<double> solver_storage_2)
+void SmootherTake::solveEvenCircleSection(Vector<double> x, Vector<double> temp)
 {
-    const int start = grid_.index(i_r, 0);
-    const int end   = start + grid_.ntheta();
+    int start                     = 0;
+    int end                       = grid_.numberCircularSmootherNodes();
+    Vector<double> circle_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
-    if (i_r > 0) {
-        circle_tridiagonal_solver_[i_r].solveInPlace(temp.data() + start, solver_storage_1.data(),
-                                                     solver_storage_2.data());
-    }
-    else if (i_r == 0) {
+    int batch_offset = 2;
+    int batch_stride = 2;
+    circle_tridiagonal_solver_.solve(circle_section, batch_offset, batch_stride);
+
 #ifdef GMGPOLAR_USE_MUMPS
-        inner_boundary_mumps_solver_.job    = JOB_COMPUTE_SOLUTION;
-        inner_boundary_mumps_solver_.nrhs   = 1; // single rhs vector
-        inner_boundary_mumps_solver_.nz_rhs = grid_.ntheta(); // non-zeros in rhs
-        inner_boundary_mumps_solver_.rhs    = temp.data() + start;
-        inner_boundary_mumps_solver_.lrhs   = grid_.ntheta(); // leading dimension of rhs
-        dmumps_c(&inner_boundary_mumps_solver_);
-        if (inner_boundary_mumps_solver_.info[0] != 0) {
-            std::cerr << "Error solving the system: " << inner_boundary_mumps_solver_.info[0] << std::endl;
-        }
-#else
-        inner_boundary_lu_solver_.solveInPlace(temp.data() + start);
-#endif
+    inner_boundary_mumps_solver_.job    = JOB_COMPUTE_SOLUTION;
+    inner_boundary_mumps_solver_.nrhs   = 1; // single rhs vector
+    inner_boundary_mumps_solver_.nz_rhs = grid_.ntheta(); // non-zeros in rhs
+    inner_boundary_mumps_solver_.rhs    = circle_section.data();
+    inner_boundary_mumps_solver_.lrhs   = grid_.ntheta(); // leading dimension of rhs
+    dmumps_c(&inner_boundary_mumps_solver_);
+    if (inner_boundary_mumps_solver_.info[0] != 0) {
+        std::cerr << "Error solving the system: " << inner_boundary_mumps_solver_.info[0] << std::endl;
     }
+#else
+    inner_boundary_lu_solver_.solveInPlace(circle_section.data());
+#endif
 
     // Move updated values to x
-    Kokkos::deep_copy(Kokkos::subview(x, Kokkos::make_pair(start, end)),
-                      Kokkos::subview(temp, Kokkos::make_pair(start, end)));
+    for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r += 2) {
+        for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
+            x[grid_.index(i_r, i_theta)] = temp[grid_.index(i_r, i_theta)];
+        }
+    }
 }
 
-void SmootherTake::solveRadialSection(const int i_theta, Vector<double> x, Vector<double> temp,
-                                      Vector<double> solver_storage)
+void SmootherTake::solveOddCircleSection(Vector<double> x, Vector<double> temp)
 {
-    const int start = grid_.index(grid_.numberSmootherCircles(), i_theta);
-    const int end   = start + grid_.lengthSmootherRadial();
+    int start                     = 0;
+    int end                       = grid_.numberCircularSmootherNodes();
+    Vector<double> circle_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
-    radial_tridiagonal_solver_[i_theta].solveInPlace(temp.data() + start, solver_storage.data());
+    int batch_offset = 1;
+    int batch_stride = 2;
+    circle_tridiagonal_solver_.solve(circle_section, batch_offset, batch_stride);
 
     // Move updated values to x
-    Kokkos::deep_copy(Kokkos::subview(x, Kokkos::make_pair(start, end)),
-                      Kokkos::subview(temp, Kokkos::make_pair(start, end)));
+    for (int i_r = 1; i_r < grid_.numberSmootherCircles(); i_r += 2) {
+        for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
+            x[grid_.index(i_r, i_theta)] = temp[grid_.index(i_r, i_theta)];
+        }
+    }
 }
 
-// clang-format off
+void SmootherTake::solveEvenRadialSection(Vector<double> x, Vector<double> temp)
+{
+    int start                     = grid_.numberCircularSmootherNodes();
+    int end                       = grid_.numberOfNodes();
+    Vector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
+
+    int batch_offset = 0;
+    int batch_stride = 2;
+    radial_tridiagonal_solver_.solve(radial_section, batch_offset, batch_stride);
+
+    // Move updated values to x
+    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta += 2) {
+        for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
+            x[grid_.index(i_r, i_theta)] = temp[grid_.index(i_r, i_theta)];
+        }
+    }
+}
+
+void SmootherTake::solveOddRadialSection(Vector<double> x, Vector<double> temp)
+{
+    int start                     = grid_.numberCircularSmootherNodes();
+    int end                       = grid_.numberOfNodes();
+    Vector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
+
+    int batch_offset = 1;
+    int batch_stride = 2;
+    radial_tridiagonal_solver_.solve(radial_section, batch_offset, batch_stride);
+
+    // Move updated values to x
+    for (int i_theta = 1; i_theta < grid_.ntheta(); i_theta += 2) {
+        for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
+            x[grid_.index(i_r, i_theta)] = temp[grid_.index(i_r, i_theta)];
+        }
+    }
+}
 
 // In temp we store the vector 'rhs - A_sc^ortho u_sc^ortho' and then we solve the system
 // Asc * u_sc = temp in place and move the updated values into 'x'.
@@ -305,43 +345,50 @@ void SmootherTake::smoothing(Vector<double> x, ConstVector<double> rhs, Vector<d
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
 
-    #pragma omp parallel
-    {
-        Vector<double> circle_solver_storage_1("circle_solver_storage_1",grid_.ntheta());
-        Vector<double> circle_solver_storage_2("circle_solver_storage_2",grid_.ntheta());
-        Vector<double> radial_solver_storage("circle_solver_storage",grid_.lengthSmootherRadial());
+    /* The outer most circle next to the radial section is defined to be black. */
+    /* Priority: Black -> White. */
+    const int start_black_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 1 : 0;
+    const int start_white_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 0 : 1;
 
-        /* The outer most circle next to the radial section is defined to be black. */
-        /* Priority: Black -> White. */
-        const int start_black_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 1 : 0;
-        const int start_white_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 0 : 1;
+/* Black Circle Section */
+#pragma omp parallel for
+    for (int i_r = start_black_circles; i_r < grid_.numberSmootherCircles(); i_r += 2) {
+        applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
+    } /* Implicit barrier */
 
-        /* Black Circle Section */
-        #pragma omp for
-        for (int i_r = start_black_circles; i_r < grid_.numberSmootherCircles(); i_r += 2) {
-            applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
-            solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
-        } /* Implicit barrier */
-
-        /* White Circle Section */
-        #pragma omp for nowait
-        for (int i_r = start_white_circles; i_r < grid_.numberSmootherCircles(); i_r += 2) {
-            applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
-            solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
-        }
-        /* Black Radial Section */
-        #pragma omp for
-        for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta += 2) {
-            applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
-            solveRadialSection(i_theta, x, temp, radial_solver_storage);
-        } /* Implicit barrier */
-
-        /* White Radial Section*/
-        #pragma omp for
-        for (int i_theta = 1; i_theta < grid_.ntheta(); i_theta += 2) {
-            applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
-            solveRadialSection(i_theta, x, temp, radial_solver_storage);
-        } /* Implicit barrier */
+    if (start_black_circles == 1) {
+        solveOddCircleSection(x, temp);
     }
+    else if (start_black_circles == 0) {
+        solveEvenCircleSection(x, temp);
+    }
+
+/* White Circle Section */
+#pragma omp parallel for
+    for (int i_r = start_white_circles; i_r < grid_.numberSmootherCircles(); i_r += 2) {
+        applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
+    } /* Implicit barrier */
+
+    if (start_white_circles == 1) {
+        solveOddCircleSection(x, temp);
+    }
+    else if (start_white_circles == 0) {
+        solveEvenCircleSection(x, temp);
+    }
+
+/* Black Radial Section */
+#pragma omp parallel for
+    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta += 2) {
+        applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
+    } /* Implicit barrier */
+
+    solveEvenRadialSection(x, temp);
+
+/* White Radial Section*/
+#pragma omp parallel for
+    for (int i_theta = 1; i_theta < grid_.ntheta(); i_theta += 2) {
+        applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
+    } /* Implicit barrier */
+
+    solveOddRadialSection(x, temp);
 }
-// clang-format on
