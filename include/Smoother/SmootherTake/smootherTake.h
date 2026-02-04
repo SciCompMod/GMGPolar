@@ -23,7 +23,7 @@ private:
     // The A_sc matrix on i_r = 0 is defined through the COO/CSR matrix
     // 'inner_boundary_circle_matrix_' due to the across-origin treatment.
     // It isn't tridiagonal and thus it requires a more advanced solver.
-    // Note that circle_tridiagonal_solver_[index=0] is thus unused!
+    // Note that circle_tridiagonal_solver_[0] is thus unused!
     // Additionally 'circle_tridiagonal_solver_[index]' will refer to the circular line i_r = index and
     // 'radial_tridiagonal_solver_[index] will refer to the radial line i_theta = index.
 #ifdef GMGPOLAR_USE_MUMPS
