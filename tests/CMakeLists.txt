@@ -14,6 +14,7 @@ add_executable(gmgpolar_tests
     LinearAlgebra/csr_solver.cpp
     LinearAlgebra/tridiagonal_solver.cpp
     LinearAlgebra/cyclic_tridiagonal_solver.cpp
+    LinearAlgebra/Solvers/tridiagonal_solver.cpp
     PolarGrid/polargrid.cpp
     Interpolation/prolongation.cpp
     Interpolation/restriction.cpp
