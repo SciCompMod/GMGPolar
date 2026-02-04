@@ -407,9 +407,9 @@ void SmootherTake::buildAscMatrices()
 #ifdef GMGPOLAR_USE_MUMPS
     // Although the matrix is symmetric, we need to store all its entries, so we disable the symmetry.
     const int i_r                 = 0;
-    const int nnz                 = getNonZeroCountCircleAsc(i_r);
+    const int inner_nnz           = getNonZeroCountCircleAsc(i_r);
     const int num_circle_nodes    = grid_.ntheta();
-    inner_boundary_circle_matrix_ = SparseMatrixCOO<double>(num_circle_nodes, num_circle_nodes, nnz);
+    inner_boundary_circle_matrix_ = SparseMatrixCOO<double>(num_circle_nodes, num_circle_nodes, inner_nnz);
     inner_boundary_circle_matrix_.is_symmetric(false);
 #else
     std::function<int(int)> nnz_per_row = [&](int i_theta) {
