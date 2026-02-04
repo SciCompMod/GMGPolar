@@ -31,7 +31,6 @@ inline void updateCOOCSRMatrixElement(SparseMatrixCSR<double>& matrix, int ptr, 
 }
 #endif
 
-template <class MatrixType>
 void SmootherGive::nodeBuildSmootherGive(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                          MatrixType& inner_boundary_circle_matrix,
                                          std::vector<SymmetricTridiagonalSolver<double>>& circle_tridiagonal_solver,
