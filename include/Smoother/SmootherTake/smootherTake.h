@@ -115,50 +115,24 @@ private:
         -1,  0, -1,
         -1, -1, -1
     };
-    /* Circle Stencils */
-    const Stencil circle_stencil_interior_ = {
-        -1,  2, -1,
-        -1,  0, -1,
-        -1,  1, -1
-    };
     const Stencil circle_stencil_across_origin_ = {
         -1,  3, -1,
          1,  0, -1,
         -1,  2, -1
     };
-    /* Radial Stencils */
-    const Stencil radial_stencil_interior_ = {
-        -1, -1, -1,
-         1,  0,  2,
-        -1, -1, -1
-    };
-    const Stencil radial_stencil_next_outer_DB_ = {
-        -1, -1, -1,
-         1,  0, -1,
-        -1, -1, -1
-    };
-    const Stencil radial_stencil_next_circular_smoothing_ = {
-        -1, -1, -1,
-        -1,  0,  1,
-        -1, -1, -1
-    };
     // clang-format on
 
-    // Select correct stencil depending on radial index and boundary type.
-    const Stencil& getStencil(int i_r) const;
+    // Select correct stencil depending on the grid position.
+    const Stencil& getStencil(const int i_r) const; /* Only i_r = 0 implemented */
+    // Number of nonzero A_sc entries.
+    int getNonZeroCountCircleAsc(const int i_r) const; /* Only i_r = 0 implemented */
+    // Obtain a ptr to index into COO matrices.
+    // It accumulates all stencil sizes within a line up to, but excluding the current node.
+    int getCircleAscIndex(const int i_r, const int i_theta) const; /* Only i_r = 0 implemented */
 
     /* --------------- */
     /* Matrix assembly */
     /* --------------- */
-
-    // Unused: Number of nonzero A_sc entries for circle/radial sections.
-    int getNonZeroCountCircleAsc(const int i_r) const;
-    int getNonZeroCountRadialAsc(const int i_theta) const;
-
-    // Used only for interior boundary A_sc to obtain a ptr to index into COO matrices.
-    // It accumulates all stencil sizes within a line up to, but excluding the current node.
-    int getCircleAscIndex(const int i_r, const int i_theta) const;
-    int getRadialAscIndex(const int i_r, const int i_theta) const;
 
     // Build all A_sc matrices for circle and radial smoothers.
     void buildAscMatrices();
