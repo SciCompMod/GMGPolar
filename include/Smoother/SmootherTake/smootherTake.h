@@ -9,15 +9,15 @@
     #include "mpi.h"
 #endif
 
-// SmootherTake implements a coupled circle-radial smoothing procedure.
-// It performs iterative updates on different section of the grid based
+// SmootherTake implements the coupled circle-radial smoothing procedure.
+// It performs iterative updates on different parts of the grid based
 // on the circle/radial section of the grid and a black/white coloring scheme.
 //
 // The smoothing solves linear systems of the form:
 //   A_sc * u_sc = f_sc − A_sc^ortho * u_sc^ortho
 // where:
-//   - s ∈ {Circle, Radial} denotes the smoother section type,
-//   - c ∈ {Black, White} denotes the coloring (even/odd sub-system).
+//   - s in {Circle, Radial} denotes the smoother section type,
+//   - c in {Black, White} denotes the coloring (even/odd line sub-system).
 //
 // The update sequence is as follows:
 //   1. Black-Circle update (u_bc):
@@ -35,9 +35,6 @@
 //   - First, temp is updated with f_sc − A_sc^ortho * u_sc^ortho.
 //   - The system is then solved in-place in temp, and the results
 //     are copied back to x.
-//   - Steps 2 (White-Circle) and 3 (Black-Radial) can be started
-//     simultaneously if the outermost circle is defined as black.
-//   - The system solves use the A-Take stencil for matrix application.
 //
 // Solver and matrix structure:
 //   - The matrix A_sc is block tridiagonal due to the smoother-based
@@ -105,6 +102,13 @@ private:
     /* ------------------- */
 
     // Stencils encode neighborhood connectivity for A_sc matrix assembly.
+    // It is only used in the construction of COO/CSR matrices.
+    // Thus it is only used for the interior boundary matrix and not needed for the tridiagonal matrices.
+    // The Stencil class stores the offset for each position.
+    // - Non-zero matrix indicesare obtained via `ptr + offset`
+    // - A value of `-1` means the position is not included in the stencil pattern.
+    // - Other values (0, 1, 2, ..., stencil_size - 1) correspond to valid stencil indices.
+
     // clang-format off
     const Stencil stencil_DB_ = {
         -1, -1, -1,
@@ -119,18 +123,18 @@ private:
     };
     const Stencil circle_stencil_across_origin_ = {
         -1,  3, -1,
-        1,  0, -1,
+         1,  0, -1,
         -1,  2, -1
     };
     /* Radial Stencils */
     const Stencil radial_stencil_interior_ = {
         -1, -1, -1,
-        1,  0,  2,
+         1,  0,  2,
         -1, -1, -1
     };
     const Stencil radial_stencil_next_outer_DB_ = {
         -1, -1, -1,
-        1,  0, -1,
+         1,  0, -1,
         -1, -1, -1
     };
     const Stencil radial_stencil_next_circular_smoothing_ = {
@@ -163,12 +167,8 @@ private:
     // Build A_sc matrix block for a single radial line.
     void buildAscRadialSection(const int i_theta);
     // Build A_sc for a specific node (i_r, i_theta)
-    void nodeBuildSmootherTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                               MatrixType& inner_boundary_circle_matrix,
-                               BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
-                               BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, ConstVector<double>& arr,
-                               ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF,
-                               ConstVector<double>& coeff_beta);
+    void nodeBuildSmootherTake(int i_r, int i_theta, ConstVector<double>& arr, ConstVector<double>& att,
+                               ConstVector<double>& art, ConstVector<double>& detDF, ConstVector<double>& coeff_beta);
 
     /* ---------------------- */
     /* Orthogonal application */
@@ -176,10 +176,9 @@ private:
 
     // Compute temp = f_sc − A_sc^ortho * u_sc^ortho   (precomputed right-hand side)
     // where x = u_sc and rhs = f_sc
-    void applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color, ConstVector<double> x,
-                                    ConstVector<double> rhs, Vector<double> temp);
-    void applyAscOrthoRadialSection(const int i_theta, const SmootherColor smoother_color, ConstVector<double> x,
-                                    ConstVector<double> rhs, Vector<double> temp);
+    void applyAscOrthoCircleSection(const int i_r, ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
+    void applyAscOrthoRadialSection(const int i_theta, ConstVector<double> x, ConstVector<double> rhs,
+                                    Vector<double> temp);
 
     /* ----------------- */
     /* Line-wise solvers */
@@ -189,14 +188,14 @@ private:
     //     A_sc * u_sc = f_sc − A_sc^ortho * u_sc^ortho
     // Parameter mapping:
     //   x    = u_sc   (solution vector for section s and color c)
-    //   temp = f_sc − A_sc^⊥ * u_sc^⊥   (precomputed right-hand side)
+    //   temp = f_sc − A_sc^ortho * u_sc^ortho   (precomputed right-hand side)
     // where:
     //   s in {Circle, Radial}  denotes the smoother section type,
-    //   c in {Black, White}    denotes the coloring (even/odd sub-system).
-    void solveEvenCircleSection(Vector<double> x, Vector<double> temp);
-    void solveOddCircleSection(Vector<double> x, Vector<double> temp);
-    void solveEvenRadialSection(Vector<double> x, Vector<double> temp);
-    void solveOddRadialSection(Vector<double> x, Vector<double> temp);
+    //   c in {Black, White}    denotes the line coloring.
+    void solveBlackCircleSection(Vector<double> x, Vector<double> temp);
+    void solveWhiteCircleSection(Vector<double> x, Vector<double> temp);
+    void solveBlackRadialSection(Vector<double> x, Vector<double> temp);
+    void solveWhiteRadialSection(Vector<double> x, Vector<double> temp);
 
     /* ----------------------------------- */
     /* Initialize and destroy MUMPS solver */
