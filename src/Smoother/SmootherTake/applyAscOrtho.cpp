@@ -208,7 +208,7 @@ inline void nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& g
     }
 }
 
-void SmootherTake::applyAscOrthoCircleSection(const int i_r, ConstVector<double> x, ConstVector<double> rhs,
+void SmootherTake::applyAscOrthoCircleSection(int i_r, ConstVector<double> x, ConstVector<double> rhs,
                                               Vector<double> temp)
 {
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles());
@@ -228,7 +228,7 @@ void SmootherTake::applyAscOrthoCircleSection(const int i_r, ConstVector<double>
     }
 }
 
-void SmootherTake::applyAscOrthoRadialSection(const int i_theta, ConstVector<double> x, ConstVector<double> rhs,
+void SmootherTake::applyAscOrthoRadialSection(int i_theta, ConstVector<double> x, ConstVector<double> rhs,
                                               Vector<double> temp)
 {
     assert(i_theta >= 0 && i_theta < grid_.ntheta());

@@ -9,11 +9,11 @@
     #include "mpi.h"
 #endif
 
-// SmootherTake implements the coupled circle-radial smoothing procedure.
+// The smoother implements the coupled circle-radial smoothing procedure.
 // It performs iterative updates on different parts of the grid based
-// on the circle/radial section of the grid and a black/white coloring scheme.
+// on the circle/radial section of the grid and black/white line coloring.
 //
-// The smoothing solves linear systems of the form:
+// The smoother solves linear systems of the form:
 //   A_sc * u_sc = f_sc − A_sc^ortho * u_sc^ortho
 // where:
 //   - s in {Circle, Radial} denotes the smoother section type,
@@ -35,6 +35,8 @@
 //   - First, temp is updated with f_sc − A_sc^ortho * u_sc^ortho.
 //   - The system is then solved in-place in temp, and the results
 //     are copied back to x.
+//   - Using 'temp' isn't strictly necessary as all updates could be performed in place in 'x'.
+//   - The stencil is applied using the A-Take method.
 //
 // Solver and matrix structure:
 //   - The matrix A_sc is block tridiagonal due to the smoother-based
@@ -47,9 +49,7 @@
 //   - Circular line matrices are cyclic tridiagonal due to angular
 //     periodicity, whereas radial line matrices are strictly tridiagonal.
 //   - Dirichlet boundary contributions in radial matrices are shifted
-//     into the right-hand side to preserve symmetry.
-//   - Enforcing symmetric matrix structure enables reduced memory usage
-//     and allows in-place factorization with the tridiagonal solver.
+//     into the right-hand side to make A_sc symmetric.
 
 class SmootherTake : public Smoother
 {
@@ -73,15 +73,17 @@ private:
     /* Tridiagonal solvers */
     /* ------------------- */
 
-    // Batched solvers for cyclic-tridiagonal circle lines.
+    // Batched solver for cyclic-tridiagonal circle line A_sc matrices.
     BatchedTridiagonalSolver<double> circle_tridiagonal_solver_;
 
-    // Batched solvers for tridiagonal radial lines.
+    // Batched solver for tridiagonal radial circle line A_sc matrices.
     BatchedTridiagonalSolver<double> radial_tridiagonal_solver_;
 
     // The A_sc matrix on i_r = 0 (inner circle) is NOT tridiagonal because
-    // it includes across-origin coupling. Therefore, it is assembled into a
-    // sparse matrix and solved using a general-purpose sparse solver.
+    // it potentially includes across-origin coupling. Therefore, it is assembled
+    // into a sparse matrix and solved using a general-purpose sparse solver.
+    // When using the MUMPS solver, the matrix is assembled in COO format.
+    // When using the in-house solver, the matrix is stored in CSR format.
 #ifdef GMGPOLAR_USE_MUMPS
     using MatrixType = SparseMatrixCOO<double>;
     DMUMPS_STRUC_C inner_boundary_mumps_solver_;
@@ -93,9 +95,9 @@ private:
     MatrixType inner_boundary_circle_matrix_;
 
     // Note:
-    //   - circle_tridiagonal_solver_[0] is unused.
-    //   - circle_tridiagonal_solver_[i_r] solves circle line i_r.
-    //   - radial_tridiagonal_solver_[i_theta] solves radial line i_theta.
+    //   - circle_tridiagonal_solver_[batch=0] is unused. Use the COO/CSR matrix instead.
+    //   - circle_tridiagonal_solver_[batch=i_r] solves circle line i_r.
+    //   - radial_tridiagonal_solver_[batch=i_theta] solves radial line i_theta.
 
     /* ------------------- */
     /* Stencil definitions */
@@ -106,7 +108,7 @@ private:
     // Thus it is only used for the interior boundary matrix and not needed for the tridiagonal matrices.
     // The Stencil class stores the offset for each position.
     // - Non-zero matrix indicesare obtained via `ptr + offset`
-    // - A value of `-1` means the position is not included in the stencil pattern.
+    // - A offset value of `-1` means the position is not included in the stencil pattern.
     // - Other values (0, 1, 2, ..., stencil_size - 1) correspond to valid stencil indices.
 
     // clang-format off
@@ -123,12 +125,12 @@ private:
     // clang-format on
 
     // Select correct stencil depending on the grid position.
-    const Stencil& getStencil(const int i_r) const; /* Only i_r = 0 implemented */
+    const Stencil& getStencil(int i_r) const; /* Only i_r = 0 implemented */
     // Number of nonzero A_sc entries.
-    int getNonZeroCountCircleAsc(const int i_r) const; /* Only i_r = 0 implemented */
+    int getNonZeroCountCircleAsc(int i_r) const; /* Only i_r = 0 implemented */
     // Obtain a ptr to index into COO matrices.
     // It accumulates all stencil sizes within a line up to, but excluding the current node.
-    int getCircleAscIndex(const int i_r, const int i_theta) const; /* Only i_r = 0 implemented */
+    int getCircleAscIndex(int i_r, int i_theta) const; /* Only i_r = 0 implemented */
 
     /* --------------- */
     /* Matrix assembly */
@@ -137,12 +139,12 @@ private:
     // Build all A_sc matrices for circle and radial smoothers.
     void buildAscMatrices();
     // Build A_sc matrix block for a single circular line.
-    void buildAscCircleSection(const int i_r);
+    void buildAscCircleSection(int i_r);
     // Build A_sc matrix block for a single radial line.
-    void buildAscRadialSection(const int i_theta);
+    void buildAscRadialSection(int i_theta);
     // Build A_sc for a specific node (i_r, i_theta)
-    void nodeBuildSmootherTake(int i_r, int i_theta, ConstVector<double>& arr, ConstVector<double>& att,
-                               ConstVector<double>& art, ConstVector<double>& detDF, ConstVector<double>& coeff_beta);
+    void nodeBuildAscTake(int i_r, int i_theta, ConstVector<double>& arr, ConstVector<double>& att,
+                          ConstVector<double>& art, ConstVector<double>& detDF, ConstVector<double>& coeff_beta);
 
     /* ---------------------- */
     /* Orthogonal application */
@@ -150,9 +152,8 @@ private:
 
     // Compute temp = f_sc − A_sc^ortho * u_sc^ortho   (precomputed right-hand side)
     // where x = u_sc and rhs = f_sc
-    void applyAscOrthoCircleSection(const int i_r, ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
-    void applyAscOrthoRadialSection(const int i_theta, ConstVector<double> x, ConstVector<double> rhs,
-                                    Vector<double> temp);
+    void applyAscOrthoCircleSection(int i_r, ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
+    void applyAscOrthoRadialSection(int i_theta, ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
 
     /* ----------------- */
     /* Line-wise solvers */

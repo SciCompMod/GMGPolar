@@ -29,9 +29,9 @@ inline void updateCOOCSRMatrixElement(SparseMatrixCSR<double>& matrix, int ptr, 
 }
 #endif
 
-void SmootherTake::nodeBuildSmootherTake(int i_r, int i_theta, ConstVector<double>& arr, ConstVector<double>& att,
-                                         ConstVector<double>& art, ConstVector<double>& detDF,
-                                         ConstVector<double>& coeff_beta)
+void SmootherTake::nodeBuildAscTake(int i_r, int i_theta, ConstVector<double>& arr, ConstVector<double>& att,
+                                    ConstVector<double>& art, ConstVector<double>& detDF,
+                                    ConstVector<double>& coeff_beta)
 {
     assert(i_r >= 0 && i_r < grid_.nr());
     assert(i_theta >= 0 && i_theta < grid_.ntheta());
@@ -357,7 +357,7 @@ void SmootherTake::nodeBuildSmootherTake(int i_r, int i_theta, ConstVector<doubl
     }
 }
 
-void SmootherTake::buildAscCircleSection(const int i_r)
+void SmootherTake::buildAscCircleSection(int i_r)
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -370,11 +370,11 @@ void SmootherTake::buildAscCircleSection(const int i_r)
 
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
         // Build Asc at the current node
-        nodeBuildSmootherTake(i_r, i_theta, arr, att, art, detDF, coeff_beta);
+        nodeBuildAscTake(i_r, i_theta, arr, att, art, detDF, coeff_beta);
     }
 }
 
-void SmootherTake::buildAscRadialSection(const int i_theta)
+void SmootherTake::buildAscRadialSection(int i_theta)
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -387,7 +387,7 @@ void SmootherTake::buildAscRadialSection(const int i_theta)
 
     for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
         // Build Asc at the current node
-        nodeBuildSmootherTake(i_r, i_theta, arr, att, art, detDF, coeff_beta);
+        nodeBuildAscTake(i_r, i_theta, arr, att, art, detDF, coeff_beta);
     }
 }
 
