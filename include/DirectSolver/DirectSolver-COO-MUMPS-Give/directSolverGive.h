@@ -86,6 +86,10 @@ private:
 
     // Retrieves the stencil for the solver matrix at the given radial index.
     const Stencil& getStencil(int i_r) const;
+
+    void nodeBuildSolverMatrixGive(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+                                   SparseMatrixCOO<double>& solver_matrix, double arr, double att, double art,
+                                   double detDF, double coeff_beta);
 };
 
 #endif
