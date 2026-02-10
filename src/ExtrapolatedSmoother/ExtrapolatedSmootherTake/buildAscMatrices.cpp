@@ -1,631 +1,646 @@
 #include "../../../include/ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.h"
 
 /* Tridiagonal matrices */
-#define UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value)                                                         \
-    do {                                                                                                               \
-        if (row == column)                                                                                             \
-            matrix.main_diagonal(row) = value;                                                                         \
-        else if (row == column - 1)                                                                                    \
-            matrix.sub_diagonal(row) = value;                                                                          \
-        else if (row == 0 && column == matrix.columns() - 1)                                                           \
-            matrix.cyclic_corner_element() = value;                                                                    \
-    } while (0)
+inline void updateTridiagonalElement(SymmetricTridiagonalSolver<double>& matrix, int row, int column, double value)
+{
+    if (row == column)
+        matrix.main_diagonal(row) = value;
+    else if (row == column - 1)
+        matrix.sub_diagonal(row) = value;
+    else if (row == 0 && column == matrix.columns() - 1)
+        matrix.cyclic_corner_element() = value;
+}
 
 /* Diagonal matrices */
-#define UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value)                                                            \
-    do {                                                                                                               \
-        matrix.diagonal(row) = value;                                                                                  \
-    } while (0)
+inline void updateDiagonalElement(DiagonalSolver<double>& matrix, int row, int column, double value)
+{
+    matrix.diagonal(row) = value;
+}
 
 /* Inner Boundary COO/CSR matrix */
 #ifdef GMGPOLAR_USE_MUMPS
-    #define COO_CSR_UPDATE(matrix, ptr, offset, row, col, val)                                                         \
-        do {                                                                                                           \
-            matrix.row_index(ptr + offset) = row;                                                                      \
-            matrix.col_index(ptr + offset) = col;                                                                      \
-            matrix.value(ptr + offset)     = val;                                                                      \
-        } while (0)
+inline void updateCOOCSRMatrixElement(SparseMatrixCOO<double>& matrix, int ptr, int offset, int row, int col,
+                                      double val)
+{
+    matrix.row_index(ptr + offset) = row;
+    matrix.col_index(ptr + offset) = col;
+    matrix.value(ptr + offset)     = val;
+}
 #else
-    #define COO_CSR_UPDATE(matrix, ptr, offset, row, col, val)                                                         \
-        do {                                                                                                           \
-            matrix.row_nz_index(row, offset) = col;                                                                    \
-            matrix.row_nz_entry(row, offset) = val;                                                                    \
-        } while (0)
+inline void updateCOOCSRMatrixElement(SparseMatrixCSR<double>& matrix, int ptr, int offset, int row, int col,
+                                      double val)
+{
+    matrix.row_nz_index(row, offset) = col;
+    matrix.row_nz_entry(row, offset) = val;
+}
 #endif
 
-#define NODE_BUILD_SMOOTHER_TAKE(i_r, i_theta, grid, DirBC_Interior, inner_boundary_circle_matrix,                     \
-                                 circle_diagonal_solver, circle_tridiagonal_solver, radial_diagonal_solver,            \
-                                 radial_tridiagonal_solver)                                                            \
-    do {                                                                                                               \
-        assert(i_r >= 0 && i_r < grid.nr());                                                                           \
-        assert(i_theta >= 0 && i_theta < grid.ntheta());                                                               \
-                                                                                                                       \
-        const int numberSmootherCircles = grid.numberSmootherCircles();                                                \
-        const int lengthSmootherRadial  = grid.lengthSmootherRadial();                                                 \
-                                                                                                                       \
-        assert(numberSmootherCircles >= 3);                                                                            \
-        assert(lengthSmootherRadial >= 3);                                                                             \
-                                                                                                                       \
-        int ptr, offset;                                                                                               \
-        int row, column, col;                                                                                          \
-        double value, val;                                                                                             \
-        /* ------------------------------------------ */                                                               \
-        /* Node in the interior of the Circle Section */                                                               \
-        /* ------------------------------------------ */                                                               \
-        if (i_r > 0 && i_r < numberSmootherCircles) { /* i_r = numberSmootherCircles-1 is included here! */            \
-            double h1     = grid.radialSpacing(i_r - 1);                                                               \
-            double h2     = grid.radialSpacing(i_r);                                                                   \
-            double k1     = grid.angularSpacing(i_theta - 1);                                                          \
-            double k2     = grid.angularSpacing(i_theta);                                                              \
-            double coeff1 = 0.5 * (k1 + k2) / h1;                                                                      \
-            double coeff2 = 0.5 * (k1 + k2) / h2;                                                                      \
-            double coeff3 = 0.5 * (h1 + h2) / k1;                                                                      \
-            double coeff4 = 0.5 * (h1 + h2) / k2;                                                                      \
-                                                                                                                       \
-            int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                         \
-            int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                         \
-                                                                                                                       \
-            const int left   = grid.index(i_r - 1, i_theta);                                                           \
-            const int bottom = grid.index(i_r, i_theta_M1);                                                            \
-            const int center = grid.index(i_r, i_theta);                                                               \
-            const int top    = grid.index(i_r, i_theta_P1);                                                            \
-            const int right  = grid.index(i_r + 1, i_theta);                                                           \
-                                                                                                                       \
-            int center_index = i_theta;                                                                                \
-            int bottom_index = i_theta_M1;                                                                             \
-            int top_index    = i_theta_P1;                                                                             \
-            /* -------------------------- */                                                                           \
-            /* Cyclic Tridiagonal Section */                                                                           \
-            /* i_r % 2 == 1               */                                                                           \
-            if (i_r & 1) {                                                                                             \
-                /* i_theta % 2 == 1 */                                                                                 \
-                /* | x | o | x | */                                                                                    \
-                /* |   |   |   | */                                                                                    \
-                /* | o | O | o | */                                                                                    \
-                /* |   |   |   | */                                                                                    \
-                /* | x | o | x | */                                                                                    \
-                /* or */                                                                                               \
-                /* i_theta % 2 == 0 */                                                                                 \
-                /* | o | o | o | */                                                                                    \
-                /* |   |   |   | */                                                                                    \
-                /* | x | O | x | */                                                                                    \
-                /* |   |   |   | */                                                                                    \
-                /* | o | o | o | */                                                                                    \
-                                                                                                                       \
-                auto& matrix = circle_tridiagonal_solver[i_r / 2];                                                     \
-                                                                                                                       \
-                /* Center: (Left, Right, Bottom, Top) */                                                               \
-                row    = center_index;                                                                                 \
-                column = center_index;                                                                                 \
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                     \
-                        coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
-                        coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
-                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
-                                                                                                                       \
-                /* Bottom */                                                                                           \
-                row    = center_index;                                                                                 \
-                column = bottom_index;                                                                                 \
-                value  = -coeff3 * (att[center] + att[bottom]);                                                        \
-                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
-                                                                                                                       \
-                /* Top */                                                                                              \
-                row    = center_index;                                                                                 \
-                column = top_index;                                                                                    \
-                value  = -coeff4 * (att[center] + att[top]);                                                           \
-                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
-            }                                                                                                          \
-            /* ---------------- */                                                                                     \
-            /* Diagonal Section */                                                                                     \
-            /* i_r % 2 == 0     */                                                                                     \
-            else {                                                                                                     \
-                /* i_theta % 2 == 1 */                                                                                 \
-                /* | o | x | o | */                                                                                    \
-                /* |   |   |   | */                                                                                    \
-                /* | o | O | o | */                                                                                    \
-                /* |   |   |   | */                                                                                    \
-                /* | o | x | o | */                                                                                    \
-                /* or */                                                                                               \
-                /* i_theta % 2 == 0 */                                                                                 \
-                /* | o | o | o | */                                                                                    \
-                /* |   |   |   | */                                                                                    \
-                /* | o | X | o | */                                                                                    \
-                /* |   |   |   | */                                                                                    \
-                /* | o | o | o | */                                                                                    \
-                                                                                                                       \
-                auto& matrix = circle_diagonal_solver[i_r / 2];                                                        \
-                                                                                                                       \
-                if (i_theta & 1) { /* i_theta % 2 == 1 */                                                              \
-                    /* Center: (Left, Right, Bottom, Top) */                                                           \
-                    row    = center_index;                                                                             \
-                    column = center_index;                                                                             \
-                    value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                 \
-                            coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                 \
-                            coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                  \
-                    UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                               \
-                }                                                                                                      \
-                else { /* i_theta % 2 == 0 */                                                                          \
-                    /* Center: Coarse */                                                                               \
-                    auto& matrix     = circle_diagonal_solver[i_r / 2];                                                \
-                    int center_index = i_theta;                                                                        \
-                                                                                                                       \
-                    row    = center_index;                                                                             \
-                    column = center_index;                                                                             \
-                    value  = 1.0;                                                                                      \
-                    UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                               \
-                }                                                                                                      \
-            }                                                                                                          \
-        }                                                                                                              \
-        /* ------------------------------------------ */                                                               \
-        /* Circle Section: Node in the inner boundary */                                                               \
-        /* ------------------------------------------ */                                                               \
-        else if (i_r == 0) {                                                                                           \
-            /* ------------------------------------------------ */                                                     \
-            /* Case 1: Dirichlet boundary on the inner boundary */                                                     \
-            /* ------------------------------------------------ */                                                     \
-            if (DirBC_Interior) {                                                                                      \
-                auto& matrix              = inner_boundary_circle_matrix;                                              \
-                const int center_index    = i_theta;                                                                   \
-                const int center_nz_index = getCircleAscIndex(i_r, i_theta);                                           \
-                                                                                                                       \
-                /* Fill matrix row of (i,j) */                                                                         \
-                row = center_index;                                                                                    \
-                ptr = center_nz_index;                                                                                 \
-                                                                                                                       \
-                const Stencil& CenterStencil = getStencil(i_r, i_theta);                                               \
-                                                                                                                       \
-                offset = CenterStencil[StencilPosition::Center];                                                       \
-                col    = center_index;                                                                                 \
-                val    = 1.0;                                                                                          \
-                COO_CSR_UPDATE(matrix, ptr, offset, row, col, val);                                                    \
-            }                                                                                                          \
-            else {                                                                                                     \
-                /* ------------------------------------------------------------- */                                    \
-                /* Case 2: Across origin discretization on the interior boundary */                                    \
-                /* ------------------------------------------------------------- */                                    \
-                /* h1 gets replaced with 2 * R0. */                                                                    \
-                /* (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()/2)). */                           \
-                /* Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil. */    \
-                double h1     = 2.0 * grid.radius(0);                                                                  \
-                double h2     = grid.radialSpacing(i_r);                                                               \
-                double k1     = grid.angularSpacing(i_theta - 1);                                                      \
-                double k2     = grid.angularSpacing(i_theta);                                                          \
-                double coeff1 = 0.5 * (k1 + k2) / h1;                                                                  \
-                double coeff2 = 0.5 * (k1 + k2) / h2;                                                                  \
-                double coeff3 = 0.5 * (h1 + h2) / k1;                                                                  \
-                double coeff4 = 0.5 * (h1 + h2) / k2;                                                                  \
-                                                                                                                       \
-                const int i_theta_M1           = grid.wrapThetaIndex(i_theta - 1);                                     \
-                const int i_theta_P1           = grid.wrapThetaIndex(i_theta + 1);                                     \
-                const int i_theta_AcrossOrigin = grid.wrapThetaIndex(i_theta + (grid.ntheta() / 2));                   \
-                                                                                                                       \
-                const int center_index = i_theta;                                                                      \
-                const int left_index   = i_theta_AcrossOrigin;                                                         \
-                const int right_index  = i_theta;                                                                      \
-                const int bottom_index = i_theta_M1;                                                                   \
-                const int top_index    = i_theta_P1;                                                                   \
-                                                                                                                       \
-                const int center_nz_index = getCircleAscIndex(i_r, i_theta);                                           \
-                const int bottom_nz_index = getCircleAscIndex(i_r, i_theta_M1);                                        \
-                const int top_nz_index    = getCircleAscIndex(i_r, i_theta_P1);                                        \
-                const int left_nz_index   = getCircleAscIndex(i_r, i_theta_AcrossOrigin);                              \
-                                                                                                                       \
-                auto& matrix = inner_boundary_circle_matrix;                                                           \
-                                                                                                                       \
-                int nz_index;                                                                                          \
-                const Stencil& CenterStencil = getStencil(i_r, i_theta);                                               \
-                                                                                                                       \
-                if (i_theta & 1) {                                                                                     \
-                    /* i_theta % 2 == 1 */                                                                             \
-                    /* -| x | o | x | */                                                                               \
-                    /* -|   |   |   | */                                                                               \
-                    /* -| O | o | o | */                                                                               \
-                    /* -|   |   |   | */                                                                               \
-                    /* -| x | o | x | */                                                                               \
-                                                                                                                       \
-                    const int left   = grid.index(i_r, i_theta_AcrossOrigin);                                          \
-                    const int bottom = grid.index(i_r, i_theta_M1);                                                    \
-                    const int center = grid.index(i_r, i_theta);                                                       \
-                    const int top    = grid.index(i_r, i_theta_P1);                                                    \
-                    const int right  = grid.index(i_r + 1, i_theta);                                                   \
-                                                                                                                       \
-                    const double center_value =                                                                        \
-                        0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                      \
-                        coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
-                        coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
-                    const double left_value = -coeff1 * (arr[center] + arr[left]);                                     \
-                                                                                                                       \
-                    /* Fill matrix row of (i,j) */                                                                     \
-                    row = center_index;                                                                                \
-                    ptr = center_nz_index;                                                                             \
-                                                                                                                       \
-                    const Stencil& CenterStencil = getStencil(i_r, i_theta);                                           \
-                                                                                                                       \
-                    offset = CenterStencil[StencilPosition::Center];                                                   \
-                    col    = center_index;                                                                             \
-                    val    = center_value;                                                                             \
-                    COO_CSR_UPDATE(matrix, ptr, offset, row, col, val);                                                \
-                                                                                                                       \
-                    offset = CenterStencil[StencilPosition::Left];                                                     \
-                    col    = left_index;                                                                               \
-                    val    = left_value;                                                                               \
-                    COO_CSR_UPDATE(matrix, ptr, offset, row, col, val);                                                \
-                }                                                                                                      \
-                else {                                                                                                 \
-                    /* i_theta % 2 == 0 */                                                                             \
-                    /* -| o | o | o | */                                                                               \
-                    /* -|   |   |   | */                                                                               \
-                    /* -| X | o | x | */                                                                               \
-                    /* -|   |   |   | */                                                                               \
-                    /* -| o | o | o | */                                                                               \
-                                                                                                                       \
-                    /* Fill matrix row of (i,j) */                                                                     \
-                    row = center_index;                                                                                \
-                    ptr = center_nz_index;                                                                             \
-                                                                                                                       \
-                    const Stencil& CenterStencil = getStencil(i_r, i_theta);                                           \
-                                                                                                                       \
-                    offset = CenterStencil[StencilPosition::Center];                                                   \
-                    col    = center_index;                                                                             \
-                    val    = 1.0;                                                                                      \
-                    COO_CSR_UPDATE(matrix, ptr, offset, row, col, val);                                                \
-                }                                                                                                      \
-            }                                                                                                          \
-        }                                                                                                              \
-        /* ------------------------------------------ */                                                               \
-        /* Node in the interior of the Radial Section */                                                               \
-        /* ------------------------------------------ */                                                               \
-        else if (i_r > numberSmootherCircles && i_r < grid.nr() - 2) {                                                 \
-            double h1 = grid.radialSpacing(i_r - 1);                                                                   \
-            double h2 = grid.radialSpacing(i_r);                                                                       \
-            double k1 = grid.angularSpacing(i_theta - 1);                                                              \
-            double k2 = grid.angularSpacing(i_theta);                                                                  \
-                                                                                                                       \
-            double coeff1 = 0.5 * (k1 + k2) / h1;                                                                      \
-            double coeff2 = 0.5 * (k1 + k2) / h2;                                                                      \
-            double coeff3 = 0.5 * (h1 + h2) / k1;                                                                      \
-            double coeff4 = 0.5 * (h1 + h2) / k2;                                                                      \
-                                                                                                                       \
-            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                   \
-            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                   \
-                                                                                                                       \
-            const int left   = grid.index(i_r - 1, i_theta);                                                           \
-            const int bottom = grid.index(i_r, i_theta_M1);                                                            \
-            const int center = grid.index(i_r, i_theta);                                                               \
-            const int top    = grid.index(i_r, i_theta_P1);                                                            \
-            const int right  = grid.index(i_r + 1, i_theta);                                                           \
-                                                                                                                       \
-            const int center_index = i_r - numberSmootherCircles;                                                      \
-            const int left_index   = i_r - numberSmootherCircles - 1;                                                  \
-            const int right_index  = i_r - numberSmootherCircles + 1;                                                  \
-            /* ------------------- */                                                                                  \
-            /* Tridiagonal Section */                                                                                  \
-            /* i_theta % 2 == 1    */                                                                                  \
-            if (i_theta & 1) {                                                                                         \
-                /* i_r % 2 == 1 */                                                                                     \
-                /* ---------- */                                                                                       \
-                /* x   o   x  */                                                                                       \
-                /* ---------- */                                                                                       \
-                /* o   O   o  */                                                                                       \
-                /* ---------- */                                                                                       \
-                /* x   o   x  */                                                                                       \
-                /* ---------- */                                                                                       \
-                /* or */                                                                                               \
-                /* i_r % 2 == 0 */                                                                                     \
-                /* ---------- */                                                                                       \
-                /* o   x   o  */                                                                                       \
-                /* ---------- */                                                                                       \
-                /* o   O   o  */                                                                                       \
-                /* ---------- */                                                                                       \
-                /* o   x   o  */                                                                                       \
-                /* ---------- */                                                                                       \
-                                                                                                                       \
-                auto& matrix = radial_tridiagonal_solver[i_theta / 2];                                                 \
-                                                                                                                       \
-                /* Center: (Left, Right, Bottom, Top) */                                                               \
-                row    = center_index;                                                                                 \
-                column = center_index;                                                                                 \
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                     \
-                        coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
-                        coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
-                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
-                                                                                                                       \
-                /* Left */                                                                                             \
-                row    = center_index;                                                                                 \
-                column = left_index;                                                                                   \
-                value  = -coeff1 * (arr[center] + arr[left]);                                                          \
-                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
-                                                                                                                       \
-                /* Right */                                                                                            \
-                row    = center_index;                                                                                 \
-                column = right_index;                                                                                  \
-                value  = -coeff2 * (arr[center] + arr[right]);                                                         \
-                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
-            }                                                                                                          \
-            /* ---------------- */                                                                                     \
-            /* Diagonal Section */                                                                                     \
-            /* i_theta % 2 == 0 */                                                                                     \
-            else {                                                                                                     \
-                /* i_r % 2 == 1 */                                                                                     \
-                /* ---------- */                                                                                       \
-                /* o   o   o  */                                                                                       \
-                /* ---------- */                                                                                       \
-                /* x   O   x  */                                                                                       \
-                /* ---------- */                                                                                       \
-                /* o   o   o  */                                                                                       \
-                /* ---------- */                                                                                       \
-                /* or */                                                                                               \
-                /* i_r % 2 == 0 */                                                                                     \
-                /* ---------- */                                                                                       \
-                /* o   o   o  */                                                                                       \
-                /* ---------- */                                                                                       \
-                /* o   X   o  */                                                                                       \
-                /* ---------- */                                                                                       \
-                /* o   o   o  */                                                                                       \
-                /* ---------- */                                                                                       \
-                                                                                                                       \
-                auto& matrix = radial_diagonal_solver[i_theta / 2];                                                    \
-                                                                                                                       \
-                if (i_r & 1) { /* i_r % 2 == 1 */                                                                      \
-                    /* Center: (Left, Right, Bottom, Top) */                                                           \
-                    row    = center_index;                                                                             \
-                    column = center_index;                                                                             \
-                    value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                 \
-                            coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                 \
-                            coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                  \
-                    UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                               \
-                }                                                                                                      \
-                else { /* i_r % 2 == 0 */                                                                              \
-                    /* Center: Coarse */                                                                               \
-                    row    = center_index;                                                                             \
-                    column = center_index;                                                                             \
-                    value  = 1.0;                                                                                      \
-                    UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                               \
-                }                                                                                                      \
-            }                                                                                                          \
-        }                                                                                                              \
-        /* --------------------------------------------- */                                                            \
-        /* Radial Section: Node next to circular section */                                                            \
-        /* --------------------------------------------- */                                                            \
-        else if (i_r == numberSmootherCircles) {                                                                       \
-                                                                                                                       \
-            double h1 = grid.radialSpacing(i_r - 1);                                                                   \
-            double h2 = grid.radialSpacing(i_r);                                                                       \
-            double k1 = grid.angularSpacing(i_theta - 1);                                                              \
-            double k2 = grid.angularSpacing(i_theta);                                                                  \
-                                                                                                                       \
-            double coeff1 = 0.5 * (k1 + k2) / h1;                                                                      \
-            double coeff2 = 0.5 * (k1 + k2) / h2;                                                                      \
-            double coeff3 = 0.5 * (h1 + h2) / k1;                                                                      \
-            double coeff4 = 0.5 * (h1 + h2) / k2;                                                                      \
-                                                                                                                       \
-            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                   \
-            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                   \
-                                                                                                                       \
-            const int left   = grid.index(i_r - 1, i_theta);                                                           \
-            const int bottom = grid.index(i_r, i_theta_M1);                                                            \
-            const int center = grid.index(i_r, i_theta);                                                               \
-            const int top    = grid.index(i_r, i_theta_P1);                                                            \
-            const int right  = grid.index(i_r + 1, i_theta);                                                           \
-                                                                                                                       \
-            const int center_index = i_r - numberSmootherCircles;                                                      \
-            const int right_index  = i_r - numberSmootherCircles + 1;                                                  \
-                                                                                                                       \
-            if (i_theta & 1) {                                                                                         \
-                /* i_theta % 2 == 1 and i_r % 2 == 1 */                                                                \
-                /* | x | o | x || o   x   o   x  */                                                                    \
-                /* |   |   |   || -------------- */                                                                    \
-                /* | o | o | o || O   o   o   o  */                                                                    \
-                /* |   |   |   || -------------- */                                                                    \
-                /* | x | o | x || o   x   o   x  */                                                                    \
-                /* or */                                                                                               \
-                /* i_theta % 2 == 1 and i_r % 2 == 0 */                                                                \
-                /* | o | x | o || x   o   x   o  */                                                                    \
-                /* |   |   |   || -------------- */                                                                    \
-                /* | o | o | o || O   o   o   o  */                                                                    \
-                /* |   |   |   || -------------- */                                                                    \
-                /* | o | x | o || x   o   x   o  */                                                                    \
-                                                                                                                       \
-                auto& matrix = radial_tridiagonal_solver[i_theta / 2];                                                 \
-                                                                                                                       \
-                /* Center: (Left, Right, Bottom, Top) */                                                               \
-                row    = center_index;                                                                                 \
-                column = center_index;                                                                                 \
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                     \
-                        coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
-                        coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
-                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
-                                                                                                                       \
-                /* Right */                                                                                            \
-                row    = center_index;                                                                                 \
-                column = right_index;                                                                                  \
-                value  = -coeff2 * (arr[center] + arr[right]);                                                         \
-                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
-            }                                                                                                          \
-            else {                                                                                                     \
-                                                                                                                       \
-                auto& matrix = radial_diagonal_solver[i_theta / 2];                                                    \
-                                                                                                                       \
-                if (i_r & 1) {                                                                                         \
-                    /* i_theta % 2 == 0 and i_r % 2 == 1 */                                                            \
-                    /* | o | o | o || o   o   o   o  */                                                                \
-                    /* |   |   |   || -------------- */                                                                \
-                    /* | x | o | x || O   x   o   x  */                                                                \
-                    /* |   |   |   || -------------- */                                                                \
-                    /* | o | o | o || o   o   o   o  */                                                                \
-                                                                                                                       \
-                    /* Center: (Left, Right, Bottom, Top) */                                                           \
-                    row    = center_index;                                                                             \
-                    column = center_index;                                                                             \
-                    value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                 \
-                            coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                 \
-                            coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                  \
-                    UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                               \
-                }                                                                                                      \
-                else {                                                                                                 \
-                    /* i_theta % 2 == 0 and i_r % 2 == 0 */                                                            \
-                    /* | o | o | o || o   o   o   o  */                                                                \
-                    /* |   |   |   || -------------- */                                                                \
-                    /* | o | x | o || X   o   x   o  */                                                                \
-                    /* |   |   |   || -------------- */                                                                \
-                    /* | o | o | o || o   o   o   o  */                                                                \
-                    /* Center: Coarse */                                                                               \
-                    row    = center_index;                                                                             \
-                    column = center_index;                                                                             \
-                    value  = 1.0;                                                                                      \
-                    UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                               \
-                }                                                                                                      \
-            }                                                                                                          \
-        }                                                                                                              \
-        /* ------------------------------------------- */                                                              \
-        /* Radial Section: Node next to outer boundary */                                                              \
-        /* ------------------------------------------- */                                                              \
-        else if (i_r == grid.nr() - 2) {                                                                               \
-            assert(i_r % 2 == 1);                                                                                      \
-                                                                                                                       \
-            double h1 = grid.radialSpacing(i_r - 1);                                                                   \
-            double h2 = grid.radialSpacing(i_r);                                                                       \
-            double k1 = grid.angularSpacing(i_theta - 1);                                                              \
-            double k2 = grid.angularSpacing(i_theta);                                                                  \
-                                                                                                                       \
-            double coeff1 = 0.5 * (k1 + k2) / h1;                                                                      \
-            double coeff2 = 0.5 * (k1 + k2) / h2;                                                                      \
-            double coeff3 = 0.5 * (h1 + h2) / k1;                                                                      \
-            double coeff4 = 0.5 * (h1 + h2) / k2;                                                                      \
-                                                                                                                       \
-            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);                                                   \
-            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);                                                   \
-                                                                                                                       \
-            const int left   = grid.index(i_r - 1, i_theta);                                                           \
-            const int bottom = grid.index(i_r, i_theta_M1);                                                            \
-            const int center = grid.index(i_r, i_theta);                                                               \
-            const int top    = grid.index(i_r, i_theta_P1);                                                            \
-            const int right  = grid.index(i_r + 1, i_theta);                                                           \
-                                                                                                                       \
-            const int center_index = i_r - numberSmootherCircles;                                                      \
-            const int left_index   = i_r - numberSmootherCircles - 1;                                                  \
-            const int right_index  = i_r - numberSmootherCircles + 1;                                                  \
-                                                                                                                       \
-            if (i_theta & 1) {                                                                                         \
-                /* i_theta % 2 == 1 */                                                                                 \
-                /* ---------------|| */                                                                                \
-                /* o   x   o   x  || */                                                                                \
-                /* ---------------|| */                                                                                \
-                /* o   o   O   o  || */                                                                                \
-                /* ---------------|| */                                                                                \
-                /* o   x   o   x  || */                                                                                \
-                /* ---------------|| */                                                                                \
-                                                                                                                       \
-                auto& matrix = radial_tridiagonal_solver[i_theta / 2];                                                 \
-                                                                                                                       \
-                /* Center: (Left, Right, Bottom, Top) */                                                               \
-                row    = center_index;                                                                                 \
-                column = center_index;                                                                                 \
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                     \
-                        coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
-                        coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
-                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
-                                                                                                                       \
-                /* Left */                                                                                             \
-                row    = center_index;                                                                                 \
-                column = left_index;                                                                                   \
-                value  = -coeff1 * (arr[center] + arr[left]);                                                          \
-                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
-                /* Right */                                                                                            \
-                row    = center_index;                                                                                 \
-                column = right_index;                                                                                  \
-                value  = 0.0; /* Make tridiagonal matrix symmetric */                                                  \
-                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
-            }                                                                                                          \
-            else {                                                                                                     \
-                /* i_theta % 2 == 0 */                                                                                 \
-                /* ---------------|| */                                                                                \
-                /* o   o   o   o  || */                                                                                \
-                /* ---------------|| */                                                                                \
-                /* o   x   O   x  || */                                                                                \
-                /* ---------------|| */                                                                                \
-                /* o   o   o   o  || */                                                                                \
-                /* ---------------|| */                                                                                \
-                                                                                                                       \
-                auto& matrix = radial_diagonal_solver[i_theta / 2];                                                    \
-                                                                                                                       \
-                /* Center: (Left, Right, Bottom, Top) */                                                               \
-                row    = center_index;                                                                                 \
-                column = center_index;                                                                                 \
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +                     \
-                        coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +                     \
-                        coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);                      \
-                UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                                   \
-            }                                                                                                          \
-        }                                                                                                              \
-        /* ------------------------------------------ */                                                               \
-        /* Radial Section: Node on the outer boundary */                                                               \
-        /* ------------------------------------------ */                                                               \
-        else if (i_r == grid.nr() - 1) {                                                                               \
-            assert(!i_r % 2 == 0);                                                                                     \
-                                                                                                                       \
-            int center_index = i_r - numberSmootherCircles;                                                            \
-            int left_index   = i_r - numberSmootherCircles - 1;                                                        \
-                                                                                                                       \
-            if (i_theta & 1) {                                                                                         \
-                /* i_theta % 2 == 1 */                                                                                 \
-                /* -----------|| */                                                                                    \
-                /* x   o   x  || */                                                                                    \
-                /* -----------|| */                                                                                    \
-                /* o   o   O  || */                                                                                    \
-                /* -----------|| */                                                                                    \
-                /* x   o   x  || */                                                                                    \
-                /* -----------|| */                                                                                    \
-                                                                                                                       \
-                auto& matrix = radial_tridiagonal_solver[i_theta / 2];                                                 \
-                                                                                                                       \
-                /* Fill matrix row of (i,j) */                                                                         \
-                row    = center_index;                                                                                 \
-                column = center_index;                                                                                 \
-                value  = 1.0;                                                                                          \
-                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
-                                                                                                                       \
-                row    = center_index;                                                                                 \
-                column = left_index;                                                                                   \
-                value  = 0.0; /* Make tridiagonal matrix symmetric */                                                  \
-                UPDATE_TRIDIAGONAL_ELEMENT(matrix, row, column, value);                                                \
-            }                                                                                                          \
-            else {                                                                                                     \
-                /* i_theta % 2 == 0 */                                                                                 \
-                /* -----------|| */                                                                                    \
-                /* o   o   o  || */                                                                                    \
-                /* -----------|| */                                                                                    \
-                /* x   o   X  || */                                                                                    \
-                /* -----------|| */                                                                                    \
-                /* o   o   o  || */                                                                                    \
-                /* -----------|| */                                                                                    \
-                                                                                                                       \
-                auto& matrix = radial_diagonal_solver[i_theta / 2];                                                    \
-                                                                                                                       \
-                /* Fill matrix row of (i,j) */                                                                         \
-                row    = center_index;                                                                                 \
-                column = center_index;                                                                                 \
-                value  = 1.0;                                                                                          \
-                UPDATE_DIAGONAL_ELEMENT(matrix, row, column, value);                                                   \
-            }                                                                                                          \
-        }                                                                                                              \
-    } while (0)
+void ExtrapolatedSmootherTake::nodeBuildSmootherTake(
+    int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior, MatrixType& inner_boundary_circle_matrix,
+    std::vector<DiagonalSolver<double>>& circle_diagonal_solver,
+    std::vector<DiagonalSolver<double>>& radial_diagonal_solver,
+    std::vector<SymmetricTridiagonalSolver<double>>& circle_tridiagonal_solver,
+    std::vector<SymmetricTridiagonalSolver<double>>& radial_tridiagonal_solver, ConstVector<double>& arr,
+    ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
+{
+
+    assert(i_r >= 0 && i_r < grid.nr());
+    assert(i_theta >= 0 && i_theta < grid.ntheta());
+
+    const int numberSmootherCircles = grid.numberSmootherCircles();
+    const int lengthSmootherRadial  = grid.lengthSmootherRadial();
+
+    assert(numberSmootherCircles >= 3);
+    assert(lengthSmootherRadial >= 3);
+
+    int ptr, offset;
+    int row, column, col;
+    double value, val;
+
+    /* ------------------------------------------ */
+    /* Node in the interior of the Circle Section */
+    /* ------------------------------------------ */
+    if (i_r > 0 && i_r < numberSmootherCircles) {
+        /* i_r = numberSmootherCircles-1 is included here! */
+        double h1 = grid.radialSpacing(i_r - 1);
+        double h2 = grid.radialSpacing(i_r);
+        double k1 = grid.angularSpacing(i_theta - 1);
+        double k2 = grid.angularSpacing(i_theta);
+
+        double coeff1 = 0.5 * (k1 + k2) / h1;
+        double coeff2 = 0.5 * (k1 + k2) / h2;
+        double coeff3 = 0.5 * (h1 + h2) / k1;
+        double coeff4 = 0.5 * (h1 + h2) / k2;
+
+        int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+        int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
+
+        const int left   = grid.index(i_r - 1, i_theta);
+        const int bottom = grid.index(i_r, i_theta_M1);
+        const int center = grid.index(i_r, i_theta);
+        const int top    = grid.index(i_r, i_theta_P1);
+        const int right  = grid.index(i_r + 1, i_theta);
+
+        int center_index = i_theta;
+        int bottom_index = i_theta_M1;
+        int top_index    = i_theta_P1;
+
+        /* -------------------------- */
+        /* Cyclic Tridiagonal Section */
+        /* i_r % 2 == 1               */
+        if (i_r & 1) {
+            /* i_theta % 2 == 1 */
+            /* | x | o | x | */
+            /* |   |   |   | */
+            /* | o | O | o | */
+            /* |   |   |   | */
+            /* | x | o | x | */
+            /* or */ /* i_theta % 2 == 0 */
+            /* | o | o | o | */
+            /* |   |   |   | */
+            /* | x | O | x | */
+            /* |   |   |   | */
+            /* | o | o | o | */
+
+            auto& matrix = circle_tridiagonal_solver[i_r / 2];
+
+            /* Center: (Left, Right, Bottom, Top) */
+            row    = center_index;
+            column = center_index;
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
+                    coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
+                    coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+            updateTridiagonalElement(matrix, row, column, value);
+
+            /* Bottom */
+            row    = center_index;
+            column = bottom_index;
+            value  = -coeff3 * (att[center] + att[bottom]);
+            updateTridiagonalElement(matrix, row, column, value);
+
+            /* Top */
+            row    = center_index;
+            column = top_index;
+            value  = -coeff4 * (att[center] + att[top]);
+            updateTridiagonalElement(matrix, row, column, value);
+        }
+        /* ---------------- */
+        /* Diagonal Section */
+        /* i_r % 2 == 0     */
+        else {
+            /* i_theta % 2 == 1 */
+            /* | o | x | o | */
+            /* |   |   |   | */
+            /* | o | O | o | */
+            /* |   |   |   | */
+            /* | o | x | o | */
+            /* or */ /* i_theta % 2 == 0 */ /* | o | o | o | */
+            /* |   |   |   | */
+            /* | o | X | o | */
+            /* |   |   |   | */
+            /* | o | o | o | */
+
+            auto& matrix = circle_diagonal_solver[i_r / 2];
+
+            if (i_theta & 1) {
+                /* i_theta % 2 == 1 */
+
+                /* Center: (Left, Right, Bottom, Top) */
+                row    = center_index;
+                column = center_index;
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
+                        coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
+                        coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+                updateDiagonalElement(matrix, row, column, value);
+            }
+            else {
+                /* i_theta % 2 == 0 */
+
+                /* Center: Coarse */
+                auto& matrix     = circle_diagonal_solver[i_r / 2];
+                int center_index = i_theta;
+
+                row    = center_index;
+                column = center_index;
+                value  = 1.0;
+                updateDiagonalElement(matrix, row, column, value);
+            }
+        }
+    }
+    /* ------------------------------------------ */
+    /* Circle Section: Node in the inner boundary */
+    /* ------------------------------------------ */
+    else if (i_r == 0) {
+        /* ------------------------------------------------ */
+        /* Case 1: Dirichlet boundary on the inner boundary */
+        /* ------------------------------------------------ */
+        if (DirBC_Interior) {
+            auto& matrix              = inner_boundary_circle_matrix;
+            const int center_index    = i_theta;
+            const int center_nz_index = getCircleAscIndex(i_r, i_theta);
+
+            /* Fill matrix row of (i,j) */
+            row = center_index;
+            ptr = center_nz_index;
+
+            const Stencil& CenterStencil = getStencil(i_r, i_theta);
+
+            offset = CenterStencil[StencilPosition::Center];
+            col    = center_index;
+            val    = 1.0;
+            updateCOOCSRMatrixElement(matrix, ptr, offset, row, col, val);
+        }
+        else {
+            /* ------------------------------------------------------------- */
+            /* Case 2: Across origin discretization on the interior boundary */
+            /* ------------------------------------------------------------- */
+            // h1 gets replaced with 2 * R0.
+            // (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()/2)).
+            // Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil.
+            double h1 = 2.0 * grid.radius(0);
+            double h2 = grid.radialSpacing(i_r);
+            double k1 = grid.angularSpacing(i_theta - 1);
+            double k2 = grid.angularSpacing(i_theta);
+
+            double coeff1 = 0.5 * (k1 + k2) / h1;
+            double coeff2 = 0.5 * (k1 + k2) / h2;
+            double coeff3 = 0.5 * (h1 + h2) / k1;
+            double coeff4 = 0.5 * (h1 + h2) / k2;
+
+            const int i_theta_M1           = grid.wrapThetaIndex(i_theta - 1);
+            const int i_theta_P1           = grid.wrapThetaIndex(i_theta + 1);
+            const int i_theta_AcrossOrigin = grid.wrapThetaIndex(i_theta + (grid.ntheta() / 2));
+
+            const int center_index = i_theta;
+            const int left_index   = i_theta_AcrossOrigin;
+            const int right_index  = i_theta;
+            const int bottom_index = i_theta_M1;
+            const int top_index    = i_theta_P1;
+
+            const int center_nz_index = getCircleAscIndex(i_r, i_theta);
+            const int bottom_nz_index = getCircleAscIndex(i_r, i_theta_M1);
+            const int top_nz_index    = getCircleAscIndex(i_r, i_theta_P1);
+            const int left_nz_index   = getCircleAscIndex(i_r, i_theta_AcrossOrigin);
+
+            auto& matrix = inner_boundary_circle_matrix;
+
+            int nz_index;
+            const Stencil& CenterStencil = getStencil(i_r, i_theta);
+
+            if (i_theta & 1) {
+                /* i_theta % 2 == 1 */
+                /* -| x | o | x | */
+                /* -|   |   |   | */
+                /* -| O | o | o | */
+                /* -|   |   |   | */
+                /* -| x | o | x | */
+
+                const int left   = grid.index(i_r, i_theta_AcrossOrigin);
+                const int bottom = grid.index(i_r, i_theta_M1);
+                const int center = grid.index(i_r, i_theta);
+                const int top    = grid.index(i_r, i_theta_P1);
+                const int right  = grid.index(i_r + 1, i_theta);
+
+                const double center_value = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
+                                            coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
+                                            coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+                const double left_value = -coeff1 * (arr[center] + arr[left]);
+
+                /* Fill matrix row of (i,j) */
+                row = center_index;
+                ptr = center_nz_index;
+
+                const Stencil& CenterStencil = getStencil(i_r, i_theta);
+
+                offset = CenterStencil[StencilPosition::Center];
+                col    = center_index;
+                val    = center_value;
+                updateCOOCSRMatrixElement(matrix, ptr, offset, row, col, val);
+
+                offset = CenterStencil[StencilPosition::Left];
+                col    = left_index;
+                val    = left_value;
+                updateCOOCSRMatrixElement(matrix, ptr, offset, row, col, val);
+            }
+            else {
+                /* i_theta % 2 == 0 */
+                /* -| o | o | o | */
+                /* -|   |   |   | */
+                /* -| X | o | x | */
+                /* -|   |   |   | */
+                /* -| o | o | o | */
+
+                /* Fill matrix row of (i,j) */
+                row = center_index;
+                ptr = center_nz_index;
+
+                const Stencil& CenterStencil = getStencil(i_r, i_theta);
+
+                offset = CenterStencil[StencilPosition::Center];
+                col    = center_index;
+                val    = 1.0;
+                updateCOOCSRMatrixElement(matrix, ptr, offset, row, col, val);
+            }
+        }
+    }
+    /* ------------------------------------------ */
+    /* Node in the interior of the Radial Section */
+    /* ------------------------------------------ */
+    else if (i_r > numberSmootherCircles && i_r < grid.nr() - 2) {
+        double h1 = grid.radialSpacing(i_r - 1);
+        double h2 = grid.radialSpacing(i_r);
+        double k1 = grid.angularSpacing(i_theta - 1);
+        double k2 = grid.angularSpacing(i_theta);
+
+        double coeff1 = 0.5 * (k1 + k2) / h1;
+        double coeff2 = 0.5 * (k1 + k2) / h2;
+        double coeff3 = 0.5 * (h1 + h2) / k1;
+        double coeff4 = 0.5 * (h1 + h2) / k2;
+
+        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
+
+        const int left   = grid.index(i_r - 1, i_theta);
+        const int bottom = grid.index(i_r, i_theta_M1);
+        const int center = grid.index(i_r, i_theta);
+        const int top    = grid.index(i_r, i_theta_P1);
+        const int right  = grid.index(i_r + 1, i_theta);
+
+        const int center_index = i_r - numberSmootherCircles;
+        const int left_index   = i_r - numberSmootherCircles - 1;
+        const int right_index  = i_r - numberSmootherCircles + 1;
+        /* ------------------- */
+        /* Tridiagonal Section */
+        /* i_theta % 2 == 1 */
+        if (i_theta & 1) {
+            /* i_r % 2 == 1 */
+            /* ---------- */
+            /* x   o   x  */
+            /* ---------- */
+            /* o   O   o  */
+            /* ---------- */
+            /* x   o   x  */
+            /* ---------- */
+            /* or */
+            /* i_r % 2 == 0 */
+            /* ---------- */
+            /* o   x   o  */
+            /* ---------- */
+            /* o   O   o  */
+            /* ---------- */
+            /* o   x   o  */
+            /* ---------- */
+
+            auto& matrix = radial_tridiagonal_solver[i_theta / 2];
+
+            /* Center: (Left, Right, Bottom, Top) */
+            row    = center_index;
+            column = center_index;
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
+                    coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
+                    coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+            updateTridiagonalElement(matrix, row, column, value);
+
+            /* Left */
+            row    = center_index;
+            column = left_index;
+            value  = -coeff1 * (arr[center] + arr[left]);
+            updateTridiagonalElement(matrix, row, column, value);
+
+            /* Right */
+            row    = center_index;
+            column = right_index;
+            value  = -coeff2 * (arr[center] + arr[right]);
+            updateTridiagonalElement(matrix, row, column, value);
+        }
+        /* ---------------- */
+        /* Diagonal Section */
+        /* i_theta % 2 == 0 */
+        else {
+            /* i_r % 2 == 1 */
+            /* ---------- */
+            /* o   o   o  */
+            /* ---------- */
+            /* x   O   x  */
+            /* ---------- */
+            /* o   o   o  */
+            /* ---------- */
+            /* or */ /* i_r % 2 == 0 */
+            /* ---------- */
+            /* o   o   o  */
+            /* ---------- */
+            /* o   X   o  */
+            /* ---------- */
+            /* o   o   o  */
+            /* ---------- */
+
+            auto& matrix = radial_diagonal_solver[i_theta / 2];
+
+            if (i_r & 1) {
+                /* i_r % 2 == 1 */
+
+                /* Center: (Left, Right, Bottom, Top) */
+                row    = center_index;
+                column = center_index;
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
+                        coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
+                        coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+                updateDiagonalElement(matrix, row, column, value);
+            }
+            else {
+                /* i_r % 2 == 0 */
+
+                /* Center: Coarse */
+                row    = center_index;
+                column = center_index;
+                value  = 1.0;
+                updateDiagonalElement(matrix, row, column, value);
+            }
+        }
+    }
+    /* --------------------------------------------- */
+    /* Radial Section: Node next to circular section */
+    /* --------------------------------------------- */
+    else if (i_r == numberSmootherCircles) {
+
+        double h1 = grid.radialSpacing(i_r - 1);
+        double h2 = grid.radialSpacing(i_r);
+        double k1 = grid.angularSpacing(i_theta - 1);
+        double k2 = grid.angularSpacing(i_theta);
+
+        double coeff1 = 0.5 * (k1 + k2) / h1;
+        double coeff2 = 0.5 * (k1 + k2) / h2;
+        double coeff3 = 0.5 * (h1 + h2) / k1;
+        double coeff4 = 0.5 * (h1 + h2) / k2;
+
+        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
+
+        const int left   = grid.index(i_r - 1, i_theta);
+        const int bottom = grid.index(i_r, i_theta_M1);
+        const int center = grid.index(i_r, i_theta);
+        const int top    = grid.index(i_r, i_theta_P1);
+        const int right  = grid.index(i_r + 1, i_theta);
+
+        const int center_index = i_r - numberSmootherCircles;
+        const int right_index  = i_r - numberSmootherCircles + 1;
+
+        if (i_theta & 1) {
+            /* i_theta % 2 == 1 and i_r % 2 == 1 */
+            /* | x | o | x || o   x   o   x  */
+            /* |   |   |   || -------------- */
+            /* | o | o | o || O   o   o   o  */
+            /* |   |   |   || -------------- */
+            /* | x | o | x || o   x   o   x  */
+            /* or */
+            /* i_theta % 2 == 1 and i_r % 2 == 0 */
+            /* | o | x | o || x   o   x   o  */
+            /* |   |   |   || -------------- */
+            /* | o | o | o || O   o   o   o  */
+            /* |   |   |   || -------------- */
+            /* | o | x | o || x   o   x   o  */
+
+            auto& matrix = radial_tridiagonal_solver[i_theta / 2];
+
+            /* Center: (Left, Right, Bottom, Top) */
+            row    = center_index;
+            column = center_index;
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
+                    coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
+                    coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+            updateTridiagonalElement(matrix, row, column, value);
+
+            /* Right */
+            row    = center_index;
+            column = right_index;
+            value  = -coeff2 * (arr[center] + arr[right]);
+            updateTridiagonalElement(matrix, row, column, value);
+        }
+        else {
+
+            auto& matrix = radial_diagonal_solver[i_theta / 2];
+
+            if (i_r & 1) {
+                /* i_theta % 2 == 0 and i_r % 2 == 1 */
+                /* | o | o | o || o   o   o   o  */
+                /* |   |   |   || -------------- */
+                /* | x | o | x || O   x   o   x  */
+                /* |   |   |   || -------------- */
+                /* | o | o | o || o   o   o   o  */
+
+                /* Center: (Left, Right, Bottom, Top) */
+                row    = center_index;
+                column = center_index;
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
+                        coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
+                        coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+                updateDiagonalElement(matrix, row, column, value);
+            }
+            else {
+                /* i_theta % 2 == 0 and i_r % 2 == 0 */
+                /* | o | o | o || o   o   o   o  */
+                /* |   |   |   || -------------- */
+                /* | o | x | o || X   o   x   o  */
+                /* |   |   |   || -------------- */
+                /* | o | o | o || o   o   o   o  */
+
+                /* Center: Coarse */
+                row    = center_index;
+                column = center_index;
+                value  = 1.0;
+                updateDiagonalElement(matrix, row, column, value);
+            }
+        }
+    }
+    /* ------------------------------------------- */
+    /* Radial Section: Node next to outer boundary */
+    /* ------------------------------------------- */
+    else if (i_r == grid.nr() - 2) {
+        assert(i_r % 2 == 1);
+
+        double h1 = grid.radialSpacing(i_r - 1);
+        double h2 = grid.radialSpacing(i_r);
+        double k1 = grid.angularSpacing(i_theta - 1);
+        double k2 = grid.angularSpacing(i_theta);
+
+        double coeff1 = 0.5 * (k1 + k2) / h1;
+        double coeff2 = 0.5 * (k1 + k2) / h2;
+        double coeff3 = 0.5 * (h1 + h2) / k1;
+        double coeff4 = 0.5 * (h1 + h2) / k2;
+
+        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
+
+        const int left   = grid.index(i_r - 1, i_theta);
+        const int bottom = grid.index(i_r, i_theta_M1);
+        const int center = grid.index(i_r, i_theta);
+        const int top    = grid.index(i_r, i_theta_P1);
+        const int right  = grid.index(i_r + 1, i_theta);
+
+        const int center_index = i_r - numberSmootherCircles;
+        const int left_index   = i_r - numberSmootherCircles - 1;
+        const int right_index  = i_r - numberSmootherCircles + 1;
+
+        if (i_theta & 1) {
+            /* i_theta % 2 == 1 */
+            /* ---------------|| */
+            /* o   x   o   x  || */
+            /* ---------------|| */
+            /* o   o   O   o  || */
+            /* ---------------|| */
+            /* o   x   o   x  || */
+            /* ---------------|| */
+
+            auto& matrix = radial_tridiagonal_solver[i_theta / 2];
+
+            /* Center: (Left, Right, Bottom, Top) */
+            row    = center_index;
+            column = center_index;
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
+                    coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
+                    coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+            updateTridiagonalElement(matrix, row, column, value);
+
+            /* Left */
+            row    = center_index;
+            column = left_index;
+            value  = -coeff1 * (arr[center] + arr[left]);
+            updateTridiagonalElement(matrix, row, column, value); /* Right */
+            row    = center_index;
+            column = right_index;
+            value  = 0.0; /* Make tridiagonal matrix symmetric */
+            updateTridiagonalElement(matrix, row, column, value);
+        }
+        else {
+            /* i_theta % 2 == 0 */
+            /* ---------------|| */
+            /* o   o   o   o  || */
+            /* ---------------|| */
+            /* o   x   O   x  || */
+            /* ---------------|| */
+            /* o   o   o   o  || */
+            /* ---------------|| */
+
+            auto& matrix = radial_diagonal_solver[i_theta / 2];
+
+            /* Center: (Left, Right, Bottom, Top) */
+            row    = center_index;
+            column = center_index;
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
+                    coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
+                    coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+            updateDiagonalElement(matrix, row, column, value);
+        }
+    }
+    /* ------------------------------------------ */
+    /* Radial Section: Node on the outer boundary */
+    /* ------------------------------------------ */
+    else if (i_r == grid.nr() - 1) {
+        assert(!i_r % 2 == 0);
+
+        int center_index = i_r - numberSmootherCircles;
+        int left_index   = i_r - numberSmootherCircles - 1;
+
+        if (i_theta & 1) {
+            /* i_theta % 2 == 1 */
+            /* -----------|| */
+            /* x   o   x  || */
+            /* -----------|| */
+            /* o   o   O  || */
+            /* -----------|| */
+            /* x   o   x  || */
+            /* -----------|| */
+
+            auto& matrix = radial_tridiagonal_solver[i_theta / 2];
+
+            /* Fill matrix row of (i,j) */
+            row    = center_index;
+            column = center_index;
+            value  = 1.0;
+            updateTridiagonalElement(matrix, row, column, value);
+
+            row    = center_index;
+            column = left_index;
+            value  = 0.0; /* Make tridiagonal matrix symmetric */
+            updateTridiagonalElement(matrix, row, column, value);
+        }
+        else {
+            /* i_theta % 2 == 0 */
+            /* -----------|| */
+            /* o   o   o  || */
+            /* -----------|| */
+            /* x   o   X  || */
+            /* -----------|| */
+            /* o   o   o  || */
+            /* -----------|| */
+
+            auto& matrix = radial_diagonal_solver[i_theta / 2];
+
+            /* Fill matrix row of (i,j) */
+            row    = center_index;
+            column = center_index;
+            value  = 1.0;
+            updateDiagonalElement(matrix, row, column, value);
+        }
+    }
+}
 
 void ExtrapolatedSmootherTake::buildAscCircleSection(const int i_r)
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
 
-    const auto& arr        = level_cache_.arr();
-    const auto& att        = level_cache_.att();
-    const auto& art        = level_cache_.art();
-    const auto& detDF      = level_cache_.detDF();
-    const auto& coeff_beta = level_cache_.coeff_beta();
+    ConstVector<double> arr        = level_cache_.arr();
+    ConstVector<double> att        = level_cache_.att();
+    ConstVector<double> art        = level_cache_.art();
+    ConstVector<double> detDF      = level_cache_.detDF();
+    ConstVector<double> coeff_beta = level_cache_.coeff_beta();
 
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
         // Build Asc at the current node
-        NODE_BUILD_SMOOTHER_TAKE(i_r, i_theta, grid_, DirBC_Interior_, inner_boundary_circle_matrix_,
-                                 circle_diagonal_solver_, circle_tridiagonal_solver_, radial_diagonal_solver_,
-                                 radial_tridiagonal_solver_);
+        nodeBuildSmootherTake(i_r, i_theta, grid_, DirBC_Interior_, inner_boundary_circle_matrix_,
+                              circle_diagonal_solver_, radial_diagonal_solver_, circle_tridiagonal_solver_,
+                              radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
     }
 }
 
@@ -634,17 +649,17 @@ void ExtrapolatedSmootherTake::buildAscRadialSection(const int i_theta)
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
 
-    const auto& arr        = level_cache_.arr();
-    const auto& att        = level_cache_.att();
-    const auto& art        = level_cache_.art();
-    const auto& detDF      = level_cache_.detDF();
-    const auto& coeff_beta = level_cache_.coeff_beta();
+    ConstVector<double> arr        = level_cache_.arr();
+    ConstVector<double> att        = level_cache_.att();
+    ConstVector<double> art        = level_cache_.art();
+    ConstVector<double> detDF      = level_cache_.detDF();
+    ConstVector<double> coeff_beta = level_cache_.coeff_beta();
 
     for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
         // Build Asc at the current node
-        NODE_BUILD_SMOOTHER_TAKE(i_r, i_theta, grid_, DirBC_Interior_, inner_boundary_circle_matrix_,
-                                 circle_diagonal_solver_, circle_tridiagonal_solver_, radial_diagonal_solver_,
-                                 radial_tridiagonal_solver_);
+        nodeBuildSmootherTake(i_r, i_theta, grid_, DirBC_Interior_, inner_boundary_circle_matrix_,
+                              circle_diagonal_solver_, radial_diagonal_solver_, circle_tridiagonal_solver_,
+                              radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
     }
 }
 
