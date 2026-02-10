@@ -21,30 +21,31 @@
  *  - Radial direction: check domain boundaries
  */
 
-#define COARSE_NODE_EXTRAPOLATED_RESTRICTION()                                                                         \
-    do {                                                                                                               \
-        int i_r     = i_r_coarse * 2;                                                                                  \
-        int i_theta = i_theta_coarse * 2;                                                                              \
-                                                                                                                       \
-        /* Center + Angular contributions (always present) */                                                          \
-        double value = fine_values[fine_grid.index(i_r, i_theta)] +                                                    \
-                       0.5 * fine_values[fine_grid.index(i_r, i_theta - 1)] +                                          \
-                       0.5 * fine_values[fine_grid.index(i_r, i_theta + 1)];                                           \
-                                                                                                                       \
-        /* Left contributions (if not at inner boundary) */                                                            \
-        if (i_r_coarse > 0) {                                                                                          \
-            value += 0.5 * fine_values[fine_grid.index(i_r - 1, i_theta)] +                                            \
-                     0.5 * fine_values[fine_grid.index(i_r - 1, i_theta + 1)]; /* Top-Left diagonal */                 \
-        }                                                                                                              \
-                                                                                                                       \
-        /* Right contributions (if not at outer boundary) */                                                           \
-        if (i_r_coarse < coarse_grid.nr() - 1) {                                                                       \
-            value += 0.5 * fine_values[fine_grid.index(i_r + 1, i_theta)] +                                            \
-                     0.5 * fine_values[fine_grid.index(i_r + 1, i_theta - 1)]; /* Bottom-Right diagonal */             \
-        }                                                                                                              \
-                                                                                                                       \
-        coarse_result[coarse_grid.index(i_r_coarse, i_theta_coarse)] = value;                                          \
-    } while (0)
+inline void coarseNodeExtrapolatedRestriction(int i_r_coarse, int i_theta_coarse, const PolarGrid& fine_grid,
+                                              const PolarGrid& coarse_grid, Vector<double>& coarse_result,
+                                              ConstVector<double>& fine_values)
+{
+    int i_r     = i_r_coarse * 2;
+    int i_theta = i_theta_coarse * 2;
+
+    /* Center + Angular contributions (always present) */
+    double value = fine_values[fine_grid.index(i_r, i_theta)] + 0.5 * fine_values[fine_grid.index(i_r, i_theta - 1)] +
+                   0.5 * fine_values[fine_grid.index(i_r, i_theta + 1)];
+
+    /* Left contributions (if not at inner boundary) */
+    if (i_r_coarse > 0) {
+        value += 0.5 * fine_values[fine_grid.index(i_r - 1, i_theta)] +
+                 0.5 * fine_values[fine_grid.index(i_r - 1, i_theta + 1)]; /* Top-Left diagonal */
+    }
+
+    /* Right contributions (if not at outer boundary) */
+    if (i_r_coarse < coarse_grid.nr() - 1) {
+        value += 0.5 * fine_values[fine_grid.index(i_r + 1, i_theta)] +
+                 0.5 * fine_values[fine_grid.index(i_r + 1, i_theta - 1)]; /* Bottom-Right diagonal */
+    }
+
+    coarse_result[coarse_grid.index(i_r_coarse, i_theta_coarse)] = value;
+}
 
 void Interpolation::applyExtrapolatedRestriction(const PolarGrid& fine_grid, const PolarGrid& coarse_grid,
                                                  Vector<double> coarse_result, ConstVector<double> fine_values) const
@@ -61,7 +62,8 @@ void Interpolation::applyExtrapolatedRestriction(const PolarGrid& fine_grid, con
 #pragma omp for nowait
         for (int i_r_coarse = 0; i_r_coarse < coarse_grid.numberSmootherCircles(); i_r_coarse++) {
             for (int i_theta_coarse = 0; i_theta_coarse < coarse_grid.ntheta(); i_theta_coarse++) {
-                COARSE_NODE_EXTRAPOLATED_RESTRICTION();
+                coarseNodeExtrapolatedRestriction(i_r_coarse, i_theta_coarse, fine_grid, coarse_grid, coarse_result,
+                                                  fine_values);
             }
         }
 
@@ -69,7 +71,8 @@ void Interpolation::applyExtrapolatedRestriction(const PolarGrid& fine_grid, con
 #pragma omp for nowait
         for (int i_theta_coarse = 0; i_theta_coarse < coarse_grid.ntheta(); i_theta_coarse++) {
             for (int i_r_coarse = coarse_grid.numberSmootherCircles(); i_r_coarse < coarse_grid.nr(); i_r_coarse++) {
-                COARSE_NODE_EXTRAPOLATED_RESTRICTION();
+                coarseNodeExtrapolatedRestriction(i_r_coarse, i_theta_coarse, fine_grid, coarse_grid, coarse_result,
+                                                  fine_values);
             }
         }
     }
