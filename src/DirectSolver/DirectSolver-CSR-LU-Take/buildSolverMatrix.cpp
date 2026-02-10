@@ -1,6 +1,6 @@
 #include "../../../include/DirectSolver/DirectSolver-CSR-LU-Take/directSolverTakeCustomLU.h"
 
-inline void updateMatrixElement(SparseMatrixCSR<double>& matrix, int offset, int row, int col, double val)
+static inline void updateMatrixElement(SparseMatrixCSR<double>& matrix, int offset, int row, int col, double val)
 {
     matrix.row_nz_index(row, offset) = col;
     matrix.row_nz_entry(row, offset) = val;

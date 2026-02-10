@@ -22,9 +22,9 @@
  *  - Radial direction: check domain boundaries (inner/outer radius)
  */
 
-inline void coarseNodeRestriction(int i_r_coarse, int i_theta_coarse, const PolarGrid& fine_grid,
-                                  const PolarGrid& coarse_grid, Vector<double>& coarse_result,
-                                  ConstVector<double>& fine_values)
+static inline void coarseNodeRestriction(int i_r_coarse, int i_theta_coarse, const PolarGrid& fine_grid,
+                                         const PolarGrid& coarse_grid, Vector<double>& coarse_result,
+                                         ConstVector<double>& fine_values)
 {
     int i_r     = i_r_coarse * 2;
     int i_theta = i_theta_coarse * 2;

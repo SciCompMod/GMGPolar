@@ -1,9 +1,10 @@
 #include "../../../include/Residual/ResidualTake/residualTake.h"
 
-inline void node_apply_residual_take(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                     Vector<double>& result, ConstVector<double>& rhs, ConstVector<double>& x,
-                                     ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art,
-                                     ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
+static inline void node_apply_residual_take(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+                                            Vector<double>& result, ConstVector<double>& rhs, ConstVector<double>& x,
+                                            ConstVector<double>& arr, ConstVector<double>& att,
+                                            ConstVector<double>& art, ConstVector<double>& detDF,
+                                            ConstVector<double>& coeff_beta)
 {
     /* -------------------- */
     /* Node in the interior */

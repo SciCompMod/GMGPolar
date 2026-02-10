@@ -53,9 +53,9 @@
  * 
  */
 
-inline void fineNodeFMGInterpolation(int i_r, int i_theta, int i_r_coarse, int i_theta_coarse,
-                                     const PolarGrid& coarse_grid, const PolarGrid& fine_grid,
-                                     Vector<double>& fine_result, ConstVector<double>& coarse_values)
+static inline void fineNodeFMGInterpolation(int i_r, int i_theta, int i_r_coarse, int i_theta_coarse,
+                                            const PolarGrid& coarse_grid, const PolarGrid& fine_grid,
+                                            Vector<double>& fine_result, ConstVector<double>& coarse_values)
 {
     /* Case 1: On the boundary */
     if (i_r == 0 || i_r == fine_grid.nr() - 1) {
