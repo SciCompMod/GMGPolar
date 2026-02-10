@@ -3,7 +3,7 @@
 #include "../../../include/common/geometry_helper.h"
 
 /* Tridiagonal matrices */
-inline void updateMatrixElement(SymmetricTridiagonalSolver<double>& matrix, int row, int column, double value)
+static inline void updateMatrixElement(SymmetricTridiagonalSolver<double>& matrix, int row, int column, double value)
 {
     if (row == column)
         matrix.main_diagonal(row) += value;
@@ -15,16 +15,16 @@ inline void updateMatrixElement(SymmetricTridiagonalSolver<double>& matrix, int 
 
 /* Inner Boundary COO/CSR matrix */
 #ifdef GMGPOLAR_USE_MUMPS
-inline void updateCOOCSRMatrixElement(SparseMatrixCOO<double>& matrix, int ptr, int offset, int row, int col,
-                                      double val)
+static inline void updateCOOCSRMatrixElement(SparseMatrixCOO<double>& matrix, int ptr, int offset, int row, int col,
+                                             double val)
 {
     matrix.row_index(ptr + offset) = row;
     matrix.col_index(ptr + offset) = col;
     matrix.value(ptr + offset) += val;
 }
 #else
-inline void updateCOOCSRMatrixElement(SparseMatrixCSR<double>& matrix, int ptr, int offset, int row, int col,
-                                      double val)
+static inline void updateCOOCSRMatrixElement(SparseMatrixCSR<double>& matrix, int ptr, int offset, int row, int col,
+                                             double val)
 {
     matrix.row_nz_index(row, offset) = col;
     matrix.row_nz_entry(row, offset) += val;

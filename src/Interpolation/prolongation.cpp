@@ -51,9 +51,9 @@
  *  - k1, k2 in angular direction
  */
 
-inline void fineNodeProlongation(int i_r, int i_theta, int i_r_coarse, int i_theta_coarse, const PolarGrid& coarse_grid,
-                                 const PolarGrid& fine_grid, Vector<double>& fine_result,
-                                 ConstVector<double>& coarse_values)
+static inline void fineNodeProlongation(int i_r, int i_theta, int i_r_coarse, int i_theta_coarse,
+                                        const PolarGrid& coarse_grid, const PolarGrid& fine_grid,
+                                        Vector<double>& fine_result, ConstVector<double>& coarse_values)
 {
     if (i_r & 1) {
         if (i_theta & 1) { /* (odd, odd) -> fine node in center of coarse cell */

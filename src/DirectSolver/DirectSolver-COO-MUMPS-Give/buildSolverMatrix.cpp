@@ -4,7 +4,8 @@
 
 #ifdef GMGPOLAR_USE_MUMPS
 
-inline void updateMatrixElement(SparseMatrixCOO<double>& matrix, int ptr, int offset, int row, int col, double val)
+static inline void updateMatrixElement(SparseMatrixCOO<double>& matrix, int ptr, int offset, int row, int col,
+                                       double val)
 {
     matrix.row_index(ptr + offset) = row;
     matrix.col_index(ptr + offset) = col;
