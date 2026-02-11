@@ -124,11 +124,12 @@ set(SMOOTHER_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/smootherSolver.cpp
     
     # SmootherTake
+    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/applyAscOrtho.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/buildMatrix.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/initializeMumps.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/matrixStencil.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/smootherSolver.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/smootherTake.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/solveAscSystem.cpp
 )
 
 # file(GLOB_RECURSE EXTRAPOLATED_SMOOTHER_SOURCES 

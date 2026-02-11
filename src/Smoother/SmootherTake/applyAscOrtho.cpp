@@ -1,8 +1,7 @@
 #include "../../../include/Smoother/SmootherTake/smootherTake.h"
 
 static inline void nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                               SmootherColor smoother_color, ConstVector<double>& x,
-                                               ConstVector<double>& rhs, Vector<double>& result,
+                                               ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
                                                ConstVector<double>& arr, ConstVector<double>& att,
                                                ConstVector<double>& art, ConstVector<double>& detDF,
                                                ConstVector<double>& coeff_beta)
@@ -90,8 +89,7 @@ static inline void nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const Polar
 }
 
 static inline void nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                               SmootherColor smoother_color, ConstVector<double>& x,
-                                               ConstVector<double>& rhs, Vector<double>& result,
+                                               ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
                                                ConstVector<double>& arr, const ConstVector<double>& att,
                                                ConstVector<double>& art, const ConstVector<double>& detDF,
                                                ConstVector<double>& coeff_beta)
@@ -211,8 +209,8 @@ static inline void nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const Polar
     }
 }
 
-void SmootherTake::applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color, ConstVector<double> x,
-                                              ConstVector<double> rhs, Vector<double> temp)
+void SmootherTake::applyAscOrthoCircleSection(int i_r, ConstVector<double> x, ConstVector<double> rhs,
+                                              Vector<double> temp)
 {
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles());
 
@@ -226,13 +224,13 @@ void SmootherTake::applyAscOrthoCircleSection(const int i_r, const SmootherColor
     ConstVector<double> coeff_beta = level_cache_.coeff_beta();
 
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
-        nodeApplyAscOrthoCircleTake(i_r, i_theta, grid_, DirBC_Interior_, smoother_color, x, rhs, temp, arr, att, art,
-                                    detDF, coeff_beta);
+        nodeApplyAscOrthoCircleTake(i_r, i_theta, grid_, DirBC_Interior_, x, rhs, temp, arr, att, art, detDF,
+                                    coeff_beta);
     }
 }
 
-void SmootherTake::applyAscOrthoRadialSection(const int i_theta, const SmootherColor smoother_color,
-                                              ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp)
+void SmootherTake::applyAscOrthoRadialSection(int i_theta, ConstVector<double> x, ConstVector<double> rhs,
+                                              Vector<double> temp)
 {
     assert(i_theta >= 0 && i_theta < grid_.ntheta());
 
@@ -246,104 +244,7 @@ void SmootherTake::applyAscOrthoRadialSection(const int i_theta, const SmootherC
     ConstVector<double> coeff_beta = level_cache_.coeff_beta();
 
     for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
-        nodeApplyAscOrthoRadialTake(i_r, i_theta, grid_, DirBC_Interior_, smoother_color, x, rhs, temp, arr, att, art,
-                                    detDF, coeff_beta);
+        nodeApplyAscOrthoRadialTake(i_r, i_theta, grid_, DirBC_Interior_, x, rhs, temp, arr, att, art, detDF,
+                                    coeff_beta);
     }
 }
-
-void SmootherTake::solveCircleSection(const int i_r, Vector<double> x, Vector<double> temp,
-                                      Vector<double> solver_storage_1, Vector<double> solver_storage_2)
-{
-    const int start = grid_.index(i_r, 0);
-    const int end   = start + grid_.ntheta();
-
-    if (i_r > 0) {
-        circle_tridiagonal_solver_[i_r].solveInPlace(temp.data() + start, solver_storage_1.data(),
-                                                     solver_storage_2.data());
-    }
-    else if (i_r == 0) {
-#ifdef GMGPOLAR_USE_MUMPS
-        inner_boundary_mumps_solver_.job    = JOB_COMPUTE_SOLUTION;
-        inner_boundary_mumps_solver_.nrhs   = 1; // single rhs vector
-        inner_boundary_mumps_solver_.nz_rhs = grid_.ntheta(); // non-zeros in rhs
-        inner_boundary_mumps_solver_.rhs    = temp.data() + start;
-        inner_boundary_mumps_solver_.lrhs   = grid_.ntheta(); // leading dimension of rhs
-        dmumps_c(&inner_boundary_mumps_solver_);
-        if (inner_boundary_mumps_solver_.info[0] != 0) {
-            std::cerr << "Error solving the system: " << inner_boundary_mumps_solver_.info[0] << std::endl;
-        }
-#else
-        inner_boundary_lu_solver_.solveInPlace(temp.data() + start);
-#endif
-    }
-
-    // Move updated values to x
-    Kokkos::deep_copy(Kokkos::subview(x, Kokkos::make_pair(start, end)),
-                      Kokkos::subview(temp, Kokkos::make_pair(start, end)));
-}
-
-void SmootherTake::solveRadialSection(const int i_theta, Vector<double> x, Vector<double> temp,
-                                      Vector<double> solver_storage)
-{
-    const int start = grid_.index(grid_.numberSmootherCircles(), i_theta);
-    const int end   = start + grid_.lengthSmootherRadial();
-
-    radial_tridiagonal_solver_[i_theta].solveInPlace(temp.data() + start, solver_storage.data());
-
-    // Move updated values to x
-    Kokkos::deep_copy(Kokkos::subview(x, Kokkos::make_pair(start, end)),
-                      Kokkos::subview(temp, Kokkos::make_pair(start, end)));
-}
-
-// clang-format off
-
-// In temp we store the vector 'rhs - A_sc^ortho u_sc^ortho' and then we solve the system
-// Asc * u_sc = temp in place and move the updated values into 'x'.
-void SmootherTake::smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp)
-{
-    assert(x.size() == rhs.size());
-    assert(temp.size() == rhs.size());
-
-    assert(level_cache_.cacheDensityProfileCoefficients());
-    assert(level_cache_.cacheDomainGeometry());
-
-    #pragma omp parallel
-    {
-        Vector<double> circle_solver_storage_1("circle_solver_storage_1",grid_.ntheta());
-        Vector<double> circle_solver_storage_2("circle_solver_storage_2",grid_.ntheta());
-        Vector<double> radial_solver_storage("circle_solver_storage",grid_.lengthSmootherRadial());
-
-        /* The outer most circle next to the radial section is defined to be black. */
-        /* Priority: Black -> White. */
-        const int start_black_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 1 : 0;
-        const int start_white_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 0 : 1;
-
-        /* Black Circle Section */
-        #pragma omp for
-        for (int i_r = start_black_circles; i_r < grid_.numberSmootherCircles(); i_r += 2) {
-            applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
-            solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
-        } /* Implicit barrier */
-
-        /* White Circle Section */
-        #pragma omp for nowait
-        for (int i_r = start_white_circles; i_r < grid_.numberSmootherCircles(); i_r += 2) {
-            applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
-            solveCircleSection(i_r, x, temp, circle_solver_storage_1, circle_solver_storage_2);
-        }
-        /* Black Radial Section */
-        #pragma omp for
-        for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta += 2) {
-            applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
-            solveRadialSection(i_theta, x, temp, radial_solver_storage);
-        } /* Implicit barrier */
-
-        /* White Radial Section*/
-        #pragma omp for
-        for (int i_theta = 1; i_theta < grid_.ntheta(); i_theta += 2) {
-            applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
-            solveRadialSection(i_theta, x, temp, radial_solver_storage);
-        } /* Implicit barrier */
-    }
-}
-// clang-format on
