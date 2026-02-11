@@ -1,21 +1,15 @@
 #include "../../../include/ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.h"
 
 /* Tridiagonal matrices */
-static inline void updateTridiagonalElement(SymmetricTridiagonalSolver<double>& matrix, int row, int column,
-                                            double value)
+static inline void updateMatrixElement(BatchedTridiagonalSolver<double>& solver, int batch, int row, int column,
+                                       double value)
 {
     if (row == column)
-        matrix.main_diagonal(row) = value;
+        solver.main_diagonal(batch, row) = value;
     else if (row == column - 1)
-        matrix.sub_diagonal(row) = value;
-    else if (row == 0 && column == matrix.columns() - 1)
-        matrix.cyclic_corner_element() = value;
-}
-
-/* Diagonal matrices */
-static inline void updateDiagonalElement(DiagonalSolver<double>& matrix, int row, int column, double value)
-{
-    matrix.diagonal(row) = value;
+        solver.sub_diagonal(batch, row) = value;
+    else if (row == 0 && column == solver.matrixDimension() - 1)
+        solver.cyclic_corner(batch) = value;
 }
 
 /* Inner Boundary COO/CSR matrix */
@@ -36,15 +30,14 @@ static inline void updateCOOCSRMatrixElement(SparseMatrixCSR<double>& matrix, in
 }
 #endif
 
-void ExtrapolatedSmootherTake::nodeBuildSmootherTake(
-    int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior, MatrixType& inner_boundary_circle_matrix,
-    std::vector<DiagonalSolver<double>>& circle_diagonal_solver,
-    std::vector<DiagonalSolver<double>>& radial_diagonal_solver,
-    std::vector<SymmetricTridiagonalSolver<double>>& circle_tridiagonal_solver,
-    std::vector<SymmetricTridiagonalSolver<double>>& radial_tridiagonal_solver, ConstVector<double>& arr,
-    ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
+void ExtrapolatedSmootherTake::nodeBuildAscTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+                                                MatrixType& inner_boundary_circle_matrix,
+                                                BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
+                                                BatchedTridiagonalSolver<double>& radial_tridiagonal_solver,
+                                                ConstVector<double>& arr, ConstVector<double>& att,
+                                                ConstVector<double>& art, ConstVector<double>& detDF,
+                                                ConstVector<double>& coeff_beta)
 {
-
     assert(i_r >= 0 && i_r < grid.nr());
     assert(i_theta >= 0 && i_theta < grid.ntheta());
 
@@ -86,6 +79,9 @@ void ExtrapolatedSmootherTake::nodeBuildSmootherTake(
         int bottom_index = i_theta_M1;
         int top_index    = i_theta_P1;
 
+        auto& solver = circle_tridiagonal_solver;
+        int batch    = i_r;
+
         /* -------------------------- */
         /* Cyclic Tridiagonal Section */
         /* i_r % 2 == 1               */
@@ -103,27 +99,25 @@ void ExtrapolatedSmootherTake::nodeBuildSmootherTake(
             /* |   |   |   | */
             /* | o | o | o | */
 
-            auto& matrix = circle_tridiagonal_solver[i_r / 2];
-
             /* Center: (Left, Right, Bottom, Top) */
             row    = center_index;
             column = center_index;
             value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
                     coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                     coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
-            updateTridiagonalElement(matrix, row, column, value);
+            updateMatrixElement(solver, batch, row, column, value);
 
             /* Bottom */
             row    = center_index;
             column = bottom_index;
             value  = -coeff3 * (att[center] + att[bottom]);
-            updateTridiagonalElement(matrix, row, column, value);
+            updateMatrixElement(solver, batch, row, column, value);
 
             /* Top */
             row    = center_index;
             column = top_index;
             value  = -coeff4 * (att[center] + att[top]);
-            updateTridiagonalElement(matrix, row, column, value);
+            updateMatrixElement(solver, batch, row, column, value);
         }
         /* ---------------- */
         /* Diagonal Section */
@@ -141,8 +135,6 @@ void ExtrapolatedSmootherTake::nodeBuildSmootherTake(
             /* |   |   |   | */
             /* | o | o | o | */
 
-            auto& matrix = circle_diagonal_solver[i_r / 2];
-
             if (i_theta & 1) {
                 /* i_theta % 2 == 1 */
 
@@ -152,19 +144,16 @@ void ExtrapolatedSmootherTake::nodeBuildSmootherTake(
                 value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
-                updateDiagonalElement(matrix, row, column, value);
+                updateMatrixElement(solver, batch, row, column, value);
             }
             else {
                 /* i_theta % 2 == 0 */
 
                 /* Center: Coarse */
-                auto& matrix     = circle_diagonal_solver[i_r / 2];
-                int center_index = i_theta;
-
                 row    = center_index;
                 column = center_index;
                 value  = 1.0;
-                updateDiagonalElement(matrix, row, column, value);
+                updateMatrixElement(solver, batch, row, column, value);
             }
         }
     }
@@ -310,6 +299,10 @@ void ExtrapolatedSmootherTake::nodeBuildSmootherTake(
         const int center_index = i_r - numberSmootherCircles;
         const int left_index   = i_r - numberSmootherCircles - 1;
         const int right_index  = i_r - numberSmootherCircles + 1;
+
+        auto& solver = radial_tridiagonal_solver;
+        int batch    = i_theta;
+
         /* ------------------- */
         /* Tridiagonal Section */
         /* i_theta % 2 == 1 */
@@ -332,27 +325,25 @@ void ExtrapolatedSmootherTake::nodeBuildSmootherTake(
             /* o   x   o  */
             /* ---------- */
 
-            auto& matrix = radial_tridiagonal_solver[i_theta / 2];
-
             /* Center: (Left, Right, Bottom, Top) */
             row    = center_index;
             column = center_index;
             value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
                     coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                     coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
-            updateTridiagonalElement(matrix, row, column, value);
+            updateMatrixElement(solver, batch, row, column, value);
 
             /* Left */
             row    = center_index;
             column = left_index;
             value  = -coeff1 * (arr[center] + arr[left]);
-            updateTridiagonalElement(matrix, row, column, value);
+            updateMatrixElement(solver, batch, row, column, value);
 
             /* Right */
             row    = center_index;
             column = right_index;
             value  = -coeff2 * (arr[center] + arr[right]);
-            updateTridiagonalElement(matrix, row, column, value);
+            updateMatrixElement(solver, batch, row, column, value);
         }
         /* ---------------- */
         /* Diagonal Section */
@@ -375,8 +366,6 @@ void ExtrapolatedSmootherTake::nodeBuildSmootherTake(
             /* o   o   o  */
             /* ---------- */
 
-            auto& matrix = radial_diagonal_solver[i_theta / 2];
-
             if (i_r & 1) {
                 /* i_r % 2 == 1 */
 
@@ -386,7 +375,7 @@ void ExtrapolatedSmootherTake::nodeBuildSmootherTake(
                 value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
-                updateDiagonalElement(matrix, row, column, value);
+                updateMatrixElement(solver, batch, row, column, value);
             }
             else {
                 /* i_r % 2 == 0 */
@@ -395,7 +384,7 @@ void ExtrapolatedSmootherTake::nodeBuildSmootherTake(
                 row    = center_index;
                 column = center_index;
                 value  = 1.0;
-                updateDiagonalElement(matrix, row, column, value);
+                updateMatrixElement(solver, batch, row, column, value);
             }
         }
     }
@@ -426,6 +415,9 @@ void ExtrapolatedSmootherTake::nodeBuildSmootherTake(
         const int center_index = i_r - numberSmootherCircles;
         const int right_index  = i_r - numberSmootherCircles + 1;
 
+        auto& solver = radial_tridiagonal_solver;
+        int batch    = i_theta;
+
         if (i_theta & 1) {
             /* i_theta % 2 == 1 and i_r % 2 == 1 */
             /* | x | o | x || o   x   o   x  */
@@ -441,26 +433,21 @@ void ExtrapolatedSmootherTake::nodeBuildSmootherTake(
             /* |   |   |   || -------------- */
             /* | o | x | o || x   o   x   o  */
 
-            auto& matrix = radial_tridiagonal_solver[i_theta / 2];
-
             /* Center: (Left, Right, Bottom, Top) */
             row    = center_index;
             column = center_index;
             value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
                     coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                     coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
-            updateTridiagonalElement(matrix, row, column, value);
+            updateMatrixElement(solver, batch, row, column, value);
 
             /* Right */
             row    = center_index;
             column = right_index;
             value  = -coeff2 * (arr[center] + arr[right]);
-            updateTridiagonalElement(matrix, row, column, value);
+            updateMatrixElement(solver, batch, row, column, value);
         }
         else {
-
-            auto& matrix = radial_diagonal_solver[i_theta / 2];
-
             if (i_r & 1) {
                 /* i_theta % 2 == 0 and i_r % 2 == 1 */
                 /* | o | o | o || o   o   o   o  */
@@ -475,7 +462,7 @@ void ExtrapolatedSmootherTake::nodeBuildSmootherTake(
                 value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
-                updateDiagonalElement(matrix, row, column, value);
+                updateMatrixElement(solver, batch, row, column, value);
             }
             else {
                 /* i_theta % 2 == 0 and i_r % 2 == 0 */
@@ -489,7 +476,7 @@ void ExtrapolatedSmootherTake::nodeBuildSmootherTake(
                 row    = center_index;
                 column = center_index;
                 value  = 1.0;
-                updateDiagonalElement(matrix, row, column, value);
+                updateMatrixElement(solver, batch, row, column, value);
             }
         }
     }
@@ -522,6 +509,9 @@ void ExtrapolatedSmootherTake::nodeBuildSmootherTake(
         const int left_index   = i_r - numberSmootherCircles - 1;
         const int right_index  = i_r - numberSmootherCircles + 1;
 
+        auto& solver = radial_tridiagonal_solver;
+        int batch    = i_theta;
+
         if (i_theta & 1) {
             /* i_theta % 2 == 1 */
             /* ---------------|| */
@@ -532,25 +522,23 @@ void ExtrapolatedSmootherTake::nodeBuildSmootherTake(
             /* o   x   o   x  || */
             /* ---------------|| */
 
-            auto& matrix = radial_tridiagonal_solver[i_theta / 2];
-
             /* Center: (Left, Right, Bottom, Top) */
             row    = center_index;
             column = center_index;
             value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
                     coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                     coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
-            updateTridiagonalElement(matrix, row, column, value);
+            updateMatrixElement(solver, batch, row, column, value);
 
             /* Left */
             row    = center_index;
             column = left_index;
             value  = -coeff1 * (arr[center] + arr[left]);
-            updateTridiagonalElement(matrix, row, column, value); /* Right */
+            updateMatrixElement(solver, batch, row, column, value); /* Right */
             row    = center_index;
             column = right_index;
             value  = 0.0; /* Make tridiagonal matrix symmetric */
-            updateTridiagonalElement(matrix, row, column, value);
+            updateMatrixElement(solver, batch, row, column, value);
         }
         else {
             /* i_theta % 2 == 0 */
@@ -562,15 +550,13 @@ void ExtrapolatedSmootherTake::nodeBuildSmootherTake(
             /* o   o   o   o  || */
             /* ---------------|| */
 
-            auto& matrix = radial_diagonal_solver[i_theta / 2];
-
             /* Center: (Left, Right, Bottom, Top) */
             row    = center_index;
             column = center_index;
             value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
                     coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                     coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
-            updateDiagonalElement(matrix, row, column, value);
+            updateMatrixElement(solver, batch, row, column, value);
         }
     }
     /* ------------------------------------------ */
@@ -582,6 +568,9 @@ void ExtrapolatedSmootherTake::nodeBuildSmootherTake(
         int center_index = i_r - numberSmootherCircles;
         int left_index   = i_r - numberSmootherCircles - 1;
 
+        auto& solver = radial_tridiagonal_solver;
+        int batch    = i_theta;
+
         if (i_theta & 1) {
             /* i_theta % 2 == 1 */
             /* -----------|| */
@@ -592,18 +581,16 @@ void ExtrapolatedSmootherTake::nodeBuildSmootherTake(
             /* x   o   x  || */
             /* -----------|| */
 
-            auto& matrix = radial_tridiagonal_solver[i_theta / 2];
-
             /* Fill matrix row of (i,j) */
             row    = center_index;
             column = center_index;
             value  = 1.0;
-            updateTridiagonalElement(matrix, row, column, value);
+            updateMatrixElement(solver, batch, row, column, value);
 
             row    = center_index;
             column = left_index;
             value  = 0.0; /* Make tridiagonal matrix symmetric */
-            updateTridiagonalElement(matrix, row, column, value);
+            updateMatrixElement(solver, batch, row, column, value);
         }
         else {
             /* i_theta % 2 == 0 */
@@ -615,18 +602,16 @@ void ExtrapolatedSmootherTake::nodeBuildSmootherTake(
             /* o   o   o  || */
             /* -----------|| */
 
-            auto& matrix = radial_diagonal_solver[i_theta / 2];
-
             /* Fill matrix row of (i,j) */
             row    = center_index;
             column = center_index;
             value  = 1.0;
-            updateDiagonalElement(matrix, row, column, value);
+            updateMatrixElement(solver, batch, row, column, value);
         }
     }
 }
 
-void ExtrapolatedSmootherTake::buildAscCircleSection(const int i_r)
+void ExtrapolatedSmootherTake::buildAscCircleSection(int i_r)
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -639,13 +624,12 @@ void ExtrapolatedSmootherTake::buildAscCircleSection(const int i_r)
 
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
         // Build Asc at the current node
-        nodeBuildSmootherTake(i_r, i_theta, grid_, DirBC_Interior_, inner_boundary_circle_matrix_,
-                              circle_diagonal_solver_, radial_diagonal_solver_, circle_tridiagonal_solver_,
-                              radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
+        nodeBuildAscTake(i_r, i_theta, grid_, DirBC_Interior_, inner_boundary_circle_matrix_,
+                         circle_tridiagonal_solver_, radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
     }
 }
 
-void ExtrapolatedSmootherTake::buildAscRadialSection(const int i_theta)
+void ExtrapolatedSmootherTake::buildAscRadialSection(int i_theta)
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -658,108 +642,58 @@ void ExtrapolatedSmootherTake::buildAscRadialSection(const int i_theta)
 
     for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
         // Build Asc at the current node
-        nodeBuildSmootherTake(i_r, i_theta, grid_, DirBC_Interior_, inner_boundary_circle_matrix_,
-                              circle_diagonal_solver_, radial_diagonal_solver_, circle_tridiagonal_solver_,
-                              radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
+        nodeBuildAscTake(i_r, i_theta, grid_, DirBC_Interior_, inner_boundary_circle_matrix_,
+                         circle_tridiagonal_solver_, radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
     }
 }
 
-/* clang-format off */
 void ExtrapolatedSmootherTake::buildAscMatrices()
 {
     /* -------------------------------------- */
     /* Part 1: Allocate Asc Smoother matrices */
     /* -------------------------------------- */
+    // BatchedTridiagonalSolvers allocations are handled in the SmootherTake constructor.
+    // circle_tridiagonal_solver_[batch_index=0] is unitialized. Use inner_boundary_circle_matrix_ instead.
 
-    const int number_smoother_circles = grid_.numberSmootherCircles();
-    const int length_smoother_radial  = grid_.lengthSmootherRadial();
-
-    const int num_circle_nodes = grid_.ntheta();
-    circle_tridiagonal_solver_.resize(number_smoother_circles / 2);
-    circle_diagonal_solver_.resize(number_smoother_circles - number_smoother_circles / 2);
-
-    assert((grid_.ntheta() / 2) % 2 == 0);
-    const int num_radial_nodes = length_smoother_radial;
-    radial_tridiagonal_solver_.resize(grid_.ntheta() / 2);
-    radial_diagonal_solver_.resize(grid_.ntheta() / 2);
-
-    // Remark: circle_diagonal_solver_[0] is undefnied.
-    // Use inner_boundary_circle_matrix_ instead.
-    #pragma omp parallel num_threads(num_omp_threads_) if (grid_.numberOfNodes() > 10'000)
-    {
-        // ---------------- //
-        // Circular Section //
-        #pragma omp for nowait
-        for (int circle_Asc_index = 0; circle_Asc_index < number_smoother_circles; circle_Asc_index++) {
-
-            /* Inner boundary circle */
-            if (circle_Asc_index == 0) {
-                #ifdef GMGPOLAR_USE_MUMPS
-                // Although the matrix is symmetric, we need to store all its entries, so we disable the symmetry.
-                const int nnz                 = getNonZeroCountCircleAsc(circle_Asc_index);
-                inner_boundary_circle_matrix_ = SparseMatrixCOO<double>(num_circle_nodes, num_circle_nodes, nnz);
-                inner_boundary_circle_matrix_.is_symmetric(false);
-                #else
-                std::function<int(int)> nnz_per_row = [&](int i_theta) {
-                    if(DirBC_Interior_) return 1;
-                    else return i_theta % 2 == 0 ? 1 : 2;
-                };
-                inner_boundary_circle_matrix_ = SparseMatrixCSR<double>(num_circle_nodes, num_circle_nodes, nnz_per_row);
-                #endif
-            }
-
-            /* Interior Circle Section */
-            else {
-                if (circle_Asc_index & 1) {
-                    const int circle_tridiagonal_solver_index = circle_Asc_index / 2;
-                    auto& solver_matrix = circle_tridiagonal_solver_[circle_tridiagonal_solver_index];
-                    solver_matrix       = SymmetricTridiagonalSolver<double>(num_circle_nodes);
-                    solver_matrix.is_cyclic(true);
-                }
-                else {
-                    const int circle_diagonal_solver_index = circle_Asc_index / 2;
-                    auto& solver_matrix                    = circle_diagonal_solver_[circle_diagonal_solver_index];
-                    solver_matrix                          = DiagonalSolver<double>(num_circle_nodes);
-                }
-            }
-        }
-
-        // -------------- //
-        // Radial Section //
-        #pragma omp for nowait
-        for (int radial_Asc_index = 0; radial_Asc_index < grid_.ntheta(); radial_Asc_index++) {
-            if (radial_Asc_index & 1) {
-                const int radial_tridiagonal_solver_index = radial_Asc_index / 2;
-                auto& solver_matrix                       = radial_tridiagonal_solver_[radial_tridiagonal_solver_index];
-                solver_matrix                             = SymmetricTridiagonalSolver<double>(num_radial_nodes);
-                solver_matrix.is_cyclic(false);
-            }
-            else {
-                const int radial_diagonal_solver_index = radial_Asc_index / 2;
-                auto& solver_matrix                    = radial_diagonal_solver_[radial_diagonal_solver_index];
-                solver_matrix                          = DiagonalSolver<double>(num_radial_nodes);
-            }
-        }
-    }
+#ifdef GMGPOLAR_USE_MUMPS
+    // Although the matrix is symmetric, we need to store all its entries, so we disable the symmetry.
+    const int inner_i_r           = 0;
+    const int inner_nnz           = getNonZeroCountCircleAsc(inner_i_r);
+    const int num_circle_nodes    = grid_.ntheta();
+    inner_boundary_circle_matrix_ = SparseMatrixCOO<double>(num_circle_nodes, num_circle_nodes, inner_nnz);
+    inner_boundary_circle_matrix_.is_symmetric(false);
+#else
+    std::function<int(int)> nnz_per_row = [&](int i_theta) {
+        if (DirBC_Interior_)
+            return 1;
+        else
+            return i_theta % 2 == 0 ? 1 : 2;
+    };
+    const int num_circle_nodes    = grid_.ntheta();
+    inner_boundary_circle_matrix_ = SparseMatrixCSR<double>(num_circle_nodes, num_circle_nodes, nnz_per_row);
+#endif
 
     /* ---------------------------------- */
     /* Part 2: Fill Asc Smoother matrices */
     /* ---------------------------------- */
 
-    #pragma omp parallel num_threads(num_omp_threads_)
+#pragma omp parallel num_threads(num_omp_threads_)
     {
-        #pragma omp for nowait
+#pragma omp for nowait
         for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
             buildAscCircleSection(i_r);
         }
 
-        #pragma omp for nowait
+#pragma omp for nowait
         for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
             buildAscRadialSection(i_theta);
         }
     }
 
-    #ifdef GMGPOLAR_USE_MUMPS
+    circle_tridiagonal_solver_.setup();
+    radial_tridiagonal_solver_.setup();
+
+#ifdef GMGPOLAR_USE_MUMPS
     /* ------------------------------------------------------------------- */
     /* Part 3: Convert inner_boundary_circle_matrix_ to a symmetric matrix */
     /* ------------------------------------------------------------------- */
@@ -785,6 +719,5 @@ void ExtrapolatedSmootherTake::buildAscMatrices()
             current_nz++;
         }
     }
-    #endif
+#endif
 }
-/* clang-format on */

@@ -23,7 +23,7 @@ const Stencil& ExtrapolatedSmootherTake::getStencil(int i_r, int i_theta) const
     throw std::out_of_range("getStencil: Only i_r = 0 implemented.");
 }
 
-int ExtrapolatedSmootherTake::getNonZeroCountCircleAsc(const int i_r) const
+int ExtrapolatedSmootherTake::getNonZeroCountCircleAsc(int i_r) const
 {
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles());
 
@@ -41,7 +41,7 @@ int ExtrapolatedSmootherTake::getNonZeroCountCircleAsc(const int i_r) const
     throw std::out_of_range("nnz_circle_Asc: Only i_r = 0 implemented.");
 }
 
-int ExtrapolatedSmootherTake::getCircleAscIndex(const int i_r, const int i_theta) const
+int ExtrapolatedSmootherTake::getCircleAscIndex(int i_r, int i_theta) const
 {
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles());
 
@@ -62,14 +62,4 @@ int ExtrapolatedSmootherTake::getCircleAscIndex(const int i_r, const int i_theta
     }
 
     throw std::out_of_range("ptr_nz_index_circle_Asc: Only i_r = 0 implemented.");
-}
-
-int ExtrapolatedSmootherTake::getNonZeroCountRadialAsc(const int i_theta) const
-{
-    throw std::out_of_range("ExtrapolatedSmoother: nnz_radial_Asc not implemented.");
-}
-
-int ExtrapolatedSmootherTake::getRadialAscIndex(const int i_r, const int i_theta) const
-{
-    throw std::out_of_range("ExtrapolatedSmoother: ptr_nz_index_radial_Asc not implemented.");
 }
