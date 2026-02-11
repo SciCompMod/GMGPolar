@@ -1,4 +1,3 @@
-
 // =============================================================================
 //   Main Solver Routine
 // =============================================================================
@@ -107,8 +106,7 @@ void IGMGPolar::solve(const BoundaryConditions& boundary_conditions, const Sourc
                 multigrid_V_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
             }
             else {
-                implicitlyExtrapolatedMultigrid_V_Cycle(level.level_depth(), level.solution(), level.rhs(),
-                                                        level.residual());
+                extrapolated_multigrid_V_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
             }
             break;
         case MultigridCycleType::W_CYCLE:
@@ -116,8 +114,7 @@ void IGMGPolar::solve(const BoundaryConditions& boundary_conditions, const Sourc
                 multigrid_W_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
             }
             else {
-                implicitlyExtrapolatedMultigrid_W_Cycle(level.level_depth(), level.solution(), level.rhs(),
-                                                        level.residual());
+                extrapolated_multigrid_W_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
             }
             break;
         case MultigridCycleType::F_CYCLE:
@@ -125,8 +122,7 @@ void IGMGPolar::solve(const BoundaryConditions& boundary_conditions, const Sourc
                 multigrid_F_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
             }
             else {
-                implicitlyExtrapolatedMultigrid_F_Cycle(level.level_depth(), level.solution(), level.rhs(),
-                                                        level.residual());
+                extrapolated_multigrid_F_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
             }
             break;
         default:

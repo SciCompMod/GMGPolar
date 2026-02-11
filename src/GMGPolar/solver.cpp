@@ -35,18 +35,18 @@ void IGMGPolar::initializeSolution()
                 if (fine_level.level_depth() == 0 && (extrapolation_ != ExtrapolationType::NONE)) {
                     switch (FMG_cycle_) {
                     case MultigridCycleType::V_CYCLE:
-                        implicitlyExtrapolatedMultigrid_V_Cycle(fine_level.level_depth(), fine_level.solution(),
-                                                                fine_level.rhs(), fine_level.residual());
+                        extrapolated_multigrid_V_Cycle(fine_level.level_depth(), fine_level.solution(),
+                                                       fine_level.rhs(), fine_level.residual());
                         break;
 
                     case MultigridCycleType::W_CYCLE:
-                        implicitlyExtrapolatedMultigrid_W_Cycle(fine_level.level_depth(), fine_level.solution(),
-                                                                fine_level.rhs(), fine_level.residual());
+                        extrapolated_multigrid_W_Cycle(fine_level.level_depth(), fine_level.solution(),
+                                                       fine_level.rhs(), fine_level.residual());
                         break;
 
                     case MultigridCycleType::F_CYCLE:
-                        implicitlyExtrapolatedMultigrid_F_Cycle(fine_level.level_depth(), fine_level.solution(),
-                                                                fine_level.rhs(), fine_level.residual());
+                        extrapolated_multigrid_F_Cycle(fine_level.level_depth(), fine_level.solution(),
+                                                       fine_level.rhs(), fine_level.residual());
                         break;
 
                     default:
@@ -135,7 +135,7 @@ void IGMGPolar::updateResidualNorms(Level& level, int iteration, double& initial
     }
 }
 
-void IGMGPolar::extrapolatedResidual(const int current_level, Vector<double> residual,
+void IGMGPolar::extrapolatedResidual(int current_level, Vector<double> residual,
                                      ConstVector<double> residual_next_level)
 {
     const PolarGrid& fineGrid   = levels_[current_level].grid();
