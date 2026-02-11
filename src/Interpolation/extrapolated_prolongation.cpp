@@ -46,40 +46,37 @@
  *
  */
 
-#define FINE_NODE_EXTRAPOLATED_PROLONGATION()                                                                          \
-    do {                                                                                                               \
-        if (i_r & 1) {                                                                                                 \
-            if (i_theta & 1) {                                                                                         \
-                /* (odd, odd) -> node in center of coarse cell */                                                      \
-                double value =                                                                                         \
-                    0.5 * (coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse)] + /* Bottom right */       \
-                           coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse + 1)] /* Top left */             \
-                          );                                                                                           \
-                fine_result[fine_grid.index(i_r, i_theta)] = value;                                                    \
-            }                                                                                                          \
-            else {                                                                                                     \
-                /* (odd, even) -> between coarse nodes in radial direction */                                          \
-                double value = 0.5 * (coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)] + /* Left */        \
-                                      coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse)] /* Right */     \
-                                     );                                                                                \
-                fine_result[fine_grid.index(i_r, i_theta)] = value;                                                    \
-            }                                                                                                          \
-        }                                                                                                              \
-        else {                                                                                                         \
-            if (i_theta & 1) {                                                                                         \
-                /* (even, odd) -> between coarse nodes in angular direction */                                         \
-                double value = 0.5 * (coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)] + /* Bottom */      \
-                                      coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse + 1)] /* Top */       \
-                                     );                                                                                \
-                fine_result[fine_grid.index(i_r, i_theta)] = value;                                                    \
-            }                                                                                                          \
-            else {                                                                                                     \
-                /* (even, even) -> node lies exactly on coarse grid */                                                 \
-                fine_result[fine_grid.index(i_r, i_theta)] =                                                           \
-                    coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)]; /* Center */                         \
-            }                                                                                                          \
-        }                                                                                                              \
-    } while (0)
+static inline void fineNodeExtrapolatedProlongation(int i_r, int i_theta, int i_r_coarse, int i_theta_coarse,
+                                                    const PolarGrid& coarse_grid, const PolarGrid& fine_grid,
+                                                    Vector<double>& fine_result, ConstVector<double>& coarse_values)
+{
+    if (i_r & 1) {
+        if (i_theta & 1) { /* (odd, odd) -> node in center of coarse cell */
+            double value = 0.5 * (coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse)] + /* Bottom right */
+                                  coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse + 1)] /* Top left */
+                                 );
+            fine_result[fine_grid.index(i_r, i_theta)] = value;
+        }
+        else { /* (odd, even) -> between coarse nodes in radial direction */
+            double value = 0.5 * (coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)] + /* Left */
+                                  coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse)] /* Right */
+                                 );
+            fine_result[fine_grid.index(i_r, i_theta)] = value;
+        }
+    }
+    else {
+        if (i_theta & 1) { /* (even, odd) -> between coarse nodes in angular direction */
+            double value = 0.5 * (coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)] + /* Bottom */
+                                  coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse + 1)] /* Top */
+                                 );
+            fine_result[fine_grid.index(i_r, i_theta)] = value;
+        }
+        else { /* (even, even) -> node lies exactly on coarse grid */
+            fine_result[fine_grid.index(i_r, i_theta)] =
+                coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)]; /* Center */
+        }
+    }
+}
 
 void Interpolation::applyExtrapolatedProlongation(const PolarGrid& coarse_grid, const PolarGrid& fine_grid,
                                                   Vector<double> fine_result, ConstVector<double> coarse_values) const
@@ -98,7 +95,8 @@ void Interpolation::applyExtrapolatedProlongation(const PolarGrid& coarse_grid, 
             int i_r_coarse = i_r / 2;
             for (int i_theta = 0; i_theta < fine_grid.ntheta(); i_theta++) {
                 int i_theta_coarse = i_theta / 2;
-                FINE_NODE_EXTRAPOLATED_PROLONGATION();
+                fineNodeExtrapolatedProlongation(i_r, i_theta, i_r_coarse, i_theta_coarse, coarse_grid, fine_grid,
+                                                 fine_result, coarse_values);
             }
         }
 
@@ -108,7 +106,8 @@ void Interpolation::applyExtrapolatedProlongation(const PolarGrid& coarse_grid, 
             int i_theta_coarse = i_theta / 2;
             for (int i_r = fine_grid.numberSmootherCircles(); i_r < fine_grid.nr(); i_r++) {
                 int i_r_coarse = i_r / 2;
-                FINE_NODE_EXTRAPOLATED_PROLONGATION();
+                fineNodeExtrapolatedProlongation(i_r, i_theta, i_r_coarse, i_theta_coarse, coarse_grid, fine_grid,
+                                                 fine_result, coarse_values);
             }
         }
     }
