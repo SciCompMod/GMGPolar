@@ -65,16 +65,12 @@ public:
 
     // Performs one full coupled smoothing sweep:
     //   BC -> WC -> BR -> WR
-    // using temp as RHS workspace.
+    // Parallel implementation using OpenMP:
+    // Scedule every 2nd/4th line in parallel to avoid race conditions arising from the A-Give distribution.
+    // Sceduling every 3rd line in parallel would also be possible, but is less natural for the 2 coloring.
     void smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) override;
 
 private:
-    // Sequential implementation to showcase simplified version without complex parallelization patterns.
-    void smoothingSequential(Vector<double> x, ConstVector<double> rhs, Vector<double> temp);
-    // Parallel implementation using OpenMP for loops.
-    // Scedule every 2nd/4th line in parallel to avoid race conditions arising from the A-Give distribution.
-    void smoothingForLoop(Vector<double> x, ConstVector<double> rhs, Vector<double> temp);
-
     /* ------------------- */
     /* Tridiagonal solvers */
     /* ------------------- */
