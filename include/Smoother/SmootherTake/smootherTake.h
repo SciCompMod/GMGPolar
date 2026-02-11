@@ -143,8 +143,9 @@ private:
     // Build A_sc matrix block for a single radial line.
     void buildAscRadialSection(int i_theta);
     // Build A_sc for a specific node (i_r, i_theta)
-    void nodeBuildAscTake(int i_r, int i_theta, ConstVector<double>& arr, ConstVector<double>& att,
-                          ConstVector<double>& art, ConstVector<double>& detDF, ConstVector<double>& coeff_beta);
+    void nodeBuildAscTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior, ConstVector<double>& arr,
+                          ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF,
+                          ConstVector<double>& coeff_beta);
 
     /* ---------------------- */
     /* Orthogonal application */

@@ -52,9 +52,14 @@ void SmootherTake::smoothing(Vector<double> x, ConstVector<double> rhs, Vector<d
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
 
+    /* The outer most circle next to the radial section is defined to be black. */
+    /* Priority: Black -> White. */
+    const int start_black_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 1 : 0;
+    const int start_white_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 0 : 1;
+
     /* Black Circle Section */
 #pragma omp parallel for num_threads(num_omp_threads_)
-    for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r += 2) {
+    for (int i_r = start_black_circles; i_r < grid_.numberSmootherCircles(); i_r += 2) {
         applyAscOrthoCircleSection(i_r, x, rhs, temp);
     } /* Implicit barrier */
 
@@ -62,7 +67,7 @@ void SmootherTake::smoothing(Vector<double> x, ConstVector<double> rhs, Vector<d
 
     /* White Circle Section */
 #pragma omp parallel for num_threads(num_omp_threads_)
-    for (int i_r = 1; i_r < grid_.numberSmootherCircles(); i_r += 2) {
+    for (int i_r = start_white_circles; i_r < grid_.numberSmootherCircles(); i_r += 2) {
         applyAscOrthoCircleSection(i_r, x, rhs, temp);
     } /* Implicit barrier */
 
