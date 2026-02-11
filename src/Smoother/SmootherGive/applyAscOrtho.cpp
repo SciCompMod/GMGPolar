@@ -410,7 +410,7 @@ static inline void nodeApplyAscOrthoRadialGive(int i_r, int i_theta, const Polar
             // "Right" is part of the radial Asc smoother matrices,
             // but is shifted over to the rhs to make the radial Asc smoother matrices symmetric.
             // Note that the circle Asc smoother matrices are symmetric by default.
-            // Note that rhs[right] contains the correct boundary value of u_D.
+            // Note that rhs[center] contains the correct boundary value of u_D.
             result[left] -= (-coeff1 * arr * rhs[center] /* Right */
             );
         }
