@@ -1,9 +1,10 @@
 #include "../../../include/Smoother/SmootherTake/smootherTake.h"
 
-inline void nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                        ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
-                                        ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art,
-                                        ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
+static inline void nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+                                               ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
+                                               ConstVector<double>& arr, ConstVector<double>& att,
+                                               ConstVector<double>& art, ConstVector<double>& detDF,
+                                               ConstVector<double>& coeff_beta)
 {
     assert(i_r >= 0 && i_r < grid.numberSmootherCircles());
 
@@ -87,11 +88,11 @@ inline void nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const PolarGrid& g
     }
 }
 
-inline void nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                        ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
-                                        ConstVector<double>& arr, const ConstVector<double>& att,
-                                        ConstVector<double>& art, const ConstVector<double>& detDF,
-                                        ConstVector<double>& coeff_beta)
+static inline void nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+                                               ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
+                                               ConstVector<double>& arr, const ConstVector<double>& att,
+                                               ConstVector<double>& art, const ConstVector<double>& detDF,
+                                               ConstVector<double>& coeff_beta)
 {
     assert(i_r >= grid.numberSmootherCircles() && i_r < grid.nr());
     /* -------------------- */

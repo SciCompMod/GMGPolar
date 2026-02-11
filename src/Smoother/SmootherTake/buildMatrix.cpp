@@ -1,7 +1,8 @@
 #include "../../../include/Smoother/SmootherTake/smootherTake.h"
 
 /* Tridiagonal matrices */
-inline void updateMatrixElement(BatchedTridiagonalSolver<double>& solver, int batch, int row, int column, double value)
+static inline void updateMatrixElement(BatchedTridiagonalSolver<double>& solver, int batch, int row, int column,
+                                       double value)
 {
     if (row == column)
         solver.main_diagonal(batch, row) = value;
@@ -13,16 +14,16 @@ inline void updateMatrixElement(BatchedTridiagonalSolver<double>& solver, int ba
 
 /* Inner Boundary COO/CSR matrix */
 #ifdef GMGPOLAR_USE_MUMPS
-inline void updateCOOCSRMatrixElement(SparseMatrixCOO<double>& matrix, int ptr, int offset, int row, int col,
-                                      double val)
+static inline void updateCOOCSRMatrixElement(SparseMatrixCOO<double>& matrix, int ptr, int offset, int row, int col,
+                                             double val)
 {
     matrix.row_index(ptr + offset) = row;
     matrix.col_index(ptr + offset) = col;
     matrix.value(ptr + offset)     = val;
 }
 #else
-inline void updateCOOCSRMatrixElement(SparseMatrixCSR<double>& matrix, int ptr, int offset, int row, int col,
-                                      double val)
+static inline void updateCOOCSRMatrixElement(SparseMatrixCSR<double>& matrix, int ptr, int offset, int row, int col,
+                                             double val)
 {
     matrix.row_nz_index(row, offset) = col;
     matrix.row_nz_entry(row, offset) = val;

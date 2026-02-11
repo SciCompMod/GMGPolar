@@ -1,8 +1,8 @@
 #include "../../../include/Residual/ResidualGive/residualGive.h"
 
-inline void node_apply_a_give(int i_r, int i_theta, double r, double theta, const PolarGrid& grid,
-                              const LevelCache& level_cache, bool DirBC_Interior, Vector<double>& result,
-                              ConstVector<double>& x)
+static inline void node_apply_a_give(int i_r, int i_theta, double r, double theta, const PolarGrid& grid,
+                                     const LevelCache& level_cache, bool DirBC_Interior, Vector<double>& result,
+                                     ConstVector<double>& x)
 {
     /* ---------------------------------------- */
     /* Compute or retrieve stencil coefficients */

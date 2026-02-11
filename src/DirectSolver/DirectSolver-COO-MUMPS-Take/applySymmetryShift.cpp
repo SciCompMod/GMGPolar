@@ -15,9 +15,9 @@ void DirectSolver_COO_MUMPS_Take::applySymmetryShiftInnerBoundary(Vector<double>
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
 
-    const auto& arr = level_cache_.arr();
-    const auto& att = level_cache_.att();
-    const auto& art = level_cache_.art();
+    ConstVector<double> arr = level_cache_.arr();
+    ConstVector<double> att = level_cache_.att();
+    ConstVector<double> art = level_cache_.art();
 
     const int i_r = 1;
 
@@ -50,9 +50,9 @@ void DirectSolver_COO_MUMPS_Take::applySymmetryShiftOuterBoundary(Vector<double>
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
 
-    const auto& arr = level_cache_.arr();
-    const auto& att = level_cache_.att();
-    const auto& art = level_cache_.art();
+    ConstVector<double> arr = level_cache_.arr();
+    ConstVector<double> att = level_cache_.att();
+    ConstVector<double> art = level_cache_.art();
 
     const int i_r = grid_.nr() - 2;
 
@@ -85,27 +85,18 @@ void DirectSolver_COO_MUMPS_Take::applySymmetryShift(Vector<double> x) const
     assert(std::ssize(x) == grid_.numberOfNodes());
     assert(grid_.nr() >= 4);
 
-    if (num_omp_threads_ == 1) {
-        /* Single-threaded execution */
-        if (DirBC_Interior_) {
-            applySymmetryShiftInnerBoundary(x);
-        }
-        applySymmetryShiftOuterBoundary(x);
-    }
-    else {
     #pragma omp parallel sections num_threads(num_omp_threads_)
-        {
+    {
     #pragma omp section
-            {
-                if (DirBC_Interior_) {
-                    applySymmetryShiftInnerBoundary(x);
-                }
+        {
+            if (DirBC_Interior_) {
+                applySymmetryShiftInnerBoundary(x);
             }
+        }
 
     #pragma omp section
-            {
-                applySymmetryShiftOuterBoundary(x);
-            }
+        {
+            applySymmetryShiftOuterBoundary(x);
         }
     }
 }
