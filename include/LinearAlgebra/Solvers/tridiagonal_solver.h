@@ -23,6 +23,20 @@ public:
         assign(sub_diagonal_, T(0));
     }
 
+    /* ------------------- */
+    /* Accessors for sizes */
+    /* ------------------- */
+
+    int matrixDimension() const
+    {
+        return matrix_dimension_;
+    }
+
+    int batchCount() const
+    {
+        return batch_count_;
+    }
+
     /* ---------------------------- */
     /* Accessors for matrix entries */
     /* ---------------------------- */
