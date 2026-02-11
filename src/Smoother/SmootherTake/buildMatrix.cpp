@@ -31,6 +31,9 @@ static inline void updateCOOCSRMatrixElement(SparseMatrixCSR<double>& matrix, in
 #endif
 
 void SmootherTake::nodeBuildAscTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+                                    MatrixType& inner_boundary_circle_matrix,
+                                    BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
+                                    BatchedTridiagonalSolver<double>& radial_tridiagonal_solver,
                                     ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art,
                                     ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
 {
@@ -68,7 +71,7 @@ void SmootherTake::nodeBuildAscTake(int i_r, int i_theta, const PolarGrid& grid,
         const int top    = grid.index(i_r, i_theta_P1);
         const int right  = grid.index(i_r + 1, i_theta);
 
-        auto& solver = circle_tridiagonal_solver_;
+        auto& solver = circle_tridiagonal_solver;
         int batch    = i_r;
 
         const int center_index = i_theta;
@@ -118,7 +121,7 @@ void SmootherTake::nodeBuildAscTake(int i_r, int i_theta, const PolarGrid& grid,
         const int top    = grid.index(i_r, i_theta_P1);
         const int right  = grid.index(i_r + 1, i_theta);
 
-        auto& solver = radial_tridiagonal_solver_;
+        auto& solver = radial_tridiagonal_solver;
         int batch    = i_theta;
 
         const int center_index = i_r - numberSmootherCircles;
@@ -156,7 +159,7 @@ void SmootherTake::nodeBuildAscTake(int i_r, int i_theta, const PolarGrid& grid,
         int row, col;
         double val;
         if (DirBC_Interior) {
-            auto& matrix              = inner_boundary_circle_matrix_;
+            auto& matrix              = inner_boundary_circle_matrix;
             const int center_index    = i_theta;
             const int center_nz_index = getCircleAscIndex(i_r, i_theta);
 
@@ -198,7 +201,7 @@ void SmootherTake::nodeBuildAscTake(int i_r, int i_theta, const PolarGrid& grid,
             const int top    = grid.index(i_r, i_theta_P1);
             const int right  = grid.index(i_r + 1, i_theta);
 
-            auto& matrix = inner_boundary_circle_matrix_;
+            auto& matrix = inner_boundary_circle_matrix;
 
             const int center_index = i_theta;
             const int left_index   = i_theta_AcrossOrigin;
@@ -264,7 +267,7 @@ void SmootherTake::nodeBuildAscTake(int i_r, int i_theta, const PolarGrid& grid,
         const int top    = grid.index(i_r, i_theta_P1);
         const int right  = grid.index(i_r + 1, i_theta);
 
-        auto& solver = radial_tridiagonal_solver_;
+        auto& solver = radial_tridiagonal_solver;
         int batch    = i_theta;
 
         const int center_index = i_r - numberSmootherCircles;
@@ -307,7 +310,7 @@ void SmootherTake::nodeBuildAscTake(int i_r, int i_theta, const PolarGrid& grid,
         const int top    = grid.index(i_r, i_theta_P1);
         const int right  = grid.index(i_r + 1, i_theta);
 
-        auto& solver = radial_tridiagonal_solver_;
+        auto& solver = radial_tridiagonal_solver;
         int batch    = i_theta;
 
         const int center_index = i_r - numberSmootherCircles;
@@ -338,7 +341,7 @@ void SmootherTake::nodeBuildAscTake(int i_r, int i_theta, const PolarGrid& grid,
     /* Radial Section: Node on the outer boundary */
     /* ------------------------------------------ */
     else if (i_r == grid.nr() - 1) {
-        auto& solver = radial_tridiagonal_solver_;
+        auto& solver = radial_tridiagonal_solver;
         int batch    = i_theta;
 
         const int center_index = i_r - numberSmootherCircles;
@@ -371,7 +374,8 @@ void SmootherTake::buildAscCircleSection(int i_r)
 
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
         // Build Asc at the current node
-        nodeBuildAscTake(i_r, i_theta, grid_, DirBC_Interior_, arr, att, art, detDF, coeff_beta);
+        nodeBuildAscTake(i_r, i_theta, grid_, DirBC_Interior_, inner_boundary_circle_matrix_,
+                         circle_tridiagonal_solver_, radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
     }
 }
 
@@ -388,7 +392,8 @@ void SmootherTake::buildAscRadialSection(int i_theta)
 
     for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
         // Build Asc at the current node
-        nodeBuildAscTake(i_r, i_theta, grid_, DirBC_Interior_, arr, att, art, detDF, coeff_beta);
+        nodeBuildAscTake(i_r, i_theta, grid_, DirBC_Interior_, inner_boundary_circle_matrix_,
+                         circle_tridiagonal_solver_, radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
     }
 }
 
