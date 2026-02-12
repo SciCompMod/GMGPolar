@@ -117,11 +117,12 @@ set(SMOOTHER_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/smoother.cpp
     
     # SmootherGive
+    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/applyAscOrtho.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/buildMatrix.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/initializeMumps.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/matrixStencil.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/smootherGive.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/smootherSolver.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/solveAscSystem.cpp
     
     # SmootherTake
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/buildMatrix.cpp
