@@ -89,19 +89,19 @@ void SmootherGive::smoothing(Vector<double> x, ConstVector<double> rhs, Vector<d
 #pragma omp parallel num_threads(num_omp_threads_)
     {
         /* Inside White Section */
-#pragma omp for nowait
+#pragma omp for
         for (int circle_task = 1; circle_task < num_smoother_circles; circle_task += 2) {
             int i_r = num_smoother_circles - circle_task - 1;
             applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
         }
         /* Outside White Section (Part 1)*/
-#pragma omp for nowait
+#pragma omp for
         for (int circle_task = 0; circle_task < num_smoother_circles; circle_task += 4) {
             int i_r = num_smoother_circles - circle_task - 1;
             applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
         }
         /* Outside White Section (Part 2)*/
-#pragma omp for nowait
+#pragma omp for
         for (int circle_task = 2; circle_task < num_smoother_circles; circle_task += 4) {
             int i_r = num_smoother_circles - circle_task - 1;
             applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
