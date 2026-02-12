@@ -140,11 +140,12 @@ set(EXTRAPOLATED_SMOOTHER_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/extrapolatedSmoother.cpp
     
     # ExtrapolatedSmootherGive
+    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/applyAscOrtho.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/buildAscMatrices.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/initializeMumps.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/smootherSolver.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/smootherStencil.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/solveAscSystem.cpp
     
     # ExtrapolatedSmootherTake
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/buildAscMatrices.cpp
