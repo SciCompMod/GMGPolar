@@ -22,7 +22,7 @@ class Level;
 
 #ifdef GMGPOLAR_USE_MUMPS
     #include "dmumps_c.h"
-    #include "mpi.h"s
+    #include "mpi.h"
 #endif
 
 #include "../LinearAlgebra/Solvers/symmetricTridiagonalSolver.h"
