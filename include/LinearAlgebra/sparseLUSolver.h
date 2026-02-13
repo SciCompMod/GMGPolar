@@ -15,12 +15,10 @@
  *
  * This solver performs a sparse LU factorization with static pivoting and
  * diagonal perturbation to ensure numerical stability. 
- * We utilize Reverse Cuthill-McKee (RCM) reordering to minimize fill-in during the factorization process.
  * It is slightly slower than MUMPS, but useful when an in-house LU implementation is desired.
  *
  * @tparam T Numeric type (e.g. double, float).
  */
-
 template <typename T>
 class SparseLUSolver
 {
@@ -67,8 +65,6 @@ private:
     std::vector<T> L_values, U_values; // Non-zero values for L and U
     std::vector<int> L_col_idx, U_col_idx; // Column indices for L and U
     std::vector<int> L_row_ptr, U_row_ptr; // Row pointers for L and U
-    std::vector<int> perm; // Permutation vector (RCM ordering)
-    std::vector<int> perm_inv; // Inverse permutation
     std::vector<T> U_diag; // Diagonal elements of U
     bool factorized_; // Factorization status flag
     T tolerance_abs_; // minimum allowed diagonal
@@ -76,12 +72,6 @@ private:
 
     // Core methods
     void factorize(const SparseMatrixCSR<T>& A);
-    void solveInPlacePermuted(T* b) const;
-
-    // Reordering and permutation utilities
-    std::vector<int> computeRCM(const SparseMatrixCSR<T>& A) const;
-    SparseMatrixCSR<T> permuteMatrix(const SparseMatrixCSR<T>& A, const std::vector<int>& perm,
-                                     const std::vector<int>& perm_inv) const;
 
     // Factorization components
     void symbolicFactorization(const SparseMatrixCSR<T>& A, std::vector<std::vector<int>>& L_pattern,
@@ -110,17 +100,7 @@ SparseLUSolver<T>::SparseLUSolver(const SparseMatrixCSR<T>& A, T tolerance_abs, 
     , tolerance_rel_(tolerance_rel)
 {
     assert(A.rows() == A.columns());
-
-    // Compute RCM ordering
-    perm = computeRCM(A);
-    perm_inv.resize(perm.size());
-    for (size_t i = 0; i < perm.size(); i++) {
-        perm_inv[perm[i]] = i;
-    }
-
-    // Permute matrix according to RCM ordering
-    SparseMatrixCSR<T> A_perm = permuteMatrix(A, perm, perm_inv);
-    factorize(A_perm);
+    factorize(A);
     factorized_ = true;
 }
 
@@ -141,33 +121,6 @@ void SparseLUSolver<T>::solveInPlace(Vector<T> b) const
 template <typename T>
 void SparseLUSolver<T>::solveInPlace(T* b) const
 {
-    assert(factorized_);
-    const int n = perm.size();
-    if (n == 0)
-        return;
-
-    // Permute RHS: b_perm = P * b
-    Vector<T> b_perm("b_perm", n);
-    for (int i = 0; i < n; i++) {
-        b_perm[i] = b[perm[i]];
-    }
-
-    // Solve permuted system
-    solveInPlacePermuted(b_perm.data());
-
-    // Unpermute solution: x = P^T * x_perm
-    for (int i = 0; i < n; i++) {
-        b[i] = b_perm[perm_inv[i]];
-    }
-}
-
-/**
- * Performs forward/backward substitution on permuted system
- * @param b - Permuted right-hand side vector (overwritten with solution)
- */
-template <typename T>
-void SparseLUSolver<T>::solveInPlacePermuted(T* b) const
-{
     const int n = L_row_ptr.size() - 1;
 
     // Forward substitution: L * y = b
@@ -187,159 +140,6 @@ void SparseLUSolver<T>::solveInPlacePermuted(T* b) const
         }
         b[i] /= U_diag[i]; // Divide by diagonal element
     }
-}
-
-/**
- * Computes Reverse Cuthill-McKee (RCM) ordering for bandwidth reduction
- * @param A - Input sparse matrix
- * @return Permutation vector
- */
-template <typename T>
-std::vector<int> SparseLUSolver<T>::computeRCM(const SparseMatrixCSR<T>& A) const
-{
-    const int n = A.rows();
-    if (n == 0)
-        return {};
-
-    // Build symmetric adjacency list
-    std::vector<std::vector<int>> adj(n);
-    for (int i = 0; i < n; i++) {
-        for (int idx = 0; idx < A.row_nz_size(i); idx++) {
-            int j = A.row_nz_index(i, idx);
-            if (j == i)
-                continue; // Skip diagonal
-            adj[i].push_back(j);
-            adj[j].push_back(i);
-        }
-    }
-
-    // Remove duplicates and sort
-    for (int i = 0; i < n; i++) {
-        std::sort(adj[i].begin(), adj[i].end());
-        auto last = std::unique(adj[i].begin(), adj[i].end());
-        adj[i].resize(last - adj[i].begin());
-    }
-
-    // Compute degrees
-    std::vector<int> deg(n);
-    for (int i = 0; i < n; i++) {
-        deg[i] = adj[i].size();
-    }
-
-    std::vector<bool> visited(n, false);
-    std::vector<int> RCM_order;
-
-    // Process disconnected components
-    for (int start = 0; start < n; start++) {
-        if (visited[start])
-            continue;
-
-        // Find connected component
-        std::vector<int> comp_nodes;
-        std::queue<int> q_comp;
-        q_comp.push(start);
-        visited[start] = true;
-        while (!q_comp.empty()) {
-            int u = q_comp.front();
-            q_comp.pop();
-            comp_nodes.push_back(u);
-            for (int v : adj[u]) {
-                if (!visited[v]) {
-                    visited[v] = true;
-                    q_comp.push(v);
-                }
-            }
-        }
-
-        // Find min-degree node in component
-        int comp_start = comp_nodes[0];
-        int min_deg    = deg[comp_start];
-        for (int node : comp_nodes) {
-            visited[node] = false; // Unmark for BFS
-            if (deg[node] < min_deg) {
-                min_deg    = deg[node];
-                comp_start = node;
-            }
-        }
-
-        // BFS traversal
-        std::queue<int> q;
-        std::vector<int> comp_order;
-        q.push(comp_start);
-        visited[comp_start] = true;
-        while (!q.empty()) {
-            int u = q.front();
-            q.pop();
-            comp_order.push_back(u);
-
-            // Collect unvisited neighbors
-            std::vector<int> neighbors;
-            for (int v : adj[u]) {
-                if (!visited[v]) {
-                    visited[v] = true;
-                    neighbors.push_back(v);
-                }
-            }
-
-            // Sort neighbors by increasing degree
-            std::sort(neighbors.begin(), neighbors.end(), [&](int a, int b) {
-                return deg[a] < deg[b];
-            });
-
-            for (int v : neighbors) {
-                q.push(v);
-            }
-        }
-
-        // Reverse for RCM ordering and append
-        std::reverse(comp_order.begin(), comp_order.end());
-        RCM_order.insert(RCM_order.end(), comp_order.begin(), comp_order.end());
-    }
-
-    return RCM_order;
-}
-
-/**
- * Permutes matrix using RCM ordering (efficient, no sorting)
- * @param A - Original matrix
- * @param perm - Permutation vector
- * @param perm_inv - Inverse permutation
- * @return Permuted CSR matrix
- */
-template <typename T>
-SparseMatrixCSR<T> SparseLUSolver<T>::permuteMatrix(const SparseMatrixCSR<T>& A, const std::vector<int>& perm,
-                                                    const std::vector<int>& perm_inv) const
-{
-    const int n = A.rows();
-
-    // Compute number of nonzeros per permuted row
-    std::vector<int> nz_per_row(n);
-    for (int i_new = 0; i_new < n; ++i_new) {
-        int i_old         = perm[i_new];
-        nz_per_row[i_new] = A.row_nz_size(i_old);
-    }
-
-    // Construct permuted matrix with preallocated storage
-    SparseMatrixCSR<T> A_perm(n, n, [&](int i) {
-        return nz_per_row[i];
-    });
-
-    // Fill values and column indices
-    for (int i_new = 0; i_new < n; ++i_new) {
-        int i_old = perm[i_new];
-        int nnz   = A.row_nz_size(i_old);
-        for (int idx = 0; idx < nnz; ++idx) {
-            int j_old = A.row_nz_index(i_old, idx);
-            T val     = A.row_nz_entry(i_old, idx);
-            int j_new = perm_inv[j_old];
-
-            // Find the position in the underlying storage
-            A_perm.row_nz_entry(i_new, idx) = val;
-            A_perm.row_nz_index(i_new, idx) = j_new;
-        }
-    }
-
-    return A_perm;
 }
 
 /**
