@@ -12,7 +12,8 @@
 #include <unistd.h>
 #include <vector>
 
-#include "../common/equals.h"
+#include "../../LinearAlgebra/Vector/vector.h"
+#include "../../Definitions/equals.h"
 
 /*
  * SymmetricTridiagonalSolver is a class for solving symmetric tridiagonal systems of linear equations.

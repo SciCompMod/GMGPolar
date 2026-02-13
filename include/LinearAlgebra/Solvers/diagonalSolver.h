@@ -15,7 +15,8 @@
 #include <fstream>
 #include <iostream>
 
-#include "vector.h"
+#include "../../LinearAlgebra/Vector/vector.h"
+#include "../../Definitions/equals.h"
 
 template <typename T>
 class DiagonalSolver

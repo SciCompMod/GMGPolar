@@ -11,13 +11,18 @@ class Level;
 #include "../InputFunctions/densityProfileCoefficients.h"
 #include "../Level/level.h"
 #include "../PolarGrid/polargrid.h"
-#include "../common/global_definitions.h"
-#include "../LinearAlgebra/vector.h"
-#include "../LinearAlgebra/vector_operations.h"
-#include "../LinearAlgebra/coo_matrix.h"
-#include "../LinearAlgebra/csr_matrix.h"
-#include "../LinearAlgebra/sparseLUSolver.h"
+#include "../Definitions/global_definitions.h"
+#include "../LinearAlgebra/Vector/vector.h"
+#include "../LinearAlgebra/Vector/vector_operations.h"
+#include "../LinearAlgebra/Matrix/coo_matrix.h"
+#include "../LinearAlgebra/Matrix/csr_matrix.h"
+#include "../LinearAlgebra/Solvers/csr_lu_solver.h"
 #include "../Stencil/stencil.h"
+
+#ifdef GMGPOLAR_USE_MUMPS
+    #include "dmumps_c.h"
+    #include "mpi.h"
+#endif
 
 class DirectSolver
 {

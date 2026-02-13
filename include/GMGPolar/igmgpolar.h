@@ -18,10 +18,10 @@ class LevelCache;
 #include "../InputFunctions/sourceTerm.h"
 #include "../Interpolation/interpolation.h"
 #include "../Level/level.h"
-#include "../LinearAlgebra/vector.h"
-#include "../LinearAlgebra/vector_operations.h"
+#include "../LinearAlgebra/Vector/vector.h"
+#include "../LinearAlgebra/Vector/vector_operations.h"
 #include "../PolarGrid/polargrid.h"
-#include "../common/global_definitions.h"
+#include "../Definitions/global_definitions.h"
 #include "test_cases.h"
 
 class IGMGPolar

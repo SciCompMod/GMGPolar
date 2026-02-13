@@ -2,9 +2,9 @@
 
 #include <gtest/gtest.h>
 
-#include "../../include/LinearAlgebra/vector.h"
-#include "../../include/LinearAlgebra/vector_operations.h"
-#include "../../include/LinearAlgebra/symmetricTridiagonalSolver.h"
+#include "../../include/LinearAlgebra/Vector/vector.h"
+#include "../../include/LinearAlgebra/Vector/vector_operations.h"
+#include "../../include/LinearAlgebra/Solvers/symmetricTridiagonalSolver.h"
 
 TEST(SymmetricTridiagonalSolver, diagonal_dominant_n_2)
 {

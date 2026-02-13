@@ -17,7 +17,7 @@
 
 #include <omp.h>
 
-#include "../common/equals.h"
+#include "../Definitions/equals.h"
 
 class PolarGrid
 {

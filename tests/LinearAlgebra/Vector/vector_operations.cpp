@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "../../include/LinearAlgebra/vector.h"
-#include "../../include/LinearAlgebra/vector_operations.h"
+#include "../../../include/LinearAlgebra/Vector/vector.h"
+#include "../../../include/LinearAlgebra/Vector/vector_operations.h"
 
 /* bool equals(ConstVector<T>& lhs, ConstVector<T>& rhs); */
 

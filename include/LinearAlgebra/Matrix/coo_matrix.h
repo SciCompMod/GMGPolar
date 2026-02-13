@@ -15,7 +15,8 @@
 #include <fstream>
 #include <iostream>
 
-#include "vector.h"
+#include "../../LinearAlgebra/Vector/vector.h"
+#include "../../LinearAlgebra/Vector/vector_operations.h"
 
 template <typename T>
 class SparseMatrixCOO
@@ -219,6 +220,10 @@ SparseMatrixCOO<T>::SparseMatrixCOO(int rows, int columns, int nnz)
     assert(rows >= 0);
     assert(columns >= 0);
     assert(nnz >= 0);
+
+    assign(row_indices_, 0);
+    assign(column_indices_, 0);
+    assign(values_, T(0));
 }
 
 template <typename T>

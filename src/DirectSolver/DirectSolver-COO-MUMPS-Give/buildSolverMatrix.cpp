@@ -1,6 +1,6 @@
 #include "../../../include/DirectSolver/DirectSolver-COO-MUMPS-Give/directSolverGive.h"
 
-#include "../../../include/common/geometry_helper.h"
+#include "../../../include/Definitions/geometry_helper.h"
 
 #ifdef GMGPOLAR_USE_MUMPS
 

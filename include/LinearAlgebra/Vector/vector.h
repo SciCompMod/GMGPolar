@@ -1,12 +1,5 @@
 #pragma once
 
-#include <algorithm>
-#include <cassert>
-#include <initializer_list>
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <vector>
 #include <Kokkos_Core.hpp>
 
 template <typename T>
