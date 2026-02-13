@@ -20,7 +20,8 @@
 #include <fstream>
 #include <iostream>
 
-#include "vector.h"
+#include "../../LinearAlgebra/Vector/vector.h"
+#include "../../LinearAlgebra/Vector/vector_operations.h"
 
 // The CSR matrix format is used if a custom LU decomposition solver is choosen.
 // MUMPS relies on the COO format.
@@ -191,6 +192,9 @@ SparseMatrixCSR<T>::SparseMatrixCSR(int rows, int columns, std::function<int(int
     row_start_indices_(rows) = nnz_;
     values_                  = Vector<T>("CSR values", nnz_);
     column_indices_          = Vector<int>("CSR column indices", nnz_);
+
+    assign(values_, T(0));
+    assign(column_indices_, 0);
 }
 
 template <typename T>

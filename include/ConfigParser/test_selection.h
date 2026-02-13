@@ -1,5 +1,7 @@
 #pragma once
+
 #include <variant>
+
 #include "../../include/GMGPolar/test_cases.h"
 #include "../../include/InputFunctions/BoundaryConditions/cartesianR2_Boundary_CircularGeometry.h"
 #include "../../include/InputFunctions/BoundaryConditions/cartesianR6_Boundary_CzarnyGeometry.h"

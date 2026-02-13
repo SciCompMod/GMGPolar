@@ -6,7 +6,7 @@
 #include <memory>
 
 #include "../../include/ConfigParser/cmdline.h"
-#include "../../include/common/global_definitions.h"
+#include "../../include/Definitions/global_definitions.h"
 #include "../../include/PolarGrid/polargrid.h"
 #include "../../include/GMGPolar/test_cases.h"
 #include "../../include/GMGPolar/igmgpolar.h"

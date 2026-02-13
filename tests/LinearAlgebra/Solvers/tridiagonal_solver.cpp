@@ -4,7 +4,7 @@
 #include <cmath>
 
 #include "../../../include/LinearAlgebra/Solvers/tridiagonal_solver.h"
-#include "../../../include/LinearAlgebra/vector.h"
+#include "../../../include/LinearAlgebra/Vector/vector.h"
 
 // clang-format off
 TEST(BatchedTridiagonalSolvers, non_cyclic_tridiagonal_n_4)

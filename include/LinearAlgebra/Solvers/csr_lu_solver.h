@@ -7,8 +7,8 @@
 #include <cmath>
 #include <stack>
 
-#include "csr_matrix.h"
-#include "vector.h"
+#include "../../LinearAlgebra/Matrix/csr_matrix.h"
+#include "../../LinearAlgebra/Vector/vector.h"
 
 /**
  * @brief Sparse LU decomposition solver for symmetric positive definite matrices.

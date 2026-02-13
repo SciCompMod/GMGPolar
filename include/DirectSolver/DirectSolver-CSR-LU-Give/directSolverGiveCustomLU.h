@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../directSolver.h"
-#include <Kokkos_Core.hpp>
 
 class DirectSolver_CSR_LU_Give : public DirectSolver
 {

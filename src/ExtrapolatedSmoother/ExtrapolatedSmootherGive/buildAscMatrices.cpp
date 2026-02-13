@@ -1,6 +1,6 @@
 #include "../../../include/ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h"
 
-#include "../../../include/common/geometry_helper.h"
+#include "../../../include/Definitions/geometry_helper.h"
 
 /* Tridiagonal matrices */
 static inline void updateTridiagonalElement(SymmetricTridiagonalSolver<double>& matrix, int row, int column,
