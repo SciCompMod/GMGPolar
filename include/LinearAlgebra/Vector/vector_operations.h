@@ -4,9 +4,10 @@
 #include <omp.h>
 #include <stdexcept>
 
-#include "../common/equals.h"
-#include "vector.h"
 #include <Kokkos_Core.hpp>
+
+#include "vector.h"
+#include "../../Definitions/equals.h"
 
 template <typename T>
 bool equals(ConstVector<T> lhs, ConstVector<T> rhs)

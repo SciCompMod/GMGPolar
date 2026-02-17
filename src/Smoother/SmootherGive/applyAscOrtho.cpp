@@ -1,6 +1,6 @@
 #include "../../../include/Smoother/SmootherGive/smootherGive.h"
 
-#include "../../../include/common/geometry_helper.h"
+#include "../../../include/Definitions/geometry_helper.h"
 
 static inline void nodeApplyAscOrthoCircleGive(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                                SmootherColor smoother_color, ConstVector<double>& x,

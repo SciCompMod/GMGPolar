@@ -4,9 +4,6 @@
 
 #ifdef GMGPOLAR_USE_MUMPS
 
-    #include "dmumps_c.h"
-    #include "mpi.h"
-
 class DirectSolver_COO_MUMPS_Take : public DirectSolver
 {
 public:

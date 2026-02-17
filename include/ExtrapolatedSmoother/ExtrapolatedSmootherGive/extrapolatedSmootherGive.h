@@ -2,11 +2,6 @@
 
 #include "../extrapolatedSmoother.h"
 
-#ifdef GMGPOLAR_USE_MUMPS
-    #include "dmumps_c.h"
-    #include "mpi.h"
-#endif
-
 class ExtrapolatedSmootherGive : public ExtrapolatedSmoother
 {
 public:
