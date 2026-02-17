@@ -22,7 +22,7 @@ class ExtrapolatedSmoother;
 #include "../Residual/residual.h"
 #include "../Smoother/smoother.h"
 
-#include "../common/geometry_helper.h"
+#include "../Definitions/geometry_helper.h"
 
 // The `Level` class represents a single level of a multigrid method.
 // In multigrid solvers, the computational domain is divided into different levels, where each level corresponds to a grid with a different resolution.

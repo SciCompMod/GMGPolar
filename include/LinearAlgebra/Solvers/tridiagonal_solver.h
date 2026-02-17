@@ -2,8 +2,8 @@
 
 #include <Kokkos_Core.hpp>
 
-#include "../vector.h"
-#include "../vector_operations.h"
+#include "../../LinearAlgebra/Vector/vector.h"
+#include "../../LinearAlgebra/Vector/vector_operations.h"
 
 template <typename T>
 class BatchedTridiagonalSolver
