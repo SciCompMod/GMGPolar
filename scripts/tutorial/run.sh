@@ -115,6 +115,8 @@ else
     exit 1
 fi
 
+export OMP_NUM_THREADS=$maxOpenMPThreads
+
 "$GMGPOLAR_EXEC" \
     --verbose $verbose \
     --paraview $paraview \
