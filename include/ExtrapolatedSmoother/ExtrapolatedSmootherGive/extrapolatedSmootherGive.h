@@ -2,13 +2,6 @@
 
 #include "../extrapolatedSmoother.h"
 
-#include "../../../include/LinearAlgebra/Solvers/tridiagonal_solver.h"
-
-#ifdef GMGPOLAR_USE_MUMPS
-    #include "dmumps_c.h"
-    #include "mpi.h"
-#endif
-
 // The extrapolated smoother implements the coupled circle-radial smoothing with coarse node elimination.
 // Coarse nodes are excluded from the smoothing iteration by:
 // 1. Setting their diagonal entries in A_sc to 1.0 (identity mapping)

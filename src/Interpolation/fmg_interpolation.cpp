@@ -1,10 +1,13 @@
 #include "../../include/Interpolation/interpolation.h"
 
 /*
- * Bicubic FMG Interpolator Using Lagrange Polynomial
- * ----------------------------------------------------
- * This implementation computes an interpolated value using a bicubic Full Multigrid (FMG)
- * scheme. The interpolator applies a scaling factor of 1/16 with the coefficient vector [-1, 9, 9, -1].
+ * Bicubic FMG Interpolator using the Lagrange Interpolating Polynomial
+ * --------------------------------------------------------------------
+ * In contrast to the interpolation of the multigrid cycle, which is applied to corrections,
+ * the FMG interpolation transfers approximations of the solution to the fine grid.
+ * The FMG scheme requires interpolation of higher order than the discretization order 
+ * of the PDE. For second-order discretizations, bicubic interpolation is commonly used.
+ * For a uniform grid, this reduces to the 1D stencil: 1/16 * [-1, 9, 9, -1]
  *
  * The method uses Lagrange interpolation with 4 coarse grid nodes to calculate a single interpolated value.
  * Nodes with an X are the 4 coarse interpolation points used for the interpolation.

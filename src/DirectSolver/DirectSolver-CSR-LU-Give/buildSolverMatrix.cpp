@@ -1,6 +1,6 @@
 #include "../../../include/DirectSolver/DirectSolver-CSR-LU-Give/directSolverGiveCustomLU.h"
 
-#include "../../../include/common/geometry_helper.h"
+#include "../../../include/Definitions/geometry_helper.h"
 
 static inline void updateMatrixElement(SparseMatrixCSR<double>& matrix, int offset, int row, int col, double val)
 {
