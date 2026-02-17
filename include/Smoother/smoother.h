@@ -25,8 +25,6 @@ class Level;
     #include "mpi.h"
 #endif
 
-#include "../LinearAlgebra/Solvers/symmetricTridiagonalSolver.h"
-
 class Smoother
 {
 public:
