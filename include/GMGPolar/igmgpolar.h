@@ -277,14 +277,14 @@ protected:
 
     /* ------------------- */
     /* Multigrid Functions */
-    void multigrid_V_Cycle(int level_depth, Vector<double> solution, Vector<double> rhs, Vector<double> residual);
-    void multigrid_W_Cycle(int level_depth, Vector<double> solution, Vector<double> rhs, Vector<double> residual);
-    void multigrid_F_Cycle(int level_depth, Vector<double> solution, Vector<double> rhs, Vector<double> residual);
-    void extrapolated_multigrid_V_Cycle(int level_depth, Vector<double> solution, Vector<double> rhs,
+    void multigrid_V_Cycle(int level_depth, Vector<double> solution, ConstVector<double> rhs, Vector<double> residual);
+    void multigrid_W_Cycle(int level_depth, Vector<double> solution, ConstVector<double> rhs, Vector<double> residual);
+    void multigrid_F_Cycle(int level_depth, Vector<double> solution, ConstVector<double> rhs, Vector<double> residual);
+    void extrapolated_multigrid_V_Cycle(int level_depth, Vector<double> solution, ConstVector<double> rhs,
                                         Vector<double> residual);
-    void extrapolated_multigrid_W_Cycle(int level_depth, Vector<double> solution, Vector<double> rhs,
+    void extrapolated_multigrid_W_Cycle(int level_depth, Vector<double> solution, ConstVector<double> rhs,
                                         Vector<double> residual);
-    void extrapolated_multigrid_F_Cycle(int level_depth, Vector<double> solution, Vector<double> rhs,
+    void extrapolated_multigrid_F_Cycle(int level_depth, Vector<double> solution, ConstVector<double> rhs,
                                         Vector<double> residual);
 
     /* ----------------------- */
