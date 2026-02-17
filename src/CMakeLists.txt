@@ -26,9 +26,9 @@ set(GMG_POLAR_SOURCES
 
 # file(GLOB_RECURSE MULTIGRID_METHODS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/*.cpp)
 set(MULTIGRID_METHODS_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/implicitly_extrapolated_multigrid_F_Cycle.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/implicitly_extrapolated_multigrid_V_Cycle.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/implicitly_extrapolated_multigrid_W_Cycle.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/extrapolated_multigrid_F_Cycle.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/extrapolated_multigrid_V_Cycle.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/extrapolated_multigrid_W_Cycle.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/multigrid_F_Cycle.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/multigrid_V_Cycle.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/multigrid_W_Cycle.cpp
