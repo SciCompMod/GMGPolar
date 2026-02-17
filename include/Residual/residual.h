@@ -7,16 +7,13 @@ class Level;
 #include <iostream>
 #include <vector>
 
-#include "../PolarGrid/polargrid.h"
-
-#include "../InputFunctions/boundaryConditions.h"
-#include "../InputFunctions/densityProfileCoefficients.h"
 #include "../InputFunctions/domainGeometry.h"
-#include "../InputFunctions/sourceTerm.h"
+#include "../InputFunctions/densityProfileCoefficients.h"
 #include "../Level/level.h"
-#include "../LinearAlgebra/vector.h"
-#include "../LinearAlgebra/vector_operations.h"
-#include "../common/global_definitions.h"
+#include "../PolarGrid/polargrid.h"
+#include "../Definitions/global_definitions.h"
+#include "../LinearAlgebra/Vector/vector.h"
+#include "../LinearAlgebra/Vector/vector_operations.h"
 
 class Residual
 {

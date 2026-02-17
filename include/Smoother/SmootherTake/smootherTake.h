@@ -2,13 +2,6 @@
 
 #include "../smoother.h"
 
-#include "../../LinearAlgebra/Solvers/tridiagonal_solver.h"
-
-#ifdef GMGPOLAR_USE_MUMPS
-    #include "dmumps_c.h"
-    #include "mpi.h"
-#endif
-
 // The smoother implements the coupled circle-radial smoothing procedure.
 // It performs iterative updates on different parts of the grid based
 // on the circle/radial section of the grid and black/white line coloring.

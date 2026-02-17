@@ -3,15 +3,12 @@
 #include <vector>
 #include <cassert>
 #include <iostream>
-
 #include <omp.h>
 
 #include "../PolarGrid/polargrid.h"
-
-#include "../LinearAlgebra/vector.h"
-#include "../LinearAlgebra/vector_operations.h"
-
-#include "../common/global_definitions.h"
+#include "../LinearAlgebra/Vector/vector.h"
+#include "../LinearAlgebra/Vector/vector_operations.h"
+#include "../Definitions/global_definitions.h"
 
 class Interpolation
 {
