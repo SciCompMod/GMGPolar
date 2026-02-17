@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 #include <random>
 #include <cmath>
-#include "../../include/LinearAlgebra/csr_matrix.h"
-#include "../../include/LinearAlgebra/vector.h"
-#include "../../include/LinearAlgebra/vector_operations.h"
-#include "../../include/LinearAlgebra/sparseLUSolver.h"
+#include "../../../include/LinearAlgebra/Matrix/csr_matrix.h"
+#include "../../../include/LinearAlgebra/Vector/vector.h"
+#include "../../../include/LinearAlgebra/Vector/vector_operations.h"
+#include "../../../include/LinearAlgebra/Solvers/csr_lu_solver.h"
 
 // All tests that the custom LU solver was unable to solve have been commented out.
 // This typically happens when the matrix is singular, has zero diagonal entries,

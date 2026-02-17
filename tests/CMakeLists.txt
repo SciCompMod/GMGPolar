@@ -8,13 +8,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Create a single test executable that includes all test sources
 add_executable(gmgpolar_tests
     gmgpolar_tests.cpp
-    LinearAlgebra/vector_operations.cpp
-    LinearAlgebra/matrix.cpp
-    LinearAlgebra/csr_matrix.cpp
-    LinearAlgebra/csr_solver.cpp
+    LinearAlgebra/Vector/vector_operations.cpp
+    LinearAlgebra/Matrix/coo_matrix.cpp
+    LinearAlgebra/Matrix/csr_matrix.cpp
+    LinearAlgebra/Solvers/csr_lu_solver.cpp
+    LinearAlgebra/Solvers/tridiagonal_solver.cpp
     LinearAlgebra/tridiagonal_solver.cpp
     LinearAlgebra/cyclic_tridiagonal_solver.cpp
-    LinearAlgebra/Solvers/tridiagonal_solver.cpp
     PolarGrid/polargrid.cpp
     Interpolation/prolongation.cpp
     Interpolation/restriction.cpp
