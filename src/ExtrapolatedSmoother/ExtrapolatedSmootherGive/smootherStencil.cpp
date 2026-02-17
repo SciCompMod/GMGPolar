@@ -63,13 +63,3 @@ int ExtrapolatedSmootherGive::getCircleAscIndex(const int i_r, const int i_theta
 
     throw std::out_of_range("ptr_nz_index_circle_Asc: Only i_r = 0 implemented.");
 }
-
-int ExtrapolatedSmootherGive::getNonZeroCountRadialAsc(const int i_theta) const
-{
-    throw std::out_of_range("ExtrapolatedSmoother: nnz_radial_Asc not implemented.");
-}
-
-int ExtrapolatedSmootherGive::getRadialAscIndex(const int i_r, const int i_theta) const
-{
-    throw std::out_of_range("ExtrapolatedSmoother: ptr_nz_index_radial_Asc not implemented.");
-}
