@@ -2,64 +2,80 @@
 
 const Stencil& ExtrapolatedSmootherTake::getStencil(int i_r, int i_theta) const
 {
-    assert(0 <= i_r && i_r < grid_.nr());
+    // Only i_r = 0 is implemented.
+    // Stencils are only used to obtain offsets to index into COO/CSR matrices.
+    // The inner boundary requires a COO/CSR matrix (rather than a tridiagonal one)
+    // because it has an additional across-origin coupling.
+    assert(i_r == 0);
 
+    // The across-origin discretization used by the extrapolated smoother requires
+    // ntheta to be divisible by 4. This ensures that nodes mapped across the origin
+    // preserve their grid classification, i.e., coarse nodes couple only to coarse
+    // nodes and fine nodes couple only to fine nodes.
+    // Without this assumption, it is a bit more complex to implement the stencil.
     assert((grid_.ntheta() / 2) % 2 == 0);
 
-    if (i_r == 0) {
-        if (i_theta % 2 == 0) {
-            return stencil_center_;
+    if (i_theta % 2 == 0) {
+        return stencil_center_;
+    }
+    else {
+        if (!DirBC_Interior_) {
+            return stencil_center_left_;
         }
         else {
-            if (!DirBC_Interior_) {
-                return stencil_center_left_;
-            }
-            else {
-                return stencil_center_;
-            }
+            return stencil_center_;
         }
     }
-
-    throw std::out_of_range("getStencil: Only i_r = 0 implemented.");
 }
 
 int ExtrapolatedSmootherTake::getNonZeroCountCircleAsc(int i_r) const
 {
-    assert(i_r >= 0 && i_r < grid_.numberSmootherCircles());
+    // Only i_r = 0 is implemented.
+    // The number of nonzero elements is only needed to construct COO matrices.
+    // The inner boundary requires a COO/CSR matrix (rather than a tridiagonal one)
+    // because it has an additional across-origin coupling.
+    assert(i_r == 0);
 
+    // The across-origin discretization used by the extrapolated smoother requires
+    // ntheta to be divisible by 4. This ensures that nodes mapped across the origin
+    // preserve their grid classification, i.e., coarse nodes couple only to coarse
+    // nodes and fine nodes couple only to fine nodes.
+    // Without this assumption, it is a bit more complex to implement the stencil.
     assert((grid_.ntheta() / 2) % 2 == 0);
 
-    if (i_r == 0) {
-        if (!DirBC_Interior_) {
-            return grid_.ntheta() / 2 + 2 * (grid_.ntheta() / 2);
-        }
-        else {
-            return grid_.ntheta();
-        }
+    if (!DirBC_Interior_) {
+        return grid_.ntheta() / 2 + 2 * (grid_.ntheta() / 2);
     }
-
-    throw std::out_of_range("nnz_circle_Asc: Only i_r = 0 implemented.");
+    else {
+        return grid_.ntheta();
+    }
 }
 
 int ExtrapolatedSmootherTake::getCircleAscIndex(int i_r, int i_theta) const
 {
-    assert(i_r >= 0 && i_r < grid_.numberSmootherCircles());
+    // Only i_r = 0 is implemented.
+    // getCircleAscIndex accumulates all stencil sizes within a line up to, but excluding the current node.
+    // It is only used to obtain a ptr to index into COO matrices.
+    // The inner boundary requires a COO/CSR matrix (rather than a tridiagonal one)
+    // because it has an additional across-origin coupling.
+    assert(i_r == 0);
 
+    // The across-origin discretization used by the extrapolated smoother requires
+    // ntheta to be divisible by 4. This ensures that nodes mapped across the origin
+    // preserve their grid classification, i.e., coarse nodes couple only to coarse
+    // nodes and fine nodes couple only to fine nodes.
+    // Without this assumption, it is a bit more complex to implement the stencil.
     assert((grid_.ntheta() / 2) % 2 == 0);
 
-    if (i_r == 0) {
-        if (!DirBC_Interior_) {
-            if (i_theta % 2 == 0) {
-                return 3 * (i_theta / 2);
-            }
-            else {
-                return 3 * (i_theta / 2) + 1;
-            }
+    if (!DirBC_Interior_) {
+        if (i_theta % 2 == 0) {
+            return 3 * (i_theta / 2);
         }
         else {
-            return i_theta;
+            return 3 * (i_theta / 2) + 1;
         }
     }
-
-    throw std::out_of_range("ptr_nz_index_circle_Asc: Only i_r = 0 implemented.");
+    else {
+        return i_theta;
+    }
 }
