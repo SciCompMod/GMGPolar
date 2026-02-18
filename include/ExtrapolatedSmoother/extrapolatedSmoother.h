@@ -25,9 +25,6 @@ class Level;
     #include "mpi.h"
 #endif
 
-#include "../LinearAlgebra/Solvers/diagonalSolver.h"
-#include "../LinearAlgebra/Solvers/symmetricTridiagonalSolver.h"
-
 class ExtrapolatedSmoother
 {
 public:
