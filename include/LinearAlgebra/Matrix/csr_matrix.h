@@ -71,7 +71,7 @@ private:
     AllocatableVector<int> column_indices_;
     AllocatableVector<int> row_start_indices_;
 
-    bool is_sorted_entries(const std::vector<std::tuple<int, int, T>>& entries)
+    bool is_sorted_entries(const std::vector<triplet_type>& entries)
     {
         for (size_t i = 1; i < entries.size(); ++i) {
             const auto& prev = entries[i - 1];
@@ -116,9 +116,9 @@ SparseMatrixCSR<T>::SparseMatrixCSR(const SparseMatrixCSR& other)
     , column_indices_("CSR column indices", nnz_)
     , row_start_indices_("CSR row start indices", rows_ + 1)
 {
-    copy_vector(values_, other.values_);
-    copy_vector(column_indices_, other.column_indices_);
-    copy_vector(row_start_indices_, other.row_start_indices_);
+    copy_vector(values_, ConstVector<T>(other.values_));
+    copy_vector(column_indices_, ConstVector<int>(other.column_indices_));
+    copy_vector(row_start_indices_, ConstVector<int>(other.row_start_indices_));
 }
 
 // copy assignment
@@ -139,9 +139,9 @@ SparseMatrixCSR<T>& SparseMatrixCSR<T>::operator=(const SparseMatrixCSR& other)
     rows_    = other.rows_;
     columns_ = other.columns_;
     nnz_     = other.nnz_;
-    copy_vector(values_, other.values_);
-    copy_vector(column_indices_, other.column_indices_);
-    copy_vector(row_start_indices_, other.row_start_indices_);
+    copy_vector(values_, ConstVector<T>(other.values_));
+    copy_vector(column_indices_, ConstVector<int>(other.column_indices_));
+    copy_vector(row_start_indices_, ConstVector<int>(other.row_start_indices_));
     return *this;
 }
 

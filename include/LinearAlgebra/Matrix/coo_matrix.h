@@ -142,9 +142,9 @@ SparseMatrixCOO<T>::SparseMatrixCOO(const SparseMatrixCOO& other)
     , values_("COO values", nnz_)
     , is_symmetric_(other.is_symmetric_)
 {
-    copy_vector(row_indices_, other.row_indices_);
-    copy_vector(column_indices_, other.column_indices_);
-    copy_vector(values_, other.values_);
+    copy_vector(row_indices_, ConstVector<int>(other.row_indices_));
+    copy_vector(column_indices_, ConstVector<int>(other.column_indices_));
+    copy_vector(values_, ConstVector<T>(other.values_));
 }
 
 // copy assignment
@@ -166,9 +166,9 @@ SparseMatrixCOO<T>& SparseMatrixCOO<T>::operator=(const SparseMatrixCOO& other)
     columns_      = other.columns_;
     nnz_          = other.nnz_;
     is_symmetric_ = other.is_symmetric_;
-    copy_vector(row_indices_, other.row_indices_);
-    copy_vector(column_indices_, other.column_indices_);
-    copy_vector(values_, other.values_);
+    copy_vector(row_indices_, ConstVector<int>(other.row_indices_));
+    copy_vector(column_indices_, ConstVector<int>(other.column_indices_));
+    copy_vector(values_, ConstVector<T>(other.values_));
     return *this;
 }
 

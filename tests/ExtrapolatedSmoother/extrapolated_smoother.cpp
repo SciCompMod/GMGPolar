@@ -65,9 +65,9 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_DirBC_Interior)
     ExtrapolatedSmootherTake smootherTake_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients,
                                                    DirBC_Interior, maxOpenMPThreads);
 
-    Vector<double> rhs   = generate_random_sample_data(level.grid(), 69);
-    Vector<double> start = generate_random_sample_data(level.grid(), 24);
-    Vector<double> temp  = generate_random_sample_data(level.grid(), 8);
+    Vector<double> rhs        = generate_random_sample_data(level.grid(), 69);
+    ConstVector<double> start = generate_random_sample_data(level.grid(), 24);
+    Vector<double> temp       = generate_random_sample_data(level.grid(), 8);
 
     Vector<double> solution_Give("solution_Give", start.size());
     copy_vector(solution_Give, start);
@@ -125,9 +125,9 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_AcossOrigin)
     ExtrapolatedSmootherTake smootherTake_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients,
                                                    DirBC_Interior, maxOpenMPThreads);
 
-    Vector<double> rhs   = generate_random_sample_data(level.grid(), 69);
-    Vector<double> start = generate_random_sample_data(level.grid(), 24);
-    Vector<double> temp  = generate_random_sample_data(level.grid(), 8);
+    Vector<double> rhs        = generate_random_sample_data(level.grid(), 69);
+    ConstVector<double> start = generate_random_sample_data(level.grid(), 24);
+    Vector<double> temp       = generate_random_sample_data(level.grid(), 8);
 
     Vector<double> solution_Give("solution_Give", start.size());
     copy_vector(solution_Give, start);
