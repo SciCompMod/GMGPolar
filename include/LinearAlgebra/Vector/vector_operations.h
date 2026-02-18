@@ -36,6 +36,19 @@ void assign(Vector<T> lhs, const T& value)
 }
 
 template <typename T>
+void copy_vector(Vector<T> dst, ConstVector<T> src)
+{
+    if (dst.size() != src.size()) {
+        throw std::invalid_argument("Vectors must be of the same size.");
+    }
+    std::size_t n = dst.size();
+#pragma omp parallel for if (n > 10'000)
+    for (std::size_t i = 0; i < n; ++i) {
+        dst(i) = src(i);
+    }
+}
+
+template <typename T>
 void add(Vector<T> result, ConstVector<T> x)
 {
     if (result.size() != x.size()) {

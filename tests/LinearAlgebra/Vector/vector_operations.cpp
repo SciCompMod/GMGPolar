@@ -49,8 +49,30 @@ TEST(VectorOperations, assign_vector_scalar)
     v(2) = 3;
     assign(v, 5.0);
     Vector<double> expected_result("expected_result", 3);
-    Kokkos::deep_copy(expected_result, 5);
+    expected_result(0) = 5;
+    expected_result(1) = 5;
+    expected_result(2) = 5;
+
     EXPECT_TRUE(equals(ConstVector<double>(v), ConstVector<double>(expected_result)));
+}
+
+/* void copy_vector(Vector<T>& dst, ConstVector<T>& src); */
+
+TEST(VectorOperations, copy_vector)
+{
+    Vector<double> src("src", 3);
+    src(0) = 1;
+    src(1) = 2;
+    src(2) = 3;
+
+    Vector<double> dst("dst", 3);
+    copy_vector(dst, ConstVector<double>(src));
+    Vector<double> expected_result("expected_result", 3);
+    expected_result(0) = 1;
+    expected_result(1) = 2;
+    expected_result(2) = 3;
+
+    EXPECT_TRUE(equals(ConstVector<double>(dst), ConstVector<double>(expected_result)));
 }
 
 /* void add(Vector<T> result, ConstVector<T> x); */

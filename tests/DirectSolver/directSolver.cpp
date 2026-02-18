@@ -194,7 +194,7 @@ TEST(DirectSolverTest_CircularGeometry, SequentialDirectSolverDirBC_Interior_Cir
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -238,7 +238,7 @@ TEST(DirectSolverTest_CircularGeometry, ParallelDirectSolverDirBC_Interior_Circu
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -282,7 +282,7 @@ TEST(DirectSolverTest_CircularGeometry, SequentialDirectSolverAcrossOrigin_Circu
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -326,7 +326,7 @@ TEST(DirectSolverTest_CircularGeometry, ParallelDirectSolverAcrossOrigin_Circula
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -375,7 +375,7 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverDirBC_Interior_ShafranovGeo
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -420,7 +420,7 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovGeome
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -470,7 +470,7 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeometry)
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -516,7 +516,7 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometry)
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -564,7 +564,7 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeometry)
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -608,7 +608,7 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometry)
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -664,7 +664,7 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -708,7 +708,7 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision2
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -753,7 +753,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, SequentialDirectSolverDirBC_Interior
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -797,7 +797,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, ParallelDirectSolverDirBC_Interior_C
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -841,7 +841,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, SequentialDirectSolverAcrossOrigin_C
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -885,7 +885,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, ParallelDirectSolverAcrossOrigin_Cir
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -934,7 +934,7 @@ TEST(DirectSolverTakeTest_ShafranovGeometry, DirectSolverDirBC_Interior_Shafrano
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -979,7 +979,7 @@ TEST(DirectSolverTakeTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovG
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -1029,7 +1029,7 @@ TEST(DirectSolverTakeTest_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeome
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -1075,7 +1075,7 @@ TEST(DirectSolverTakeTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometr
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -1123,7 +1123,7 @@ TEST(DirectSolverTakeTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeome
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -1167,7 +1167,7 @@ TEST(DirectSolverTakeTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometr
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -1221,7 +1221,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecis
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());
@@ -1265,7 +1265,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecis
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
-    Kokkos::deep_copy(solution, rhs);
+    copy_vector(solution, rhs);
     solver_op.solveInPlace(solution);
 
     Vector<double> residuum("residuum", level.grid().numberOfNodes());

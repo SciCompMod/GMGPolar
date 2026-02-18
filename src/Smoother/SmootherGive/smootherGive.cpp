@@ -49,7 +49,7 @@ void SmootherGive::smoothing(Vector<double> x, ConstVector<double> rhs, Vector<d
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
-    Kokkos::deep_copy(temp, rhs);
+    copy_vector(temp, rhs);
 
     /* Multi-threaded execution */
     const int num_smoother_circles = grid_.numberSmootherCircles();

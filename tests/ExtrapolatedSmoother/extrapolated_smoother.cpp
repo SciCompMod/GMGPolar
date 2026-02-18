@@ -70,11 +70,11 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_DirBC_Interior)
     Vector<double> temp  = generate_random_sample_data(level.grid(), 8);
 
     Vector<double> solution_Give("solution_Give", start.size());
-    Kokkos::deep_copy(solution_Give, start);
+    copy_vector(solution_Give, start);
     smootherGive_operator.extrapolatedSmoothing(solution_Give, rhs, temp);
 
     Vector<double> solution_Take("solution_Take", start.size());
-    Kokkos::deep_copy(solution_Take, start);
+    copy_vector(solution_Take, start);
 
     smootherTake_operator.extrapolatedSmoothing(solution_Take, rhs, temp);
 
@@ -130,11 +130,11 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_AcossOrigin)
     Vector<double> temp  = generate_random_sample_data(level.grid(), 8);
 
     Vector<double> solution_Give("solution_Give", start.size());
-    Kokkos::deep_copy(solution_Give, start);
+    copy_vector(solution_Give, start);
     smootherGive_operator.extrapolatedSmoothing(solution_Give, rhs, temp);
 
     Vector<double> solution_Take("solution_Take", start.size());
-    Kokkos::deep_copy(solution_Take, start);
+    copy_vector(solution_Take, start);
     smootherTake_operator.extrapolatedSmoothing(solution_Take, rhs, temp);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
@@ -190,7 +190,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior)
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
+    copy_vector(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
@@ -273,7 +273,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior)
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
+    copy_vector(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
@@ -356,7 +356,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin)
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
+    copy_vector(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
@@ -441,7 +441,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin)
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
+    copy_vector(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
@@ -525,7 +525,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior_Smal
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
+    copy_vector(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
@@ -609,7 +609,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior_Smalle
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
+    copy_vector(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
@@ -693,7 +693,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin_Smalle
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
+    copy_vector(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
@@ -775,7 +775,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin_Smallest
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
+    copy_vector(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
@@ -860,7 +860,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior)
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
+    copy_vector(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
@@ -945,7 +945,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior)
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
+    copy_vector(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
@@ -1028,7 +1028,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin)
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
+    copy_vector(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
@@ -1111,7 +1111,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin)
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
+    copy_vector(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
@@ -1193,7 +1193,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior_
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
+    copy_vector(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
@@ -1275,7 +1275,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior_Sm
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
+    copy_vector(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
@@ -1357,7 +1357,7 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin_Sm
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
+    copy_vector(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
@@ -1439,7 +1439,7 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin_Smal
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
+    copy_vector(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());

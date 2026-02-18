@@ -16,7 +16,7 @@ void ResidualGive::computeResidual(Vector<double> result, ConstVector<double> rh
 {
     assert(result.size() == x.size());
 
-    Kokkos::deep_copy(result, rhs);
+    copy_vector(result, rhs);
 
     /* Single-threaded execution */
     if (num_omp_threads_ == 1) {

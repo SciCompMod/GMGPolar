@@ -116,9 +116,9 @@ SparseMatrixCSR<T>::SparseMatrixCSR(const SparseMatrixCSR& other)
     , column_indices_("CSR column indices", nnz_)
     , row_start_indices_("CSR row start indices", rows_ + 1)
 {
-    Kokkos::deep_copy(values_, other.values_);
-    Kokkos::deep_copy(column_indices_, other.column_indices_);
-    Kokkos::deep_copy(row_start_indices_, other.row_start_indices_);
+    copy_vector(values_, other.values_);
+    copy_vector(column_indices_, other.column_indices_);
+    copy_vector(row_start_indices_, other.row_start_indices_);
 }
 
 // copy assignment
@@ -139,9 +139,9 @@ SparseMatrixCSR<T>& SparseMatrixCSR<T>::operator=(const SparseMatrixCSR& other)
     rows_    = other.rows_;
     columns_ = other.columns_;
     nnz_     = other.nnz_;
-    Kokkos::deep_copy(values_, other.values_);
-    Kokkos::deep_copy(column_indices_, other.column_indices_);
-    Kokkos::deep_copy(row_start_indices_, other.row_start_indices_);
+    copy_vector(values_, other.values_);
+    copy_vector(column_indices_, other.column_indices_);
+    copy_vector(row_start_indices_, other.row_start_indices_);
     return *this;
 }
 
