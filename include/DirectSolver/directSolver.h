@@ -17,6 +17,7 @@ class Level;
 #include "../LinearAlgebra/Matrix/coo_matrix.h"
 #include "../LinearAlgebra/Matrix/csr_matrix.h"
 #include "../LinearAlgebra/Solvers/csr_lu_solver.h"
+#include "../LinearAlgebra/Solvers/coo_mumps_solver.h"
 #include "../Stencil/stencil.h"
 
 #ifdef GMGPOLAR_USE_MUMPS

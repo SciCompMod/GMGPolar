@@ -125,20 +125,11 @@ void DirectSolver_COO_MUMPS_Give::applySymmetryShift(Vector<double> x) const
     assert(std::ssize(x) == grid_.numberOfNodes());
     assert(grid_.nr() >= 4);
 
-    #pragma omp parallel sections num_threads(num_omp_threads_)
-    {
-    #pragma omp section
-        {
-            if (DirBC_Interior_) {
-                applySymmetryShiftInnerBoundary(x);
-            }
-        }
-
-    #pragma omp section
-        {
-            applySymmetryShiftOuterBoundary(x);
-        }
+    if (DirBC_Interior_) {
+        applySymmetryShiftInnerBoundary(x);
     }
+
+    applySymmetryShiftOuterBoundary(x);
 }
 
 #endif

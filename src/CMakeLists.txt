@@ -66,26 +66,24 @@ set(DIRECT_SOLVER_SOURCES
     # Main DirectSolver files
     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/directSolver.cpp
     
-    # DirectSolverGive
+    # DirectSolver-COO-MUMPS-Give
     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Give/applySymmetryShift.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Give/buildSolverMatrix.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Give/directSolverGive.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Give/initializeMumps.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Give/matrixStencil.cpp
     
-    # DirectSolverGiveCustomLU
+    # DirectSolver-CSR-LU-Give
     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-CSR-LU-Give/buildSolverMatrix.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-CSR-LU-Give/directSolverGive.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-CSR-LU-Give/matrixStencil.cpp
     
-    # DirectSolverTake
+    # DirectSolver-COO-MUMPS-Take
     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Take/applySymmetryShift.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Take/buildSolverMatrix.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Take/directSolverTake.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Take/initializeMumps.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Take/matrixStencil.cpp
     
-    # DirectSolverTakeCustomLU
+    # DirectSolver-CSR-LU-Take
     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-CSR-LU-Take/buildSolverMatrix.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-CSR-LU-Take/directSolverTake.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-CSR-LU-Take/matrixStencil.cpp
