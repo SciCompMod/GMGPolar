@@ -1,7 +1,10 @@
 #pragma once
 
-#include <array>
 #include <initializer_list>
+
+#include <Kokkos_Core.hpp>
+
+#include "../include/LinearAlgebra/vector.h"
 
 enum class StencilPosition
 {
@@ -32,10 +35,29 @@ enum class StencilPosition
 class Stencil
 {
 public:
-    Stencil(std::initializer_list<int> init);
-    int operator[](StencilPosition type) const;
+    Stencil(std::initializer_list<int> init)
+        : values_("stencil_values", 9)
+        , stencil_size_(0)
+    {
+        int i = 0;
+        for (int v : init) {
+            values_(i++) = v;
+            if (v != -1)
+                stencil_size_++;
+        }
+    }
+
+    KOKKOS_INLINE_FUNCTION int operator[](StencilPosition type) const
+    {
+        return values_(static_cast<int>(type));
+    }
+
+    KOKKOS_INLINE_FUNCTION int stencil_size() const
+    {
+        return stencil_size_;
+    }
 
 private:
-    std::array<int, 9> values_;
+    AllocatableVector<int> values_;
     int stencil_size_;
 };
