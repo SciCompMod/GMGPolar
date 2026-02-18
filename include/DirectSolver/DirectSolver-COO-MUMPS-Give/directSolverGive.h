@@ -16,9 +16,6 @@ public:
     void solveInPlace(Vector<double> solution) override;
 
 private:
-    // MUMPS solver structure with the solver matrix initialized in the constructor.
-    CooMumpsSolver mumps_solver_;
-
     // clang-format off
     const Stencil stencil_interior_      = {
         7, 4, 8,
@@ -46,6 +43,10 @@ private:
         4,  2, -1
     };
     // clang-format on
+
+    // MUMPS solver structure with the solver matrix initialized in the constructor.
+    // Defined below stencils to ensure that the solver matrix is built after the stencils are defined.
+    CooMumpsSolver mumps_solver_;
 
     // Constructs a symmetric solver matrix.
     SparseMatrixCOO<double> buildSolverMatrix();
