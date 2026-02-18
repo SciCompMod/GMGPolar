@@ -4,7 +4,7 @@
 
 #include <Kokkos_Core.hpp>
 
-#include "../include/LinearAlgebra/vector.h"
+#include "../include/LinearAlgebra/Vector/vector.h"
 
 enum class StencilPosition
 {
