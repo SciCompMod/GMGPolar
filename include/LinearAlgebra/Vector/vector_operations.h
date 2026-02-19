@@ -36,6 +36,12 @@ void assign(Vector<T> lhs, const T& value)
 }
 
 template <typename T>
+void copy_vector(Vector<T> dst, ConstVector<T> src)
+{
+    Kokkos::deep_copy(dst, src);
+}
+
+template <typename T>
 void add(Vector<T> result, ConstVector<T> x)
 {
     if (result.size() != x.size()) {
