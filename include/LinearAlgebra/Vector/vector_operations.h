@@ -38,9 +38,6 @@ void assign(Vector<T> lhs, const T& value)
 template <typename T>
 void copy_vector(Vector<T> dst, ConstVector<T> src)
 {
-    if (dst.size() != src.size()) {
-        throw std::invalid_argument("Vectors must be of the same size.");
-    }
     Kokkos::parallel_deep_copy(dst, src);
 }
 
