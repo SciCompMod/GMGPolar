@@ -38,7 +38,7 @@ void assign(Vector<T> lhs, const T& value)
 template <typename T>
 void copy_vector(Vector<T> dst, ConstVector<T> src)
 {
-    Kokkos::parallel_deep_copy(dst, src);
+    Kokkos::deep_copy(dst, src);
 }
 
 template <typename T>
