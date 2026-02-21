@@ -28,8 +28,7 @@ void CooMumpsSolver::solve(Vector<double>& rhs)
     dmumps_c(&mumps_solver_);
 
     if (INFOG(1) != 0) {
-        std::cerr << "MUMPS reported an error during solution phase "
-                  << "(INFOG(1) = " << INFOG(1) << ").\n";
+        std::cerr << "MUMPS reported an error during solution phase " << "(INFOG(1) = " << INFOG(1) << ").\n";
     }
 }
 
@@ -64,15 +63,14 @@ void CooMumpsSolver::initialize()
     dmumps_c(&mumps_solver_);
 
     if (INFOG(1) != 0) {
-        std::cerr << "MUMPS reported an error during analysis/factorization "
-                  << "(INFOG(1) = " << INFOG(1) << ").\n";
+        std::cerr << "MUMPS reported an error during analysis/factorization " << "(INFOG(1) = " << INFOG(1) << ").\n";
         return;
     }
 
     if (mumps_solver_.sym == SYM_POSITIVE_DEFINITE && INFOG(12) != 0) {
         std::cerr << "Matrix declared positive definite, "
-                  << "but negative pivots were encountered during factorization "
-                  << "(INFOG(12) = " << INFOG(12) << ").\n";
+                  << "but negative pivots were encountered during factorization " << "(INFOG(12) = " << INFOG(12)
+                  << ").\n";
     }
 }
 
