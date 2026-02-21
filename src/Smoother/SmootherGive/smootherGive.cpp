@@ -8,17 +8,14 @@ SmootherGive::SmootherGive(const PolarGrid& grid, const LevelCache& level_cache,
     , radial_tridiagonal_solver_(grid.lengthSmootherRadial(), grid.ntheta(), false)
 {
     buildAscMatrices();
+
+    circle_tridiagonal_solver_.setup();
+    radial_tridiagonal_solver_.setup();
+
 #ifdef GMGPOLAR_USE_MUMPS
-    initializeMumpsSolver(inner_boundary_mumps_solver_, inner_boundary_circle_matrix_);
+    inner_boundary_mumps_solver_.emplace(std::move(inner_boundary_circle_matrix_));
 #else
     inner_boundary_lu_solver_ = SparseLUSolver<double>(inner_boundary_circle_matrix_);
-#endif
-}
-
-SmootherGive::~SmootherGive()
-{
-#ifdef GMGPOLAR_USE_MUMPS
-    finalizeMumpsSolver(inner_boundary_mumps_solver_);
 #endif
 }
 

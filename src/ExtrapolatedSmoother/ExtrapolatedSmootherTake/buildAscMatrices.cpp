@@ -690,9 +690,6 @@ void ExtrapolatedSmootherTake::buildAscMatrices()
         }
     }
 
-    circle_tridiagonal_solver_.setup();
-    radial_tridiagonal_solver_.setup();
-
 #ifdef GMGPOLAR_USE_MUMPS
     /* ------------------------------------------------------------------- */
     /* Part 3: Convert inner_boundary_circle_matrix_ to a symmetric matrix */

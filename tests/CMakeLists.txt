@@ -12,6 +12,7 @@ add_executable(gmgpolar_tests
     LinearAlgebra/Matrix/coo_matrix.cpp
     LinearAlgebra/Matrix/csr_matrix.cpp
     LinearAlgebra/Solvers/csr_lu_solver.cpp
+    LinearAlgebra/Solvers/coo_mumps_solver.cpp
     LinearAlgebra/Solvers/tridiagonal_solver.cpp
     PolarGrid/polargrid.cpp
     Interpolation/prolongation.cpp

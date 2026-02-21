@@ -124,7 +124,6 @@ set(SMOOTHER_SOURCES
     # SmootherGive
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/applyAscOrtho.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/buildMatrix.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/initializeMumps.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/matrixStencil.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/smootherGive.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/solveAscSystem.cpp
@@ -132,7 +131,6 @@ set(SMOOTHER_SOURCES
     # SmootherTake
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/applyAscOrtho.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/buildMatrix.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/initializeMumps.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/matrixStencil.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/smootherTake.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/solveAscSystem.cpp
@@ -150,7 +148,6 @@ set(EXTRAPOLATED_SMOOTHER_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/applyAscOrtho.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/buildAscMatrices.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/initializeMumps.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/smootherStencil.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/solveAscSystem.cpp
     
@@ -158,7 +155,6 @@ set(EXTRAPOLATED_SMOOTHER_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/applyAscOrtho.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/buildAscMatrices.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/initializeMumps.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/smootherStencil.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/solveAscSystem.cpp
 )
