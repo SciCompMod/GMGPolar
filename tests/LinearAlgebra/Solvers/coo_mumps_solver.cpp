@@ -16,11 +16,7 @@
 //   [ 0  6  7  0 ]
 //   [ 0  8  0  9 ]
 //
-// RHS b = [2, 4, 6, 8]
-//
-// Expected solution computed from A*x = b.
-//
-// x = [140.0 / 43.0, 149.0 / 86.0, -27.0/43.0, -28.0/43.0]
+// RHS b = [2, 4, 6, 8]^T
 // -----------------------------------------------------------------------
 TEST(CooMumpsSolverTest, GeneralNonSymmetric4x4)
 {
@@ -66,7 +62,7 @@ TEST(CooMumpsSolverTest, GeneralNonSymmetric4x4)
 //   [ 0  3  2  7 ]
 //
 // Only lower triangular entries provided (including diagonal).
-// RHS b = [6, 8, 9, 11]^T
+// RHS b = [2, 4, 6, 8]^T
 // -----------------------------------------------------------------------
 TEST(CooMumpsSolverTest, SymmetricPositiveDefinite4x4)
 {
