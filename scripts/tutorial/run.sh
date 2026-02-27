@@ -100,8 +100,8 @@ multigridCycle=0
 # Convergence criteria:
 maxIterations=150
 residualNormType=0 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
-absoluteTolerance=1e-12
-relativeTolerance=1e-12
+absoluteTolerance=1e-10
+relativeTolerance=1e-10
 
 # Define additional geometry parameters
 kappa_eps=0.0

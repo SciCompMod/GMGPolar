@@ -124,7 +124,13 @@ void IGMGPolar::solve(const BoundaryConditions& boundary_conditions, const Sourc
             // Solve A*x = b using Preconditioned Conjugate Gradient (PCG),
             // with multigrid cycles as the preconditioner (i.e., one multigrid
             // cycle approximates the action of A^{-1} at each PCG iteration).
+            auto start_conjugate_gradient = std::chrono::high_resolution_clock::now();
+
             solvePCG(initial_residual_norm, current_residual_norm, current_relative_residual_norm);
+
+            auto end_conjugate_gradient = std::chrono::high_resolution_clock::now();
+            t_conjugate_gradient_ +=
+                std::chrono::duration<double>(end_conjugate_gradient - start_conjugate_gradient).count();
         }
     }
 

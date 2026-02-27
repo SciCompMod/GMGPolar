@@ -367,16 +367,30 @@ void IGMGPolar::solvePCG(double& initial_residual_norm, double& current_residual
         // r -= alpha * A*p
         linear_combination(level.rhs(), 1.0, ConstVector<double>(level.residual()), -alpha);
 
+        /* ---------------------------- */
+        /* Compute convergence criteria */
+        /* ---------------------------- */
+        auto start_check_convergence = std::chrono::high_resolution_clock::now();
+
         current_residual_norm = residualNorm(residual_norm_type_, level, level.rhs());
         residual_norms_.push_back(current_residual_norm);
         current_relative_residual_norm = current_residual_norm / initial_residual_norm;
 
-        // --- Check exact error, excluded from timings
+        auto end_check_convergence = std::chrono::high_resolution_clock::now();
+        t_check_convergence_ += std::chrono::duration<double>(end_check_convergence - start_check_convergence).count();
+
+        /* ---------------------------------------------- */
+        /* Test solution against exact solution if given. */
+        /* ---------------------------------------------- */
+        LIKWID_STOP("Solver");
         auto start_check_exact_error = std::chrono::high_resolution_clock::now();
+
         if (exact_solution_ != nullptr)
-            exact_errors_.push_back(computeExactError(level, pcg_solution_, level.residual(), *exact_solution_));
+            evaluateExactError(level, *exact_solution_);
+
         auto end_check_exact_error = std::chrono::high_resolution_clock::now();
         t_check_exact_error_ += std::chrono::duration<double>(end_check_exact_error - start_check_exact_error).count();
+        LIKWID_START("Solver");
 
         number_of_iterations_++;
 

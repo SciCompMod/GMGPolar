@@ -362,6 +362,7 @@ protected:
     double t_solve_multigrid_iterations_;
     double t_check_convergence_;
     double t_check_exact_error_;
+    double t_conjugate_gradient_;
 
     void resetAvgMultigridCycleTimings();
     double t_avg_MGC_total_;
