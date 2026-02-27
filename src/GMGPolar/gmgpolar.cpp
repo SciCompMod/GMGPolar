@@ -26,6 +26,13 @@ IGMGPolar::IGMGPolar(const PolarGrid& grid)
     , FMG_(false)
     , FMG_iterations_(3)
     , FMG_cycle_(MultigridCycleType::F_CYCLE)
+    // PCG settings
+    , PCG_(false)
+    , PCG_FMG_(true)
+    , PCG_FMG_iterations_(1)
+    , PCG_FMG_cycle_(MultigridCycleType::V_CYCLE)
+    , PCG_MG_iterations_(1)
+    , PCG_MG_cycle_(MultigridCycleType::V_CYCLE)
     // Convergence settings
     , max_iterations_(300)
     , residual_norm_type_(ResidualNormType::WEIGHTED_EUCLIDEAN)
@@ -193,6 +200,55 @@ MultigridCycleType IGMGPolar::FMG_cycle() const
 void IGMGPolar::FMG_cycle(MultigridCycleType FMG_cycle)
 {
     FMG_cycle_ = FMG_cycle;
+}
+
+bool IGMGPolar::PCG() const
+{
+    return PCG_;
+}
+void IGMGPolar::PCG(bool PCG)
+{
+    PCG_ = PCG;
+}
+bool IGMGPolar::PCG_FMG() const
+{
+    return PCG_FMG_;
+}
+void IGMGPolar::PCG_FMG(bool PCG_FMG)
+{
+    PCG_FMG_ = PCG_FMG;
+}
+int IGMGPolar::PCG_FMG_iterations() const
+{
+    return PCG_FMG_iterations_;
+}
+void IGMGPolar::PCG_FMG_iterations(int PCG_FMG_iterations)
+{
+    PCG_FMG_iterations_ = PCG_FMG_iterations;
+}
+MultigridCycleType IGMGPolar::PCG_FMG_cycle() const
+{
+    return PCG_FMG_cycle_;
+}
+void IGMGPolar::PCG_FMG_cycle(MultigridCycleType PCG_FMG_cycle)
+{
+    PCG_FMG_cycle_ = PCG_FMG_cycle;
+}
+int IGMGPolar::PCG_MG_iterations() const
+{
+    return PCG_MG_iterations_;
+}
+void IGMGPolar::PCG_MG_iterations(int PCG_MG_iterations)
+{
+    PCG_MG_iterations_ = PCG_MG_iterations;
+}
+MultigridCycleType IGMGPolar::PCG_MG_cycle() const
+{
+    return PCG_MG_cycle_;
+}
+void IGMGPolar::PCG_MG_cycle(MultigridCycleType PCG_MG_cycle)
+{
+    PCG_MG_cycle_ = PCG_MG_cycle;
 }
 
 /* ---------------------------------------------------------------------- */

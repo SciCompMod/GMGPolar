@@ -16,17 +16,17 @@ paraview=0
 
 # OpenMP settings:
 # Maximum number of threads OpenMP can use for parallel execution
-maxOpenMPThreads=32
+maxOpenMPThreads=1
 
 # Stencil distribution method:
 # 0 - CPU "Take": Each node independently applies the stencil
 # 1 - CPU "Give": The stencil operation is distributed across adjacent neighboring nodes
-stencilDistributionMethod=1
+stencilDistributionMethod=0
 # Caching behavior:
 # 0 - Recompute values on each iteration: Uses less memory but results in slower execution.
 # 1 - Reuse cached values: Consumes more memory but significantly improves performance.
 cacheDensityProfileCoefficients=1
-cacheDomainGeometry=0
+cacheDomainGeometry=1
 # Note: In the "Take" approach (stencilDistributionMethod=0), 
 # caching is required for optimal performance, 
 # so both density profile coefficients and domain geometry need to be cached.
@@ -62,9 +62,23 @@ beta_coeff=1 # Zero(0), Gyro - Alpha Inverse(1)
 # Full Multigrid Method:
 # 0: Initial approximation is set to zero
 # 1: Initial approximation obtained by nested iteration (recommended)
-FMG=0
-FMG_iterations=3
+FMG=1
+FMG_iterations=2
 FMG_cycle=2 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
+
+# Preconditioned Conjugate Gradient Method:
+# 0: GMGPolar as iterative solver
+# 1: GMGPolar solver as preconditioner for Conjugate Gradient (recommended)
+PCG=1
+# Initial approximation for PCG:
+# 0: Initial approximation is set to residual -> no preconditioning
+# 1: FMG-approximation as initial guess (recommended)
+PCG_FMG=1
+PCG_FMG_iterations=1
+PCG_FMG_cycle=0 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
+# Additional multigrid iterations after initial approximation to solve the linear system in each PCG iteration
+PCG_MG_iterations=1
+PCG_MG_cycle=0 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
 
 # Extrapolation Method:
 # 0: No extrapolation
@@ -86,8 +100,8 @@ multigridCycle=0
 # Convergence criteria:
 maxIterations=150
 residualNormType=0 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
-absoluteTolerance=1e-8
-relativeTolerance=1e-8
+absoluteTolerance=1e-12
+relativeTolerance=1e-12
 
 # Define additional geometry parameters
 kappa_eps=0.0
@@ -141,6 +155,12 @@ export OMP_NUM_THREADS=$maxOpenMPThreads
     --FMG $FMG \
     --FMG_iterations $FMG_iterations \
     --FMG_cycle $FMG_cycle \
+    --PCG $PCG \
+    --PCG_FMG $PCG_FMG \
+    --PCG_FMG_iterations $PCG_FMG_iterations \
+    --PCG_FMG_cycle $PCG_FMG_cycle \
+    --PCG_MG_iterations $PCG_MG_iterations \
+    --PCG_MG_cycle $PCG_MG_cycle \
     --extrapolation $extrapolation \
     --maxLevels $maxLevels \
     --preSmoothingSteps $preSmoothingSteps \

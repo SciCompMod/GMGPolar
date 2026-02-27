@@ -86,77 +86,46 @@ void IGMGPolar::solve(const BoundaryConditions& boundary_conditions, const Sourc
 
     printIterationHeader(exact_solution_);
 
-    while (number_of_iterations_ < max_iterations_) {
-        /* ---------------------------------------------- */
-        /* Test solution against exact solution if given. */
-        /* ---------------------------------------------- */
-        LIKWID_STOP("Solver");
-        auto start_check_exact_error = std::chrono::high_resolution_clock::now();
+    /* ---------------------------------------------- */
+    /* Test solution against exact solution if given. */
+    /* ---------------------------------------------- */
+    LIKWID_STOP("Solver");
+    auto start_check_exact_error = std::chrono::high_resolution_clock::now();
 
-        if (exact_solution_ != nullptr)
-            evaluateExactError(level, *exact_solution_);
+    if (exact_solution_ != nullptr)
+        evaluateExactError(level, *exact_solution_);
 
-        auto end_check_exact_error = std::chrono::high_resolution_clock::now();
-        t_check_exact_error_ += std::chrono::duration<double>(end_check_exact_error - start_check_exact_error).count();
-        LIKWID_START("Solver");
+    auto end_check_exact_error = std::chrono::high_resolution_clock::now();
+    t_check_exact_error_ += std::chrono::duration<double>(end_check_exact_error - start_check_exact_error).count();
+    LIKWID_START("Solver");
 
-        /* ---------------------------- */
-        /* Compute convergence criteria */
-        /* ---------------------------- */
-        auto start_check_convergence = std::chrono::high_resolution_clock::now();
+    /* ---------------------------- */
+    /* Compute convergence criteria */
+    /* ---------------------------- */
+    auto start_check_convergence = std::chrono::high_resolution_clock::now();
 
-        if (absolute_tolerance_.has_value() || relative_tolerance_.has_value()) {
-            updateResidualNorms(level, number_of_iterations_, initial_residual_norm, current_residual_norm,
-                                current_relative_residual_norm);
+    if (absolute_tolerance_.has_value() || relative_tolerance_.has_value()) {
+        updateResidualNorms(level, number_of_iterations_, initial_residual_norm, current_residual_norm,
+                            current_relative_residual_norm);
+    }
+
+    auto end_check_convergence = std::chrono::high_resolution_clock::now();
+    t_check_convergence_ += std::chrono::duration<double>(end_check_convergence - start_check_convergence).count();
+
+    printIterationInfo(number_of_iterations_, current_residual_norm, current_relative_residual_norm, exact_solution_);
+
+    if (!converged(current_residual_norm, current_relative_residual_norm)) {
+        if (!PCG_) {
+            // Solve A*x = b directly using multigrid cycles (V/W/F-cycle)
+            // until convergence or max_iterations_ is reached.
+            solveMultigrid(initial_residual_norm, current_residual_norm, current_relative_residual_norm);
         }
-
-        auto end_check_convergence = std::chrono::high_resolution_clock::now();
-        t_check_convergence_ += std::chrono::duration<double>(end_check_convergence - start_check_convergence).count();
-
-        printIterationInfo(number_of_iterations_, current_residual_norm, current_relative_residual_norm,
-                           exact_solution_);
-
-        if (converged(current_residual_norm, current_relative_residual_norm))
-            break;
-
-        /* ----------------------- */
-        /* Perform Multigrid Cycle */
-        /* ----------------------- */
-        auto start_solve_multigrid_iterations = std::chrono::high_resolution_clock::now();
-
-        switch (multigrid_cycle_) {
-        case MultigridCycleType::V_CYCLE:
-            if (extrapolation_ == ExtrapolationType::NONE) {
-                multigrid_V_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
-            }
-            else {
-                extrapolated_multigrid_V_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
-            }
-            break;
-        case MultigridCycleType::W_CYCLE:
-            if (extrapolation_ == ExtrapolationType::NONE) {
-                multigrid_W_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
-            }
-            else {
-                extrapolated_multigrid_W_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
-            }
-            break;
-        case MultigridCycleType::F_CYCLE:
-            if (extrapolation_ == ExtrapolationType::NONE) {
-                multigrid_F_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
-            }
-            else {
-                extrapolated_multigrid_F_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
-            }
-            break;
-        default:
-            throw std::invalid_argument("Unknown MultigridCycleType");
+        else {
+            // Solve A*x = b using Preconditioned Conjugate Gradient (PCG),
+            // with multigrid cycles as the preconditioner (i.e., one multigrid
+            // cycle approximates the action of A^{-1} at each PCG iteration).
+            solvePCG(initial_residual_norm, current_residual_norm, current_relative_residual_norm);
         }
-        number_of_iterations_++;
-
-        auto end_solve_multigrid_iterations = std::chrono::high_resolution_clock::now();
-        t_solve_multigrid_iterations_ +=
-            std::chrono::duration<double>(end_solve_multigrid_iterations - start_solve_multigrid_iterations).count();
     }
 
     /* ---------------------- */
