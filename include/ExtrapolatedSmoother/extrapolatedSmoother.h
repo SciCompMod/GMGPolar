@@ -1,13 +1,17 @@
 #pragma once
 
-class LevelCache;
-class Level;
-
 #include <chrono>
 #include <iostream>
 #include <vector>
 
 #include "../InputFunctions/domainGeometry.h"
+
+template <concepts::DomainGeometry DomainGeometry>
+class LevelCache;
+
+template <concepts::DomainGeometry DomainGeometry>
+class Level;
+
 #include "../InputFunctions/densityProfileCoefficients.h"
 #include "../Level/level.h"
 #include "../PolarGrid/polargrid.h"

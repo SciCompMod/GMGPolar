@@ -8,12 +8,16 @@
 #include <optional>
 #include <utility>
 
-class Level;
+#include "../InputFunctions/domainGeometry.h"
+
+template <concepts::DomainGeometry DomainGeometry>
 class LevelCache;
+
+template <concepts::DomainGeometry DomainGeometry>
+class Level;
 
 #include "../InputFunctions/boundaryConditions.h"
 #include "../InputFunctions/densityProfileCoefficients.h"
-#include "../InputFunctions/domainGeometry.h"
 #include "../InputFunctions/exactSolution.h"
 #include "../InputFunctions/sourceTerm.h"
 #include "../Interpolation/interpolation.h"
