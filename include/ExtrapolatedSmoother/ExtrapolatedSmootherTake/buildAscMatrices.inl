@@ -1,4 +1,6 @@
-#include "../../../include/ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.h"
+#pragma once
+
+namespace extrapolated_smoother_take {
 
 /* Tridiagonal matrices */
 static inline void updateMatrixElement(BatchedTridiagonalSolver<double>& solver, int batch, int row, int column,
@@ -30,7 +32,10 @@ static inline void updateCOOCSRMatrixElement(SparseMatrixCSR<double>& matrix, in
 }
 #endif
 
-void ExtrapolatedSmootherTake::nodeBuildAscTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+} // namespace extrapolated_smoother_take
+
+template <concepts::DomainGeometry DomainGeometry>
+void ExtrapolatedSmootherTake<DomainGeometry>::nodeBuildAscTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                                 MatrixType& inner_boundary_circle_matrix,
                                                 BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
                                                 BatchedTridiagonalSolver<double>& radial_tridiagonal_solver,
@@ -38,6 +43,9 @@ void ExtrapolatedSmootherTake::nodeBuildAscTake(int i_r, int i_theta, const Pola
                                                 ConstVector<double>& art, ConstVector<double>& detDF,
                                                 ConstVector<double>& coeff_beta)
 {
+    using extrapolated_smoother_take::updateMatrixElement;
+    using extrapolated_smoother_take::updateCOOCSRMatrixElement;
+
     assert(i_r >= 0 && i_r < grid.nr());
     assert(i_theta >= 0 && i_theta < grid.ntheta());
 
@@ -611,7 +619,8 @@ void ExtrapolatedSmootherTake::nodeBuildAscTake(int i_r, int i_theta, const Pola
     }
 }
 
-void ExtrapolatedSmootherTake::buildAscCircleSection(int i_r)
+template <concepts::DomainGeometry DomainGeometry>
+void ExtrapolatedSmootherTake<DomainGeometry>::buildAscCircleSection(int i_r)
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -629,7 +638,8 @@ void ExtrapolatedSmootherTake::buildAscCircleSection(int i_r)
     }
 }
 
-void ExtrapolatedSmootherTake::buildAscRadialSection(int i_theta)
+template <concepts::DomainGeometry DomainGeometry>
+void ExtrapolatedSmootherTake<DomainGeometry>::buildAscRadialSection(int i_theta)
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -647,7 +657,8 @@ void ExtrapolatedSmootherTake::buildAscRadialSection(int i_theta)
     }
 }
 
-void ExtrapolatedSmootherTake::buildAscMatrices()
+template <concepts::DomainGeometry DomainGeometry>
+void ExtrapolatedSmootherTake<DomainGeometry>::buildAscMatrices()
 {
     /* -------------------------------------- */
     /* Part 1: Allocate Asc Smoother matrices */

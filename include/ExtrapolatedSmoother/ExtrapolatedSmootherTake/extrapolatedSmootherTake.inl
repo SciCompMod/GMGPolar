@@ -1,11 +1,12 @@
-#include "../../../include/ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.h"
+#pragma once
 
-ExtrapolatedSmootherTake::ExtrapolatedSmootherTake(const PolarGrid& grid, const LevelCache& level_cache,
-                                                   const DomainGeometry& domain_geometry,
-                                                   const DensityProfileCoefficients& density_profile_coefficients,
-                                                   const bool DirBC_Interior, const int num_omp_threads)
-    : ExtrapolatedSmoother(grid, level_cache, domain_geometry, density_profile_coefficients, DirBC_Interior,
-                           num_omp_threads)
+template <concepts::DomainGeometry DomainGeometry>
+ExtrapolatedSmootherTake<DomainGeometry>::ExtrapolatedSmootherTake(
+    const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache, const DomainGeometry& domain_geometry,
+    const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior,
+    const int num_omp_threads)
+    : ExtrapolatedSmoother<DomainGeometry>(grid, level_cache, domain_geometry, density_profile_coefficients,
+                                           DirBC_Interior, num_omp_threads)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
     , radial_tridiagonal_solver_(grid.lengthSmootherRadial(), grid.ntheta(), false)
 {
@@ -17,7 +18,8 @@ ExtrapolatedSmootherTake::ExtrapolatedSmootherTake(const PolarGrid& grid, const 
 #endif
 }
 
-ExtrapolatedSmootherTake::~ExtrapolatedSmootherTake()
+template <concepts::DomainGeometry DomainGeometry>
+ExtrapolatedSmootherTake<DomainGeometry>::~ExtrapolatedSmootherTake()
 {
 #ifdef GMGPOLAR_USE_MUMPS
     finalizeMumpsSolver(inner_boundary_mumps_solver_);
@@ -47,7 +49,9 @@ ExtrapolatedSmootherTake::~ExtrapolatedSmootherTake()
 //   - The system is then solved in-place in temp, and the results
 //     are copied back to x.
 
-void ExtrapolatedSmootherTake::extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp)
+template <concepts::DomainGeometry DomainGeometry>
+void ExtrapolatedSmootherTake<DomainGeometry>::extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs,
+                                                                      Vector<double> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());

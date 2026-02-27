@@ -1,6 +1,7 @@
-#include "../../../include/ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h"
+#pragma once
 
-void ExtrapolatedSmootherGive::solveBlackCircleSection(Vector<double> x, Vector<double> temp)
+template <concepts::DomainGeometry DomainGeometry>
+void ExtrapolatedSmootherGive<DomainGeometry>::solveBlackCircleSection(Vector<double> x, Vector<double> temp)
 {
     int start                     = 0;
     int end                       = grid_.numberCircularSmootherNodes();
@@ -43,7 +44,8 @@ void ExtrapolatedSmootherGive::solveBlackCircleSection(Vector<double> x, Vector<
     }
 }
 
-void ExtrapolatedSmootherGive::solveWhiteCircleSection(Vector<double> x, Vector<double> temp)
+template <concepts::DomainGeometry DomainGeometry>
+void ExtrapolatedSmootherGive<DomainGeometry>::solveWhiteCircleSection(Vector<double> x, Vector<double> temp)
 {
     int start                     = 0;
     int end                       = grid_.numberCircularSmootherNodes();
@@ -86,7 +88,8 @@ void ExtrapolatedSmootherGive::solveWhiteCircleSection(Vector<double> x, Vector<
     }
 }
 
-void ExtrapolatedSmootherGive::solveBlackRadialSection(Vector<double> x, Vector<double> temp)
+template <concepts::DomainGeometry DomainGeometry>
+void ExtrapolatedSmootherGive<DomainGeometry>::solveBlackRadialSection(Vector<double> x, Vector<double> temp)
 {
     int start                     = grid_.numberCircularSmootherNodes();
     int end                       = grid_.numberOfNodes();
@@ -105,7 +108,8 @@ void ExtrapolatedSmootherGive::solveBlackRadialSection(Vector<double> x, Vector<
     }
 }
 
-void ExtrapolatedSmootherGive::solveWhiteRadialSection(Vector<double> x, Vector<double> temp)
+template <concepts::DomainGeometry DomainGeometry>
+void ExtrapolatedSmootherGive<DomainGeometry>::solveWhiteRadialSection(Vector<double> x, Vector<double> temp)
 {
     int start                     = grid_.numberCircularSmootherNodes();
     int end                       = grid_.numberOfNodes();

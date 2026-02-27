@@ -1,8 +1,9 @@
-#include "../../../include/ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h"
+#pragma once
 
 #ifdef GMGPOLAR_USE_MUMPS
 
-void ExtrapolatedSmootherGive::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver,
+template <concepts::DomainGeometry DomainGeometry>
+void ExtrapolatedSmootherGive<DomainGeometry>::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver,
                                                      SparseMatrixCOO<double>& solver_matrix)
 {
     /* 
@@ -103,7 +104,8 @@ void ExtrapolatedSmootherGive::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solve
     }
 }
 
-void ExtrapolatedSmootherGive::finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver)
+template <concepts::DomainGeometry DomainGeometry>
+void ExtrapolatedSmootherGive<DomainGeometry>::finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver)
 {
     mumps_solver.job = JOB_END;
     dmumps_c(&mumps_solver);

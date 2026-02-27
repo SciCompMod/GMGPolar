@@ -1,6 +1,7 @@
-#include "../../../include/ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.h"
+#pragma once
 
-const Stencil& ExtrapolatedSmootherTake::getStencil(int i_r, int i_theta) const
+template <concepts::DomainGeometry DomainGeometry>
+const Stencil& ExtrapolatedSmootherTake<DomainGeometry>::getStencil(int i_r, int i_theta) const
 {
     // Only i_r = 0 is implemented.
     // Stencils are only used to obtain offsets to index into COO/CSR matrices.
@@ -28,7 +29,8 @@ const Stencil& ExtrapolatedSmootherTake::getStencil(int i_r, int i_theta) const
     }
 }
 
-int ExtrapolatedSmootherTake::getNonZeroCountCircleAsc(int i_r) const
+template <concepts::DomainGeometry DomainGeometry>
+int ExtrapolatedSmootherTake<DomainGeometry>::getNonZeroCountCircleAsc(int i_r) const
 {
     // Only i_r = 0 is implemented.
     // The number of nonzero elements is only needed to construct COO matrices.
@@ -51,7 +53,8 @@ int ExtrapolatedSmootherTake::getNonZeroCountCircleAsc(int i_r) const
     }
 }
 
-int ExtrapolatedSmootherTake::getCircleAscIndex(int i_r, int i_theta) const
+template <concepts::DomainGeometry DomainGeometry>
+int ExtrapolatedSmootherTake<DomainGeometry>::getCircleAscIndex(int i_r, int i_theta) const
 {
     // Only i_r = 0 is implemented.
     // getCircleAscIndex accumulates all stencil sizes within a line up to, but excluding the current node.

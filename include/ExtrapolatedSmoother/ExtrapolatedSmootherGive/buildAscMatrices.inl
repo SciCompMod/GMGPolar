@@ -1,6 +1,6 @@
-#include "../../../include/ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h"
+#pragma once
 
-#include "../../../include/Definitions/geometry_helper.h"
+namespace extrapolated_smoother_give {
 
 /* Tridiagonal matrices */
 static inline void updateMatrixElement(BatchedTridiagonalSolver<double>& solver, int batch, int row, int column,
@@ -32,12 +32,18 @@ static inline void updateCOOCSRMatrixElement(SparseMatrixCSR<double>& matrix, in
 }
 #endif
 
-void ExtrapolatedSmootherGive::nodeBuildAscGive(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+} // namespace extrapolated_smoother_give
+
+template <concepts::DomainGeometry DomainGeometry>
+void ExtrapolatedSmootherGive<DomainGeometry>::nodeBuildAscGive(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                                 MatrixType& inner_boundary_circle_matrix,
                                                 BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
                                                 BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, double arr,
                                                 double att, double art, double detDF, double coeff_beta)
 {
+    using extrapolated_smoother_give::updateMatrixElement;
+    using extrapolated_smoother_give::updateCOOCSRMatrixElement;
+
     assert(i_r >= 0 && i_r < grid.nr());
     assert(i_theta >= 0 && i_theta < grid.ntheta());
 
@@ -1203,7 +1209,8 @@ void ExtrapolatedSmootherGive::nodeBuildAscGive(int i_r, int i_theta, const Pola
     }
 }
 
-void ExtrapolatedSmootherGive::buildAscCircleSection(const int i_r)
+template <concepts::DomainGeometry DomainGeometry>
+void ExtrapolatedSmootherGive<DomainGeometry>::buildAscCircleSection(const int i_r)
 {
     const double r = grid_.radius(i_r);
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
@@ -1219,7 +1226,8 @@ void ExtrapolatedSmootherGive::buildAscCircleSection(const int i_r)
     }
 }
 
-void ExtrapolatedSmootherGive::buildAscRadialSection(const int i_theta)
+template <concepts::DomainGeometry DomainGeometry>
+void ExtrapolatedSmootherGive<DomainGeometry>::buildAscRadialSection(const int i_theta)
 {
     const double theta = grid_.theta(i_theta);
     for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
@@ -1235,7 +1243,8 @@ void ExtrapolatedSmootherGive::buildAscRadialSection(const int i_theta)
     }
 }
 
-void ExtrapolatedSmootherGive::buildAscMatrices()
+template <concepts::DomainGeometry DomainGeometry>
+void ExtrapolatedSmootherGive<DomainGeometry>::buildAscMatrices()
 {
     /* -------------------------------------- */
     /* Part 1: Allocate Asc Smoother matrices */

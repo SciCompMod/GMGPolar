@@ -1,4 +1,6 @@
-#include "../../../include/ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.h"
+#pragma once
+
+namespace extrapolated_smoother_take {
 
 static inline void nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                                ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
@@ -181,6 +183,10 @@ static inline void nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const Polar
         }
     }
 }
+
+} // namespace extrapolated_smoother_take
+
+namespace extrapolated_smoother_take {
 
 static inline void nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                                ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
@@ -455,8 +461,11 @@ static inline void nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const Polar
     }
 }
 
-void ExtrapolatedSmootherTake::applyAscOrthoCircleSection(int i_r, ConstVector<double> x, ConstVector<double> rhs,
-                                                          Vector<double> temp)
+} // namespace extrapolated_smoother_take
+
+template <concepts::DomainGeometry DomainGeometry>
+void ExtrapolatedSmootherTake<DomainGeometry>::applyAscOrthoCircleSection(int i_r, ConstVector<double> x,
+                                                                           ConstVector<double> rhs, Vector<double> temp)
 {
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles());
 
@@ -470,13 +479,14 @@ void ExtrapolatedSmootherTake::applyAscOrthoCircleSection(int i_r, ConstVector<d
     const auto& coeff_beta = level_cache_.coeff_beta();
 
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
-        nodeApplyAscOrthoCircleTake(i_r, i_theta, grid_, DirBC_Interior_, x, rhs, temp, arr, att, art, detDF,
-                                    coeff_beta);
+        extrapolated_smoother_take::nodeApplyAscOrthoCircleTake(i_r, i_theta, grid_, DirBC_Interior_, x, rhs, temp,
+                                                                arr, att, art, detDF, coeff_beta);
     }
 }
 
-void ExtrapolatedSmootherTake::applyAscOrthoRadialSection(int i_theta, ConstVector<double> x, ConstVector<double> rhs,
-                                                          Vector<double> temp)
+template <concepts::DomainGeometry DomainGeometry>
+void ExtrapolatedSmootherTake<DomainGeometry>::applyAscOrthoRadialSection(int i_theta, ConstVector<double> x,
+                                                                           ConstVector<double> rhs, Vector<double> temp)
 {
     assert(i_theta >= 0 && i_theta < grid_.ntheta());
 
@@ -490,7 +500,7 @@ void ExtrapolatedSmootherTake::applyAscOrthoRadialSection(int i_theta, ConstVect
     const auto& coeff_beta = level_cache_.coeff_beta();
 
     for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
-        nodeApplyAscOrthoRadialTake(i_r, i_theta, grid_, DirBC_Interior_, x, rhs, temp, arr, att, art, detDF,
-                                    coeff_beta);
+        extrapolated_smoother_take::nodeApplyAscOrthoRadialTake(i_r, i_theta, grid_, DirBC_Interior_, x, rhs, temp,
+                                                                arr, att, art, detDF, coeff_beta);
     }
 }
