@@ -1,4 +1,6 @@
-#include "../../../include/Smoother/SmootherTake/smootherTake.h"
+#pragma once
+
+namespace smoother_take {
 
 static inline void nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                                ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
@@ -209,9 +211,14 @@ static inline void nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const Polar
     }
 }
 
-void SmootherTake::applyAscOrthoCircleSection(int i_r, ConstVector<double> x, ConstVector<double> rhs,
-                                              Vector<double> temp)
+} // namespace smoother_take
+
+template <concepts::DomainGeometry DomainGeometry>
+void SmootherTake<DomainGeometry>::applyAscOrthoCircleSection(int i_r, ConstVector<double> x, ConstVector<double> rhs,
+                                                              Vector<double> temp)
 {
+    using smoother_take::nodeApplyAscOrthoCircleTake;
+
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles());
 
     assert(level_cache_.cacheDensityProfileCoefficients());
@@ -229,9 +236,12 @@ void SmootherTake::applyAscOrthoCircleSection(int i_r, ConstVector<double> x, Co
     }
 }
 
-void SmootherTake::applyAscOrthoRadialSection(int i_theta, ConstVector<double> x, ConstVector<double> rhs,
-                                              Vector<double> temp)
+template <concepts::DomainGeometry DomainGeometry>
+void SmootherTake<DomainGeometry>::applyAscOrthoRadialSection(int i_theta, ConstVector<double> x,
+                                                              ConstVector<double> rhs, Vector<double> temp)
 {
+    using smoother_take::nodeApplyAscOrthoRadialTake;
+
     assert(i_theta >= 0 && i_theta < grid_.ntheta());
 
     assert(level_cache_.cacheDensityProfileCoefficients());

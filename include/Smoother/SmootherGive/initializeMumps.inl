@@ -1,12 +1,14 @@
-#include "../../../include/Smoother/SmootherGive/smootherGive.h"
+#pragma once
 
 #ifdef GMGPOLAR_USE_MUMPS
 
-void SmootherGive::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, SparseMatrixCOO<double>& solver_matrix)
+template <concepts::DomainGeometry DomainGeometry>
+void SmootherGive<DomainGeometry>::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver,
+                                                         SparseMatrixCOO<double>& solver_matrix)
 {
-    /* 
-     * MUMPS (a parallel direct solver) uses 1-based indexing, 
-     * whereas the input matrix follows 0-based indexing. 
+    /*
+     * MUMPS (a parallel direct solver) uses 1-based indexing,
+     * whereas the input matrix follows 0-based indexing.
      * Adjust row and column indices to match MUMPS' requirements.
      */
     for (int i = 0; i < solver_matrix.non_zero_size(); i++) {
@@ -48,7 +50,7 @@ void SmootherGive::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, SparseMat
     ICNTL(mumps_solver, 22) = 0; // Controls the in-core/out-of-core (OOC) factorization and solve.
     ICNTL(mumps_solver, 23) = 0; // Corresponds to the maximum size of the working memory in MegaBytes that MUMPS can
     //                             allocate per working process
-    ICNTL(mumps_solver, 24) = 0; // Controls the detection of “null pivot rows”.
+    ICNTL(mumps_solver, 24) = 0; // Controls the detection of "null pivot rows".
     ICNTL(mumps_solver, 25) =
         0; // Allows the computation of a solution of a deficient matrix and also of a null space basis
     ICNTL(mumps_solver, 26) = 0; // Drives the solution phase if a Schur complement matrix has been computed
@@ -102,7 +104,8 @@ void SmootherGive::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, SparseMat
     }
 }
 
-void SmootherGive::finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver)
+template <concepts::DomainGeometry DomainGeometry>
+void SmootherGive<DomainGeometry>::finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver)
 {
     mumps_solver.job = JOB_END;
     dmumps_c(&mumps_solver);

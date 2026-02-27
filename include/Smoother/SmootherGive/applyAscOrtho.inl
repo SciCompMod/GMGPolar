@@ -1,6 +1,6 @@
-#include "../../../include/Smoother/SmootherGive/smootherGive.h"
+#pragma once
 
-#include "../../../include/Definitions/geometry_helper.h"
+namespace smoother_give {
 
 static inline void nodeApplyAscOrthoCircleGive(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                                SmootherColor smoother_color, ConstVector<double>& x,
@@ -422,9 +422,15 @@ static inline void nodeApplyAscOrthoRadialGive(int i_r, int i_theta, const Polar
     }
 }
 
-void SmootherGive::applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color, ConstVector<double> x,
-                                              ConstVector<double> rhs, Vector<double> temp)
+} // namespace smoother_give
+
+template <concepts::DomainGeometry DomainGeometry>
+void SmootherGive<DomainGeometry>::applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color,
+                                                              ConstVector<double> x, ConstVector<double> rhs,
+                                                              Vector<double> temp)
 {
+    using smoother_give::nodeApplyAscOrthoCircleGive;
+
     assert(i_r >= 0 && i_r < grid_.numberSmootherCircles() + 1);
 
     const double r = grid_.radius(i_r);
@@ -442,9 +448,13 @@ void SmootherGive::applyAscOrthoCircleSection(const int i_r, const SmootherColor
     }
 }
 
-void SmootherGive::applyAscOrthoRadialSection(const int i_theta, const SmootherColor smoother_color,
-                                              ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp)
+template <concepts::DomainGeometry DomainGeometry>
+void SmootherGive<DomainGeometry>::applyAscOrthoRadialSection(const int i_theta, const SmootherColor smoother_color,
+                                                              ConstVector<double> x, ConstVector<double> rhs,
+                                                              Vector<double> temp)
 {
+    using smoother_give::nodeApplyAscOrthoRadialGive;
+
     const double theta = grid_.theta(i_theta);
 
     /* We need to obtain left contributions from the circular section for AscOrtho. */

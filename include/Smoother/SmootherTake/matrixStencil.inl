@@ -1,6 +1,7 @@
-#include "../../../include/Smoother/SmootherTake/smootherTake.h"
+#pragma once
 
-const Stencil& SmootherTake::getStencil(int i_r) const
+template <concepts::DomainGeometry DomainGeometry>
+const Stencil& SmootherTake<DomainGeometry>::getStencil(int i_r) const
 {
     // Only i_r = 0 is implemented.
     // Stencils are only used to obtain offsets to index into COO/CSR matrices.
@@ -11,7 +12,8 @@ const Stencil& SmootherTake::getStencil(int i_r) const
     return DirBC_Interior_ ? stencil_DB_ : circle_stencil_across_origin_;
 }
 
-int SmootherTake::getNonZeroCountCircleAsc(int i_r) const
+template <concepts::DomainGeometry DomainGeometry>
+int SmootherTake<DomainGeometry>::getNonZeroCountCircleAsc(int i_r) const
 {
     // Only i_r = 0 is implemented.
     // The number of nonzero elements is only needed to construct COO matrices.
@@ -23,7 +25,8 @@ int SmootherTake::getNonZeroCountCircleAsc(int i_r) const
     return size_stencil_inner_boundary * grid_.ntheta();
 }
 
-int SmootherTake::getCircleAscIndex(int i_r, int i_theta) const
+template <concepts::DomainGeometry DomainGeometry>
+int SmootherTake<DomainGeometry>::getCircleAscIndex(int i_r, int i_theta) const
 {
     // Only i_r = 0 is implemented.
     // getCircleAscIndex accumulates all stencil sizes within a line up to, but excluding the current node.

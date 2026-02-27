@@ -1,6 +1,7 @@
-#include "../../../include/Smoother/SmootherGive/smootherGive.h"
+#pragma once
 
-void SmootherGive::solveBlackCircleSection(Vector<double> x, Vector<double> temp)
+template <concepts::DomainGeometry DomainGeometry>
+void SmootherGive<DomainGeometry>::solveBlackCircleSection(Vector<double> x, Vector<double> temp)
 {
     int start                     = 0;
     int end                       = grid_.numberCircularSmootherNodes();
@@ -38,7 +39,8 @@ void SmootherGive::solveBlackCircleSection(Vector<double> x, Vector<double> temp
     }
 }
 
-void SmootherGive::solveWhiteCircleSection(Vector<double> x, Vector<double> temp)
+template <concepts::DomainGeometry DomainGeometry>
+void SmootherGive<DomainGeometry>::solveWhiteCircleSection(Vector<double> x, Vector<double> temp)
 {
     int start                     = 0;
     int end                       = grid_.numberCircularSmootherNodes();
@@ -76,7 +78,8 @@ void SmootherGive::solveWhiteCircleSection(Vector<double> x, Vector<double> temp
     }
 }
 
-void SmootherGive::solveBlackRadialSection(Vector<double> x, Vector<double> temp)
+template <concepts::DomainGeometry DomainGeometry>
+void SmootherGive<DomainGeometry>::solveBlackRadialSection(Vector<double> x, Vector<double> temp)
 {
     int start                     = grid_.numberCircularSmootherNodes();
     int end                       = grid_.numberOfNodes();
@@ -95,7 +98,8 @@ void SmootherGive::solveBlackRadialSection(Vector<double> x, Vector<double> temp
     }
 }
 
-void SmootherGive::solveWhiteRadialSection(Vector<double> x, Vector<double> temp)
+template <concepts::DomainGeometry DomainGeometry>
+void SmootherGive<DomainGeometry>::solveWhiteRadialSection(Vector<double> x, Vector<double> temp)
 {
     int start                     = grid_.numberCircularSmootherNodes();
     int end                       = grid_.numberOfNodes();

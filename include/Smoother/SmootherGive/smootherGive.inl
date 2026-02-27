@@ -1,9 +1,12 @@
-#include "../../../include/Smoother/SmootherGive/smootherGive.h"
+#pragma once
 
-SmootherGive::SmootherGive(const PolarGrid& grid, const LevelCache& level_cache, const DomainGeometry& domain_geometry,
-                           const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior,
-                           int num_omp_threads)
-    : Smoother(grid, level_cache, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads)
+template <concepts::DomainGeometry DomainGeometry>
+SmootherGive<DomainGeometry>::SmootherGive(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
+                                           const DomainGeometry& domain_geometry,
+                                           const DensityProfileCoefficients& density_profile_coefficients,
+                                           bool DirBC_Interior, int num_omp_threads)
+    : Smoother<DomainGeometry>(grid, level_cache, domain_geometry, density_profile_coefficients, DirBC_Interior,
+                               num_omp_threads)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
     , radial_tridiagonal_solver_(grid.lengthSmootherRadial(), grid.ntheta(), false)
 {
@@ -15,7 +18,8 @@ SmootherGive::SmootherGive(const PolarGrid& grid, const LevelCache& level_cache,
 #endif
 }
 
-SmootherGive::~SmootherGive()
+template <concepts::DomainGeometry DomainGeometry>
+SmootherGive<DomainGeometry>::~SmootherGive()
 {
 #ifdef GMGPOLAR_USE_MUMPS
     finalizeMumpsSolver(inner_boundary_mumps_solver_);
@@ -44,7 +48,8 @@ SmootherGive::~SmootherGive()
 //   - First, temp is updated with f_sc − A_sc^ortho * u_sc^ortho.
 //   - The system is then solved in-place in temp, and the results
 //     are copied back to x.
-void SmootherGive::smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp)
+template <concepts::DomainGeometry DomainGeometry>
+void SmootherGive<DomainGeometry>::smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());

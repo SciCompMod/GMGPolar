@@ -1,4 +1,7 @@
-#include "../../../include/Smoother/SmootherTake/smootherTake.h"
+#pragma once
+
+namespace smoother_take
+{
 
 /* Tridiagonal matrices */
 static inline void updateMatrixElement(BatchedTridiagonalSolver<double>& solver, int batch, int row, int column,
@@ -30,13 +33,20 @@ static inline void updateCOOCSRMatrixElement(SparseMatrixCSR<double>& matrix, in
 }
 #endif
 
-void SmootherTake::nodeBuildAscTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                    MatrixType& inner_boundary_circle_matrix,
-                                    BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
-                                    BatchedTridiagonalSolver<double>& radial_tridiagonal_solver,
-                                    ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art,
-                                    ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
+} // namespace smoother_take
+
+template <concepts::DomainGeometry DomainGeometry>
+void SmootherTake<DomainGeometry>::nodeBuildAscTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+                                                    MatrixType& inner_boundary_circle_matrix,
+                                                    BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
+                                                    BatchedTridiagonalSolver<double>& radial_tridiagonal_solver,
+                                                    ConstVector<double>& arr, ConstVector<double>& att,
+                                                    ConstVector<double>& art, ConstVector<double>& detDF,
+                                                    ConstVector<double>& coeff_beta)
 {
+    using smoother_take::updateMatrixElement;
+    using smoother_take::updateCOOCSRMatrixElement;
+
     assert(i_r >= 0 && i_r < grid.nr());
     assert(i_theta >= 0 && i_theta < grid.ntheta());
 
@@ -361,8 +371,12 @@ void SmootherTake::nodeBuildAscTake(int i_r, int i_theta, const PolarGrid& grid,
     }
 }
 
-void SmootherTake::buildAscCircleSection(int i_r)
+template <concepts::DomainGeometry DomainGeometry>
+void SmootherTake<DomainGeometry>::buildAscCircleSection(int i_r)
 {
+    using smoother_take::updateMatrixElement;
+    using smoother_take::updateCOOCSRMatrixElement;
+
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
 
@@ -379,8 +393,12 @@ void SmootherTake::buildAscCircleSection(int i_r)
     }
 }
 
-void SmootherTake::buildAscRadialSection(int i_theta)
+template <concepts::DomainGeometry DomainGeometry>
+void SmootherTake<DomainGeometry>::buildAscRadialSection(int i_theta)
 {
+    using smoother_take::updateMatrixElement;
+    using smoother_take::updateCOOCSRMatrixElement;
+
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
 
@@ -397,7 +415,8 @@ void SmootherTake::buildAscRadialSection(int i_theta)
     }
 }
 
-void SmootherTake::buildAscMatrices()
+template <concepts::DomainGeometry DomainGeometry>
+void SmootherTake<DomainGeometry>::buildAscMatrices()
 {
     /* -------------------------------------- */
     /* Part 1: Allocate Asc Smoother matrices */
