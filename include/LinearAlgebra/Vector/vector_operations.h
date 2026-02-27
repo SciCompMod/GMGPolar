@@ -112,18 +112,7 @@ T l1_norm(ConstVector<T> x)
     return result;
 }
 
-template <typename T>
-T l2_norm_squared(ConstVector<T> x)
-{
-    T result      = 0.0;
-    std::size_t n = x.size();
-#pragma omp parallel for reduction(+ : result) if (n > 10'000)
-    for (std::size_t i = 0; i < n; ++i) {
-        result += x(i) * x(i);
-    }
-    return result;
-}
-
+// Underflow- and overflow-resistant implementation of the L2 norm
 template <typename T>
 T l2_norm(ConstVector<T> x)
 {
@@ -137,17 +126,17 @@ T l2_norm(ConstVector<T> x)
             scale = abs_val;
         }
     }
-    if (equals(scale, T{0})) {
+    // 2) if the largest absolute value is zero, the norm is zero
+    if (scale == T{0})
         return T{0};
-    }
-    // 2) accumulate sum of squares of scaled entries
+    // 3) accumulate sum of squares of scaled entries
     T sum = 0.0;
 #pragma omp parallel for reduction(+ : sum) if (n > 10'000)
     for (std::size_t i = 0; i < n; ++i) {
         T value = x(i) / scale;
         sum += value * value;
     }
-    // 3) rescale
+    // 4) rescale
     return scale * std::sqrt(sum);
 }
 
