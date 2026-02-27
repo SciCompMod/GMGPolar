@@ -1,10 +1,9 @@
 #include "../../../include/Residual/ResidualTake/residualTake.h"
 
-static inline void node_apply_residual_take(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                            Vector<double>& result, ConstVector<double>& rhs, ConstVector<double>& x,
-                                            ConstVector<double>& arr, ConstVector<double>& att,
-                                            ConstVector<double>& art, ConstVector<double>& detDF,
-                                            ConstVector<double>& coeff_beta)
+static inline void node_apply_a_take(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+                                     Vector<double>& result, ConstVector<double>& x, ConstVector<double>& arr,
+                                     ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF,
+                                     ConstVector<double>& coeff_beta)
 {
     /* -------------------- */
     /* Node in the interior */
@@ -34,19 +33,17 @@ static inline void node_apply_residual_take(int i_r, int i_theta, const PolarGri
         const int top_right    = grid.index(i_r + 1, i_theta_P1);
 
         result[center] =
-            rhs[center] -
-            (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) * x[center] /* beta_{i,j} */
+            0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) * x[center] /* beta_{i,j} */
 
-             - coeff1 * (arr[center] + arr[left]) * (x[left] - x[center]) /* Left - Center: (Left) */
-             - coeff2 * (arr[center] + arr[right]) * (x[right] - x[center]) /* Right - Center: (Right) */
-             - coeff3 * (att[center] + att[bottom]) * (x[bottom] - x[center]) /* Bottom - Center: (Bottom) */
-             - coeff4 * (att[center] + att[top]) * (x[top] - x[center]) /* Top - Center: (Top) */
+            - coeff1 * (arr[center] + arr[left]) * (x[left] - x[center]) /* Left - Center: (Left) */
+            - coeff2 * (arr[center] + arr[right]) * (x[right] - x[center]) /* Right - Center: (Right) */
+            - coeff3 * (att[center] + att[bottom]) * (x[bottom] - x[center]) /* Bottom - Center: (Bottom) */
+            - coeff4 * (att[center] + att[top]) * (x[top] - x[center]) /* Top - Center: (Top) */
 
-             - 0.25 * (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
-             + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
-             + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
-             - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
-            );
+            - 0.25 * (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
+            + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
+            + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
+            - 0.25 * (art[right] + art[top]) * x[top_right]; /* Top Right */
     }
     /* -------------------------- */
     /* Node on the inner boundary */
@@ -57,7 +54,7 @@ static inline void node_apply_residual_take(int i_r, int i_theta, const PolarGri
         /* ------------------------------------------------ */
         if (DirBC_Interior) {
             const int center = grid.index(i_r, i_theta);
-            result[center]   = rhs[center] - x[center];
+            result[center]   = x[center];
         }
         else {
             /* ------------------------------------------------------------- */
@@ -89,20 +86,18 @@ static inline void node_apply_residual_take(int i_r, int i_theta, const PolarGri
             const int top_right    = grid.index(i_r + 1, i_theta_P1);
 
             result[center] =
-                rhs[center] -
-                (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) *
-                     x[center] /* beta_{i,j} */
+                0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) *
+                    x[center] /* beta_{i,j} */
 
-                 - coeff1 * (arr[center] + arr[left]) * (x[left] - x[center]) /* Left - Center: (Left) */
-                 - coeff2 * (arr[center] + arr[right]) * (x[right] - x[center]) /* Right - Center: (Right) */
-                 - coeff3 * (att[center] + att[bottom]) * (x[bottom] - x[center]) /* Bottom - Center: (Bottom) */
-                 - coeff4 * (att[center] + att[top]) * (x[top] - x[center]) /* Top - Center: (Top) */
+                - coeff1 * (arr[center] + arr[left]) * (x[left] - x[center]) /* Left - Center: (Left) */
+                - coeff2 * (arr[center] + arr[right]) * (x[right] - x[center]) /* Right - Center: (Right) */
+                - coeff3 * (att[center] + att[bottom]) * (x[bottom] - x[center]) /* Bottom - Center: (Bottom) */
+                - coeff4 * (att[center] + att[top]) * (x[top] - x[center]) /* Top - Center: (Top) */
 
-                 /* - 0.25 * (art[left] + art[bottom]) * x[bottom_left] // Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
-                 + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
-                 /* + 0.25 * (art[left] + art[top]) * x[top_left] // Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
-                 - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
-                );
+                /* - 0.25 * (art[left] + art[bottom]) * x[bottom_left] // Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
+                + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
+                /* + 0.25 * (art[left] + art[top]) * x[top_left] // Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
+                - 0.25 * (art[right] + art[top]) * x[top_right]; /* Top Right */
         }
     }
     /* ----------------------------- */
@@ -111,12 +106,11 @@ static inline void node_apply_residual_take(int i_r, int i_theta, const PolarGri
     else if (i_r == grid.nr() - 1) {
         /* Fill result of (i,j) */
         const int center = grid.index(i_r, i_theta);
-        result[center]   = rhs[center] - x[center];
+        result[center]   = x[center];
     }
 }
 
-void ResidualTake::applyCircleSection(const int i_r, Vector<double> result, ConstVector<double> rhs,
-                                      ConstVector<double> x) const
+void ResidualTake::applyCircleSection(const int i_r, Vector<double> result, ConstVector<double> x) const
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -128,13 +122,11 @@ void ResidualTake::applyCircleSection(const int i_r, Vector<double> result, Cons
     ConstVector<double> coeff_beta = level_cache_.coeff_beta();
 
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
-        node_apply_residual_take(i_r, i_theta, grid_, DirBC_Interior_, result, rhs, x, arr, att, art, detDF,
-                                 coeff_beta);
+        node_apply_a_take(i_r, i_theta, grid_, DirBC_Interior_, result, x, arr, att, art, detDF, coeff_beta);
     }
 }
 
-void ResidualTake::applyRadialSection(const int i_theta, Vector<double> result, ConstVector<double> rhs,
-                                      ConstVector<double> x) const
+void ResidualTake::applyRadialSection(const int i_theta, Vector<double> result, ConstVector<double> x) const
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -146,7 +138,6 @@ void ResidualTake::applyRadialSection(const int i_theta, Vector<double> result, 
     ConstVector<double> coeff_beta = level_cache_.coeff_beta();
 
     for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
-        node_apply_residual_take(i_r, i_theta, grid_, DirBC_Interior_, result, rhs, x, arr, att, art, detDF,
-                                 coeff_beta);
+        node_apply_a_take(i_r, i_theta, grid_, DirBC_Interior_, result, x, arr, att, art, detDF, coeff_beta);
     }
 }
