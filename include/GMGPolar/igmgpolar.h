@@ -192,6 +192,7 @@ public:
     double timeSolveMultigridIterations() const;
     double timeCheckConvergence() const;
     double timeCheckExactError() const;
+    double timeConjugateGradient() const;
 
     double timeAvgMGCTotal() const;
     double timeAvgMGCPreSmoothing() const;

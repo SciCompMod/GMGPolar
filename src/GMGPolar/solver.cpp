@@ -386,7 +386,7 @@ void IGMGPolar::solvePCG(double& initial_residual_norm, double& current_residual
         auto start_check_exact_error = std::chrono::high_resolution_clock::now();
 
         if (exact_solution_ != nullptr)
-            evaluateExactError(level, *exact_solution_);
+            exact_errors_.push_back(computeExactError(level, pcg_solution_, level.residual(), *exact_solution_));
 
         auto end_check_exact_error = std::chrono::high_resolution_clock::now();
         t_check_exact_error_ += std::chrono::duration<double>(end_check_exact_error - start_check_exact_error).count();

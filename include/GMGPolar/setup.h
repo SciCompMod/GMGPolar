@@ -148,7 +148,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
             levels_[0].initializeSmoothing(domain_geometry_, density_profile_coefficients_, DirBC_Interior_,
                                            max_omp_threads_, stencil_distribution_method_);
         }
-        if (do_extrapolated_smoothing) {
+        // PCG doesn't use extrapolated smoothing, so we only initialize it if PCG is disabled.
+        if (do_extrapolated_smoothing && !PCG_) {
             levels_[0].initializeExtrapolatedSmoothing(domain_geometry_, density_profile_coefficients_, DirBC_Interior_,
                                                        max_omp_threads_, stencil_distribution_method_);
         }

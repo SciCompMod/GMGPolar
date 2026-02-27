@@ -358,6 +358,11 @@ double IGMGPolar::timeCheckExactError() const
     return t_check_exact_error_;
 }
 
+double IGMGPolar::timeConjugateGradient() const
+{
+    return t_conjugate_gradient_;
+}
+
 /* ---------------------------------------------------------------------- */
 /* Average Multigrid Cycle timings                                        */
 /* ---------------------------------------------------------------------- */
