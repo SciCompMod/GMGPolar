@@ -35,22 +35,24 @@ class ExtrapolatedSmoother;
 // coefficients (`arr`, `att`, `art`, `detDF`) related to the domain geometry. These coefficients are critical for efficient matrix-free stencil operations
 // and contribute to the accuracy and performance of the multigrid solver.
 
+template <concepts::DomainGeometry DomainGeometry>
 class LevelCache;
 
+template <concepts::DomainGeometry DomainGeometry>
 class Level
 {
 public:
     // ----------- //
     // Constructor //
     explicit Level(const int level_depth, std::unique_ptr<const PolarGrid> grid,
-                   std::unique_ptr<const LevelCache> level_cache, const ExtrapolationType extrapolation,
+                   std::unique_ptr<const LevelCache<DomainGeometry>> level_cache, const ExtrapolationType extrapolation,
                    const bool FMG);
 
     // ---------------- //
     // Getter Functions //
     int level_depth() const;
     const PolarGrid& grid() const;
-    const LevelCache& levelCache() const;
+    const LevelCache<DomainGeometry>& levelCache() const;
 
     Vector<double> rhs();
     ConstVector<double> rhs() const;
@@ -95,7 +97,7 @@ public:
 private:
     const int level_depth_;
     std::unique_ptr<const PolarGrid> grid_;
-    std::unique_ptr<const LevelCache> level_cache_;
+    std::unique_ptr<const LevelCache<DomainGeometry>> level_cache_;
 
     std::unique_ptr<DirectSolver> op_directSolver_;
     std::unique_ptr<Residual> op_residual_;
@@ -108,6 +110,7 @@ private:
     Vector<double> error_correction_;
 };
 
+template <concepts::DomainGeometry DomainGeometry>
 class LevelCache
 {
 public:
@@ -162,3 +165,6 @@ private:
     Vector<double> art_;
     Vector<double> detDF_;
 };
+
+#include "levelCache.inl"
+#include "level.inl"

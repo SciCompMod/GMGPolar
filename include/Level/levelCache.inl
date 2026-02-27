@@ -1,8 +1,10 @@
-#include "../../include/Level/level.h"
+#pragma once
 
-LevelCache::LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients,
-                       const DomainGeometry& domain_geometry, const bool cache_density_profile_coefficients,
-                       const bool cache_domain_geometry)
+template <concepts::DomainGeometry DomainGeometry>
+LevelCache<DomainGeometry>::LevelCache(const PolarGrid& grid,
+                                       const DensityProfileCoefficients& density_profile_coefficients,
+                                       const DomainGeometry& domain_geometry,
+                                       const bool cache_density_profile_coefficients, const bool cache_domain_geometry)
     : domain_geometry_(domain_geometry)
     , density_profile_coefficients_(density_profile_coefficients)
     , cache_density_profile_coefficients_(cache_density_profile_coefficients)
@@ -76,45 +78,62 @@ LevelCache::LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& 
     }
 }
 
-const DensityProfileCoefficients& LevelCache::densityProfileCoefficients() const
+template <concepts::DomainGeometry DomainGeometry>
+const DensityProfileCoefficients& LevelCache<DomainGeometry>::densityProfileCoefficients() const
 {
     return density_profile_coefficients_;
 }
-const DomainGeometry& LevelCache::domainGeometry() const
+
+template <concepts::DomainGeometry DomainGeometry>
+const DomainGeometry& LevelCache<DomainGeometry>::domainGeometry() const
 {
     return domain_geometry_;
 }
 
-bool LevelCache::cacheDensityProfileCoefficients() const
+template <concepts::DomainGeometry DomainGeometry>
+bool LevelCache<DomainGeometry>::cacheDensityProfileCoefficients() const
 {
     return cache_density_profile_coefficients_;
 }
-ConstVector<double> LevelCache::coeff_alpha() const
+
+template <concepts::DomainGeometry DomainGeometry>
+ConstVector<double> LevelCache<DomainGeometry>::coeff_alpha() const
 {
     return coeff_alpha_;
 }
-ConstVector<double> LevelCache::coeff_beta() const
+
+template <concepts::DomainGeometry DomainGeometry>
+ConstVector<double> LevelCache<DomainGeometry>::coeff_beta() const
 {
     return coeff_beta_;
 }
 
-bool LevelCache::cacheDomainGeometry() const
+template <concepts::DomainGeometry DomainGeometry>
+bool LevelCache<DomainGeometry>::cacheDomainGeometry() const
 {
     return cache_domain_geometry_;
 }
-ConstVector<double> LevelCache::arr() const
+
+template <concepts::DomainGeometry DomainGeometry>
+ConstVector<double> LevelCache<DomainGeometry>::arr() const
 {
     return arr_;
 }
-ConstVector<double> LevelCache::att() const
+
+template <concepts::DomainGeometry DomainGeometry>
+ConstVector<double> LevelCache<DomainGeometry>::att() const
 {
     return att_;
 }
-ConstVector<double> LevelCache::art() const
+
+template <concepts::DomainGeometry DomainGeometry>
+ConstVector<double> LevelCache<DomainGeometry>::art() const
 {
     return art_;
 }
-ConstVector<double> LevelCache::detDF() const
+
+template <concepts::DomainGeometry DomainGeometry>
+ConstVector<double> LevelCache<DomainGeometry>::detDF() const
 {
     return detDF_;
 }
