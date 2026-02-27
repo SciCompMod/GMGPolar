@@ -29,20 +29,29 @@ class Level;
     #include "mpi.h"
 #endif
 
+template <concepts::DomainGeometry DomainGeometry>
 class ExtrapolatedSmoother
 {
 public:
-    explicit ExtrapolatedSmoother(const PolarGrid& grid, const LevelCache& level_cache,
+    explicit ExtrapolatedSmoother(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
                                   const DomainGeometry& domain_geometry,
                                   const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior,
-                                  int num_omp_threads);
+                                  int num_omp_threads)
+        : grid_(grid)
+        , level_cache_(level_cache)
+        , domain_geometry_(domain_geometry)
+        , density_profile_coefficients_(density_profile_coefficients)
+        , DirBC_Interior_(DirBC_Interior)
+        , num_omp_threads_(num_omp_threads)
+    {
+    }
     virtual ~ExtrapolatedSmoother() = default;
 
     virtual void extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) = 0;
 
 protected:
     const PolarGrid& grid_;
-    const LevelCache& level_cache_;
+    const LevelCache<DomainGeometry>& level_cache_;
     const DomainGeometry& domain_geometry_;
     const DensityProfileCoefficients& density_profile_coefficients_;
     const bool DirBC_Interior_;

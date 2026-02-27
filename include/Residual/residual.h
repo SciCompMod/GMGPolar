@@ -19,12 +19,22 @@ class Level;
 #include "../LinearAlgebra/Vector/vector.h"
 #include "../LinearAlgebra/Vector/vector_operations.h"
 
+template <concepts::DomainGeometry DomainGeometry>
 class Residual
 {
 public:
-    explicit Residual(const PolarGrid& grid, const LevelCache& level_cache, const DomainGeometry& domain_geometry,
+    explicit Residual(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
+                      const DomainGeometry& domain_geometry,
                       const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior,
-                      const int num_omp_threads);
+                      const int num_omp_threads)
+        : grid_(grid)
+        , level_cache_(level_cache)
+        , domain_geometry_(domain_geometry)
+        , density_profile_coefficients_(density_profile_coefficients)
+        , DirBC_Interior_(DirBC_Interior)
+        , num_omp_threads_(num_omp_threads)
+    {
+    }
     virtual ~Residual() = default;
 
     virtual void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const = 0;
@@ -33,7 +43,7 @@ protected:
     /* ------------------- */
     /* Constructor members */
     const PolarGrid& grid_;
-    const LevelCache& level_cache_;
+    const LevelCache<DomainGeometry>& level_cache_;
     const DomainGeometry& domain_geometry_;
     const DensityProfileCoefficients& density_profile_coefficients_;
     const bool DirBC_Interior_;
