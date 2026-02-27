@@ -1,6 +1,6 @@
 #include "../../../include/GMGPolar/gmgpolar.h"
 
-void IGMGPolar::extrapolated_multigrid_F_Cycle(int level_depth, Vector<double> solution, Vector<double> rhs,
+void IGMGPolar::extrapolated_multigrid_F_Cycle(int level_depth, Vector<double> solution, ConstVector<double> rhs,
                                                Vector<double> residual)
 {
     assert(0 <= level_depth && level_depth < number_of_levels_ - 1);
@@ -93,8 +93,14 @@ void IGMGPolar::extrapolated_multigrid_F_Cycle(int level_depth, Vector<double> s
         assign(next_level.residual(), 0.0);
 
         /* Step 3: Solve for the error by recursively calling the multigrid cycle. */
-        multigrid_F_Cycle(level_depth + 1, next_level.residual(), next_level.error_correction(), next_level.solution());
-        multigrid_V_Cycle(level_depth + 1, next_level.residual(), next_level.error_correction(), next_level.solution());
+        multigrid_F_Cycle(level_depth + 1,
+                          next_level.residual(), // error (solution)
+                          next_level.error_correction(), // coarse residual (rhs)
+                          next_level.solution()); // workspace
+        multigrid_V_Cycle(level_depth + 1,
+                          next_level.residual(), // error (solution)
+                          next_level.error_correction(), // coarse residual (rhs)
+                          next_level.solution()); // workspace
     }
 
     /* Interpolate the correction */

@@ -6,7 +6,7 @@ int IGMGPolar::chooseNumberOfLevels(const PolarGrid& finestGrid)
     const int minAngularDivisions = 4;
 
     // Minimum level for Multigrid
-    const int multigridMinLevel = 2;
+    const int multigridMinLevel = (extrapolation_ == ExtrapolationType::NONE) ? 1 : 2;
 
     // Calculate radial maximum level
     int radialNodes    = finestGrid.nr();
