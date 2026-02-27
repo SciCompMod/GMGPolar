@@ -41,7 +41,31 @@ void IGMGPolar::solve(const BoundaryConditions& boundary_conditions, const Sourc
     /* ---------------------------- */
     auto start_initial_approximation = std::chrono::high_resolution_clock::now();
 
-    initializeSolution();
+    if (!FMG_) {
+        // Assign zero initial guess if not using FMG
+        assign(levels_[0].solution(), 0.0);
+    }
+    else {
+        // Compute an initial approximation to the discrete system
+        //
+        //     A * levels_[0].solution() = levels_[0].rhs()
+        //
+        // using the Full Multigrid (FMG) algorithm.
+        //
+        // Prerequisite:
+        // The right-hand side must already be properly initialized on all levels,
+        // i.e., constructed on the finest level and transferred to coarser levels
+        // via injection and discretization. This ensures consistency of the coarse-
+        // grid operators and guarantees correctness of the multigrid hierarchy.
+        //
+        // The FMG algorithm performs an exact solve on the coarsest grid and then
+        // successively prolongates the solution to finer grids, applying multigrid
+        // cycles on each level to reduce the error. This produces a high-quality
+        // initial guess on the finest level, typically reducing the error to the
+        // order of the discretization error and significantly accelerating convergence
+        // of the subsequent solve phase.
+        fullMultigridApproximation(FMG_cycle_, FMG_iterations_);
+    }
 
     auto end_initial_approximation = std::chrono::high_resolution_clock::now();
     t_solve_initial_approximation_ =

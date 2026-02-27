@@ -262,7 +262,7 @@ protected:
 
     /* --------------- */
     /* Solve Functions */
-    void initializeSolution();
+    void fullMultigridApproximation(MultigridCycleType FMG_cycle, int FMG_iterations);
     double residualNorm(const ResidualNormType& norm_type, const Level& level, ConstVector<double> residual) const;
     void evaluateExactError(Level& level, const ExactSolution& exact_solution);
     void updateResidualNorms(Level& level, int iteration, double& initial_residual_norm, double& current_residual_norm,
