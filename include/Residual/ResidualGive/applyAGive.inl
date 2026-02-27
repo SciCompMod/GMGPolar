@@ -1,8 +1,12 @@
-#include "../../../include/Residual/ResidualGive/residualGive.h"
+#pragma once
 
+namespace residual_give
+{
+
+template <concepts::DomainGeometry DomainGeometry>
 static inline void node_apply_a_give(int i_r, int i_theta, double r, double theta, const PolarGrid& grid,
-                                     const LevelCache& level_cache, bool DirBC_Interior, Vector<double>& result,
-                                     ConstVector<double>& x)
+                                     const LevelCache<DomainGeometry>& level_cache, bool DirBC_Interior,
+                                     Vector<double>& result, ConstVector<double>& x)
 {
     /* ---------------------------------------- */
     /* Compute or retrieve stencil coefficients */
@@ -285,8 +289,14 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
     }
 }
 
-void ResidualGive::applyCircleSection(const int i_r, Vector<double> result, ConstVector<double> x) const
+} // namespace residual_give
+
+template <concepts::DomainGeometry DomainGeometry>
+void ResidualGive<DomainGeometry>::applyCircleSection(const int i_r, Vector<double> result,
+                                                      ConstVector<double> x) const
 {
+    using residual_give::node_apply_a_give;
+
     const double r = grid_.radius(i_r);
     for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
         const double theta = grid_.theta(i_theta);
@@ -294,8 +304,12 @@ void ResidualGive::applyCircleSection(const int i_r, Vector<double> result, Cons
     }
 }
 
-void ResidualGive::applyRadialSection(const int i_theta, Vector<double> result, ConstVector<double> x) const
+template <concepts::DomainGeometry DomainGeometry>
+void ResidualGive<DomainGeometry>::applyRadialSection(const int i_theta, Vector<double> result,
+                                                      ConstVector<double> x) const
 {
+    using residual_give::node_apply_a_give;
+
     const double theta = grid_.theta(i_theta);
     for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
         const double r = grid_.radius(i_r);

@@ -21,3 +21,4 @@ private:
 };
 
 #include "residualTake.inl"
+#include "applyResidualTake.inl"

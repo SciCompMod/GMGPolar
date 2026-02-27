@@ -1,10 +1,12 @@
-#include "../../../include/Residual/ResidualGive/residualGive.h"
-#include "../../../include/Residual/residual.h"
+#pragma once
 
-ResidualGive::ResidualGive(const PolarGrid& grid, const LevelCache& level_cache, const DomainGeometry& domain_geometry,
-                           const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior,
-                           int num_omp_threads)
-    : Residual(grid, level_cache, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads)
+template <concepts::DomainGeometry DomainGeometry>
+ResidualGive<DomainGeometry>::ResidualGive(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
+                                           const DomainGeometry& domain_geometry,
+                                           const DensityProfileCoefficients& density_profile_coefficients,
+                                           bool DirBC_Interior, int num_omp_threads)
+    : Residual<DomainGeometry>(grid, level_cache, domain_geometry, density_profile_coefficients, DirBC_Interior,
+                               num_omp_threads)
 {
 }
 
@@ -12,7 +14,8 @@ ResidualGive::ResidualGive(const PolarGrid& grid, const LevelCache& level_cache,
 /* result = rhs - A*x */
 
 // clang-format off
-void ResidualGive::computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const
+template <concepts::DomainGeometry DomainGeometry>
+void ResidualGive<DomainGeometry>::computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const
 {
     assert(result.size() == x.size());
 

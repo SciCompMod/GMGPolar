@@ -1,4 +1,7 @@
-#include "../../../include/Residual/ResidualTake/residualTake.h"
+#pragma once
+
+namespace residual_take
+{
 
 static inline void node_apply_residual_take(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                             Vector<double>& result, ConstVector<double>& rhs, ConstVector<double>& x,
@@ -115,9 +118,14 @@ static inline void node_apply_residual_take(int i_r, int i_theta, const PolarGri
     }
 }
 
-void ResidualTake::applyCircleSection(const int i_r, Vector<double> result, ConstVector<double> rhs,
-                                      ConstVector<double> x) const
+} // namespace residual_take
+
+template <concepts::DomainGeometry DomainGeometry>
+void ResidualTake<DomainGeometry>::applyCircleSection(const int i_r, Vector<double> result, ConstVector<double> rhs,
+                                                      ConstVector<double> x) const
 {
+    using residual_take::node_apply_residual_take;
+
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
 
@@ -133,9 +141,12 @@ void ResidualTake::applyCircleSection(const int i_r, Vector<double> result, Cons
     }
 }
 
-void ResidualTake::applyRadialSection(const int i_theta, Vector<double> result, ConstVector<double> rhs,
-                                      ConstVector<double> x) const
+template <concepts::DomainGeometry DomainGeometry>
+void ResidualTake<DomainGeometry>::applyRadialSection(const int i_theta, Vector<double> result, ConstVector<double> rhs,
+                                                      ConstVector<double> x) const
 {
+    using residual_take::node_apply_residual_take;
+
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
 
