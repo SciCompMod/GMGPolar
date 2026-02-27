@@ -8,15 +8,15 @@ ResidualGive::ResidualGive(const PolarGrid& grid, const LevelCache& level_cache,
 {
 }
 
-/* ------------------ */
-/* result = rhs - A*x */
+/* ------------ */
+/* result = A*x */
 
 // clang-format off
-void ResidualGive::computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const
+void ResidualGive::applySystemOperator(Vector<double> result, ConstVector<double> x) const
 {
     assert(result.size() == x.size());
 
-    Kokkos::deep_copy(result, rhs);
+    assign(result, 0.0);
 
     /* Single-threaded execution */
     if (num_omp_threads_ == 1) {
@@ -101,3 +101,19 @@ void ResidualGive::computeResidual(Vector<double> result, ConstVector<double> rh
     }
 }
 // clang-format on
+
+/* ------------------ */
+/* result = rhs - A*x */
+void ResidualGive::computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const
+{
+    assert(result.size() == x.size());
+
+    applySystemOperator(result, x);
+
+    // Subtract A*x from rhs to get the residual.
+    const int n = result.size();
+#pragma omp parallel for num_threads(num_omp_threads_)
+    for (int i = 0; i < n; i++) {
+        result[i] = rhs[i] - result[i];
+    }
+}

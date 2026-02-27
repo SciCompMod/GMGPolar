@@ -104,7 +104,7 @@ set(RESIDUAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Residual/ResidualGive/residualGive.cpp
     
     # ResidualTake
-    ${CMAKE_CURRENT_SOURCE_DIR}/Residual/ResidualTake/applyResidualTake.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Residual/ResidualTake/applyATake.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Residual/ResidualTake/residualTake.cpp
 )
 
