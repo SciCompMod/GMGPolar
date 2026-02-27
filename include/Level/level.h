@@ -1,9 +1,13 @@
 #pragma once
 
 // Required to prevent circular dependencies.
+template <concepts::DomainGeometry DomainGeometry>
 class DirectSolver;
+template <concepts::DomainGeometry DomainGeometry>
 class Residual;
+template <concepts::DomainGeometry DomainGeometry>
 class Smoother;
+template <concepts::DomainGeometry DomainGeometry>
 class ExtrapolatedSmoother;
 
 #include <memory>
@@ -99,10 +103,10 @@ private:
     std::unique_ptr<const PolarGrid> grid_;
     std::unique_ptr<const LevelCache<DomainGeometry>> level_cache_;
 
-    std::unique_ptr<DirectSolver> op_directSolver_;
-    std::unique_ptr<Residual> op_residual_;
-    std::unique_ptr<Smoother> op_smoother_;
-    std::unique_ptr<ExtrapolatedSmoother> op_extrapolated_smoother_;
+    std::unique_ptr<DirectSolver<DomainGeometry>> op_directSolver_;
+    std::unique_ptr<Residual<DomainGeometry>> op_residual_;
+    std::unique_ptr<Smoother<DomainGeometry>> op_smoother_;
+    std::unique_ptr<ExtrapolatedSmoother<DomainGeometry>> op_extrapolated_smoother_;
 
     Vector<double> rhs_;
     Vector<double> solution_;
