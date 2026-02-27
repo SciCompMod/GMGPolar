@@ -1,6 +1,4 @@
-#include "../../../include/DirectSolver/DirectSolver-COO-MUMPS-Give/directSolverGive.h"
-
-#include "../../../include/Definitions/geometry_helper.h"
+#pragma once
 
 #ifdef GMGPOLAR_USE_MUMPS
 
@@ -8,7 +6,8 @@
 /* Boundary Symmetry Shift */
 /* ----------------------- */
 
-void DirectSolver_COO_MUMPS_Give::applySymmetryShiftInnerBoundary(Vector<double> x) const
+template <concepts::DomainGeometry DomainGeometry>
+void DirectSolver_COO_MUMPS_Give<DomainGeometry>::applySymmetryShiftInnerBoundary(Vector<double> x) const
 {
     assert(DirBC_Interior_);
 
@@ -65,7 +64,8 @@ void DirectSolver_COO_MUMPS_Give::applySymmetryShiftInnerBoundary(Vector<double>
     }
 }
 
-void DirectSolver_COO_MUMPS_Give::applySymmetryShiftOuterBoundary(Vector<double> x) const
+template <concepts::DomainGeometry DomainGeometry>
+void DirectSolver_COO_MUMPS_Give<DomainGeometry>::applySymmetryShiftOuterBoundary(Vector<double> x) const
 {
     int i_r;
     double r;
@@ -120,7 +120,8 @@ void DirectSolver_COO_MUMPS_Give::applySymmetryShiftOuterBoundary(Vector<double>
     }
 }
 
-void DirectSolver_COO_MUMPS_Give::applySymmetryShift(Vector<double> x) const
+template <concepts::DomainGeometry DomainGeometry>
+void DirectSolver_COO_MUMPS_Give<DomainGeometry>::applySymmetryShift(Vector<double> x) const
 {
     assert(std::ssize(x) == grid_.numberOfNodes());
     assert(grid_.nr() >= 4);

@@ -1,18 +1,19 @@
-#include "../../../include/DirectSolver/DirectSolver-COO-MUMPS-Give/directSolverGive.h"
+#pragma once
 
 #ifdef GMGPOLAR_USE_MUMPS
 
-DirectSolver_COO_MUMPS_Give::DirectSolver_COO_MUMPS_Give(const PolarGrid& grid, const LevelCache& level_cache,
-                                                         const DomainGeometry& domain_geometry,
-                                                         const DensityProfileCoefficients& density_profile_coefficients,
-                                                         bool DirBC_Interior, int num_omp_threads)
+template <concepts::DomainGeometry DomainGeometry>
+DirectSolver_COO_MUMPS_Give<DomainGeometry>::DirectSolver_COO_MUMPS_Give(
+    const PolarGrid& grid, const LevelCache& level_cache, const DomainGeometry& domain_geometry,
+    const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior, int num_omp_threads)
     : DirectSolver(grid, level_cache, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads)
 {
     solver_matrix_ = buildSolverMatrix();
     initializeMumpsSolver(mumps_solver_, solver_matrix_);
 }
 
-void DirectSolver_COO_MUMPS_Give::solveInPlace(Vector<double> solution)
+template <concepts::DomainGeometry DomainGeometry>
+void DirectSolver_COO_MUMPS_Give<DomainGeometry>::solveInPlace(Vector<double> solution)
 {
     // Adjusts the right-hand side vector to account for symmetry corrections.
     // This transforms the system matrixA * solution = rhs into the equivalent system:
@@ -24,7 +25,8 @@ void DirectSolver_COO_MUMPS_Give::solveInPlace(Vector<double> solution)
     solveWithMumps(solution);
 }
 
-DirectSolver_COO_MUMPS_Give::~DirectSolver_COO_MUMPS_Give()
+template <concepts::DomainGeometry DomainGeometry>
+DirectSolver_COO_MUMPS_Give<DomainGeometry>::~DirectSolver_COO_MUMPS_Give()
 {
     finalizeMumpsSolver(mumps_solver_);
 }

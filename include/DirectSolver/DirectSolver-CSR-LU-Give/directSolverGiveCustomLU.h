@@ -2,7 +2,8 @@
 
 #include "../directSolver.h"
 
-class DirectSolver_CSR_LU_Give : public DirectSolver
+template <concepts::DomainGeometry DomainGeometry>
+class DirectSolver_CSR_LU_Give : public DirectSolver<DomainGeometry>
 {
 public:
     explicit DirectSolver_CSR_LU_Give(const PolarGrid& grid, const LevelCache& level_cache,
@@ -62,3 +63,7 @@ private:
                                    SparseMatrixCSR<double>& solver_matrix, double arr, double att, double art,
                                    double detDF, double coeff_beta);
 };
+
+#include "buildSolverMatrix.inl"
+#include "directSolverGive.inl"
+#include "matrixStencil.inl"

@@ -1,4 +1,7 @@
-#include "../../../include/DirectSolver/DirectSolver-CSR-LU-Take/directSolverTakeCustomLU.h"
+#pragma once
+
+namespace direct_solver_csr_lu_take
+{
 
 static inline void updateMatrixElement(SparseMatrixCSR<double>& matrix, int offset, int row, int col, double val)
 {
@@ -6,12 +9,15 @@ static inline void updateMatrixElement(SparseMatrixCSR<double>& matrix, int offs
     matrix.row_nz_entry(row, offset) = val;
 }
 
-void DirectSolver_CSR_LU_Take::nodeBuildSolverMatrixTake(int i_r, int i_theta, const PolarGrid& grid,
-                                                         bool DirBC_Interior, SparseMatrixCSR<double>& solver_matrix,
-                                                         ConstVector<double>& arr, ConstVector<double>& att,
-                                                         ConstVector<double>& art, ConstVector<double>& detDF,
-                                                         ConstVector<double>& coeff_beta)
+} // namespace direct_solver_csr_lu_take
+
+template <concepts::DomainGeometry DomainGeometry>
+void DirectSolver_CSR_LU_Take<DomainGeometry>::nodeBuildSolverMatrixTake(
+    int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior, SparseMatrixCSR<double>& solver_matrix,
+    ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF,
+    ConstVector<double>& coeff_beta)
 {
+    using direct_solver_csr_lu_take::updateMatrixElement;
     int offset;
     int row, col;
     double val;
@@ -240,7 +246,9 @@ void DirectSolver_CSR_LU_Take::nodeBuildSolverMatrixTake(int i_r, int i_theta, c
     }
 }
 
-void DirectSolver_CSR_LU_Take::buildSolverMatrixCircleSection(const int i_r, SparseMatrixCSR<double>& solver_matrix)
+template <concepts::DomainGeometry DomainGeometry>
+void DirectSolver_CSR_LU_Take<DomainGeometry>::buildSolverMatrixCircleSection(const int i_r,
+                                                                              SparseMatrixCSR<double>& solver_matrix)
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -258,7 +266,9 @@ void DirectSolver_CSR_LU_Take::buildSolverMatrixCircleSection(const int i_r, Spa
     }
 }
 
-void DirectSolver_CSR_LU_Take::buildSolverMatrixRadialSection(const int i_theta, SparseMatrixCSR<double>& solver_matrix)
+template <concepts::DomainGeometry DomainGeometry>
+void DirectSolver_CSR_LU_Take<DomainGeometry>::buildSolverMatrixRadialSection(const int i_theta,
+                                                                              SparseMatrixCSR<double>& solver_matrix)
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -280,7 +290,8 @@ void DirectSolver_CSR_LU_Take::buildSolverMatrixRadialSection(const int i_theta,
 
 /* ------------------------------------------------------------------------ */
 /* If the indexing is not smoother-based, please adjust the access patterns */
-SparseMatrixCSR<double> DirectSolver_CSR_LU_Take::buildSolverMatrix()
+template <concepts::DomainGeometry DomainGeometry>
+SparseMatrixCSR<double> DirectSolver_CSR_LU_Take<DomainGeometry>::buildSolverMatrix()
 {
     const int n = grid_.numberOfNodes();
 
