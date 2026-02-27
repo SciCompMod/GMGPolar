@@ -332,12 +332,12 @@ void IGMGPolar::solvePCG(double& initial_residual_norm, double& current_residual
     if (PCG_FMG_) {
         initRhsHierarchy(level.rhs());
         fullMultigridApproximation(PCG_FMG_cycle_, PCG_FMG_iterations_);
-        applyMultigridIterations(level, PCG_MG_cycle_, PCG_MG_iterations_);
     }
     else {
         // z = I^{-1} * r (no preconditioning)
         Kokkos::deep_copy(level.solution(), level.rhs());
     }
+    applyMultigridIterations(level, PCG_MG_cycle_, PCG_MG_iterations_);
 
     // p = z
     Kokkos::deep_copy(pcg_search_direction_, level.solution());
@@ -404,12 +404,12 @@ void IGMGPolar::solvePCG(double& initial_residual_norm, double& current_residual
         if (PCG_FMG_) {
             initRhsHierarchy(level.rhs());
             fullMultigridApproximation(PCG_FMG_cycle_, PCG_FMG_iterations_);
-            applyMultigridIterations(level, PCG_MG_cycle_, PCG_MG_iterations_);
         }
         else {
             // z = I^{-1} * r (no preconditioning)
             Kokkos::deep_copy(level.solution(), level.rhs());
         }
+        applyMultigridIterations(level, PCG_MG_cycle_, PCG_MG_iterations_);
 
         // r^T * z
         double r_z_new = dot_product(ConstVector<double>(level.rhs()), ConstVector<double>(level.solution()));
