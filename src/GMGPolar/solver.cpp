@@ -1,80 +1,48 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
 // =============================================================================
-//   Solution Initialization
+//   Full Multigrid Approximation
 // =============================================================================
 
-void IGMGPolar::initializeSolution()
+void IGMGPolar::fullMultigridApproximation(MultigridCycleType FMG_cycle, int FMG_iterations)
 {
-    if (!FMG_) {
-        int start_level_depth = 0;
-        Level& level          = levels_[start_level_depth];
-        assign(level.solution(), 0.0); // Assign zero initial guess if not using FMG
-    }
-    else {
-        // Start from the coarsest level
-        int coarsest_depth    = number_of_levels_ - 1;
-        Level& coarsest_level = levels_[coarsest_depth];
+    // Start from the coarsest level
+    int coarsest_depth    = number_of_levels_ - 1;
+    Level& coarsest_level = levels_[coarsest_depth];
 
-        // Solve directly on the coarsest level
-        Kokkos::deep_copy(coarsest_level.solution(), coarsest_level.rhs());
-        coarsest_level.directSolveInPlace(coarsest_level.solution()); // Direct solve on coarsest grid
+    // Solve directly on the coarsest level
+    Kokkos::deep_copy(coarsest_level.solution(), coarsest_level.rhs());
+    coarsest_level.directSolveInPlace(coarsest_level.solution()); // Direct solve on coarsest grid
 
-        // Prolongate the solution from the coarsest level up to the finest, while applying Multigrid Cycles on each level
-        for (int depth = coarsest_depth; depth > 0; --depth) {
-            Level& coarse_level = levels_[depth]; // Current coarse level
-            Level& fine_level   = levels_[depth - 1]; // Next finer level
+    // Prolongate the solution from the coarsest level up to the finest, while applying Multigrid Cycles on each level
+    for (int depth = coarsest_depth; depth > 0; --depth) {
+        Level& coarse_level = levels_[depth]; // Current coarse level
+        Level& fine_level   = levels_[depth - 1]; // Next finer level
 
-            // The bi-cubic FMG interpolation is of higher order
-            FMGInterpolation(coarse_level.level_depth(), fine_level.solution(), coarse_level.solution());
+        // The bi-cubic FMG interpolation is of higher order
+        FMGInterpolation(coarse_level.level_depth(), fine_level.solution(), coarse_level.solution());
 
-            // Apply some FMG iterations
-            for (int i = 0; i < FMG_iterations_; i++) {
-                if (fine_level.level_depth() == 0 && (extrapolation_ != ExtrapolationType::NONE)) {
-                    switch (FMG_cycle_) {
-                    case MultigridCycleType::V_CYCLE:
-                        extrapolated_multigrid_V_Cycle(fine_level.level_depth(), fine_level.solution(),
-                                                       fine_level.rhs(), fine_level.residual());
-                        break;
-
-                    case MultigridCycleType::W_CYCLE:
-                        extrapolated_multigrid_W_Cycle(fine_level.level_depth(), fine_level.solution(),
-                                                       fine_level.rhs(), fine_level.residual());
-                        break;
-
-                    case MultigridCycleType::F_CYCLE:
-                        extrapolated_multigrid_F_Cycle(fine_level.level_depth(), fine_level.solution(),
-                                                       fine_level.rhs(), fine_level.residual());
-                        break;
-
-                    default:
-                        std::cerr << "Error: Unknown multigrid cycle type!" << std::endl;
-                        throw std::runtime_error("Invalid multigrid cycle type encountered.");
-                        break;
-                    }
-                }
-                else {
-                    switch (FMG_cycle_) {
-                    case MultigridCycleType::V_CYCLE:
-                        multigrid_V_Cycle(fine_level.level_depth(), fine_level.solution(), fine_level.rhs(),
-                                          fine_level.residual());
-                        break;
-
-                    case MultigridCycleType::W_CYCLE:
-                        multigrid_W_Cycle(fine_level.level_depth(), fine_level.solution(), fine_level.rhs(),
-                                          fine_level.residual());
-                        break;
-
-                    case MultigridCycleType::F_CYCLE:
-                        multigrid_F_Cycle(fine_level.level_depth(), fine_level.solution(), fine_level.rhs(),
-                                          fine_level.residual());
-                        break;
-
-                    default:
-                        std::cerr << "Error: Unknown multigrid cycle type!" << std::endl;
-                        throw std::runtime_error("Invalid multigrid cycle type encountered.");
-                        break;
-                    }
+        // Apply some FMG iterations, except on the finest level,
+        // where the interpolated solution is sufficintly accurate as an initial guess
+        if (fine_level.level_depth() > 0) {
+            for (int i = 0; i < FMG_iterations; i++) {
+                switch (FMG_cycle) {
+                case MultigridCycleType::V_CYCLE:
+                    multigrid_V_Cycle(fine_level.level_depth(), fine_level.solution(), fine_level.rhs(),
+                                      fine_level.residual());
+                    break;
+                case MultigridCycleType::W_CYCLE:
+                    multigrid_W_Cycle(fine_level.level_depth(), fine_level.solution(), fine_level.rhs(),
+                                      fine_level.residual());
+                    break;
+                case MultigridCycleType::F_CYCLE:
+                    multigrid_F_Cycle(fine_level.level_depth(), fine_level.solution(), fine_level.rhs(),
+                                      fine_level.residual());
+                    break;
+                default:
+                    std::cerr << "Error: Unknown multigrid cycle type!" << std::endl;
+                    throw std::runtime_error("Invalid multigrid cycle type encountered.");
+                    break;
                 }
             }
         }
