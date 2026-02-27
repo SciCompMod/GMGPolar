@@ -9,11 +9,22 @@ public:
     explicit DirectSolver_CSR_LU_Take(const PolarGrid& grid, const LevelCache& level_cache,
                                       const DomainGeometry& domain_geometry,
                                       const DensityProfileCoefficients& density_profile_coefficients,
-                                      bool DirBC_Interior, int num_omp_threads);
+                                      bool DirBC_Interior, int num_omp_threads)
+        : DirectSolver(grid, level_cache, domain_geometry, density_profile_coefficients, DirBC_Interior,
+                       num_omp_threads)
+    {
+        solver_matrix_ = buildSolverMatrix();
+        lu_solver_     = SparseLUSolver<double>(solver_matrix_);
+    }
 
-    ~DirectSolver_CSR_LU_Take() override;
+    ~DirectSolver_CSR_LU_Take() override
+    {
+    }
     // Note: The rhs (right-hand side) vector gets overwritten with the solution.
-    void solveInPlace(Vector<double> solution) override;
+    void solveInPlace(Vector<double> solution) override
+    {
+        lu_solver_.solveInPlace(solution);
+    }
 
 private:
     // Solver matrix and solver structure

@@ -1,8 +1,9 @@
-#include "../../../include/DirectSolver/DirectSolver-COO-MUMPS-Take/directSolverTake.h"
+#pragma once
 
 #ifdef GMGPOLAR_USE_MUMPS
 
-DirectSolver_COO_MUMPS_Take::DirectSolver_COO_MUMPS_Take(const PolarGrid& grid, const LevelCache& level_cache,
+template <concepts::DomainGeometry DomainGeometry>
+DirectSolver_COO_MUMPS_Take<DomainGeometry>::DirectSolver_COO_MUMPS_Take(const PolarGrid& grid, const LevelCache& level_cache,
                                                          const DomainGeometry& domain_geometry,
                                                          const DensityProfileCoefficients& density_profile_coefficients,
                                                          bool DirBC_Interior, int num_omp_threads)
@@ -12,7 +13,8 @@ DirectSolver_COO_MUMPS_Take::DirectSolver_COO_MUMPS_Take(const PolarGrid& grid, 
     initializeMumpsSolver(mumps_solver_, solver_matrix_);
 }
 
-void DirectSolver_COO_MUMPS_Take::solveInPlace(Vector<double> solution)
+template <concepts::DomainGeometry DomainGeometry>
+void DirectSolver_COO_MUMPS_Take<DomainGeometry>::solveInPlace(Vector<double> solution)
 {
     // Adjusts the right-hand side vector to account for symmetry corrections.
     // This transforms the system matrixA * solution = rhs into the equivalent system:
@@ -24,7 +26,8 @@ void DirectSolver_COO_MUMPS_Take::solveInPlace(Vector<double> solution)
     solveWithMumps(solution);
 }
 
-DirectSolver_COO_MUMPS_Take::~DirectSolver_COO_MUMPS_Take()
+template <concepts::DomainGeometry DomainGeometry>
+DirectSolver_COO_MUMPS_Take<DomainGeometry>::~DirectSolver_COO_MUMPS_Take()
 {
     finalizeMumpsSolver(mumps_solver_);
 }

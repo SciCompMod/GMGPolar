@@ -1,6 +1,7 @@
-#include "../../../include/DirectSolver/DirectSolver-CSR-LU-Take/directSolverTakeCustomLU.h"
+#pragma once
 
-int DirectSolver_CSR_LU_Take::getStencilSize(int global_index) const
+template <concepts::DomainGeometry DomainGeometry>
+int DirectSolver_CSR_LU_Give<DomainGeometry>::getStencilSize(int global_index) const
 {
     int i_r, i_theta;
     grid_.multiIndex(global_index, i_r, i_theta);
@@ -29,7 +30,8 @@ int DirectSolver_CSR_LU_Take::getStencilSize(int global_index) const
     throw std::out_of_range("Invalid index for stencil");
 }
 
-const Stencil& DirectSolver_CSR_LU_Take::getStencil(int i_r) const
+template <concepts::DomainGeometry DomainGeometry>
+const Stencil& DirectSolver_CSR_LU_Give<DomainGeometry>::getStencil(int i_r) const
 {
     assert(0 <= i_r && i_r < grid_.nr());
     assert(grid_.nr() >= 4);
@@ -52,7 +54,8 @@ const Stencil& DirectSolver_CSR_LU_Take::getStencil(int i_r) const
     throw std::out_of_range("Invalid index for stencil");
 }
 
-int DirectSolver_CSR_LU_Take::getNonZeroCountSolverMatrix() const
+template <concepts::DomainGeometry DomainGeometry>
+int DirectSolver_CSR_LU_Give<DomainGeometry>::getNonZeroCountSolverMatrix() const
 {
     const int size_stencil_inner_boundary      = DirBC_Interior_ ? 1 : 7;
     const int size_stencil_next_inner_boundary = DirBC_Interior_ ? 9 : 9;

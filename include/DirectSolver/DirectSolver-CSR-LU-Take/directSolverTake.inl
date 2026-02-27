@@ -1,6 +1,7 @@
-#include "../../../include/DirectSolver/DirectSolver-CSR-LU-Give/directSolverGiveCustomLU.h"
+#include "../../../include/DirectSolver/DirectSolver-CSR-LU-Take/directSolverTakeCustomLU.h"
 
-DirectSolver_CSR_LU_Give::DirectSolver_CSR_LU_Give(const PolarGrid& grid, const LevelCache& level_cache,
+template <concepts::DomainGeometry DomainGeometry>
+DirectSolver_CSR_LU_Take<DomainGeometry>::DirectSolver_CSR_LU_Take(const PolarGrid& grid, const LevelCache& level_cache,
                                                    const DomainGeometry& domain_geometry,
                                                    const DensityProfileCoefficients& density_profile_coefficients,
                                                    bool DirBC_Interior, int num_omp_threads)
@@ -10,11 +11,13 @@ DirectSolver_CSR_LU_Give::DirectSolver_CSR_LU_Give(const PolarGrid& grid, const 
     lu_solver_     = SparseLUSolver<double>(solver_matrix_);
 }
 
-void DirectSolver_CSR_LU_Give::solveInPlace(Vector<double> solution)
+template <concepts::DomainGeometry DomainGeometry>
+void DirectSolver_CSR_LU_Take<DomainGeometry>::solveInPlace(Vector<double> solution)
 {
     lu_solver_.solveInPlace(solution);
 }
 
-DirectSolver_CSR_LU_Give::~DirectSolver_CSR_LU_Give()
+template <concepts::DomainGeometry DomainGeometry>
+DirectSolver_CSR_LU_Take<DomainGeometry>::~DirectSolver_CSR_LU_Take()
 {
 }

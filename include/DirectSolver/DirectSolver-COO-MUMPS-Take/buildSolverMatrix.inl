@@ -1,6 +1,8 @@
-#include "../../../include/DirectSolver/DirectSolver-COO-MUMPS-Take/directSolverTake.h"
+#pragma once
 
 #ifdef GMGPOLAR_USE_MUMPS
+
+namespace direct_solver_coo_mumps_take {
 
 static inline void updateMatrixElement(SparseMatrixCOO<double>& matrix, int ptr, int offset, int row, int col,
                                        double val)
@@ -10,12 +12,16 @@ static inline void updateMatrixElement(SparseMatrixCOO<double>& matrix, int ptr,
     matrix.value(ptr + offset)     = val;
 }
 
-void DirectSolver_COO_MUMPS_Take::nodeBuildSolverMatrixTake(int i_r, int i_theta, const PolarGrid& grid,
+}
+
+template <concepts::DomainGeometry DomainGeometry>
+void DirectSolver_COO_MUMPS_Take<DomainGeometry>::nodeBuildSolverMatrixTake(int i_r, int i_theta, const PolarGrid& grid,
                                                             bool DirBC_Interior, SparseMatrixCOO<double>& solver_matrix,
                                                             ConstVector<double>& arr, ConstVector<double>& att,
                                                             ConstVector<double>& art, ConstVector<double>& detDF,
                                                             ConstVector<double>& coeff_beta)
 {
+    using direct_solver_coo_mumps_take::updateMatrixElement;
     int ptr, offset;
     int row, col;
     double val;
@@ -452,7 +458,8 @@ void DirectSolver_COO_MUMPS_Take::nodeBuildSolverMatrixTake(int i_r, int i_theta
     }
 }
 
-void DirectSolver_COO_MUMPS_Take::buildSolverMatrixCircleSection(const int i_r, SparseMatrixCOO<double>& solver_matrix)
+template <concepts::DomainGeometry DomainGeometry>
+void DirectSolver_COO_MUMPS_Take<DomainGeometry>::buildSolverMatrixCircleSection(const int i_r, SparseMatrixCOO<double>& solver_matrix)
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
@@ -470,7 +477,8 @@ void DirectSolver_COO_MUMPS_Take::buildSolverMatrixCircleSection(const int i_r, 
     }
 }
 
-void DirectSolver_COO_MUMPS_Take::buildSolverMatrixRadialSection(const int i_theta,
+template <concepts::DomainGeometry DomainGeometry>
+void DirectSolver_COO_MUMPS_Take<DomainGeometry>::buildSolverMatrixRadialSection(const int i_theta,
                                                                  SparseMatrixCOO<double>& solver_matrix)
 {
     assert(level_cache_.cacheDensityProfileCoefficients());
@@ -493,7 +501,8 @@ void DirectSolver_COO_MUMPS_Take::buildSolverMatrixRadialSection(const int i_the
 
 /* ------------------------------------------------------------------------ */
 /* If the indexing is not smoother-based, please adjust the access patterns */
-SparseMatrixCOO<double> DirectSolver_COO_MUMPS_Take::buildSolverMatrix()
+template <concepts::DomainGeometry DomainGeometry>
+SparseMatrixCOO<double> DirectSolver_COO_MUMPS_Take<DomainGeometry>::buildSolverMatrix()
 {
     const int n   = grid_.numberOfNodes();
     const int nnz = getNonZeroCountSolverMatrix();
