@@ -432,7 +432,7 @@ void IGMGPolar::initRhsHierarchy(Vector<double> rhs)
     Kokkos::deep_copy(levels_[0].rhs(), rhs);
     for (int level_depth = 0; level_depth < number_of_levels_ - 1; ++level_depth) {
         Level& current_level = levels_[level_depth];
-        Level& next_level = levels_[level_depth + 1];
+        Level& next_level    = levels_[level_depth + 1];
         restriction(level_depth, next_level.rhs(), current_level.rhs());
     }
 }
