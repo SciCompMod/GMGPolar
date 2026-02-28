@@ -241,6 +241,4 @@ void IGMGPolar::printSettings() const
     else {
         std::cout << "Preconditioned Conjugate Gradient: Disabled\n";
     }
-
-    std::cout << "------------------------------\n";
 }
