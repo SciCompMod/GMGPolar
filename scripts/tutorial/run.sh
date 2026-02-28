@@ -77,7 +77,7 @@ PCG_FMG=1
 PCG_FMG_iterations=1
 PCG_FMG_cycle=0 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
 # Additional multigrid iterations after initial approximation to solve the linear system in each PCG iteration
-PCG_MG_iterations=1
+PCG_MG_iterations=2
 PCG_MG_cycle=0 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
 
 # Extrapolation Method:
