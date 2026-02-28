@@ -429,14 +429,11 @@ void IGMGPolar::solvePCG(double& initial_residual_norm, double& current_residual
 
 void IGMGPolar::initRhsHierarchy(Vector<double> rhs)
 {
-    Level& level = levels_[0];
-    Kokkos::deep_copy(level.rhs(), rhs);
-    for (int level_depth = 0; level_depth < number_of_levels_; ++level_depth) {
+    Kokkos::deep_copy(levels_[0].rhs(), rhs);
+    for (int level_depth = 0; level_depth < number_of_levels_ - 1; ++level_depth) {
         Level& current_level = levels_[level_depth];
-        if (level_depth + 1 < number_of_levels_) {
-            Level& next_level = levels_[level_depth + 1];
-            restriction(level_depth, next_level.rhs(), current_level.rhs());
-        }
+        Level& next_level = levels_[level_depth + 1];
+        restriction(level_depth, next_level.rhs(), current_level.rhs());
     }
 }
 
