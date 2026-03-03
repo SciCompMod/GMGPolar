@@ -467,20 +467,24 @@ template <concepts::DomainGeometry DomainGeometry>
 void ExtrapolatedSmootherTake<DomainGeometry>::applyAscOrthoCircleSection(int i_r, ConstVector<double> x,
                                                                            ConstVector<double> rhs, Vector<double> temp)
 {
-    assert(i_r >= 0 && i_r < grid_.numberSmootherCircles());
+    const PolarGrid&                  grid        = ExtrapolatedSmoother<DomainGeometry>::grid_;
+    const LevelCache<DomainGeometry>& level_cache = ExtrapolatedSmoother<DomainGeometry>::level_cache_;
 
-    assert(level_cache_.cacheDensityProfileCoefficients());
-    assert(level_cache_.cacheDomainGeometry());
+    assert(i_r >= 0 && i_r < grid.numberSmootherCircles());
 
-    const auto& arr        = level_cache_.arr();
-    const auto& att        = level_cache_.att();
-    const auto& art        = level_cache_.art();
-    const auto& detDF      = level_cache_.detDF();
-    const auto& coeff_beta = level_cache_.coeff_beta();
+    assert(level_cache.cacheDensityProfileCoefficients());
+    assert(level_cache.cacheDomainGeometry());
 
-    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
-        extrapolated_smoother_take::nodeApplyAscOrthoCircleTake(i_r, i_theta, grid_, DirBC_Interior_, x, rhs, temp,
-                                                                arr, att, art, detDF, coeff_beta);
+    const auto& arr        = level_cache.arr();
+    const auto& att        = level_cache.att();
+    const auto& art        = level_cache.art();
+    const auto& detDF      = level_cache.detDF();
+    const auto& coeff_beta = level_cache.coeff_beta();
+
+    for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
+        extrapolated_smoother_take::nodeApplyAscOrthoCircleTake(i_r, i_theta, grid,
+                                                                ExtrapolatedSmoother<DomainGeometry>::DirBC_Interior_,
+                                                                x, rhs, temp, arr, att, art, detDF, coeff_beta);
     }
 }
 
@@ -488,19 +492,23 @@ template <concepts::DomainGeometry DomainGeometry>
 void ExtrapolatedSmootherTake<DomainGeometry>::applyAscOrthoRadialSection(int i_theta, ConstVector<double> x,
                                                                            ConstVector<double> rhs, Vector<double> temp)
 {
-    assert(i_theta >= 0 && i_theta < grid_.ntheta());
+    const PolarGrid&                  grid        = ExtrapolatedSmoother<DomainGeometry>::grid_;
+    const LevelCache<DomainGeometry>& level_cache = ExtrapolatedSmoother<DomainGeometry>::level_cache_;
 
-    assert(level_cache_.cacheDensityProfileCoefficients());
-    assert(level_cache_.cacheDomainGeometry());
+    assert(i_theta >= 0 && i_theta < grid.ntheta());
 
-    const auto& arr        = level_cache_.arr();
-    const auto& att        = level_cache_.att();
-    const auto& art        = level_cache_.art();
-    const auto& detDF      = level_cache_.detDF();
-    const auto& coeff_beta = level_cache_.coeff_beta();
+    assert(level_cache.cacheDensityProfileCoefficients());
+    assert(level_cache.cacheDomainGeometry());
 
-    for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
-        extrapolated_smoother_take::nodeApplyAscOrthoRadialTake(i_r, i_theta, grid_, DirBC_Interior_, x, rhs, temp,
-                                                                arr, att, art, detDF, coeff_beta);
+    const auto& arr        = level_cache.arr();
+    const auto& att        = level_cache.att();
+    const auto& art        = level_cache.art();
+    const auto& detDF      = level_cache.detDF();
+    const auto& coeff_beta = level_cache.coeff_beta();
+
+    for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
+        extrapolated_smoother_take::nodeApplyAscOrthoRadialTake(i_r, i_theta, grid,
+                                                                ExtrapolatedSmoother<DomainGeometry>::DirBC_Interior_,
+                                                                x, rhs, temp, arr, att, art, detDF, coeff_beta);
     }
 }

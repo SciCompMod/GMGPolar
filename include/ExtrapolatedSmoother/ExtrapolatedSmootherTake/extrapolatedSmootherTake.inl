@@ -56,41 +56,44 @@ void ExtrapolatedSmootherTake<DomainGeometry>::extrapolatedSmoothing(Vector<doub
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
-    assert(level_cache_.cacheDensityProfileCoefficients());
-    assert(level_cache_.cacheDomainGeometry());
+    assert(ExtrapolatedSmoother<DomainGeometry>::level_cache_.cacheDensityProfileCoefficients());
+    assert(ExtrapolatedSmoother<DomainGeometry>::level_cache_.cacheDomainGeometry());
+
+    const PolarGrid& grid            = ExtrapolatedSmoother<DomainGeometry>::grid_;
+    const int        num_omp_threads = ExtrapolatedSmoother<DomainGeometry>::num_omp_threads_;
 
     /* The outer most circle next to the radial section is defined to be black. */
     /* Priority: Black -> White. */
-    const int start_black_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 1 : 0;
-    const int start_white_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 0 : 1;
+    const int start_black_circles = (grid.numberSmootherCircles() % 2 == 0) ? 1 : 0;
+    const int start_white_circles = (grid.numberSmootherCircles() % 2 == 0) ? 0 : 1;
 
     /* Black Circle Section */
-#pragma omp parallel for num_threads(num_omp_threads_)
-    for (int i_r = start_black_circles; i_r < grid_.numberSmootherCircles(); i_r += 2) {
+#pragma omp parallel for num_threads(num_omp_threads)
+    for (int i_r = start_black_circles; i_r < grid.numberSmootherCircles(); i_r += 2) {
         applyAscOrthoCircleSection(i_r, x, rhs, temp);
     } /* Implicit barrier */
 
     solveBlackCircleSection(x, temp);
 
     /* White Circle Section */
-#pragma omp parallel for num_threads(num_omp_threads_)
-    for (int i_r = start_white_circles; i_r < grid_.numberSmootherCircles(); i_r += 2) {
+#pragma omp parallel for num_threads(num_omp_threads)
+    for (int i_r = start_white_circles; i_r < grid.numberSmootherCircles(); i_r += 2) {
         applyAscOrthoCircleSection(i_r, x, rhs, temp);
     } /* Implicit barrier */
 
     solveWhiteCircleSection(x, temp);
 
     /* Black Radial Section */
-#pragma omp parallel for num_threads(num_omp_threads_)
-    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta += 2) {
+#pragma omp parallel for num_threads(num_omp_threads)
+    for (int i_theta = 0; i_theta < grid.ntheta(); i_theta += 2) {
         applyAscOrthoRadialSection(i_theta, x, rhs, temp);
     } /* Implicit barrier */
 
     solveBlackRadialSection(x, temp);
 
     /* White Radial Section*/
-#pragma omp parallel for num_threads(num_omp_threads_)
-    for (int i_theta = 1; i_theta < grid_.ntheta(); i_theta += 2) {
+#pragma omp parallel for num_threads(num_omp_threads)
+    for (int i_theta = 1; i_theta < grid.ntheta(); i_theta += 2) {
         applyAscOrthoRadialSection(i_theta, x, rhs, temp);
     } /* Implicit barrier */
 

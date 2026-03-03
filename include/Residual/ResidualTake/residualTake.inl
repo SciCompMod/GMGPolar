@@ -19,20 +19,23 @@ void ResidualTake<DomainGeometry>::computeResidual(Vector<double> result, ConstV
 {
     assert(result.size() == x.size());
 
-    assert(level_cache_.cacheDensityProfileCoefficients());
-    assert(level_cache_.cacheDomainGeometry());
+    assert(Residual<DomainGeometry>::level_cache_.cacheDensityProfileCoefficients());
+    assert(Residual<DomainGeometry>::level_cache_.cacheDomainGeometry());
 
-    #pragma omp parallel num_threads(num_omp_threads_)
+    const PolarGrid& grid            = Residual<DomainGeometry>::grid_;
+    const int        num_omp_threads = Residual<DomainGeometry>::num_omp_threads_;
+
+    #pragma omp parallel num_threads(num_omp_threads)
     {
         /* Circle Section */
         #pragma omp for nowait
-        for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
+        for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
             applyCircleSection(i_r, result, rhs, x);
         }
 
         /* Radial Section */
         #pragma omp for nowait
-        for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
+        for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
             applyRadialSection(i_theta, result, rhs, x);
         }
     }

@@ -56,15 +56,18 @@ void SmootherGive<DomainGeometry>::smoothing(Vector<double> x, ConstVector<doubl
 
     Kokkos::deep_copy(temp, rhs);
 
+    const PolarGrid& grid            = Smoother<DomainGeometry>::grid_;
+    const int        num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
+
     /* Multi-threaded execution */
-    const int num_smoother_circles = grid_.numberSmootherCircles();
-    const int num_radial_lines     = grid_.ntheta();
+    const int num_smoother_circles = grid.numberSmootherCircles();
+    const int num_radial_lines     = grid.ntheta();
 
     /* ----------------------------------------------- */
     /* 1. Black-Circle update (u_bc):                  */
     /*    A_bc * u_bc = f_bc − A_bc^ortho * u_bc^ortho */
     /* ----------------------------------------------- */
-#pragma omp parallel num_threads(num_omp_threads_)
+#pragma omp parallel num_threads(num_omp_threads)
     {
         /* Inside Black Section */
 #pragma omp for
@@ -91,7 +94,7 @@ void SmootherGive<DomainGeometry>::smoothing(Vector<double> x, ConstVector<doubl
     /* 2. White-Circle update (u_wc):                  */
     /*    A_wc * u_wc = f_wc − A_wc^ortho * u_wc^ortho */
     /* ----------------------------------------------- */
-#pragma omp parallel num_threads(num_omp_threads_)
+#pragma omp parallel num_threads(num_omp_threads)
     {
         /* Inside White Section */
 #pragma omp for
@@ -118,7 +121,7 @@ void SmootherGive<DomainGeometry>::smoothing(Vector<double> x, ConstVector<doubl
     /* 3. Black-Radial update (u_br):                  */
     /*    A_br * u_br = f_br − A_br^ortho * u_br^ortho */
     /* ----------------------------------------------- */
-#pragma omp parallel num_threads(num_omp_threads_)
+#pragma omp parallel num_threads(num_omp_threads)
     {
         /* Inside Black Section */
 #pragma omp for
@@ -142,7 +145,7 @@ void SmootherGive<DomainGeometry>::smoothing(Vector<double> x, ConstVector<doubl
     /* 4. White-Radial update (u_wr):                  */
     /*    A_wr * u_wr = f_wr − A_wr^ortho * u_wr^ortho */
     /* ----------------------------------------------- */
-#pragma omp parallel num_threads(num_omp_threads_)
+#pragma omp parallel num_threads(num_omp_threads)
     {
         /* Inside Black Section */
 #pragma omp for

@@ -638,16 +638,19 @@ void SmootherGive<DomainGeometry>::nodeBuildAscGive(int i_r, int i_theta, const 
 template <concepts::DomainGeometry DomainGeometry>
 void SmootherGive<DomainGeometry>::buildAscCircleSection(const int i_r)
 {
-    const double r = grid_.radius(i_r);
-    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
-        const int global_index = grid_.index(i_r, i_theta);
-        const double theta     = grid_.theta(i_theta);
+    const PolarGrid&                  grid        = Smoother<DomainGeometry>::grid_;
+    const LevelCache<DomainGeometry>& level_cache = Smoother<DomainGeometry>::level_cache_;
+
+    const double r = grid.radius(i_r);
+    for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
+        const int global_index = grid.index(i_r, i_theta);
+        const double theta     = grid.theta(i_theta);
 
         double coeff_beta, arr, att, art, detDF;
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
+        level_cache.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Build Asc at the current node
-        nodeBuildAscGive(i_r, i_theta, grid_, DirBC_Interior_, inner_boundary_circle_matrix_,
+        nodeBuildAscGive(i_r, i_theta, grid, Smoother<DomainGeometry>::DirBC_Interior_, inner_boundary_circle_matrix_,
                          circle_tridiagonal_solver_, radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
     }
 }
@@ -655,16 +658,19 @@ void SmootherGive<DomainGeometry>::buildAscCircleSection(const int i_r)
 template <concepts::DomainGeometry DomainGeometry>
 void SmootherGive<DomainGeometry>::buildAscRadialSection(const int i_theta)
 {
-    const double theta = grid_.theta(i_theta);
-    for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
-        const int global_index = grid_.index(i_r, i_theta);
-        const double r         = grid_.radius(i_r);
+    const PolarGrid&                  grid        = Smoother<DomainGeometry>::grid_;
+    const LevelCache<DomainGeometry>& level_cache = Smoother<DomainGeometry>::level_cache_;
+
+    const double theta = grid.theta(i_theta);
+    for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
+        const int global_index = grid.index(i_r, i_theta);
+        const double r         = grid.radius(i_r);
 
         double coeff_beta, arr, att, art, detDF;
-        level_cache_.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
+        level_cache.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Build Asc at the current node
-        nodeBuildAscGive(i_r, i_theta, grid_, DirBC_Interior_, inner_boundary_circle_matrix_,
+        nodeBuildAscGive(i_r, i_theta, grid, Smoother<DomainGeometry>::DirBC_Interior_, inner_boundary_circle_matrix_,
                          circle_tridiagonal_solver_, radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
     }
 }
@@ -678,18 +684,22 @@ void SmootherGive<DomainGeometry>::buildAscMatrices()
     // BatchedTridiagonalSolvers allocations are handled in the SmootherTake constructor.
     // circle_tridiagonal_solver_[batch_index=0] is unitialized. Use inner_boundary_circle_matrix_ instead.
 
+    const PolarGrid& grid            = Smoother<DomainGeometry>::grid_;
+    const bool       DirBC_Interior  = Smoother<DomainGeometry>::DirBC_Interior_;
+    const int        num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
+
 #ifdef GMGPOLAR_USE_MUMPS
     // Although the matrix is symmetric, we need to store all its entries, so we disable the symmetry.
     const int inner_i_r           = 0;
     const int inner_nnz           = getNonZeroCountCircleAsc(inner_i_r);
-    const int num_circle_nodes    = grid_.ntheta();
+    const int num_circle_nodes    = grid.ntheta();
     inner_boundary_circle_matrix_ = SparseMatrixCOO<double>(num_circle_nodes, num_circle_nodes, inner_nnz);
     inner_boundary_circle_matrix_.is_symmetric(false);
 #else
     std::function<int(int)> nnz_per_row = [&](int i_theta) {
-        return DirBC_Interior_ ? 1 : 4;
+        return DirBC_Interior ? 1 : 4;
     };
-    const int num_circle_nodes    = grid_.ntheta();
+    const int num_circle_nodes    = grid.ntheta();
     inner_boundary_circle_matrix_ = SparseMatrixCSR<double>(num_circle_nodes, num_circle_nodes, nnz_per_row);
 #endif
 
@@ -698,11 +708,11 @@ void SmootherGive<DomainGeometry>::buildAscMatrices()
     /* ---------------------------------- */
 
     /*  Multi-threaded execution: */
-    const int num_smoother_circles    = grid_.numberSmootherCircles();
-    const int additional_radial_tasks = grid_.ntheta() % 3;
-    const int num_radial_tasks        = grid_.ntheta() - additional_radial_tasks;
+    const int num_smoother_circles    = grid.numberSmootherCircles();
+    const int additional_radial_tasks = grid.ntheta() % 3;
+    const int num_radial_tasks        = grid.ntheta() - additional_radial_tasks;
 
-#pragma omp parallel num_threads(num_omp_threads_)
+#pragma omp parallel num_threads(num_omp_threads)
     {
 #pragma omp for
         for (int i_r = 0; i_r < num_smoother_circles; i_r += 3) {

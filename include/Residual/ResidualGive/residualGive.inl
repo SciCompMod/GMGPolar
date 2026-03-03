@@ -21,39 +21,43 @@ void ResidualGive<DomainGeometry>::computeResidual(Vector<double> result, ConstV
 
     Kokkos::deep_copy(result, rhs);
 
+    const PolarGrid& grid = Residual<DomainGeometry>::grid_;
+
+    const int num_omp_threads = Residual<DomainGeometry>::num_omp_threads_;
+
     /* Single-threaded execution */
-    if (num_omp_threads_ == 1) {
-        for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
+    if (num_omp_threads == 1) {
+        for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
             applyCircleSection(i_r, result, x);
         }
-        for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
+        for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
             applyRadialSection(i_theta, result, x);
         }
     }
     /* Multi-threaded execution */
     else {
-        const int num_circle_tasks        = grid_.numberSmootherCircles();
-        const int additional_radial_tasks = grid_.ntheta() % 3;
-        const int num_radial_tasks        = grid_.ntheta() - additional_radial_tasks;
+        const int num_circle_tasks        = grid.numberSmootherCircles();
+        const int additional_radial_tasks = grid.ntheta() % 3;
+        const int num_radial_tasks        = grid.ntheta() - additional_radial_tasks;
 
-        #pragma omp parallel num_threads(num_omp_threads_)
+        #pragma omp parallel num_threads(num_omp_threads)
         {
             /* Circle Section 0 */
             #pragma omp for
             for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
-                int i_r = grid_.numberSmootherCircles() - circle_task - 1;
+                int i_r = grid.numberSmootherCircles() - circle_task - 1;
                 applyCircleSection(i_r, result, x);
             }
             /* Circle Section 1 */
             #pragma omp for
             for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 3) {
-                int i_r = grid_.numberSmootherCircles() - circle_task - 1;
+                int i_r = grid.numberSmootherCircles() - circle_task - 1;
                 applyCircleSection(i_r, result, x);
             }
             /* Circle Section 2 */
             #pragma omp for nowait
             for (int circle_task = 2; circle_task < num_circle_tasks; circle_task += 3) {
-                int i_r = grid_.numberSmootherCircles() - circle_task - 1;
+                int i_r = grid.numberSmootherCircles() - circle_task - 1;
                 applyCircleSection(i_r, result, x);
             }
 

@@ -219,20 +219,23 @@ void SmootherTake<DomainGeometry>::applyAscOrthoCircleSection(int i_r, ConstVect
 {
     using smoother_take::nodeApplyAscOrthoCircleTake;
 
-    assert(i_r >= 0 && i_r < grid_.numberSmootherCircles());
+    const PolarGrid&                  grid        = Smoother<DomainGeometry>::grid_;
+    const LevelCache<DomainGeometry>& level_cache = Smoother<DomainGeometry>::level_cache_;
 
-    assert(level_cache_.cacheDensityProfileCoefficients());
-    assert(level_cache_.cacheDomainGeometry());
+    assert(i_r >= 0 && i_r < grid.numberSmootherCircles());
 
-    ConstVector<double> arr        = level_cache_.arr();
-    ConstVector<double> att        = level_cache_.att();
-    ConstVector<double> art        = level_cache_.art();
-    ConstVector<double> detDF      = level_cache_.detDF();
-    ConstVector<double> coeff_beta = level_cache_.coeff_beta();
+    assert(level_cache.cacheDensityProfileCoefficients());
+    assert(level_cache.cacheDomainGeometry());
 
-    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
-        nodeApplyAscOrthoCircleTake(i_r, i_theta, grid_, DirBC_Interior_, x, rhs, temp, arr, att, art, detDF,
-                                    coeff_beta);
+    ConstVector<double> arr        = level_cache.arr();
+    ConstVector<double> att        = level_cache.att();
+    ConstVector<double> art        = level_cache.art();
+    ConstVector<double> detDF      = level_cache.detDF();
+    ConstVector<double> coeff_beta = level_cache.coeff_beta();
+
+    for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
+        nodeApplyAscOrthoCircleTake(i_r, i_theta, grid, Smoother<DomainGeometry>::DirBC_Interior_, x, rhs, temp, arr,
+                                    att, art, detDF, coeff_beta);
     }
 }
 
@@ -242,19 +245,22 @@ void SmootherTake<DomainGeometry>::applyAscOrthoRadialSection(int i_theta, Const
 {
     using smoother_take::nodeApplyAscOrthoRadialTake;
 
-    assert(i_theta >= 0 && i_theta < grid_.ntheta());
+    const PolarGrid&                  grid        = Smoother<DomainGeometry>::grid_;
+    const LevelCache<DomainGeometry>& level_cache = Smoother<DomainGeometry>::level_cache_;
 
-    assert(level_cache_.cacheDensityProfileCoefficients());
-    assert(level_cache_.cacheDomainGeometry());
+    assert(i_theta >= 0 && i_theta < grid.ntheta());
 
-    ConstVector<double> arr        = level_cache_.arr();
-    ConstVector<double> att        = level_cache_.att();
-    ConstVector<double> art        = level_cache_.art();
-    ConstVector<double> detDF      = level_cache_.detDF();
-    ConstVector<double> coeff_beta = level_cache_.coeff_beta();
+    assert(level_cache.cacheDensityProfileCoefficients());
+    assert(level_cache.cacheDomainGeometry());
 
-    for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
-        nodeApplyAscOrthoRadialTake(i_r, i_theta, grid_, DirBC_Interior_, x, rhs, temp, arr, att, art, detDF,
-                                    coeff_beta);
+    ConstVector<double> arr        = level_cache.arr();
+    ConstVector<double> att        = level_cache.att();
+    ConstVector<double> art        = level_cache.art();
+    ConstVector<double> detDF      = level_cache.detDF();
+    ConstVector<double> coeff_beta = level_cache.coeff_beta();
+
+    for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
+        nodeApplyAscOrthoRadialTake(i_r, i_theta, grid, Smoother<DomainGeometry>::DirBC_Interior_, x, rhs, temp, arr,
+                                    att, art, detDF, coeff_beta);
     }
 }

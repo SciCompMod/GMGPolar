@@ -55,33 +55,36 @@ void ExtrapolatedSmootherGive<DomainGeometry>::extrapolatedSmoothing(Vector<doub
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
-#pragma omp parallel num_threads(num_omp_threads_)
+    const PolarGrid& grid            = ExtrapolatedSmoother<DomainGeometry>::grid_;
+    const int        num_omp_threads = ExtrapolatedSmoother<DomainGeometry>::num_omp_threads_;
+
+#pragma omp parallel num_threads(num_omp_threads)
     {
 #pragma omp for nowait
-        for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
-            for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
-                const int index = grid_.index(i_r, i_theta);
+        for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
+            for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
+                const int index = grid.index(i_r, i_theta);
                 temp[index]     = (i_r & 1 || i_theta & 1) ? rhs[index] : x[index];
             }
         }
 #pragma omp for
-        for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
-            for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
-                const int index = grid_.index(i_r, i_theta);
+        for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
+            for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
+                const int index = grid.index(i_r, i_theta);
                 temp[index]     = (i_r & 1 || i_theta & 1) ? rhs[index] : x[index];
             }
         }
     }
 
     /* Multi-threaded execution */
-    const int num_smoother_circles = grid_.numberSmootherCircles();
-    const int num_radial_lines     = grid_.ntheta();
+    const int num_smoother_circles = grid.numberSmootherCircles();
+    const int num_radial_lines     = grid.ntheta();
 
     /* ----------------------------------------------- */
     /* 1. Black-Circle update (u_bc):                  */
     /*    A_bc * u_bc = f_bc − A_bc^ortho * u_bc^ortho */
     /* ----------------------------------------------- */
-#pragma omp parallel num_threads(num_omp_threads_)
+#pragma omp parallel num_threads(num_omp_threads)
     {
         /* Inside Black Section */
 #pragma omp for
@@ -108,7 +111,7 @@ void ExtrapolatedSmootherGive<DomainGeometry>::extrapolatedSmoothing(Vector<doub
     /* 2. White-Circle update (u_wc):                  */
     /*    A_wc * u_wc = f_wc − A_wc^ortho * u_wc^ortho */
     /* ----------------------------------------------- */
-#pragma omp parallel num_threads(num_omp_threads_)
+#pragma omp parallel num_threads(num_omp_threads)
     {
         /* Inside White Section */
 #pragma omp for
@@ -135,7 +138,7 @@ void ExtrapolatedSmootherGive<DomainGeometry>::extrapolatedSmoothing(Vector<doub
     /* 3. Black-Radial update (u_br):                  */
     /*    A_br * u_br = f_br − A_br^ortho * u_br^ortho */
     /* ----------------------------------------------- */
-#pragma omp parallel num_threads(num_omp_threads_)
+#pragma omp parallel num_threads(num_omp_threads)
     {
         /* Inside Black Section */
 #pragma omp for
@@ -159,7 +162,7 @@ void ExtrapolatedSmootherGive<DomainGeometry>::extrapolatedSmoothing(Vector<doub
     /* 4. White-Radial update (u_wr):                  */
     /*    A_wr * u_wr = f_wr − A_wr^ortho * u_wr^ortho */
     /* ----------------------------------------------- */
-#pragma omp parallel num_threads(num_omp_threads_)
+#pragma omp parallel num_threads(num_omp_threads)
     {
         /* Inside Black Section */
 #pragma omp for

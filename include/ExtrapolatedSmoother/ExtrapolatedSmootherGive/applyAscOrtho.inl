@@ -895,20 +895,25 @@ void ExtrapolatedSmootherGive<DomainGeometry>::applyAscOrthoCircleSection(int i_
                                                                            ConstVector<double> x,
                                                                            ConstVector<double> rhs, Vector<double> temp)
 {
-    assert(i_r >= 0 && i_r < grid_.numberSmootherCircles() + 1);
+    const PolarGrid&                  grid        = ExtrapolatedSmoother<DomainGeometry>::grid_;
+    const LevelCache<DomainGeometry>& level_cache = ExtrapolatedSmoother<DomainGeometry>::level_cache_;
 
-    const double r = grid_.radius(i_r);
+    assert(i_r >= 0 && i_r < grid.numberSmootherCircles() + 1);
 
-    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
-        const double theta = grid_.theta(i_theta);
-        const int index    = grid_.index(i_r, i_theta);
+    const double r = grid.radius(i_r);
+
+    for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
+        const double theta = grid.theta(i_theta);
+        const int index    = grid.index(i_r, i_theta);
 
         double coeff_beta, arr, att, art, detDF;
-        level_cache_.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
+        level_cache.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Apply Asc Ortho at the current node
-        extrapolated_smoother_give::nodeApplyAscOrthoCircleGive(i_r, i_theta, grid_, DirBC_Interior_, smoother_color, x,
-                                                                 rhs, temp, arr, att, art, detDF, coeff_beta);
+        extrapolated_smoother_give::nodeApplyAscOrthoCircleGive(i_r, i_theta, grid,
+                                                                 ExtrapolatedSmoother<DomainGeometry>::DirBC_Interior_,
+                                                                 smoother_color, x, rhs, temp, arr, att, art, detDF,
+                                                                 coeff_beta);
     }
 }
 
@@ -917,18 +922,23 @@ void ExtrapolatedSmootherGive<DomainGeometry>::applyAscOrthoRadialSection(int i_
                                                                            ConstVector<double> x,
                                                                            ConstVector<double> rhs, Vector<double> temp)
 {
-    const double theta = grid_.theta(i_theta);
+    const PolarGrid&                  grid        = ExtrapolatedSmoother<DomainGeometry>::grid_;
+    const LevelCache<DomainGeometry>& level_cache = ExtrapolatedSmoother<DomainGeometry>::level_cache_;
 
-    /* !!! i_r = grid_.numberSmootherCircles()-1 !!! */
-    for (int i_r = grid_.numberSmootherCircles() - 1; i_r < grid_.nr(); i_r++) {
-        const double r  = grid_.radius(i_r);
-        const int index = grid_.index(i_r, i_theta);
+    const double theta = grid.theta(i_theta);
+
+    /* !!! i_r = grid.numberSmootherCircles()-1 !!! */
+    for (int i_r = grid.numberSmootherCircles() - 1; i_r < grid.nr(); i_r++) {
+        const double r  = grid.radius(i_r);
+        const int index = grid.index(i_r, i_theta);
 
         double coeff_beta, arr, att, art, detDF;
-        level_cache_.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
+        level_cache.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Apply Asc Ortho at the current node
-        extrapolated_smoother_give::nodeApplyAscOrthoRadialGive(i_r, i_theta, grid_, DirBC_Interior_, smoother_color, x,
-                                                                 rhs, temp, arr, att, art, detDF, coeff_beta);
+        extrapolated_smoother_give::nodeApplyAscOrthoRadialGive(i_r, i_theta, grid,
+                                                                 ExtrapolatedSmoother<DomainGeometry>::DirBC_Interior_,
+                                                                 smoother_color, x, rhs, temp, arr, att, art, detDF,
+                                                                 coeff_beta);
     }
 }

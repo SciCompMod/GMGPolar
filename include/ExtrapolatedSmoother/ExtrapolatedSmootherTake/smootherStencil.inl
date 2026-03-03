@@ -3,6 +3,9 @@
 template <concepts::DomainGeometry DomainGeometry>
 const Stencil& ExtrapolatedSmootherTake<DomainGeometry>::getStencil(int i_r, int i_theta) const
 {
+    const PolarGrid& grid           = ExtrapolatedSmoother<DomainGeometry>::grid_;
+    const bool       DirBC_Interior = ExtrapolatedSmoother<DomainGeometry>::DirBC_Interior_;
+
     // Only i_r = 0 is implemented.
     // Stencils are only used to obtain offsets to index into COO/CSR matrices.
     // The inner boundary requires a COO/CSR matrix (rather than a tridiagonal one)
@@ -14,13 +17,13 @@ const Stencil& ExtrapolatedSmootherTake<DomainGeometry>::getStencil(int i_r, int
     // preserve their grid classification, i.e., coarse nodes couple only to coarse
     // nodes and fine nodes couple only to fine nodes.
     // Without this assumption, it is a bit more complex to implement the stencil.
-    assert((grid_.ntheta() / 2) % 2 == 0);
+    assert((grid.ntheta() / 2) % 2 == 0);
 
     if (i_theta % 2 == 0) {
         return stencil_center_;
     }
     else {
-        if (!DirBC_Interior_) {
+        if (!DirBC_Interior) {
             return stencil_center_left_;
         }
         else {
@@ -32,6 +35,9 @@ const Stencil& ExtrapolatedSmootherTake<DomainGeometry>::getStencil(int i_r, int
 template <concepts::DomainGeometry DomainGeometry>
 int ExtrapolatedSmootherTake<DomainGeometry>::getNonZeroCountCircleAsc(int i_r) const
 {
+    const PolarGrid& grid           = ExtrapolatedSmoother<DomainGeometry>::grid_;
+    const bool       DirBC_Interior = ExtrapolatedSmoother<DomainGeometry>::DirBC_Interior_;
+
     // Only i_r = 0 is implemented.
     // The number of nonzero elements is only needed to construct COO matrices.
     // The inner boundary requires a COO/CSR matrix (rather than a tridiagonal one)
@@ -43,19 +49,22 @@ int ExtrapolatedSmootherTake<DomainGeometry>::getNonZeroCountCircleAsc(int i_r) 
     // preserve their grid classification, i.e., coarse nodes couple only to coarse
     // nodes and fine nodes couple only to fine nodes.
     // Without this assumption, it is a bit more complex to implement the stencil.
-    assert((grid_.ntheta() / 2) % 2 == 0);
+    assert((grid.ntheta() / 2) % 2 == 0);
 
-    if (!DirBC_Interior_) {
-        return grid_.ntheta() / 2 + 2 * (grid_.ntheta() / 2);
+    if (!DirBC_Interior) {
+        return grid.ntheta() / 2 + 2 * (grid.ntheta() / 2);
     }
     else {
-        return grid_.ntheta();
+        return grid.ntheta();
     }
 }
 
 template <concepts::DomainGeometry DomainGeometry>
 int ExtrapolatedSmootherTake<DomainGeometry>::getCircleAscIndex(int i_r, int i_theta) const
 {
+    const PolarGrid& grid           = ExtrapolatedSmoother<DomainGeometry>::grid_;
+    const bool       DirBC_Interior = ExtrapolatedSmoother<DomainGeometry>::DirBC_Interior_;
+
     // Only i_r = 0 is implemented.
     // getCircleAscIndex accumulates all stencil sizes within a line up to, but excluding the current node.
     // It is only used to obtain a ptr to index into COO matrices.
@@ -68,9 +77,9 @@ int ExtrapolatedSmootherTake<DomainGeometry>::getCircleAscIndex(int i_r, int i_t
     // preserve their grid classification, i.e., coarse nodes couple only to coarse
     // nodes and fine nodes couple only to fine nodes.
     // Without this assumption, it is a bit more complex to implement the stencil.
-    assert((grid_.ntheta() / 2) % 2 == 0);
+    assert((grid.ntheta() / 2) % 2 == 0);
 
-    if (!DirBC_Interior_) {
+    if (!DirBC_Interior) {
         if (i_theta % 2 == 0) {
             return 3 * (i_theta / 2);
         }
