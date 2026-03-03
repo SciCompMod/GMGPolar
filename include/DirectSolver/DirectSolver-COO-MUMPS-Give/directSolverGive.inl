@@ -4,9 +4,9 @@
 
 template <concepts::DomainGeometry DomainGeometry>
 DirectSolver_COO_MUMPS_Give<DomainGeometry>::DirectSolver_COO_MUMPS_Give(
-    const PolarGrid& grid, const LevelCache& level_cache, const DomainGeometry& domain_geometry,
+    const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache, const DomainGeometry& domain_geometry,
     const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior, int num_omp_threads)
-    : DirectSolver(grid, level_cache, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads)
+    : DirectSolver<DomainGeometry>(grid, level_cache, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads)
 {
     solver_matrix_ = buildSolverMatrix();
     initializeMumpsSolver(mumps_solver_, solver_matrix_);
