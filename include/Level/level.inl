@@ -108,11 +108,11 @@ void Level<DomainGeometry>::initializeResidual(const DomainGeometry& domain_geom
                                                const StencilDistributionMethod stencil_distribution_method)
 {
     if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
-        op_residual_ = std::make_unique<ResidualTake>(*grid_, *level_cache_, domain_geometry,
+        op_residual_ = std::make_unique<ResidualTake<DomainGeometry>>(*grid_, *level_cache_, domain_geometry,
                                                       density_profile_coefficients, DirBC_Interior, num_omp_threads);
     }
     else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
-        op_residual_ = std::make_unique<ResidualGive>(*grid_, *level_cache_, domain_geometry,
+        op_residual_ = std::make_unique<ResidualGive<DomainGeometry>>(*grid_, *level_cache_, domain_geometry,
                                                       density_profile_coefficients, DirBC_Interior, num_omp_threads);
     }
     if (!op_residual_)
@@ -137,20 +137,20 @@ void Level<DomainGeometry>::initializeDirectSolver(const DomainGeometry& domain_
 {
 #ifdef GMGPOLAR_USE_MUMPS
     if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
-        op_directSolver_ = std::make_unique<DirectSolver_COO_MUMPS_Take>(
+        op_directSolver_ = std::make_unique<DirectSolver_COO_MUMPS_Take<DomainGeometry>>(
             *grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads);
     }
     else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
-        op_directSolver_ = std::make_unique<DirectSolver_COO_MUMPS_Give>(
+        op_directSolver_ = std::make_unique<DirectSolver_COO_MUMPS_Give<DomainGeometry>>(
             *grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads);
     }
 #else
     if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
-        op_directSolver_ = std::make_unique<DirectSolver_CSR_LU_Take>(
+        op_directSolver_ = std::make_unique<DirectSolver_CSR_LU_Take<DomainGeometry>>(
             *grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads);
     }
     else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
-        op_directSolver_ = std::make_unique<DirectSolver_CSR_LU_Give>(
+        op_directSolver_ = std::make_unique<DirectSolver_CSR_LU_Give<DomainGeometry>>(
             *grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads);
     }
 #endif
@@ -175,11 +175,11 @@ void Level<DomainGeometry>::initializeSmoothing(const DomainGeometry& domain_geo
                                                 const StencilDistributionMethod stencil_distribution_method)
 {
     if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
-        op_smoother_ = std::make_unique<SmootherTake>(*grid_, *level_cache_, domain_geometry,
+        op_smoother_ = std::make_unique<SmootherTake<DomainGeometry>>(*grid_, *level_cache_, domain_geometry,
                                                       density_profile_coefficients, DirBC_Interior, num_omp_threads);
     }
     else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
-        op_smoother_ = std::make_unique<SmootherGive>(*grid_, *level_cache_, domain_geometry,
+        op_smoother_ = std::make_unique<SmootherGive<DomainGeometry>>(*grid_, *level_cache_, domain_geometry,
                                                       density_profile_coefficients, DirBC_Interior, num_omp_threads);
     }
     if (!op_smoother_)
@@ -202,11 +202,11 @@ void Level<DomainGeometry>::initializeExtrapolatedSmoothing(
     const bool DirBC_Interior, const int num_omp_threads, const StencilDistributionMethod stencil_distribution_method)
 {
     if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
-        op_extrapolated_smoother_ = std::make_unique<ExtrapolatedSmootherTake>(
+        op_extrapolated_smoother_ = std::make_unique<ExtrapolatedSmootherTake<DomainGeometry>>(
             *grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads);
     }
     else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
-        op_extrapolated_smoother_ = std::make_unique<ExtrapolatedSmootherGive>(
+        op_extrapolated_smoother_ = std::make_unique<ExtrapolatedSmootherGive<DomainGeometry>>(
             *grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads);
     }
     if (!op_extrapolated_smoother_)
