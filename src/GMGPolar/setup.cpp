@@ -43,7 +43,7 @@ int IGMGPolar::chooseNumberOfLevels(const PolarGrid& finestGrid)
     return levels;
 }
 
-void IGMGPolar::printSettings() const
+void IGMGPolar::printSettings(const PolarGrid& finest_grid, const PolarGrid& coarsest_grid) const
 {
 
     std::cout << "------------------------------\n";
@@ -95,9 +95,6 @@ void IGMGPolar::printSettings() const
     std::cout << "------------------------------\n";
     std::cout << "---------- PolarGrid ---------\n";
     std::cout << "------------------------------\n";
-
-    const PolarGrid& finest_grid   = levels_.front().grid();
-    const PolarGrid& coarsest_grid = levels_.back().grid();
 
     std::cout << "r ∈ [" << finest_grid.radius(0) << ", " << finest_grid.radius(finest_grid.nr() - 1)
               << "], θ ∈ [0, 2π]\n";

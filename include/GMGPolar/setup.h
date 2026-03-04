@@ -55,15 +55,15 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     levels_.reserve(number_of_levels_);
 
     int level_depth        = 0;
-    auto finest_levelCache = std::make_unique<LevelCache>(*finest_grid, density_profile_coefficients_, domain_geometry_,
-                                                          cache_density_profile_coefficients_, cache_domain_geometry_);
+    auto finest_levelCache = std::make_unique<LevelCache<DomainGeometry>>(*finest_grid, density_profile_coefficients_, domain_geometry_,
+                                                                         cache_density_profile_coefficients_, cache_domain_geometry_);
     levels_.emplace_back(level_depth, std::move(finest_grid), std::move(finest_levelCache), extrapolation_, FMG_);
 
     for (level_depth = 1; level_depth < number_of_levels_; level_depth++) {
         auto current_grid = std::make_unique<PolarGrid>(coarseningGrid(levels_[level_depth - 1].grid()));
         auto current_levelCache =
-            std::make_unique<LevelCache>(*current_grid, density_profile_coefficients_, domain_geometry_,
-                                         cache_density_profile_coefficients_, cache_domain_geometry_);
+            std::make_unique<LevelCache<DomainGeometry>>(*current_grid, density_profile_coefficients_, domain_geometry_,
+                                                         cache_density_profile_coefficients_, cache_domain_geometry_);
         levels_.emplace_back(level_depth, std::move(current_grid), std::move(current_levelCache), extrapolation_, FMG_);
     }
 
@@ -79,7 +79,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     interpolation_ = std::make_unique<Interpolation>(max_omp_threads_, DirBC_Interior_);
 
     if (verbose_ > 0)
-        printSettings();
+        printSettings(levels_[0].grid(), levels_.back().grid());
 
     // -------------------------------------------------------
     // Initializing various operators based on the level index
