@@ -48,15 +48,15 @@ TEST(OperatorATest, applyA_DirBC_Interior)
     bool cache_domain_geometry              = true;
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
-    auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
+    auto levelCache = std::make_unique<LevelCache<decltype(domain_geometry)>>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, false);
+    Level<decltype(domain_geometry)> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, false);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    ResidualGive residualGive_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    ResidualGive<decltype(domain_geometry)> residualGive_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
-    ResidualTake residualTake_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    ResidualTake<decltype(domain_geometry)> residualTake_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
 
     Vector<double> x   = generate_random_sample_data(level.grid(), 42);
@@ -103,15 +103,15 @@ TEST(OperatorATest, applyA_AcrossOrigin)
     bool cache_domain_geometry              = true;
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
-    auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
+    auto levelCache = std::make_unique<LevelCache<decltype(domain_geometry)>>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, false);
+    Level<decltype(domain_geometry)> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, false);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    ResidualGive residualGive_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    ResidualGive<decltype(domain_geometry)> residualGive_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
-    ResidualTake residualTake_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    ResidualTake<decltype(domain_geometry)> residualTake_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
 
     Vector<double> x   = generate_random_sample_data(level.grid(), 42);
