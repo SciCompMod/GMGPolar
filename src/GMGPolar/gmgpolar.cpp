@@ -238,17 +238,6 @@ void IGMGPolar::relativeTolerance(std::optional<double> tol)
 /* ---------------------------------------------------------------------- */
 /* Solution & Grid Access                                                 */
 /* ---------------------------------------------------------------------- */
-Vector<double> IGMGPolar::solution()
-{
-    int level_depth = 0;
-    return levels_[level_depth].solution();
-}
-ConstVector<double> IGMGPolar::solution() const
-{
-    int level_depth = 0;
-    return levels_[level_depth].solution();
-}
-
 const PolarGrid& IGMGPolar::grid() const
 {
     return grid_;
