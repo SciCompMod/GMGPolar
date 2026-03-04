@@ -24,16 +24,6 @@ set(GMG_POLAR_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/solver.cpp
 )
 
-# file(GLOB_RECURSE MULTIGRID_METHODS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/*.cpp)
-set(MULTIGRID_METHODS_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/extrapolated_multigrid_F_Cycle.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/extrapolated_multigrid_V_Cycle.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/extrapolated_multigrid_W_Cycle.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/multigrid_F_Cycle.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/multigrid_V_Cycle.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/multigrid_W_Cycle.cpp
-)
-
 # file(GLOB_RECURSE STENCIL_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Stencil/*.cpp)
 set(STENCIL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Stencil/stencil.cpp
@@ -61,7 +51,6 @@ set(CONFIG_PARSER_SOURCES
 add_library(GMGPolarLib STATIC
     ${POLAR_GRID_SOURCES}
     ${GMG_POLAR_SOURCES}
-    ${MULTIGRID_METHODS_SOURCES}
     ${STENCIL_SOURCES}
     ${INTERPOLATION_SOURCES}
     ${CONFIG_PARSER_SOURCES}
