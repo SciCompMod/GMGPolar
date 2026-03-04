@@ -1,6 +1,8 @@
-#include "../../../include/GMGPolar/gmgpolar.h"
-
-void IGMGPolar::multigrid_F_Cycle(int level_depth, Vector<double> solution, Vector<double> rhs, Vector<double> residual)
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_F_Cycle(int level_depth,
+                                                                              Vector<double> solution,
+                                                                              Vector<double> rhs,
+                                                                              Vector<double> residual)
 {
     assert(0 <= level_depth && level_depth < number_of_levels_ - 1);
 
@@ -9,8 +11,8 @@ void IGMGPolar::multigrid_F_Cycle(int level_depth, Vector<double> solution, Vect
         start_MGC = std::chrono::high_resolution_clock::now();
     }
 
-    Level& level      = levels_[level_depth];
-    Level& next_level = levels_[level_depth + 1];
+    Level<DomainGeometry>& level      = levels_[level_depth];
+    Level<DomainGeometry>& next_level = levels_[level_depth + 1];
 
     auto start_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
 
