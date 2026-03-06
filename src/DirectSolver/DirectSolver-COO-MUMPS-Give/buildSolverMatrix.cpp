@@ -920,7 +920,7 @@ SparseMatrixCOO<double> DirectSolver_COO_MUMPS_Give::buildSolverMatrix()
         if (row <= col) {
             symmetric_solver_matrix.row_index(current_nz) = row;
             symmetric_solver_matrix.col_index(current_nz) = col;
-            symmetric_solver_matrix.value(current_nz)     = std::move(solver_matrix.value(nz_index));
+            symmetric_solver_matrix.value(current_nz)     = solver_matrix.value(nz_index);
             current_nz++;
         }
     }

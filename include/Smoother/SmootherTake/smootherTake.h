@@ -53,9 +53,6 @@ public:
                           const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior,
                           int num_omp_threads);
 
-    // If MUMPS is enabled, this cleans up the inner boundary solver.
-    ~SmootherTake() override;
-
     // Performs one full coupled smoothing sweep:
     //   BC -> WC -> BR -> WR
     // using temp as RHS workspace.
@@ -79,7 +76,9 @@ private:
     // When using the in-house solver, the matrix is stored in CSR format.
 #ifdef GMGPOLAR_USE_MUMPS
     using MatrixType = SparseMatrixCOO<double>;
-    DMUMPS_STRUC_C inner_boundary_mumps_solver_;
+    // MUMPS solver structure with the solver matrix initialized in the constructor.
+    // std::optional is used because CooMumpsSolver cannot be default-constructed.
+    std::optional<CooMumpsSolver> inner_boundary_mumps_solver_;
 #else
     using MatrixType = SparseMatrixCSR<double>;
     SparseLUSolver<double> inner_boundary_lu_solver_;
@@ -168,14 +167,4 @@ private:
     void solveWhiteCircleSection(Vector<double> x, Vector<double> temp);
     void solveBlackRadialSection(Vector<double> x, Vector<double> temp);
     void solveWhiteRadialSection(Vector<double> x, Vector<double> temp);
-
-    /* ----------------------------------- */
-    /* Initialize and destroy MUMPS solver */
-    /* ----------------------------------- */
-#ifdef GMGPOLAR_USE_MUMPS
-    // Initialize sparse MUMPS solver with assembled COO matrix.
-    void initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, SparseMatrixCOO<double>& solver_matrix);
-    // Release MUMPS internal memory and MPI structures.
-    void finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver);
-#endif
 };

@@ -18,18 +18,12 @@ void ExtrapolatedSmootherGive::solveBlackCircleSection(Vector<double> x, Vector<
         int batch_stride = 2;
         circle_tridiagonal_solver_.solve_diagonal(circle_section, batch_offset, batch_stride);
 
+        Vector<double> inner_boundary = Kokkos::subview(temp, Kokkos::make_pair(0, grid_.ntheta()));
+
 #ifdef GMGPOLAR_USE_MUMPS
-        inner_boundary_mumps_solver_.job    = JOB_COMPUTE_SOLUTION;
-        inner_boundary_mumps_solver_.nrhs   = 1; // single rhs vector
-        inner_boundary_mumps_solver_.nz_rhs = grid_.ntheta(); // non-zeros in rhs
-        inner_boundary_mumps_solver_.rhs    = circle_section.data();
-        inner_boundary_mumps_solver_.lrhs   = grid_.ntheta(); // leading dimension of rhs
-        dmumps_c(&inner_boundary_mumps_solver_);
-        if (inner_boundary_mumps_solver_.info[0] != 0) {
-            std::cerr << "Error solving the system: " << inner_boundary_mumps_solver_.info[0] << std::endl;
-        }
+        inner_boundary_mumps_solver_->solve(inner_boundary);
 #else
-        inner_boundary_lu_solver_.solveInPlace(circle_section.data());
+        inner_boundary_lu_solver_.solveInPlace(inner_boundary);
 #endif
     }
 
@@ -61,18 +55,12 @@ void ExtrapolatedSmootherGive::solveWhiteCircleSection(Vector<double> x, Vector<
         int batch_stride = 2;
         circle_tridiagonal_solver_.solve_diagonal(circle_section, batch_offset, batch_stride);
 
+        Vector<double> inner_boundary = Kokkos::subview(temp, Kokkos::make_pair(0, grid_.ntheta()));
+
 #ifdef GMGPOLAR_USE_MUMPS
-        inner_boundary_mumps_solver_.job    = JOB_COMPUTE_SOLUTION;
-        inner_boundary_mumps_solver_.nrhs   = 1; // single rhs vector
-        inner_boundary_mumps_solver_.nz_rhs = grid_.ntheta(); // non-zeros in rhs
-        inner_boundary_mumps_solver_.rhs    = circle_section.data();
-        inner_boundary_mumps_solver_.lrhs   = grid_.ntheta(); // leading dimension of rhs
-        dmumps_c(&inner_boundary_mumps_solver_);
-        if (inner_boundary_mumps_solver_.info[0] != 0) {
-            std::cerr << "Error solving the system: " << inner_boundary_mumps_solver_.info[0] << std::endl;
-        }
+        inner_boundary_mumps_solver_->solve(inner_boundary);
 #else
-        inner_boundary_lu_solver_.solveInPlace(circle_section.data());
+        inner_boundary_lu_solver_.solveInPlace(inner_boundary);
 #endif
     }
 
