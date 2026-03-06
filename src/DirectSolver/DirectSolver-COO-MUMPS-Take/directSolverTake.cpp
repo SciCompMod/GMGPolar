@@ -7,9 +7,8 @@ DirectSolver_COO_MUMPS_Take::DirectSolver_COO_MUMPS_Take(const PolarGrid& grid, 
                                                          const DensityProfileCoefficients& density_profile_coefficients,
                                                          bool DirBC_Interior, int num_omp_threads)
     : DirectSolver(grid, level_cache, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads)
+    , mumps_solver_(buildSolverMatrix())
 {
-    SparseMatrixCOO<double> solver_matrix = buildSolverMatrix();
-    mumps_solver_.emplace(std::move(solver_matrix));
 }
 
 void DirectSolver_COO_MUMPS_Take::solveInPlace(Vector<double> solution)
@@ -21,7 +20,7 @@ void DirectSolver_COO_MUMPS_Take::solveInPlace(Vector<double> solution)
     // ensuring that the solution at the boundary is correctly adjusted and maintains the required symmetry.
     applySymmetryShift(solution);
     // Solves the adjusted system symmetric(matrixA) * solution = rhs using the MUMPS solver.
-    mumps_solver_->solve(solution);
+    mumps_solver_.solve(solution);
 }
 
 #endif
