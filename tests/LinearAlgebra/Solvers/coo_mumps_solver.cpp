@@ -1,4 +1,3 @@
-#pragma once
 #ifdef GMGPOLAR_USE_MUMPS
 
     #include <gtest/gtest.h>
