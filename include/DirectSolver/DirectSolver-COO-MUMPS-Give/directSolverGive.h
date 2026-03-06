@@ -16,9 +16,8 @@ public:
     void solveInPlace(Vector<double> solution) override;
 
 private:
-    // MUMPS solver structure with the solver matrix initialized in the constructor.
-    // std::optional is used because CooMumpsSolver cannot be default-constructed.
-    std::optional<CooMumpsSolver> mumps_solver_;
+    // The stencil definitions must be defined before the declaration of the mumps_solver,
+    // since the mumps solver will be build in the member initializer.
 
     // clang-format off
     const Stencil stencil_interior_      = {
@@ -47,6 +46,9 @@ private:
         4,  2, -1
     };
     // clang-format on
+
+    // MUMPS solver structure with the solver matrix initialized in the constructor.
+    CooMumpsSolver mumps_solver_;
 
     // Constructs a symmetric solver matrix.
     SparseMatrixCOO<double> buildSolverMatrix();
