@@ -123,14 +123,16 @@ set(SMOOTHER_SOURCES
     
     # SmootherGive
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/applyAscOrtho.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/buildMatrix.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/buildInnerBoundaryAsc.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/buildTridiagonalAsc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/matrixStencil.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/smootherGive.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/solveAscSystem.cpp
     
     # SmootherTake
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/applyAscOrtho.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/buildMatrix.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/buildInnerBoundaryAsc.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/buildTridiagonalAsc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/matrixStencil.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/smootherTake.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/solveAscSystem.cpp
@@ -146,14 +148,16 @@ set(EXTRAPOLATED_SMOOTHER_SOURCES
     
     # ExtrapolatedSmootherGive
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/applyAscOrtho.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/buildAscMatrices.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/buildInnerBoundaryAsc.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/buildTridiagonalAsc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/smootherStencil.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/solveAscSystem.cpp
     
     # ExtrapolatedSmootherTake
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/applyAscOrtho.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/buildAscMatrices.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/buildInnerBoundaryAsc.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/buildTridiagonalAsc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/smootherStencil.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/solveAscSystem.cpp
@@ -197,7 +201,7 @@ find_package(OpenMP REQUIRED)
 if(OpenMP_CXX_FOUND)
     target_link_libraries(GMGPolarLib PUBLIC OpenMP::OpenMP_CXX)
 endif()
-find_package(Kokkos  4.4.1...<5 QUIET REQUIRED)
+find_package(Kokkos  4.4.1...<5.1 QUIET REQUIRED)
 target_link_libraries(GMGPolarLib PUBLIC Kokkos::kokkos)
 
 

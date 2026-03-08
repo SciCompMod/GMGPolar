@@ -166,13 +166,13 @@ void DirectSolver_CSR_LU_Take::nodeBuildSolverMatrixTake(int i_r, int i_theta, c
             double bottom_value = -coeff3 * (att[center_index] + att[bottom_index]); /* Bottom */
             double top_value    = -coeff4 * (att[center_index] + att[top_index]); /* Top */
 
-            double center_value =
-                (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] * fabs(detDF[center_index]) /* beta_{i,j} */
-                 - left_value /* Center: (Left) */
-                 - right_value /* Center: (Right) */
-                 - bottom_value /* Center: (Bottom) */
-                 - top_value /* Center: (Top) */
-                );
+            double center_value = (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] *
+                                       std::fabs(detDF[center_index]) /* beta_{i,j} */
+                                   - left_value /* Center: (Left) */
+                                   - right_value /* Center: (Right) */
+                                   - bottom_value /* Center: (Bottom) */
+                                   - top_value /* Center: (Top) */
+            );
 
             double bottom_right_value = +0.25 * (art[right_index] + art[bottom_index]); /* Bottom Right */
             double top_right_value    = -0.25 * (art[right_index] + art[top_index]); /* Top Right */

@@ -9,15 +9,15 @@ static inline void nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const Polar
     assert(i_r >= 0 && i_r < grid.numberSmootherCircles());
 
     if (i_r > 0 && i_r < grid.numberSmootherCircles()) {
-        double h1 = grid.radialSpacing(i_r - 1);
-        double h2 = grid.radialSpacing(i_r);
-        double k1 = grid.angularSpacing(i_theta - 1);
-        double k2 = grid.angularSpacing(i_theta);
+        const double h1 = grid.radialSpacing(i_r - 1);
+        const double h2 = grid.radialSpacing(i_r);
+        const double k1 = grid.angularSpacing(i_theta - 1);
+        const double k2 = grid.angularSpacing(i_theta);
 
-        double coeff1 = 0.5 * (k1 + k2) / h1;
-        double coeff2 = 0.5 * (k1 + k2) / h2;
-        double coeff3 = 0.5 * (h1 + h2) / k1;
-        double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff1 = 0.5 * (k1 + k2) / h1;
+        const double coeff2 = 0.5 * (k1 + k2) / h2;
+        const double coeff3 = 0.5 * (h1 + h2) / k1;
+        const double coeff4 = 0.5 * (h1 + h2) / k2;
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -53,15 +53,15 @@ static inline void nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const Polar
             // h1 gets replaced with 2 * R0.
             // (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()/2)).
             // Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil.
-            double h1 = 2.0 * grid.radius(0);
-            double h2 = grid.radialSpacing(i_r);
-            double k1 = grid.angularSpacing(i_theta - 1);
-            double k2 = grid.angularSpacing(i_theta);
+            const double h1 = 2.0 * grid.radius(0);
+            const double h2 = grid.radialSpacing(i_r);
+            const double k1 = grid.angularSpacing(i_theta - 1);
+            const double k2 = grid.angularSpacing(i_theta);
 
-            double coeff1 = 0.5 * (k1 + k2) / h1;
-            double coeff2 = 0.5 * (k1 + k2) / h2;
-            double coeff3 = 0.5 * (h1 + h2) / k1;
-            double coeff4 = 0.5 * (h1 + h2) / k2;
+            const double coeff1 = 0.5 * (k1 + k2) / h1;
+            const double coeff2 = 0.5 * (k1 + k2) / h2;
+            const double coeff3 = 0.5 * (h1 + h2) / k1;
+            const double coeff4 = 0.5 * (h1 + h2) / k2;
 
             const int i_theta_M1     = grid.wrapThetaIndex(i_theta - 1);
             const int i_theta_P1     = grid.wrapThetaIndex(i_theta + 1);
@@ -99,15 +99,15 @@ static inline void nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const Polar
     /* Node in the interior */
     /* -------------------- */
     if (i_r > grid.numberSmootherCircles() && i_r < grid.nr() - 2) {
-        double h1 = grid.radialSpacing(i_r - 1);
-        double h2 = grid.radialSpacing(i_r);
-        double k1 = grid.angularSpacing(i_theta - 1);
-        double k2 = grid.angularSpacing(i_theta);
+        const double h1 = grid.radialSpacing(i_r - 1);
+        const double h2 = grid.radialSpacing(i_r);
+        const double k1 = grid.angularSpacing(i_theta - 1);
+        const double k2 = grid.angularSpacing(i_theta);
 
-        double coeff1 = 0.5 * (k1 + k2) / h1;
-        double coeff2 = 0.5 * (k1 + k2) / h2;
-        double coeff3 = 0.5 * (h1 + h2) / k1;
-        double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff1 = 0.5 * (k1 + k2) / h1;
+        const double coeff2 = 0.5 * (k1 + k2) / h2;
+        const double coeff3 = 0.5 * (h1 + h2) / k1;
+        const double coeff4 = 0.5 * (h1 + h2) / k2;
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -132,15 +132,15 @@ static inline void nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const Polar
                                        );
     }
     else if (i_r == grid.numberSmootherCircles()) {
-        double h1 = grid.radialSpacing(i_r - 1);
-        double h2 = grid.radialSpacing(i_r);
-        double k1 = grid.angularSpacing(i_theta - 1);
-        double k2 = grid.angularSpacing(i_theta);
+        const double h1 = grid.radialSpacing(i_r - 1);
+        const double h2 = grid.radialSpacing(i_r);
+        const double k1 = grid.angularSpacing(i_theta - 1);
+        const double k2 = grid.angularSpacing(i_theta);
 
-        double coeff1 = 0.5 * (k1 + k2) / h1;
-        double coeff2 = 0.5 * (k1 + k2) / h2;
-        double coeff3 = 0.5 * (h1 + h2) / k1;
-        double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff1 = 0.5 * (k1 + k2) / h1;
+        const double coeff2 = 0.5 * (k1 + k2) / h2;
+        const double coeff3 = 0.5 * (h1 + h2) / k1;
+        const double coeff4 = 0.5 * (h1 + h2) / k2;
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -166,15 +166,15 @@ static inline void nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const Polar
                                        );
     }
     else if (i_r == grid.nr() - 2) {
-        double h1 = grid.radialSpacing(i_r - 1);
-        double h2 = grid.radialSpacing(i_r);
-        double k1 = grid.angularSpacing(i_theta - 1);
-        double k2 = grid.angularSpacing(i_theta);
+        const double h1 = grid.radialSpacing(i_r - 1);
+        const double h2 = grid.radialSpacing(i_r);
+        const double k1 = grid.angularSpacing(i_theta - 1);
+        const double k2 = grid.angularSpacing(i_theta);
 
-        double coeff1 = 0.5 * (k1 + k2) / h1;
-        double coeff2 = 0.5 * (k1 + k2) / h2;
-        double coeff3 = 0.5 * (h1 + h2) / k1;
-        double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff1 = 0.5 * (k1 + k2) / h1;
+        const double coeff2 = 0.5 * (k1 + k2) / h2;
+        const double coeff3 = 0.5 * (h1 + h2) / k1;
+        const double coeff4 = 0.5 * (h1 + h2) / k2;
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -209,11 +209,8 @@ static inline void nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const Polar
     }
 }
 
-void SmootherTake::applyAscOrthoCircleSection(int i_r, ConstVector<double> x, ConstVector<double> rhs,
-                                              Vector<double> temp)
+void SmootherTake::applyAscOrthoBlackCircleSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp)
 {
-    assert(i_r >= 0 && i_r < grid_.numberSmootherCircles());
-
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
 
@@ -223,17 +220,20 @@ void SmootherTake::applyAscOrthoCircleSection(int i_r, ConstVector<double> x, Co
     ConstVector<double> detDF      = level_cache_.detDF();
     ConstVector<double> coeff_beta = level_cache_.coeff_beta();
 
-    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
-        nodeApplyAscOrthoCircleTake(i_r, i_theta, grid_, DirBC_Interior_, x, rhs, temp, arr, att, art, detDF,
-                                    coeff_beta);
+    /* The outer most circle next to the radial section is defined to be black. */
+    const int start_black_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 1 : 0;
+
+#pragma omp parallel for num_threads(num_omp_threads_)
+    for (int i_r = start_black_circles; i_r < grid_.numberSmootherCircles(); i_r += 2) {
+        for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
+            nodeApplyAscOrthoCircleTake(i_r, i_theta, grid_, DirBC_Interior_, x, rhs, temp, arr, att, art, detDF,
+                                        coeff_beta);
+        }
     }
 }
 
-void SmootherTake::applyAscOrthoRadialSection(int i_theta, ConstVector<double> x, ConstVector<double> rhs,
-                                              Vector<double> temp)
+void SmootherTake::applyAscOrthoWhiteCircleSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp)
 {
-    assert(i_theta >= 0 && i_theta < grid_.ntheta());
-
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
 
@@ -243,8 +243,54 @@ void SmootherTake::applyAscOrthoRadialSection(int i_theta, ConstVector<double> x
     ConstVector<double> detDF      = level_cache_.detDF();
     ConstVector<double> coeff_beta = level_cache_.coeff_beta();
 
-    for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
-        nodeApplyAscOrthoRadialTake(i_r, i_theta, grid_, DirBC_Interior_, x, rhs, temp, arr, att, art, detDF,
-                                    coeff_beta);
+    /* The outer most circle next to the radial section is defined to be black. */
+    const int start_white_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 0 : 1;
+
+#pragma omp parallel for num_threads(num_omp_threads_)
+    for (int i_r = start_white_circles; i_r < grid_.numberSmootherCircles(); i_r += 2) {
+        for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
+            nodeApplyAscOrthoCircleTake(i_r, i_theta, grid_, DirBC_Interior_, x, rhs, temp, arr, att, art, detDF,
+                                        coeff_beta);
+        }
+    }
+}
+
+void SmootherTake::applyAscOrthoBlackRadialSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp)
+{
+    assert(level_cache_.cacheDensityProfileCoefficients());
+    assert(level_cache_.cacheDomainGeometry());
+
+    ConstVector<double> arr        = level_cache_.arr();
+    ConstVector<double> att        = level_cache_.att();
+    ConstVector<double> art        = level_cache_.art();
+    ConstVector<double> detDF      = level_cache_.detDF();
+    ConstVector<double> coeff_beta = level_cache_.coeff_beta();
+
+#pragma omp parallel for num_threads(num_omp_threads_)
+    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta += 2) {
+        for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
+            nodeApplyAscOrthoRadialTake(i_r, i_theta, grid_, DirBC_Interior_, x, rhs, temp, arr, att, art, detDF,
+                                        coeff_beta);
+        }
+    }
+}
+
+void SmootherTake::applyAscOrthoWhiteRadialSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp)
+{
+    assert(level_cache_.cacheDensityProfileCoefficients());
+    assert(level_cache_.cacheDomainGeometry());
+
+    ConstVector<double> arr        = level_cache_.arr();
+    ConstVector<double> att        = level_cache_.att();
+    ConstVector<double> art        = level_cache_.art();
+    ConstVector<double> detDF      = level_cache_.detDF();
+    ConstVector<double> coeff_beta = level_cache_.coeff_beta();
+
+#pragma omp parallel for num_threads(num_omp_threads_)
+    for (int i_theta = 1; i_theta < grid_.ntheta(); i_theta += 2) {
+        for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
+            nodeApplyAscOrthoRadialTake(i_r, i_theta, grid_, DirBC_Interior_, x, rhs, temp, arr, att, art, detDF,
+                                        coeff_beta);
+        }
     }
 }

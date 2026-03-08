@@ -25,7 +25,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(cons
                         double k1          = grid.angularSpacing(i_theta - 1);
                         double k2          = grid.angularSpacing(i_theta);
                         const double detDF = detDF_cache[grid.index(i_r, i_theta)];
-                        rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * fabs(detDF);
+                        rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * std::fabs(detDF);
                     }
                     else if (i_r == 0 && DirBC_Interior_) {
                         rhs_f[grid.index(i_r, i_theta)] *= 1.0;
@@ -50,7 +50,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(cons
                         double k1          = grid.angularSpacing(i_theta - 1);
                         double k2          = grid.angularSpacing(i_theta);
                         const double detDF = detDF_cache[grid.index(i_r, i_theta)];
-                        rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * fabs(detDF);
+                        rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * std::fabs(detDF);
                     }
                     else if (i_r == 0 && DirBC_Interior_) {
                         rhs_f[grid.index(i_r, i_theta)] *= 1.0;
@@ -91,7 +91,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(cons
                         double Jtt = domain_geometry_.dFy_dt(r, theta);
                         /* Compute the determinant of the Jacobian matrix */
                         double detDF = Jrr * Jtt - Jrt * Jtr;
-                        rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * fabs(detDF);
+                        rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * std::fabs(detDF);
                     }
                     else if (i_r == 0 && DirBC_Interior_) {
                         rhs_f[grid.index(i_r, i_theta)] *= 1.0;
@@ -126,7 +126,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(cons
                         double Jtt = domain_geometry_.dFy_dt(r, theta);
                         /* Compute the determinant of the Jacobian matrix */
                         double detDF = Jrr * Jtt - Jrt * Jtr;
-                        rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * fabs(detDF);
+                        rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * std::fabs(detDF);
                     }
                     else if (i_r == 0 && DirBC_Interior_) {
                         rhs_f[grid.index(i_r, i_theta)] *= 1.0;

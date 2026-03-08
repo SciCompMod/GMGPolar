@@ -6,17 +6,16 @@ SmootherTake::SmootherTake(const PolarGrid& grid, const LevelCache& level_cache,
     : Smoother(grid, level_cache, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
     , radial_tridiagonal_solver_(grid.lengthSmootherRadial(), grid.ntheta(), false)
+#ifdef GMGPOLAR_USE_MUMPS
+    , inner_boundary_mumps_solver_(buildInteriorBoundarySolverMatrix())
+#else
+    , inner_boundary_circle_matrix_(buildInteriorBoundarySolverMatrix())
+    , inner_boundary_lu_solver_(inner_boundary_circle_matrix_)
+#endif
 {
-    buildAscMatrices();
-
+    buildTridiagonalSolverMatrices();
     circle_tridiagonal_solver_.setup();
     radial_tridiagonal_solver_.setup();
-
-#ifdef GMGPOLAR_USE_MUMPS
-    inner_boundary_mumps_solver_.emplace(inner_boundary_circle_matrix_);
-#else
-    inner_boundary_lu_solver_ = SparseLUSolver<double>(inner_boundary_circle_matrix_);
-#endif
 }
 
 // The smoothing solves linear systems of the form:
@@ -46,43 +45,31 @@ void SmootherTake::smoothing(Vector<double> x, ConstVector<double> rhs, Vector<d
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
-    assert(level_cache_.cacheDensityProfileCoefficients());
-    assert(level_cache_.cacheDomainGeometry());
-
-    /* The outer most circle next to the radial section is defined to be black. */
-    /* Priority: Black -> White. */
-    const int start_black_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 1 : 0;
-    const int start_white_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 0 : 1;
-
-    /* Black Circle Section */
-#pragma omp parallel for num_threads(num_omp_threads_)
-    for (int i_r = start_black_circles; i_r < grid_.numberSmootherCircles(); i_r += 2) {
-        applyAscOrthoCircleSection(i_r, x, rhs, temp);
-    } /* Implicit barrier */
-
+    /* ----------------------------------------------- */
+    /* 1. Black-Circle update (u_bc):                  */
+    /*    A_bc * u_bc = f_bc − A_bc^ortho * u_bc^ortho */
+    /* ----------------------------------------------- */
+    applyAscOrthoBlackCircleSection(x, rhs, temp);
     solveBlackCircleSection(x, temp);
 
-    /* White Circle Section */
-#pragma omp parallel for num_threads(num_omp_threads_)
-    for (int i_r = start_white_circles; i_r < grid_.numberSmootherCircles(); i_r += 2) {
-        applyAscOrthoCircleSection(i_r, x, rhs, temp);
-    } /* Implicit barrier */
-
+    /* ----------------------------------------------- */
+    /* 2. White-Circle update (u_wc):                  */
+    /*    A_wc * u_wc = f_wc − A_wc^ortho * u_wc^ortho */
+    /* ----------------------------------------------- */
+    applyAscOrthoWhiteCircleSection(x, rhs, temp);
     solveWhiteCircleSection(x, temp);
 
-    /* Black Radial Section */
-#pragma omp parallel for num_threads(num_omp_threads_)
-    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta += 2) {
-        applyAscOrthoRadialSection(i_theta, x, rhs, temp);
-    } /* Implicit barrier */
-
+    /* ----------------------------------------------- */
+    /* 3. Black-Radial update (u_br):                  */
+    /*    A_br * u_br = f_br − A_br^ortho * u_br^ortho */
+    /* ----------------------------------------------- */
+    applyAscOrthoBlackRadialSection(x, rhs, temp);
     solveBlackRadialSection(x, temp);
 
-    /* White Radial Section*/
-#pragma omp parallel for num_threads(num_omp_threads_)
-    for (int i_theta = 1; i_theta < grid_.ntheta(); i_theta += 2) {
-        applyAscOrthoRadialSection(i_theta, x, rhs, temp);
-    } /* Implicit barrier */
-
+    /* ----------------------------------------------- */
+    /* 4. White-Radial update (u_wr):                  */
+    /*    A_wr * u_wr = f_wr − A_wr^ortho * u_wr^ortho */
+    /* ----------------------------------------------- */
+    applyAscOrthoWhiteRadialSection(x, rhs, temp);
     solveWhiteRadialSection(x, temp);
 }

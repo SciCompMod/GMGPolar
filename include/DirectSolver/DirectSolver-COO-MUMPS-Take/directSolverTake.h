@@ -17,7 +17,7 @@ public:
 
 private:
     // The stencil definitions must be defined before the declaration of the mumps_solver,
-    // since the mumps solver will be build in the member initializer.
+    // since the mumps solver will be build in the member initializer of the DirectSolver class.
 
     // clang-format off
     const Stencil stencil_interior_      = {

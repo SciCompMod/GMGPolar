@@ -884,42 +884,270 @@ static inline void nodeApplyAscOrthoRadialGive(int i_r, int i_theta, const Polar
     }
 }
 
-void ExtrapolatedSmootherGive::applyAscOrthoCircleSection(int i_r, SmootherColor smoother_color, ConstVector<double> x,
-                                                          ConstVector<double> rhs, Vector<double> temp)
+void ExtrapolatedSmootherGive::applyAscOrthoBlackCircleSection(ConstVector<double> x, ConstVector<double> rhs,
+                                                               Vector<double> temp)
 {
-    assert(i_r >= 0 && i_r < grid_.numberSmootherCircles() + 1);
+    const int num_smoother_circles     = grid_.numberSmootherCircles();
+    const SmootherColor smoother_color = SmootherColor::Black;
 
-    const double r = grid_.radius(i_r);
+#pragma omp parallel num_threads(num_omp_threads_)
+    {
+        /* Inside Black Section */
+#pragma omp for
+        for (int circle_task = 0; circle_task < num_smoother_circles; circle_task += 2) {
+            const int i_r  = num_smoother_circles - circle_task - 1;
+            const double r = grid_.radius(i_r);
 
-    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
-        const double theta = grid_.theta(i_theta);
-        const int index    = grid_.index(i_r, i_theta);
+            for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
+                const double theta = grid_.theta(i_theta);
+                const int index    = grid_.index(i_r, i_theta);
 
-        double coeff_beta, arr, att, art, detDF;
-        level_cache_.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
+                double coeff_beta, arr, att, art, detDF;
+                level_cache_.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
 
-        // Apply Asc Ortho at the current node
-        nodeApplyAscOrthoCircleGive(i_r, i_theta, grid_, DirBC_Interior_, smoother_color, x, rhs, temp, arr, att, art,
-                                    detDF, coeff_beta);
+                // Apply Asc Ortho at the current node
+                nodeApplyAscOrthoCircleGive(i_r, i_theta, grid_, DirBC_Interior_, smoother_color, x, rhs, temp, arr,
+                                            att, art, detDF, coeff_beta);
+            }
+        }
+
+        /* Outside Black Section (Part 1)*/
+#pragma omp for
+        for (int circle_task = -1; circle_task < num_smoother_circles; circle_task += 4) {
+            const int i_r  = num_smoother_circles - circle_task - 1;
+            const double r = grid_.radius(i_r);
+
+            for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
+                const double theta = grid_.theta(i_theta);
+                const int index    = grid_.index(i_r, i_theta);
+
+                double coeff_beta, arr, att, art, detDF;
+                level_cache_.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
+
+                // Apply Asc Ortho at the current node
+                nodeApplyAscOrthoCircleGive(i_r, i_theta, grid_, DirBC_Interior_, smoother_color, x, rhs, temp, arr,
+                                            att, art, detDF, coeff_beta);
+            }
+        }
+
+        /* Outside Black Section (Part 2)*/
+#pragma omp for
+        for (int circle_task = 1; circle_task < num_smoother_circles; circle_task += 4) {
+            const int i_r  = num_smoother_circles - circle_task - 1;
+            const double r = grid_.radius(i_r);
+
+            for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
+                const double theta = grid_.theta(i_theta);
+                const int index    = grid_.index(i_r, i_theta);
+
+                double coeff_beta, arr, att, art, detDF;
+                level_cache_.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
+
+                // Apply Asc Ortho at the current node
+                nodeApplyAscOrthoCircleGive(i_r, i_theta, grid_, DirBC_Interior_, smoother_color, x, rhs, temp, arr,
+                                            att, art, detDF, coeff_beta);
+            }
+        }
     }
 }
 
-void ExtrapolatedSmootherGive::applyAscOrthoRadialSection(int i_theta, SmootherColor smoother_color,
-                                                          ConstVector<double> x, ConstVector<double> rhs,
-                                                          Vector<double> temp)
+void ExtrapolatedSmootherGive::applyAscOrthoWhiteCircleSection(ConstVector<double> x, ConstVector<double> rhs,
+                                                               Vector<double> temp)
 {
-    const double theta = grid_.theta(i_theta);
+    const int num_smoother_circles     = grid_.numberSmootherCircles();
+    const SmootherColor smoother_color = SmootherColor::White;
 
-    /* !!! i_r = grid_.numberSmootherCircles()-1 !!! */
-    for (int i_r = grid_.numberSmootherCircles() - 1; i_r < grid_.nr(); i_r++) {
-        const double r  = grid_.radius(i_r);
-        const int index = grid_.index(i_r, i_theta);
+#pragma omp parallel num_threads(num_omp_threads_)
+    {
+        /* Inside White Section */
+#pragma omp for
+        for (int circle_task = 1; circle_task < num_smoother_circles; circle_task += 2) {
+            const int i_r  = num_smoother_circles - circle_task - 1;
+            const double r = grid_.radius(i_r);
 
-        double coeff_beta, arr, att, art, detDF;
-        level_cache_.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
+            for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
+                const double theta = grid_.theta(i_theta);
+                const int index    = grid_.index(i_r, i_theta);
 
-        // Apply Asc Ortho at the current node
-        nodeApplyAscOrthoRadialGive(i_r, i_theta, grid_, DirBC_Interior_, smoother_color, x, rhs, temp, arr, att, art,
-                                    detDF, coeff_beta);
+                double coeff_beta, arr, att, art, detDF;
+                level_cache_.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
+
+                // Apply Asc Ortho at the current node
+                nodeApplyAscOrthoCircleGive(i_r, i_theta, grid_, DirBC_Interior_, smoother_color, x, rhs, temp, arr,
+                                            att, art, detDF, coeff_beta);
+            }
+        }
+        /* Outside White Section (Part 1)*/
+#pragma omp for
+        for (int circle_task = 0; circle_task < num_smoother_circles; circle_task += 4) {
+            const int i_r  = num_smoother_circles - circle_task - 1;
+            const double r = grid_.radius(i_r);
+
+            for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
+                const double theta = grid_.theta(i_theta);
+                const int index    = grid_.index(i_r, i_theta);
+
+                double coeff_beta, arr, att, art, detDF;
+                level_cache_.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
+
+                // Apply Asc Ortho at the current node
+                nodeApplyAscOrthoCircleGive(i_r, i_theta, grid_, DirBC_Interior_, smoother_color, x, rhs, temp, arr,
+                                            att, art, detDF, coeff_beta);
+            }
+        }
+        /* Outside White Section (Part 2)*/
+#pragma omp for
+        for (int circle_task = 2; circle_task < num_smoother_circles; circle_task += 4) {
+            const int i_r  = num_smoother_circles - circle_task - 1;
+            const double r = grid_.radius(i_r);
+
+            for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
+                const double theta = grid_.theta(i_theta);
+                const int index    = grid_.index(i_r, i_theta);
+
+                double coeff_beta, arr, att, art, detDF;
+                level_cache_.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
+
+                // Apply Asc Ortho at the current node
+                nodeApplyAscOrthoCircleGive(i_r, i_theta, grid_, DirBC_Interior_, smoother_color, x, rhs, temp, arr,
+                                            att, art, detDF, coeff_beta);
+            }
+        }
+    }
+}
+
+void ExtrapolatedSmootherGive::applyAscOrthoBlackRadialSection(ConstVector<double> x, ConstVector<double> rhs,
+                                                               Vector<double> temp)
+{
+    const int num_radial_lines         = grid_.ntheta();
+    const SmootherColor smoother_color = SmootherColor::Black;
+
+#pragma omp parallel num_threads(num_omp_threads_)
+    {
+        /* Inside Black Section */
+#pragma omp for
+        for (int i_theta = 0; i_theta < num_radial_lines; i_theta += 2) {
+            const double theta = grid_.theta(i_theta);
+
+            /* We need to obtain left contributions from the circular section for AscOrtho. */
+            /* !!! i_r = grid_.numberSmootherCircles()-1 !!! */
+            for (int i_r = grid_.numberSmootherCircles() - 1; i_r < grid_.nr(); i_r++) {
+                const double r  = grid_.radius(i_r);
+                const int index = grid_.index(i_r, i_theta);
+
+                double coeff_beta, arr, att, art, detDF;
+                level_cache_.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
+
+                // Apply Asc Ortho at the current node
+                nodeApplyAscOrthoRadialGive(i_r, i_theta, grid_, DirBC_Interior_, smoother_color, x, rhs, temp, arr,
+                                            att, art, detDF, coeff_beta);
+            }
+        }
+        /* Outside Black Section (Part 1) */
+#pragma omp for
+        for (int i_theta = 1; i_theta < num_radial_lines; i_theta += 4) {
+            const double theta = grid_.theta(i_theta);
+
+            /* We need to obtain left contributions from the circular section for AscOrtho. */
+            /* !!! i_r = grid_.numberSmootherCircles()-1 !!! */
+            for (int i_r = grid_.numberSmootherCircles() - 1; i_r < grid_.nr(); i_r++) {
+                const double r  = grid_.radius(i_r);
+                const int index = grid_.index(i_r, i_theta);
+
+                double coeff_beta, arr, att, art, detDF;
+                level_cache_.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
+
+                // Apply Asc Ortho at the current node
+                nodeApplyAscOrthoRadialGive(i_r, i_theta, grid_, DirBC_Interior_, smoother_color, x, rhs, temp, arr,
+                                            att, art, detDF, coeff_beta);
+            }
+        }
+        /* Outside Black Section (Part 2) */
+#pragma omp for
+        for (int i_theta = 3; i_theta < num_radial_lines; i_theta += 4) {
+            const double theta = grid_.theta(i_theta);
+
+            /* We need to obtain left contributions from the circular section for AscOrtho. */
+            /* !!! i_r = grid_.numberSmootherCircles()-1 !!! */
+            for (int i_r = grid_.numberSmootherCircles() - 1; i_r < grid_.nr(); i_r++) {
+                const double r  = grid_.radius(i_r);
+                const int index = grid_.index(i_r, i_theta);
+
+                double coeff_beta, arr, att, art, detDF;
+                level_cache_.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
+
+                // Apply Asc Ortho at the current node
+                nodeApplyAscOrthoRadialGive(i_r, i_theta, grid_, DirBC_Interior_, smoother_color, x, rhs, temp, arr,
+                                            att, art, detDF, coeff_beta);
+            }
+        }
+    }
+}
+
+void ExtrapolatedSmootherGive::applyAscOrthoWhiteRadialSection(ConstVector<double> x, ConstVector<double> rhs,
+                                                               Vector<double> temp)
+{
+    const int num_radial_lines         = grid_.ntheta();
+    const SmootherColor smoother_color = SmootherColor::White;
+
+#pragma omp parallel num_threads(num_omp_threads_)
+    {
+        /* Inside Black Section */
+#pragma omp for
+        for (int i_theta = 1; i_theta < num_radial_lines; i_theta += 2) {
+            const double theta = grid_.theta(i_theta);
+
+            /* We need to obtain left contributions from the circular section for AscOrtho. */
+            /* !!! i_r = grid_.numberSmootherCircles()-1 !!! */
+            for (int i_r = grid_.numberSmootherCircles() - 1; i_r < grid_.nr(); i_r++) {
+                const double r  = grid_.radius(i_r);
+                const int index = grid_.index(i_r, i_theta);
+
+                double coeff_beta, arr, att, art, detDF;
+                level_cache_.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
+
+                // Apply Asc Ortho at the current node
+                nodeApplyAscOrthoRadialGive(i_r, i_theta, grid_, DirBC_Interior_, smoother_color, x, rhs, temp, arr,
+                                            att, art, detDF, coeff_beta);
+            }
+        }
+        /* Outside Black Section (Part 1) */
+#pragma omp for
+        for (int i_theta = 0; i_theta < num_radial_lines; i_theta += 4) {
+            const double theta = grid_.theta(i_theta);
+
+            /* We need to obtain left contributions from the circular section for AscOrtho. */
+            /* !!! i_r = grid_.numberSmootherCircles()-1 !!! */
+            for (int i_r = grid_.numberSmootherCircles() - 1; i_r < grid_.nr(); i_r++) {
+                const double r  = grid_.radius(i_r);
+                const int index = grid_.index(i_r, i_theta);
+
+                double coeff_beta, arr, att, art, detDF;
+                level_cache_.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
+
+                // Apply Asc Ortho at the current node
+                nodeApplyAscOrthoRadialGive(i_r, i_theta, grid_, DirBC_Interior_, smoother_color, x, rhs, temp, arr,
+                                            att, art, detDF, coeff_beta);
+            }
+        }
+        /* Outside Black Section (Part 2) */
+#pragma omp for
+        for (int i_theta = 2; i_theta < num_radial_lines; i_theta += 4) {
+            const double theta = grid_.theta(i_theta);
+
+            /* We need to obtain left contributions from the circular section for AscOrtho. */
+            /* !!! i_r = grid_.numberSmootherCircles()-1 !!! */
+            for (int i_r = grid_.numberSmootherCircles() - 1; i_r < grid_.nr(); i_r++) {
+                const double r  = grid_.radius(i_r);
+                const int index = grid_.index(i_r, i_theta);
+
+                double coeff_beta, arr, att, art, detDF;
+                level_cache_.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
+
+                // Apply Asc Ortho at the current node
+                nodeApplyAscOrthoRadialGive(i_r, i_theta, grid_, DirBC_Interior_, smoother_color, x, rhs, temp, arr,
+                                            att, art, detDF, coeff_beta);
+            }
+        }
     }
 }

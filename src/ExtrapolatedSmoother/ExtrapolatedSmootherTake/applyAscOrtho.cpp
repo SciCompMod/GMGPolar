@@ -455,42 +455,92 @@ static inline void nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const Polar
     }
 }
 
-void ExtrapolatedSmootherTake::applyAscOrthoCircleSection(int i_r, ConstVector<double> x, ConstVector<double> rhs,
-                                                          Vector<double> temp)
+void ExtrapolatedSmootherTake::applyAscOrthoBlackCircleSection(ConstVector<double> x, ConstVector<double> rhs,
+                                                               Vector<double> temp)
 {
-    assert(i_r >= 0 && i_r < grid_.numberSmootherCircles());
-
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
 
-    const auto& arr        = level_cache_.arr();
-    const auto& att        = level_cache_.att();
-    const auto& art        = level_cache_.art();
-    const auto& detDF      = level_cache_.detDF();
-    const auto& coeff_beta = level_cache_.coeff_beta();
+    ConstVector<double> arr        = level_cache_.arr();
+    ConstVector<double> att        = level_cache_.att();
+    ConstVector<double> art        = level_cache_.art();
+    ConstVector<double> detDF      = level_cache_.detDF();
+    ConstVector<double> coeff_beta = level_cache_.coeff_beta();
 
-    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
-        nodeApplyAscOrthoCircleTake(i_r, i_theta, grid_, DirBC_Interior_, x, rhs, temp, arr, att, art, detDF,
-                                    coeff_beta);
+    /* The outer most circle next to the radial section is defined to be black. */
+    const int start_black_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 1 : 0;
+
+#pragma omp parallel for num_threads(num_omp_threads_)
+    for (int i_r = start_black_circles; i_r < grid_.numberSmootherCircles(); i_r += 2) {
+        for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
+            nodeApplyAscOrthoCircleTake(i_r, i_theta, grid_, DirBC_Interior_, x, rhs, temp, arr, att, art, detDF,
+                                        coeff_beta);
+        }
     }
 }
 
-void ExtrapolatedSmootherTake::applyAscOrthoRadialSection(int i_theta, ConstVector<double> x, ConstVector<double> rhs,
-                                                          Vector<double> temp)
+void ExtrapolatedSmootherTake::applyAscOrthoWhiteCircleSection(ConstVector<double> x, ConstVector<double> rhs,
+                                                               Vector<double> temp)
 {
-    assert(i_theta >= 0 && i_theta < grid_.ntheta());
-
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
 
-    const auto& arr        = level_cache_.arr();
-    const auto& att        = level_cache_.att();
-    const auto& art        = level_cache_.art();
-    const auto& detDF      = level_cache_.detDF();
-    const auto& coeff_beta = level_cache_.coeff_beta();
+    ConstVector<double> arr        = level_cache_.arr();
+    ConstVector<double> att        = level_cache_.att();
+    ConstVector<double> art        = level_cache_.art();
+    ConstVector<double> detDF      = level_cache_.detDF();
+    ConstVector<double> coeff_beta = level_cache_.coeff_beta();
 
-    for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
-        nodeApplyAscOrthoRadialTake(i_r, i_theta, grid_, DirBC_Interior_, x, rhs, temp, arr, att, art, detDF,
-                                    coeff_beta);
+    /* The outer most circle next to the radial section is defined to be black. */
+    const int start_white_circles = (grid_.numberSmootherCircles() % 2 == 0) ? 0 : 1;
+
+#pragma omp parallel for num_threads(num_omp_threads_)
+    for (int i_r = start_white_circles; i_r < grid_.numberSmootherCircles(); i_r += 2) {
+        for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
+            nodeApplyAscOrthoCircleTake(i_r, i_theta, grid_, DirBC_Interior_, x, rhs, temp, arr, att, art, detDF,
+                                        coeff_beta);
+        }
+    }
+}
+
+void ExtrapolatedSmootherTake::applyAscOrthoBlackRadialSection(ConstVector<double> x, ConstVector<double> rhs,
+                                                               Vector<double> temp)
+{
+    assert(level_cache_.cacheDensityProfileCoefficients());
+    assert(level_cache_.cacheDomainGeometry());
+
+    ConstVector<double> arr        = level_cache_.arr();
+    ConstVector<double> att        = level_cache_.att();
+    ConstVector<double> art        = level_cache_.art();
+    ConstVector<double> detDF      = level_cache_.detDF();
+    ConstVector<double> coeff_beta = level_cache_.coeff_beta();
+
+#pragma omp parallel for num_threads(num_omp_threads_)
+    for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta += 2) {
+        for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
+            nodeApplyAscOrthoRadialTake(i_r, i_theta, grid_, DirBC_Interior_, x, rhs, temp, arr, att, art, detDF,
+                                        coeff_beta);
+        }
+    }
+}
+
+void ExtrapolatedSmootherTake::applyAscOrthoWhiteRadialSection(ConstVector<double> x, ConstVector<double> rhs,
+                                                               Vector<double> temp)
+{
+    assert(level_cache_.cacheDensityProfileCoefficients());
+    assert(level_cache_.cacheDomainGeometry());
+
+    ConstVector<double> arr        = level_cache_.arr();
+    ConstVector<double> att        = level_cache_.att();
+    ConstVector<double> art        = level_cache_.art();
+    ConstVector<double> detDF      = level_cache_.detDF();
+    ConstVector<double> coeff_beta = level_cache_.coeff_beta();
+
+#pragma omp parallel for num_threads(num_omp_threads_)
+    for (int i_theta = 1; i_theta < grid_.ntheta(); i_theta += 2) {
+        for (int i_r = grid_.numberSmootherCircles(); i_r < grid_.nr(); i_r++) {
+            nodeApplyAscOrthoRadialTake(i_r, i_theta, grid_, DirBC_Interior_, x, rhs, temp, arr, att, art, detDF,
+                                        coeff_beta);
+        }
     }
 }

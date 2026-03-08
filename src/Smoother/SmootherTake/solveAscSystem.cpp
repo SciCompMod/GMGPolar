@@ -16,7 +16,7 @@ void SmootherTake::solveBlackCircleSection(Vector<double> x, Vector<double> temp
         Vector<double> inner_boundary = Kokkos::subview(temp, Kokkos::make_pair(0, grid_.ntheta()));
 
 #ifdef GMGPOLAR_USE_MUMPS
-        inner_boundary_mumps_solver_->solve(inner_boundary);
+        inner_boundary_mumps_solver_.solve(inner_boundary);
 #else
         inner_boundary_lu_solver_.solveInPlace(inner_boundary);
 #endif
@@ -48,7 +48,7 @@ void SmootherTake::solveWhiteCircleSection(Vector<double> x, Vector<double> temp
         Vector<double> inner_boundary = Kokkos::subview(temp, Kokkos::make_pair(0, grid_.ntheta()));
 
 #ifdef GMGPOLAR_USE_MUMPS
-        inner_boundary_mumps_solver_->solve(inner_boundary);
+        inner_boundary_mumps_solver_.solve(inner_boundary);
 #else
         inner_boundary_lu_solver_.solveInPlace(inner_boundary);
 #endif
