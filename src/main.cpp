@@ -41,6 +41,14 @@ int main(int argc, char* argv[])
     solver->FMG_iterations(parser.FMG_iterations()); // FMG iteration count
     solver->FMG_cycle(parser.FMG_cycle()); // FMG cycle type
 
+    // --- Preconditioned Conjugate Gradient settings --- //
+    solver->PCG(parser.PCG()); // Preconditioned Conjugate Gradient mode on/off
+    solver->PCG_FMG(parser.PCG_FMG()); // Use FMG as preconditioner for PCG
+    solver->PCG_FMG_iterations(parser.PCG_FMG_iterations()); // FMG iterations for PCG preconditioner
+    solver->PCG_FMG_cycle(parser.PCG_FMG_cycle()); // FMG cycle type for PCG preconditioner
+    solver->PCG_MG_iterations(parser.PCG_MG_iterations()); // Multigrid iterations for PCG preconditioner
+    solver->PCG_MG_cycle(parser.PCG_MG_cycle()); // Multigrid cycle type for PCG preconditioner
+
     // --- Iterative solver controls --- //
     solver->maxIterations(parser.maxIterations()); // Max number of iterations
     solver->residualNormType(parser.residualNormType()); // Residual norm type (L2, weighted-L2, L∞)
