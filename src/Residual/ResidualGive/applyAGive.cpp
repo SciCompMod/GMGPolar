@@ -240,7 +240,7 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
                          + 0.25 * art * x[bottom]); /* Bottom Right */
         /* Don't give to the outer dirichlet boundary! */
         /* Fill result(i+1,j) */
-        /* result[right] -= ( */
+        /* result[right] += ( */
         /*     - coeff2 * arr * x[center] // Left */
         /*     + coeff2 * arr * x[right] // Center: (Left) */
         /*     + 0.25 * art * x[top] // Top Left */
