@@ -56,14 +56,15 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
 
     auto finest_levelCache = std::make_unique<LevelCache>(*finest_grid, density_profile_coefficients_, domain_geometry_,
                                                           cache_density_profile_coefficients_, cache_domain_geometry_);
-    levels_.emplace_back(0, std::move(finest_grid), std::move(finest_levelCache), extrapolation_, FMG_);
+    levels_.emplace_back(0, std::move(finest_grid), std::move(finest_levelCache), extrapolation_, FMG_, PCG_FMG_);
 
     for (int level_depth = 1; level_depth < number_of_levels_; level_depth++) {
         auto current_grid = std::make_unique<PolarGrid>(coarseningGrid(levels_[level_depth - 1].grid()));
         auto current_levelCache =
             std::make_unique<LevelCache>(*current_grid, density_profile_coefficients_, domain_geometry_,
                                          cache_density_profile_coefficients_, cache_domain_geometry_);
-        levels_.emplace_back(level_depth, std::move(current_grid), std::move(current_levelCache), extrapolation_, FMG_);
+        levels_.emplace_back(level_depth, std::move(current_grid), std::move(current_levelCache), extrapolation_, FMG_,
+                             PCG_FMG_);
     }
 
     auto end_setup_createLevels = std::chrono::high_resolution_clock::now();
@@ -79,6 +80,19 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
 
     if (verbose_ > 0)
         printSettings();
+
+    // ------------------------------- //
+    // PCG-specific vector allocations //
+    // ------------------------------- //
+    if (PCG_) {
+        const int grid_size = levels_[0].grid().numberOfNodes();
+        if (std::ssize(pcg_solution_) != grid_size) {
+            pcg_solution_ = Vector<double>("pcg_solution", grid_size);
+        }
+        if (std::ssize(pcg_search_direction_) != grid_size) {
+            pcg_search_direction_ = Vector<double>("pcg_search_direction", grid_size);
+        }
+    }
 
     // ------------------------------------------------ //
     // Define residual operator on all multigrid levels //
@@ -129,11 +143,13 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     full_grid_smoothing_ = do_full_grid_smoothing;
 
     if (number_of_levels_ > 1) {
-        if (do_full_grid_smoothing) {
+        // PCG uses non-extrapolated smoothing on level 0, so we need to initialize it if PCG is enabled.
+        if (do_full_grid_smoothing || (PCG_ && PCG_MG_iterations_ > 0)) {
             levels_[0].initializeSmoothing(domain_geometry_, density_profile_coefficients_, DirBC_Interior_,
                                            max_omp_threads_, stencil_distribution_method_);
         }
-        if (do_extrapolated_smoothing) {
+        // PCG doesn't use extrapolated smoothing, so we only initialize it if PCG is disabled.
+        if (do_extrapolated_smoothing && !PCG_) {
             levels_[0].initializeExtrapolatedSmoothing(domain_geometry_, density_profile_coefficients_, DirBC_Interior_,
                                                        max_omp_threads_, stencil_distribution_method_);
         }
