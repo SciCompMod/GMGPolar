@@ -137,11 +137,6 @@ public:
     // If an exact solution is provided, the solver will compute the exact error at each iteration.
     void setSolution(const ExactSolution* exact_solution);
 
-    // Solve system with given boundary conditions and source term.
-    // Multiple solves with different inputs are supported.
-    template <concepts::BoundaryConditions BoundaryConditions>
-    void solve(const BoundaryConditions& boundary_conditions, const SourceTerm& source_term);
-
     /* ---------------------------------------------------------------------- */
     /* Solution & Grid Access                                                 */
     /* ---------------------------------------------------------------------- */
@@ -228,7 +223,8 @@ protected:
     /* ---------------- */
     /* Multigrid levels */
     int number_of_levels_;
-    std::vector<Level> levels_;
+
+    std::vector<std::pair<double, double>> exact_errors_;
 
     /* ---------------------- */
     /* Interpolation operator */
@@ -245,13 +241,6 @@ protected:
     double mean_residual_reduction_factor_;
     bool converged(double current_residual_norm, double first_residual_norm);
 
-    /* ---------------------------------------------------- */
-    /* Compute exact error if an exact solution is provided */
-    // The results are stored as a pair: (weighted L2 error, infinity error).
-    std::vector<std::pair<double, double>> exact_errors_;
-    std::pair<double, double> computeExactError(Level& level, ConstVector<double> solution, Vector<double> error,
-                                                const ExactSolution& exact_solution);
-
     /* ------------------------------------------------------------------------- */
     /* Compute the extrapolated residual: res_ex = 4/3 res_fine - 1/3 res_coarse */
     void extrapolatedResidual(int current_level, Vector<double> residual, ConstVector<double> residual_next_level);
@@ -259,52 +248,13 @@ protected:
     /* --------------- */
     /* Setup Functions */
     int chooseNumberOfLevels(const PolarGrid& finest_grid);
-    template <concepts::BoundaryConditions BoundaryConditions>
-    void build_rhs_f(const Level& level, Vector<double> rhs_f, const BoundaryConditions& boundary_conditions,
-                     const SourceTerm& source_term);
-    virtual void discretize_rhs_f(const Level& level, Vector<double> rhs_f) = 0;
-
-    /* --------------- */
-    /* Solve Functions */
-    void initializeSolution();
-    double residualNorm(const ResidualNormType& norm_type, const Level& level, ConstVector<double> residual) const;
-    void evaluateExactError(Level& level, const ExactSolution& exact_solution);
-    void updateResidualNorms(Level& level, int iteration, double& initial_residual_norm, double& current_residual_norm,
-                             double& current_relative_residual_norm);
 
     /* ----------------- */
     /* Print information */
-    void printSettings() const;
+    void printSettings(const PolarGrid& finest_grid, const PolarGrid& coarsest_grid) const;
     void printIterationHeader(const ExactSolution* exact_solution);
     void printIterationInfo(int iteration, double current_residual_norm, double current_relative_residual_norm,
                             const ExactSolution* exact_solution);
-
-    /* ------------------- */
-    /* Multigrid Functions */
-    void multigrid_V_Cycle(int level_depth, Vector<double> solution, Vector<double> rhs, Vector<double> residual);
-    void multigrid_W_Cycle(int level_depth, Vector<double> solution, Vector<double> rhs, Vector<double> residual);
-    void multigrid_F_Cycle(int level_depth, Vector<double> solution, Vector<double> rhs, Vector<double> residual);
-    void extrapolated_multigrid_V_Cycle(int level_depth, Vector<double> solution, Vector<double> rhs,
-                                        Vector<double> residual);
-    void extrapolated_multigrid_W_Cycle(int level_depth, Vector<double> solution, Vector<double> rhs,
-                                        Vector<double> residual);
-    void extrapolated_multigrid_F_Cycle(int level_depth, Vector<double> solution, Vector<double> rhs,
-                                        Vector<double> residual);
-
-    /* ----------------------- */
-    /* Interpolation functions */
-    void prolongation(int current_level, Vector<double> result, ConstVector<double> x) const;
-    void restriction(int current_level, Vector<double> result, ConstVector<double> x) const;
-    void injection(int current_level, Vector<double> result, ConstVector<double> x) const;
-    void extrapolatedProlongation(int current_level, Vector<double> result, ConstVector<double> x) const;
-    void extrapolatedRestriction(int current_level, Vector<double> result, ConstVector<double> x) const;
-    void FMGInterpolation(int current_level, Vector<double> result, ConstVector<double> x) const;
-
-    /* ------------- */
-    /* Visualization */
-    virtual void writeToVTK(const std::filesystem::path& file_path, const PolarGrid& grid) = 0;
-    virtual void writeToVTK(const std::filesystem::path& file_path, const Level& level,
-                            ConstVector<double> grid_function)                             = 0;
 
     /* ------------------------------ */
     /* Timing statistics for GMGPolar */
@@ -331,5 +281,3 @@ protected:
     double t_avg_MGC_residual_;
     double t_avg_MGC_directSolver_;
 };
-
-#include "solver.h"

@@ -1,8 +1,10 @@
 // =============================================================================
 //   Main Solver Routine
 // =============================================================================
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 template <concepts::BoundaryConditions BoundaryConditions>
-void IGMGPolar::solve(const BoundaryConditions& boundary_conditions, const SourceTerm& source_term)
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryConditions& boundary_conditions,
+                                                                 const SourceTerm& source_term)
 {
     auto start_setup_rhs = std::chrono::high_resolution_clock::now();
 
@@ -17,10 +19,10 @@ void IGMGPolar::solve(const BoundaryConditions& boundary_conditions, const Sourc
     int initial_rhs_f_levels = FMG_ ? number_of_levels_ : (extrapolation_ == ExtrapolationType::NONE ? 1 : 2);
     // Loop through the levels, injecting and discretizing rhs
     for (int level_depth = 0; level_depth < initial_rhs_f_levels; ++level_depth) {
-        Level& current_level = levels_[level_depth];
+        Level<DomainGeometry>& current_level = levels_[level_depth];
         // Inject rhs if there is a next level
         if (level_depth + 1 < initial_rhs_f_levels) {
-            Level& next_level = levels_[level_depth + 1];
+            Level<DomainGeometry>& next_level = levels_[level_depth + 1];
             injection(level_depth, next_level.rhs(), current_level.rhs());
         }
         // Discretize the rhs for the current level
@@ -53,7 +55,7 @@ void IGMGPolar::solve(const BoundaryConditions& boundary_conditions, const Sourc
     /* --------------------------------------- */
     /* Start Solver at finest level (depth 0)  */
     /* --------------------------------------- */
-    Level& level = levels_[0];
+    Level<DomainGeometry>& level = levels_[0];
 
     number_of_iterations_                 = 0;
     double initial_residual_norm          = 1.0;

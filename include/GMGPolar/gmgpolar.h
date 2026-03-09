@@ -45,17 +45,65 @@ private:
     const DomainGeometry& domain_geometry_;
     const DensityProfileCoefficients& density_profile_coefficients_;
 
+    /* ---------------- */
+    /* Multigrid levels */
+    std::vector<Level<DomainGeometry>> levels_;
+
+    /* ---------------------------------------------------- */
+    /* Compute exact error if an exact solution is provided */
+    // The results are stored as a pair: (weighted L2 error, infinity error).
+    std::pair<double, double> computeExactError(Level<DomainGeometry>& level, ConstVector<double> solution, Vector<double> error,
+                                                const ExactSolution& exact_solution);
+
     /* --------------- */
     /* Setup Functions */
-    void discretize_rhs_f(const Level& level, Vector<double> rhs_f) final;
+    void discretize_rhs_f(const Level<DomainGeometry>& level, Vector<double> rhs_f);
+    template <concepts::BoundaryConditions BoundaryConditions>
+    void build_rhs_f(const Level<DomainGeometry>& level, Vector<double> rhs_f, const BoundaryConditions& boundary_conditions,
+                     const SourceTerm& source_term);
+
+    /* --------------- */
+    /* Solve Functions */
+    void initializeSolution();
+    // Solve system with given boundary conditions and source term.
+    // Multiple solves with different inputs are supported.
+    template <concepts::BoundaryConditions BoundaryConditions>
+    void solve(const BoundaryConditions& boundary_conditions, const SourceTerm& source_term);
+
+    double residualNorm(const ResidualNormType& norm_type, const Level<DomainGeometry>& level, ConstVector<double> residual) const;
+    void evaluateExactError(Level<DomainGeometry>& level, const ExactSolution& exact_solution);
+    void updateResidualNorms(Level<DomainGeometry>& level, int iteration, double& initial_residual_norm, double& current_residual_norm,
+                             double& current_relative_residual_norm);
+
+    /* ------------------- */
+    /* Multigrid Functions */
+    void multigrid_V_Cycle(int level_depth, Vector<double> solution, Vector<double> rhs, Vector<double> residual);
+    void multigrid_W_Cycle(int level_depth, Vector<double> solution, Vector<double> rhs, Vector<double> residual);
+    void multigrid_F_Cycle(int level_depth, Vector<double> solution, Vector<double> rhs, Vector<double> residual);
+    void extrapolated_multigrid_V_Cycle(int level_depth, Vector<double> solution, Vector<double> rhs,
+                                        Vector<double> residual);
+    void extrapolated_multigrid_W_Cycle(int level_depth, Vector<double> solution, Vector<double> rhs,
+                                        Vector<double> residual);
+    void extrapolated_multigrid_F_Cycle(int level_depth, Vector<double> solution, Vector<double> rhs,
+                                        Vector<double> residual);
+
+    /* ----------------------- */
+    /* Interpolation functions */
+    void prolongation(int current_level, Vector<double> result, ConstVector<double> x) const;
+    void restriction(int current_level, Vector<double> result, ConstVector<double> x) const;
+    void injection(int current_level, Vector<double> result, ConstVector<double> x) const;
+    void extrapolatedProlongation(int current_level, Vector<double> result, ConstVector<double> x) const;
+    void extrapolatedRestriction(int current_level, Vector<double> result, ConstVector<double> x) const;
+    void FMGInterpolation(int current_level, Vector<double> result, ConstVector<double> x) const;
 
     /* ------------- */
     /* Visualization */
-    void writeToVTK(const std::filesystem::path& file_path, const PolarGrid& grid) final;
-    void writeToVTK(const std::filesystem::path& file_path, const Level& level,
-                    ConstVector<double> grid_function) final;
+    void writeToVTK(const std::filesystem::path& file_path, const PolarGrid& grid);
+    void writeToVTK(const std::filesystem::path& file_path, const Level<DomainGeometry>& level,
+                    ConstVector<double> grid_function);
 };
 
 #include "build_rhs_f.h"
 #include "setup.h"
+#include "solver.h"
 #include "writeToVTK.h"
