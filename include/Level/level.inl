@@ -126,7 +126,8 @@ void Level<DomainGeometry>::computeResidual(Vector<double> result, ConstVector<d
         throw std::runtime_error("Residual not initialized.");
     op_residual_->computeResidual(result, rhs, x);
 }
-void Level::applySystemOperator(Vector<double> result, ConstVector<double> x) const
+template <concepts::DomainGeometry DomainGeometry>
+void Level<DomainGeometry>::applySystemOperator(Vector<double> result, ConstVector<double> x) const
 {
     if (!op_residual_)
         throw std::runtime_error("Residual not initialized.");
