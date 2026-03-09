@@ -128,12 +128,6 @@ public:
     std::optional<double> relativeTolerance() const;
     void relativeTolerance(std::optional<double> tol);
 
-    /* ---------------------------------------------------------------------- */
-    /* Setup & Solve                                                          */
-    /* ---------------------------------------------------------------------- */
-    // Finalize solver setup (allocate data, build operators, etc.).
-    virtual void setup() = 0;
-
     // If an exact solution is provided, the solver will compute the exact error at each iteration.
     void setSolution(const ExactSolution* exact_solution);
 

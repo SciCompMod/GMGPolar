@@ -36,7 +36,7 @@ public:
     /* Setup & Solve                                                          */
     /* ---------------------------------------------------------------------- */
     // Finalize solver setup (allocate data, build operators, etc.).
-    void setup() final;
+    void setup();
 
 private:
     /* ------------------------------------ */
