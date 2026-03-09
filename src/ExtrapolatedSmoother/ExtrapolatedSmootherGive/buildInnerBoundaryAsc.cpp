@@ -39,19 +39,7 @@ void ExtrapolatedSmootherGive::nodeBuildInteriorBoundarySolverMatrix_i_r_0(int i
     /* ------------------------------------------------ */
     if (DirBC_Interior) {
         /* Fill result(i,j) */
-        double h2 = grid.radialSpacing(i_r);
-        double k1 = grid.angularSpacing(i_theta - 1);
-        double k2 = grid.angularSpacing(i_theta);
-
-        double coeff2 = 0.5 * (k1 + k2) / h2;
-
-        int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-        int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
-
         int center_index = i_theta;
-        int right_index  = i_theta;
-        int bottom_index = i_theta_M1;
-        int top_index    = i_theta_P1;
 
         /* Fill matrix row of (i,j) */
         row = center_index;
