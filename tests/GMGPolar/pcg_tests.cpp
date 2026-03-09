@@ -5,11 +5,10 @@
 #include <random>
 
 // Including the necessary header from the project
-#include "../../include/ConfigParser/test_selection.h"
 #include "../../include/GMGPolar/gmgpolar.h"
 
 template <class T>
-class GMGPolarTestCase;
+class PCGTestCase;
 
 // clang-format off
 template <
@@ -38,6 +37,12 @@ template <
     bool FMG_,
     int FMG_iterations_,
     MultigridCycleType FMG_cycle_,
+    bool PCG_,
+    bool PCG_FMG_,
+    int PCG_FMG_iterations_,
+    MultigridCycleType PCG_FMG_cycle_,
+    int PCG_MG_iterations_,
+    MultigridCycleType PCG_MG_cycle_,
     int maxIterations_,
     ResidualNormType residualNormType_,
     double absoluteTolerance_,
@@ -48,7 +53,7 @@ template <
     double expected_inf_error_,
     double expected_residual_reduction_
 >
-class GMGPolarTestCase<
+class PCGTestCase<
     std::tuple<
         DomainGeometryType,
         DensityProfileCoefficientsType,
@@ -74,6 +79,12 @@ class GMGPolarTestCase<
         std::integral_constant<bool, FMG_>,
         std::integral_constant<int, FMG_iterations_>,
         std::integral_constant<MultigridCycleType, FMG_cycle_>,
+        std::integral_constant<bool, PCG_>,
+        std::integral_constant<bool, PCG_FMG_>,
+        std::integral_constant<int, PCG_FMG_iterations_>,
+        std::integral_constant<MultigridCycleType, PCG_FMG_cycle_>,
+        std::integral_constant<int, PCG_MG_iterations_>,
+        std::integral_constant<MultigridCycleType, PCG_MG_cycle_>,
         std::integral_constant<int, maxIterations_>,
         std::integral_constant<ResidualNormType, residualNormType_>,
         std::integral_constant<double, absoluteTolerance_>,
@@ -110,6 +121,12 @@ public:
     static constexpr bool FMG                                            = FMG_;
     static constexpr int FMG_iterations                                  = FMG_iterations_;
     static constexpr MultigridCycleType FMG_cycle                        = FMG_cycle_;
+    static constexpr bool PCG                                            = PCG_;
+    static constexpr bool PCG_FMG                                        = PCG_FMG_;
+    static constexpr int PCG_FMG_iterations                              = PCG_FMG_iterations_;
+    static constexpr MultigridCycleType PCG_FMG_cycle                    = PCG_FMG_cycle_;
+    static constexpr int PCG_MG_iterations                               = PCG_MG_iterations_;
+    static constexpr MultigridCycleType PCG_MG_cycle                     = PCG_MG_cycle_;
     static constexpr int maxIterations                                   = maxIterations_;
     static constexpr ResidualNormType residualNormType                   = residualNormType_;
     static constexpr double absoluteTolerance                            = absoluteTolerance_;
@@ -150,6 +167,12 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<bool, false>, // FMG
         std::integral_constant<int, 2>, // FMG_iterations
         std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>, // FMG_cycle
+        std::integral_constant<bool, false>, // PCG
+        std::integral_constant<bool, true>, // PCG_FMG
+        std::integral_constant<int, 1>, // PCG_FMG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>, // PCG_FMG_cycle
+        std::integral_constant<int, 1>, // PCG_MG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>, // PCG_MG_cycle
         std::integral_constant<int, 50>, // maxIterations
         std::integral_constant<ResidualNormType, ResidualNormType::WEIGHTED_EUCLIDEAN>, // residualNormType
         std::integral_constant<double, 1e-6>, // absoluteTolerance
@@ -187,11 +210,17 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<bool, true>, // FMG
         std::integral_constant<int, 1>, // FMG_iterations
         std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>, // FMG_cycle
+        std::integral_constant<bool, true>, // PCG
+        std::integral_constant<bool, true>, // PCG_FMG
+        std::integral_constant<int, 2>, // PCG_FMG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>, // PCG_FMG_cycle
+        std::integral_constant<int, 2>, // PCG_MG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>, // PCG_MG_cycle
         std::integral_constant<int, 50>, // maxIterations
         std::integral_constant<ResidualNormType, ResidualNormType::EUCLIDEAN>, // residualNormType
         std::integral_constant<double, 1e-8>, // absoluteTolerance
         std::integral_constant<double, 1e-8>, // relativeTolerance
-        std::integral_constant<int, 27>, // expected_iterations
+        std::integral_constant<int, 8>, // expected_iterations
         std::integral_constant<double, 2e-6>, // expected_l2_error
         std::integral_constant<double, 9e-6>, // expected_inf_error
         std::integral_constant<double, 0.7> // expected_residual_reduction
@@ -224,11 +253,17 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<bool, true>, // FMG
         std::integral_constant<int, 1>, // FMG_iterations
         std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>, // FMG_cycle
+        std::integral_constant<bool, true>, // PCG
+        std::integral_constant<bool, true>, // PCG_FMG
+        std::integral_constant<int, 3>, // PCG_FMG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>, // PCG_FMG_cycle
+        std::integral_constant<int, 3>, // PCG_MG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>, // PCG_MG_cycle
         std::integral_constant<int, 50>, // maxIterations
         std::integral_constant<ResidualNormType, ResidualNormType::EUCLIDEAN>, // residualNormType
         std::integral_constant<double, 1e-8>, // absoluteTolerance
         std::integral_constant<double, 1e-8>, // relativeTolerance
-        std::integral_constant<int, 27>, // expected_iterations
+        std::integral_constant<int, 7>, // expected_iterations
         std::integral_constant<double, 2e-6>, // expected_l2_error
         std::integral_constant<double, 9e-6>, // expected_inf_error
         std::integral_constant<double, 0.7> // expected_residual_reduction
@@ -261,15 +296,21 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<bool, true>, // FMG
         std::integral_constant<int, 1>, // FMG_iterations
         std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>, // FMG_cycle
+        std::integral_constant<bool, true>, // PCG
+        std::integral_constant<bool, true>, // PCG_FMG
+        std::integral_constant<int, 1>, // PCG_FMG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>, // PCG_FMG_cycle
+        std::integral_constant<int, 1>, // PCG_MG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>, // PCG_MG_cycle
         std::integral_constant<int, 50>, // maxIterations
         std::integral_constant<ResidualNormType, ResidualNormType::EUCLIDEAN>, // residualNormType
         std::integral_constant<double, 1e-8>, // absoluteTolerance
         std::integral_constant<double, 1e-8>, // relativeTolerance
-        std::integral_constant<int, 27>, // expected_iterations
+        std::integral_constant<int, 8>, // expected_iterations
         std::integral_constant<double, 2e-6>, // expected_l2_error
         std::integral_constant<double, 9e-6>, // expected_inf_error
         std::integral_constant<double, 0.7> // expected_residual_reduction
-    >, 
+    >,
     /* No Extrapolation */
     std::tuple<
         CzarnyGeometry,
@@ -296,11 +337,17 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<bool, true>, // FMG
         std::integral_constant<int, 1>, // FMG_iterations
         std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>, // FMG_cycle
+        std::integral_constant<bool, true>, // PCG
+        std::integral_constant<bool, true>, // PCG_FMG
+        std::integral_constant<int, 3>, // PCG_FMG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>, // PCG_FMG_cycle
+        std::integral_constant<int, 3>, // PCG_MG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>, // PCG_MG_cycle
         std::integral_constant<int, 50>, // maxIterations
         std::integral_constant<ResidualNormType, ResidualNormType::INFINITY_NORM>, // residualNormType
         std::integral_constant<double, 1e-12>, // absoluteTolerance
         std::integral_constant<double, 1e-10>, // relativeTolerance
-        std::integral_constant<int, 13>, // expected_iterations
+        std::integral_constant<int, 4>, // expected_iterations
         std::integral_constant<double, 6e-6>, // expected_l2_error
         std::integral_constant<double, 2e-5>, // expected_inf_error
         std::integral_constant<double, 0.3> // expected_residual_reduction
@@ -331,11 +378,17 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<bool, true>, // FMG
         std::integral_constant<int, 2>, // FMG_iterations
         std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>, // FMG_cycle
+        std::integral_constant<bool, true>, // PCG
+        std::integral_constant<bool, true>, // PCG_FMG
+        std::integral_constant<int, 2>, // PCG_FMG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>, // PCG_FMG_cycle
+        std::integral_constant<int, 1>, // PCG_MG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>, // PCG_MG_cycle
         std::integral_constant<int, 50>, // maxIterations
         std::integral_constant<ResidualNormType, ResidualNormType::EUCLIDEAN>, // residualNormType
         std::integral_constant<double, 1e-8>, // absoluteTolerance
         std::integral_constant<double, 1e-6>, // relativeTolerance
-        std::integral_constant<int, 34>, // expected_iterations
+        std::integral_constant<int, 10>, // expected_iterations
         std::integral_constant<double, 5e-4>, // expected_l2_error
         std::integral_constant<double, 2e-3>, // expected_inf_error
         std::integral_constant<double, 0.7> // expected_residual_reduction
@@ -366,11 +419,17 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<bool, false>, // FMG
         std::integral_constant<int, 0>, // FMG_iterations
         std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>, // FMG_cycle
+        std::integral_constant<bool, true>, // PCG
+        std::integral_constant<bool, true>, // PCG_FMG
+        std::integral_constant<int, 1>, // PCG_FMG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>, // PCG_FMG_cycle
+        std::integral_constant<int, 4>, // PCG_MG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>, // PCG_MG_cycle
         std::integral_constant<int, 50>, // maxIterations
         std::integral_constant<ResidualNormType, ResidualNormType::EUCLIDEAN>, // residualNormType
         std::integral_constant<double, 1e-8>, // absoluteTolerance
         std::integral_constant<double, 1e-6>, // relativeTolerance
-        std::integral_constant<int, 38>, // expected_iterations
+        std::integral_constant<int, 8>, // expected_iterations
         std::integral_constant<double, 2e-3>, // expected_l2_error
         std::integral_constant<double, 3e-3>, // expected_inf_error
         std::integral_constant<double, 0.7> // expected_residual_reduction
@@ -401,6 +460,12 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<bool, false>, // FMG
         std::integral_constant<int, 0>, // FMG_iterations
         std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>, // FMG_cycle
+        std::integral_constant<bool, true>, // PCG
+        std::integral_constant<bool, true>, // PCG_FMG
+        std::integral_constant<int, 2>, // PCG_FMG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>, // PCG_FMG_cycle
+        std::integral_constant<int, 4>, // PCG_MG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>, // PCG_MG_cycle
         std::integral_constant<int, 25>, // maxIterations
         std::integral_constant<ResidualNormType, ResidualNormType::WEIGHTED_EUCLIDEAN>, // residualNormType
         std::integral_constant<double, -1.0>, // absoluteTolerance
@@ -435,11 +500,17 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<bool, true>, // FMG
         std::integral_constant<int, 0>, // FMG_iterations
         std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>, // FMG_cycle
+        std::integral_constant<bool, true>, // PCG
+        std::integral_constant<bool, true>, // PCG_FMG
+        std::integral_constant<int, 2>, // PCG_FMG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>, // PCG_FMG_cycle
+        std::integral_constant<int, 7>, // PCG_MG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>, // PCG_MG_cycle
         std::integral_constant<int, 30>, // maxIterations
         std::integral_constant<ResidualNormType, ResidualNormType::INFINITY_NORM>, // residualNormType
         std::integral_constant<double, -1.0>, // absoluteTolerance
         std::integral_constant<double, 1e-7>, // relativeTolerance
-        std::integral_constant<int, 10>, // expected_iterations
+        std::integral_constant<int, 2>, // expected_iterations
         std::integral_constant<double, 3e-4>, // expected_l2_error
         std::integral_constant<double, 9e-4>, // expected_inf_error
         std::integral_constant<double, 0.2> // expected_residual_reduction
@@ -469,11 +540,17 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<bool, true>, // FMG
         std::integral_constant<int, 2>, // FMG_iterations
         std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>, // FMG_cycle
+        std::integral_constant<bool, true>, // PCG
+        std::integral_constant<bool, true>, // PCG_FMG
+        std::integral_constant<int, 1>, // PCG_FMG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>, // PCG_FMG_cycle
+        std::integral_constant<int, 4>, // PCG_MG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>, // PCG_MG_cycle
         std::integral_constant<int, 50>, // maxIterations
         std::integral_constant<ResidualNormType, ResidualNormType::WEIGHTED_EUCLIDEAN>, // residualNormType
         std::integral_constant<double, 1e-8>, // absoluteTolerance
         std::integral_constant<double, -1.0>, // relativeTolerance
-        std::integral_constant<int, 16>, // expected_iterations
+        std::integral_constant<int, 5>, // expected_iterations
         std::integral_constant<double, 9e-5>, // expected_l2_error
         std::integral_constant<double, 3e-4>, // expected_inf_error
         std::integral_constant<double, 0.6> // expected_residual_reduction
@@ -503,11 +580,17 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<bool, true>, // FMG
         std::integral_constant<int, 1>, // FMG_iterations
         std::integral_constant<MultigridCycleType, MultigridCycleType::W_CYCLE>, // FMG_cycle
+        std::integral_constant<bool, true>, // PCG
+        std::integral_constant<bool, true>, // PCG_FMG
+        std::integral_constant<int, 1>, // PCG_FMG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>, // PCG_FMG_cycle
+        std::integral_constant<int, 4>, // PCG_MG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>, // PCG_MG_cycle
         std::integral_constant<int, 50>, // maxIterations
         std::integral_constant<ResidualNormType, ResidualNormType::EUCLIDEAN>, // residualNormType
         std::integral_constant<double, 1e-9>, // absoluteTolerance
         std::integral_constant<double, 1e-8>, // relativeTolerance
-        std::integral_constant<int, 8>, // expected_iterations
+        std::integral_constant<int, 2>, // expected_iterations
         std::integral_constant<double, 5e-6>, // expected_l2_error
         std::integral_constant<double, 2e-5>, // expected_inf_error
         std::integral_constant<double, 0.2> // expected_residual_reduction
@@ -537,11 +620,17 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<bool, false>, // FMG
         std::integral_constant<int, 1>, // FMG_iterations
         std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>, // FMG_cycle
+        std::integral_constant<bool, true>, // PCG
+        std::integral_constant<bool, true>, // PCG_FMG
+        std::integral_constant<int, 1>, // PCG_FMG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::F_CYCLE>, // PCG_FMG_cycle
+        std::integral_constant<int, 4>, // PCG_MG_iterations
+        std::integral_constant<MultigridCycleType, MultigridCycleType::V_CYCLE>, // PCG_MG_cycle
         std::integral_constant<int, 50>, // maxIterations
         std::integral_constant<ResidualNormType, ResidualNormType::EUCLIDEAN>, // residualNormType
         std::integral_constant<double, 1e-7>, // absoluteTolerance
         std::integral_constant<double, 1e-7>, // relativeTolerance
-        std::integral_constant<int, 17>, // expected_iterations
+        std::integral_constant<int, 5>, // expected_iterations
         std::integral_constant<double, 8e-5>, // expected_l2_error
         std::integral_constant<double, 3e-4>, // expected_inf_error
         std::integral_constant<double, 0.7> // expected_residual_reduction
@@ -549,7 +638,7 @@ using gmgpolar_test_suite = testing::Types<
 >;
 // clang-format on
 
-TYPED_TEST_SUITE(GMGPolarTestCase, gmgpolar_test_suite);
+TYPED_TEST_SUITE(PCGTestCase, gmgpolar_test_suite);
 
 template <class TestFixture>
 void run_gmgpolar()
@@ -593,6 +682,12 @@ void run_gmgpolar()
     solver.FMG(TestFixture::FMG);
     solver.FMG_iterations(TestFixture::FMG_iterations);
     solver.FMG_cycle(TestFixture::FMG_cycle);
+    solver.PCG(TestFixture::PCG);
+    solver.PCG_FMG(TestFixture::PCG_FMG);
+    solver.PCG_FMG_iterations(TestFixture::PCG_FMG_iterations);
+    solver.PCG_FMG_cycle(TestFixture::PCG_FMG_cycle);
+    solver.PCG_MG_iterations(TestFixture::PCG_MG_iterations);
+    solver.PCG_MG_cycle(TestFixture::PCG_MG_cycle);
     // --- Iterative solver controls --- //
     solver.maxIterations(TestFixture::maxIterations);
     solver.residualNormType(TestFixture::residualNormType);
@@ -630,6 +725,12 @@ void run_gmgpolar()
     EXPECT_EQ(solver.FMG(), TestFixture::FMG);
     EXPECT_EQ(solver.FMG_iterations(), TestFixture::FMG_iterations);
     EXPECT_EQ(solver.FMG_cycle(), TestFixture::FMG_cycle);
+    EXPECT_EQ(solver.PCG(), TestFixture::PCG);
+    EXPECT_EQ(solver.PCG_FMG(), TestFixture::PCG_FMG);
+    EXPECT_EQ(solver.PCG_FMG_iterations(), TestFixture::PCG_FMG_iterations);
+    EXPECT_EQ(solver.PCG_FMG_cycle(), TestFixture::PCG_FMG_cycle);
+    EXPECT_EQ(solver.PCG_MG_iterations(), TestFixture::PCG_MG_iterations);
+    EXPECT_EQ(solver.PCG_MG_cycle(), TestFixture::PCG_MG_cycle);
     EXPECT_EQ(solver.maxIterations(), TestFixture::maxIterations);
     EXPECT_EQ(solver.residualNormType(), TestFixture::residualNormType);
     if (solver.absoluteTolerance().has_value()) {
@@ -667,6 +768,7 @@ void run_gmgpolar()
     EXPECT_GE(solver.timeSolveMultigridIterations(), 0.0);
     EXPECT_GE(solver.timeCheckConvergence(), 0.0);
     EXPECT_GE(solver.timeCheckExactError(), 0.0);
+    EXPECT_GE(solver.timeConjugateGradient(), 0.0);
 
     EXPECT_GE(solver.timeAvgMGCTotal(), 0.0);
     EXPECT_GE(solver.timeAvgMGCPreSmoothing(), 0.0);
@@ -675,7 +777,7 @@ void run_gmgpolar()
     EXPECT_GE(solver.timeAvgMGCDirectSolver(), 0.0);
 }
 
-TYPED_TEST(GMGPolarTestCase, GeneralTest)
+TYPED_TEST(PCGTestCase, GeneralTest)
 {
     run_gmgpolar<TestFixture>();
 }

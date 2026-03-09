@@ -26,6 +26,13 @@ IGMGPolar::IGMGPolar(const PolarGrid& grid)
     , FMG_(false)
     , FMG_iterations_(3)
     , FMG_cycle_(MultigridCycleType::F_CYCLE)
+    // PCG settings
+    , PCG_(false)
+    , PCG_FMG_(true)
+    , PCG_FMG_iterations_(1)
+    , PCG_FMG_cycle_(MultigridCycleType::V_CYCLE)
+    , PCG_MG_iterations_(1)
+    , PCG_MG_cycle_(MultigridCycleType::V_CYCLE)
     // Convergence settings
     , max_iterations_(300)
     , residual_norm_type_(ResidualNormType::WEIGHTED_EUCLIDEAN)
@@ -195,6 +202,55 @@ void IGMGPolar::FMG_cycle(MultigridCycleType FMG_cycle)
     FMG_cycle_ = FMG_cycle;
 }
 
+bool IGMGPolar::PCG() const
+{
+    return PCG_;
+}
+void IGMGPolar::PCG(bool PCG)
+{
+    PCG_ = PCG;
+}
+bool IGMGPolar::PCG_FMG() const
+{
+    return PCG_FMG_;
+}
+void IGMGPolar::PCG_FMG(bool PCG_FMG)
+{
+    PCG_FMG_ = PCG_FMG;
+}
+int IGMGPolar::PCG_FMG_iterations() const
+{
+    return PCG_FMG_iterations_;
+}
+void IGMGPolar::PCG_FMG_iterations(int PCG_FMG_iterations)
+{
+    PCG_FMG_iterations_ = PCG_FMG_iterations;
+}
+MultigridCycleType IGMGPolar::PCG_FMG_cycle() const
+{
+    return PCG_FMG_cycle_;
+}
+void IGMGPolar::PCG_FMG_cycle(MultigridCycleType PCG_FMG_cycle)
+{
+    PCG_FMG_cycle_ = PCG_FMG_cycle;
+}
+int IGMGPolar::PCG_MG_iterations() const
+{
+    return PCG_MG_iterations_;
+}
+void IGMGPolar::PCG_MG_iterations(int PCG_MG_iterations)
+{
+    PCG_MG_iterations_ = PCG_MG_iterations;
+}
+MultigridCycleType IGMGPolar::PCG_MG_cycle() const
+{
+    return PCG_MG_cycle_;
+}
+void IGMGPolar::PCG_MG_cycle(MultigridCycleType PCG_MG_cycle)
+{
+    PCG_MG_cycle_ = PCG_MG_cycle;
+}
+
 /* ---------------------------------------------------------------------- */
 /* Iterative solver termination                                           */
 /* ---------------------------------------------------------------------- */
@@ -302,6 +358,11 @@ double IGMGPolar::timeCheckExactError() const
     return t_check_exact_error_;
 }
 
+double IGMGPolar::timeConjugateGradient() const
+{
+    return t_conjugate_gradient_;
+}
+
 /* ---------------------------------------------------------------------- */
 /* Average Multigrid Cycle timings                                        */
 /* ---------------------------------------------------------------------- */
@@ -353,6 +414,7 @@ void IGMGPolar::resetSolvePhaseTimings()
     t_solve_multigrid_iterations_  = 0.0;
     t_check_convergence_           = 0.0;
     t_check_exact_error_           = 0.0;
+    t_conjugate_gradient_          = 0.0;
 }
 
 void IGMGPolar::resetAvgMultigridCycleTimings()
@@ -381,19 +443,28 @@ void IGMGPolar::printTimings() const
     std::cout << "    (Build rhs: " << t_setup_rhs_ << " seconds)" << std::endl;
     std::cout << "\nSolve Time: " << t_solve_total_ << " seconds" << std::endl;
     std::cout << "    Initial Approximation: " << t_solve_initial_approximation_ << " seconds" << std::endl;
-    std::cout << "    Multigrid Iteration: " << t_solve_multigrid_iterations_ << " seconds" << std::endl;
+    if (!PCG_) {
+        std::cout << "    Multigrid Iterations: " << t_solve_multigrid_iterations_ << " seconds" << std::endl;
+    }
+    else {
+        std::cout << "    Preconditioned Conjugate Gradient: "
+                  << t_conjugate_gradient_ - t_check_convergence_ - t_check_exact_error_ << " seconds" << std::endl;
+    }
     std::cout << "    Check Convergence: " << t_check_convergence_ << " seconds" << std::endl;
     std::cout << "    (Check Exact Error: " << t_check_exact_error_ << " seconds)" << std::endl;
-    std::cout << "\nAverage Multigrid Iteration: " << t_avg_MGC_total_ << " seconds" << std::endl;
-    std::cout << "    PreSmoothing: " << t_avg_MGC_preSmoothing_ << " seconds" << std::endl;
-    std::cout << "    PostSmoothing: " << t_avg_MGC_postSmoothing_ << " seconds" << std::endl;
-    std::cout << "    Residual: " << t_avg_MGC_residual_ << " seconds" << std::endl;
-    std::cout << "    DirectSolve: " << t_avg_MGC_directSolver_ << " seconds" << std::endl;
-    std::cout << "    Other Computations: "
-              << std::max(t_avg_MGC_total_ - t_avg_MGC_preSmoothing_ - t_avg_MGC_postSmoothing_ - t_avg_MGC_residual_ -
-                              t_avg_MGC_directSolver_,
-                          0.0)
-              << " seconds" << std::endl;
+
+    if (!PCG_) {
+        std::cout << "\nAverage Multigrid Iteration: " << t_avg_MGC_total_ << " seconds" << std::endl;
+        std::cout << "    PreSmoothing: " << t_avg_MGC_preSmoothing_ << " seconds" << std::endl;
+        std::cout << "    PostSmoothing: " << t_avg_MGC_postSmoothing_ << " seconds" << std::endl;
+        std::cout << "    Residual: " << t_avg_MGC_residual_ << " seconds" << std::endl;
+        std::cout << "    DirectSolve: " << t_avg_MGC_directSolver_ << " seconds" << std::endl;
+        std::cout << "    Other Computations: "
+                  << std::max(t_avg_MGC_total_ - t_avg_MGC_preSmoothing_ - t_avg_MGC_postSmoothing_ -
+                                  t_avg_MGC_residual_ - t_avg_MGC_directSolver_,
+                              0.0)
+                  << " seconds" << std::endl;
+    }
 }
 
 // Number of iterations taken by last solve.

@@ -104,7 +104,7 @@ set(RESIDUAL_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Residual/ResidualGive/residualGive.cpp
     
     # ResidualTake
-    ${CMAKE_CURRENT_SOURCE_DIR}/Residual/ResidualTake/applyResidualTake.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Residual/ResidualTake/applyATake.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Residual/ResidualTake/residualTake.cpp
 )
 
@@ -195,7 +195,7 @@ find_package(OpenMP REQUIRED)
 if(OpenMP_CXX_FOUND)
     target_link_libraries(GMGPolarLib PUBLIC OpenMP::OpenMP_CXX)
 endif()
-find_package(Kokkos  4.4.1...<5 QUIET REQUIRED)
+find_package(Kokkos  4.4.1...<5.1 QUIET REQUIRED)
 target_link_libraries(GMGPolarLib PUBLIC Kokkos::kokkos)
 
 

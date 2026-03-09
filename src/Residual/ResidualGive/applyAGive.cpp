@@ -34,7 +34,7 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
         const int top    = grid.index(i_r, i_theta_P1);
 
         /* Fill result(i,j) */
-        result[center] -= (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
+        result[center] += (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
                            - coeff1 * arr * x[left] /* Left */
                            - coeff2 * arr * x[right] /* Right */
                            - coeff3 * att * x[bottom] /* Bottom */
@@ -42,22 +42,22 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
                            + ((coeff1 + coeff2) * arr + (coeff3 + coeff4) * att) *
                                  x[center]) /* Center: (Left, Right, Bottom, Top) */;
         /* Fill result(i-1,j) */
-        result[left] -= (-coeff1 * arr * x[center] /* Right */
+        result[left] += (-coeff1 * arr * x[center] /* Right */
                          + coeff1 * arr * x[left] /* Center: (Right) */
                          - 0.25 * art * x[top] /* Top Right */
                          + 0.25 * art * x[bottom]); /* Bottom Right */
         /* Fill result(i+1,j) */
-        result[right] -= (-coeff2 * arr * x[center] /* Left */
+        result[right] += (-coeff2 * arr * x[center] /* Left */
                           + coeff2 * arr * x[right] /* Center: (Left) */
                           + 0.25 * art * x[top] /* Top Left */
                           - 0.25 * art * x[bottom]); /* Bottom Left */
         /* Fill result(i,j-1) */
-        result[bottom] -= (-coeff3 * att * x[center] /* Top */
+        result[bottom] += (-coeff3 * att * x[center] /* Top */
                            + coeff3 * att * x[bottom] /* Center: (Top) */
                            - 0.25 * art * x[right] /* Top Right */
                            + 0.25 * art * x[left]); /* Top Left */
         /* Fill result(i,j+1) */
-        result[top] -= (-coeff4 * att * x[center] /* Bottom */
+        result[top] += (-coeff4 * att * x[center] /* Bottom */
                         + coeff4 * att * x[top] /* Center: (Bottom) */
                         + 0.25 * art * x[right] /* Bottom Right */
                         - 0.25 * art * x[left]); /* Bottom Left */
@@ -71,7 +71,7 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
         /* ------------------------------------------------ */
         if (DirBC_Interior) {
             /* Fill result(i,j) */
-            result[center] -= x[center];
+            result[center] += x[center];
 
             /* Give value to the interior nodes! */
             double h2 = grid.radialSpacing(i_r);
@@ -88,7 +88,7 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
             const int top    = grid.index(i_r, i_theta_P1);
 
             /* Fill result(i+1,j) */
-            result[right] -= (-coeff2 * arr * x[center] /* Left */
+            result[right] += (-coeff2 * arr * x[center] /* Left */
                               + coeff2 * arr * x[right] /* Center: (Left) */
                               + 0.25 * art * x[top] /* Top Left */
                               - 0.25 * art * x[bottom]); /* Bottom Left */
@@ -120,7 +120,7 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
             const int top    = grid.index(i_r, i_theta_P1);
 
             /* Fill result(i,j) */
-            result[center] -= (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
+            result[center] += (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
                                - coeff1 * arr * x[left] /* Left */
                                - coeff2 * arr * x[right] /* Right */
                                - coeff3 * att * x[bottom] /* Bottom */
@@ -129,22 +129,22 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
                                      x[center]); /* Center: (Left, Right, Bottom, Top) */
             /* Fill result(i-1,j) */
             /* From view the view of the across origin node, the directions are roatated by 180 degrees in the stencil! */
-            result[left] -= (-coeff1 * arr * x[center] /* Right -> Left */
+            result[left] += (-coeff1 * arr * x[center] /* Right -> Left */
                              + coeff1 * arr * x[left]); /* Center: (Right) -> Center: (Left)*/
             /* + 0.25 * art * x[top]; // Top Right -> Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
             /* - 0.25 * art * x[bottom]; // Bottom Right -> Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
             /* Fill result(i+1,j) */
-            result[right] -= (-coeff2 * arr * x[center] /* Left */
+            result[right] += (-coeff2 * arr * x[center] /* Left */
                               + coeff2 * arr * x[right] /* Center: (Left) */
                               + 0.25 * art * x[top] /* Top Left */
                               - 0.25 * art * x[bottom]); /* Bottom Left */
             /* Fill result(i,j-1) */
-            result[bottom] -= (-coeff3 * att * x[center] /* Top */
+            result[bottom] += (-coeff3 * att * x[center] /* Top */
                                + coeff3 * att * x[bottom] /* Center: (Top) */
                                - 0.25 * art * x[right]); /* Top Right */
             /* + 0.25 * art * x[left]; // Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
             /* Fill result(i,j+1) */
-            result[top] -= (-coeff4 * att * x[center] /* Bottom */
+            result[top] += (-coeff4 * att * x[center] /* Bottom */
                             + coeff4 * att * x[top] /* Center: (Bottom) */
                             + 0.25 * art * x[right]); /* Bottom Right */
             /* - 0.25 * art * x[left]; // Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
@@ -173,7 +173,7 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
         const int top    = grid.index(i_r, i_theta_P1);
 
         /* Fill result(i,j) */
-        result[center] -= (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
+        result[center] += (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
                            - coeff1 * arr * x[left] /* Left */
                            - coeff2 * arr * x[right] /* Right */
                            - coeff3 * att * x[bottom] /* Bottom */
@@ -182,23 +182,23 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
                                  x[center]); /* Center: (Left, Right, Bottom, Top) */
         /* Fill result(i-1,j) */
         if (!DirBC_Interior) { /* Don't give to the inner dirichlet boundary! */
-            result[left] -= (-coeff1 * arr * x[center] /* Right */
+            result[left] += (-coeff1 * arr * x[center] /* Right */
                              + coeff1 * arr * x[left] /* Center: (Right) */
                              - 0.25 * art * x[top] /* Top Right */
                              + 0.25 * art * x[bottom]); /* Bottom Right */
         }
         /* Fill result(i+1,j) */
-        result[right] -= (-coeff2 * arr * x[center] /* Left */
+        result[right] += (-coeff2 * arr * x[center] /* Left */
                           + coeff2 * arr * x[right] /* Center: (Left) */
                           + 0.25 * art * x[top] /* Top Left */
                           - 0.25 * art * x[bottom]); /* Bottom Left */
         /* Fill result(i,j-1) */
-        result[bottom] -= (-coeff3 * att * x[center] /* Top */
+        result[bottom] += (-coeff3 * att * x[center] /* Top */
                            + coeff3 * att * x[bottom] /* Center: (Top) */
                            - 0.25 * art * x[right] /* Top Right */
                            + 0.25 * art * x[left]); /* Top Left */
         /* Fill result(i,j+1) */
-        result[top] -= (-coeff4 * att * x[center] /* Bottom */
+        result[top] += (-coeff4 * att * x[center] /* Bottom */
                         + coeff4 * att * x[top] /* Center: (Bottom) */
                         + 0.25 * art * x[right] /* Bottom Right */
                         - 0.25 * art * x[left]); /* Bottom Left */
@@ -226,7 +226,7 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
         const int top    = grid.index(i_r, i_theta_P1);
 
         /* Fill result(i,j) */
-        result[center] -= (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
+        result[center] += (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
                            - coeff1 * arr * x[left] /* Left */
                            - coeff2 * arr * x[right] /* Right */
                            - coeff3 * att * x[bottom] /* Bottom */
@@ -234,24 +234,24 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
                            + ((coeff1 + coeff2) * arr + (coeff3 + coeff4) * att) *
                                  x[center]); /* Center: (Left, Right, Bottom, Top) */
         /* Fill result(i-1,j) */
-        result[left] -= (-coeff1 * arr * x[center] /* Right */
+        result[left] += (-coeff1 * arr * x[center] /* Right */
                          + coeff1 * arr * x[left] /* Center: (Right) */
                          - 0.25 * art * x[top] /* Top Right */
                          + 0.25 * art * x[bottom]); /* Bottom Right */
         /* Don't give to the outer dirichlet boundary! */
         /* Fill result(i+1,j) */
-        /* result[right] -= ( */
+        /* result[right] += ( */
         /*     - coeff2 * arr * x[center] // Left */
         /*     + coeff2 * arr * x[right] // Center: (Left) */
         /*     + 0.25 * art * x[top] // Top Left */
         /*     - 0.25 * art * x[bottom]); // Bottom Left */
         /* Fill result(i,j-1) */
-        result[bottom] -= (-coeff3 * att * x[center] /* Top */
+        result[bottom] += (-coeff3 * att * x[center] /* Top */
                            + coeff3 * att * x[bottom] /* Center: (Top) */
                            - 0.25 * art * x[right] /* Top Right */
                            + 0.25 * art * x[left]); /* Top Left */
         /* Fill result(i,j+1) */
-        result[top] -= (-coeff4 * att * x[center] /* Bottom */
+        result[top] += (-coeff4 * att * x[center] /* Bottom */
                         + coeff4 * att * x[top] /* Center: (Bottom) */
                         + 0.25 * art * x[right] /* Bottom Right */
                         - 0.25 * art * x[left]); /* Bottom Left */
@@ -261,7 +261,7 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
     /* ----------------------------- */
     else if (i_r == grid.nr() - 1) {
         /* Fill result of (i,j) */
-        result[center] -= x[center];
+        result[center] += x[center];
 
         /* Give value to the interior nodes! */
         double h1 = grid.radialSpacing(i_r - 1);
@@ -278,7 +278,7 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
         const int top    = grid.index(i_r, i_theta_P1);
 
         /* Fill result(i-1,j) */
-        result[left] -= (-coeff1 * arr * x[center] /* Right */
+        result[left] += (-coeff1 * arr * x[center] /* Right */
                          + coeff1 * arr * x[left] /* Center: (Right) */
                          - 0.25 * art * x[top] /* Top Right */
                          + 0.25 * art * x[bottom]); /* Bottom Right */

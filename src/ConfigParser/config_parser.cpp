@@ -28,10 +28,21 @@ ConfigParser::ConfigParser()
     parser_.add<int>("maxLevels", 'l', "Max multigrid levels.", OPTIONAL, -1);
     parser_.add<int>("preSmoothingSteps", '\0', "Pre-smoothing steps.", OPTIONAL, 1);
     parser_.add<int>("postSmoothingSteps", '\0', "Post-smoothing steps.", OPTIONAL, 1);
+
     parser_.add<int>("multigridCycle", '\0', "Cycle type (0=V,1=W,2=F).", OPTIONAL, 0, cmdline::oneof(0, 1, 2));
     parser_.add<int>("FMG", '\0', "Use Full Multigrid (0/1).", OPTIONAL, 0, cmdline::oneof(0, 1));
     parser_.add<int>("FMG_iterations", '\0', "FMG iterations.", OPTIONAL, 2);
     parser_.add<int>("FMG_cycle", '\0', "FMG cycle type (0=V,1=W,2=F).", OPTIONAL, 0, cmdline::oneof(0, 1, 2));
+
+    parser_.add<int>("PCG", '\0', "Use Preconditioned Conjugate Gradient (0/1).", OPTIONAL, 0, cmdline::oneof(0, 1));
+    parser_.add<int>("PCG_FMG", '\0', "Use FMG as preconditioner for PCG (0/1).", OPTIONAL, 0, cmdline::oneof(0, 1));
+    parser_.add<int>("PCG_FMG_iterations", '\0', "FMG iterations for PCG preconditioner.", OPTIONAL, 2);
+    parser_.add<int>("PCG_FMG_cycle", '\0', "FMG cycle type for PCG preconditioner (0=V,1=W,2=F).", OPTIONAL, 0,
+                     cmdline::oneof(0, 1, 2));
+    parser_.add<int>("PCG_MG_iterations", '\0', "Multigrid iterations for PCG preconditioner.", OPTIONAL, 1);
+    parser_.add<int>("PCG_MG_cycle", '\0', "Multigrid cycle type for PCG preconditioner (0=V,1=W,2=F).", OPTIONAL, 0,
+                     cmdline::oneof(0, 1, 2));
+
     parser_.add<int>("maxIterations", '\0', "Max solver iterations.", OPTIONAL, 150);
     parser_.add<int>("residualNormType", '\0', "Residual norm (0=Euclidean,1=Weighted,2=Infinity)", OPTIONAL, 0,
                      cmdline::oneof(0, 1, 2));
@@ -106,6 +117,30 @@ bool ConfigParser::parse(int argc, char* argv[])
     else {
         throw std::runtime_error("Invalid FMG cycle type.");
     }
+
+    PCG_                         = parser_.get<int>("PCG") != 0;
+    PCG_FMG_                     = parser_.get<int>("PCG_FMG") != 0;
+    PCG_FMG_iterations_          = parser_.get<int>("PCG_FMG_iterations");
+    const int PCG_FMG_cycleValue = parser_.get<int>("PCG_FMG_cycle");
+    if (PCG_FMG_cycleValue == static_cast<int>(MultigridCycleType::V_CYCLE) ||
+        PCG_FMG_cycleValue == static_cast<int>(MultigridCycleType::W_CYCLE) ||
+        PCG_FMG_cycleValue == static_cast<int>(MultigridCycleType::F_CYCLE)) {
+        PCG_FMG_cycle_ = static_cast<MultigridCycleType>(PCG_FMG_cycleValue);
+    }
+    else {
+        throw std::runtime_error("Invalid PCG FMG cycle type.");
+    }
+    PCG_MG_iterations_          = parser_.get<int>("PCG_MG_iterations");
+    const int PCG_MG_cycleValue = parser_.get<int>("PCG_MG_cycle");
+    if (PCG_MG_cycleValue == static_cast<int>(MultigridCycleType::V_CYCLE) ||
+        PCG_MG_cycleValue == static_cast<int>(MultigridCycleType::W_CYCLE) ||
+        PCG_MG_cycleValue == static_cast<int>(MultigridCycleType::F_CYCLE)) {
+        PCG_MG_cycle_ = static_cast<MultigridCycleType>(PCG_MG_cycleValue);
+    }
+    else {
+        throw std::runtime_error("Invalid PCG MG cycle type.");
+    }
+
     const int extrapolationValue = parser_.get<int>("extrapolation");
     if (extrapolationValue == static_cast<int>(ExtrapolationType::NONE) ||
         extrapolationValue == static_cast<int>(ExtrapolationType::IMPLICIT_EXTRAPOLATION) ||
@@ -329,6 +364,31 @@ int ConfigParser::FMG_iterations() const
 MultigridCycleType ConfigParser::FMG_cycle() const
 {
     return FMG_cycle_;
+}
+
+bool ConfigParser::PCG() const
+{
+    return PCG_;
+}
+bool ConfigParser::PCG_FMG() const
+{
+    return PCG_FMG_;
+}
+int ConfigParser::PCG_FMG_iterations() const
+{
+    return PCG_FMG_iterations_;
+}
+MultigridCycleType ConfigParser::PCG_FMG_cycle() const
+{
+    return PCG_FMG_cycle_;
+}
+int ConfigParser::PCG_MG_iterations() const
+{
+    return PCG_MG_iterations_;
+}
+MultigridCycleType ConfigParser::PCG_MG_cycle() const
+{
+    return PCG_MG_cycle_;
 }
 ExtrapolationType ConfigParser::extrapolation() const
 {

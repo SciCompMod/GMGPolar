@@ -42,10 +42,20 @@ public:
 
     const PolarGrid& grid() const;
 
-    // Multigrid Parameters
+    // Full Multigrid Method
     bool FMG() const;
     int FMG_iterations() const;
     MultigridCycleType FMG_cycle() const;
+
+    // Preconditioned Conjugate Gradient Method
+    bool PCG() const;
+    bool PCG_FMG() const;
+    int PCG_FMG_iterations() const;
+    MultigridCycleType PCG_FMG_cycle() const;
+    int PCG_MG_iterations() const;
+    MultigridCycleType PCG_MG_cycle() const;
+
+    // Multigrid Parameters
     ExtrapolationType extrapolation() const;
     int maxLevels() const;
     int preSmoothingSteps() const;
@@ -86,6 +96,12 @@ private:
     bool FMG_;
     int FMG_iterations_;
     MultigridCycleType FMG_cycle_;
+    bool PCG_;
+    bool PCG_FMG_;
+    int PCG_FMG_iterations_;
+    MultigridCycleType PCG_FMG_cycle_;
+    int PCG_MG_iterations_;
+    MultigridCycleType PCG_MG_cycle_;
     // Iterative solver controls
     int max_iterations_;
     ResidualNormType residual_norm_type_;

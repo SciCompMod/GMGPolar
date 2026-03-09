@@ -17,11 +17,12 @@
 // ----------- //
 // Constructor //
 Level::Level(const int level_depth, std::unique_ptr<const PolarGrid> grid,
-             std::unique_ptr<const LevelCache> level_cache, const ExtrapolationType extrapolation, const bool FMG)
+             std::unique_ptr<const LevelCache> level_cache, const ExtrapolationType extrapolation, const bool FMG,
+             const bool PCG_FMG)
     : level_depth_(level_depth)
     , grid_(std::move(grid))
     , level_cache_(std::move(level_cache))
-    , rhs_("rhs", (FMG || level_depth == 0 || (level_depth == 1 && extrapolation != ExtrapolationType::NONE))
+    , rhs_("rhs", (FMG || PCG_FMG || level_depth == 0 || (level_depth == 1 && extrapolation != ExtrapolationType::NONE))
                       ? grid_->numberOfNodes()
                       : 0)
     , solution_("solution", grid_->numberOfNodes())
@@ -103,6 +104,12 @@ void Level::computeResidual(Vector<double> result, ConstVector<double> rhs, Cons
     if (!op_residual_)
         throw std::runtime_error("Residual not initialized.");
     op_residual_->computeResidual(result, rhs, x);
+}
+void Level::applySystemOperator(Vector<double> result, ConstVector<double> x) const
+{
+    if (!op_residual_)
+        throw std::runtime_error("Residual not initialized.");
+    op_residual_->applySystemOperator(result, x);
 }
 
 // ------------------- //

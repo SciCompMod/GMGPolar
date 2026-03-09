@@ -12,6 +12,8 @@ public:
 
     void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const override;
 
+    void applySystemOperator(Vector<double> result, ConstVector<double> x) const override;
+
 private:
     void applyCircleSection(const int i_r, Vector<double> result, ConstVector<double> x) const;
     void applyRadialSection(const int i_theta, Vector<double> result, ConstVector<double> x) const;

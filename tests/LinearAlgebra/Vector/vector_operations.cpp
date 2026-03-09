@@ -163,18 +163,6 @@ TEST(VectorOperations, l1_vector_norm)
     EXPECT_DOUBLE_EQ(l1_norm(ConstVector<double>(v)), 8.0);
 }
 
-/* T l2_norm_squared(ConstVector<T>& x); */
-
-TEST(VectorOperations, l2_vector_norm_squared)
-{
-    Vector<double> v("v", 3);
-    v(0) = 1;
-    v(1) = -5;
-    v(2) = 2;
-    ConstVector<double> const_v(v);
-    EXPECT_DOUBLE_EQ(l2_norm_squared(const_v), 30.0);
-}
-
 /* T l2_norm(ConstVector<T>& x); */
 
 TEST(VectorOperations, l2_vector_norm)
@@ -185,6 +173,36 @@ TEST(VectorOperations, l2_vector_norm)
     v(2) = 2;
     ConstVector<double> const_v(v);
     EXPECT_DOUBLE_EQ(l2_norm(ConstVector<double>(const_v)), std::sqrt(30.0));
+}
+
+TEST(VectorOperations, zero_l2_vector_norm)
+{
+    Vector<double> v("v", 3);
+    v(0) = 0;
+    v(1) = 0;
+    v(2) = 0;
+    ConstVector<double> const_v(v);
+    EXPECT_DOUBLE_EQ(l2_norm(ConstVector<double>(const_v)), 0.0);
+}
+
+TEST(VectorOperations, underflow_l2_vector_norm)
+{
+    Vector<double> v("v", 3);
+    v(0) = 1e-300;
+    v(1) = 1e-300;
+    v(2) = 1e-300;
+    ConstVector<double> const_v(v);
+    EXPECT_DOUBLE_EQ(l2_norm(ConstVector<double>(const_v)), std::sqrt(3.0) * 1e-300);
+}
+
+TEST(VectorOperations, overflow_l2_vector_norm)
+{
+    Vector<double> v("v", 3);
+    v(0) = 1e+300;
+    v(1) = 1e+300;
+    v(2) = 1e+300;
+    ConstVector<double> const_v(v);
+    EXPECT_DOUBLE_EQ(l2_norm(ConstVector<double>(const_v)), std::sqrt(3.0) * 1e+300);
 }
 
 /* T infinity_norm(ConstVector<T>& x); */

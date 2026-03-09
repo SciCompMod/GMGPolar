@@ -25,6 +25,8 @@ public:
 
     virtual void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const = 0;
 
+    virtual void applySystemOperator(Vector<double> result, ConstVector<double> x) const = 0;
+
 protected:
     /* ------------------- */
     /* Constructor members */
