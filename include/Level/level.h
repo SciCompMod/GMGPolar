@@ -49,8 +49,8 @@ public:
     // ----------- //
     // Constructor //
     explicit Level(const int level_depth, std::unique_ptr<const PolarGrid> grid,
-                   std::unique_ptr<const LevelCache<DomainGeometry>> level_cache, const ExtrapolationType extrapolation,
-                   const bool FMG);
+                   std::unique_ptr<const LevelCache<DomainGeometry>> level_cache, const ExtrapolationType extrapolation, const bool FMG,
+                   const bool PCG_FMG = false);
 
     // ---------------- //
     // Getter Functions //
@@ -73,6 +73,7 @@ public:
                             const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior,
                             const int num_omp_threads, const StencilDistributionMethod stencil_distribution_method);
     void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const;
+    void applySystemOperator(Vector<double> result, ConstVector<double> x) const;
 
     // ------------------- //
     // Solve coarse System //

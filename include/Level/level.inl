@@ -18,11 +18,11 @@
 template <concepts::DomainGeometry DomainGeometry>
 Level<DomainGeometry>::Level(const int level_depth, std::unique_ptr<const PolarGrid> grid,
                              std::unique_ptr<const LevelCache<DomainGeometry>> level_cache,
-                             const ExtrapolationType extrapolation, const bool FMG)
+                             const ExtrapolationType extrapolation, const bool FMG, const bool PCG_FMG)
     : level_depth_(level_depth)
     , grid_(std::move(grid))
     , level_cache_(std::move(level_cache))
-    , rhs_("rhs", (FMG || level_depth == 0 || (level_depth == 1 && extrapolation != ExtrapolationType::NONE))
+    , rhs_("rhs", (FMG || PCG_FMG || level_depth == 0 || (level_depth == 1 && extrapolation != ExtrapolationType::NONE))
                       ? grid_->numberOfNodes()
                       : 0)
     , solution_("solution", grid_->numberOfNodes())
@@ -108,12 +108,12 @@ void Level<DomainGeometry>::initializeResidual(const DomainGeometry& domain_geom
                                                const StencilDistributionMethod stencil_distribution_method)
 {
     if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
-        op_residual_ = std::make_unique<ResidualTake<DomainGeometry>>(*grid_, *level_cache_, domain_geometry,
-                                                      density_profile_coefficients, DirBC_Interior, num_omp_threads);
+        op_residual_ = std::make_unique<ResidualTake<DomainGeometry>>(
+            *grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads);
     }
     else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
-        op_residual_ = std::make_unique<ResidualGive<DomainGeometry>>(*grid_, *level_cache_, domain_geometry,
-                                                      density_profile_coefficients, DirBC_Interior, num_omp_threads);
+        op_residual_ = std::make_unique<ResidualGive<DomainGeometry>>(
+            *grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads);
     }
     if (!op_residual_)
         throw std::runtime_error("Failed to initialize Residual.");
@@ -125,6 +125,12 @@ void Level<DomainGeometry>::computeResidual(Vector<double> result, ConstVector<d
     if (!op_residual_)
         throw std::runtime_error("Residual not initialized.");
     op_residual_->computeResidual(result, rhs, x);
+}
+void Level::applySystemOperator(Vector<double> result, ConstVector<double> x) const
+{
+    if (!op_residual_)
+        throw std::runtime_error("Residual not initialized.");
+    op_residual_->applySystemOperator(result, x);
 }
 
 // ------------------- //
@@ -175,12 +181,12 @@ void Level<DomainGeometry>::initializeSmoothing(const DomainGeometry& domain_geo
                                                 const StencilDistributionMethod stencil_distribution_method)
 {
     if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
-        op_smoother_ = std::make_unique<SmootherTake<DomainGeometry>>(*grid_, *level_cache_, domain_geometry,
-                                                      density_profile_coefficients, DirBC_Interior, num_omp_threads);
+        op_smoother_ = std::make_unique<SmootherTake<DomainGeometry>>(
+            *grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads);
     }
     else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
-        op_smoother_ = std::make_unique<SmootherGive<DomainGeometry>>(*grid_, *level_cache_, domain_geometry,
-                                                      density_profile_coefficients, DirBC_Interior, num_omp_threads);
+        op_smoother_ = std::make_unique<SmootherGive<DomainGeometry>>(
+            *grid_, *level_cache_, domain_geometry, density_profile_coefficients, DirBC_Interior, num_omp_threads);
     }
     if (!op_smoother_)
         throw std::runtime_error("Failed to initialize Smoother.");

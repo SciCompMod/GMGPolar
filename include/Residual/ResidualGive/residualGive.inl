@@ -10,16 +10,16 @@ ResidualGive<DomainGeometry>::ResidualGive(const PolarGrid& grid, const LevelCac
 {
 }
 
-/* ------------------ */
-/* result = rhs - A*x */
+/* ------------ */
+/* result = A*x */
 
 // clang-format off
 template <concepts::DomainGeometry DomainGeometry>
-void ResidualGive<DomainGeometry>::computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const
+void ResidualGive<DomainGeometry>::computeResidual(Vector<double> result, ConstVector<double> x) const
 {
     assert(result.size() == x.size());
 
-    Kokkos::deep_copy(result, rhs);
+    assign(result, 0.0);
 
     const PolarGrid& grid = Residual<DomainGeometry>::grid_;
 
@@ -108,3 +108,19 @@ void ResidualGive<DomainGeometry>::computeResidual(Vector<double> result, ConstV
     }
 }
 // clang-format on
+
+/* ------------------ */
+/* result = rhs - A*x */
+void ResidualGive::computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const
+{
+    assert(result.size() == x.size());
+
+    applySystemOperator(result, x);
+
+    // Subtract A*x from rhs to get the residual.
+    const int n = result.size();
+#pragma omp parallel for num_threads(num_omp_threads_)
+    for (int i = 0; i < n; i++) {
+        result[i] = rhs[i] - result[i];
+    }
+}

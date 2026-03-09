@@ -25,6 +25,7 @@ add_executable(gmgpolar_tests
     ExtrapolatedSmoother/extrapolated_smoother.cpp
     ConfigParser/config_parser.cpp
     GMGPolar/solve_tests.cpp
+    GMGPolar/pcg_tests.cpp
     GMGPolar/convergence_order.cpp
 )
 

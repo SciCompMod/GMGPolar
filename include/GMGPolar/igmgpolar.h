@@ -109,6 +109,20 @@ public:
     MultigridCycleType FMG_cycle() const;
     void FMG_cycle(MultigridCycleType FMG_cycle);
 
+    // Preconditioned Conjugate Gradient (PCG) control.
+    bool PCG() const;
+    void PCG(bool PCG);
+    bool PCG_FMG() const;
+    void PCG_FMG(bool PCG_FMG);
+    int PCG_FMG_iterations() const;
+    void PCG_FMG_iterations(int PCG_FMG_iterations);
+    MultigridCycleType PCG_FMG_cycle() const;
+    void PCG_FMG_cycle(MultigridCycleType PCG_FMG_cycle);
+    int PCG_MG_iterations() const;
+    void PCG_MG_iterations(int PCG_MG_iterations);
+    MultigridCycleType PCG_MG_cycle() const;
+    void PCG_MG_cycle(MultigridCycleType PCG_MG_cycle);
+
     /* ---------------------------------------------------------------------- */
     /* Iterative solver termination                                           */
     /* ---------------------------------------------------------------------- */
@@ -171,6 +185,7 @@ public:
     double timeSolveMultigridIterations() const;
     double timeCheckConvergence() const;
     double timeCheckExactError() const;
+    double timeConjugateGradient() const;
 
     double timeAvgMGCTotal() const;
     double timeAvgMGCPreSmoothing() const;
@@ -208,6 +223,13 @@ protected:
     bool FMG_;
     int FMG_iterations_;
     MultigridCycleType FMG_cycle_;
+    // PCG settings
+    bool PCG_;
+    bool PCG_FMG_;
+    int PCG_FMG_iterations_;
+    MultigridCycleType PCG_FMG_cycle_;
+    int PCG_MG_iterations_;
+    MultigridCycleType PCG_MG_cycle_;
     // Convergence settings
     int max_iterations_;
     ResidualNormType residual_norm_type_;
@@ -228,6 +250,22 @@ protected:
     /* Chooses if full grid smoothing is active on level 0 for extrapolation > 0 */
     bool full_grid_smoothing_ = false;
 
+    /* -------------------------------------------------- */
+    /* Vectors for PCG (Preconditioned Conjugate Gradient)
+    * https://en.wikipedia.org/wiki/Conjugate_gradient_method#The_preconditioned_conjugate_gradient_method
+    *
+    * Dedicated vectors:
+    *   x  (solution)            -> pcg_solution_
+    *   p  (search direction)    -> pcg_search_direction_
+    *
+    * Reused vectors (to avoid extra allocations):
+    *   r    (residual)                       -> level.rhs()
+    *   z    (preconditioned residual)        -> level.solution()
+    *   A*p  (matrix applied to search dir.)  -> level.residual()
+    */
+    AllocatableVector<double> pcg_solution_; // x (solution)
+    AllocatableVector<double> pcg_search_direction_; // p (search direction)
+
     /* -------------------- */
     /* Convergence criteria */
     int number_of_iterations_;
@@ -242,6 +280,14 @@ protected:
     /* --------------- */
     /* Setup Functions */
     int chooseNumberOfLevels(const PolarGrid& finest_grid);
+
+    /* --------------- */
+    /* Solve Functions */
+    void fullMultigridApproximation(MultigridCycleType FMG_cycle, int FMG_iterations);
+    void solveMultigrid(double& initial_residual_norm, double& current_residual_norm,
+                        double& current_relative_residual_norm);
+    void solvePCG(double& initial_residual_norm, double& current_residual_norm, double& current_relative_residual_norm);
+    void initRhsHierarchy(Vector<double> rhs);
 
     /* ----------------- */
     /* Print information */
@@ -267,6 +313,7 @@ protected:
     double t_solve_multigrid_iterations_;
     double t_check_convergence_;
     double t_check_exact_error_;
+    double t_conjugate_gradient_;
 
     void resetAvgMultigridCycleTimings();
     double t_avg_MGC_total_;

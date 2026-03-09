@@ -74,6 +74,8 @@ private:
     void evaluateExactError(Level<DomainGeometry>& level, const ExactSolution& exact_solution);
     void updateResidualNorms(Level<DomainGeometry>& level, int iteration, double& initial_residual_norm, double& current_residual_norm,
                              double& current_relative_residual_norm);
+    void applyMultigridIterations(Level<DomainGeometry>& level, MultigridCycleType cycle, int iterations);
+    void applyExtrapolatedMultigridIterations(Level<DomainGeometry>& level, MultigridCycleType cycle, int iterations);
 
     /* ------------------- */
     /* Multigrid Functions */

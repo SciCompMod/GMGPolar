@@ -195,4 +195,47 @@ void IGMGPolar::printSettings(const PolarGrid& finest_grid, const PolarGrid& coa
     else {
         std::cout << "Full-Multigrid: Disabled\n";
     }
+
+    if (PCG_) {
+        std::cout << "Preconditioned Conjugate Gradient: Enabled\n";
+        if (PCG_FMG_) {
+            std::cout << "- PCG Full-Multigrid: " << PCG_FMG_iterations_ << "x ";
+            switch (PCG_FMG_cycle_) {
+            case MultigridCycleType::V_CYCLE:
+                std::cout << "V(" << pre_smoothing_steps_ << "," << post_smoothing_steps_ << ")-Cycle\n";
+                break;
+            case MultigridCycleType::W_CYCLE:
+                std::cout << "W(" << pre_smoothing_steps_ << "," << post_smoothing_steps_ << ")-Cycle\n";
+                break;
+            case MultigridCycleType::F_CYCLE:
+                std::cout << "F(" << pre_smoothing_steps_ << "," << post_smoothing_steps_ << ")-Cycle\n";
+                break;
+            default:
+                std::cout << "Unknown Configuration\n";
+                break;
+            }
+        }
+        else {
+            std::cout << "PCG Full-Multigrid: Disabled\n";
+        }
+
+        std::cout << "- PCG Multigrid Iteration: " << PCG_MG_iterations_ << "x ";
+        switch (PCG_MG_cycle_) {
+        case MultigridCycleType::V_CYCLE:
+            std::cout << "V(" << pre_smoothing_steps_ << "," << post_smoothing_steps_ << ")-Cycle\n";
+            break;
+        case MultigridCycleType::W_CYCLE:
+            std::cout << "W(" << pre_smoothing_steps_ << "," << post_smoothing_steps_ << ")-Cycle\n";
+            break;
+        case MultigridCycleType::F_CYCLE:
+            std::cout << "F(" << pre_smoothing_steps_ << "," << post_smoothing_steps_ << ")-Cycle\n";
+            break;
+        default:
+            std::cout << "Unknown Configuration\n";
+            break;
+        }
+    }
+    else {
+        std::cout << "Preconditioned Conjugate Gradient: Disabled\n";
+    }
 }
