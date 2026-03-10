@@ -19,8 +19,8 @@ void ResidualTake<DomainGeometry>::applySystemOperator(Vector<double> result, Co
 
     const int num_omp_threads = Residual<DomainGeometry>::num_omp_threads_;
 
-    assert(level_cache_.cacheDensityProfileCoefficients());
-    assert(level_cache_.cacheDomainGeometry());
+    assert(Residual<DomainGeometry>::level_cache_.cacheDensityProfileCoefficients());
+    assert(Residual<DomainGeometry>::level_cache_.cacheDomainGeometry());
 
     const PolarGrid& grid = Residual<DomainGeometry>::grid_;
 
@@ -43,7 +43,8 @@ void ResidualTake<DomainGeometry>::applySystemOperator(Vector<double> result, Co
 /* ------------------ */
 /* result = rhs - A*x */
 template <concepts::DomainGeometry DomainGeometry>
-void ResidualTake<DomainGeometry>::computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const
+void ResidualTake<DomainGeometry>::computeResidual(Vector<double> result, ConstVector<double> rhs,
+                                                   ConstVector<double> x) const
 {
     assert(result.size() == x.size());
 
