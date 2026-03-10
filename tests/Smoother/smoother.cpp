@@ -38,7 +38,8 @@ TEST(SmootherTest, smoother_DirBC_Interior)
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
 
-    CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
+    using DomainGeometryType = CzarnyGeometry;
+    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
 
@@ -53,15 +54,15 @@ TEST(SmootherTest, smoother_DirBC_Interior)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<decltype(domain_geometry)>>(*grid, *coefficients, domain_geometry,
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<decltype(domain_geometry)> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
+    Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    SmootherGive<decltype(domain_geometry)> smootherGive_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    SmootherGive<DomainGeometryType> smootherGive_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
-    SmootherTake<decltype(domain_geometry)> smootherTake_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    SmootherTake<DomainGeometryType> smootherTake_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
 
     Vector<double> rhs   = generate_random_sample_data(level.grid(), 69);
@@ -97,7 +98,8 @@ TEST(SmootherTest, smoother_AcrossOrigin)
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
 
-    CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
+    using DomainGeometryType = CzarnyGeometry;
+    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
 
@@ -112,15 +114,15 @@ TEST(SmootherTest, smoother_AcrossOrigin)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<decltype(domain_geometry)>>(*grid, *coefficients, domain_geometry,
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<decltype(domain_geometry)> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
+    Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    SmootherGive<decltype(domain_geometry)> smootherGive_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    SmootherGive<DomainGeometryType> smootherGive_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
-    SmootherTake<decltype(domain_geometry)> smootherTake_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    SmootherTake<DomainGeometryType> smootherTake_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
 
     Vector<double> rhs   = generate_random_sample_data(level.grid(), 69);
@@ -159,7 +161,8 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior)
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
 
-    CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
+    using DomainGeometryType = CzarnyGeometry;
+    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
 
@@ -173,17 +176,17 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto levelCache = std::make_unique<LevelCache<decltype(domain_geometry)>>(*grid, *coefficients, domain_geometry,
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<decltype(domain_geometry)> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
+    Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<decltype(domain_geometry)> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
-    ResidualGive<decltype(domain_geometry)> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
-    SmootherGive<decltype(domain_geometry)> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -237,7 +240,8 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior)
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
 
-    CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
+    using DomainGeometryType = CzarnyGeometry;
+    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
 
@@ -251,17 +255,17 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto levelCache = std::make_unique<LevelCache<decltype(domain_geometry)>>(*grid, *coefficients, domain_geometry,
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<decltype(domain_geometry)> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
+    Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<decltype(domain_geometry)> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
-    ResidualGive<decltype(domain_geometry)> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
-    SmootherGive<decltype(domain_geometry)> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -315,7 +319,8 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin)
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
 
-    CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
+    using DomainGeometryType = CzarnyGeometry;
+    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
 
@@ -329,17 +334,17 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto levelCache = std::make_unique<LevelCache<decltype(domain_geometry)>>(*grid, *coefficients, domain_geometry,
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<decltype(domain_geometry)> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
+    Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<decltype(domain_geometry)> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
-    ResidualGive<decltype(domain_geometry)> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
-    SmootherGive<decltype(domain_geometry)> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -393,7 +398,8 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin)
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
 
-    CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
+    using DomainGeometryType = CzarnyGeometry;
+    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
 
@@ -407,17 +413,17 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto levelCache = std::make_unique<LevelCache<decltype(domain_geometry)>>(*grid, *coefficients, domain_geometry,
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<decltype(domain_geometry)> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
+    Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<decltype(domain_geometry)> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
-    ResidualGive<decltype(domain_geometry)> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
-    SmootherGive<decltype(domain_geometry)> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -470,7 +476,8 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior_SmallestGrid)
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
 
-    CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
+    using DomainGeometryType = CzarnyGeometry;
+    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
 
@@ -484,17 +491,17 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior_SmallestGrid)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto levelCache = std::make_unique<LevelCache<decltype(domain_geometry)>>(*grid, *coefficients, domain_geometry,
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<decltype(domain_geometry)> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
+    Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<decltype(domain_geometry)> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
-    ResidualGive<decltype(domain_geometry)> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
-    SmootherGive<decltype(domain_geometry)> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -547,7 +554,8 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior_SmallestGrid)
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
 
-    CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
+    using DomainGeometryType = CzarnyGeometry;
+    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
 
@@ -561,17 +569,17 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior_SmallestGrid)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto levelCache = std::make_unique<LevelCache<decltype(domain_geometry)>>(*grid, *coefficients, domain_geometry,
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<decltype(domain_geometry)> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
+    Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<decltype(domain_geometry)> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
-    ResidualGive<decltype(domain_geometry)> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
-    SmootherGive<decltype(domain_geometry)> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -624,7 +632,8 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin_SmallestGrid)
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
 
-    CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
+    using DomainGeometryType = CzarnyGeometry;
+    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
 
@@ -638,17 +647,17 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin_SmallestGrid)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto levelCache = std::make_unique<LevelCache<decltype(domain_geometry)>>(*grid, *coefficients, domain_geometry,
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<decltype(domain_geometry)> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
+    Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<decltype(domain_geometry)> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
-    ResidualGive<decltype(domain_geometry)> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
-    SmootherGive<decltype(domain_geometry)> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -701,7 +710,8 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin_SmallestGrid)
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
 
-    CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
+    using DomainGeometryType = CzarnyGeometry;
+    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
 
@@ -715,17 +725,17 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin_SmallestGrid)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto levelCache = std::make_unique<LevelCache<decltype(domain_geometry)>>(*grid, *coefficients, domain_geometry,
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<decltype(domain_geometry)> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
+    Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<decltype(domain_geometry)> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
-    ResidualGive<decltype(domain_geometry)> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
-    SmootherGive<decltype(domain_geometry)> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -781,7 +791,8 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior)
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
 
-    CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
+    using DomainGeometryType = CzarnyGeometry;
+    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
 
@@ -795,17 +806,17 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<decltype(domain_geometry)>>(*grid, *coefficients, domain_geometry,
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<decltype(domain_geometry)> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
+    Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<decltype(domain_geometry)> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
-    ResidualGive<decltype(domain_geometry)> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
-    SmootherTake<decltype(domain_geometry)> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -859,7 +870,8 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior)
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
 
-    CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
+    using DomainGeometryType = CzarnyGeometry;
+    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
 
@@ -873,17 +885,17 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<decltype(domain_geometry)>>(*grid, *coefficients, domain_geometry,
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<decltype(domain_geometry)> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
+    Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<decltype(domain_geometry)> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
-    ResidualGive<decltype(domain_geometry)> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
-    SmootherTake<decltype(domain_geometry)> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -937,7 +949,8 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin)
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
 
-    CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
+    using DomainGeometryType = CzarnyGeometry;
+    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
 
@@ -951,17 +964,17 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<decltype(domain_geometry)>>(*grid, *coefficients, domain_geometry,
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<decltype(domain_geometry)> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
+    Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<decltype(domain_geometry)> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
-    ResidualGive<decltype(domain_geometry)> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
-    SmootherTake<decltype(domain_geometry)> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -1015,7 +1028,8 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin)
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
 
-    CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
+    using DomainGeometryType = CzarnyGeometry;
+    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
 
@@ -1029,17 +1043,17 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<decltype(domain_geometry)>>(*grid, *coefficients, domain_geometry,
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<decltype(domain_geometry)> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
+    Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<decltype(domain_geometry)> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
-    ResidualGive<decltype(domain_geometry)> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
-    SmootherTake<decltype(domain_geometry)> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -1092,7 +1106,8 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior_SmallestGrid)
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
 
-    CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
+    using DomainGeometryType = CzarnyGeometry;
+    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
 
@@ -1106,17 +1121,17 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior_SmallestGrid)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<decltype(domain_geometry)>>(*grid, *coefficients, domain_geometry,
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<decltype(domain_geometry)> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
+    Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<decltype(domain_geometry)> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
-    ResidualGive<decltype(domain_geometry)> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
-    SmootherTake<decltype(domain_geometry)> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -1169,7 +1184,8 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior_SmallestGrid)
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
 
-    CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
+    using DomainGeometryType = CzarnyGeometry;
+    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
 
@@ -1183,17 +1199,17 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior_SmallestGrid)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<decltype(domain_geometry)>>(*grid, *coefficients, domain_geometry,
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<decltype(domain_geometry)> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
+    Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<decltype(domain_geometry)> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
-    ResidualGive<decltype(domain_geometry)> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
-    SmootherTake<decltype(domain_geometry)> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -1246,7 +1262,8 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin_SmallestGrid)
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
 
-    CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
+    using DomainGeometryType = CzarnyGeometry;
+    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
 
@@ -1260,17 +1277,17 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin_SmallestGrid)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<decltype(domain_geometry)>>(*grid, *coefficients, domain_geometry,
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<decltype(domain_geometry)> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
+    Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<decltype(domain_geometry)> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
-    ResidualGive<decltype(domain_geometry)> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
-    SmootherTake<decltype(domain_geometry)> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -1323,7 +1340,8 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin_SmallestGrid)
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
 
-    CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
+    using DomainGeometryType = CzarnyGeometry;
+    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
     auto grid = std::make_unique<PolarGrid>(radii, angles);
 
@@ -1337,17 +1355,17 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin_SmallestGrid)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<decltype(domain_geometry)>>(*grid, *coefficients, domain_geometry,
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
                                                    cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<decltype(domain_geometry)> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
+    Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<decltype(domain_geometry)> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                                        maxOpenMPThreads);
-    ResidualGive<decltype(domain_geometry)> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
-    SmootherTake<decltype(domain_geometry)> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
+    SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
                              maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
