@@ -184,10 +184,6 @@ static inline void nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const Polar
     }
 }
 
-} // namespace extrapolated_smoother_take
-
-namespace extrapolated_smoother_take {
-
 static inline void nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                                ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
                                                ConstVector<double>& arr, const ConstVector<double>& att,
