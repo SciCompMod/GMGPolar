@@ -50,7 +50,7 @@ void SmootherGive<DomainGeometry>::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_s
     ICNTL(mumps_solver, 22) = 0; // Controls the in-core/out-of-core (OOC) factorization and solve.
     ICNTL(mumps_solver, 23) = 0; // Corresponds to the maximum size of the working memory in MegaBytes that MUMPS can
     //                             allocate per working process
-    ICNTL(mumps_solver, 24) = 0; // Controls the detection of "null pivot rows".
+    ICNTL(mumps_solver, 24) = 0; // Controls the detection of “null pivot rows”.
     ICNTL(mumps_solver, 25) =
         0; // Allows the computation of a solution of a deficient matrix and also of a null space basis
     ICNTL(mumps_solver, 26) = 0; // Drives the solution phase if a Schur complement matrix has been computed
