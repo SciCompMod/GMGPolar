@@ -125,7 +125,15 @@ private:
 };
 
 #include "build_rhs_f.h"
+#include "level_interpolation.inl"
 #include "setup.h"
 #include "solver.inl"
 #include "solver.h"
 #include "writeToVTK.h"
+#include "MultigridMethods/extrapolated_multigrid_F_Cycle.inl"
+#include "MultigridMethods/extrapolated_multigrid_W_Cycle.inl"
+#include "MultigridMethods/multigrid_V_Cycle.inl"
+#include "MultigridMethods/extrapolated_multigrid_V_Cycle.inl"
+#include "MultigridMethods/multigrid_F_Cycle.inl"
+#include "MultigridMethods/multigrid_W_Cycle.inl"
+
