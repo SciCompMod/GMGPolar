@@ -38,6 +38,15 @@ public:
     // Finalize solver setup (allocate data, build operators, etc.).
     void setup();
 
+    // Solve system with given boundary conditions and source term.
+    // Multiple solves with different inputs are supported.
+    template <concepts::BoundaryConditions BoundaryConditions>
+    void solve(const BoundaryConditions& boundary_conditions, const SourceTerm& source_term);
+
+    // Return the computed solution vector (hides IGMGPolar::solution()).
+    Vector<double> solution();
+    ConstVector<double> solution() const;
+
 private:
     /* ------------------------------------ */
     /* Grid Configuration & Input Functions */
@@ -65,15 +74,18 @@ private:
     /* --------------- */
     /* Solve Functions */
     void initializeSolution();
-    // Solve system with given boundary conditions and source term.
-    // Multiple solves with different inputs are supported.
-    template <concepts::BoundaryConditions BoundaryConditions>
-    void solve(const BoundaryConditions& boundary_conditions, const SourceTerm& source_term);
 
     double residualNorm(const ResidualNormType& norm_type, const Level<DomainGeometry>& level, ConstVector<double> residual) const;
     void evaluateExactError(Level<DomainGeometry>& level, const ExactSolution& exact_solution);
     void updateResidualNorms(Level<DomainGeometry>& level, int iteration, double& initial_residual_norm, double& current_residual_norm,
                              double& current_relative_residual_norm);
+    void extrapolatedResidual(int current_level, Vector<double> residual, ConstVector<double> residual_next_level);
+    void fullMultigridApproximation(MultigridCycleType FMG_cycle, int FMG_iterations);
+    void initRhsHierarchy(Vector<double> rhs);
+    void solveMultigrid(double& initial_residual_norm, double& current_residual_norm,
+                        double& current_relative_residual_norm);
+    void solvePCG(double& initial_residual_norm, double& current_residual_norm,
+                  double& current_relative_residual_norm);
     void applyMultigridIterations(Level<DomainGeometry>& level, MultigridCycleType cycle, int iterations);
     void applyExtrapolatedMultigridIterations(Level<DomainGeometry>& level, MultigridCycleType cycle, int iterations);
 
@@ -107,5 +119,6 @@ private:
 
 #include "build_rhs_f.h"
 #include "setup.h"
+#include "solver.inl"
 #include "solver.h"
 #include "writeToVTK.h"

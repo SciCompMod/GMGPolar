@@ -283,11 +283,6 @@ protected:
 
     /* --------------- */
     /* Solve Functions */
-    void fullMultigridApproximation(MultigridCycleType FMG_cycle, int FMG_iterations);
-    void solveMultigrid(double& initial_residual_norm, double& current_residual_norm,
-                        double& current_relative_residual_norm);
-    void solvePCG(double& initial_residual_norm, double& current_residual_norm, double& current_relative_residual_norm);
-    void initRhsHierarchy(Vector<double> rhs);
 
     /* ----------------- */
     /* Print information */
