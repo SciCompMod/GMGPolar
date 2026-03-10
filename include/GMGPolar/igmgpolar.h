@@ -12,8 +12,6 @@ class Level;
 class LevelCache;
 
 #include "../InputFunctions/boundaryConditions.h"
-#include "../InputFunctions/densityProfileCoefficients.h"
-#include "../InputFunctions/domainGeometry.h"
 #include "../InputFunctions/exactSolution.h"
 #include "../InputFunctions/sourceTerm.h"
 #include "../Interpolation/interpolation.h"
@@ -22,7 +20,6 @@ class LevelCache;
 #include "../LinearAlgebra/Vector/vector_operations.h"
 #include "../PolarGrid/polargrid.h"
 #include "../Definitions/global_definitions.h"
-#include "test_cases.h"
 
 class IGMGPolar
 {

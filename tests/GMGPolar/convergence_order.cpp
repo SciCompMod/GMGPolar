@@ -5,6 +5,7 @@
 #include <vector>
 #include <random>
 
+#include "../../include/ConfigParser/test_selection.h"
 #include "../../include/GMGPolar/gmgpolar.h"
 
 template <class T>
