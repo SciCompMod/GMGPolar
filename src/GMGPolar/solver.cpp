@@ -69,4 +69,3 @@ void IGMGPolar::printIterationInfo(int iteration, double current_residual_norm, 
     std::cout << "\n";
     std::cout << std::right << std::defaultfloat << std::setprecision(6) << std::setfill(' ');
 }
-

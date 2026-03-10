@@ -136,4 +136,3 @@ private:
 #include "MultigridMethods/extrapolated_multigrid_V_Cycle.inl"
 #include "MultigridMethods/multigrid_F_Cycle.inl"
 #include "MultigridMethods/multigrid_W_Cycle.inl"
-

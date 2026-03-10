@@ -90,10 +90,10 @@ private:
                                    double detDF, double coeff_beta);
 };
 
-#include "applySymmetryShift.inl"
-#include "buildSolverMatrix.inl"
-#include "directSolverGive.inl"
-#include "initializeMumps.inl"
-#include "matrixStencil.inl"
+    #include "applySymmetryShift.inl"
+    #include "buildSolverMatrix.inl"
+    #include "directSolverGive.inl"
+    #include "initializeMumps.inl"
+    #include "matrixStencil.inl"
 
 #endif

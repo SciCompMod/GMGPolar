@@ -71,16 +71,16 @@ TEST(DirectSolverTestNoMumps, directSolver_DirBC_Interior)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, false);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Take<DomainGeometryType> directSolverGive_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients,
-                                                       DirBC_Interior, maxOpenMPThreads);
-    DirectSolver_CSR_LU_Give<DomainGeometryType> directSolverTake_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients,
-                                                       DirBC_Interior, maxOpenMPThreads);
+    DirectSolver_CSR_LU_Take<DomainGeometryType> directSolverGive_operator(
+        level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior, maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give<DomainGeometryType> directSolverTake_operator(
+        level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior, maxOpenMPThreads);
 
     Vector<double> rhs = generate_random_sample_data(level.grid(), 69);
 
@@ -127,16 +127,16 @@ TEST(DirectSolverTestNoMumps, directSolver_AcrossOrigin)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> directSolverGive_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients,
-                                                       DirBC_Interior, maxOpenMPThreads);
-    DirectSolver_CSR_LU_Take<DomainGeometryType> directSolverTake_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients,
-                                                       DirBC_Interior, maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give<DomainGeometryType> directSolverGive_operator(
+        level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior, maxOpenMPThreads);
+    DirectSolver_CSR_LU_Take<DomainGeometryType> directSolverTake_operator(
+        level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior, maxOpenMPThreads);
 
     Vector<double> rhs = generate_random_sample_data(level.grid(), 69);
 
@@ -184,16 +184,16 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, SequentialDirectSolverDirBC_Inter
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<CartesianR2_SonnendruckerGyro_CircularGeometry>(level.grid(), Rmax);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());
@@ -229,16 +229,16 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, ParallelDirectSolverDirBC_Interio
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<CartesianR2_SonnendruckerGyro_CircularGeometry>(level.grid(), Rmax);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());
@@ -274,16 +274,16 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, SequentialDirectSolverAcrossOrigi
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<CartesianR2_SonnendruckerGyro_CircularGeometry>(level.grid(), Rmax);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());
@@ -319,16 +319,16 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, ParallelDirectSolverAcrossOrigin_
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<CartesianR2_SonnendruckerGyro_CircularGeometry>(level.grid(), Rmax);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());
@@ -370,16 +370,16 @@ TEST(DirectSolverTestNoMumps_ShafranovGeometry, DirectSolverDirBC_Interior_Shafr
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<CartesianR6_ZoniGyro_ShafranovGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());
@@ -417,16 +417,16 @@ TEST(DirectSolverTestNoMumps_ShafranovGeometry, DirectSolverAcrossOrigin_Shafran
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<CartesianR6_ZoniGyro_ShafranovGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());
@@ -469,16 +469,16 @@ TEST(DirectSolverTestNoMumps_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGe
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());
@@ -517,16 +517,16 @@ TEST(DirectSolverTestNoMumps_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeom
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());
@@ -566,16 +566,16 @@ TEST(DirectSolverTestNoMumps_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGe
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<Refined_ZoniShiftedGyro_CulhamGeometry>(level.grid(), Rmax);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());
@@ -611,16 +611,16 @@ TEST(DirectSolverTestNoMumps_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeom
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<Refined_ZoniShiftedGyro_CulhamGeometry>(level.grid(), Rmax);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());
@@ -668,16 +668,16 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, DirectSolverAcrossOriginHigherPre
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<CartesianR2_SonnendruckerGyro_CircularGeometry>(level.grid(), Rmax);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());
@@ -713,16 +713,16 @@ TEST(DirectSolverTestNoMumps_CircularGeometry, DirectSolverAcrossOriginHigherPre
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<CartesianR2_SonnendruckerGyro_CircularGeometry>(level.grid(), Rmax);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());
@@ -759,16 +759,16 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, SequentialDirectSolverDirBC_
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<CartesianR2_SonnendruckerGyro_CircularGeometry>(level.grid(), Rmax);
 
-    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());
@@ -804,16 +804,16 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, ParallelDirectSolverDirBC_In
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<CartesianR2_SonnendruckerGyro_CircularGeometry>(level.grid(), Rmax);
 
-    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());
@@ -849,16 +849,16 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, SequentialDirectSolverAcross
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<CartesianR2_SonnendruckerGyro_CircularGeometry>(level.grid(), Rmax);
 
-    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());
@@ -894,16 +894,16 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, ParallelDirectSolverAcrossOr
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<CartesianR2_SonnendruckerGyro_CircularGeometry>(level.grid(), Rmax);
 
-    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());
@@ -945,16 +945,16 @@ TEST(DirectSolverTakeCustomLUTest_ShafranovGeometry, DirectSolverDirBC_Interior_
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<CartesianR6_ZoniGyro_ShafranovGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());
@@ -992,16 +992,16 @@ TEST(DirectSolverTakeCustomLUTest_ShafranovGeometry, DirectSolverAcrossOrigin_Sh
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<CartesianR6_ZoniGyro_ShafranovGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());
@@ -1044,16 +1044,16 @@ TEST(DirectSolverTakeCustomLUTest_CzarnyGeometry, DirectSolverDirBC_Interior_Cza
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());
@@ -1092,16 +1092,16 @@ TEST(DirectSolverTakeCustomLUTest_CzarnyGeometry, DirectSolverAcrossOrigin_Czarn
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());
@@ -1141,16 +1141,16 @@ TEST(DirectSolverTakeCustomLUTest_CulhamGeometry, DirectSolverDirBC_Interior_Cul
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<Refined_ZoniShiftedGyro_CulhamGeometry>(level.grid(), Rmax);
 
-    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());
@@ -1186,16 +1186,16 @@ TEST(DirectSolverTakeCustomLUTest_CulhamGeometry, DirectSolverAcrossOrigin_Culha
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<Refined_ZoniShiftedGyro_CulhamGeometry>(level.grid(), Rmax);
 
-    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());
@@ -1241,16 +1241,16 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, DirectSolverAcrossOriginHigh
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<CartesianR2_SonnendruckerGyro_CircularGeometry>(level.grid(), Rmax);
 
-    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());
@@ -1286,16 +1286,16 @@ TEST(DirectSolverTakeCustomLUTest_CircularGeometry, DirectSolverAcrossOriginHigh
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, 0);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<CartesianR2_SonnendruckerGyro_CircularGeometry>(level.grid(), Rmax);
 
-    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                             maxOpenMPThreads);
+    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), domain_geometry, *coefficients,
+                                                 DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("solution", rhs.size());

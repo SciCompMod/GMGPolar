@@ -18,8 +18,7 @@ public:
 
 private:
     void applyCircleSection(const int i_r, Vector<double> result, ConstVector<double> x) const;
-    void applyRadialSection(const int i_theta, Vector<double> result,
-                            ConstVector<double> x) const;
+    void applyRadialSection(const int i_theta, Vector<double> result, ConstVector<double> x) const;
 };
 
 #include "residualTake.inl"

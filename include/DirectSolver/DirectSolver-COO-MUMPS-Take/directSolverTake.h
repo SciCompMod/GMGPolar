@@ -91,10 +91,10 @@ private:
                                    ConstVector<double>& coeff_beta);
 };
 
-#include "applySymmetryShift.inl"
-#include "buildSolverMatrix.inl"
-#include "directSolverTake.inl"
-#include "initializeMumps.inl"
-#include "matrixStencil.inl"
+    #include "applySymmetryShift.inl"
+    #include "buildSolverMatrix.inl"
+    #include "directSolverTake.inl"
+    #include "initializeMumps.inl"
+    #include "matrixStencil.inl"
 
 #endif

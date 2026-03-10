@@ -65,7 +65,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(const std:
                                                                       const Level<DomainGeometry>& level,
                                                                       ConstVector<double> grid_function)
 {
-    const PolarGrid& grid                        = level.grid();
+    const PolarGrid& grid                         = level.grid();
     const LevelCache<DomainGeometry>& level_cache = level.levelCache();
 
     assert(std::ssize(grid_function) == grid.numberOfNodes());
