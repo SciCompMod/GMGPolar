@@ -8,7 +8,14 @@
 #include "../InputFunctions/densityProfileCoefficients.h"
 #include "../InputFunctions/domainGeometry.h"
 
+template <concepts::DomainGeometry DomainGeometry>
+class LevelCache;
+
+template <concepts::DomainGeometry DomainGeometry>
+class Level;
+
 #include "igmgpolar.h"
+#include "../Level/level.h"
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 class GMGPolar : public IGMGPolar
@@ -61,31 +68,31 @@ private:
     /* ---------------------------------------------------- */
     /* Compute exact error if an exact solution is provided */
     // The results are stored as a pair: (weighted L2 error, infinity error).
-    std::pair<double, double> computeExactError(Level<DomainGeometry>& level, ConstVector<double> solution, Vector<double> error,
-                                                const ExactSolution& exact_solution);
+    std::pair<double, double> computeExactError(Level<DomainGeometry>& level, ConstVector<double> solution,
+                                                Vector<double> error, const ExactSolution& exact_solution);
 
     /* --------------- */
     /* Setup Functions */
     void discretize_rhs_f(const Level<DomainGeometry>& level, Vector<double> rhs_f);
     template <concepts::BoundaryConditions BoundaryConditions>
-    void build_rhs_f(const Level<DomainGeometry>& level, Vector<double> rhs_f, const BoundaryConditions& boundary_conditions,
-                     const SourceTerm& source_term);
+    void build_rhs_f(const Level<DomainGeometry>& level, Vector<double> rhs_f,
+                     const BoundaryConditions& boundary_conditions, const SourceTerm& source_term);
 
     /* --------------- */
     /* Solve Functions */
     void initializeSolution();
 
-    double residualNorm(const ResidualNormType& norm_type, const Level<DomainGeometry>& level, ConstVector<double> residual) const;
+    double residualNorm(const ResidualNormType& norm_type, const Level<DomainGeometry>& level,
+                        ConstVector<double> residual) const;
     void evaluateExactError(Level<DomainGeometry>& level, const ExactSolution& exact_solution);
-    void updateResidualNorms(Level<DomainGeometry>& level, int iteration, double& initial_residual_norm, double& current_residual_norm,
-                             double& current_relative_residual_norm);
+    void updateResidualNorms(Level<DomainGeometry>& level, int iteration, double& initial_residual_norm,
+                             double& current_residual_norm, double& current_relative_residual_norm);
     void extrapolatedResidual(int current_level, Vector<double> residual, ConstVector<double> residual_next_level);
     void fullMultigridApproximation(MultigridCycleType FMG_cycle, int FMG_iterations);
     void initRhsHierarchy(Vector<double> rhs);
     void solveMultigrid(double& initial_residual_norm, double& current_residual_norm,
                         double& current_relative_residual_norm);
-    void solvePCG(double& initial_residual_norm, double& current_residual_norm,
-                  double& current_relative_residual_norm);
+    void solvePCG(double& initial_residual_norm, double& current_residual_norm, double& current_relative_residual_norm);
     void applyMultigridIterations(Level<DomainGeometry>& level, MultigridCycleType cycle, int iterations);
     void applyExtrapolatedMultigridIterations(Level<DomainGeometry>& level, MultigridCycleType cycle, int iterations);
 

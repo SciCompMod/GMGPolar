@@ -9,24 +9,14 @@
 #include <utility>
 
 #include "../InputFunctions/domainGeometry.h"
-
-template <concepts::DomainGeometry DomainGeometry>
-class LevelCache;
-
-template <concepts::DomainGeometry DomainGeometry>
-class Level;
-
 #include "../InputFunctions/boundaryConditions.h"
-#include "../InputFunctions/densityProfileCoefficients.h"
 #include "../InputFunctions/exactSolution.h"
 #include "../InputFunctions/sourceTerm.h"
 #include "../Interpolation/interpolation.h"
-#include "../Level/level.h"
 #include "../LinearAlgebra/Vector/vector.h"
 #include "../LinearAlgebra/Vector/vector_operations.h"
 #include "../PolarGrid/polargrid.h"
 #include "../Definitions/global_definitions.h"
-#include "test_cases.h"
 
 class IGMGPolar
 {
