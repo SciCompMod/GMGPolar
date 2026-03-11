@@ -44,8 +44,8 @@ void SmootherTake<DomainGeometry>::nodeBuildAscTake(int i_r, int i_theta, const 
                                                     ConstVector<double>& art, ConstVector<double>& detDF,
                                                     ConstVector<double>& coeff_beta)
 {
-    using smoother_take::updateMatrixElement;
     using smoother_take::updateCOOCSRMatrixElement;
+    using smoother_take::updateMatrixElement;
 
     assert(i_r >= 0 && i_r < grid.nr());
     assert(i_theta >= 0 && i_theta < grid.ntheta());
@@ -374,10 +374,10 @@ void SmootherTake<DomainGeometry>::nodeBuildAscTake(int i_r, int i_theta, const 
 template <concepts::DomainGeometry DomainGeometry>
 void SmootherTake<DomainGeometry>::buildAscCircleSection(int i_r)
 {
-    using smoother_take::updateMatrixElement;
     using smoother_take::updateCOOCSRMatrixElement;
+    using smoother_take::updateMatrixElement;
 
-    const PolarGrid&                  grid        = Smoother<DomainGeometry>::grid_;
+    const PolarGrid& grid                         = Smoother<DomainGeometry>::grid_;
     const LevelCache<DomainGeometry>& level_cache = Smoother<DomainGeometry>::level_cache_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
@@ -399,10 +399,10 @@ void SmootherTake<DomainGeometry>::buildAscCircleSection(int i_r)
 template <concepts::DomainGeometry DomainGeometry>
 void SmootherTake<DomainGeometry>::buildAscRadialSection(int i_theta)
 {
-    using smoother_take::updateMatrixElement;
     using smoother_take::updateCOOCSRMatrixElement;
+    using smoother_take::updateMatrixElement;
 
-    const PolarGrid&                  grid        = Smoother<DomainGeometry>::grid_;
+    const PolarGrid& grid                         = Smoother<DomainGeometry>::grid_;
     const LevelCache<DomainGeometry>& level_cache = Smoother<DomainGeometry>::level_cache_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
@@ -430,9 +430,9 @@ void SmootherTake<DomainGeometry>::buildAscMatrices()
     // BatchedTridiagonalSolvers allocations are handled in the SmootherTake constructor.
     // circle_tridiagonal_solver_[batch_index=0] is unitialized. Use inner_boundary_circle_matrix_ instead.
 
-    const PolarGrid& grid            = Smoother<DomainGeometry>::grid_;
-    const bool       DirBC_Interior  = Smoother<DomainGeometry>::DirBC_Interior_;
-    const int        num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = Smoother<DomainGeometry>::grid_;
+    const bool DirBC_Interior = Smoother<DomainGeometry>::DirBC_Interior_;
+    const int num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
 
 #ifdef GMGPOLAR_USE_MUMPS
     // Although the matrix is symmetric, we need to store all its entries, so we disable the symmetry.

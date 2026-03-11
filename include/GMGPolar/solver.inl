@@ -39,7 +39,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::initializeSolution()
 
         // Prolongate the solution from the coarsest level up to the finest, while applying Multigrid Cycles on each level
         for (int depth = coarsest_depth; depth > 0; --depth) {
-            Level<DomainGeometry>& coarse_level = levels_[depth];     // Current coarse level
+            Level<DomainGeometry>& coarse_level = levels_[depth]; // Current coarse level
             Level<DomainGeometry>& fine_level   = levels_[depth - 1]; // Next finer level
 
             // The bi-cubic FMG interpolation is of higher order
@@ -120,9 +120,11 @@ double GMGPolar<DomainGeometry, DensityProfileCoefficients>::residualNorm(const 
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::updateResidualNorms(
-    Level<DomainGeometry>& level, int iteration, double& initial_residual_norm, double& current_residual_norm,
-    double& current_relative_residual_norm)
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::updateResidualNorms(Level<DomainGeometry>& level,
+                                                                               int iteration,
+                                                                               double& initial_residual_norm,
+                                                                               double& current_residual_norm,
+                                                                               double& current_relative_residual_norm)
 {
     level.computeResidual(level.residual(), level.rhs(), level.solution());
     if (extrapolation_ != ExtrapolationType::NONE) {
@@ -225,8 +227,8 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
     Level<DomainGeometry>& level, ConstVector<double> solution, Vector<double> error,
     const ExactSolution& exact_solution)
 {
-    const PolarGrid& grid                          = level.grid();
-    const LevelCache<DomainGeometry>& levelCache   = level.levelCache();
+    const PolarGrid& grid                        = level.grid();
+    const LevelCache<DomainGeometry>& levelCache = level.levelCache();
 
     assert(solution.size() == error.size());
     assert(std::ssize(solution) == grid.numberOfNodes());
@@ -277,7 +279,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::fullMultigridApproxim
 
     // Prolongate the solution from the coarsest level up to the finest, while applying Multigrid Cycles on each level
     for (int depth = coarsest_depth; depth > 0; --depth) {
-        Level<DomainGeometry>& coarse_level = levels_[depth];     // Current coarse level
+        Level<DomainGeometry>& coarse_level = levels_[depth]; // Current coarse level
         Level<DomainGeometry>& fine_level   = levels_[depth - 1]; // Next finer level
 
         // The bi-cubic FMG interpolation is of higher order

@@ -1,6 +1,7 @@
 #pragma once
 
-namespace extrapolated_smoother_give {
+namespace extrapolated_smoother_give
+{
 
 /* Tridiagonal matrices */
 static inline void updateMatrixElement(BatchedTridiagonalSolver<double>& solver, int batch, int row, int column,
@@ -35,14 +36,14 @@ static inline void updateCOOCSRMatrixElement(SparseMatrixCSR<double>& matrix, in
 } // namespace extrapolated_smoother_give
 
 template <concepts::DomainGeometry DomainGeometry>
-void ExtrapolatedSmootherGive<DomainGeometry>::nodeBuildAscGive(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                                MatrixType& inner_boundary_circle_matrix,
-                                                BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
-                                                BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, double arr,
-                                                double att, double art, double detDF, double coeff_beta)
+void ExtrapolatedSmootherGive<DomainGeometry>::nodeBuildAscGive(
+    int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior, MatrixType& inner_boundary_circle_matrix,
+    BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
+    BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, double arr, double att, double art, double detDF,
+    double coeff_beta)
 {
-    using extrapolated_smoother_give::updateMatrixElement;
     using extrapolated_smoother_give::updateCOOCSRMatrixElement;
+    using extrapolated_smoother_give::updateMatrixElement;
 
     assert(i_r >= 0 && i_r < grid.nr());
     assert(i_theta >= 0 && i_theta < grid.ntheta());
@@ -1212,7 +1213,7 @@ void ExtrapolatedSmootherGive<DomainGeometry>::nodeBuildAscGive(int i_r, int i_t
 template <concepts::DomainGeometry DomainGeometry>
 void ExtrapolatedSmootherGive<DomainGeometry>::buildAscCircleSection(const int i_r)
 {
-    const PolarGrid&                  grid        = ExtrapolatedSmoother<DomainGeometry>::grid_;
+    const PolarGrid& grid                         = ExtrapolatedSmoother<DomainGeometry>::grid_;
     const LevelCache<DomainGeometry>& level_cache = ExtrapolatedSmoother<DomainGeometry>::level_cache_;
 
     const double r = grid.radius(i_r);
@@ -1233,7 +1234,7 @@ void ExtrapolatedSmootherGive<DomainGeometry>::buildAscCircleSection(const int i
 template <concepts::DomainGeometry DomainGeometry>
 void ExtrapolatedSmootherGive<DomainGeometry>::buildAscRadialSection(const int i_theta)
 {
-    const PolarGrid&                  grid        = ExtrapolatedSmoother<DomainGeometry>::grid_;
+    const PolarGrid& grid                         = ExtrapolatedSmoother<DomainGeometry>::grid_;
     const LevelCache<DomainGeometry>& level_cache = ExtrapolatedSmoother<DomainGeometry>::level_cache_;
 
     const double theta = grid.theta(i_theta);
@@ -1260,9 +1261,9 @@ void ExtrapolatedSmootherGive<DomainGeometry>::buildAscMatrices()
     // BatchedTridiagonalSolvers allocations are handled in the SmootherTake constructor.
     // circle_tridiagonal_solver_[batch_index=0] is unitialized. Use inner_boundary_circle_matrix_ instead.
 
-    const PolarGrid& grid            = ExtrapolatedSmoother<DomainGeometry>::grid_;
-    const bool       DirBC_Interior  = ExtrapolatedSmoother<DomainGeometry>::DirBC_Interior_;
-    const int        num_omp_threads = ExtrapolatedSmoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = ExtrapolatedSmoother<DomainGeometry>::grid_;
+    const bool DirBC_Interior = ExtrapolatedSmoother<DomainGeometry>::DirBC_Interior_;
+    const int num_omp_threads = ExtrapolatedSmoother<DomainGeometry>::num_omp_threads_;
 
 #ifdef GMGPOLAR_USE_MUMPS
     // Although the matrix is symmetric, we need to store all its entries, so we disable the symmetry.

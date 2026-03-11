@@ -50,13 +50,13 @@ ExtrapolatedSmootherGive<DomainGeometry>::~ExtrapolatedSmootherGive()
 //     are copied back to x.
 template <concepts::DomainGeometry DomainGeometry>
 void ExtrapolatedSmootherGive<DomainGeometry>::extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs,
-                                                                      Vector<double> temp)
+                                                                     Vector<double> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
-    const PolarGrid& grid            = ExtrapolatedSmoother<DomainGeometry>::grid_;
-    const int        num_omp_threads = ExtrapolatedSmoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = ExtrapolatedSmoother<DomainGeometry>::grid_;
+    const int num_omp_threads = ExtrapolatedSmoother<DomainGeometry>::num_omp_threads_;
 
 #pragma omp parallel num_threads(num_omp_threads)
     {

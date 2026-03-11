@@ -9,7 +9,7 @@
 template <concepts::DomainGeometry DomainGeometry>
 void DirectSolver_COO_MUMPS_Give<DomainGeometry>::applySymmetryShiftInnerBoundary(Vector<double> x) const
 {
-    const PolarGrid&                  grid        = DirectSolver<DomainGeometry>::grid_;
+    const PolarGrid& grid                         = DirectSolver<DomainGeometry>::grid_;
     const LevelCache<DomainGeometry>& level_cache = DirectSolver<DomainGeometry>::level_cache_;
 
     assert(DirectSolver<DomainGeometry>::DirBC_Interior_);
@@ -70,7 +70,7 @@ void DirectSolver_COO_MUMPS_Give<DomainGeometry>::applySymmetryShiftInnerBoundar
 template <concepts::DomainGeometry DomainGeometry>
 void DirectSolver_COO_MUMPS_Give<DomainGeometry>::applySymmetryShiftOuterBoundary(Vector<double> x) const
 {
-    const PolarGrid&                  grid        = DirectSolver<DomainGeometry>::grid_;
+    const PolarGrid& grid                         = DirectSolver<DomainGeometry>::grid_;
     const LevelCache<DomainGeometry>& level_cache = DirectSolver<DomainGeometry>::level_cache_;
 
     int i_r;
@@ -129,9 +129,9 @@ void DirectSolver_COO_MUMPS_Give<DomainGeometry>::applySymmetryShiftOuterBoundar
 template <concepts::DomainGeometry DomainGeometry>
 void DirectSolver_COO_MUMPS_Give<DomainGeometry>::applySymmetryShift(Vector<double> x) const
 {
-    const PolarGrid& grid            = DirectSolver<DomainGeometry>::grid_;
-    const bool       DirBC_Interior  = DirectSolver<DomainGeometry>::DirBC_Interior_;
-    const int        num_omp_threads = DirectSolver<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = DirectSolver<DomainGeometry>::grid_;
+    const bool DirBC_Interior = DirectSolver<DomainGeometry>::DirBC_Interior_;
+    const int num_omp_threads = DirectSolver<DomainGeometry>::num_omp_threads_;
 
     assert(std::ssize(x) == grid.numberOfNodes());
     assert(grid.nr() >= 4);

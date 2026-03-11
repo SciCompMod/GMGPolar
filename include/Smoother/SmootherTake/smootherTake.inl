@@ -57,8 +57,8 @@ void SmootherTake<DomainGeometry>::smoothing(Vector<double> x, ConstVector<doubl
     assert(Smoother<DomainGeometry>::level_cache_.cacheDensityProfileCoefficients());
     assert(Smoother<DomainGeometry>::level_cache_.cacheDomainGeometry());
 
-    const PolarGrid& grid            = Smoother<DomainGeometry>::grid_;
-    const int        num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = Smoother<DomainGeometry>::grid_;
+    const int num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
 
     /* The outer most circle next to the radial section is defined to be black. */
     /* Priority: Black -> White. */

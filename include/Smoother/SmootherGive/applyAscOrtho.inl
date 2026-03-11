@@ -1,6 +1,7 @@
 #pragma once
 
-namespace smoother_give {
+namespace smoother_give
+{
 
 static inline void nodeApplyAscOrthoCircleGive(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                                SmootherColor smoother_color, ConstVector<double>& x,
@@ -431,7 +432,7 @@ void SmootherGive<DomainGeometry>::applyAscOrthoCircleSection(const int i_r, con
 {
     using smoother_give::nodeApplyAscOrthoCircleGive;
 
-    const PolarGrid&                  grid        = Smoother<DomainGeometry>::grid_;
+    const PolarGrid& grid                         = Smoother<DomainGeometry>::grid_;
     const LevelCache<DomainGeometry>& level_cache = Smoother<DomainGeometry>::level_cache_;
 
     assert(i_r >= 0 && i_r < grid.numberSmootherCircles() + 1);
@@ -458,7 +459,7 @@ void SmootherGive<DomainGeometry>::applyAscOrthoRadialSection(const int i_theta,
 {
     using smoother_give::nodeApplyAscOrthoRadialGive;
 
-    const PolarGrid&                  grid        = Smoother<DomainGeometry>::grid_;
+    const PolarGrid& grid                         = Smoother<DomainGeometry>::grid_;
     const LevelCache<DomainGeometry>& level_cache = Smoother<DomainGeometry>::level_cache_;
 
     const double theta = grid.theta(i_theta);

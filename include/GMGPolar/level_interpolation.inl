@@ -1,6 +1,6 @@
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::prolongation(int current_level, Vector<double> result,
-                                                                         ConstVector<double> x) const
+                                                                        ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ && 1 <= current_level);
     if (!interpolation_)
@@ -11,7 +11,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::prolongation(int curr
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::restriction(int current_level, Vector<double> result,
-                                                                        ConstVector<double> x) const
+                                                                       ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ - 1 && 0 <= current_level);
     if (!interpolation_)
@@ -22,7 +22,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::restriction(int curre
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::injection(int current_level, Vector<double> result,
-                                                                      ConstVector<double> x) const
+                                                                     ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ - 1 && 0 <= current_level);
     if (!interpolation_)
@@ -33,8 +33,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::injection(int current
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedProlongation(int current_level,
-                                                                                     Vector<double> result,
-                                                                                     ConstVector<double> x) const
+                                                                                    Vector<double> result,
+                                                                                    ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ && 1 <= current_level);
     if (!interpolation_)
@@ -46,8 +46,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedProlongat
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedRestriction(int current_level,
-                                                                                    Vector<double> result,
-                                                                                    ConstVector<double> x) const
+                                                                                   Vector<double> result,
+                                                                                   ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ - 1 && 0 <= current_level);
     if (!interpolation_)
@@ -59,7 +59,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedRestricti
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::FMGInterpolation(int current_level, Vector<double> result,
-                                                                              ConstVector<double> x) const
+                                                                            ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ && 1 <= current_level);
     if (!interpolation_)
