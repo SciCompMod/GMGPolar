@@ -2,19 +2,24 @@
 
 #include "../residual.h"
 
-class ResidualGive : public Residual
+template <concepts::DomainGeometry DomainGeometry>
+class ResidualGive : public Residual<DomainGeometry>
 {
 public:
-    explicit ResidualGive(const PolarGrid& grid, const LevelCache& level_cache, const DomainGeometry& domain_geometry,
+    explicit ResidualGive(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
+                          const DomainGeometry& domain_geometry,
                           const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior,
                           const int num_omp_threads);
     ~ResidualGive() override = default;
 
-    void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const override;
+    void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const final;
 
-    void applySystemOperator(Vector<double> result, ConstVector<double> x) const override;
+    void applySystemOperator(Vector<double> result, ConstVector<double> x) const final;
 
 private:
     void applyCircleSection(const int i_r, Vector<double> result, ConstVector<double> x) const;
     void applyRadialSection(const int i_theta, Vector<double> result, ConstVector<double> x) const;
 };
+
+#include "residualGive.inl"
+#include "applyAGive.inl"

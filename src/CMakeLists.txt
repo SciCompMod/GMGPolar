@@ -19,25 +19,6 @@ set(POLAR_GRID_SOURCES
 # file(GLOB_RECURSE GMG_POLAR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/*.cpp)
 set(GMG_POLAR_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/gmgpolar.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/level_interpolation.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/setup.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/solver.cpp
-)
-
-# file(GLOB_RECURSE MULTIGRID_METHODS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/*.cpp)
-set(MULTIGRID_METHODS_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/extrapolated_multigrid_F_Cycle.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/extrapolated_multigrid_V_Cycle.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/extrapolated_multigrid_W_Cycle.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/multigrid_F_Cycle.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/multigrid_V_Cycle.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/MultigridMethods/multigrid_W_Cycle.cpp
-)
-
-#file(GLOB_RECURSE LEVEL_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Level/*.cpp)
-set(LEVEL_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/Level/level.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Level/levelCache.cpp
 )
 
 # file(GLOB_RECURSE STENCIL_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Stencil/*.cpp)
@@ -56,108 +37,6 @@ set(INTERPOLATION_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Interpolation/restriction.cpp
 )
 
-# file(GLOB_RECURSE DIRECT_SOLVER_SOURCES 
-#     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/*.cpp
-#     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Give/*.cpp
-#     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Take/*.cpp
-#     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-CSR-LU-Give/*.cpp
-#     ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-CSR-LU-Take/*.cpp)
-set(DIRECT_SOLVER_SOURCES
-    # Main DirectSolver files
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/directSolver.cpp
-    
-    # DirectSolverGive
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Give/applySymmetryShift.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Give/buildSolverMatrix.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Give/directSolverGive.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Give/initializeMumps.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Give/matrixStencil.cpp
-    
-    # DirectSolverGiveCustomLU
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-CSR-LU-Give/buildSolverMatrix.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-CSR-LU-Give/directSolverGive.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-CSR-LU-Give/matrixStencil.cpp
-    
-    # DirectSolverTake
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Take/applySymmetryShift.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Take/buildSolverMatrix.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Take/directSolverTake.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Take/initializeMumps.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-COO-MUMPS-Take/matrixStencil.cpp
-    
-    # DirectSolverTakeCustomLU
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-CSR-LU-Take/buildSolverMatrix.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-CSR-LU-Take/directSolverTake.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/DirectSolver/DirectSolver-CSR-LU-Take/matrixStencil.cpp
-)
-
-# file(GLOB_RECURSE RESIDUAL_SOURCES 
-#     ${CMAKE_CURRENT_SOURCE_DIR}/Residual/*.cpp
-#     ${CMAKE_CURRENT_SOURCE_DIR}/Residual/ResidualGive/*.cpp
-#     ${CMAKE_CURRENT_SOURCE_DIR}/Residual/ResidualTake/*.cpp)
-set(RESIDUAL_SOURCES
-    # Main Residual files
-    ${CMAKE_CURRENT_SOURCE_DIR}/Residual/residual.cpp
-    
-    # ResidualGive
-    ${CMAKE_CURRENT_SOURCE_DIR}/Residual/ResidualGive/applyAGive.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Residual/ResidualGive/residualGive.cpp
-    
-    # ResidualTake
-    ${CMAKE_CURRENT_SOURCE_DIR}/Residual/ResidualTake/applyATake.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Residual/ResidualTake/residualTake.cpp
-)
-
-# file(GLOB_RECURSE SMOOTHER_SOURCES 
-#     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/*.cpp
-#     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/*.cpp
-#     ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/*.cpp)
-set(SMOOTHER_SOURCES
-    # Main Smoother files
-    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/smoother.cpp
-    
-    # SmootherGive
-    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/applyAscOrtho.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/buildMatrix.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/initializeMumps.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/matrixStencil.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/smootherGive.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherGive/solveAscSystem.cpp
-    
-    # SmootherTake
-    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/applyAscOrtho.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/buildMatrix.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/initializeMumps.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/matrixStencil.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/smootherTake.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Smoother/SmootherTake/solveAscSystem.cpp
-)
-
-# file(GLOB_RECURSE EXTRAPOLATED_SMOOTHER_SOURCES 
-#     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/*.cpp
-#     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/*.cpp
-#     ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/*.cpp)
-set(EXTRAPOLATED_SMOOTHER_SOURCES
-    # Main ExtrapolatedSmoother files
-    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/extrapolatedSmoother.cpp
-    
-    # ExtrapolatedSmootherGive
-    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/applyAscOrtho.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/buildAscMatrices.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/initializeMumps.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/smootherStencil.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherGive/solveAscSystem.cpp
-    
-    # ExtrapolatedSmootherTake
-    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/applyAscOrtho.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/buildAscMatrices.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/initializeMumps.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/smootherStencil.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ExtrapolatedSmoother/ExtrapolatedSmootherTake/solveAscSystem.cpp
-)
-
 # Gather all source files
 # file(GLOB_RECURSE CONFIG_PARSER_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ConfigParser/*.cpp)
 set(CONFIG_PARSER_SOURCES
@@ -169,14 +48,8 @@ set(CONFIG_PARSER_SOURCES
 add_library(GMGPolarLib STATIC
     ${POLAR_GRID_SOURCES}
     ${GMG_POLAR_SOURCES}
-    ${MULTIGRID_METHODS_SOURCES}
-    ${LEVEL_SOURCES}
     ${STENCIL_SOURCES}
     ${INTERPOLATION_SOURCES}
-    ${DIRECT_SOLVER_SOURCES}
-    ${RESIDUAL_SOURCES}
-    ${SMOOTHER_SOURCES}
-    ${EXTRAPOLATED_SMOOTHER_SOURCES}
     ${CONFIG_PARSER_SOURCES}
 )
 

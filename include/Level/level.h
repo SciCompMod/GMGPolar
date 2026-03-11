@@ -1,9 +1,13 @@
 #pragma once
 
 // Required to prevent circular dependencies.
+template <concepts::DomainGeometry DomainGeometry>
 class DirectSolver;
+template <concepts::DomainGeometry DomainGeometry>
 class Residual;
+template <concepts::DomainGeometry DomainGeometry>
 class Smoother;
+template <concepts::DomainGeometry DomainGeometry>
 class ExtrapolatedSmoother;
 
 #include <memory>
@@ -35,22 +39,24 @@ class ExtrapolatedSmoother;
 // coefficients (`arr`, `att`, `art`, `detDF`) related to the domain geometry. These coefficients are critical for efficient matrix-free stencil operations
 // and contribute to the accuracy and performance of the multigrid solver.
 
+template <concepts::DomainGeometry DomainGeometry>
 class LevelCache;
 
+template <concepts::DomainGeometry DomainGeometry>
 class Level
 {
 public:
     // ----------- //
     // Constructor //
     explicit Level(const int level_depth, std::unique_ptr<const PolarGrid> grid,
-                   std::unique_ptr<const LevelCache> level_cache, const ExtrapolationType extrapolation, const bool FMG,
-                   const bool PCG_FMG = false);
+                   std::unique_ptr<const LevelCache<DomainGeometry>> level_cache, const ExtrapolationType extrapolation,
+                   const bool FMG, const bool PCG_FMG = false);
 
     // ---------------- //
     // Getter Functions //
     int level_depth() const;
     const PolarGrid& grid() const;
-    const LevelCache& levelCache() const;
+    const LevelCache<DomainGeometry>& levelCache() const;
 
     Vector<double> rhs();
     ConstVector<double> rhs() const;
@@ -96,12 +102,12 @@ public:
 private:
     const int level_depth_;
     std::unique_ptr<const PolarGrid> grid_;
-    std::unique_ptr<const LevelCache> level_cache_;
+    std::unique_ptr<const LevelCache<DomainGeometry>> level_cache_;
 
-    std::unique_ptr<DirectSolver> op_directSolver_;
-    std::unique_ptr<Residual> op_residual_;
-    std::unique_ptr<Smoother> op_smoother_;
-    std::unique_ptr<ExtrapolatedSmoother> op_extrapolated_smoother_;
+    std::unique_ptr<DirectSolver<DomainGeometry>> op_directSolver_;
+    std::unique_ptr<Residual<DomainGeometry>> op_residual_;
+    std::unique_ptr<Smoother<DomainGeometry>> op_smoother_;
+    std::unique_ptr<ExtrapolatedSmoother<DomainGeometry>> op_extrapolated_smoother_;
 
     Vector<double> rhs_;
     Vector<double> solution_;
@@ -109,6 +115,7 @@ private:
     Vector<double> error_correction_;
 };
 
+template <concepts::DomainGeometry DomainGeometry>
 class LevelCache
 {
 public:
@@ -163,3 +170,6 @@ private:
     Vector<double> art_;
     Vector<double> detDF_;
 };
+
+#include "levelCache.inl"
+#include "level.inl"

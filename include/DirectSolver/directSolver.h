@@ -1,13 +1,17 @@
 #pragma once
 
-class LevelCache;
-class Level;
-
 #include <chrono>
 #include <iostream>
 #include <vector>
 
 #include "../InputFunctions/domainGeometry.h"
+
+template <concepts::DomainGeometry DomainGeometry>
+class LevelCache;
+
+template <concepts::DomainGeometry DomainGeometry>
+class Level;
+
 #include "../InputFunctions/densityProfileCoefficients.h"
 #include "../Level/level.h"
 #include "../PolarGrid/polargrid.h"
@@ -24,12 +28,22 @@ class Level;
     #include "mpi.h"
 #endif
 
+template <concepts::DomainGeometry DomainGeometry>
 class DirectSolver
 {
 public:
-    explicit DirectSolver(const PolarGrid& grid, const LevelCache& level_cache, const DomainGeometry& domain_geometry,
+    explicit DirectSolver(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
+                          const DomainGeometry& domain_geometry,
                           const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior,
-                          int num_omp_threads);
+                          int num_omp_threads)
+        : grid_(grid)
+        , level_cache_(level_cache)
+        , domain_geometry_(domain_geometry)
+        , density_profile_coefficients_(density_profile_coefficients)
+        , DirBC_Interior_(DirBC_Interior)
+        , num_omp_threads_(num_omp_threads)
+    {
+    }
 
     virtual ~DirectSolver() = default;
 
@@ -38,7 +52,7 @@ public:
 
 protected:
     const PolarGrid& grid_;
-    const LevelCache& level_cache_;
+    const LevelCache<DomainGeometry>& level_cache_;
     const DomainGeometry& domain_geometry_;
     const DensityProfileCoefficients& density_profile_coefficients_;
     const bool DirBC_Interior_;

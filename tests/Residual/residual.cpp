@@ -34,7 +34,8 @@ TEST(OperatorATest, applyA_DirBC_Interior)
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
 
-    CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
+    using DomainGeometryType = CzarnyGeometry;
+    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
@@ -48,16 +49,16 @@ TEST(OperatorATest, applyA_DirBC_Interior)
     bool cache_domain_geometry              = true;
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
-    auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, false);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+    Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, false);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    ResidualGive residualGive_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualTake residualTake_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residualGive_operator(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualTake<DomainGeometryType> residualTake_operator(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
 
     Vector<double> x   = generate_random_sample_data(level.grid(), 42);
     Vector<double> rhs = generate_random_sample_data(level.grid(), 69);
@@ -89,7 +90,8 @@ TEST(OperatorATest, applyA_AcrossOrigin)
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
 
-    CzarnyGeometry domain_geometry(Rmax, kappa_eps, delta_e);
+    using DomainGeometryType = CzarnyGeometry;
+    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
     double alpha_jump = 0.678 * Rmax;
     std::unique_ptr<DensityProfileCoefficients> coefficients =
@@ -103,16 +105,16 @@ TEST(OperatorATest, applyA_AcrossOrigin)
     bool cache_domain_geometry              = true;
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
-    auto levelCache = std::make_unique<LevelCache>(*grid, *coefficients, domain_geometry,
-                                                   cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, false);
+    auto levelCache = std::make_unique<LevelCache<DomainGeometryType>>(
+        *grid, *coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+    Level<DomainGeometryType> level(0, std::move(grid), std::move(levelCache), ExtrapolationType::NONE, false);
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    ResidualGive residualGive_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
-    ResidualTake residualTake_operator(level.grid(), level.levelCache(), domain_geometry, *coefficients, DirBC_Interior,
-                                       maxOpenMPThreads);
+    ResidualGive<DomainGeometryType> residualGive_operator(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+    ResidualTake<DomainGeometryType> residualTake_operator(level.grid(), level.levelCache(), domain_geometry,
+                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
 
     Vector<double> x   = generate_random_sample_data(level.grid(), 42);
     Vector<double> rhs = generate_random_sample_data(level.grid(), 69);

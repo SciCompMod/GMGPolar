@@ -5,7 +5,6 @@
 /* ---------------------------------------------------------------------- */
 IGMGPolar::IGMGPolar(const PolarGrid& grid)
     : grid_(grid)
-    , exact_solution_(nullptr)
     // General solver output and visualization settings
     , verbose_(0)
     , paraview_(false)
@@ -38,21 +37,10 @@ IGMGPolar::IGMGPolar(const PolarGrid& grid)
     , residual_norm_type_(ResidualNormType::WEIGHTED_EUCLIDEAN)
     , absolute_tolerance_(1e-8)
     , relative_tolerance_(1e-8)
-    // Level management and internal solver data
-    , number_of_levels_(0)
-    , interpolation_(nullptr)
-    , full_grid_smoothing_(false)
-    , number_of_iterations_(0)
-    , mean_residual_reduction_factor_(1.0)
 {
     resetAllTimings();
     LIKWID_REGISTER("Setup");
     LIKWID_REGISTER("Solve");
-}
-
-void IGMGPolar::setSolution(const ExactSolution* exact_solution)
-{
-    exact_solution_ = exact_solution;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -292,25 +280,6 @@ void IGMGPolar::relativeTolerance(std::optional<double> tol)
 }
 
 /* ---------------------------------------------------------------------- */
-/* Solution & Grid Access                                                 */
-/* ---------------------------------------------------------------------- */
-Vector<double> IGMGPolar::solution()
-{
-    int level_depth = 0;
-    return levels_[level_depth].solution();
-}
-ConstVector<double> IGMGPolar::solution() const
-{
-    int level_depth = 0;
-    return levels_[level_depth].solution();
-}
-
-const PolarGrid& IGMGPolar::grid() const
-{
-    return grid_;
-}
-
-/* ---------------------------------------------------------------------- */
 /* Setup timings                                                          */
 /* ---------------------------------------------------------------------- */
 double IGMGPolar::timeSetupTotal() const
@@ -424,73 +393,4 @@ void IGMGPolar::resetAvgMultigridCycleTimings()
     t_avg_MGC_postSmoothing_ = 0.0;
     t_avg_MGC_residual_      = 0.0;
     t_avg_MGC_directSolver_  = 0.0;
-}
-
-/* ---------------------------------------------------------------------- */
-/* Diagnostics & statistics                                               */
-/* ---------------------------------------------------------------------- */
-// Print timing breakdown for setup, smoothing, coarse solve, etc.
-void IGMGPolar::printTimings() const
-{
-    // t_setup_rhs_ is neither included in t_setup_total_ and t_solve_total_.
-    std::cout << "\n------------------" << std::endl;
-    std::cout << "Timing Information" << std::endl;
-    std::cout << "------------------" << std::endl;
-    std::cout << "Setup Time: " << t_setup_total_ << " seconds" << std::endl;
-    std::cout << "    Create Levels: " << t_setup_createLevels_ << " seconds" << std::endl;
-    std::cout << "    Smoother: " << t_setup_smoother_ << " seconds" << std::endl;
-    std::cout << "    Direct Solver: " << t_setup_directSolver_ << " seconds" << std::endl;
-    std::cout << "    (Build rhs: " << t_setup_rhs_ << " seconds)" << std::endl;
-    std::cout << "\nSolve Time: " << t_solve_total_ << " seconds" << std::endl;
-    std::cout << "    Initial Approximation: " << t_solve_initial_approximation_ << " seconds" << std::endl;
-    if (!PCG_) {
-        std::cout << "    Multigrid Iterations: " << t_solve_multigrid_iterations_ << " seconds" << std::endl;
-    }
-    else {
-        std::cout << "    Preconditioned Conjugate Gradient: "
-                  << t_conjugate_gradient_ - t_check_convergence_ - t_check_exact_error_ << " seconds" << std::endl;
-    }
-    std::cout << "    Check Convergence: " << t_check_convergence_ << " seconds" << std::endl;
-    std::cout << "    (Check Exact Error: " << t_check_exact_error_ << " seconds)" << std::endl;
-
-    if (!PCG_) {
-        std::cout << "\nAverage Multigrid Iteration: " << t_avg_MGC_total_ << " seconds" << std::endl;
-        std::cout << "    PreSmoothing: " << t_avg_MGC_preSmoothing_ << " seconds" << std::endl;
-        std::cout << "    PostSmoothing: " << t_avg_MGC_postSmoothing_ << " seconds" << std::endl;
-        std::cout << "    Residual: " << t_avg_MGC_residual_ << " seconds" << std::endl;
-        std::cout << "    DirectSolve: " << t_avg_MGC_directSolver_ << " seconds" << std::endl;
-        std::cout << "    Other Computations: "
-                  << std::max(t_avg_MGC_total_ - t_avg_MGC_preSmoothing_ - t_avg_MGC_postSmoothing_ -
-                                  t_avg_MGC_residual_ - t_avg_MGC_directSolver_,
-                              0.0)
-                  << " seconds" << std::endl;
-    }
-}
-
-// Number of iterations taken by last solve.
-int IGMGPolar::numberOfIterations() const
-{
-    return number_of_iterations_;
-}
-
-// Mean residual reduction factor per iteration.
-double IGMGPolar::meanResidualReductionFactor() const
-{
-    return mean_residual_reduction_factor_;
-}
-
-// Error norms (only available if exact solution was set).
-std::optional<double> IGMGPolar::exactErrorWeightedEuclidean() const
-{
-    if (exact_solution_) {
-        return exact_errors_.back().first;
-    }
-    return std::nullopt;
-}
-std::optional<double> IGMGPolar::exactErrorInfinity() const
-{
-    if (exact_solution_) {
-        return exact_errors_.back().second;
-    }
-    return std::nullopt;
 }

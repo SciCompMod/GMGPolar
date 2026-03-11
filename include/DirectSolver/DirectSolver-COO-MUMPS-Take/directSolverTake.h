@@ -4,10 +4,11 @@
 
 #ifdef GMGPOLAR_USE_MUMPS
 
-class DirectSolver_COO_MUMPS_Take : public DirectSolver
+template <concepts::DomainGeometry DomainGeometry>
+class DirectSolver_COO_MUMPS_Take : public DirectSolver<DomainGeometry>
 {
 public:
-    explicit DirectSolver_COO_MUMPS_Take(const PolarGrid& grid, const LevelCache& level_cache,
+    explicit DirectSolver_COO_MUMPS_Take(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
                                          const DomainGeometry& domain_geometry,
                                          const DensityProfileCoefficients& density_profile_coefficients,
                                          bool DirBC_Interior, int num_omp_threads);
@@ -89,5 +90,11 @@ private:
                                    ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF,
                                    ConstVector<double>& coeff_beta);
 };
+
+    #include "applySymmetryShift.inl"
+    #include "buildSolverMatrix.inl"
+    #include "directSolverTake.inl"
+    #include "initializeMumps.inl"
+    #include "matrixStencil.inl"
 
 #endif

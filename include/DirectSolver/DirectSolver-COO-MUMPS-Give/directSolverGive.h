@@ -4,10 +4,11 @@
 
 #ifdef GMGPOLAR_USE_MUMPS
 
-class DirectSolver_COO_MUMPS_Give : public DirectSolver
+template <concepts::DomainGeometry DomainGeometry>
+class DirectSolver_COO_MUMPS_Give : public DirectSolver<DomainGeometry>
 {
 public:
-    explicit DirectSolver_COO_MUMPS_Give(const PolarGrid& grid, const LevelCache& level_cache,
+    explicit DirectSolver_COO_MUMPS_Give(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
                                          const DomainGeometry& domain_geometry,
                                          const DensityProfileCoefficients& density_profile_coefficients,
                                          bool DirBC_Interior, int num_omp_threads);
@@ -88,5 +89,11 @@ private:
                                    SparseMatrixCOO<double>& solver_matrix, double arr, double att, double art,
                                    double detDF, double coeff_beta);
 };
+
+    #include "applySymmetryShift.inl"
+    #include "buildSolverMatrix.inl"
+    #include "directSolverGive.inl"
+    #include "initializeMumps.inl"
+    #include "matrixStencil.inl"
 
 #endif

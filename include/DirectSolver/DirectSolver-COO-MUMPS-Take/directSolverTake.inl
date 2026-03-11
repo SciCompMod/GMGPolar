@@ -1,0 +1,35 @@
+#pragma once
+
+#ifdef GMGPOLAR_USE_MUMPS
+
+template <concepts::DomainGeometry DomainGeometry>
+DirectSolver_COO_MUMPS_Take<DomainGeometry>::DirectSolver_COO_MUMPS_Take(
+    const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache, const DomainGeometry& domain_geometry,
+    const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior, int num_omp_threads)
+    : DirectSolver<DomainGeometry>(grid, level_cache, domain_geometry, density_profile_coefficients, DirBC_Interior,
+                                   num_omp_threads)
+{
+    solver_matrix_ = buildSolverMatrix();
+    initializeMumpsSolver(mumps_solver_, solver_matrix_);
+}
+
+template <concepts::DomainGeometry DomainGeometry>
+void DirectSolver_COO_MUMPS_Take<DomainGeometry>::solveInPlace(Vector<double> solution)
+{
+    // Adjusts the right-hand side vector to account for symmetry corrections.
+    // This transforms the system matrixA * solution = rhs into the equivalent system:
+    // symmetric_DBc(matrixA) * solution = rhs - applySymmetryShift(rhs).
+    // The correction modifies the rhs to account for the influence of the Dirichlet boundary conditions,
+    // ensuring that the solution at the boundary is correctly adjusted and maintains the required symmetry.
+    applySymmetryShift(solution);
+    // Solves the adjusted system symmetric(matrixA) * solution = rhs using the MUMPS solver.
+    solveWithMumps(solution);
+}
+
+template <concepts::DomainGeometry DomainGeometry>
+DirectSolver_COO_MUMPS_Take<DomainGeometry>::~DirectSolver_COO_MUMPS_Take()
+{
+    finalizeMumpsSolver(mumps_solver_);
+}
+
+#endif
