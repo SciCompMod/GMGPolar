@@ -211,8 +211,6 @@ int GMGPolar<DomainGeometry, DensityProfileCoefficients>::chooseNumberOfLevels(c
     return levels;
 }
 
-#include "../../include/GMGPolar/gmgpolar.h"
-
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(const Level<DomainGeometry>& level,
                                                                             Vector<double> rhs_f)
