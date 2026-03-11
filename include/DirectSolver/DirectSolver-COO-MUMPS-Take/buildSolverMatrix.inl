@@ -2,7 +2,8 @@
 
 #ifdef GMGPOLAR_USE_MUMPS
 
-namespace direct_solver_coo_mumps_take {
+namespace direct_solver_coo_mumps_take
+{
 
 static inline void updateMatrixElement(SparseMatrixCOO<double>& matrix, int ptr, int offset, int row, int col,
                                        double val)
@@ -12,14 +13,13 @@ static inline void updateMatrixElement(SparseMatrixCOO<double>& matrix, int ptr,
     matrix.value(ptr + offset)     = val;
 }
 
-}
+} // namespace direct_solver_coo_mumps_take
 
 template <concepts::DomainGeometry DomainGeometry>
-void DirectSolver_COO_MUMPS_Take<DomainGeometry>::nodeBuildSolverMatrixTake(int i_r, int i_theta, const PolarGrid& grid,
-                                                            bool DirBC_Interior, SparseMatrixCOO<double>& solver_matrix,
-                                                            ConstVector<double>& arr, ConstVector<double>& att,
-                                                            ConstVector<double>& art, ConstVector<double>& detDF,
-                                                            ConstVector<double>& coeff_beta)
+void DirectSolver_COO_MUMPS_Take<DomainGeometry>::nodeBuildSolverMatrixTake(
+    int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior, SparseMatrixCOO<double>& solver_matrix,
+    ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF,
+    ConstVector<double>& coeff_beta)
 {
     using direct_solver_coo_mumps_take::updateMatrixElement;
     int ptr, offset;
@@ -459,9 +459,10 @@ void DirectSolver_COO_MUMPS_Take<DomainGeometry>::nodeBuildSolverMatrixTake(int 
 }
 
 template <concepts::DomainGeometry DomainGeometry>
-void DirectSolver_COO_MUMPS_Take<DomainGeometry>::buildSolverMatrixCircleSection(const int i_r, SparseMatrixCOO<double>& solver_matrix)
+void DirectSolver_COO_MUMPS_Take<DomainGeometry>::buildSolverMatrixCircleSection(const int i_r,
+                                                                                 SparseMatrixCOO<double>& solver_matrix)
 {
-    const PolarGrid&                  grid        = DirectSolver<DomainGeometry>::grid_;
+    const PolarGrid& grid                         = DirectSolver<DomainGeometry>::grid_;
     const LevelCache<DomainGeometry>& level_cache = DirectSolver<DomainGeometry>::level_cache_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
@@ -475,16 +476,16 @@ void DirectSolver_COO_MUMPS_Take<DomainGeometry>::buildSolverMatrixCircleSection
 
     for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
         // Build solver matrix at the current node
-        nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirectSolver<DomainGeometry>::DirBC_Interior_, solver_matrix,
-                                  arr, att, art, detDF, coeff_beta);
+        nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirectSolver<DomainGeometry>::DirBC_Interior_, solver_matrix, arr,
+                                  att, art, detDF, coeff_beta);
     }
 }
 
 template <concepts::DomainGeometry DomainGeometry>
 void DirectSolver_COO_MUMPS_Take<DomainGeometry>::buildSolverMatrixRadialSection(const int i_theta,
-                                                                 SparseMatrixCOO<double>& solver_matrix)
+                                                                                 SparseMatrixCOO<double>& solver_matrix)
 {
-    const PolarGrid&                  grid        = DirectSolver<DomainGeometry>::grid_;
+    const PolarGrid& grid                         = DirectSolver<DomainGeometry>::grid_;
     const LevelCache<DomainGeometry>& level_cache = DirectSolver<DomainGeometry>::level_cache_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
@@ -498,8 +499,8 @@ void DirectSolver_COO_MUMPS_Take<DomainGeometry>::buildSolverMatrixRadialSection
 
     for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
         // Build solver matrix at the current node
-        nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirectSolver<DomainGeometry>::DirBC_Interior_, solver_matrix,
-                                  arr, att, art, detDF, coeff_beta);
+        nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirectSolver<DomainGeometry>::DirBC_Interior_, solver_matrix, arr,
+                                  att, art, detDF, coeff_beta);
     }
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
-namespace extrapolated_smoother_give {
+namespace extrapolated_smoother_give
+{
 
 static inline void nodeApplyAscOrthoCircleGive(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                                SmootherColor smoother_color, ConstVector<double>& x,
@@ -396,7 +397,8 @@ static inline void nodeApplyAscOrthoCircleGive(int i_r, int i_theta, const Polar
 
 } // namespace extrapolated_smoother_give
 
-namespace extrapolated_smoother_give {
+namespace extrapolated_smoother_give
+{
 
 static inline void nodeApplyAscOrthoRadialGive(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                                SmootherColor smoother_color, ConstVector<double>& x,
@@ -892,10 +894,10 @@ static inline void nodeApplyAscOrthoRadialGive(int i_r, int i_theta, const Polar
 
 template <concepts::DomainGeometry DomainGeometry>
 void ExtrapolatedSmootherGive<DomainGeometry>::applyAscOrthoCircleSection(int i_r, SmootherColor smoother_color,
-                                                                           ConstVector<double> x,
-                                                                           ConstVector<double> rhs, Vector<double> temp)
+                                                                          ConstVector<double> x,
+                                                                          ConstVector<double> rhs, Vector<double> temp)
 {
-    const PolarGrid&                  grid        = ExtrapolatedSmoother<DomainGeometry>::grid_;
+    const PolarGrid& grid                         = ExtrapolatedSmoother<DomainGeometry>::grid_;
     const LevelCache<DomainGeometry>& level_cache = ExtrapolatedSmoother<DomainGeometry>::level_cache_;
 
     assert(i_r >= 0 && i_r < grid.numberSmootherCircles() + 1);
@@ -910,19 +912,18 @@ void ExtrapolatedSmootherGive<DomainGeometry>::applyAscOrthoCircleSection(int i_
         level_cache.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Apply Asc Ortho at the current node
-        extrapolated_smoother_give::nodeApplyAscOrthoCircleGive(i_r, i_theta, grid,
-                                                                 ExtrapolatedSmoother<DomainGeometry>::DirBC_Interior_,
-                                                                 smoother_color, x, rhs, temp, arr, att, art, detDF,
-                                                                 coeff_beta);
+        extrapolated_smoother_give::nodeApplyAscOrthoCircleGive(
+            i_r, i_theta, grid, ExtrapolatedSmoother<DomainGeometry>::DirBC_Interior_, smoother_color, x, rhs, temp,
+            arr, att, art, detDF, coeff_beta);
     }
 }
 
 template <concepts::DomainGeometry DomainGeometry>
 void ExtrapolatedSmootherGive<DomainGeometry>::applyAscOrthoRadialSection(int i_theta, SmootherColor smoother_color,
-                                                                           ConstVector<double> x,
-                                                                           ConstVector<double> rhs, Vector<double> temp)
+                                                                          ConstVector<double> x,
+                                                                          ConstVector<double> rhs, Vector<double> temp)
 {
-    const PolarGrid&                  grid        = ExtrapolatedSmoother<DomainGeometry>::grid_;
+    const PolarGrid& grid                         = ExtrapolatedSmoother<DomainGeometry>::grid_;
     const LevelCache<DomainGeometry>& level_cache = ExtrapolatedSmoother<DomainGeometry>::level_cache_;
 
     const double theta = grid.theta(i_theta);
@@ -936,9 +937,8 @@ void ExtrapolatedSmootherGive<DomainGeometry>::applyAscOrthoRadialSection(int i_
         level_cache.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Apply Asc Ortho at the current node
-        extrapolated_smoother_give::nodeApplyAscOrthoRadialGive(i_r, i_theta, grid,
-                                                                 ExtrapolatedSmoother<DomainGeometry>::DirBC_Interior_,
-                                                                 smoother_color, x, rhs, temp, arr, att, art, detDF,
-                                                                 coeff_beta);
+        extrapolated_smoother_give::nodeApplyAscOrthoRadialGive(
+            i_r, i_theta, grid, ExtrapolatedSmoother<DomainGeometry>::DirBC_Interior_, smoother_color, x, rhs, temp,
+            arr, att, art, detDF, coeff_beta);
     }
 }

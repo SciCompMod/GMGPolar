@@ -22,8 +22,8 @@ int SmootherGive<DomainGeometry>::getNonZeroCountCircleAsc(int i_r) const
     // because it has an additional across-origin coupling.
     assert(i_r == 0);
 
-    const PolarGrid& grid           = Smoother<DomainGeometry>::grid_;
-    const bool       DirBC_Interior = Smoother<DomainGeometry>::DirBC_Interior_;
+    const PolarGrid& grid                 = Smoother<DomainGeometry>::grid_;
+    const bool DirBC_Interior             = Smoother<DomainGeometry>::DirBC_Interior_;
     const int size_stencil_inner_boundary = DirBC_Interior ? 1 : 4;
     return size_stencil_inner_boundary * grid.ntheta();
 }

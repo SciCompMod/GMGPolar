@@ -3,8 +3,8 @@
 template <concepts::DomainGeometry DomainGeometry>
 void SmootherTake<DomainGeometry>::solveBlackCircleSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid& grid            = Smoother<DomainGeometry>::grid_;
-    const int        num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = Smoother<DomainGeometry>::grid_;
+    const int num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
 
     int start                     = 0;
     int end                       = grid.numberCircularSmootherNodes();
@@ -45,8 +45,8 @@ void SmootherTake<DomainGeometry>::solveBlackCircleSection(Vector<double> x, Vec
 template <concepts::DomainGeometry DomainGeometry>
 void SmootherTake<DomainGeometry>::solveWhiteCircleSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid& grid            = Smoother<DomainGeometry>::grid_;
-    const int        num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = Smoother<DomainGeometry>::grid_;
+    const int num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
 
     int start                     = 0;
     int end                       = grid.numberCircularSmootherNodes();
@@ -87,8 +87,8 @@ void SmootherTake<DomainGeometry>::solveWhiteCircleSection(Vector<double> x, Vec
 template <concepts::DomainGeometry DomainGeometry>
 void SmootherTake<DomainGeometry>::solveBlackRadialSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid& grid            = Smoother<DomainGeometry>::grid_;
-    const int        num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = Smoother<DomainGeometry>::grid_;
+    const int num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
 
     int start                     = grid.numberCircularSmootherNodes();
     int end                       = grid.numberOfNodes();
@@ -110,8 +110,8 @@ void SmootherTake<DomainGeometry>::solveBlackRadialSection(Vector<double> x, Vec
 template <concepts::DomainGeometry DomainGeometry>
 void SmootherTake<DomainGeometry>::solveWhiteRadialSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid& grid            = Smoother<DomainGeometry>::grid_;
-    const int        num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = Smoother<DomainGeometry>::grid_;
+    const int num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
 
     int start                     = grid.numberCircularSmootherNodes();
     int end                       = grid.numberOfNodes();

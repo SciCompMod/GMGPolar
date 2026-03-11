@@ -51,7 +51,7 @@ ExtrapolatedSmootherTake<DomainGeometry>::~ExtrapolatedSmootherTake()
 
 template <concepts::DomainGeometry DomainGeometry>
 void ExtrapolatedSmootherTake<DomainGeometry>::extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs,
-                                                                      Vector<double> temp)
+                                                                     Vector<double> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
@@ -59,8 +59,8 @@ void ExtrapolatedSmootherTake<DomainGeometry>::extrapolatedSmoothing(Vector<doub
     assert(ExtrapolatedSmoother<DomainGeometry>::level_cache_.cacheDensityProfileCoefficients());
     assert(ExtrapolatedSmoother<DomainGeometry>::level_cache_.cacheDomainGeometry());
 
-    const PolarGrid& grid            = ExtrapolatedSmoother<DomainGeometry>::grid_;
-    const int        num_omp_threads = ExtrapolatedSmoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = ExtrapolatedSmoother<DomainGeometry>::grid_;
+    const int num_omp_threads = ExtrapolatedSmoother<DomainGeometry>::num_omp_threads_;
 
     /* The outer most circle next to the radial section is defined to be black. */
     /* Priority: Black -> White. */

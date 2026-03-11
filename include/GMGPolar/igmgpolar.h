@@ -132,35 +132,6 @@ public:
     std::optional<double> relativeTolerance() const;
     void relativeTolerance(std::optional<double> tol);
 
-    // If an exact solution is provided, the solver will compute the exact error at each iteration.
-    void setSolution(const ExactSolution* exact_solution);
-
-    /* ---------------------------------------------------------------------- */
-    /* Solution & Grid Access                                                 */
-    /* ---------------------------------------------------------------------- */
-    // Return a reference to the computed solution vector.
-    Vector<double> solution();
-    ConstVector<double> solution() const;
-
-    // Return the underlying cartesian mesh used for discretization.
-    const PolarGrid& grid() const;
-
-    /* ---------------------------------------------------------------------- */
-    /* Diagnostics & statistics                                               */
-    /* ---------------------------------------------------------------------- */
-    // Print timing breakdown for setup, smoothing, coarse solve, etc.
-    void printTimings() const;
-
-    // Number of iterations taken by last solve.
-    int numberOfIterations() const;
-
-    // Mean residual reduction factor per iteration.
-    double meanResidualReductionFactor() const;
-
-    // Error norms (only available if exact solution was set).
-    std::optional<double> exactErrorWeightedEuclidean() const;
-    std::optional<double> exactErrorInfinity() const;
-
     /* ---------------------------------------------------------------------- */
     /* Timing Statistics                                                      */
     /* ---------------------------------------------------------------------- */
@@ -188,7 +159,6 @@ protected:
     /* Grid Configuration & Input Functions */
     /* ------------------------------------ */
     const PolarGrid& grid_;
-    const ExactSolution* exact_solution_; // Optional exact solution for validation
 
     /* ------------------ */
     /* Control Parameters */
@@ -225,61 +195,6 @@ protected:
     ResidualNormType residual_norm_type_;
     std::optional<double> absolute_tolerance_;
     std::optional<double> relative_tolerance_;
-
-    /* ---------------- */
-    /* Multigrid levels */
-    int number_of_levels_;
-
-    std::vector<std::pair<double, double>> exact_errors_;
-
-    /* ---------------------- */
-    /* Interpolation operator */
-    std::unique_ptr<Interpolation> interpolation_;
-
-    /* ------------------------------------------------------------------------- */
-    /* Chooses if full grid smoothing is active on level 0 for extrapolation > 0 */
-    bool full_grid_smoothing_ = false;
-
-    /* -------------------------------------------------- */
-    /* Vectors for PCG (Preconditioned Conjugate Gradient)
-    * https://en.wikipedia.org/wiki/Conjugate_gradient_method#The_preconditioned_conjugate_gradient_method
-    *
-    * Dedicated vectors:
-    *   x  (solution)            -> pcg_solution_
-    *   p  (search direction)    -> pcg_search_direction_
-    *
-    * Reused vectors (to avoid extra allocations):
-    *   r    (residual)                       -> level.rhs()
-    *   z    (preconditioned residual)        -> level.solution()
-    *   A*p  (matrix applied to search dir.)  -> level.residual()
-    */
-    AllocatableVector<double> pcg_solution_; // x (solution)
-    AllocatableVector<double> pcg_search_direction_; // p (search direction)
-
-    /* -------------------- */
-    /* Convergence criteria */
-    int number_of_iterations_;
-    std::vector<double> residual_norms_;
-    double mean_residual_reduction_factor_;
-    bool converged(double current_residual_norm, double first_residual_norm);
-
-    /* ------------------------------------------------------------------------- */
-    /* Compute the extrapolated residual: res_ex = 4/3 res_fine - 1/3 res_coarse */
-    void extrapolatedResidual(int current_level, Vector<double> residual, ConstVector<double> residual_next_level);
-
-    /* --------------- */
-    /* Setup Functions */
-    int chooseNumberOfLevels(const PolarGrid& finest_grid);
-
-    /* --------------- */
-    /* Solve Functions */
-
-    /* ----------------- */
-    /* Print information */
-    void printSettings(const PolarGrid& finest_grid, const PolarGrid& coarsest_grid) const;
-    void printIterationHeader(const ExactSolution* exact_solution);
-    void printIterationInfo(int iteration, double current_residual_norm, double current_relative_residual_norm,
-                            const ExactSolution* exact_solution);
 
     /* ------------------------------ */
     /* Timing statistics for GMGPolar */

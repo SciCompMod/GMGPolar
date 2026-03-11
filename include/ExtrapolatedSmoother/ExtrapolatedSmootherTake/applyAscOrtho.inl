@@ -1,6 +1,7 @@
 #pragma once
 
-namespace extrapolated_smoother_take {
+namespace extrapolated_smoother_take
+{
 
 static inline void nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                                ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
@@ -461,9 +462,9 @@ static inline void nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const Polar
 
 template <concepts::DomainGeometry DomainGeometry>
 void ExtrapolatedSmootherTake<DomainGeometry>::applyAscOrthoCircleSection(int i_r, ConstVector<double> x,
-                                                                           ConstVector<double> rhs, Vector<double> temp)
+                                                                          ConstVector<double> rhs, Vector<double> temp)
 {
-    const PolarGrid&                  grid        = ExtrapolatedSmoother<DomainGeometry>::grid_;
+    const PolarGrid& grid                         = ExtrapolatedSmoother<DomainGeometry>::grid_;
     const LevelCache<DomainGeometry>& level_cache = ExtrapolatedSmoother<DomainGeometry>::level_cache_;
 
     assert(i_r >= 0 && i_r < grid.numberSmootherCircles());
@@ -486,9 +487,9 @@ void ExtrapolatedSmootherTake<DomainGeometry>::applyAscOrthoCircleSection(int i_
 
 template <concepts::DomainGeometry DomainGeometry>
 void ExtrapolatedSmootherTake<DomainGeometry>::applyAscOrthoRadialSection(int i_theta, ConstVector<double> x,
-                                                                           ConstVector<double> rhs, Vector<double> temp)
+                                                                          ConstVector<double> rhs, Vector<double> temp)
 {
-    const PolarGrid&                  grid        = ExtrapolatedSmoother<DomainGeometry>::grid_;
+    const PolarGrid& grid                         = ExtrapolatedSmoother<DomainGeometry>::grid_;
     const LevelCache<DomainGeometry>& level_cache = ExtrapolatedSmoother<DomainGeometry>::level_cache_;
 
     assert(i_theta >= 0 && i_theta < grid.ntheta());

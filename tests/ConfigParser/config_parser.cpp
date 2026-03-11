@@ -197,7 +197,6 @@ TEST_P(ConfigParserTest, ParseAllGeometryAndProblemCombinations)
 
     // Solver
     std::unique_ptr<IGMGPolar> solver = parser.solver();
-    EXPECT_EQ(&solver->grid(), &parser.grid());
 }
 
 // Define test cases covering all combinations

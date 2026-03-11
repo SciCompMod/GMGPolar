@@ -5,8 +5,8 @@
 template <concepts::DomainGeometry DomainGeometry>
 const Stencil& DirectSolver_COO_MUMPS_Give<DomainGeometry>::getStencil(int i_r) const
 {
-    const PolarGrid& grid           = DirectSolver<DomainGeometry>::grid_;
-    const bool       DirBC_Interior = DirectSolver<DomainGeometry>::DirBC_Interior_;
+    const PolarGrid& grid     = DirectSolver<DomainGeometry>::grid_;
+    const bool DirBC_Interior = DirectSolver<DomainGeometry>::DirBC_Interior_;
 
     assert(0 <= i_r && i_r < grid.nr());
     assert(grid.nr() >= 4);
@@ -32,8 +32,8 @@ const Stencil& DirectSolver_COO_MUMPS_Give<DomainGeometry>::getStencil(int i_r) 
 template <concepts::DomainGeometry DomainGeometry>
 int DirectSolver_COO_MUMPS_Give<DomainGeometry>::getNonZeroCountSolverMatrix() const
 {
-    const PolarGrid& grid           = DirectSolver<DomainGeometry>::grid_;
-    const bool       DirBC_Interior = DirectSolver<DomainGeometry>::DirBC_Interior_;
+    const PolarGrid& grid     = DirectSolver<DomainGeometry>::grid_;
+    const bool DirBC_Interior = DirectSolver<DomainGeometry>::DirBC_Interior_;
 
     const int size_stencil_inner_boundary      = DirBC_Interior ? 1 : 7;
     const int size_stencil_next_inner_boundary = DirBC_Interior ? 6 : 9;
@@ -53,8 +53,8 @@ int DirectSolver_COO_MUMPS_Give<DomainGeometry>::getNonZeroCountSolverMatrix() c
 template <concepts::DomainGeometry DomainGeometry>
 int DirectSolver_COO_MUMPS_Give<DomainGeometry>::getSolverMatrixIndex(const int i_r, const int i_theta) const
 {
-    const PolarGrid& grid           = DirectSolver<DomainGeometry>::grid_;
-    const bool       DirBC_Interior = DirectSolver<DomainGeometry>::DirBC_Interior_;
+    const PolarGrid& grid     = DirectSolver<DomainGeometry>::grid_;
+    const bool DirBC_Interior = DirectSolver<DomainGeometry>::DirBC_Interior_;
 
     const int size_stencil_inner_boundary      = DirBC_Interior ? 1 : 7;
     const int size_stencil_next_inner_boundary = DirBC_Interior ? 6 : 9;

@@ -1,6 +1,7 @@
 #pragma once
 
-namespace smoother_take {
+namespace smoother_take
+{
 
 static inline void nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                                ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
@@ -219,7 +220,7 @@ void SmootherTake<DomainGeometry>::applyAscOrthoCircleSection(int i_r, ConstVect
 {
     using smoother_take::nodeApplyAscOrthoCircleTake;
 
-    const PolarGrid&                  grid        = Smoother<DomainGeometry>::grid_;
+    const PolarGrid& grid                         = Smoother<DomainGeometry>::grid_;
     const LevelCache<DomainGeometry>& level_cache = Smoother<DomainGeometry>::level_cache_;
 
     assert(i_r >= 0 && i_r < grid.numberSmootherCircles());
@@ -245,7 +246,7 @@ void SmootherTake<DomainGeometry>::applyAscOrthoRadialSection(int i_theta, Const
 {
     using smoother_take::nodeApplyAscOrthoRadialTake;
 
-    const PolarGrid&                  grid        = Smoother<DomainGeometry>::grid_;
+    const PolarGrid& grid                         = Smoother<DomainGeometry>::grid_;
     const LevelCache<DomainGeometry>& level_cache = Smoother<DomainGeometry>::level_cache_;
 
     assert(i_theta >= 0 && i_theta < grid.ntheta());

@@ -1,6 +1,7 @@
 #pragma once
 
-namespace smoother_give {
+namespace smoother_give
+{
 
 /* Tridiagonal matrices */
 static inline void updateMatrixElement(BatchedTridiagonalSolver<double>& solver, int batch, int row, int column,
@@ -41,8 +42,8 @@ void SmootherGive<DomainGeometry>::nodeBuildAscGive(int i_r, int i_theta, const 
                                                     BatchedTridiagonalSolver<double>& radial_tridiagonal_solver,
                                                     double arr, double att, double art, double detDF, double coeff_beta)
 {
-    using smoother_give::updateMatrixElement;
     using smoother_give::updateCOOCSRMatrixElement;
+    using smoother_give::updateMatrixElement;
 
     assert(i_r >= 0 && i_r < grid.nr());
     assert(i_theta >= 0 && i_theta < grid.ntheta());
@@ -638,7 +639,7 @@ void SmootherGive<DomainGeometry>::nodeBuildAscGive(int i_r, int i_theta, const 
 template <concepts::DomainGeometry DomainGeometry>
 void SmootherGive<DomainGeometry>::buildAscCircleSection(const int i_r)
 {
-    const PolarGrid&                  grid        = Smoother<DomainGeometry>::grid_;
+    const PolarGrid& grid                         = Smoother<DomainGeometry>::grid_;
     const LevelCache<DomainGeometry>& level_cache = Smoother<DomainGeometry>::level_cache_;
 
     const double r = grid.radius(i_r);
@@ -658,7 +659,7 @@ void SmootherGive<DomainGeometry>::buildAscCircleSection(const int i_r)
 template <concepts::DomainGeometry DomainGeometry>
 void SmootherGive<DomainGeometry>::buildAscRadialSection(const int i_theta)
 {
-    const PolarGrid&                  grid        = Smoother<DomainGeometry>::grid_;
+    const PolarGrid& grid                         = Smoother<DomainGeometry>::grid_;
     const LevelCache<DomainGeometry>& level_cache = Smoother<DomainGeometry>::level_cache_;
 
     const double theta = grid.theta(i_theta);
@@ -684,9 +685,9 @@ void SmootherGive<DomainGeometry>::buildAscMatrices()
     // BatchedTridiagonalSolvers allocations are handled in the SmootherTake constructor.
     // circle_tridiagonal_solver_[batch_index=0] is unitialized. Use inner_boundary_circle_matrix_ instead.
 
-    const PolarGrid& grid            = Smoother<DomainGeometry>::grid_;
-    const bool       DirBC_Interior  = Smoother<DomainGeometry>::DirBC_Interior_;
-    const int        num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = Smoother<DomainGeometry>::grid_;
+    const bool DirBC_Interior = Smoother<DomainGeometry>::DirBC_Interior_;
+    const int num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
 
 #ifdef GMGPOLAR_USE_MUMPS
     // Although the matrix is symmetric, we need to store all its entries, so we disable the symmetry.

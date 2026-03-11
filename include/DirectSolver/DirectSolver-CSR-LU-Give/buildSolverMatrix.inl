@@ -746,7 +746,7 @@ template <concepts::DomainGeometry DomainGeometry>
 void DirectSolver_CSR_LU_Give<DomainGeometry>::buildSolverMatrixCircleSection(const int i_r,
                                                                               SparseMatrixCSR<double>& solver_matrix)
 {
-    const PolarGrid&                  grid        = DirectSolver<DomainGeometry>::grid_;
+    const PolarGrid& grid                         = DirectSolver<DomainGeometry>::grid_;
     const LevelCache<DomainGeometry>& level_cache = DirectSolver<DomainGeometry>::level_cache_;
 
     const double r = grid.radius(i_r);
@@ -758,8 +758,8 @@ void DirectSolver_CSR_LU_Give<DomainGeometry>::buildSolverMatrixCircleSection(co
         level_cache.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Build solver matrix at the current node
-        nodeBuildSolverMatrixGive(i_r, i_theta, grid, DirectSolver<DomainGeometry>::DirBC_Interior_, solver_matrix,
-                                  arr, att, art, detDF, coeff_beta);
+        nodeBuildSolverMatrixGive(i_r, i_theta, grid, DirectSolver<DomainGeometry>::DirBC_Interior_, solver_matrix, arr,
+                                  att, art, detDF, coeff_beta);
     }
 }
 
@@ -767,7 +767,7 @@ template <concepts::DomainGeometry DomainGeometry>
 void DirectSolver_CSR_LU_Give<DomainGeometry>::buildSolverMatrixRadialSection(const int i_theta,
                                                                               SparseMatrixCSR<double>& solver_matrix)
 {
-    const PolarGrid&                  grid        = DirectSolver<DomainGeometry>::grid_;
+    const PolarGrid& grid                         = DirectSolver<DomainGeometry>::grid_;
     const LevelCache<DomainGeometry>& level_cache = DirectSolver<DomainGeometry>::level_cache_;
 
     const double theta = grid.theta(i_theta);
@@ -779,8 +779,8 @@ void DirectSolver_CSR_LU_Give<DomainGeometry>::buildSolverMatrixRadialSection(co
         level_cache.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Build solver matrix at the current node
-        nodeBuildSolverMatrixGive(i_r, i_theta, grid, DirectSolver<DomainGeometry>::DirBC_Interior_, solver_matrix,
-                                  arr, att, art, detDF, coeff_beta);
+        nodeBuildSolverMatrixGive(i_r, i_theta, grid, DirectSolver<DomainGeometry>::DirBC_Interior_, solver_matrix, arr,
+                                  att, art, detDF, coeff_beta);
     }
 }
 

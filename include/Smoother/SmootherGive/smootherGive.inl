@@ -56,8 +56,8 @@ void SmootherGive<DomainGeometry>::smoothing(Vector<double> x, ConstVector<doubl
 
     Kokkos::deep_copy(temp, rhs);
 
-    const PolarGrid& grid            = Smoother<DomainGeometry>::grid_;
-    const int        num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = Smoother<DomainGeometry>::grid_;
+    const int num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
 
     /* Multi-threaded execution */
     const int num_smoother_circles = grid.numberSmootherCircles();

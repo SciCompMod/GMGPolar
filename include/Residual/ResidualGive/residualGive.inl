@@ -112,7 +112,8 @@ void ResidualGive<DomainGeometry>::applySystemOperator(Vector<double> result, Co
 /* ------------------ */
 /* result = rhs - A*x */
 template <concepts::DomainGeometry DomainGeometry>
-void ResidualGive<DomainGeometry>::computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const
+void ResidualGive<DomainGeometry>::computeResidual(Vector<double> result, ConstVector<double> rhs,
+                                                   ConstVector<double> x) const
 {
     assert(result.size() == x.size());
 

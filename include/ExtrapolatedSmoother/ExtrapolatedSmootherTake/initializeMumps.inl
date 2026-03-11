@@ -4,7 +4,7 @@
 
 template <concepts::DomainGeometry DomainGeometry>
 void ExtrapolatedSmootherTake<DomainGeometry>::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver,
-                                                     SparseMatrixCOO<double>& solver_matrix)
+                                                                     SparseMatrixCOO<double>& solver_matrix)
 {
     /* 
      * MUMPS (a parallel direct solver) uses 1-based indexing, 
