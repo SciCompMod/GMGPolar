@@ -80,11 +80,6 @@ void CooMumpsSolver::initialize()
                   << "but negative pivots were encountered during factorization " << "(INFOG(12) = " << INFOG(12)
                   << ").\n";
     }
-
-    if (INFOG(1) != 0) {
-        std::cerr << "MUMPS reported an error during analysis/factorization " << "(INFOG(1) = " << INFOG(1) << ").\n";
-        return;
-    }
 }
 
 void CooMumpsSolver::finalize()
