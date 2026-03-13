@@ -82,8 +82,7 @@ void CooMumpsSolver::initialize()
     }
 
     if (INFOG(1) != 0) {
-        std::cerr << "MUMPS reported an error during analysis/factorization "
-                  << "(INFOG(1) = " << INFOG(1) << ").\n";
+        std::cerr << "MUMPS reported an error during analysis/factorization " << "(INFOG(1) = " << INFOG(1) << ").\n";
         return;
     }
 }
