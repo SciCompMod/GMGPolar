@@ -466,7 +466,7 @@ SparseMatrixCOO<double> DirectSolver_COO_MUMPS_Take<DomainGeometry>::buildSolver
     const int num_omp_threads                     = DirectSolver<DomainGeometry>::num_omp_threads_;
     const bool DirBC_Interior                     = DirectSolver<DomainGeometry>::DirBC_Interior_;
 
-    const int n   = grid_.numberOfNodes();
+    const int n   = grid.numberOfNodes();
     const int nnz = getNonZeroCountSolverMatrix();
 
     SparseMatrixCOO<double> solver_matrix(n, n, nnz);
@@ -475,27 +475,27 @@ SparseMatrixCOO<double> DirectSolver_COO_MUMPS_Take<DomainGeometry>::buildSolver
     assert(level_cache_.cacheDensityProfileCoefficients());
     assert(level_cache_.cacheDomainGeometry());
 
-    ConstVector<double> arr        = level_cache_.arr();
-    ConstVector<double> att        = level_cache_.att();
-    ConstVector<double> art        = level_cache_.art();
-    ConstVector<double> detDF      = level_cache_.detDF();
-    ConstVector<double> coeff_beta = level_cache_.coeff_beta();
+    ConstVector<double> arr        = level_cache.arr();
+    ConstVector<double> att        = level_cache.att();
+    ConstVector<double> art        = level_cache.art();
+    ConstVector<double> detDF      = level_cache.detDF();
+    ConstVector<double> coeff_beta = level_cache.coeff_beta();
 
-    #pragma omp parallel num_threads(num_omp_threads_)
+    #pragma omp parallel num_threads(num_omp_threads)
     {
     /* Circle Section */
     #pragma omp for nowait
         for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
-            for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
+            for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
                 nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF,
                                           coeff_beta);
             }
         }
     /* Radial Section */
     #pragma omp for nowait
-        for (int i_theta = 0; i_theta < grid_.ntheta(); i_theta++) {
+        for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
             for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
-                nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirBC_Interior solver_matrix, arr, att, art, detDF,
+                nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF,
                                           coeff_beta);
             }
         }
