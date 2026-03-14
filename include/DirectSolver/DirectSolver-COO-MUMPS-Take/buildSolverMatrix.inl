@@ -472,8 +472,8 @@ SparseMatrixCOO<double> DirectSolver_COO_MUMPS_Take<DomainGeometry>::buildSolver
     SparseMatrixCOO<double> solver_matrix(n, n, nnz);
     solver_matrix.is_symmetric(true);
 
-    assert(level_cache_.cacheDensityProfileCoefficients());
-    assert(level_cache_.cacheDomainGeometry());
+    assert(level_cache.cacheDensityProfileCoefficients());
+    assert(level_cache.cacheDomainGeometry());
 
     ConstVector<double> arr        = level_cache.arr();
     ConstVector<double> att        = level_cache.att();
@@ -485,7 +485,7 @@ SparseMatrixCOO<double> DirectSolver_COO_MUMPS_Take<DomainGeometry>::buildSolver
     {
     /* Circle Section */
     #pragma omp for nowait
-        for (int i_r = 0; i_r < grid_.numberSmootherCircles(); i_r++) {
+        for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
             for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
                 nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF,
                                           coeff_beta);
