@@ -16,6 +16,13 @@ set(POLAR_GRID_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/PolarGrid/anisotropic_division.cpp
 )
 
+# Gather all source files
+# file(GLOB_RECURSE LINEAR_ALGEBRA_SOURCES 
+# ${CMAKE_CURRENT_SOURCE_DIR}/LinearAlgebra/Solvers/*.cpp)
+set(LINEAR_ALGEBRA_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/LinearAlgebra/Solvers/coo_mumps_solver.cpp
+)
+
 # file(GLOB_RECURSE GMG_POLAR_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/*.cpp)
 set(GMG_POLAR_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/gmgpolar.cpp
@@ -47,6 +54,7 @@ set(CONFIG_PARSER_SOURCES
 # Create the main library
 add_library(GMGPolarLib STATIC
     ${POLAR_GRID_SOURCES}
+    ${LINEAR_ALGEBRA_SOURCES}
     ${GMG_POLAR_SOURCES}
     ${STENCIL_SOURCES}
     ${INTERPOLATION_SOURCES}

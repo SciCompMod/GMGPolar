@@ -11,7 +11,6 @@ public:
                                       const DensityProfileCoefficients& density_profile_coefficients,
                                       bool DirBC_Interior, int num_omp_threads);
 
-    ~DirectSolver_CSR_LU_Take() override;
     // Note: The rhs (right-hand side) vector gets overwritten with the solution.
     void solveInPlace(Vector<double> solution) override;
 
@@ -49,8 +48,6 @@ private:
     // clang-format on
 
     SparseMatrixCSR<double> buildSolverMatrix();
-    void buildSolverMatrixCircleSection(const int i_r, SparseMatrixCSR<double>& solver_matrix);
-    void buildSolverMatrixRadialSection(const int i_theta, SparseMatrixCSR<double>& solver_matrix);
 
     // Returns the total number of non-zero elements in the solver matrix.
     int getNonZeroCountSolverMatrix() const;

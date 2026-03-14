@@ -16,8 +16,3 @@ void DirectSolver_CSR_LU_Take<DomainGeometry>::solveInPlace(Vector<double> solut
 {
     lu_solver_.solveInPlace(solution);
 }
-
-template <concepts::DomainGeometry DomainGeometry>
-DirectSolver_CSR_LU_Take<DomainGeometry>::~DirectSolver_CSR_LU_Take()
-{
-}

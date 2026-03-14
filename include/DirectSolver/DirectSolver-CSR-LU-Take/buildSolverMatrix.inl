@@ -247,60 +247,12 @@ void DirectSolver_CSR_LU_Take<DomainGeometry>::nodeBuildSolverMatrixTake(
 }
 
 template <concepts::DomainGeometry DomainGeometry>
-void DirectSolver_CSR_LU_Take<DomainGeometry>::buildSolverMatrixCircleSection(const int i_r,
-                                                                              SparseMatrixCSR<double>& solver_matrix)
-{
-    const PolarGrid& grid                         = DirectSolver<DomainGeometry>::grid_;
-    const LevelCache<DomainGeometry>& level_cache = DirectSolver<DomainGeometry>::level_cache_;
-
-    assert(level_cache.cacheDensityProfileCoefficients());
-    assert(level_cache.cacheDomainGeometry());
-
-    ConstVector<double> arr        = level_cache.arr();
-    ConstVector<double> att        = level_cache.att();
-    ConstVector<double> art        = level_cache.art();
-    ConstVector<double> detDF      = level_cache.detDF();
-    ConstVector<double> coeff_beta = level_cache.coeff_beta();
-
-    for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-        // Build solver matrix at the current node
-        nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirectSolver<DomainGeometry>::DirBC_Interior_, solver_matrix, arr,
-                                  att, art, detDF, coeff_beta);
-    }
-}
-
-template <concepts::DomainGeometry DomainGeometry>
-void DirectSolver_CSR_LU_Take<DomainGeometry>::buildSolverMatrixRadialSection(const int i_theta,
-                                                                              SparseMatrixCSR<double>& solver_matrix)
-{
-    const PolarGrid& grid                         = DirectSolver<DomainGeometry>::grid_;
-    const LevelCache<DomainGeometry>& level_cache = DirectSolver<DomainGeometry>::level_cache_;
-
-    assert(level_cache.cacheDensityProfileCoefficients());
-    assert(level_cache.cacheDomainGeometry());
-
-    ConstVector<double> arr        = level_cache.arr();
-    ConstVector<double> att        = level_cache.att();
-    ConstVector<double> art        = level_cache.art();
-    ConstVector<double> detDF      = level_cache.detDF();
-    ConstVector<double> coeff_beta = level_cache.coeff_beta();
-
-    for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
-        // Build solver matrix at the current node
-        nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirectSolver<DomainGeometry>::DirBC_Interior_, solver_matrix, arr,
-                                  att, art, detDF, coeff_beta);
-    }
-}
-
-// clang-format off
-
-/* ------------------------------------------------------------------------ */
-/* If the indexing is not smoother-based, please adjust the access patterns */
-template <concepts::DomainGeometry DomainGeometry>
 SparseMatrixCSR<double> DirectSolver_CSR_LU_Take<DomainGeometry>::buildSolverMatrix()
 {
-    const PolarGrid& grid            = DirectSolver<DomainGeometry>::grid_;
-    const int        num_omp_threads = DirectSolver<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid                         = DirectSolver<DomainGeometry>::grid_;
+    const LevelCache<DomainGeometry>& level_cache = DirectSolver<DomainGeometry>::level_cache_;
+    const int num_omp_threads                     = DirectSolver<DomainGeometry>::num_omp_threads_;
+    const bool DirBC_Interior                     = DirectSolver<DomainGeometry>::DirBC_Interior_;
 
     const int n = grid.numberOfNodes();
 
@@ -310,32 +262,34 @@ SparseMatrixCSR<double> DirectSolver_CSR_LU_Take<DomainGeometry>::buildSolverMat
 
     SparseMatrixCSR<double> solver_matrix(n, n, nnz_per_row);
 
-    if (num_omp_threads == 1) {
-        /* Single-threaded execution */
+    assert(level_cache.cacheDensityProfileCoefficients());
+    assert(level_cache.cacheDomainGeometry());
+
+    ConstVector<double> arr        = level_cache.arr();
+    ConstVector<double> att        = level_cache.att();
+    ConstVector<double> art        = level_cache.art();
+    ConstVector<double> detDF      = level_cache.detDF();
+    ConstVector<double> coeff_beta = level_cache.coeff_beta();
+
+#pragma omp parallel num_threads(num_omp_threads)
+    {
+        /* Circle Section */
+#pragma omp for nowait
         for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
-            buildSolverMatrixCircleSection(i_r, solver_matrix);
-        }
-        for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-            buildSolverMatrixRadialSection(i_theta, solver_matrix);
-        }
-    }
-    else {
-        /* Multi-threaded execution */
-        #pragma omp parallel num_threads(num_omp_threads)
-        {
-            /* Circle Section */
-            #pragma omp for nowait
-            for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
-                buildSolverMatrixCircleSection(i_r, solver_matrix);
-            }
-            /* Radial Section */
-            #pragma omp for nowait
             for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                buildSolverMatrixRadialSection(i_theta, solver_matrix);
+                nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF,
+                                          coeff_beta);
+            }
+        }
+        /* Radial Section */
+#pragma omp for nowait
+        for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
+            for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
+                nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF,
+                                          coeff_beta);
             }
         }
     }
 
     return solver_matrix;
 }
-// clang-format on
