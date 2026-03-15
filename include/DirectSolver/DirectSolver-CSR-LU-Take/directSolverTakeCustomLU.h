@@ -36,18 +36,29 @@ private:
         -1, -1, -1
     };
     const Stencil stencil_next_inner_DB_ = {
-        7, 4, 8,
-        1, 0, 2,
-        5, 3, 6
+        -1, 3, 5,
+        -1, 0, 1,
+        -1, 2, 4
     };
     const Stencil stencil_next_outer_DB_ = {
-        7, 4, 8,
-        1, 0, 2,
-        5, 3, 6
+        5, 3, -1,
+        1, 0, -1,
+        4, 2, -1
     };
     // clang-format on
 
     SparseMatrixCSR<double> buildSolverMatrix();
+
+    // Adjusts the right-hand side vector for symmetry corrections.
+    // This modifies the system from
+    //    A * solution = rhs
+    // to the equivalent system
+    //    symmetric_DBc(A) * solution = rhs - applySymmetryShift(rhs).
+    // The correction modifies the rhs to account for the influence of the Dirichlet boundary conditions,
+    // ensuring that the solution at the boundary is correctly adjusted and maintains the required symmetry.
+    void applySymmetryShift(Vector<double> rhs) const;
+    void applySymmetryShiftInnerBoundary(Vector<double> x) const;
+    void applySymmetryShiftOuterBoundary(Vector<double> x) const;
 
     // Returns the total number of non-zero elements in the solver matrix.
     int getNonZeroCountSolverMatrix() const;
@@ -63,5 +74,6 @@ private:
 };
 
 #include "buildSolverMatrix.inl"
+#include "applySymmetryShift.inl"
 #include "directSolverTake.inl"
 #include "matrixStencil.inl"

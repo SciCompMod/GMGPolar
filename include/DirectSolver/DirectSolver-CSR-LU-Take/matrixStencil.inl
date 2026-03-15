@@ -10,9 +10,9 @@ int DirectSolver_CSR_LU_Take<DomainGeometry>::getStencilSize(int global_index) c
     grid.multiIndex(global_index, i_r, i_theta);
 
     const int size_stencil_inner_boundary      = DirBC_Interior ? 1 : 7;
-    const int size_stencil_next_inner_boundary = DirBC_Interior ? 9 : 9;
+    const int size_stencil_next_inner_boundary = DirBC_Interior ? 6 : 9;
     const int size_stencil_interior            = 9;
-    const int size_stencil_next_outer_boundary = 9;
+    const int size_stencil_next_outer_boundary = 6;
     const int size_stencil_outer_boundary      = 1;
 
     if ((i_r > 1 && i_r < grid.nr() - 2) || (i_r == 1 && !DirBC_Interior)) {
@@ -67,9 +67,9 @@ int DirectSolver_CSR_LU_Take<DomainGeometry>::getNonZeroCountSolverMatrix() cons
     const bool DirBC_Interior = DirectSolver<DomainGeometry>::DirBC_Interior_;
 
     const int size_stencil_inner_boundary      = DirBC_Interior ? 1 : 7;
-    const int size_stencil_next_inner_boundary = DirBC_Interior ? 9 : 9;
+    const int size_stencil_next_inner_boundary = DirBC_Interior ? 6 : 9;
     const int size_stencil_interior            = 9;
-    const int size_stencil_next_outer_boundary = 9;
+    const int size_stencil_next_outer_boundary = 6;
     const int size_stencil_outer_boundary      = 1;
 
     assert(grid.nr() >= 4);
