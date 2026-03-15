@@ -91,25 +91,15 @@ void DirectSolver_COO_MUMPS_Take<DomainGeometry>::applySymmetryShift(Vector<doub
 {
     const PolarGrid& grid     = DirectSolver<DomainGeometry>::grid_;
     const bool DirBC_Interior = DirectSolver<DomainGeometry>::DirBC_Interior_;
-    const int num_omp_threads = DirectSolver<DomainGeometry>::num_omp_threads_;
 
     assert(std::ssize(x) == grid.numberOfNodes());
     assert(grid.nr() >= 4);
 
-    #pragma omp parallel sections num_threads(num_omp_threads)
-    {
-    #pragma omp section
-        {
-            if (DirBC_Interior) {
-                applySymmetryShiftInnerBoundary(x);
-            }
-        }
-
-    #pragma omp section
-        {
-            applySymmetryShiftOuterBoundary(x);
-        }
+    if (DirBC_Interior) {
+        applySymmetryShiftInnerBoundary(x);
     }
+
+    applySymmetryShiftOuterBoundary(x);
 }
 
 #endif
