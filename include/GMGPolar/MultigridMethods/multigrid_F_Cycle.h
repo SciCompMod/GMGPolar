@@ -78,10 +78,13 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_F_Cycle(int
                           next_level.residual(), // error (solution)
                           next_level.error_correction(), // coarse residual (rhs)
                           next_level.solution()); // workspace
-        multigrid_V_Cycle(level_depth + 1,
-                          next_level.residual(), // error (solution)
-                          next_level.error_correction(), // coarse residual (rhs)
-                          next_level.solution()); // workspace
+        // Don't do a second recursion on the coarsest level since the DirectSolver is exact.
+        if (level_depth + 1 != number_of_levels - 1) {
+            multigrid_V_Cycle(level_depth + 1,
+                              next_level.residual(), // error (solution)
+                              next_level.error_correction(), // coarse residual (rhs)
+                              next_level.solution()); // workspace
+        }
 
         /* Interpolate the correction */
         prolongation(level_depth + 1, residual, next_level.residual());
