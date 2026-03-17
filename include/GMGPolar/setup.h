@@ -153,8 +153,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 int GMGPolar<DomainGeometry, DensityProfileCoefficients>::chooseNumberOfLevels(const PolarGrid& finestGrid)
 {
-    const int minRadialNodes      = 5;
-    const int minAngularDivisions = 4;
+    constexpr int minRadialNodes      = 5;
+    constexpr int minAngularDivisions = 4;
 
     // Calculate radial maximum level
     int radialNodes    = finestGrid.nr();
@@ -173,15 +173,19 @@ int GMGPolar<DomainGeometry, DensityProfileCoefficients>::chooseNumberOfLevels(c
         angularMaxLevel++;
     }
 
-    /* Currently unused: Number of levels which guarantee linear scalability */
-    const int linear_complexity_levels = static_cast<int>(std::ceil(
-        (2.0 * std::log(static_cast<double>(finestGrid.numberOfNodes())) - std::log(3.0)) / (3.0 * std::log(4.0))));
-
     // Determine the number of levels as the minimum of radial maximum level, angular maximum level,
     // and the maximum levels specified.
     int levels = std::min(radialMaxLevel, angularMaxLevel);
     if (max_levels_ > 0)
         levels = std::min(max_levels_, levels);
+
+    // Extrapolation requires at least 2 levels
+    if (extrapolation_ != ExtrapolationType::NONE && levels < 2) {
+        std::cerr << "[GMGPolar Warning] Extrapolation disabled: requires at least 2 multigrid levels, but only "
+                  << levels << " available.\n";
+
+        extrapolation_ = ExtrapolationType::NONE;
+    }
 
     return levels;
 }
@@ -586,7 +590,7 @@ template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoeff
 bool GMGPolar<DomainGeometry, DensityProfileCoefficients>::checkUniformRefinement(const PolarGrid& grid,
                                                                                   double tolerance) const
 {
-    // --- Radial direction ---
+    // Radial direction
     for (int i_r = 1; i_r < grid.nr() - 1; i_r += 2) {
         double left         = grid.radius(i_r - 1);
         double right        = grid.radius(i_r + 1);
@@ -603,7 +607,7 @@ bool GMGPolar<DomainGeometry, DensityProfileCoefficients>::checkUniformRefinemen
         }
     }
 
-    // --- Angular direction ---
+    // Angular direction
     for (int i_theta = 1; i_theta < grid.ntheta(); i_theta += 2) {
         double left         = grid.theta(i_theta - 1);
         double right        = grid.theta(i_theta + 1);
