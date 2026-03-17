@@ -1,55 +1,72 @@
+#pragma once
+
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigrid_F_Cycle(int level_depth,
                                                                                           Vector<double> solution,
                                                                                           ConstVector<double> rhs,
                                                                                           Vector<double> residual)
 {
-    assert(0 <= level_depth && level_depth < number_of_levels_ - 1);
+    assert(0 <= level_depth && level_depth < number_of_levels_);
 
     std::chrono::high_resolution_clock::time_point start_MGC;
     if (level_depth == 0) {
         start_MGC = std::chrono::high_resolution_clock::now();
     }
 
-    Level<DomainGeometry>& level      = levels_[level_depth];
-    Level<DomainGeometry>& next_level = levels_[level_depth + 1];
+    if (level_depth == number_of_levels_ - 1) {
+        /* ---------------------------------------------------- */
+        /* Coarsest level: solve A * x = rhs using DirectSolver */
+        /* ---------------------------------------------------- */
+        // Note: A_ex * x = rhs is only solvable when level_depth >= 2.
 
-    auto start_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
+        Level<DomainGeometry>& coarsest_level = levels_[level_depth];
 
-    /* ------------ */
-    /* Presmoothing */
-    for (int i = 0; i < pre_smoothing_steps_; i++) {
-        if (level_depth == 0 && !full_grid_smoothing_) {
-            level.extrapolatedSmoothing(solution, rhs, residual);
-        }
-        else {
-            level.smoothing(solution, rhs, residual);
-        }
+        /* Step 1: Copy rhs in solution */
+        Kokkos::deep_copy(solution, rhs);
+
+        /* Step 2: Solve for the solution in place */
+        auto start_MGC_directSolver = std::chrono::high_resolution_clock::now();
+
+        coarsest_level.directSolveInPlace(solution);
+
+        auto end_MGC_directSolver = std::chrono::high_resolution_clock::now();
+        t_avg_MGC_directSolver_ += std::chrono::duration<double>(end_MGC_directSolver - start_MGC_directSolver).count();
     }
+    else {
+        /* ------------------------------ */
+        /* Extrapolated multigrid F-cycle */
+        /* ------------------------------ */
+        Level<DomainGeometry>& level      = levels_[level_depth];
+        Level<DomainGeometry>& next_level = levels_[level_depth + 1];
 
-    auto end_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
-    t_avg_MGC_preSmoothing_ += std::chrono::duration<double>(end_MGC_preSmoothing - start_MGC_preSmoothing).count();
+        /* ------------ */
+        /* Presmoothing */
+        /* ------------ */
+        auto start_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
 
-    /* ---------------------- */
-    /* Coarse grid correction */
-    /* ---------------------- */
+        for (int i = 0; i < pre_smoothing_steps_; i++) {
+            if (level.level_depth() == 0 && !full_grid_smoothing_) {
+                level.extrapolatedSmoothing(solution, rhs, residual);
+            }
+            else {
+                level.smoothing(solution, rhs, residual);
+            }
+        }
 
-    /* -------------------------- */
-    /* Solve A * error = residual */
-    if (level_depth + 1 == number_of_levels_ - 1) {
-        /* --------------------- */
-        /* Using a direct solver */
-        /* --------------------- */
+        auto end_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
+        t_avg_MGC_preSmoothing_ += std::chrono::duration<double>(end_MGC_preSmoothing - start_MGC_preSmoothing).count();
 
-        /* Step 1: Compute extrapolated residual */
+        /* -------------------------------------------- */
+        /* Compute the restricted extrapolated residual */
+        /* -------------------------------------------- */
         auto start_MGC_residual = std::chrono::high_resolution_clock::now();
 
         // P_ex^T (f_l - A_l*u_l)
         level.computeResidual(residual, rhs, solution);
-        extrapolatedRestriction(level_depth, next_level.residual(), residual);
+        extrapolatedRestriction(level.level_depth(), next_level.residual(), residual);
 
         // f_{l-1} - A_{l-1}* Inject(u_l)
-        injection(level_depth, next_level.solution(), solution);
+        injection(level.level_depth(), next_level.solution(), solution);
         next_level.computeResidual(next_level.error_correction(), next_level.rhs(), next_level.solution());
 
         // res_ex = 4/3 * P_ex^T (f_l - A_l*u_l) - 1/3 * (f_{l-1} - A_{l-1}* Inject(u_l))
@@ -59,72 +76,54 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
         auto end_MGC_residual = std::chrono::high_resolution_clock::now();
         t_avg_MGC_residual_ += std::chrono::duration<double>(end_MGC_residual - start_MGC_residual).count();
 
-        /* Step 2: Solve for the error in place */
-        auto start_MGC_directSolver = std::chrono::high_resolution_clock::now();
+        /* -------------------------------------------------- */
+        /* Solve A * error = restricted extrapolated residual */
+        /* -------------------------------------------------- */
+        // Note: We deliberately use the non-extrapolated multigrid cycle here.
 
-        next_level.directSolveInPlace(next_level.residual());
+        /* Set starting error to zero. */
+        assign(next_level.error_correction(), 0.0);
 
-        auto end_MGC_directSolver = std::chrono::high_resolution_clock::now();
-        t_avg_MGC_directSolver_ += std::chrono::duration<double>(end_MGC_directSolver - start_MGC_directSolver).count();
-    }
-    else {
-        /* ------------------------------------------ */
-        /* By recursively calling the multigrid cycle */
-        /* ------------------------------------------ */
+        /* Solve for the error by recursively calling the multigrid cycle. */
+        multigrid_F_Cycle(next_level.level_depth(), next_level.error_correction(), next_level.residual(),
+                          next_level.solution());
 
-        /* Step 1: Compute extrapolated residual. */
-        auto start_MGC_residual = std::chrono::high_resolution_clock::now();
-
-        // P_ex^T (f_l - A_l*u_l)
-        level.computeResidual(residual, rhs, solution);
-        extrapolatedRestriction(level_depth, next_level.error_correction(), residual);
-
-        // f_{l-1} - A_{l-1}* Inject(u_l)
-        injection(level_depth, next_level.solution(), solution);
-        next_level.computeResidual(next_level.residual(), next_level.rhs(), next_level.solution());
-
-        // res_ex = 4/3 * P_ex^T (f_l - A_l*u_l) - 1/3 * (f_{l-1} - A_{l-1}* Inject(u_l))
-        linear_combination(next_level.error_correction(), 4.0 / 3.0, ConstVector<double>(next_level.residual()),
-                           -1.0 / 3.0);
-
-        auto end_MGC_residual = std::chrono::high_resolution_clock::now();
-        t_avg_MGC_residual_ += std::chrono::duration<double>(end_MGC_residual - start_MGC_residual).count();
-
-        /* Step 2: Set starting error to zero. */
-        assign(next_level.residual(), 0.0);
-
-        /* Step 3: Solve for the error by recursively calling the multigrid cycle. */
-        multigrid_F_Cycle(level_depth + 1,
-                          next_level.residual(), // error (solution)
-                          next_level.error_correction(), // coarse residual (rhs)
-                          next_level.solution()); // workspace
-        multigrid_V_Cycle(level_depth + 1,
-                          next_level.residual(), // error (solution)
-                          next_level.error_correction(), // coarse residual (rhs)
-                          next_level.solution()); // workspace
-    }
-
-    /* Interpolate the correction */
-    extrapolatedProlongation(level_depth + 1, residual, next_level.residual());
-
-    /* Compute the corrected approximation: u = u + error */
-    add(solution, ConstVector<double>(residual));
-
-    auto start_MGC_postSmoothing = std::chrono::high_resolution_clock::now();
-
-    /* ------------- */
-    /* Postsmoothing */
-    for (int i = 0; i < post_smoothing_steps_; i++) {
-        if (level_depth == 0 && !full_grid_smoothing_) {
-            level.extrapolatedSmoothing(solution, rhs, residual);
+        /* Don't do a second recursion on the coarsest level since the DirectSolver is exact. */
+        if (next_level.level_depth() != number_of_levels_ - 1) {
+            multigrid_V_Cycle(next_level.level_depth(), next_level.error_correction(), next_level.residual(),
+                              next_level.solution());
         }
-        else {
-            level.smoothing(solution, rhs, residual);
-        }
-    }
 
-    auto end_MGC_postSmoothing = std::chrono::high_resolution_clock::now();
-    t_avg_MGC_postSmoothing_ += std::chrono::duration<double>(end_MGC_postSmoothing - start_MGC_postSmoothing).count();
+        /* -------------------------- */
+        /* Interpolate the correction */
+        /* -------------------------- */
+        // Use 'residual' instead of 'level.error_correction()' as a temporary buffer.
+        // Note: 'level.error_correction()' has size 0 at level depth = 0.
+        extrapolatedProlongation(next_level.level_depth(), residual, next_level.error_correction());
+
+        /* ----------------------------------- */
+        /* Compute the corrected approximation */
+        /* ----------------------------------- */
+        add(solution, ConstVector<double>(residual));
+
+        /* ------------- */
+        /* Postsmoothing */
+        /* ------------- */
+        auto start_MGC_postSmoothing = std::chrono::high_resolution_clock::now();
+
+        for (int i = 0; i < post_smoothing_steps_; i++) {
+            if (level.level_depth() == 0 && !full_grid_smoothing_) {
+                level.extrapolatedSmoothing(solution, rhs, residual);
+            }
+            else {
+                level.smoothing(solution, rhs, residual);
+            }
+        }
+
+        auto end_MGC_postSmoothing = std::chrono::high_resolution_clock::now();
+        t_avg_MGC_postSmoothing_ +=
+            std::chrono::duration<double>(end_MGC_postSmoothing - start_MGC_postSmoothing).count();
+    }
 
     if (level_depth == 0) {
         auto end_MGC = std::chrono::high_resolution_clock::now();
