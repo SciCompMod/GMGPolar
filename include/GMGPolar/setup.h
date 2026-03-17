@@ -26,7 +26,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     if (extrapolation_ != ExtrapolationType::NONE) {
         const double precision = 1e-12;
         if (!checkUniformRefinement(*finest_grid, precision)) {
-            std::cerr << "[Extrapolation Warning] Finest PolarGrid doesn't originate from a single uniform refinement.\n";
+            std::cerr << "[Extrapolation Warning] Finest PolarGrid is not from a single uniform refinement.\n";
         }
     }
 
