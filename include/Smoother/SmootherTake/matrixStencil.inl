@@ -10,6 +10,7 @@ const Stencil& SmootherTake<DomainGeometry>::getStencil(int i_r) const
     assert(i_r == 0);
 
     const bool DirBC_Interior = Smoother<DomainGeometry>::DirBC_Interior_;
+
     return DirBC_Interior ? stencil_DB_ : circle_stencil_across_origin_;
 }
 
@@ -22,8 +23,9 @@ int SmootherTake<DomainGeometry>::getNonZeroCountCircleAsc(int i_r) const
     // because it has an additional across-origin coupling.
     assert(i_r == 0);
 
-    const PolarGrid& grid                 = Smoother<DomainGeometry>::grid_;
-    const bool DirBC_Interior             = Smoother<DomainGeometry>::DirBC_Interior_;
+    const PolarGrid& grid     = Smoother<DomainGeometry>::grid_;
+    const bool DirBC_Interior = Smoother<DomainGeometry>::DirBC_Interior_;
+
     const int size_stencil_inner_boundary = DirBC_Interior ? 1 : 4;
     return size_stencil_inner_boundary * grid.ntheta();
 }
@@ -38,7 +40,8 @@ int SmootherTake<DomainGeometry>::getCircleAscIndex(int i_r, int i_theta) const
     // because it has an additional across-origin coupling.
     assert(i_r == 0);
 
-    const bool DirBC_Interior             = Smoother<DomainGeometry>::DirBC_Interior_;
+    const bool DirBC_Interior = Smoother<DomainGeometry>::DirBC_Interior_;
+
     const int size_stencil_inner_boundary = DirBC_Interior ? 1 : 4;
     return size_stencil_inner_boundary * i_theta;
 }

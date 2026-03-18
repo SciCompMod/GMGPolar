@@ -23,7 +23,7 @@ CooMumpsSolver::~CooMumpsSolver()
     finalize();
 }
 
-void CooMumpsSolver::solve(Vector<double>& rhs)
+void CooMumpsSolver::solveInPlace(Vector<double>& rhs)
 {
     assert(std::ssize(rhs) == mumps_solver_.n);
 

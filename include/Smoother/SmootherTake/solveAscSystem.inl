@@ -17,19 +17,8 @@ void SmootherTake<DomainGeometry>::solveBlackCircleSection(Vector<double> x, Vec
     circle_tridiagonal_solver_.solve(circle_section, batch_offset, batch_stride);
 
     if (is_inner_circle_black) {
-#ifdef GMGPOLAR_USE_MUMPS
-        inner_boundary_mumps_solver_.job    = JOB_COMPUTE_SOLUTION;
-        inner_boundary_mumps_solver_.nrhs   = 1; // single rhs vector
-        inner_boundary_mumps_solver_.nz_rhs = grid.ntheta(); // non-zeros in rhs
-        inner_boundary_mumps_solver_.rhs    = circle_section.data();
-        inner_boundary_mumps_solver_.lrhs   = grid.ntheta(); // leading dimension of rhs
-        dmumps_c(&inner_boundary_mumps_solver_);
-        if (inner_boundary_mumps_solver_.info[0] != 0) {
-            std::cerr << "Error solving the system: " << inner_boundary_mumps_solver_.info[0] << std::endl;
-        }
-#else
-        inner_boundary_lu_solver_.solveInPlace(circle_section.data());
-#endif
+        Vector<double> inner_boundary = Kokkos::subview(temp, Kokkos::make_pair(0, grid.ntheta()));
+        inner_boundary_solver_.solveInPlace(inner_boundary);
     }
 
     // Move updated values to x
@@ -59,19 +48,8 @@ void SmootherTake<DomainGeometry>::solveWhiteCircleSection(Vector<double> x, Vec
     circle_tridiagonal_solver_.solve(circle_section, batch_offset, batch_stride);
 
     if (is_inner_circle_white) {
-#ifdef GMGPOLAR_USE_MUMPS
-        inner_boundary_mumps_solver_.job    = JOB_COMPUTE_SOLUTION;
-        inner_boundary_mumps_solver_.nrhs   = 1; // single rhs vector
-        inner_boundary_mumps_solver_.nz_rhs = grid.ntheta(); // non-zeros in rhs
-        inner_boundary_mumps_solver_.rhs    = circle_section.data();
-        inner_boundary_mumps_solver_.lrhs   = grid.ntheta(); // leading dimension of rhs
-        dmumps_c(&inner_boundary_mumps_solver_);
-        if (inner_boundary_mumps_solver_.info[0] != 0) {
-            std::cerr << "Error solving the system: " << inner_boundary_mumps_solver_.info[0] << std::endl;
-        }
-#else
-        inner_boundary_lu_solver_.solveInPlace(circle_section.data());
-#endif
+        Vector<double> inner_boundary = Kokkos::subview(temp, Kokkos::make_pair(0, grid.ntheta()));
+        inner_boundary_solver_.solveInPlace(inner_boundary);
     }
 
     // Move updated values to x

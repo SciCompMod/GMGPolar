@@ -22,7 +22,7 @@ void DirectSolver_COO_MUMPS_Give<DomainGeometry>::solveInPlace(Vector<double> so
     // ensuring that the solution at the boundary is correctly adjusted and maintains the required symmetry.
     applySymmetryShift(solution);
     // Solves the adjusted system symmetric(matrixA) * solution = rhs using the MUMPS solver.
-    mumps_solver_.solve(solution);
+    mumps_solver_.solveInPlace(solution);
 }
 
 #endif

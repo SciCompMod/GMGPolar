@@ -37,7 +37,7 @@ public:
     ~CooMumpsSolver();
 
     // rhs is overwritten in-place with the solution on return.
-    void solve(Vector<double>& rhs);
+    void solveInPlace(Vector<double>& rhs);
 
 private:
     void initialize();

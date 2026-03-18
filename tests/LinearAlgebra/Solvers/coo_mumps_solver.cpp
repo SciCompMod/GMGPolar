@@ -36,7 +36,7 @@ TEST(CooMumpsSolverTest, GeneralNonSymmetric4x4)
     rhs(2) = 6.0;
     rhs(3) = 8.0;
 
-    solver.solve(rhs);
+    solver.solveInPlace(rhs);
 
     Vector<double> solution("solution", 4);
     solution(0) = 140.0 / 43.0;
@@ -80,7 +80,7 @@ TEST(CooMumpsSolverTest, SymmetricPositiveDefinite4x4)
     rhs(2) = 6.0;
     rhs(3) = 8.0;
 
-    solver.solve(rhs);
+    solver.solveInPlace(rhs);
 
     Vector<double> solution("solution", 4);
     solution(0) = 9.0 / 46.0;
