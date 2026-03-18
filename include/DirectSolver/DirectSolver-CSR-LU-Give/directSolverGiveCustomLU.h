@@ -11,7 +11,6 @@ public:
                                       const DensityProfileCoefficients& density_profile_coefficients,
                                       bool DirBC_Interior, int num_omp_threads);
 
-    ~DirectSolver_CSR_LU_Give() override;
     // Note: The rhs (right-hand side) vector gets overwritten with the solution.
     void solveInPlace(Vector<double> solution) override;
 

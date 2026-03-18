@@ -13,14 +13,12 @@ public:
                                          const DensityProfileCoefficients& density_profile_coefficients,
                                          bool DirBC_Interior, int num_omp_threads);
 
-    ~DirectSolver_COO_MUMPS_Take() override;
     // Note: The rhs (right-hand side) vector gets overwritten during the solution process.
     void solveInPlace(Vector<double> solution) override;
 
 private:
-    // Solver matrix and MUMPS solver structure
-    SparseMatrixCOO<double> solver_matrix_;
-    DMUMPS_STRUC_C mumps_solver_;
+    // The stencil definitions must be defined before the declaration of the mumps_solver,
+    // since the mumps solver will be built in the member initializer of the DirectSolver class.
 
     // clang-format off
     const Stencil stencil_interior_      = {
@@ -50,14 +48,11 @@ private:
     };
     // clang-format on
 
+    // MUMPS solver structure with the solver matrix initialized in the constructor.
+    CooMumpsSolver mumps_solver_;
+
     // Constructs a symmetric solver matrix.
     SparseMatrixCOO<double> buildSolverMatrix();
-    void buildSolverMatrixCircleSection(const int i_r, SparseMatrixCOO<double>& solver_matrix);
-    void buildSolverMatrixRadialSection(const int i_theta, SparseMatrixCOO<double>& solver_matrix);
-
-    // Initializes the MUMPS solver with the specified matrix.
-    // Converts to 1-based indexing.
-    void initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, SparseMatrixCOO<double>& solver_matrix);
 
     // Adjusts the right-hand side vector for symmetry corrections.
     // This modifies the system from
@@ -69,12 +64,6 @@ private:
     void applySymmetryShift(Vector<double> rhs) const;
     void applySymmetryShiftInnerBoundary(Vector<double> x) const;
     void applySymmetryShiftOuterBoundary(Vector<double> x) const;
-
-    // Solves the adjusted system symmetric(matrixA) * solution = rhs using the MUMPS solver.
-    void solveWithMumps(Vector<double> solution);
-
-    // Finalizes the MUMPS solver, releasing any allocated resources.
-    void finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver);
 
     // Returns the total number of non-zero elements in the solver matrix.
     int getNonZeroCountSolverMatrix() const;
@@ -94,7 +83,6 @@ private:
     #include "applySymmetryShift.inl"
     #include "buildSolverMatrix.inl"
     #include "directSolverTake.inl"
-    #include "initializeMumps.inl"
     #include "matrixStencil.inl"
 
 #endif

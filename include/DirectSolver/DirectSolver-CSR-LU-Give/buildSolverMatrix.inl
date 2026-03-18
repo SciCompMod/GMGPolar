@@ -748,6 +748,7 @@ void DirectSolver_CSR_LU_Give<DomainGeometry>::buildSolverMatrixCircleSection(co
 {
     const PolarGrid& grid                         = DirectSolver<DomainGeometry>::grid_;
     const LevelCache<DomainGeometry>& level_cache = DirectSolver<DomainGeometry>::level_cache_;
+    const bool DirBC_Interior                     = DirectSolver<DomainGeometry>::DirBC_Interior_;
 
     const double r = grid.radius(i_r);
     for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
@@ -758,8 +759,7 @@ void DirectSolver_CSR_LU_Give<DomainGeometry>::buildSolverMatrixCircleSection(co
         level_cache.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Build solver matrix at the current node
-        nodeBuildSolverMatrixGive(i_r, i_theta, grid, DirectSolver<DomainGeometry>::DirBC_Interior_, solver_matrix, arr,
-                                  att, art, detDF, coeff_beta);
+        nodeBuildSolverMatrixGive(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF, coeff_beta);
     }
 }
 
@@ -769,6 +769,7 @@ void DirectSolver_CSR_LU_Give<DomainGeometry>::buildSolverMatrixRadialSection(co
 {
     const PolarGrid& grid                         = DirectSolver<DomainGeometry>::grid_;
     const LevelCache<DomainGeometry>& level_cache = DirectSolver<DomainGeometry>::level_cache_;
+    const bool DirBC_Interior                     = DirectSolver<DomainGeometry>::DirBC_Interior_;
 
     const double theta = grid.theta(i_theta);
     for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
@@ -779,20 +780,15 @@ void DirectSolver_CSR_LU_Give<DomainGeometry>::buildSolverMatrixRadialSection(co
         level_cache.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Build solver matrix at the current node
-        nodeBuildSolverMatrixGive(i_r, i_theta, grid, DirectSolver<DomainGeometry>::DirBC_Interior_, solver_matrix, arr,
-                                  att, art, detDF, coeff_beta);
+        nodeBuildSolverMatrixGive(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF, coeff_beta);
     }
 }
 
-// clang-format off
-
-/* ------------------------------------------------------------------------ */
-/* If the indexing is not smoother-based, please adjust the access patterns */
 template <concepts::DomainGeometry DomainGeometry>
 SparseMatrixCSR<double> DirectSolver_CSR_LU_Give<DomainGeometry>::buildSolverMatrix()
 {
-    const PolarGrid& grid            = DirectSolver<DomainGeometry>::grid_;
-    const int        num_omp_threads = DirectSolver<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = DirectSolver<DomainGeometry>::grid_;
+    const int num_omp_threads = DirectSolver<DomainGeometry>::num_omp_threads_;
 
     const int n = grid.numberOfNodes();
 
@@ -801,13 +797,6 @@ SparseMatrixCSR<double> DirectSolver_CSR_LU_Give<DomainGeometry>::buildSolverMat
     };
 
     SparseMatrixCSR<double> solver_matrix(n, n, nnz_per_row);
-
-    const int nnz = solver_matrix.non_zero_size();
-
-    #pragma omp parallel for num_threads(num_omp_threads) if (nnz > 10'000)
-    for (int i = 0; i < nnz; i++) {
-        solver_matrix.values_data()[i] = 0.0;
-    }
 
     if (num_omp_threads == 1) {
         /* Single-threaded execution */
@@ -824,25 +813,25 @@ SparseMatrixCSR<double> DirectSolver_CSR_LU_Give<DomainGeometry>::buildSolverMat
         const int additional_radial_tasks = grid.ntheta() % 3;
         const int num_radial_tasks        = grid.ntheta() - additional_radial_tasks;
 
-        #pragma omp parallel num_threads(num_omp_threads)
+#pragma omp parallel num_threads(num_omp_threads)
         {
-            #pragma omp for
+#pragma omp for
             for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
                 int i_r = grid.numberSmootherCircles() - circle_task - 1;
                 buildSolverMatrixCircleSection(i_r, solver_matrix);
             }
-            #pragma omp for
+#pragma omp for
             for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 3) {
                 int i_r = grid.numberSmootherCircles() - circle_task - 1;
                 buildSolverMatrixCircleSection(i_r, solver_matrix);
             }
-            #pragma omp for nowait
+#pragma omp for nowait
             for (int circle_task = 2; circle_task < num_circle_tasks; circle_task += 3) {
                 int i_r = grid.numberSmootherCircles() - circle_task - 1;
                 buildSolverMatrixCircleSection(i_r, solver_matrix);
             }
 
-            #pragma omp for
+#pragma omp for
             for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {
                 if (radial_task > 0) {
                     int i_theta = radial_task + additional_radial_tasks;
@@ -858,7 +847,7 @@ SparseMatrixCSR<double> DirectSolver_CSR_LU_Give<DomainGeometry>::buildSolverMat
                     }
                 }
             }
-            #pragma omp for
+#pragma omp for
             for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 3) {
                 if (radial_task > 1) {
                     int i_theta = radial_task + additional_radial_tasks;
@@ -877,7 +866,7 @@ SparseMatrixCSR<double> DirectSolver_CSR_LU_Give<DomainGeometry>::buildSolverMat
                     }
                 }
             }
-            #pragma omp for
+#pragma omp for
             for (int radial_task = 2; radial_task < num_radial_tasks; radial_task += 3) {
                 int i_theta = radial_task + additional_radial_tasks;
                 buildSolverMatrixRadialSection(i_theta, solver_matrix);
@@ -887,4 +876,3 @@ SparseMatrixCSR<double> DirectSolver_CSR_LU_Give<DomainGeometry>::buildSolverMat
 
     return solver_matrix;
 }
-// clang-format on
