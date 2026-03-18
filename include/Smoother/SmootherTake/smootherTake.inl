@@ -10,10 +10,10 @@ SmootherTake<DomainGeometry>::SmootherTake(const PolarGrid& grid, const LevelCac
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
     , radial_tridiagonal_solver_(grid.lengthSmootherRadial(), grid.ntheta(), false)
 #ifdef GMGPOLAR_USE_MUMPS
-    , inner_boundary_mumps_solver_(buildInteriorBoundarySolverMatrix())
+    , inner_boundary_solver_(buildInteriorBoundarySolverMatrix())
 #else
     , inner_boundary_circle_matrix_(buildInteriorBoundarySolverMatrix())
-    , inner_boundary_lu_solver_(inner_boundary_circle_matrix_)
+    , inner_boundary_solver_(inner_boundary_circle_matrix_)
 #endif
 {
     buildTridiagonalSolverMatrices();

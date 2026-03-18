@@ -108,25 +108,28 @@ private:
     /* Interior boundary solver */
     /* ------------------------ */
 
-    // The A_sc matrix on i_r = 0 (inner circle) is NOT tridiagonal because
-    // it potentially includes across-origin coupling. Therefore, it is assembled
-    // into a sparse matrix and solved using a general-purpose sparse solver.
-    // When using the MUMPS solver, the matrix is assembled in COO format.
-    // When using the in-house solver, the matrix is stored in CSR format.
+    // The inner circle matrix (i_r = 0) is NOT tridiagonal due to across-origin coupling.
+    // It is solved using a general-purpose sparse solver.
+    // - MUMPS: matrix assembled in COO format; solver owns the matrix internally.
+    // - In-house: matrix stored in CSR; solver does not own the matrix.
 
 #ifdef GMGPOLAR_USE_MUMPS
-    // When using the MUMPS solver, the matrix is assembled in COO format.
-    using MatrixType = SparseMatrixCOO<double>;
-    // MUMPS solver structure with the solver matrix initialized in the constructor.
-    CooMumpsSolver inner_boundary_mumps_solver_;
+    using InnerBoundaryMatrix = SparseMatrixCOO<double>;
+    using InnerBoundarySolver = CooMumpsSolver;
 #else
-    // When using the in-house solver, the matrix is stored in CSR format.
-    using MatrixType = SparseMatrixCSR<double>;
-    // Sparse matrix for the non-tridiagonal inner boundary circle block.
-    MatrixType inner_boundary_circle_matrix_;
-    // LU solver for the inner boundary circle block.
-    SparseLUSolver<double> inner_boundary_lu_solver_;
+    using InnerBoundaryMatrix = SparseMatrixCSR<double>;
+    using InnerBoundarySolver = SparseLUSolver<double>;
+
+    // Stored only for the in-house solver (CSR).
+    InnerBoundaryMatrix inner_boundary_circle_matrix_;
 #endif
+
+    // Solver object (owns matrix if MUMPS, references if in-house solver).
+    InnerBoundarySolver inner_boundary_solver_;
+
+    /* -------------- */
+    /* Stencil access */
+    /* -------------- */
 
     // Select correct stencil depending on the grid position.
     const Stencil& getStencil(int i_r) const; /* Only i_r = 0 implemented */
@@ -150,12 +153,12 @@ private:
                                             ConstVector<double>& coeff_beta);
 
     // Build the solver matrix for the interior boundary (i_r = 0) which is non-tridiagonal due to across-origin coupling.
-    MatrixType buildInteriorBoundarySolverMatrix();
+    InnerBoundaryMatrix buildInteriorBoundarySolverMatrix();
     // Build the solver matrix for a specific node (i_r = 0, i_theta) on the interior boundary.
     void nodeBuildInteriorBoundarySolverMatrix(int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                               MatrixType& matrix, ConstVector<double>& arr, ConstVector<double>& att,
-                                               ConstVector<double>& art, ConstVector<double>& detDF,
-                                               ConstVector<double>& coeff_beta);
+                                               InnerBoundaryMatrix& matrix, ConstVector<double>& arr,
+                                               ConstVector<double>& att, ConstVector<double>& art,
+                                               ConstVector<double>& detDF, ConstVector<double>& coeff_beta);
 
     /* ---------------------- */
     /* Orthogonal application */

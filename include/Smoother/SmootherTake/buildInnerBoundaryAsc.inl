@@ -26,7 +26,7 @@ static inline void update_CSR_COO_MatrixElement(SparseMatrixCSR<double>& matrix,
 
 template <concepts::DomainGeometry DomainGeometry>
 void SmootherTake<DomainGeometry>::nodeBuildInteriorBoundarySolverMatrix(
-    int i_theta, const PolarGrid& grid, bool DirBC_Interior, MatrixType& matrix, ConstVector<double>& arr,
+    int i_theta, const PolarGrid& grid, bool DirBC_Interior, InnerBoundaryMatrix& matrix, ConstVector<double>& arr,
     ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
 {
     using smoother_take::update_CSR_COO_MatrixElement;
@@ -131,7 +131,8 @@ void SmootherTake<DomainGeometry>::nodeBuildInteriorBoundarySolverMatrix(
 }
 
 template <concepts::DomainGeometry DomainGeometry>
-typename SmootherTake<DomainGeometry>::MatrixType SmootherTake<DomainGeometry>::buildInteriorBoundarySolverMatrix()
+typename SmootherTake<DomainGeometry>::InnerBoundaryMatrix
+SmootherTake<DomainGeometry>::buildInteriorBoundarySolverMatrix()
 {
     const PolarGrid& grid                         = Smoother<DomainGeometry>::grid_;
     const LevelCache<DomainGeometry>& level_cache = Smoother<DomainGeometry>::level_cache_;
