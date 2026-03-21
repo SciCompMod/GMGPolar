@@ -9,21 +9,16 @@ ExtrapolatedSmootherTake<DomainGeometry>::ExtrapolatedSmootherTake(
                                            DirBC_Interior, num_omp_threads)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
     , radial_tridiagonal_solver_(grid.lengthSmootherRadial(), grid.ntheta(), false)
-{
-    buildAscMatrices();
 #ifdef GMGPOLAR_USE_MUMPS
-    initializeMumpsSolver(inner_boundary_mumps_solver_, inner_boundary_circle_matrix_);
+    , inner_boundary_solver_(buildInteriorBoundarySolverMatrix())
 #else
-    inner_boundary_lu_solver_ = SparseLUSolver<double>(inner_boundary_circle_matrix_);
+    , inner_boundary_circle_matrix_(buildInteriorBoundarySolverMatrix())
+    , inner_boundary_solver_(inner_boundary_circle_matrix_)
 #endif
-}
-
-template <concepts::DomainGeometry DomainGeometry>
-ExtrapolatedSmootherTake<DomainGeometry>::~ExtrapolatedSmootherTake()
 {
-#ifdef GMGPOLAR_USE_MUMPS
-    finalizeMumpsSolver(inner_boundary_mumps_solver_);
-#endif
+    buildTridiagonalSolverMatrices();
+    circle_tridiagonal_solver_.setup();
+    radial_tridiagonal_solver_.setup();
 }
 
 // The smoothing solves linear systems of the form:
@@ -56,46 +51,15 @@ void ExtrapolatedSmootherTake<DomainGeometry>::extrapolatedSmoothing(Vector<doub
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
-    assert(ExtrapolatedSmoother<DomainGeometry>::level_cache_.cacheDensityProfileCoefficients());
-    assert(ExtrapolatedSmoother<DomainGeometry>::level_cache_.cacheDomainGeometry());
-
-    const PolarGrid& grid     = ExtrapolatedSmoother<DomainGeometry>::grid_;
-    const int num_omp_threads = ExtrapolatedSmoother<DomainGeometry>::num_omp_threads_;
-
-    /* The outer most circle next to the radial section is defined to be black. */
-    /* Priority: Black -> White. */
-    const int start_black_circles = (grid.numberSmootherCircles() % 2 == 0) ? 1 : 0;
-    const int start_white_circles = (grid.numberSmootherCircles() % 2 == 0) ? 0 : 1;
-
-    /* Black Circle Section */
-#pragma omp parallel for num_threads(num_omp_threads)
-    for (int i_r = start_black_circles; i_r < grid.numberSmootherCircles(); i_r += 2) {
-        applyAscOrthoCircleSection(i_r, x, rhs, temp);
-    } /* Implicit barrier */
-
+    applyAscOrthoBlackCircleSection(x, rhs, temp);
     solveBlackCircleSection(x, temp);
 
-    /* White Circle Section */
-#pragma omp parallel for num_threads(num_omp_threads)
-    for (int i_r = start_white_circles; i_r < grid.numberSmootherCircles(); i_r += 2) {
-        applyAscOrthoCircleSection(i_r, x, rhs, temp);
-    } /* Implicit barrier */
-
+    applyAscOrthoWhiteCircleSection(x, rhs, temp);
     solveWhiteCircleSection(x, temp);
 
-    /* Black Radial Section */
-#pragma omp parallel for num_threads(num_omp_threads)
-    for (int i_theta = 0; i_theta < grid.ntheta(); i_theta += 2) {
-        applyAscOrthoRadialSection(i_theta, x, rhs, temp);
-    } /* Implicit barrier */
-
+    applyAscOrthoBlackRadialSection(x, rhs, temp);
     solveBlackRadialSection(x, temp);
 
-    /* White Radial Section*/
-#pragma omp parallel for num_threads(num_omp_threads)
-    for (int i_theta = 1; i_theta < grid.ntheta(); i_theta += 2) {
-        applyAscOrthoRadialSection(i_theta, x, rhs, temp);
-    } /* Implicit barrier */
-
+    applyAscOrthoWhiteRadialSection(x, rhs, temp);
     solveWhiteRadialSection(x, temp);
 }
