@@ -7,6 +7,7 @@
 
 #include "../InputFunctions/densityProfileCoefficients.h"
 #include "../InputFunctions/domainGeometry.h"
+#include "../InputFunctions/sourceTerm.h"
 #include "../Level/level.h"
 
 #include "igmgpolar.h"
@@ -51,7 +52,7 @@ public:
 
     // Solve system with given boundary conditions and source term.
     // Multiple solves with different inputs are supported.
-    template <concepts::BoundaryConditions BoundaryConditions>
+    template <concepts::BoundaryConditions BoundaryConditions, concepts::SourceTerm SourceTerm>
     void solve(const BoundaryConditions& boundary_conditions, const SourceTerm& source_term);
 
     /* ---------------------------------------------------------------------- */
@@ -139,7 +140,7 @@ private:
     /* --------------- */
     /* Setup Functions */
     int chooseNumberOfLevels(const PolarGrid& finest_grid);
-    template <concepts::BoundaryConditions BoundaryConditions>
+    template <concepts::BoundaryConditions BoundaryConditions, concepts::SourceTerm SourceTerm>
     void build_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f,
                      const BoundaryConditions& boundary_conditions, const SourceTerm& source_term);
     void discretize_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f);
