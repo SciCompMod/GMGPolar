@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "../InputFunctions/domainGeometry.h"
+#include "../InputFunctions/densityProfileCoefficients.h"
 
 template <concepts::DomainGeometry DomainGeometry>
 class LevelCache;
@@ -12,7 +13,6 @@ class LevelCache;
 template <concepts::DomainGeometry DomainGeometry>
 class Level;
 
-#include "../InputFunctions/densityProfileCoefficients.h"
 #include "../Level/level.h"
 #include "../PolarGrid/polargrid.h"
 #include "../Definitions/global_definitions.h"
@@ -22,6 +22,7 @@ class Level;
 #include "../LinearAlgebra/Matrix/coo_matrix.h"
 #include "../LinearAlgebra/Matrix/csr_matrix.h"
 #include "../LinearAlgebra/Solvers/csr_lu_solver.h"
+#include "../LinearAlgebra/Solvers/coo_mumps_solver.h"
 #include "../Stencil/stencil.h"
 
 #ifdef GMGPOLAR_USE_MUMPS
@@ -34,11 +35,10 @@ class ExtrapolatedSmoother
 {
 public:
     explicit ExtrapolatedSmoother(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-                                  const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior,
+                                  bool DirBC_Interior,
                                   int num_omp_threads)
         : grid_(grid)
         , level_cache_(level_cache)
-        , density_profile_coefficients_(density_profile_coefficients)
         , DirBC_Interior_(DirBC_Interior)
         , num_omp_threads_(num_omp_threads)
     {
@@ -50,7 +50,6 @@ public:
 protected:
     const PolarGrid& grid_;
     const LevelCache<DomainGeometry>& level_cache_;
-    const DensityProfileCoefficients& density_profile_coefficients_;
     const bool DirBC_Interior_;
     const int num_omp_threads_;
 };

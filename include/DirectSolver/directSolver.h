@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "../InputFunctions/domainGeometry.h"
-#include "../InputFunctions/densityProfileCoefficients.h"
 
 template <concepts::DomainGeometry DomainGeometry>
 class LevelCache;
@@ -33,11 +32,10 @@ class DirectSolver
 {
 public:
     explicit DirectSolver(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-                          const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior,
+                          bool DirBC_Interior,
                           int num_omp_threads)
         : grid_(grid)
         , level_cache_(level_cache)
-        , density_profile_coefficients_(density_profile_coefficients)
         , DirBC_Interior_(DirBC_Interior)
         , num_omp_threads_(num_omp_threads)
     {
@@ -51,7 +49,6 @@ public:
 protected:
     const PolarGrid& grid_;
     const LevelCache<DomainGeometry>& level_cache_;
-    const DensityProfileCoefficients& density_profile_coefficients_;
     const bool DirBC_Interior_;
     const int num_omp_threads_;
 };

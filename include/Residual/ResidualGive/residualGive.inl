@@ -2,9 +2,9 @@
 
 template <concepts::DomainGeometry DomainGeometry>
 ResidualGive<DomainGeometry>::ResidualGive(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-                                           const DensityProfileCoefficients& density_profile_coefficients,
-                                           bool DirBC_Interior, int num_omp_threads)
-    : Residual<DomainGeometry>(grid, level_cache, density_profile_coefficients, DirBC_Interior, num_omp_threads)
+                                           bool DirBC_Interior,
+                                           int num_omp_threads)
+    : Residual<DomainGeometry>(grid, level_cache, DirBC_Interior, num_omp_threads)
 {
 }
 

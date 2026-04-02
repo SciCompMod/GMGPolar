@@ -51,8 +51,7 @@ public:
     // Constructs the coupled circle-radial smoother.
     // Builds the A_sc smoother matrices and prepares the solvers.
     explicit SmootherTake(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-                          const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior,
-                          int num_omp_threads);
+                          bool DirBC_Interior, int num_omp_threads);
 
     // Performs one full coupled smoothing sweep:
     //   BC -> WC -> BR -> WR

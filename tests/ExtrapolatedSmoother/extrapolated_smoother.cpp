@@ -61,10 +61,10 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_DirBC_Interior)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    ExtrapolatedSmootherGive<DomainGeometryType> smootherGive_operator(level.grid(), level.levelCache(), *coefficients,
-                                                                       DirBC_Interior, maxOpenMPThreads);
-    ExtrapolatedSmootherTake<DomainGeometryType> smootherTake_operator(level.grid(), level.levelCache(), *coefficients,
-                                                                       DirBC_Interior, maxOpenMPThreads);
+    ExtrapolatedSmootherGive<DomainGeometryType> smootherGive_operator(
+        level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ExtrapolatedSmootherTake<DomainGeometryType> smootherTake_operator(
+        level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     Vector<double> rhs   = generate_random_sample_data(level.grid(), 69);
     Vector<double> start = generate_random_sample_data(level.grid(), 24);
@@ -122,10 +122,10 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_AcossOrigin)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    ExtrapolatedSmootherGive<DomainGeometryType> smootherGive_operator(level.grid(), level.levelCache(), *coefficients,
-                                                                       DirBC_Interior, maxOpenMPThreads);
-    ExtrapolatedSmootherTake<DomainGeometryType> smootherTake_operator(level.grid(), level.levelCache(), *coefficients,
-                                                                       DirBC_Interior, maxOpenMPThreads);
+    ExtrapolatedSmootherGive<DomainGeometryType> smootherGive_operator(
+        level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ExtrapolatedSmootherTake<DomainGeometryType> smootherTake_operator(
+        level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     Vector<double> rhs   = generate_random_sample_data(level.grid(), 69);
     Vector<double> start = generate_random_sample_data(level.grid(), 24);
@@ -185,12 +185,12 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), *coefficients,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(),
                                                            DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                  maxOpenMPThreads);
     ExtrapolatedSmootherGive<DomainGeometryType> extrapolated_smoother_op(
-        level.grid(), level.levelCache(), *coefficients, DirBC_Interior, maxOpenMPThreads);
+        level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -270,12 +270,12 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), *coefficients,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(),
                                                            DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                  maxOpenMPThreads);
     ExtrapolatedSmootherGive<DomainGeometryType> extrapolated_smoother_op(
-        level.grid(), level.levelCache(), *coefficients, DirBC_Interior, maxOpenMPThreads);
+        level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -355,12 +355,12 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), *coefficients,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(),
                                                            DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                  maxOpenMPThreads);
     ExtrapolatedSmootherGive<DomainGeometryType> extrapolated_smoother_op(
-        level.grid(), level.levelCache(), *coefficients, DirBC_Interior, maxOpenMPThreads);
+        level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -442,12 +442,12 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), *coefficients,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(),
                                                            DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                  maxOpenMPThreads);
     ExtrapolatedSmootherGive<DomainGeometryType> extrapolated_smoother_op(
-        level.grid(), level.levelCache(), *coefficients, DirBC_Interior, maxOpenMPThreads);
+        level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -528,12 +528,12 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior_Smal
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), *coefficients,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(),
                                                            DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                  maxOpenMPThreads);
     ExtrapolatedSmootherGive<DomainGeometryType> extrapolated_smoother_op(
-        level.grid(), level.levelCache(), *coefficients, DirBC_Interior, maxOpenMPThreads);
+        level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -614,12 +614,12 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior_Smalle
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), *coefficients,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(),
                                                            DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                  maxOpenMPThreads);
     ExtrapolatedSmootherGive<DomainGeometryType> extrapolated_smoother_op(
-        level.grid(), level.levelCache(), *coefficients, DirBC_Interior, maxOpenMPThreads);
+        level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -700,12 +700,12 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin_Smalle
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), *coefficients,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(),
                                                            DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                  maxOpenMPThreads);
     ExtrapolatedSmootherGive<DomainGeometryType> extrapolated_smoother_op(
-        level.grid(), level.levelCache(), *coefficients, DirBC_Interior, maxOpenMPThreads);
+        level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -784,12 +784,12 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin_Smallest
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), *coefficients,
+    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(),
                                                            DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), *coefficients, DirBC_Interior,
+    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                  maxOpenMPThreads);
     ExtrapolatedSmootherGive<DomainGeometryType> extrapolated_smoother_op(
-        level.grid(), level.levelCache(), *coefficients, DirBC_Interior, maxOpenMPThreads);
+        level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -871,12 +871,12 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), *coefficients,
+    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(),
                                                            DirBC_Interior, maxOpenMPThreads);
-    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), *coefficients, DirBC_Interior,
+    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                  maxOpenMPThreads);
     ExtrapolatedSmootherTake<DomainGeometryType> extrapolated_smoother_op(
-        level.grid(), level.levelCache(), *coefficients, DirBC_Interior, maxOpenMPThreads);
+        level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -958,12 +958,12 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), *coefficients,
+    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(),
                                                            DirBC_Interior, maxOpenMPThreads);
-    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), *coefficients, DirBC_Interior,
+    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                  maxOpenMPThreads);
     ExtrapolatedSmootherTake<DomainGeometryType> extrapolated_smoother_op(
-        level.grid(), level.levelCache(), *coefficients, DirBC_Interior, maxOpenMPThreads);
+        level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -1043,12 +1043,12 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), *coefficients,
+    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(),
                                                            DirBC_Interior, maxOpenMPThreads);
-    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), *coefficients, DirBC_Interior,
+    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                  maxOpenMPThreads);
     ExtrapolatedSmootherTake<DomainGeometryType> extrapolated_smoother_op(
-        level.grid(), level.levelCache(), *coefficients, DirBC_Interior, maxOpenMPThreads);
+        level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -1128,12 +1128,12 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), *coefficients,
+    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(),
                                                            DirBC_Interior, maxOpenMPThreads);
-    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), *coefficients, DirBC_Interior,
+    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                  maxOpenMPThreads);
     ExtrapolatedSmootherTake<DomainGeometryType> extrapolated_smoother_op(
-        level.grid(), level.levelCache(), *coefficients, DirBC_Interior, maxOpenMPThreads);
+        level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -1212,12 +1212,12 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior_
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), *coefficients,
+    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(),
                                                            DirBC_Interior, maxOpenMPThreads);
-    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), *coefficients, DirBC_Interior,
+    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                  maxOpenMPThreads);
     ExtrapolatedSmootherTake<DomainGeometryType> extrapolated_smoother_op(
-        level.grid(), level.levelCache(), *coefficients, DirBC_Interior, maxOpenMPThreads);
+        level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -1296,12 +1296,12 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior_Sm
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), *coefficients,
+    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(),
                                                            DirBC_Interior, maxOpenMPThreads);
-    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), *coefficients, DirBC_Interior,
+    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                  maxOpenMPThreads);
     ExtrapolatedSmootherTake<DomainGeometryType> extrapolated_smoother_op(
-        level.grid(), level.levelCache(), *coefficients, DirBC_Interior, maxOpenMPThreads);
+        level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -1380,12 +1380,12 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin_Sm
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), *coefficients,
+    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(),
                                                            DirBC_Interior, maxOpenMPThreads);
-    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), *coefficients, DirBC_Interior,
+    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                  maxOpenMPThreads);
     ExtrapolatedSmootherTake<DomainGeometryType> extrapolated_smoother_op(
-        level.grid(), level.levelCache(), *coefficients, DirBC_Interior, maxOpenMPThreads);
+        level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -1464,12 +1464,12 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin_Smal
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(), *coefficients,
+    DirectSolver_CSR_LU_Take<DomainGeometryType> solver_op(level.grid(), level.levelCache(),
                                                            DirBC_Interior, maxOpenMPThreads);
-    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), *coefficients, DirBC_Interior,
+    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                  maxOpenMPThreads);
     ExtrapolatedSmootherTake<DomainGeometryType> extrapolated_smoother_op(
-        level.grid(), level.levelCache(), *coefficients, DirBC_Interior, maxOpenMPThreads);
+        level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());

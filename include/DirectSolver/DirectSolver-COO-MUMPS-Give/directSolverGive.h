@@ -9,7 +9,6 @@ class DirectSolver_COO_MUMPS_Give : public DirectSolver<DomainGeometry>
 {
 public:
     explicit DirectSolver_COO_MUMPS_Give(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-                                         const DensityProfileCoefficients& density_profile_coefficients,
                                          bool DirBC_Interior, int num_omp_threads);
 
     // Note: The rhs (right-hand side) vector gets overwritten during the solution process.

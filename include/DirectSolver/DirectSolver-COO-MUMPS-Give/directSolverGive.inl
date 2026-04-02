@@ -3,10 +3,10 @@
 #ifdef GMGPOLAR_USE_MUMPS
 
 template <concepts::DomainGeometry DomainGeometry>
-DirectSolver_COO_MUMPS_Give<DomainGeometry>::DirectSolver_COO_MUMPS_Give(
-    const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-    const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior, int num_omp_threads)
-    : DirectSolver<DomainGeometry>(grid, level_cache, density_profile_coefficients, DirBC_Interior, num_omp_threads)
+DirectSolver_COO_MUMPS_Give<DomainGeometry>::DirectSolver_COO_MUMPS_Give(const PolarGrid& grid,
+                                                                         const LevelCache<DomainGeometry>& level_cache,
+                                                                         bool DirBC_Interior, int num_omp_threads)
+    : DirectSolver<DomainGeometry>(grid, level_cache, DirBC_Interior, num_omp_threads)
     , mumps_solver_(buildSolverMatrix())
 {
 }

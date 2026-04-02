@@ -69,29 +69,28 @@ public:
 
     // -------------- //
     // Apply Residual //
-    void initializeResidual(const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior,
+    void initializeResidual(const bool DirBC_Interior,
                             const int num_omp_threads, const StencilDistributionMethod stencil_distribution_method);
     void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const;
     void applySystemOperator(Vector<double> result, ConstVector<double> x) const;
 
     // ------------------- //
     // Solve coarse System //
-    void initializeDirectSolver(const DensityProfileCoefficients& density_profile_coefficients,
-                                const bool DirBC_Interior, const int num_omp_threads,
-                                const StencilDistributionMethod stencil_distribution_method);
+    void initializeDirectSolver(const bool DirBC_Interior,
+                                const int num_omp_threads, const StencilDistributionMethod stencil_distribution_method);
     // Note: The rhs (right-hand side) vector gets overwritten by the solution.
     void directSolveInPlace(Vector<double> x) const;
 
     // --------------- //
     // Apply Smoothing //
-    void initializeSmoothing(const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior,
+    void initializeSmoothing(const bool DirBC_Interior,
                              const int num_omp_threads, const StencilDistributionMethod stencil_distribution_method);
     void smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) const;
 
     // ---------------------------- //
     // Apply Extrapolated Smoothing //
-    void initializeExtrapolatedSmoothing(const DensityProfileCoefficients& density_profile_coefficients,
-                                         const bool DirBC_Interior, const int num_omp_threads,
+    void initializeExtrapolatedSmoothing(const bool DirBC_Interior,
+                                         const int num_omp_threads,
                                          const StencilDistributionMethod stencil_distribution_method);
     void extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) const;
 
