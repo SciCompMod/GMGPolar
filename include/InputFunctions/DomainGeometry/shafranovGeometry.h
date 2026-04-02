@@ -6,20 +6,18 @@
 
 /* Strechted Ellipse with a Shafranov Shift */
 
-class ShafranovGeometry : public DomainGeometry
+class ShafranovGeometry
 {
 public:
     ShafranovGeometry() = default;
     explicit ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
 
-    virtual ~ShafranovGeometry() = default;
-
-    double Fx(double r, double theta) const override;
-    double Fy(double r, double theta) const override;
-    double dFx_dr(double r, double theta) const override;
-    double dFy_dr(double r, double theta) const override;
-    double dFx_dt(double r, double theta) const override;
-    double dFy_dt(double r, double theta) const override;
+    double Fx(double r, double theta) const;
+    double Fy(double r, double theta) const;
+    double dFx_dr(double r, double theta) const;
+    double dFy_dr(double r, double theta) const;
+    double dFx_dt(double r, double theta) const;
+    double dFy_dt(double r, double theta) const;
 
 private:
     const double Rmax             = 1.3;
