@@ -1,7 +1,7 @@
 #pragma once
 
-template <concepts::DomainGeometry DomainGeometry>
-LevelCache<DomainGeometry>::LevelCache(const PolarGrid& grid,
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+LevelCache<DomainGeometry, DensityProfileCoefficients>::LevelCache(const PolarGrid& grid,
                                        const DensityProfileCoefficients& density_profile_coefficients,
                                        const DomainGeometry& domain_geometry,
                                        const bool cache_density_profile_coefficients, const bool cache_domain_geometry)
@@ -78,62 +78,62 @@ LevelCache<DomainGeometry>::LevelCache(const PolarGrid& grid,
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-const DensityProfileCoefficients& LevelCache<DomainGeometry>::densityProfileCoefficients() const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+const DensityProfileCoefficients& LevelCache<DomainGeometry, DensityProfileCoefficients>::densityProfileCoefficients() const
 {
     return density_profile_coefficients_;
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-const DomainGeometry& LevelCache<DomainGeometry>::domainGeometry() const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+const DomainGeometry& LevelCache<DomainGeometry, DensityProfileCoefficients>::domainGeometry() const
 {
     return domain_geometry_;
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-bool LevelCache<DomainGeometry>::cacheDensityProfileCoefficients() const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+bool LevelCache<DomainGeometry, DensityProfileCoefficients>::cacheDensityProfileCoefficients() const
 {
     return cache_density_profile_coefficients_;
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-ConstVector<double> LevelCache<DomainGeometry>::coeff_alpha() const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::coeff_alpha() const
 {
     return coeff_alpha_;
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-ConstVector<double> LevelCache<DomainGeometry>::coeff_beta() const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::coeff_beta() const
 {
     return coeff_beta_;
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-bool LevelCache<DomainGeometry>::cacheDomainGeometry() const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+bool LevelCache<DomainGeometry, DensityProfileCoefficients>::cacheDomainGeometry() const
 {
     return cache_domain_geometry_;
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-ConstVector<double> LevelCache<DomainGeometry>::arr() const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::arr() const
 {
     return arr_;
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-ConstVector<double> LevelCache<DomainGeometry>::att() const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::att() const
 {
     return att_;
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-ConstVector<double> LevelCache<DomainGeometry>::art() const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::art() const
 {
     return art_;
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-ConstVector<double> LevelCache<DomainGeometry>::detDF() const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::detDF() const
 {
     return detDF_;
 }

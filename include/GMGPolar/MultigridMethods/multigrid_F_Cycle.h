@@ -16,7 +16,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_F_Cycle(int
         /* ---------------------------------------------------- */
         /* Coarsest level: solve A * x = rhs using DirectSolver */
         /* ---------------------------------------------------- */
-        Level<DomainGeometry>& coarsest_level = levels_[level_depth];
+        Level<DomainGeometry, DensityProfileCoefficients>& level = levels_[level_depth];
 
         /* Step 1: Copy rhs in solution */
         Kokkos::deep_copy(solution, rhs);
@@ -33,8 +33,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_F_Cycle(int
         /* ----------------- */
         /* Multigrid F-cycle */
         /* ----------------- */
-        Level<DomainGeometry>& level      = levels_[level_depth];
-        Level<DomainGeometry>& next_level = levels_[level_depth + 1];
+        Level<DomainGeometry, DensityProfileCoefficients>& level      = levels_[level_depth];
+        Level<DomainGeometry, DensityProfileCoefficients>& next_level = levels_[level_depth + 1];
 
         /* ------------ */
         /* Presmoothing */

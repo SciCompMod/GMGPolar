@@ -38,14 +38,14 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     levels_.reserve(number_of_levels_);
 
     auto finest_levelCache =
-        std::make_unique<LevelCache<DomainGeometry>>(*finest_grid, density_profile_coefficients_, domain_geometry_,
+        std::make_unique<LevelCache<DomainGeometry, DensityProfileCoefficients>>(*finest_grid, density_profile_coefficients_, domain_geometry_,
                                                      cache_density_profile_coefficients_, cache_domain_geometry_);
     levels_.emplace_back(0, std::move(finest_grid), std::move(finest_levelCache), extrapolation_, FMG_, PCG_FMG_);
 
     for (int level_depth = 1; level_depth < number_of_levels_; level_depth++) {
         auto current_grid = std::make_unique<PolarGrid>(coarseningGrid(levels_[level_depth - 1].grid()));
         auto current_levelCache =
-            std::make_unique<LevelCache<DomainGeometry>>(*current_grid, density_profile_coefficients_, domain_geometry_,
+            std::make_unique<LevelCache<DomainGeometry, DensityProfileCoefficients>>(*current_grid, density_profile_coefficients_, domain_geometry_,
                                                          cache_density_profile_coefficients_, cache_domain_geometry_);
         levels_.emplace_back(level_depth, std::move(current_grid), std::move(current_levelCache), extrapolation_, FMG_,
                              PCG_FMG_);
@@ -186,7 +186,7 @@ int GMGPolar<DomainGeometry, DensityProfileCoefficients>::chooseNumberOfLevels(c
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(const Level<DomainGeometry>& level,
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level,
                                                                             Vector<double> rhs_f)
 {
     const PolarGrid& grid = level.grid();
@@ -328,7 +328,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(cons
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 template <concepts::BoundaryConditions BoundaryConditions>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::build_rhs_f(const Level<DomainGeometry>& level,
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::build_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level,
                                                                        Vector<double> rhs_f,
                                                                        const BoundaryConditions& boundary_conditions,
                                                                        const SourceTerm& source_term)

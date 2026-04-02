@@ -19,10 +19,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
     int initial_rhs_f_levels = FMG_ ? number_of_levels_ : (extrapolation_ == ExtrapolationType::NONE ? 1 : 2);
     // Loop through the levels, injecting and discretizing rhs
     for (int level_depth = 0; level_depth < initial_rhs_f_levels; ++level_depth) {
-        Level<DomainGeometry>& current_level = levels_[level_depth];
+        Level<DomainGeometry, DensityProfileCoefficients>& current_level = levels_[level_depth];
         // Inject rhs if there is a next level
         if (level_depth + 1 < initial_rhs_f_levels) {
-            Level<DomainGeometry>& next_level = levels_[level_depth + 1];
+            Level<DomainGeometry, DensityProfileCoefficients>& next_level = levels_[level_depth + 1];
             injection(level_depth, next_level.rhs(), current_level.rhs());
         }
         // Discretize the rhs for the current level
@@ -79,7 +79,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
     /* --------------------------------------- */
     /* Start Solver at finest level (depth 0)  */
     /* --------------------------------------- */
-    Level<DomainGeometry>& level = levels_[0];
+    Level<DomainGeometry, DensityProfileCoefficients>& level = levels_[0];
 
     number_of_iterations_                 = 0;
     double initial_residual_norm          = 1.0;
@@ -184,7 +184,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::fullMultigridApproxim
 {
     // Start from the coarsest level
     int coarsest_depth                    = number_of_levels_ - 1;
-    Level<DomainGeometry>& coarsest_level = levels_[coarsest_depth];
+    Level<DomainGeometry, DensityProfileCoefficients>& coarsest_level = levels_[coarsest_depth];
 
     // Solve directly on the coarsest level
     Kokkos::deep_copy(coarsest_level.solution(), coarsest_level.rhs());
@@ -192,8 +192,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::fullMultigridApproxim
 
     // Prolongate the solution from the coarsest level up to the finest, while applying Multigrid Cycles on each level
     for (int depth = coarsest_depth; depth > 0; --depth) {
-        Level<DomainGeometry>& coarse_level = levels_[depth]; // Current coarse level
-        Level<DomainGeometry>& fine_level   = levels_[depth - 1]; // Next finer level
+        Level<DomainGeometry, DensityProfileCoefficients>& coarse_level = levels_[depth]; // Current coarse level
+        Level<DomainGeometry, DensityProfileCoefficients>& fine_level   = levels_[depth - 1]; // Next finer level
 
         // The bi-cubic FMG interpolation is of higher order
         FMGInterpolation(coarse_level.level_depth(), fine_level.solution(), coarse_level.solution());
@@ -215,7 +215,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solveMultigrid(double
                                                                           double& current_residual_norm,
                                                                           double& current_relative_residual_norm)
 {
-    Level<DomainGeometry>& level = levels_[0];
+    Level<DomainGeometry, DensityProfileCoefficients>& level = levels_[0];
 
     while (number_of_iterations_ < max_iterations_) {
         /* ----------------------- */
@@ -288,7 +288,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
                                                                     double& current_residual_norm,
                                                                     double& current_relative_residual_norm)
 {
-    Level<DomainGeometry>& level = levels_[0];
+    Level<DomainGeometry, DensityProfileCoefficients>& level = levels_[0];
 
     // x = initial guess
     Kokkos::deep_copy(pcg_solution_, level.solution());
@@ -318,7 +318,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
         level.applySystemOperator(level.residual(), pcg_search_direction_);
         if (extrapolation_ != ExtrapolationType::NONE) {
             assert(number_of_levels_ > 1);
-            Level<DomainGeometry>& next_level = levels_[level.level_depth() + 1];
+            Level<DomainGeometry, DensityProfileCoefficients>& next_level = levels_[level.level_depth() + 1];
             injection(0, next_level.solution(), pcg_search_direction_);
             next_level.applySystemOperator(next_level.residual(), next_level.solution());
             extrapolatedResidual(0, level.residual(), next_level.residual());
@@ -399,7 +399,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
 // =============================================================================
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyMultigridIterations(Level<DomainGeometry>& level,
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyMultigridIterations(Level<DomainGeometry, DensityProfileCoefficients>& level,
                                                                                     MultigridCycleType cycle,
                                                                                     int iterations)
 {
@@ -423,7 +423,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyMultigridIterati
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolatedMultigridIterations(
-    Level<DomainGeometry>& level, MultigridCycleType cycle, int iterations)
+    Level<DomainGeometry, DensityProfileCoefficients>& level, MultigridCycleType cycle, int iterations)
 {
     for (int i = 0; i < iterations; i++) {
         switch (cycle) {
@@ -448,7 +448,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolatedMult
 // =============================================================================
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::updateResidualNorms(Level<DomainGeometry>& level,
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::updateResidualNorms(Level<DomainGeometry, DensityProfileCoefficients>& level,
                                                                                int iteration,
                                                                                double& initial_residual_norm,
                                                                                double& current_residual_norm,
@@ -456,7 +456,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::updateResidualNorms(L
 {
     level.computeResidual(level.residual(), level.rhs(), level.solution());
     if (extrapolation_ != ExtrapolationType::NONE) {
-        Level<DomainGeometry>& next_level = levels_[level.level_depth() + 1];
+        Level<DomainGeometry, DensityProfileCoefficients>& next_level = levels_[level.level_depth() + 1];
         injection(level.level_depth(), next_level.solution(), level.solution());
         next_level.computeResidual(next_level.residual(), next_level.rhs(), next_level.solution());
         extrapolatedResidual(level.level_depth(), level.residual(), next_level.residual());
@@ -486,7 +486,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::updateResidualNorms(L
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 double GMGPolar<DomainGeometry, DensityProfileCoefficients>::residualNorm(const ResidualNormType& norm_type,
-                                                                          const Level<DomainGeometry>& level,
+                                                                          const Level<DomainGeometry, DensityProfileCoefficients>& level,
                                                                           ConstVector<double> residual) const
 {
     switch (norm_type) {
@@ -563,8 +563,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::initRhsHierarchy(Vect
 {
     Kokkos::deep_copy(levels_[0].rhs(), rhs);
     for (int level_depth = 0; level_depth < number_of_levels_ - 1; ++level_depth) {
-        Level<DomainGeometry>& current_level = levels_[level_depth];
-        Level<DomainGeometry>& next_level    = levels_[level_depth + 1];
+        Level<DomainGeometry, DensityProfileCoefficients>& current_level = levels_[level_depth];
+        Level<DomainGeometry, DensityProfileCoefficients>& next_level    = levels_[level_depth + 1];
         restriction(level_depth, next_level.rhs(), current_level.rhs());
     }
 }
@@ -574,7 +574,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::initRhsHierarchy(Vect
 // =============================================================================
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::evaluateExactError(Level<DomainGeometry>& level,
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::evaluateExactError(Level<DomainGeometry, DensityProfileCoefficients>& level,
                                                                               const ExactSolution& exact_solution)
 {
     // Compute the weighted L2 norm and infinity norm of the error between the numerical and exact solution.
@@ -584,11 +584,11 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::evaluateExactError(Le
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::computeExactError(
-    Level<DomainGeometry>& level, ConstVector<double> solution, Vector<double> error,
+    Level<DomainGeometry, DensityProfileCoefficients>& level, ConstVector<double> solution, Vector<double> error,
     const ExactSolution& exact_solution)
 {
     const PolarGrid& grid                        = level.grid();
-    const LevelCache<DomainGeometry>& levelCache = level.levelCache();
+    const LevelCache<DomainGeometry, DensityProfileCoefficients>& levelCache = level.levelCache();
 
     assert(solution.size() == error.size());
     assert(std::ssize(solution) == grid.numberOfNodes());

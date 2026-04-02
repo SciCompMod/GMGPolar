@@ -91,7 +91,7 @@ private:
     /* ---------------- */
     /* Multigrid levels */
     int number_of_levels_;
-    std::vector<Level<DomainGeometry>> levels_;
+    std::vector<Level<DomainGeometry, DensityProfileCoefficients>> levels_;
 
     /* ---------------------- */
     /* Interpolation operator */
@@ -128,7 +128,7 @@ private:
     /* Compute exact error if an exact solution is provided */
     // The results are stored as a pair: (weighted L2 error, infinity error).
     std::vector<std::pair<double, double>> exact_errors_;
-    std::pair<double, double> computeExactError(Level<DomainGeometry>& level, ConstVector<double> solution,
+    std::pair<double, double> computeExactError(Level<DomainGeometry, DensityProfileCoefficients>& level, ConstVector<double> solution,
                                                 Vector<double> error, const ExactSolution& exact_solution);
 
     /* ------------------------------------------------------------------------- */
@@ -139,9 +139,9 @@ private:
     /* Setup Functions */
     int chooseNumberOfLevels(const PolarGrid& finest_grid);
     template <concepts::BoundaryConditions BoundaryConditions>
-    void build_rhs_f(const Level<DomainGeometry>& level, Vector<double> rhs_f,
+    void build_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f,
                      const BoundaryConditions& boundary_conditions, const SourceTerm& source_term);
-    void discretize_rhs_f(const Level<DomainGeometry>& level, Vector<double> rhs_f);
+    void discretize_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f);
     bool checkUniformRefinement(const PolarGrid& grid, double tolerance) const;
 
     /* --------------- */
@@ -150,14 +150,14 @@ private:
     void solveMultigrid(double& initial_residual_norm, double& current_residual_norm,
                         double& current_relative_residual_norm);
     void solvePCG(double& initial_residual_norm, double& current_residual_norm, double& current_relative_residual_norm);
-    double residualNorm(const ResidualNormType& norm_type, const Level<DomainGeometry>& level,
+    double residualNorm(const ResidualNormType& norm_type, const Level<DomainGeometry, DensityProfileCoefficients>& level,
                         ConstVector<double> residual) const;
-    void evaluateExactError(Level<DomainGeometry>& level, const ExactSolution& exact_solution);
-    void updateResidualNorms(Level<DomainGeometry>& level, int iteration, double& initial_residual_norm,
+    void evaluateExactError(Level<DomainGeometry, DensityProfileCoefficients>& level, const ExactSolution& exact_solution);
+    void updateResidualNorms(Level<DomainGeometry, DensityProfileCoefficients>& level, int iteration, double& initial_residual_norm,
                              double& current_residual_norm, double& current_relative_residual_norm);
     void initRhsHierarchy(Vector<double> rhs);
-    void applyMultigridIterations(Level<DomainGeometry>& level, MultigridCycleType cycle, int iterations);
-    void applyExtrapolatedMultigridIterations(Level<DomainGeometry>& level, MultigridCycleType cycle, int iterations);
+    void applyMultigridIterations(Level<DomainGeometry, DensityProfileCoefficients>& level, MultigridCycleType cycle, int iterations);
+    void applyExtrapolatedMultigridIterations(Level<DomainGeometry, DensityProfileCoefficients>& level, MultigridCycleType cycle, int iterations);
 
     /* ----------------- */
     /* Print information */
@@ -190,7 +190,7 @@ private:
     /* ------------- */
     /* Visualization */
     void writeToVTK(const std::filesystem::path& file_path, const PolarGrid& grid);
-    void writeToVTK(const std::filesystem::path& file_path, const Level<DomainGeometry>& level,
+    void writeToVTK(const std::filesystem::path& file_path, const Level<DomainGeometry, DensityProfileCoefficients>& level,
                     ConstVector<double> grid_function);
 };
 
