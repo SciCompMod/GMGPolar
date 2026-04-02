@@ -12,7 +12,6 @@ class LevelCache;
 template <concepts::DomainGeometry DomainGeometry>
 class Level;
 
-#include "../InputFunctions/densityProfileCoefficients.h"
 #include "../Level/level.h"
 #include "../PolarGrid/polargrid.h"
 #include "../Definitions/global_definitions.h"

@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "../InputFunctions/domainGeometry.h"
-#include "../InputFunctions/densityProfileCoefficients.h"
 
 template <concepts::DomainGeometry DomainGeometry>
 class LevelCache;
