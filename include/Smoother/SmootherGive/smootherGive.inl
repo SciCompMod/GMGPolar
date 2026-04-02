@@ -2,11 +2,9 @@
 
 template <concepts::DomainGeometry DomainGeometry>
 SmootherGive<DomainGeometry>::SmootherGive(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-                                           const DomainGeometry& domain_geometry,
                                            const DensityProfileCoefficients& density_profile_coefficients,
                                            bool DirBC_Interior, int num_omp_threads)
-    : Smoother<DomainGeometry>(grid, level_cache, domain_geometry, density_profile_coefficients, DirBC_Interior,
-                               num_omp_threads)
+    : Smoother<DomainGeometry>(grid, level_cache, density_profile_coefficients, DirBC_Interior, num_omp_threads)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
     , radial_tridiagonal_solver_(grid.lengthSmootherRadial(), grid.ntheta(), false)
 {

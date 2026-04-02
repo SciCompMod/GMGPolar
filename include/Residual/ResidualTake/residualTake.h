@@ -7,7 +7,6 @@ class ResidualTake : public Residual<DomainGeometry>
 {
 public:
     explicit ResidualTake(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-                          const DomainGeometry& domain_geometry,
                           const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior,
                           const int num_omp_threads);
     ~ResidualTake() override = default;

@@ -51,7 +51,6 @@ public:
     // Constructs the coupled circle-radial smoother.
     // Builds the A_sc smoother matrices and prepares the solvers.
     explicit SmootherGive(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-                          const DomainGeometry& domain_geometry,
                           const DensityProfileCoefficients& density_profile_coefficients, bool DirBC_Interior,
                           int num_omp_threads);
 

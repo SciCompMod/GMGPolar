@@ -99,17 +99,16 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     // Define residual operator on all multigrid levels //
     // ------------------------------------------------ //
     for (int level_depth = 0; level_depth < number_of_levels_; level_depth++) {
-        levels_[level_depth].initializeResidual(domain_geometry_, density_profile_coefficients_, DirBC_Interior_,
-                                                max_omp_threads_, stencil_distribution_method_);
+        levels_[level_depth].initializeResidual(density_profile_coefficients_, DirBC_Interior_, max_omp_threads_,
+                                                stencil_distribution_method_);
     }
 
     // ----------------------------------------- //
     // Build direct solver on the coarsest level //
     // ----------------------------------------- //
     auto start_setup_directSolver = std::chrono::high_resolution_clock::now();
-    levels_[number_of_levels_ - 1].initializeDirectSolver(domain_geometry_, density_profile_coefficients_,
-                                                          DirBC_Interior_, max_omp_threads_,
-                                                          stencil_distribution_method_);
+    levels_[number_of_levels_ - 1].initializeDirectSolver(density_profile_coefficients_, DirBC_Interior_,
+                                                          max_omp_threads_, stencil_distribution_method_);
     auto end_setup_directSolver = std::chrono::high_resolution_clock::now();
     t_setup_directSolver_ += std::chrono::duration<double>(end_setup_directSolver - start_setup_directSolver).count();
 
@@ -146,17 +145,17 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     if (number_of_levels_ > 1) {
         // PCG uses non-extrapolated smoothing on level 0, so we need to initialize it if PCG is enabled.
         if (do_full_grid_smoothing || (PCG_ && PCG_MG_iterations_ > 0)) {
-            levels_[0].initializeSmoothing(domain_geometry_, density_profile_coefficients_, DirBC_Interior_,
-                                           max_omp_threads_, stencil_distribution_method_);
+            levels_[0].initializeSmoothing(density_profile_coefficients_, DirBC_Interior_, max_omp_threads_,
+                                           stencil_distribution_method_);
         }
         // PCG doesn't use extrapolated smoothing, so we only initialize it if PCG is disabled.
         if (do_extrapolated_smoothing && !PCG_) {
-            levels_[0].initializeExtrapolatedSmoothing(domain_geometry_, density_profile_coefficients_, DirBC_Interior_,
-                                                       max_omp_threads_, stencil_distribution_method_);
+            levels_[0].initializeExtrapolatedSmoothing(density_profile_coefficients_, DirBC_Interior_, max_omp_threads_,
+                                                       stencil_distribution_method_);
         }
         for (int level_depth = 1; level_depth < number_of_levels_ - 1; level_depth++) {
-            levels_[level_depth].initializeSmoothing(domain_geometry_, density_profile_coefficients_, DirBC_Interior_,
-                                                     max_omp_threads_, stencil_distribution_method_);
+            levels_[level_depth].initializeSmoothing(density_profile_coefficients_, DirBC_Interior_, max_omp_threads_,
+                                                     stencil_distribution_method_);
         }
     }
     auto end_setup_smoother = std::chrono::high_resolution_clock::now();
