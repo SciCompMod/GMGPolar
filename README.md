@@ -17,8 +17,10 @@ The GMGPolar Solver can run with or without the sparse direct solver `MUMPS`, th
 
 To begin, download the latest stable version of GMGPolar by running the following commands in your terminal:
 
-    # Clone the repository. This will create a directory named GMGPolar.
-    git clone -b main https://github.com/SciCompMod/GMGPolar GMGPolar
+```bash
+# Clone the repository. This will create a directory named GMGPolar.
+git clone -b main https://github.com/SciCompMod/GMGPolar GMGPolar
+```
 
 ## Configuring the Solver
 
@@ -32,26 +34,32 @@ We highly recommend using Spack to manage and install external dependencies such
 
 To install and set up Spack, execute the following commands in your terminal:
 
-    # Clone the Spack repository
-    git clone https://github.com/spack/spack.git
+```bash
+# Clone the Spack repository
+git clone https://github.com/spack/spack.git
 
-    # Add Spack to your environment by sourcing its setup script
-    echo ". $HOME/spack/share/spack/setup-env.sh" >> ~/.bashrc
+# Add Spack to your environment by sourcing its setup script
+echo ". $HOME/spack/share/spack/setup-env.sh" >> ~/.bashrc
 
-    # Refresh your terminal or source your .bashrc
-    source ~/.bashrc
+# Refresh your terminal or source your .bashrc
+source ~/.bashrc
+```
 
 ## Step 2: Install MUMPS
 
 With Spack set up, you can now install MUMPS. The following command installs version 5.5.1 of MUMPS with specific options that are recommended for GMGPolar:
 
+```bash
 spack install mumps@5.5.1 ~blr_mt ~complex +double +float ~incfort ~int64 +metis ~mpi +openmp ~parmetis ~ptscotch ~scotch +shared
+```
 
 ### Note on AVX / AVX-512 Compatibility
 
 If your system does not support AVX or AVX-512 instructions (e.g., on AMD processors), install MUMPS with the following command:
 
-    spack install mumps@5.5.1 target=x86_64 ~blr_mt ~complex +double +float ~incfort ~int64 +metis ~mpi +openmp ~parmetis ~ptscotch ~scotch +shared
+```bash
+spack install mumps@5.5.1 target=x86_64 ~blr_mt ~complex +double +float ~incfort ~int64 +metis ~mpi +openmp ~parmetis ~ptscotch ~scotch +shared
+```
 
 ## Step 3: Configure CMake for GMGPolar
 
@@ -172,13 +180,13 @@ by giving:
    - Simplified interpolation class to interpolate directly between grids instead of levels.
    - Encapsulated MUMPS solver in its own class; improved DirectSolver naming consistency.
    - Replaced macro-heavy patterns with standard functions for type safety.
-   - Removed unused `Point`, `MultiIndex` classes, redundant `LevelCache` constructor, and thread reduction factor variable.
+   - Removed unused Point, MultiIndex classes, redundant LevelCache constructor, and thread reduction factor variable.
 
 4. **New Features**
-   - Added support for solves without a multigrid hierarchy (`max_levels = 1`).
+   - Added support for solves without a multigrid hierarchy.
 
 5. **Bug Fixes**
-   - Fixed MUMPS factorization failure when OpenMP multithreading (`ICNTL(48)=1`) is enabled in versions later than 5.5.1. Version 5.5.1 remains recommended.
+   - Fixed MUMPS factorization failure when OpenMP multithreading is enabled in versions later than 5.5.1. Version 5.5.1 remains recommended.
 
 6. **Testing**
    - Added formatting validation tests and automatic CI testing with MUMPS.
