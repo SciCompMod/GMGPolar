@@ -7,7 +7,7 @@ class ResidualGive : public Residual<DomainGeometry>
 {
 public:
     explicit ResidualGive(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-                          const DomainGeometry& domain_geometry, const bool DirBC_Interior, const int num_omp_threads);
+                          const bool DirBC_Interior, const int num_omp_threads);
     ~ResidualGive() override = default;
 
     void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const final;

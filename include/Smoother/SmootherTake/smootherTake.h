@@ -50,8 +50,8 @@ class SmootherTake : public Smoother<DomainGeometry>
 public:
     // Constructs the coupled circle-radial smoother.
     // Builds the A_sc smoother matrices and prepares the solvers.
-    explicit SmootherTake(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-                          const DomainGeometry& domain_geometry, bool DirBC_Interior, int num_omp_threads);
+    explicit SmootherTake(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache, bool DirBC_Interior,
+                          int num_omp_threads);
 
     // Performs one full coupled smoothing sweep:
     //   BC -> WC -> BR -> WR

@@ -2,9 +2,9 @@
 
 template <concepts::DomainGeometry DomainGeometry>
 SmootherTake<DomainGeometry>::SmootherTake(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-                                           const DomainGeometry& domain_geometry, bool DirBC_Interior,
+                                           bool DirBC_Interior,
                                            int num_omp_threads)
-    : Smoother<DomainGeometry>(grid, level_cache, domain_geometry, DirBC_Interior, num_omp_threads)
+    : Smoother<DomainGeometry>(grid, level_cache, DirBC_Interior, num_omp_threads)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
     , radial_tridiagonal_solver_(grid.lengthSmootherRadial(), grid.ntheta(), false)
 #ifdef GMGPOLAR_USE_MUMPS
