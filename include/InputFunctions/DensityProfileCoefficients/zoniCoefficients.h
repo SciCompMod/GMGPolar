@@ -4,17 +4,16 @@
 
 #include "../densityProfileCoefficients.h"
 
-class ZoniCoefficients : public DensityProfileCoefficients
+class ZoniCoefficients
 {
 public:
     ZoniCoefficients() = default;
     explicit ZoniCoefficients(double Rmax, double alpha);
-    virtual ~ZoniCoefficients() = default;
 
-    double alpha(double r, double theta) const override;
-    double beta(double r, double theta) const override;
+    double alpha(double r, double theta) const;
+    double beta(double r, double theta) const;
 
-    double getAlphaJump() const override;
+    double getAlphaJump() const;
 
 private:
     const double Rmax       = 1.3;
