@@ -183,7 +183,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::fullMultigridApproxim
                                                                                       int FMG_iterations)
 {
     // Start from the coarsest level
-    int coarsest_depth                    = number_of_levels_ - 1;
+    int coarsest_depth                                                = number_of_levels_ - 1;
     Level<DomainGeometry, DensityProfileCoefficients>& coarsest_level = levels_[coarsest_depth];
 
     // Solve directly on the coarsest level
@@ -399,9 +399,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
 // =============================================================================
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyMultigridIterations(Level<DomainGeometry, DensityProfileCoefficients>& level,
-                                                                                    MultigridCycleType cycle,
-                                                                                    int iterations)
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyMultigridIterations(
+    Level<DomainGeometry, DensityProfileCoefficients>& level, MultigridCycleType cycle, int iterations)
 {
     for (int i = 0; i < iterations; i++) {
         switch (cycle) {
@@ -448,11 +447,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolatedMult
 // =============================================================================
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::updateResidualNorms(Level<DomainGeometry, DensityProfileCoefficients>& level,
-                                                                               int iteration,
-                                                                               double& initial_residual_norm,
-                                                                               double& current_residual_norm,
-                                                                               double& current_relative_residual_norm)
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::updateResidualNorms(
+    Level<DomainGeometry, DensityProfileCoefficients>& level, int iteration, double& initial_residual_norm,
+    double& current_residual_norm, double& current_relative_residual_norm)
 {
     level.computeResidual(level.residual(), level.rhs(), level.solution());
     if (extrapolation_ != ExtrapolationType::NONE) {
@@ -485,9 +482,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::updateResidualNorms(L
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-double GMGPolar<DomainGeometry, DensityProfileCoefficients>::residualNorm(const ResidualNormType& norm_type,
-                                                                          const Level<DomainGeometry, DensityProfileCoefficients>& level,
-                                                                          ConstVector<double> residual) const
+double GMGPolar<DomainGeometry, DensityProfileCoefficients>::residualNorm(
+    const ResidualNormType& norm_type, const Level<DomainGeometry, DensityProfileCoefficients>& level,
+    ConstVector<double> residual) const
 {
     switch (norm_type) {
     case ResidualNormType::EUCLIDEAN:
@@ -574,8 +571,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::initRhsHierarchy(Vect
 // =============================================================================
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::evaluateExactError(Level<DomainGeometry, DensityProfileCoefficients>& level,
-                                                                              const ExactSolution& exact_solution)
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::evaluateExactError(
+    Level<DomainGeometry, DensityProfileCoefficients>& level, const ExactSolution& exact_solution)
 {
     // Compute the weighted L2 norm and infinity norm of the error between the numerical and exact solution.
     // The results are stored as a pair: (weighted L2 error, infinity error).
@@ -587,7 +584,7 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
     Level<DomainGeometry, DensityProfileCoefficients>& level, ConstVector<double> solution, Vector<double> error,
     const ExactSolution& exact_solution)
 {
-    const PolarGrid& grid                        = level.grid();
+    const PolarGrid& grid                                                    = level.grid();
     const LevelCache<DomainGeometry, DensityProfileCoefficients>& levelCache = level.levelCache();
 
     assert(solution.size() == error.size());
