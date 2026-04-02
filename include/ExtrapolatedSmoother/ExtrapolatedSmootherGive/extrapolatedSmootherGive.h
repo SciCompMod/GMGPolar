@@ -57,8 +57,8 @@ class ExtrapolatedSmootherGive : public ExtrapolatedSmoother<LevelCacheType>
 public:
     // Constructs the coupled circle-radial extrapolated smoother.
     // Builds the A_sc smoother matrices and prepares the solvers.
-    explicit ExtrapolatedSmootherGive(const PolarGrid& grid, const LevelCacheType& level_cache,
-                                      bool DirBC_Interior, int num_omp_threads);
+    explicit ExtrapolatedSmootherGive(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
+                                      int num_omp_threads);
 
     // If MUMPS is enabled, this cleans up the inner boundary solver.
     ~ExtrapolatedSmootherGive() override;

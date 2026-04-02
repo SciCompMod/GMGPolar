@@ -305,10 +305,10 @@ void SmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
 template <class LevelCacheType>
 void SmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
 {
-    const PolarGrid& grid                         = Smoother<LevelCacheType>::grid_;
+    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior                     = Smoother<LevelCacheType>::DirBC_Interior_;
-    const int num_omp_threads                     = Smoother<LevelCacheType>::num_omp_threads_;
+    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
+    const int num_omp_threads         = Smoother<LevelCacheType>::num_omp_threads_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());

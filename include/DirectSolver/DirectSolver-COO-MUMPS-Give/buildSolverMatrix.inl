@@ -783,9 +783,9 @@ template <class LevelCacheType>
 void DirectSolver_COO_MUMPS_Give<LevelCacheType>::buildSolverMatrixCircleSection(const int i_r,
                                                                                  SparseMatrixCOO<double>& solver_matrix)
 {
-    const PolarGrid& grid                         = DirectSolver<LevelCacheType>::grid_;
+    const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior                     = DirectSolver<LevelCacheType>::DirBC_Interior_;
+    const bool DirBC_Interior         = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
     const double r = grid.radius(i_r);
     for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
@@ -804,9 +804,9 @@ template <class LevelCacheType>
 void DirectSolver_COO_MUMPS_Give<LevelCacheType>::buildSolverMatrixRadialSection(const int i_theta,
                                                                                  SparseMatrixCOO<double>& solver_matrix)
 {
-    const PolarGrid& grid                         = DirectSolver<LevelCacheType>::grid_;
+    const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior                     = DirectSolver<LevelCacheType>::DirBC_Interior_;
+    const bool DirBC_Interior         = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
     const double theta = grid.theta(i_theta);
     for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {

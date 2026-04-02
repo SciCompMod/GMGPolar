@@ -5,8 +5,8 @@ namespace residual_give
 
 template <class LevelCacheType>
 static inline void node_apply_a_give(int i_r, int i_theta, double r, double theta, const PolarGrid& grid,
-                                     const LevelCacheType& level_cache, bool DirBC_Interior,
-                                     Vector<double>& result, ConstVector<double>& x)
+                                     const LevelCacheType& level_cache, bool DirBC_Interior, Vector<double>& result,
+                                     ConstVector<double>& x)
 {
     /* ---------------------------------------- */
     /* Compute or retrieve stencil coefficients */

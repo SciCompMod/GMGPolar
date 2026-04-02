@@ -9,7 +9,7 @@
 template <class LevelCacheType>
 void DirectSolver_COO_MUMPS_Give<LevelCacheType>::applySymmetryShiftInnerBoundary(Vector<double> x) const
 {
-    const PolarGrid& grid                         = DirectSolver<LevelCacheType>::grid_;
+    const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
 
     assert(DirectSolver<LevelCacheType>::DirBC_Interior_);
@@ -70,7 +70,7 @@ void DirectSolver_COO_MUMPS_Give<LevelCacheType>::applySymmetryShiftInnerBoundar
 template <class LevelCacheType>
 void DirectSolver_COO_MUMPS_Give<LevelCacheType>::applySymmetryShiftOuterBoundary(Vector<double> x) const
 {
-    const PolarGrid& grid                         = DirectSolver<LevelCacheType>::grid_;
+    const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
 
     int i_r;

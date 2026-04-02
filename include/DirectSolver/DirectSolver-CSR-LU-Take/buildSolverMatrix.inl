@@ -249,10 +249,10 @@ void DirectSolver_CSR_LU_Take<LevelCacheType>::nodeBuildSolverMatrixTake(
 template <class LevelCacheType>
 SparseMatrixCSR<double> DirectSolver_CSR_LU_Take<LevelCacheType>::buildSolverMatrix()
 {
-    const PolarGrid& grid                         = DirectSolver<LevelCacheType>::grid_;
+    const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
-    const int num_omp_threads                     = DirectSolver<LevelCacheType>::num_omp_threads_;
-    const bool DirBC_Interior                     = DirectSolver<LevelCacheType>::DirBC_Interior_;
+    const int num_omp_threads         = DirectSolver<LevelCacheType>::num_omp_threads_;
+    const bool DirBC_Interior         = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
     const int n = grid.numberOfNodes();
 

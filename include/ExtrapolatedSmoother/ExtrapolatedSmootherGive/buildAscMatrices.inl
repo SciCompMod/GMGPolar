@@ -1213,7 +1213,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildAscGive(
 template <class LevelCacheType>
 void ExtrapolatedSmootherGive<LevelCacheType>::buildAscCircleSection(const int i_r)
 {
-    const PolarGrid& grid                         = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
 
     const double r = grid.radius(i_r);
@@ -1234,7 +1234,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::buildAscCircleSection(const int i
 template <class LevelCacheType>
 void ExtrapolatedSmootherGive<LevelCacheType>::buildAscRadialSection(const int i_theta)
 {
-    const PolarGrid& grid                         = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
 
     const double theta = grid.theta(i_theta);

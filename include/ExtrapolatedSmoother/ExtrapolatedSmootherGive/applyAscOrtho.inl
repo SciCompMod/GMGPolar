@@ -897,7 +897,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoCircleSection(int i_
                                                                           ConstVector<double> x,
                                                                           ConstVector<double> rhs, Vector<double> temp)
 {
-    const PolarGrid& grid                         = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
 
     assert(i_r >= 0 && i_r < grid.numberSmootherCircles() + 1);
@@ -923,7 +923,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoRadialSection(int i_
                                                                           ConstVector<double> x,
                                                                           ConstVector<double> rhs, Vector<double> temp)
 {
-    const PolarGrid& grid                         = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
 
     const double theta = grid.theta(i_theta);

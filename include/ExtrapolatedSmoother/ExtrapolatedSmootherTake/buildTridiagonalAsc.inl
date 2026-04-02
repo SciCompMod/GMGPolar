@@ -518,10 +518,10 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
 template <class LevelCacheType>
 void ExtrapolatedSmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
 {
-    const PolarGrid& grid                         = ExtrapolatedSmootherTake<LevelCacheType>::grid_;
+    const PolarGrid& grid             = ExtrapolatedSmootherTake<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmootherTake<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior                     = ExtrapolatedSmootherTake<LevelCacheType>::DirBC_Interior_;
-    const int num_omp_threads                     = ExtrapolatedSmootherTake<LevelCacheType>::num_omp_threads_;
+    const bool DirBC_Interior         = ExtrapolatedSmootherTake<LevelCacheType>::DirBC_Interior_;
+    const int num_omp_threads         = ExtrapolatedSmootherTake<LevelCacheType>::num_omp_threads_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());

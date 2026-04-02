@@ -639,7 +639,7 @@ void SmootherGive<LevelCacheType>::nodeBuildAscGive(int i_r, int i_theta, const 
 template <class LevelCacheType>
 void SmootherGive<LevelCacheType>::buildAscCircleSection(const int i_r)
 {
-    const PolarGrid& grid                         = Smoother<LevelCacheType>::grid_;
+    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
 
     const double r = grid.radius(i_r);
@@ -659,7 +659,7 @@ void SmootherGive<LevelCacheType>::buildAscCircleSection(const int i_r)
 template <class LevelCacheType>
 void SmootherGive<LevelCacheType>::buildAscRadialSection(const int i_theta)
 {
-    const PolarGrid& grid                         = Smoother<LevelCacheType>::grid_;
+    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
 
     const double theta = grid.theta(i_theta);

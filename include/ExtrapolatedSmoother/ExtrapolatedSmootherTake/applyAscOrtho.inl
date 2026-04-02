@@ -467,10 +467,10 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(C
 {
     using extrapolated_smoother_take::nodeApplyAscOrthoCircleTake;
 
-    const PolarGrid& grid                         = ExtrapolatedSmootherTake<LevelCacheType>::grid_;
+    const PolarGrid& grid             = ExtrapolatedSmootherTake<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmootherTake<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior                     = ExtrapolatedSmootherTake<LevelCacheType>::DirBC_Interior_;
-    const int num_omp_threads                     = ExtrapolatedSmootherTake<LevelCacheType>::num_omp_threads_;
+    const bool DirBC_Interior         = ExtrapolatedSmootherTake<LevelCacheType>::DirBC_Interior_;
+    const int num_omp_threads         = ExtrapolatedSmootherTake<LevelCacheType>::num_omp_threads_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
@@ -500,10 +500,10 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(C
 {
     using extrapolated_smoother_take::nodeApplyAscOrthoCircleTake;
 
-    const PolarGrid& grid                         = ExtrapolatedSmootherTake<LevelCacheType>::grid_;
+    const PolarGrid& grid             = ExtrapolatedSmootherTake<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmootherTake<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior                     = ExtrapolatedSmootherTake<LevelCacheType>::DirBC_Interior_;
-    const int num_omp_threads                     = ExtrapolatedSmootherTake<LevelCacheType>::num_omp_threads_;
+    const bool DirBC_Interior         = ExtrapolatedSmootherTake<LevelCacheType>::DirBC_Interior_;
+    const int num_omp_threads         = ExtrapolatedSmootherTake<LevelCacheType>::num_omp_threads_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
@@ -533,10 +533,10 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(C
 {
     using extrapolated_smoother_take::nodeApplyAscOrthoRadialTake;
 
-    const PolarGrid& grid                         = ExtrapolatedSmootherTake<LevelCacheType>::grid_;
+    const PolarGrid& grid             = ExtrapolatedSmootherTake<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmootherTake<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior                     = ExtrapolatedSmootherTake<LevelCacheType>::DirBC_Interior_;
-    const int num_omp_threads                     = ExtrapolatedSmootherTake<LevelCacheType>::num_omp_threads_;
+    const bool DirBC_Interior         = ExtrapolatedSmootherTake<LevelCacheType>::DirBC_Interior_;
+    const int num_omp_threads         = ExtrapolatedSmootherTake<LevelCacheType>::num_omp_threads_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
@@ -563,10 +563,10 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(C
 {
     using extrapolated_smoother_take::nodeApplyAscOrthoRadialTake;
 
-    const PolarGrid& grid                         = ExtrapolatedSmootherTake<LevelCacheType>::grid_;
+    const PolarGrid& grid             = ExtrapolatedSmootherTake<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmootherTake<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior                     = ExtrapolatedSmootherTake<LevelCacheType>::DirBC_Interior_;
-    const int num_omp_threads                     = ExtrapolatedSmootherTake<LevelCacheType>::num_omp_threads_;
+    const bool DirBC_Interior         = ExtrapolatedSmootherTake<LevelCacheType>::DirBC_Interior_;
+    const int num_omp_threads         = ExtrapolatedSmootherTake<LevelCacheType>::num_omp_threads_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());

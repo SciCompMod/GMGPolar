@@ -156,10 +156,10 @@ template <class LevelCacheType>
 typename ExtrapolatedSmootherTake<LevelCacheType>::InnerBoundaryMatrix
 ExtrapolatedSmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
 {
-    const PolarGrid& grid                         = ExtrapolatedSmootherTake<LevelCacheType>::grid_;
+    const PolarGrid& grid             = ExtrapolatedSmootherTake<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmootherTake<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior                     = ExtrapolatedSmootherTake<LevelCacheType>::DirBC_Interior_;
-    const int num_omp_threads                     = ExtrapolatedSmootherTake<LevelCacheType>::num_omp_threads_;
+    const bool DirBC_Interior         = ExtrapolatedSmootherTake<LevelCacheType>::DirBC_Interior_;
+    const int num_omp_threads         = ExtrapolatedSmootherTake<LevelCacheType>::num_omp_threads_;
 
     const int i_r    = 0;
     const int ntheta = grid.ntheta();

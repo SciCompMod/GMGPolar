@@ -2,8 +2,7 @@
 
 template <class LevelCacheType>
 SmootherGive<LevelCacheType>::SmootherGive(const PolarGrid& grid, const LevelCacheType& level_cache,
-                                           bool DirBC_Interior,
-                                           int num_omp_threads)
+                                           bool DirBC_Interior, int num_omp_threads)
     : Smoother<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
     , radial_tridiagonal_solver_(grid.lengthSmootherRadial(), grid.ntheta(), false)

@@ -432,7 +432,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoCircleSection(const int i_r, con
 {
     using smoother_give::nodeApplyAscOrthoCircleGive;
 
-    const PolarGrid& grid                         = Smoother<LevelCacheType>::grid_;
+    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
 
     assert(i_r >= 0 && i_r < grid.numberSmootherCircles() + 1);
@@ -459,7 +459,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoRadialSection(const int i_theta,
 {
     using smoother_give::nodeApplyAscOrthoRadialGive;
 
-    const PolarGrid& grid                         = Smoother<LevelCacheType>::grid_;
+    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
 
     const double theta = grid.theta(i_theta);

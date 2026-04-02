@@ -24,8 +24,8 @@ template <class LevelCacheType>
 class ExtrapolatedSmoother
 {
 public:
-    explicit ExtrapolatedSmoother(const PolarGrid& grid, const LevelCacheType& level_cache,
-                                  bool DirBC_Interior, int num_omp_threads)
+    explicit ExtrapolatedSmoother(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
+                                  int num_omp_threads)
         : grid_(grid)
         , level_cache_(level_cache)
         , DirBC_Interior_(DirBC_Interior)

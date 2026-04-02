@@ -45,8 +45,9 @@ class LevelCache;
 template <concepts::DomainGeometry DomainGeometry>
 class Level
 {
-    public:
+public:
     using LevelCacheType = LevelCache<DomainGeometry>;
+
 public:
     // ----------- //
     // Constructor //

@@ -60,10 +60,8 @@ TEST(SmootherTest, smoother_DirBC_Interior)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    SmootherGive smootherGive_operator(level.grid(), level.levelCache(), DirBC_Interior,
-                                                           maxOpenMPThreads);
-    SmootherTake smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior,
-                                                           maxOpenMPThreads);
+    SmootherGive smootherGive_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    SmootherTake smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     Vector<double> rhs   = generate_random_sample_data(level.grid(), 69);
     Vector<double> start = generate_random_sample_data(level.grid(), 24);
@@ -120,10 +118,8 @@ TEST(SmootherTest, smoother_AcrossOrigin)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    SmootherGive smootherGive_operator(level.grid(), level.levelCache(), DirBC_Interior,
-                                                           maxOpenMPThreads);
-    SmootherTake smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior,
-                                                           maxOpenMPThreads);
+    SmootherGive smootherGive_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    SmootherTake smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     Vector<double> rhs   = generate_random_sample_data(level.grid(), 69);
     Vector<double> start = generate_random_sample_data(level.grid(), 24);
