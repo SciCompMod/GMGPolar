@@ -31,8 +31,7 @@ template <concepts::DomainGeometry DomainGeometry>
 class DirectSolver
 {
 public:
-    explicit DirectSolver(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-                          bool DirBC_Interior,
+    explicit DirectSolver(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache, bool DirBC_Interior,
                           int num_omp_threads)
         : grid_(grid)
         , level_cache_(level_cache)

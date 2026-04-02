@@ -50,8 +50,8 @@ class SmootherGive : public Smoother<DomainGeometry>
 public:
     // Constructs the coupled circle-radial smoother.
     // Builds the A_sc smoother matrices and prepares the solvers.
-    explicit SmootherGive(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-                          bool DirBC_Interior, int num_omp_threads);
+    explicit SmootherGive(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache, bool DirBC_Interior,
+                          int num_omp_threads);
 
     // If MUMPS is enabled, this cleans up the inner boundary solver.
     ~SmootherGive() override;

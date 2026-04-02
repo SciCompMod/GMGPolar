@@ -22,8 +22,8 @@ template <concepts::DomainGeometry DomainGeometry>
 class Residual
 {
 public:
-    explicit Residual(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-                      const bool DirBC_Interior, const int num_omp_threads)
+    explicit Residual(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache, const bool DirBC_Interior,
+                      const int num_omp_threads)
         : grid_(grid)
         , level_cache_(level_cache)
         , DirBC_Interior_(DirBC_Interior)

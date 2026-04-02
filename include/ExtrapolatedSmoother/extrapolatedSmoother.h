@@ -35,8 +35,7 @@ class ExtrapolatedSmoother
 {
 public:
     explicit ExtrapolatedSmoother(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-                                  bool DirBC_Interior,
-                                  int num_omp_threads)
+                                  bool DirBC_Interior, int num_omp_threads)
         : grid_(grid)
         , level_cache_(level_cache)
         , DirBC_Interior_(DirBC_Interior)

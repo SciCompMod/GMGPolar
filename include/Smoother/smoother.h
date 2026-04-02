@@ -33,8 +33,8 @@ template <concepts::DomainGeometry DomainGeometry>
 class Smoother
 {
 public:
-    explicit Smoother(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-                      bool DirBC_Interior, int num_omp_threads)
+    explicit Smoother(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache, bool DirBC_Interior,
+                      int num_omp_threads)
         : grid_(grid)
         , level_cache_(level_cache)
         , DirBC_Interior_(DirBC_Interior)
