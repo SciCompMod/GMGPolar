@@ -12,7 +12,6 @@ public:
     ShafranovGeometry() = default;
     explicit ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
 
-
     double Fx(double r, double theta) const;
     double Fy(double r, double theta) const;
     double dFx_dr(double r, double theta) const;

@@ -10,7 +10,6 @@ public:
     CircularGeometry() = default;
     explicit CircularGeometry(double Rmax);
 
-
     double Fx(double r, double theta) const;
     double Fy(double r, double theta) const;
     double dFx_dr(double r, double theta) const;

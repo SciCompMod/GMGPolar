@@ -12,7 +12,6 @@ public:
     explicit CzarnyGeometry();
     explicit CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon, double ellipticity_e);
 
-
     double Fx(double r, double theta) const;
     double Fy(double r, double theta) const;
     double dFx_dr(double r, double theta) const;
