@@ -183,7 +183,7 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior)
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -259,7 +259,7 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior)
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -335,7 +335,7 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin)
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -411,7 +411,7 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin)
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -486,7 +486,7 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior_SmallestGrid)
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -561,7 +561,7 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior_SmallestGrid)
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -636,7 +636,7 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin_SmallestGrid)
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -711,7 +711,7 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin_SmallestGrid)
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -789,7 +789,7 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior)
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -865,7 +865,7 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior)
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -941,7 +941,7 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin)
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -1017,7 +1017,7 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin)
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -1092,7 +1092,7 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior_SmallestGrid)
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -1167,7 +1167,7 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior_SmallestGrid)
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -1242,7 +1242,7 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin_SmallestGrid)
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -1317,7 +1317,7 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin_SmallestGrid)
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);

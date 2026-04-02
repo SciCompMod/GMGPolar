@@ -1,10 +1,10 @@
 #pragma once
 
-template <concepts::DomainGeometry DomainGeometry>
-ExtrapolatedSmootherTake<DomainGeometry>::ExtrapolatedSmootherTake(const PolarGrid& grid,
-                                                                   const LevelCache<DomainGeometry>& level_cache,
+template <class LevelCacheType>
+ExtrapolatedSmootherTake<LevelCacheType>::ExtrapolatedSmootherTake(const PolarGrid& grid,
+                                                                   const LevelCacheType& level_cache,
                                                                    const bool DirBC_Interior, const int num_omp_threads)
-    : ExtrapolatedSmoother<DomainGeometry>(grid, level_cache, DirBC_Interior, num_omp_threads)
+    : ExtrapolatedSmoother<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
     , radial_tridiagonal_solver_(grid.lengthSmootherRadial(), grid.ntheta(), false)
 #ifdef GMGPOLAR_USE_MUMPS
@@ -42,8 +42,8 @@ ExtrapolatedSmootherTake<DomainGeometry>::ExtrapolatedSmootherTake(const PolarGr
 //   - The system is then solved in-place in temp, and the results
 //     are copied back to x.
 
-template <concepts::DomainGeometry DomainGeometry>
-void ExtrapolatedSmootherTake<DomainGeometry>::extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs,
+template <class LevelCacheType>
+void ExtrapolatedSmootherTake<LevelCacheType>::extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs,
                                                                      Vector<double> temp)
 {
     assert(x.size() == rhs.size());

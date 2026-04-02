@@ -24,8 +24,8 @@ static inline void update_CSR_COO_MatrixElement(SparseMatrixCSR<double>& matrix,
 
 } // namespace extrapolated_smoother_take
 
-template <concepts::DomainGeometry DomainGeometry>
-void ExtrapolatedSmootherTake<DomainGeometry>::nodeBuildInteriorBoundarySolverMatrix(
+template <class LevelCacheType>
+void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildInteriorBoundarySolverMatrix(
     int i_theta, const PolarGrid& grid, bool DirBC_Interior, InnerBoundaryMatrix& matrix, ConstVector<double>& arr,
     ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
 {
@@ -152,14 +152,14 @@ void ExtrapolatedSmootherTake<DomainGeometry>::nodeBuildInteriorBoundarySolverMa
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-typename ExtrapolatedSmootherTake<DomainGeometry>::InnerBoundaryMatrix
-ExtrapolatedSmootherTake<DomainGeometry>::buildInteriorBoundarySolverMatrix()
+template <class LevelCacheType>
+typename ExtrapolatedSmootherTake<LevelCacheType>::InnerBoundaryMatrix
+ExtrapolatedSmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
 {
-    const PolarGrid& grid                         = ExtrapolatedSmootherTake<DomainGeometry>::grid_;
-    const LevelCache<DomainGeometry>& level_cache = ExtrapolatedSmootherTake<DomainGeometry>::level_cache_;
-    const bool DirBC_Interior                     = ExtrapolatedSmootherTake<DomainGeometry>::DirBC_Interior_;
-    const int num_omp_threads                     = ExtrapolatedSmootherTake<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid                         = ExtrapolatedSmootherTake<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = ExtrapolatedSmootherTake<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                     = ExtrapolatedSmootherTake<LevelCacheType>::DirBC_Interior_;
+    const int num_omp_threads                     = ExtrapolatedSmootherTake<LevelCacheType>::num_omp_threads_;
 
     const int i_r    = 0;
     const int ntheta = grid.ntheta();

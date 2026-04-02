@@ -2,8 +2,8 @@
 
 #ifdef GMGPOLAR_USE_MUMPS
 
-template <concepts::DomainGeometry DomainGeometry>
-void ExtrapolatedSmootherGive<DomainGeometry>::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver,
+template <class LevelCacheType>
+void ExtrapolatedSmootherGive<LevelCacheType>::initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver,
                                                                      SparseMatrixCOO<double>& solver_matrix)
 {
     /* 
@@ -104,8 +104,8 @@ void ExtrapolatedSmootherGive<DomainGeometry>::initializeMumpsSolver(DMUMPS_STRU
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-void ExtrapolatedSmootherGive<DomainGeometry>::finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver)
+template <class LevelCacheType>
+void ExtrapolatedSmootherGive<LevelCacheType>::finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver)
 {
     mumps_solver.job = JOB_END;
     dmumps_c(&mumps_solver);

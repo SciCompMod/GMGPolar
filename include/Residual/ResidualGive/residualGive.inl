@@ -1,10 +1,10 @@
 #pragma once
 
-template <concepts::DomainGeometry DomainGeometry>
-ResidualGive<DomainGeometry>::ResidualGive(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
+template <class LevelCacheType>
+ResidualGive<LevelCacheType>::ResidualGive(const PolarGrid& grid, const LevelCacheType& level_cache,
                                            bool DirBC_Interior,
                                            int num_omp_threads)
-    : Residual<DomainGeometry>(grid, level_cache, DirBC_Interior, num_omp_threads)
+    : Residual<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
 {
 }
 
@@ -12,16 +12,16 @@ ResidualGive<DomainGeometry>::ResidualGive(const PolarGrid& grid, const LevelCac
 /* result = A*x */
 
 // clang-format off
-template <concepts::DomainGeometry DomainGeometry>
-void ResidualGive<DomainGeometry>::applySystemOperator(Vector<double> result, ConstVector<double> x) const
+template <class LevelCacheType>
+void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, ConstVector<double> x) const
 {
     assert(result.size() == x.size());
 
     assign(result, 0.0);
 
-    const PolarGrid& grid = Residual<DomainGeometry>::grid_;
+    const PolarGrid& grid = Residual<LevelCacheType>::grid_;
 
-    const int num_omp_threads = Residual<DomainGeometry>::num_omp_threads_;
+    const int num_omp_threads = Residual<LevelCacheType>::num_omp_threads_;
 
     /* Single-threaded execution */
     if (num_omp_threads == 1) {
@@ -109,8 +109,8 @@ void ResidualGive<DomainGeometry>::applySystemOperator(Vector<double> result, Co
 
 /* ------------------ */
 /* result = rhs - A*x */
-template <concepts::DomainGeometry DomainGeometry>
-void ResidualGive<DomainGeometry>::computeResidual(Vector<double> result, ConstVector<double> rhs,
+template <class LevelCacheType>
+void ResidualGive<LevelCacheType>::computeResidual(Vector<double> result, ConstVector<double> rhs,
                                                    ConstVector<double> x) const
 {
     assert(result.size() == x.size());
@@ -119,7 +119,7 @@ void ResidualGive<DomainGeometry>::computeResidual(Vector<double> result, ConstV
 
     // Subtract A*x from rhs to get the residual.
     const int n               = result.size();
-    const int num_omp_threads = Residual<DomainGeometry>::num_omp_threads_;
+    const int num_omp_threads = Residual<LevelCacheType>::num_omp_threads_;
 #pragma omp parallel for num_threads(num_omp_threads)
     for (int i = 0; i < n; i++) {
         result[i] = rhs[i] - result[i];

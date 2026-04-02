@@ -1,10 +1,10 @@
 #pragma once
 
-template <concepts::DomainGeometry DomainGeometry>
-const Stencil& ExtrapolatedSmootherTake<DomainGeometry>::getStencil(int i_r, int i_theta) const
+template <class LevelCacheType>
+const Stencil& ExtrapolatedSmootherTake<LevelCacheType>::getStencil(int i_r, int i_theta) const
 {
-    const PolarGrid& grid     = ExtrapolatedSmoother<DomainGeometry>::grid_;
-    const bool DirBC_Interior = ExtrapolatedSmoother<DomainGeometry>::DirBC_Interior_;
+    const PolarGrid& grid     = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const bool DirBC_Interior = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
     // Only i_r = 0 is implemented.
     // Stencils are only used to obtain offsets to index into COO/CSR matrices.
@@ -32,11 +32,11 @@ const Stencil& ExtrapolatedSmootherTake<DomainGeometry>::getStencil(int i_r, int
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-int ExtrapolatedSmootherTake<DomainGeometry>::getNonZeroCountCircleAsc(int i_r) const
+template <class LevelCacheType>
+int ExtrapolatedSmootherTake<LevelCacheType>::getNonZeroCountCircleAsc(int i_r) const
 {
-    const PolarGrid& grid     = ExtrapolatedSmoother<DomainGeometry>::grid_;
-    const bool DirBC_Interior = ExtrapolatedSmoother<DomainGeometry>::DirBC_Interior_;
+    const PolarGrid& grid     = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const bool DirBC_Interior = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
     // Only i_r = 0 is implemented.
     // The number of nonzero elements is only needed to construct COO matrices.
@@ -59,11 +59,11 @@ int ExtrapolatedSmootherTake<DomainGeometry>::getNonZeroCountCircleAsc(int i_r) 
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-int ExtrapolatedSmootherTake<DomainGeometry>::getCircleAscIndex(int i_r, int i_theta) const
+template <class LevelCacheType>
+int ExtrapolatedSmootherTake<LevelCacheType>::getCircleAscIndex(int i_r, int i_theta) const
 {
-    const PolarGrid& grid     = ExtrapolatedSmoother<DomainGeometry>::grid_;
-    const bool DirBC_Interior = ExtrapolatedSmoother<DomainGeometry>::DirBC_Interior_;
+    const PolarGrid& grid     = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const bool DirBC_Interior = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
     // Only i_r = 0 is implemented.
     // getCircleAscIndex accumulates all stencil sizes within a line up to, but excluding the current node.

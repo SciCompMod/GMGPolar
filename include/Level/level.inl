@@ -107,11 +107,11 @@ void Level<DomainGeometry>::initializeResidual(const bool DirBC_Interior,
                                                const StencilDistributionMethod stencil_distribution_method)
 {
     if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
-        op_residual_ = std::make_unique<ResidualTake<DomainGeometry>>(*grid_, *level_cache_,
+        op_residual_ = std::make_unique<ResidualTake<LevelCacheType>>(*grid_, *level_cache_,
                                                                       DirBC_Interior, num_omp_threads);
     }
     else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
-        op_residual_ = std::make_unique<ResidualGive<DomainGeometry>>(*grid_, *level_cache_,
+        op_residual_ = std::make_unique<ResidualGive<LevelCacheType>>(*grid_, *level_cache_,
                                                                       DirBC_Interior, num_omp_threads);
     }
     if (!op_residual_)
@@ -205,11 +205,11 @@ void Level<DomainGeometry>::initializeExtrapolatedSmoothing(const bool DirBC_Int
                                                             const StencilDistributionMethod stencil_distribution_method)
 {
     if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
-        op_extrapolated_smoother_ = std::make_unique<ExtrapolatedSmootherTake<DomainGeometry>>(
+        op_extrapolated_smoother_ = std::make_unique<ExtrapolatedSmootherTake<LevelCacheType>>(
             *grid_, *level_cache_, DirBC_Interior, num_omp_threads);
     }
     else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
-        op_extrapolated_smoother_ = std::make_unique<ExtrapolatedSmootherGive<DomainGeometry>>(
+        op_extrapolated_smoother_ = std::make_unique<ExtrapolatedSmootherGive<LevelCacheType>>(
             *grid_, *level_cache_, DirBC_Interior, num_omp_threads);
     }
     if (!op_extrapolated_smoother_)

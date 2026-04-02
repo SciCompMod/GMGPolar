@@ -3,11 +3,11 @@
 // Required to prevent circular dependencies.
 template <class LevelCacheType>
 class DirectSolver;
-template <concepts::DomainGeometry DomainGeometry>
+template <class LevelCacheType>
 class Residual;
 template <class LevelCacheType>
 class Smoother;
-template <concepts::DomainGeometry DomainGeometry>
+template <class LevelCacheType>
 class ExtrapolatedSmoother;
 
 #include <memory>
@@ -101,9 +101,9 @@ private:
     std::unique_ptr<const LevelCacheType> level_cache_;
 
     std::unique_ptr<DirectSolver<LevelCacheType>> op_directSolver_;
-    std::unique_ptr<Residual<DomainGeometry>> op_residual_;
+    std::unique_ptr<Residual<LevelCacheType>> op_residual_;
     std::unique_ptr<Smoother<LevelCacheType>> op_smoother_;
-    std::unique_ptr<ExtrapolatedSmoother<DomainGeometry>> op_extrapolated_smoother_;
+    std::unique_ptr<ExtrapolatedSmoother<LevelCacheType>> op_extrapolated_smoother_;
 
     Vector<double> rhs_;
     Vector<double> solution_;

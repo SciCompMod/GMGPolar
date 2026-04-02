@@ -2,11 +2,11 @@
 
 #include "../residual.h"
 
-template <concepts::DomainGeometry DomainGeometry>
-class ResidualGive : public Residual<DomainGeometry>
+template <class LevelCacheType>
+class ResidualGive : public Residual<LevelCacheType>
 {
 public:
-    explicit ResidualGive(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
+    explicit ResidualGive(const PolarGrid& grid, const LevelCacheType& level_cache,
                           const bool DirBC_Interior, const int num_omp_threads);
     ~ResidualGive() override = default;
 

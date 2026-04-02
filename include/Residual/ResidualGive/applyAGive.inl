@@ -3,9 +3,9 @@
 namespace residual_give
 {
 
-template <concepts::DomainGeometry DomainGeometry>
+template <class LevelCacheType>
 static inline void node_apply_a_give(int i_r, int i_theta, double r, double theta, const PolarGrid& grid,
-                                     const LevelCache<DomainGeometry>& level_cache, bool DirBC_Interior,
+                                     const LevelCacheType& level_cache, bool DirBC_Interior,
                                      Vector<double>& result, ConstVector<double>& x)
 {
     /* ---------------------------------------- */
@@ -291,33 +291,33 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
 
 } // namespace residual_give
 
-template <concepts::DomainGeometry DomainGeometry>
-void ResidualGive<DomainGeometry>::applyCircleSection(const int i_r, Vector<double> result, ConstVector<double> x) const
+template <class LevelCacheType>
+void ResidualGive<LevelCacheType>::applyCircleSection(const int i_r, Vector<double> result, ConstVector<double> x) const
 {
     using residual_give::node_apply_a_give;
 
-    const PolarGrid& grid = Residual<DomainGeometry>::grid_;
+    const PolarGrid& grid = Residual<LevelCacheType>::grid_;
 
     const double r = grid.radius(i_r);
     for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
         const double theta = grid.theta(i_theta);
-        node_apply_a_give(i_r, i_theta, r, theta, grid, Residual<DomainGeometry>::level_cache_,
-                          Residual<DomainGeometry>::DirBC_Interior_, result, x);
+        node_apply_a_give(i_r, i_theta, r, theta, grid, Residual<LevelCacheType>::level_cache_,
+                          Residual<LevelCacheType>::DirBC_Interior_, result, x);
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-void ResidualGive<DomainGeometry>::applyRadialSection(const int i_theta, Vector<double> result,
+template <class LevelCacheType>
+void ResidualGive<LevelCacheType>::applyRadialSection(const int i_theta, Vector<double> result,
                                                       ConstVector<double> x) const
 {
     using residual_give::node_apply_a_give;
 
-    const PolarGrid& grid = Residual<DomainGeometry>::grid_;
+    const PolarGrid& grid = Residual<LevelCacheType>::grid_;
 
     const double theta = grid.theta(i_theta);
     for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
         const double r = grid.radius(i_r);
-        node_apply_a_give(i_r, i_theta, r, theta, grid, Residual<DomainGeometry>::level_cache_,
-                          Residual<DomainGeometry>::DirBC_Interior_, result, x);
+        node_apply_a_give(i_r, i_theta, r, theta, grid, Residual<LevelCacheType>::level_cache_,
+                          Residual<LevelCacheType>::DirBC_Interior_, result, x);
     }
 }

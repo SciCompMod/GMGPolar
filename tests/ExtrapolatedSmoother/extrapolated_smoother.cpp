@@ -61,9 +61,9 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_DirBC_Interior)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    ExtrapolatedSmootherGive<DomainGeometryType> smootherGive_operator(level.grid(), level.levelCache(), DirBC_Interior,
+    ExtrapolatedSmootherGive smootherGive_operator(level.grid(), level.levelCache(), DirBC_Interior,
                                                                        maxOpenMPThreads);
-    ExtrapolatedSmootherTake<DomainGeometryType> smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior,
+    ExtrapolatedSmootherTake smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior,
                                                                        maxOpenMPThreads);
 
     Vector<double> rhs   = generate_random_sample_data(level.grid(), 69);
@@ -122,9 +122,9 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_AcossOrigin)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    ExtrapolatedSmootherGive<DomainGeometryType> smootherGive_operator(level.grid(), level.levelCache(), DirBC_Interior,
+    ExtrapolatedSmootherGive smootherGive_operator(level.grid(), level.levelCache(), DirBC_Interior,
                                                                        maxOpenMPThreads);
-    ExtrapolatedSmootherTake<DomainGeometryType> smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior,
+    ExtrapolatedSmootherTake smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior,
                                                                        maxOpenMPThreads);
 
     Vector<double> rhs   = generate_random_sample_data(level.grid(), 69);
@@ -187,8 +187,8 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior)
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                            maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ExtrapolatedSmootherGive<DomainGeometryType> extrapolated_smoother_op(level.grid(), level.levelCache(),
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(),
                                                                           DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -271,8 +271,8 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior)
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                            maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ExtrapolatedSmootherGive<DomainGeometryType> extrapolated_smoother_op(level.grid(), level.levelCache(),
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(),
                                                                           DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -355,8 +355,8 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin)
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                            maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ExtrapolatedSmootherGive<DomainGeometryType> extrapolated_smoother_op(level.grid(), level.levelCache(),
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(),
                                                                           DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -441,8 +441,8 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin)
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                            maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ExtrapolatedSmootherGive<DomainGeometryType> extrapolated_smoother_op(level.grid(), level.levelCache(),
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(),
                                                                           DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -526,8 +526,8 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherDirBC_Interior_Smal
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                            maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ExtrapolatedSmootherGive<DomainGeometryType> extrapolated_smoother_op(level.grid(), level.levelCache(),
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(),
                                                                           DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -611,8 +611,8 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherDirBC_Interior_Smalle
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                            maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ExtrapolatedSmootherGive<DomainGeometryType> extrapolated_smoother_op(level.grid(), level.levelCache(),
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(),
                                                                           DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -696,8 +696,8 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherAcrossOrigin_Smalle
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                            maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ExtrapolatedSmootherGive<DomainGeometryType> extrapolated_smoother_op(level.grid(), level.levelCache(),
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(),
                                                                           DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -779,8 +779,8 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherAcrossOrigin_Smallest
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                            maxOpenMPThreads);
-    ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ExtrapolatedSmootherGive<DomainGeometryType> extrapolated_smoother_op(level.grid(), level.levelCache(),
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(),
                                                                           DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -865,8 +865,8 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior)
 
     DirectSolver_CSR_LU_Take solver_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                            maxOpenMPThreads);
-    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ExtrapolatedSmootherTake<DomainGeometryType> extrapolated_smoother_op(level.grid(), level.levelCache(),
+    ResidualTake residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(),
                                                                           DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -951,8 +951,8 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior)
 
     DirectSolver_CSR_LU_Take solver_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                            maxOpenMPThreads);
-    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ExtrapolatedSmootherTake<DomainGeometryType> extrapolated_smoother_op(level.grid(), level.levelCache(),
+    ResidualTake residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(),
                                                                           DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -1035,8 +1035,8 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin)
 
     DirectSolver_CSR_LU_Take solver_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                            maxOpenMPThreads);
-    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ExtrapolatedSmootherTake<DomainGeometryType> extrapolated_smoother_op(level.grid(), level.levelCache(),
+    ResidualTake residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(),
                                                                           DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -1119,8 +1119,8 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin)
 
     DirectSolver_CSR_LU_Take solver_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                            maxOpenMPThreads);
-    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ExtrapolatedSmootherTake<DomainGeometryType> extrapolated_smoother_op(level.grid(), level.levelCache(),
+    ResidualTake residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(),
                                                                           DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -1202,8 +1202,8 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeDirBC_Interior_
 
     DirectSolver_CSR_LU_Take solver_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                            maxOpenMPThreads);
-    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ExtrapolatedSmootherTake<DomainGeometryType> extrapolated_smoother_op(level.grid(), level.levelCache(),
+    ResidualTake residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(),
                                                                           DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -1285,8 +1285,8 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeDirBC_Interior_Sm
 
     DirectSolver_CSR_LU_Take solver_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                            maxOpenMPThreads);
-    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ExtrapolatedSmootherTake<DomainGeometryType> extrapolated_smoother_op(level.grid(), level.levelCache(),
+    ResidualTake residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(),
                                                                           DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -1368,8 +1368,8 @@ TEST(ExtrapolatedSmootherTest, SequentialExtrapolatedSmootherTakeAcrossOrigin_Sm
 
     DirectSolver_CSR_LU_Take solver_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                            maxOpenMPThreads);
-    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ExtrapolatedSmootherTake<DomainGeometryType> extrapolated_smoother_op(level.grid(), level.levelCache(),
+    ResidualTake residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(),
                                                                           DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
@@ -1451,8 +1451,8 @@ TEST(ExtrapolatedSmootherTest, ParallelExtrapolatedSmootherTakeAcrossOrigin_Smal
 
     DirectSolver_CSR_LU_Take solver_op(level.grid(), level.levelCache(), DirBC_Interior,
                                                            maxOpenMPThreads);
-    ResidualTake<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ExtrapolatedSmootherTake<DomainGeometryType> extrapolated_smoother_op(level.grid(), level.levelCache(),
+    ResidualTake residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(),
                                                                           DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
