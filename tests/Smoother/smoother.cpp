@@ -60,9 +60,9 @@ TEST(SmootherTest, smoother_DirBC_Interior)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    SmootherGive<DomainGeometryType> smootherGive_operator(level.grid(), level.levelCache(), DirBC_Interior,
+    SmootherGive smootherGive_operator(level.grid(), level.levelCache(), DirBC_Interior,
                                                            maxOpenMPThreads);
-    SmootherTake<DomainGeometryType> smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior,
+    SmootherTake smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior,
                                                            maxOpenMPThreads);
 
     Vector<double> rhs   = generate_random_sample_data(level.grid(), 69);
@@ -120,9 +120,9 @@ TEST(SmootherTest, smoother_AcrossOrigin)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    SmootherGive<DomainGeometryType> smootherGive_operator(level.grid(), level.levelCache(), DirBC_Interior,
+    SmootherGive smootherGive_operator(level.grid(), level.levelCache(), DirBC_Interior,
                                                            maxOpenMPThreads);
-    SmootherTake<DomainGeometryType> smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior,
+    SmootherTake smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior,
                                                            maxOpenMPThreads);
 
     Vector<double> rhs   = generate_random_sample_data(level.grid(), 69);
@@ -184,7 +184,7 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior)
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -260,7 +260,7 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior)
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -336,7 +336,7 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin)
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -412,7 +412,7 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin)
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -487,7 +487,7 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior_SmallestGrid)
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -562,7 +562,7 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior_SmallestGrid)
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -637,7 +637,7 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin_SmallestGrid)
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -712,7 +712,7 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin_SmallestGrid)
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -790,7 +790,7 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior)
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -866,7 +866,7 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior)
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -942,7 +942,7 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin)
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -1018,7 +1018,7 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin)
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -1093,7 +1093,7 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior_SmallestGrid)
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -1168,7 +1168,7 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior_SmallestGrid)
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -1243,7 +1243,7 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin_SmallestGrid)
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());
@@ -1318,7 +1318,7 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin_SmallestGrid)
 
     DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> discrete_solution("discrete_solution", rhs.size());

@@ -4,15 +4,6 @@
 #include <iostream>
 #include <vector>
 
-#include "../InputFunctions/domainGeometry.h"
-
-template <concepts::DomainGeometry DomainGeometry>
-class LevelCache;
-
-template <concepts::DomainGeometry DomainGeometry>
-class Level;
-
-#include "../Level/level.h"
 #include "../PolarGrid/polargrid.h"
 #include "../Definitions/global_definitions.h"
 #include "../LinearAlgebra/Vector/vector.h"
@@ -29,11 +20,11 @@ class Level;
     #include "mpi.h"
 #endif
 
-template <concepts::DomainGeometry DomainGeometry>
+template <class LevelCacheType>
 class Smoother
 {
 public:
-    explicit Smoother(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache, bool DirBC_Interior,
+    explicit Smoother(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
                       int num_omp_threads)
         : grid_(grid)
         , level_cache_(level_cache)
@@ -47,7 +38,7 @@ public:
 
 protected:
     const PolarGrid& grid_;
-    const LevelCache<DomainGeometry>& level_cache_;
+    const LevelCacheType& level_cache_;
     const bool DirBC_Interior_;
     const int num_omp_threads_;
 };

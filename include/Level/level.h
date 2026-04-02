@@ -5,7 +5,7 @@ template <class LevelCacheType>
 class DirectSolver;
 template <concepts::DomainGeometry DomainGeometry>
 class Residual;
-template <concepts::DomainGeometry DomainGeometry>
+template <class LevelCacheType>
 class Smoother;
 template <concepts::DomainGeometry DomainGeometry>
 class ExtrapolatedSmoother;
@@ -102,7 +102,7 @@ private:
 
     std::unique_ptr<DirectSolver<LevelCacheType>> op_directSolver_;
     std::unique_ptr<Residual<DomainGeometry>> op_residual_;
-    std::unique_ptr<Smoother<DomainGeometry>> op_smoother_;
+    std::unique_ptr<Smoother<LevelCacheType>> op_smoother_;
     std::unique_ptr<ExtrapolatedSmoother<DomainGeometry>> op_extrapolated_smoother_;
 
     Vector<double> rhs_;

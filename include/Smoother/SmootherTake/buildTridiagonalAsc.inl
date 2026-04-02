@@ -16,8 +16,8 @@ static inline void updateMatrixElement(BatchedTridiagonalSolver<double>& solver,
 
 } // namespace smoother_take
 
-template <concepts::DomainGeometry DomainGeometry>
-void SmootherTake<DomainGeometry>::nodeBuildTridiagonalSolverMatrices(
+template <class LevelCacheType>
+void SmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
     int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
     BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
     BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, ConstVector<double>& arr, ConstVector<double>& att,
@@ -302,13 +302,13 @@ void SmootherTake<DomainGeometry>::nodeBuildTridiagonalSolverMatrices(
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-void SmootherTake<DomainGeometry>::buildTridiagonalSolverMatrices()
+template <class LevelCacheType>
+void SmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
 {
-    const PolarGrid& grid                         = Smoother<DomainGeometry>::grid_;
-    const LevelCache<DomainGeometry>& level_cache = Smoother<DomainGeometry>::level_cache_;
-    const bool DirBC_Interior                     = Smoother<DomainGeometry>::DirBC_Interior_;
-    const int num_omp_threads                     = Smoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid                         = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                     = Smoother<LevelCacheType>::DirBC_Interior_;
+    const int num_omp_threads                     = Smoother<LevelCacheType>::num_omp_threads_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());

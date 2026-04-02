@@ -142,20 +142,20 @@ void Level<DomainGeometry>::initializeDirectSolver(const bool DirBC_Interior,
 {
 #ifdef GMGPOLAR_USE_MUMPS
     if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
-        op_directSolver_ = std::make_unique<DirectSolver_COO_MUMPS_Take<LevelCache<DomainGeometry>>>(
+        op_directSolver_ = std::make_unique<DirectSolver_COO_MUMPS_Take<LevelCacheType>>(
             *grid_, *level_cache_, DirBC_Interior, num_omp_threads);
     }
     else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
-        op_directSolver_ = std::make_unique<DirectSolver_COO_MUMPS_Give<LevelCache<DomainGeometry>>>(
+        op_directSolver_ = std::make_unique<DirectSolver_COO_MUMPS_Give<LevelCacheType>>(
             *grid_, *level_cache_, DirBC_Interior, num_omp_threads);
     }
 #else
     if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
-        op_directSolver_ = std::make_unique<DirectSolver_CSR_LU_Take<LevelCache<DomainGeometry>>>(
+        op_directSolver_ = std::make_unique<DirectSolver_CSR_LU_Take<LevelCacheType>>(
             *grid_, *level_cache_, DirBC_Interior, num_omp_threads);
     }
     else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
-        op_directSolver_ = std::make_unique<DirectSolver_CSR_LU_Give<LevelCache<DomainGeometry>>>(
+        op_directSolver_ = std::make_unique<DirectSolver_CSR_LU_Give<LevelCacheType>>(
             *grid_, *level_cache_, DirBC_Interior, num_omp_threads);
     }
 #endif
@@ -179,11 +179,11 @@ void Level<DomainGeometry>::initializeSmoothing(const bool DirBC_Interior,
                                                 const StencilDistributionMethod stencil_distribution_method)
 {
     if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
-        op_smoother_ = std::make_unique<SmootherTake<DomainGeometry>>(*grid_, *level_cache_,
+        op_smoother_ = std::make_unique<SmootherTake<LevelCacheType>>(*grid_, *level_cache_,
                                                                       DirBC_Interior, num_omp_threads);
     }
     else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
-        op_smoother_ = std::make_unique<SmootherGive<DomainGeometry>>(*grid_, *level_cache_,
+        op_smoother_ = std::make_unique<SmootherGive<LevelCacheType>>(*grid_, *level_cache_,
                                                                       DirBC_Interior, num_omp_threads);
     }
     if (!op_smoother_)

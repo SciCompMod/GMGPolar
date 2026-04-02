@@ -4,12 +4,6 @@
 #include <iostream>
 #include <vector>
 
-#include "../InputFunctions/domainGeometry.h"
-
-template <concepts::DomainGeometry DomainGeometry>
-class Level;
-
-#include "../Level/level.h"
 #include "../PolarGrid/polargrid.h"
 #include "../Definitions/global_definitions.h"
 #include "../LinearAlgebra/Vector/vector.h"

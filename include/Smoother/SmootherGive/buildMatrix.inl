@@ -35,8 +35,8 @@ static inline void updateCOOCSRMatrixElement(SparseMatrixCSR<double>& matrix, in
 
 } // namespace smoother_give
 
-template <concepts::DomainGeometry DomainGeometry>
-void SmootherGive<DomainGeometry>::nodeBuildAscGive(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+template <class LevelCacheType>
+void SmootherGive<LevelCacheType>::nodeBuildAscGive(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                                     MatrixType& inner_boundary_circle_matrix,
                                                     BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
                                                     BatchedTridiagonalSolver<double>& radial_tridiagonal_solver,
@@ -636,11 +636,11 @@ void SmootherGive<DomainGeometry>::nodeBuildAscGive(int i_r, int i_theta, const 
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-void SmootherGive<DomainGeometry>::buildAscCircleSection(const int i_r)
+template <class LevelCacheType>
+void SmootherGive<LevelCacheType>::buildAscCircleSection(const int i_r)
 {
-    const PolarGrid& grid                         = Smoother<DomainGeometry>::grid_;
-    const LevelCache<DomainGeometry>& level_cache = Smoother<DomainGeometry>::level_cache_;
+    const PolarGrid& grid                         = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
 
     const double r = grid.radius(i_r);
     for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
@@ -651,16 +651,16 @@ void SmootherGive<DomainGeometry>::buildAscCircleSection(const int i_r)
         level_cache.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Build Asc at the current node
-        nodeBuildAscGive(i_r, i_theta, grid, Smoother<DomainGeometry>::DirBC_Interior_, inner_boundary_circle_matrix_,
+        nodeBuildAscGive(i_r, i_theta, grid, Smoother<LevelCacheType>::DirBC_Interior_, inner_boundary_circle_matrix_,
                          circle_tridiagonal_solver_, radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-void SmootherGive<DomainGeometry>::buildAscRadialSection(const int i_theta)
+template <class LevelCacheType>
+void SmootherGive<LevelCacheType>::buildAscRadialSection(const int i_theta)
 {
-    const PolarGrid& grid                         = Smoother<DomainGeometry>::grid_;
-    const LevelCache<DomainGeometry>& level_cache = Smoother<DomainGeometry>::level_cache_;
+    const PolarGrid& grid                         = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
 
     const double theta = grid.theta(i_theta);
     for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
@@ -671,13 +671,13 @@ void SmootherGive<DomainGeometry>::buildAscRadialSection(const int i_theta)
         level_cache.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Build Asc at the current node
-        nodeBuildAscGive(i_r, i_theta, grid, Smoother<DomainGeometry>::DirBC_Interior_, inner_boundary_circle_matrix_,
+        nodeBuildAscGive(i_r, i_theta, grid, Smoother<LevelCacheType>::DirBC_Interior_, inner_boundary_circle_matrix_,
                          circle_tridiagonal_solver_, radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-void SmootherGive<DomainGeometry>::buildAscMatrices()
+template <class LevelCacheType>
+void SmootherGive<LevelCacheType>::buildAscMatrices()
 {
     /* -------------------------------------- */
     /* Part 1: Allocate Asc Smoother matrices */
@@ -685,9 +685,9 @@ void SmootherGive<DomainGeometry>::buildAscMatrices()
     // BatchedTridiagonalSolvers allocations are handled in the SmootherTake constructor.
     // circle_tridiagonal_solver_[batch_index=0] is unitialized. Use inner_boundary_circle_matrix_ instead.
 
-    const PolarGrid& grid     = Smoother<DomainGeometry>::grid_;
-    const bool DirBC_Interior = Smoother<DomainGeometry>::DirBC_Interior_;
-    const int num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
+    const bool DirBC_Interior = Smoother<LevelCacheType>::DirBC_Interior_;
+    const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
 #ifdef GMGPOLAR_USE_MUMPS
     // Although the matrix is symmetric, we need to store all its entries, so we disable the symmetry.
