@@ -19,31 +19,14 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     // Create the finest mesh (level 0) //
     // -------------------------------- //
     auto finest_grid = std::make_unique<PolarGrid>(grid_);
+
     if (paraview_)
         writeToVTK("output_finest_grid", *finest_grid);
 
     if (extrapolation_ != ExtrapolationType::NONE) {
-        // Check if grid comes from a single uniform refinement
-        bool is_uniform_refinement = true;
-
-        for (int i_r = 1; i_r < finest_grid->nr() - 1; i_r += 2) {
-            double mid = 0.5 * (finest_grid->radius(i_r - 1) + finest_grid->radius(i_r + 1));
-            if (std::abs(mid - finest_grid->radius(i_r)) > 1e-12) {
-                is_uniform_refinement = false;
-                break;
-            }
-        }
-        for (int i_theta = 1; i_theta < finest_grid->ntheta(); i_theta += 2) {
-            double mid = 0.5 * (finest_grid->theta(i_theta - 1) + finest_grid->theta(i_theta + 1));
-            if (std::abs(mid - finest_grid->theta(i_theta)) > 1e-12) {
-                is_uniform_refinement = false;
-                break;
-            }
-        }
-
-        if (!is_uniform_refinement) {
-            throw std::runtime_error(
-                "Extrapolation Error: Finest PolarGrid does not originate from a single uniform refinement.");
+        const double precision = 1e-12;
+        if (!checkUniformRefinement(*finest_grid, precision)) {
+            std::cerr << "[Extrapolation Warning] Finest PolarGrid is not from a single uniform refinement.\n";
         }
     }
 
@@ -165,11 +148,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 int GMGPolar<DomainGeometry, DensityProfileCoefficients>::chooseNumberOfLevels(const PolarGrid& finestGrid)
 {
-    const int minRadialNodes      = 5;
-    const int minAngularDivisions = 4;
-
-    // Minimum level for Multigrid
-    const int multigridMinLevel = (extrapolation_ == ExtrapolationType::NONE) ? 1 : 2;
+    constexpr int minRadialNodes      = 5;
+    constexpr int minAngularDivisions = 4;
 
     // Calculate radial maximum level
     int radialNodes    = finestGrid.nr();
@@ -188,19 +168,18 @@ int GMGPolar<DomainGeometry, DensityProfileCoefficients>::chooseNumberOfLevels(c
         angularMaxLevel++;
     }
 
-    /* Currently unused: Number of levels which guarantee linear scalability */
-    const int linear_complexity_levels = static_cast<int>(std::ceil(
-        (2.0 * std::log(static_cast<double>(finestGrid.numberOfNodes())) - std::log(3.0)) / (3.0 * std::log(4.0))));
-
     // Determine the number of levels as the minimum of radial maximum level, angular maximum level,
     // and the maximum levels specified.
     int levels = std::min(radialMaxLevel, angularMaxLevel);
     if (max_levels_ > 0)
         levels = std::min(max_levels_, levels);
 
-    // Check if levels is less than Multigrid minimum level and throw an error
-    if (levels < multigridMinLevel) {
-        throw std::runtime_error("Number of possible levels is less than Multigrid minimum level");
+    // Extrapolation requires at least 2 levels
+    if (extrapolation_ != ExtrapolationType::NONE && levels < 2) {
+        std::cerr << "[GMGPolar Warning] Extrapolation disabled: requires at least 2 multigrid levels, but only "
+                  << levels << " available.\n";
+
+        extrapolation_ = ExtrapolationType::NONE;
     }
 
     return levels;
@@ -600,4 +579,45 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printSettings(const P
     else {
         std::cout << "Preconditioned Conjugate Gradient: Disabled\n";
     }
+}
+
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+bool GMGPolar<DomainGeometry, DensityProfileCoefficients>::checkUniformRefinement(const PolarGrid& grid,
+                                                                                  double tolerance) const
+{
+    // Radial direction
+    for (int i_r = 1; i_r < grid.nr() - 1; i_r += 2) {
+        double left         = grid.radius(i_r - 1);
+        double right        = grid.radius(i_r + 1);
+        double expected_mid = 0.5 * (left + right);
+        double actual_mid   = grid.radius(i_r);
+
+        double diff = std::abs(expected_mid - actual_mid);
+        if (diff > tolerance) {
+            std::cerr << "[Extrapolation Warning] Radial mismatch at i_r = " << i_r << "\n"
+                      << "  left = " << left << ", right = " << right << "\n"
+                      << "  expected = " << expected_mid << ", actual = " << actual_mid << "\n"
+                      << "  diff = " << diff << " (tol = " << tolerance << ")\n";
+            return false;
+        }
+    }
+
+    // Angular direction
+    for (int i_theta = 1; i_theta < grid.ntheta(); i_theta += 2) {
+        double left         = grid.theta(i_theta - 1);
+        double right        = grid.theta(i_theta + 1);
+        double expected_mid = 0.5 * (left + right);
+        double actual_mid   = grid.theta(i_theta);
+
+        double diff = std::abs(expected_mid - actual_mid);
+        if (diff > tolerance) {
+            std::cerr << "[Extrapolation Warning] Angular mismatch at i_theta = " << i_theta << "\n"
+                      << "  left = " << left << ", right = " << right << "\n"
+                      << "  expected = " << expected_mid << ", actual = " << actual_mid << "\n"
+                      << "  diff = " << diff << " (tol = " << tolerance << ")\n";
+            return false;
+        }
+    }
+
+    return true;
 }

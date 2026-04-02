@@ -120,7 +120,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printTimings() const
     }
     else {
         std::cout << "    Preconditioned Conjugate Gradient: "
-                  << t_conjugate_gradient_ - t_check_convergence_ - t_check_exact_error_ << " seconds" << std::endl;
+                  << std::max(t_conjugate_gradient_ - t_check_convergence_ - t_check_exact_error_, 0.0) << " seconds"
+                  << std::endl;
     }
     std::cout << "    Check Convergence: " << t_check_convergence_ << " seconds" << std::endl;
     std::cout << "    (Check Exact Error: " << t_check_exact_error_ << " seconds)" << std::endl;

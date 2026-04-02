@@ -142,6 +142,7 @@ private:
     void build_rhs_f(const Level<DomainGeometry>& level, Vector<double> rhs_f,
                      const BoundaryConditions& boundary_conditions, const SourceTerm& source_term);
     void discretize_rhs_f(const Level<DomainGeometry>& level, Vector<double> rhs_f);
+    bool checkUniformRefinement(const PolarGrid& grid, double tolerance) const;
 
     /* --------------- */
     /* Solve Functions */
