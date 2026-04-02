@@ -2,11 +2,11 @@
 
 #include "../directSolver.h"
 
-template <concepts::DomainGeometry DomainGeometry>
-class DirectSolver_CSR_LU_Give : public DirectSolver<DomainGeometry>
+template <class LevelCacheType>
+class DirectSolver_CSR_LU_Give : public DirectSolver<LevelCacheType>
 {
 public:
-    explicit DirectSolver_CSR_LU_Give(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
+    explicit DirectSolver_CSR_LU_Give(const PolarGrid& grid, const LevelCacheType& level_cache,
                                       bool DirBC_Interior, int num_omp_threads);
 
     // Note: The rhs (right-hand side) vector gets overwritten with the solution.

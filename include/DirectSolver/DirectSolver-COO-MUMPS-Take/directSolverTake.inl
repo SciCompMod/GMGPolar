@@ -2,17 +2,17 @@
 
 #ifdef GMGPOLAR_USE_MUMPS
 
-template <concepts::DomainGeometry DomainGeometry>
-DirectSolver_COO_MUMPS_Take<DomainGeometry>::DirectSolver_COO_MUMPS_Take(const PolarGrid& grid,
-                                                                         const LevelCache<DomainGeometry>& level_cache,
+template <class LevelCacheType>
+DirectSolver_COO_MUMPS_Take<LevelCacheType>::DirectSolver_COO_MUMPS_Take(const PolarGrid& grid,
+                                                                         const LevelCacheType& level_cache,
                                                                          bool DirBC_Interior, int num_omp_threads)
-    : DirectSolver<DomainGeometry>(grid, level_cache, DirBC_Interior, num_omp_threads)
+    : DirectSolver<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
     , mumps_solver_(buildSolverMatrix())
 {
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-void DirectSolver_COO_MUMPS_Take<DomainGeometry>::solveInPlace(Vector<double> solution)
+template <class LevelCacheType>
+void DirectSolver_COO_MUMPS_Take<LevelCacheType>::solveInPlace(Vector<double> solution)
 {
     // Adjusts the right-hand side vector to account for symmetry corrections.
     // This transforms the system matrixA * solution = rhs into the equivalent system:

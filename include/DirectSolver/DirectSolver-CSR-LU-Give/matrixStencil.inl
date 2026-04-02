@@ -1,10 +1,10 @@
 #pragma once
 
-template <concepts::DomainGeometry DomainGeometry>
-int DirectSolver_CSR_LU_Give<DomainGeometry>::getStencilSize(int global_index) const
+template <class LevelCacheType>
+int DirectSolver_CSR_LU_Give<LevelCacheType>::getStencilSize(int global_index) const
 {
-    const PolarGrid& grid     = DirectSolver<DomainGeometry>::grid_;
-    const bool DirBC_Interior = DirectSolver<DomainGeometry>::DirBC_Interior_;
+    const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
+    const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
     int i_r, i_theta;
     grid.multiIndex(global_index, i_r, i_theta);
@@ -33,11 +33,11 @@ int DirectSolver_CSR_LU_Give<DomainGeometry>::getStencilSize(int global_index) c
     throw std::out_of_range("Invalid index for stencil");
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-const Stencil& DirectSolver_CSR_LU_Give<DomainGeometry>::getStencil(int i_r) const
+template <class LevelCacheType>
+const Stencil& DirectSolver_CSR_LU_Give<LevelCacheType>::getStencil(int i_r) const
 {
-    const PolarGrid& grid     = DirectSolver<DomainGeometry>::grid_;
-    const bool DirBC_Interior = DirectSolver<DomainGeometry>::DirBC_Interior_;
+    const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
+    const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
     assert(0 <= i_r && i_r < grid.nr());
     assert(grid.nr() >= 4);
@@ -60,11 +60,11 @@ const Stencil& DirectSolver_CSR_LU_Give<DomainGeometry>::getStencil(int i_r) con
     throw std::out_of_range("Invalid index for stencil");
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-int DirectSolver_CSR_LU_Give<DomainGeometry>::getNonZeroCountSolverMatrix() const
+template <class LevelCacheType>
+int DirectSolver_CSR_LU_Give<LevelCacheType>::getNonZeroCountSolverMatrix() const
 {
-    const PolarGrid& grid     = DirectSolver<DomainGeometry>::grid_;
-    const bool DirBC_Interior = DirectSolver<DomainGeometry>::DirBC_Interior_;
+    const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
+    const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
     const int size_stencil_inner_boundary      = DirBC_Interior ? 1 : 7;
     const int size_stencil_next_inner_boundary = DirBC_Interior ? 9 : 9;

@@ -11,8 +11,8 @@ static inline void updateMatrixElement(SparseMatrixCSR<double>& matrix, int offs
 
 } // namespace direct_solver_csr_lu_give
 
-template <concepts::DomainGeometry DomainGeometry>
-void DirectSolver_CSR_LU_Give<DomainGeometry>::nodeBuildSolverMatrixGive(int i_r, int i_theta, const PolarGrid& grid,
+template <class LevelCacheType>
+void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_theta, const PolarGrid& grid,
                                                                          const bool DirBC_Interior,
                                                                          SparseMatrixCSR<double>& solver_matrix,
                                                                          double arr, double att, double art,
@@ -742,13 +742,13 @@ void DirectSolver_CSR_LU_Give<DomainGeometry>::nodeBuildSolverMatrixGive(int i_r
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-void DirectSolver_CSR_LU_Give<DomainGeometry>::buildSolverMatrixCircleSection(const int i_r,
+template <class LevelCacheType>
+void DirectSolver_CSR_LU_Give<LevelCacheType>::buildSolverMatrixCircleSection(const int i_r,
                                                                               SparseMatrixCSR<double>& solver_matrix)
 {
-    const PolarGrid& grid                         = DirectSolver<DomainGeometry>::grid_;
-    const LevelCache<DomainGeometry>& level_cache = DirectSolver<DomainGeometry>::level_cache_;
-    const bool DirBC_Interior                     = DirectSolver<DomainGeometry>::DirBC_Interior_;
+    const PolarGrid& grid                         = DirectSolver<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                     = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
     const double r = grid.radius(i_r);
     for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
@@ -763,13 +763,13 @@ void DirectSolver_CSR_LU_Give<DomainGeometry>::buildSolverMatrixCircleSection(co
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-void DirectSolver_CSR_LU_Give<DomainGeometry>::buildSolverMatrixRadialSection(const int i_theta,
+template <class LevelCacheType>
+void DirectSolver_CSR_LU_Give<LevelCacheType>::buildSolverMatrixRadialSection(const int i_theta,
                                                                               SparseMatrixCSR<double>& solver_matrix)
 {
-    const PolarGrid& grid                         = DirectSolver<DomainGeometry>::grid_;
-    const LevelCache<DomainGeometry>& level_cache = DirectSolver<DomainGeometry>::level_cache_;
-    const bool DirBC_Interior                     = DirectSolver<DomainGeometry>::DirBC_Interior_;
+    const PolarGrid& grid                         = DirectSolver<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                     = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
     const double theta = grid.theta(i_theta);
     for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
@@ -784,11 +784,11 @@ void DirectSolver_CSR_LU_Give<DomainGeometry>::buildSolverMatrixRadialSection(co
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-SparseMatrixCSR<double> DirectSolver_CSR_LU_Give<DomainGeometry>::buildSolverMatrix()
+template <class LevelCacheType>
+SparseMatrixCSR<double> DirectSolver_CSR_LU_Give<LevelCacheType>::buildSolverMatrix()
 {
-    const PolarGrid& grid     = DirectSolver<DomainGeometry>::grid_;
-    const int num_omp_threads = DirectSolver<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
+    const int num_omp_threads = DirectSolver<LevelCacheType>::num_omp_threads_;
 
     const int n = grid.numberOfNodes();
 

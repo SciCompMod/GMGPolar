@@ -6,13 +6,13 @@
 /* Boundary Symmetry Shift */
 /* ----------------------- */
 
-template <concepts::DomainGeometry DomainGeometry>
-void DirectSolver_COO_MUMPS_Give<DomainGeometry>::applySymmetryShiftInnerBoundary(Vector<double> x) const
+template <class LevelCacheType>
+void DirectSolver_COO_MUMPS_Give<LevelCacheType>::applySymmetryShiftInnerBoundary(Vector<double> x) const
 {
-    const PolarGrid& grid                         = DirectSolver<DomainGeometry>::grid_;
-    const LevelCache<DomainGeometry>& level_cache = DirectSolver<DomainGeometry>::level_cache_;
+    const PolarGrid& grid                         = DirectSolver<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
 
-    assert(DirectSolver<DomainGeometry>::DirBC_Interior_);
+    assert(DirectSolver<LevelCacheType>::DirBC_Interior_);
 
     int i_r;
     double r;
@@ -67,11 +67,11 @@ void DirectSolver_COO_MUMPS_Give<DomainGeometry>::applySymmetryShiftInnerBoundar
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-void DirectSolver_COO_MUMPS_Give<DomainGeometry>::applySymmetryShiftOuterBoundary(Vector<double> x) const
+template <class LevelCacheType>
+void DirectSolver_COO_MUMPS_Give<LevelCacheType>::applySymmetryShiftOuterBoundary(Vector<double> x) const
 {
-    const PolarGrid& grid                         = DirectSolver<DomainGeometry>::grid_;
-    const LevelCache<DomainGeometry>& level_cache = DirectSolver<DomainGeometry>::level_cache_;
+    const PolarGrid& grid                         = DirectSolver<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
 
     int i_r;
     double r;
@@ -126,11 +126,11 @@ void DirectSolver_COO_MUMPS_Give<DomainGeometry>::applySymmetryShiftOuterBoundar
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-void DirectSolver_COO_MUMPS_Give<DomainGeometry>::applySymmetryShift(Vector<double> x) const
+template <class LevelCacheType>
+void DirectSolver_COO_MUMPS_Give<LevelCacheType>::applySymmetryShift(Vector<double> x) const
 {
-    const PolarGrid& grid     = DirectSolver<DomainGeometry>::grid_;
-    const bool DirBC_Interior = DirectSolver<DomainGeometry>::DirBC_Interior_;
+    const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
+    const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
     assert(std::ssize(x) == grid.numberOfNodes());
     assert(grid.nr() >= 4);
