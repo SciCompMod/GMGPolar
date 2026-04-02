@@ -182,8 +182,7 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), DirBC_Interior,
-                                                           maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
@@ -259,8 +258,7 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), DirBC_Interior,
-                                                           maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
@@ -336,8 +334,7 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), DirBC_Interior,
-                                                           maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
@@ -413,8 +410,7 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), DirBC_Interior,
-                                                           maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
@@ -489,8 +485,7 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior_SmallestGrid)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), DirBC_Interior,
-                                                           maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
@@ -565,8 +560,7 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior_SmallestGrid)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), DirBC_Interior,
-                                                           maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
@@ -641,8 +635,7 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin_SmallestGrid)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), DirBC_Interior,
-                                                           maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
@@ -717,8 +710,7 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin_SmallestGrid)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), DirBC_Interior,
-                                                           maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherGive<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
@@ -796,8 +788,7 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), DirBC_Interior,
-                                                           maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
@@ -873,8 +864,7 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), DirBC_Interior,
-                                                           maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
@@ -950,8 +940,7 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), DirBC_Interior,
-                                                           maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
@@ -1027,8 +1016,7 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), DirBC_Interior,
-                                                           maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
@@ -1103,8 +1091,7 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior_SmallestGrid)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), DirBC_Interior,
-                                                           maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
@@ -1179,8 +1166,7 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior_SmallestGrid)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), DirBC_Interior,
-                                                           maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
@@ -1255,8 +1241,7 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin_SmallestGrid)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), DirBC_Interior,
-                                                           maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
@@ -1331,8 +1316,7 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin_SmallestGrid)
     std::unique_ptr<SourceTerm> source_term =
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
-    DirectSolver_CSR_LU_Give<DomainGeometryType> solver_op(level.grid(), level.levelCache(), DirBC_Interior,
-                                                           maxOpenMPThreads);
+    DirectSolver_CSR_LU_Give solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualGive<DomainGeometryType> residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     SmootherTake<DomainGeometryType> smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
