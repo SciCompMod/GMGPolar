@@ -16,8 +16,8 @@ static inline void updateMatrixElement(BatchedTridiagonalSolver<double>& solver,
 
 } // namespace extrapolated_smoother_take
 
-template <concepts::DomainGeometry DomainGeometry>
-void ExtrapolatedSmootherTake<DomainGeometry>::nodeBuildTridiagonalSolverMatrices(
+template <class LevelCacheType>
+void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
     int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
     BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
     BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, ConstVector<double>& arr, ConstVector<double>& att,
@@ -515,13 +515,13 @@ void ExtrapolatedSmootherTake<DomainGeometry>::nodeBuildTridiagonalSolverMatrice
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-void ExtrapolatedSmootherTake<DomainGeometry>::buildTridiagonalSolverMatrices()
+template <class LevelCacheType>
+void ExtrapolatedSmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
 {
-    const PolarGrid& grid                         = ExtrapolatedSmootherTake<DomainGeometry>::grid_;
-    const LevelCache<DomainGeometry>& level_cache = ExtrapolatedSmootherTake<DomainGeometry>::level_cache_;
-    const bool DirBC_Interior                     = ExtrapolatedSmootherTake<DomainGeometry>::DirBC_Interior_;
-    const int num_omp_threads                     = ExtrapolatedSmootherTake<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid             = ExtrapolatedSmootherTake<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = ExtrapolatedSmootherTake<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = ExtrapolatedSmootherTake<LevelCacheType>::DirBC_Interior_;
+    const int num_omp_threads         = ExtrapolatedSmootherTake<LevelCacheType>::num_omp_threads_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());

@@ -214,16 +214,16 @@ static inline void nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const Polar
 
 } // namespace smoother_take
 
-template <concepts::DomainGeometry DomainGeometry>
-void SmootherTake<DomainGeometry>::applyAscOrthoBlackCircleSection(ConstVector<double> x, ConstVector<double> rhs,
+template <class LevelCacheType>
+void SmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<double> x, ConstVector<double> rhs,
                                                                    Vector<double> temp)
 {
     using smoother_take::nodeApplyAscOrthoCircleTake;
 
-    const PolarGrid& grid                         = Smoother<DomainGeometry>::grid_;
-    const LevelCache<DomainGeometry>& level_cache = Smoother<DomainGeometry>::level_cache_;
-    const bool DirBC_Interior                     = Smoother<DomainGeometry>::DirBC_Interior_;
-    const int num_omp_threads                     = Smoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
+    const int num_omp_threads         = Smoother<LevelCacheType>::num_omp_threads_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
@@ -246,16 +246,16 @@ void SmootherTake<DomainGeometry>::applyAscOrthoBlackCircleSection(ConstVector<d
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-void SmootherTake<DomainGeometry>::applyAscOrthoWhiteCircleSection(ConstVector<double> x, ConstVector<double> rhs,
+template <class LevelCacheType>
+void SmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<double> x, ConstVector<double> rhs,
                                                                    Vector<double> temp)
 {
     using smoother_take::nodeApplyAscOrthoCircleTake;
 
-    const PolarGrid& grid                         = Smoother<DomainGeometry>::grid_;
-    const LevelCache<DomainGeometry>& level_cache = Smoother<DomainGeometry>::level_cache_;
-    const bool DirBC_Interior                     = Smoother<DomainGeometry>::DirBC_Interior_;
-    const int num_omp_threads                     = Smoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
+    const int num_omp_threads         = Smoother<LevelCacheType>::num_omp_threads_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
@@ -278,16 +278,16 @@ void SmootherTake<DomainGeometry>::applyAscOrthoWhiteCircleSection(ConstVector<d
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-void SmootherTake<DomainGeometry>::applyAscOrthoBlackRadialSection(ConstVector<double> x, ConstVector<double> rhs,
+template <class LevelCacheType>
+void SmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<double> x, ConstVector<double> rhs,
                                                                    Vector<double> temp)
 {
     using smoother_take::nodeApplyAscOrthoRadialTake;
 
-    const PolarGrid& grid                         = Smoother<DomainGeometry>::grid_;
-    const LevelCache<DomainGeometry>& level_cache = Smoother<DomainGeometry>::level_cache_;
-    const bool DirBC_Interior                     = Smoother<DomainGeometry>::DirBC_Interior_;
-    const int num_omp_threads                     = Smoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
+    const int num_omp_threads         = Smoother<LevelCacheType>::num_omp_threads_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
@@ -307,16 +307,16 @@ void SmootherTake<DomainGeometry>::applyAscOrthoBlackRadialSection(ConstVector<d
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-void SmootherTake<DomainGeometry>::applyAscOrthoWhiteRadialSection(ConstVector<double> x, ConstVector<double> rhs,
+template <class LevelCacheType>
+void SmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<double> x, ConstVector<double> rhs,
                                                                    Vector<double> temp)
 {
     using smoother_take::nodeApplyAscOrthoRadialTake;
 
-    const PolarGrid& grid                         = Smoother<DomainGeometry>::grid_;
-    const LevelCache<DomainGeometry>& level_cache = Smoother<DomainGeometry>::level_cache_;
-    const bool DirBC_Interior                     = Smoother<DomainGeometry>::DirBC_Interior_;
-    const int num_omp_threads                     = Smoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
+    const int num_omp_threads         = Smoother<LevelCacheType>::num_omp_threads_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());

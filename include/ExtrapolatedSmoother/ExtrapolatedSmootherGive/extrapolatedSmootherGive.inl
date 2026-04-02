@@ -1,10 +1,10 @@
 #pragma once
 
-template <concepts::DomainGeometry DomainGeometry>
-ExtrapolatedSmootherGive<DomainGeometry>::ExtrapolatedSmootherGive(const PolarGrid& grid,
-                                                                   const LevelCache<DomainGeometry>& level_cache,
+template <class LevelCacheType>
+ExtrapolatedSmootherGive<LevelCacheType>::ExtrapolatedSmootherGive(const PolarGrid& grid,
+                                                                   const LevelCacheType& level_cache,
                                                                    const bool DirBC_Interior, const int num_omp_threads)
-    : ExtrapolatedSmoother<DomainGeometry>(grid, level_cache, DirBC_Interior, num_omp_threads)
+    : ExtrapolatedSmoother<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
     , radial_tridiagonal_solver_(grid.lengthSmootherRadial(), grid.ntheta(), false)
 {
@@ -16,8 +16,8 @@ ExtrapolatedSmootherGive<DomainGeometry>::ExtrapolatedSmootherGive(const PolarGr
 #endif
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-ExtrapolatedSmootherGive<DomainGeometry>::~ExtrapolatedSmootherGive()
+template <class LevelCacheType>
+ExtrapolatedSmootherGive<LevelCacheType>::~ExtrapolatedSmootherGive()
 {
 #ifdef GMGPOLAR_USE_MUMPS
     finalizeMumpsSolver(inner_boundary_mumps_solver_);
@@ -46,15 +46,15 @@ ExtrapolatedSmootherGive<DomainGeometry>::~ExtrapolatedSmootherGive()
 //   - First, temp is updated with f_sc − A_sc^ortho * u_sc^ortho.
 //   - The system is then solved in-place in temp, and the results
 //     are copied back to x.
-template <concepts::DomainGeometry DomainGeometry>
-void ExtrapolatedSmootherGive<DomainGeometry>::extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs,
+template <class LevelCacheType>
+void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs,
                                                                      Vector<double> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
-    const PolarGrid& grid     = ExtrapolatedSmoother<DomainGeometry>::grid_;
-    const int num_omp_threads = ExtrapolatedSmoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const int num_omp_threads = ExtrapolatedSmoother<LevelCacheType>::num_omp_threads_;
 
 #pragma omp parallel num_threads(num_omp_threads)
     {

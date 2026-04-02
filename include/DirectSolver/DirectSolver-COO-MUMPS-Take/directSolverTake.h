@@ -4,12 +4,12 @@
 
 #ifdef GMGPOLAR_USE_MUMPS
 
-template <concepts::DomainGeometry DomainGeometry>
-class DirectSolver_COO_MUMPS_Take : public DirectSolver<DomainGeometry>
+template <class LevelCacheType>
+class DirectSolver_COO_MUMPS_Take : public DirectSolver<LevelCacheType>
 {
 public:
-    explicit DirectSolver_COO_MUMPS_Take(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-                                         bool DirBC_Interior, int num_omp_threads);
+    explicit DirectSolver_COO_MUMPS_Take(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
+                                         int num_omp_threads);
 
     // Note: The rhs (right-hand side) vector gets overwritten during the solution process.
     void solveInPlace(Vector<double> solution) override;

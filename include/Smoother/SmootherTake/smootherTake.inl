@@ -1,10 +1,9 @@
 #pragma once
 
-template <concepts::DomainGeometry DomainGeometry>
-SmootherTake<DomainGeometry>::SmootherTake(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-                                           bool DirBC_Interior,
-                                           int num_omp_threads)
-    : Smoother<DomainGeometry>(grid, level_cache, DirBC_Interior, num_omp_threads)
+template <class LevelCacheType>
+SmootherTake<LevelCacheType>::SmootherTake(const PolarGrid& grid, const LevelCacheType& level_cache,
+                                           bool DirBC_Interior, int num_omp_threads)
+    : Smoother<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
     , radial_tridiagonal_solver_(grid.lengthSmootherRadial(), grid.ntheta(), false)
 #ifdef GMGPOLAR_USE_MUMPS
@@ -41,8 +40,8 @@ SmootherTake<DomainGeometry>::SmootherTake(const PolarGrid& grid, const LevelCac
 //   - First, temp is updated with f_sc − A_sc^ortho * u_sc^ortho.
 //   - The system is then solved in-place in temp, and the results
 //     are copied back to x.
-template <concepts::DomainGeometry DomainGeometry>
-void SmootherTake<DomainGeometry>::smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp)
+template <class LevelCacheType>
+void SmootherTake<LevelCacheType>::smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());

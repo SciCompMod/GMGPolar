@@ -2,11 +2,11 @@
 
 #ifdef GMGPOLAR_USE_MUMPS
 
-template <concepts::DomainGeometry DomainGeometry>
-const Stencil& DirectSolver_COO_MUMPS_Give<DomainGeometry>::getStencil(int i_r) const
+template <class LevelCacheType>
+const Stencil& DirectSolver_COO_MUMPS_Give<LevelCacheType>::getStencil(int i_r) const
 {
-    const PolarGrid& grid     = DirectSolver<DomainGeometry>::grid_;
-    const bool DirBC_Interior = DirectSolver<DomainGeometry>::DirBC_Interior_;
+    const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
+    const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
     assert(0 <= i_r && i_r < grid.nr());
     assert(grid.nr() >= 4);
@@ -29,11 +29,11 @@ const Stencil& DirectSolver_COO_MUMPS_Give<DomainGeometry>::getStencil(int i_r) 
     throw std::out_of_range("Invalid index for stencil");
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-int DirectSolver_COO_MUMPS_Give<DomainGeometry>::getNonZeroCountSolverMatrix() const
+template <class LevelCacheType>
+int DirectSolver_COO_MUMPS_Give<LevelCacheType>::getNonZeroCountSolverMatrix() const
 {
-    const PolarGrid& grid     = DirectSolver<DomainGeometry>::grid_;
-    const bool DirBC_Interior = DirectSolver<DomainGeometry>::DirBC_Interior_;
+    const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
+    const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
     const int size_stencil_inner_boundary      = DirBC_Interior ? 1 : 7;
     const int size_stencil_next_inner_boundary = DirBC_Interior ? 6 : 9;
@@ -50,11 +50,11 @@ int DirectSolver_COO_MUMPS_Give<DomainGeometry>::getNonZeroCountSolverMatrix() c
 
 /* ----------------------------------------------------------------- */
 /* If the indexing is not smoother-based, please adjust the indexing */
-template <concepts::DomainGeometry DomainGeometry>
-int DirectSolver_COO_MUMPS_Give<DomainGeometry>::getSolverMatrixIndex(const int i_r, const int i_theta) const
+template <class LevelCacheType>
+int DirectSolver_COO_MUMPS_Give<LevelCacheType>::getSolverMatrixIndex(const int i_r, const int i_theta) const
 {
-    const PolarGrid& grid     = DirectSolver<DomainGeometry>::grid_;
-    const bool DirBC_Interior = DirectSolver<DomainGeometry>::DirBC_Interior_;
+    const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
+    const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
     const int size_stencil_inner_boundary      = DirBC_Interior ? 1 : 7;
     const int size_stencil_next_inner_boundary = DirBC_Interior ? 6 : 9;

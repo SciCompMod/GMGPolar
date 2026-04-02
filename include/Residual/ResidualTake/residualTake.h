@@ -2,12 +2,12 @@
 
 #include "../residual.h"
 
-template <concepts::DomainGeometry DomainGeometry>
-class ResidualTake : public Residual<DomainGeometry>
+template <class LevelCacheType>
+class ResidualTake : public Residual<LevelCacheType>
 {
 public:
-    explicit ResidualTake(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-                          const bool DirBC_Interior, const int num_omp_threads);
+    explicit ResidualTake(const PolarGrid& grid, const LevelCacheType& level_cache, const bool DirBC_Interior,
+                          const int num_omp_threads);
     ~ResidualTake() override = default;
 
     void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const override;

@@ -1,10 +1,10 @@
 #pragma once
 
-template <concepts::DomainGeometry DomainGeometry>
-void ExtrapolatedSmootherGive<DomainGeometry>::solveBlackCircleSection(Vector<double> x, Vector<double> temp)
+template <class LevelCacheType>
+void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackCircleSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid& grid     = ExtrapolatedSmoother<DomainGeometry>::grid_;
-    const int num_omp_threads = ExtrapolatedSmoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const int num_omp_threads = ExtrapolatedSmoother<LevelCacheType>::num_omp_threads_;
 
     int start                     = 0;
     int end                       = grid.numberCircularSmootherNodes();
@@ -47,11 +47,11 @@ void ExtrapolatedSmootherGive<DomainGeometry>::solveBlackCircleSection(Vector<do
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-void ExtrapolatedSmootherGive<DomainGeometry>::solveWhiteCircleSection(Vector<double> x, Vector<double> temp)
+template <class LevelCacheType>
+void ExtrapolatedSmootherGive<LevelCacheType>::solveWhiteCircleSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid& grid     = ExtrapolatedSmoother<DomainGeometry>::grid_;
-    const int num_omp_threads = ExtrapolatedSmoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const int num_omp_threads = ExtrapolatedSmoother<LevelCacheType>::num_omp_threads_;
 
     int start                     = 0;
     int end                       = grid.numberCircularSmootherNodes();
@@ -94,11 +94,11 @@ void ExtrapolatedSmootherGive<DomainGeometry>::solveWhiteCircleSection(Vector<do
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-void ExtrapolatedSmootherGive<DomainGeometry>::solveBlackRadialSection(Vector<double> x, Vector<double> temp)
+template <class LevelCacheType>
+void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackRadialSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid& grid     = ExtrapolatedSmoother<DomainGeometry>::grid_;
-    const int num_omp_threads = ExtrapolatedSmoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const int num_omp_threads = ExtrapolatedSmoother<LevelCacheType>::num_omp_threads_;
 
     int start                     = grid.numberCircularSmootherNodes();
     int end                       = grid.numberOfNodes();
@@ -117,11 +117,11 @@ void ExtrapolatedSmootherGive<DomainGeometry>::solveBlackRadialSection(Vector<do
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-void ExtrapolatedSmootherGive<DomainGeometry>::solveWhiteRadialSection(Vector<double> x, Vector<double> temp)
+template <class LevelCacheType>
+void ExtrapolatedSmootherGive<LevelCacheType>::solveWhiteRadialSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid& grid     = ExtrapolatedSmoother<DomainGeometry>::grid_;
-    const int num_omp_threads = ExtrapolatedSmoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const int num_omp_threads = ExtrapolatedSmoother<LevelCacheType>::num_omp_threads_;
 
     int start                     = grid.numberCircularSmootherNodes();
     int end                       = grid.numberOfNodes();

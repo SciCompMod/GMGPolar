@@ -1,10 +1,10 @@
 #pragma once
 
-template <concepts::DomainGeometry DomainGeometry>
-void SmootherGive<DomainGeometry>::solveBlackCircleSection(Vector<double> x, Vector<double> temp)
+template <class LevelCacheType>
+void SmootherGive<LevelCacheType>::solveBlackCircleSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid& grid     = Smoother<DomainGeometry>::grid_;
-    const int num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
+    const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
     int start                     = 0;
     int end                       = grid.numberCircularSmootherNodes();
@@ -42,11 +42,11 @@ void SmootherGive<DomainGeometry>::solveBlackCircleSection(Vector<double> x, Vec
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-void SmootherGive<DomainGeometry>::solveWhiteCircleSection(Vector<double> x, Vector<double> temp)
+template <class LevelCacheType>
+void SmootherGive<LevelCacheType>::solveWhiteCircleSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid& grid     = Smoother<DomainGeometry>::grid_;
-    const int num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
+    const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
     int start                     = 0;
     int end                       = grid.numberCircularSmootherNodes();
@@ -84,11 +84,11 @@ void SmootherGive<DomainGeometry>::solveWhiteCircleSection(Vector<double> x, Vec
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-void SmootherGive<DomainGeometry>::solveBlackRadialSection(Vector<double> x, Vector<double> temp)
+template <class LevelCacheType>
+void SmootherGive<LevelCacheType>::solveBlackRadialSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid& grid     = Smoother<DomainGeometry>::grid_;
-    const int num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
+    const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
     int start                     = grid.numberCircularSmootherNodes();
     int end                       = grid.numberOfNodes();
@@ -107,11 +107,11 @@ void SmootherGive<DomainGeometry>::solveBlackRadialSection(Vector<double> x, Vec
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-void SmootherGive<DomainGeometry>::solveWhiteRadialSection(Vector<double> x, Vector<double> temp)
+template <class LevelCacheType>
+void SmootherGive<LevelCacheType>::solveWhiteRadialSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid& grid     = Smoother<DomainGeometry>::grid_;
-    const int num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
+    const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
     int start                     = grid.numberCircularSmootherNodes();
     int end                       = grid.numberOfNodes();

@@ -1,10 +1,9 @@
 #pragma once
 
-template <concepts::DomainGeometry DomainGeometry>
-SmootherGive<DomainGeometry>::SmootherGive(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-                                           bool DirBC_Interior,
-                                           int num_omp_threads)
-    : Smoother<DomainGeometry>(grid, level_cache, DirBC_Interior, num_omp_threads)
+template <class LevelCacheType>
+SmootherGive<LevelCacheType>::SmootherGive(const PolarGrid& grid, const LevelCacheType& level_cache,
+                                           bool DirBC_Interior, int num_omp_threads)
+    : Smoother<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
     , radial_tridiagonal_solver_(grid.lengthSmootherRadial(), grid.ntheta(), false)
 {
@@ -16,8 +15,8 @@ SmootherGive<DomainGeometry>::SmootherGive(const PolarGrid& grid, const LevelCac
 #endif
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-SmootherGive<DomainGeometry>::~SmootherGive()
+template <class LevelCacheType>
+SmootherGive<LevelCacheType>::~SmootherGive()
 {
 #ifdef GMGPOLAR_USE_MUMPS
     finalizeMumpsSolver(inner_boundary_mumps_solver_);
@@ -46,16 +45,16 @@ SmootherGive<DomainGeometry>::~SmootherGive()
 //   - First, temp is updated with f_sc − A_sc^ortho * u_sc^ortho.
 //   - The system is then solved in-place in temp, and the results
 //     are copied back to x.
-template <concepts::DomainGeometry DomainGeometry>
-void SmootherGive<DomainGeometry>::smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp)
+template <class LevelCacheType>
+void SmootherGive<LevelCacheType>::smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
     Kokkos::deep_copy(temp, rhs);
 
-    const PolarGrid& grid     = Smoother<DomainGeometry>::grid_;
-    const int num_omp_threads = Smoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
+    const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
     /* Multi-threaded execution */
     const int num_smoother_circles = grid.numberSmootherCircles();

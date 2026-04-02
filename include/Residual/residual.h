@@ -4,25 +4,16 @@
 #include <iostream>
 #include <vector>
 
-#include "../InputFunctions/domainGeometry.h"
-
-template <concepts::DomainGeometry DomainGeometry>
-class LevelCache;
-
-template <concepts::DomainGeometry DomainGeometry>
-class Level;
-
-#include "../Level/level.h"
 #include "../PolarGrid/polargrid.h"
 #include "../Definitions/global_definitions.h"
 #include "../LinearAlgebra/Vector/vector.h"
 #include "../LinearAlgebra/Vector/vector_operations.h"
 
-template <concepts::DomainGeometry DomainGeometry>
+template <class LevelCacheType>
 class Residual
 {
 public:
-    explicit Residual(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache, const bool DirBC_Interior,
+    explicit Residual(const PolarGrid& grid, const LevelCacheType& level_cache, const bool DirBC_Interior,
                       const int num_omp_threads)
         : grid_(grid)
         , level_cache_(level_cache)
@@ -40,7 +31,7 @@ protected:
     /* ------------------- */
     /* Constructor members */
     const PolarGrid& grid_;
-    const LevelCache<DomainGeometry>& level_cache_;
+    const LevelCacheType& level_cache_;
     const bool DirBC_Interior_;
     const int num_omp_threads_;
 };

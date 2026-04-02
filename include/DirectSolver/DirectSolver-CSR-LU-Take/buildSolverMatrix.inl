@@ -11,8 +11,8 @@ static inline void updateMatrixElement(SparseMatrixCSR<double>& matrix, int offs
 
 } // namespace direct_solver_csr_lu_take
 
-template <concepts::DomainGeometry DomainGeometry>
-void DirectSolver_CSR_LU_Take<DomainGeometry>::nodeBuildSolverMatrixTake(
+template <class LevelCacheType>
+void DirectSolver_CSR_LU_Take<LevelCacheType>::nodeBuildSolverMatrixTake(
     int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior, SparseMatrixCSR<double>& solver_matrix,
     ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF,
     ConstVector<double>& coeff_beta)
@@ -246,13 +246,13 @@ void DirectSolver_CSR_LU_Take<DomainGeometry>::nodeBuildSolverMatrixTake(
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-SparseMatrixCSR<double> DirectSolver_CSR_LU_Take<DomainGeometry>::buildSolverMatrix()
+template <class LevelCacheType>
+SparseMatrixCSR<double> DirectSolver_CSR_LU_Take<LevelCacheType>::buildSolverMatrix()
 {
-    const PolarGrid& grid                         = DirectSolver<DomainGeometry>::grid_;
-    const LevelCache<DomainGeometry>& level_cache = DirectSolver<DomainGeometry>::level_cache_;
-    const int num_omp_threads                     = DirectSolver<DomainGeometry>::num_omp_threads_;
-    const bool DirBC_Interior                     = DirectSolver<DomainGeometry>::DirBC_Interior_;
+    const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
+    const int num_omp_threads         = DirectSolver<LevelCacheType>::num_omp_threads_;
+    const bool DirBC_Interior         = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
     const int n = grid.numberOfNodes();
 

@@ -115,43 +115,43 @@ static inline void node_apply_a_take(int i_r, int i_theta, const PolarGrid& grid
 
 } // namespace residual_take
 
-template <concepts::DomainGeometry DomainGeometry>
-void ResidualTake<DomainGeometry>::applyCircleSection(const int i_r, Vector<double> result, ConstVector<double> x) const
+template <class LevelCacheType>
+void ResidualTake<LevelCacheType>::applyCircleSection(const int i_r, Vector<double> result, ConstVector<double> x) const
 {
     using residual_take::node_apply_a_take;
 
-    assert(Residual<DomainGeometry>::level_cache_.cacheDensityProfileCoefficients());
-    assert(Residual<DomainGeometry>::level_cache_.cacheDomainGeometry());
+    assert(Residual<LevelCacheType>::level_cache_.cacheDensityProfileCoefficients());
+    assert(Residual<LevelCacheType>::level_cache_.cacheDomainGeometry());
 
-    const PolarGrid& grid          = Residual<DomainGeometry>::grid_;
-    const bool DirBC_Interior      = Residual<DomainGeometry>::DirBC_Interior_;
-    ConstVector<double> arr        = Residual<DomainGeometry>::level_cache_.arr();
-    ConstVector<double> att        = Residual<DomainGeometry>::level_cache_.att();
-    ConstVector<double> art        = Residual<DomainGeometry>::level_cache_.art();
-    ConstVector<double> detDF      = Residual<DomainGeometry>::level_cache_.detDF();
-    ConstVector<double> coeff_beta = Residual<DomainGeometry>::level_cache_.coeff_beta();
+    const PolarGrid& grid          = Residual<LevelCacheType>::grid_;
+    const bool DirBC_Interior      = Residual<LevelCacheType>::DirBC_Interior_;
+    ConstVector<double> arr        = Residual<LevelCacheType>::level_cache_.arr();
+    ConstVector<double> att        = Residual<LevelCacheType>::level_cache_.att();
+    ConstVector<double> art        = Residual<LevelCacheType>::level_cache_.art();
+    ConstVector<double> detDF      = Residual<LevelCacheType>::level_cache_.detDF();
+    ConstVector<double> coeff_beta = Residual<LevelCacheType>::level_cache_.coeff_beta();
 
     for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
         node_apply_a_take(i_r, i_theta, grid, DirBC_Interior, result, x, arr, att, art, detDF, coeff_beta);
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-void ResidualTake<DomainGeometry>::applyRadialSection(const int i_theta, Vector<double> result,
+template <class LevelCacheType>
+void ResidualTake<LevelCacheType>::applyRadialSection(const int i_theta, Vector<double> result,
                                                       ConstVector<double> x) const
 {
     using residual_take::node_apply_a_take;
 
-    assert(Residual<DomainGeometry>::level_cache_.cacheDensityProfileCoefficients());
-    assert(Residual<DomainGeometry>::level_cache_.cacheDomainGeometry());
+    assert(Residual<LevelCacheType>::level_cache_.cacheDensityProfileCoefficients());
+    assert(Residual<LevelCacheType>::level_cache_.cacheDomainGeometry());
 
-    const PolarGrid& grid          = Residual<DomainGeometry>::grid_;
-    const bool DirBC_Interior      = Residual<DomainGeometry>::DirBC_Interior_;
-    ConstVector<double> arr        = Residual<DomainGeometry>::level_cache_.arr();
-    ConstVector<double> att        = Residual<DomainGeometry>::level_cache_.att();
-    ConstVector<double> art        = Residual<DomainGeometry>::level_cache_.art();
-    ConstVector<double> detDF      = Residual<DomainGeometry>::level_cache_.detDF();
-    ConstVector<double> coeff_beta = Residual<DomainGeometry>::level_cache_.coeff_beta();
+    const PolarGrid& grid          = Residual<LevelCacheType>::grid_;
+    const bool DirBC_Interior      = Residual<LevelCacheType>::DirBC_Interior_;
+    ConstVector<double> arr        = Residual<LevelCacheType>::level_cache_.arr();
+    ConstVector<double> att        = Residual<LevelCacheType>::level_cache_.att();
+    ConstVector<double> art        = Residual<LevelCacheType>::level_cache_.art();
+    ConstVector<double> detDF      = Residual<LevelCacheType>::level_cache_.detDF();
+    ConstVector<double> coeff_beta = Residual<LevelCacheType>::level_cache_.coeff_beta();
 
     for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
         node_apply_a_take(i_r, i_theta, grid, DirBC_Interior, result, x, arr, att, art, detDF, coeff_beta);

@@ -24,8 +24,8 @@ static inline void update_CSR_COO_MatrixElement(SparseMatrixCSR<double>& matrix,
 
 } // namespace smoother_take
 
-template <concepts::DomainGeometry DomainGeometry>
-void SmootherTake<DomainGeometry>::nodeBuildInteriorBoundarySolverMatrix(
+template <class LevelCacheType>
+void SmootherTake<LevelCacheType>::nodeBuildInteriorBoundarySolverMatrix(
     int i_theta, const PolarGrid& grid, bool DirBC_Interior, InnerBoundaryMatrix& matrix, ConstVector<double>& arr,
     ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
 {
@@ -130,14 +130,14 @@ void SmootherTake<DomainGeometry>::nodeBuildInteriorBoundarySolverMatrix(
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry>
-typename SmootherTake<DomainGeometry>::InnerBoundaryMatrix
-SmootherTake<DomainGeometry>::buildInteriorBoundarySolverMatrix()
+template <class LevelCacheType>
+typename SmootherTake<LevelCacheType>::InnerBoundaryMatrix
+SmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
 {
-    const PolarGrid& grid                         = Smoother<DomainGeometry>::grid_;
-    const LevelCache<DomainGeometry>& level_cache = Smoother<DomainGeometry>::level_cache_;
-    const bool DirBC_Interior                     = Smoother<DomainGeometry>::DirBC_Interior_;
-    const int num_omp_threads                     = Smoother<DomainGeometry>::num_omp_threads_;
+    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
+    const int num_omp_threads         = Smoother<LevelCacheType>::num_omp_threads_;
 
     const int i_r    = 0;
     const int ntheta = grid.ntheta();

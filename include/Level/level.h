@@ -1,13 +1,13 @@
 #pragma once
 
 // Required to prevent circular dependencies.
-template <concepts::DomainGeometry DomainGeometry>
+template <class LevelCacheType>
 class DirectSolver;
-template <concepts::DomainGeometry DomainGeometry>
+template <class LevelCacheType>
 class Residual;
-template <concepts::DomainGeometry DomainGeometry>
+template <class LevelCacheType>
 class Smoother;
-template <concepts::DomainGeometry DomainGeometry>
+template <class LevelCacheType>
 class ExtrapolatedSmoother;
 
 #include <memory>
@@ -46,17 +46,20 @@ template <concepts::DomainGeometry DomainGeometry>
 class Level
 {
 public:
+    using LevelCacheType = LevelCache<DomainGeometry>;
+
+public:
     // ----------- //
     // Constructor //
     explicit Level(const int level_depth, std::unique_ptr<const PolarGrid> grid,
-                   std::unique_ptr<const LevelCache<DomainGeometry>> level_cache, const ExtrapolationType extrapolation,
+                   std::unique_ptr<const LevelCacheType> level_cache, const ExtrapolationType extrapolation,
                    const bool FMG, const bool PCG_FMG = false);
 
     // ---------------- //
     // Getter Functions //
     int level_depth() const;
     const PolarGrid& grid() const;
-    const LevelCache<DomainGeometry>& levelCache() const;
+    const LevelCacheType& levelCache() const;
 
     Vector<double> rhs();
     ConstVector<double> rhs() const;
@@ -96,12 +99,12 @@ public:
 private:
     const int level_depth_;
     std::unique_ptr<const PolarGrid> grid_;
-    std::unique_ptr<const LevelCache<DomainGeometry>> level_cache_;
+    std::unique_ptr<const LevelCacheType> level_cache_;
 
-    std::unique_ptr<DirectSolver<DomainGeometry>> op_directSolver_;
-    std::unique_ptr<Residual<DomainGeometry>> op_residual_;
-    std::unique_ptr<Smoother<DomainGeometry>> op_smoother_;
-    std::unique_ptr<ExtrapolatedSmoother<DomainGeometry>> op_extrapolated_smoother_;
+    std::unique_ptr<DirectSolver<LevelCacheType>> op_directSolver_;
+    std::unique_ptr<Residual<LevelCacheType>> op_residual_;
+    std::unique_ptr<Smoother<LevelCacheType>> op_smoother_;
+    std::unique_ptr<ExtrapolatedSmoother<LevelCacheType>> op_extrapolated_smoother_;
 
     Vector<double> rhs_;
     Vector<double> solution_;

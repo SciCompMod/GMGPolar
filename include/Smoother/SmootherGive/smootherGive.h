@@ -44,13 +44,13 @@
 //   - Dirichlet boundary contributions in radial matrices are shifted
 //     into the right-hand side to make A_sc symmetric.
 
-template <concepts::DomainGeometry DomainGeometry>
-class SmootherGive : public Smoother<DomainGeometry>
+template <class LevelCacheType>
+class SmootherGive : public Smoother<LevelCacheType>
 {
 public:
     // Constructs the coupled circle-radial smoother.
     // Builds the A_sc smoother matrices and prepares the solvers.
-    explicit SmootherGive(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache, bool DirBC_Interior,
+    explicit SmootherGive(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
                           int num_omp_threads);
 
     // If MUMPS is enabled, this cleans up the inner boundary solver.

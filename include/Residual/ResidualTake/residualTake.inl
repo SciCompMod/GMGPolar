@@ -1,26 +1,25 @@
 #pragma once
 
-template <concepts::DomainGeometry DomainGeometry>
-ResidualTake<DomainGeometry>::ResidualTake(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-                                           bool DirBC_Interior,
-                                           int num_omp_threads)
-    : Residual<DomainGeometry>(grid, level_cache, DirBC_Interior, num_omp_threads)
+template <class LevelCacheType>
+ResidualTake<LevelCacheType>::ResidualTake(const PolarGrid& grid, const LevelCacheType& level_cache,
+                                           bool DirBC_Interior, int num_omp_threads)
+    : Residual<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
 {
 }
 
 /* ------------ */
 /* result = A*x */
-template <concepts::DomainGeometry DomainGeometry>
-void ResidualTake<DomainGeometry>::applySystemOperator(Vector<double> result, ConstVector<double> x) const
+template <class LevelCacheType>
+void ResidualTake<LevelCacheType>::applySystemOperator(Vector<double> result, ConstVector<double> x) const
 {
     assert(result.size() == x.size());
 
-    const int num_omp_threads = Residual<DomainGeometry>::num_omp_threads_;
+    const int num_omp_threads = Residual<LevelCacheType>::num_omp_threads_;
 
-    assert(Residual<DomainGeometry>::level_cache_.cacheDensityProfileCoefficients());
-    assert(Residual<DomainGeometry>::level_cache_.cacheDomainGeometry());
+    assert(Residual<LevelCacheType>::level_cache_.cacheDensityProfileCoefficients());
+    assert(Residual<LevelCacheType>::level_cache_.cacheDomainGeometry());
 
-    const PolarGrid& grid = Residual<DomainGeometry>::grid_;
+    const PolarGrid& grid = Residual<LevelCacheType>::grid_;
 
 #pragma omp parallel num_threads(num_omp_threads)
     {
@@ -40,13 +39,13 @@ void ResidualTake<DomainGeometry>::applySystemOperator(Vector<double> result, Co
 
 /* ------------------ */
 /* result = rhs - A*x */
-template <concepts::DomainGeometry DomainGeometry>
-void ResidualTake<DomainGeometry>::computeResidual(Vector<double> result, ConstVector<double> rhs,
+template <class LevelCacheType>
+void ResidualTake<LevelCacheType>::computeResidual(Vector<double> result, ConstVector<double> rhs,
                                                    ConstVector<double> x) const
 {
     assert(result.size() == x.size());
 
-    const int num_omp_threads = Residual<DomainGeometry>::num_omp_threads_;
+    const int num_omp_threads = Residual<LevelCacheType>::num_omp_threads_;
 
     applySystemOperator(result, x);
 
