@@ -358,8 +358,9 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverDirBC_Interior_ShafranovGeo
     using DomainGeometryType = ShafranovGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    double alpha_jump                                        = 0.4837 * Rmax;
-    std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniGyroCoefficients>(Rmax, alpha_jump);
+    double alpha_jump                    = 0.4837 * Rmax;
+    using DensityProfileCoefficientsType = ZoniGyroCoefficients;
+    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
     int maxOpenMPThreads                    = 16;
@@ -403,8 +404,9 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovGeome
     using DomainGeometryType = ShafranovGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    double alpha_jump                                        = 0.4837 * Rmax;
-    std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniGyroCoefficients>(Rmax, alpha_jump);
+    double alpha_jump                    = 0.4837 * Rmax;
+    using DensityProfileCoefficientsType = ZoniGyroCoefficients;
+    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
     int maxOpenMPThreads                    = 16;
@@ -917,8 +919,9 @@ TEST(DirectSolverTakeTest_ShafranovGeometry, DirectSolverDirBC_Interior_Shafrano
     using DomainGeometryType = ShafranovGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    double alpha_jump                                        = 0.4837 * Rmax;
-    std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniGyroCoefficients>(Rmax, alpha_jump);
+    double alpha_jump                    = 0.4837 * Rmax;
+    using DensityProfileCoefficientsType = ZoniGyroCoefficients;
+    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
     int maxOpenMPThreads                    = 16;
@@ -962,8 +965,9 @@ TEST(DirectSolverTakeTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovG
     using DomainGeometryType = ShafranovGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    double alpha_jump                                        = 0.4837 * Rmax;
-    std::unique_ptr<DensityProfileCoefficients> coefficients = std::make_unique<ZoniGyroCoefficients>(Rmax, alpha_jump);
+    double alpha_jump                    = 0.4837 * Rmax;
+    using DensityProfileCoefficientsType = ZoniGyroCoefficients;
+    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
     int maxOpenMPThreads                    = 16;
