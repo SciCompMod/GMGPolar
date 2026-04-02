@@ -1,12 +1,11 @@
 #pragma once
 
 template <concepts::DomainGeometry DomainGeometry>
-ExtrapolatedSmootherTake<DomainGeometry>::ExtrapolatedSmootherTake(
-    const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache, const DomainGeometry& domain_geometry,
-    const DensityProfileCoefficients& density_profile_coefficients, const bool DirBC_Interior,
-    const int num_omp_threads)
-    : ExtrapolatedSmoother<DomainGeometry>(grid, level_cache, domain_geometry, density_profile_coefficients,
-                                           DirBC_Interior, num_omp_threads)
+ExtrapolatedSmootherTake<DomainGeometry>::ExtrapolatedSmootherTake(const PolarGrid& grid,
+                                                                   const LevelCache<DomainGeometry>& level_cache,
+                                                                   const DomainGeometry& domain_geometry,
+                                                                   const bool DirBC_Interior, const int num_omp_threads)
+    : ExtrapolatedSmoother<DomainGeometry>(grid, level_cache, domain_geometry, DirBC_Interior, num_omp_threads)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
     , radial_tridiagonal_solver_(grid.lengthSmootherRadial(), grid.ntheta(), false)
 {

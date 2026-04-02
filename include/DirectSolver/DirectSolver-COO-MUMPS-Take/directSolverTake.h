@@ -9,9 +9,8 @@ class DirectSolver_COO_MUMPS_Take : public DirectSolver<DomainGeometry>
 {
 public:
     explicit DirectSolver_COO_MUMPS_Take(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-                                         const DomainGeometry& domain_geometry,
-                                         const DensityProfileCoefficients& density_profile_coefficients,
-                                         bool DirBC_Interior, int num_omp_threads);
+                                         const DomainGeometry& domain_geometry, bool DirBC_Interior,
+                                         int num_omp_threads);
 
     // Note: The rhs (right-hand side) vector gets overwritten during the solution process.
     void solveInPlace(Vector<double> solution) override;

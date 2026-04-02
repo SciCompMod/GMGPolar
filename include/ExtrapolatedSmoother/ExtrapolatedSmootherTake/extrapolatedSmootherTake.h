@@ -58,9 +58,7 @@ public:
     // Constructs the coupled circle-radial extrapolated smoother.
     // Builds the A_sc smoother matrices and prepares the solvers.
     explicit ExtrapolatedSmootherTake(const PolarGrid& grid, const LevelCache<DomainGeometry>& level_cache,
-                                      const DomainGeometry& domain_geometry,
-                                      const DensityProfileCoefficients& density_profile_coefficients,
-                                      bool DirBC_Interior, int num_omp_threads);
+                                      const DomainGeometry& domain_geometry, bool DirBC_Interior, int num_omp_threads);
 
     // If MUMPS is enabled, this cleans up the inner boundary solver.
     ~ExtrapolatedSmootherTake() override;

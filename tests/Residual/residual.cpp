@@ -56,9 +56,9 @@ TEST(OperatorATest, applyA_DirBC_Interior)
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
     ResidualGive<DomainGeometryType> residualGive_operator(level.grid(), level.levelCache(), domain_geometry,
-                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+                                                           DirBC_Interior, maxOpenMPThreads);
     ResidualTake<DomainGeometryType> residualTake_operator(level.grid(), level.levelCache(), domain_geometry,
-                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+                                                           DirBC_Interior, maxOpenMPThreads);
 
     Vector<double> x   = generate_random_sample_data(level.grid(), 42);
     Vector<double> rhs = generate_random_sample_data(level.grid(), 69);
@@ -112,9 +112,9 @@ TEST(OperatorATest, applyA_AcrossOrigin)
         std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
     ResidualGive<DomainGeometryType> residualGive_operator(level.grid(), level.levelCache(), domain_geometry,
-                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+                                                           DirBC_Interior, maxOpenMPThreads);
     ResidualTake<DomainGeometryType> residualTake_operator(level.grid(), level.levelCache(), domain_geometry,
-                                                           *coefficients, DirBC_Interior, maxOpenMPThreads);
+                                                           DirBC_Interior, maxOpenMPThreads);
 
     Vector<double> x   = generate_random_sample_data(level.grid(), 42);
     Vector<double> rhs = generate_random_sample_data(level.grid(), 69);
