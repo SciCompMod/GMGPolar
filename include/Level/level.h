@@ -39,14 +39,14 @@ class ExtrapolatedSmoother;
 // coefficients (`arr`, `att`, `art`, `detDF`) related to the domain geometry. These coefficients are critical for efficient matrix-free stencil operations
 // and contribute to the accuracy and performance of the multigrid solver.
 
-template <concepts::DomainGeometry DomainGeometry>
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 class LevelCache;
 
-template <concepts::DomainGeometry DomainGeometry>
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 class Level
 {
 public:
-    using LevelCacheType = LevelCache<DomainGeometry>;
+    using LevelCacheType = LevelCache<DomainGeometry, DensityProfileCoefficients>;
 
 public:
     // ----------- //
@@ -112,7 +112,7 @@ private:
     Vector<double> error_correction_;
 };
 
-template <concepts::DomainGeometry DomainGeometry>
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 class LevelCache
 {
 public:
