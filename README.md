@@ -164,7 +164,38 @@ by giving:
 
 - Added a new LU decomposition solver, allowing users to choose between MUMPS and the in-house solver for greater flexibility and performance.
 
+### GMGPolar 2.0.1
+
+GMGPolar v2.0.1 addresses some minor items:
+- Correction of broken code coverage
+- Improved output
+- Changed position for anisotropic refinement with ZoniShifted
+
 ### GMGPolar 2.1.0
+
+This release delivers performance optimizations, structural improvements, and extended functionality.
+
+1. **Solver & Performance**
+
+- Replaced the custom LU decomposition solver with a faster implementation.
+- Fixed an error in the FMG method, reducing iterations when using a small number of multigrid levels.
+
+2. **New Functionality**
+
+- Added angular dependence in profile coefficients.
+- Enabled multiple solves with the same GMGPolar instance for varying source terms and boundary conditions.
+
+3. **Restructuring & Code Quality**
+
+- Refactored GMGPolar by moving command-line parsing into a dedicated ConfigParser.
+- Redesigned the solve and setup functions, and reorganized the header file with a clearer structure and enhanced documentation.
+
+4. **Testing & Usability**
+5. 
+- Added tests for LU solver, convergence order, and solver validation across multiple settings.
+- Improved verbose output formatting for clearer settings and runtime information.
+
+### GMGPolar 2.2.0
 
 1. **Preconditioned Conjugate Gradient (PCG)**
    - Added PCG solver, allowing GMGPolar to be used as a preconditioner for CG instead of a standalone iterative solver.
