@@ -150,7 +150,7 @@ by giving:
 2. **New Features**
     - Introduced W- and F cycles for enhanced solving capabilities.
     - Added FMG (Full Multigrid) to obtain improved starting solutions.
-    - Implemented advanced caching behavior options for the "A-Give" implementation strategy.
+    - Implemented advanced caching behavior options for the 'A-Give' implementation strategy.
     - Added a new strategy named 'A-Take,' which is appropriate for cases where memory is less of a constraint, resulting in faster execution times.
     - Comprehensive Unit Tests: Integrated Google Unit Tests for all classes, ensuring robust and reliable functionality across the codebase.
 
