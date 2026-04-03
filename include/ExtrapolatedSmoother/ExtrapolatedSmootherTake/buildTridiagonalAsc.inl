@@ -89,7 +89,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
             /* Center: (Left, Right, Bottom, Top) */
             row    = center_index;
             column = center_index;
-            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) +
                      coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                      coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
             updateMatrixElement(solver, batch, row, column, value);
@@ -128,7 +128,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
                 /* Center: (Left, Right, Bottom, Top) */
                 row    = center_index;
                 column = center_index;
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) +
                          coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                          coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
                 updateMatrixElement(solver, batch, row, column, value);
@@ -232,7 +232,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
             /* Center: (Left, Right, Bottom, Top) */
             row    = center_index;
             column = center_index;
-            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) +
                      coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                      coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
             updateMatrixElement(solver, batch, row, column, value);
@@ -276,7 +276,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
                 /* Center: (Left, Right, Bottom, Top) */
                 row    = center_index;
                 column = center_index;
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) +
                          coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                          coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
                 updateMatrixElement(solver, batch, row, column, value);
@@ -340,7 +340,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
             /* Center: (Left, Right, Bottom, Top) */
             row    = center_index;
             column = center_index;
-            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) +
                      coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                      coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
             updateMatrixElement(solver, batch, row, column, value);
@@ -363,7 +363,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
                 /* Center: (Left, Right, Bottom, Top) */
                 row    = center_index;
                 column = center_index;
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) +
                          coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                          coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
                 updateMatrixElement(solver, batch, row, column, value);
@@ -429,7 +429,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
             /* Center: (Left, Right, Bottom, Top) */
             row    = center_index;
             column = center_index;
-            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) +
                      coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                      coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
             updateMatrixElement(solver, batch, row, column, value);
@@ -457,7 +457,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
             /* Center: (Left, Right, Bottom, Top) */
             row    = center_index;
             column = center_index;
-            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) +
                      coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                      coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
             updateMatrixElement(solver, batch, row, column, value);
