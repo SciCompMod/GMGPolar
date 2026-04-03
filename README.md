@@ -19,7 +19,7 @@ To begin, download the latest stable version of GMGPolar by running the followin
 
 ```bash
 # Clone the repository. This will create a directory named GMGPolar.
-git clone -b main https://github.com/SciCompMod/GMGPolar GMGPolar
+git clone https://github.com/SciCompMod/GMGPolar
 ```
 
 ## Configuring the Solver
@@ -191,7 +191,7 @@ This release delivers performance optimizations, structural improvements, and ex
 - Redesigned the solve and setup functions, and reorganized the header file with a clearer structure and enhanced documentation.
 
 4. **Testing & Usability**
-5. 
+
 - Added tests for LU solver, convergence order, and solver validation across multiple settings.
 - Improved verbose output formatting for clearer settings and runtime information.
 
