@@ -148,52 +148,45 @@ by giving:
   - Replaced the LU-Decomposition algorithm with the Thomas algorithm for improved efficiency.
 
 2. **New Features**
-
-- Introduced W- and F cycles for enhanced solving capabilities.
-- Added FMG (Full Multigrid) to obtain improved starting solutions.
-- Implemented advanced caching behavior options for the "A-Give" implementation strategy.
-- Added a new strategy named 'A-Take,' which is appropriate for cases where memory is less of a constraint, resulting in faster execution times.
-- Comprehensive Unit Tests: Integrated Google Unit Tests for all classes, ensuring robust and reliable functionality across the codebase.
+    - Introduced W- and F cycles for enhanced solving capabilities.
+    - Added FMG (Full Multigrid) to obtain improved starting solutions.
+    - Implemented advanced caching behavior options for the "A-Give" implementation strategy.
+    - Added a new strategy named 'A-Take,' which is appropriate for cases where memory is less of a constraint, resulting in faster execution times.
+    - Comprehensive Unit Tests: Integrated Google Unit Tests for all classes, ensuring robust and reliable functionality across the codebase.
 
 3. **Performance Improvements**
-
-- Removed the task-based approach, which did not scale well with increasing parallelization.
-- Reduced maximum usage by 61.5% by constructing symmetric matrices and utilizing the tridiagonal structure of smoother matrices.
+    - Removed the task-based approach, which did not scale well with increasing parallelization.
+    - Reduced maximum usage by 61.5% by constructing symmetric matrices and utilizing the tridiagonal structure of smoother matrices.
 
 4. **Updated Features**
-
-- Added a new LU decomposition solver, allowing users to choose between MUMPS and the in-house solver for greater flexibility and performance.
+    - Added a new LU decomposition solver, allowing users to choose between MUMPS and the in-house solver for greater flexibility and performance.
 
 ### GMGPolar 2.0.1
 
 GMGPolar v2.0.1 addresses some minor items:
-- Correction of broken code coverage
-- Improved output
-- Changed position for anisotropic refinement with ZoniShifted
+    - Correction of broken code coverage
+    - Improved output
+    - Changed position for anisotropic refinement with ZoniShifted
 
 ### GMGPolar 2.1.0
 
 This release delivers performance optimizations, structural improvements, and extended functionality.
 
 1. **Solver & Performance**
-
-- Replaced the custom LU decomposition solver with a faster implementation.
-- Fixed an error in the FMG method, reducing iterations when using a small number of multigrid levels.
+    - Replaced the custom LU decomposition solver with a faster implementation.
+    - Fixed an error in the FMG method, reducing iterations when using a small number of multigrid levels.
 
 2. **New Functionality**
-
-- Added angular dependence in profile coefficients.
-- Enabled multiple solves with the same GMGPolar instance for varying source terms and boundary conditions.
+    - Added angular dependence in profile coefficients.
+    - Enabled multiple solves with the same GMGPolar instance for varying source terms and boundary conditions.
 
 3. **Restructuring & Code Quality**
-
-- Refactored GMGPolar by moving command-line parsing into a dedicated ConfigParser.
-- Redesigned the solve and setup functions, and reorganized the header file with a clearer structure and enhanced documentation.
+    - Refactored GMGPolar by moving command-line parsing into a dedicated ConfigParser.
+    - Redesigned the solve and setup functions, and reorganized the header file with a clearer structure and enhanced documentation.
 
 4. **Testing & Usability**
-
-- Added tests for LU solver, convergence order, and solver validation across multiple settings.
-- Improved verbose output formatting for clearer settings and runtime information.
+    - Added tests for LU solver, convergence order, and solver validation across multiple settings.
+    - Improved verbose output formatting for clearer settings and runtime information.
 
 ### GMGPolar 2.2.0
 
