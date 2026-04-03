@@ -14,12 +14,8 @@ void ResidualTake<LevelCacheType>::applySystemOperator(Vector<double> result, Co
 {
     assert(result.size() == x.size());
 
+    const PolarGrid& grid     = Residual<LevelCacheType>::grid_;
     const int num_omp_threads = Residual<LevelCacheType>::num_omp_threads_;
-
-    assert(Residual<LevelCacheType>::level_cache_.cacheDensityProfileCoefficients());
-    assert(Residual<LevelCacheType>::level_cache_.cacheDomainGeometry());
-
-    const PolarGrid& grid = Residual<LevelCacheType>::grid_;
 
 #pragma omp parallel num_threads(num_omp_threads)
     {

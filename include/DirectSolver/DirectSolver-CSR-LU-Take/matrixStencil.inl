@@ -9,13 +9,11 @@ int DirectSolver_CSR_LU_Take<LevelCacheType>::getStencilSize(int global_index) c
     int i_r, i_theta;
     grid.multiIndex(global_index, i_r, i_theta);
 
-    const int size_stencil_inner_boundary      = DirBC_Interior ? 1 : 7;
-    const int size_stencil_next_inner_boundary = DirBC_Interior ? 9 : 9;
-    const int size_stencil_interior            = 9;
-    const int size_stencil_next_outer_boundary = 9;
-    const int size_stencil_outer_boundary      = 1;
+    const int size_stencil_inner_boundary = DirBC_Interior ? 1 : 7;
+    const int size_stencil_interior       = 9;
+    const int size_stencil_outer_boundary = 1;
 
-    if ((i_r > 1 && i_r < grid.nr() - 2) || (i_r == 1 && !DirBC_Interior)) {
+    if ((i_r > 0 && i_r < grid.nr() - 1)) {
         return size_stencil_interior;
     }
     else if (i_r == 0 && !DirBC_Interior) {
@@ -24,12 +22,7 @@ int DirectSolver_CSR_LU_Take<LevelCacheType>::getStencilSize(int global_index) c
     else if ((i_r == 0 && DirBC_Interior) || i_r == grid.nr() - 1) {
         return size_stencil_outer_boundary;
     }
-    else if (i_r == 1 && DirBC_Interior) {
-        return size_stencil_next_inner_boundary;
-    }
-    else if (i_r == grid.nr() - 2) {
-        return size_stencil_next_outer_boundary;
-    }
+
     throw std::out_of_range("Invalid index for stencil");
 }
 
@@ -42,7 +35,7 @@ const Stencil& DirectSolver_CSR_LU_Take<LevelCacheType>::getStencil(int i_r) con
     assert(0 <= i_r && i_r < grid.nr());
     assert(grid.nr() >= 4);
 
-    if ((i_r > 1 && i_r < grid.nr() - 2) || (i_r == 1 && !DirBC_Interior)) {
+    if ((i_r > 0 && i_r < grid.nr() - 1)) {
         return stencil_interior_;
     }
     else if (i_r == 0 && !DirBC_Interior) {
@@ -51,12 +44,7 @@ const Stencil& DirectSolver_CSR_LU_Take<LevelCacheType>::getStencil(int i_r) con
     else if ((i_r == 0 && DirBC_Interior) || i_r == grid.nr() - 1) {
         return stencil_DB_;
     }
-    else if (i_r == 1 && DirBC_Interior) {
-        return stencil_next_inner_DB_;
-    }
-    else if (i_r == grid.nr() - 2) {
-        return stencil_next_outer_DB_;
-    }
+
     throw std::out_of_range("Invalid index for stencil");
 }
 
@@ -66,15 +54,10 @@ int DirectSolver_CSR_LU_Take<LevelCacheType>::getNonZeroCountSolverMatrix() cons
     const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
     const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
-    const int size_stencil_inner_boundary      = DirBC_Interior ? 1 : 7;
-    const int size_stencil_next_inner_boundary = DirBC_Interior ? 9 : 9;
-    const int size_stencil_interior            = 9;
-    const int size_stencil_next_outer_boundary = 9;
-    const int size_stencil_outer_boundary      = 1;
-
-    assert(grid.nr() >= 4);
+    const int size_stencil_inner_boundary = DirBC_Interior ? 1 : 7;
+    const int size_stencil_interior       = 9;
+    const int size_stencil_outer_boundary = 1;
 
     return grid.ntheta() *
-           (size_stencil_inner_boundary + size_stencil_next_inner_boundary + (grid.nr() - 4) * size_stencil_interior +
-            size_stencil_next_outer_boundary + size_stencil_outer_boundary);
+           (size_stencil_inner_boundary + (grid.nr() - 2) * size_stencil_interior + size_stencil_outer_boundary);
 }

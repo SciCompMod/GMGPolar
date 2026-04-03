@@ -3,7 +3,6 @@
 namespace smoother_give
 {
 
-/* Tridiagonal matrices */
 static inline void updateMatrixElement(BatchedTridiagonalSolver<double>& solver, int batch, int row, int column,
                                        double value)
 {
@@ -15,34 +14,15 @@ static inline void updateMatrixElement(BatchedTridiagonalSolver<double>& solver,
         solver.cyclic_corner(batch) += value;
 }
 
-/* Inner Boundary COO/CSR matrix */
-#ifdef GMGPOLAR_USE_MUMPS
-static inline void updateCOOCSRMatrixElement(SparseMatrixCOO<double>& matrix, int ptr, int offset, int row, int col,
-                                             double val)
-{
-    matrix.row_index(ptr + offset) = row;
-    matrix.col_index(ptr + offset) = col;
-    matrix.value(ptr + offset) += val;
-}
-#else
-static inline void updateCOOCSRMatrixElement(SparseMatrixCSR<double>& matrix, int ptr, int offset, int row, int col,
-                                             double val)
-{
-    matrix.row_nz_index(row, offset) = col;
-    matrix.row_nz_entry(row, offset) += val;
-}
-#endif
-
 } // namespace smoother_give
 
 template <class LevelCacheType>
-void SmootherGive<LevelCacheType>::nodeBuildAscGive(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                                    MatrixType& inner_boundary_circle_matrix,
-                                                    BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
-                                                    BatchedTridiagonalSolver<double>& radial_tridiagonal_solver,
-                                                    double arr, double att, double art, double detDF, double coeff_beta)
+void SmootherGive<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
+    int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+    BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
+    BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, double arr, double att, double art, double detDF,
+    double coeff_beta)
 {
-    using smoother_give::updateCOOCSRMatrixElement;
     using smoother_give::updateMatrixElement;
 
     assert(i_r >= 0 && i_r < grid.nr());
@@ -105,7 +85,7 @@ void SmootherGive<LevelCacheType>::nodeBuildAscGive(int i_r, int i_theta, const 
         /* Fill matrix row of (i,j) */
         row    = center_index;
         column = center_index;
-        value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */
+        value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
         updateMatrixElement(center_solver, center_batch, row, column, value);
 
         row    = center_index;
@@ -146,17 +126,7 @@ void SmootherGive<LevelCacheType>::nodeBuildAscGive(int i_r, int i_theta, const 
         updateMatrixElement(center_solver, center_batch, row, column, value);
 
         /* Fill matrix row of (i-1,j) */
-        if (!DirBC_Interior && i_r == 1) {
-            row = left_index;
-            ptr = getCircleAscIndex(i_r - 1, i_theta);
-
-            const Stencil& LeftStencil = getStencil(i_r - 1);
-
-            offset = LeftStencil[StencilPosition::Center];
-            col    = left_index;
-            val    = coeff1 * arr; /* Center: (Right) */
-            updateCOOCSRMatrixElement(inner_boundary_circle_matrix, ptr, offset, row, col, val);
-        }
+        // The inner boundary circle line are is handled by the inner_boundary_mumps_solver, so we fill in the identity matrix.
         if (i_r > 1) {
             row    = left_index;
             column = left_index;
@@ -266,180 +236,39 @@ void SmootherGive<LevelCacheType>::nodeBuildAscGive(int i_r, int i_theta, const 
     /* Circle Section: Node in the inner boundary */
     /* ------------------------------------------ */
     else if (i_r == 0) {
-        /* ------------------------------------------------ */
-        /* Case 1: Dirichlet boundary on the inner boundary */
-        /* ------------------------------------------------ */
-        if (DirBC_Interior) {
-            /* Fill result(i,j) */
-            const double h2 = grid.radialSpacing(i_r);
-            const double k1 = grid.angularSpacing(i_theta - 1);
-            const double k2 = grid.angularSpacing(i_theta);
+        // The inner boundary circle line are is handled by the inner_boundary_mumps_solver, so we fill in the identity matrix.
 
-            const double coeff2 = 0.5 * (k1 + k2) / h2;
+        /* Fill result(i,j) */
+        const double h2 = grid.radialSpacing(i_r);
+        const double k1 = grid.angularSpacing(i_theta - 1);
+        const double k2 = grid.angularSpacing(i_theta);
 
-            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
+        const double coeff2 = 0.5 * (k1 + k2) / h2;
 
-            auto& right_solver = circle_tridiagonal_solver;
-            int right_batch    = i_r + 1;
+        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
 
-            const int center_index = i_theta;
-            const int right_index  = i_theta;
-            const int bottom_index = i_theta_M1;
-            const int top_index    = i_theta_P1;
+        auto& center_solver = circle_tridiagonal_solver;
+        int center_batch    = i_r;
+        auto& right_solver  = circle_tridiagonal_solver;
+        int right_batch     = i_r + 1;
 
-            /* Fill matrix row of (i,j) */
-            row = center_index;
-            ptr = getCircleAscIndex(i_r, i_theta);
+        const int center_index = i_theta;
+        const int right_index  = i_theta;
+        const int bottom_index = i_theta_M1;
+        const int top_index    = i_theta_P1;
 
-            const Stencil& CenterStencil = getStencil(i_r);
+        /* Fill matrix row of (i,j) */
+        row    = center_index;
+        column = center_index;
+        value  = 1.0;
+        updateMatrixElement(center_solver, center_batch, row, column, value);
 
-            offset = CenterStencil[StencilPosition::Center];
-            col    = center_index;
-            val    = 1.0;
-            updateCOOCSRMatrixElement(inner_boundary_circle_matrix, ptr, offset, row, col, val);
-
-            /* Fill matrix row of (i+1,j) */
-            row    = right_index;
-            column = right_index;
-            value  = coeff2 * arr; /* Center: (Left) */
-            updateMatrixElement(right_solver, right_batch, row, column, value);
-        }
-        else {
-            /* ------------------------------------------------------------- */
-            /* Case 2: Across origin discretization on the interior boundary */
-            /* ------------------------------------------------------------- */
-            // h1 gets replaced with 2 * R0.
-            // (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()>>1)).
-            // Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil.
-            const double h1 = 2 * grid.radius(0);
-            const double h2 = grid.radialSpacing(i_r);
-            const double k1 = grid.angularSpacing(i_theta - 1);
-            const double k2 = grid.angularSpacing(i_theta);
-
-            const double coeff1 = 0.5 * (k1 + k2) / h1;
-            const double coeff2 = 0.5 * (k1 + k2) / h2;
-            const double coeff3 = 0.5 * (h1 + h2) / k1;
-            const double coeff4 = 0.5 * (h1 + h2) / k2;
-
-            /* left_matrix (across-the origin), center_matrix, right_matrix */
-            /* -| x | o | x | */
-            /* -|   |   |   | */
-            /* -| O | o | o | */
-            /* -|   |   |   | */
-            /* -| x | o | x | */
-            auto& right_solver = circle_tridiagonal_solver;
-            int right_batch    = i_r + 1;
-
-            const int i_theta_M1           = grid.wrapThetaIndex(i_theta - 1);
-            const int i_theta_P1           = grid.wrapThetaIndex(i_theta + 1);
-            const int i_theta_AcrossOrigin = grid.wrapThetaIndex(i_theta + grid.ntheta() / 2);
-
-            const int center_index = i_theta;
-            const int left_index   = i_theta_AcrossOrigin;
-            const int right_index  = i_theta;
-            const int bottom_index = i_theta_M1;
-            const int top_index    = i_theta_P1;
-
-            const int center_nz_index = getCircleAscIndex(i_r, i_theta);
-            const int bottom_nz_index = getCircleAscIndex(i_r, i_theta_M1);
-            const int top_nz_index    = getCircleAscIndex(i_r, i_theta_P1);
-            const int left_nz_index   = getCircleAscIndex(i_r, i_theta_AcrossOrigin);
-
-            int nz_index; /* Fill matrix row of (i,j) */
-            row = center_index;
-            ptr = center_nz_index;
-
-            const Stencil& CenterStencil = getStencil(i_r);
-
-            offset = CenterStencil[StencilPosition::Center];
-            col    = center_index;
-            val    = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* beta_{i,j} */
-            updateCOOCSRMatrixElement(inner_boundary_circle_matrix, ptr, offset, row, col, val);
-
-            offset = CenterStencil[StencilPosition::Left];
-            col    = left_index;
-            val    = -coeff1 * arr; /* Left */
-            updateCOOCSRMatrixElement(inner_boundary_circle_matrix, ptr, offset, row, col, val);
-
-            offset = CenterStencil[StencilPosition::Bottom];
-            col    = bottom_index;
-            val    = -coeff3 * att; /* Bottom */
-            updateCOOCSRMatrixElement(inner_boundary_circle_matrix, ptr, offset, row, col, val);
-
-            offset = CenterStencil[StencilPosition::Top];
-            col    = top_index;
-            val    = -coeff4 * att; /* Top */
-            updateCOOCSRMatrixElement(inner_boundary_circle_matrix, ptr, offset, row, col, val);
-
-            offset = CenterStencil[StencilPosition::Center];
-            col    = center_index;
-            val    = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */
-            updateCOOCSRMatrixElement(inner_boundary_circle_matrix, ptr, offset, row, col, val);
-
-            /* Fill matrix row of (i-1,j) */
-            /* From view the view of the across origin node, */ /* the directions are roatated by 180 degrees in the stencil! */
-            row = left_index;
-            ptr = left_nz_index;
-
-            const Stencil& LeftStencil = CenterStencil;
-
-            offset = LeftStencil[StencilPosition::Left];
-            col    = center_index;
-            val    = -coeff1 * arr; /* Right -> Left*/
-            updateCOOCSRMatrixElement(inner_boundary_circle_matrix, ptr, offset, row, col, val);
-
-            offset = LeftStencil[StencilPosition::Center];
-            col    = left_index;
-            val    = +coeff1 * arr; /* Center: (Right) -> Center: (Left) */
-            updateCOOCSRMatrixElement(inner_boundary_circle_matrix, ptr, offset, row, col, val);
-
-            /* Top Right -> Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
-
-            /* Bottom Right -> Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
-
-            /* Fill matrix row of (i+1,j) */
-            row    = right_index;
-            column = right_index;
-            value  = coeff2 * arr; /* Center: (Left) */
-            updateMatrixElement(right_solver, right_batch, row, column, value);
-
-            /* Fill matrix row of (i,j-1) */
-            row = bottom_index;
-            ptr = bottom_nz_index;
-
-            const Stencil& BottomStencil = CenterStencil;
-
-            offset = BottomStencil[StencilPosition::Top];
-            col    = center_index;
-            val    = -coeff3 * att; /* Top */
-            updateCOOCSRMatrixElement(inner_boundary_circle_matrix, ptr, offset, row, col, val);
-
-            offset = BottomStencil[StencilPosition::Center];
-            col    = bottom_index;
-            val    = +coeff3 * att; /* Center: (Top) */
-            updateCOOCSRMatrixElement(inner_boundary_circle_matrix, ptr, offset, row, col, val);
-
-            /* TopLeft: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
-
-            /* Fill matrix row of (i,j+1) */
-            row = top_index;
-            ptr = top_nz_index;
-
-            const Stencil& TopStencil = CenterStencil;
-
-            offset = TopStencil[StencilPosition::Bottom];
-            col    = center_index;
-            val    = -coeff4 * att; /* Bottom */
-            updateCOOCSRMatrixElement(inner_boundary_circle_matrix, ptr, offset, row, col, val);
-
-            offset = TopStencil[StencilPosition::Center];
-            col    = top_index;
-            val    = +coeff4 * att; /* Center: (Bottom) */
-            updateCOOCSRMatrixElement(inner_boundary_circle_matrix, ptr, offset, row, col, val);
-
-            /* BottomLeft: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
-        }
+        /* Fill matrix row of (i+1,j) */
+        row    = right_index;
+        column = right_index;
+        value  = coeff2 * arr; /* Center: (Left) */
+        updateMatrixElement(right_solver, right_batch, row, column, value);
     }
     /* --------------------------------------------- */
     /* Radial Section: Node next to circular section */
@@ -481,7 +310,7 @@ void SmootherGive<LevelCacheType>::nodeBuildAscGive(int i_r, int i_theta, const 
         /* Fill matrix row of (i,j) */
         row    = center_index;
         column = center_index;
-        value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */
+        value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
         updateMatrixElement(center_solver, center_batch, row, column, value);
 
         row    = center_index;
@@ -564,7 +393,7 @@ void SmootherGive<LevelCacheType>::nodeBuildAscGive(int i_r, int i_theta, const 
         /* ---------------------------- */ /* Fill matrix row of (i,j) */
         row    = center_index;
         column = center_index;
-        value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */
+        value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
         updateMatrixElement(center_solver, center_batch, row, column, value);
 
         row    = center_index;
@@ -637,11 +466,13 @@ void SmootherGive<LevelCacheType>::nodeBuildAscGive(int i_r, int i_theta, const 
 }
 
 template <class LevelCacheType>
-void SmootherGive<LevelCacheType>::buildAscCircleSection(const int i_r)
+void SmootherGive<LevelCacheType>::buildTridiagonalCircleSection(int i_r)
 {
     const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 
+    // Access pattern is aligned with the memory layout of the grid data to maximize cache efficiency.
     const double r = grid.radius(i_r);
     for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
         const int global_index = grid.index(i_r, i_theta);
@@ -651,17 +482,19 @@ void SmootherGive<LevelCacheType>::buildAscCircleSection(const int i_r)
         level_cache.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Build Asc at the current node
-        nodeBuildAscGive(i_r, i_theta, grid, Smoother<LevelCacheType>::DirBC_Interior_, inner_boundary_circle_matrix_,
-                         circle_tridiagonal_solver_, radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
+        nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, DirBC_Interior, circle_tridiagonal_solver_,
+                                           radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
     }
 }
 
 template <class LevelCacheType>
-void SmootherGive<LevelCacheType>::buildAscRadialSection(const int i_theta)
+void SmootherGive<LevelCacheType>::buildTridiagonalRadialSection(int i_theta)
 {
     const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 
+    // Access pattern is aligned with the memory layout of the grid data to maximize cache efficiency.
     const double theta = grid.theta(i_theta);
     for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
         const int global_index = grid.index(i_r, i_theta);
@@ -671,132 +504,75 @@ void SmootherGive<LevelCacheType>::buildAscRadialSection(const int i_theta)
         level_cache.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Build Asc at the current node
-        nodeBuildAscGive(i_r, i_theta, grid, Smoother<LevelCacheType>::DirBC_Interior_, inner_boundary_circle_matrix_,
-                         circle_tridiagonal_solver_, radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
+        nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, DirBC_Interior, circle_tridiagonal_solver_,
+                                           radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
     }
 }
 
 template <class LevelCacheType>
-void SmootherGive<LevelCacheType>::buildAscMatrices()
+void SmootherGive<LevelCacheType>::buildTridiagonalSolverMatrices()
 {
-    /* -------------------------------------- */
-    /* Part 1: Allocate Asc Smoother matrices */
-    /* -------------------------------------- */
-    // BatchedTridiagonalSolvers allocations are handled in the SmootherTake constructor.
-    // circle_tridiagonal_solver_[batch_index=0] is unitialized. Use inner_boundary_circle_matrix_ instead.
+    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
+    const int num_omp_threads         = Smoother<LevelCacheType>::num_omp_threads_;
 
-    const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
-    const bool DirBC_Interior = Smoother<LevelCacheType>::DirBC_Interior_;
-    const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
-
-#ifdef GMGPOLAR_USE_MUMPS
-    // Although the matrix is symmetric, we need to store all its entries, so we disable the symmetry.
-    const int inner_i_r           = 0;
-    const int inner_nnz           = getNonZeroCountCircleAsc(inner_i_r);
-    const int num_circle_nodes    = grid.ntheta();
-    inner_boundary_circle_matrix_ = SparseMatrixCOO<double>(num_circle_nodes, num_circle_nodes, inner_nnz);
-    inner_boundary_circle_matrix_.is_symmetric(false);
-#else
-    std::function<int(int)> nnz_per_row = [&](int i_theta) {
-        return DirBC_Interior ? 1 : 4;
-    };
-    const int num_circle_nodes    = grid.ntheta();
-    inner_boundary_circle_matrix_ = SparseMatrixCSR<double>(num_circle_nodes, num_circle_nodes, nnz_per_row);
-#endif
-
-    /* ---------------------------------- */
-    /* Part 2: Fill Asc Smoother matrices */
-    /* ---------------------------------- */
-
-    /*  Multi-threaded execution: */
     const int num_smoother_circles    = grid.numberSmootherCircles();
     const int additional_radial_tasks = grid.ntheta() % 3;
     const int num_radial_tasks        = grid.ntheta() - additional_radial_tasks;
 
+    /* ---------------- */
+    /* Circular section */
+    /* ---------------- */
+    // We parallelize the loop with step 3 to avoid data race conditions between adjacent circles.
 #pragma omp parallel num_threads(num_omp_threads)
     {
 #pragma omp for
         for (int i_r = 0; i_r < num_smoother_circles; i_r += 3) {
-            buildAscCircleSection(i_r);
-        }
+            buildTridiagonalCircleSection(i_r);
+        } /* Implicit barrier */
 #pragma omp for
         for (int i_r = 1; i_r < num_smoother_circles; i_r += 3) {
-            buildAscCircleSection(i_r);
-        }
+            buildTridiagonalCircleSection(i_r);
+        } /* Implicit barrier */
 #pragma omp for
         for (int i_r = 2; i_r < num_smoother_circles; i_r += 3) {
-            buildAscCircleSection(i_r);
-        }
+            buildTridiagonalCircleSection(i_r);
+        } /* Implicit barrier */
+    }
 
+    /* ---------------- */
+    /* Radial section */
+    /* ---------------- */
+    // We parallelize the loop with step 3 to avoid data race conditions between adjacent radial lines.
+    // Due to the periodicity in the angular direction, we can have at most 2 additional radial tasks
+    // that are handled serially before the parallel loops.
+    if (additional_radial_tasks > 0) {
+        const int i_theta = 0;
+        buildTridiagonalRadialSection(i_theta);
+    }
+
+    if (additional_radial_tasks > 1) {
+        const int i_theta = 1;
+        buildTridiagonalRadialSection(i_theta);
+    }
+
+#pragma omp parallel num_threads(num_omp_threads)
+    {
 #pragma omp for
         for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {
-            if (radial_task > 0) {
-                int i_theta = radial_task + additional_radial_tasks;
-                buildAscRadialSection(i_theta);
-            }
-            else {
-                if (additional_radial_tasks == 0) {
-                    buildAscRadialSection(0);
-                }
-                else if (additional_radial_tasks >= 1) {
-                    buildAscRadialSection(0);
-                    buildAscRadialSection(1);
-                }
-            }
-        }
+            const int i_theta = radial_task + additional_radial_tasks;
+            buildTridiagonalRadialSection(i_theta);
+        } /* Implicit barrier */
 #pragma omp for
         for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 3) {
-            if (radial_task > 1) {
-                int i_theta = radial_task + additional_radial_tasks;
-                buildAscRadialSection(i_theta);
-            }
-            else {
-                if (additional_radial_tasks == 0) {
-                    buildAscRadialSection(1);
-                }
-                else if (additional_radial_tasks == 1) {
-                    buildAscRadialSection(2);
-                }
-                else if (additional_radial_tasks == 2) {
-                    buildAscRadialSection(2);
-                    buildAscRadialSection(3);
-                }
-            }
-        }
+            const int i_theta = radial_task + additional_radial_tasks;
+            buildTridiagonalRadialSection(i_theta);
+        } /* Implicit barrier */
 #pragma omp for
         for (int radial_task = 2; radial_task < num_radial_tasks; radial_task += 3) {
-            int i_theta = radial_task + additional_radial_tasks;
-            buildAscRadialSection(i_theta);
-        }
+            const int i_theta = radial_task + additional_radial_tasks;
+            buildTridiagonalRadialSection(i_theta);
+        } /* Implicit barrier */
     }
-
-    circle_tridiagonal_solver_.setup();
-    radial_tridiagonal_solver_.setup();
-
-#ifdef GMGPOLAR_USE_MUMPS
-    /* ------------------------------------------------------------------ */
-    /* Part 3: Convert inner_boundary_circle_matrix to a symmetric matrix */
-    /* ------------------------------------------------------------------ */
-    SparseMatrixCOO<double> full_matrix = std::move(inner_boundary_circle_matrix_);
-
-    const int nnz           = full_matrix.non_zero_size();
-    const int numRows       = full_matrix.rows();
-    const int numColumns    = full_matrix.columns();
-    const int symmetric_nnz = nnz - (nnz - numRows) / 2;
-
-    inner_boundary_circle_matrix_ = SparseMatrixCOO<double>(numRows, numColumns, symmetric_nnz);
-    inner_boundary_circle_matrix_.is_symmetric(true);
-
-    int current_nz = 0;
-    for (int nz_index = 0; nz_index < full_matrix.non_zero_size(); nz_index++) {
-        int current_row = full_matrix.row_index(nz_index);
-        int current_col = full_matrix.col_index(nz_index);
-        if (current_row <= current_col) {
-            inner_boundary_circle_matrix_.row_index(current_nz) = current_row;
-            inner_boundary_circle_matrix_.col_index(current_nz) = current_col;
-            inner_boundary_circle_matrix_.value(current_nz)     = std::move(full_matrix.value(nz_index));
-            current_nz++;
-        }
-    }
-#endif
 }

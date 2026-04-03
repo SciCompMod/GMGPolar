@@ -798,80 +798,63 @@ SparseMatrixCSR<double> DirectSolver_CSR_LU_Give<LevelCacheType>::buildSolverMat
 
     SparseMatrixCSR<double> solver_matrix(n, n, nnz_per_row);
 
-    if (num_omp_threads == 1) {
-        /* Single-threaded execution */
-        for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
+    const int num_smoother_circles    = grid.numberSmootherCircles();
+    const int additional_radial_tasks = grid.ntheta() % 3;
+    const int num_radial_tasks        = grid.ntheta() - additional_radial_tasks;
+
+    /* ---------------- */
+    /* Circular section */
+    /* ---------------- */
+    // We parallelize the loop with step 3 to avoid data race conditions between adjacent circles.
+#pragma omp parallel num_threads(num_omp_threads)
+    {
+#pragma omp for
+        for (int i_r = 0; i_r < num_smoother_circles; i_r += 3) {
             buildSolverMatrixCircleSection(i_r, solver_matrix);
-        }
-        for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-            buildSolverMatrixRadialSection(i_theta, solver_matrix);
-        }
+        } /* Implicit barrier */
+#pragma omp for
+        for (int i_r = 1; i_r < num_smoother_circles; i_r += 3) {
+            buildSolverMatrixCircleSection(i_r, solver_matrix);
+        } /* Implicit barrier */
+#pragma omp for
+        for (int i_r = 2; i_r < num_smoother_circles; i_r += 3) {
+            buildSolverMatrixCircleSection(i_r, solver_matrix);
+        } /* Implicit barrier */
     }
-    else {
-        /*  Multi-threaded execution: For Loops */
-        const int num_circle_tasks        = grid.numberSmootherCircles();
-        const int additional_radial_tasks = grid.ntheta() % 3;
-        const int num_radial_tasks        = grid.ntheta() - additional_radial_tasks;
+
+    /* ---------------- */
+    /* Radial section */
+    /* ---------------- */
+    // We parallelize the loop with step 3 to avoid data race conditions between adjacent radial lines.
+    // Due to the periodicity in the angular direction, we can have at most 2 additional radial tasks
+    // that are handled serially before the parallel loops.
+    if (additional_radial_tasks > 0) {
+        const int i_theta = 0;
+        buildSolverMatrixRadialSection(i_theta, solver_matrix);
+    }
+
+    if (additional_radial_tasks > 1) {
+        const int i_theta = 1;
+        buildSolverMatrixRadialSection(i_theta, solver_matrix);
+    }
 
 #pragma omp parallel num_threads(num_omp_threads)
-        {
+    {
 #pragma omp for
-            for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
-                int i_r = grid.numberSmootherCircles() - circle_task - 1;
-                buildSolverMatrixCircleSection(i_r, solver_matrix);
-            }
+        for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {
+            const int i_theta = radial_task + additional_radial_tasks;
+            buildSolverMatrixRadialSection(i_theta, solver_matrix);
+        } /* Implicit barrier */
 #pragma omp for
-            for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 3) {
-                int i_r = grid.numberSmootherCircles() - circle_task - 1;
-                buildSolverMatrixCircleSection(i_r, solver_matrix);
-            }
-#pragma omp for nowait
-            for (int circle_task = 2; circle_task < num_circle_tasks; circle_task += 3) {
-                int i_r = grid.numberSmootherCircles() - circle_task - 1;
-                buildSolverMatrixCircleSection(i_r, solver_matrix);
-            }
-
+        for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 3) {
+            const int i_theta = radial_task + additional_radial_tasks;
+            buildSolverMatrixRadialSection(i_theta, solver_matrix);
+        } /* Implicit barrier */
 #pragma omp for
-            for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {
-                if (radial_task > 0) {
-                    int i_theta = radial_task + additional_radial_tasks;
-                    buildSolverMatrixRadialSection(i_theta, solver_matrix);
-                }
-                else {
-                    if (additional_radial_tasks == 0) {
-                        buildSolverMatrixRadialSection(0, solver_matrix);
-                    }
-                    else if (additional_radial_tasks >= 1) {
-                        buildSolverMatrixRadialSection(0, solver_matrix);
-                        buildSolverMatrixRadialSection(1, solver_matrix);
-                    }
-                }
-            }
-#pragma omp for
-            for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 3) {
-                if (radial_task > 1) {
-                    int i_theta = radial_task + additional_radial_tasks;
-                    buildSolverMatrixRadialSection(i_theta, solver_matrix);
-                }
-                else {
-                    if (additional_radial_tasks == 0) {
-                        buildSolverMatrixRadialSection(1, solver_matrix);
-                    }
-                    else if (additional_radial_tasks == 1) {
-                        buildSolverMatrixRadialSection(2, solver_matrix);
-                    }
-                    else if (additional_radial_tasks == 2) {
-                        buildSolverMatrixRadialSection(2, solver_matrix);
-                        buildSolverMatrixRadialSection(3, solver_matrix);
-                    }
-                }
-            }
-#pragma omp for
-            for (int radial_task = 2; radial_task < num_radial_tasks; radial_task += 3) {
-                int i_theta = radial_task + additional_radial_tasks;
-                buildSolverMatrixRadialSection(i_theta, solver_matrix);
-            }
-        }
+        for (int radial_task = 2; radial_task < num_radial_tasks; radial_task += 3) {
+            const int i_theta = radial_task + additional_radial_tasks;
+            buildSolverMatrixRadialSection(i_theta, solver_matrix);
+        } /* Implicit barrier */
     }
 
     return solver_matrix;

@@ -3,10 +3,10 @@
 #include "../directSolver.h"
 
 template <class LevelCacheType>
-class DirectSolver_CSR_LU_Take : public DirectSolver<LevelCacheType>
+class DirectSolver_CSR_LU_Give : public DirectSolver<LevelCacheType>
 {
 public:
-    explicit DirectSolver_CSR_LU_Take(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
+    explicit DirectSolver_CSR_LU_Give(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
                                       int num_omp_threads);
 
     // Note: The rhs (right-hand side) vector gets overwritten with the solution.
@@ -33,19 +33,11 @@ private:
         -1,  0, -1,
         -1, -1, -1
     };
-    const Stencil stencil_next_inner_DB_ = {
-        7, 4, 8,
-        1, 0, 2,
-        5, 3, 6
-    };
-    const Stencil stencil_next_outer_DB_ = {
-        7, 4, 8,
-        1, 0, 2,
-        5, 3, 6
-    };
     // clang-format on
 
     SparseMatrixCSR<double> buildSolverMatrix();
+    void buildSolverMatrixCircleSection(const int i_r, SparseMatrixCSR<double>& solver_matrix);
+    void buildSolverMatrixRadialSection(const int i_theta, SparseMatrixCSR<double>& solver_matrix);
 
     // Returns the total number of non-zero elements in the solver matrix.
     int getNonZeroCountSolverMatrix() const;
@@ -54,12 +46,11 @@ private:
 
     int getStencilSize(int global_index) const;
 
-    void nodeBuildSolverMatrixTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                   SparseMatrixCSR<double>& solver_matrix, ConstVector<double>& arr,
-                                   ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF,
-                                   ConstVector<double>& coeff_beta);
+    void nodeBuildSolverMatrixGive(int i_r, int i_theta, const PolarGrid& grid, const bool DirBC_Interior,
+                                   SparseMatrixCSR<double>& solver_matrix, double arr, double att, double art,
+                                   double detDF, double coeff_beta);
 };
 
 #include "buildSolverMatrix.inl"
-#include "directSolverTake.inl"
+#include "directSolverGive.inl"
 #include "matrixStencil.inl"

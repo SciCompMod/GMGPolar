@@ -90,8 +90,8 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
             row    = center_index;
             column = center_index;
             value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
-                    coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
-                    coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+                     coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
+                     coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
             updateMatrixElement(solver, batch, row, column, value);
 
             /* Bottom */
@@ -129,8 +129,8 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
                 row    = center_index;
                 column = center_index;
                 value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
-                        coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
-                        coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
+                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
                 updateMatrixElement(solver, batch, row, column, value);
             }
             else {
@@ -233,8 +233,8 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
             row    = center_index;
             column = center_index;
             value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
-                    coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
-                    coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+                     coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
+                     coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
             updateMatrixElement(solver, batch, row, column, value);
 
             /* Left */
@@ -277,8 +277,8 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
                 row    = center_index;
                 column = center_index;
                 value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
-                        coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
-                        coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
+                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
                 updateMatrixElement(solver, batch, row, column, value);
             }
             else {
@@ -341,8 +341,8 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
             row    = center_index;
             column = center_index;
             value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
-                    coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
-                    coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+                     coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
+                     coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
             updateMatrixElement(solver, batch, row, column, value);
 
             /* Right */
@@ -364,8 +364,8 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
                 row    = center_index;
                 column = center_index;
                 value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
-                        coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
-                        coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
+                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
                 updateMatrixElement(solver, batch, row, column, value);
             }
             else {
@@ -430,8 +430,8 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
             row    = center_index;
             column = center_index;
             value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
-                    coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
-                    coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+                     coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
+                     coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
             updateMatrixElement(solver, batch, row, column, value);
 
             /* Left */
@@ -458,8 +458,8 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
             row    = center_index;
             column = center_index;
             value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
-                    coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
-                    coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+                     coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
+                     coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
             updateMatrixElement(solver, batch, row, column, value);
         }
     }
@@ -518,10 +518,10 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
 template <class LevelCacheType>
 void ExtrapolatedSmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
 {
-    const PolarGrid& grid             = ExtrapolatedSmootherTake<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = ExtrapolatedSmootherTake<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = ExtrapolatedSmootherTake<LevelCacheType>::DirBC_Interior_;
-    const int num_omp_threads         = ExtrapolatedSmootherTake<LevelCacheType>::num_omp_threads_;
+    const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
+    const int num_omp_threads         = ExtrapolatedSmoother<LevelCacheType>::num_omp_threads_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
