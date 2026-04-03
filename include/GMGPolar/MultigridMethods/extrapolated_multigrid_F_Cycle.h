@@ -44,7 +44,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
 
     // P_ex^T (f_l - A_l*u_l)
     level.computeResidual(residual, rhs, solution);
-    extrapolatedRestriction(level.level_depth(), next_level.residual(), residual);
+    restriction(level.level_depth(), next_level.residual(), residual);
 
     // f_{l-1} - A_{l-1}* Inject(u_l)
     injection(level.level_depth(), next_level.solution(), solution);
@@ -80,7 +80,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     /* -------------------------- */
     // Use 'residual' instead of 'level.error_correction()' as a temporary buffer.
     // Note: 'level.error_correction()' has size 0 at level depth = 0.
-    extrapolatedProlongation(next_level.level_depth(), residual, next_level.error_correction());
+    prolongation(next_level.level_depth(), residual, next_level.error_correction());
 
     /* ----------------------------------- */
     /* Compute the corrected approximation */

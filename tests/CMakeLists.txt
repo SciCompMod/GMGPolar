@@ -17,8 +17,6 @@ add_executable(gmgpolar_tests
     PolarGrid/polargrid.cpp
     Interpolation/prolongation.cpp
     Interpolation/restriction.cpp
-    Interpolation/extrapolated_prolongation.cpp
-    Interpolation/extrapolated_restriction.cpp
     Residual/residual.cpp
     DirectSolver/directSolver.cpp
     DirectSolver/directSolverNoMumps.cpp
