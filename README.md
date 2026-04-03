@@ -208,7 +208,7 @@ by giving:
    - Added support for solves without a multigrid hierarchy.
 
 5. **Bug Fixes**
-   - Fixed MUMPS factorization failure when OpenMP multithreading is enabled in versions later than 5.5.1. Version 5.5.1 remains recommended.
+   - Fixed MUMPS factorization failure when OpenMP multithreading is enabled in versions later than 5.5.1.
 
 6. **Testing**
    - Added formatting validation tests and automatic CI testing with MUMPS.
