@@ -258,7 +258,7 @@ ExtrapolatedSmootherGive<LevelCacheType>::buildInteriorBoundarySolverMatrix()
 #ifdef GMGPOLAR_USE_MUMPS
     const int nnz = getNonZeroCountCircleAsc(0);
     SparseMatrixCOO<double> inner_boundary_solver_matrix(ntheta, ntheta, nnz);
-    inner_boundary_solver_matrix.is_symmetric(false);
+    inner_boundary_solver_matrix.is_symmetric(true);
 #else
     std::function<int(int)> nnz_per_row = [&](int i_theta) {
         if (DirBC_Interior)
