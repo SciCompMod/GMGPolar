@@ -129,7 +129,7 @@ by giving:
 
 ### GMGPolar 2.0.0
 
-1. **Enhancements and New Class Layout:**
+1. **Enhancements and New Class Layout**
 
 - **Linear Algebra:**
   - Introduced custom Vector and SparseMatrix classes.
@@ -163,14 +163,12 @@ by giving:
 
 ### GMGPolar 2.0.1
 
-GMGPolar v2.0.1 addresses some minor items:
+1. **Minor Changes**
     - Correction of broken code coverage
     - Improved output
     - Changed position for anisotropic refinement with ZoniShifted
 
 ### GMGPolar 2.1.0
-
-This release delivers performance optimizations, structural improvements, and extended functionality.
 
 1. **Solver & Performance**
     - Replaced the custom LU decomposition solver with a faster implementation.
