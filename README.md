@@ -115,17 +115,16 @@ by giving:
 
 ### GMGPolar 1.0.0
 
-1. Working multigrid cycle
-2. In-house solver and possibility to link with MUMPS for the smoothing and coarse grid solution
-3. Extrapolation strategies:
-
-   a. No extrapolation (--extrapolation 0)
-
-   b. Default implicit extrapolation (--extrapolation 1)
-
-   c. Non-default implicit extrapolation with smoothing of all nodes on the finest level [experimental, use with care, convergence cannot be observed with residual] (--extrapolation 2)
-
-4. Optimization of apply_A / build_rhs / apply_prolongation / build_Asc / apply_Asc_ortho
+1. **Multigrid**
+    - Implemented a fully functional multigrid cycle.
+3. **Direct Solver**
+    - In-house solver and possibility to link with MUMPS for the smoothing and coarse grid solution
+4. **Extrapolation strategies**
+   - No extrapolation
+   - Default implicit extrapolation
+   - Non-default implicit extrapolation with smoothing of all nodes on the finest level [experimental, use with care, convergence cannot be observed with residual]
+5. **Optimization**
+   - Optimization of apply_A / build_rhs / apply_prolongation / build_Asc / apply_Asc_ortho
 
 ### GMGPolar 2.0.0
 
