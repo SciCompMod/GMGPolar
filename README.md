@@ -120,7 +120,7 @@ by giving:
 3. **Direct Solver**
     - Custom in-house solver for smoothing and coarse-grid solutions.
     - Emable MUMPS for faster factorization times.
-5. **Extrapolation strategies**
+4. **Extrapolation strategies**
    - No extrapolation
    - Default implicit extrapolation
    - Non-default implicit extrapolation with smoothing of all nodes on the finest level (Experimental: residuals can't be used as convergence criterion)
