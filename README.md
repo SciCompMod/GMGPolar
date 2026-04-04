@@ -118,8 +118,8 @@ by giving:
 1. **Multigrid**
     - Implemented a fully functional multigrid cycle
 3. **Direct Solver**
-    - Added an in-house direct solver
-    - Enabled optional integration with MUMPS for smoothing and coarse-grid solves
+    - Custom in-house solver for smoothing and coarse-grid solutions.
+    - Emable MUMPS for faster factorization times.
 5. **Extrapolation strategies**
    - No extrapolation
    - Default implicit extrapolation
