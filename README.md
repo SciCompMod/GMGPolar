@@ -173,6 +173,8 @@ J. Litz, P. Leleux, C. Kruse, J. Gedicke, M. J. Kühn Memory- and compute-optimi
 
 ### GMGPolar 2.1.0
 
+Version 2.1.0 delivers performance optimizations, structural improvements, and extended functionality.
+
 1. **Solver & Performance**
     - Replaced the custom LU decomposition solver with a faster implementation.
     - Fixed an error in the FMG method, reducing iterations when using a small number of multigrid levels.
