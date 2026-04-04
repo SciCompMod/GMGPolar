@@ -129,6 +129,9 @@ by giving:
 
 ### GMGPolar 2.0.0
 
+Version 2.0.0. is a fully refactored version used in
+J. Litz, P. Leleux, C. Kruse, J. Gedicke, M. J. Kühn Memory- and compute-optimized geometric multigrid GMGPolar for curvilinear coordinate representations -- Applications to fusion plasma. Journal of Computational and Applied Mathematics 481, 117308 (2026). [Preprint](https://arxiv.org/abs/2507.03812) [DOI: 10.1016/j.cam.2025.117308](https://doi.org/10.1016/j.cam.2025.117308)
+
 1. **Enhancements and New Class Layout**
 
 - **Linear Algebra:**
