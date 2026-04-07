@@ -15,8 +15,7 @@ int main(int argc, char* argv[])
     parser.parse(argc, argv);
 
     std::visit(
-        [&parser](auto const& domain_geometry, auto const& density_profile_coeffs, auto const& boundary_condition,
-                  auto const& source_term) {
+        [&parser](auto const& domain_geometry, auto const& density_profile_coeffs) {
             // Get the types of the domain geometry and the density profile coefficients
             using DG = std::decay_t<decltype(domain_geometry)>;
             using DC = std::decay_t<decltype(density_profile_coeffs)>;
@@ -73,7 +72,7 @@ int main(int argc, char* argv[])
             solver.setSolution(&parser.exactSolution());
 
             // --- Solve Phase --- //
-            solver.solve(boundary_condition, source_term);
+            parser.solve(solver);
 
             // --- Retrieve solution and associated grid --- //
             Vector<double> solution = solver.solution();
@@ -82,7 +81,7 @@ int main(int argc, char* argv[])
             // Print timing statistics for each solver phase
             solver.printTimings();
         },
-        parser.domainGeometry(), parser.densityProfileCoefficients(), parser.boundaryConditions(), parser.sourceTerm());
+        parser.domainGeometry(), parser.densityProfileCoefficients());
 
     // Finalize LIKWID performance markers
     LIKWID_CLOSE();
