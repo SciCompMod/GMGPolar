@@ -427,11 +427,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printSettings(const P
         std::cout << "A-Give (Stencil Distribution)\n";
     }
 
-    std::cout << "Domain geometry mode:"
-              << " " << (cache_domain_geometry_ ? "Precomputed" : "On-the-fly") << "\n";
+    std::cout << "Domain geometry mode:" << " " << (cache_domain_geometry_ ? "Precomputed" : "On-the-fly") << "\n";
 
-    std::cout << "Density profile mode:"
-              << " " << (cache_density_profile_coefficients_ ? "Precomputed" : "On-the-fly") << "\n";
+    std::cout << "Density profile mode:" << " " << (cache_density_profile_coefficients_ ? "Precomputed" : "On-the-fly")
+              << "\n";
 
     std::cout << "------------------------------\n";
     std::cout << "---------- PolarGrid ---------\n";
