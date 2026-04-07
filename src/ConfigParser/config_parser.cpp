@@ -437,16 +437,6 @@ const DensityProfileCoefficientsVariant& ConfigParser::densityProfileCoefficient
     return *density_profile_coefficients_.get();
 }
 
-const BoundaryConditionsVariant& ConfigParser::boundaryConditions() const
-{
-    return *boundary_conditions_.get();
-}
-
-const SourceTermVariant& ConfigParser::sourceTerm() const
-{
-    return *source_term_.get();
-}
-
 const ExactSolution& ConfigParser::exactSolution() const
 {
     return *exact_solution_.get();
