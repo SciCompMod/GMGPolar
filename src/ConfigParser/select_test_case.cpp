@@ -264,7 +264,7 @@ void ConfigParser::solve(GMGPolar<DomainGeometry, DensityProfileCoefficients>& s
         }
 
         case GeometryType::SHAFRANOV: {
-            CartesianR6_Boundary_ShafranovGeometry boundary_conditions(Rmax_, kappa_eps_, delta_e_);
+            CartesianR2_Boundary_ShafranovGeometry boundary_conditions(Rmax_, kappa_eps_, delta_e_);
 
             switch (alpha_type_) {
             case AlphaCoeff::POISSON: {
@@ -461,7 +461,7 @@ void ConfigParser::solve(GMGPolar<DomainGeometry, DensityProfileCoefficients>& s
         }
 
         case GeometryType::SHAFRANOV: {
-            CartesianR6_Boundary_ShafranovGeometry boundary_conditions(Rmax_);
+            CartesianR6_Boundary_ShafranovGeometry boundary_conditions(Rmax_, kappa_eps_, delta_e_);
 
             switch (alpha_type_) {
             case AlphaCoeff::POISSON: {
@@ -810,7 +810,7 @@ void ConfigParser::solve(GMGPolar<DomainGeometry, DensityProfileCoefficients>& s
 
     case ProblemType::REFINED_RADIUS:
 
-        switch (geometry_type_)
+        switch (geometry_type_) {
         case GeometryType::CIRCULAR: {
             Refined_Boundary_CircularGeometry boundary_conditions(Rmax_);
 
@@ -893,13 +893,15 @@ void ConfigParser::solve(GMGPolar<DomainGeometry, DensityProfileCoefficients>& s
                 throw std::runtime_error("Invalid alpha for configuration.\n");
             }
             break;
+        }
 
         default:
             throw std::runtime_error("Invalid geometry for configuration.\n");
-        } break;
+        }
+        break;
 
-        default:
-            throw std::runtime_error("Invalid problem.\n");
+    default:
+        throw std::runtime_error("Invalid problem.\n");
     }
 }
 
@@ -909,8 +911,8 @@ template void ConfigParser::solve<CircularGeometry, SonnendruckerCoefficients>(
     GMGPolar<CircularGeometry, SonnendruckerCoefficients>& solver) const;
 template void ConfigParser::solve<CircularGeometry, SonnendruckerGyroCoefficients>(
     GMGPolar<CircularGeometry, SonnendruckerGyroCoefficients>& solver) const;
-template void ConfigParser::solve<CircularGeometry, ZoniCoefficients>(
-    GMGPolar<CircularGeometry, ZoniCoefficients>& solver) const;
+template void
+ConfigParser::solve<CircularGeometry, ZoniCoefficients>(GMGPolar<CircularGeometry, ZoniCoefficients>& solver) const;
 template void ConfigParser::solve<CircularGeometry, ZoniGyroCoefficients>(
     GMGPolar<CircularGeometry, ZoniGyroCoefficients>& solver) const;
 template void ConfigParser::solve<CircularGeometry, ZoniShiftedCoefficients>(
@@ -924,8 +926,8 @@ template void ConfigParser::solve<ShafranovGeometry, SonnendruckerCoefficients>(
     GMGPolar<ShafranovGeometry, SonnendruckerCoefficients>& solver) const;
 template void ConfigParser::solve<ShafranovGeometry, SonnendruckerGyroCoefficients>(
     GMGPolar<ShafranovGeometry, SonnendruckerGyroCoefficients>& solver) const;
-template void ConfigParser::solve<ShafranovGeometry, ZoniCoefficients>(
-    GMGPolar<ShafranovGeometry, ZoniCoefficients>& solver) const;
+template void
+ConfigParser::solve<ShafranovGeometry, ZoniCoefficients>(GMGPolar<ShafranovGeometry, ZoniCoefficients>& solver) const;
 template void ConfigParser::solve<ShafranovGeometry, ZoniGyroCoefficients>(
     GMGPolar<ShafranovGeometry, ZoniGyroCoefficients>& solver) const;
 template void ConfigParser::solve<ShafranovGeometry, ZoniShiftedCoefficients>(
@@ -933,31 +935,31 @@ template void ConfigParser::solve<ShafranovGeometry, ZoniShiftedCoefficients>(
 template void ConfigParser::solve<ShafranovGeometry, ZoniShiftedGyroCoefficients>(
     GMGPolar<ShafranovGeometry, ZoniShiftedGyroCoefficients>& solver) const;
 
-template void ConfigParser::solve<CzarnyGeometry, PoissonCoefficients>(
-    GMGPolar<CzarnyGeometry, PoissonCoefficients>& solver) const;
+template void
+ConfigParser::solve<CzarnyGeometry, PoissonCoefficients>(GMGPolar<CzarnyGeometry, PoissonCoefficients>& solver) const;
 template void ConfigParser::solve<CzarnyGeometry, SonnendruckerCoefficients>(
     GMGPolar<CzarnyGeometry, SonnendruckerCoefficients>& solver) const;
 template void ConfigParser::solve<CzarnyGeometry, SonnendruckerGyroCoefficients>(
     GMGPolar<CzarnyGeometry, SonnendruckerGyroCoefficients>& solver) const;
 template void
 ConfigParser::solve<CzarnyGeometry, ZoniCoefficients>(GMGPolar<CzarnyGeometry, ZoniCoefficients>& solver) const;
-template void ConfigParser::solve<CzarnyGeometry, ZoniGyroCoefficients>(
-    GMGPolar<CzarnyGeometry, ZoniGyroCoefficients>& solver) const;
+template void
+ConfigParser::solve<CzarnyGeometry, ZoniGyroCoefficients>(GMGPolar<CzarnyGeometry, ZoniGyroCoefficients>& solver) const;
 template void ConfigParser::solve<CzarnyGeometry, ZoniShiftedCoefficients>(
     GMGPolar<CzarnyGeometry, ZoniShiftedCoefficients>& solver) const;
 template void ConfigParser::solve<CzarnyGeometry, ZoniShiftedGyroCoefficients>(
     GMGPolar<CzarnyGeometry, ZoniShiftedGyroCoefficients>& solver) const;
 
-template void ConfigParser::solve<CulhamGeometry, PoissonCoefficients>(
-    GMGPolar<CulhamGeometry, PoissonCoefficients>& solver) const;
+template void
+ConfigParser::solve<CulhamGeometry, PoissonCoefficients>(GMGPolar<CulhamGeometry, PoissonCoefficients>& solver) const;
 template void ConfigParser::solve<CulhamGeometry, SonnendruckerCoefficients>(
     GMGPolar<CulhamGeometry, SonnendruckerCoefficients>& solver) const;
 template void ConfigParser::solve<CulhamGeometry, SonnendruckerGyroCoefficients>(
     GMGPolar<CulhamGeometry, SonnendruckerGyroCoefficients>& solver) const;
 template void
 ConfigParser::solve<CulhamGeometry, ZoniCoefficients>(GMGPolar<CulhamGeometry, ZoniCoefficients>& solver) const;
-template void ConfigParser::solve<CulhamGeometry, ZoniGyroCoefficients>(
-    GMGPolar<CulhamGeometry, ZoniGyroCoefficients>& solver) const;
+template void
+ConfigParser::solve<CulhamGeometry, ZoniGyroCoefficients>(GMGPolar<CulhamGeometry, ZoniGyroCoefficients>& solver) const;
 template void ConfigParser::solve<CulhamGeometry, ZoniShiftedCoefficients>(
     GMGPolar<CulhamGeometry, ZoniShiftedCoefficients>& solver) const;
 template void ConfigParser::solve<CulhamGeometry, ZoniShiftedGyroCoefficients>(

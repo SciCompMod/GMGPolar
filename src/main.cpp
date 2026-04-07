@@ -19,7 +19,6 @@ int main(int argc, char* argv[])
             // Get the types of the domain geometry and the density profile coefficients
             using DG = std::decay_t<decltype(domain_geometry)>;
             using DC = std::decay_t<decltype(density_profile_coeffs)>;
-            using ST = std::decay_t<decltype(source_term)>;
             // Create GMGPolar solver for the selected geometry and coefficient types
             GMGPolar<DG, DC> solver(parser.grid(), domain_geometry, density_profile_coeffs);
 
