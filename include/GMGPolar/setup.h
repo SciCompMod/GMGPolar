@@ -327,7 +327,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-template <concepts::BoundaryConditions BoundaryConditions>
+template <concepts::BoundaryConditions BoundaryConditions, concepts::SourceTerm SourceTerm>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::build_rhs_f(
     const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f,
     const BoundaryConditions& boundary_conditions, const SourceTerm& source_term)

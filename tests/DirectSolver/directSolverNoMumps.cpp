@@ -16,31 +16,26 @@
 #include "../../include/InputFunctions/domainGeometry.h"
 #include "../../include/InputFunctions/densityProfileCoefficients.h"
 #include "../../include/InputFunctions/boundaryConditions.h"
-#include "../../include/InputFunctions/sourceTerm.h"
 /* ------ */
 /* Test 1 */
 /* ------ */
 #include "../include/InputFunctions/DomainGeometry/circularGeometry.h"
 #include "../include/InputFunctions/DensityProfileCoefficients/sonnendruckerGyroCoefficients.h"
-#include "../include/InputFunctions/SourceTerms/cartesianR2_SonnendruckerGyro_CircularGeometry.h"
 /* ------ */
 /* Test 2 */
 /* ------ */
 #include "../include/InputFunctions/DomainGeometry/shafranovGeometry.h"
 #include "../include/InputFunctions/DensityProfileCoefficients/zoniGyroCoefficients.h"
-#include "../include/InputFunctions/SourceTerms/cartesianR6_ZoniGyro_ShafranovGeometry.h"
 /* ------ */
 /* Test 3 */
 /* ------ */
 #include "../include/InputFunctions/DomainGeometry/czarnyGeometry.h"
 #include "../include/InputFunctions/DensityProfileCoefficients/zoniShiftedCoefficients.h"
-#include "../include/InputFunctions/SourceTerms/polarR6_ZoniShifted_CzarnyGeometry.h"
 /* ------ */
 /* Test 4 */
 /* ------ */
 #include "../include/InputFunctions/DomainGeometry/culhamGeometry.h"
 #include "../include/InputFunctions/DensityProfileCoefficients/zoniShiftedGyroCoefficients.h"
-#include "../include/InputFunctions/SourceTerms/refined_ZoniShiftedGyro_CulhamGeometry.h"
 
 /* Test 1/2: */
 /* Does the Take and Give Implementation match up? */

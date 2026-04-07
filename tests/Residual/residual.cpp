@@ -13,13 +13,11 @@
 #include "../../include/InputFunctions/domainGeometry.h"
 #include "../../include/InputFunctions/densityProfileCoefficients.h"
 #include "../../include/InputFunctions/boundaryConditions.h"
-#include "../../include/InputFunctions/sourceTerm.h"
 /* --------- */
 /* Test Case */
 /* --------- */
 #include "../include/InputFunctions/DomainGeometry/czarnyGeometry.h"
 #include "../include/InputFunctions/DensityProfileCoefficients/zoniShiftedCoefficients.h"
-#include "../include/InputFunctions/SourceTerms/polarR6_ZoniShifted_CzarnyGeometry.h"
 
 /* Test 1/1: */
 /* Does the Take and Give Implementation match up? */
@@ -53,8 +51,6 @@ TEST(OperatorATest, applyA_DirBC_Interior)
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, false);
-    std::unique_ptr<SourceTerm> source_term =
-        std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
     ResidualGive residualGive_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualTake residualTake_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
@@ -108,8 +104,6 @@ TEST(OperatorATest, applyA_AcrossOrigin)
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, false);
-    std::unique_ptr<SourceTerm> source_term =
-        std::make_unique<PolarR6_ZoniShifted_CzarnyGeometry>(level.grid(), Rmax, kappa_eps, delta_e);
 
     ResidualGive residualGive_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualTake residualTake_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);

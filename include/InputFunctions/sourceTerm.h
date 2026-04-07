@@ -1,10 +1,11 @@
 #pragma once
 
-class SourceTerm
+namespace concepts
 {
-public:
-    SourceTerm()          = default;
-    virtual ~SourceTerm() = default;
 
-    virtual double operator()(std::size_t i_r, std::size_t i_theta) const = 0;
+template <typename T>
+concept SourceTerm = requires(const T source, std::size_t i_r, std::size_t i_theta) {
+    { source(i_r, i_theta) } -> std::convertible_to<double>;
 };
+
+} // namespace concepts

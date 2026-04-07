@@ -160,8 +160,6 @@ TEST_P(ConfigParserTest, ParseAllGeometryAndProblemCombinations)
     // Test case objects are initialized
     EXPECT_NE(&parser.domainGeometry(), nullptr);
     EXPECT_NE(&parser.densityProfileCoefficients(), nullptr);
-    EXPECT_NE(&parser.boundaryConditions(), nullptr);
-    EXPECT_NE(&parser.sourceTerm(), nullptr);
     EXPECT_NE(&parser.exactSolution(), nullptr);
 
     // Control parameters
