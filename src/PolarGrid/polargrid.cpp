@@ -49,13 +49,13 @@ void PolarGrid::constructRadialDivisions(double R0, double R, const int nr_exp, 
 {
     // r_temp contains the values before we refine one last time for extrapolation.
     // Therefore we first consider 2^(nr_exp-1) points.
-
+    int nr                  = (1 << (nr_exp - 1)) + 1;
+    double uniform_distance = (R - R0) / (nr - 1);
+    assert(uniform_distance > 0.0);
+    Vector<double> r_temp("r_tem", nr);
     if (anisotropic_factor == 0) {
         // nr = 2**(nr_exp-1) + 1
-        int nr                  = (1 << (nr_exp - 1)) + 1;
-        double uniform_distance = (R - R0) / (nr - 1);
-        assert(uniform_distance > 0.0);
-        Vector<double> r_temp("r_tem", nr);
+
         for (int i = 0; i < nr - 1; i++) {
             r_temp[i] = R0 + i * uniform_distance;
         }
@@ -67,7 +67,7 @@ void PolarGrid::constructRadialDivisions(double R0, double R, const int nr_exp, 
     }
     // Refine division in the middle for extrapolation
     nr_ = 2 * r_temp.size() - 1;
-    radii_.resize(nr_);
+    Kokkos::resize(radii_, nr_);
     for (int i = 0; i < nr_; i++) {
         if (!(i % 2))
             radii_[i] = r_temp[i / 2];
@@ -93,7 +93,7 @@ void PolarGrid::constructAngularDivisions(const int ntheta_exp, const int nr)
     is_ntheta_PowerOfTwo_ = (ntheta_ & (ntheta_ - 1)) == 0;
     // Note that currently ntheta_ = 2^k which allows us to do some optimizations when indexing.
     double uniform_distance = 2 * M_PI / ntheta_;
-    angles_.resize(ntheta_ + 1);
+    Kokkos::resize(angles_, ntheta_ + 1);
     for (int i = 0; i < ntheta_; i++) {
         angles_[i] = i * uniform_distance;
     }
@@ -125,7 +125,7 @@ Vector<double> PolarGrid::divideVector(Vector<double> vec, const int divideBy2) 
             result[baseIndex + j]     = interpolated_value;
         }
     }
-    result[resultSize - 1] = vec.back(); // Add the last value of the original vector
+    result[resultSize - 1] = vec(vec.extent(0) - 1); // Add the last value of the original vector
     return result;
 }
 
@@ -133,7 +133,7 @@ void PolarGrid::initializeDistances()
 {
     // radial_spacings contains the distances between each consecutive radii division.
     // radial_spacings = [R_1-R0, ..., R_{N} - R_{N-1}].
-    radial_spacings_.resize(nr() - 1);
+    Kokkos::resize(radial_spacings_, nr() - 1);
     for (int i = 0; i < nr() - 1; i++) {
         radial_spacings_[i] = radius(i + 1) - radius(i);
     }
@@ -142,7 +142,7 @@ void PolarGrid::initializeDistances()
     // we have to make sure the index wraps around correctly when accessing it.
     // Here theta_0 = 0.0 and theta_N = 2*pi refer to the same point.
     // angular_spacings = [theta_{1}-theta_{0}, ..., theta_{N}-theta_{N-1}].
-    angular_spacings_.resize(ntheta());
+    Kokkos::resize(angular_spacings_, ntheta());
     for (int i = 0; i < ntheta(); i++) {
         angular_spacings_[i] = theta(i + 1) - theta(i);
     }
@@ -156,7 +156,7 @@ void PolarGrid::initializeDistances()
 void PolarGrid::initializeLineSplitting(std::optional<double> splitting_radius)
 {
     if (splitting_radius.has_value()) {
-        if (splitting_radius.value() < radii_.front()) {
+        if (splitting_radius.value() < radii_(0)) {
             number_smoother_circles_   = 0;
             length_smoother_radial_    = nr();
             smoother_splitting_radius_ = -1.0;
@@ -171,7 +171,7 @@ void PolarGrid::initializeLineSplitting(std::optional<double> splitting_radius)
             else {
                 number_smoother_circles_   = nr();
                 length_smoother_radial_    = 0;
-                smoother_splitting_radius_ = radii_.back() + 1.0;
+                smoother_splitting_radius_ = radii_(radii_.extent(0) - 1) + 1.0;
             }
         }
     }
@@ -268,11 +268,11 @@ void PolarGrid::checkParameters(Vector<double> radii, Vector<double> angles) con
         throw std::invalid_argument("Angles must be strictly increasing.");
     }
 
-    if (!equals(angles.front(), 0.0)) {
+    if (!equals(angles(0), 0.0)) {
         throw std::invalid_argument("First angle must be 0.");
     }
 
-    if (!equals(angles.back(), 2 * M_PI)) {
+    if (!equals(angles(angles.extent(0) - 1), 2 * M_PI)) {
         throw std::invalid_argument("Last angle must be 2*pi.");
     }
 
