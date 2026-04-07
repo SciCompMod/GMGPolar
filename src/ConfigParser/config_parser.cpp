@@ -442,7 +442,7 @@ const BoundaryConditionsVariant& ConfigParser::boundaryConditions() const
     return *boundary_conditions_.get();
 }
 
-const SourceTerm& ConfigParser::sourceTerm() const
+const SourceTermVariant& ConfigParser::sourceTerm() const
 {
     return *source_term_.get();
 }
