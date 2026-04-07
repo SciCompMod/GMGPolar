@@ -9,10 +9,9 @@ std::unique_ptr<IGMGPolar> ConfigParser::solver() const
 
     // Create a solver specialized to the active domain geometry.
     return std::visit(
-        [&grid](auto const& domain_geometry, auto const& density_profile_coefficients, auto const& source_term) {
+        [&grid](auto const& domain_geometry, auto const& density_profile_coefficients) {
             using DomainGeomType                 = std::decay_t<decltype(domain_geometry)>;
             using DensityProfileCoefficientsType = std::decay_t<decltype(density_profile_coefficients)>;
-            using SourceTermType                 = std::decay_t<decltype(source_term)>;
 
             // Construct the solver specialized for this geometry type.
             std::unique_ptr<IGMGPolar> solver =
@@ -22,7 +21,7 @@ std::unique_ptr<IGMGPolar> ConfigParser::solver() const
             // The lambdas must return objects of identical type
             return solver;
         },
-        *domain_geometry_, *density_profile_coefficients_, *source_term_);
+        *domain_geometry_, *density_profile_coefficients_);
 }
 
 void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType problem_type, AlphaCoeff alpha_type,
