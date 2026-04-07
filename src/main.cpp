@@ -15,11 +15,12 @@ int main(int argc, char* argv[])
     parser.parse(argc, argv);
 
     std::visit(
-        [&parser](auto const& domain_geometry, auto const& density_profile_coeffs, auto const& boundary_condition) {
+        [&parser](auto const& domain_geometry, auto const& density_profile_coeffs, auto const& boundary_condition,
+                  auto const& source_term) {
             // Get the types of the domain geometry and the density profile coefficients
             using DG = std::decay_t<decltype(domain_geometry)>;
             using DC = std::decay_t<decltype(density_profile_coeffs)>;
-
+            using ST = std::decay_t<decltype(source_term)>;
             // Create GMGPolar solver for the selected geometry and coefficient types
             GMGPolar<DG, DC> solver(parser.grid(), domain_geometry, density_profile_coeffs);
 
@@ -72,7 +73,7 @@ int main(int argc, char* argv[])
             solver.setSolution(&parser.exactSolution());
 
             // --- Solve Phase --- //
-            solver.solve(boundary_condition, parser.sourceTerm());
+            solver.solve(boundary_condition, source_term);
 
             // --- Retrieve solution and associated grid --- //
             Vector<double> solution = solver.solution();
@@ -81,7 +82,7 @@ int main(int argc, char* argv[])
             // Print timing statistics for each solver phase
             solver.printTimings();
         },
-        parser.domainGeometry(), parser.densityProfileCoefficients(), parser.boundaryConditions());
+        parser.domainGeometry(), parser.densityProfileCoefficients(), parser.boundaryConditions(), parser.sourceTerm());
 
     // Finalize LIKWID performance markers
     LIKWID_CLOSE();
