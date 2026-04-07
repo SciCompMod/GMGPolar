@@ -6,13 +6,12 @@
 
 #include "../../PolarGrid/polargrid.h"
 
-class CartesianR6_ZoniShiftedGyro_CircularGeometry : public SourceTerm
+class CartesianR6_ZoniShiftedGyro_CircularGeometry
 {
 public:
     explicit CartesianR6_ZoniShiftedGyro_CircularGeometry(PolarGrid const& grid, double Rmax);
-    virtual ~CartesianR6_ZoniShiftedGyro_CircularGeometry() = default;
 
-    double operator()(std::size_t i_r, std::size_t i_theta) const override;
+    double operator()(std::size_t i_r, std::size_t i_theta) const;
 
 private:
     PolarGrid const& grid_;

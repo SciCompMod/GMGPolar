@@ -7,6 +7,9 @@
 
 #include "../../include/ConfigParser/test_selection.h"
 #include "../../include/GMGPolar/gmgpolar.h"
+#include "../../include/InputFunctions/boundaryConditions.h"
+#include "../../include/InputFunctions/densityProfileCoefficients.h"
+#include "../../include/InputFunctions/sourceTerm.h"
 
 template <class T>
 class GMGPolarPaperTestCase;
@@ -153,7 +156,8 @@ std::vector<double> refine(std::vector<double> const& original_points)
     return refined;
 }
 
-template <class DensityProfileCoefficients, concepts::BoundaryConditions BoundaryConditions>
+template <concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::BoundaryConditions BoundaryConditions, concepts::SourceTerm SourceTerm>
 std::tuple<double, double>
 get_gmgpolar_error(PolarGrid const& grid, CzarnyGeometry const& domain_geometry,
                    DensityProfileCoefficients const& coefficients, BoundaryConditions const& boundary_conditions,

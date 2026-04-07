@@ -6,14 +6,13 @@
 
 #include "../../PolarGrid/polargrid.h"
 
-class CartesianR6_ZoniShiftedGyro_ShafranovGeometry : public SourceTerm
+class CartesianR6_ZoniShiftedGyro_ShafranovGeometry
 {
 public:
     explicit CartesianR6_ZoniShiftedGyro_ShafranovGeometry(PolarGrid const& grid, double Rmax, double elongation_kappa,
                                                            double shift_delta);
-    virtual ~CartesianR6_ZoniShiftedGyro_ShafranovGeometry() = default;
 
-    double operator()(std::size_t i_r, std::size_t i_theta) const override;
+    double operator()(std::size_t i_r, std::size_t i_theta) const;
 
 private:
     PolarGrid const& grid_;

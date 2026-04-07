@@ -10,6 +10,7 @@
 #include "../../include/PolarGrid/polargrid.h"
 #include "../../include/GMGPolar/test_cases.h"
 #include "../../include/GMGPolar/igmgpolar.h"
+#include "../../include/GMGPolar/gmgpolar.h"
 #include "test_selection.h"
 
 class ConfigParser
@@ -26,10 +27,11 @@ public:
     // Test Case
     const DomainGeometryVariant& domainGeometry() const;
     const DensityProfileCoefficientsVariant& densityProfileCoefficients() const;
-    const BoundaryConditionsVariant& boundaryConditions() const;
-    const SourceTerm& sourceTerm() const;
     const ExactSolution& exactSolution() const;
     std::unique_ptr<IGMGPolar> solver() const;
+
+    template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+    void solve(GMGPolar<DomainGeometry, DensityProfileCoefficients>& solver) const;
 
     // Control Parameters
     int verbose() const;
@@ -72,9 +74,14 @@ private:
     // Input Functions
     std::unique_ptr<const DomainGeometryVariant> domain_geometry_;
     std::unique_ptr<const DensityProfileCoefficientsVariant> density_profile_coefficients_;
-    std::unique_ptr<const BoundaryConditionsVariant> boundary_conditions_;
-    std::unique_ptr<const SourceTerm> source_term_;
     std::unique_ptr<const ExactSolution> exact_solution_;
+    GeometryType geometry_type_;
+    ProblemType problem_type_;
+    AlphaCoeff alpha_type_;
+    BetaCoeff beta_type_;
+    double Rmax_;
+    double kappa_eps_;
+    double delta_e_;
     // General solver output and visualization settings
     int verbose_;
     bool paraview_;

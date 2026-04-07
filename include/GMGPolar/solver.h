@@ -2,7 +2,7 @@
 //   Main Solver Routine
 // =============================================================================
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-template <concepts::BoundaryConditions BoundaryConditions>
+template <concepts::BoundaryConditions BoundaryConditions, concepts::SourceTerm SourceTerm>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryConditions& boundary_conditions,
                                                                  const SourceTerm& source_term)
 {
