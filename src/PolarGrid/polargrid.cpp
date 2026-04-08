@@ -1,5 +1,5 @@
 #include "../../include/PolarGrid/polargrid.h"
-
+#include <Kokkos_StdAlgorithms.hpp>
 // ------------ //
 // Constructors //
 // ------------ //
@@ -162,9 +162,9 @@ void PolarGrid::initializeLineSplitting(std::optional<double> splitting_radius)
             smoother_splitting_radius_ = -1.0;
         }
         else {
-            double* start = radii_.data();
-            double* end   = start + radii_.extent(0);
-            auto it       = std::lower_bound(start, end, splitting_radius.value());
+            auto start = Kokkos::Experimental::begin(radii_);
+            auto end   = Kokkos::Experimental::end(radii_);
+            auto it    = std::lower_bound(start, end, splitting_radius.value());
 
             if (it != end) {
                 number_smoother_circles_   = std::distance(start, it);
@@ -243,8 +243,8 @@ PolarGrid coarseningGrid(const PolarGrid& fineGrid)
 
 void PolarGrid::checkParameters(Vector<double> radii, Vector<double> angles) const
 {
-    double* radii_start = radii.data();
-    double* radii_end   = radii_start + radii.extent(0);
+    double* radii_start = Kokkos::Exeperimental::begin(radii);
+    double* radii_end   = Kokkos::Exeperimental::end(radii);
     if (radii.size() < 2) {
         throw std::invalid_argument("At least two radii are required.");
     }
@@ -262,8 +262,8 @@ void PolarGrid::checkParameters(Vector<double> radii, Vector<double> angles) con
     if (angles.size() < 3) {
         throw std::invalid_argument("At least two angles are required.");
     }
-    double* angles_start = angles.data();
-    double* angles_end   = angles_start + angles.extent(0);
+    double* angles_start = Kokkos::Experimental::begin(angles);
+    double* angles_end   = Kokkos::Experimental::end(angles);
     if (!std::all_of(angles_start, angles_end, [](double theta) {
             return theta >= 0.0;
         })) {
