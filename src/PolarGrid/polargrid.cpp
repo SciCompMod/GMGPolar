@@ -21,6 +21,32 @@ PolarGrid::PolarGrid(Vector<double> radii, Vector<double> angles, std::optional<
     initializeLineSplitting(splitting_radius);
 }
 
+// Constructor to initialize grid using vectors of radii and angles.
+PolarGrid::PolarGrid(std::vector<double> radii, std::vector<double> angles, std::optional<double> splitting_radius)
+    : nr_(radii.size())
+    , ntheta_(angles.size() - 1)
+    , is_ntheta_PowerOfTwo_((ntheta_ & (ntheta_ - 1)) == 0)
+    , radii_("radii", nr_)
+    , angles_("angles", angles.size())
+
+{
+    // Copy from std vector to Kokkos view
+    for (int i(0); i < radii.size(); ++i) {
+        radii_(i) = radii[i];
+    }
+    for (int i(0); i < angles.size(); ++i) {
+        angles_(i) = angles[i];
+    }
+
+    // Check parameter validity
+    checkParameters(radii_, angles_);
+    // Store distances to adjacent neighboring nodes.
+    // Initializes radial_spacings_, angular_spacings_
+    initializeDistances();
+    // Initializes smoothers splitting radius for circle/radial indexing.
+    initializeLineSplitting(splitting_radius);
+}
+
 // Constructor to initialize grid using parameters from GMGPolar.
 PolarGrid::PolarGrid(double R0, double Rmax, const int nr_exp, const int ntheta_exp, double refinement_radius,
                      const int anisotropic_factor, const int divideBy2, std::optional<double> splitting_radius)

@@ -25,8 +25,11 @@ public:
     // Default constructor.
     explicit PolarGrid() = default;
 
-    // Constructor to initialize grid using vectors of radii and angles.
+    // Constructor to initialize grid using kokkos views of radii and angles.
     PolarGrid(Vector<double> radii, Vector<double> angles, std::optional<double> splitting_radius = std::nullopt);
+    // Constructor to initialize grid using std::vectors of radii and angles.
+    PolarGrid(std::vector<double> radii, std::vector<double> angles,
+              std::optional<double> splitting_radius = std::nullopt);
 
     // Constructor to initialize grid using parameters from GMGPolar.
     explicit PolarGrid(double R0, double Rmax, const int nr_exp, const int ntheta_exp, double refinement_radius,
