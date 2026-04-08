@@ -52,7 +52,7 @@ void PolarGrid::constructRadialDivisions(double R0, double R, const int nr_exp, 
     int nr                  = (1 << (nr_exp - 1)) + 1;
     double uniform_distance = (R - R0) / (nr - 1);
     assert(uniform_distance > 0.0);
-    Vector<double> r_temp("r_tem", nr);
+    Vector<double> r_temp("r_temp", nr);
     if (anisotropic_factor == 0) {
         // nr = 2**(nr_exp-1) + 1
 
@@ -162,9 +162,12 @@ void PolarGrid::initializeLineSplitting(std::optional<double> splitting_radius)
             smoother_splitting_radius_ = -1.0;
         }
         else {
-            auto it = std::lower_bound(radii_.begin(), radii_.end(), splitting_radius.value());
-            if (it != radii_.end()) {
-                number_smoother_circles_   = std::distance(radii_.begin(), it);
+            double* start = radii_.data();
+            double* end   = start + radii_.extent(0);
+            auto it       = std::lower_bound(start, end, splitting_radius.value());
+
+            if (it != end) {
+                number_smoother_circles_   = std::distance(start, it);
                 length_smoother_radial_    = nr() - number_smoother_circles_;
                 smoother_splitting_radius_ = splitting_radius.value();
             }
@@ -240,31 +243,34 @@ PolarGrid coarseningGrid(const PolarGrid& fineGrid)
 
 void PolarGrid::checkParameters(Vector<double> radii, Vector<double> angles) const
 {
+    double* radii_start = radii.data();
+    double* radii_end   = radii_start + radii.extent(0);
     if (radii.size() < 2) {
         throw std::invalid_argument("At least two radii are required.");
     }
 
-    if (!std::all_of(radii.begin(), radii.end(), [](double r) {
+    if (!std::all_of(radii_start, radii_end, [](double r) {
             return r > 0.0;
         })) {
         throw std::invalid_argument("All radii must be greater than zero.");
     }
 
-    if (std::adjacent_find(radii.begin(), radii.end(), std::greater_equal<double>()) != radii.end()) {
+    if (std::adjacent_find(radii_start, radii_end, std::greater_equal<double>()) != radii_end) {
         throw std::invalid_argument("Radii must be strictly increasing.");
     }
 
     if (angles.size() < 3) {
         throw std::invalid_argument("At least two angles are required.");
     }
-
-    if (!std::all_of(angles.begin(), angles.end(), [](double theta) {
+    double* angles_start = angles.data();
+    double* angles_end   = angles_start + angles.extent(0);
+    if (!std::all_of(angles_start, angles_end, [](double theta) {
             return theta >= 0.0;
         })) {
         throw std::invalid_argument("All angles must be non-negative.");
     }
 
-    if (std::adjacent_find(angles.begin(), angles.end(), std::greater_equal<double>()) != angles.end()) {
+    if (std::adjacent_find(angles_start, angles_end, std::greater_equal<double>()) != angles_end) {
         throw std::invalid_argument("Angles must be strictly increasing.");
     }
 

@@ -127,7 +127,7 @@ private:
 
     // Help constrcut radii_ when an anisotropic radial division is requested
     // Implementation in src/PolarGrid/anisotropic_division.cpp
-    void RadialAnisotropicDivision(Vector<double>& r_temp, double R0, double R, const int nr_exp,
+    void RadialAnisotropicDivision(AllocatableVector<double> r_temp, double R0, double R, const int nr_exp,
                                    double refinement_radius, const int anisotropic_factor) const;
 };
 
