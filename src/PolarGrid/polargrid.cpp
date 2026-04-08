@@ -151,7 +151,7 @@ Vector<double> PolarGrid::divideVector(Vector<double> vec, const int divideBy2) 
             result[baseIndex + j]     = interpolated_value;
         }
     }
-    result[resultSize - 1] = vec(vec.extent(0) - 1); // Add the last value of the original vector
+    result[resultSize - 1] = vec(vec.size() - 1); // Add the last value of the original vector
     return result;
 }
 
@@ -200,7 +200,7 @@ void PolarGrid::initializeLineSplitting(std::optional<double> splitting_radius)
             else {
                 number_smoother_circles_   = nr();
                 length_smoother_radial_    = 0;
-                smoother_splitting_radius_ = radii_(radii_.extent(0) - 1) + 1.0;
+                smoother_splitting_radius_ = radii_(radii_.size() - 1) + 1.0;
             }
         }
     }
@@ -276,6 +276,7 @@ void PolarGrid::checkParameters(Vector<double> radii, Vector<double> angles) con
     }
 
     if (!std::all_of(radii_start, radii_end, [](double r) {
+            std::cout << "r loop " << r;
             return r > 0.0;
         })) {
         throw std::invalid_argument("All radii must be greater than zero.");
@@ -304,7 +305,7 @@ void PolarGrid::checkParameters(Vector<double> radii, Vector<double> angles) con
         throw std::invalid_argument("First angle must be 0.");
     }
 
-    if (!equals(angles(angles.extent(0) - 1), 2 * M_PI)) {
+    if (!equals(angles(angles.size() - 1), 2 * M_PI)) {
         throw std::invalid_argument("Last angle must be 2*pi.");
     }
 
