@@ -1,6 +1,6 @@
 #include "../../include/PolarGrid/polargrid.h"
 
-void PolarGrid::RadialAnisotropicDivision(std::vector<double>& r_temp, double R0, double R, const int nr_exp,
+void PolarGrid::RadialAnisotropicDivision(AllocatableVector<double> r_temp, double R0, double R, const int nr_exp,
                                           double refinement_radius, const int anisotropic_factor) const
 {
     // Calculate the percentage of refinement_radius.
@@ -23,9 +23,9 @@ void PolarGrid::RadialAnisotropicDivision(std::vector<double>& r_temp, double R0
     if ((anisotropic_factor % 2) ==
         1) // odd number of elements on an open circular disk is desired because of coarsening
         n_elems_equi++;
-    double uniform_distance     = (R - R0) / n_elems_equi;
-    int nr                      = n_elems_equi + 1;
-    std::vector<double> r_temp2 = std::vector<double>(nr);
+    double uniform_distance = (R - R0) / n_elems_equi;
+    int nr                  = n_elems_equi + 1;
+    Vector<double> r_temp2("r_temp2", nr);
     for (int i = 0; i < nr - 1; i++)
         r_temp2[i] = R0 + i * uniform_distance;
     r_temp2[nr - 1] = R;
@@ -89,7 +89,7 @@ void PolarGrid::RadialAnisotropicDivision(std::vector<double>& r_temp, double R0
     // group all in r_tmp
     nr = n_elems_equi - n_elems_refined + r_set.size() + 1;
 
-    r_temp.resize(nr);
+    Kokkos::resize(r_temp, nr);
 
     for (int i = 0; i < se; i++)
         r_temp[i] = r_temp2[i];
