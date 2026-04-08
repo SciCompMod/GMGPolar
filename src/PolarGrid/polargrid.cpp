@@ -31,10 +31,10 @@ PolarGrid::PolarGrid(std::vector<double> radii, std::vector<double> angles, std:
 
 {
     // Copy from std vector to Kokkos view
-    for (int i(0); i < radii.size(); ++i) {
+    for (std::size_t i(0); i < radii.size(); ++i) {
         radii_(i) = radii[i];
     }
-    for (int i(0); i < angles.size(); ++i) {
+    for (std::size_t i(0); i < angles.size(); ++i) {
         angles_(i) = angles[i];
     }
 
@@ -75,13 +75,13 @@ void PolarGrid::constructRadialDivisions(double R0, double R, const int nr_exp, 
 {
     // r_temp contains the values before we refine one last time for extrapolation.
     // Therefore we first consider 2^(nr_exp-1) points.
-    int nr                  = (1 << (nr_exp - 1)) + 1;
-    double uniform_distance = (R - R0) / (nr - 1);
-    assert(uniform_distance > 0.0);
-    Vector<double> r_temp("r_temp", nr);
+    AllocatableVector<double> r_temp;
     if (anisotropic_factor == 0) {
         // nr = 2**(nr_exp-1) + 1
-
+        int nr                  = (1 << (nr_exp - 1)) + 1;
+        double uniform_distance = (R - R0) / (nr - 1);
+        assert(uniform_distance > 0.0);
+        r_temp = Vector<double>("r_temp", nr);
         for (int i = 0; i < nr - 1; i++) {
             r_temp[i] = R0 + i * uniform_distance;
         }
@@ -89,11 +89,11 @@ void PolarGrid::constructRadialDivisions(double R0, double R, const int nr_exp, 
     }
     else {
         // Implementation in src/PolarGrid/anisotropic_division.cpp
-        RadialAnisotropicDivision(r_temp, R0, R, nr_exp, refinement_radius, anisotropic_factor);
+        r_temp = RadialAnisotropicDivision(R0, R, nr_exp, refinement_radius, anisotropic_factor);
     }
     // Refine division in the middle for extrapolation
-    nr_ = 2 * r_temp.size() - 1;
-    Kokkos::resize(radii_, nr_);
+    nr_    = 2 * r_temp.size() - 1;
+    radii_ = AllocatableVector<double>("radii_", nr_);
     for (int i = 0; i < nr_; i++) {
         if (!(i % 2))
             radii_[i] = r_temp[i / 2];
@@ -276,7 +276,6 @@ void PolarGrid::checkParameters(Vector<double> radii, Vector<double> angles) con
     }
 
     if (!std::all_of(radii_start, radii_end, [](double r) {
-            std::cout << "r loop " << r;
             return r > 0.0;
         })) {
         throw std::invalid_argument("All radii must be greater than zero.");

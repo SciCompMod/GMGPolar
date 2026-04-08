@@ -1,7 +1,7 @@
 #include "../../include/PolarGrid/polargrid.h"
 
-void PolarGrid::RadialAnisotropicDivision(AllocatableVector<double> r_temp, double R0, double R, const int nr_exp,
-                                          double refinement_radius, const int anisotropic_factor) const
+Vector<double> PolarGrid::RadialAnisotropicDivision(double R0, double R, const int nr_exp, double refinement_radius,
+                                                    const int anisotropic_factor) const
 {
     // Calculate the percentage of refinement_radius.
     const double percentage = (refinement_radius - R0) / (R - R0);
@@ -89,8 +89,7 @@ void PolarGrid::RadialAnisotropicDivision(AllocatableVector<double> r_temp, doub
     // group all in r_tmp
     nr = n_elems_equi - n_elems_refined + r_set.size() + 1;
 
-    Kokkos::resize(r_temp, nr);
-
+    Vector<double> r_temp("r_temp", nr);
     for (int i = 0; i < se; i++)
         r_temp[i] = r_temp2[i];
     itr = r_set.begin();
@@ -100,4 +99,5 @@ void PolarGrid::RadialAnisotropicDivision(AllocatableVector<double> r_temp, doub
     }
     for (int i = 0; i < n_elems_equi - ee + 1; i++)
         r_temp[se + r_set.size() + i] = r_temp2[ee + i];
+    return r_temp;
 }
