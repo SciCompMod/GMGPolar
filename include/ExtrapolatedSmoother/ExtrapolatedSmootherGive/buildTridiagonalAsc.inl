@@ -979,7 +979,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
     /* Radial Section: Node on the outer boundary */
     /* ------------------------------------------ */
     else if (i_r == grid.nr() - 1) {
-        assert(!i_r % 2 == 0);
+        assert(i_r % 2 == 0);
 
         double h1 = grid.radialSpacing(i_r - 1);
         double k1 = grid.angularSpacing(i_theta - 1);
