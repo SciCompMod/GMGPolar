@@ -467,7 +467,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
     /* Radial Section: Node on the outer boundary */
     /* ------------------------------------------ */
     else if (i_r == grid.nr() - 1) {
-        assert(!i_r % 2 == 0);
+        assert(i_r % 2 == 0);
 
         int center_index = i_r - numberSmootherCircles;
         int left_index   = i_r - numberSmootherCircles - 1;
