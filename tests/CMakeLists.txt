@@ -31,7 +31,7 @@ add_executable(gmgpolar_tests
 )
 
 # Set the compile features and link libraries
-target_compile_features(gmgpolar_tests PRIVATE cxx_std_17)
+target_compile_features(gmgpolar_tests PRIVATE cxx_std_20)
 target_link_libraries(gmgpolar_tests GMGPolarLib GTest::gtest_main)
 
 include(GoogleTest)
