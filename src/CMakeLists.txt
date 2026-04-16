@@ -74,11 +74,10 @@ target_link_libraries(GMGPolarLib PUBLIC
 # Handle OpenMP
 find_package(OpenMP REQUIRED)
 if(OpenMP_CXX_FOUND)
-    target_link_libraries(GMGPolarLib PUBLIC OpenMP::OpenMP_CXX)
+    target_link_libraries(GMGPolarLib PUBLIC Kokkos::kokkos OpenMP::OpenMP_CXX)
+else()
+    target_link_libraries(GMGPolarLib PUBLIC Kokkos::kokkos)
 endif()
-find_package(Kokkos  4.4.1...<5.1 QUIET REQUIRED)
-target_link_libraries(GMGPolarLib PUBLIC Kokkos::kokkos)
-
 
 # Handle MUMPS configuration
 if(GMGPOLAR_USE_MUMPS)
