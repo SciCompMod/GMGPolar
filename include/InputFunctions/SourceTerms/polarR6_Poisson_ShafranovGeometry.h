@@ -6,14 +6,13 @@
 
 #include "../../PolarGrid/polargrid.h"
 
-class PolarR6_Poisson_ShafranovGeometry : public SourceTerm
+class PolarR6_Poisson_ShafranovGeometry
 {
 public:
     explicit PolarR6_Poisson_ShafranovGeometry(PolarGrid const& grid, double Rmax, double elongation_kappa,
                                                double shift_delta);
-    virtual ~PolarR6_Poisson_ShafranovGeometry() = default;
 
-    double operator()(std::size_t i_r, std::size_t i_theta) const override;
+    double operator()(std::size_t i_r, std::size_t i_theta) const;
 
 private:
     PolarGrid const& grid_;

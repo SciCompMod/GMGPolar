@@ -6,14 +6,13 @@
 
 #include "../../PolarGrid/polargrid.h"
 
-class CartesianR2_Sonnendrucker_ShafranovGeometry : public SourceTerm
+class CartesianR2_Sonnendrucker_ShafranovGeometry
 {
 public:
     explicit CartesianR2_Sonnendrucker_ShafranovGeometry(PolarGrid const& grid, double Rmax, double elongation_kappa,
                                                          double shift_delta);
-    virtual ~CartesianR2_Sonnendrucker_ShafranovGeometry() = default;
 
-    double operator()(std::size_t i_r, std::size_t i_theta) const override;
+    double operator()(std::size_t i_r, std::size_t i_theta) const;
 
 private:
     PolarGrid const& grid_;

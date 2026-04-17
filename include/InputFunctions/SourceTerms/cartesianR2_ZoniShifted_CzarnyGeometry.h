@@ -6,14 +6,13 @@
 
 #include "../../PolarGrid/polargrid.h"
 
-class CartesianR2_ZoniShifted_CzarnyGeometry : public SourceTerm
+class CartesianR2_ZoniShifted_CzarnyGeometry
 {
 public:
     explicit CartesianR2_ZoniShifted_CzarnyGeometry(PolarGrid const& grid, double Rmax,
                                                     double inverse_aspect_ratio_epsilon, double ellipticity_e);
-    virtual ~CartesianR2_ZoniShifted_CzarnyGeometry() = default;
 
-    double operator()(std::size_t i_r, std::size_t i_theta) const override;
+    double operator()(std::size_t i_r, std::size_t i_theta) const;
 
 private:
     PolarGrid const& grid_;
