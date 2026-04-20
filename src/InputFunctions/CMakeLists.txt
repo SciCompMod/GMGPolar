@@ -25,5 +25,6 @@ install(TARGETS
     InputFunctions_DomainGeometry
     InputFunctions_ExactSolution
     InputFunctions_SourceTerms
+    EXPORT GMGPolarTargets
     ARCHIVE DESTINATION lib
 )

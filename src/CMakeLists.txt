@@ -68,6 +68,7 @@ target_link_libraries(GMGPolarLib
 
 
 install(TARGETS GMGPolarLib
+    EXPORT GMGPolarTargets
     ARCHIVE DESTINATION lib
 )
 

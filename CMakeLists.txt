@@ -68,6 +68,34 @@ endif()
 
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include)
 
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(
+    cmake/GMGPolarConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/GMGPolarConfig.cmake
+    INSTALL_DESTINATION lib/cmake/GMGPolar
+)
+
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/GMGPolarConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/GMGPolarConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/GMGPolarConfigVersion.cmake
+    cmake/FindMUMPS.cmake
+    cmake/FindLIKWID.cmake
+    cmake/FindMetis.cmake
+    DESTINATION lib/cmake/GMGPolar
+)
+
+install(EXPORT GMGPolarTargets
+    NAMESPACE GMGPolar::
+    DESTINATION lib/cmake/GMGPolar
+)
+
 add_subdirectory(src)
 
 add_executable(gmgpolar src/main.cpp)
