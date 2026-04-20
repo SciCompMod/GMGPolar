@@ -67,6 +67,10 @@ target_link_libraries(GMGPolarLib
 )
 
 
+install(TARGETS GMGPolarLib
+    ARCHIVE DESTINATION lib
+)
+
 # Handle MUMPS configuration
 if(GMGPOLAR_USE_MUMPS)
     target_link_libraries(GMGPolarLib PUBLIC MUMPS::MUMPS)

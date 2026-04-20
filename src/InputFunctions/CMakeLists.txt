@@ -17,3 +17,13 @@ target_link_libraries(InputFunctions INTERFACE
 target_include_directories(InputFunctions INTERFACE
     ${PROJECT_SOURCE_DIR}/include
 )
+
+install(TARGETS
+    InputFunctions
+    InputFunctions_BoundaryConditions
+    InputFunctions_DensityProfileCoefficients
+    InputFunctions_DomainGeometry
+    InputFunctions_ExactSolution
+    InputFunctions_SourceTerms
+    ARCHIVE DESTINATION lib
+)

@@ -66,6 +66,8 @@ if(GMGPOLAR_USE_LIKWID)
     find_package(LIKWID REQUIRED)
 endif()
 
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include)
+
 add_subdirectory(src)
 
 add_executable(gmgpolar src/main.cpp)
