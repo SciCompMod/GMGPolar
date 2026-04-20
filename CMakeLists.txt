@@ -68,9 +68,9 @@ add_executable(weak_scaling src/weak_scaling.cpp)
 add_executable(strong_scaling src/strong_scaling.cpp)
 
 target_link_libraries(gmgpolar PRIVATE GMGPolarLib InputFunctions)
-target_link_libraries(convergence_order PRIVATE GMGPolarLib)
-target_link_libraries(weak_scaling PRIVATE GMGPolarLib)
-target_link_libraries(strong_scaling PRIVATE GMGPolarLib)
+target_link_libraries(convergence_order PRIVATE GMGPolarLib InputFunctions)
+target_link_libraries(weak_scaling PRIVATE GMGPolarLib InputFunctions)
+target_link_libraries(strong_scaling PRIVATE GMGPolarLib InputFunctions)
 
 if(GMGPOLAR_BUILD_TESTS)
     enable_testing()
