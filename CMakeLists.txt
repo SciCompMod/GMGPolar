@@ -80,7 +80,10 @@ target_link_libraries(strong_scaling PRIVATE GMGPolarLib InputFunctions)
 
 if(GMGPOLAR_BUILD_TESTS)
     enable_testing()
-    add_subdirectory(third-party)
+    find_package(GTest 1.17)
+    if (NOT GTest_FOUND)
+        add_subdirectory(third-party)
+    endif()
     add_subdirectory(tests)
 
     # Add coverage target - moved after test configuration
