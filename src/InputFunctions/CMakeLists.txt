@@ -15,7 +15,7 @@ target_link_libraries(InputFunctions INTERFACE
 )
 
 target_include_directories(InputFunctions INTERFACE
-    ${PROJECT_SOURCE_DIR}/include
+    ${GMGPOLAR_INCLUDE_DIRS}
 )
 
 install(TARGETS

@@ -10,5 +10,5 @@ set(DENSITY_PROFILE_COEFFICIENTS_SOURCES
 
 add_library(InputFunctions_DensityProfileCoefficients STATIC ${DENSITY_PROFILE_COEFFICIENTS_SOURCES})
 target_include_directories(InputFunctions_DensityProfileCoefficients PUBLIC
-    ${PROJECT_SOURCE_DIR}/include
+    ${GMGPOLAR_INCLUDE_DIRS}
 )

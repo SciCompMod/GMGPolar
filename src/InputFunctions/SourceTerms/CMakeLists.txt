@@ -71,7 +71,7 @@ set(SOURCE_TERMS_SOURCES
 
 add_library(InputFunctions_SourceTerms STATIC ${SOURCE_TERMS_SOURCES})
 target_include_directories(InputFunctions_SourceTerms PUBLIC
-    ${PROJECT_SOURCE_DIR}/include
+    ${GMGPOLAR_INCLUDE_DIRS}
 )
 
 target_link_libraries(InputFunctions_SourceTerms PUBLIC Kokkos::kokkos)

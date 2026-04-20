@@ -66,6 +66,11 @@ if(GMGPOLAR_USE_LIKWID)
     find_package(LIKWID REQUIRED)
 endif()
 
+set(GMGPOLAR_INCLUDE_DIRS
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include)
 
 include(CMakePackageConfigHelpers)

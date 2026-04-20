@@ -55,8 +55,8 @@ add_library(GMGPolarLib STATIC
 )
 
 # Basic library configuration
-target_include_directories(GMGPolarLib PUBLIC 
-    ${CMAKE_CURRENT_SOURCE_DIR}/../include
+target_include_directories(GMGPolarLib PUBLIC
+    ${GMGPOLAR_INCLUDE_DIRS}
 )
 
 # Handle OpenMP

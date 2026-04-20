@@ -18,5 +18,5 @@ set(BOUNDARY_CONDITIONS_SOURCES
 add_library(InputFunctions_BoundaryConditions STATIC ${BOUNDARY_CONDITIONS_SOURCES})
 
 target_include_directories(InputFunctions_BoundaryConditions PUBLIC
-    ${PROJECT_SOURCE_DIR}/include
+    ${GMGPOLAR_INCLUDE_DIRS}
 )

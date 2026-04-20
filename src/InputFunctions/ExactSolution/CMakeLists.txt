@@ -17,5 +17,5 @@ set(EXACT_SOLUTION_SOURCES
 
 add_library(InputFunctions_ExactSolution STATIC ${EXACT_SOLUTION_SOURCES})
 target_include_directories(InputFunctions_ExactSolution PUBLIC
-    ${PROJECT_SOURCE_DIR}/include
+    ${GMGPOLAR_INCLUDE_DIRS}
 )
