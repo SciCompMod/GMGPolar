@@ -1,10 +1,3 @@
-cmake_minimum_required(VERSION 3.12)
-
-if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE STREQUAL "Release")
-    # If using GNU increase maximum number of instructions considered for inlining
-    # in Release mode in this folder and sub-folders
-    add_compile_options(--param max-inline-insns-single=1500)
-endif()
 
 # Add subdirectories for components
 add_subdirectory(InputFunctions)
@@ -63,20 +56,15 @@ add_library(GMGPolarLib STATIC
 
 # Basic library configuration
 target_include_directories(GMGPolarLib PUBLIC 
-    ${CMAKE_CURRENT_SOURCE_DIR}/..
-    ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-target_link_libraries(GMGPolarLib PUBLIC 
-    InputFunctions
+    ${CMAKE_CURRENT_SOURCE_DIR}/../include
 )
 
 # Handle OpenMP
-find_package(OpenMP REQUIRED)
-if(OpenMP_CXX_FOUND)
-    target_link_libraries(GMGPolarLib PUBLIC OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(GMGPolarLib PUBLIC Kokkos::kokkos)
+target_link_libraries(GMGPolarLib
+    PUBLIC
+    OpenMP::OpenMP_CXX
+    Kokkos::kokkos
+)
 
 
 # Handle MUMPS configuration
@@ -113,25 +101,6 @@ if(GMGPOLAR_USE_MUMPS)
             target_compile_definitions(GMGPolarLib PUBLIC GMGPOLAR_USE_MUMPS)
         else()
             message(SEND_ERROR "MUMPS not found")
-        endif()
-    endif()
-
-    if(DEFINED ENV{METIS_DIR})
-        set(METIS_DIR $ENV{METIS_DIR})
-
-        if(EXISTS "${METIS_DIR}/include" AND EXISTS "${METIS_DIR}/lib")
-            set(METIS_INCLUDE_DIR "${METIS_DIR}/include")
-            set(METIS_LIBRARY_DIR "${METIS_DIR}/lib")
-
-            target_include_directories(GMGPolarLib PUBLIC ${METIS_INCLUDE_DIR})
-            target_link_directories(GMGPolarLib PUBLIC ${METIS_LIBRARY_DIR})
-            set(METIS_FOUND TRUE)
-        endif()
-
-        if(METIS_FOUND)
-            target_link_libraries(GMGPolarLib PUBLIC metis)
-        else()
-            message(SEND_ERROR "METIS not found")
         endif()
     endif()
 endif()

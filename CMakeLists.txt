@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.12)
 
+# Ensure custom cmake modules can be found
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 # Options should be defined before they're used
 option(GMGPOLAR_BUILD_TESTS "Build GMGPolar unit tests." ON)
 option(GMGPOLAR_USE_LIKWID "Use LIKWID to measure code (regions)." OFF)
@@ -27,6 +30,12 @@ endif()
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -pedantic -Wno-unused -Wno-psabi -Wfloat-conversion")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -mtune=generic -Wno-psabi")
 
+if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE STREQUAL "Release")
+    # If using GNU increase maximum number of instructions considered for inlining
+    # in Release mode in this folder and sub-folders
+    add_compile_options(--param max-inline-insns-single=1500)
+endif()
+
 # Set coverage compiler flags - must come before any targets are defined
 if(GMGPOLAR_ENABLE_COVERAGE)
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
@@ -44,8 +53,13 @@ if(GMGPOLAR_ENABLE_COVERAGE)
     endif()
 endif()
 
+find_package(OpenMP REQUIRED)
 find_package(Kokkos  4.4.1...<5.1 QUIET REQUIRED)
-include_directories(include)
+
+if (${GMGPOLAR_USE_MUMPS})
+    find_package(Metis REQUIRED)
+endif()
+
 add_subdirectory(src)
 
 add_executable(gmgpolar src/main.cpp)
@@ -53,7 +67,7 @@ add_executable(convergence_order src/convergence_order.cpp)
 add_executable(weak_scaling src/weak_scaling.cpp)
 add_executable(strong_scaling src/strong_scaling.cpp)
 
-target_link_libraries(gmgpolar PRIVATE GMGPolarLib)
+target_link_libraries(gmgpolar PRIVATE GMGPolarLib InputFunctions)
 target_link_libraries(convergence_order PRIVATE GMGPolarLib)
 target_link_libraries(weak_scaling PRIVATE GMGPolarLib)
 target_link_libraries(strong_scaling PRIVATE GMGPolarLib)
