@@ -74,3 +74,5 @@ target_include_directories(InputFunctions_SourceTerms PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/include/InputFunctions/SourceTerms
 )
+
+target_link_libraries(InputFunctions_SourceTerms PUBLIC Kokkos::kokkos)
