@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/cartesianR2_ZoniGyro_CircularGeometry.h"
+#include <InputFunctions/SourceTerms/cartesianR2_ZoniGyro_CircularGeometry.h>
 
 CartesianR2_ZoniGyro_CircularGeometry::CartesianR2_ZoniGyro_CircularGeometry(PolarGrid const& grid, double Rmax)
     : grid_(grid)

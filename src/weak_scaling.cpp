@@ -5,8 +5,8 @@
 #include <limits>
 #include <memory>
 
-#include "../include/GMGPolar/gmgpolar.h"
-#include "../include/GMGPolar/test_cases.h"
+#include <GMGPolar/gmgpolar.h>
+#include <GMGPolar/test_cases.h>
 
 void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
 {

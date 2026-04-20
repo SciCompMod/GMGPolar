@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/BoundaryConditions/refined_Boundary_CzarnyGeometry.h"
+#include <InputFunctions/BoundaryConditions/refined_Boundary_CzarnyGeometry.h>
 
 void Refined_Boundary_CzarnyGeometry::initializeGeometry()
 {

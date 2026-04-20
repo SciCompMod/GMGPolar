@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/BoundaryConditions/cartesianR6_Boundary_ShafranovGeometry.h"
+#include <InputFunctions/BoundaryConditions/cartesianR6_Boundary_ShafranovGeometry.h>
 
 CartesianR6_Boundary_ShafranovGeometry::CartesianR6_Boundary_ShafranovGeometry(double Rmax, double elongation_kappa,
                                                                                double shift_delta)

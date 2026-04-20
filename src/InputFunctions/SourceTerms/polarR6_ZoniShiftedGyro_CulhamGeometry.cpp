@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/polarR6_ZoniShiftedGyro_CulhamGeometry.h"
+#include <InputFunctions/SourceTerms/polarR6_ZoniShiftedGyro_CulhamGeometry.h>
 
 PolarR6_ZoniShiftedGyro_CulhamGeometry::PolarR6_ZoniShiftedGyro_CulhamGeometry(PolarGrid const& grid, double Rmax)
     : grid_(grid)

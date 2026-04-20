@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/refined_ZoniShiftedGyro_ShafranovGeometry.h"
+#include <InputFunctions/SourceTerms/refined_ZoniShiftedGyro_ShafranovGeometry.h>
 
 Refined_ZoniShiftedGyro_ShafranovGeometry::Refined_ZoniShiftedGyro_ShafranovGeometry(PolarGrid const& grid, double Rmax,
                                                                                      double elongation_kappa,

@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/BoundaryConditions/cartesianR2_Boundary_CircularGeometry.h"
+#include <InputFunctions/BoundaryConditions/cartesianR2_Boundary_CircularGeometry.h>
 
 CartesianR2_Boundary_CircularGeometry::CartesianR2_Boundary_CircularGeometry(double Rmax)
     : Rmax(Rmax)

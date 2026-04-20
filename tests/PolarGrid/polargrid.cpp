@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "../../include/PolarGrid/polargrid.h"
+#include <PolarGrid/polargrid.h>
 
 TEST(PolarGridTest, DefaultConstructor)
 {

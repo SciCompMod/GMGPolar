@@ -1,4 +1,4 @@
-#include "../../include/Interpolation/interpolation.h"
+#include <Interpolation/interpolation.h>
 
 /*
  * Bicubic FMG Interpolator using the Lagrange Interpolating Polynomial

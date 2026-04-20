@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/cartesianR6_Sonnendrucker_ShafranovGeometry.h"
+#include <InputFunctions/SourceTerms/cartesianR6_Sonnendrucker_ShafranovGeometry.h>
 
 CartesianR6_Sonnendrucker_ShafranovGeometry::CartesianR6_Sonnendrucker_ShafranovGeometry(PolarGrid const& grid,
                                                                                          double Rmax,

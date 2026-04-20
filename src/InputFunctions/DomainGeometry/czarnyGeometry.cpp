@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/DomainGeometry/czarnyGeometry.h"
+#include <InputFunctions/DomainGeometry/czarnyGeometry.h>
 
 CzarnyGeometry::CzarnyGeometry()
 {

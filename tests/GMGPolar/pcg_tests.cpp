@@ -5,8 +5,8 @@
 #include <random>
 
 // Including the necessary header from the project
-#include "../../include/GMGPolar/gmgpolar.h"
-#include "../../include/ConfigParser/test_selection.h"
+#include <GMGPolar/gmgpolar.h>
+#include <ConfigParser/test_selection.h>
 
 template <class T>
 class PCGTestCase;

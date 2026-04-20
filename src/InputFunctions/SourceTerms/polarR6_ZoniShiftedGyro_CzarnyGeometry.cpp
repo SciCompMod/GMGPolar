@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/polarR6_ZoniShiftedGyro_CzarnyGeometry.h"
+#include <InputFunctions/SourceTerms/polarR6_ZoniShiftedGyro_CzarnyGeometry.h>
 
 void PolarR6_ZoniShiftedGyro_CzarnyGeometry::initializeGeometry()
 {

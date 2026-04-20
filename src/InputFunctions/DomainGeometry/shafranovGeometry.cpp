@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/DomainGeometry/shafranovGeometry.h"
+#include <InputFunctions/DomainGeometry/shafranovGeometry.h>
 
 ShafranovGeometry::ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta)
     : Rmax(Rmax)

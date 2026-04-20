@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/cartesianR2_Poisson_CircularGeometry.h"
+#include <InputFunctions/SourceTerms/cartesianR2_Poisson_CircularGeometry.h>
 
 CartesianR2_Poisson_CircularGeometry::CartesianR2_Poisson_CircularGeometry(PolarGrid const& grid, double Rmax)
     : grid_(grid)

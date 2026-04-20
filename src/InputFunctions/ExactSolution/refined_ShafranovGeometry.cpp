@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/ExactSolution/refined_ShafranovGeometry.h"
+#include <InputFunctions/ExactSolution/refined_ShafranovGeometry.h>
 
 Refined_ShafranovGeometry::Refined_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta)
     : Rmax(Rmax)

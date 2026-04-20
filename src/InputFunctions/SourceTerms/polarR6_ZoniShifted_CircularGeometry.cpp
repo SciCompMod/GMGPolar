@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/polarR6_ZoniShifted_CircularGeometry.h"
+#include <InputFunctions/SourceTerms/polarR6_ZoniShifted_CircularGeometry.h>
 
 PolarR6_ZoniShifted_CircularGeometry::PolarR6_ZoniShifted_CircularGeometry(PolarGrid const& grid, double Rmax)
     : grid_(grid)

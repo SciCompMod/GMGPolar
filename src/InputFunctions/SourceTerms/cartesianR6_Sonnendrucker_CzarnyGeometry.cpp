@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/cartesianR6_Sonnendrucker_CzarnyGeometry.h"
+#include <InputFunctions/SourceTerms/cartesianR6_Sonnendrucker_CzarnyGeometry.h>
 
 void CartesianR6_Sonnendrucker_CzarnyGeometry::initializeGeometry()
 {

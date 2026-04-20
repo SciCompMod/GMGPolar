@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/DensityProfileCoefficients/zoniGyroCoefficients.h"
+#include <InputFunctions/DensityProfileCoefficients/zoniGyroCoefficients.h>
 
 ZoniGyroCoefficients::ZoniGyroCoefficients(double Rmax, double alpha_jump)
     : Rmax(Rmax)

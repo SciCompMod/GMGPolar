@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/cartesianR6_Zoni_CzarnyGeometry.h"
+#include <InputFunctions/SourceTerms/cartesianR6_Zoni_CzarnyGeometry.h>
 
 void CartesianR6_Zoni_CzarnyGeometry::initializeGeometry()
 {

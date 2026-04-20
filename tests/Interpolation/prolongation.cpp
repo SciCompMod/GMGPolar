@@ -3,8 +3,8 @@
 
 #include "../test_tools.h"
 
-#include "../../include/Interpolation/interpolation.h"
-#include "../../include/InputFunctions/DensityProfileCoefficients/poissonCoefficients.h"
+#include <Interpolation/interpolation.h>
+#include <InputFunctions/DensityProfileCoefficients/poissonCoefficients.h>
 
 // Helper that computes the mathematically expected prolongation value
 static double expected_value(const PolarGrid& coarse, const PolarGrid& fine, ConstVector<double> coarse_vals, int i_r,

@@ -5,37 +5,37 @@
 
 #include "../test_tools.h"
 
-#include "../../include/GMGPolar/gmgpolar.h"
+#include <GMGPolar/gmgpolar.h>
 
-#include "../../include/Residual/ResidualGive/residualGive.h"
-#include "../../include/DirectSolver/DirectSolver-COO-MUMPS-Give/directSolverGive.h"
-#include "../../include/DirectSolver/DirectSolver-COO-MUMPS-Take/directSolverTake.h"
-#include "../../include/DirectSolver/DirectSolver-CSR-LU-Give/directSolverGiveCustomLU.h"
-#include "../../include/DirectSolver/DirectSolver-CSR-LU-Take/directSolverTakeCustomLU.h"
+#include <Residual/ResidualGive/residualGive.h>
+#include <DirectSolver/DirectSolver-COO-MUMPS-Give/directSolverGive.h>
+#include <DirectSolver/DirectSolver-COO-MUMPS-Take/directSolverTake.h>
+#include <DirectSolver/DirectSolver-CSR-LU-Give/directSolverGiveCustomLU.h>
+#include <DirectSolver/DirectSolver-CSR-LU-Take/directSolverTakeCustomLU.h>
 
-#include "../../include/InputFunctions/domainGeometry.h"
-#include "../../include/InputFunctions/densityProfileCoefficients.h"
-#include "../../include/InputFunctions/boundaryConditions.h"
+#include <InputFunctions/domainGeometry.h>
+#include <InputFunctions/densityProfileCoefficients.h>
+#include <InputFunctions/boundaryConditions.h>
 /* ------ */
 /* Test 1 */
 /* ------ */
-#include "../include/InputFunctions/DomainGeometry/circularGeometry.h"
-#include "../include/InputFunctions/DensityProfileCoefficients/sonnendruckerGyroCoefficients.h"
+#include <InputFunctions/DomainGeometry/circularGeometry.h>
+#include <InputFunctions/DensityProfileCoefficients/sonnendruckerGyroCoefficients.h>
 /* ------ */
 /* Test 2 */
 /* ------ */
-#include "../include/InputFunctions/DomainGeometry/shafranovGeometry.h"
-#include "../include/InputFunctions/DensityProfileCoefficients/zoniGyroCoefficients.h"
+#include <InputFunctions/DomainGeometry/shafranovGeometry.h>
+#include <InputFunctions/DensityProfileCoefficients/zoniGyroCoefficients.h>
 /* ------ */
 /* Test 3 */
 /* ------ */
-#include "../include/InputFunctions/DomainGeometry/czarnyGeometry.h"
-#include "../include/InputFunctions/DensityProfileCoefficients/zoniShiftedCoefficients.h"
+#include <InputFunctions/DomainGeometry/czarnyGeometry.h>
+#include <InputFunctions/DensityProfileCoefficients/zoniShiftedCoefficients.h>
 /* ------ */
 /* Test 4 */
 /* ------ */
-#include "../include/InputFunctions/DomainGeometry/culhamGeometry.h"
-#include "../include/InputFunctions/DensityProfileCoefficients/zoniShiftedGyroCoefficients.h"
+#include <InputFunctions/DomainGeometry/culhamGeometry.h>
+#include <InputFunctions/DensityProfileCoefficients/zoniShiftedGyroCoefficients.h>
 
 #ifdef GMGPOLAR_USE_MUMPS
 

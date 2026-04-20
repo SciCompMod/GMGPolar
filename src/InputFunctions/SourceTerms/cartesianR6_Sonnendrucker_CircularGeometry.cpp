@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/cartesianR6_Sonnendrucker_CircularGeometry.h"
+#include <InputFunctions/SourceTerms/cartesianR6_Sonnendrucker_CircularGeometry.h>
 
 CartesianR6_Sonnendrucker_CircularGeometry::CartesianR6_Sonnendrucker_CircularGeometry(PolarGrid const& grid,
                                                                                        double Rmax)

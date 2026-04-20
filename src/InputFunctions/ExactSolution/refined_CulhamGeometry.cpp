@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/ExactSolution/refined_CulhamGeometry.h"
+#include <InputFunctions/ExactSolution/refined_CulhamGeometry.h>
 
 Refined_CulhamGeometry::Refined_CulhamGeometry(double Rmax)
     : Rmax(Rmax)

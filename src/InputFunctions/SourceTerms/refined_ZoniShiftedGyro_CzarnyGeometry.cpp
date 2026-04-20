@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/refined_ZoniShiftedGyro_CzarnyGeometry.h"
+#include <InputFunctions/SourceTerms/refined_ZoniShiftedGyro_CzarnyGeometry.h>
 
 void Refined_ZoniShiftedGyro_CzarnyGeometry::initializeGeometry()
 {

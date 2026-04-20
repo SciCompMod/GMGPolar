@@ -1,4 +1,4 @@
-#include "../../include/Interpolation/interpolation.h"
+#include <Interpolation/interpolation.h>
 
 /* Remark: This injection is not scaled. */
 

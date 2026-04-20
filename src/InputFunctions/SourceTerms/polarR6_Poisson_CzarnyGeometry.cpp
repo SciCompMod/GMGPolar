@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/polarR6_Poisson_CzarnyGeometry.h"
+#include <InputFunctions/SourceTerms/polarR6_Poisson_CzarnyGeometry.h>
 
 void PolarR6_Poisson_CzarnyGeometry::initializeGeometry()
 {

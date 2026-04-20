@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/polarR6_Zoni_CzarnyGeometry.h"
+#include <InputFunctions/SourceTerms/polarR6_Zoni_CzarnyGeometry.h>
 
 void PolarR6_Zoni_CzarnyGeometry::initializeGeometry()
 {

@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/ExactSolution/polarR6_CulhamGeometry.h"
+#include <InputFunctions/ExactSolution/polarR6_CulhamGeometry.h>
 
 PolarR6_CulhamGeometry::PolarR6_CulhamGeometry(double Rmax)
     : Rmax(Rmax)

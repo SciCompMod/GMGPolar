@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/cartesianR2_ZoniGyro_CzarnyGeometry.h"
+#include <InputFunctions/SourceTerms/cartesianR2_ZoniGyro_CzarnyGeometry.h>
 
 void CartesianR2_ZoniGyro_CzarnyGeometry::initializeGeometry()
 {

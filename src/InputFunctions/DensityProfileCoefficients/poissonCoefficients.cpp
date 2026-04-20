@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/DensityProfileCoefficients/poissonCoefficients.h"
+#include <InputFunctions/DensityProfileCoefficients/poissonCoefficients.h>
 
 PoissonCoefficients::PoissonCoefficients(double Rmax, double alpha_jump)
     : Rmax(Rmax)

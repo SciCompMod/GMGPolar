@@ -1,4 +1,4 @@
-#include "../../include/PolarGrid/polargrid.h"
+#include <PolarGrid/polargrid.h>
 #include <Kokkos_StdAlgorithms.hpp>
 // ------------ //
 // Constructors //

@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/polarR6_SonnendruckerGyro_CzarnyGeometry.h"
+#include <InputFunctions/SourceTerms/polarR6_SonnendruckerGyro_CzarnyGeometry.h>
 
 void PolarR6_SonnendruckerGyro_CzarnyGeometry::initializeGeometry()
 {

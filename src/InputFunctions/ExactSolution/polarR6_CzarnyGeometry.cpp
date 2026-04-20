@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/ExactSolution/polarR6_CzarnyGeometry.h"
+#include <InputFunctions/ExactSolution/polarR6_CzarnyGeometry.h>
 
 void PolarR6_CzarnyGeometry::initializeGeometry()
 {

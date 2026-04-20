@@ -1,4 +1,4 @@
-#include "../include/ConfigParser/config_parser.h"
+#include <ConfigParser/config_parser.h>
 
 ConfigParser::ConfigParser()
 {

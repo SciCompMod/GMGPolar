@@ -3,9 +3,9 @@
 
 #include "../test_tools.h"
 
-#include "../../include/GMGPolar/gmgpolar.h"
-#include "../../include/Interpolation/interpolation.h"
-#include "../../include/InputFunctions/DensityProfileCoefficients/poissonCoefficients.h"
+#include <GMGPolar/gmgpolar.h>
+#include <Interpolation/interpolation.h>
+#include <InputFunctions/DensityProfileCoefficients/poissonCoefficients.h>
 
 // Helper that computes the mathematically expected extrapolated restriction value
 static double expected_extrapolated_restriction_value(const PolarGrid& fine, const PolarGrid& coarse,

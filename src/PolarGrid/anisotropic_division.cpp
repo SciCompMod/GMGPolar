@@ -1,4 +1,4 @@
-#include "../../include/PolarGrid/polargrid.h"
+#include <PolarGrid/polargrid.h>
 
 Vector<double> PolarGrid::RadialAnisotropicDivision(double R0, double R, const int nr_exp, double refinement_radius,
                                                     const int anisotropic_factor) const

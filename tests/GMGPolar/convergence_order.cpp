@@ -5,11 +5,11 @@
 #include <vector>
 #include <random>
 
-#include "../../include/ConfigParser/test_selection.h"
-#include "../../include/GMGPolar/gmgpolar.h"
-#include "../../include/InputFunctions/boundaryConditions.h"
-#include "../../include/InputFunctions/densityProfileCoefficients.h"
-#include "../../include/InputFunctions/sourceTerm.h"
+#include <ConfigParser/test_selection.h>
+#include <GMGPolar/gmgpolar.h>
+#include <InputFunctions/boundaryConditions.h>
+#include <InputFunctions/densityProfileCoefficients.h>
+#include <InputFunctions/sourceTerm.h>
 
 template <class T>
 class GMGPolarPaperTestCase;

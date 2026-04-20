@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/DensityProfileCoefficients/zoniShiftedCoefficients.h"
+#include <InputFunctions/DensityProfileCoefficients/zoniShiftedCoefficients.h>
 #include <iostream>
 ZoniShiftedCoefficients::ZoniShiftedCoefficients(double Rmax, double alpha_jump)
     : Rmax(Rmax)

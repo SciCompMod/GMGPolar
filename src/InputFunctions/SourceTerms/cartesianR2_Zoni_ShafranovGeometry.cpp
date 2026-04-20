@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/cartesianR2_Zoni_ShafranovGeometry.h"
+#include <InputFunctions/SourceTerms/cartesianR2_Zoni_ShafranovGeometry.h>
 
 CartesianR2_Zoni_ShafranovGeometry::CartesianR2_Zoni_ShafranovGeometry(PolarGrid const& grid, double Rmax,
                                                                        double elongation_kappa, double shift_delta)

@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/cartesianR2_ZoniShiftedGyro_ShafranovGeometry.h"
+#include <InputFunctions/SourceTerms/cartesianR2_ZoniShiftedGyro_ShafranovGeometry.h>
 
 CartesianR2_ZoniShiftedGyro_ShafranovGeometry::CartesianR2_ZoniShiftedGyro_ShafranovGeometry(PolarGrid const& grid,
                                                                                              double Rmax,

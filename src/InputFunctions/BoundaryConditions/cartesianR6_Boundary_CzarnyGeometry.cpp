@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/BoundaryConditions/cartesianR6_Boundary_CzarnyGeometry.h"
+#include <InputFunctions/BoundaryConditions/cartesianR6_Boundary_CzarnyGeometry.h>
 
 void CartesianR6_Boundary_CzarnyGeometry::initializeGeometry()
 {

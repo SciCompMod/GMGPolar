@@ -3,8 +3,8 @@
 
 #include "../test_tools.h"
 
-#include "../../include/Interpolation/interpolation.h"
-#include "../../include/InputFunctions/DensityProfileCoefficients/poissonCoefficients.h"
+#include <Interpolation/interpolation.h>
+#include <InputFunctions/DensityProfileCoefficients/poissonCoefficients.h>
 
 // Helper that computes the mathematically expected restriction value
 static double expected_restriction_value(const PolarGrid& fine, const PolarGrid& coarse, ConstVector<double> fine_vals,

@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/ExactSolution/refined_CircularGeometry.h"
+#include <InputFunctions/ExactSolution/refined_CircularGeometry.h>
 
 Refined_CircularGeometry::Refined_CircularGeometry(double Rmax)
     : Rmax(Rmax)

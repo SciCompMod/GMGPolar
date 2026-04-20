@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/BoundaryConditions/polarR6_Boundary_CulhamGeometry.h"
+#include <InputFunctions/BoundaryConditions/polarR6_Boundary_CulhamGeometry.h>
 
 PolarR6_Boundary_CulhamGeometry::PolarR6_Boundary_CulhamGeometry(double Rmax)
     : Rmax(Rmax)

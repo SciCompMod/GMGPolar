@@ -1,4 +1,4 @@
-#include "../../include/GMGPolar/gmgpolar.h"
+#include <GMGPolar/gmgpolar.h>
 
 /* ---------------------------------------------------------------------- */
 /* Constructor & Initialization                                           */

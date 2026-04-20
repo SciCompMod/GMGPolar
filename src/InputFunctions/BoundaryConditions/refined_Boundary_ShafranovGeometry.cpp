@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/BoundaryConditions/refined_Boundary_ShafranovGeometry.h"
+#include <InputFunctions/BoundaryConditions/refined_Boundary_ShafranovGeometry.h>
 
 Refined_Boundary_ShafranovGeometry::Refined_Boundary_ShafranovGeometry(double Rmax, double elongation_kappa,
                                                                        double shift_delta)

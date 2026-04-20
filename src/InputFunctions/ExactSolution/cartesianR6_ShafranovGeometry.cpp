@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/ExactSolution/cartesianR6_ShafranovGeometry.h"
+#include <InputFunctions/ExactSolution/cartesianR6_ShafranovGeometry.h>
 
 CartesianR6_ShafranovGeometry::CartesianR6_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta)
     : Rmax(Rmax)

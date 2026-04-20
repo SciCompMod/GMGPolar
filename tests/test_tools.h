@@ -1,8 +1,8 @@
 #pragma once
 #include <random>
 
-#include "../include/PolarGrid/polargrid.h"
-#include "../include/LinearAlgebra/Vector/vector.h"
+#include <PolarGrid/polargrid.h>
+#include <LinearAlgebra/Vector/vector.h>
 
 inline Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed, double min_val = -100.0,
                                                   double max_val = 100.0)

@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/DensityProfileCoefficients/sonnendruckerGyroCoefficients.h"
+#include <InputFunctions/DensityProfileCoefficients/sonnendruckerGyroCoefficients.h>
 
 SonnendruckerGyroCoefficients::SonnendruckerGyroCoefficients(double _Rmax, double _alpha_jump)
     : Rmax(_Rmax)

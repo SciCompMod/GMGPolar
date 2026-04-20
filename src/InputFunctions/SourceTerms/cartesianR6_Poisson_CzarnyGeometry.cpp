@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/cartesianR6_Poisson_CzarnyGeometry.h"
+#include <InputFunctions/SourceTerms/cartesianR6_Poisson_CzarnyGeometry.h>
 
 void CartesianR6_Poisson_CzarnyGeometry::initializeGeometry()
 {

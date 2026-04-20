@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/DomainGeometry/culhamGeometry.h"
+#include <InputFunctions/DomainGeometry/culhamGeometry.h>
 
 CulhamGeometry::CulhamGeometry(double Rmax)
     : Rmax(Rmax)
