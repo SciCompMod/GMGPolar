@@ -58,8 +58,12 @@ endif()
 find_package(OpenMP REQUIRED)
 find_package(Kokkos  4.4.1...<5.1 QUIET REQUIRED)
 
-if (${GMGPOLAR_USE_MUMPS})
-    find_package(Metis REQUIRED)
+if(GMGPOLAR_USE_MUMPS)
+    find_package(MUMPS REQUIRED COMPONENTS OpenMP METIS)
+endif()
+
+if(GMGPOLAR_USE_LIKWID)
+    find_package(LIKWID REQUIRED)
 endif()
 
 add_subdirectory(src)

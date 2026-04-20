@@ -69,76 +69,12 @@ target_link_libraries(GMGPolarLib
 
 # Handle MUMPS configuration
 if(GMGPOLAR_USE_MUMPS)
-    find_package(MUMPS COMPONENTS OpenMP METIS)
-    if (${MUMPS_FOUND})
-      target_link_libraries(GMGPolarLib PUBLIC MUMPS::MUMPS)
-      target_compile_definitions(GMGPolarLib PUBLIC GMGPOLAR_USE_MUMPS)
-    elseif(DEFINED ENV{MUMPS_DIR})
-        set(MUMPS_DIR $ENV{MUMPS_DIR})
-
-        if(EXISTS "${MUMPS_DIR}/include" AND EXISTS "${MUMPS_DIR}/lib")
-            set(MUMPS_INCLUDE_DIR "${MUMPS_DIR}/include")
-            set(MUMPS_LIBRARY_DIR "${MUMPS_DIR}/lib")
-
-            target_include_directories(GMGPolarLib PUBLIC ${MUMPS_INCLUDE_DIR})
-            target_link_directories(GMGPolarLib PUBLIC ${MUMPS_LIBRARY_DIR})
-
-            if (EXISTS "${MUMPS_DIR}/libseq")
-              target_include_directories(GMGPolarLib PUBLIC "${MUMPS_DIR}/libseq")
-              target_link_directories(GMGPolarLib PUBLIC "${MUMPS_DIR}/libseq")
-            endif()
-
-            set(MUMPS_FOUND TRUE)
-        endif()
-
-        if(MUMPS_FOUND)
-            target_link_libraries(GMGPolarLib PUBLIC
-                mumps_common
-                smumps
-                dmumps
-                mpiseq
-            )
-            target_compile_definitions(GMGPolarLib PUBLIC GMGPOLAR_USE_MUMPS)
-        else()
-            message(SEND_ERROR "MUMPS not found")
-        endif()
-    endif()
+    target_link_libraries(GMGPolarLib PUBLIC MUMPS::MUMPS)
+    target_compile_definitions(GMGPolarLib PUBLIC GMGPOLAR_USE_MUMPS)
 endif()
 
 # Handle LIKWID configuration
 if(GMGPOLAR_USE_LIKWID)
-    if(NOT DEFINED LIKWID_DIR)
-        if(DEFINED ENV{LIKWID_DIR})
-            set(LIKWID_DIR $ENV{LIKWID_DIR} CACHE PATH "Path to Likwid installation")
-        endif()
-    endif()
-
-    if(LIKWID_DIR)
-        find_path(LIKWID_INCLUDE_DIR
-            NAMES likwid.h
-            PATHS "${LIKWID_DIR}/include"
-            NO_DEFAULT_PATH
-            REQUIRED
-        )
-        find_library(LIKWID_LIBRARY
-            NAMES likwid
-            PATHS "${LIKWID_DIR}/lib" "${LIKWID_DIR}/lib64"
-            NO_DEFAULT_PATH
-            REQUIRED
-        )
-    else()
-        find_package(PkgConfig QUIET)
-        if(PKG_CONFIG_FOUND)
-            pkg_check_modules(LIKWID QUIET likwid)
-        endif()
-    endif()
-
-    if(LIKWID_INCLUDE_DIR AND LIKWID_LIBRARY)
-        target_include_directories(GMGPolarLib PUBLIC ${LIKWID_INCLUDE_DIR})
-        target_link_libraries(GMGPolarLib PUBLIC ${LIKWID_LIBRARY})
-        target_compile_definitions(GMGPolarLib PUBLIC
-            LIKWID_PERFMON
-            GMGPOLAR_USE_LIKWID
-        )
-    endif()
+    target_link_libraries(GMGPolarLib PUBLIC LIKWID::LIKWID)
+    target_compile_definitions(GMGPolarLib PUBLIC GMGPOLAR_USE_LIKWID)
 endif()
