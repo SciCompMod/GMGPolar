@@ -82,6 +82,7 @@ private:
     double Rmax_;
     double kappa_eps_;
     double delta_e_;
+    double alpha_jump_;
     // General solver output and visualization settings
     int verbose_;
     bool paraview_;
