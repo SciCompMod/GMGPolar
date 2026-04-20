@@ -296,13 +296,14 @@ void ResidualGive<LevelCacheType>::applyCircleSection(const int i_r, Vector<doub
 {
     using residual_give::node_apply_a_give;
 
-    const PolarGrid& grid = Residual<LevelCacheType>::grid_;
+    const PolarGrid& grid             = Residual<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = Residual<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = Residual<LevelCacheType>::DirBC_Interior_;
 
     const double r = grid.radius(i_r);
     for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
         const double theta = grid.theta(i_theta);
-        node_apply_a_give(i_r, i_theta, r, theta, grid, Residual<LevelCacheType>::level_cache_,
-                          Residual<LevelCacheType>::DirBC_Interior_, result, x);
+        node_apply_a_give(i_r, i_theta, r, theta, grid, level_cache, DirBC_Interior, result, x);
     }
 }
 
@@ -312,12 +313,13 @@ void ResidualGive<LevelCacheType>::applyRadialSection(const int i_theta, Vector<
 {
     using residual_give::node_apply_a_give;
 
-    const PolarGrid& grid = Residual<LevelCacheType>::grid_;
+    const PolarGrid& grid             = Residual<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = Residual<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = Residual<LevelCacheType>::DirBC_Interior_;
 
     const double theta = grid.theta(i_theta);
     for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
         const double r = grid.radius(i_r);
-        node_apply_a_give(i_r, i_theta, r, theta, grid, Residual<LevelCacheType>::level_cache_,
-                          Residual<LevelCacheType>::DirBC_Interior_, result, x);
+        node_apply_a_give(i_r, i_theta, r, theta, grid, level_cache, DirBC_Interior, result, x);
     }
 }

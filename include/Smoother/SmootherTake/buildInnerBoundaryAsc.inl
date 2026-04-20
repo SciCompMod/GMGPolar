@@ -142,6 +142,12 @@ SmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     const int i_r    = 0;
     const int ntheta = grid.ntheta();
 
+    // The interior boundary matrix is symmetric due to the periodicity in the theta direction
+    // and the assumption that ntheta is even, which is required for the across-origin discretization.
+    // We store all non-zero entries of the matrix, both in COO format (for MUMPS)
+    // and in CSR format (for the in-house solver). If the COO matrix is marked as symmetric,
+    // the COO_Mumps_Solver optimizes the factorization by only using the upper triangular part of the matrix,
+    // which is extracted by the COO_Mumps_Solver internally.
 #ifdef GMGPOLAR_USE_MUMPS
     const int nnz = getNonZeroCountCircleAsc(i_r);
     SparseMatrixCOO<double> inner_boundary_solver_matrix(ntheta, ntheta, nnz);

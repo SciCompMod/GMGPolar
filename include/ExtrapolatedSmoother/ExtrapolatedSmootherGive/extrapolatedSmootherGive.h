@@ -60,9 +60,6 @@ public:
     explicit ExtrapolatedSmootherGive(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
                                       int num_omp_threads);
 
-    // If MUMPS is enabled, this cleans up the inner boundary solver.
-    ~ExtrapolatedSmootherGive() override;
-
     // Performs one full coupled extrapolated smoothing sweep:
     //   BC -> WC -> BR -> WR
     // Parallel implementation using OpenMP:
@@ -72,38 +69,11 @@ public:
 
 private:
     /* ------------------- */
-    /* Tridiagonal solvers */
-    /* ------------------- */
-
-    // Batched solver for cyclic-tridiagonal circle line A_sc matrices.
-    BatchedTridiagonalSolver<double> circle_tridiagonal_solver_;
-
-    // Batched solver for tridiagonal radial circle line A_sc matrices.
-    BatchedTridiagonalSolver<double> radial_tridiagonal_solver_;
-
-    // The A_sc matrix on i_r = 0 (inner circle) is NOT tridiagonal because
-    // it potentially includes across-origin coupling. Therefore, it is assembled
-    // into a sparse matrix and solved using a general-purpose sparse solver.
-    // When using the MUMPS solver, the matrix is assembled in COO format.
-    // When using the in-house solver, the matrix is stored in CSR format.
-#ifdef GMGPOLAR_USE_MUMPS
-    using MatrixType = SparseMatrixCOO<double>;
-    DMUMPS_STRUC_C inner_boundary_mumps_solver_;
-#else
-    using MatrixType = SparseMatrixCSR<double>;
-    SparseLUSolver<double> inner_boundary_lu_solver_;
-#endif
-    // Sparse matrix for the non-tridiagonal inner boundary circle block.
-    MatrixType inner_boundary_circle_matrix_;
-
-    // Note:
-    //   - circle_tridiagonal_solver_[batch=0] is unused. Use the COO/CSR matrix instead.
-    //   - circle_tridiagonal_solver_[batch=i_r] solves circle line i_r.
-    //   - radial_tridiagonal_solver_[batch=i_theta] solves radial line i_theta.
-
-    /* ------------------- */
     /* Stencil definitions */
     /* ------------------- */
+
+    // The stencil definitions must be defined before the declaration of the inner_boundary_mumps_solver_,
+    // since the mumps solver will be build in the member initializer of the Smoother class.
 
     // Stencils encode neighborhood connectivity for A_sc matrix assembly.
     // It is only used in the construction of COO/CSR matrices.
@@ -126,6 +96,48 @@ private:
     };
     // clang-format on
 
+    /* ------------------- */
+    /* Tridiagonal solvers */
+    /* ------------------- */
+
+    // Batched solver for cyclic-tridiagonal circle line A_sc matrices.
+    BatchedTridiagonalSolver<double> circle_tridiagonal_solver_;
+
+    // Batched solver for tridiagonal radial line A_sc matrices.
+    BatchedTridiagonalSolver<double> radial_tridiagonal_solver_;
+
+    // Note:
+    //   - circle_tridiagonal_solver_[batch=0] is unused. Use the COO/CSR matrix instead.
+    //   - circle_tridiagonal_solver_[batch=i_r] solves circle line i_r.
+    //   - radial_tridiagonal_solver_[batch=i_theta] solves radial line i_theta.
+
+    /* ------------------------ */
+    /* Interior boundary solver */
+    /* ------------------------ */
+
+    // The inner circle matrix (i_r = 0) is NOT tridiagonal due to across-origin coupling.
+    // It is solved using a general-purpose sparse solver.
+    // - MUMPS: matrix assembled in COO format; solver owns the matrix internally.
+    // - In-house: matrix stored in CSR; solver does not own the matrix.
+
+#ifdef GMGPOLAR_USE_MUMPS
+    using InnerBoundaryMatrix = SparseMatrixCOO<double>;
+    using InnerBoundarySolver = CooMumpsSolver;
+#else
+    using InnerBoundaryMatrix = SparseMatrixCSR<double>;
+    using InnerBoundarySolver = SparseLUSolver<double>;
+
+    // Stored only for the in-house solver (CSR).
+    InnerBoundaryMatrix inner_boundary_circle_matrix_;
+#endif
+
+    // Solver object (owns matrix if MUMPS, references if in-house solver).
+    InnerBoundarySolver inner_boundary_solver_;
+
+    /* -------------- */
+    /* Stencil access */
+    /* -------------- */
+
     // Select correct stencil depending on the grid position.
     const Stencil& getStencil(int i_r, int i_theta) const; /* Only i_r = 0 implemented */
     // Number of nonzero A_sc entries.
@@ -137,19 +149,25 @@ private:
     /* --------------- */
     /* Matrix assembly */
     /* --------------- */
-
     // Build all A_sc matrices for circle and radial smoothers.
-    void buildAscMatrices();
-    // Build A_sc matrix block for a single circular line.
-    void buildAscCircleSection(int i_r);
-    // Build A_sc matrix block for a single radial line.
-    void buildAscRadialSection(int i_theta);
-    // Build A_sc for a specific node (i_r, i_theta)
-    void nodeBuildAscGive(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                          MatrixType& inner_boundary_circle_matrix,
-                          BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
-                          BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, double arr, double att,
-                          double art, double detDF, double coeff_beta);
+    void buildTridiagonalSolverMatrices();
+    void buildTridiagonalCircleSection(int i_r);
+    void buildTridiagonalRadialSection(int i_theta);
+    // Build the tridiagonal solver matrices for a specific node (i_r, i_theta)
+    void nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+                                            BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
+                                            BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, double arr,
+                                            double att, double art, double detDF, double coeff_beta);
+
+    // Build the solver matrix for the interior boundary (i_r = 0) which is non-tridiagonal due to across-origin coupling.
+    InnerBoundaryMatrix buildInteriorBoundarySolverMatrix();
+    // Build the solver matrix for a specific node (i_r = 0, i_theta) on the interior boundary.
+    void nodeBuildInteriorBoundarySolverMatrix_i_r_0(int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+                                                     InnerBoundaryMatrix& matrix, double arr, double att, double art,
+                                                     double detDF, double coeff_beta);
+    void nodeBuildInteriorBoundarySolverMatrix_i_r_1(int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+                                                     InnerBoundaryMatrix& matrix, double arr, double att, double art,
+                                                     double detDF, double coeff_beta);
 
     /* ---------------------- */
     /* Orthogonal application */
@@ -157,9 +175,9 @@ private:
 
     // Compute temp = f_sc − A_sc^ortho * u_sc^ortho   (precomputed right-hand side)
     // where x = u_sc and rhs = f_sc
-    void applyAscOrthoCircleSection(int i_r, SmootherColor smoother_color, ConstVector<double> x,
+    void applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color, ConstVector<double> x,
                                     ConstVector<double> rhs, Vector<double> temp);
-    void applyAscOrthoRadialSection(int i_theta, SmootherColor smoother_color, ConstVector<double> x,
+    void applyAscOrthoRadialSection(const int i_theta, const SmootherColor smoother_color, ConstVector<double> x,
                                     ConstVector<double> rhs, Vector<double> temp);
 
     /* ----------------- */
@@ -178,21 +196,11 @@ private:
     void solveWhiteCircleSection(Vector<double> x, Vector<double> temp);
     void solveBlackRadialSection(Vector<double> x, Vector<double> temp);
     void solveWhiteRadialSection(Vector<double> x, Vector<double> temp);
-
-    /* ----------------------------------- */
-    /* Initialize and destroy MUMPS solver */
-    /* ----------------------------------- */
-#ifdef GMGPOLAR_USE_MUMPS
-    // Initialize sparse MUMPS solver with assembled COO matrix.
-    void initializeMumpsSolver(DMUMPS_STRUC_C& mumps_solver, SparseMatrixCOO<double>& solver_matrix);
-    // Release MUMPS internal memory and MPI structures.
-    void finalizeMumpsSolver(DMUMPS_STRUC_C& mumps_solver);
-#endif
 };
 
 #include "extrapolatedSmootherGive.inl"
 #include "smootherStencil.inl"
-#include "buildAscMatrices.inl"
+#include "buildInnerBoundaryAsc.inl"
+#include "buildTridiagonalAsc.inl"
 #include "applyAscOrtho.inl"
 #include "solveAscSystem.inl"
-#include "initializeMumps.inl"

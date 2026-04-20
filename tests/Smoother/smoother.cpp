@@ -8,7 +8,7 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
 #include "../../include/Residual/ResidualGive/residualGive.h"
-#include "../../include/DirectSolver/DirectSolver-CSR-LU-Give/directSolverGiveCustomLU.h"
+#include "../../include/DirectSolver/DirectSolver-CSR-LU-Give/directSolverGive.h"
 #include "../../include/Smoother/SmootherGive/smootherGive.h"
 #include "../../include/Smoother/SmootherTake/smootherTake.h"
 
