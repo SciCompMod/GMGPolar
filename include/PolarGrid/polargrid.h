@@ -19,6 +19,9 @@
 #include "../Definitions/equals.h"
 #include "../LinearAlgebra/Vector/vector.h"
 
+namespace gmgpolar
+{
+
 class PolarGrid
 {
 public:
@@ -140,3 +143,4 @@ private:
 PolarGrid coarseningGrid(const PolarGrid& grid);
 
 #include "polargrid.inl" // Include the inline function definitions
+} // namespace gmgpolar

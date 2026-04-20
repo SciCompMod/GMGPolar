@@ -3,6 +3,7 @@
 #include "../../../include/LinearAlgebra/Matrix/csr_matrix.h"
 #include "../../../include/LinearAlgebra/Solvers/csr_lu_solver.h"
 #include "../../../include/LinearAlgebra/Vector/vector.h"
+using namespace gmgpolar;
 
 TEST(SparseMatrixCSR, default_construct)
 {

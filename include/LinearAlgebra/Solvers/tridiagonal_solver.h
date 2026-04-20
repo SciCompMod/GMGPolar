@@ -5,6 +5,9 @@
 #include "../../LinearAlgebra/Vector/vector.h"
 #include "../../LinearAlgebra/Vector/vector_operations.h"
 
+namespace gmgpolar
+{
+
 template <typename T>
 class BatchedTridiagonalSolver
 {
@@ -303,3 +306,4 @@ private:
     bool is_cyclic_;
     bool is_factorized_;
 };
+} // namespace gmgpolar

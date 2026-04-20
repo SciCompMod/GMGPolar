@@ -1,4 +1,5 @@
 #include "../../include/Interpolation/interpolation.h"
+using namespace gmgpolar;
 
 Interpolation::Interpolation(int max_omp_threads, bool DirBC_Interior)
     : max_omp_threads_(max_omp_threads)

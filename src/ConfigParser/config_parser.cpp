@@ -1,4 +1,5 @@
 #include "../include/ConfigParser/config_parser.h"
+using namespace gmgpolar;
 
 ConfigParser::ConfigParser()
 {

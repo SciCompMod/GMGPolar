@@ -26,6 +26,9 @@
 // The CSR matrix format is used if a custom LU decomposition solver is choosen.
 // MUMPS relies on the COO format.
 
+namespace gmgpolar
+{
+
 template <typename T>
 class SparseMatrixCSR
 {
@@ -325,3 +328,4 @@ int* SparseMatrixCSR<T>::row_start_indices_data() const
 {
     return row_start_indices_.data();
 }
+} // namespace gmgpolar

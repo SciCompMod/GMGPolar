@@ -1,5 +1,6 @@
 #include "../../include/PolarGrid/polargrid.h"
 #include <Kokkos_StdAlgorithms.hpp>
+using namespace gmgpolar;
 // ------------ //
 // Constructors //
 // ------------ //
@@ -237,6 +238,8 @@ void PolarGrid::initializeLineSplitting(std::optional<double> splitting_radius)
 // Generates a coarser PolarGrid from a finer PolarGrid //
 // ---------------------------------------------------- //
 
+namespace gmgpolar {
+
 PolarGrid coarseningGrid(const PolarGrid& fineGrid)
 {
     assert((fineGrid.nr() - 1) % 2 == 0 && (fineGrid.ntheta()) % 2 == 0);
@@ -261,6 +264,8 @@ PolarGrid coarseningGrid(const PolarGrid& fineGrid)
     else {
         return PolarGrid(coarse_r, coarse_theta);
     }
+}
+
 }
 
 // ------------------------ //

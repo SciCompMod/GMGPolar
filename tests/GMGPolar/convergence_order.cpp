@@ -10,6 +10,7 @@
 #include "../../include/InputFunctions/boundaryConditions.h"
 #include "../../include/InputFunctions/densityProfileCoefficients.h"
 #include "../../include/InputFunctions/sourceTerm.h"
+using namespace gmgpolar;
 
 template <class T>
 class GMGPolarPaperTestCase;

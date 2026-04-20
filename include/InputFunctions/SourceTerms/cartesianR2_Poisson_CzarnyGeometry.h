@@ -6,6 +6,9 @@
 
 #include "../../PolarGrid/polargrid.h"
 
+namespace gmgpolar
+{
+
 class CartesianR2_Poisson_CzarnyGeometry
 {
 public:
@@ -23,3 +26,4 @@ private:
     void initializeGeometry();
     double factor_xi;
 };
+} // namespace gmgpolar

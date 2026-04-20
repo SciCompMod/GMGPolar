@@ -1,5 +1,6 @@
 #include "../../include/ConfigParser/config_parser.h"
 #include "../../include/GMGPolar/gmgpolar.h"
+using namespace gmgpolar;
 
 std::unique_ptr<IGMGPolar> ConfigParser::solver() const
 {
