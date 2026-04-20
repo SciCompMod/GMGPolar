@@ -44,6 +44,7 @@ if(GMGPOLAR_ENABLE_COVERAGE)
     endif()
 endif()
 
+find_package(Kokkos  4.4.1...<5.1 QUIET REQUIRED)
 include_directories(include)
 add_subdirectory(src)
 
