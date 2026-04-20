@@ -18,6 +18,5 @@ set(BOUNDARY_CONDITIONS_SOURCES
 add_library(InputFunctions_BoundaryConditions STATIC ${BOUNDARY_CONDITIONS_SOURCES})
 
 target_include_directories(InputFunctions_BoundaryConditions PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/include/InputFunctions/BoundaryConditions
+    ${PROJECT_SOURCE_DIR}/include
 )

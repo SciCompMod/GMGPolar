@@ -15,5 +15,5 @@ target_link_libraries(InputFunctions INTERFACE
 )
 
 target_include_directories(InputFunctions INTERFACE
-    ${CMAKE_SOURCE_DIR}/include/InputFunctions
+    ${PROJECT_SOURCE_DIR}/include
 )

@@ -71,8 +71,7 @@ set(SOURCE_TERMS_SOURCES
 
 add_library(InputFunctions_SourceTerms STATIC ${SOURCE_TERMS_SOURCES})
 target_include_directories(InputFunctions_SourceTerms PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/include/InputFunctions/SourceTerms
+    ${PROJECT_SOURCE_DIR}/include
 )
 
 target_link_libraries(InputFunctions_SourceTerms PUBLIC Kokkos::kokkos)
