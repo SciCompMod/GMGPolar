@@ -17,10 +17,9 @@ runs:
       run: |
         apt-get -qq update
         apt-get -qq -y install lcov
-    - name: Install MUMPS Dependencies
-      shell: bash
-      run: |
-        apt-get -qq -y install gfortran
+    - name: Install additional dependencies to use MUMPS
+      if: inputs.use-mumps == 'true'
+      uses: ./.github/actions/install-dependencies
     - name: Download build test directory
       uses: actions/download-artifact@v4
       with:
