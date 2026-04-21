@@ -2,6 +2,7 @@
 
 #include "../../../include/LinearAlgebra/Vector/vector.h"
 #include "../../../include/LinearAlgebra/Vector/vector_operations.h"
+using namespace gmgpolar;
 
 /* bool equals(ConstVector<T>& lhs, ConstVector<T>& rhs); */
 

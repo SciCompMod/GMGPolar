@@ -12,6 +12,9 @@
 
 #include "igmgpolar.h"
 
+namespace gmgpolar
+{
+
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 class GMGPolar : public IGMGPolar
 {
@@ -210,3 +213,4 @@ private:
 #include "MultigridMethods/extrapolated_multigrid_V_Cycle.h"
 #include "MultigridMethods/multigrid_F_Cycle.h"
 #include "MultigridMethods/multigrid_W_Cycle.h"
+} // namespace gmgpolar

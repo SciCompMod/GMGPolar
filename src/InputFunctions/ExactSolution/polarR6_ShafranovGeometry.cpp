@@ -1,4 +1,5 @@
 #include "../include/InputFunctions/ExactSolution/polarR6_ShafranovGeometry.h"
+using namespace gmgpolar;
 
 PolarR6_ShafranovGeometry::PolarR6_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta)
     : Rmax(Rmax)

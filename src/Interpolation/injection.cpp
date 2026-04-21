@@ -1,4 +1,5 @@
 #include "../../include/Interpolation/interpolation.h"
+using namespace gmgpolar;
 
 /* Remark: This injection is not scaled. */
 

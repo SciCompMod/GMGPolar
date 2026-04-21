@@ -10,6 +10,9 @@
 #include "../../LinearAlgebra/Matrix/csr_matrix.h"
 #include "../../LinearAlgebra/Vector/vector.h"
 
+namespace gmgpolar
+{
+
 /**
  * @brief Sparse LU decomposition solver for symmetric positive definite matrices.
  *
@@ -551,3 +554,4 @@ void SparseLUSolver<T>::numericFactorization(const SparseMatrixCSR<T>& A,
         }
     }
 }
+} // namespace gmgpolar

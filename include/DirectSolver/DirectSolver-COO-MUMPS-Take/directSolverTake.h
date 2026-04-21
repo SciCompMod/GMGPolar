@@ -4,6 +4,9 @@
 
 #ifdef GMGPOLAR_USE_MUMPS
 
+namespace gmgpolar
+{
+
 template <class LevelCacheType>
 class DirectSolver_COO_MUMPS_Take : public DirectSolver<LevelCacheType>
 {
@@ -83,4 +86,5 @@ private:
     #include "directSolverTake.inl"
     #include "matrixStencil.inl"
 
+} // namespace gmgpolar
 #endif

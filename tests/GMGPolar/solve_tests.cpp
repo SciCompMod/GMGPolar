@@ -7,6 +7,7 @@
 // Including the necessary header from the project
 #include "../../include/ConfigParser/test_selection.h"
 #include "../../include/GMGPolar/gmgpolar.h"
+using namespace gmgpolar;
 
 template <class T>
 class GMGPolarTestCase;
