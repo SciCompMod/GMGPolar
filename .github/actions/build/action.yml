@@ -14,7 +14,7 @@ runs:
       run: |
         apt-get -qq update
         apt-get -qq -y install lcov
-    - name: Install MUMPS dependencies
+    - name: Install additional dependencies to use MUMPS
       if: inputs.use-mumps == 'true'
       uses: ./.github/actions/install-dependencies
     - name: Build
