@@ -238,7 +238,8 @@ void PolarGrid::initializeLineSplitting(std::optional<double> splitting_radius)
 // Generates a coarser PolarGrid from a finer PolarGrid //
 // ---------------------------------------------------- //
 
-namespace gmgpolar {
+namespace gmgpolar
+{
 
 PolarGrid coarseningGrid(const PolarGrid& fineGrid)
 {
@@ -266,7 +267,7 @@ PolarGrid coarseningGrid(const PolarGrid& fineGrid)
     }
 }
 
-}
+} // namespace gmgpolar
 
 // ------------------------ //
 // Check parameter validity //
