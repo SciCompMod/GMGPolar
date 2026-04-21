@@ -2,6 +2,9 @@
 
 #include "../smoother.h"
 
+namespace gmgpolar
+{
+
 // The smoother implements the coupled circle-radial smoothing procedure.
 // It performs iterative updates on different parts of the grid based
 // on the circle/radial section of the grid and black/white line coloring.
@@ -193,3 +196,4 @@ private:
 #include "applyAscOrtho.inl"
 #include "solveAscSystem.inl"
 #include "matrixStencil.inl"
+} // namespace gmgpolar

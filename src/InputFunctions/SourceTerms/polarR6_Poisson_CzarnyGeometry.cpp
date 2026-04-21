@@ -1,4 +1,5 @@
 #include "../include/InputFunctions/SourceTerms/polarR6_Poisson_CzarnyGeometry.h"
+using namespace gmgpolar;
 
 void PolarR6_Poisson_CzarnyGeometry::initializeGeometry()
 {

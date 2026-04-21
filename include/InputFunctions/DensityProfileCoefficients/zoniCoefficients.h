@@ -4,6 +4,9 @@
 
 #include "../densityProfileCoefficients.h"
 
+namespace gmgpolar
+{
+
 class ZoniCoefficients
 {
 public:
@@ -19,3 +22,4 @@ private:
     const double Rmax       = 1.3;
     const double alpha_jump = 0.4837 * 1.3;
 };
+} // namespace gmgpolar

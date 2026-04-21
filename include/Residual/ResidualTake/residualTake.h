@@ -2,6 +2,9 @@
 
 #include "../residual.h"
 
+namespace gmgpolar
+{
+
 template <class LevelCacheType>
 class ResidualTake : public Residual<LevelCacheType>
 {
@@ -21,3 +24,4 @@ private:
 
 #include "residualTake.inl"
 #include "applyATake.inl"
+} // namespace gmgpolar

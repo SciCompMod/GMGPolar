@@ -7,6 +7,9 @@
 
 #include "../domainGeometry.h"
 
+namespace gmgpolar
+{
+
 class CulhamGeometry
 {
 public:
@@ -94,3 +97,4 @@ private:
 };
 
 #include "culhamGeometry.inl"
+} // namespace gmgpolar

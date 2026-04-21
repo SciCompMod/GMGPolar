@@ -4,6 +4,9 @@
 
 #include "../domainGeometry.h"
 
+namespace gmgpolar
+{
+
 class CircularGeometry
 {
 public:
@@ -22,3 +25,4 @@ private:
 };
 
 #include "circularGeometry.inl"
+} // namespace gmgpolar

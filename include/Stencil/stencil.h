@@ -29,6 +29,9 @@ enum class StencilPosition
  * - A value of `-1` means the position is not included in the stencil pattern.
  * - Other values (0, 1, 2, ..., stencil_size - 1) correspond to valid stencil indices.
  */
+namespace gmgpolar
+{
+
 class Stencil
 {
 public:
@@ -39,3 +42,4 @@ private:
     std::array<int, 9> values_;
     int stencil_size_;
 };
+} // namespace gmgpolar
