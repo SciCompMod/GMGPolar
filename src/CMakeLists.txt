@@ -51,7 +51,6 @@ add_library(GMGPolarLib STATIC
     ${GMG_POLAR_SOURCES}
     ${STENCIL_SOURCES}
     ${INTERPOLATION_SOURCES}
-    ${CONFIG_PARSER_SOURCES}
 )
 
 # Basic library configuration
@@ -66,12 +65,6 @@ target_link_libraries(GMGPolarLib
     Kokkos::kokkos
 )
 
-
-install(TARGETS GMGPolarLib
-    EXPORT GMGPolarTargets
-    ARCHIVE DESTINATION lib
-)
-
 # Handle MUMPS configuration
 if(GMGPOLAR_USE_MUMPS)
     target_link_libraries(GMGPolarLib PUBLIC MUMPS::MUMPS)
@@ -83,3 +76,20 @@ if(GMGPOLAR_USE_LIKWID)
     target_link_libraries(GMGPolarLib PUBLIC LIKWID::LIKWID)
     target_compile_definitions(GMGPolarLib PUBLIC GMGPOLAR_USE_LIKWID)
 endif()
+
+add_library(GMGPolarInterface STATIC
+    ${CONFIG_PARSER_SOURCES}
+)
+target_link_libraries(GMGPolarInterface
+    PUBLIC
+    GMGPolarLib
+    InputFunctions
+)
+
+
+install(TARGETS
+    GMGPolarLib
+    GMGPolarInterface
+    EXPORT GMGPolarTargets
+    ARCHIVE DESTINATION lib
+)
