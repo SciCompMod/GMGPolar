@@ -17,6 +17,5 @@ set(EXACT_SOLUTION_SOURCES
 
 add_library(InputFunctions_ExactSolution STATIC ${EXACT_SOLUTION_SOURCES})
 target_include_directories(InputFunctions_ExactSolution PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/include/InputFunctions/ExactSolution
+    ${GMGPOLAR_INCLUDE_DIRS}
 )

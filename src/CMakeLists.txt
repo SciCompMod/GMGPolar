@@ -1,10 +1,3 @@
-cmake_minimum_required(VERSION 3.12)
-
-if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE STREQUAL "Release")
-    # If using GNU increase maximum number of instructions considered for inlining
-    # in Release mode in this folder and sub-folders
-    add_compile_options(--param max-inline-insns-single=1500)
-endif()
 
 # Add subdirectories for components
 add_subdirectory(InputFunctions)
@@ -62,114 +55,31 @@ add_library(GMGPolarLib STATIC
 )
 
 # Basic library configuration
-target_include_directories(GMGPolarLib PUBLIC 
-    ${CMAKE_CURRENT_SOURCE_DIR}/..
-    ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
-target_link_libraries(GMGPolarLib PUBLIC 
-    InputFunctions
+target_include_directories(GMGPolarLib PUBLIC
+    ${GMGPOLAR_INCLUDE_DIRS}
 )
 
 # Handle OpenMP
-find_package(OpenMP REQUIRED)
-if(OpenMP_CXX_FOUND)
-    target_link_libraries(GMGPolarLib PUBLIC OpenMP::OpenMP_CXX)
-endif()
-target_link_libraries(GMGPolarLib PUBLIC Kokkos::kokkos)
+target_link_libraries(GMGPolarLib
+    PUBLIC
+    OpenMP::OpenMP_CXX
+    Kokkos::kokkos
+)
 
+
+install(TARGETS GMGPolarLib
+    EXPORT GMGPolarTargets
+    ARCHIVE DESTINATION lib
+)
 
 # Handle MUMPS configuration
 if(GMGPOLAR_USE_MUMPS)
-    find_package(MUMPS COMPONENTS OpenMP METIS)
-    if (${MUMPS_FOUND})
-      target_link_libraries(GMGPolarLib PUBLIC MUMPS::MUMPS)
-      target_compile_definitions(GMGPolarLib PUBLIC GMGPOLAR_USE_MUMPS)
-    elseif(DEFINED ENV{MUMPS_DIR})
-        set(MUMPS_DIR $ENV{MUMPS_DIR})
-
-        if(EXISTS "${MUMPS_DIR}/include" AND EXISTS "${MUMPS_DIR}/lib")
-            set(MUMPS_INCLUDE_DIR "${MUMPS_DIR}/include")
-            set(MUMPS_LIBRARY_DIR "${MUMPS_DIR}/lib")
-
-            target_include_directories(GMGPolarLib PUBLIC ${MUMPS_INCLUDE_DIR})
-            target_link_directories(GMGPolarLib PUBLIC ${MUMPS_LIBRARY_DIR})
-
-            if (EXISTS "${MUMPS_DIR}/libseq")
-              target_include_directories(GMGPolarLib PUBLIC "${MUMPS_DIR}/libseq")
-              target_link_directories(GMGPolarLib PUBLIC "${MUMPS_DIR}/libseq")
-            endif()
-
-            set(MUMPS_FOUND TRUE)
-        endif()
-
-        if(MUMPS_FOUND)
-            target_link_libraries(GMGPolarLib PUBLIC
-                mumps_common
-                smumps
-                dmumps
-                mpiseq
-            )
-            target_compile_definitions(GMGPolarLib PUBLIC GMGPOLAR_USE_MUMPS)
-        else()
-            message(SEND_ERROR "MUMPS not found")
-        endif()
-    endif()
-
-    if(DEFINED ENV{METIS_DIR})
-        set(METIS_DIR $ENV{METIS_DIR})
-
-        if(EXISTS "${METIS_DIR}/include" AND EXISTS "${METIS_DIR}/lib")
-            set(METIS_INCLUDE_DIR "${METIS_DIR}/include")
-            set(METIS_LIBRARY_DIR "${METIS_DIR}/lib")
-
-            target_include_directories(GMGPolarLib PUBLIC ${METIS_INCLUDE_DIR})
-            target_link_directories(GMGPolarLib PUBLIC ${METIS_LIBRARY_DIR})
-            set(METIS_FOUND TRUE)
-        endif()
-
-        if(METIS_FOUND)
-            target_link_libraries(GMGPolarLib PUBLIC metis)
-        else()
-            message(SEND_ERROR "METIS not found")
-        endif()
-    endif()
+    target_link_libraries(GMGPolarLib PUBLIC MUMPS::MUMPS)
+    target_compile_definitions(GMGPolarLib PUBLIC GMGPOLAR_USE_MUMPS)
 endif()
 
 # Handle LIKWID configuration
 if(GMGPOLAR_USE_LIKWID)
-    if(NOT DEFINED LIKWID_DIR)
-        if(DEFINED ENV{LIKWID_DIR})
-            set(LIKWID_DIR $ENV{LIKWID_DIR} CACHE PATH "Path to Likwid installation")
-        endif()
-    endif()
-
-    if(LIKWID_DIR)
-        find_path(LIKWID_INCLUDE_DIR
-            NAMES likwid.h
-            PATHS "${LIKWID_DIR}/include"
-            NO_DEFAULT_PATH
-            REQUIRED
-        )
-        find_library(LIKWID_LIBRARY
-            NAMES likwid
-            PATHS "${LIKWID_DIR}/lib" "${LIKWID_DIR}/lib64"
-            NO_DEFAULT_PATH
-            REQUIRED
-        )
-    else()
-        find_package(PkgConfig QUIET)
-        if(PKG_CONFIG_FOUND)
-            pkg_check_modules(LIKWID QUIET likwid)
-        endif()
-    endif()
-
-    if(LIKWID_INCLUDE_DIR AND LIKWID_LIBRARY)
-        target_include_directories(GMGPolarLib PUBLIC ${LIKWID_INCLUDE_DIR})
-        target_link_libraries(GMGPolarLib PUBLIC ${LIKWID_LIBRARY})
-        target_compile_definitions(GMGPolarLib PUBLIC
-            LIKWID_PERFMON
-            GMGPOLAR_USE_LIKWID
-        )
-    endif()
+    target_link_libraries(GMGPolarLib PUBLIC LIKWID::LIKWID)
+    target_compile_definitions(GMGPolarLib PUBLIC GMGPOLAR_USE_LIKWID)
 endif()
