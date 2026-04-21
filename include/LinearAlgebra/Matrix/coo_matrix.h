@@ -18,6 +18,9 @@
 #include "../../LinearAlgebra/Vector/vector.h"
 #include "../../LinearAlgebra/Vector/vector_operations.h"
 
+namespace gmgpolar
+{
+
 template <typename T>
 class SparseMatrixCOO
 {
@@ -343,3 +346,4 @@ T* SparseMatrixCOO<T>::values_data() const
 {
     return values_.data();
 }
+} // namespace gmgpolar

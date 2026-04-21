@@ -1,4 +1,5 @@
 #include <InputFunctions/DensityProfileCoefficients/zoniGyroCoefficients.h>
+using namespace gmgpolar;
 
 ZoniGyroCoefficients::ZoniGyroCoefficients(double Rmax, double alpha_jump)
     : Rmax(Rmax)

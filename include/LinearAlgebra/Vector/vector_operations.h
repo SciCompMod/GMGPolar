@@ -9,6 +9,9 @@
 #include "vector.h"
 #include "../../Definitions/equals.h"
 
+namespace gmgpolar
+{
+
 template <typename T>
 bool equals(ConstVector<T> lhs, ConstVector<T> rhs)
 {
@@ -154,3 +157,5 @@ T infinity_norm(ConstVector<T> x)
     }
     return result;
 }
+
+} // namespace gmgpolar

@@ -4,6 +4,9 @@
 
 #include "../exactSolution.h"
 
+namespace gmgpolar
+{
+
 class PolarR6_CulhamGeometry : public ExactSolution
 {
 public:
@@ -16,3 +19,4 @@ public:
 private:
     const double Rmax = 1.3;
 };
+} // namespace gmgpolar

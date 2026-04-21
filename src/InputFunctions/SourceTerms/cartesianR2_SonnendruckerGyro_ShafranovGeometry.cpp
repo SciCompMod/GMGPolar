@@ -1,4 +1,5 @@
 #include <InputFunctions/SourceTerms/cartesianR2_SonnendruckerGyro_ShafranovGeometry.h>
+using namespace gmgpolar;
 
 CartesianR2_SonnendruckerGyro_ShafranovGeometry::CartesianR2_SonnendruckerGyro_ShafranovGeometry(
     PolarGrid const& grid, double Rmax, double elongation_kappa, double shift_delta)

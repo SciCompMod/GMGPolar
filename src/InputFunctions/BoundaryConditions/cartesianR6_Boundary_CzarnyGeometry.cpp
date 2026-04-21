@@ -1,4 +1,5 @@
 #include <InputFunctions/BoundaryConditions/cartesianR6_Boundary_CzarnyGeometry.h>
+using namespace gmgpolar;
 
 void CartesianR6_Boundary_CzarnyGeometry::initializeGeometry()
 {

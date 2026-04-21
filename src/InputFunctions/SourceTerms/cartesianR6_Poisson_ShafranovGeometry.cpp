@@ -1,4 +1,5 @@
 #include <InputFunctions/SourceTerms/cartesianR6_Poisson_ShafranovGeometry.h>
+using namespace gmgpolar;
 
 CartesianR6_Poisson_ShafranovGeometry::CartesianR6_Poisson_ShafranovGeometry(PolarGrid const& grid, double Rmax,
                                                                              double elongation_kappa,

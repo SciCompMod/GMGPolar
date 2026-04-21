@@ -1,4 +1,5 @@
 #include <Interpolation/interpolation.h>
+using namespace gmgpolar;
 
 /*
  * Extrapolated Restriction Operator

@@ -7,6 +7,7 @@
 // Including the necessary header from the project
 #include <GMGPolar/gmgpolar.h>
 #include <ConfigParser/test_selection.h>
+using namespace gmgpolar;
 
 template <class T>
 class PCGTestCase;

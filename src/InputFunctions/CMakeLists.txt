@@ -15,16 +15,5 @@ target_link_libraries(InputFunctions INTERFACE
 )
 
 target_include_directories(InputFunctions INTERFACE
-    ${GMGPOLAR_INCLUDE_DIRS}
-)
-
-install(TARGETS
-    InputFunctions
-    InputFunctions_BoundaryConditions
-    InputFunctions_DensityProfileCoefficients
-    InputFunctions_DomainGeometry
-    InputFunctions_ExactSolution
-    InputFunctions_SourceTerms
-    EXPORT GMGPolarTargets
-    ARCHIVE DESTINATION lib
+    ${CMAKE_SOURCE_DIR}/include/InputFunctions
 )

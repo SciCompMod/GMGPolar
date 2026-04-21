@@ -1,4 +1,5 @@
 #include <InputFunctions/BoundaryConditions/polarR6_Boundary_CircularGeometry.h>
+using namespace gmgpolar;
 
 PolarR6_Boundary_CircularGeometry::PolarR6_Boundary_CircularGeometry(double Rmax)
     : Rmax(Rmax)

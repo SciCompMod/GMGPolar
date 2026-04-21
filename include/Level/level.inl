@@ -1,17 +1,4 @@
 #pragma once
-#include <Residual/ResidualGive/residualGive.h>
-#include <Residual/ResidualTake/residualTake.h>
-
-#include <DirectSolver/DirectSolver-COO-MUMPS-Give/directSolverGive.h>
-#include <DirectSolver/DirectSolver-COO-MUMPS-Take/directSolverTake.h>
-#include <DirectSolver/DirectSolver-CSR-LU-Give/directSolverGiveCustomLU.h>
-#include <DirectSolver/DirectSolver-CSR-LU-Take/directSolverTakeCustomLU.h>
-
-#include <Smoother/SmootherGive/smootherGive.h>
-#include <Smoother/SmootherTake/smootherTake.h>
-
-#include <ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h>
-#include <ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.h>
 
 // ----------- //
 // Constructor //

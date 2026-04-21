@@ -1,4 +1,5 @@
 #include <InputFunctions/SourceTerms/cartesianR2_ZoniShifted_ShafranovGeometry.h>
+using namespace gmgpolar;
 
 CartesianR2_ZoniShifted_ShafranovGeometry::CartesianR2_ZoniShifted_ShafranovGeometry(PolarGrid const& grid, double Rmax,
                                                                                      double elongation_kappa,

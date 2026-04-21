@@ -1,4 +1,5 @@
 #include <InputFunctions/DomainGeometry/czarnyGeometry.h>
+using namespace gmgpolar;
 
 CzarnyGeometry::CzarnyGeometry()
 {

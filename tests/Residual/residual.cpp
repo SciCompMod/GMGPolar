@@ -18,6 +18,7 @@
 /* --------- */
 #include <InputFunctions/DomainGeometry/czarnyGeometry.h>
 #include <InputFunctions/DensityProfileCoefficients/zoniShiftedCoefficients.h>
+using namespace gmgpolar;
 
 /* Test 1/1: */
 /* Does the Take and Give Implementation match up? */

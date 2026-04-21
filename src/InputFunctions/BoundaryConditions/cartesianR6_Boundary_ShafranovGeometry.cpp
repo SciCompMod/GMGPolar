@@ -1,4 +1,5 @@
 #include <InputFunctions/BoundaryConditions/cartesianR6_Boundary_ShafranovGeometry.h>
+using namespace gmgpolar;
 
 CartesianR6_Boundary_ShafranovGeometry::CartesianR6_Boundary_ShafranovGeometry(double Rmax, double elongation_kappa,
                                                                                double shift_delta)

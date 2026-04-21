@@ -1,4 +1,5 @@
 #include <InputFunctions/SourceTerms/cartesianR2_Poisson_CzarnyGeometry.h>
+using namespace gmgpolar;
 
 void CartesianR2_Poisson_CzarnyGeometry::initializeGeometry()
 {

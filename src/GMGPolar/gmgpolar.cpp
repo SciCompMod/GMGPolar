@@ -1,4 +1,5 @@
 #include <GMGPolar/gmgpolar.h>
+using namespace gmgpolar;
 
 /* ---------------------------------------------------------------------- */
 /* Constructor & Initialization                                           */

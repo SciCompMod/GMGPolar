@@ -1,4 +1,5 @@
 #include <InputFunctions/ExactSolution/cartesianR6_CircularGeometry.h>
+using namespace gmgpolar;
 
 CartesianR6_CircularGeometry::CartesianR6_CircularGeometry(double Rmax)
     : Rmax(Rmax)

@@ -1,4 +1,5 @@
 #include <InputFunctions/BoundaryConditions/cartesianR2_Boundary_CircularGeometry.h>
+using namespace gmgpolar;
 
 CartesianR2_Boundary_CircularGeometry::CartesianR2_Boundary_CircularGeometry(double Rmax)
     : Rmax(Rmax)

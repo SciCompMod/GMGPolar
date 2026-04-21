@@ -1,4 +1,5 @@
 #include <InputFunctions/SourceTerms/polarR6_Sonnendrucker_CircularGeometry.h>
+using namespace gmgpolar;
 
 PolarR6_Sonnendrucker_CircularGeometry::PolarR6_Sonnendrucker_CircularGeometry(PolarGrid const& grid, double Rmax)
     : grid_(grid)

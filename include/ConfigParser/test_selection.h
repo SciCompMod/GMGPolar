@@ -4,8 +4,13 @@
 
 #include <GMGPolar/test_cases.h>
 
+namespace gmgpolar
+{
+
 using DomainGeometryVariant = std::variant<CircularGeometry, ShafranovGeometry, CzarnyGeometry, CulhamGeometry>;
 
 using DensityProfileCoefficientsVariant =
     std::variant<PoissonCoefficients, SonnendruckerCoefficients, SonnendruckerGyroCoefficients, ZoniCoefficients,
                  ZoniGyroCoefficients, ZoniShiftedCoefficients, ZoniShiftedGyroCoefficients>;
+
+} // namespace gmgpolar

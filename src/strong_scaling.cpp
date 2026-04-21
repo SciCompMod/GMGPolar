@@ -8,6 +8,7 @@
 
 #include <GMGPolar/gmgpolar.h>
 #include <GMGPolar/test_cases.h>
+using namespace gmgpolar;
 
 void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
 {

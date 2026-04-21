@@ -1,4 +1,5 @@
 #include <InputFunctions/SourceTerms/cartesianR2_Zoni_CircularGeometry.h>
+using namespace gmgpolar;
 
 CartesianR2_Zoni_CircularGeometry::CartesianR2_Zoni_CircularGeometry(PolarGrid const& grid, double Rmax)
     : grid_(grid)

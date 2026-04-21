@@ -1,5 +1,8 @@
 #pragma once
 
+namespace gmgpolar
+{
+
 // Required to prevent circular dependencies.
 template <class LevelCacheType>
 class DirectSolver;
@@ -9,6 +12,8 @@ template <class LevelCacheType>
 class Smoother;
 template <class LevelCacheType>
 class ExtrapolatedSmoother;
+
+} // namespace gmgpolar
 
 #include <memory>
 #include <omp.h>
@@ -27,6 +32,23 @@ class ExtrapolatedSmoother;
 #include "../Smoother/smoother.h"
 
 #include "../Definitions/geometry_helper.h"
+
+#include "../Residual/ResidualGive/residualGive.h"
+#include "../Residual/ResidualTake/residualTake.h"
+
+#include "../DirectSolver/DirectSolver-COO-MUMPS-Give/directSolverGive.h"
+#include "../DirectSolver/DirectSolver-COO-MUMPS-Take/directSolverTake.h"
+#include "../DirectSolver/DirectSolver-CSR-LU-Give/directSolverGiveCustomLU.h"
+#include "../DirectSolver/DirectSolver-CSR-LU-Take/directSolverTakeCustomLU.h"
+
+#include "../Smoother/SmootherGive/smootherGive.h"
+#include "../Smoother/SmootherTake/smootherTake.h"
+
+#include "../ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h"
+#include "../ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.h"
+
+namespace gmgpolar
+{
 
 // The `Level` class represents a single level of a multigrid method.
 // In multigrid solvers, the computational domain is divided into different levels, where each level corresponds to a grid with a different resolution.
@@ -170,3 +192,5 @@ private:
 
 #include "levelCache.inl"
 #include "level.inl"
+
+} // namespace gmgpolar

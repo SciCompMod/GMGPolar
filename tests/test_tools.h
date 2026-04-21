@@ -4,6 +4,8 @@
 #include <PolarGrid/polargrid.h>
 #include <LinearAlgebra/Vector/vector.h>
 
+using namespace gmgpolar;
+
 inline Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed, double min_val = -100.0,
                                                   double max_val = 100.0)
 {

@@ -1,4 +1,5 @@
 #include <InputFunctions/SourceTerms/polarR6_Sonnendrucker_CzarnyGeometry.h>
+using namespace gmgpolar;
 
 void PolarR6_Sonnendrucker_CzarnyGeometry::initializeGeometry()
 {

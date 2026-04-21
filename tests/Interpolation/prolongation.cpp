@@ -5,6 +5,7 @@
 
 #include <Interpolation/interpolation.h>
 #include <InputFunctions/DensityProfileCoefficients/poissonCoefficients.h>
+using namespace gmgpolar;
 
 // Helper that computes the mathematically expected prolongation value
 static double expected_value(const PolarGrid& coarse, const PolarGrid& fine, ConstVector<double> coarse_vals, int i_r,

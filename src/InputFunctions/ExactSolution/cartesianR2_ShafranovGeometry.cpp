@@ -1,4 +1,5 @@
 #include <InputFunctions/ExactSolution/cartesianR2_ShafranovGeometry.h>
+using namespace gmgpolar;
 
 CartesianR2_ShafranovGeometry::CartesianR2_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta)
     : Rmax(Rmax)

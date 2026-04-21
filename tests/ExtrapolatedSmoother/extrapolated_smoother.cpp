@@ -23,6 +23,7 @@
 #include <InputFunctions/DensityProfileCoefficients/zoniShiftedCoefficients.h>
 
 #include <random>
+using namespace gmgpolar;
 
 /* Test 1/2: */
 /* Does the Take and Give Implementation match up? */

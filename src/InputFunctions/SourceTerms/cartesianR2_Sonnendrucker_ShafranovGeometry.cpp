@@ -1,4 +1,5 @@
 #include <InputFunctions/SourceTerms/cartesianR2_Sonnendrucker_ShafranovGeometry.h>
+using namespace gmgpolar;
 
 CartesianR2_Sonnendrucker_ShafranovGeometry::CartesianR2_Sonnendrucker_ShafranovGeometry(PolarGrid const& grid,
                                                                                          double Rmax,

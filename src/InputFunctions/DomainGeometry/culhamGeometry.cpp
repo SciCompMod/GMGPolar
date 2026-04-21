@@ -1,4 +1,5 @@
 #include <InputFunctions/DomainGeometry/culhamGeometry.h>
+using namespace gmgpolar;
 
 CulhamGeometry::CulhamGeometry(double Rmax)
     : Rmax(Rmax)

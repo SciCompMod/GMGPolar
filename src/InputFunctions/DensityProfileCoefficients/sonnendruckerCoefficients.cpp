@@ -1,4 +1,5 @@
 #include <InputFunctions/DensityProfileCoefficients/sonnendruckerCoefficients.h>
+using namespace gmgpolar;
 
 SonnendruckerCoefficients::SonnendruckerCoefficients(double Rmax, double alpha_jump)
     : Rmax(Rmax)

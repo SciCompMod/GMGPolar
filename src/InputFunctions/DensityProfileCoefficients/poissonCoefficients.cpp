@@ -1,4 +1,5 @@
 #include <InputFunctions/DensityProfileCoefficients/poissonCoefficients.h>
+using namespace gmgpolar;
 
 PoissonCoefficients::PoissonCoefficients(double Rmax, double alpha_jump)
     : Rmax(Rmax)

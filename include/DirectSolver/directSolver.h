@@ -19,6 +19,9 @@
     #include "mpi.h"
 #endif
 
+namespace gmgpolar
+{
+
 template <class LevelCacheType>
 class DirectSolver
 {
@@ -43,3 +46,4 @@ protected:
     const bool DirBC_Interior_;
     const int num_omp_threads_;
 };
+} // namespace gmgpolar

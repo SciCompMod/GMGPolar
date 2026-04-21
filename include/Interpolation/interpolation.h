@@ -10,6 +10,9 @@
 #include "../LinearAlgebra/Vector/vector_operations.h"
 #include "../Definitions/global_definitions.h"
 
+namespace gmgpolar
+{
+
 class Interpolation
 {
 public:
@@ -41,3 +44,4 @@ private:
     const int max_omp_threads_;
     const bool DirBC_Interior_;
 };
+} // namespace gmgpolar

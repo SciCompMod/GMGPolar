@@ -1,4 +1,5 @@
 #include <InputFunctions/BoundaryConditions/refined_Boundary_CzarnyGeometry.h>
+using namespace gmgpolar;
 
 void Refined_Boundary_CzarnyGeometry::initializeGeometry()
 {

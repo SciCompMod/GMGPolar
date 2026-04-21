@@ -1,4 +1,5 @@
 #include <InputFunctions/SourceTerms/refined_ZoniShiftedGyro_CzarnyGeometry.h>
+using namespace gmgpolar;
 
 void Refined_ZoniShiftedGyro_CzarnyGeometry::initializeGeometry()
 {

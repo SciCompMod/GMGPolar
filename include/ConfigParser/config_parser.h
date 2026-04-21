@@ -13,6 +13,9 @@
 #include <GMGPolar/gmgpolar.h>
 #include "test_selection.h"
 
+namespace gmgpolar
+{
+
 class ConfigParser
 {
 public:
@@ -82,6 +85,7 @@ private:
     double Rmax_;
     double kappa_eps_;
     double delta_e_;
+    double alpha_jump_;
     // General solver output and visualization settings
     int verbose_;
     bool paraview_;
@@ -118,3 +122,4 @@ private:
     void selectTestCase(GeometryType geometry_type, ProblemType problem_type, AlphaCoeff alpha_type,
                         BetaCoeff beta_type, double Rmax, double kappa_eps, double delta_e, double alpha_jump);
 };
+} // namespace gmgpolar

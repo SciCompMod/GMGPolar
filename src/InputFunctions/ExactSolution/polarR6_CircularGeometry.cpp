@@ -1,4 +1,5 @@
 #include <InputFunctions/ExactSolution/polarR6_CircularGeometry.h>
+using namespace gmgpolar;
 
 PolarR6_CircularGeometry::PolarR6_CircularGeometry(double Rmax)
     : Rmax(Rmax)

@@ -1,4 +1,5 @@
 #include <InputFunctions/ExactSolution/polarR6_CzarnyGeometry.h>
+using namespace gmgpolar;
 
 void PolarR6_CzarnyGeometry::initializeGeometry()
 {
