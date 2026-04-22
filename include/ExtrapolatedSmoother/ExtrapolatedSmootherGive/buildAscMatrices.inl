@@ -70,6 +70,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildAscGive(
         double coeff2 = 0.5 * (k1 + k2) / h2;
         double coeff3 = 0.5 * (h1 + h2) / k1;
         double coeff4 = 0.5 * (h1 + h2) / k2;
+        double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -108,7 +109,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildAscGive(
             /* Fill matrix row of (i,j) */
             row    = center_index;
             column = center_index;
-            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */
+            value  = coeff5 * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */
             updateMatrixElement(center_solver, center_batch, row, column, value);
 
             row    = center_index;
@@ -207,7 +208,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildAscGive(
                 /* Fill matrix row of (i,j) */
                 row    = center_index;
                 column = center_index;
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
+                value  = coeff5 * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
                 updateMatrixElement(center_solver, center_batch, row, column, value);
 
                 row    = center_index;
@@ -260,6 +261,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildAscGive(
         double coeff2 = 0.5 * (k1 + k2) / h2;
         double coeff3 = 0.5 * (h1 + h2) / k1;
         double coeff4 = 0.5 * (h1 + h2) / k2;
+        double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -302,7 +304,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildAscGive(
             /* Fill matrix row of (i,j) */
             row    = center_index;
             column = center_index;
-            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */
+            value  = coeff5 * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */
             updateMatrixElement(center_solver, center_batch, row, column, value);
 
             row    = center_index;
@@ -389,7 +391,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildAscGive(
                 /* Fill matrix row of (i,j) */
                 row    = center_index;
                 column = center_index;
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
+                value  = coeff5 * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
                 updateMatrixElement(center_solver, center_batch, row, column, value);
 
                 row    = center_index;
@@ -521,7 +523,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildAscGive(
 
                 offset = CenterStencil[StencilPosition::Center];
                 col    = center_index;
-                val    = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* beta_{i,j} */
+                val    = coeff5 * coeff_beta * std::fabs(detDF); /* beta_{i,j} */
                 updateCOOCSRMatrixElement(inner_boundary_circle_matrix, ptr, offset, row, col, val);
 
                 offset = CenterStencil[StencilPosition::Left];
@@ -620,6 +622,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildAscGive(
         double coeff2 = 0.5 * (k1 + k2) / h2;
         double coeff3 = 0.5 * (h1 + h2) / k1;
         double coeff4 = 0.5 * (h1 + h2) / k2;
+        double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -649,7 +652,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildAscGive(
                 /* Fill matrix row of (i,j) */
                 row    = center_index;
                 column = center_index;
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
+                value  = coeff5 * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
                 updateMatrixElement(center_solver, center_batch, row, column, value);
 
                 row    = center_index;
@@ -712,7 +715,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildAscGive(
                 /* Fill matrix row of (i,j) */
                 row    = center_index;
                 column = center_index;
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
+                value  = coeff5 * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
                 updateMatrixElement(center_solver, center_batch, row, column, value);
 
                 row    = center_index;
@@ -765,7 +768,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildAscGive(
                 /* Fill matrix row of (i,j) */
                 row    = center_index;
                 column = center_index;
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
+                value  = coeff5 * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
                 updateMatrixElement(center_solver, center_batch, row, column, value);
 
                 row    = center_index;
@@ -838,6 +841,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildAscGive(
         double coeff2 = 0.5 * (k1 + k2) / h2;
         double coeff3 = 0.5 * (h1 + h2) / k1;
         double coeff4 = 0.5 * (h1 + h2) / k2;
+        double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -869,7 +873,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildAscGive(
                 /* Fill matrix row of (i,j) */
                 row    = center_index;
                 column = center_index;
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
+                value  = coeff5 * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
                 updateMatrixElement(center_solver, center_batch, row, column, value);
 
                 row    = center_index;
@@ -922,7 +926,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildAscGive(
                 /* Fill matrix row of (i,j) */
                 row    = center_index;
                 column = center_index;
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
+                value  = coeff5 * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
                 updateMatrixElement(center_solver, center_batch, row, column, value);
 
                 row    = center_index;
@@ -965,7 +969,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildAscGive(
                 /* Fill matrix row of (i,j) */
                 row    = center_index;
                 column = center_index;
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
+                value  = coeff5 * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
                 updateMatrixElement(center_solver, center_batch, row, column, value);
 
                 row    = center_index;
@@ -1040,6 +1044,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildAscGive(
         double coeff2 = 0.5 * (k1 + k2) / h2;
         double coeff3 = 0.5 * (h1 + h2) / k1;
         double coeff4 = 0.5 * (h1 + h2) / k2;
+        double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -1070,7 +1075,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildAscGive(
             /* Fill matrix row of (i,j) */
             row    = center_index;
             column = center_index;
-            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
+            value  = coeff5 * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
             updateMatrixElement(center_solver, center_batch, row, column, value);
 
             row    = center_index;
@@ -1124,7 +1129,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildAscGive(
             /* Fill matrix row of (i,j) */
             row    = center_index;
             column = center_index;
-            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
+            value  = coeff5 * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
             updateMatrixElement(center_solver, center_batch, row, column, value);
 
             row    = center_index;

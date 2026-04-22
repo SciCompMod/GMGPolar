@@ -21,6 +21,7 @@ static inline void node_apply_a_take(int i_r, int i_theta, const PolarGrid& grid
         double coeff2 = 0.5 * (k1 + k2) / h2;
         double coeff3 = 0.5 * (h1 + h2) / k1;
         double coeff4 = 0.5 * (h1 + h2) / k2;
+        double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -35,18 +36,18 @@ static inline void node_apply_a_take(int i_r, int i_theta, const PolarGrid& grid
         const int right        = grid.index(i_r + 1, i_theta);
         const int top_right    = grid.index(i_r + 1, i_theta_P1);
 
-        result[center] =
-            0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) * x[center] /* beta_{i,j} */
+        result[center] = coeff5 * coeff_beta[center] * std::fabs(detDF[center]) * x[center] /* beta_{i,j} */
 
-            - coeff1 * (arr[center] + arr[left]) * (x[left] - x[center]) /* Left - Center: (Left) */
-            - coeff2 * (arr[center] + arr[right]) * (x[right] - x[center]) /* Right - Center: (Right) */
-            - coeff3 * (att[center] + att[bottom]) * (x[bottom] - x[center]) /* Bottom - Center: (Bottom) */
-            - coeff4 * (att[center] + att[top]) * (x[top] - x[center]) /* Top - Center: (Top) */
+                         - coeff1 * (arr[center] + arr[left]) * (x[left] - x[center]) /* Left - Center: (Left) */
+                         - coeff2 * (arr[center] + arr[right]) * (x[right] - x[center]) /* Right - Center: (Right) */
+                         -
+                         coeff3 * (att[center] + att[bottom]) * (x[bottom] - x[center]) /* Bottom - Center: (Bottom) */
+                         - coeff4 * (att[center] + att[top]) * (x[top] - x[center]) /* Top - Center: (Top) */
 
-            - 0.25 * (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
-            + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
-            + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
-            - 0.25 * (art[right] + art[top]) * x[top_right]; /* Top Right */
+                         - 0.25 * (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
+                         + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
+                         + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
+                         - 0.25 * (art[right] + art[top]) * x[top_right]; /* Top Right */
     }
     /* -------------------------- */
     /* Node on the inner boundary */
@@ -75,6 +76,7 @@ static inline void node_apply_a_take(int i_r, int i_theta, const PolarGrid& grid
             double coeff2 = 0.5 * (k1 + k2) / h2;
             double coeff3 = 0.5 * (h1 + h2) / k1;
             double coeff4 = 0.5 * (h1 + h2) / k2;
+            double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
             const int i_theta_M1     = grid.wrapThetaIndex(i_theta - 1);
             const int i_theta_P1     = grid.wrapThetaIndex(i_theta + 1);
@@ -89,8 +91,7 @@ static inline void node_apply_a_take(int i_r, int i_theta, const PolarGrid& grid
             const int top_right    = grid.index(i_r + 1, i_theta_P1);
 
             result[center] =
-                0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) *
-                    x[center] /* beta_{i,j} */
+                coeff5 * coeff_beta[center] * std::fabs(detDF[center]) * x[center] /* beta_{i,j} */
 
                 - coeff1 * (arr[center] + arr[left]) * (x[left] - x[center]) /* Left - Center: (Left) */
                 - coeff2 * (arr[center] + arr[right]) * (x[right] - x[center]) /* Right - Center: (Right) */

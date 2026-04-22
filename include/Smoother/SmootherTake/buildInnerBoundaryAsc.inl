@@ -76,6 +76,7 @@ void SmootherTake<LevelCacheType>::nodeBuildInteriorBoundarySolverMatrix(
         const double coeff2 = 0.5 * (k1 + k2) / h2;
         const double coeff3 = 0.5 * (h1 + h2) / k1;
         const double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1           = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1           = grid.wrapThetaIndex(i_theta + 1);
@@ -99,7 +100,7 @@ void SmootherTake<LevelCacheType>::nodeBuildInteriorBoundarySolverMatrix(
         const double bottom_value = -coeff3 * (att[center] + att[bottom]);
         const double top_value    = -coeff4 * (att[center] + att[top]);
 
-        const double center_value = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) -
+        const double center_value = coeff5 * coeff_beta[center] * std::fabs(detDF[center]) -
                                     (left_value + right_value + bottom_value + top_value);
 
         /* Fill matrix row of (i,j) */
