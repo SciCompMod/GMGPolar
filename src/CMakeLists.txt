@@ -77,6 +77,8 @@ if(GMGPOLAR_USE_LIKWID)
     target_compile_definitions(GMGPolarLib PUBLIC GMGPOLAR_USE_LIKWID)
 endif()
 
+add_library(GMGPolar::GMGPolarLib ALIAS GMGPolarLib)
+
 add_library(GMGPolarInterface STATIC
     ${CONFIG_PARSER_SOURCES}
 )
@@ -86,10 +88,11 @@ target_link_libraries(GMGPolarInterface
     InputFunctions
 )
 
+add_library(GMGPolar::GMGPolarInterface ALIAS GMGPolarInterface)
 
 install(TARGETS
-    GMGPolarLib
-    GMGPolarInterface
+    GMGPolar::GMGPolarLib
+    GMGPolar::GMGPolarInterface
     EXPORT GMGPolarTargets
     ARCHIVE DESTINATION lib
 )
