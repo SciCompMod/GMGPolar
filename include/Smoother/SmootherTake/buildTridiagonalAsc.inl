@@ -75,13 +75,8 @@ void SmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
         /* Center: (Left, Right, Bottom, Top) */
         row    = center_index;
         column = center_index;
-<<<<<<< HEAD
-        value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) -
-                (left_value + right_value + bottom_value + top_value);
-=======
         value  = coeff5 * coeff_beta[center] * std::fabs(detDF[center]) -
                  (left_value + right_value + bottom_value + top_value);
->>>>>>> 3d8ce52 (litz_coeff5 changes)
         updateMatrixElement(solver, batch, row, column, value);
 
         /* Bottom */
@@ -135,13 +130,8 @@ void SmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
         /* Center: (Left, Right, Bottom, Top) */
         row    = center_index;
         column = center_index;
-<<<<<<< HEAD
-        value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) -
-                (left_value + right_value + bottom_value + top_value);
-=======
         value  = coeff5 * coeff_beta[center] * std::fabs(detDF[center]) -
                  (left_value + right_value + bottom_value + top_value);
->>>>>>> 3d8ce52 (litz_coeff5 changes)
         updateMatrixElement(solver, batch, row, column, value);
 
         /* Left */
@@ -227,13 +217,8 @@ void SmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
         /* Center: (Left, Right, Bottom, Top) */
         row    = center_index;
         column = center_index;
-<<<<<<< HEAD
-        value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) -
-                (left_value + right_value + bottom_value + top_value);
-=======
         value  = coeff5 * coeff_beta[center] * std::fabs(detDF[center]) -
                  (left_value + right_value + bottom_value + top_value);
->>>>>>> 3d8ce52 (litz_coeff5 changes)
         updateMatrixElement(solver, batch, row, column, value);
 
         /* Right */
@@ -281,13 +266,8 @@ void SmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
         /* Center: (Left, Right, Bottom, Top) */
         row    = center_index;
         column = center_index;
-<<<<<<< HEAD
-        value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) -
-                (left_value + right_value + bottom_value + top_value);
-=======
         value  = coeff5 * coeff_beta[center] * std::fabs(detDF[center]) -
                  (left_value + right_value + bottom_value + top_value);
->>>>>>> 3d8ce52 (litz_coeff5 changes)
         updateMatrixElement(solver, batch, row, column, value);
 
         /* Left */
