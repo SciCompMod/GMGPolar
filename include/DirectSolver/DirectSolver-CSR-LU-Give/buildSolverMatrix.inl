@@ -38,6 +38,7 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
         const double coeff2 = 0.5 * (k1 + k2) / h2;
         const double coeff3 = 0.5 * (h1 + h2) / k1;
         const double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int center_index = grid.index(i_r, i_theta);
         const int left_index   = grid.index(i_r - 1, i_theta);
@@ -52,7 +53,7 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
 
         offset = CenterStencil[StencilPosition::Center];
         col    = center_index;
-        val    = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* beta_{i,j} */
+        val    = coeff5 * coeff_beta * std::fabs(detDF); /* beta_{i,j} */
         updateMatrixElement(solver_matrix, offset, row, col, val);
 
         offset = CenterStencil[StencilPosition::Left];
@@ -250,14 +251,16 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
             assert(grid.ntheta() % 2 == 0);
             const int i_theta_AcrossOrigin = grid.wrapThetaIndex(i_theta + grid.ntheta() / 2);
 
-            double h1     = 2.0 * grid.radius(0);
-            double h2     = grid.radialSpacing(i_r);
-            double k1     = grid.angularSpacing(i_theta_M1);
-            double k2     = grid.angularSpacing(i_theta);
+            double h1 = 2.0 * grid.radius(0);
+            double h2 = grid.radialSpacing(i_r);
+            double k1 = grid.angularSpacing(i_theta_M1);
+            double k2 = grid.angularSpacing(i_theta);
+
             double coeff1 = 0.5 * (k1 + k2) / h1;
             double coeff2 = 0.5 * (k1 + k2) / h2;
             double coeff3 = 0.5 * (h1 + h2) / k1;
             double coeff4 = 0.5 * (h1 + h2) / k2;
+            double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
             const int center_index = grid.index(i_r, i_theta);
             const int left_index   = grid.index(i_r, i_theta_AcrossOrigin);
@@ -272,7 +275,7 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
 
             offset = CenterStencil[StencilPosition::Center];
             col    = center_index;
-            val    = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* beta_{i,j} */
+            val    = coeff5 * coeff_beta * std::fabs(detDF); /* beta_{i,j} */
             updateMatrixElement(solver_matrix, offset, row, col, val);
 
             offset = CenterStencil[StencilPosition::Left];
@@ -404,6 +407,7 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
         const double coeff2 = 0.5 * (k1 + k2) / h2;
         const double coeff3 = 0.5 * (h1 + h2) / k1;
         const double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -421,7 +425,7 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
 
         offset = CenterStencil[StencilPosition::Center];
         col    = center_index;
-        val    = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* beta_{i,j} */
+        val    = coeff5 * coeff_beta * std::fabs(detDF); /* beta_{i,j} */
         updateMatrixElement(solver_matrix, offset, row, col, val);
 
         offset = CenterStencil[StencilPosition::Left];
@@ -564,6 +568,7 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
         const double coeff2 = 0.5 * (k1 + k2) / h2;
         const double coeff3 = 0.5 * (h1 + h2) / k1;
         const double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -581,7 +586,7 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
 
         offset = CenterStencil[StencilPosition::Center];
         col    = center_index;
-        val    = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* beta_{i,j} */
+        val    = coeff5 * coeff_beta * std::fabs(detDF); /* beta_{i,j} */
         updateMatrixElement(solver_matrix, offset, row, col, val);
 
         offset = CenterStencil[StencilPosition::Left];

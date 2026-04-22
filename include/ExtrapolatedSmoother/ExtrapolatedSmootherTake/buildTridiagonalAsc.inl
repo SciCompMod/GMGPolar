@@ -52,6 +52,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
         double coeff2 = 0.5 * (k1 + k2) / h2;
         double coeff3 = 0.5 * (h1 + h2) / k1;
         double coeff4 = 0.5 * (h1 + h2) / k2;
+        double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -89,9 +90,15 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
             /* Center: (Left, Right, Bottom, Top) */
             row    = center_index;
             column = center_index;
+<<<<<<< HEAD
             value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
                     coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                     coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+=======
+            value  = coeff5 * coeff_beta[center] * fabs(detDF[center]) + coeff1 * (arr[center] + arr[left]) +
+                     coeff2 * (arr[center] + arr[right]) + coeff3 * (att[center] + att[bottom]) +
+                     coeff4 * (att[center] + att[top]);
+>>>>>>> 3d8ce52 (litz_coeff5 changes)
             updateMatrixElement(solver, batch, row, column, value);
 
             /* Bottom */
@@ -128,9 +135,15 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
                 /* Center: (Left, Right, Bottom, Top) */
                 row    = center_index;
                 column = center_index;
+<<<<<<< HEAD
                 value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+=======
+                value  = coeff5 * coeff_beta[center] * fabs(detDF[center]) + coeff1 * (arr[center] + arr[left]) +
+                         coeff2 * (arr[center] + arr[right]) + coeff3 * (att[center] + att[bottom]) +
+                         coeff4 * (att[center] + att[top]);
+>>>>>>> 3d8ce52 (litz_coeff5 changes)
                 updateMatrixElement(solver, batch, row, column, value);
             }
             else {
@@ -190,6 +203,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
         double coeff2 = 0.5 * (k1 + k2) / h2;
         double coeff3 = 0.5 * (h1 + h2) / k1;
         double coeff4 = 0.5 * (h1 + h2) / k2;
+        double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -232,9 +246,15 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
             /* Center: (Left, Right, Bottom, Top) */
             row    = center_index;
             column = center_index;
+<<<<<<< HEAD
             value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
                     coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                     coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+=======
+            value  = coeff5 * coeff_beta[center] * fabs(detDF[center]) + coeff1 * (arr[center] + arr[left]) +
+                     coeff2 * (arr[center] + arr[right]) + coeff3 * (att[center] + att[bottom]) +
+                     coeff4 * (att[center] + att[top]);
+>>>>>>> 3d8ce52 (litz_coeff5 changes)
             updateMatrixElement(solver, batch, row, column, value);
 
             /* Left */
@@ -276,9 +296,15 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
                 /* Center: (Left, Right, Bottom, Top) */
                 row    = center_index;
                 column = center_index;
+<<<<<<< HEAD
                 value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+=======
+                value  = coeff5 * coeff_beta[center] * fabs(detDF[center]) + coeff1 * (arr[center] + arr[left]) +
+                         coeff2 * (arr[center] + arr[right]) + coeff3 * (att[center] + att[bottom]) +
+                         coeff4 * (att[center] + att[top]);
+>>>>>>> 3d8ce52 (litz_coeff5 changes)
                 updateMatrixElement(solver, batch, row, column, value);
             }
             else {
@@ -306,6 +332,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
         double coeff2 = 0.5 * (k1 + k2) / h2;
         double coeff3 = 0.5 * (h1 + h2) / k1;
         double coeff4 = 0.5 * (h1 + h2) / k2;
+        double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -340,9 +367,15 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
             /* Center: (Left, Right, Bottom, Top) */
             row    = center_index;
             column = center_index;
+<<<<<<< HEAD
             value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
                     coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                     coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+=======
+            value  = coeff5 * coeff_beta[center] * fabs(detDF[center]) + coeff1 * (arr[center] + arr[left]) +
+                     coeff2 * (arr[center] + arr[right]) + coeff3 * (att[center] + att[bottom]) +
+                     coeff4 * (att[center] + att[top]);
+>>>>>>> 3d8ce52 (litz_coeff5 changes)
             updateMatrixElement(solver, batch, row, column, value);
 
             /* Right */
@@ -363,9 +396,15 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
                 /* Center: (Left, Right, Bottom, Top) */
                 row    = center_index;
                 column = center_index;
+<<<<<<< HEAD
                 value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+=======
+                value  = coeff5 * coeff_beta[center] * fabs(detDF[center]) + coeff1 * (arr[center] + arr[left]) +
+                         coeff2 * (arr[center] + arr[right]) + coeff3 * (att[center] + att[bottom]) +
+                         coeff4 * (att[center] + att[top]);
+>>>>>>> 3d8ce52 (litz_coeff5 changes)
                 updateMatrixElement(solver, batch, row, column, value);
             }
             else {
@@ -399,6 +438,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
         double coeff2 = 0.5 * (k1 + k2) / h2;
         double coeff3 = 0.5 * (h1 + h2) / k1;
         double coeff4 = 0.5 * (h1 + h2) / k2;
+        double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -429,9 +469,15 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
             /* Center: (Left, Right, Bottom, Top) */
             row    = center_index;
             column = center_index;
+<<<<<<< HEAD
             value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
                     coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                     coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+=======
+            value  = coeff5 * coeff_beta[center] * fabs(detDF[center]) + coeff1 * (arr[center] + arr[left]) +
+                     coeff2 * (arr[center] + arr[right]) + coeff3 * (att[center] + att[bottom]) +
+                     coeff4 * (att[center] + att[top]);
+>>>>>>> 3d8ce52 (litz_coeff5 changes)
             updateMatrixElement(solver, batch, row, column, value);
 
             /* Left */
@@ -457,9 +503,15 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrice
             /* Center: (Left, Right, Bottom, Top) */
             row    = center_index;
             column = center_index;
+<<<<<<< HEAD
             value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
                     coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                     coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+=======
+            value  = coeff5 * coeff_beta[center] * fabs(detDF[center]) + coeff1 * (arr[center] + arr[left]) +
+                     coeff2 * (arr[center] + arr[right]) + coeff3 * (att[center] + att[bottom]) +
+                     coeff4 * (att[center] + att[top]);
+>>>>>>> 3d8ce52 (litz_coeff5 changes)
             updateMatrixElement(solver, batch, row, column, value);
         }
     }

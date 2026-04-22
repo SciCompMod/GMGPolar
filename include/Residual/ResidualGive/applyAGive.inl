@@ -28,6 +28,7 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
         double coeff2 = 0.5 * (k1 + k2) / h2;
         double coeff3 = 0.5 * (h1 + h2) / k1;
         double coeff4 = 0.5 * (h1 + h2) / k2;
+        double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -38,7 +39,7 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
         const int top    = grid.index(i_r, i_theta_P1);
 
         /* Fill result(i,j) */
-        result[center] += (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
+        result[center] += (coeff5 * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
                            - coeff1 * arr * x[left] /* Left */
                            - coeff2 * arr * x[right] /* Right */
                            - coeff3 * att * x[bottom] /* Bottom */
@@ -113,6 +114,7 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
             double coeff2 = 0.5 * (k1 + k2) / h2;
             double coeff3 = 0.5 * (h1 + h2) / k1;
             double coeff4 = 0.5 * (h1 + h2) / k2;
+            double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
             const int i_theta_M1     = grid.wrapThetaIndex(i_theta - 1);
             const int i_theta_P1     = grid.wrapThetaIndex(i_theta + 1);
@@ -124,7 +126,7 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
             const int top    = grid.index(i_r, i_theta_P1);
 
             /* Fill result(i,j) */
-            result[center] += (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
+            result[center] += (coeff5 * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
                                - coeff1 * arr * x[left] /* Left */
                                - coeff2 * arr * x[right] /* Right */
                                - coeff3 * att * x[bottom] /* Bottom */
@@ -167,6 +169,7 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
         double coeff2 = 0.5 * (k1 + k2) / h2;
         double coeff3 = 0.5 * (h1 + h2) / k1;
         double coeff4 = 0.5 * (h1 + h2) / k2;
+        double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -177,7 +180,7 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
         const int top    = grid.index(i_r, i_theta_P1);
 
         /* Fill result(i,j) */
-        result[center] += (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
+        result[center] += (coeff5 * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
                            - coeff1 * arr * x[left] /* Left */
                            - coeff2 * arr * x[right] /* Right */
                            - coeff3 * att * x[bottom] /* Bottom */
@@ -220,6 +223,7 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
         double coeff2 = 0.5 * (k1 + k2) / h2;
         double coeff3 = 0.5 * (h1 + h2) / k1;
         double coeff4 = 0.5 * (h1 + h2) / k2;
+        double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -230,7 +234,7 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
         const int top    = grid.index(i_r, i_theta_P1);
 
         /* Fill result(i,j) */
-        result[center] += (0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
+        result[center] += (coeff5 * coeff_beta * std::fabs(detDF) * x[center] /* beta_{i,j} */
                            - coeff1 * arr * x[left] /* Left */
                            - coeff2 * arr * x[right] /* Right */
                            - coeff3 * att * x[bottom] /* Bottom */
