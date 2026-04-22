@@ -76,6 +76,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildInteriorBoundarySolverMa
         double coeff2 = 0.5 * (k1 + k2) / h2;
         double coeff3 = 0.5 * (h1 + h2) / k1;
         double coeff4 = 0.5 * (h1 + h2) / k2;
+        double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1           = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1           = grid.wrapThetaIndex(i_theta + 1);
@@ -109,10 +110,10 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildInteriorBoundarySolverMa
             const int top    = grid.index(i_r, i_theta_P1);
             const int right  = grid.index(i_r + 1, i_theta);
 
-            const double center_value = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
+            const double center_value = coeff5 * coeff_beta[center] * fabs(detDF[center]) +
                                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
-            const double left_value = -coeff1 * (arr[center] + arr[left]);
+            const double left_value   = -coeff1 * (arr[center] + arr[left]);
 
             /* Fill matrix row of (i,j) */
             row = center_index;

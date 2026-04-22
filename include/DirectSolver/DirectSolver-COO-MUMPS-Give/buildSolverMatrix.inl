@@ -42,6 +42,7 @@ void DirectSolver_COO_MUMPS_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int 
         const double coeff2 = 0.5 * (k1 + k2) / h2;
         const double coeff3 = 0.5 * (h1 + h2) / k1;
         const double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int center_nz_index = getSolverMatrixIndex(i_r, i_theta);
         const int left_nz_index   = getSolverMatrixIndex(i_r - 1, i_theta);
@@ -63,7 +64,7 @@ void DirectSolver_COO_MUMPS_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int 
 
         offset = CenterStencil[StencilPosition::Center];
         col    = center_index;
-        val    = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* beta_{i,j} */
+        val    = coeff5 * coeff_beta * std::fabs(detDF); /* beta_{i,j} */
         updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
 
         offset = CenterStencil[StencilPosition::Left];
@@ -269,6 +270,7 @@ void DirectSolver_COO_MUMPS_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int 
             double coeff2 = 0.5 * (k1 + k2) / h2;
             double coeff3 = 0.5 * (h1 + h2) / k1;
             double coeff4 = 0.5 * (h1 + h2) / k2;
+            double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
             const int center_nz_index = getSolverMatrixIndex(i_r, i_theta);
             const int left_nz_index   = getSolverMatrixIndex(i_r, i_theta_AcrossOrigin);
@@ -289,7 +291,7 @@ void DirectSolver_COO_MUMPS_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int 
 
             offset = CenterStencil[StencilPosition::Center];
             col    = center_index;
-            val    = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* beta_{i,j} */
+            val    = coeff5 * coeff_beta * std::fabs(detDF); /* beta_{i,j} */
             updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
 
             offset = CenterStencil[StencilPosition::Left];
@@ -424,6 +426,7 @@ void DirectSolver_COO_MUMPS_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int 
         const double coeff2 = 0.5 * (k1 + k2) / h2;
         const double coeff3 = 0.5 * (h1 + h2) / k1;
         const double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -448,7 +451,7 @@ void DirectSolver_COO_MUMPS_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int 
 
         offset = CenterStencil[StencilPosition::Center];
         col    = center_index;
-        val    = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* beta_{i,j} */
+        val    = coeff5 * coeff_beta * std::fabs(detDF); /* beta_{i,j} */
         updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
 
         /* REMOVED: Moved to the right hand side to make the matrix symmetric */
@@ -604,6 +607,7 @@ void DirectSolver_COO_MUMPS_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int 
         const double coeff2 = 0.5 * (k1 + k2) / h2;
         const double coeff3 = 0.5 * (h1 + h2) / k1;
         const double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -628,7 +632,7 @@ void DirectSolver_COO_MUMPS_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int 
 
         offset = CenterStencil[StencilPosition::Center];
         col    = center_index;
-        val    = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* beta_{i,j} */
+        val    = coeff5 * coeff_beta * std::fabs(detDF); /* beta_{i,j} */
         updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
 
         offset = CenterStencil[StencilPosition::Left];

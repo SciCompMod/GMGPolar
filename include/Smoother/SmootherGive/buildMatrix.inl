@@ -71,6 +71,7 @@ void SmootherGive<LevelCacheType>::nodeBuildAscGive(int i_r, int i_theta, const 
         const double coeff2 = 0.5 * (k1 + k2) / h2;
         const double coeff3 = 0.5 * (h1 + h2) / k1;
         const double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -105,7 +106,7 @@ void SmootherGive<LevelCacheType>::nodeBuildAscGive(int i_r, int i_theta, const 
         /* Fill matrix row of (i,j) */
         row    = center_index;
         column = center_index;
-        value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */
+        value  = coeff5 * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */
         updateMatrixElement(center_solver, center_batch, row, column, value);
 
         row    = center_index;
@@ -183,6 +184,7 @@ void SmootherGive<LevelCacheType>::nodeBuildAscGive(int i_r, int i_theta, const 
         const double coeff2 = 0.5 * (k1 + k2) / h2;
         const double coeff3 = 0.5 * (h1 + h2) / k1;
         const double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -210,7 +212,7 @@ void SmootherGive<LevelCacheType>::nodeBuildAscGive(int i_r, int i_theta, const 
         /* Fill matrix row of (i,j) */
         row    = center_index;
         column = center_index;
-        value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
+        value  = coeff5 * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
         updateMatrixElement(center_solver, center_batch, row, column, value);
 
         row    = center_index;
@@ -321,6 +323,7 @@ void SmootherGive<LevelCacheType>::nodeBuildAscGive(int i_r, int i_theta, const 
             const double coeff2 = 0.5 * (k1 + k2) / h2;
             const double coeff3 = 0.5 * (h1 + h2) / k1;
             const double coeff4 = 0.5 * (h1 + h2) / k2;
+            const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
             /* left_matrix (across-the origin), center_matrix, right_matrix */
             /* -| x | o | x | */
@@ -354,7 +357,7 @@ void SmootherGive<LevelCacheType>::nodeBuildAscGive(int i_r, int i_theta, const 
 
             offset = CenterStencil[StencilPosition::Center];
             col    = center_index;
-            val    = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* beta_{i,j} */
+            val    = coeff5 * coeff_beta * fabs(detDF); /* beta_{i,j} */
             updateCOOCSRMatrixElement(inner_boundary_circle_matrix, ptr, offset, row, col, val);
 
             offset = CenterStencil[StencilPosition::Left];
@@ -450,10 +453,11 @@ void SmootherGive<LevelCacheType>::nodeBuildAscGive(int i_r, int i_theta, const 
         double k1 = grid.angularSpacing(i_theta - 1);
         double k2 = grid.angularSpacing(i_theta);
 
-        double coeff1 = 0.5 * (k1 + k2) / h1;
-        double coeff2 = 0.5 * (k1 + k2) / h2;
-        double coeff3 = 0.5 * (h1 + h2) / k1;
-        double coeff4 = 0.5 * (h1 + h2) / k2;
+        double coeff1       = 0.5 * (k1 + k2) / h1;
+        double coeff2       = 0.5 * (k1 + k2) / h2;
+        double coeff3       = 0.5 * (h1 + h2) / k1;
+        double coeff4       = 0.5 * (h1 + h2) / k2;
+        const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -481,7 +485,7 @@ void SmootherGive<LevelCacheType>::nodeBuildAscGive(int i_r, int i_theta, const 
         /* Fill matrix row of (i,j) */
         row    = center_index;
         column = center_index;
-        value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */
+        value  = coeff5 * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */
         updateMatrixElement(center_solver, center_batch, row, column, value);
 
         row    = center_index;
@@ -536,6 +540,7 @@ void SmootherGive<LevelCacheType>::nodeBuildAscGive(int i_r, int i_theta, const 
         const double coeff2 = 0.5 * (k1 + k2) / h2;
         const double coeff3 = 0.5 * (h1 + h2) / k1;
         const double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -564,7 +569,7 @@ void SmootherGive<LevelCacheType>::nodeBuildAscGive(int i_r, int i_theta, const 
         /* ---------------------------- */ /* Fill matrix row of (i,j) */
         row    = center_index;
         column = center_index;
-        value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */
+        value  = coeff5 * coeff_beta * fabs(detDF); /* Center: beta_{i,j} */
         updateMatrixElement(center_solver, center_batch, row, column, value);
 
         row    = center_index;
