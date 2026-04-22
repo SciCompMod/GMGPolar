@@ -91,8 +91,8 @@ target_link_libraries(GMGPolarInterface
 add_library(GMGPolar::GMGPolarInterface ALIAS GMGPolarInterface)
 
 install(TARGETS
-    GMGPolar::GMGPolarLib
-    GMGPolar::GMGPolarInterface
+    GMGPolarLib
+    GMGPolarInterface
     EXPORT GMGPolarTargets
     ARCHIVE DESTINATION lib
 )
