@@ -55,7 +55,7 @@ if(GMGPOLAR_ENABLE_COVERAGE)
     endif()
 endif()
 
-find_package(OpenMP REQUIRED)
+find_package(OpenMP REQUIRED COMPONENTS CXX)
 find_package(Kokkos  4.4.1...<5.1 QUIET REQUIRED)
 
 if(GMGPOLAR_USE_MUMPS)
