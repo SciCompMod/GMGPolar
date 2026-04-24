@@ -1,13 +1,11 @@
 #pragma once
 
-#ifdef GMGPOLAR_USE_MUMPS
-
 /* ----------------------- */
 /* Boundary Symmetry Shift */
 /* ----------------------- */
 
 template <class LevelCacheType>
-void DirectSolver_COO_MUMPS_Give<LevelCacheType>::applySymmetryShiftInnerBoundary(Vector<double> x) const
+void DirectSolverGive<LevelCacheType>::applySymmetryShiftInnerBoundary(Vector<double> x) const
 {
     const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
@@ -68,7 +66,7 @@ void DirectSolver_COO_MUMPS_Give<LevelCacheType>::applySymmetryShiftInnerBoundar
 }
 
 template <class LevelCacheType>
-void DirectSolver_COO_MUMPS_Give<LevelCacheType>::applySymmetryShiftOuterBoundary(Vector<double> x) const
+void DirectSolverGive<LevelCacheType>::applySymmetryShiftOuterBoundary(Vector<double> x) const
 {
     const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
@@ -127,7 +125,7 @@ void DirectSolver_COO_MUMPS_Give<LevelCacheType>::applySymmetryShiftOuterBoundar
 }
 
 template <class LevelCacheType>
-void DirectSolver_COO_MUMPS_Give<LevelCacheType>::applySymmetryShift(Vector<double> x) const
+void DirectSolverGive<LevelCacheType>::applySymmetryShift(Vector<double> x) const
 {
     const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
     const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;
@@ -141,5 +139,3 @@ void DirectSolver_COO_MUMPS_Give<LevelCacheType>::applySymmetryShift(Vector<doub
 
     applySymmetryShiftOuterBoundary(x);
 }
-
-#endif

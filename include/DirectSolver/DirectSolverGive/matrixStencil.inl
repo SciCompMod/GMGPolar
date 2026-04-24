@@ -1,9 +1,41 @@
 #pragma once
 
-#ifdef GMGPOLAR_USE_MUMPS
+template <class LevelCacheType>
+int DirectSolverGive<LevelCacheType>::getStencilSize(int global_index) const
+{
+    const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
+    const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;
+
+    int i_r, i_theta;
+    grid.multiIndex(global_index, i_r, i_theta);
+
+    const int size_stencil_inner_boundary      = DirBC_Interior ? 1 : 7;
+    const int size_stencil_next_inner_boundary = DirBC_Interior ? 6 : 9;
+    const int size_stencil_interior            = 9;
+    const int size_stencil_next_outer_boundary = 6;
+    const int size_stencil_outer_boundary      = 1;
+
+    if ((i_r > 1 && i_r < grid.nr() - 2 || (i_r == 1 && !DirBC_Interior))) {
+        return size_stencil_interior;
+    }
+    else if (i_r == 0 && !DirBC_Interior) {
+        return size_stencil_inner_boundary;
+    }
+    else if ((i_r == 0 && DirBC_Interior) || i_r == grid.nr() - 1) {
+        return size_stencil_outer_boundary;
+    }
+    else if (i_r == 1 && DirBC_Interior) {
+        return size_stencil_next_inner_boundary;
+    }
+    else if (i_r == grid.nr() - 2) {
+        return size_stencil_next_outer_boundary;
+    }
+
+    throw std::out_of_range("Invalid index for stencil");
+}
 
 template <class LevelCacheType>
-const Stencil& DirectSolver_COO_MUMPS_Give<LevelCacheType>::getStencil(int i_r) const
+const Stencil& DirectSolverGive<LevelCacheType>::getStencil(int i_r) const
 {
     const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
     const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;
@@ -30,7 +62,7 @@ const Stencil& DirectSolver_COO_MUMPS_Give<LevelCacheType>::getStencil(int i_r) 
 }
 
 template <class LevelCacheType>
-int DirectSolver_COO_MUMPS_Give<LevelCacheType>::getNonZeroCountSolverMatrix() const
+int DirectSolverGive<LevelCacheType>::getNonZeroCountSolverMatrix() const
 {
     const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
     const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;
@@ -51,7 +83,7 @@ int DirectSolver_COO_MUMPS_Give<LevelCacheType>::getNonZeroCountSolverMatrix() c
 /* ----------------------------------------------------------------- */
 /* If the indexing is not smoother-based, please adjust the indexing */
 template <class LevelCacheType>
-int DirectSolver_COO_MUMPS_Give<LevelCacheType>::getSolverMatrixIndex(const int i_r, const int i_theta) const
+int DirectSolverGive<LevelCacheType>::getSolverMatrixIndex(const int i_r, const int i_theta) const
 {
     const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
     const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;
@@ -80,8 +112,8 @@ int DirectSolver_COO_MUMPS_Give<LevelCacheType>::getSolverMatrixIndex(const int 
         const int prior_inner_boundary_nodes      = grid.ntheta();
         const int prior_next_inner_boundary_nodes = grid.ntheta();
         const int prior_interior_nodes            = grid.ntheta() * (grid.numberSmootherCircles() - 2) +
-                                         i_theta * (grid.lengthSmootherRadial() - 2) + i_r -
-                                         grid.numberSmootherCircles();
+                                                    i_theta * (grid.lengthSmootherRadial() - 2) + i_r -
+                                                    grid.numberSmootherCircles();
         const int prior_next_outer_boundary_nodes = i_theta;
         const int prior_outer_boundary_nodes      = i_theta;
         return size_stencil_inner_boundary * prior_inner_boundary_nodes +
@@ -132,5 +164,3 @@ int DirectSolver_COO_MUMPS_Give<LevelCacheType>::getSolverMatrixIndex(const int 
     }
     throw std::out_of_range("Invalid index for stencil");
 }
-
-#endif
