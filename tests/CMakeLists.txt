@@ -24,8 +24,7 @@ add_executable(gmgpolar_tests
     GMGPolar/convergence_order.cpp
 )
 
-# Set the compile features and link libraries
-target_compile_features(gmgpolar_tests PRIVATE cxx_std_20)
+# Set the link libraries
 target_link_libraries(gmgpolar_tests GMGPolarLib GMGPolarInterface GTest::gtest_main)
 
 include(GoogleTest)
