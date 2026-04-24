@@ -115,7 +115,7 @@ target_link_libraries(strong_scaling PRIVATE GMGPolarLib GMGPolarInterface)
 
 if(GMGPOLAR_BUILD_TESTS)
     enable_testing()
-    find_package(GTest 1.17)
+    find_package(GTest 1.17 QUIET)
     if (NOT GTest_FOUND)
         add_subdirectory(third-party)
     endif()
