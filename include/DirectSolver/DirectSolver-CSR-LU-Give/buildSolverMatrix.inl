@@ -3,7 +3,7 @@
 namespace direct_solver_csr_lu_give
 {
 
-static inline void updateMatrixElement(SparseMatrixCSR<double>& matrix, int offset, int row, int col, double val)
+static inline void updateMatrixElement(SparseMatrixCSR<double> matrix, int offset, int row, int col, double val)
 {
     matrix.row_nz_index(row, offset) = col;
     matrix.row_nz_entry(row, offset) += val;
@@ -14,7 +14,7 @@ static inline void updateMatrixElement(SparseMatrixCSR<double>& matrix, int offs
 template <class LevelCacheType>
 void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_theta, const PolarGrid& grid,
                                                                          const bool DirBC_Interior,
-                                                                         SparseMatrixCSR<double>& solver_matrix,
+                                                                         SparseMatrixCSR<double> solver_matrix,
                                                                          double arr, double att, double art,
                                                                          double detDF, double coeff_beta)
 {
@@ -744,7 +744,7 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
 
 template <class LevelCacheType>
 void DirectSolver_CSR_LU_Give<LevelCacheType>::buildSolverMatrixCircleSection(const int i_r,
-                                                                              SparseMatrixCSR<double>& solver_matrix)
+                                                                              SparseMatrixCSR<double> solver_matrix)
 {
     const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
@@ -812,25 +812,28 @@ SparseMatrixCSR<double> DirectSolver_CSR_LU_Give<LevelCacheType>::buildSolverMat
         const int num_circle_tasks        = grid.numberSmootherCircles();
         const int additional_radial_tasks = grid.ntheta() % 3;
         const int num_radial_tasks        = grid.ntheta() - additional_radial_tasks;
+        const int stride                  = 3;
+        const int num_steps               = (num_circle_tasks + stride - 1) / stride;
 
+        //for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
+        Kokkos::parallel_for(
+            num_steps, KOKKOS_CLASS_LAMBDA(const int circle_task) {
+                int circle_idx = stride * circle_task;
+                int i_r        = grid.numberSmootherCircles() - circle_idx - 1;
+                buildSolverMatrixCircleSection(i_r, solver_matrix);
+            });
+
+        for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 3) {
+            int i_r = grid.numberSmootherCircles() - circle_task - 1;
+            buildSolverMatrixCircleSection(i_r, solver_matrix);
+        }
+
+        for (int circle_task = 2; circle_task < num_circle_tasks; circle_task += 3) {
+            int i_r = grid.numberSmootherCircles() - circle_task - 1;
+            buildSolverMatrixCircleSection(i_r, solver_matrix);
+        }
 #pragma omp parallel num_threads(num_omp_threads)
         {
-#pragma omp for
-            for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
-                int i_r = grid.numberSmootherCircles() - circle_task - 1;
-                buildSolverMatrixCircleSection(i_r, solver_matrix);
-            }
-#pragma omp for
-            for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 3) {
-                int i_r = grid.numberSmootherCircles() - circle_task - 1;
-                buildSolverMatrixCircleSection(i_r, solver_matrix);
-            }
-#pragma omp for nowait
-            for (int circle_task = 2; circle_task < num_circle_tasks; circle_task += 3) {
-                int i_r = grid.numberSmootherCircles() - circle_task - 1;
-                buildSolverMatrixCircleSection(i_r, solver_matrix);
-            }
-
 #pragma omp for
             for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {
                 if (radial_task > 0) {
