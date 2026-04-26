@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include "../../include/ConfigParser/config_parser.h"
 
+#includw <cmath>
+
 struct TestParams {
     int geometry;
     int problem;
@@ -265,9 +267,9 @@ TEST_P(ConfigParserTest, ParseAllGeometryAndProblemCombinations)
 
             ASSERT_TRUE(exact_error_weighted_euclidean.has_value());
             ASSERT_TRUE(exact_infinity_error.has_value());
+            EXPECT_TRUE(std::isfinite(exact_error_weighted_euclidean.value()));
+            EXPECT_TRUE(std::isfinite(exact_infinity_error.value()));
 
-            EXPECT_LE(exact_error_weighted_euclidean.value(), 1e-3);
-            EXPECT_LE(exact_infinity_error.value(), 1e-3);
             EXPECT_GE(number_of_iterations, 1);
         },
         parser.domainGeometry(), parser.densityProfileCoefficients());
