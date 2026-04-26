@@ -86,8 +86,7 @@ if(GMGPOLAR_BUILD_TESTS)
                 '*/_deps/googletest-src/*'
                 '*/include/InputFunctions/*'
                 '*/src/InputFunctions/*'
-                '*/include/ConfigParser/*'
-                '*/src/ConfigParser/*'
+                '*/include/ConfigParser/cmdline.h'
                 --output-file ${CMAKE_BINARY_DIR}/coverage-filtered.info
                 --ignore-errors unused
             # Generate HTML report
