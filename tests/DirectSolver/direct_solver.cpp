@@ -38,7 +38,7 @@
 /* Test 1/2: */
 /* Does the Take and Give Implementation match up? */
 
-TEST(DirectSolver_COO_MUMPS_Test, directSolver_DirBC_Interior)
+TEST(DirectSolver_Test, directSolver_DirBC_Interior)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -71,12 +71,10 @@ TEST(DirectSolver_COO_MUMPS_Test, directSolver_DirBC_Interior)
     DirectSolverTake directSolverGive_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     DirectSolverGive directSolverTake_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
-    Vector<double> rhs = generate_random_sample_data(level.grid(), 69);
-
-    Vector<double> solution_Give = rhs;
+    Vector<double> solution_Give = generate_random_sample_data(level.grid(), 69);
     directSolverGive_operator.solveInPlace(solution_Give);
 
-    Vector<double> solution_Take = rhs;
+    Vector<double> solution_Take = generate_random_sample_data(level.grid(), 69);
     directSolverTake_operator.solveInPlace(solution_Take);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
@@ -90,7 +88,7 @@ TEST(DirectSolver_COO_MUMPS_Test, directSolver_DirBC_Interior)
     }
 }
 
-TEST(DirectSolver_COO_MUMPS_Test, directSolver_AcrossOrigin)
+TEST(DirectSolver_Test, directSolver_AcrossOrigin)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -123,12 +121,10 @@ TEST(DirectSolver_COO_MUMPS_Test, directSolver_AcrossOrigin)
     DirectSolverGive directSolverGive_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     DirectSolverTake directSolverTake_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
-    Vector<double> rhs = generate_random_sample_data(level.grid(), 69);
-
-    Vector<double> solution_Give = rhs;
+    Vector<double> solution_Give = generate_random_sample_data(level.grid(), 69);
     directSolverGive_operator.solveInPlace(solution_Give);
 
-    Vector<double> solution_Take = rhs;
+    Vector<double> solution_Take = generate_random_sample_data(level.grid(), 69);
     directSolverTake_operator.solveInPlace(solution_Take);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
