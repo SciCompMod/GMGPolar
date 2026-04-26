@@ -2,14 +2,12 @@
 
 #include "../directSolver.h"
 
-#ifdef GMGPOLAR_USE_MUMPS
-
 template <class LevelCacheType>
-class DirectSolver_COO_MUMPS_Take : public DirectSolver<LevelCacheType>
+class DirectSolverGive : public DirectSolver<LevelCacheType>
 {
 public:
-    explicit DirectSolver_COO_MUMPS_Take(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
-                                         int num_omp_threads);
+    explicit DirectSolverGive(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
+                              int num_omp_threads);
 
     // Note: The rhs (right-hand side) vector gets overwritten during the solution process.
     void solveInPlace(Vector<double> solution) override;
@@ -46,11 +44,23 @@ private:
     };
     // clang-format on
 
-    // MUMPS solver structure with the solver matrix initialized in the constructor.
-    CooMumpsSolver mumps_solver_;
+#ifdef GMGPOLAR_USE_MUMPS
+    using SystemMatrix = SparseMatrixCOO<double>;
+    using SystemSolver = CooMumpsSolver;
+#else
+    using SystemMatrix = SparseMatrixCSR<double>;
+    using SystemSolver = SparseLUSolver<double>;
+    // Stored only for the in-house solver (CSR).
+    SystemMatrix system_matrix_;
+#endif
+
+    // Solver object (owns matrix if MUMPS, references if in-house solver).
+    SystemSolver system_solver_;
 
     // Constructs a symmetric solver matrix.
-    SparseMatrixCOO<double> buildSolverMatrix();
+    SystemMatrix buildSolverMatrix();
+    void buildSolverMatrixCircleSection(const int i_r, SystemMatrix& solver_matrix);
+    void buildSolverMatrixRadialSection(const int i_theta, SystemMatrix& solver_matrix);
 
     // Adjusts the right-hand side vector for symmetry corrections.
     // This modifies the system from
@@ -72,15 +82,14 @@ private:
     // Retrieves the stencil for the solver matrix at the given radial index.
     const Stencil& getStencil(int i_r) const;
 
-    void nodeBuildSolverMatrixTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                   SparseMatrixCOO<double>& solver_matrix, ConstVector<double>& arr,
-                                   ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF,
-                                   ConstVector<double>& coeff_beta);
+    int getStencilSize(int global_index) const;
+
+    void nodeBuildSolverMatrixGive(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+                                   SystemMatrix& solver_matrix, double arr, double att, double art, double detDF,
+                                   double coeff_beta);
 };
 
-    #include "applySymmetryShift.inl"
-    #include "buildSolverMatrix.inl"
-    #include "directSolverTake.inl"
-    #include "matrixStencil.inl"
-
-#endif
+#include "applySymmetryShift.inl"
+#include "buildSolverMatrix.inl"
+#include "directSolverGive.inl"
+#include "matrixStencil.inl"

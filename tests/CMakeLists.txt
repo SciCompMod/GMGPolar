@@ -20,8 +20,7 @@ add_executable(gmgpolar_tests
     Interpolation/extrapolated_prolongation.cpp
     Interpolation/extrapolated_restriction.cpp
     Residual/residual.cpp
-    DirectSolver/directSolver_coo_mumps.cpp
-    DirectSolver/directSolver_csr_lu.cpp
+    DirectSolver/direct_solver.cpp
     Smoother/smoother.cpp
     ExtrapolatedSmoother/extrapolated_smoother.cpp
     ConfigParser/config_parser.cpp
