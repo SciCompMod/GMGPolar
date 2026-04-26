@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "../../include/ConfigParser/config_parser.h"
 
-#includw <cmath>
+#include <cmath>
 
 struct TestParams {
     int geometry;
