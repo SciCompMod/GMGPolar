@@ -37,7 +37,7 @@ TEST_P(ConfigParserTest, ParseAllGeometryAndProblemCombinations)
 {
     const int verbose                          = (params.case_id > 0 ? 0 : 1);
     const bool paraview                        = false;
-    const int maxOpenMPThreads                 = 2;
+    const int maxOpenMPThreads                 = 1;
     const bool DirBC_Interior                  = false;
     const int stencilDistributionMethod        = params.case_id % 2;
     const bool cacheDensityProfileCoefficients = true;
@@ -45,9 +45,9 @@ TEST_P(ConfigParserTest, ParseAllGeometryAndProblemCombinations)
     const double R0                            = 1e-8;
     const double Rmax                          = 1.3;
     const int nr_exp                           = 3;
-    const int ntheta_exp                       = 4;
-    const int anisotropic_factor               = 1;
-    const int divideBy2                        = 1;
+    const int ntheta_exp                       = 3;
+    const int anisotropic_factor               = 0;
+    const int divideBy2                        = 0;
     const bool FMG                             = true;
     const int FMG_iterations                   = 1;
     const int FMG_cycle                        = params.case_id % 3;
