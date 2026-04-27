@@ -10,6 +10,9 @@ usage() {
     exit 1
 }
 
+export CXX_FLAGS_RELEASE="-O2 -mtune=generic"
+export CXX_FLAGS_DEBUG="-Wall -Wextra -pedantic -Wno-unused -Wfloat-conversion"
+
 # Check if build directory exists in the parent directory
 if [ -d "../build" ]; then
     build_exists=true
@@ -56,7 +59,10 @@ if [ -n "$build_type" ]; then
     echo "Configuring with $build_type build type..."
 
     cmake -S ${PWD}/.. -B ${PWD}/../build \
-        -DCMAKE_BUILD_TYPE="$build_type"  .. || { echo "CMake configuration failed"; exit 1; }
+        -DCMAKE_BUILD_TYPE="$build_type" \
+        -DCMAKE_CXX_FLAGS_RELEASE="${CXX_FLAGS_RELEASE}" \
+        -DCMAKE_CXX_FLAGS_DEBUG="${CXX_FLAGS_DEBUG}" \
+        .. || { echo "CMake configuration failed"; exit 1; }
 fi
 
 cmake --build ${PWD}/../build -j 2
