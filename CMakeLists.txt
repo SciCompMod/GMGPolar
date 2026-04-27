@@ -14,6 +14,10 @@ if (${GMGPOLAR_USE_MUMPS})
     project(GMGPolar VERSION 2.0.0 LANGUAGES CXX Fortran)
 else()
     project(GMGPolar VERSION 2.0.0 LANGUAGES CXX)
+project(GMGPolar VERSION 2.1.0 LANGUAGES CXX)
+# MUMPS does not automatically provide Fortran libraries
+if (${GMGPOLAR_USE_MUMPS})
+    enable_language(Fortran)
 endif()
 
 set(CMAKE_CXX_STANDARD 20)
