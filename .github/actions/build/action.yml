@@ -22,7 +22,7 @@ runs:
       run: |
         mkdir build && cd build
         export CMAKE_PREFIX_PATH=/opt/openmp
-        export CXXFLAGS="-Wall -Wextra -pedantic -Wno-unused -Wno-psabi -Wfloat-conversion"
+        export CXXFLAGS="-Wall -Wextra -pedantic -Wno-unused -Wfloat-conversion"
         cmake -DCMAKE_BUILD_TYPE=Debug -DGMGPOLAR_ENABLE_COVERAGE=ON -DGMGPOLAR_USE_MUMPS=${{ inputs.use-mumps }} ..
         make -j4
     - name: create build dir archive
