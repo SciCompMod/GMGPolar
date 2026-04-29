@@ -3,9 +3,9 @@
 namespace direct_solver_csr_lu_give
 {
 
-static inline void updateMatrixElement(SparseMatrixCSR<double> matrix, int offset, int row, int col, double val)
+static inline void updateMatrixElement(const SparseMatrixCSR<double>& matrix, int offset, int row, int col, double val)
 {
-    matrix.row_nz_index(row, offset) = col;
+    Kokkos::atomic_store(&matrix.row_nz_index(row, offset), col);
     Kokkos::atomic_add(&matrix.row_nz_entry(row, offset), val);
 }
 
@@ -14,7 +14,7 @@ static inline void updateMatrixElement(SparseMatrixCSR<double> matrix, int offse
 template <class LevelCacheType>
 void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_theta, const PolarGrid grid,
                                                                          const bool DirBC_Interior,
-                                                                         SparseMatrixCSR<double> solver_matrix,
+                                                                         const SparseMatrixCSR<double>& solver_matrix,
                                                                          double arr, double att, double art,
                                                                          double detDF, double coeff_beta) const
 {
@@ -744,7 +744,7 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
 
 template <class LevelCacheType>
 void DirectSolver_CSR_LU_Give<LevelCacheType>::buildSolverMatrixCircleSection(
-    const int i_r, SparseMatrixCSR<double> solver_matrix) const
+    const int i_r, const SparseMatrixCSR<double>& solver_matrix) const
 {
     const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
@@ -792,7 +792,8 @@ SparseMatrixCSR<double> DirectSolver_CSR_LU_Give<LevelCacheType>::buildSolverMat
 
     const int n = grid.numberOfNodes();
 
-    std::function<int(int)> nnz_per_row = [&](int global_index) {
+    std::function<int(int)> nnz_per_row = KOKKOS_CLASS_LAMBDA(int global_index)
+    {
         return getStencilSize(global_index);
     };
 
@@ -815,14 +816,14 @@ SparseMatrixCSR<double> DirectSolver_CSR_LU_Give<LevelCacheType>::buildSolverMat
         const int stride                  = 3;
         const int num_steps               = (num_circle_tasks + stride - 1) / stride;
 
-        for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
-            // Kokkos::parallel_for(
-            // num_steps, KOKKOS_CLASS_LAMBDA(const int circle_task) {
-            int circle_idx = stride * circle_task;
-            int i_r        = grid.numberSmootherCircles() - circle_task - 1;
-            buildSolverMatrixCircleSection(i_r, solver_matrix);
-        }
-        //);
+        //for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
+        Kokkos::parallel_for(
+            num_steps, KOKKOS_CLASS_LAMBDA(const int circle_task) {
+                int circle_idx = stride * circle_task;
+                int i_r        = grid.numberSmootherCircles() - circle_task - 1;
+                buildSolverMatrixCircleSection(i_r, solver_matrix);
+            });
+        Kokkos::fence();
 
         for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 3) {
             int i_r = grid.numberSmootherCircles() - circle_task - 1;
