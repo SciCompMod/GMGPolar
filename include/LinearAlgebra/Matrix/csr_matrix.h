@@ -53,11 +53,11 @@ public:
 
     int row_nz_size(int row) const;
 
-    const int& row_nz_index(int row, int nz_index) const;
-    int& row_nz_index(int row, int nz_index);
+    //const int& row_nz_index(int row, int nz_index) const;
+    int& row_nz_index(int row, int nz_index) const;
 
-    const T& row_nz_entry(int row, int nz_index) const;
-    T& row_nz_entry(int row, int nz_index);
+    //const T& row_nz_entry(int row, int nz_index) const;
+    T& row_nz_entry(int row, int nz_index) const;
 
     T* values_data() const;
     int* column_indices_data() const;
@@ -112,13 +112,14 @@ SparseMatrixCSR<T>::SparseMatrixCSR()
 // copy construction
 template <typename T>
 SparseMatrixCSR<T>::SparseMatrixCSR(const SparseMatrixCSR& other)
-    : rows_(other.rows_)
-    , columns_(other.columns_)
-    , nnz_(other.nnz_)
+    : rows_(other.rows())
+    , columns_(other.columns())
+    , nnz_(other.non_zero_size())
     , values_("CSR values", nnz_)
     , column_indices_("CSR column indices", nnz_)
-    , row_start_indices_("CSR row start indices", rows_ + 1)
+    , row_start_indices_("CSR row start indices", other.row_start_indices_.size())
 {
+    Kokkos::printf("rows=%d col=%f nnz=%f\n ", rows_, columns_, nnz_);
     Kokkos::deep_copy(values_, other.values_);
     Kokkos::deep_copy(column_indices_, other.column_indices_);
     Kokkos::deep_copy(row_start_indices_, other.row_start_indices_);
@@ -196,8 +197,8 @@ SparseMatrixCSR<T>::SparseMatrixCSR(int rows, int columns, std::function<int(int
     values_                  = Vector<T>("CSR values", nnz_);
     column_indices_          = Vector<int>("CSR column indices", nnz_);
 
-    assign(values_, T(0));
-    assign(column_indices_, 0);
+    Kokkos::deep_copy(values_, T(0));
+    Kokkos::deep_copy(column_indices_, 0);
 }
 
 template <typename T>
@@ -278,17 +279,17 @@ int SparseMatrixCSR<T>::row_nz_size(int row) const
     assert(row >= 0 && row < rows_);
     return row_start_indices_(row + 1) - row_start_indices_(row);
 }
-
+/*
 template <typename T>
 const int& SparseMatrixCSR<T>::row_nz_index(int row, int nz_index) const
 {
     assert(row >= 0 && row < rows_);
     assert(nz_index >= 0 && nz_index < row_nz_size(row));
     return column_indices_(row_start_indices_(row) + nz_index);
-}
+}*/
 
 template <typename T>
-int& SparseMatrixCSR<T>::row_nz_index(int row, int nz_index)
+KOKKOS_FUNCTION int& SparseMatrixCSR<T>::row_nz_index(int row, int nz_index) const
 {
     assert(row >= 0 && row < rows_);
     assert(nz_index >= 0 && nz_index < row_nz_size(row));
@@ -296,15 +297,7 @@ int& SparseMatrixCSR<T>::row_nz_index(int row, int nz_index)
 }
 
 template <typename T>
-const T& SparseMatrixCSR<T>::row_nz_entry(int row, int nz_index) const
-{
-    assert(row >= 0 && row < rows_);
-    assert(nz_index >= 0 && nz_index < row_nz_size(row));
-    return values_(row_start_indices_(row) + nz_index);
-}
-
-template <typename T>
-T& SparseMatrixCSR<T>::row_nz_entry(int row, int nz_index)
+KOKKOS_FUNCTION T& SparseMatrixCSR<T>::row_nz_entry(int row, int nz_index) const
 {
     assert(row >= 0 && row < rows_);
     assert(nz_index >= 0 && nz_index < row_nz_size(row));
