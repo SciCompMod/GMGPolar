@@ -62,8 +62,7 @@ public:
      *
      * @param b Right-hand side vector (modified in place to contain the solution).
      */
-    void solveInPlace(Vector<T> b) const;
-    void solveInPlace(T* b) const;
+    void solveInPlace(Vector<T>& b) const;
 
 private:
     // LU decomposition data structures
@@ -79,7 +78,7 @@ private:
 
     // Core methods
     void factorize(const SparseMatrixCSR<T>& A);
-    void solveInPlacePermuted(T* b) const;
+    void solveInPlacePermuted(Vector<T>& b) const;
 
     // Reordering and permutation utilities
     std::vector<int> computeRCM(const SparseMatrixCSR<T>& A) const;
@@ -132,17 +131,7 @@ SparseLUSolver<T>::SparseLUSolver(const SparseMatrixCSR<T>& A, T tolerance_abs, 
  * @param b - Right-hand side vector (overwritten with solution)
  */
 template <typename T>
-void SparseLUSolver<T>::solveInPlace(Vector<T> b) const
-{
-    solveInPlace(b.data());
-}
-
-/**
- * Solves Ax = b for raw pointer
- * @param b - Right-hand side vector (overwritten with solution)
- */
-template <typename T>
-void SparseLUSolver<T>::solveInPlace(T* b) const
+void SparseLUSolver<T>::solveInPlace(Vector<T>& b) const
 {
     assert(factorized_);
     const int n = perm.size();
@@ -156,7 +145,7 @@ void SparseLUSolver<T>::solveInPlace(T* b) const
     }
 
     // Solve permuted system
-    solveInPlacePermuted(b_perm.data());
+    solveInPlacePermuted(b_perm);
 
     // Unpermute solution: x = P^T * x_perm
     for (int i = 0; i < n; i++) {
@@ -169,7 +158,7 @@ void SparseLUSolver<T>::solveInPlace(T* b) const
  * @param b - Permuted right-hand side vector (overwritten with solution)
  */
 template <typename T>
-void SparseLUSolver<T>::solveInPlacePermuted(T* b) const
+void SparseLUSolver<T>::solveInPlacePermuted(Vector<T>& b) const
 {
     const int n = L_row_ptr.size() - 1;
 
