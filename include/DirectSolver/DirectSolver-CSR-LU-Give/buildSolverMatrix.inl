@@ -5,7 +5,7 @@ namespace direct_solver_csr_lu_give
 
 static inline void updateMatrixElement(const SparseMatrixCSR<double>& matrix, int offset, int row, int col, double val)
 {
-    Kokkos::atomic_store(&matrix.row_nz_index(row, offset), col);
+    matrix.row_nz_index(row, offset) = col;
     Kokkos::atomic_add(&matrix.row_nz_entry(row, offset), val);
 }
 
@@ -820,7 +820,7 @@ SparseMatrixCSR<double> DirectSolver_CSR_LU_Give<LevelCacheType>::buildSolverMat
         Kokkos::parallel_for(
             num_steps, KOKKOS_CLASS_LAMBDA(const int circle_task) {
                 int circle_idx = stride * circle_task;
-                int i_r        = grid.numberSmootherCircles() - circle_task - 1;
+                int i_r        = grid.numberSmootherCircles() - circle_idx - 1;
                 buildSolverMatrixCircleSection(i_r, solver_matrix);
             });
         Kokkos::fence();
