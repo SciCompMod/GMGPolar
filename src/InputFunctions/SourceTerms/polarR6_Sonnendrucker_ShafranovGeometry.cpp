@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/polarR6_Sonnendrucker_ShafranovGeometry.h"
+#include <InputFunctions/SourceTerms/polarR6_Sonnendrucker_ShafranovGeometry.h>
 using namespace gmgpolar;
 
 PolarR6_Sonnendrucker_ShafranovGeometry::PolarR6_Sonnendrucker_ShafranovGeometry(PolarGrid const& grid, double Rmax,

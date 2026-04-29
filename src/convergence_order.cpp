@@ -5,8 +5,8 @@
 #include <limits>
 #include <vector>
 
-#include "../include/GMGPolar/gmgpolar.h"
-#include "../include/GMGPolar/test_cases.h"
+#include <GMGPolar/gmgpolar.h>
+#include <GMGPolar/test_cases.h>
 using namespace gmgpolar;
 
 int main(int argc, char* argv[])

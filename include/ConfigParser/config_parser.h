@@ -5,12 +5,12 @@
 #include <stdexcept>
 #include <memory>
 
-#include "../../include/ConfigParser/cmdline.h"
-#include "../../include/Definitions/global_definitions.h"
-#include "../../include/PolarGrid/polargrid.h"
-#include "../../include/GMGPolar/test_cases.h"
-#include "../../include/GMGPolar/igmgpolar.h"
-#include "../../include/GMGPolar/gmgpolar.h"
+#include <ConfigParser/cmdline.h>
+#include <Definitions/global_definitions.h>
+#include <PolarGrid/polargrid.h>
+#include <GMGPolar/test_cases.h>
+#include <GMGPolar/igmgpolar.h>
+#include <GMGPolar/gmgpolar.h>
 #include "test_selection.h"
 
 namespace gmgpolar

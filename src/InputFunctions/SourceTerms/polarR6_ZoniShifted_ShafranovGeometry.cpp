@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/polarR6_ZoniShifted_ShafranovGeometry.h"
+#include <InputFunctions/SourceTerms/polarR6_ZoniShifted_ShafranovGeometry.h>
 using namespace gmgpolar;
 
 PolarR6_ZoniShifted_ShafranovGeometry::PolarR6_ZoniShifted_ShafranovGeometry(PolarGrid const& grid, double Rmax,

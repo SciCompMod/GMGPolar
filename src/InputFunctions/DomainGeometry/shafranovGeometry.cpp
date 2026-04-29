@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/DomainGeometry/shafranovGeometry.h"
+#include <InputFunctions/DomainGeometry/shafranovGeometry.h>
 using namespace gmgpolar;
 
 ShafranovGeometry::ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta)

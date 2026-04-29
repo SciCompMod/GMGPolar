@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/BoundaryConditions/polarR6_Boundary_CzarnyGeometry.h"
+#include <InputFunctions/BoundaryConditions/polarR6_Boundary_CzarnyGeometry.h>
 using namespace gmgpolar;
 
 void PolarR6_Boundary_CzarnyGeometry::initializeGeometry()

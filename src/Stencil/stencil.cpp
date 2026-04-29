@@ -1,4 +1,4 @@
-#include "../../include/Stencil/stencil.h"
+#include <Stencil/stencil.h>
 using namespace gmgpolar;
 
 Stencil::Stencil(std::initializer_list<int> init)

@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/ExactSolution/cartesianR2_CzarnyGeometry.h"
+#include <InputFunctions/ExactSolution/cartesianR2_CzarnyGeometry.h>
 using namespace gmgpolar;
 
 void CartesianR2_CzarnyGeometry::initializeGeometry()

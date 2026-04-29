@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/polarR6_ZoniGyro_CircularGeometry.h"
+#include <InputFunctions/SourceTerms/polarR6_ZoniGyro_CircularGeometry.h>
 using namespace gmgpolar;
 
 PolarR6_ZoniGyro_CircularGeometry::PolarR6_ZoniGyro_CircularGeometry(PolarGrid const& grid, double Rmax)

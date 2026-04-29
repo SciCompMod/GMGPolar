@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/cartesianR6_SonnendruckerGyro_ShafranovGeometry.h"
+#include <InputFunctions/SourceTerms/cartesianR6_SonnendruckerGyro_ShafranovGeometry.h>
 using namespace gmgpolar;
 
 CartesianR6_SonnendruckerGyro_ShafranovGeometry::CartesianR6_SonnendruckerGyro_ShafranovGeometry(
