@@ -136,10 +136,6 @@ private:
                                                 ConstVector<double> solution, Vector<double> error,
                                                 const ExactSolution& exact_solution);
 
-    /* ------------------------------------------------------------------------- */
-    /* Compute the extrapolated residual: res_ex = 4/3 res_fine - 1/3 res_coarse */
-    void extrapolatedResidual(int current_level, Vector<double> residual, ConstVector<double> residual_next_level);
-
     /* --------------- */
     /* Setup Functions */
     int chooseNumberOfLevels(const PolarGrid& finest_grid);
@@ -168,6 +164,8 @@ private:
                                   int iterations);
     void applyExtrapolatedMultigridIterations(Level<DomainGeometry, DensityProfileCoefficients>& level,
                                               MultigridCycleType cycle, int iterations);
+    // Compute the extrapolated values: u_ex = 4/3 u_fine - 1/3 u_coarse
+    void applyExtrapolation(int current_level, Vector<double> fine_values, ConstVector<double> coarse_values);
 
     /* ----------------- */
     /* Print information */

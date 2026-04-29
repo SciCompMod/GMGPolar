@@ -6,7 +6,7 @@ ExtrapolatedSmootherTake<LevelCacheType>::ExtrapolatedSmootherTake(const PolarGr
                                                                    const bool DirBC_Interior, const int num_omp_threads)
     : ExtrapolatedSmoother<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
-    , radial_tridiagonal_solver_(grid.lengthSmootherRadial(), grid.ntheta(), false)
+    , radial_tridiagonal_solver_(grid.lengthRadialSmoother(), grid.ntheta(), false)
 #ifdef GMGPOLAR_USE_MUMPS
     , inner_boundary_solver_(buildInteriorBoundarySolverMatrix())
 #else

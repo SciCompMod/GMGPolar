@@ -64,7 +64,7 @@ int DirectSolver_COO_MUMPS_Give<LevelCacheType>::getSolverMatrixIndex(const int 
 
     assert(grid.nr() >= 4);
     assert(grid.numberSmootherCircles() >= 2);
-    assert(grid.lengthSmootherRadial() >= 2);
+    assert(grid.lengthRadialSmoother() >= 2);
 
     if (1 < i_r && i_r < grid.numberSmootherCircles()) {
         // Interior: Circle index section
@@ -80,8 +80,8 @@ int DirectSolver_COO_MUMPS_Give<LevelCacheType>::getSolverMatrixIndex(const int 
         const int prior_inner_boundary_nodes      = grid.ntheta();
         const int prior_next_inner_boundary_nodes = grid.ntheta();
         const int prior_interior_nodes            = grid.ntheta() * (grid.numberSmootherCircles() - 2) +
-                                         i_theta * (grid.lengthSmootherRadial() - 2) + i_r -
-                                         grid.numberSmootherCircles();
+                                                    i_theta * (grid.lengthRadialSmoother() - 2) + i_r -
+                                                    grid.numberSmootherCircles();
         const int prior_next_outer_boundary_nodes = i_theta;
         const int prior_outer_boundary_nodes      = i_theta;
         return size_stencil_inner_boundary * prior_inner_boundary_nodes +
@@ -107,7 +107,7 @@ int DirectSolver_COO_MUMPS_Give<LevelCacheType>::getSolverMatrixIndex(const int 
         const int prior_inner_boundary_nodes      = grid.ntheta();
         const int prior_next_inner_boundary_nodes = grid.ntheta();
         const int prior_interior_nodes =
-            grid.ntheta() * (grid.numberSmootherCircles() - 2) + (i_theta + 1) * (grid.lengthSmootherRadial() - 2);
+            grid.ntheta() * (grid.numberSmootherCircles() - 2) + (i_theta + 1) * (grid.lengthRadialSmoother() - 2);
         const int prior_next_outer_boundary_nodes = i_theta;
         const int prior_outer_boundary_nodes      = i_theta;
         return size_stencil_inner_boundary * prior_inner_boundary_nodes +
@@ -121,7 +121,7 @@ int DirectSolver_COO_MUMPS_Give<LevelCacheType>::getSolverMatrixIndex(const int 
         const int prior_inner_boundary_nodes      = grid.ntheta();
         const int prior_next_inner_boundary_nodes = grid.ntheta();
         const int prior_interior_nodes =
-            grid.ntheta() * (grid.numberSmootherCircles() - 2) + (i_theta + 1) * (grid.lengthSmootherRadial() - 2);
+            grid.ntheta() * (grid.numberSmootherCircles() - 2) + (i_theta + 1) * (grid.lengthRadialSmoother() - 2);
         const int prior_next_outer_boundary_nodes = i_theta + 1;
         const int prior_outer_boundary_nodes      = i_theta;
         return size_stencil_inner_boundary * prior_inner_boundary_nodes +

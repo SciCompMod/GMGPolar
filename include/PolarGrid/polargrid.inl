@@ -41,7 +41,7 @@ inline int PolarGrid::numberSmootherCircles() const
     return number_smoother_circles_;
 }
 // Get the length of the radial smoother lines.
-inline int PolarGrid::lengthSmootherRadial() const
+inline int PolarGrid::lengthRadialSmoother() const
 {
     return length_smoother_radial_;
 }
@@ -96,7 +96,7 @@ inline int PolarGrid::index(const int r_index, const int unwrapped_theta_index) 
     int global_index =
         r_index < numberSmootherCircles()
             ? theta_index + ntheta() * r_index
-            : numberCircularSmootherNodes() + r_index - numberSmootherCircles() + lengthSmootherRadial() * theta_index;
+            : numberCircularSmootherNodes() + r_index - numberSmootherCircles() + lengthRadialSmoother() * theta_index;
     assert(0 <= global_index && global_index < numberOfNodes());
     return global_index;
 }
@@ -109,7 +109,7 @@ inline void PolarGrid::multiIndex(const int node_index, int& r_index, int& theta
         theta_index = wrapThetaIndex(node_index);
     }
     else {
-        theta_index = (node_index - numberCircularSmootherNodes()) / lengthSmootherRadial();
-        r_index     = numberSmootherCircles() + (node_index - numberCircularSmootherNodes()) % lengthSmootherRadial();
+        theta_index = (node_index - numberCircularSmootherNodes()) / lengthRadialSmoother();
+        r_index     = numberSmootherCircles() + (node_index - numberCircularSmootherNodes()) % lengthRadialSmoother();
     }
 }

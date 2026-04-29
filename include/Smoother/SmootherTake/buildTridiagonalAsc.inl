@@ -29,10 +29,10 @@ void SmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
     assert(i_theta >= 0 && i_theta < grid.ntheta());
 
     const int numberSmootherCircles = grid.numberSmootherCircles();
-    const int lengthSmootherRadial  = grid.lengthSmootherRadial();
+    const int lengthRadialSmoother  = grid.lengthRadialSmoother();
 
     assert(numberSmootherCircles >= 2);
-    assert(lengthSmootherRadial >= 3);
+    assert(lengthRadialSmoother >= 3);
 
     int row, column;
     double value;
@@ -75,7 +75,7 @@ void SmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
         row    = center_index;
         column = center_index;
         value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) -
-                (left_value + right_value + bottom_value + top_value);
+                 (left_value + right_value + bottom_value + top_value);
         updateMatrixElement(solver, batch, row, column, value);
 
         /* Bottom */
@@ -129,7 +129,7 @@ void SmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
         row    = center_index;
         column = center_index;
         value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) -
-                (left_value + right_value + bottom_value + top_value);
+                 (left_value + right_value + bottom_value + top_value);
         updateMatrixElement(solver, batch, row, column, value);
 
         /* Left */
@@ -215,7 +215,7 @@ void SmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
         row    = center_index;
         column = center_index;
         value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) -
-                (left_value + right_value + bottom_value + top_value);
+                 (left_value + right_value + bottom_value + top_value);
         updateMatrixElement(solver, batch, row, column, value);
 
         /* Right */
@@ -263,7 +263,7 @@ void SmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
         row    = center_index;
         column = center_index;
         value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) -
-                (left_value + right_value + bottom_value + top_value);
+                 (left_value + right_value + bottom_value + top_value);
         updateMatrixElement(solver, batch, row, column, value);
 
         /* Left */
