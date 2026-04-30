@@ -53,6 +53,9 @@ add_library(GMGPolarLib STATIC
     ${INTERPOLATION_SOURCES}
 )
 
+# Declare C++20 is a minimum required to use GMGPolarLib headers
+target_compile_features(GMGPolarLib INTERFACE cxx_std_20)
+
 # Basic library configuration
 target_include_directories(GMGPolarLib PUBLIC
     ${GMGPOLAR_INCLUDE_DIRS}
@@ -82,6 +85,8 @@ add_library(GMGPolar::GMGPolarLib ALIAS GMGPolarLib)
 add_library(GMGPolarInterface STATIC
     ${CONFIG_PARSER_SOURCES}
 )
+# Declare C++20 is a minimum required to use GMGPolarInterface headers
+target_compile_features(GMGPolarInterface INTERFACE cxx_std_20)
 target_link_libraries(GMGPolarInterface
     PUBLIC
     GMGPolarLib
