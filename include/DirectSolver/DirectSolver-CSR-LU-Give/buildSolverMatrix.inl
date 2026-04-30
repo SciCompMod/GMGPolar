@@ -821,10 +821,8 @@ static inline void buildSolverMatrixCircleSection(const int i_r, SparseMatrixCSR
 } // namespace direct_solver_csr_lu_give
 
 template <class LevelCacheType>
-void DirectSolver_CSR_LU_Give<LevelCacheType>::buildSolverMatrixRadialSection(
-    const int i_theta,
-    SparseMatrixCSR<double>&
-        solver_matrix) //, const PolarGrid& grid, const LevelCacheType& level_cache , const bool DirBC_Interior)
+void DirectSolver_CSR_LU_Give<LevelCacheType>::buildSolverMatrixRadialSection(const int i_theta,
+                                                                              SparseMatrixCSR<double>& solver_matrix)
 {
     const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
