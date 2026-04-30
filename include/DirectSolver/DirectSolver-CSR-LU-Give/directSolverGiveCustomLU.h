@@ -5,22 +5,7 @@
 namespace gmgpolar
 {
 
-template <class LevelCacheType>
-class DirectSolver_CSR_LU_Give : public DirectSolver<LevelCacheType>
-{
-public:
-    explicit DirectSolver_CSR_LU_Give(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
-                                      int num_omp_threads);
-
-    // Note: The rhs (right-hand side) vector gets overwritten with the solution.
-    void solveInPlace(Vector<double> solution) override;
-
-private:
-    // Solver matrix and solver structure
-    SparseMatrixCSR<double> solver_matrix_;
-    SparseLUSolver<double> lu_solver_;
-
-    // clang-format off
+// clang-format off
     const Stencil stencil_interior_      = {
         7, 4, 8,
         1, 0, 2,
@@ -46,10 +31,25 @@ private:
         1, 0, 2,
         5, 3, 6
     };
-    // clang-format on
+// clang-format on
+
+template <class LevelCacheType>
+class DirectSolver_CSR_LU_Give : public DirectSolver<LevelCacheType>
+{
+public:
+    explicit DirectSolver_CSR_LU_Give(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
+                                      int num_omp_threads);
+
+    // Note: The rhs (right-hand side) vector gets overwritten with the solution.
+    void solveInPlace(Vector<double> solution) override;
+
+private:
+    // Solver matrix and solver structure
+    SparseMatrixCSR<double> solver_matrix_;
+    SparseLUSolver<double> lu_solver_;
 
     SparseMatrixCSR<double> buildSolverMatrix();
-    void buildSolverMatrixCircleSection(const int i_r, const SparseMatrixCSR<double>& solver_matrix) const;
+    //void buildSolverMatrixCircleSection(const int i_r,  SparseMatrixCSR<double>& solver_matrix) const;
     void buildSolverMatrixRadialSection(const int i_theta, SparseMatrixCSR<double>& solver_matrix);
 
     // Returns the total number of non-zero elements in the solver matrix.
@@ -59,9 +59,9 @@ private:
 
     int getStencilSize(int global_index) const;
 
-    void nodeBuildSolverMatrixGive(int i_r, int i_theta, const PolarGrid grid, const bool DirBC_Interior,
+    /* void nodeBuildSolverMatrixGive(int i_r, int i_theta, const PolarGrid grid, const bool DirBC_Interior,
                                    const SparseMatrixCSR<double>& solver_matrix, double arr, double att, double art,
-                                   double detDF, double coeff_beta) const;
+                                   double detDF, double coeff_beta) const;*/
 };
 
 #include "buildSolverMatrix.inl"
