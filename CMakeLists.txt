@@ -53,7 +53,7 @@ if(GMGPOLAR_ENABLE_COVERAGE)
 endif()
 
 find_package(OpenMP REQUIRED COMPONENTS CXX)
-find_package(Kokkos  4.4.1...<5.1 QUIET REQUIRED)
+find_package(Kokkos 4.4.1...<6 QUIET REQUIRED)
 
 if(GMGPOLAR_USE_MUMPS)
     find_package(MUMPS REQUIRED COMPONENTS OpenMP METIS)
