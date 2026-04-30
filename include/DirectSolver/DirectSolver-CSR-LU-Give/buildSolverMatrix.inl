@@ -3,22 +3,78 @@
 namespace direct_solver_csr_lu_give
 {
 
-static inline void updateMatrixElement(const SparseMatrixCSR<double>& matrix, int offset, int row, int col, double val)
+static inline void updateMatrixElement(SparseMatrixCSR<double>& matrix, int offset, int row, int col, double val)
 {
     matrix.row_nz_index(row, offset) = col;
-    Kokkos::atomic_add(&matrix.row_nz_entry(row, offset), val);
+    matrix.row_nz_entry(row, offset) += val;
 }
 
-} // namespace direct_solver_csr_lu_give
-
-template <class LevelCacheType>
-void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_theta, const PolarGrid grid,
-                                                                         const bool DirBC_Interior,
-                                                                         const SparseMatrixCSR<double>& solver_matrix,
-                                                                         double arr, double att, double art,
-                                                                         double detDF, double coeff_beta) const
+static inline int getStencilSize(int global_index, const PolarGrid& grid, const bool DirBC_Interior)
 {
+    //const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
+    // const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;
+
+    int i_r, i_theta;
+    grid.multiIndex(global_index, i_r, i_theta);
+
+    const int size_stencil_inner_boundary      = DirBC_Interior ? 1 : 7;
+    const int size_stencil_next_inner_boundary = DirBC_Interior ? 9 : 9;
+    const int size_stencil_interior            = 9;
+    const int size_stencil_next_outer_boundary = 9;
+    const int size_stencil_outer_boundary      = 1;
+
+    if ((i_r > 1 && i_r < grid.nr() - 2) || (i_r == 1 && !DirBC_Interior)) {
+        return size_stencil_interior;
+    }
+    else if (i_r == 0 && !DirBC_Interior) {
+        return size_stencil_inner_boundary;
+    }
+    else if ((i_r == 0 && DirBC_Interior) || i_r == grid.nr() - 1) {
+        return size_stencil_outer_boundary;
+    }
+    else if (i_r == 1 && DirBC_Interior) {
+        return size_stencil_next_inner_boundary;
+    }
+    else if (i_r == grid.nr() - 2) {
+        return size_stencil_next_outer_boundary;
+    }
+    throw std::out_of_range("Invalid index for stencil");
+}
+
+static inline const Stencil& getStencil(int i_r, const PolarGrid& grid, const bool DirBC_Interior)
+{
+    //const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
+    //const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;
+
+    assert(0 <= i_r && i_r < grid.nr());
+    assert(grid.nr() >= 4);
+
+    if ((i_r > 1 && i_r < grid.nr() - 2) || (i_r == 1 && !DirBC_Interior)) {
+        return stencil_interior_;
+    }
+    else if (i_r == 0 && !DirBC_Interior) {
+        return stencil_across_origin_;
+    }
+    else if ((i_r == 0 && DirBC_Interior) || i_r == grid.nr() - 1) {
+        return stencil_DB_;
+    }
+    else if (i_r == 1 && DirBC_Interior) {
+        return stencil_next_inner_DB_;
+    }
+    else if (i_r == grid.nr() - 2) {
+        return stencil_next_outer_DB_;
+    }
+    throw std::out_of_range("Invalid index for stencil");
+}
+
+static inline void nodeBuildSolverMatrixGive(int i_r, int i_theta, SparseMatrixCSR<double>& solver_matrix,
+                                             const PolarGrid grid, const bool DirBC_Interior, double arr, double att,
+                                             double art, double detDF, double coeff_beta)
+{
+    using direct_solver_csr_lu_give::getStencil;
+    using direct_solver_csr_lu_give::getStencilSize;
     using direct_solver_csr_lu_give::updateMatrixElement;
+
     int offset;
     int row, col;
     double val;
@@ -48,7 +104,7 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
         /* Fill matrix row of (i,j) */
         row = center_index;
 
-        const Stencil& CenterStencil = getStencil(i_r);
+        const Stencil& CenterStencil = getStencil(i_r, grid, DirBC_Interior);
 
         offset = CenterStencil[StencilPosition::Center];
         col    = center_index;
@@ -83,7 +139,7 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
         /* Fill matrix row of (i-1,j) */
         row = left_index;
 
-        const Stencil& LeftStencil = getStencil(i_r - 1);
+        const Stencil& LeftStencil = getStencil(i_r - 1, grid, DirBC_Interior);
 
         offset = LeftStencil[StencilPosition::Right];
         col    = center_index;
@@ -108,7 +164,7 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
         /* Fill matrix row of (i+1,j) */
         row = right_index;
 
-        const Stencil& RightStencil = getStencil(i_r + 1);
+        const Stencil& RightStencil = getStencil(i_r + 1, grid, DirBC_Interior);
 
         offset = RightStencil[StencilPosition::Left];
         col    = center_index;
@@ -205,7 +261,7 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
             /* Fill matrix row of (i,j) */
             row = center_index;
 
-            const Stencil& CenterStencil = getStencil(i_r);
+            const Stencil& CenterStencil = getStencil(i_r, grid, DirBC_Interior);
 
             offset = CenterStencil[StencilPosition::Center];
             col    = center_index;
@@ -215,7 +271,7 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
             /* Fill matrix row of (i+1,j) */
             row = right_index;
 
-            const Stencil& RightStencil = getStencil(i_r + 1);
+            const Stencil& RightStencil = getStencil(i_r + 1, grid, DirBC_Interior);
 
             offset = RightStencil[StencilPosition::Left];
             col    = center_index;
@@ -268,7 +324,7 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
             /* Fill matrix row of (i,j) */
             row = center_index;
 
-            const Stencil& CenterStencil = getStencil(i_r);
+            const Stencil& CenterStencil = getStencil(i_r, grid, DirBC_Interior);
 
             offset = CenterStencil[StencilPosition::Center];
             col    = center_index;
@@ -324,7 +380,7 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
             /* Fill matrix row of (i+1,j) */
             row = right_index;
 
-            const Stencil& RightStencil = getStencil(i_r + 1);
+            const Stencil& RightStencil = getStencil(i_r + 1, grid, DirBC_Interior);
 
             offset = RightStencil[StencilPosition::Left];
             col    = center_index;
@@ -417,7 +473,7 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
         /* Fill matrix row of (i,j) */
         row = center_index;
 
-        const Stencil& CenterStencil = getStencil(i_r);
+        const Stencil& CenterStencil = getStencil(i_r, grid, DirBC_Interior);
 
         offset = CenterStencil[StencilPosition::Center];
         col    = center_index;
@@ -453,7 +509,7 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
             /* Fill matrix row of (i-1,j) */
             row = left_index;
 
-            const Stencil& LeftStencil = getStencil(i_r - 1);
+            const Stencil& LeftStencil = getStencil(i_r - 1, grid, DirBC_Interior);
 
             offset = LeftStencil[StencilPosition::Right];
             col    = center_index;
@@ -479,7 +535,7 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
         /* Fill matrix row of (i+1,j) */
         row = right_index;
 
-        const Stencil& RightStencil = getStencil(i_r + 1);
+        const Stencil& RightStencil = getStencil(i_r + 1, grid, DirBC_Interior);
 
         offset = RightStencil[StencilPosition::Left];
         col    = center_index;
@@ -577,7 +633,7 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
         /* Fill matrix row of (i,j) */
         row = center_index;
 
-        const Stencil& CenterStencil = getStencil(i_r);
+        const Stencil& CenterStencil = getStencil(i_r, grid, DirBC_Interior);
 
         offset = CenterStencil[StencilPosition::Center];
         col    = center_index;
@@ -612,7 +668,7 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
         /* Fill matrix row of (i-1,j) */
         row = left_index;
 
-        const Stencil& LeftStencil = getStencil(i_r - 1);
+        const Stencil& LeftStencil = getStencil(i_r - 1, grid, DirBC_Interior);
 
         offset = LeftStencil[StencilPosition::Right];
         col    = center_index;
@@ -707,7 +763,7 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
         /* Fill matrix row of (i,j) */
         row = center_index;
 
-        const Stencil& CenterStencil = getStencil(i_r);
+        const Stencil& CenterStencil = getStencil(i_r, grid, DirBC_Interior);
 
         offset = CenterStencil[StencilPosition::Center];
         col    = center_index;
@@ -718,7 +774,7 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
         /* Fill matrix row of (i-1,j) */
         row = left_index;
 
-        const Stencil& LeftStencil = getStencil(i_r - 1);
+        const Stencil& LeftStencil = getStencil(i_r - 1, grid, DirBC_Interior);
 
         offset = LeftStencil[StencilPosition::Right];
         col    = center_index;
@@ -743,12 +799,10 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r
 }
 
 template <class LevelCacheType>
-void DirectSolver_CSR_LU_Give<LevelCacheType>::buildSolverMatrixCircleSection(
-    const int i_r, const SparseMatrixCSR<double>& solver_matrix) const
+static inline void buildSolverMatrixCircleSection(const int i_r, SparseMatrixCSR<double>& solver_matrix,
+                                                  const PolarGrid& grid, const LevelCacheType& level_cache,
+                                                  const bool DirBC_Interior)
 {
-    const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
     const double r = grid.radius(i_r);
     for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
@@ -759,13 +813,18 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::buildSolverMatrixCircleSection(
         level_cache.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Build solver matrix at the current node
-        nodeBuildSolverMatrixGive(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF, coeff_beta);
+        direct_solver_csr_lu_give::nodeBuildSolverMatrixGive(i_r, i_theta, solver_matrix, grid, DirBC_Interior, arr,
+                                                             att, art, detDF, coeff_beta);
     }
 }
 
+} // namespace direct_solver_csr_lu_give
+
 template <class LevelCacheType>
-void DirectSolver_CSR_LU_Give<LevelCacheType>::buildSolverMatrixRadialSection(const int i_theta,
-                                                                              SparseMatrixCSR<double>& solver_matrix)
+void DirectSolver_CSR_LU_Give<LevelCacheType>::buildSolverMatrixRadialSection(
+    const int i_theta,
+    SparseMatrixCSR<double>&
+        solver_matrix) //, const PolarGrid& grid, const LevelCacheType& level_cache , const bool DirBC_Interior)
 {
     const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
@@ -780,21 +839,27 @@ void DirectSolver_CSR_LU_Give<LevelCacheType>::buildSolverMatrixRadialSection(co
         level_cache.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Build solver matrix at the current node
-        nodeBuildSolverMatrixGive(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF, coeff_beta);
+        direct_solver_csr_lu_give::nodeBuildSolverMatrixGive(i_r, i_theta, solver_matrix, grid, DirBC_Interior, arr,
+                                                             att, art, detDF, coeff_beta);
     }
 }
 
 template <class LevelCacheType>
 SparseMatrixCSR<double> DirectSolver_CSR_LU_Give<LevelCacheType>::buildSolverMatrix()
 {
-    const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
-    const int num_omp_threads = DirectSolver<LevelCacheType>::num_omp_threads_;
+    using direct_solver_csr_lu_give::buildSolverMatrixCircleSection;
+    using direct_solver_csr_lu_give::getStencilSize;
+
+    const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = DirectSolver<LevelCacheType>::DirBC_Interior_;
+    const int num_omp_threads         = DirectSolver<LevelCacheType>::num_omp_threads_;
 
     const int n = grid.numberOfNodes();
 
     std::function<int(int)> nnz_per_row = KOKKOS_CLASS_LAMBDA(int global_index)
     {
-        return getStencilSize(global_index);
+        return getStencilSize(global_index, grid, DirBC_Interior);
     };
 
     SparseMatrixCSR<double> solver_matrix(n, n, nnz_per_row);
@@ -802,7 +867,7 @@ SparseMatrixCSR<double> DirectSolver_CSR_LU_Give<LevelCacheType>::buildSolverMat
     if (num_omp_threads == 1) {
         /* Single-threaded execution */
         for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
-            buildSolverMatrixCircleSection(i_r, solver_matrix);
+            buildSolverMatrixCircleSection(i_r, solver_matrix, grid, level_cache, DirBC_Interior);
         }
         for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
             buildSolverMatrixRadialSection(i_theta, solver_matrix);
@@ -818,21 +883,22 @@ SparseMatrixCSR<double> DirectSolver_CSR_LU_Give<LevelCacheType>::buildSolverMat
 
         //for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
         Kokkos::parallel_for(
-            num_steps, KOKKOS_CLASS_LAMBDA(const int circle_task) {
+            num_steps, KOKKOS_LAMBDA(const int circle_task) {
                 int circle_idx = stride * circle_task;
                 int i_r        = grid.numberSmootherCircles() - circle_idx - 1;
-                buildSolverMatrixCircleSection(i_r, solver_matrix);
+                buildSolverMatrixCircleSection(i_r, solver_matrix, grid, level_cache, DirBC_Interior);
             });
         Kokkos::fence();
 
         for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 3) {
             int i_r = grid.numberSmootherCircles() - circle_task - 1;
-            buildSolverMatrixCircleSection(i_r, solver_matrix);
+            buildSolverMatrixCircleSection(i_r, solver_matrix, grid, level_cache, DirBC_Interior);
+            ;
         }
 
         for (int circle_task = 2; circle_task < num_circle_tasks; circle_task += 3) {
             int i_r = grid.numberSmootherCircles() - circle_task - 1;
-            buildSolverMatrixCircleSection(i_r, solver_matrix);
+            buildSolverMatrixCircleSection(i_r, solver_matrix, grid, level_cache, DirBC_Interior);
         }
 #pragma omp parallel num_threads(num_omp_threads)
         {
