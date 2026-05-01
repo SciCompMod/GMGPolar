@@ -62,9 +62,13 @@ public:
     // -------------------------------------------------------------- //
     // Const setters — safe for Kokkos device lambdas (host + device) //
     // -------------------------------------------------------------- //
+    KOKKOS_INLINE_FUNCTION
     void set_row_index(int nz_index, int row) const;
+    KOKKOS_INLINE_FUNCTION
     void set_col_index(int nz_index, int column) const;
+    KOKKOS_INLINE_FUNCTION
     void set_value(int nz_index, T value) const;
+    KOKKOS_INLINE_FUNCTION
     void add_value(int nz_index, T value) const;
 
     bool is_symmetric() const;
@@ -336,6 +340,7 @@ const T& SparseMatrixCOO<T>::value(int nz_index) const
 }
 
 template <typename T>
+KOKKOS_INLINE_FUNCTION
 void SparseMatrixCOO<T>::set_row_index(int nz_index, int row) const
 {
     assert(nz_index >= 0);
@@ -344,6 +349,7 @@ void SparseMatrixCOO<T>::set_row_index(int nz_index, int row) const
 }
 
 template <typename T>
+KOKKOS_INLINE_FUNCTION
 void SparseMatrixCOO<T>::set_col_index(int nz_index, int column) const
 {
     assert(nz_index >= 0);
@@ -352,6 +358,7 @@ void SparseMatrixCOO<T>::set_col_index(int nz_index, int column) const
 }
 
 template <typename T>
+KOKKOS_INLINE_FUNCTION
 void SparseMatrixCOO<T>::set_value(int nz_index, T value) const
 {
     assert(nz_index >= 0);
@@ -360,6 +367,7 @@ void SparseMatrixCOO<T>::set_value(int nz_index, T value) const
 }
 
 template <typename T>
+KOKKOS_INLINE_FUNCTION
 void SparseMatrixCOO<T>::add_value(int nz_index, T value) const
 {
     assert(nz_index >= 0);
