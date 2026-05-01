@@ -6,6 +6,9 @@
 
 #include "../../PolarGrid/polargrid.h"
 
+namespace gmgpolar
+{
+
 class CartesianR2_ZoniShifted_CircularGeometry
 {
 public:
@@ -17,3 +20,4 @@ private:
     PolarGrid const& grid_;
     const double Rmax = 1.3;
 };
+} // namespace gmgpolar

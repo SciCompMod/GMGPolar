@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "../../include/PolarGrid/polargrid.h"
+using namespace gmgpolar;
 
 TEST(PolarGridTest, DefaultConstructor)
 {

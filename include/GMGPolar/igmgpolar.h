@@ -18,6 +18,9 @@
 #include "../PolarGrid/polargrid.h"
 #include "../Definitions/global_definitions.h"
 
+namespace gmgpolar
+{
+
 class IGMGPolar
 {
 public:
@@ -222,3 +225,4 @@ protected:
     double t_avg_MGC_residual_;
     double t_avg_MGC_directSolver_;
 };
+} // namespace gmgpolar

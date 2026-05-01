@@ -1,5 +1,6 @@
 #include "../../include/ConfigParser/config_parser.h"
 #include "../../include/GMGPolar/gmgpolar.h"
+using namespace gmgpolar;
 
 std::unique_ptr<IGMGPolar> ConfigParser::solver() const
 {
@@ -31,6 +32,10 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
     problem_type_  = problem_type;
     alpha_type_    = alpha_type;
     beta_type_     = beta_type;
+    Rmax_          = Rmax;
+    kappa_eps_     = kappa_eps;
+    delta_e_       = delta_e;
+    alpha_jump_    = alpha_jump;
 
     /* --------------- */
     /* Domain Geometry */

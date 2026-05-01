@@ -34,6 +34,7 @@
 /* ------ */
 #include "../include/InputFunctions/DomainGeometry/culhamGeometry.h"
 #include "../include/InputFunctions/DensityProfileCoefficients/zoniShiftedGyroCoefficients.h"
+using namespace gmgpolar;
 
 #ifdef GMGPOLAR_USE_MUMPS
 

@@ -4,6 +4,9 @@
 
 #include "../exactSolution.h"
 
+namespace gmgpolar
+{
+
 class Refined_CzarnyGeometry : public ExactSolution
 {
 public:
@@ -22,3 +25,4 @@ private:
     void initializeGeometry();
     double factor_xi;
 };
+} // namespace gmgpolar

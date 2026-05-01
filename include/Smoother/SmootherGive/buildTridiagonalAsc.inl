@@ -29,10 +29,10 @@ void SmootherGive<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
     assert(i_theta >= 0 && i_theta < grid.ntheta());
 
     const int numberSmootherCircles = grid.numberSmootherCircles();
-    const int lengthSmootherRadial  = grid.lengthSmootherRadial();
+    const int lengthRadialSmoother  = grid.lengthRadialSmoother();
 
     assert(numberSmootherCircles >= 2);
-    assert(lengthSmootherRadial >= 3);
+    assert(lengthRadialSmoother >= 3);
 
     int ptr, offset;
     int row, column, col;

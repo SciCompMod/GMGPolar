@@ -1,12 +1,12 @@
 #include "../../include/PolarGrid/polargrid.h"
-
+#include <Kokkos_StdAlgorithms.hpp>
+using namespace gmgpolar;
 // ------------ //
 // Constructors //
 // ------------ //
 
 // Constructor to initialize grid using vectors of radii and angles.
-PolarGrid::PolarGrid(const std::vector<double>& radii, const std::vector<double>& angles,
-                     std::optional<double> splitting_radius)
+PolarGrid::PolarGrid(Vector<double> radii, Vector<double> angles, std::optional<double> splitting_radius)
     : nr_(radii.size())
     , ntheta_(angles.size() - 1)
     , is_ntheta_PowerOfTwo_((ntheta_ & (ntheta_ - 1)) == 0)
@@ -15,6 +15,32 @@ PolarGrid::PolarGrid(const std::vector<double>& radii, const std::vector<double>
 {
     // Check parameter validity
     checkParameters(radii, angles);
+    // Store distances to adjacent neighboring nodes.
+    // Initializes radial_spacings_, angular_spacings_
+    initializeDistances();
+    // Initializes smoothers splitting radius for circle/radial indexing.
+    initializeLineSplitting(splitting_radius);
+}
+
+// Constructor to initialize grid using vectors of radii and angles.
+PolarGrid::PolarGrid(std::vector<double> radii, std::vector<double> angles, std::optional<double> splitting_radius)
+    : nr_(radii.size())
+    , ntheta_(angles.size() - 1)
+    , is_ntheta_PowerOfTwo_((ntheta_ & (ntheta_ - 1)) == 0)
+    , radii_("radii", nr_)
+    , angles_("angles", angles.size())
+
+{
+    // Copy from std vector to Kokkos view
+    for (std::size_t i(0); i < radii.size(); ++i) {
+        radii_(i) = radii[i];
+    }
+    for (std::size_t i(0); i < angles.size(); ++i) {
+        angles_(i) = angles[i];
+    }
+
+    // Check parameter validity
+    checkParameters(radii_, angles_);
     // Store distances to adjacent neighboring nodes.
     // Initializes radial_spacings_, angular_spacings_
     initializeDistances();
@@ -50,13 +76,13 @@ void PolarGrid::constructRadialDivisions(double R0, double R, const int nr_exp, 
 {
     // r_temp contains the values before we refine one last time for extrapolation.
     // Therefore we first consider 2^(nr_exp-1) points.
-    std::vector<double> r_temp;
+    AllocatableVector<double> r_temp;
     if (anisotropic_factor == 0) {
         // nr = 2**(nr_exp-1) + 1
         int nr                  = (1 << (nr_exp - 1)) + 1;
         double uniform_distance = (R - R0) / (nr - 1);
         assert(uniform_distance > 0.0);
-        r_temp.resize(nr);
+        r_temp = Vector<double>("r_temp", nr);
         for (int i = 0; i < nr - 1; i++) {
             r_temp[i] = R0 + i * uniform_distance;
         }
@@ -64,11 +90,11 @@ void PolarGrid::constructRadialDivisions(double R0, double R, const int nr_exp, 
     }
     else {
         // Implementation in src/PolarGrid/anisotropic_division.cpp
-        RadialAnisotropicDivision(r_temp, R0, R, nr_exp, refinement_radius, anisotropic_factor);
+        r_temp = RadialAnisotropicDivision(R0, R, nr_exp, refinement_radius, anisotropic_factor);
     }
     // Refine division in the middle for extrapolation
-    nr_ = 2 * r_temp.size() - 1;
-    radii_.resize(nr_);
+    nr_    = 2 * r_temp.size() - 1;
+    radii_ = AllocatableVector<double>("radii_", nr_);
     for (int i = 0; i < nr_; i++) {
         if (!(i % 2))
             radii_[i] = r_temp[i / 2];
@@ -94,7 +120,7 @@ void PolarGrid::constructAngularDivisions(const int ntheta_exp, const int nr)
     is_ntheta_PowerOfTwo_ = (ntheta_ & (ntheta_ - 1)) == 0;
     // Note that currently ntheta_ = 2^k which allows us to do some optimizations when indexing.
     double uniform_distance = 2 * M_PI / ntheta_;
-    angles_.resize(ntheta_ + 1);
+    Kokkos::resize(angles_, ntheta_ + 1);
     for (int i = 0; i < ntheta_; i++) {
         angles_[i] = i * uniform_distance;
     }
@@ -111,12 +137,12 @@ void PolarGrid::refineGrid(const int divideBy2)
     is_ntheta_PowerOfTwo_ = (ntheta_ & (ntheta_ - 1)) == 0;
 }
 
-std::vector<double> PolarGrid::divideVector(const std::vector<double>& vec, const int divideBy2) const
+Vector<double> PolarGrid::divideVector(Vector<double> vec, const int divideBy2) const
 {
     const int powerOfTwo = 1 << divideBy2;
     size_t vecSize       = vec.size();
     size_t resultSize    = vecSize + (vecSize - 1) * (powerOfTwo - 1);
-    std::vector<double> result(resultSize);
+    Vector<double> result("result", resultSize);
 
     for (size_t i = 0; i < vecSize - 1; ++i) {
         size_t baseIndex  = i * powerOfTwo;
@@ -126,7 +152,7 @@ std::vector<double> PolarGrid::divideVector(const std::vector<double>& vec, cons
             result[baseIndex + j]     = interpolated_value;
         }
     }
-    result[resultSize - 1] = vec.back(); // Add the last value of the original vector
+    result[resultSize - 1] = vec(vec.size() - 1); // Add the last value of the original vector
     return result;
 }
 
@@ -134,7 +160,7 @@ void PolarGrid::initializeDistances()
 {
     // radial_spacings contains the distances between each consecutive radii division.
     // radial_spacings = [R_1-R0, ..., R_{N} - R_{N-1}].
-    radial_spacings_.resize(nr() - 1);
+    Kokkos::resize(radial_spacings_, nr() - 1);
     for (int i = 0; i < nr() - 1; i++) {
         radial_spacings_[i] = radius(i + 1) - radius(i);
     }
@@ -143,7 +169,7 @@ void PolarGrid::initializeDistances()
     // we have to make sure the index wraps around correctly when accessing it.
     // Here theta_0 = 0.0 and theta_N = 2*pi refer to the same point.
     // angular_spacings = [theta_{1}-theta_{0}, ..., theta_{N}-theta_{N-1}].
-    angular_spacings_.resize(ntheta());
+    Kokkos::resize(angular_spacings_, ntheta());
     for (int i = 0; i < ntheta(); i++) {
         angular_spacings_[i] = theta(i + 1) - theta(i);
     }
@@ -157,29 +183,32 @@ void PolarGrid::initializeDistances()
 void PolarGrid::initializeLineSplitting(std::optional<double> splitting_radius)
 {
     if (splitting_radius.has_value()) {
-        if (splitting_radius.value() < radii_.front()) {
+        if (splitting_radius.value() < radii_(0)) {
             number_smoother_circles_   = 0;
             length_smoother_radial_    = nr();
             smoother_splitting_radius_ = -1.0;
         }
         else {
-            auto it = std::lower_bound(radii_.begin(), radii_.end(), splitting_radius.value());
-            if (it != radii_.end()) {
-                number_smoother_circles_   = std::distance(radii_.begin(), it);
+            auto start = Kokkos::Experimental::begin(radii_);
+            auto end   = Kokkos::Experimental::end(radii_);
+            auto it    = std::lower_bound(start, end, splitting_radius.value());
+
+            if (it != end) {
+                number_smoother_circles_   = std::distance(start, it);
                 length_smoother_radial_    = nr() - number_smoother_circles_;
                 smoother_splitting_radius_ = splitting_radius.value();
             }
             else {
                 number_smoother_circles_   = nr();
                 length_smoother_radial_    = 0;
-                smoother_splitting_radius_ = radii_.back() + 1.0;
+                smoother_splitting_radius_ = radii_(radii_.size() - 1) + 1.0;
             }
         }
     }
     else {
         number_smoother_circles_ = 2; /* We assume numberSmootherCircles_ >= 2 in the further implementation */
         for (int i_r = 2; i_r < nr() - 2;
-             i_r++) { /* We assume lengthSmootherRadial_ >= 3 in the further implementation */
+             i_r++) { /* We assume lengthRadialSmoother_ >= 3 in the further implementation */
             double uniform_theta_k = (2 * M_PI) / ntheta();
             double radius_r        = radius(i_r);
             double radial_dist_h   = radius(i_r) - radius(i_r - 1);
@@ -190,7 +219,7 @@ void PolarGrid::initializeLineSplitting(std::optional<double> splitting_radius)
                 break;
             }
         }
-        /* The ExtrapolatedSmoother requires numberSmootherCircles_ >= 3 and lengthSmootherRadial_ >= 3. */
+        /* The ExtrapolatedSmoother requires numberSmootherCircles_ >= 3 and lengthRadialSmoother_ >= 3. */
         if (number_smoother_circles_ < 3 && nr() > 5)
             number_smoother_circles_ = 3;
 
@@ -201,7 +230,7 @@ void PolarGrid::initializeLineSplitting(std::optional<double> splitting_radius)
     number_circular_smoother_nodes_ = number_smoother_circles_ * ntheta();
     number_radial_smoother_nodes_   = length_smoother_radial_ * ntheta();
 
-    assert(numberSmootherCircles() + lengthSmootherRadial() == nr());
+    assert(numberSmootherCircles() + lengthRadialSmoother() == nr());
     assert(numberCircularSmootherNodes() + numberRadialSmootherNodes() == numberOfNodes());
 }
 
@@ -209,14 +238,17 @@ void PolarGrid::initializeLineSplitting(std::optional<double> splitting_radius)
 // Generates a coarser PolarGrid from a finer PolarGrid //
 // ---------------------------------------------------- //
 
+namespace gmgpolar
+{
+
 PolarGrid coarseningGrid(const PolarGrid& fineGrid)
 {
     assert((fineGrid.nr() - 1) % 2 == 0 && (fineGrid.ntheta()) % 2 == 0);
     const int coarse_nr     = (fineGrid.nr() + 1) / 2;
     const int coarse_ntheta = fineGrid.ntheta() / 2;
 
-    std::vector<double> coarse_r(coarse_nr);
-    std::vector<double> coarse_theta(coarse_ntheta + 1);
+    Vector<double> coarse_r("coarse_r", coarse_nr);
+    Vector<double> coarse_theta("coarse_theta", coarse_ntheta + 1);
 
     for (int i = 0; i < coarse_nr; i++) {
         coarse_r[i] = fineGrid.radius(2 * i);
@@ -235,45 +267,50 @@ PolarGrid coarseningGrid(const PolarGrid& fineGrid)
     }
 }
 
+} // namespace gmgpolar
+
 // ------------------------ //
 // Check parameter validity //
 // ------------------------ //
 
-void PolarGrid::checkParameters(const std::vector<double>& radii, const std::vector<double>& angles) const
+void PolarGrid::checkParameters(Vector<double> radii, Vector<double> angles) const
 {
+    auto radii_start = Kokkos::Experimental::begin(radii);
+    auto radii_end   = Kokkos::Experimental::end(radii);
     if (radii.size() < 2) {
         throw std::invalid_argument("At least two radii are required.");
     }
 
-    if (!std::all_of(radii.begin(), radii.end(), [](double r) {
+    if (!std::all_of(radii_start, radii_end, [](double r) {
             return r > 0.0;
         })) {
         throw std::invalid_argument("All radii must be greater than zero.");
     }
 
-    if (std::adjacent_find(radii.begin(), radii.end(), std::greater_equal<double>()) != radii.end()) {
+    if (std::adjacent_find(radii_start, radii_end, std::greater_equal<double>()) != radii_end) {
         throw std::invalid_argument("Radii must be strictly increasing.");
     }
 
     if (angles.size() < 3) {
         throw std::invalid_argument("At least two angles are required.");
     }
-
-    if (!std::all_of(angles.begin(), angles.end(), [](double theta) {
+    auto angles_start = Kokkos::Experimental::begin(angles);
+    auto angles_end   = Kokkos::Experimental::end(angles);
+    if (!std::all_of(angles_start, angles_end, [](double theta) {
             return theta >= 0.0;
         })) {
         throw std::invalid_argument("All angles must be non-negative.");
     }
 
-    if (std::adjacent_find(angles.begin(), angles.end(), std::greater_equal<double>()) != angles.end()) {
+    if (std::adjacent_find(angles_start, angles_end, std::greater_equal<double>()) != angles_end) {
         throw std::invalid_argument("Angles must be strictly increasing.");
     }
 
-    if (!equals(angles.front(), 0.0)) {
+    if (!equals(angles(0), 0.0)) {
         throw std::invalid_argument("First angle must be 0.");
     }
 
-    if (!equals(angles.back(), 2 * M_PI)) {
+    if (!equals(angles(angles.size() - 1), 2 * M_PI)) {
         throw std::invalid_argument("Last angle must be 2*pi.");
     }
 

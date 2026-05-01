@@ -1,4 +1,5 @@
 #pragma once
+
 #include "../../include/Residual/ResidualGive/residualGive.h"
 #include "../../include/Residual/ResidualTake/residualTake.h"
 

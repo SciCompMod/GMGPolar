@@ -23,10 +23,6 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-# Set compiler flags
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -pedantic -Wno-unused -Wno-psabi -Wfloat-conversion")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -mtune=generic -Wno-psabi")
-
 # Set coverage compiler flags - must come before any targets are defined
 if(GMGPOLAR_ENABLE_COVERAGE)
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
@@ -44,6 +40,7 @@ if(GMGPOLAR_ENABLE_COVERAGE)
     endif()
 endif()
 
+find_package(Kokkos  4.4.1...<5.1 QUIET REQUIRED)
 include_directories(include)
 add_subdirectory(src)
 

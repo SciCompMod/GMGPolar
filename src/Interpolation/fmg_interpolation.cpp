@@ -1,4 +1,5 @@
 #include "../../include/Interpolation/interpolation.h"
+using namespace gmgpolar;
 
 /*
  * Bicubic FMG Interpolator using the Lagrange Interpolating Polynomial

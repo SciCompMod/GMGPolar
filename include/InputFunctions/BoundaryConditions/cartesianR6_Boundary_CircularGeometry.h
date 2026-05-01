@@ -4,6 +4,9 @@
 
 #include "../boundaryConditions.h"
 
+namespace gmgpolar
+{
+
 class CartesianR6_Boundary_CircularGeometry
 {
 public:
@@ -17,3 +20,4 @@ private:
 };
 
 static_assert(concepts::BoundaryConditions<CartesianR6_Boundary_CircularGeometry>);
+} // namespace gmgpolar

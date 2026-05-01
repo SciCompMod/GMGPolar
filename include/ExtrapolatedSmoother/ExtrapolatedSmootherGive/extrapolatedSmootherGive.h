@@ -2,6 +2,9 @@
 
 #include "../extrapolatedSmoother.h"
 
+namespace gmgpolar
+{
+
 // The extrapolated smoother implements the coupled circle-radial smoothing with coarse node elimination.
 // Coarse nodes are excluded from the smoothing iteration by:
 // 1. Setting their diagonal entries in A_sc to 1.0 (identity mapping)
@@ -204,3 +207,6 @@ private:
 #include "buildTridiagonalAsc.inl"
 #include "applyAscOrtho.inl"
 #include "solveAscSystem.inl"
+#include "initializeMumps.inl"
+
+} // namespace gmgpolar
