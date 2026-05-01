@@ -33,20 +33,6 @@ class ExtrapolatedSmoother;
 
 #include "../Definitions/geometry_helper.h"
 
-#include "../../include/Residual/ResidualGive/residualGive.h"
-#include "../../include/Residual/ResidualTake/residualTake.h"
-
-#include "../../include/DirectSolver/DirectSolver-COO-MUMPS-Give/directSolverGive.h"
-#include "../../include/DirectSolver/DirectSolver-COO-MUMPS-Take/directSolverTake.h"
-#include "../../include/DirectSolver/DirectSolver-CSR-LU-Give/directSolverGiveCustomLU.h"
-#include "../../include/DirectSolver/DirectSolver-CSR-LU-Take/directSolverTakeCustomLU.h"
-
-#include "../../include/Smoother/SmootherGive/smootherGive.h"
-#include "../../include/Smoother/SmootherTake/smootherTake.h"
-
-#include "../../include/ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h"
-#include "../../include/ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.h"
-
 namespace gmgpolar
 {
 
