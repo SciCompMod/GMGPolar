@@ -5,7 +5,7 @@ SmootherGive<LevelCacheType>::SmootherGive(const PolarGrid& grid, const LevelCac
                                            bool DirBC_Interior, int num_omp_threads)
     : Smoother<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
-    , radial_tridiagonal_solver_(grid.lengthSmootherRadial(), grid.ntheta(), false)
+    , radial_tridiagonal_solver_(grid.lengthRadialSmoother(), grid.ntheta(), false)
 #ifdef GMGPOLAR_USE_MUMPS
     , inner_boundary_solver_(buildInteriorBoundarySolverMatrix())
 #else
