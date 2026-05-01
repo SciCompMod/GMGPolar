@@ -14,6 +14,10 @@ static inline void coarseNodeInjection(int i_r_coarse, int i_theta_coarse, const
     const int fine_index   = fine_grid.index(i_r_fine, i_theta_fine);
 
     coarse_result[coarse_index] = fine_values[fine_index];
+
+    std::cout << "Coarse node (" << i_r_coarse << ", " << i_theta_coarse << ") with index " << coarse_index
+              << " injected from fine node (" << i_r_fine << ", " << i_theta_fine << ") with index " << fine_index
+              << std::endl;
 }
 
 void Interpolation::applyInjection(const PolarGrid& fine_grid, const PolarGrid& coarse_grid,
@@ -29,7 +33,7 @@ void Interpolation::applyInjection(const PolarGrid& fine_grid, const PolarGrid& 
     /* For loop matches circular access pattern */
     Kokkos::parallel_for(
         "Interpolation: Injection (Circular)",
-        Kokkos::MDRangePolicy<Kokkos::Rank<2, Kokkos::Iterate::Right>>({0, 0}, {smoother_circles, ntheta}),
+        Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, 0}, {smoother_circles, ntheta}),
         KOKKOS_LAMBDA(int i_r_coarse, int i_theta_coarse) {
             coarseNodeInjection(i_r_coarse, i_theta_coarse, fine_grid, coarse_grid, coarse_result, fine_values);
         });
@@ -37,8 +41,8 @@ void Interpolation::applyInjection(const PolarGrid& fine_grid, const PolarGrid& 
     /* For loop matches radial access pattern */
     Kokkos::parallel_for(
         "Interpolation: Injection (Radial)",
-        Kokkos::MDRangePolicy<Kokkos::Rank<2, Kokkos::Iterate::Left>>({smoother_circles, 0}, {nr, ntheta}),
-        KOKKOS_LAMBDA(int i_r_coarse, int i_theta_coarse) {
+        Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, smoother_circles}, {ntheta, nr}),
+        KOKKOS_LAMBDA(int i_theta_coarse, int i_r_coarse) {
             coarseNodeInjection(i_r_coarse, i_theta_coarse, fine_grid, coarse_grid, coarse_result, fine_values);
         });
 }
