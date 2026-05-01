@@ -200,3 +200,5 @@ private:
 #include "applyAscOrtho.inl"
 #include "solveAscSystem.inl"
 #include "matrixStencil.inl"
+
+} // namespace gmgpolar

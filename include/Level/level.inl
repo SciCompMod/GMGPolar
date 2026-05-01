@@ -1,19 +1,5 @@
 #pragma once
 
-#include "../../include/Residual/ResidualGive/residualGive.h"
-#include "../../include/Residual/ResidualTake/residualTake.h"
-
-#include "../../include/DirectSolver/DirectSolver-COO-MUMPS-Give/directSolverGive.h"
-#include "../../include/DirectSolver/DirectSolver-COO-MUMPS-Take/directSolverTake.h"
-#include "../../include/DirectSolver/DirectSolver-CSR-LU-Give/directSolverGive.h"
-#include "../../include/DirectSolver/DirectSolver-CSR-LU-Take/directSolverTake.h"
-
-#include "../../include/Smoother/SmootherGive/smootherGive.h"
-#include "../../include/Smoother/SmootherTake/smootherTake.h"
-
-#include "../../include/ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h"
-#include "../../include/ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.h"
-
 // ----------- //
 // Constructor //
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
