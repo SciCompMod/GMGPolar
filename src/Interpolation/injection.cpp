@@ -41,6 +41,6 @@ void Interpolation::applyInjection(const PolarGrid& fine_grid, const PolarGrid& 
         KOKKOS_LAMBDA(int i_theta_coarse, int i_r_coarse) {
             coarseNodeInjection(i_r_coarse, i_theta_coarse, fine_grid, coarse_grid, coarse_result, fine_values);
         });
-      
+
     Kokkos::fence();
 }
