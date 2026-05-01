@@ -9,9 +9,12 @@ namespace smoother_take
 static inline void update_CSR_COO_MatrixElement(const SparseMatrixCOO<double>& matrix, const int ptr, const int offset,
                                                 const int row, const int column, const double value)
 {
+    std::cout << "Updating COO matrix at row " << row << ", column " << column << " with value " << value << std::endl;
     matrix.set_row_index(ptr + offset, row);
     matrix.set_col_index(ptr + offset, column);
     matrix.set_value(ptr + offset, value);
+    std::cout << "Updated COO matrix at row " << matrix.row_index(ptr + offset) << ", column "
+              << matrix.col_index(ptr + offset) << " with value " << matrix.value(ptr + offset) << std::endl;
 }
 #else
 // When using the in-house solver, the matrix is stored in CSR format.
@@ -23,12 +26,17 @@ static inline void update_CSR_COO_MatrixElement(const SparseMatrixCSR<double>& m
 }
 #endif
 
-// Build the solver matrix for a specific node (i_r = 0, i_theta) on the interior boundary.
-template <typename MatrixType>
-static inline void nodeBuildInteriorBoundarySolverMatrix(int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                                         const MatrixType& matrix, ConstVector<double>& arr,
-                                                         ConstVector<double>& att, ConstVector<double>& art,
-                                                         ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
+#ifdef GMGPOLAR_USE_MUMPS
+using InnerBoundaryMatrix = SparseMatrixCOO<double>;
+#else
+using InnerBoundaryMatrix = SparseMatrixCSR<double>;
+#endif
+
+KOKKOS_INLINE_FUNCTION
+static void nodeBuildInteriorBoundarySolverMatrix(int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+                                                  const InnerBoundaryMatrix& matrix, ConstVector<double>& arr,
+                                                  ConstVector<double>& att, ConstVector<double>& art,
+                                                  ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
 {
     using smoother_take::getCircleAscIndex;
     using smoother_take::getStencil;
@@ -173,8 +181,8 @@ SmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
 
     Kokkos::parallel_for(
         "Smoother Take: BuildInnerBoundaryAsc", Kokkos::RangePolicy<>(0, ntheta), KOKKOS_LAMBDA(const int i_theta) {
-            nodeBuildInteriorBoundarySolverMatrix<InnerBoundaryMatrix>(
-                i_theta, grid, DirBC_Interior, inner_boundary_solver_matrix, arr, att, art, detDF, coeff_beta);
+            nodeBuildInteriorBoundarySolverMatrix(i_theta, grid, DirBC_Interior, inner_boundary_solver_matrix, arr, att,
+                                                  art, detDF, coeff_beta);
         });
 
     Kokkos::fence();
