@@ -54,10 +54,10 @@ public:
     int row_nz_size(int row) const;
 
     const int& row_nz_index(int row, int nz_index) const;
-    int& row_nz_index(int row, int nz_index);
+    int& row_nz_index(int row, int nz_index) ;
 
     const T& row_nz_entry(int row, int nz_index) const;
-    T& row_nz_entry(int row, int nz_index);
+    T& row_nz_entry(int row, int nz_index) ;
 
     T* values_data() const;
     int* column_indices_data() const;
@@ -112,12 +112,12 @@ SparseMatrixCSR<T>::SparseMatrixCSR()
 // copy construction
 template <typename T>
 SparseMatrixCSR<T>::SparseMatrixCSR(const SparseMatrixCSR& other)
-    : rows_(other.rows_)
-    , columns_(other.columns_)
-    , nnz_(other.nnz_)
+    : rows_(other.rows())
+    , columns_(other.columns())
+    , nnz_(other.non_zero_size())
     , values_("CSR values", nnz_)
     , column_indices_("CSR column indices", nnz_)
-    , row_start_indices_("CSR row start indices", rows_ + 1)
+    , row_start_indices_("CSR row start indices", other.row_start_indices_.size())
 {
     Kokkos::deep_copy(values_, other.values_);
     Kokkos::deep_copy(column_indices_, other.column_indices_);
@@ -304,7 +304,7 @@ const T& SparseMatrixCSR<T>::row_nz_entry(int row, int nz_index) const
 }
 
 template <typename T>
-T& SparseMatrixCSR<T>::row_nz_entry(int row, int nz_index)
+ T& SparseMatrixCSR<T>::row_nz_entry(int row, int nz_index)
 {
     assert(row >= 0 && row < rows_);
     assert(nz_index >= 0 && nz_index < row_nz_size(row));
