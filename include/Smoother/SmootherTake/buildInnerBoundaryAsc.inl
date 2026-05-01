@@ -32,7 +32,6 @@ using InnerBoundaryMatrix = SparseMatrixCOO<double>;
 using InnerBoundaryMatrix = SparseMatrixCSR<double>;
 #endif
 
-KOKKOS_INLINE_FUNCTION
 static inline void nodeBuildInteriorBoundarySolverMatrix(int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                                          const InnerBoundaryMatrix& matrix, ConstVector<double>& arr,
                                                          ConstVector<double>& att, ConstVector<double>& art,
