@@ -238,7 +238,6 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<d
     const int start_black_circles = (grid.numberSmootherCircles() % 2 == 0) ? 1 : 0;
     const int num_black_circles   = (grid.numberSmootherCircles() - start_black_circles + 1) / 2;
 
-    // The For loop matches circular access pattern */
     Kokkos::parallel_for(
         "Smoother Take: ApplyAscOrtho (Black Circular)",
         Kokkos::MDRangePolicy<Kokkos::Rank<2>>( // Rank of the index space
