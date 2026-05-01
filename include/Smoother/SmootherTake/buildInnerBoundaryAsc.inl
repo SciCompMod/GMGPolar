@@ -171,18 +171,13 @@ SmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     ConstVector<double> detDF      = level_cache.detDF();
     ConstVector<double> coeff_beta = level_cache.coeff_beta();
 
-    // Kokkos::parallel_for(
-    //     "Smoother Take: BuildInnerBoundaryAsc", Kokkos::RangePolicy<>(0, ntheta), KOKKOS_LAMBDA(const int i_theta) {
-    //         nodeBuildInteriorBoundarySolverMatrix<InnerBoundaryMatrix>(
-    //             i_theta, grid, DirBC_Interior, inner_boundary_solver_matrix, arr, att, art, detDF, coeff_beta);
-    //     });
+    Kokkos::parallel_for(
+        "Smoother Take: BuildInnerBoundaryAsc", Kokkos::RangePolicy<>(0, ntheta), KOKKOS_LAMBDA(const int i_theta) {
+            nodeBuildInteriorBoundarySolverMatrix<InnerBoundaryMatrix>(
+                i_theta, grid, DirBC_Interior, inner_boundary_solver_matrix, arr, att, art, detDF, coeff_beta);
+        });
 
-    // Kokkos::fence();
-
-    for (int i_theta = 0; i_theta < ntheta; ++i_theta) {
-        nodeBuildInteriorBoundarySolverMatrix<InnerBoundaryMatrix>(
-            i_theta, grid, DirBC_Interior, inner_boundary_solver_matrix, arr, att, art, detDF, coeff_beta);
-    }
+    Kokkos::fence();
 
     return inner_boundary_solver_matrix;
 }
