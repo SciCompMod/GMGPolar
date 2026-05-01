@@ -37,18 +37,35 @@ public:
     SparseMatrixCOO& operator=(const SparseMatrixCOO& other);
     SparseMatrixCOO& operator=(SparseMatrixCOO&& other) noexcept;
 
+    // ---------------------------- //
+    // Size queries (host + device) //
+    // ---------------------------- //
     int rows() const;
     int columns() const;
     int non_zero_size() const;
 
+    // --------------------------- //
+    // Read access (host + device) //
+    // --------------------------- //
     const int& row_index(int nz_index) const;
-    int& row_index(int nz_index);
-
     const int& col_index(int nz_index) const;
-    int& col_index(int nz_index);
-
     const T& value(int nz_index) const;
+
+    // ------------------------------------------------------------- //
+    // Backwards-compatible mutable reference access (host only)     //
+    // Deprecated: prefer set_nz_index / set_nz_entry / add_nz_entry //
+    // ------------------------------------------------------------- //
+    int& row_index(int nz_index);
+    int& col_index(int nz_index);
     T& value(int nz_index);
+
+    // -------------------------------------------------------------- //
+    // Const setters — safe for Kokkos device lambdas (host + device) //
+    // -------------------------------------------------------------- //
+    void set_row_index(int nz_index, int column) const;
+    void set_col_index(int nz_index, int row) const;
+    void set_value(int nz_index, T value) const;
+    void add_value(int nz_index, T value) const;
 
     bool is_symmetric() const;
     void is_symmetric(bool value);
@@ -316,6 +333,38 @@ const T& SparseMatrixCOO<T>::value(int nz_index) const
     assert(nz_index >= 0);
     assert(nz_index < nnz_);
     return values_(nz_index);
+}
+
+template <typename T>
+void SparseMatrixCOO<T>::set_row_index(int nz_index, int column) const
+{
+    assert(nz_index >= 0);
+    assert(nz_index < nnz_);
+    row_indices_(nz_index) = column;
+}
+
+template <typename T>
+void SparseMatrixCOO<T>::set_col_index(int nz_index, int row) const
+{
+    assert(nz_index >= 0);
+    assert(nz_index < nnz_);
+    column_indices_(nz_index) = row;
+}
+
+template <typename T>
+void SparseMatrixCOO<T>::set_value(int nz_index, T value) const
+{
+    assert(nz_index >= 0);
+    assert(nz_index < nnz_);
+    values_(nz_index) = value;
+}
+
+template <typename T>
+void SparseMatrixCOO<T>::add_value(int nz_index, T value) const
+{
+    assert(nz_index >= 0);
+    assert(nz_index < nnz_);
+    values_(nz_index) += value;
 }
 
 template <typename T>

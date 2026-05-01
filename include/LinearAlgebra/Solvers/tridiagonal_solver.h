@@ -54,6 +54,16 @@ public:
     {
         return main_diagonal_(batch_idx * matrix_dimension_ + index);
     }
+    KOKKOS_INLINE_FUNCTION
+    void set_main_diagonal(const int batch_idx, const int index, const T value) const
+    {
+        main_diagonal_(batch_idx * matrix_dimension_ + index) = value;
+    }
+    KOKKOS_INLINE_FUNCTION
+    void add_main_diagonal(const int batch_idx, const int index, const T value) const
+    {
+        main_diagonal_(batch_idx * matrix_dimension_ + index) += value;
+    }
 
     KOKKOS_INLINE_FUNCTION
     const T& sub_diagonal(const int batch_idx, const int index) const
@@ -65,17 +75,36 @@ public:
     {
         return sub_diagonal_(batch_idx * matrix_dimension_ + index);
     }
+    KOKKOS_INLINE_FUNCTION
+    void set_sub_diagonal(const int batch_idx, const int index, const T value) const
+    {
+        sub_diagonal_(batch_idx * matrix_dimension_ + index) = value;
+    }
+    KOKKOS_INLINE_FUNCTION
+    void add_sub_diagonal(const int batch_idx, const int index, const T value) const
+    {
+        sub_diagonal_(batch_idx * matrix_dimension_ + index) += value;
+    }
 
     KOKKOS_INLINE_FUNCTION
     const T& cyclic_corner(const int batch_idx) const
     {
         return sub_diagonal_(batch_idx * matrix_dimension_ + (matrix_dimension_ - 1));
     }
-
     KOKKOS_INLINE_FUNCTION
     T& cyclic_corner(const int batch_idx)
     {
         return sub_diagonal_(batch_idx * matrix_dimension_ + (matrix_dimension_ - 1));
+    }
+    KOKKOS_INLINE_FUNCTION
+    void set_cyclic_corner(const int batch_idx, const T value) const
+    {
+        sub_diagonal_(batch_idx * matrix_dimension_ + (matrix_dimension_ - 1)) = value;
+    }
+    KOKKOS_INLINE_FUNCTION
+    void add_cyclic_corner(const int batch_idx, const T value) const
+    {
+        sub_diagonal_(batch_idx * matrix_dimension_ + (matrix_dimension_ - 1)) += value;
     }
 
     /* ---------------------------------------------- */
@@ -229,7 +258,7 @@ public:
                         rhs(offset + 0) + cyclic_corner_element / gamma(batch_idx) * rhs(offset + matrix_dimension - 1);
                     const T dot_product_u_v = buffer(offset + 0) + cyclic_corner_element / gamma(batch_idx) *
                                                                        buffer(offset + matrix_dimension - 1);
-                    const T factor = dot_product_x_v / (1.0 + dot_product_u_v);
+                    const T factor          = dot_product_x_v / (1.0 + dot_product_u_v);
 
                     for (int i = 0; i < matrix_dimension; i++) {
                         rhs(offset + i) -= factor * buffer(offset + i);

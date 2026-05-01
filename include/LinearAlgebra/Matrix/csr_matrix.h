@@ -47,18 +47,39 @@ public:
     SparseMatrixCSR& operator=(const SparseMatrixCSR& other);
     SparseMatrixCSR& operator=(SparseMatrixCSR&& other) noexcept;
 
+    // ---------------------------- //
+    // Size queries (host + device) //
+    // ---------------------------- //
     int rows() const;
     int columns() const;
     int non_zero_size() const;
-
     int row_nz_size(int row) const;
 
-    const int& row_nz_index(int row, int nz_index) const;
-    int& row_nz_index(int row, int nz_index);
-
+    // --------------------------- //
+    // Read access (host + device) //
+    // --------------------------- //
+    int row_nz_index(int row, int nz_index) const;
     const T& row_nz_entry(int row, int nz_index) const;
+
+    // ------------------------------------------------------------- //
+    // Backwards-compatible mutable reference access (host only)     //
+    // Deprecated: prefer set_nz_index / set_nz_entry / add_nz_entry //
+    // ------------------------------------------------------------- //
+    int& row_nz_index(int row, int nz_index);
     T& row_nz_entry(int row, int nz_index);
 
+    // -------------------------------------------------------------- //
+    // Const setters — safe for Kokkos device lambdas (host + device) //
+    // -------------------------------------------------------------- //
+    void set_nz_index(int row, int nz_index, int column) const;
+    void set_nz_entry(int row, int nz_index, T value) const;
+    void add_nz_entry(int row, int nz_index, T value) const;
+
+    // --------------------------------------------------------------- //
+    // Raw pointer access (host only, for external solvers e.g. MUMPS) //
+    // TODO: Return Kokkos::View<T*> instead of raw pointers.          //
+    // The COO_MUMPS_Solver is responsible for copying data to host    //
+    // --------------------------------------------------------------- //
     T* values_data() const;
     int* column_indices_data() const;
     int* row_start_indices_data() const;
@@ -74,6 +95,7 @@ private:
     AllocatableVector<int> column_indices_;
     AllocatableVector<int> row_start_indices_;
 
+    // Only used in testing
     bool is_sorted_entries(const std::vector<std::tuple<int, int, T>>& entries)
     {
         for (size_t i = 1; i < entries.size(); ++i) {
@@ -89,14 +111,19 @@ private:
 template <typename U>
 std::ostream& operator<<(std::ostream& stream, const SparseMatrixCSR<U>& matrix)
 {
+    // Create host mirrors and deep_copy from device if necessary.
+    // If the View is already on host, deep_copy is a no-op.
+    auto h_values            = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, matrix.values_);
+    auto h_column_indices    = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, matrix.column_indices_);
+    auto h_row_start_indices = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, matrix.row_start_indices_);
+
     stream << "SparseMatrixCSR: " << matrix.rows_ << " x " << matrix.columns_ << "\n";
     stream << "Number of non-zeros (nnz): " << matrix.nnz_ << "\n";
     stream << "Non-zero elements (row, column, value):\n";
-    for (int row = 0; row < matrix.rows_; ++row) {
-        for (int nnz = matrix.row_start_indices_(row); nnz < matrix.row_start_indices_(row + 1); ++nnz) {
-            stream << "(" << row << ", " << matrix.column_indices_(nnz) << ", " << matrix.values_(nnz) << ")\n";
-        }
-    }
+    for (int row = 0; row < matrix.rows_; ++row)
+        for (int nnz = h_row_start_indices(row); nnz < h_row_start_indices(row + 1); ++nnz)
+            stream << "(" << row << ", " << h_column_indices(nnz) << ", " << h_values(nnz) << ")\n";
+
     return stream;
 }
 
@@ -196,8 +223,8 @@ SparseMatrixCSR<T>::SparseMatrixCSR(int rows, int columns, std::function<int(int
     values_                  = Vector<T>("CSR values", nnz_);
     column_indices_          = Vector<int>("CSR column indices", nnz_);
 
-    assign(values_, T(0));
-    assign(column_indices_, 0);
+    Kokkos::deep_copy(values_, T(0));
+    Kokkos::deep_copy(column_indices_, 0);
 }
 
 template <typename T>
@@ -246,11 +273,22 @@ SparseMatrixCSR<T>::SparseMatrixCSR(int rows, int columns, const std::vector<T>&
     assert(row_start_indices.size() == static_cast<size_t>(rows + 1));
     assert(values.size() == column_indices.size());
 
-    // Copy data to internal storage
-    std::copy(values.begin(), values.end(), values_.data());
-    std::copy(column_indices.begin(), column_indices.end(), column_indices_.data());
-    std::copy(row_start_indices.begin(), row_start_indices.end(), row_start_indices_.data());
+    // Wrap the std::vector data in unmanaged host Views, then deep_copy.
+    // deep_copy handles host->device transfer automatically; it is a no-op
+    // when both sides are already in HostSpace.
+    Kokkos::View<const T*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> h_values(values.data(), nnz_);
+    Kokkos::View<const int*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> h_column_indices(column_indices.data(), nnz_);
+    Kokkos::View<const int*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> h_row_start_indices(row_start_indices.data(),
+                                                                                             rows + 1);
+
+    Kokkos::deep_copy(values_, h_values);
+    Kokkos::deep_copy(column_indices_, h_column_indices);
+    Kokkos::deep_copy(row_start_indices_, h_row_start_indices);
 }
+
+// ============================================================================
+// Size queries
+// ============================================================================
 
 template <typename T>
 int SparseMatrixCSR<T>::rows() const
@@ -268,7 +306,6 @@ template <typename T>
 int SparseMatrixCSR<T>::non_zero_size() const
 {
     assert(this->nnz_ >= 0);
-    assert(static_cast<size_t>(this->nnz_) <= static_cast<size_t>(this->rows_) * static_cast<size_t>(this->columns_));
     return this->nnz_;
 }
 
@@ -279,16 +316,12 @@ int SparseMatrixCSR<T>::row_nz_size(int row) const
     return row_start_indices_(row + 1) - row_start_indices_(row);
 }
 
-template <typename T>
-const int& SparseMatrixCSR<T>::row_nz_index(int row, int nz_index) const
-{
-    assert(row >= 0 && row < rows_);
-    assert(nz_index >= 0 && nz_index < row_nz_size(row));
-    return column_indices_(row_start_indices_(row) + nz_index);
-}
+// ============================================================================
+// Read access (host + device)
+// ============================================================================
 
 template <typename T>
-int& SparseMatrixCSR<T>::row_nz_index(int row, int nz_index)
+int SparseMatrixCSR<T>::row_nz_index(int row, int nz_index) const
 {
     assert(row >= 0 && row < rows_);
     assert(nz_index >= 0 && nz_index < row_nz_size(row));
@@ -303,6 +336,18 @@ const T& SparseMatrixCSR<T>::row_nz_entry(int row, int nz_index) const
     return values_(row_start_indices_(row) + nz_index);
 }
 
+// ============================================================================
+// Backwards-compatible mutable reference access (host only)
+// ============================================================================
+
+template <typename T>
+int& SparseMatrixCSR<T>::row_nz_index(int row, int nz_index)
+{
+    assert(row >= 0 && row < rows_);
+    assert(nz_index >= 0 && nz_index < row_nz_size(row));
+    return column_indices_(row_start_indices_(row) + nz_index);
+}
+
 template <typename T>
 T& SparseMatrixCSR<T>::row_nz_entry(int row, int nz_index)
 {
@@ -310,6 +355,38 @@ T& SparseMatrixCSR<T>::row_nz_entry(int row, int nz_index)
     assert(nz_index >= 0 && nz_index < row_nz_size(row));
     return values_(row_start_indices_(row) + nz_index);
 }
+
+// ============================================================================
+// Const setters (host + device)
+// ============================================================================
+
+template <typename T>
+void SparseMatrixCSR<T>::set_nz_index(int row, int nz_index, int column) const
+{
+    assert(row >= 0 && row < rows_);
+    assert(nz_index >= 0 && nz_index < row_nz_size(row));
+    column_indices_(row_start_indices_(row) + nz_index) = column;
+}
+
+template <typename T>
+void SparseMatrixCSR<T>::set_nz_entry(int row, int nz_index, T value) const
+{
+    assert(row >= 0 && row < rows_);
+    assert(nz_index >= 0 && nz_index < row_nz_size(row));
+    values_(row_start_indices_(row) + nz_index) = value;
+}
+
+template <typename T>
+void SparseMatrixCSR<T>::add_nz_entry(int row, int nz_index, T value) const
+{
+    assert(row >= 0 && row < rows_);
+    assert(nz_index >= 0 && nz_index < row_nz_size(row));
+    values_(row_start_indices_(row) + nz_index) += value;
+}
+
+// ============================================================================
+// Raw pointer access (host only)
+// ============================================================================
 
 template <typename T>
 T* SparseMatrixCSR<T>::values_data() const
