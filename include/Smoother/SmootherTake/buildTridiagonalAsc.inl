@@ -6,12 +6,18 @@ namespace smoother_take
 static inline void updateMatrixElement(const BatchedTridiagonalSolver<double>& solver, int batch, int row, int column,
                                        double value)
 {
-    if (row == column)
+    if (row == column) {
         solver.set_main_diagonal(batch, row, value);
-    else if (row == column - 1)
+        std::cout << solver.main_diagonal(batch, row) << ", " << value << std::endl;
+    }
+    else if (row == column - 1) {
         solver.set_sub_diagonal(batch, row, value);
-    else if (row == 0 && column == solver.matrixDimension() - 1)
+        std::cout << solver.sub_diagonal(batch, row) << ", " << value << std::endl;
+    }
+    else if (row == 0 && column == solver.matrixDimension() - 1) {
         solver.set_cyclic_corner(batch, value);
+        std::cout << solver.cyclic_corner(batch) << ", " << value << std::endl;
+    }
 }
 
 // Build the tridiagonal solver matrices for a specific node (i_r, i_theta)
@@ -312,6 +318,10 @@ void SmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
     const int num_omp_threads         = Smoother<LevelCacheType>::num_omp_threads_;
+    const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver =
+        SmootherTake<LevelCacheType>::circle_tridiagonal_solver_;
+    const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver =
+        SmootherTake<LevelCacheType>::radial_tridiagonal_solver_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
@@ -334,8 +344,8 @@ void SmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_r, const int i_theta) {
-            nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, DirBC_Interior, circle_tridiagonal_solver_,
-                                               radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
+            nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, DirBC_Interior, circle_tridiagonal_solver,
+                                               radial_tridiagonal_solver, arr, att, art, detDF, coeff_beta);
         });
 
     /* For loop matches radial access pattern */
@@ -347,8 +357,8 @@ void SmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_theta, const int i_r) {
-            nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, DirBC_Interior, circle_tridiagonal_solver_,
-                                               radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
+            nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, DirBC_Interior, circle_tridiagonal_solver,
+                                               radial_tridiagonal_solver, arr, att, art, detDF, coeff_beta);
         });
 
     Kokkos::fence();
