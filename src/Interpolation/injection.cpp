@@ -14,10 +14,6 @@ static inline void coarseNodeInjection(int i_r_coarse, int i_theta_coarse, const
     const int fine_index   = fine_grid.index(i_r_fine, i_theta_fine);
 
     coarse_result[coarse_index] = fine_values[fine_index];
-
-    std::cout << "Coarse node (" << i_r_coarse << ", " << i_theta_coarse << ") with index " << coarse_index
-              << " injected from fine node (" << i_r_fine << ", " << i_theta_fine << ") with index " << fine_index
-              << std::endl;
 }
 
 void Interpolation::applyInjection(const PolarGrid& fine_grid, const PolarGrid& coarse_grid,
