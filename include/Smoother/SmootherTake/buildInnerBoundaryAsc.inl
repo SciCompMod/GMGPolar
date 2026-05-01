@@ -33,10 +33,10 @@ using InnerBoundaryMatrix = SparseMatrixCSR<double>;
 #endif
 
 KOKKOS_INLINE_FUNCTION
-static void nodeBuildInteriorBoundarySolverMatrix(int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                                  const InnerBoundaryMatrix& matrix, ConstVector<double>& arr,
-                                                  ConstVector<double>& att, ConstVector<double>& art,
-                                                  ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
+static inline void nodeBuildInteriorBoundarySolverMatrix(int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+                                                         const InnerBoundaryMatrix& matrix, ConstVector<double>& arr,
+                                                         ConstVector<double>& att, ConstVector<double>& art,
+                                                         ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
 {
     using smoother_take::getCircleAscIndex;
     using smoother_take::getStencil;
