@@ -1,9 +1,4 @@
-<<<<<<< ebourne_cleanup_cmake
 #include <Interpolation/interpolation.h>
-=======
-#include "../../include/Interpolation/interpolation.h"
-
->>>>>>> main
 using namespace gmgpolar;
 
 /* Remark: This injection is not scaled. */
