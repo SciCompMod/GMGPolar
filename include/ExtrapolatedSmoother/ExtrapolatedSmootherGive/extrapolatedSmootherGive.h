@@ -207,6 +207,5 @@ private:
 #include "buildTridiagonalAsc.inl"
 #include "applyAscOrtho.inl"
 #include "solveAscSystem.inl"
-#include "initializeMumps.inl"
 
 } // namespace gmgpolar
