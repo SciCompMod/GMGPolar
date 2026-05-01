@@ -258,7 +258,8 @@ public:
                         rhs(offset + 0) + cyclic_corner_element / gamma(batch_idx) * rhs(offset + matrix_dimension - 1);
                     const T dot_product_u_v = buffer(offset + 0) + cyclic_corner_element / gamma(batch_idx) *
                                                                        buffer(offset + matrix_dimension - 1);
-                    const T factor          = dot_product_x_v / (1.0 + dot_product_u_v);
+
+                    const T factor = dot_product_x_v / (1.0 + dot_product_u_v);
 
                     for (int i = 0; i < matrix_dimension; i++) {
                         rhs(offset + i) -= factor * buffer(offset + i);
