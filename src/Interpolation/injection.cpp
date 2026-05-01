@@ -26,10 +26,15 @@ void Interpolation::applyInjection(const PolarGrid& fine_grid, const PolarGrid& 
     const int ntheta           = coarse_grid.ntheta();
     const int nr               = coarse_grid.nr();
 
-    /* For loop matches circular access pattern */
+    // The For loop matches circular access pattern */
     Kokkos::parallel_for(
         "Interpolation: Injection (Circular)",
-        Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, 0}, {smoother_circles, ntheta}),
+        // Rank of the index space, Iteration pattern between tiles, Iteration pattern within tiles
+        Kokkos::MDRangePolicy<Kokkos::Rank<2, Kokkos::Iterate::Right, Kokkos::Iterate::Right>>( // Iteration policy
+            {0, 0}, // Starting point of the index space
+            {smoother_circles, ntheta} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(int i_r_coarse, int i_theta_coarse) {
             coarseNodeInjection(i_r_coarse, i_theta_coarse, fine_grid, coarse_grid, coarse_result, fine_values);
         });
@@ -37,8 +42,13 @@ void Interpolation::applyInjection(const PolarGrid& fine_grid, const PolarGrid& 
     /* For loop matches radial access pattern */
     Kokkos::parallel_for(
         "Interpolation: Injection (Radial)",
-        Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, smoother_circles}, {ntheta, nr}),
-        KOKKOS_LAMBDA(int i_theta_coarse, int i_r_coarse) {
+        // Rank of the index space, Iteration pattern between tiles, Iteration pattern within tiles
+        Kokkos::MDRangePolicy<Kokkos::Rank<2, Kokkos::Iterate::Left, Kokkos::Iterate::Left>>( // Iteration policy
+            {smoother_circles, 0}, // Starting point of the index space
+            {nr, ntheta} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(int i_r_coarse, int i_theta_coarse) {
             coarseNodeInjection(i_r_coarse, i_theta_coarse, fine_grid, coarse_grid, coarse_result, fine_values);
         });
 
