@@ -62,8 +62,8 @@ public:
     // -------------------------------------------------------------- //
     // Const setters — safe for Kokkos device lambdas (host + device) //
     // -------------------------------------------------------------- //
-    void set_row_index(int nz_index, int column) const;
-    void set_col_index(int nz_index, int row) const;
+    void set_row_index(int nz_index, int row) const;
+    void set_col_index(int nz_index, int column) const;
     void set_value(int nz_index, T value) const;
     void add_value(int nz_index, T value) const;
 
@@ -336,19 +336,19 @@ const T& SparseMatrixCOO<T>::value(int nz_index) const
 }
 
 template <typename T>
-void SparseMatrixCOO<T>::set_row_index(int nz_index, int column) const
+void SparseMatrixCOO<T>::set_row_index(int nz_index, int row) const
 {
     assert(nz_index >= 0);
     assert(nz_index < nnz_);
-    row_indices_(nz_index) = column;
+    row_indices_(nz_index) = row;
 }
 
 template <typename T>
-void SparseMatrixCOO<T>::set_col_index(int nz_index, int row) const
+void SparseMatrixCOO<T>::set_col_index(int nz_index, int column) const
 {
     assert(nz_index >= 0);
     assert(nz_index < nnz_);
-    column_indices_(nz_index) = row;
+    column_indices_(nz_index) = column;
 }
 
 template <typename T>

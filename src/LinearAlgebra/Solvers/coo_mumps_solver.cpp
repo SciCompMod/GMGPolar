@@ -9,6 +9,8 @@ using namespace gmgpolar;
 
 CooMumpsSolver::CooMumpsSolver(SparseMatrixCOO<double> matrix)
 {
+    std::cout << matrix << std::endl;
+
     if (matrix.is_symmetric()) {
         matrix_ = extractUpperTriangle(matrix);
     }
