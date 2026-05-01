@@ -68,7 +68,7 @@ public:
     // Get the number of circles in the circular smoother.
     int numberSmootherCircles() const;
     // Get the length of the radial smoother lines.
-    int lengthSmootherRadial() const;
+    int lengthRadialSmoother() const;
     // Get the number of nodes in circular smoother.
     int numberCircularSmootherNodes() const;
     // Get the number of nodes in radial smoother.
@@ -105,7 +105,7 @@ private:
     /*
      * Relationship constraints:
      * - radius(numberSmootherCircles) <= smoother_splitting_radius < radius(numberSmootherCircles + 1)
-     * - numberSmootherCircles + lengthSmootherRadial = nr()
+     * - numberSmootherCircles + lengthRadialSmoother = nr()
      * - numberCircularSmootherNodes + numberRadialSmootherNodes = number_of_nodes()
      */
 
