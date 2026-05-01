@@ -362,11 +362,11 @@ void SmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<d
         "Smoother Take: ApplyAscOrtho (White Radial)",
         Kokkos::MDRangePolicy<Kokkos::Rank<2>>( // Rank of the index space
             {0, grid.numberSmootherCircles()}, // Starting point of the index space
-            {num_black_radial_lines, grid.nr()} // Ending point of the index space
+            {num_white_radial_lines, grid.nr()} // Ending point of the index space
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int radial_task, const int i_r) {
-            const int i_theta = start_black_radials + radial_task * 2;
+            const int i_theta = start_white_radials + radial_task * 2;
             nodeApplyAscOrthoRadialTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF,
                                         coeff_beta);
         });
