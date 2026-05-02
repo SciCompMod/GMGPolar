@@ -37,6 +37,8 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackCircleSection(Vector<do
 #endif
     }
 
+    const PolarGrid* grid_ptr = &grid;
+
     // Move updated values to x
     const int start_black_circles = is_inner_circle_black ? 0 : 1;
     const int num_black_circles   = (grid.numberSmootherCircles() - start_black_circles + 1) / 2;
@@ -87,6 +89,8 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveWhiteCircleSection(Vector<do
         inner_boundary_lu_solver_.solveInPlace(circle_section.data());
 #endif
     }
+
+    const PolarGrid* grid_ptr = &grid;
 
     // Move updated values to x
     const int start_white_circles = is_inner_circle_white ? 0 : 1;
