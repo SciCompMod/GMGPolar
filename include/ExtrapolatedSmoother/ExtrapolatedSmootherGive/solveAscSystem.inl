@@ -44,8 +44,9 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackCircleSection(Vector<do
         "ExtrapolatedSmootherGive: moveUpdatedValues (Black Circular)",
         Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, 0}, {num_black_circles, grid.ntheta()}),
         KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
-            const int i_r               = start_black_circles + circle_task * 2;
-            x[grid.index(i_r, i_theta)] = temp[grid.index(i_r, i_theta)];
+            const int i_r   = start_black_circles + circle_task * 2;
+            const int index = grid_ptr->index(i_r, i_theta);
+            x[index]        = temp[index];
         });
     Kokkos::fence();
 }
@@ -94,8 +95,9 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveWhiteCircleSection(Vector<do
         "ExtrapolatedSmootherGive: moveUpdatedValues (White Circular)",
         Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, 0}, {num_white_circles, grid.ntheta()}),
         KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
-            const int i_r               = start_white_circles + circle_task * 2;
-            x[grid.index(i_r, i_theta)] = temp[grid.index(i_r, i_theta)];
+            const int i_r   = start_white_circles + circle_task * 2;
+            const int index = grid_ptr->index(i_r, i_theta);
+            x[index]        = temp[index];
         });
     Kokkos::fence();
 }
@@ -114,6 +116,8 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackRadialSection(Vector<do
     int batch_stride = 2;
     radial_tridiagonal_solver_.solve_diagonal(radial_section, batch_offset, batch_stride);
 
+    const PolarGrid* grid_ptr = &grid;
+
     // Move updated values to x
     assert(grid.ntheta() % 2 == 0);
     const int start_black_radials    = 0;
@@ -122,8 +126,9 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackRadialSection(Vector<do
         "ExtrapolatedSmootherGive: moveUpdatedValues (Black Radial)",
         Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, grid.numberSmootherCircles()}, {num_black_radial_lines, grid.nr()}),
         KOKKOS_LAMBDA(const int radial_task, const int i_r) {
-            const int i_theta           = start_black_radials + radial_task * 2;
-            x[grid.index(i_r, i_theta)] = temp[grid.index(i_r, i_theta)];
+            const int i_theta = start_black_radials + radial_task * 2;
+            const int index   = grid_ptr->index(i_r, i_theta);
+            x[index]          = temp[index];
         });
     Kokkos::fence();
 }
@@ -142,6 +147,8 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveWhiteRadialSection(Vector<do
     int batch_stride = 2;
     radial_tridiagonal_solver_.solve(radial_section, batch_offset, batch_stride);
 
+    const PolarGrid* grid_ptr = &grid;
+
     // Move updated values to x
     assert(grid.ntheta() % 2 == 0);
     const int start_white_radials    = 1;
@@ -150,8 +157,9 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveWhiteRadialSection(Vector<do
         "ExtrapolatedSmootherGive: moveUpdatedValues (White Radial)",
         Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, grid.numberSmootherCircles()}, {num_white_radial_lines, grid.nr()}),
         KOKKOS_LAMBDA(const int radial_task, const int i_r) {
-            const int i_theta           = start_white_radials + radial_task * 2;
-            x[grid.index(i_r, i_theta)] = temp[grid.index(i_r, i_theta)];
+            const int i_theta = start_white_radials + radial_task * 2;
+            const int index   = grid_ptr->index(i_r, i_theta);
+            x[index]          = temp[index];
         });
     Kokkos::fence();
 }
