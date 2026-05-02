@@ -22,7 +22,7 @@ bool equals(ConstVector<T> lhs, ConstVector<T> rhs)
     const std::size_t n = lhs.size();
     int mismatches      = 0;
     Kokkos::parallel_reduce(
-        "equals", Kokkos::RangePolicy<>(0, n),
+        "Vector: equals", Kokkos::RangePolicy<>(0, n),
         KOKKOS_LAMBDA(const std::size_t i, int& local_mismatches) {
             if (!equals(lhs(i), rhs(i))) {
                 ++local_mismatches;
@@ -36,7 +36,8 @@ template <typename T>
 void assign(Vector<T> lhs, const T& value)
 {
     const std::size_t n = lhs.size();
-    Kokkos::parallel_for("assign", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const std::size_t i) { lhs(i) = value; });
+    Kokkos::parallel_for(
+        "Vector: assign", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const std::size_t i) { lhs(i) = value; });
 }
 
 template <typename T>
@@ -46,7 +47,8 @@ void add(Vector<T> result, ConstVector<T> x)
         throw std::invalid_argument("Vectors must be of the same size.");
     }
     const std::size_t n = result.size();
-    Kokkos::parallel_for("add", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const std::size_t i) { result(i) += x(i); });
+    Kokkos::parallel_for(
+        "Vector: add", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const std::size_t i) { result(i) += x(i); });
 }
 
 template <typename T>
@@ -57,7 +59,7 @@ void subtract(Vector<T> result, ConstVector<T> x)
     }
     const std::size_t n = result.size();
     Kokkos::parallel_for(
-        "subtract", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const std::size_t i) { result(i) -= x(i); });
+        "Vector: subtract", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const std::size_t i) { result(i) -= x(i); });
 }
 
 template <typename T>
@@ -68,7 +70,7 @@ void linear_combination(Vector<T> x, const T& alpha, ConstVector<T> y, const T& 
     }
     const std::size_t n = x.size();
     Kokkos::parallel_for(
-        "linear_combination", Kokkos::RangePolicy<>(0, n),
+        "Vector: linear_combination", Kokkos::RangePolicy<>(0, n),
         KOKKOS_LAMBDA(const std::size_t i) { x(i) = alpha * x(i) + beta * y(i); });
 }
 
@@ -77,7 +79,7 @@ void multiply(Vector<T> x, const T& alpha)
 {
     const std::size_t n = x.size();
     Kokkos::parallel_for(
-        "multiply", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const std::size_t i) { x(i) *= alpha; });
+        "Vector: multiply", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const std::size_t i) { x(i) *= alpha; });
 }
 
 template <typename T>
@@ -89,7 +91,7 @@ T dot_product(ConstVector<T> lhs, ConstVector<T> rhs)
     const std::size_t n = lhs.size();
     T result            = T{0};
     Kokkos::parallel_reduce(
-        "dot_product", Kokkos::RangePolicy<>(0, n),
+        "Vector: dot_product", Kokkos::RangePolicy<>(0, n),
         KOKKOS_LAMBDA(const std::size_t i, T& local_sum) { local_sum += lhs(i) * rhs(i); }, result);
     return result;
 }
@@ -100,7 +102,7 @@ T l1_norm(ConstVector<T> x)
     const std::size_t n = x.size();
     T result            = T{0};
     Kokkos::parallel_reduce(
-        "l1_norm", Kokkos::RangePolicy<>(0, n),
+        "Vector: l1_norm", Kokkos::RangePolicy<>(0, n),
         KOKKOS_LAMBDA(const std::size_t i, T& local_sum) { local_sum += Kokkos::abs(x(i)); }, result);
     return result;
 }
@@ -114,7 +116,7 @@ T l2_norm(ConstVector<T> x)
     // 1) Find the largest absolute value
     T scale = T{0};
     Kokkos::parallel_reduce(
-        "l2_norm_scale", Kokkos::RangePolicy<>(0, n),
+        "Vector: l2_norm_scale", Kokkos::RangePolicy<>(0, n),
         KOKKOS_LAMBDA(const std::size_t i, T& local_max) {
             const T abs_val = Kokkos::abs(x(i));
             if (abs_val > local_max) {
@@ -130,7 +132,7 @@ T l2_norm(ConstVector<T> x)
     // 3) Accumulate sum of squares of scaled entries
     T sum = T{0};
     Kokkos::parallel_reduce(
-        "l2_norm_sum", Kokkos::RangePolicy<>(0, n),
+        "Vector: l2_norm_sum", Kokkos::RangePolicy<>(0, n),
         KOKKOS_LAMBDA(const std::size_t i, T& local_sum) {
             const T value = x(i) / scale;
             local_sum += value * value;
@@ -147,7 +149,7 @@ T infinity_norm(ConstVector<T> x)
     const std::size_t n = x.size();
     T result            = T{0};
     Kokkos::parallel_reduce(
-        "infinity_norm", Kokkos::RangePolicy<>(0, n),
+        "Vector: infinity_norm", Kokkos::RangePolicy<>(0, n),
         KOKKOS_LAMBDA(const std::size_t i, T& local_max) {
             const T abs_value = Kokkos::abs(x(i));
             if (abs_value > local_max) {
