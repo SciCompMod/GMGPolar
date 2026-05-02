@@ -33,13 +33,16 @@ void SmootherGive<LevelCacheType>::solveBlackCircleSection(Vector<double> x, Vec
     }
 
     // Move updated values to x
-    int start_black_circles = is_inner_circle_black ? 0 : 1;
-#pragma omp parallel for num_threads(num_omp_threads)
-    for (int i_r = start_black_circles; i_r < grid.numberSmootherCircles(); i_r += 2) {
-        for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
+    const int start_black_circles = is_inner_circle_black ? 0 : 1;
+    const int num_black_circles   = (grid.numberSmootherCircles() - start_black_circles + 1) / 2;
+    Kokkos::parallel_for(
+        "SmootherGive: moveUpdatedValues (Black Circular)",
+        Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, 0}, {num_black_circles, grid.ntheta()}),
+        KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
+            const int i_r               = start_black_circles + circle_task * 2;
             x[grid.index(i_r, i_theta)] = temp[grid.index(i_r, i_theta)];
-        }
-    }
+        });
+    Kokkos::fence();
 }
 
 template <class LevelCacheType>
@@ -75,13 +78,16 @@ void SmootherGive<LevelCacheType>::solveWhiteCircleSection(Vector<double> x, Vec
     }
 
     // Move updated values to x
-    int start_white_circles = is_inner_circle_white ? 0 : 1;
-#pragma omp parallel for num_threads(num_omp_threads)
-    for (int i_r = start_white_circles; i_r < grid.numberSmootherCircles(); i_r += 2) {
-        for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
+    const int start_white_circles = is_inner_circle_white ? 0 : 1;
+    const int num_white_circles   = (grid.numberSmootherCircles() - start_white_circles + 1) / 2;
+    Kokkos::parallel_for(
+        "SmootherGive: moveUpdatedValues (White Circular)",
+        Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, 0}, {num_white_circles, grid.ntheta()}),
+        KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
+            const int i_r               = start_white_circles + circle_task * 2;
             x[grid.index(i_r, i_theta)] = temp[grid.index(i_r, i_theta)];
-        }
-    }
+        });
+    Kokkos::fence();
 }
 
 template <class LevelCacheType>
@@ -98,13 +104,18 @@ void SmootherGive<LevelCacheType>::solveBlackRadialSection(Vector<double> x, Vec
     int batch_stride = 2;
     radial_tridiagonal_solver_.solve(radial_section, batch_offset, batch_stride);
 
-// Move updated values to x
-#pragma omp parallel for num_threads(num_omp_threads)
-    for (int i_theta = 0; i_theta < grid.ntheta(); i_theta += 2) {
-        for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
+    // Move updated values to x
+    assert(grid.ntheta() % 2 == 0);
+    const int start_black_radials    = 0;
+    const int num_black_radial_lines = grid.ntheta() / 2;
+    Kokkos::parallel_for(
+        "SmootherGive: moveUpdatedValues (Black Radial)",
+        Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, grid.numberSmootherCircles()}, {num_black_radial_lines, grid.nr()}),
+        KOKKOS_LAMBDA(const int radial_task, const int i_r) {
+            const int i_theta           = start_black_radials + radial_task * 2;
             x[grid.index(i_r, i_theta)] = temp[grid.index(i_r, i_theta)];
-        }
-    }
+        });
+    Kokkos::fence();
 }
 
 template <class LevelCacheType>
@@ -121,11 +132,16 @@ void SmootherGive<LevelCacheType>::solveWhiteRadialSection(Vector<double> x, Vec
     int batch_stride = 2;
     radial_tridiagonal_solver_.solve(radial_section, batch_offset, batch_stride);
 
-// Move updated values to x
-#pragma omp parallel for num_threads(num_omp_threads)
-    for (int i_theta = 1; i_theta < grid.ntheta(); i_theta += 2) {
-        for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
+    // Move updated values to x
+    assert(grid.ntheta() % 2 == 0);
+    const int start_white_radials    = 1;
+    const int num_white_radial_lines = grid.ntheta() / 2;
+    Kokkos::parallel_for(
+        "SmootherGive: moveUpdatedValues (White Radial)",
+        Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, grid.numberSmootherCircles()}, {num_white_radial_lines, grid.nr()}),
+        KOKKOS_LAMBDA(const int radial_task, const int i_r) {
+            const int i_theta           = start_white_radials + radial_task * 2;
             x[grid.index(i_r, i_theta)] = temp[grid.index(i_r, i_theta)];
-        }
-    }
+        });
+    Kokkos::fence();
 }
