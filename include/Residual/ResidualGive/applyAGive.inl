@@ -368,7 +368,7 @@ void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, Co
     for (int i_theta = 0; i_theta < additional_radial_tasks; i_theta++) {
         Kokkos::parallel_for(
             "ResidualGive: ApplyA (Radial, additional)", Kokkos::RangePolicy<>(0, 1), KOKKOS_LAMBDA(const int) {
-                for (int i_r = 0; i_r < grid.nr(); i_r++) {
+                for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
                     node_apply_a_give(i_r, i_theta, *grid_ptr, *level_cache_ptr, DirBC_Interior, result, x);
                 }
             });
@@ -381,7 +381,7 @@ void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, Co
             "ResidualGive: ApplyA (Radial, pass 0)", Kokkos::RangePolicy<>(0, num_radial_batches),
             KOKKOS_LAMBDA(const int radial_task) {
                 const int i_theta = start_radial + radial_task * 3;
-                for (int i_r = 0; i_r < grid.nr(); i_r++) {
+                for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
                     node_apply_a_give(i_r, i_theta, *grid_ptr, *level_cache_ptr, DirBC_Interior, result, x);
                 }
             });
@@ -394,7 +394,7 @@ void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, Co
             "ResidualGive: ApplyA (Radial, pass 1)", Kokkos::RangePolicy<>(0, num_radial_batches),
             KOKKOS_LAMBDA(const int radial_task) {
                 const int i_theta = start_radial + radial_task * 3;
-                for (int i_r = 0; i_r < grid.nr(); i_r++) {
+                for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
                     node_apply_a_give(i_r, i_theta, *grid_ptr, *level_cache_ptr, DirBC_Interior, result, x);
                 }
             });
@@ -407,7 +407,7 @@ void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, Co
             "ResidualGive: ApplyA (Radial, pass 2)", Kokkos::RangePolicy<>(0, num_radial_batches),
             KOKKOS_LAMBDA(const int radial_task) {
                 const int i_theta = start_radial + radial_task * 3;
-                for (int i_r = 0; i_r < grid.nr(); i_r++) {
+                for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
                     node_apply_a_give(i_r, i_theta, *grid_ptr, *level_cache_ptr, DirBC_Interior, result, x);
                 }
             });
