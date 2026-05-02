@@ -4,14 +4,16 @@ namespace residual_give
 {
 
 template <class LevelCacheType>
-static inline void node_apply_a_give(int i_r, int i_theta, double r, double theta, const PolarGrid& grid,
-                                     const LevelCacheType& level_cache, bool DirBC_Interior, Vector<double>& result,
-                                     ConstVector<double>& x)
+static inline void node_apply_a_give(int i_r, int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache,
+                                     bool DirBC_Interior, Vector<double>& result, ConstVector<double>& x)
 {
     /* ---------------------------------------- */
     /* Compute or retrieve stencil coefficients */
     /* ---------------------------------------- */
-    const int center = grid.index(i_r, i_theta);
+    const int center   = grid.index(i_r, i_theta);
+    const double r     = grid.radius(i_r);
+    const double theta = grid.theta(i_theta);
+
     double coeff_beta, arr, att, art, detDF;
     level_cache.obtainValues(i_r, i_theta, center, r, theta, coeff_beta, arr, att, art, detDF);
 
@@ -292,32 +294,124 @@ static inline void node_apply_a_give(int i_r, int i_theta, double r, double thet
 } // namespace residual_give
 
 template <class LevelCacheType>
-void ResidualGive<LevelCacheType>::applyCircleSection(const int i_r, Vector<double> result, ConstVector<double> x) const
+void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, ConstVector<double> x) const
 {
+    assert(result.size() == x.size());
+
+    assign(result, 0.0);
+
+    const PolarGrid& grid             = Residual<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = Residual<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = Residual<LevelCacheType>::DirBC_Interior_;
+
+    const LevelCacheType* level_cache_ptr = &level_cache;
+    const PolarGrid* grid_ptr             = &grid;
+
+    const int num_smoother_circles    = grid.numberSmootherCircles();
+    const int additional_radial_tasks = grid.ntheta() % 3;
+    const int num_radial_tasks        = grid.ntheta() - additional_radial_tasks;
+
     using residual_give::node_apply_a_give;
 
-    const PolarGrid& grid = Residual<LevelCacheType>::grid_;
+    /* ---------------- */
+    /* Circular section */
+    /* ---------------- */
+    // We parallelize over i_r (step 3) to avoid data race conditions between adjacent circles.
+    // The i_theta loop is sequential inside the kernel.
+    {
+        const int start_circle       = 0;
+        const int num_circular_tasks = (num_smoother_circles - start_circle + 2) / 3;
+        Kokkos::parallel_for(
+            "ResidualGive: ApplyA (Circular, pass 0)", Kokkos::RangePolicy<>(0, num_circular_tasks),
+            KOKKOS_LAMBDA(const int circle_task) {
+                const int i_r = start_circle + circle_task * 3;
+                for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
+                    node_apply_a_give(i_r, i_theta, *grid_ptr, *level_cache_ptr, DirBC_Interior, result, x);
+                }
+            });
+        Kokkos::fence();
+    }
+    {
+        const int start_circle       = 1;
+        const int num_circular_tasks = (num_smoother_circles - start_circle + 2) / 3;
+        Kokkos::parallel_for(
+            "ResidualGive: ApplyA (Circular, pass 1)", Kokkos::RangePolicy<>(0, num_circular_tasks),
+            KOKKOS_LAMBDA(const int circle_task) {
+                const int i_r = start_circle + circle_task * 3;
+                for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
+                    node_apply_a_give(i_r, i_theta, *grid_ptr, *level_cache_ptr, DirBC_Interior, result, x);
+                }
+            });
+        Kokkos::fence();
+    }
+    {
+        const int start_circle       = 2;
+        const int num_circular_tasks = (num_smoother_circles - start_circle + 2) / 3;
+        Kokkos::parallel_for(
+            "ResidualGive: ApplyA (Circular, pass 2)", Kokkos::RangePolicy<>(0, num_circular_tasks),
+            KOKKOS_LAMBDA(const int circle_task) {
+                const int i_r = start_circle + circle_task * 3;
+                for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
+                    node_apply_a_give(i_r, i_theta, *grid_ptr, *level_cache_ptr, DirBC_Interior, result, x);
+                }
+            });
+        Kokkos::fence();
+    }
 
-    const double r = grid.radius(i_r);
-    for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-        const double theta = grid.theta(i_theta);
-        node_apply_a_give(i_r, i_theta, r, theta, grid, Residual<LevelCacheType>::level_cache_,
-                          Residual<LevelCacheType>::DirBC_Interior_, result, x);
+    /* -------------- */
+    /* Radial section */
+    /* -------------- */
+    // We parallelize over i_theta (step 3) to avoid data race conditions between adjacent radial lines.
+    // The i_r loop is sequential inside the kernel.
+    // Due to periodicity in the angular direction, handle up to 2 additional
+    // radial lines (i_theta = 0 and 1) before the parallel passes.
+    for (int i_theta = 0; i_theta < additional_radial_tasks; i_theta++) {
+        Kokkos::parallel_for(
+            "ResidualGive: ApplyA (Radial, additional)", Kokkos::RangePolicy<>(0, 1), KOKKOS_LAMBDA(const int) {
+                for (int i_r = 0; i_r < grid.nr(); i_r++) {
+                    node_apply_a_give(i_r, i_theta, *grid_ptr, *level_cache_ptr, DirBC_Interior, result, x);
+                }
+            });
+        Kokkos::fence();
+    }
+    {
+        const int start_radial       = additional_radial_tasks + 0;
+        const int num_radial_batches = num_radial_tasks / 3;
+        Kokkos::parallel_for(
+            "ResidualGive: ApplyA (Radial, pass 0)", Kokkos::RangePolicy<>(0, num_radial_batches),
+            KOKKOS_LAMBDA(const int radial_task) {
+                const int i_theta = start_radial + radial_task * 3;
+                for (int i_r = 0; i_r < grid.nr(); i_r++) {
+                    node_apply_a_give(i_r, i_theta, *grid_ptr, *level_cache_ptr, DirBC_Interior, result, x);
+                }
+            });
+        Kokkos::fence();
+    }
+    {
+        const int start_radial       = additional_radial_tasks + 1;
+        const int num_radial_batches = num_radial_tasks / 3;
+        Kokkos::parallel_for(
+            "ResidualGive: ApplyA (Radial, pass 1)", Kokkos::RangePolicy<>(0, num_radial_batches),
+            KOKKOS_LAMBDA(const int radial_task) {
+                const int i_theta = start_radial + radial_task * 3;
+                for (int i_r = 0; i_r < grid.nr(); i_r++) {
+                    node_apply_a_give(i_r, i_theta, *grid_ptr, *level_cache_ptr, DirBC_Interior, result, x);
+                }
+            });
+        Kokkos::fence();
+    }
+    {
+        const int start_radial       = additional_radial_tasks + 2;
+        const int num_radial_batches = num_radial_tasks / 3;
+        Kokkos::parallel_for(
+            "ResidualGive: ApplyA (Radial, pass 2)", Kokkos::RangePolicy<>(0, num_radial_batches),
+            KOKKOS_LAMBDA(const int radial_task) {
+                const int i_theta = start_radial + radial_task * 3;
+                for (int i_r = 0; i_r < grid.nr(); i_r++) {
+                    node_apply_a_give(i_r, i_theta, *grid_ptr, *level_cache_ptr, DirBC_Interior, result, x);
+                }
+            });
+        Kokkos::fence();
     }
 }
-
-template <class LevelCacheType>
-void ResidualGive<LevelCacheType>::applyRadialSection(const int i_theta, Vector<double> result,
-                                                      ConstVector<double> x) const
-{
-    using residual_give::node_apply_a_give;
-
-    const PolarGrid& grid = Residual<LevelCacheType>::grid_;
-
-    const double theta = grid.theta(i_theta);
-    for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
-        const double r = grid.radius(i_r);
-        node_apply_a_give(i_r, i_theta, r, theta, grid, Residual<LevelCacheType>::level_cache_,
-                          Residual<LevelCacheType>::DirBC_Interior_, result, x);
-    }
-}
+// clang-format on
