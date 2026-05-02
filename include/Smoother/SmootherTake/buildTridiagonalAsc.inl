@@ -325,6 +325,8 @@ void SmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
     ConstVector<double> detDF      = level_cache.detDF();
     ConstVector<double> coeff_beta = level_cache.coeff_beta();
 
+    const PolarGrid* grid_ptr = &grid;
+
     /* We split the loops into two regions to better respect the */
     /* access patterns of the smoother and improve cache locality. */
 
@@ -337,7 +339,7 @@ void SmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_r, const int i_theta) {
-            nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, DirBC_Interior, *circle_tridiagonal_solver_ptr,
+            nodeBuildTridiagonalSolverMatrices(i_r, i_theta, *grid_ptr, DirBC_Interior, *circle_tridiagonal_solver_ptr,
                                                *radial_tridiagonal_solver_ptr, arr, att, art, detDF, coeff_beta);
         });
 
@@ -350,7 +352,7 @@ void SmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_theta, const int i_r) {
-            nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, DirBC_Interior, *circle_tridiagonal_solver_ptr,
+            nodeBuildTridiagonalSolverMatrices(i_r, i_theta, *grid_ptr, DirBC_Interior, *circle_tridiagonal_solver_ptr,
                                                *radial_tridiagonal_solver_ptr, arr, att, art, detDF, coeff_beta);
         });
 

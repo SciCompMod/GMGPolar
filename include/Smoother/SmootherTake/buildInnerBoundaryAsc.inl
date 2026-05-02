@@ -170,12 +170,14 @@ SmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     ConstVector<double> detDF      = level_cache.detDF();
     ConstVector<double> coeff_beta = level_cache.coeff_beta();
 
+    const PolarGrid* grid_ptr = &grid;
+
     // Capture pointer to matrix for use in Kokkos parallel loop.
     const InnerBoundaryMatrix* matrix_ptr = &inner_boundary_solver_matrix;
 
     Kokkos::parallel_for(
         "Smoother Take: BuildInnerBoundaryAsc", Kokkos::RangePolicy<>(0, ntheta), KOKKOS_LAMBDA(const int i_theta) {
-            nodeBuildInteriorBoundarySolverMatrix(i_theta, grid, DirBC_Interior, *matrix_ptr, arr, att, art, detDF,
+            nodeBuildInteriorBoundarySolverMatrix(i_theta, *grid_ptr, DirBC_Interior, *matrix_ptr, arr, att, art, detDF,
                                                   coeff_beta);
         });
 
