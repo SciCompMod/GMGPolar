@@ -18,8 +18,8 @@ static inline void update_CSR_COO_MatrixElement(const SparseMatrixCOO<double>& m
 static inline void update_CSR_COO_MatrixElement(const SparseMatrixCSR<double>& matrix, const int ptr, const int offset,
                                                 const int row, const int column, const double value)
 {
-    matrix.set_nz_index(row, offset, column);
-    matrix.set_nz_entry(row, offset, value);
+    matrix.set_row_nz_index(row, offset, column);
+    matrix.set_row_nz_entry(row, offset, value);
 }
 #endif
 

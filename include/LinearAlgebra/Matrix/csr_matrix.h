@@ -71,9 +71,9 @@ public:
     // -------------------------------------------------------------- //
     // Const setters — safe for Kokkos device lambdas (host + device) //
     // -------------------------------------------------------------- //
-    void set_nz_index(int row, int nz_index, int column) const;
-    void set_nz_entry(int row, int nz_index, T value) const;
-    void add_nz_entry(int row, int nz_index, T value) const;
+    void set_row_nz_index(int row, int nz_index, int column) const;
+    void set_row_nz_entry(int row, int nz_index, T value) const;
+    void add_row_nz_entry(int row, int nz_index, T value) const;
 
     // --------------------------------------------------------------- //
     // Raw pointer access (host only, for external solvers e.g. MUMPS) //
@@ -361,7 +361,7 @@ T& SparseMatrixCSR<T>::row_nz_entry(int row, int nz_index)
 // ============================================================================
 
 template <typename T>
-void SparseMatrixCSR<T>::set_nz_index(int row, int nz_index, int column) const
+void SparseMatrixCSR<T>::set_row_nz_index(int row, int nz_index, int column) const
 {
     assert(row >= 0 && row < rows_);
     assert(nz_index >= 0 && nz_index < row_nz_size(row));
@@ -369,7 +369,7 @@ void SparseMatrixCSR<T>::set_nz_index(int row, int nz_index, int column) const
 }
 
 template <typename T>
-void SparseMatrixCSR<T>::set_nz_entry(int row, int nz_index, T value) const
+void SparseMatrixCSR<T>::set_row_nz_entry(int row, int nz_index, T value) const
 {
     assert(row >= 0 && row < rows_);
     assert(nz_index >= 0 && nz_index < row_nz_size(row));
@@ -377,7 +377,7 @@ void SparseMatrixCSR<T>::set_nz_entry(int row, int nz_index, T value) const
 }
 
 template <typename T>
-void SparseMatrixCSR<T>::add_nz_entry(int row, int nz_index, T value) const
+void SparseMatrixCSR<T>::add_row_nz_entry(int row, int nz_index, T value) const
 {
     assert(row >= 0 && row < rows_);
     assert(nz_index >= 0 && nz_index < row_nz_size(row));
