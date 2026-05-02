@@ -20,22 +20,23 @@ bool equals(ConstVector<T> lhs, ConstVector<T> rhs)
     }
 
     const std::size_t n = lhs.size();
-    for (std::size_t i = 0; i < n; ++i) {
-        if (!equals(lhs(i), rhs(i))) {
-            return false;
-        }
-    }
-    return true;
+    int mismatches      = 0;
+    Kokkos::parallel_reduce(
+        "equals", Kokkos::RangePolicy<>(0, n),
+        KOKKOS_LAMBDA(const std::size_t i, int& local_mismatches) {
+            if (!equals(lhs(i), rhs(i))) {
+                ++local_mismatches;
+            }
+        },
+        mismatches);
+    return mismatches == 0;
 }
 
 template <typename T>
 void assign(Vector<T> lhs, const T& value)
 {
-    std::size_t n = lhs.size();
-#pragma omp parallel for if (n > 10'000)
-    for (std::size_t i = 0; i < n; ++i) {
-        lhs(i) = value;
-    }
+    const std::size_t n = lhs.size();
+    Kokkos::parallel_for("assign", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const std::size_t i) { lhs(i) = value; });
 }
 
 template <typename T>
@@ -44,11 +45,8 @@ void add(Vector<T> result, ConstVector<T> x)
     if (result.size() != x.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
     }
-    std::size_t n = result.size();
-#pragma omp parallel for if (n > 10'000)
-    for (std::size_t i = 0; i < n; ++i) {
-        result(i) += x(i);
-    }
+    const std::size_t n = result.size();
+    Kokkos::parallel_for("add", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const std::size_t i) { result(i) += x(i); });
 }
 
 template <typename T>
@@ -57,11 +55,9 @@ void subtract(Vector<T> result, ConstVector<T> x)
     if (result.size() != x.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
     }
-    std::size_t n = result.size();
-#pragma omp parallel for if (n > 10'000)
-    for (std::size_t i = 0; i < n; ++i) {
-        result(i) -= x(i);
-    }
+    const std::size_t n = result.size();
+    Kokkos::parallel_for(
+        "subtract", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const std::size_t i) { result(i) -= x(i); });
 }
 
 template <typename T>
@@ -70,21 +66,18 @@ void linear_combination(Vector<T> x, const T& alpha, ConstVector<T> y, const T& 
     if (x.size() != y.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
     }
-    std::size_t n = x.size();
-#pragma omp parallel for if (n > 10'000)
-    for (std::size_t i = 0; i < n; ++i) {
-        x(i) = alpha * x(i) + beta * y(i);
-    }
+    const std::size_t n = x.size();
+    Kokkos::parallel_for(
+        "linear_combination", Kokkos::RangePolicy<>(0, n),
+        KOKKOS_LAMBDA(const std::size_t i) { x(i) = alpha * x(i) + beta * y(i); });
 }
 
 template <typename T>
 void multiply(Vector<T> x, const T& alpha)
 {
-    std::size_t n = x.size();
-#pragma omp parallel for if (n > 10'000)
-    for (std::size_t i = 0; i < n; ++i) {
-        x(i) *= alpha;
-    }
+    const std::size_t n = x.size();
+    Kokkos::parallel_for(
+        "multiply", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const std::size_t i) { x(i) *= alpha; });
 }
 
 template <typename T>
@@ -93,25 +86,22 @@ T dot_product(ConstVector<T> lhs, ConstVector<T> rhs)
     if (lhs.size() != rhs.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
     }
-
-    T result      = 0.0;
-    std::size_t n = lhs.size();
-#pragma omp parallel for reduction(+ : result) if (n > 10'000)
-    for (std::size_t i = 0; i < n; ++i) {
-        result += lhs(i) * rhs(i);
-    }
+    const std::size_t n = lhs.size();
+    T result            = T{0};
+    Kokkos::parallel_reduce(
+        "dot_product", Kokkos::RangePolicy<>(0, n),
+        KOKKOS_LAMBDA(const std::size_t i, T& local_sum) { local_sum += lhs(i) * rhs(i); }, result);
     return result;
 }
 
 template <typename T>
 T l1_norm(ConstVector<T> x)
 {
-    T result      = 0.0;
-    std::size_t n = x.size();
-#pragma omp parallel for reduction(+ : result) if (n > 10'000)
-    for (std::size_t i = 0; i < n; ++i) {
-        result += std::abs(x(i));
-    }
+    const std::size_t n = x.size();
+    T result            = T{0};
+    Kokkos::parallel_reduce(
+        "l1_norm", Kokkos::RangePolicy<>(0, n),
+        KOKKOS_LAMBDA(const std::size_t i, T& local_sum) { local_sum += Kokkos::abs(x(i)); }, result);
     return result;
 }
 
@@ -120,41 +110,51 @@ template <typename T>
 T l2_norm(ConstVector<T> x)
 {
     const std::size_t n = x.size();
-    // 1) find the largest absolute value
-    T scale = 0.0;
-#pragma omp parallel for reduction(max : scale) if (n > 10'000)
-    for (std::size_t i = 0; i < n; ++i) {
-        T abs_val = std::abs(x(i));
-        if (abs_val > scale) {
-            scale = abs_val;
-        }
-    }
-    // 2) if the largest absolute value is zero, the norm is zero
+
+    // 1) Find the largest absolute value
+    T scale = T{0};
+    Kokkos::parallel_reduce(
+        "l2_norm_scale", Kokkos::RangePolicy<>(0, n),
+        KOKKOS_LAMBDA(const std::size_t i, T& local_max) {
+            const T abs_val = Kokkos::abs(x(i));
+            if (abs_val > local_max) {
+                local_max = abs_val;
+            }
+        },
+        Kokkos::Max<T>(scale));
+
+    // 2) If the largest absolute value is zero, the norm is zero
     if (scale == T{0})
         return T{0};
-    // 3) accumulate sum of squares of scaled entries
-    T sum = 0.0;
-#pragma omp parallel for reduction(+ : sum) if (n > 10'000)
-    for (std::size_t i = 0; i < n; ++i) {
-        T value = x(i) / scale;
-        sum += value * value;
-    }
-    // 4) rescale
-    return scale * std::sqrt(sum);
+
+    // 3) Accumulate sum of squares of scaled entries
+    T sum = T{0};
+    Kokkos::parallel_reduce(
+        "l2_norm_sum", Kokkos::RangePolicy<>(0, n),
+        KOKKOS_LAMBDA(const std::size_t i, T& local_sum) {
+            const T value = x(i) / scale;
+            local_sum += value * value;
+        },
+        sum);
+
+    // 4) Rescale
+    return scale * Kokkos::sqrt(sum);
 }
 
 template <typename T>
 T infinity_norm(ConstVector<T> x)
 {
-    T result      = 0.0;
-    std::size_t n = x.size();
-#pragma omp parallel for reduction(max : result) if (n > 10'000)
-    for (std::size_t i = 0; i < n; ++i) {
-        T abs_value = std::abs(x(i));
-        if (abs_value > result) {
-            result = abs_value;
-        }
-    }
+    const std::size_t n = x.size();
+    T result            = T{0};
+    Kokkos::parallel_reduce(
+        "infinity_norm", Kokkos::RangePolicy<>(0, n),
+        KOKKOS_LAMBDA(const std::size_t i, T& local_max) {
+            const T abs_value = Kokkos::abs(x(i));
+            if (abs_value > local_max) {
+                local_max = abs_value;
+            }
+        },
+        Kokkos::Max<T>(result));
     return result;
 }
 
