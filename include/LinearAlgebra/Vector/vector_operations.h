@@ -35,9 +35,7 @@ bool equals(ConstVector<T> lhs, ConstVector<T> rhs)
 template <typename T>
 void assign(Vector<T> lhs, const T& value)
 {
-    const std::size_t n = lhs.size();
-    Kokkos::parallel_for(
-        "Vector: assign", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const std::size_t i) { lhs(i) = value; });
+    Kokkos::deep_copy(lhs, value);
 }
 
 template <typename T>
