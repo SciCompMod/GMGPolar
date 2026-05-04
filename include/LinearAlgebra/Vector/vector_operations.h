@@ -20,16 +20,14 @@ bool equals(ConstVector<T> lhs, ConstVector<T> rhs)
     }
 
     const std::size_t n = lhs.size();
-    int mismatches      = 0;
-    Kokkos::parallel_reduce(
+    bool is_equal = true;
+    return Kokkos::parallel_reduce(
         "Vector: equals", Kokkos::RangePolicy<>(0, n),
-        KOKKOS_LAMBDA(const std::size_t i, int& local_mismatches) {
-            if (!equals(lhs(i), rhs(i))) {
-                ++local_mismatches;
-            }
+        KOKKOS_LAMBDA(const std::size_t i, bool& local_is_equal) {
+            local_is_equal = local_is_equal && equals(lhs(i), rhs(i));
         },
-        mismatches);
-    return mismatches == 0;
+        LAnd<bool>(is_equal));
+    return is_equal;
 }
 
 template <typename T>
