@@ -15,13 +15,13 @@ int DirectSolverTake<LevelCacheType>::getStencilSize(int global_index) const
     const int size_stencil_next_outer_boundary = 6;
     const int size_stencil_outer_boundary      = 1;
 
-    if ((i_r > 1 && i_r < grid.nr() - 2 || (i_r == 1 && !DirBC_Interior))) {
+    if ((i_r > 1 && i_r < grid.nr() - 2) || (i_r == 1 && !DirBC_Interior)) {
         return size_stencil_interior;
     }
     else if (i_r == 0 && !DirBC_Interior) {
         return size_stencil_inner_boundary;
     }
-    else if ((i_r == 0 && DirBC_Interior) || i_r == grid.nr() - 1) {
+    else if ((i_r == 0 && DirBC_Interior) || (i_r == grid.nr() - 1)) {
         return size_stencil_outer_boundary;
     }
     else if (i_r == 1 && DirBC_Interior) {
@@ -49,7 +49,7 @@ const Stencil& DirectSolverTake<LevelCacheType>::getStencil(int i_r) const
     else if (i_r == 0 && !DirBC_Interior) {
         return stencil_across_origin_;
     }
-    else if ((i_r == 0 && DirBC_Interior) || i_r == grid.nr() - 1) {
+    else if ((i_r == 0 && DirBC_Interior) || (i_r == grid.nr() - 1)) {
         return stencil_DB_;
     }
     else if (i_r == 1 && DirBC_Interior) {
