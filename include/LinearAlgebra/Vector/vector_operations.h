@@ -11,7 +11,7 @@
 
 namespace gmgpolar
 {
-    
+
 template <typename T>
 bool equals(ConstVector<T> lhs, ConstVector<T> rhs)
 {
