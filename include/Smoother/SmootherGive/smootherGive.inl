@@ -6,21 +6,16 @@ SmootherGive<LevelCacheType>::SmootherGive(const PolarGrid& grid, const LevelCac
     : Smoother<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
     , radial_tridiagonal_solver_(grid.lengthRadialSmoother(), grid.ntheta(), false)
-{
-    buildAscMatrices();
 #ifdef GMGPOLAR_USE_MUMPS
-    initializeMumpsSolver(inner_boundary_mumps_solver_, inner_boundary_circle_matrix_);
+    , inner_boundary_solver_(buildInteriorBoundarySolverMatrix())
 #else
-    inner_boundary_lu_solver_ = SparseLUSolver<double>(inner_boundary_circle_matrix_);
+    , inner_boundary_circle_matrix_(buildInteriorBoundarySolverMatrix())
+    , inner_boundary_solver_(inner_boundary_circle_matrix_)
 #endif
-}
-
-template <class LevelCacheType>
-SmootherGive<LevelCacheType>::~SmootherGive()
 {
-#ifdef GMGPOLAR_USE_MUMPS
-    finalizeMumpsSolver(inner_boundary_mumps_solver_);
-#endif
+    buildTridiagonalSolverMatrices();
+    circle_tridiagonal_solver_.setup();
+    radial_tridiagonal_solver_.setup();
 }
 
 // The smoothing solves linear systems of the form:
