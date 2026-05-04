@@ -2,6 +2,9 @@
 
 #include "../directSolver.h"
 
+namespace gmgpolar
+{
+
 template <class LevelCacheType>
 class DirectSolverGive : public DirectSolver<LevelCacheType>
 {
@@ -93,3 +96,5 @@ private:
 #include "buildSolverMatrix.inl"
 #include "directSolverGive.inl"
 #include "matrixStencil.inl"
+
+} // namespace gmgpolar
