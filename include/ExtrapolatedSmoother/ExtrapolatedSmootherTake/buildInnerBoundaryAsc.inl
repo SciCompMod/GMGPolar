@@ -109,10 +109,10 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildInteriorBoundarySolverMa
             const int top    = grid.index(i_r, i_theta_P1);
             const int right  = grid.index(i_r + 1, i_theta);
 
-            const double center_value = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * fabs(detDF[center]) +
+            const double center_value = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) +
                                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
-            const double left_value = -coeff1 * (arr[center] + arr[left]);
+            const double left_value   = -coeff1 * (arr[center] + arr[left]);
 
             /* Fill matrix row of (i,j) */
             row = center_index;
@@ -156,14 +156,20 @@ template <class LevelCacheType>
 typename ExtrapolatedSmootherTake<LevelCacheType>::InnerBoundaryMatrix
 ExtrapolatedSmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
 {
-    const PolarGrid& grid             = ExtrapolatedSmootherTake<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = ExtrapolatedSmootherTake<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = ExtrapolatedSmootherTake<LevelCacheType>::DirBC_Interior_;
-    const int num_omp_threads         = ExtrapolatedSmootherTake<LevelCacheType>::num_omp_threads_;
+    const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
+    const int num_omp_threads         = ExtrapolatedSmoother<LevelCacheType>::num_omp_threads_;
 
     const int i_r    = 0;
     const int ntheta = grid.ntheta();
 
+    // The interior boundary matrix is symmetric due to the periodicity in the theta direction
+    // and the assumption that ntheta is even, which is required for the across-origin discretization.
+    // We store all non-zero entries of the matrix, both in COO format (for MUMPS)
+    // and in CSR format (for the in-house solver). If the COO matrix is marked as symmetric,
+    // the COO_Mumps_Solver optimizes the factorization by only using the upper triangular part of the matrix,
+    // which is extracted by the COO_Mumps_Solver internally.
 #ifdef GMGPOLAR_USE_MUMPS
     const int nnz = getNonZeroCountCircleAsc(i_r);
     SparseMatrixCOO<double> inner_boundary_solver_matrix(ntheta, ntheta, nnz);

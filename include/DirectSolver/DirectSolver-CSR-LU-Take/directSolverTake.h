@@ -36,16 +36,6 @@ private:
         -1,  0, -1,
         -1, -1, -1
     };
-    const Stencil stencil_next_inner_DB_ = {
-        7, 4, 8,
-        1, 0, 2,
-        5, 3, 6
-    };
-    const Stencil stencil_next_outer_DB_ = {
-        7, 4, 8,
-        1, 0, 2,
-        5, 3, 6
-    };
     // clang-format on
 
     SparseMatrixCSR<double> buildSolverMatrix();
