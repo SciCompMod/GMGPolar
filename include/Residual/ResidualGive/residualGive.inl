@@ -9,7 +9,8 @@ ResidualGive<LevelCacheType>::ResidualGive(const PolarGrid& grid, const LevelCac
 
 /* ------------ */
 /* result = A*x */
-/* ------------ */
+
+// clang-format off
 template <class LevelCacheType>
 void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, ConstVector<double> x) const
 {
@@ -17,84 +18,107 @@ void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, Co
 
     assign(result, 0.0);
 
-    const PolarGrid& grid     = Residual<LevelCacheType>::grid_;
+    const PolarGrid& grid = Residual<LevelCacheType>::grid_;
+
     const int num_omp_threads = Residual<LevelCacheType>::num_omp_threads_;
 
-    const int num_smoother_circles    = grid.numberSmootherCircles();
-    const int additional_radial_tasks = grid.ntheta() % 3;
-    const int num_radial_tasks        = grid.ntheta() - additional_radial_tasks;
-
-    /* ---------------- */
-    /* Circular section */
-    /* ---------------- */
-    // We parallelize the loop with step 3 to avoid data race conditions between adjacent circles.
-#pragma omp parallel num_threads(num_omp_threads)
-    {
-#pragma omp for
-        for (int i_r = 0; i_r < num_smoother_circles; i_r += 3) {
+    /* Single-threaded execution */
+    if (num_omp_threads == 1) {
+        for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
             applyCircleSection(i_r, result, x);
-        } /* Implicit barrier */
-#pragma omp for
-        for (int i_r = 1; i_r < num_smoother_circles; i_r += 3) {
-            applyCircleSection(i_r, result, x);
-        } /* Implicit barrier */
-#pragma omp for
-        for (int i_r = 2; i_r < num_smoother_circles; i_r += 3) {
-            applyCircleSection(i_r, result, x);
-        } /* Implicit barrier */
-    }
-
-    /* -------------- */
-    /* Radial section */
-    /* -------------- */
-    // We parallelize the loop with step 3 to avoid data race conditions between adjacent radial lines.
-    // Due to the periodicity in the angular direction, we can have at most 2 additional radial tasks
-    // that are handled serially before the parallel loops.
-    if (additional_radial_tasks > 0) {
-        const int i_theta = 0;
-        applyRadialSection(i_theta, result, x);
-    }
-
-    if (additional_radial_tasks > 1) {
-        const int i_theta = 1;
-        applyRadialSection(i_theta, result, x);
-    }
-
-#pragma omp parallel num_threads(num_omp_threads)
-    {
-#pragma omp for
-        for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {
-            const int i_theta = radial_task + additional_radial_tasks;
+        }
+        for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
             applyRadialSection(i_theta, result, x);
-        } /* Implicit barrier */
-#pragma omp for
-        for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 3) {
-            const int i_theta = radial_task + additional_radial_tasks;
-            applyRadialSection(i_theta, result, x);
-        } /* Implicit barrier */
-#pragma omp for
-        for (int radial_task = 2; radial_task < num_radial_tasks; radial_task += 3) {
-            const int i_theta = radial_task + additional_radial_tasks;
-            applyRadialSection(i_theta, result, x);
-        } /* Implicit barrier */
+        }
+    }
+    /* Multi-threaded execution */
+    else {
+        const int num_circle_tasks        = grid.numberSmootherCircles();
+        const int additional_radial_tasks = grid.ntheta() % 3;
+        const int num_radial_tasks        = grid.ntheta() - additional_radial_tasks;
+
+        #pragma omp parallel num_threads(num_omp_threads)
+        {
+            /* Circle Section 0 */
+            #pragma omp for
+            for (int circle_task = 0; circle_task < num_circle_tasks; circle_task += 3) {
+                int i_r = grid.numberSmootherCircles() - circle_task - 1;
+                applyCircleSection(i_r, result, x);
+            }
+            /* Circle Section 1 */
+            #pragma omp for
+            for (int circle_task = 1; circle_task < num_circle_tasks; circle_task += 3) {
+                int i_r = grid.numberSmootherCircles() - circle_task - 1;
+                applyCircleSection(i_r, result, x);
+            }
+            /* Circle Section 2 */
+            #pragma omp for nowait
+            for (int circle_task = 2; circle_task < num_circle_tasks; circle_task += 3) {
+                int i_r = grid.numberSmootherCircles() - circle_task - 1;
+                applyCircleSection(i_r, result, x);
+            }
+
+            /* Radial Section 0 */
+            #pragma omp for
+            for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {
+                if (radial_task > 0) {
+                    int i_theta = radial_task + additional_radial_tasks;
+                    applyRadialSection(i_theta, result, x);
+                }
+                else {
+                    if (additional_radial_tasks == 0) {
+                        applyRadialSection(0, result, x);
+                    }
+                    else if (additional_radial_tasks >= 1) {
+                        applyRadialSection(0, result, x);
+                        applyRadialSection(1, result, x);
+                    }
+                }
+            }
+            /* Radial Section 1 */
+            #pragma omp for
+            for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 3) {
+                if (radial_task > 1) {
+                    int i_theta = radial_task + additional_radial_tasks;
+                    applyRadialSection(i_theta, result, x);
+                }
+                else {
+                    if (additional_radial_tasks == 0) {
+                        applyRadialSection(1, result, x);
+                    }
+                    else if (additional_radial_tasks == 1) {
+                        applyRadialSection(2, result, x);
+                    }
+                    else if (additional_radial_tasks == 2) {
+                        applyRadialSection(2, result, x);
+                        applyRadialSection(3, result, x);
+                    }
+                }
+            }
+            /* Radial Section 2 */
+            #pragma omp for
+            for (int radial_task = 2; radial_task < num_radial_tasks; radial_task += 3) {
+                int i_theta = radial_task + additional_radial_tasks;
+                applyRadialSection(i_theta, result, x);
+            }
+        }
     }
 }
+// clang-format on
 
 /* ------------------ */
 /* result = rhs - A*x */
-/* ------------------ */
 template <class LevelCacheType>
 void ResidualGive<LevelCacheType>::computeResidual(Vector<double> result, ConstVector<double> rhs,
                                                    ConstVector<double> x) const
 {
     assert(result.size() == x.size());
 
-    const int num_omp_threads = Residual<LevelCacheType>::num_omp_threads_;
-
     applySystemOperator(result, x);
 
     // Subtract A*x from rhs to get the residual.
-    const int n = result.size();
+    const int n               = result.size();
+    const int num_omp_threads = Residual<LevelCacheType>::num_omp_threads_;
 #pragma omp parallel for num_threads(num_omp_threads)
     for (int i = 0; i < n; i++) {
         result[i] = rhs[i] - result[i];

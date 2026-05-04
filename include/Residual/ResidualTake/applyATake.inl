@@ -123,15 +123,13 @@ void ResidualTake<LevelCacheType>::applyCircleSection(const int i_r, Vector<doub
     assert(Residual<LevelCacheType>::level_cache_.cacheDensityProfileCoefficients());
     assert(Residual<LevelCacheType>::level_cache_.cacheDomainGeometry());
 
-    const PolarGrid& grid             = Residual<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = Residual<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = Residual<LevelCacheType>::DirBC_Interior_;
-
-    ConstVector<double> arr        = level_cache.arr();
-    ConstVector<double> att        = level_cache.att();
-    ConstVector<double> art        = level_cache.art();
-    ConstVector<double> detDF      = level_cache.detDF();
-    ConstVector<double> coeff_beta = level_cache.coeff_beta();
+    const PolarGrid& grid          = Residual<LevelCacheType>::grid_;
+    const bool DirBC_Interior      = Residual<LevelCacheType>::DirBC_Interior_;
+    ConstVector<double> arr        = Residual<LevelCacheType>::level_cache_.arr();
+    ConstVector<double> att        = Residual<LevelCacheType>::level_cache_.att();
+    ConstVector<double> art        = Residual<LevelCacheType>::level_cache_.art();
+    ConstVector<double> detDF      = Residual<LevelCacheType>::level_cache_.detDF();
+    ConstVector<double> coeff_beta = Residual<LevelCacheType>::level_cache_.coeff_beta();
 
     for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
         node_apply_a_take(i_r, i_theta, grid, DirBC_Interior, result, x, arr, att, art, detDF, coeff_beta);
@@ -147,15 +145,13 @@ void ResidualTake<LevelCacheType>::applyRadialSection(const int i_theta, Vector<
     assert(Residual<LevelCacheType>::level_cache_.cacheDensityProfileCoefficients());
     assert(Residual<LevelCacheType>::level_cache_.cacheDomainGeometry());
 
-    const PolarGrid& grid             = Residual<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = Residual<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = Residual<LevelCacheType>::DirBC_Interior_;
-
-    ConstVector<double> arr        = level_cache.arr();
-    ConstVector<double> att        = level_cache.att();
-    ConstVector<double> art        = level_cache.art();
-    ConstVector<double> detDF      = level_cache.detDF();
-    ConstVector<double> coeff_beta = level_cache.coeff_beta();
+    const PolarGrid& grid          = Residual<LevelCacheType>::grid_;
+    const bool DirBC_Interior      = Residual<LevelCacheType>::DirBC_Interior_;
+    ConstVector<double> arr        = Residual<LevelCacheType>::level_cache_.arr();
+    ConstVector<double> att        = Residual<LevelCacheType>::level_cache_.att();
+    ConstVector<double> art        = Residual<LevelCacheType>::level_cache_.art();
+    ConstVector<double> detDF      = Residual<LevelCacheType>::level_cache_.detDF();
+    ConstVector<double> coeff_beta = Residual<LevelCacheType>::level_cache_.coeff_beta();
 
     for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
         node_apply_a_take(i_r, i_theta, grid, DirBC_Interior, result, x, arr, att, art, detDF, coeff_beta);

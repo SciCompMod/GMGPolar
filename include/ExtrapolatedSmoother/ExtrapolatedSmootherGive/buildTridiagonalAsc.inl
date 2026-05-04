@@ -1122,13 +1122,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::buildTridiagonalSolverMatrices()
     // We parallelize the loop with step 3 to avoid data race conditions between adjacent radial lines.
     // Due to the periodicity in the angular direction, we can have at most 2 additional radial tasks
     // that are handled serially before the parallel loops.
-    if (additional_radial_tasks > 0) {
-        const int i_theta = 0;
-        buildTridiagonalRadialSection(i_theta);
-    }
-
-    if (additional_radial_tasks > 1) {
-        const int i_theta = 1;
+    for (int i_theta = 0; i_theta < additional_radial_tasks; i_theta++) {
         buildTridiagonalRadialSection(i_theta);
     }
 

@@ -8,6 +8,8 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 
 #include "../../include/Residual/ResidualGive/residualGive.h"
+#include "../../include/DirectSolver/DirectSolver-COO-MUMPS-Give/directSolverGive.h"
+#include "../../include/DirectSolver/DirectSolver-COO-MUMPS-Take/directSolverTake.h"
 #include "../../include/DirectSolver/DirectSolver-CSR-LU-Give/directSolverGive.h"
 #include "../../include/DirectSolver/DirectSolver-CSR-LU-Take/directSolverTake.h"
 
@@ -39,7 +41,7 @@ using namespace gmgpolar;
 /* Test 1/2: */
 /* Does the Take and Give Implementation match up? */
 
-TEST(DirectSolver_CSR_LU_Test, directSolver_DirBC_Interior)
+TEST(DirectSolverTestNoMumps, directSolver_DirBC_Interior)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -95,7 +97,7 @@ TEST(DirectSolver_CSR_LU_Test, directSolver_DirBC_Interior)
     }
 }
 
-TEST(DirectSolver_CSR_LU_Test, directSolver_AcrossOrigin)
+TEST(DirectSolverTestNoMumps, directSolver_AcrossOrigin)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -158,7 +160,7 @@ TEST(DirectSolver_CSR_LU_Test, directSolver_AcrossOrigin)
 /* Circular */
 /* -------- */
 
-TEST(DirectSolver_CSR_LU_Give_Test_CircularGeometry, SequentialDirectSolverDirBC_Interior_CircularGeometry)
+TEST(DirectSolverTestNoMumps_CircularGeometry, SequentialDirectSolverDirBC_Interior_CircularGeometry)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -201,7 +203,7 @@ TEST(DirectSolver_CSR_LU_Give_Test_CircularGeometry, SequentialDirectSolverDirBC
     ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-12);
 }
 
-TEST(DirectSolver_CSR_LU_Give_Test_CircularGeometry, ParallelDirectSolverDirBC_Interior_CircularGeometry)
+TEST(DirectSolverTestNoMumps_CircularGeometry, ParallelDirectSolverDirBC_Interior_CircularGeometry)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -245,7 +247,7 @@ TEST(DirectSolver_CSR_LU_Give_Test_CircularGeometry, ParallelDirectSolverDirBC_I
     ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-12);
 }
 
-TEST(DirectSolver_CSR_LU_Give_Test_CircularGeometry, SequentialDirectSolverAcrossOrigin_CircularGeometry)
+TEST(DirectSolverTestNoMumps_CircularGeometry, SequentialDirectSolverAcrossOrigin_CircularGeometry)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -289,7 +291,7 @@ TEST(DirectSolver_CSR_LU_Give_Test_CircularGeometry, SequentialDirectSolverAcros
     ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-8);
 }
 
-TEST(DirectSolver_CSR_LU_Give_Test_CircularGeometry, ParallelDirectSolverAcrossOrigin_CircularGeometry)
+TEST(DirectSolverTestNoMumps_CircularGeometry, ParallelDirectSolverAcrossOrigin_CircularGeometry)
 {
     std::vector<double> radii  = {1e-5, 0.1, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -337,7 +339,7 @@ TEST(DirectSolver_CSR_LU_Give_Test_CircularGeometry, ParallelDirectSolverAcrossO
 /* Shafranov */
 /* --------- */
 
-TEST(DirectSolver_CSR_LU_Give_Test_ShafranovGeometry, DirectSolverDirBC_Interior_ShafranovGeometry)
+TEST(DirectSolverTestNoMumps_ShafranovGeometry, DirectSolverDirBC_Interior_ShafranovGeometry)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -383,7 +385,7 @@ TEST(DirectSolver_CSR_LU_Give_Test_ShafranovGeometry, DirectSolverDirBC_Interior
     ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-12);
 }
 
-TEST(DirectSolver_CSR_LU_Give_Test_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovGeometry)
+TEST(DirectSolverTestNoMumps_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovGeometry)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -432,7 +434,7 @@ TEST(DirectSolver_CSR_LU_Give_Test_ShafranovGeometry, DirectSolverAcrossOrigin_S
 /* Czarny */
 /* ------ */
 
-TEST(DirectSolver_CSR_LU_Give_Test_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeometry)
+TEST(DirectSolverTestNoMumps_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeometry)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -477,7 +479,7 @@ TEST(DirectSolver_CSR_LU_Give_Test_CzarnyGeometry, DirectSolverDirBC_Interior_Cz
     ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-12);
 }
 
-TEST(DirectSolver_CSR_LU_Give_Test_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometry)
+TEST(DirectSolverTestNoMumps_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometry)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -527,7 +529,7 @@ TEST(DirectSolver_CSR_LU_Give_Test_CzarnyGeometry, DirectSolverAcrossOrigin_Czar
 /* Culham */
 /* ------ */
 
-TEST(DirectSolver_CSR_LU_Give_Test_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeometry)
+TEST(DirectSolverTestNoMumps_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeometry)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -570,7 +572,7 @@ TEST(DirectSolver_CSR_LU_Give_Test_CulhamGeometry, DirectSolverDirBC_Interior_Cu
     ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
 }
 
-TEST(DirectSolver_CSR_LU_Give_Test_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometry)
+TEST(DirectSolverTestNoMumps_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometry)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -615,7 +617,7 @@ TEST(DirectSolver_CSR_LU_Give_Test_CulhamGeometry, DirectSolverAcrossOrigin_Culh
 
 /* We adjust the PolarGrid to increase the precision */
 
-TEST(DirectSolver_CSR_LU_Give_Test_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_CircularGeometry)
+TEST(DirectSolverTestNoMumps_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_CircularGeometry)
 {
     std::vector<double> radii  = {1e-5,          1.441 * 1e-5,
                                   3.8833 * 1e-5, 8.7666 * 1e-5,
@@ -668,7 +670,7 @@ TEST(DirectSolver_CSR_LU_Give_Test_CircularGeometry, DirectSolverAcrossOriginHig
     ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-10);
 }
 
-TEST(DirectSolver_CSR_LU_Give_Test_CircularGeometry, DirectSolverAcrossOriginHigherPrecision2_CircularGeometry)
+TEST(DirectSolverTestNoMumps_CircularGeometry, DirectSolverAcrossOriginHigherPrecision2_CircularGeometry)
 {
     std::vector<double> radii  = {0.15, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -713,7 +715,7 @@ TEST(DirectSolver_CSR_LU_Give_Test_CircularGeometry, DirectSolverAcrossOriginHig
 
 /* Same test now using Take */
 
-TEST(DirectSolver_CSR_LU_Take_Test_CircularGeometry, SequentialDirectSolverDirBC_Interior_CircularGeometry)
+TEST(DirectSolverTakeCustomLUTest_CircularGeometry, SequentialDirectSolverDirBC_Interior_CircularGeometry)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -755,7 +757,7 @@ TEST(DirectSolver_CSR_LU_Take_Test_CircularGeometry, SequentialDirectSolverDirBC
     ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-12);
 }
 
-TEST(DirectSolver_CSR_LU_Take_Test_CircularGeometry, ParallelDirectSolverDirBC_Interior_CircularGeometry)
+TEST(DirectSolverTakeCustomLUTest_CircularGeometry, ParallelDirectSolverDirBC_Interior_CircularGeometry)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -798,7 +800,7 @@ TEST(DirectSolver_CSR_LU_Take_Test_CircularGeometry, ParallelDirectSolverDirBC_I
     ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-12);
 }
 
-TEST(DirectSolver_CSR_LU_Take_Test_CircularGeometry, SequentialDirectSolverAcrossOrigin_CircularGeometry)
+TEST(DirectSolverTakeCustomLUTest_CircularGeometry, SequentialDirectSolverAcrossOrigin_CircularGeometry)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -841,7 +843,7 @@ TEST(DirectSolver_CSR_LU_Take_Test_CircularGeometry, SequentialDirectSolverAcros
     ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-8);
 }
 
-TEST(DirectSolver_CSR_LU_Take_Test_CircularGeometry, ParallelDirectSolverAcrossOrigin_CircularGeometry)
+TEST(DirectSolverTakeCustomLUTest_CircularGeometry, ParallelDirectSolverAcrossOrigin_CircularGeometry)
 {
     std::vector<double> radii  = {1e-5, 0.1, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -888,7 +890,7 @@ TEST(DirectSolver_CSR_LU_Take_Test_CircularGeometry, ParallelDirectSolverAcrossO
 /* Shafranov */
 /* --------- */
 
-TEST(DirectSolver_CSR_LU_Take_Test_ShafranovGeometry, DirectSolverDirBC_Interior_ShafranovGeometry)
+TEST(DirectSolverTakeCustomLUTest_ShafranovGeometry, DirectSolverDirBC_Interior_ShafranovGeometry)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -933,7 +935,7 @@ TEST(DirectSolver_CSR_LU_Take_Test_ShafranovGeometry, DirectSolverDirBC_Interior
     ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-12);
 }
 
-TEST(DirectSolver_CSR_LU_Take_Test_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovGeometry)
+TEST(DirectSolverTakeCustomLUTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovGeometry)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -983,7 +985,7 @@ TEST(DirectSolver_CSR_LU_Take_Test_ShafranovGeometry, DirectSolverAcrossOrigin_S
 /* Czarny */
 /* ------ */
 
-TEST(DirectSolver_CSR_LU_Take_Test_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeometry)
+TEST(DirectSolverTakeCustomLUTest_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeometry)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -1029,7 +1031,7 @@ TEST(DirectSolver_CSR_LU_Take_Test_CzarnyGeometry, DirectSolverDirBC_Interior_Cz
     ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-12);
 }
 
-TEST(DirectSolver_CSR_LU_Take_Test_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometry)
+TEST(DirectSolverTakeCustomLUTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometry)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -1079,7 +1081,7 @@ TEST(DirectSolver_CSR_LU_Take_Test_CzarnyGeometry, DirectSolverAcrossOrigin_Czar
 /* Culham */
 /* ------ */
 
-TEST(DirectSolver_CSR_LU_Take_Test_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeometry)
+TEST(DirectSolverTakeCustomLUTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeometry)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -1121,7 +1123,7 @@ TEST(DirectSolver_CSR_LU_Take_Test_CulhamGeometry, DirectSolverDirBC_Interior_Cu
     ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-11);
 }
 
-TEST(DirectSolver_CSR_LU_Take_Test_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometry)
+TEST(DirectSolverTakeCustomLUTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometry)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -1164,7 +1166,7 @@ TEST(DirectSolver_CSR_LU_Take_Test_CulhamGeometry, DirectSolverAcrossOrigin_Culh
     ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-8);
 }
 
-TEST(DirectSolver_CSR_LU_Take_Test_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_CircularGeometry)
+TEST(DirectSolverTakeCustomLUTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_CircularGeometry)
 {
     std::vector<double> radii  = {1e-5,          1.441 * 1e-5,
                                   3.8833 * 1e-5, 8.7666 * 1e-5,
@@ -1217,7 +1219,7 @@ TEST(DirectSolver_CSR_LU_Take_Test_CircularGeometry, DirectSolverAcrossOriginHig
     ASSERT_NEAR(infinity_norm(ConstVector<double>(residuum)), 0.0, 1e-10);
 }
 
-TEST(DirectSolver_CSR_LU_Take_Test_CircularGeometry, DirectSolverAcrossOriginHigherPrecision2_CircularGeometry)
+TEST(DirectSolverTakeCustomLUTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision2_CircularGeometry)
 {
     std::vector<double> radii  = {0.15, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
