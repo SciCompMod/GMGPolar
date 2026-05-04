@@ -9,8 +9,8 @@
 
 #include "../../include/Residual/ResidualGive/residualGive.h"
 #include "../../include/Residual/ResidualTake/residualTake.h"
-#include "../../include/DirectSolver/DirectSolver-CSR-LU-Give/directSolverGiveCustomLU.h"
-#include "../../include/DirectSolver/DirectSolver-CSR-LU-Take/directSolverTakeCustomLU.h"
+#include "../../include/DirectSolver/DirectSolver-CSR-LU-Give/directSolverGive.h"
+#include "../../include/DirectSolver/DirectSolver-CSR-LU-Take/directSolverTake.h"
 #include "../../include/ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h"
 #include "../../include/ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.h"
 

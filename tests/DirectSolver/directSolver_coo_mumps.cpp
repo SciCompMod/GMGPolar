@@ -10,8 +10,8 @@
 #include "../../include/Residual/ResidualGive/residualGive.h"
 #include "../../include/DirectSolver/DirectSolver-COO-MUMPS-Give/directSolverGive.h"
 #include "../../include/DirectSolver/DirectSolver-COO-MUMPS-Take/directSolverTake.h"
-#include "../../include/DirectSolver/DirectSolver-CSR-LU-Give/directSolverGiveCustomLU.h"
-#include "../../include/DirectSolver/DirectSolver-CSR-LU-Take/directSolverTakeCustomLU.h"
+#include "../../include/DirectSolver/DirectSolver-CSR-LU-Give/directSolverGive.h"
+#include "../../include/DirectSolver/DirectSolver-CSR-LU-Take/directSolverTake.h"
 
 #include "../../include/InputFunctions/domainGeometry.h"
 #include "../../include/InputFunctions/densityProfileCoefficients.h"
