@@ -833,6 +833,8 @@ typename DirectSolverGive<LevelCacheType>::SystemMatrix DirectSolverGive<LevelCa
     const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
     const int num_omp_threads = DirectSolver<LevelCacheType>::num_omp_threads_;
 
+    assert(validateSolverMatrixIndexing() && "Solver matrix indexing is inconsistent");
+
     const int n = grid.numberOfNodes();
 
 #ifdef GMGPOLAR_USE_MUMPS
