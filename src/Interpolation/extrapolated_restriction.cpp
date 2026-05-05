@@ -54,9 +54,6 @@ void Interpolation::applyExtrapolatedRestriction(const PolarGrid& fine_grid, con
     assert(std::ssize(fine_values) == fine_grid.numberOfNodes());
     assert(std::ssize(coarse_result) == coarse_grid.numberOfNodes());
 
-    const PolarGrid* fine_grid_ptr   = &fine_grid;
-    const PolarGrid* coarse_grid_ptr = &coarse_grid;
-
     /* We split the loops into two regions to better respect the */
     /* access patterns of the smoother and improve cache locality. */
 
@@ -69,8 +66,8 @@ void Interpolation::applyExtrapolatedRestriction(const PolarGrid& fine_grid, con
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_r_coarse, const int i_theta_coarse) {
-            coarseNodeExtrapolatedRestriction(i_r_coarse, i_theta_coarse, *fine_grid_ptr, *coarse_grid_ptr,
-                                              coarse_result, fine_values);
+            coarseNodeExtrapolatedRestriction(i_r_coarse, i_theta_coarse, fine_grid, coarse_grid, coarse_result,
+                                              fine_values);
         });
 
     /* For loop matches radial access pattern */
@@ -82,8 +79,8 @@ void Interpolation::applyExtrapolatedRestriction(const PolarGrid& fine_grid, con
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_theta_coarse, const int i_r_coarse) {
-            coarseNodeExtrapolatedRestriction(i_r_coarse, i_theta_coarse, *fine_grid_ptr, *coarse_grid_ptr,
-                                              coarse_result, fine_values);
+            coarseNodeExtrapolatedRestriction(i_r_coarse, i_theta_coarse, fine_grid, coarse_grid, coarse_result, 
+                                              fine_values);
         });
 
     Kokkos::fence();
