@@ -83,8 +83,6 @@ void ResidualTake<LevelCacheType>::applySystemOperator(Vector<double> result, Co
     ConstVector<double> detDF      = Residual<LevelCacheType>::level_cache_.detDF();
     ConstVector<double> coeff_beta = Residual<LevelCacheType>::level_cache_.coeff_beta();
 
-    const PolarGrid* grid_ptr = &grid;
-
     /* We split the loops into two regions to better respect the */
     /* access patterns of the smoother and improve cache locality. */
 
@@ -97,7 +95,7 @@ void ResidualTake<LevelCacheType>::applySystemOperator(Vector<double> result, Co
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_r, const int i_theta) {
-            node_apply_a_take(i_r, i_theta, *grid_ptr, DirBC_Interior, result, x, arr, att, art, detDF, coeff_beta);
+            node_apply_a_take(i_r, i_theta, grid, DirBC_Interior, result, x, arr, att, art, detDF, coeff_beta);
         });
 
     /* For loop matches radial access pattern */
@@ -109,7 +107,7 @@ void ResidualTake<LevelCacheType>::applySystemOperator(Vector<double> result, Co
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_theta, const int i_r) {
-            node_apply_a_take(i_r, i_theta, *grid_ptr, DirBC_Interior, result, x, arr, att, art, detDF, coeff_beta);
+            node_apply_a_take(i_r, i_theta, grid, DirBC_Interior, result, x, arr, att, art, detDF, coeff_beta);
         });
 
     Kokkos::fence();
