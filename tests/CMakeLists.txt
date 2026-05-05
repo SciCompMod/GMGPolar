@@ -1,9 +1,3 @@
-cmake_minimum_required(VERSION 3.12)
-
-project(GMGPolarTests LANGUAGES CXX)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Create a single test executable that includes all test sources
 add_executable(gmgpolar_tests
@@ -30,9 +24,8 @@ add_executable(gmgpolar_tests
     GMGPolar/convergence_order.cpp
 )
 
-# Set the compile features and link libraries
-target_compile_features(gmgpolar_tests PRIVATE cxx_std_20)
-target_link_libraries(gmgpolar_tests GMGPolarLib GTest::gtest_main)
+# Set the link libraries
+target_link_libraries(gmgpolar_tests GMGPolarLib GMGPolarInterface GTest::gtest_main)
 
 include(GoogleTest)
 gtest_discover_tests(gmgpolar_tests)

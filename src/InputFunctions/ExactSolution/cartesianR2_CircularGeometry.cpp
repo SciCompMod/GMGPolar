@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/ExactSolution/cartesianR2_CircularGeometry.h"
+#include <InputFunctions/ExactSolution/cartesianR2_CircularGeometry.h>
 using namespace gmgpolar;
 
 CartesianR2_CircularGeometry::CartesianR2_CircularGeometry(double Rmax)

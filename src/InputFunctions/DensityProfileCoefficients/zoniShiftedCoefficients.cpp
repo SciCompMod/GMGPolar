@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/DensityProfileCoefficients/zoniShiftedCoefficients.h"
+#include <InputFunctions/DensityProfileCoefficients/zoniShiftedCoefficients.h>
 #include <iostream>
 using namespace gmgpolar;
 ZoniShiftedCoefficients::ZoniShiftedCoefficients(double Rmax, double alpha_jump)

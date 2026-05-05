@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/cartesianR2_ZoniShiftedGyro_CircularGeometry.h"
+#include <InputFunctions/SourceTerms/cartesianR2_ZoniShiftedGyro_CircularGeometry.h>
 using namespace gmgpolar;
 
 CartesianR2_ZoniShiftedGyro_CircularGeometry::CartesianR2_ZoniShiftedGyro_CircularGeometry(PolarGrid const& grid,

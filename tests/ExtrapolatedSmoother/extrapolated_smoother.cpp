@@ -5,22 +5,22 @@
 
 #include "../test_tools.h"
 
-#include "../../include/GMGPolar/gmgpolar.h"
+#include <GMGPolar/gmgpolar.h>
 
-#include "../../include/Residual/ResidualGive/residualGive.h"
-#include "../../include/Residual/ResidualTake/residualTake.h"
-#include "../../include/DirectSolver/DirectSolver-CSR-LU-Give/directSolverGiveCustomLU.h"
-#include "../../include/DirectSolver/DirectSolver-CSR-LU-Take/directSolverTakeCustomLU.h"
-#include "../../include/ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h"
-#include "../../include/ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.h"
+#include <Residual/ResidualGive/residualGive.h>
+#include <Residual/ResidualTake/residualTake.h>
+#include <DirectSolver/DirectSolver-CSR-LU-Give/directSolverGiveCustomLU.h>
+#include <DirectSolver/DirectSolver-CSR-LU-Take/directSolverTakeCustomLU.h>
+#include <ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h>
+#include <ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.h>
 
-#include "../../include/InputFunctions/domainGeometry.h"
-#include "../../include/InputFunctions/densityProfileCoefficients.h"
+#include <InputFunctions/domainGeometry.h>
+#include <InputFunctions/densityProfileCoefficients.h>
 /* --------- */
 /* Test Case */
 /* --------- */
-#include "../include/InputFunctions/DomainGeometry/czarnyGeometry.h"
-#include "../include/InputFunctions/DensityProfileCoefficients/zoniShiftedCoefficients.h"
+#include <InputFunctions/DomainGeometry/czarnyGeometry.h>
+#include <InputFunctions/DensityProfileCoefficients/zoniShiftedCoefficients.h>
 
 #include <random>
 using namespace gmgpolar;

@@ -1,0 +1,33 @@
+
+if(DEFINED ENV{LIKWID_DIR} AND NOT LIKWID_DIR)
+    set(LIKWID_DIR "$ENV{LIKWID_DIR}" CACHE PATH "LIKWID installation directory")
+endif()
+
+find_package(PkgConfig QUIET)
+if(PKG_CONFIG_FOUND)
+    pkg_check_modules(LIKWID_PC QUIET likwid)
+endif()
+
+find_path(LIKWID_INCLUDE_DIR
+    NAMES likwid.h
+    HINTS ${LIKWID_DIR}/include ${LIKWID_PC_INCLUDE_DIRS}
+)
+
+find_library(LIKWID_LIBRARY
+    NAMES likwid
+    HINTS ${LIKWID_DIR}/lib ${LIKWID_DIR}/lib64 ${LIKWID_PC_LIBRARY_DIRS}
+)
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(LIKWID
+    REQUIRED_VARS LIKWID_INCLUDE_DIR LIKWID_LIBRARY
+)
+
+if(LIKWID_FOUND AND NOT TARGET LIKWID::LIKWID)
+    add_library(LIKWID::LIKWID INTERFACE IMPORTED)
+    set_target_properties(LIKWID::LIKWID PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${LIKWID_INCLUDE_DIR}"
+        INTERFACE_LINK_LIBRARIES      "${LIKWID_LIBRARY}"
+        INTERFACE_COMPILE_DEFINITIONS "LIKWID_PERFMON"
+    )
+endif()

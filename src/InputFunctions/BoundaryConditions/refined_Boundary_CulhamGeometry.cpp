@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/BoundaryConditions/refined_Boundary_CulhamGeometry.h"
+#include <InputFunctions/BoundaryConditions/refined_Boundary_CulhamGeometry.h>
 using namespace gmgpolar;
 
 Refined_Boundary_CulhamGeometry::Refined_Boundary_CulhamGeometry(double Rmax)

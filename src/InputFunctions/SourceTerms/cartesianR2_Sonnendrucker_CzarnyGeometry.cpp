@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/cartesianR2_Sonnendrucker_CzarnyGeometry.h"
+#include <InputFunctions/SourceTerms/cartesianR2_Sonnendrucker_CzarnyGeometry.h>
 using namespace gmgpolar;
 
 void CartesianR2_Sonnendrucker_CzarnyGeometry::initializeGeometry()

@@ -14,6 +14,13 @@ target_link_libraries(InputFunctions INTERFACE
     InputFunctions_SourceTerms
 )
 
-target_include_directories(InputFunctions INTERFACE
-    ${CMAKE_SOURCE_DIR}/include/InputFunctions
+install(TARGETS
+    InputFunctions
+    InputFunctions_BoundaryConditions
+    InputFunctions_DensityProfileCoefficients
+    InputFunctions_DomainGeometry
+    InputFunctions_ExactSolution
+    InputFunctions_SourceTerms
+    EXPORT GMGPolarTargets
+    ARCHIVE DESTINATION lib
 )
