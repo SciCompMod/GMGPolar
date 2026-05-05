@@ -44,8 +44,8 @@ public:
     explicit SparseMatrixCSR(int rows, int columns, const std::vector<T>& values,
                              const std::vector<int>& column_indices, const std::vector<int>& row_start_indices);
 
-    SparseMatrixCSR& operator=(const SparseMatrixCSR& other);
-    SparseMatrixCSR& operator=(SparseMatrixCSR&& other) noexcept;
+    SparseMatrixCSR& operator=(const SparseMatrixCSR& other) = default;
+    SparseMatrixCSR& operator=(SparseMatrixCSR&& other) noexcept = default;
 
     int rows() const;
     int columns() const;
@@ -124,30 +124,6 @@ SparseMatrixCSR<T>::SparseMatrixCSR(const SparseMatrixCSR& other)
     Kokkos::deep_copy(row_start_indices_, other.row_start_indices_);
 }
 
-// copy assignment
-template <typename T>
-SparseMatrixCSR<T>& SparseMatrixCSR<T>::operator=(const SparseMatrixCSR& other)
-{
-    if (this == &other) {
-        // Self-assignment, no work needed
-        return *this;
-    }
-    // Only allocate new memory if the sizes are different
-    if (nnz_ != other.nnz_ || rows_ != other.rows_) {
-        values_            = Vector<T>("CSR values", other.nnz_);
-        column_indices_    = Vector<int>("CSR column indices", other.nnz_);
-        row_start_indices_ = Vector<int>("CSR row start indices", other.rows_ + 1);
-    }
-    // Copy the elements
-    rows_    = other.rows_;
-    columns_ = other.columns_;
-    nnz_     = other.nnz_;
-    Kokkos::deep_copy(values_, other.values_);
-    Kokkos::deep_copy(column_indices_, other.column_indices_);
-    Kokkos::deep_copy(row_start_indices_, other.row_start_indices_);
-    return *this;
-}
-
 // move construction
 template <typename T>
 SparseMatrixCSR<T>::SparseMatrixCSR(SparseMatrixCSR&& other) noexcept
@@ -161,22 +137,6 @@ SparseMatrixCSR<T>::SparseMatrixCSR(SparseMatrixCSR&& other) noexcept
     other.nnz_     = 0;
     other.rows_    = 0;
     other.columns_ = 0;
-}
-
-// move assignment
-template <typename T>
-SparseMatrixCSR<T>& SparseMatrixCSR<T>::operator=(SparseMatrixCSR&& other) noexcept
-{
-    rows_              = other.rows_;
-    columns_           = other.columns_;
-    nnz_               = other.nnz_;
-    values_            = std::move(other.values_);
-    column_indices_    = std::move(other.column_indices_);
-    row_start_indices_ = std::move(other.row_start_indices_);
-    other.nnz_         = 0;
-    other.rows_        = 0;
-    other.columns_     = 0;
-    return *this;
 }
 
 template <typename T>
