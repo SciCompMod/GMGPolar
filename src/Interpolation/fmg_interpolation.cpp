@@ -231,9 +231,6 @@ void Interpolation::applyFMGInterpolation(const PolarGrid& coarse_grid, const Po
     assert(std::ssize(coarse_values) == coarse_grid.numberOfNodes());
     assert(std::ssize(fine_result) == fine_grid.numberOfNodes());
 
-    const PolarGrid* coarse_grid_ptr = &coarse_grid;
-    const PolarGrid* fine_grid_ptr   = &fine_grid;
-
     /* We split the loops into two regions to better respect the */
     /* access patterns of the smoother and improve cache locality. */
 
@@ -246,7 +243,7 @@ void Interpolation::applyFMGInterpolation(const PolarGrid& coarse_grid, const Po
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_r, const int i_theta) {
-            fineNodeFMGInterpolation(i_r, i_theta, *coarse_grid_ptr, *fine_grid_ptr, fine_result, coarse_values);
+            fineNodeFMGInterpolation(i_r, i_theta, coarse_grid, fine_grid, fine_result, coarse_values);
         });
 
     /* For loop matches radial access pattern */
@@ -258,7 +255,7 @@ void Interpolation::applyFMGInterpolation(const PolarGrid& coarse_grid, const Po
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_theta, const int i_r) {
-            fineNodeFMGInterpolation(i_r, i_theta, *coarse_grid_ptr, *fine_grid_ptr, fine_result, coarse_values);
+            fineNodeFMGInterpolation(i_r, i_theta, coarse_grid, fine_grid, fine_result, coarse_values);
         });
 
     Kokkos::fence();
