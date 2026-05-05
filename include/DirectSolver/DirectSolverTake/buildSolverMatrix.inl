@@ -476,6 +476,8 @@ typename DirectSolverTake<LevelCacheType>::SystemMatrix DirectSolverTake<LevelCa
     const int num_omp_threads         = DirectSolver<LevelCacheType>::num_omp_threads_;
     const bool DirBC_Interior         = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
+    assert(validateSolverMatrixIndexing() && "Solver matrix indexing is inconsistent");
+
     const int n = grid.numberOfNodes();
 
 #ifdef GMGPOLAR_USE_MUMPS
