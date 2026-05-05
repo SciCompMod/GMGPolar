@@ -339,8 +339,8 @@ void SmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_r, const int i_theta) {
-            nodeBuildTridiagonalSolverMatrices(i_r, i_theta, *grid_ptr, DirBC_Interior, circle_tridiagonal_solver,
-                                               radial_tridiagonal_solver, arr, att, art, detDF, coeff_beta);
+            nodeBuildTridiagonalSolverMatrices(i_r, i_theta, *grid_ptr, DirBC_Interior, circle_tridiagonal_solver_,
+                                               radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
         });
 
     /* For loop matches radial access pattern */
@@ -352,8 +352,8 @@ void SmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_theta, const int i_r) {
-            nodeBuildTridiagonalSolverMatrices(i_r, i_theta, *grid_ptr, DirBC_Interior, circle_tridiagonal_solver,
-                                               radial_tridiagonal_solver, arr, att, art, detDF, coeff_beta);
+            nodeBuildTridiagonalSolverMatrices(i_r, i_theta, *grid_ptr, DirBC_Interior, circle_tridiagonal_solver_,
+                                               radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
         });
 
     Kokkos::fence();
