@@ -328,10 +328,10 @@ private:
     int matrix_dimension_;
     int batch_count_;
 
-    Vector<T> main_diagonal_;
-    Vector<T> sub_diagonal_;
-    Vector<T> buffer_;
-    Vector<T> gamma_;
+    AllocatableVector<T> main_diagonal_;
+    AllocatableVector<T> sub_diagonal_;
+    AllocatableVector<T> buffer_;
+    AllocatableVector<T> gamma_;
 
     bool is_cyclic_;
     bool is_factorized_;
