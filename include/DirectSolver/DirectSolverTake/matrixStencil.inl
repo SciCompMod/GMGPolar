@@ -1,6 +1,35 @@
 #pragma once
 
 template <class LevelCacheType>
+bool DirectSolverTake<LevelCacheType>::validateSolverMatrixIndexing() const
+{
+    const PolarGrid& grid = DirectSolver<LevelCacheType>::grid_;
+
+    // 1. Check each node: getSolverMatrixIndex == cumulative sum of prior stencil sizes
+    for (int global_index = 0; global_index < grid.numberOfNodes(); ++global_index) {
+        int i_r, i_theta;
+        grid.multiIndex(global_index, i_r, i_theta);
+
+        int expected = 0;
+        for (int prior = 0; prior < global_index; ++prior) {
+            expected += getStencilSize(prior);
+        }
+
+        if (getSolverMatrixIndex(i_r, i_theta) != expected) return false;
+        if (getStencilSize(global_index) != getStencil(i_r).size()) return false;
+    }
+
+    // 2. Check total non-zero count
+    int total = 0;
+    for (int global_index = 0; global_index < grid.numberOfNodes(); ++global_index) {
+        total += getStencilSize(global_index);
+    }
+    if (total != getNonZeroCountSolverMatrix()) return false;
+
+    return true;
+}
+
+template <class LevelCacheType>
 int DirectSolverTake<LevelCacheType>::getStencilSize(int global_index) const
 {
     const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
