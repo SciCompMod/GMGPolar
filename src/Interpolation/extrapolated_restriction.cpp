@@ -79,7 +79,7 @@ void Interpolation::applyExtrapolatedRestriction(const PolarGrid& fine_grid, con
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_theta_coarse, const int i_r_coarse) {
-            coarseNodeExtrapolatedRestriction(i_r_coarse, i_theta_coarse, fine_grid, coarse_grid, coarse_result, 
+            coarseNodeExtrapolatedRestriction(i_r_coarse, i_theta_coarse, fine_grid, coarse_grid, coarse_result,
                                               fine_values);
         });
 
