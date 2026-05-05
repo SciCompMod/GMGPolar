@@ -37,6 +37,7 @@ class Stencil
 public:
     Stencil(std::initializer_list<int> init);
     int operator[](StencilPosition type) const;
+    int size() const;
 
 private:
     std::array<int, 9> values_;
