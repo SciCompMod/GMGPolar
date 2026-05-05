@@ -74,6 +74,9 @@ private:
     void applySymmetryShiftInnerBoundary(Vector<double> x) const;
     void applySymmetryShiftOuterBoundary(Vector<double> x) const;
 
+    // Verify that solver matrix indexing is valid.
+    bool validateSolverMatrixIndexing() const;
+
     // Returns the total number of non-zero elements in the solver matrix.
     int getNonZeroCountSolverMatrix() const;
 
