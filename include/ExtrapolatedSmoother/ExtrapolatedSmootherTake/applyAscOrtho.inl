@@ -481,8 +481,6 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(C
     ConstVector<double> detDF      = level_cache.detDF();
     ConstVector<double> coeff_beta = level_cache.coeff_beta();
 
-    const PolarGrid* grid_ptr = &grid;
-
     /* The outer most circle next to the radial section is defined to be black. */
     const int start_black_circles = (grid.numberSmootherCircles() % 2 == 0) ? 1 : 0;
     const int num_black_circles   = (grid.numberSmootherCircles() - start_black_circles + 1) / 2;
@@ -496,7 +494,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(C
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
             int i_r = start_black_circles + circle_task * 2;
-            nodeApplyAscOrthoCircleTake(i_r, i_theta, *grid_ptr, DirBC_Interior, x, rhs, temp, arr, att, art, detDF,
+            nodeApplyAscOrthoCircleTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF,
                                         coeff_beta);
         });
 
@@ -524,8 +522,6 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(C
     ConstVector<double> detDF      = level_cache.detDF();
     ConstVector<double> coeff_beta = level_cache.coeff_beta();
 
-    const PolarGrid* grid_ptr = &grid;
-
     /* The outer most circle next to the radial section is defined to be black. */
     const int start_white_circles = (grid.numberSmootherCircles() % 2 == 0) ? 0 : 1;
     const int num_white_circles   = (grid.numberSmootherCircles() - start_white_circles + 1) / 2;
@@ -539,7 +535,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(C
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
             const int i_r = start_white_circles + circle_task * 2;
-            nodeApplyAscOrthoCircleTake(i_r, i_theta, *grid_ptr, DirBC_Interior, x, rhs, temp, arr, att, art, detDF,
+            nodeApplyAscOrthoCircleTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF,
                                         coeff_beta);
         });
 
@@ -567,8 +563,6 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(C
     ConstVector<double> detDF      = level_cache.detDF();
     ConstVector<double> coeff_beta = level_cache.coeff_beta();
 
-    const PolarGrid* grid_ptr = &grid;
-
     assert(grid.ntheta() % 2 == 0);
     const int start_black_radials    = 0;
     const int num_black_radial_lines = grid.ntheta() / 2;
@@ -582,7 +576,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(C
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int radial_task, const int i_r) {
             const int i_theta = start_black_radials + radial_task * 2;
-            nodeApplyAscOrthoRadialTake(i_r, i_theta, *grid_ptr, DirBC_Interior, x, rhs, temp, arr, att, art, detDF,
+            nodeApplyAscOrthoRadialTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF,
                                         coeff_beta);
         });
 
@@ -610,8 +604,6 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(C
     ConstVector<double> detDF      = level_cache.detDF();
     ConstVector<double> coeff_beta = level_cache.coeff_beta();
 
-    const PolarGrid* grid_ptr = &grid;
-
     assert(grid.ntheta() % 2 == 0);
     const int start_white_radials    = 1;
     const int num_white_radial_lines = grid.ntheta() / 2;
@@ -625,7 +617,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(C
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int radial_task, const int i_r) {
             const int i_theta = start_white_radials + radial_task * 2;
-            nodeApplyAscOrthoRadialTake(i_r, i_theta, *grid_ptr, DirBC_Interior, x, rhs, temp, arr, att, art, detDF,
+            nodeApplyAscOrthoRadialTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF,
                                         coeff_beta);
         });
 
