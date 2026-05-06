@@ -52,18 +52,21 @@ using namespace gmgpolar;
  *  - k1, k2 in angular direction
  */
 
-static inline void fineNodeProlongation(int i_r, int i_theta, int i_r_coarse, int i_theta_coarse,
-                                        const PolarGrid& coarse_grid, const PolarGrid& fine_grid,
-                                        Vector<double>& fine_result, ConstVector<double>& coarse_values)
+static inline void fineNodeProlongation(const int i_r, const int i_theta, const PolarGrid& coarse_grid,
+                                        const PolarGrid& fine_grid, Vector<double>& fine_result,
+                                        ConstVector<double>& coarse_values)
 {
+    const int i_r_coarse     = i_r / 2;
+    const int i_theta_coarse = i_theta / 2;
+
     if (i_r & 1) {
         if (i_theta & 1) { /* (odd, odd) -> fine node in center of coarse cell */
-            double h1 = fine_grid.radialSpacing(i_r - 1);
-            double h2 = fine_grid.radialSpacing(i_r);
-            double k1 = fine_grid.angularSpacing(i_theta - 1);
-            double k2 = fine_grid.angularSpacing(i_theta);
+            const double h1 = fine_grid.radialSpacing(i_r - 1);
+            const double h2 = fine_grid.radialSpacing(i_r);
+            const double k1 = fine_grid.angularSpacing(i_theta - 1);
+            const double k2 = fine_grid.angularSpacing(i_theta);
 
-            double value =
+            const double value =
                 (h1 * k1 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)] + /* Bottom left */
                  h2 * k1 * coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse)] + /* Bottom right */
                  h1 * k2 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse + 1)] + /* Top left */
@@ -74,26 +77,26 @@ static inline void fineNodeProlongation(int i_r, int i_theta, int i_r_coarse, in
             fine_result[fine_grid.index(i_r, i_theta)] = value;
         }
         else { /* (odd, even) -> between coarse nodes in radial direction */
-            double h1 = fine_grid.radialSpacing(i_r - 1);
-            double h2 = fine_grid.radialSpacing(i_r);
+            const double h1 = fine_grid.radialSpacing(i_r - 1);
+            const double h2 = fine_grid.radialSpacing(i_r);
 
-            double value = (h1 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)] + /* Left */
-                            h2 * coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse)] /* Right */
-                            ) /
-                           (h1 + h2);
+            const double value = (h1 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)] + /* Left */
+                                  h2 * coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse)] /* Right */
+                                  ) /
+                                 (h1 + h2);
 
             fine_result[fine_grid.index(i_r, i_theta)] = value;
         }
     }
     else {
         if (i_theta & 1) { /* (even, odd) -> between coarse nodes in angular direction */
-            double k1 = fine_grid.angularSpacing(i_theta - 1);
-            double k2 = fine_grid.angularSpacing(i_theta);
+            const double k1 = fine_grid.angularSpacing(i_theta - 1);
+            const double k2 = fine_grid.angularSpacing(i_theta);
 
-            double value = (k1 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)] + /* Bottom */
-                            k2 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse + 1)] /* Top */
-                            ) /
-                           (k1 + k2);
+            const double value = (k1 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)] + /* Bottom */
+                                  k2 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse + 1)] /* Top */
+                                  ) /
+                                 (k1 + k2);
 
             fine_result[fine_grid.index(i_r, i_theta)] = value;
         }
@@ -113,28 +116,29 @@ void Interpolation::applyProlongation(const PolarGrid& coarse_grid, const PolarG
     /* We split the loops into two regions to better respect the */
     /* access patterns of the smoother and improve cache locality. */
 
-#pragma omp parallel num_threads(max_omp_threads_)
-    {
-        /* Circular Indexing Section */
-#pragma omp for nowait
-        for (int i_r = 0; i_r < fine_grid.numberSmootherCircles(); i_r++) {
-            int i_r_coarse = i_r / 2;
-            for (int i_theta = 0; i_theta < fine_grid.ntheta(); i_theta++) {
-                int i_theta_coarse = i_theta / 2;
-                fineNodeProlongation(i_r, i_theta, i_r_coarse, i_theta_coarse, coarse_grid, fine_grid, fine_result,
-                                     coarse_values);
-            }
-        }
+    // The For loop matches circular access pattern */
+    Kokkos::parallel_for(
+        "Interpolation: Prolongation (Circular)",
+        Kokkos::MDRangePolicy<Kokkos::Rank<2>>( // Rank of the index space
+            {0, 0}, // Starting point of the index space
+            {fine_grid.numberSmootherCircles(), fine_grid.ntheta()} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int i_r, const int i_theta) {
+            fineNodeProlongation(i_r, i_theta, coarse_grid, fine_grid, fine_result, coarse_values);
+        });
 
-        /* Radial Indexing Section */
-#pragma omp for nowait
-        for (int i_theta = 0; i_theta < fine_grid.ntheta(); i_theta++) {
-            int i_theta_coarse = i_theta / 2;
-            for (int i_r = fine_grid.numberSmootherCircles(); i_r < fine_grid.nr(); i_r++) {
-                int i_r_coarse = i_r / 2;
-                fineNodeProlongation(i_r, i_theta, i_r_coarse, i_theta_coarse, coarse_grid, fine_grid, fine_result,
-                                     coarse_values);
-            }
-        }
-    }
+    /* For loop matches radial access pattern */
+    Kokkos::parallel_for(
+        "Interpolation: Prolongation (Radial)",
+        Kokkos::MDRangePolicy<Kokkos::Rank<2>>( // Rank of the index space
+            {0, fine_grid.numberSmootherCircles()}, // Starting point of the index space
+            {fine_grid.ntheta(), fine_grid.nr()} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int i_theta, const int i_r) {
+            fineNodeProlongation(i_r, i_theta, coarse_grid, fine_grid, fine_result, coarse_values);
+        });
+
+    Kokkos::fence();
 }
