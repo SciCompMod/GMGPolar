@@ -318,37 +318,10 @@ void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, Co
     /* ---------------- */
     // We parallelize over i_r (step 3) to avoid data race conditions between adjacent circles.
     // The i_theta loop is sequential inside the kernel.
-    {
-        const int start_circle       = 0;
+    for (int start_circle = 0; start_circle < 3; ++start_circle) {
         const int num_circular_tasks = (num_smoother_circles - start_circle + 2) / 3;
         Kokkos::parallel_for(
-            "ResidualGive: ApplyA (Circular, pass 0)", Kokkos::RangePolicy<>(0, num_circular_tasks),
-            KOKKOS_LAMBDA(const int circle_task) {
-                const int i_r = start_circle + circle_task * 3;
-                for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                    node_apply_a_give(i_r, i_theta, *grid_ptr, *level_cache_ptr, DirBC_Interior, result, x);
-                }
-            });
-        Kokkos::fence();
-    }
-    {
-        const int start_circle       = 1;
-        const int num_circular_tasks = (num_smoother_circles - start_circle + 2) / 3;
-        Kokkos::parallel_for(
-            "ResidualGive: ApplyA (Circular, pass 1)", Kokkos::RangePolicy<>(0, num_circular_tasks),
-            KOKKOS_LAMBDA(const int circle_task) {
-                const int i_r = start_circle + circle_task * 3;
-                for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                    node_apply_a_give(i_r, i_theta, *grid_ptr, *level_cache_ptr, DirBC_Interior, result, x);
-                }
-            });
-        Kokkos::fence();
-    }
-    {
-        const int start_circle       = 2;
-        const int num_circular_tasks = (num_smoother_circles - start_circle + 2) / 3;
-        Kokkos::parallel_for(
-            "ResidualGive: ApplyA (Circular, pass 2)", Kokkos::RangePolicy<>(0, num_circular_tasks),
+            "ResidualGive: ApplyA (Circular)", Kokkos::RangePolicy<>(0, num_circular_tasks),
             KOKKOS_LAMBDA(const int circle_task) {
                 const int i_r = start_circle + circle_task * 3;
                 for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
