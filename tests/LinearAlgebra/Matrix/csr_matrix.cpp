@@ -161,8 +161,8 @@ TEST(SparseMatrixCSR, move_construct)
     using triplet = SparseMatrixCSR<double>::triplet_type;
 
     SparseMatrixCSR<double> m1(4, 3,
-                                     {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0}, triplet{2, 0, 4.0},
-                                      triplet{2, 1, 5.0}, triplet{2, 2, 6.0}, triplet{3, 2, 7.0}});
+                               {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0}, triplet{2, 0, 4.0},
+                                triplet{2, 1, 5.0}, triplet{2, 2, 6.0}, triplet{3, 2, 7.0}});
 
     EXPECT_EQ(m1.rows(), 4);
     EXPECT_EQ(m1.columns(), 3);
@@ -323,8 +323,9 @@ TEST(SparseMatrixCSR, lu_solver_3x3)
     using triplet = SparseMatrixCSR<double>::triplet_type;
 
     SparseMatrixCSR<const double> matrix(3, 3,
-                                   {triplet{0, 0, 2.0}, triplet{0, 2, -10.0}, triplet{1, 0, -1.0}, triplet{1, 1, 2.0},
-                                    triplet{1, 2, -1.0}, triplet{2, 0, -7.0}, triplet{2, 2, 2.0}});
+                                         {triplet{0, 0, 2.0}, triplet{0, 2, -10.0}, triplet{1, 0, -1.0},
+                                          triplet{1, 1, 2.0}, triplet{1, 2, -1.0}, triplet{2, 0, -7.0},
+                                          triplet{2, 2, 2.0}});
 
     Vector<double> rhs("rhs", 3);
     rhs(0) = 1.0;
@@ -347,12 +348,12 @@ TEST(SparseMatrixCSR, lu_solver_5x5)
 {
     using triplet = SparseMatrixCSR<double>::triplet_type;
 
-    SparseMatrixCSR<const double> matrix(5, 5,
-                                   {triplet{0, 0, 2.0}, triplet{0, 3, 7.0}, triplet{0, 4, 3.0}, triplet{1, 0, -1.0},
-                                    triplet{1, 1, -5.0}, triplet{1, 2, -1.0}, triplet{1, 3, 5.0}, triplet{1, 4, 6.0},
-                                    triplet{2, 1, -7.0}, triplet{2, 2, 1.0}, triplet{2, 3, 2.0}, triplet{2, 4, -4.0},
-                                    triplet{3, 2, -4.0}, triplet{3, 3, 6.0}, triplet{3, 4, 9.0}, triplet{4, 0, 2.0},
-                                    triplet{4, 1, 4.0}, triplet{4, 3, -4.0}, triplet{4, 4, 9.0}});
+    SparseMatrixCSR<const double> matrix(
+        5, 5,
+        {triplet{0, 0, 2.0}, triplet{0, 3, 7.0}, triplet{0, 4, 3.0}, triplet{1, 0, -1.0}, triplet{1, 1, -5.0},
+         triplet{1, 2, -1.0}, triplet{1, 3, 5.0}, triplet{1, 4, 6.0}, triplet{2, 1, -7.0}, triplet{2, 2, 1.0},
+         triplet{2, 3, 2.0}, triplet{2, 4, -4.0}, triplet{3, 2, -4.0}, triplet{3, 3, 6.0}, triplet{3, 4, 9.0},
+         triplet{4, 0, 2.0}, triplet{4, 1, 4.0}, triplet{4, 3, -4.0}, triplet{4, 4, 9.0}});
 
     Vector<double> rhs("rhs", 5);
     rhs(0) = 1.0;
