@@ -41,8 +41,8 @@ public:
     using triplet_type = std::tuple<int, int, non_const_element_type>;
 
     SparseMatrixCSR();
-    SparseMatrixCSR(const SparseMatrixCSR& other) = delete;
-    SparseMatrixCSR(SparseMatrixCSR&& other) noexcept;
+    KOKKOS_DEFAULTED_FUNCTION SparseMatrixCSR(const SparseMatrixCSR& other) = default;
+    KOKKOS_DEFAULTED_FUNCTION SparseMatrixCSR(SparseMatrixCSR&& other) noexcept;
     template <typename T2,
               std::enable_if_t<std::is_same_v<non_const_element_type, T2> && std::is_const_v<T>, bool> = true>
     KOKKOS_FUNCTION SparseMatrixCSR(const SparseMatrixCSR<T2>& other);
@@ -52,8 +52,8 @@ public:
     explicit SparseMatrixCSR(int rows, int columns, const std::vector<non_const_element_type>& values,
                              const std::vector<int>& column_indices, const std::vector<int>& row_start_indices);
 
-    SparseMatrixCSR& operator=(const SparseMatrixCSR& other)     = default;
-    SparseMatrixCSR& operator=(SparseMatrixCSR&& other) noexcept = default;
+    KOKKOS_DEFAULTED_FUNCTION SparseMatrixCSR& operator=(const SparseMatrixCSR& other)     = default;
+    KOKKOS_DEFAULTED_FUNCTION SparseMatrixCSR& operator=(SparseMatrixCSR&& other) noexcept = default;
 
     template <typename T2,
               std::enable_if_t<std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>> && std::is_const_v<T>,
@@ -61,20 +61,21 @@ public:
     KOKKOS_FUNCTION SparseMatrixCSR& operator=(const SparseMatrixCSR<T2>& other);
 
     non_const_type copy() const;
+    const_type to_const() const;
 
-    int rows() const;
-    int columns() const;
-    int non_zero_size() const;
+    KOKKOS_FUNCTION int rows() const;
+    KOKKOS_FUNCTION int columns() const;
+    KOKKOS_FUNCTION int non_zero_size() const;
 
-    int row_nz_size(int row) const;
+    KOKKOS_FUNCTION int row_nz_size(int row) const;
 
-    int_element_type& row_nz_index(int row, int nz_index) const;
+    KOKKOS_FUNCTION int_element_type& row_nz_index(int row, int nz_index) const;
 
-    T& row_nz_entry(int row, int nz_index) const;
+    KOKKOS_FUNCTION T& row_nz_entry(int row, int nz_index) const;
 
-    T* values_data() const;
-    int_element_type* column_indices_data() const;
-    int_element_type* row_start_indices_data() const;
+    KOKKOS_FUNCTION T* values_data() const;
+    KOKKOS_FUNCTION int_element_type* column_indices_data() const;
+    KOKKOS_FUNCTION int_element_type* row_start_indices_data() const;
 
     template <typename U>
     friend std::ostream& operator<<(std::ostream& stream, const SparseMatrixCSR<U>& matrix);
@@ -145,7 +146,7 @@ SparseMatrixCSR<T>::non_const_type SparseMatrixCSR<T>::copy() const
 
 // move construction
 template <typename T>
-SparseMatrixCSR<T>::SparseMatrixCSR(SparseMatrixCSR&& other) noexcept
+KOKKOS_FUNCTION SparseMatrixCSR<T>::SparseMatrixCSR(SparseMatrixCSR&& other) noexcept
     : rows_(other.rows_)
     , columns_(other.columns_)
     , nnz_(other.nnz_)
@@ -276,19 +277,25 @@ SparseMatrixCSR<T>::SparseMatrixCSR(int rows, int columns, const std::vector<non
 }
 
 template <typename T>
-int SparseMatrixCSR<T>::rows() const
+SparseMatrixCSR<const T> SparseMatrixCSR<T>::to_const() const
+{
+    return const_type(*this);
+}
+
+template <typename T>
+KOKKOS_FUNCTION int SparseMatrixCSR<T>::rows() const
 {
     assert(this->rows_ >= 0);
     return this->rows_;
 }
 template <typename T>
-int SparseMatrixCSR<T>::columns() const
+KOKKOS_FUNCTION int SparseMatrixCSR<T>::columns() const
 {
     assert(this->columns_ >= 0);
     return this->columns_;
 }
 template <typename T>
-int SparseMatrixCSR<T>::non_zero_size() const
+KOKKOS_FUNCTION int SparseMatrixCSR<T>::non_zero_size() const
 {
     assert(this->nnz_ >= 0);
     assert(static_cast<size_t>(this->nnz_) <= static_cast<size_t>(this->rows_) * static_cast<size_t>(this->columns_));
@@ -296,14 +303,14 @@ int SparseMatrixCSR<T>::non_zero_size() const
 }
 
 template <typename T>
-int SparseMatrixCSR<T>::row_nz_size(int row) const
+KOKKOS_FUNCTION int SparseMatrixCSR<T>::row_nz_size(int row) const
 {
     assert(row >= 0 && row < rows_);
     return row_start_indices_(row + 1) - row_start_indices_(row);
 }
 
 template <typename T>
-SparseMatrixCSR<T>::int_element_type& SparseMatrixCSR<T>::row_nz_index(int row, int nz_index) const
+KOKKOS_FUNCTION SparseMatrixCSR<T>::int_element_type& SparseMatrixCSR<T>::row_nz_index(int row, int nz_index) const
 {
     assert(row >= 0 && row < rows_);
     assert(nz_index >= 0 && nz_index < row_nz_size(row));
@@ -311,7 +318,7 @@ SparseMatrixCSR<T>::int_element_type& SparseMatrixCSR<T>::row_nz_index(int row, 
 }
 
 template <typename T>
-T& SparseMatrixCSR<T>::row_nz_entry(int row, int nz_index) const
+KOKKOS_FUNCTION T& SparseMatrixCSR<T>::row_nz_entry(int row, int nz_index) const
 {
     assert(row >= 0 && row < rows_);
     assert(nz_index >= 0 && nz_index < row_nz_size(row));
@@ -319,19 +326,19 @@ T& SparseMatrixCSR<T>::row_nz_entry(int row, int nz_index) const
 }
 
 template <typename T>
-T* SparseMatrixCSR<T>::values_data() const
+KOKKOS_FUNCTION T* SparseMatrixCSR<T>::values_data() const
 {
     return values_.data();
 }
 
 template <typename T>
-SparseMatrixCSR<T>::int_element_type* SparseMatrixCSR<T>::column_indices_data() const
+KOKKOS_FUNCTION SparseMatrixCSR<T>::int_element_type* SparseMatrixCSR<T>::column_indices_data() const
 {
     return column_indices_.data();
 }
 
 template <typename T>
-SparseMatrixCSR<T>::int_element_type* SparseMatrixCSR<T>::row_start_indices_data() const
+KOKKOS_FUNCTION SparseMatrixCSR<T>::int_element_type* SparseMatrixCSR<T>::row_start_indices_data() const
 {
     return row_start_indices_.data();
 }
