@@ -11,7 +11,6 @@
 #include <tuple>
 #include <unistd.h>
 #include <vector>
-#include <vector>
 #include <unordered_map>
 #include <cassert>
 #include <iostream>
@@ -34,7 +33,7 @@ class SparseMatrixCSR
 {
 public:
     using non_const_element_type = std::remove_const_t<T>;
-    using int_element_type = std::conditional_t<std::is_const_v<T>, const int, int>;
+    using int_element_type       = std::conditional_t<std::is_const_v<T>, const int, int>;
 
     using const_type     = SparseMatrixCSR<const T>;
     using non_const_type = SparseMatrixCSR<non_const_element_type>;
@@ -50,11 +49,16 @@ public:
 
     explicit SparseMatrixCSR(int rows, int columns, std::function<int(int)> nz_per_row);
     explicit SparseMatrixCSR(int rows, int columns, const std::vector<triplet_type>& entries);
-    explicit SparseMatrixCSR(int rows, int columns, const std::vector<T>& values,
+    explicit SparseMatrixCSR(int rows, int columns, const std::vector<non_const_element_type>& values,
                              const std::vector<int>& column_indices, const std::vector<int>& row_start_indices);
 
     SparseMatrixCSR& operator=(const SparseMatrixCSR& other)     = default;
     SparseMatrixCSR& operator=(SparseMatrixCSR&& other) noexcept = default;
+
+    template <typename T2,
+              std::enable_if_t<std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>> && std::is_const_v<T>,
+                               bool> = true>
+    KOKKOS_FUNCTION SparseMatrixCSR& operator=(const SparseMatrixCSR<T2>& other);
 
     non_const_type copy() const;
 
@@ -75,6 +79,9 @@ public:
     template <typename U>
     friend std::ostream& operator<<(std::ostream& stream, const SparseMatrixCSR<U>& matrix);
 
+    template <typename T2>
+    friend class SparseMatrixCSR;
+
 private:
     int rows_;
     int columns_;
@@ -83,7 +90,7 @@ private:
     AllocatableVector<int_element_type> column_indices_;
     AllocatableVector<int_element_type> row_start_indices_;
 
-    bool is_sorted_entries(const std::vector<std::tuple<int, int, T>>& entries)
+    bool is_sorted_entries(const std::vector<std::tuple<int, int, non_const_element_type>>& entries)
     {
         for (size_t i = 1; i < entries.size(); ++i) {
             const auto& prev = entries[i - 1];
@@ -165,24 +172,44 @@ KOKKOS_FUNCTION SparseMatrixCSR<T>::SparseMatrixCSR(const SparseMatrixCSR<T2>& o
 }
 
 template <typename T>
+template <typename T2,
+          std::enable_if_t<std::is_same_v<std::remove_const_t<T>, std::remove_const_t<T2>> && std::is_const_v<T>, bool>>
+KOKKOS_FUNCTION SparseMatrixCSR<T>& SparseMatrixCSR<T>::operator=(const SparseMatrixCSR<T2>& other)
+{
+    rows_              = other.rows_;
+    columns_           = other.columns_;
+    nnz_               = other.nnz_;
+    values_            = other.values_;
+    column_indices_    = other.column_indices_;
+    row_start_indices_ = other.row_start_indices_;
+}
+
+template <typename T>
 SparseMatrixCSR<T>::SparseMatrixCSR(int rows, int columns, std::function<int(int)> nz_per_row)
     : rows_(rows)
     , columns_(columns)
-    , row_start_indices_("CSR row start indices", rows_ + 1)
 {
     assert(rows >= 0);
     assert(columns >= 0);
+
+    Vector<int> row_start_indices("CSR row start indices", rows_ + 1);
+
     nnz_ = 0;
     for (int i = 0; i < rows; i++) {
-        row_start_indices_(i) = nnz_;
+        row_start_indices(i) = nnz_;
         nnz_ += nz_per_row(i);
     }
-    row_start_indices_(rows) = nnz_;
-    values_                  = Vector<T>("CSR values", nnz_);
-    column_indices_          = Vector<int>("CSR column indices", nnz_);
+    row_start_indices(rows) = nnz_;
 
-    assign(values_, T(0));
-    assign(column_indices_, 0);
+    Vector<non_const_element_type> values("CSR values", nnz_);
+    Vector<int> column_indices("CSR column indices", nnz_);
+
+    assign(values, T(0));
+    assign(column_indices, 0);
+
+    values_            = values;
+    column_indices_    = column_indices;
+    row_start_indices_ = row_start_indices;
 }
 
 template <typename T>
@@ -191,50 +218,61 @@ SparseMatrixCSR<T>::SparseMatrixCSR(int rows, int columns, const std::vector<tri
     rows_(rows)
     , columns_(columns)
     , nnz_(entries.size())
-    , values_("CSR values", nnz_)
-    , column_indices_("CSR column indices", nnz_)
-    , row_start_indices_("CSR row start indices", rows_ + 1)
 {
     assert(rows >= 0);
     assert(columns >= 0);
     assert(is_sorted_entries(entries) && "Entries must be sorted by row!");
+
+    Vector<non_const_element_type> values("CSR values", nnz_);
+    Vector<int> column_indices("CSR column indices", nnz_);
+    Vector<int> row_start_indices("CSR row start indices", rows_ + 1);
+
     // fill values and column indexes
     for (int i = 0; i < nnz_; i++) {
         assert(0 <= std::get<0>(entries[i]) && std::get<0>(entries[i]) < rows);
-        values_(i)         = std::get<2>(entries[i]);
-        column_indices_(i) = std::get<1>(entries[i]);
-        assert(0 <= column_indices_(i) && column_indices_(i) < columns);
+        values(i)         = std::get<2>(entries[i]);
+        column_indices(i) = std::get<1>(entries[i]);
+        assert(0 <= column_indices(i) && column_indices(i) < columns);
     }
     //fill row indexes
-    int count             = 0;
-    row_start_indices_(0) = 0;
+    int count            = 0;
+    row_start_indices(0) = 0;
     for (int r = 0; r < rows; r++) {
         while (count < nnz_ && std::get<0>(entries[count]) == r)
             count++;
-        row_start_indices_(r + 1) = count;
+        row_start_indices(r + 1) = count;
     }
-    assert(row_start_indices_(rows) == nnz_);
+    assert(row_start_indices(rows) == nnz_);
+
+    values_            = values;
+    column_indices_    = column_indices;
+    row_start_indices_ = row_start_indices;
 }
 
 template <typename T>
-SparseMatrixCSR<T>::SparseMatrixCSR(int rows, int columns, const std::vector<T>& values,
+SparseMatrixCSR<T>::SparseMatrixCSR(int rows, int columns, const std::vector<non_const_element_type>& values,
                                     const std::vector<int>& column_indices, const std::vector<int>& row_start_indices)
     : rows_(rows)
     , columns_(columns)
     , nnz_(values.size())
-    , values_("CSR values", nnz_)
-    , column_indices_("CSR column indices", nnz_)
-    , row_start_indices_("CSR row start indices", rows_ + 1)
 {
     assert(rows >= 0);
     assert(columns >= 0);
     assert(row_start_indices.size() == static_cast<size_t>(rows + 1));
     assert(values.size() == column_indices.size());
 
+    Vector<non_const_element_type> csr_values("CSR values", nnz_);
+    Vector<int> csr_column_indices("CSR column indices", nnz_);
+    Vector<int> csr_row_start_indices("CSR row start indices", rows_ + 1);
+
     // Copy data to internal storage
-    std::copy(values.begin(), values.end(), values_.data());
-    std::copy(column_indices.begin(), column_indices.end(), column_indices_.data());
-    std::copy(row_start_indices.begin(), row_start_indices.end(), row_start_indices_.data());
+    std::copy(values.begin(), values.end(), csr_values.data());
+    std::copy(column_indices.begin(), column_indices.end(), csr_column_indices.data());
+    std::copy(row_start_indices.begin(), row_start_indices.end(), csr_row_start_indices.data());
+
+    values_            = csr_values;
+    column_indices_    = csr_column_indices;
+    row_start_indices_ = csr_row_start_indices;
 }
 
 template <typename T>

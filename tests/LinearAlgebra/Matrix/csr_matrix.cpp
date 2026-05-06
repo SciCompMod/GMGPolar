@@ -7,7 +7,7 @@ using namespace gmgpolar;
 
 TEST(SparseMatrixCSR, default_construct)
 {
-    const SparseMatrixCSR<double> v;
+    SparseMatrixCSR<const double> v;
     (void)v;
 }
 
@@ -15,7 +15,7 @@ TEST(SparseMatrixCSR, value_construct)
 {
     using triplet = SparseMatrixCSR<double>::triplet_type;
 
-    const SparseMatrixCSR<double> m(4, 3,
+    SparseMatrixCSR<const double> m(4, 3,
                                     {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0}, triplet{2, 0, 4.0},
                                      triplet{2, 1, 5.0}, triplet{2, 2, 6.0}, triplet{3, 2, 7.0}});
 
@@ -43,10 +43,10 @@ TEST(SparseMatrixCSR, copy_construct)
 {
     using triplet = SparseMatrixCSR<double>::triplet_type;
 
-    const SparseMatrixCSR<double> m1(4, 3,
+    SparseMatrixCSR<const double> m1(4, 3,
                                      {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0}, triplet{2, 0, 4.0},
                                       triplet{2, 1, 5.0}, triplet{2, 2, 6.0}, triplet{3, 2, 7.0}});
-    const SparseMatrixCSR<double> m2 = m1.copy();
+    SparseMatrixCSR<const double> m2 = m1.copy();
 
     const double dense_values[4][3] = {{1.0, 0.0, 2.0}, {3.0, 0.0, 0.0}, {4.0, 5.0, 6.0}, {0.0, 0.0, 7.0}};
 
@@ -89,12 +89,12 @@ TEST(SparseMatrixCSR, copy_assign)
 {
     const double dense_values[4][3] = {{1.0, 0.0, 2.0}, {3.0, 0.0, 0.0}, {4.0, 5.0, 6.0}, {0.0, 0.0, 7.0}};
 
-    SparseMatrixCSR<double> m2;
+    SparseMatrixCSR<const double> m2;
 
     {
         using triplet = SparseMatrixCSR<double>::triplet_type;
 
-        const SparseMatrixCSR<double> m1(4, 3,
+        SparseMatrixCSR<const double> m1(4, 3,
                                          {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0},
                                           triplet{2, 0, 4.0}, triplet{2, 1, 5.0}, triplet{2, 2, 6.0},
                                           triplet{3, 2, 7.0}});
@@ -207,10 +207,10 @@ TEST(SparseMatrixCSR, move_assign)
 
     using triplet = SparseMatrixCSR<double>::triplet_type;
 
-    SparseMatrixCSR<double> m2;
+    SparseMatrixCSR<const double> m2;
 
     {
-        const SparseMatrixCSR<double> m1(4, 3,
+        SparseMatrixCSR<const double> m1(4, 3,
                                          {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0},
                                           triplet{2, 0, 4.0}, triplet{2, 1, 5.0}, triplet{2, 2, 6.0},
                                           triplet{3, 2, 7.0}});
@@ -322,7 +322,7 @@ TEST(SparseMatrixCSR, lu_solver_3x3)
 {
     using triplet = SparseMatrixCSR<double>::triplet_type;
 
-    SparseMatrixCSR<double> matrix(3, 3,
+    SparseMatrixCSR<const double> matrix(3, 3,
                                    {triplet{0, 0, 2.0}, triplet{0, 2, -10.0}, triplet{1, 0, -1.0}, triplet{1, 1, 2.0},
                                     triplet{1, 2, -1.0}, triplet{2, 0, -7.0}, triplet{2, 2, 2.0}});
 
@@ -347,7 +347,7 @@ TEST(SparseMatrixCSR, lu_solver_5x5)
 {
     using triplet = SparseMatrixCSR<double>::triplet_type;
 
-    SparseMatrixCSR<double> matrix(5, 5,
+    SparseMatrixCSR<const double> matrix(5, 5,
                                    {triplet{0, 0, 2.0}, triplet{0, 3, 7.0}, triplet{0, 4, 3.0}, triplet{1, 0, -1.0},
                                     triplet{1, 1, -5.0}, triplet{1, 2, -1.0}, triplet{1, 3, 5.0}, triplet{1, 4, 6.0},
                                     triplet{2, 1, -7.0}, triplet{2, 2, 1.0}, triplet{2, 3, 2.0}, triplet{2, 4, -4.0},

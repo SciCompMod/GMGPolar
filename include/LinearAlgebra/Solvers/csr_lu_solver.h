@@ -51,7 +51,7 @@ public:
      *        entry in a row. Ensures diagonal is not too small compared
      *        to other row entries. Default: 1e-8.
      */
-    explicit SparseLUSolver(const SparseMatrixCSR<T>& A, T tolerance_abs = static_cast<T>(1e-12),
+    explicit SparseLUSolver(const SparseMatrixCSR<const T>& A, T tolerance_abs = static_cast<T>(1e-12),
                             T tolerance_rel = static_cast<T>(1e-8));
 
     /**
@@ -78,18 +78,18 @@ private:
     T tolerance_rel_; // relative to the max in the row
 
     // Core methods
-    void factorize(const SparseMatrixCSR<T>& A);
+    void factorize(const SparseMatrixCSR<const T>& A);
     void solveInPlacePermuted(T* b) const;
 
     // Reordering and permutation utilities
-    std::vector<int> computeRCM(const SparseMatrixCSR<T>& A) const;
-    SparseMatrixCSR<T> permuteMatrix(const SparseMatrixCSR<T>& A, const std::vector<int>& perm,
+    std::vector<int> computeRCM(const SparseMatrixCSR<const T>& A) const;
+    SparseMatrixCSR<T> permuteMatrix(const SparseMatrixCSR<const T>& A, const std::vector<int>& perm,
                                      const std::vector<int>& perm_inv) const;
 
     // Factorization components
-    void symbolicFactorization(const SparseMatrixCSR<T>& A, std::vector<std::vector<int>>& L_pattern,
+    void symbolicFactorization(const SparseMatrixCSR<const T>& A, std::vector<std::vector<int>>& L_pattern,
                                std::vector<std::vector<int>>& U_pattern) const;
-    void numericFactorization(const SparseMatrixCSR<T>& A, const std::vector<std::vector<int>>& L_pattern,
+    void numericFactorization(const SparseMatrixCSR<const T>& A, const std::vector<std::vector<int>>& L_pattern,
                               const std::vector<std::vector<int>>& U_pattern);
 };
 
@@ -107,7 +107,7 @@ SparseLUSolver<T>::SparseLUSolver(T tolerance_abs, T tolerance_rel)
  * @param A - Input matrix (must be square)
  */
 template <typename T>
-SparseLUSolver<T>::SparseLUSolver(const SparseMatrixCSR<T>& A, T tolerance_abs, T tolerance_rel)
+SparseLUSolver<T>::SparseLUSolver(const SparseMatrixCSR<const T>& A, T tolerance_abs, T tolerance_rel)
     : factorized_(false)
     , tolerance_abs_(tolerance_abs)
     , tolerance_rel_(tolerance_rel)
@@ -198,7 +198,7 @@ void SparseLUSolver<T>::solveInPlacePermuted(T* b) const
  * @return Permutation vector
  */
 template <typename T>
-std::vector<int> SparseLUSolver<T>::computeRCM(const SparseMatrixCSR<T>& A) const
+std::vector<int> SparseLUSolver<T>::computeRCM(const SparseMatrixCSR<const T>& A) const
 {
     const int n = A.rows();
     if (n == 0)
@@ -310,7 +310,7 @@ std::vector<int> SparseLUSolver<T>::computeRCM(const SparseMatrixCSR<T>& A) cons
  * @return Permuted CSR matrix
  */
 template <typename T>
-SparseMatrixCSR<T> SparseLUSolver<T>::permuteMatrix(const SparseMatrixCSR<T>& A, const std::vector<int>& perm,
+SparseMatrixCSR<T> SparseLUSolver<T>::permuteMatrix(const SparseMatrixCSR<const T>& A, const std::vector<int>& perm,
                                                     const std::vector<int>& perm_inv) const
 {
     const int n = A.rows();
@@ -350,7 +350,7 @@ SparseMatrixCSR<T> SparseLUSolver<T>::permuteMatrix(const SparseMatrixCSR<T>& A,
  * @param A - Permuted matrix to factorize
  */
 template <typename T>
-void SparseLUSolver<T>::factorize(const SparseMatrixCSR<T>& A)
+void SparseLUSolver<T>::factorize(const SparseMatrixCSR<const T>& A)
 {
     std::vector<std::vector<int>> L_pattern, U_pattern;
     symbolicFactorization(A, L_pattern, U_pattern);
@@ -365,7 +365,8 @@ void SparseLUSolver<T>::factorize(const SparseMatrixCSR<T>& A)
  * @param U_pattern - Output pattern for U
  */
 template <typename T>
-void SparseLUSolver<T>::symbolicFactorization(const SparseMatrixCSR<T>& A, std::vector<std::vector<int>>& L_pattern,
+void SparseLUSolver<T>::symbolicFactorization(const SparseMatrixCSR<const T>& A,
+                                              std::vector<std::vector<int>>& L_pattern,
                                               std::vector<std::vector<int>>& U_pattern) const
 {
     const int n = A.rows();
@@ -434,7 +435,7 @@ void SparseLUSolver<T>::symbolicFactorization(const SparseMatrixCSR<T>& A, std::
  * @param U_pattern - Symbolic pattern for U
  */
 template <typename T>
-void SparseLUSolver<T>::numericFactorization(const SparseMatrixCSR<T>& A,
+void SparseLUSolver<T>::numericFactorization(const SparseMatrixCSR<const T>& A,
                                              const std::vector<std::vector<int>>& L_pattern,
                                              const std::vector<std::vector<int>>& U_pattern)
 {
