@@ -52,7 +52,7 @@ public:
     explicit SparseMatrixCSR(int rows, int columns, const std::vector<non_const_element_type>& values,
                              const std::vector<int>& column_indices, const std::vector<int>& row_start_indices);
 
-    KOKKOS_DEFAULTED_FUNCTION SparseMatrixCSR& operator=(const SparseMatrixCSR& other)     = default;
+    KOKKOS_FUNCTION SparseMatrixCSR& operator=(const SparseMatrixCSR& other);
     KOKKOS_DEFAULTED_FUNCTION SparseMatrixCSR& operator=(SparseMatrixCSR&& other) noexcept = default;
 
     template <typename T2,
@@ -183,6 +183,29 @@ KOKKOS_FUNCTION SparseMatrixCSR<T>& SparseMatrixCSR<T>::operator=(const SparseMa
     values_            = other.values_;
     column_indices_    = other.column_indices_;
     row_start_indices_ = other.row_start_indices_;
+}
+
+template <typename T>
+KOKKOS_FUNCTION SparseMatrixCSR<T>& SparseMatrixCSR<T>::operator=(const SparseMatrixCSR<T>& other)
+{
+    if (this == &other) {
+        // Self-assignment, no work needed
+        return *this;
+    }
+    // Only allocate new memory if the sizes are different
+    if (nnz_ != other.nnz_ || rows_ != other.rows_) {
+        values_            = Vector<T>("CSR values", other.nnz_);
+        column_indices_    = Vector<int>("CSR column indices", other.nnz_);
+        row_start_indices_ = Vector<int>("CSR row start indices", other.rows_ + 1);
+    }
+    // Copy the elements
+    rows_    = other.rows_;
+    columns_ = other.columns_;
+    nnz_     = other.nnz_;
+    Kokkos::deep_copy(values_, other.values_);
+    Kokkos::deep_copy(column_indices_, other.column_indices_);
+    Kokkos::deep_copy(row_start_indices_, other.row_start_indices_);
+    return *this;
 }
 
 template <typename T>
