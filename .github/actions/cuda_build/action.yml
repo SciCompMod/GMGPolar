@@ -25,7 +25,7 @@ runs:
         echo "Kokkos_ROOT=$PWD/kokkos" >> $GITHUB_ENV
         git clone --depth 1 --branch 3.0.00 https://github.com/kokkos/kokkos.git kokkos_src
         cmake \
-              -D CXX=kokkos_src/bin/nvcc_wrapper \
+              -D CMAKE_CXX_COMPILER=kokkos_src/bin/nvcc_wrapper \
               -D CMAKE_CXX_STANDARD=20 \
               -D Kokkos_ENABLE_DEPRECATED_CODE_4=OFF \
               -D Kokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
