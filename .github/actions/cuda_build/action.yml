@@ -17,12 +17,18 @@ runs:
     - name: Install additional dependencies to use MUMPS
       if: inputs.use-mumps == 'true'
       uses: ./.github/actions/install-dependencies
-    - name: Build Kokkos
+    - name: Cache Kokkos
+      id: restore-cache-kokkos
+      uses: actions/cache/restore@v5
+      with:
+        path: third-party/kokkos
+        key: kokkos-v5.0.2
+    - name: Install Kokkos
       shell: bash
+      if: steps.cache-kokkos.outputs.cache-hit != 'true'
       run: |
         cd third-party
         export Kokkos_ROOT=$PWD/kokkos
-        echo "Kokkos_ROOT=$PWD/kokkos" >> $GITHUB_ENV
         git clone --depth 1 --branch 5.0.2 https://github.com/kokkos/kokkos.git kokkos_src
         cmake \
               -D CMAKE_CXX_COMPILER=$PWD/kokkos_src/bin/nvcc_wrapper \
@@ -39,9 +45,16 @@ runs:
             cmake --build build --parallel 4
             cmake --install build --prefix $Kokkos_ROOT
             rm -rf build
+    - name: Cache Kokkos
+      id: cache-kokkos
+      uses: actions/cache/save@v5
+      with:
+        path: third-party/kokkos
+        key: ${{ steps.restore-cache-kokkos.outputs.cache-primary-key }}
     - name: Build
       shell: bash
       run: |
+        export Kokkos_ROOT=$PWD/kokkos
         mkdir build && cd build
         export CXXFLAGS="-Wall -Wextra -pedantic -Wno-unused -Wfloat-conversion -Werror"
         cmake -DCMAKE_BUILD_TYPE=Debug -DGMGPOLAR_ENABLE_COVERAGE=OFF -DGMGPOLAR_USE_MUMPS=${{ inputs.use-mumps }} ..
