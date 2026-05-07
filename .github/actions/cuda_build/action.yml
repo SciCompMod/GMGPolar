@@ -54,7 +54,7 @@ runs:
     - name: Build
       shell: bash
       run: |
-        export Kokkos_ROOT=$PWD/kokkos
+        export Kokkos_ROOT=$PWD/third-party/kokkos
         mkdir build && cd build
         export CXXFLAGS="-Wall -Wextra -pedantic -Wno-unused -Wfloat-conversion -Werror=cross-execution-space-call"
         cmake \
