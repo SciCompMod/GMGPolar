@@ -16,15 +16,17 @@ jobs:
     strategy:
       matrix:
         USE_MUMPS: [false, true]
+        backend: ['openmp', 'cuda']
     name: 'install-and-build (USE_MUMPS=${{matrix.USE_MUMPS}})'
     container:
-      image: ghcr.io/gyselax/gyselalibxx_env:latest
+      image: ${{ matrix.backend == 'openmp' && ghcr.io/gyselax/gyselalibxx_env:latest || ghcr.io/cexa-project/ddc/latest_cuda:latest }}
       options: --user root
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/build
         with:
           use-mumps: ${{ matrix.USE_MUMPS }}
+          backend: ${{ matrix.backend }}
       
   run-unit-test:
     needs: install-and-build

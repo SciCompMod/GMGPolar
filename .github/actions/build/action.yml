@@ -5,6 +5,10 @@ inputs:
     description: 'Indicates if GMGPolar should be built with mumps support'
     type: bool
     required: true
+  backend:
+    description: 'The chosen backend for Kokkos (openmp/cuda)'
+    type: string
+    required: true
 
 runs:
   using: "composite"
@@ -18,6 +22,7 @@ runs:
       if: inputs.use-mumps == 'true'
       uses: ./.github/actions/install-dependencies
     - name: Build
+      if: inputs.backend == 'openmp'
       shell: bash
       run: |
         mkdir build && cd build
@@ -25,11 +30,33 @@ runs:
         export CXXFLAGS="-Wall -Wextra -pedantic -Wno-unused -Wfloat-conversion"
         cmake -DCMAKE_BUILD_TYPE=Debug -DGMGPOLAR_ENABLE_COVERAGE=ON -DGMGPOLAR_USE_MUMPS=${{ inputs.use-mumps }} ..
         make -j4
+    - name: Build Kokkos
+      if: inputs.backend == 'cuda'
+      shell: bash
+      run: |
+        cd third-party
+        export Kokkos_ROOT=$PWD/kokkos
+        git clone https://github.com/kokkos/kokkos.git kokkos_src
+        cmake \
+              -D Kokkos_ENABLE_DEPRECATED_CODE_4=OFF \
+              -D Kokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
+              -D Kokkos_ENABLE_SERIAL=ON \
+              -D Kokkos_ENABLE_CUDA=ON -D Kokkos_ENABLE_CUDA_CONSTEXPR=ON -D Kokkos_ENABLE_CUDA_RELOCATABLE_DEVICE_CODE=ON -D Kokkos_ARCH_AMPERE80=ON \
+              -B build \
+              -S kokkos_src
+            cmake --build build
+            cmake --install build --prefix $Kokkos_ROOT
+            rm -rf build
+
+        export CXXFLAGS="-Wall -Wextra -pedantic -Wno-unused -Wfloat-conversion -Werror"
+        cmake -DCMAKE_BUILD_TYPE=Debug -DGMGPOLAR_ENABLE_COVERAGE=OFF -DGMGPOLAR_USE_MUMPS=${{ inputs.use-mumps }} ..
+        make -j4
     - name: create build dir archive
       shell: bash
       run: |
         tar -czf build.tar.gz build
     - name: Upload build dir archive
+      if: inputs.backend == 'openmp'
       uses: actions/upload-artifact@v4
       with:
         name: build-cpp-linux-gmgpolar${{ inputs.use-mumps == 'true' && '-mumps' || ''}}
