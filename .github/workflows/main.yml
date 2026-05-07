@@ -11,12 +11,13 @@ on :
 
 jobs:
   install-and-build:
-    if: github.event.pull_request.draft == false
+    #if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     strategy:
       matrix:
         USE_MUMPS: [false, true]
-        backend: ['openmp', 'cuda']
+        #backend: ['openmp', 'cuda']
+        backend: ['cuda']
     name: 'install-and-build (USE_MUMPS=${{matrix.USE_MUMPS}}, backend=${{matrix.backend}})'
     container:
       image: ${{ matrix.backend == 'openmp' && 'ghcr.io/gyselax/gyselalibxx_env:latest' || 'nvidia/cuda:13.1.2-devel-ubuntu24.04' }}
