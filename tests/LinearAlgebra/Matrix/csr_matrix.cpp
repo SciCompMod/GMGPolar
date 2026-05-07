@@ -99,7 +99,7 @@ TEST(SparseMatrixCSR, copy_assign)
                                           triplet{2, 0, 4.0}, triplet{2, 1, 5.0}, triplet{2, 2, 6.0},
                                           triplet{3, 2, 7.0}});
 
-        m2 = m1;
+        m2 = m1.copy();
 
         EXPECT_EQ(m1.rows(), 4);
         EXPECT_EQ(m1.columns(), 3);
