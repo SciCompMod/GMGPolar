@@ -16,13 +16,22 @@ jobs:
     strategy:
       matrix:
         USE_MUMPS: [false, true]
-    name: 'install-and-build (USE_MUMPS=${{matrix.USE_MUMPS}})'
+        backend: ['openmp', 'cuda']
+        exclude:
+          - backend: cuda
+            USE_MUMPS: true
+    name: 'install-and-build (USE_MUMPS=${{matrix.USE_MUMPS}}, backend=${{matrix.backend}})'
     container:
-      image: ghcr.io/gyselax/gyselalibxx_env:latest
+      image: ${{ matrix.backend == 'openmp' && 'ghcr.io/gyselax/gyselalibxx_env:latest' || 'nvidia/cuda:12.8.2-devel-ubuntu24.04' }}
       options: --user root
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/build
+        if: matrix.backend == 'openmp'
+        with:
+          use-mumps: ${{ matrix.USE_MUMPS }}
+      - uses: ./.github/actions/cuda_build
+        if: matrix.backend == 'cuda'
         with:
           use-mumps: ${{ matrix.USE_MUMPS }}
       
@@ -36,7 +45,7 @@ jobs:
       image: ghcr.io/gyselax/gyselalibxx_env:latest
       options: --user root
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/test
         with:
           build-artifact: build-cpp-linux-gmgpolar
@@ -47,14 +56,14 @@ jobs:
     needs: [run-unit-test]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Download cpp coverage report
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: test-coverage-reports
           path: coverage
       - name: Download mumps cpp coverage report
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: test-coverage-reports-mumps
           path: coverage-mumps
@@ -72,7 +81,7 @@ jobs:
       image: ghcr.io/gyselax/gyselalibxx_env:latest
       options: --user root
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Install clang-format v18
         run: |
           apt-get -qq update

@@ -1,0 +1,68 @@
+name: "Linux Cuda Build"
+
+inputs:
+  use-mumps:
+    description: 'Indicates if GMGPolar should be built with mumps support'
+    type: bool
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install dependencies
+      shell: bash
+      run: |
+        apt-get -qq update
+        apt-get -qq -y install git cmake
+    - name: Install additional dependencies to use MUMPS
+      if: inputs.use-mumps == 'true'
+      uses: ./.github/actions/install-dependencies
+    - name: Cache Kokkos
+      id: restore-cache-kokkos
+      uses: actions/cache/restore@v5
+      with:
+        path: third-party/kokkos
+        key: kokkos-v5.0.2
+    - name: Install Kokkos
+      shell: bash
+      if: steps.restore-cache-kokkos.outputs.cache-hit != 'true'
+      run: |
+        cd third-party
+        export Kokkos_ROOT=$PWD/kokkos
+        git clone --depth 1 --branch 5.0.2 https://github.com/kokkos/kokkos.git kokkos_src
+        cmake \
+              -D CMAKE_CXX_COMPILER=$PWD/kokkos_src/bin/nvcc_wrapper \
+              -D CMAKE_CXX_STANDARD=20 \
+              -D Kokkos_ENABLE_DEPRECATED_CODE_4=OFF \
+              -D Kokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
+              -D Kokkos_ENABLE_SERIAL=ON \
+              -D Kokkos_ENABLE_CUDA=ON \
+              -D Kokkos_ENABLE_CUDA_CONSTEXPR=ON \
+              -D Kokkos_ENABLE_CUDA_RELOCATABLE_DEVICE_CODE=ON \
+              -D Kokkos_ARCH_AMPERE80=ON \
+              -B build \
+              -S kokkos_src
+        cmake --build build --parallel 4
+        cmake --install build --prefix $Kokkos_ROOT
+        rm -rf build
+    - name: Cache Kokkos
+      if: steps.restore-cache-kokkos.outputs.cache-hit != 'true'
+      id: cache-kokkos
+      uses: actions/cache/save@v5
+      with:
+        path: third-party/kokkos
+        key: ${{ steps.restore-cache-kokkos.outputs.cache-primary-key }}
+    - name: Build
+      shell: bash
+      run: |
+        export Kokkos_ROOT=$PWD/third-party/kokkos
+        mkdir build && cd build
+        export CXXFLAGS="-Wall -Wextra -pedantic -Wno-unused -Wfloat-conversion -Werror=cross-execution-space-call"
+        cmake \
+              -D CMAKE_BUILD_TYPE=Debug \
+              -D CMAKE_CXX_COMPILER=$Kokkos_ROOT/bin/nvcc_wrapper \
+              -D CMAKE_CXX_FLAGS="-Werror=cross-execution-space-call" \
+              -D GMGPOLAR_ENABLE_COVERAGE=OFF \
+              -D GMGPOLAR_USE_MUMPS=${{ inputs.use-mumps }} ..
+        make -j4
+

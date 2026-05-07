@@ -34,4 +34,4 @@ target_compile_features(gmgpolar_tests PRIVATE cxx_std_20)
 target_link_libraries(gmgpolar_tests GMGPolarLib GTest::gtest_main)
 
 include(GoogleTest)
-gtest_discover_tests(gmgpolar_tests)
+gtest_discover_tests(gmgpolar_tests DISCOVERY_MODE PRE_TEST)

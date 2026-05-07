@@ -57,9 +57,10 @@ using namespace gmgpolar;
  * 
  */
 
-static inline void fineNodeFMGInterpolation(const int i_r, const int i_theta, const PolarGrid& coarse_grid,
-                                            const PolarGrid& fine_grid, Vector<double>& fine_result,
-                                            ConstVector<double>& coarse_values)
+static KOKKOS_INLINE_FUNCTION void fineNodeFMGInterpolation(const int i_r, const int i_theta,
+                                                            const PolarGrid& coarse_grid, const PolarGrid& fine_grid,
+                                                            Vector<double>& fine_result,
+                                                            ConstVector<double>& coarse_values)
 {
     const int i_r_coarse     = i_r / 2;
     const int i_theta_coarse = i_theta / 2;
