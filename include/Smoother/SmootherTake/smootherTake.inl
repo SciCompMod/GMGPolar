@@ -46,15 +46,15 @@ void SmootherTake<LevelCacheType>::smoothing(Vector<double> x, ConstVector<doubl
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
-    applyAscOrthoBlackCircleSection(x, rhs, temp);
+    private_applyAscOrthoBlackCircleSection(x, rhs, temp);
     solveBlackCircleSection(x, temp);
 
-    applyAscOrthoWhiteCircleSection(x, rhs, temp);
+    private_applyAscOrthoWhiteCircleSection(x, rhs, temp);
     solveWhiteCircleSection(x, temp);
 
-    applyAscOrthoBlackRadialSection(x, rhs, temp);
+    private_applyAscOrthoBlackRadialSection(x, rhs, temp);
     solveBlackRadialSection(x, temp);
 
-    applyAscOrthoWhiteRadialSection(x, rhs, temp);
+    private_applyAscOrthoWhiteRadialSection(x, rhs, temp);
     solveWhiteRadialSection(x, temp);
 }
