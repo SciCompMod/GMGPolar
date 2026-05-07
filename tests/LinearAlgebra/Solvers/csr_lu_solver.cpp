@@ -48,7 +48,7 @@ std::vector<std::tuple<int, int, T>> sort_entries(std::vector<std::tuple<int, in
 
 // Helper: Multiply CSR matrix by vector
 template <typename T>
-Vector<T> csr_matvec(const SparseMatrixCSR<T>& A, const Vector<T>& x)
+Vector<T> csr_matvec(const SparseMatrixCSR<const T>& A, const Vector<T>& x)
 {
     Vector<T> y("y", A.rows());
     for (int i = 0; i < A.rows(); ++i) {
@@ -73,7 +73,7 @@ void expect_vector_near(const Vector<T>& a, const Vector<T>& b, double tol = 1e-
 TEST(SparseLUSolver, OneByOne)
 {
     using T = double;
-    SparseMatrixCSR<T> A(1, 1, sort_entries<T>({{0, 0, 2.0}}));
+    SparseMatrixCSR<const T> A(1, 1, sort_entries<T>({{0, 0, 2.0}}));
     Vector<T> b("b", 1);
     b(0) = 4.0;
     SparseLUSolver<T> solver(A);
@@ -85,7 +85,7 @@ TEST(SparseLUSolver, OneByOne)
 TEST(SparseLUSolver, TwoByTwoDiagonal)
 {
     using T = double;
-    SparseMatrixCSR<T> A(2, 2, sort_entries<T>({{0, 0, 3.0}, {1, 1, 4.0}}));
+    SparseMatrixCSR<const T> A(2, 2, sort_entries<T>({{0, 0, 3.0}, {1, 1, 4.0}}));
     Vector<T> b("b", 2);
     b(0) = 6.0;
     b(1) = 8.0;
@@ -99,7 +99,7 @@ TEST(SparseLUSolver, TwoByTwoDiagonal)
 TEST(SparseLUSolver, TwoByTwoOffDiagonal)
 {
     using T = double;
-    SparseMatrixCSR<T> A(2, 2, sort_entries<T>({{0, 0, 1.0}, {0, 1, 2.0}, {1, 0, 3.0}, {1, 1, 4.0}}));
+    SparseMatrixCSR<const T> A(2, 2, sort_entries<T>({{0, 0, 1.0}, {0, 1, 2.0}, {1, 0, 3.0}, {1, 1, 4.0}}));
     Vector<T> b("b", 2);
     b(0) = 1.0;
     b(1) = 2.0;
@@ -115,7 +115,7 @@ TEST(SparseLUSolver, TwoByTwoOffDiagonal)
 TEST(SparseLUSolver, ThreeByThreeLowerTriangular)
 {
     using T = double;
-    SparseMatrixCSR<T> A(
+    SparseMatrixCSR<const T> A(
         3, 3, sort_entries<T>({{0, 0, 1.0}, {1, 0, 2.0}, {1, 1, 3.0}, {2, 0, 4.0}, {2, 1, 5.0}, {2, 2, 6.0}}));
     Vector<T> b("b", 3);
     b(0) = 1;
@@ -134,7 +134,7 @@ TEST(SparseLUSolver, ThreeByThreeLowerTriangular)
 TEST(SparseLUSolver, ThreeByThreeUpperTriangular)
 {
     using T = double;
-    SparseMatrixCSR<T> A(
+    SparseMatrixCSR<const T> A(
         3, 3, sort_entries<T>({{0, 0, 1.0}, {0, 1, 2.0}, {0, 2, 3.0}, {1, 1, 4.0}, {1, 2, 5.0}, {2, 2, 6.0}}));
     Vector<T> b("b", 3);
     b(0) = 1;
@@ -153,7 +153,7 @@ TEST(SparseLUSolver, ThreeByThreeUpperTriangular)
 TEST(SparseLUSolver, ThreeByThreeZeroDiagonal)
 {
     using T = double;
-    SparseMatrixCSR<T> A(3, 3, sort_entries<T>({{0, 0, 0.0}, {0, 1, 2.0}, {1, 1, 3.0}, {2, 2, 4.0}}));
+    SparseMatrixCSR<const T> A(3, 3, sort_entries<T>({{0, 0, 0.0}, {0, 1, 2.0}, {1, 1, 3.0}, {2, 2, 4.0}}));
     Vector<T> x_true("x_true", 3);
     x_true(0)   = 1;
     x_true(1)   = 2;
@@ -169,15 +169,15 @@ TEST(SparseLUSolver, ThreeByThreeZeroDiagonal)
 TEST(SparseLUSolver, FourByFourPermutation)
 {
     using T = double;
-    SparseMatrixCSR<T> A(4, 4,
-                         sort_entries<T>({{0, 1, 1.0},
-                                          {1, 2, 1.0},
-                                          {2, 3, 1.0},
-                                          {3, 0, 1.0},
-                                          {0, 0, 10.0},
-                                          {1, 1, 10.0},
-                                          {2, 2, 10.0},
-                                          {3, 3, 10.0}}));
+    SparseMatrixCSR<const T> A(4, 4,
+                               sort_entries<T>({{0, 1, 1.0},
+                                                {1, 2, 1.0},
+                                                {2, 3, 1.0},
+                                                {3, 0, 1.0},
+                                                {0, 0, 10.0},
+                                                {1, 1, 10.0},
+                                                {2, 2, 10.0},
+                                                {3, 3, 10.0}}));
     Vector<T> x_true("x_true", 4);
     x_true(0)   = 1;
     x_true(1)   = 2;
@@ -196,7 +196,7 @@ TEST(SparseLUSolver, FiveByFiveRandomSparse)
     std::vector<SparseMatrixCSR<T>::triplet_type> entries = {{0, 0, 2.0}, {0, 2, 3.0}, {1, 1, 4.0}, {2, 0, 1.0},
                                                              {2, 2, 5.0}, {3, 3, 6.0}, {4, 1, 7.0}, {4, 4, 8.0}};
     auto sorted_entries                                   = sort_entries(entries);
-    SparseMatrixCSR<T> A(5, 5, sorted_entries);
+    SparseMatrixCSR<const T> A(5, 5, sorted_entries);
     Vector<T> b("b", 5);
     b(0) = 1;
     b(1) = 2;
@@ -222,7 +222,7 @@ TEST(SparseLUSolver, TenByTenSmallDiagonal)
     for (int i = 0; i < 10; ++i)
         entries.emplace_back(i, i, 1e-10 + 1e-12 * i);
     auto sorted_entries = sort_entries(entries);
-    SparseMatrixCSR<T> A(10, 10, sorted_entries);
+    SparseMatrixCSR<const T> A(10, 10, sorted_entries);
     Vector<T> x_true("x_true", 10);
     for (int i = 0; i < 10; ++i)
         x_true(i) = i + 1;
@@ -245,7 +245,7 @@ TEST(SparseLUSolver, TenByTenTridiagonal)
             entries.emplace_back(i, i + 1, -1.0);
     }
     auto sorted_entries = sort_entries(entries);
-    SparseMatrixCSR<T> A(10, 10, sorted_entries);
+    SparseMatrixCSR<const T> A(10, 10, sorted_entries);
     Vector<T> x_true("x_true", 10);
     for (int i = 0; i < 10; ++i)
         x_true(i) = i + 1;
@@ -265,7 +265,7 @@ TEST(SparseLUSolver, TenByTenPermutationPattern)
         entries.emplace_back(i, i, 10.0 + i);
     }
     auto sorted_entries = sort_entries(entries);
-    SparseMatrixCSR<T> A(10, 10, sorted_entries);
+    SparseMatrixCSR<const T> A(10, 10, sorted_entries);
     Vector<T> x_true("x_true", 10);
     for (int i = 0; i < 10; ++i)
         x_true(i) = i - 5;
@@ -290,7 +290,7 @@ TEST(SparseLUSolver, TwentyByTwentyRandomSparse)
         }
     }
     auto sorted_entries = sort_entries(entries);
-    SparseMatrixCSR<T> A(20, 20, sorted_entries);
+    SparseMatrixCSR<const T> A(20, 20, sorted_entries);
     Vector<T> x_true("x_true", 20);
     for (int i = 0; i < 20; ++i)
         x_true(i) = dist(gen);
@@ -313,7 +313,7 @@ TEST(SparseLUSolver, FiftyByFiftyDiagonalDominant)
             entries.emplace_back(i, i + 1, 1.0);
     }
     auto sorted_entries = sort_entries(entries);
-    SparseMatrixCSR<T> A(50, 50, sorted_entries);
+    SparseMatrixCSR<const T> A(50, 50, sorted_entries);
     Vector<T> x_true("x_true", 50);
     for (int i = 0; i < 50; ++i)
         x_true(i) = i * 0.5;
@@ -338,7 +338,7 @@ TEST(SparseLUSolver, HundredByHundredRandomSparse)
         }
     }
     auto sorted_entries = sort_entries(entries);
-    SparseMatrixCSR<T> A(100, 100, sorted_entries);
+    SparseMatrixCSR<const T> A(100, 100, sorted_entries);
     Vector<T> x_true("x_true", 100);
     for (int i = 0; i < 100; ++i)
         x_true(i) = dist(gen);
@@ -361,7 +361,7 @@ TEST(SparseLUSolver, TenByTenIllConditioned)
             entries.emplace_back(i, i + 1, 1.0);
     }
     auto sorted_entries = sort_entries(entries);
-    SparseMatrixCSR<T> A(10, 10, sorted_entries);
+    SparseMatrixCSR<const T> A(10, 10, sorted_entries);
     Vector<T> x_true("x_true", 10);
     for (int i = 0; i < 10; ++i)
         x_true(i) = i + 1;
@@ -382,7 +382,7 @@ TEST(SparseLUSolver, TwentyByTwentyBanded)
             entries.emplace_back(i, j, (i == j) ? 5.0 : 1.0);
     }
     auto sorted_entries = sort_entries(entries);
-    SparseMatrixCSR<T> A(20, 20, sorted_entries);
+    SparseMatrixCSR<const T> A(20, 20, sorted_entries);
     Vector<T> x_true("x_true", 20);
     for (int i = 0; i < 20; ++i)
         x_true(i) = std::sin(i);
@@ -396,7 +396,7 @@ TEST(SparseLUSolver, TwentyByTwentyBanded)
 TEST(SparseLUSolver, FiveByFiveMixedSigns)
 {
     using T = double;
-    SparseMatrixCSR<T> A(
+    SparseMatrixCSR<const T> A(
         5, 5,
         sort_entries<T>(
             {{0, 0, -2.0}, {0, 4, 1.0}, {1, 1, 3.0}, {2, 2, -4.0}, {3, 3, 5.0}, {4, 0, -1.0}, {4, 4, -6.0}}));
@@ -414,7 +414,7 @@ TEST(SparseLUSolver, FiveByFiveMixedSigns)
 
 // Helper to multiply CSR matrix by vector: b = A * x
 template <typename T>
-Vector<T> multiply(const SparseMatrixCSR<T>& A, const Vector<T>& x)
+Vector<T> multiply(const SparseMatrixCSR<const T>& A, const Vector<T>& x)
 {
     int n = A.rows();
     Vector<T> b("b", n);
@@ -446,7 +446,8 @@ void expectVectorNear(const Vector<T>& a, const Vector<T>& b, double tol = 1e-8)
 // 21. Test 1x1 matrix
 TEST(SparseLUSolver, 1x1)
 {
-    SparseMatrixCSR<double> A(1, 1, sort_entries(std::vector<SparseMatrixCSR<double>::triplet_type>{{0, 0, 5.0}}));
+    SparseMatrixCSR<const double> A(1, 1,
+                                    sort_entries(std::vector<SparseMatrixCSR<double>::triplet_type>{{0, 0, 5.0}}));
     Vector<double> x_true("x_true", 1);
     x_true(0)        = 2.0;
     Vector<double> b = multiply(A, x_true);
@@ -459,7 +460,7 @@ TEST(SparseLUSolver, 1x1)
 TEST(SparseLUSolver, 2x2Diagonal)
 {
     std::vector<SparseMatrixCSR<double>::triplet_type> triplets = sort_entries<double>({{0, 0, 2.0}, {1, 1, 3.0}});
-    SparseMatrixCSR<double> A(2, 2, triplets);
+    SparseMatrixCSR<const double> A(2, 2, triplets);
     Vector<double> x_true("x_true", 2);
     x_true(0)        = 1.0;
     x_true(1)        = -1.0;
@@ -474,7 +475,7 @@ TEST(SparseLUSolver, 2x2General)
 {
     std::vector<SparseMatrixCSR<double>::triplet_type> triplets =
         sort_entries<double>({{0, 0, 4.0}, {0, 1, 1.0}, {1, 0, 2.0}, {1, 1, 3.0}});
-    SparseMatrixCSR<double> A(2, 2, triplets);
+    SparseMatrixCSR<const double> A(2, 2, triplets);
     Vector<double> x_true("x_true", 2);
     x_true(0)        = 3.0;
     x_true(1)        = -2.0;
@@ -490,7 +491,7 @@ TEST(SparseLUSolver, 3x3Permutation)
     // Matrix with zero at (0,0) so pivot will be permuted
     std::vector<SparseMatrixCSR<double>::triplet_type> triplets =
         sort_entries<double>({{0, 1, 1.0}, {1, 0, 1.0}, {1, 1, 2.0}, {1, 2, 1.0}, {2, 1, 1.0}, {2, 2, 3.0}});
-    SparseMatrixCSR<double> A(3, 3, triplets);
+    SparseMatrixCSR<const double> A(3, 3, triplets);
     Vector<double> x_true("x_true", 3);
     x_true(0)        = 1.0;
     x_true(1)        = 2.0;
@@ -506,7 +507,7 @@ TEST(SparseLUSolver, 4x4parse)
 {
     std::vector<SparseMatrixCSR<double>::triplet_type> triplets =
         sort_entries<double>({{0, 0, 10.0}, {0, 3, 2.0}, {1, 1, 5.0}, {2, 2, 3.0}, {3, 0, 1.0}, {3, 3, 4.0}});
-    SparseMatrixCSR<double> A(4, 4, triplets);
+    SparseMatrixCSR<const double> A(4, 4, triplets);
     Vector<double> x_true("x_true", 4);
     x_true(0)        = 1.0;
     x_true(1)        = 2.0;
@@ -523,7 +524,7 @@ TEST(SparseLUSolver, 0Diagonal)
 {
     std::vector<SparseMatrixCSR<double>::triplet_type> triplets =
         sort_entries<double>({{0, 0, 0.0}, {0, 1, 1.0}, {1, 0, 1.0}, {1, 1, 2.0}});
-    SparseMatrixCSR<double> A(2, 2, triplets);
+    SparseMatrixCSR<const double> A(2, 2, triplets);
     Vector<double> x_true("x_true", 2);
     x_true(0)        = 1.5;
     x_true(1)        = -0.5;
@@ -537,7 +538,7 @@ TEST(SparseLUSolver, 0Diagonal)
 TEST(SparseLUSolver, 5x5Random)
 {
     int n = 5;
-    SparseMatrixCSR<double> A(n, n, [&](int row) {
+    SparseMatrixCSR<const double> A(n, n, [&](int row) {
         return 3;
     }); // 3 non-zeros per row
     // Fill A with random but controlled entries
@@ -554,7 +555,7 @@ TEST(SparseLUSolver, 5x5Random)
         }
     }
     row_ptr[n] = idx;
-    SparseMatrixCSR<double> B(n, n, values, cols, row_ptr);
+    SparseMatrixCSR<const double> B(n, n, values, cols, row_ptr);
     Vector<double> x_true("x_true", 5);
     x_true(0)        = 1.0;
     x_true(1)        = -2.0;
@@ -575,7 +576,7 @@ TEST(SparseLUSolver, 10x10Diagonal)
     for (int i = 0; i < n; ++i)
         triplets.emplace_back(i, i, i + 1.0);
 
-    SparseMatrixCSR<double> A(n, n, sort_entries(triplets));
+    SparseMatrixCSR<const double> A(n, n, sort_entries(triplets));
     Vector<double> x_true("x_true", n);
     for (int i = 0; i < n; ++i)
         x_true(i) = (i % 2 == 0 ? 1.0 : -1.0);
@@ -595,7 +596,7 @@ TEST(SparseLUSolver, 4x4Hilbert)
             triplets.emplace_back(i, j, 1.0 / (i + j + 1));
         }
     }
-    SparseMatrixCSR<double> A(n, n, sort_entries(triplets));
+    SparseMatrixCSR<const double> A(n, n, sort_entries(triplets));
     Vector<double> x_true("x_true", 4);
     x_true(0)        = 1.0;
     x_true(1)        = 2.0;
@@ -611,7 +612,7 @@ TEST(SparseLUSolver, 4x4Hilbert)
 TEST(SparseLUSolver, DoublePointerOverload)
 {
     std::vector<SparseMatrixCSR<double>::triplet_type> triplets = {{0, 0, 2.0}, {0, 1, 0.5}, {1, 0, 1.0}, {1, 1, 3.0}};
-    SparseMatrixCSR<double> A(2, 2, sort_entries(triplets));
+    SparseMatrixCSR<const double> A(2, 2, sort_entries(triplets));
     Vector<double> x_true("x_true", 2);
     x_true(0) = 4.0;
     x_true(1) = -1.0;
@@ -635,7 +636,7 @@ TEST(SparseLUSolver, 6x6Block)
         triplets.emplace_back(i, i, 5.0 + i);
         triplets.emplace_back(i + 3, i + 3, 2.0 + i);
     }
-    SparseMatrixCSR<double> A(n, n, sort_entries(triplets));
+    SparseMatrixCSR<const double> A(n, n, sort_entries(triplets));
     Vector<double> x_true("x_true", 6);
     x_true(0)        = 1.0;
     x_true(1)        = -1.0;
@@ -661,7 +662,7 @@ TEST(SparseLUSolver, 5x5MixedSigns)
             triplets.emplace_back(i + 1, i, -0.3 * (i + 1));
         }
     }
-    SparseMatrixCSR<double> A(n, n, sort_entries(triplets));
+    SparseMatrixCSR<const double> A(n, n, sort_entries(triplets));
     Vector<double> x_true("x_true", 5);
     x_true(0)        = 2.0;
     x_true(1)        = -1.0;
@@ -687,7 +688,7 @@ TEST(SparseLUSolver, 7x7DiagDominant)
             triplets.emplace_back(i + 1, i, -1.0);
         }
     }
-    SparseMatrixCSR<double> A(n, n, sort_entries(triplets));
+    SparseMatrixCSR<const double> A(n, n, sort_entries(triplets));
     Vector<double> x_true("x_true", n);
     for (int i = 0; i < n; ++i)
         x_true(i) = (i + 1) * 0.1;
@@ -710,7 +711,7 @@ TEST(SparseLUSolver, 8x8ChainGraph)
             triplets.emplace_back(i + 1, i, 1.0);
         }
     }
-    SparseMatrixCSR<double> A(n, n, sort_entries(triplets));
+    SparseMatrixCSR<const double> A(n, n, sort_entries(triplets));
     Vector<double> x_true("x_true", n);
     for (int i = 0; i < n; ++i)
         x_true(i) = (i % 2 == 0 ? 1.0 : -1.0);
@@ -725,7 +726,7 @@ TEST(SparseLUSolver, FloatPrecision)
 {
     std::vector<SparseMatrixCSR<float>::triplet_type> triplets = {
         {0, 0, 1.0f}, {0, 1, 2.0f}, {1, 0, 3.0f}, {1, 1, 4.0f}};
-    SparseMatrixCSR<float> A(2, 2, sort_entries(triplets));
+    SparseMatrixCSR<const float> A(2, 2, sort_entries(triplets));
     Vector<float> x_true("x_true", 2);
     x_true(0)       = 1.0f;
     x_true(1)       = -1.0f;
@@ -744,7 +745,7 @@ TEST(SparseLUSolver, 3x3Identity)
     std::vector<SparseMatrixCSR<double>::triplet_type> triplets;
     for (int i = 0; i < n; ++i)
         triplets.emplace_back(i, i, 1.0);
-    SparseMatrixCSR<double> A(n, n, sort_entries(triplets));
+    SparseMatrixCSR<const double> A(n, n, sort_entries(triplets));
     Vector<double> x_true("x_true", 3);
     x_true(0)        = 5.0;
     x_true(1)        = -3.0;
@@ -760,7 +761,7 @@ TEST(SparseLUSolver, 4x4SmallDiagonal)
 {
     std::vector<SparseMatrixCSR<double>::triplet_type> triplets = {{0, 0, 1e-12}, {0, 1, 1.0}, {1, 0, 1.0},
                                                                    {1, 1, 2.0},   {2, 2, 3.0}, {3, 3, 4.0}};
-    SparseMatrixCSR<double> A(4, 4, sort_entries(triplets));
+    SparseMatrixCSR<const double> A(4, 4, sort_entries(triplets));
     Vector<double> x_true("x_true", 4);
     x_true(0)        = 1.0;
     x_true(1)        = 2.0;
@@ -794,7 +795,7 @@ TEST(SparseLUSolver, 5x5SPD)
                 triplets.emplace_back(i, j, sum);
         }
     }
-    SparseMatrixCSR<double> A(n, n, sort_entries(triplets));
+    SparseMatrixCSR<const double> A(n, n, sort_entries(triplets));
     Vector<double> x_true("x_true", 5);
     x_true(0)        = 1.0;
     x_true(1)        = 2.0;
