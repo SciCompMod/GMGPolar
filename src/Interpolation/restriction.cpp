@@ -23,9 +23,10 @@ using namespace gmgpolar;
  *  - Radial direction: check domain boundaries (inner/outer radius)
  */
 
-static inline void coarseNodeRestriction(const int i_r_coarse, const int i_theta_coarse, const PolarGrid& fine_grid,
-                                         const PolarGrid& coarse_grid, Vector<double>& coarse_result,
-                                         ConstVector<double>& fine_values)
+static KOKKOS_INLINE_FUNCTION void coarseNodeRestriction(const int i_r_coarse, const int i_theta_coarse,
+                                                         const PolarGrid& fine_grid, const PolarGrid& coarse_grid,
+                                                         Vector<double>& coarse_result,
+                                                         ConstVector<double>& fine_values)
 {
     const int i_r     = i_r_coarse * 2;
     const int i_theta = i_theta_coarse * 2;

@@ -52,9 +52,9 @@ using namespace gmgpolar;
  *  - k1, k2 in angular direction
  */
 
-static inline void fineNodeProlongation(const int i_r, const int i_theta, const PolarGrid& coarse_grid,
-                                        const PolarGrid& fine_grid, Vector<double>& fine_result,
-                                        ConstVector<double>& coarse_values)
+static KOKKOS_INLINE_FUNCTION void fineNodeProlongation(const int i_r, const int i_theta, const PolarGrid& coarse_grid,
+                                                        const PolarGrid& fine_grid, Vector<double>& fine_result,
+                                                        ConstVector<double>& coarse_values)
 {
     const int i_r_coarse     = i_r / 2;
     const int i_theta_coarse = i_theta / 2;
