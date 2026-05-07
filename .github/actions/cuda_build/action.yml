@@ -36,6 +36,7 @@ runs:
     - name: Build
       shell: bash
       run: |
+        mkdir build && cd build
         export CXXFLAGS="-Wall -Wextra -pedantic -Wno-unused -Wfloat-conversion -Werror"
         cmake -DCMAKE_BUILD_TYPE=Debug -DGMGPOLAR_ENABLE_COVERAGE=OFF -DGMGPOLAR_USE_MUMPS=${{ inputs.use-mumps }} ..
         make -j4
