@@ -216,8 +216,8 @@ nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& grid, bool Di
 } // namespace smoother_take
 
 template <class LevelCacheType>
-void SmootherTake<LevelCacheType>::private_applyAscOrthoBlackCircleSection(ConstVector<double> x,
-                                                                           ConstVector<double> rhs, Vector<double> temp)
+void SmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<double> x, ConstVector<double> rhs,
+                                                                   Vector<double> temp)
 {
     using smoother_take::nodeApplyAscOrthoCircleTake;
 
@@ -256,8 +256,8 @@ void SmootherTake<LevelCacheType>::private_applyAscOrthoBlackCircleSection(Const
 }
 
 template <class LevelCacheType>
-void SmootherTake<LevelCacheType>::private_applyAscOrthoWhiteCircleSection(ConstVector<double> x,
-                                                                           ConstVector<double> rhs, Vector<double> temp)
+void SmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<double> x, ConstVector<double> rhs,
+                                                                   Vector<double> temp)
 {
     using smoother_take::nodeApplyAscOrthoCircleTake;
 
@@ -296,8 +296,8 @@ void SmootherTake<LevelCacheType>::private_applyAscOrthoWhiteCircleSection(Const
 }
 
 template <class LevelCacheType>
-void SmootherTake<LevelCacheType>::private_applyAscOrthoBlackRadialSection(ConstVector<double> x,
-                                                                           ConstVector<double> rhs, Vector<double> temp)
+void SmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<double> x, ConstVector<double> rhs,
+                                                                   Vector<double> temp)
 {
     using smoother_take::nodeApplyAscOrthoRadialTake;
 
@@ -336,8 +336,8 @@ void SmootherTake<LevelCacheType>::private_applyAscOrthoBlackRadialSection(Const
 }
 
 template <class LevelCacheType>
-void SmootherTake<LevelCacheType>::private_applyAscOrthoWhiteRadialSection(ConstVector<double> x,
-                                                                           ConstVector<double> rhs, Vector<double> temp)
+void SmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<double> x, ConstVector<double> rhs,
+                                                                   Vector<double> temp)
 {
     using smoother_take::nodeApplyAscOrthoRadialTake;
 
