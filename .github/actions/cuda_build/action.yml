@@ -23,7 +23,7 @@ runs:
         cd third-party
         export Kokkos_ROOT=$PWD/kokkos
         echo "Kokkos_ROOT=$PWD/kokkos" >> $GITHUB_ENV
-        git clone --depth 1 --branch 3.0.00 https://github.com/kokkos/kokkos.git kokkos_src
+        git clone --depth 1 --branch 5.0.2 https://github.com/kokkos/kokkos.git kokkos_src
         cmake \
               -D CMAKE_CXX_COMPILER=$PWD/kokkos_src/bin/nvcc_wrapper \
               -D CMAKE_CXX_STANDARD=20 \
@@ -34,7 +34,6 @@ runs:
               -D Kokkos_ENABLE_CUDA_CONSTEXPR=ON \
               -D Kokkos_ENABLE_CUDA_RELOCATABLE_DEVICE_CODE=ON \
               -D Kokkos_ARCH_AMPERE80=ON \
-              -D CMAKE_CUDA_ARCHITECTURES=80 \
               -B build \
               -S kokkos_src
             cmake --build build
