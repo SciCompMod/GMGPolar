@@ -42,9 +42,9 @@ runs:
               -D Kokkos_ARCH_AMPERE80=ON \
               -B build \
               -S kokkos_src
-            cmake --build build --parallel 4
-            cmake --install build --prefix $Kokkos_ROOT
-            rm -rf build
+        cmake --build build --parallel 4
+        cmake --install build --prefix $Kokkos_ROOT
+        rm -rf build
     - name: Cache Kokkos
       if: steps.restore-cache-kokkos.outputs.cache-hit != 'true'
       id: cache-kokkos
