@@ -54,7 +54,7 @@ TEST(SparseMatrixDouble, copy_construct)
 {
     std::vector<triplet> entries = {{0, 0, 1.0}, {1, 2, 2.0}, {2, 1, 3.0}};
     const SparseMatrixCOO<double> m1(3, 3, entries);
-    const SparseMatrixCOO<double> m2 = m1;
+    const SparseMatrixCOO<double> m2 = m1.copy();
 
     ASSERT_EQ(m2.rows(), 3);
     ASSERT_EQ(m2.columns(), 3);
@@ -111,7 +111,7 @@ TEST(SparseMatrixDouble, copy_assign)
     const SparseMatrixCOO<double> m1(3, 3, entries);
     SparseMatrixCOO<double> m2;
 
-    m2 = m1;
+    m2 = m1.copy();
 
     ASSERT_EQ(m2.rows(), 3);
     ASSERT_EQ(m2.columns(), 3);

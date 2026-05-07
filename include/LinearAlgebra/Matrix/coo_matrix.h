@@ -28,14 +28,16 @@ public:
     using triplet_type = std::tuple<int, int, T>;
 
     SparseMatrixCOO();
-    SparseMatrixCOO(const SparseMatrixCOO& other);
+    SparseMatrixCOO(const SparseMatrixCOO& other) = delete;
     SparseMatrixCOO(SparseMatrixCOO&& other) noexcept;
 
     explicit SparseMatrixCOO(int rows, int columns, int nnz);
     explicit SparseMatrixCOO(int rows, int columns, const std::vector<triplet_type>& entries);
 
-    SparseMatrixCOO& operator=(const SparseMatrixCOO& other);
+    SparseMatrixCOO& operator=(const SparseMatrixCOO& other) = delete;
     SparseMatrixCOO& operator=(SparseMatrixCOO&& other) noexcept;
+
+    SparseMatrixCOO copy() const;
 
     int rows() const;
     int columns() const;
@@ -136,43 +138,22 @@ SparseMatrixCOO<T>::SparseMatrixCOO()
 
 // copy construction
 template <typename T>
-SparseMatrixCOO<T>::SparseMatrixCOO(const SparseMatrixCOO& other)
-    : rows_(other.rows_)
-    , columns_(other.columns_)
-    , nnz_(other.nnz_)
-    , row_indices_("COO row indices", nnz_)
-    , column_indices_("COO column indices", nnz_)
-    , values_("COO values", nnz_)
-    , is_symmetric_(other.is_symmetric_)
+SparseMatrixCOO<T> SparseMatrixCOO<T>::copy() const
 {
-    Kokkos::deep_copy(row_indices_, other.row_indices_);
-    Kokkos::deep_copy(column_indices_, other.column_indices_);
-    Kokkos::deep_copy(values_, other.values_);
-}
+    SparseMatrixCOO<T> other;
+    other.rows_ = rows_;
+    other.columns_ = columns_;
+    other.nnz_ = other.nnz_;
+    other.row_indices_ = Vector<int>("COO row indices", nnz_);
+    other.column_indices_ = Vector<int>("COO column indices", nnz_);
+    other.values_ = Vector<T>("COO values", nnz_);
+    other.is_symmetric_ = is_symmetric_;
 
-// copy assignment
-template <typename T>
-SparseMatrixCOO<T>& SparseMatrixCOO<T>::operator=(const SparseMatrixCOO& other)
-{
-    if (this == &other) {
-        // Self-assignment, no work needed
-        return *this;
-    }
-    // Only allocate new memory if the sizes are different
-    if (nnz_ != other.nnz_) {
-        row_indices_    = Vector<int>("COO row indices", other.nnz_);
-        column_indices_ = Vector<int>("COO column indices", other.nnz_);
-        values_         = Vector<T>("COO values", other.nnz_);
-    }
-    // Copy the elements
-    rows_         = other.rows_;
-    columns_      = other.columns_;
-    nnz_          = other.nnz_;
-    is_symmetric_ = other.is_symmetric_;
-    Kokkos::deep_copy(row_indices_, other.row_indices_);
-    Kokkos::deep_copy(column_indices_, other.column_indices_);
-    Kokkos::deep_copy(values_, other.values_);
-    return *this;
+    Kokkos::deep_copy(other.row_indices_, row_indices_);
+    Kokkos::deep_copy(other.column_indices_, column_indices_);
+    Kokkos::deep_copy(other.values_, values_);
+
+    return other;
 }
 
 // move construction
