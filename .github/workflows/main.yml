@@ -21,7 +21,7 @@ jobs:
         backend: ['cuda']
     name: 'install-and-build (USE_MUMPS=${{matrix.USE_MUMPS}}, backend=${{matrix.backend}})'
     container:
-      image: ${{ matrix.backend == 'openmp' && 'ghcr.io/gyselax/gyselalibxx_env:latest' || 'nvidia/cuda:13.1.2-devel-ubuntu24.04' }}
+      image: ${{ matrix.backend == 'openmp' && 'ghcr.io/gyselax/gyselalibxx_env:latest' || 'nvidia/cuda:12.8.2-devel-ubuntu24.04' }}
       options: --user root
     steps:
       - uses: actions/checkout@v4
