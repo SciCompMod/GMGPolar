@@ -25,7 +25,7 @@ runs:
         key: kokkos-v5.0.2
     - name: Install Kokkos
       shell: bash
-      if: steps.cache-kokkos.outputs.cache-hit != 'true'
+      if: steps.restore-cache-kokkos.outputs.cache-hit != 'true'
       run: |
         cd third-party
         export Kokkos_ROOT=$PWD/kokkos
@@ -46,7 +46,7 @@ runs:
             cmake --install build --prefix $Kokkos_ROOT
             rm -rf build
     - name: Cache Kokkos
-      if: steps.cache-kokkos.outputs.cache-hit != 'true'
+      if: steps.restore-cache-kokkos.outputs.cache-hit != 'true'
       id: cache-kokkos
       uses: actions/cache/save@v5
       with:
