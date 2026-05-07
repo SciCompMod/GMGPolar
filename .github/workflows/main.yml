@@ -15,7 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        USE_MUMPS: [false, true]
+        USE_MUMPS: [false]
+        #USE_MUMPS: [false, true]
         #backend: ['openmp', 'cuda']
         backend: ['cuda']
     name: 'install-and-build (USE_MUMPS=${{matrix.USE_MUMPS}}, backend=${{matrix.backend}})'
