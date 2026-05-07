@@ -22,6 +22,7 @@ runs:
       run: |
         cd third-party
         export Kokkos_ROOT=$PWD/kokkos
+        echo "Kokkos_ROOT=$PWD/kokkos" >> $GITHUB_ENV
         git clone https://github.com/kokkos/kokkos.git kokkos_src
         cmake \
               -D Kokkos_ENABLE_DEPRECATED_CODE_4=OFF \
