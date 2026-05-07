@@ -24,9 +24,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/build
+        if: matrix.backend == 'openmp'
         with:
           use-mumps: ${{ matrix.USE_MUMPS }}
-          backend: ${{ matrix.backend }}
+      - uses: ./.github/actions/cuda_build
+        if: matrix.backend == 'cuda'
+        with:
+          use-mumps: ${{ matrix.USE_MUMPS }}
       
   run-unit-test:
     needs: install-and-build

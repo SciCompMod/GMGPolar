@@ -1,0 +1,38 @@
+name: "Linux Cuda Build"
+
+inputs:
+  use-mumps:
+    description: 'Indicates if GMGPolar should be built with mumps support'
+    type: bool
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install additional dependencies to use MUMPS
+      if: inputs.use-mumps == 'true'
+      uses: ./.github/actions/install-dependencies
+    - name: Build Kokkos
+      if: inputs.backend == 'cuda'
+      shell: bash
+      run: |
+        cd third-party
+        export Kokkos_ROOT=$PWD/kokkos
+        git clone https://github.com/kokkos/kokkos.git kokkos_src
+        cmake \
+              -D Kokkos_ENABLE_DEPRECATED_CODE_4=OFF \
+              -D Kokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
+              -D Kokkos_ENABLE_SERIAL=ON \
+              -D Kokkos_ENABLE_CUDA=ON -D Kokkos_ENABLE_CUDA_CONSTEXPR=ON -D Kokkos_ENABLE_CUDA_RELOCATABLE_DEVICE_CODE=ON -D Kokkos_ARCH_AMPERE80=ON \
+              -B build \
+              -S kokkos_src
+            cmake --build build
+            cmake --install build --prefix $Kokkos_ROOT
+            rm -rf build
+    - name: Build
+      shell: bash
+      run: |
+        export CXXFLAGS="-Wall -Wextra -pedantic -Wno-unused -Wfloat-conversion -Werror"
+        cmake -DCMAKE_BUILD_TYPE=Debug -DGMGPOLAR_ENABLE_COVERAGE=OFF -DGMGPOLAR_USE_MUMPS=${{ inputs.use-mumps }} ..
+        make -j4
+
