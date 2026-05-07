@@ -22,12 +22,12 @@ using namespace gmgpolar;
  *  - Radial direction: check domain boundaries
  */
 
-static inline void coarseNodeExtrapolatedRestriction(int i_r_coarse, int i_theta_coarse, const PolarGrid& fine_grid,
-                                                     const PolarGrid& coarse_grid, Vector<double>& coarse_result,
-                                                     ConstVector<double>& fine_values)
+static inline void coarseNodeExtrapolatedRestriction(const int i_r_coarse, const int i_theta_coarse,
+                                                     const PolarGrid& fine_grid, const PolarGrid& coarse_grid,
+                                                     Vector<double>& coarse_result, ConstVector<double>& fine_values)
 {
-    int i_r     = i_r_coarse * 2;
-    int i_theta = i_theta_coarse * 2;
+    const int i_r     = i_r_coarse * 2;
+    const int i_theta = i_theta_coarse * 2;
 
     /* Center + Angular contributions (always present) */
     double value = fine_values[fine_grid.index(i_r, i_theta)] + 0.5 * fine_values[fine_grid.index(i_r, i_theta - 1)] +
@@ -57,24 +57,31 @@ void Interpolation::applyExtrapolatedRestriction(const PolarGrid& fine_grid, con
     /* We split the loops into two regions to better respect the */
     /* access patterns of the smoother and improve cache locality. */
 
-#pragma omp parallel num_threads(max_omp_threads_)
-    {
-        /* Circular Indexing Section */
-#pragma omp for nowait
-        for (int i_r_coarse = 0; i_r_coarse < coarse_grid.numberSmootherCircles(); i_r_coarse++) {
-            for (int i_theta_coarse = 0; i_theta_coarse < coarse_grid.ntheta(); i_theta_coarse++) {
-                coarseNodeExtrapolatedRestriction(i_r_coarse, i_theta_coarse, fine_grid, coarse_grid, coarse_result,
-                                                  fine_values);
-            }
-        }
+    // The For loop matches circular access pattern */
+    Kokkos::parallel_for(
+        "Interpolation: Extrapolated Restriction (Circular)",
+        Kokkos::MDRangePolicy<Kokkos::Rank<2>>( // Rank of the index space
+            {0, 0}, // Starting point of the index space
+            {coarse_grid.numberSmootherCircles(), coarse_grid.ntheta()} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int i_r_coarse, const int i_theta_coarse) {
+            coarseNodeExtrapolatedRestriction(i_r_coarse, i_theta_coarse, fine_grid, coarse_grid, coarse_result,
+                                              fine_values);
+        });
 
-        /* Radial Indexing Section */
-#pragma omp for nowait
-        for (int i_theta_coarse = 0; i_theta_coarse < coarse_grid.ntheta(); i_theta_coarse++) {
-            for (int i_r_coarse = coarse_grid.numberSmootherCircles(); i_r_coarse < coarse_grid.nr(); i_r_coarse++) {
-                coarseNodeExtrapolatedRestriction(i_r_coarse, i_theta_coarse, fine_grid, coarse_grid, coarse_result,
-                                                  fine_values);
-            }
-        }
-    }
+    /* For loop matches radial access pattern */
+    Kokkos::parallel_for(
+        "Interpolation: Extrapolated Restriction (Radial)",
+        Kokkos::MDRangePolicy<Kokkos::Rank<2>>( // Rank of the index space
+            {0, coarse_grid.numberSmootherCircles()}, // Starting point of the index space
+            {coarse_grid.ntheta(), coarse_grid.nr()} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int i_theta_coarse, const int i_r_coarse) {
+            coarseNodeExtrapolatedRestriction(i_r_coarse, i_theta_coarse, fine_grid, coarse_grid, coarse_result,
+                                              fine_values);
+        });
+
+    Kokkos::fence();
 }

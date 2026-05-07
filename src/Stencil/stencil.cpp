@@ -16,3 +16,8 @@ int Stencil::operator[](StencilPosition type) const
 {
     return values_[static_cast<int>(type)];
 }
+
+int Stencil::size() const
+{
+    return stencil_size_;
+}

@@ -236,14 +236,22 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<d
 
     /* The outer most circle next to the radial section is defined to be black. */
     const int start_black_circles = (grid.numberSmootherCircles() % 2 == 0) ? 1 : 0;
+    const int num_black_circles   = (grid.numberSmootherCircles() - start_black_circles + 1) / 2;
 
-#pragma omp parallel for num_threads(num_omp_threads)
-    for (int i_r = start_black_circles; i_r < grid.numberSmootherCircles(); i_r += 2) {
-        for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
+    Kokkos::parallel_for(
+        "Smoother Take: ApplyAscOrtho (Black Circular)",
+        Kokkos::MDRangePolicy<Kokkos::Rank<2>>( // Rank of the index space
+            {0, 0}, // Starting point of the index space
+            {num_black_circles, grid.ntheta()} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
+            int i_r = start_black_circles + circle_task * 2;
             nodeApplyAscOrthoCircleTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF,
                                         coeff_beta);
-        }
-    }
+        });
+
+    Kokkos::fence();
 }
 
 template <class LevelCacheType>
@@ -268,14 +276,22 @@ void SmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<d
 
     /* The outer most circle next to the radial section is defined to be black. */
     const int start_white_circles = (grid.numberSmootherCircles() % 2 == 0) ? 0 : 1;
+    const int num_white_circles   = (grid.numberSmootherCircles() - start_white_circles + 1) / 2;
 
-#pragma omp parallel for num_threads(num_omp_threads)
-    for (int i_r = start_white_circles; i_r < grid.numberSmootherCircles(); i_r += 2) {
-        for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
+    Kokkos::parallel_for(
+        "Smoother Take: ApplyAscOrtho (White Circular)",
+        Kokkos::MDRangePolicy<Kokkos::Rank<2>>( // Rank of the index space
+            {0, 0}, // Starting point of the index space
+            {num_white_circles, grid.ntheta()} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
+            const int i_r = start_white_circles + circle_task * 2;
             nodeApplyAscOrthoCircleTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF,
                                         coeff_beta);
-        }
-    }
+        });
+
+    Kokkos::fence();
 }
 
 template <class LevelCacheType>
@@ -298,13 +314,24 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<d
     ConstVector<double> detDF      = level_cache.detDF();
     ConstVector<double> coeff_beta = level_cache.coeff_beta();
 
-#pragma omp parallel for num_threads(num_omp_threads)
-    for (int i_theta = 0; i_theta < grid.ntheta(); i_theta += 2) {
-        for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
+    assert(grid.ntheta() % 2 == 0);
+    const int start_black_radials    = 0;
+    const int num_black_radial_lines = grid.ntheta() / 2;
+
+    Kokkos::parallel_for(
+        "Smoother Take: ApplyAscOrtho (Black Radial)",
+        Kokkos::MDRangePolicy<Kokkos::Rank<2>>( // Rank of the index space
+            {0, grid.numberSmootherCircles()}, // Starting point of the index space
+            {num_black_radial_lines, grid.nr()} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int radial_task, const int i_r) {
+            const int i_theta = start_black_radials + radial_task * 2;
             nodeApplyAscOrthoRadialTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF,
                                         coeff_beta);
-        }
-    }
+        });
+
+    Kokkos::fence();
 }
 
 template <class LevelCacheType>
@@ -327,11 +354,22 @@ void SmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<d
     ConstVector<double> detDF      = level_cache.detDF();
     ConstVector<double> coeff_beta = level_cache.coeff_beta();
 
-#pragma omp parallel for num_threads(num_omp_threads)
-    for (int i_theta = 1; i_theta < grid.ntheta(); i_theta += 2) {
-        for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
+    assert(grid.ntheta() % 2 == 0);
+    const int start_white_radials    = 1;
+    const int num_white_radial_lines = grid.ntheta() / 2;
+
+    Kokkos::parallel_for(
+        "Smoother Take: ApplyAscOrtho (White Radial)",
+        Kokkos::MDRangePolicy<Kokkos::Rank<2>>( // Rank of the index space
+            {0, grid.numberSmootherCircles()}, // Starting point of the index space
+            {num_white_radial_lines, grid.nr()} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int radial_task, const int i_r) {
+            const int i_theta = start_white_radials + radial_task * 2;
             nodeApplyAscOrthoRadialTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF,
                                         coeff_beta);
-        }
-    }
+        });
+
+    Kokkos::fence();
 }
