@@ -57,6 +57,11 @@ runs:
         export Kokkos_ROOT=$PWD/kokkos
         mkdir build && cd build
         export CXXFLAGS="-Wall -Wextra -pedantic -Wno-unused -Wfloat-conversion -Werror=cross-execution-space-call"
-        cmake -DCMAKE_BUILD_TYPE=Debug -DGMGPOLAR_ENABLE_COVERAGE=OFF -DGMGPOLAR_USE_MUMPS=${{ inputs.use-mumps }} ..
+        cmake \
+              -D CMAKE_BUILD_TYPE=Debug \
+              -D CMAKE_CXX_COMPILER=$PWD/kokkos_src/bin/nvcc_wrapper \
+              -D CMAKE_CXX_FLAGS="-Werror=cross-execution-space-call" \
+              -D GMGPOLAR_ENABLE_COVERAGE=OFF \
+              -D GMGPOLAR_USE_MUMPS=${{ inputs.use-mumps }} ..
         make -j4
 
