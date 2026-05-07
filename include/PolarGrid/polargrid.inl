@@ -4,73 +4,73 @@
 
 #include "polargrid.h"
 
-inline int PolarGrid::nr() const
+KOKKOS_INLINE_FUNCTION int PolarGrid::nr() const
 {
     return nr_;
 }
-inline int PolarGrid::ntheta() const
+KOKKOS_INLINE_FUNCTION int PolarGrid::ntheta() const
 {
     return ntheta_;
 }
 
-inline int PolarGrid::numberOfNodes() const
+KOKKOS_INLINE_FUNCTION int PolarGrid::numberOfNodes() const
 {
     return nr() * ntheta();
 }
 
-inline double PolarGrid::radius(const int r_index) const
+KOKKOS_INLINE_FUNCTION double PolarGrid::radius(const int r_index) const
 {
     assert(r_index >= 0 && r_index < std::ssize(radii_));
     return radii_[r_index];
 }
 
-inline double PolarGrid::theta(const int theta_index) const
+KOKKOS_INLINE_FUNCTION double PolarGrid::theta(const int theta_index) const
 {
     assert(theta_index >= 0 && theta_index < std::ssize(angles_));
     return angles_[theta_index];
 }
 
-inline double PolarGrid::smootherSplittingRadius() const
+KOKKOS_INLINE_FUNCTION double PolarGrid::smootherSplittingRadius() const
 {
     return smoother_splitting_radius_;
 }
 
 // Get the number of circles in the circular smoother.
-inline int PolarGrid::numberSmootherCircles() const
+KOKKOS_INLINE_FUNCTION int PolarGrid::numberSmootherCircles() const
 {
     return number_smoother_circles_;
 }
 // Get the length of the radial smoother lines.
-inline int PolarGrid::lengthRadialSmoother() const
+KOKKOS_INLINE_FUNCTION int PolarGrid::lengthRadialSmoother() const
 {
     return length_smoother_radial_;
 }
 
 // Get the number of nodes in circular smoother.
-inline int PolarGrid::numberCircularSmootherNodes() const
+KOKKOS_INLINE_FUNCTION int PolarGrid::numberCircularSmootherNodes() const
 {
     return number_circular_smoother_nodes_;
 }
 // Get the number of nodes in radial smoother.
-inline int PolarGrid::numberRadialSmootherNodes() const
+KOKKOS_INLINE_FUNCTION int PolarGrid::numberRadialSmootherNodes() const
 {
     return number_radial_smoother_nodes_;
 }
 
-inline double PolarGrid::radialSpacing(const int r_index) const
+KOKKOS_INLINE_FUNCTION double PolarGrid::radialSpacing(const int r_index) const
 {
     assert(r_index >= 0 && r_index < std::ssize(radial_spacings_));
     return radial_spacings_[r_index];
 }
 
-inline double PolarGrid::angularSpacing(const int unwrapped_theta_index) const
+KOKKOS_INLINE_FUNCTION double PolarGrid::angularSpacing(const int unwrapped_theta_index) const
 {
     // unwrapped_theta_index may be negative or larger than ntheta() to allow for periodicity.
     const int theta_index = wrapThetaIndex(unwrapped_theta_index);
     return angular_spacings_[theta_index];
 }
 
-inline int PolarGrid::wrapThetaIndex(const int unwrapped_theta_index) const
+KOKKOS_INLINE_FUNCTION int PolarGrid::wrapThetaIndex(const int unwrapped_theta_index) const
 {
     // The unwrapped_theta_index may be negative or exceed the number of theta steps (ntheta()),
     // so we need to wrap it into the valid range [0, ntheta() - 1] to maintain periodicity.
@@ -88,7 +88,7 @@ inline int PolarGrid::wrapThetaIndex(const int unwrapped_theta_index) const
     return theta_index;
 }
 
-inline int PolarGrid::index(const int r_index, const int unwrapped_theta_index) const
+KOKKOS_INLINE_FUNCTION int PolarGrid::index(const int r_index, const int unwrapped_theta_index) const
 {
     // unwrapped_theta_index may be negative or larger than ntheta() to allow for periodicity.
     assert(0 <= r_index && r_index < nr());
@@ -101,7 +101,7 @@ inline int PolarGrid::index(const int r_index, const int unwrapped_theta_index) 
     return global_index;
 }
 
-inline void PolarGrid::multiIndex(const int node_index, int& r_index, int& theta_index) const
+KOKKOS_INLINE_FUNCTION void PolarGrid::multiIndex(const int node_index, int& r_index, int& theta_index) const
 {
     assert(0 <= node_index && node_index < numberOfNodes());
     if (node_index < numberCircularSmootherNodes()) {

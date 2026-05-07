@@ -3,7 +3,7 @@
 using namespace gmgpolar;
 
 /* Remark: This injection is not scaled. */
-static inline void coarseNodeInjection(const int i_r_coarse, const int i_theta_coarse, const PolarGrid& fine_grid,
+KOKKOS_FUNCTION static inline void coarseNodeInjection(const int i_r_coarse, const int i_theta_coarse, const PolarGrid& fine_grid,
                                        const PolarGrid& coarse_grid, Vector<double>& coarse_result,
                                        ConstVector<double>& fine_values)
 {
