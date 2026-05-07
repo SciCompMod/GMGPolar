@@ -17,7 +17,7 @@ jobs:
       matrix:
         USE_MUMPS: [false, true]
         backend: ['openmp', 'cuda']
-    name: 'install-and-build (USE_MUMPS=${{matrix.USE_MUMPS}})'
+    name: 'install-and-build (USE_MUMPS=${{matrix.USE_MUMPS}}, backend=${{matrix.backend}})'
     container:
       image: ${{ matrix.backend == 'openmp' && 'ghcr.io/gyselax/gyselalibxx_env:latest' || 'ghcr.io/cexa-project/ddc/latest_cuda:latest' }}
       options: --user root
