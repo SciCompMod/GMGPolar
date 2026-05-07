@@ -46,6 +46,7 @@ runs:
             cmake --install build --prefix $Kokkos_ROOT
             rm -rf build
     - name: Cache Kokkos
+      if: steps.cache-kokkos.outputs.cache-hit != 'true'
       id: cache-kokkos
       uses: actions/cache/save@v5
       with:
