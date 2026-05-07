@@ -21,7 +21,6 @@ add_executable(gmgpolar_tests
     Interpolation/extrapolated_restriction.cpp
     Residual/residual.cpp
     DirectSolver/directSolver.cpp
-    DirectSolver/directSolverNoMumps.cpp
     Smoother/smoother.cpp
     ExtrapolatedSmoother/extrapolated_smoother.cpp
     ConfigParser/config_parser.cpp

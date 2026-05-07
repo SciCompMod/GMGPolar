@@ -1,25 +1,35 @@
 #pragma once
 
-#ifdef GMGPOLAR_USE_MUMPS
-
 namespace direct_solver_coo_mumps_take
 {
 
-static inline void updateMatrixElement(SparseMatrixCOO<double>& matrix, int ptr, int offset, int row, int col,
-                                       double val)
+#ifdef GMGPOLAR_USE_MUMPS
+// When using the MUMPS solver, the matrix is assembled in COO format.
+static inline void updateMatrixElement(SparseMatrixCOO<double>& matrix, int ptr, int offset, int row, int column,
+                                       double value)
 {
     matrix.row_index(ptr + offset) = row;
-    matrix.col_index(ptr + offset) = col;
-    matrix.value(ptr + offset)     = val;
+    matrix.col_index(ptr + offset) = column;
+    matrix.value(ptr + offset)     = value;
 }
+#else
+// When using the in-house solver, the matrix is stored in CSR format.
+static inline void updateMatrixElement(SparseMatrixCSR<double>& matrix, int ptr, int offset, int row, int column,
+                                       double value)
+{
+    matrix.row_nz_index(row, offset) = column;
+    matrix.row_nz_entry(row, offset) = value;
+}
+#endif
 
 } // namespace direct_solver_coo_mumps_take
 
 template <class LevelCacheType>
-void DirectSolver_COO_MUMPS_Take<LevelCacheType>::nodeBuildSolverMatrixTake(
-    int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior, SparseMatrixCOO<double>& solver_matrix,
-    ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF,
-    ConstVector<double>& coeff_beta)
+void DirectSolverTake<LevelCacheType>::nodeBuildSolverMatrixTake(int i_r, int i_theta, const PolarGrid& grid,
+                                                                 bool DirBC_Interior, SystemMatrix& solver_matrix,
+                                                                 ConstVector<double>& arr, ConstVector<double>& att,
+                                                                 ConstVector<double>& art, ConstVector<double>& detDF,
+                                                                 ConstVector<double>& coeff_beta)
 {
     using direct_solver_coo_mumps_take::updateMatrixElement;
     int ptr, offset;
@@ -60,7 +70,7 @@ void DirectSolver_COO_MUMPS_Take<LevelCacheType>::nodeBuildSolverMatrixTake(
         double top_value    = -coeff4 * (att(center_index) + att(top_index)); /* Top */
 
         double center_value =
-            (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] * fabs(detDF(center_index)) /* beta_{i,j} */
+            (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] * std::fabs(detDF(center_index)) /* beta_{i,j} */
              - left_value /* Center: (Left) */
              - right_value /* Center: (Right) */
              - bottom_value /* Center: (Bottom) */
@@ -184,13 +194,13 @@ void DirectSolver_COO_MUMPS_Take<LevelCacheType>::nodeBuildSolverMatrixTake(
             double bottom_value = -coeff3 * (att(center_index) + att(bottom_index)); /* Bottom */
             double top_value    = -coeff4 * (att(center_index) + att(top_index)); /* Top */
 
-            double center_value =
-                (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] * fabs(detDF(center_index)) /* beta_{i,j} */
-                 - left_value /* Center: (Left) */
-                 - right_value /* Center: (Right) */
-                 - bottom_value /* Center: (Bottom) */
-                 - top_value /* Center: (Top) */
-                );
+            double center_value = (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] *
+                                       std::fabs(detDF(center_index)) /* beta_{i,j} */
+                                   - left_value /* Center: (Left) */
+                                   - right_value /* Center: (Right) */
+                                   - bottom_value /* Center: (Bottom) */
+                                   - top_value /* Center: (Top) */
+            );
 
             double bottom_right_value = +0.25 * (art(right_index) + art(bottom_index)); /* Bottom Right */
             double top_right_value    = -0.25 * (art(right_index) + art(top_index)); /* Top Right */
@@ -276,7 +286,7 @@ void DirectSolver_COO_MUMPS_Take<LevelCacheType>::nodeBuildSolverMatrixTake(
         double top_value    = -coeff4 * (att(center_index) + att(top_index)); /* Top */
 
         double center_value =
-            (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] * fabs(detDF(center_index)) /* beta_{i,j} */
+            (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] * std::fabs(detDF(center_index)) /* beta_{i,j} */
              - left_value /* Center: (Left) */
              - right_value /* Center: (Right) */
              - bottom_value /* Center: (Bottom) */
@@ -383,7 +393,7 @@ void DirectSolver_COO_MUMPS_Take<LevelCacheType>::nodeBuildSolverMatrixTake(
         double top_value    = -coeff4 * (att(center_index) + att(top_index)); /* Top */
 
         double center_value =
-            (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] * fabs(detDF(center_index)) /* beta_{i,j} */
+            (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] * std::fabs(detDF(center_index)) /* beta_{i,j} */
              - left_value /* Center: (Left) */
              - right_value /* Center: (Right) */
              - bottom_value /* Center: (Bottom) */
@@ -459,18 +469,28 @@ void DirectSolver_COO_MUMPS_Take<LevelCacheType>::nodeBuildSolverMatrixTake(
 }
 
 template <class LevelCacheType>
-SparseMatrixCOO<double> DirectSolver_COO_MUMPS_Take<LevelCacheType>::buildSolverMatrix()
+typename DirectSolverTake<LevelCacheType>::SystemMatrix DirectSolverTake<LevelCacheType>::buildSolverMatrix()
 {
     const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
     const int num_omp_threads         = DirectSolver<LevelCacheType>::num_omp_threads_;
     const bool DirBC_Interior         = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
-    const int n   = grid.numberOfNodes();
-    const int nnz = getNonZeroCountSolverMatrix();
+    assert(validateSolverMatrixIndexing() && "Solver matrix indexing is inconsistent");
 
+    const int n = grid.numberOfNodes();
+
+#ifdef GMGPOLAR_USE_MUMPS
+    const int nnz = getNonZeroCountSolverMatrix();
     SparseMatrixCOO<double> solver_matrix(n, n, nnz);
     solver_matrix.is_symmetric(true);
+#else
+    std::function<int(int)> nnz_per_row = [&](int global_index) {
+        return getStencilSize(global_index);
+    };
+
+    SparseMatrixCSR<double> solver_matrix(n, n, nnz_per_row);
+#endif
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
@@ -481,18 +501,18 @@ SparseMatrixCOO<double> DirectSolver_COO_MUMPS_Take<LevelCacheType>::buildSolver
     ConstVector<double> detDF      = level_cache.detDF();
     ConstVector<double> coeff_beta = level_cache.coeff_beta();
 
-    #pragma omp parallel num_threads(num_omp_threads)
+#pragma omp parallel num_threads(num_omp_threads)
     {
-    /* Circle Section */
-    #pragma omp for nowait
+/* Circle Section */
+#pragma omp for nowait
         for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
             for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
                 nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF,
                                           coeff_beta);
             }
         }
-    /* Radial Section */
-    #pragma omp for nowait
+/* Radial Section */
+#pragma omp for nowait
         for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
             for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
                 nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF,
@@ -503,5 +523,3 @@ SparseMatrixCOO<double> DirectSolver_COO_MUMPS_Take<LevelCacheType>::buildSolver
 
     return solver_matrix;
 }
-
-#endif
