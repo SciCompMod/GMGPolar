@@ -66,12 +66,12 @@ public:
 
 private:
     // LU decomposition data structures
-    std::vector<T> L_values, U_values; // Non-zero values for L and U
-    std::vector<int> L_col_idx, U_col_idx; // Column indices for L and U
-    std::vector<int> L_row_ptr, U_row_ptr; // Row pointers for L and U
-    std::vector<int> perm; // Permutation vector (RCM ordering)
-    std::vector<int> perm_inv; // Inverse permutation
-    std::vector<T> U_diag; // Diagonal elements of U
+    AllocatableVector<T> L_values, U_values; // Non-zero values for L and U
+    AllocatableVector<int> L_col_idx, U_col_idx; // Column indices for L and U
+    AllocatableVector<int> L_row_ptr, U_row_ptr; // Row pointers for L and U
+    AllocatableVector<int> perm; // Permutation vector (RCM ordering)
+    AllocatableVector<int> perm_inv; // Inverse permutation
+    AllocatableVector<T> U_diag; // Diagonal elements of U
     bool factorized_; // Factorization status flag
     T tolerance_abs_; // minimum allowed diagonal
     T tolerance_rel_; // relative to the max in the row
@@ -81,9 +81,9 @@ private:
     void solveInPlacePermuted(const Vector<T>& b) const;
 
     // Reordering and permutation utilities
-    std::vector<int> computeRCM(const SparseMatrixCSR<T>& A) const;
-    SparseMatrixCSR<T> permuteMatrix(const SparseMatrixCSR<T>& A, const std::vector<int>& perm,
-                                     const std::vector<int>& perm_inv) const;
+    Vector<int> computeRCM(const SparseMatrixCSR<T>& A) const;
+    SparseMatrixCSR<T> permuteMatrix(const SparseMatrixCSR<T>& A, const Vector<int>& perm,
+                                     const Vector<int>& perm_inv) const;
 
     // Factorization components
     void symbolicFactorization(const SparseMatrixCSR<T>& A, std::vector<std::vector<int>>& L_pattern,
@@ -114,8 +114,8 @@ SparseLUSolver<T>::SparseLUSolver(const SparseMatrixCSR<T>& A, T tolerance_abs, 
     assert(A.rows() == A.columns());
 
     // Compute RCM ordering
-    perm = computeRCM(A);
-    perm_inv.resize(perm.size());
+    perm     = computeRCM(A);
+    perm_inv = Vector<int>("perm_inv", perm.size());
     for (size_t i = 0; i < perm.size(); i++) {
         perm_inv[perm[i]] = i;
     }
@@ -134,24 +134,21 @@ template <typename T>
 void SparseLUSolver<T>::solveInPlace(Vector<T> b) const
 {
     assert(factorized_);
-    assert(b.size() == perm.size());
     const int n = perm.size();
     if (n == 0)
         return;
 
     // Permute RHS: b_perm = P * b
     Vector<T> b_perm("b_perm", n);
-    for (int i = 0; i < n; i++) {
-        b_perm[i] = b[perm[i]];
-    }
+    Kokkos::parallel_for(
+        "b permute", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) { b_perm[i] = b[perm[i]]; });
 
     // Solve permuted system
     solveInPlacePermuted(b_perm);
 
     // Unpermute solution: x = P^T * x_perm
-    for (int i = 0; i < n; i++) {
-        b[i] = b_perm[perm_inv[i]];
-    }
+    Kokkos::parallel_for(
+        "b unpermute", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) { b[i] = b_perm[perm_inv[i]]; });
 }
 
 /**
@@ -164,7 +161,7 @@ void SparseLUSolver<T>::solveInPlacePermuted(const Vector<T>& b) const
     const int n = L_row_ptr.size() - 1;
 
     // Forward substitution: L * y = b
-    for (int i = 0; i < n; i++) {
+    for (int i(0); i < n; ++i) {
         for (int idx = L_row_ptr[i]; idx < L_row_ptr[i + 1]; idx++) {
             b[i] -= L_values[idx] * b[L_col_idx[idx]];
         }
@@ -188,7 +185,7 @@ void SparseLUSolver<T>::solveInPlacePermuted(const Vector<T>& b) const
  * @return Permutation vector
  */
 template <typename T>
-std::vector<int> SparseLUSolver<T>::computeRCM(const SparseMatrixCSR<T>& A) const
+Vector<int> SparseLUSolver<T>::computeRCM(const SparseMatrixCSR<T>& A) const
 {
     const int n = A.rows();
     if (n == 0)
@@ -289,7 +286,12 @@ std::vector<int> SparseLUSolver<T>::computeRCM(const SparseMatrixCSR<T>& A) cons
         RCM_order.insert(RCM_order.end(), comp_order.begin(), comp_order.end());
     }
 
-    return RCM_order;
+    Vector<int> RCM_order_vec("RCM_order_vec", RCM_order.size());
+    for (std::size_t i(0); i < RCM_order.size(); ++i) {
+        RCM_order_vec[i] = RCM_order[i];
+    }
+
+    return RCM_order_vec;
 }
 
 /**
@@ -300,13 +302,13 @@ std::vector<int> SparseLUSolver<T>::computeRCM(const SparseMatrixCSR<T>& A) cons
  * @return Permuted CSR matrix
  */
 template <typename T>
-SparseMatrixCSR<T> SparseLUSolver<T>::permuteMatrix(const SparseMatrixCSR<T>& A, const std::vector<int>& perm,
-                                                    const std::vector<int>& perm_inv) const
+SparseMatrixCSR<T> SparseLUSolver<T>::permuteMatrix(const SparseMatrixCSR<T>& A, const Vector<int>& perm,
+                                                    const Vector<int>& perm_inv) const
 {
     const int n = A.rows();
 
     // Compute number of nonzeros per permuted row
-    std::vector<int> nz_per_row(n);
+    Vector<int> nz_per_row("nz_per_row", n);
     for (int i_new = 0; i_new < n; ++i_new) {
         int i_old         = perm[i_new];
         nz_per_row[i_new] = A.row_nz_size(i_old);
@@ -431,9 +433,13 @@ void SparseLUSolver<T>::numericFactorization(const SparseMatrixCSR<T>& A,
     const int n = A.rows();
 
     // Initialize storage structures
-    L_row_ptr.resize(n + 1, 0);
-    U_row_ptr.resize(n + 1, 0);
-    U_diag.resize(n, 0);
+    L_row_ptr = Vector<int>("L_row_ptr", n + 1);
+    U_row_ptr = Vector<int>("U_row_ptr", n + 1);
+    U_diag    = Vector<T>("U_diag", n);
+
+    Kokkos::deep_copy(L_row_ptr, 0);
+    Kokkos::deep_copy(U_row_ptr, 0);
+    Kokkos::deep_copy(U_diag, 0);
 
     // Compute row pointers
     for (int i = 0; i < n; i++) {
@@ -442,13 +448,13 @@ void SparseLUSolver<T>::numericFactorization(const SparseMatrixCSR<T>& A,
     }
 
     // Allocate memory for values and indices
-    L_values.resize(L_row_ptr[n]);
-    L_col_idx.resize(L_row_ptr[n]);
-    U_values.resize(U_row_ptr[n]);
-    U_col_idx.resize(U_row_ptr[n]);
+    L_values  = Vector<T>("L_values", L_row_ptr[n]);
+    L_col_idx = Vector<int>("L_col_idx", L_row_ptr[n]);
+    U_values  = Vector<T>("U_values", U_row_ptr[n]);
+    U_col_idx = Vector<int>("U_col_idx", U_row_ptr[n]);
 
     // Find start of upper triangular part in U patterns
-    std::vector<int> U_pattern_start_upper(n, 0);
+    Vector<int> U_pattern_start_upper("U_pattern_start_upper", n);
     for (int j = 0; j < n; j++) {
         size_t pos = 0;
         while (pos < U_pattern[j].size() && U_pattern[j][pos] <= j)
