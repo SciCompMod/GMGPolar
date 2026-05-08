@@ -40,9 +40,20 @@ public:
 
     using triplet_type = std::tuple<int, int, non_const_element_type>;
 
+    // Default constructor.
     SparseMatrixCSR();
+
+    // Copy constructor — A shallow copy is intentional here
     KOKKOS_DEFAULTED_FUNCTION SparseMatrixCSR(const SparseMatrixCSR& other) = default;
+
+    // Move constructor — takes ownership instead of sharing.
     KOKKOS_DEFAULTED_FUNCTION SparseMatrixCSR(SparseMatrixCSR&& other) noexcept;
+
+    // Converting constructor: SparseMatrixCSR<T2> -> SparseMatrixCSR<const T2>.
+    // This constructor only exists for the instantiation SparseMatrixCSR<const double>,
+    // and accepts a SparseMatrixCSR<double> argument.
+    // The resulting const matrix shares storage with the source but exposes
+    // only read-only access through T and int_element_type.
     template <typename T2,
               std::enable_if_t<std::is_same_v<non_const_element_type, T2> && std::is_const_v<T>, bool> = true>
     KOKKOS_FUNCTION SparseMatrixCSR(const SparseMatrixCSR<T2>& other);
@@ -52,9 +63,16 @@ public:
     explicit SparseMatrixCSR(int rows, int columns, const std::vector<non_const_element_type>& values,
                              const std::vector<int>& column_indices, const std::vector<int>& row_start_indices);
 
-    SparseMatrixCSR& operator=(const SparseMatrixCSR& other)                               = delete;
+    // Copy assignment is deleted.
+    // Copying is only allowed through the copy constructor or copy() below,
+    // making ownership transfer explicit and preventing accidental shallow
+    // copies that silently share mutable storage.
+    SparseMatrixCSR& operator=(const SparseMatrixCSR& other) = delete;
+
+    // Move assignment — transfers ownership.
     KOKKOS_DEFAULTED_FUNCTION SparseMatrixCSR& operator=(SparseMatrixCSR&& other) noexcept = default;
 
+    // Converting assignment: SparseMatrixCSR<double> -> SparseMatrixCSR<const double>.
     template <typename T2,
               std::enable_if_t<std::is_same_v<std::remove_const_t<T>, T2> && std::is_const_v<T>, bool> = true>
     KOKKOS_FUNCTION SparseMatrixCSR& operator=(const SparseMatrixCSR<T2>& other);
@@ -105,12 +123,18 @@ private:
 template <typename U>
 std::ostream& operator<<(std::ostream& stream, const SparseMatrixCSR<U>& matrix)
 {
+    // Create host mirrors and deep_copy from device if necessary.
+    // If the View is already on host, deep_copy is a no-op.
+    auto h_values            = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, matrix.values_);
+    auto h_column_indices    = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, matrix.column_indices_);
+    auto h_row_start_indices = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, matrix.row_start_indices_);
+
     stream << "SparseMatrixCSR: " << matrix.rows_ << " x " << matrix.columns_ << "\n";
     stream << "Number of non-zeros (nnz): " << matrix.nnz_ << "\n";
     stream << "Non-zero elements (row, column, value):\n";
     for (int row = 0; row < matrix.rows_; ++row) {
-        for (int nnz = matrix.row_start_indices_(row); nnz < matrix.row_start_indices_(row + 1); ++nnz) {
-            stream << "(" << row << ", " << matrix.column_indices_(nnz) << ", " << matrix.values_(nnz) << ")\n";
+        for (int nnz = h_row_start_indices(row); nnz < h_row_start_indices(row + 1); ++nnz) {
+            stream << "(" << row << ", " << h_column_indices(nnz) << ", " << h_values(nnz) << ")\n";
         }
     }
     return stream;
