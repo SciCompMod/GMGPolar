@@ -29,7 +29,7 @@ static inline void updateCOOCSRMatrixElement(SparseMatrixCSR<double>& matrix, in
                                              double val)
 {
     matrix.set_row_nz_index(row, offset, col);
-    matrix.set_row_nz_entry(row, offset, matrix.row_nz_entry(row, offset) + val);
+    matrix.increase_row_nz_entry(row, offset, val);
 }
 #endif
 

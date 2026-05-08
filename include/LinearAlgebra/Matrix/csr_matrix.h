@@ -66,9 +66,11 @@ public:
 
     KOKKOS_FUNCTION const int& row_nz_index(int row, int nz_index) const;
     KOKKOS_FUNCTION void set_row_nz_index(int row, int nz_index, int row_nz_index) const;
+    KOKKOS_FUNCTION void increase_row_nz_index(int row, int nz_index, int row_nz_index) const;
 
     KOKKOS_FUNCTION const T& row_nz_entry(int row, int nz_index) const;
     KOKKOS_FUNCTION void set_row_nz_entry(int row, int nz_index, T row_nz_entry) const;
+    KOKKOS_FUNCTION void increase_row_nz_entry(int row, int nz_index, T row_nz_entry) const;
 
     KOKKOS_FUNCTION T* values_data() const;
     KOKKOS_FUNCTION int* column_indices_data() const;
@@ -276,6 +278,14 @@ KOKKOS_FUNCTION void SparseMatrixCSR<T>::set_row_nz_index(int row, int nz_index,
 }
 
 template <typename T>
+KOKKOS_FUNCTION void SparseMatrixCSR<T>::increase_row_nz_index(int row, int nz_index, int row_nz_index) const
+{
+    KOKKOS_ASSERT(row >= 0 && row < rows_);
+    KOKKOS_ASSERT(nz_index >= 0 && nz_index < row_nz_size(row));
+    column_indices_(row_start_indices_(row) + nz_index) += row_nz_index;
+}
+
+template <typename T>
 KOKKOS_FUNCTION const T& SparseMatrixCSR<T>::row_nz_entry(int row, int nz_index) const
 {
     KOKKOS_ASSERT(row >= 0 && row < rows_);
@@ -289,6 +299,14 @@ KOKKOS_FUNCTION void SparseMatrixCSR<T>::set_row_nz_entry(int row, int nz_index,
     KOKKOS_ASSERT(row >= 0 && row < rows_);
     KOKKOS_ASSERT(nz_index >= 0 && nz_index < row_nz_size(row));
     values_(row_start_indices_(row) + nz_index) = row_nz_entry;
+}
+
+template <typename T>
+KOKKOS_FUNCTION void SparseMatrixCSR<T>::increase_row_nz_entry(int row, int nz_index, T row_nz_entry) const
+{
+    KOKKOS_ASSERT(row >= 0 && row < rows_);
+    KOKKOS_ASSERT(nz_index >= 0 && nz_index < row_nz_size(row));
+    values_(row_start_indices_(row) + nz_index) += row_nz_entry;
 }
 
 template <typename T>

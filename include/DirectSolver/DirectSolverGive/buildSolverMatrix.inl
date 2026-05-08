@@ -18,7 +18,7 @@ static inline void updateMatrixElement(SparseMatrixCSR<double>& matrix, int ptr,
                                        double value)
 {
     matrix.set_row_nz_index(row, offset, column);
-    matrix.set_row_nz_entry(row, offset, matrix.row_nz_entry(row, offset) + value);
+    matrix.increase_row_nz_entry(row, offset, value);
 }
 #endif
 
