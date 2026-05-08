@@ -337,8 +337,8 @@ SparseMatrixCSR<T> SparseLUSolver<T>::permuteMatrix(const SparseMatrixCSR<T>& A,
             int j_new = perm_inv[j_old];
 
             // Find the position in the underlying storage
-            A_perm.row_nz_entry(i_new, idx) = val;
-            A_perm.row_nz_index(i_new, idx) = j_new;
+            A_perm.set_row_nz_entry(i_new, idx, val);
+            A_perm.set_row_nz_index(i_new, idx, j_new);
         }
     }
 
