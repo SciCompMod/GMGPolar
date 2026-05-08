@@ -1,7 +1,7 @@
 #pragma once
 
 #include <algorithm>
-#include <cKOKKOS_ASSERT>
+#include <cassert>
 #include <functional>
 #include <limits>
 #include <memory>
@@ -11,9 +11,7 @@
 #include <tuple>
 #include <unistd.h>
 #include <vector>
-#include <vector>
 #include <unordered_map>
-#include <cKOKKOS_ASSERT>
 #include <iostream>
 #include <cmath>
 
