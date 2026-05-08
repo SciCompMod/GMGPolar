@@ -78,7 +78,7 @@ private:
 
     // Core methods
     void factorize(const SparseMatrixCSR<T>& A);
-    void solveInPlacePermuted(T* b) const;
+    void solveInPlacePermuted(Vector<T>& b) const;
 
     // Reordering and permutation utilities
     std::vector<int> computeRCM(const SparseMatrixCSR<T>& A) const;
@@ -145,7 +145,7 @@ void SparseLUSolver<T>::solveInPlace(Vector<T>& b) const
     }
 
     // Solve permuted system
-    solveInPlacePermuted(b_perm.data());
+    solveInPlacePermuted(b_perm);
 
     // Unpermute solution: x = P^T * x_perm
     for (int i = 0; i < n; i++) {
@@ -158,7 +158,7 @@ void SparseLUSolver<T>::solveInPlace(Vector<T>& b) const
  * @param b - Permuted right-hand side vector (overwritten with solution)
  */
 template <typename T>
-void SparseLUSolver<T>::solveInPlacePermuted(T* b) const
+void SparseLUSolver<T>::solveInPlacePermuted(Vector<T>& b) const
 {
     const int n = L_row_ptr.size() - 1;
 
