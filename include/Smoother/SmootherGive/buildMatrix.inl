@@ -28,8 +28,8 @@ static inline void updateCOOCSRMatrixElement(SparseMatrixCOO<double>& matrix, in
 static inline void updateCOOCSRMatrixElement(SparseMatrixCSR<double>& matrix, int ptr, int offset, int row, int col,
                                              double val)
 {
-    matrix.row_nz_index(row, offset) = col;
-    matrix.row_nz_entry(row, offset) += val;
+    matrix.set_row_nz_index(row, offset, col);
+    matrix.increase_row_nz_entry(row, offset, val);
 }
 #endif
 
