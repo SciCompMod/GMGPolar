@@ -51,6 +51,7 @@ public:
 
     const T& value(int nz_index) const;
     void set_value(int nz_index, T value) const;
+    void increase_value(int nz_index, T value) const;
 
     bool is_symmetric() const;
     void is_symmetric(bool value);
@@ -268,6 +269,13 @@ const int& SparseMatrixCOO<T>::row_index(int nz_index) const
     assert(nz_index < this->nnz_);
     return row_indices_(nz_index);
 }
+template <typename T>
+void SparseMatrixCOO<T>::increment_row_index(int nz_index) const
+{
+    assert(nz_index >= 0);
+    assert(nz_index < this->nnz_);
+    row_indices_(nz_index)++;
+}
 
 template <typename T>
 void SparseMatrixCOO<T>::set_col_index(int nz_index, int col_index) const
@@ -283,6 +291,13 @@ const int& SparseMatrixCOO<T>::col_index(int nz_index) const
     assert(nz_index < nnz_);
     return column_indices_(nz_index);
 }
+template <typename T>
+void SparseMatrixCOO<T>::increment_col_index(int nz_index) const
+{
+    assert(nz_index >= 0);
+    assert(nz_index < nnz_);
+    column_indices_(nz_index)++;
+}
 
 template <typename T>
 void SparseMatrixCOO<T>::set_value(int nz_index, T value) const
@@ -297,6 +312,13 @@ const T& SparseMatrixCOO<T>::value(int nz_index) const
     assert(nz_index >= 0);
     assert(nz_index < nnz_);
     return values_(nz_index);
+}
+template <typename T>
+void SparseMatrixCOO<T>::increase_value(int nz_index, T value) const
+{
+    assert(nz_index >= 0);
+    assert(nz_index < nnz_);
+    values_(nz_index) += value;
 }
 
 template <typename T>

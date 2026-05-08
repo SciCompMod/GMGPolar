@@ -10,7 +10,7 @@ static inline void updateMatrixElement(SparseMatrixCOO<double>& matrix, int ptr,
 {
     matrix.set_row_index(ptr + offset, row);
     matrix.set_col_index(ptr + offset, col);
-    matrix.set_value(ptr + offset, matrix.value(ptr + offset) + val);
+    matrix.increase_value(ptr + offset, val);
 }
 
 } // namespace direct_solver_coo_mumps_give
