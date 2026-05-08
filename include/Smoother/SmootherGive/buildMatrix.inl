@@ -20,9 +20,9 @@ static inline void updateMatrixElement(BatchedTridiagonalSolver<double>& solver,
 static inline void updateCOOCSRMatrixElement(SparseMatrixCOO<double>& matrix, int ptr, int offset, int row, int col,
                                              double val)
 {
-    matrix.row_index(ptr + offset) = row;
-    matrix.col_index(ptr + offset) = col;
-    matrix.value(ptr + offset) += val;
+    matrix.set_row_index(ptr + offset, row);
+    matrix.set_col_index(ptr + offset, col);
+    matrix.set_value(ptr + offset, matrix.value(ptr + offset) + val);
 }
 #else
 static inline void updateCOOCSRMatrixElement(SparseMatrixCSR<double>& matrix, int ptr, int offset, int row, int col,

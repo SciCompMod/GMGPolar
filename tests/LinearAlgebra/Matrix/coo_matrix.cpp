@@ -170,7 +170,7 @@ TEST(SparseMatrixDouble, value_modify)
 
     EXPECT_DOUBLE_EQ(m.value(2), 3.0);
 
-    m.value(2) = 5.0;
+    m.set_value(2, 5.0);
     EXPECT_DOUBLE_EQ(m.value(2), 5.0);
 }
 
@@ -183,29 +183,29 @@ TEST(SparseMatrixDouble, modify_construction)
     const int nnz     = 6;
     SparseMatrixCOO<double> matrixA(rows, columns, nnz);
 
-    matrixA.row_index(0) = 0;
-    matrixA.col_index(0) = 1;
-    matrixA.value(0)     = 2.0;
+    matrixA.set_row_index(0, 0);
+    matrixA.set_col_index(0, 1);
+    matrixA.set_value(0, 2.0);
 
-    matrixA.row_index(1) = 1;
-    matrixA.col_index(1) = 0;
-    matrixA.value(1)     = 8.0;
+    matrixA.set_row_index(1, 1);
+    matrixA.set_col_index(1, 0);
+    matrixA.set_value(1, 8.0);
 
-    matrixA.row_index(2) = 1;
-    matrixA.col_index(2) = 3;
-    matrixA.value(2)     = -6.0;
+    matrixA.set_row_index(2, 1);
+    matrixA.set_col_index(2, 3);
+    matrixA.set_value(2, -6.0);
 
-    matrixA.row_index(3) = 2;
-    matrixA.col_index(3) = 0;
-    matrixA.value(3)     = -5.0;
+    matrixA.set_row_index(3, 2);
+    matrixA.set_col_index(3, 0);
+    matrixA.set_value(3, -5.0);
 
-    matrixA.row_index(4) = 3;
-    matrixA.col_index(4) = 1;
-    matrixA.value(4)     = 7.0;
+    matrixA.set_row_index(4, 3);
+    matrixA.set_col_index(4, 1);
+    matrixA.set_value(4, 7.0);
 
-    matrixA.row_index(5) = 3;
-    matrixA.col_index(5) = 3;
-    matrixA.value(5)     = 3.0;
+    matrixA.set_row_index(5, 3);
+    matrixA.set_col_index(5, 3);
+    matrixA.set_value(5, 3.0);
 
     ASSERT_EQ(matrixA.rows(), 4);
     ASSERT_EQ(matrixA.columns(), 5);

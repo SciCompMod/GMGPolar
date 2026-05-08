@@ -184,9 +184,9 @@ SparseMatrixCOO<double> CooMumpsSolver::extractUpperTriangle(const SparseMatrixC
         const int column = matrix.col_index(i);
 
         if (row <= column) {
-            sym.row_index(current) = row;
-            sym.col_index(current) = column;
-            sym.value(current)     = matrix.value(i);
+            sym.set_row_index(current, row);
+            sym.set_col_index(current, column);
+            sym.set_value(current, matrix.value(i));
             current++;
         }
     }

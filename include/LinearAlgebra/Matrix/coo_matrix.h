@@ -44,13 +44,13 @@ public:
     int non_zero_size() const;
 
     const int& row_index(int nz_index) const;
-    int& row_index(int nz_index);
+    void set_row_index(int nz_index, int row_index) const;
 
     const int& col_index(int nz_index) const;
-    int& col_index(int nz_index);
+    void set_col_index(int nz_index, int col_index) const;
 
     const T& value(int nz_index) const;
-    T& value(int nz_index);
+    void set_value(int nz_index, T value) const;
 
     bool is_symmetric() const;
     void is_symmetric(bool value);
@@ -141,13 +141,13 @@ template <typename T>
 SparseMatrixCOO<T> SparseMatrixCOO<T>::copy() const
 {
     SparseMatrixCOO<T> other;
-    other.rows_ = rows_;
-    other.columns_ = columns_;
-    other.nnz_ = other.nnz_;
-    other.row_indices_ = Vector<int>("COO row indices", nnz_);
+    other.rows_           = rows_;
+    other.columns_        = columns_;
+    other.nnz_            = other.nnz_;
+    other.row_indices_    = Vector<int>("COO row indices", nnz_);
     other.column_indices_ = Vector<int>("COO column indices", nnz_);
-    other.values_ = Vector<T>("COO values", nnz_);
-    other.is_symmetric_ = is_symmetric_;
+    other.values_         = Vector<T>("COO values", nnz_);
+    other.is_symmetric_   = is_symmetric_;
 
     Kokkos::deep_copy(other.row_indices_, row_indices_);
     Kokkos::deep_copy(other.column_indices_, column_indices_);
@@ -224,14 +224,14 @@ SparseMatrixCOO<T>::SparseMatrixCOO(int rows, int columns, const std::vector<tri
     assert(rows_ >= 0);
     assert(columns_ >= 0);
     assert(nnz_ >= 0);
-#pragma omp parallel for
-    for (int i = 0; i < nnz_; i++) {
-        assert(0 <= std::get<0>(entries[i]) && std::get<0>(entries[i]) < rows_);
-        assert(0 <= std::get<1>(entries[i]) && std::get<1>(entries[i]) < columns_);
-        row_indices_(i)    = std::get<0>(entries[i]);
-        column_indices_(i) = std::get<1>(entries[i]);
-        values_(i)         = std::get<2>(entries[i]);
-    }
+    Kokkos::parallel_for(
+        "SparseMatrixCOO constructor", nnz_, KOKKOS_LAMBDA(const int i) {
+            assert(0 <= std::get<0>(entries[i]) && std::get<0>(entries[i]) < rows_);
+            assert(0 <= std::get<1>(entries[i]) && std::get<1>(entries[i]) < columns_);
+            row_indices_(i)    = std::get<0>(entries[i]);
+            column_indices_(i) = std::get<1>(entries[i]);
+            values_(i)         = std::get<2>(entries[i]);
+        });
 }
 
 template <typename T>
@@ -255,11 +255,11 @@ int SparseMatrixCOO<T>::non_zero_size() const
 }
 
 template <typename T>
-int& SparseMatrixCOO<T>::row_index(int nz_index)
+void SparseMatrixCOO<T>::set_row_index(int nz_index, int row_index) const
 {
     assert(nz_index >= 0);
     assert(nz_index < this->nnz_);
-    return row_indices_(nz_index);
+    row_indices_(nz_index) = row_index;
 }
 template <typename T>
 const int& SparseMatrixCOO<T>::row_index(int nz_index) const
@@ -270,11 +270,11 @@ const int& SparseMatrixCOO<T>::row_index(int nz_index) const
 }
 
 template <typename T>
-int& SparseMatrixCOO<T>::col_index(int nz_index)
+void SparseMatrixCOO<T>::set_col_index(int nz_index, int col_index) const
 {
     assert(nz_index >= 0);
     assert(nz_index < nnz_);
-    return column_indices_(nz_index);
+    column_indices_(nz_index) = col_index;
 }
 template <typename T>
 const int& SparseMatrixCOO<T>::col_index(int nz_index) const
@@ -285,11 +285,11 @@ const int& SparseMatrixCOO<T>::col_index(int nz_index) const
 }
 
 template <typename T>
-T& SparseMatrixCOO<T>::value(int nz_index)
+void SparseMatrixCOO<T>::set_value(int nz_index, T value) const
 {
     assert(nz_index >= 0);
     assert(nz_index < nnz_);
-    return values_(nz_index);
+    values_(nz_index) = value;
 }
 template <typename T>
 const T& SparseMatrixCOO<T>::value(int nz_index) const

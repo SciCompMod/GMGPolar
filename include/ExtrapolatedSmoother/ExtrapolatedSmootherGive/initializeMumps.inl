@@ -12,8 +12,8 @@ void ExtrapolatedSmootherGive<LevelCacheType>::initializeMumpsSolver(DMUMPS_STRU
      * Adjust row and column indices to match MUMPS' requirements.
      */
     for (int i = 0; i < solver_matrix.non_zero_size(); i++) {
-        solver_matrix.row_index(i) += 1;
-        solver_matrix.col_index(i) += 1;
+        solver_matrix.set_row_index(i, solver_matrix.row_index(i) + 1);
+        solver_matrix.set_col_index(i, solver_matrix.col_index(i) + 1);
     }
 
     mumps_solver.job = JOB_INIT;

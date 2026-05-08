@@ -8,9 +8,9 @@ namespace direct_solver_coo_mumps_take
 static inline void updateMatrixElement(SparseMatrixCOO<double>& matrix, int ptr, int offset, int row, int col,
                                        double val)
 {
-    matrix.row_index(ptr + offset) = row;
-    matrix.col_index(ptr + offset) = col;
-    matrix.value(ptr + offset)     = val;
+    matrix.set_row_index(ptr + offset, row);
+    matrix.set_col_index(ptr + offset, col);
+    matrix.set_value(ptr + offset, val);
 }
 
 } // namespace direct_solver_coo_mumps_take
