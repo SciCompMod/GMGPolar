@@ -102,12 +102,18 @@ private:
 template <typename U>
 std::ostream& operator<<(std::ostream& stream, const SparseMatrixCSR<U>& matrix)
 {
+    // Create host mirrors and deep_copy from device if necessary.
+    // If the View is already on host, deep_copy is a no-op.
+    auto h_values            = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, matrix.values_);
+    auto h_column_indices    = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, matrix.column_indices_);
+    auto h_row_start_indices = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, matrix.row_start_indices_);
+
     stream << "SparseMatrixCSR: " << matrix.rows_ << " x " << matrix.columns_ << "\n";
     stream << "Number of non-zeros (nnz): " << matrix.nnz_ << "\n";
     stream << "Non-zero elements (row, column, value):\n";
     for (int row = 0; row < matrix.rows_; ++row) {
-        for (int nnz = matrix.row_start_indices_(row); nnz < matrix.row_start_indices_(row + 1); ++nnz) {
-            stream << "(" << row << ", " << matrix.column_indices_(nnz) << ", " << matrix.values_(nnz) << ")\n";
+        for (int nnz = h_row_start_indices(row); nnz < h_row_start_indices(row + 1); ++nnz) {
+            stream << "(" << row << ", " << h_column_indices(nnz) << ", " << h_values(nnz) << ")\n";
         }
     }
     return stream;
