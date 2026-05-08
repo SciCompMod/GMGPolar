@@ -44,6 +44,8 @@ public:
     explicit SparseMatrixCSR(int rows, int columns, const std::vector<T>& values,
                              const std::vector<int>& column_indices, const std::vector<int>& row_start_indices);
 
+    SparseMatrixCSR copy() const;
+
     SparseMatrixCSR& operator=(const SparseMatrixCSR& other) = delete;
     SparseMatrixCSR& operator=(SparseMatrixCSR&& other) noexcept = default;
 
@@ -54,10 +56,10 @@ public:
     int row_nz_size(int row) const;
 
     const int& row_nz_index(int row, int nz_index) const;
-    int& row_nz_index(int row, int nz_index);
+    void set_row_nz_index(int row, int nz_index, int row_nz_index) const;
 
     const T& row_nz_entry(int row, int nz_index) const;
-    T& row_nz_entry(int row, int nz_index);
+    void set_row_nz_entry(int row, int nz_index, T row_nz_entry) const;
 
     T* values_data() const;
     int* column_indices_data() const;
@@ -107,6 +109,24 @@ SparseMatrixCSR<T>::SparseMatrixCSR()
     , columns_(0)
     , nnz_(0)
 {
+}
+
+// copy construction
+template <typename T>
+SparseMatrixCSR<T> SparseMatrixCSR<T>::copy() const
+{
+    SparseMatrixCSR<T> new_copy;
+    new_copy.rows_              = rows_;
+    new_copy.columns_           = columns_;
+    new_copy.nnz_               = nnz_;
+    new_copy.values_            = AllocatableVector<T>("CSR values", nnz_);
+    new_copy.column_indices_    = AllocatableVector<int>("CSR column indices", nnz_);
+    new_copy.row_start_indices_ = AllocatableVector<int>("CSR row start indices", rows_ + 1);
+    Kokkos::deep_copy(new_copy.values_, values_);
+    Kokkos::deep_copy(new_copy.column_indices_, column_indices_);
+    Kokkos::deep_copy(new_copy.row_start_indices_, row_start_indices_);
+
+    return new_copy;
 }
 
 // move construction
@@ -233,11 +253,11 @@ const int& SparseMatrixCSR<T>::row_nz_index(int row, int nz_index) const
 }
 
 template <typename T>
-int& SparseMatrixCSR<T>::row_nz_index(int row, int nz_index)
+void SparseMatrixCSR<T>::set_row_nz_index(int row, int nz_index, int row_nz_index) const
 {
     assert(row >= 0 && row < rows_);
     assert(nz_index >= 0 && nz_index < row_nz_size(row));
-    return column_indices_(row_start_indices_(row) + nz_index);
+    column_indices_(row_start_indices_(row) + nz_index) = row_nz_index;
 }
 
 template <typename T>
@@ -249,11 +269,11 @@ const T& SparseMatrixCSR<T>::row_nz_entry(int row, int nz_index) const
 }
 
 template <typename T>
-T& SparseMatrixCSR<T>::row_nz_entry(int row, int nz_index)
+void SparseMatrixCSR<T>::set_row_nz_entry(int row, int nz_index, T row_nz_entry) const
 {
     assert(row >= 0 && row < rows_);
     assert(nz_index >= 0 && nz_index < row_nz_size(row));
-    return values_(row_start_indices_(row) + nz_index);
+    values_(row_start_indices_(row) + nz_index) = row_nz_entry;
 }
 
 template <typename T>
