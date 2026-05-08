@@ -3,7 +3,7 @@
 namespace residual_take
 {
 
-static inline void node_apply_a_take(const int i_r, const int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+static KOKKOS_INLINE_FUNCTION void node_apply_a_take(const int i_r, const int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                      Vector<double>& result, ConstVector<double>& x, ConstVector<double>& arr,
                                      ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF,
                                      ConstVector<double>& coeff_beta)
