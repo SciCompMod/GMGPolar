@@ -28,7 +28,7 @@ void SmootherGive<LevelCacheType>::solveBlackCircleSection(Vector<double> x, Vec
             std::cerr << "Error solving the system: " << inner_boundary_mumps_solver_.info[0] << std::endl;
         }
 #else
-        inner_boundary_lu_solver_.solveInPlace(circle_section.data());
+        inner_boundary_lu_solver_.solveInPlace(circle_section);
 #endif
     }
 
@@ -70,7 +70,7 @@ void SmootherGive<LevelCacheType>::solveWhiteCircleSection(Vector<double> x, Vec
             std::cerr << "Error solving the system: " << inner_boundary_mumps_solver_.info[0] << std::endl;
         }
 #else
-        inner_boundary_lu_solver_.solveInPlace(circle_section.data());
+        inner_boundary_lu_solver_.solveInPlace(circle_section);
 #endif
     }
 

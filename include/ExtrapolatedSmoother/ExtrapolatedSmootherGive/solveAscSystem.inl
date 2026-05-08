@@ -33,7 +33,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackCircleSection(Vector<do
             std::cerr << "Error solving the system: " << inner_boundary_mumps_solver_.info[0] << std::endl;
         }
 #else
-        inner_boundary_lu_solver_.solveInPlace(circle_section.data());
+        inner_boundary_lu_solver_.solveInPlace(circle_section);
 #endif
     }
 
@@ -80,7 +80,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveWhiteCircleSection(Vector<do
             std::cerr << "Error solving the system: " << inner_boundary_mumps_solver_.info[0] << std::endl;
         }
 #else
-        inner_boundary_lu_solver_.solveInPlace(circle_section.data());
+        inner_boundary_lu_solver_.solveInPlace(circle_section);
 #endif
     }
 
