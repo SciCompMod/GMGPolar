@@ -129,25 +129,15 @@ template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoeff
 void Level<DomainGeometry, DensityProfileCoefficients>::initializeDirectSolver(
     const bool DirBC_Interior, const int num_omp_threads, const StencilDistributionMethod stencil_distribution_method)
 {
-#ifdef GMGPOLAR_USE_MUMPS
     if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
-        op_directSolver_ = std::make_unique<DirectSolver_COO_MUMPS_Take<LevelCacheType>>(
-            *grid_, *level_cache_, DirBC_Interior, num_omp_threads);
+        op_directSolver_ =
+            std::make_unique<DirectSolverTake<LevelCacheType>>(*grid_, *level_cache_, DirBC_Interior, num_omp_threads);
     }
     else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
-        op_directSolver_ = std::make_unique<DirectSolver_COO_MUMPS_Give<LevelCacheType>>(
-            *grid_, *level_cache_, DirBC_Interior, num_omp_threads);
+        op_directSolver_ =
+            std::make_unique<DirectSolverGive<LevelCacheType>>(*grid_, *level_cache_, DirBC_Interior, num_omp_threads);
     }
-#else
-    if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
-        op_directSolver_ = std::make_unique<DirectSolver_CSR_LU_Take<LevelCacheType>>(*grid_, *level_cache_,
-                                                                                      DirBC_Interior, num_omp_threads);
-    }
-    else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
-        op_directSolver_ = std::make_unique<DirectSolver_CSR_LU_Give<LevelCacheType>>(*grid_, *level_cache_,
-                                                                                      DirBC_Interior, num_omp_threads);
-    }
-#endif
+
     if (!op_directSolver_)
         throw std::runtime_error("Failed to initialize Direct Solver.");
 }
