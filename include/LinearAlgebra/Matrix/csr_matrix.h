@@ -27,6 +27,26 @@
 namespace gmgpolar
 {
 
+namespace sparse_csr_helpers {
+		template<class MemorySpace>
+void row_start_indices_from_nz_per_row(int& nnz, const Vector<int, MemorySpace>& nz_per_row, int rows, const Vector<int, MemorySpace>& row_start_indices)
+{
+    nnz = 0;
+	    Kokkos::parallel_reduce(
+        "compute nz_per_row", Kokkos::RangePolicy<>(0, 1),
+        KOKKOS_LAMBDA(const std::size_t i, int& local_nnz) {
+    for (int i = 0; i < rows; i++) {
+        row_start_indices(i) = local_nnz;
+        local_nnz += nz_per_row(i);
+    }
+    row_start_indices(rows) = local_nnz;
+        },
+        nnz);
+	Kokkos::fence();
+
+}
+}
+
 template <typename T, class MemorySpace = Kokkos::HostSpace>
 class SparseMatrixCSR
 {
@@ -42,6 +62,7 @@ public:
     // Move constructor — takes ownership instead of sharing.
     KOKKOS_FUNCTION SparseMatrixCSR(SparseMatrixCSR&& other) noexcept;
 
+	SparseMatrixCSR(int rows, int columns, Vector<int, MemorySpace> nz_per_row);
     explicit SparseMatrixCSR(int rows, int columns, std::function<int(int)> nz_per_row);
     explicit SparseMatrixCSR(int rows, int columns, const std::vector<triplet_type>& entries);
     explicit SparseMatrixCSR(int rows, int columns, const std::vector<T>& values,
@@ -58,7 +79,7 @@ public:
 
     SparseMatrixCSR copy() const;
     template<class TargetMemorySpace>
-    SparseMatrixCSR<T, TargetMemorySpace> mirror_and_copy() const;
+    std::conditional_t<std::is_same_v<MemorySpace, TargetMemorySpace>, const SparseMatrixCSR&, SparseMatrixCSR<T, TargetMemorySpace>> mirror_view_and_copy() const;
 
     KOKKOS_FUNCTION int rows() const;
     KOKKOS_FUNCTION int columns() const;
@@ -153,8 +174,11 @@ SparseMatrixCSR<T, MemorySpace> SparseMatrixCSR<T, MemorySpace>::copy() const
 
 template <typename T, class MemorySpace>
 template <class TargetMemorySpace>
-SparseMatrixCSR<T, TargetMemorySpace> SparseMatrixCSR<T, MemorySpace>::mirror_and_copy() const
+std::conditional_t<std::is_same_v<MemorySpace, TargetMemorySpace>, const SparseMatrixCSR<T, MemorySpace>&, SparseMatrixCSR<T, TargetMemorySpace>> SparseMatrixCSR<T, MemorySpace>::mirror_view_and_copy() const
 {
+if constexpr(std::is_same_v<MemorySpace, TargetMemorySpace>) {
+		return *this;
+} else {
     SparseMatrixCSR<T, TargetMemorySpace> new_copy;
     new_copy.rows_              = rows_;
     new_copy.columns_           = columns_;
@@ -163,6 +187,7 @@ SparseMatrixCSR<T, TargetMemorySpace> SparseMatrixCSR<T, MemorySpace>::mirror_an
     new_copy.column_indices_    = Kokkos::create_mirror_view_and_copy(TargetMemorySpace(), column_indices_);
     new_copy.row_start_indices_ = Kokkos::create_mirror_view_and_copy(TargetMemorySpace(), row_start_indices_);
     return new_copy;
+}
 }
 
 // move construction
@@ -186,8 +211,8 @@ SparseMatrixCSR<T, MemorySpace>::SparseMatrixCSR(int rows, int columns, std::fun
     , columns_(columns)
     , row_start_indices_("CSR row start indices", rows_ + 1)
 {
-    KOKKOS_ASSERT(rows >= 0);
-    KOKKOS_ASSERT(columns >= 0);
+    assert(rows >= 0);
+    assert(columns >= 0);
 
     auto h_row_start_indices = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, row_start_indices_);
 
@@ -206,6 +231,23 @@ SparseMatrixCSR<T, MemorySpace>::SparseMatrixCSR(int rows, int columns, std::fun
 }
 
 template <typename T, class MemorySpace>
+SparseMatrixCSR<T, MemorySpace>::SparseMatrixCSR(int rows, int columns, Vector<int, MemorySpace> nz_per_row)
+    : rows_(rows)
+    , columns_(columns)
+    , row_start_indices_("CSR row start indices", rows + 1)
+{
+    assert(rows >= 0);
+    assert(columns >= 0);
+
+	sparse_csr_helpers::row_start_indices_from_nz_per_row(nnz_, nz_per_row, rows, row_start_indices_);
+    values_                  = Vector<T, MemorySpace>("CSR values", nnz_);
+    column_indices_          = Vector<int, MemorySpace>("CSR column indices", nnz_);
+
+    assign(values_, T(0));
+    assign(column_indices_, 0);
+}
+
+template <typename T, class MemorySpace>
 SparseMatrixCSR<T, MemorySpace>::SparseMatrixCSR(int rows, int columns, const std::vector<triplet_type>& entries)
     : // entries: row_idx, col_idx, value
     rows_(rows)
@@ -215,9 +257,9 @@ SparseMatrixCSR<T, MemorySpace>::SparseMatrixCSR(int rows, int columns, const st
     , column_indices_("CSR column indices", nnz_)
     , row_start_indices_("CSR row start indices", rows_ + 1)
 {
-    KOKKOS_ASSERT(rows >= 0);
-    KOKKOS_ASSERT(columns >= 0);
-    KOKKOS_ASSERT(is_sorted_entries(entries) && "Entries must be sorted by row!");
+    assert(rows >= 0);
+    assert(columns >= 0);
+    assert(is_sorted_entries(entries) && "Entries must be sorted by row!");
 
     auto h_values            = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, values_);
     auto h_column_indices    = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, column_indices_);
@@ -225,10 +267,10 @@ SparseMatrixCSR<T, MemorySpace>::SparseMatrixCSR(int rows, int columns, const st
 
     // fill values and column indexes
     for (int i = 0; i < nnz_; i++) {
-        KOKKOS_ASSERT(0 <= std::get<0>(entries[i]) && std::get<0>(entries[i]) < rows);
+        assert(0 <= std::get<0>(entries[i]) && std::get<0>(entries[i]) < rows);
         h_values(i)         = std::get<2>(entries[i]);
         h_column_indices(i) = std::get<1>(entries[i]);
-        KOKKOS_ASSERT(0 <= h_column_indices(i) && h_column_indices(i) < columns);
+        assert(0 <= h_column_indices(i) && h_column_indices(i) < columns);
     }
     //fill row indexes
     int count             = 0;
@@ -238,7 +280,7 @@ SparseMatrixCSR<T, MemorySpace>::SparseMatrixCSR(int rows, int columns, const st
             count++;
         h_row_start_indices(r + 1) = count;
     }
-    KOKKOS_ASSERT(h_row_start_indices(rows) == nnz_);
+    assert(h_row_start_indices(rows) == nnz_);
 
     Kokkos::deep_copy(values_, h_values);
     Kokkos::deep_copy(column_indices_, h_column_indices);
@@ -256,10 +298,10 @@ SparseMatrixCSR<T, MemorySpace>::SparseMatrixCSR(int rows, int columns, const st
     , column_indices_("CSR column indices", nnz_)
     , row_start_indices_("CSR row start indices", rows_ + 1)
 {
-    KOKKOS_ASSERT(rows >= 0);
-    KOKKOS_ASSERT(columns >= 0);
-    KOKKOS_ASSERT(row_start_indices.size() == static_cast<size_t>(rows + 1));
-    KOKKOS_ASSERT(values.size() == column_indices.size());
+    assert(rows >= 0);
+    assert(columns >= 0);
+    assert(row_start_indices.size() == static_cast<size_t>(rows + 1));
+    assert(values.size() == column_indices.size());
 
     auto h_values            = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, values_);
     auto h_column_indices    = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, column_indices_);

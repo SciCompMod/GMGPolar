@@ -76,12 +76,14 @@ template <typename T, class MemSpace>
 void fill_b(Vector<T, MemSpace> const& b) {
     Kokkos::parallel_for(
         "fill_b", Kokkos::RangePolicy<>(0, 3), KOKKOS_LAMBDA(const int i) { b(i) = i + 1; });
+	Kokkos::fence();
 }
 
 template <typename T, class MemSpace>
 void fill_b_1x1(Vector<T, MemSpace> const& b) {
     Kokkos::parallel_for(
         "fill_b", Kokkos::RangePolicy<>(0, 1), KOKKOS_LAMBDA(const int i) { b(i) = 4.0; });
+	Kokkos::fence();
 }
 
 // Test 1: 1x1 matrix
@@ -104,6 +106,7 @@ void fill_b_2x2Diag(Vector<T, MemSpace> const& b) {
             b(0) = 6.0;
             b(1) = 8.0;
 		});
+	Kokkos::fence();
 }
 
 // Test 2: 2x2 diagonal
@@ -127,6 +130,7 @@ void fill_b_2x2OffDiag(Vector<T, MemSpace> const& b) {
             b(0) = 1.0;
             b(1) = 2.0;
 		});
+	Kokkos::fence();
 }
 
 // Test 3: 2x2 off-diagonal
