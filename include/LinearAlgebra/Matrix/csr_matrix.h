@@ -194,8 +194,8 @@ SparseMatrixCSR<T, MemorySpace>::SparseMatrixCSR(int rows, int columns, std::fun
         nnz_ += nz_per_row(i);
     }
     row_start_indices_(rows) = nnz_;
-    values_                  = Vector<T>("CSR values", nnz_);
-    column_indices_          = Vector<int>("CSR column indices", nnz_);
+    values_                  = Vector<T, MemorySpace>("CSR values", nnz_);
+    column_indices_          = Vector<int, MemorySpace>("CSR column indices", nnz_);
 
     assign(values_, T(0));
     assign(column_indices_, 0);
