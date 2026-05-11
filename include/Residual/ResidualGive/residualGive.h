@@ -13,9 +13,8 @@ public:
                           const int num_omp_threads);
     ~ResidualGive() override = default;
 
-    void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const final;
-
     void applySystemOperator(Vector<double> result, ConstVector<double> x) const final;
+    void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const final;
 
 private:
     void applyCircleSection(const int i_r, Vector<double> result, ConstVector<double> x) const;
@@ -24,4 +23,5 @@ private:
 
 #include "residualGive.inl"
 #include "applyAGive.inl"
+
 } // namespace gmgpolar
