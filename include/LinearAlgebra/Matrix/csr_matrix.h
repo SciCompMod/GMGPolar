@@ -31,9 +31,10 @@ namespace sparse_csr_helpers {
 		template<class MemorySpace>
 void row_start_indices_from_nz_per_row(int& nnz, const Vector<int, MemorySpace>& nz_per_row, int rows, const Vector<int, MemorySpace>& row_start_indices)
 {
+	using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>, Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
     nnz = 0;
 	    Kokkos::parallel_reduce(
-        "compute nz_per_row", Kokkos::RangePolicy<>(0, 1),
+        "compute nz_per_row", Kokkos::RangePolicy<ExecSpace>(0, 1),
         KOKKOS_LAMBDA(const std::size_t i, int& local_nnz) {
     for (int i = 0; i < rows; i++) {
         row_start_indices(i) = local_nnz;

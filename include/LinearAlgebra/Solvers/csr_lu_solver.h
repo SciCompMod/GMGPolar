@@ -17,9 +17,10 @@ namespace sparse_lu_helpers {
 
 template <class MemorySpace>
 static inline Vector<int, MemorySpace> build_perm_inv(Vector<int, MemorySpace> const& perm) {
+	using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>, Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
     Vector<int, MemorySpace> perm_inv("perm_inv", perm.size());
     Kokkos::parallel_for(
-        "Calculate perm_inv", Kokkos::RangePolicy<>(0, perm.size()),
+        "Calculate perm_inv", Kokkos::RangePolicy<ExecSpace>(0, perm.size()),
         KOKKOS_LAMBDA(const int i) { perm_inv[perm[i]] = i; });
 	Kokkos::fence();
     return perm_inv;
@@ -41,6 +42,7 @@ static inline Vector<int, MemorySpace> build_perm_inv(Vector<int, MemorySpace> c
 template <typename T, class MemorySpace = Kokkos::HostSpace>
 class SparseLUSolver
 {
+	using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>, Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
 public:
     /**
      * @brief Construct an empty solver with given tolerances.
@@ -164,7 +166,7 @@ void SparseLUSolver<T, MemorySpace>::solveInPlace(Vector<T, MemorySpace> b) cons
     // Permute RHS: b_perm = P * b
     Vector<T, MemorySpace> b_perm("b_perm", n);
     Kokkos::parallel_for(
-        "b permute", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) { b_perm[i] = b[perm[i]]; });
+        "b permute", Kokkos::RangePolicy<ExecSpace>(0, n), KOKKOS_LAMBDA(const int i) { b_perm[i] = b[perm[i]]; });
 	Kokkos::fence();
 
     // Solve permuted system
@@ -172,7 +174,7 @@ void SparseLUSolver<T, MemorySpace>::solveInPlace(Vector<T, MemorySpace> b) cons
 
     // Unpermute solution: x = P^T * x_perm
     Kokkos::parallel_for(
-        "b unpermute", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) { b[i] = b_perm[perm_inv[i]]; });
+        "b unpermute", Kokkos::RangePolicy<ExecSpace>(0, n), KOKKOS_LAMBDA(const int i) { b[i] = b_perm[perm_inv[i]]; });
 	Kokkos::fence();
 }
 
@@ -187,7 +189,7 @@ void SparseLUSolver<T, MemorySpace>::solveInPlacePermuted(const Vector<T, Memory
 
     // A loop of size 1 so that calculations are run on GPU
     Kokkos::parallel_for(
-        "solveInPlacePermuted", Kokkos::RangePolicy<>(0, 1), KOKKOS_CLASS_LAMBDA(const int) {
+        "solveInPlacePermuted", Kokkos::RangePolicy<ExecSpace>(0, 1), KOKKOS_CLASS_LAMBDA(const int) {
             // Forward substitution: L * y = b
             for (int i(0); i < n; ++i) {
                 for (int idx = L_row_ptr_[i]; idx < L_row_ptr_[i + 1]; idx++) {
@@ -344,7 +346,7 @@ SparseLUSolver<T, MemorySpace>::permuteMatrix(const SparseMatrixCSR<T, MemorySpa
     // Compute number of nonzeros per permuted row
     Vector<int, MemorySpace> nz_per_row("nz_per_row", n);
     Kokkos::parallel_for(
-        "compute nz_per_row", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i_new) {
+        "compute nz_per_row", Kokkos::RangePolicy<ExecSpace>(0, n), KOKKOS_LAMBDA(const int i_new) {
             int i_old         = perm[i_new];
             nz_per_row[i_new] = A.row_nz_size(i_old);
         });
@@ -355,7 +357,7 @@ SparseLUSolver<T, MemorySpace>::permuteMatrix(const SparseMatrixCSR<T, MemorySpa
 
     // Fill values and column indices
     Kokkos::parallel_for(
-        "SparseLU values and column indices", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i_new) {
+        "SparseLU values and column indices", Kokkos::RangePolicy<ExecSpace>(0, n), KOKKOS_LAMBDA(const int i_new) {
             int i_old = perm[i_new];
             int nnz   = A.row_nz_size(i_old);
             for (int idx = 0; idx < nnz; ++idx) {
