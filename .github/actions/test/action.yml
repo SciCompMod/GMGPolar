@@ -37,6 +37,7 @@ runs:
         cd build/tests
         chmod a+x gmgpolar_tests
         ./gmgpolar_tests  --gtest_output="xml:testreport.xml"
+        ls
     - name: Compute code coverage
       shell: bash
       # compute code coverage
