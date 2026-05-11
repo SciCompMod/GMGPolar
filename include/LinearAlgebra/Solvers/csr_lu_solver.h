@@ -24,7 +24,7 @@ namespace gmgpolar
  * @tparam T Numeric type (e.g. double, float).
  */
 
-template <typename T>
+template <typename T, class MemorySpace = Kokkos::HostSpace>
 class SparseLUSolver
 {
 public:
@@ -51,7 +51,7 @@ public:
      *        entry in a row. Ensures diagonal is not too small compared
      *        to other row entries. Default: 1e-8.
      */
-    explicit SparseLUSolver(const SparseMatrixCSR<T>& A, T tolerance_abs = static_cast<T>(1e-12),
+    explicit SparseLUSolver(const SparseMatrixCSR<T, MemorySpace>& A, T tolerance_abs = static_cast<T>(1e-12),
                             T tolerance_rel = static_cast<T>(1e-8));
 
     /**
@@ -62,39 +62,40 @@ public:
      *
      * @param b Right-hand side vector (modified in place to contain the solution).
      */
-    void solveInPlace(Vector<T> b) const;
+    void solveInPlace(Vector<T, MemorySpace> b) const;
 
 private:
     // LU decomposition data structures
-    AllocatableVector<T> L_values, U_values; // Non-zero values for L and U
-    AllocatableVector<int> L_col_idx, U_col_idx; // Column indices for L and U
-    AllocatableVector<int> L_row_ptr, U_row_ptr; // Row pointers for L and U
-    AllocatableVector<int> perm; // Permutation vector (RCM ordering)
-    AllocatableVector<int> perm_inv; // Inverse permutation
-    AllocatableVector<T> U_diag; // Diagonal elements of U
+    AllocatableVector<T, MemorySpace> L_values, U_values; // Non-zero values for L and U
+    AllocatableVector<int, MemorySpace> L_col_idx, U_col_idx; // Column indices for L and U
+    AllocatableVector<int, MemorySpace> L_row_ptr, U_row_ptr; // Row pointers for L and U
+    AllocatableVector<int, MemorySpace> perm; // Permutation vector (RCM ordering)
+    AllocatableVector<int, MemorySpace> perm_inv; // Inverse permutation
+    AllocatableVector<T, MemorySpace> U_diag; // Diagonal elements of U
     bool factorized_; // Factorization status flag
     T tolerance_abs_; // minimum allowed diagonal
     T tolerance_rel_; // relative to the max in the row
 
     // Core methods
-    void factorize(const SparseMatrixCSR<T>& A);
-    void solveInPlacePermuted(const Vector<T>& b) const;
+    void factorize(const SparseMatrixCSR<T, MemorySpace>& A);
+    void solveInPlacePermuted(const Vector<T, MemorySpace>& b) const;
 
     // Reordering and permutation utilities
-    Vector<int> computeRCM(const SparseMatrixCSR<T>& A) const;
-    SparseMatrixCSR<T> permuteMatrix(const SparseMatrixCSR<T>& A, const Vector<int>& perm,
-                                     const Vector<int>& perm_inv) const;
+    Vector<int, MemorySpace> computeRCM(const SparseMatrixCSR<T, MemorySpace>& A) const;
+    SparseMatrixCSR<T, MemorySpace> permuteMatrix(const SparseMatrixCSR<T, MemorySpace>& A,
+                                                  const Vector<int, MemorySpace>& perm,
+                                                  const Vector<int, MemorySpace>& perm_inv) const;
 
     // Factorization components
-    void symbolicFactorization(const SparseMatrixCSR<T>& A, std::vector<std::vector<int>>& L_pattern,
+    void symbolicFactorization(const SparseMatrixCSR<T, MemorySpace>& A, std::vector<std::vector<int>>& L_pattern,
                                std::vector<std::vector<int>>& U_pattern) const;
-    void numericFactorization(const SparseMatrixCSR<T>& A, const std::vector<std::vector<int>>& L_pattern,
+    void numericFactorization(const SparseMatrixCSR<T, MemorySpace>& A, const std::vector<std::vector<int>>& L_pattern,
                               const std::vector<std::vector<int>>& U_pattern);
 };
 
 // Default constructor
-template <typename T>
-SparseLUSolver<T>::SparseLUSolver(T tolerance_abs, T tolerance_rel)
+template <typename T, class MemorySpace>
+SparseLUSolver<T, MemorySpace>::SparseLUSolver(T tolerance_abs, T tolerance_rel)
     : factorized_(false)
     , tolerance_abs_(tolerance_abs)
     , tolerance_rel_(tolerance_rel)
@@ -105,8 +106,9 @@ SparseLUSolver<T>::SparseLUSolver(T tolerance_abs, T tolerance_rel)
  * Constructs LU solver with RCM reordering and matrix factorization
  * @param A - Input matrix (must be square)
  */
-template <typename T>
-SparseLUSolver<T>::SparseLUSolver(const SparseMatrixCSR<T>& A, T tolerance_abs, T tolerance_rel)
+template <typename T, class MemorySpace>
+SparseLUSolver<T, MemorySpace>::SparseLUSolver(const SparseMatrixCSR<T, MemorySpace>& A, T tolerance_abs,
+                                               T tolerance_rel)
     : factorized_(false)
     , tolerance_abs_(tolerance_abs)
     , tolerance_rel_(tolerance_rel)
@@ -115,13 +117,13 @@ SparseLUSolver<T>::SparseLUSolver(const SparseMatrixCSR<T>& A, T tolerance_abs, 
 
     // Compute RCM ordering
     perm     = computeRCM(A);
-    perm_inv = Vector<int>("perm_inv", perm.size());
-    for (size_t i = 0; i < perm.size(); i++) {
-        perm_inv[perm[i]] = i;
-    }
+    perm_inv = Vector<int, MemorySpace>("perm_inv", perm.size());
+    Kokkos::parallel_for(
+        "Calculate perm_inv", Kokkos::RangePolicy<>(0, perm.size()),
+        KOKKOS_LAMBDA(const int i) { perm_inv[perm[i]] = i; });
 
     // Permute matrix according to RCM ordering
-    SparseMatrixCSR<T> A_perm = permuteMatrix(A, perm, perm_inv);
+    SparseMatrixCSR<T, MemorySpace> A_perm = permuteMatrix(A, perm, perm_inv);
     factorize(A_perm);
     factorized_ = true;
 }
@@ -130,8 +132,8 @@ SparseLUSolver<T>::SparseLUSolver(const SparseMatrixCSR<T>& A, T tolerance_abs, 
  * Solves Ax = b for Vector<T> type
  * @param b - Right-hand side vector (overwritten with solution)
  */
-template <typename T>
-void SparseLUSolver<T>::solveInPlace(Vector<T> b) const
+template <typename T, class MemorySpace>
+void SparseLUSolver<T, MemorySpace>::solveInPlace(Vector<T, MemorySpace> b) const
 {
     assert(factorized_);
     const int n = perm.size();
@@ -139,7 +141,7 @@ void SparseLUSolver<T>::solveInPlace(Vector<T> b) const
         return;
 
     // Permute RHS: b_perm = P * b
-    Vector<T> b_perm("b_perm", n);
+    Vector<T, MemorySpace> b_perm("b_perm", n);
     Kokkos::parallel_for(
         "b permute", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) { b_perm[i] = b[perm[i]]; });
 
@@ -155,8 +157,8 @@ void SparseLUSolver<T>::solveInPlace(Vector<T> b) const
  * Performs forward/backward substitution on permuted system
  * @param b - Permuted right-hand side vector (overwritten with solution)
  */
-template <typename T>
-void SparseLUSolver<T>::solveInPlacePermuted(const Vector<T>& b) const
+template <typename T, class MemorySpace>
+void SparseLUSolver<T, MemorySpace>::solveInPlacePermuted(const Vector<T, MemorySpace>& b) const
 {
     const int n = L_row_ptr.size() - 1;
 
@@ -188,8 +190,8 @@ void SparseLUSolver<T>::solveInPlacePermuted(const Vector<T>& b) const
  * @param A - Input sparse matrix
  * @return Permutation vector
  */
-template <typename T>
-Vector<int> SparseLUSolver<T>::computeRCM(const SparseMatrixCSR<T>& A) const
+template <typename T, class MemorySpace>
+Vector<int, MemorySpace> SparseLUSolver<T, MemorySpace>::computeRCM(const SparseMatrixCSR<T, MemorySpace>& A) const
 {
     const int n = A.rows();
     if (n == 0)
@@ -290,12 +292,12 @@ Vector<int> SparseLUSolver<T>::computeRCM(const SparseMatrixCSR<T>& A) const
         RCM_order.insert(RCM_order.end(), comp_order.begin(), comp_order.end());
     }
 
-    Vector<int> RCM_order_vec("RCM_order_vec", RCM_order.size());
+    Vector<int, Kokkos::HostSpace> RCM_order_vec_host("RCM_order_vec", RCM_order.size());
     for (std::size_t i(0); i < RCM_order.size(); ++i) {
-        RCM_order_vec[i] = RCM_order[i];
+        RCM_order_vec_host[i] = RCM_order[i];
     }
 
-    return RCM_order_vec;
+    return Kokkos::create_mirror_view_and_copy(MemorySpace(), RCM_order_vec_host);
 }
 
 /**
@@ -305,38 +307,41 @@ Vector<int> SparseLUSolver<T>::computeRCM(const SparseMatrixCSR<T>& A) const
  * @param perm_inv - Inverse permutation
  * @return Permuted CSR matrix
  */
-template <typename T>
-SparseMatrixCSR<T> SparseLUSolver<T>::permuteMatrix(const SparseMatrixCSR<T>& A, const Vector<int>& perm,
-                                                    const Vector<int>& perm_inv) const
+template <typename T, class MemorySpace>
+SparseMatrixCSR<T, MemorySpace>
+SparseLUSolver<T, MemorySpace>::permuteMatrix(const SparseMatrixCSR<T, MemorySpace>& A,
+                                              const Vector<int, MemorySpace>& perm,
+                                              const Vector<int, MemorySpace>& perm_inv) const
 {
     const int n = A.rows();
 
     // Compute number of nonzeros per permuted row
-    Vector<int> nz_per_row("nz_per_row", n);
-    for (int i_new = 0; i_new < n; ++i_new) {
-        int i_old         = perm[i_new];
-        nz_per_row[i_new] = A.row_nz_size(i_old);
-    }
+    Vector<int, MemorySpace> nz_per_row("nz_per_row", n);
+    Kokkos::parallel_for(
+        "compute nz_per_row", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i_new) {
+            int i_old         = perm[i_new];
+            nz_per_row[i_new] = A.row_nz_size(i_old);
+        });
 
     // Construct permuted matrix with preallocated storage
-    SparseMatrixCSR<T> A_perm(n, n, [&](int i) {
-        return nz_per_row[i];
-    });
+    SparseMatrixCSR<T, MemorySpace> A_perm(
+        n, n, KOKKOS_LAMBDA(int i) { return nz_per_row[i]; });
 
     // Fill values and column indices
-    for (int i_new = 0; i_new < n; ++i_new) {
-        int i_old = perm[i_new];
-        int nnz   = A.row_nz_size(i_old);
-        for (int idx = 0; idx < nnz; ++idx) {
-            int j_old = A.row_nz_index(i_old, idx);
-            T val     = A.row_nz_entry(i_old, idx);
-            int j_new = perm_inv[j_old];
+    Kokkos::parallel_for(
+        "SparseLU values and column indices", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i_new) {
+            int i_old = perm[i_new];
+            int nnz   = A.row_nz_size(i_old);
+            for (int idx = 0; idx < nnz; ++idx) {
+                int j_old = A.row_nz_index(i_old, idx);
+                T val     = A.row_nz_entry(i_old, idx);
+                int j_new = perm_inv[j_old];
 
-            // Find the position in the underlying storage
-            A_perm.set_row_nz_entry(i_new, idx, val);
-            A_perm.set_row_nz_index(i_new, idx, j_new);
-        }
-    }
+                // Find the position in the underlying storage
+                A_perm.set_row_nz_entry(i_new, idx, val);
+                A_perm.set_row_nz_index(i_new, idx, j_new);
+            }
+        });
 
     return A_perm;
 }
@@ -345,8 +350,8 @@ SparseMatrixCSR<T> SparseLUSolver<T>::permuteMatrix(const SparseMatrixCSR<T>& A,
  * Main factorization driver
  * @param A - Permuted matrix to factorize
  */
-template <typename T>
-void SparseLUSolver<T>::factorize(const SparseMatrixCSR<T>& A)
+template <typename T, class MemorySpace>
+void SparseLUSolver<T, MemorySpace>::factorize(const SparseMatrixCSR<T, MemorySpace>& A)
 {
     std::vector<std::vector<int>> L_pattern, U_pattern;
     symbolicFactorization(A, L_pattern, U_pattern);
@@ -360,11 +365,13 @@ void SparseLUSolver<T>::factorize(const SparseMatrixCSR<T>& A)
  * @param L_pattern - Output pattern for L
  * @param U_pattern - Output pattern for U
  */
-template <typename T>
-void SparseLUSolver<T>::symbolicFactorization(const SparseMatrixCSR<T>& A, std::vector<std::vector<int>>& L_pattern,
-                                              std::vector<std::vector<int>>& U_pattern) const
+template <typename T, class MemorySpace>
+void SparseLUSolver<T, MemorySpace>::symbolicFactorization(const SparseMatrixCSR<T, MemorySpace>& A,
+                                                           std::vector<std::vector<int>>& L_pattern,
+                                                           std::vector<std::vector<int>>& U_pattern) const
 {
-    const int n = A.rows();
+    SparseMatrixCSR<T, Kokkos::HostSpace> A_host = A.template mirror_and_copy<Kokkos::HostSpace>();
+    const int n                                  = A.rows();
     L_pattern.resize(n);
     U_pattern.resize(n);
 
@@ -377,9 +384,9 @@ void SparseLUSolver<T>::symbolicFactorization(const SparseMatrixCSR<T>& A, std::
         stk.clear();
 
         // Process original non-zeros in row i
-        const int nnz = A.row_nz_size(i);
+        const int nnz = A_host.row_nz_size(i);
         for (int idx = 0; idx < nnz; ++idx) {
-            int col = A.row_nz_index(i, idx);
+            int col = A_host.row_nz_index(i, idx);
             if (marker[col] != i) {
                 marker[col] = i;
                 if (col < i) {
@@ -429,12 +436,13 @@ void SparseLUSolver<T>::symbolicFactorization(const SparseMatrixCSR<T>& A, std::
  * @param L_pattern - Symbolic pattern for L
  * @param U_pattern - Symbolic pattern for U
  */
-template <typename T>
-void SparseLUSolver<T>::numericFactorization(const SparseMatrixCSR<T>& A,
-                                             const std::vector<std::vector<int>>& L_pattern,
-                                             const std::vector<std::vector<int>>& U_pattern)
+template <typename T, class MemorySpace>
+void SparseLUSolver<T, MemorySpace>::numericFactorization(const SparseMatrixCSR<T, MemorySpace>& A,
+                                                          const std::vector<std::vector<int>>& L_pattern,
+                                                          const std::vector<std::vector<int>>& U_pattern)
 {
-    const int n = A.rows();
+    SparseMatrixCSR<T, Kokkos::HostSpace> A_host = A.template mirror_and_copy<Kokkos::HostSpace>();
+    const int n                                  = A.rows();
 
     // Initialize storage structures
     L_row_ptr = Vector<int>("L_row_ptr", n + 1);
@@ -473,9 +481,9 @@ void SparseLUSolver<T>::numericFactorization(const SparseMatrixCSR<T>& A,
 
     for (int i = 0; i < n; i++) {
         // Initialize dense row with original matrix values
-        for (int idx = 0; idx < A.row_nz_size(i); idx++) {
-            int j    = A.row_nz_index(i, idx);
-            T val    = A.row_nz_entry(i, idx);
+        for (int idx = 0; idx < A_host.row_nz_size(i); idx++) {
+            int j    = A_host.row_nz_index(i, idx);
+            T val    = A_host.row_nz_entry(i, idx);
             dense[j] = val;
             if (marker[j] != i) {
                 marker[j] = i;
