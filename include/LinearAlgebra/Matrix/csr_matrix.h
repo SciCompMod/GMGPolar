@@ -188,17 +188,21 @@ SparseMatrixCSR<T, MemorySpace>::SparseMatrixCSR(int rows, int columns, std::fun
 {
     KOKKOS_ASSERT(rows >= 0);
     KOKKOS_ASSERT(columns >= 0);
+
+    auto h_row_start_indices = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, row_start_indices_);
+
     nnz_ = 0;
     for (int i = 0; i < rows; i++) {
-        row_start_indices_(i) = nnz_;
+        h_row_start_indices(i) = nnz_;
         nnz_ += nz_per_row(i);
     }
-    row_start_indices_(rows) = nnz_;
+    h_row_start_indices(rows) = nnz_;
     values_                  = Vector<T, MemorySpace>("CSR values", nnz_);
     column_indices_          = Vector<int, MemorySpace>("CSR column indices", nnz_);
 
     assign(values_, T(0));
     assign(column_indices_, 0);
+    Kokkos::deep_copy(row_start_indices_, h_row_start_indices);
 }
 
 template <typename T, class MemorySpace>
@@ -228,7 +232,7 @@ SparseMatrixCSR<T, MemorySpace>::SparseMatrixCSR(int rows, int columns, const st
     }
     //fill row indexes
     int count             = 0;
-    row_start_indices_(0) = 0;
+    h_row_start_indices(0) = 0;
     for (int r = 0; r < rows; r++) {
         while (count < nnz_ && std::get<0>(entries[count]) == r)
             count++;
@@ -236,7 +240,7 @@ SparseMatrixCSR<T, MemorySpace>::SparseMatrixCSR(int rows, int columns, const st
     }
     KOKKOS_ASSERT(h_row_start_indices(rows) == nnz_);
 
-    Kokkos::deep_copy(values_, h_values_);
+    Kokkos::deep_copy(values_, h_values);
     Kokkos::deep_copy(column_indices_, h_column_indices);
     Kokkos::deep_copy(row_start_indices_, h_row_start_indices);
 }
@@ -266,7 +270,7 @@ SparseMatrixCSR<T, MemorySpace>::SparseMatrixCSR(int rows, int columns, const st
     std::copy(column_indices.begin(), column_indices.end(), h_column_indices.data());
     std::copy(row_start_indices.begin(), row_start_indices.end(), h_row_start_indices.data());
 
-    Kokkos::deep_copy(values_, h_values_);
+    Kokkos::deep_copy(values_, h_values);
     Kokkos::deep_copy(column_indices_, h_column_indices);
     Kokkos::deep_copy(row_start_indices_, h_row_start_indices);
 }
