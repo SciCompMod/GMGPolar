@@ -161,8 +161,8 @@ TEST(SparseMatrixCSR, move_construct)
     using triplet = SparseMatrixCSR<double>::triplet_type;
 
     SparseMatrixCSR<double> m1(4, 3,
-                                     {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0}, triplet{2, 0, 4.0},
-                                      triplet{2, 1, 5.0}, triplet{2, 2, 6.0}, triplet{3, 2, 7.0}});
+                               {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0}, triplet{2, 0, 4.0},
+                                triplet{2, 1, 5.0}, triplet{2, 2, 6.0}, triplet{3, 2, 7.0}});
 
     EXPECT_EQ(m1.rows(), 4);
     EXPECT_EQ(m1.columns(), 3);
@@ -211,9 +211,8 @@ TEST(SparseMatrixCSR, move_assign)
 
     {
         SparseMatrixCSR<double> m1(4, 3,
-                                         {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0},
-                                          triplet{2, 0, 4.0}, triplet{2, 1, 5.0}, triplet{2, 2, 6.0},
-                                          triplet{3, 2, 7.0}});
+                                   {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0}, triplet{2, 0, 4.0},
+                                    triplet{2, 1, 5.0}, triplet{2, 2, 6.0}, triplet{3, 2, 7.0}});
 
         EXPECT_EQ(m1.rows(), 4);
         EXPECT_EQ(m1.columns(), 3);

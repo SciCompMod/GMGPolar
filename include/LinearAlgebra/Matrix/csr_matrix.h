@@ -250,7 +250,8 @@ template <typename T>
 KOKKOS_FUNCTION int SparseMatrixCSR<T>::non_zero_size() const
 {
     KOKKOS_ASSERT(this->nnz_ >= 0);
-    KOKKOS_ASSERT(static_cast<size_t>(this->nnz_) <= static_cast<size_t>(this->rows_) * static_cast<size_t>(this->columns_));
+    KOKKOS_ASSERT(static_cast<size_t>(this->nnz_) <=
+                  static_cast<size_t>(this->rows_) * static_cast<size_t>(this->columns_));
     return this->nnz_;
 }
 
