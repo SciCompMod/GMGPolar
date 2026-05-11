@@ -79,12 +79,12 @@ public:
 
 private:
     // LU decomposition data structures
-    AllocatableVector<T, MemorySpace> L_values, U_values; // Non-zero values for L and U
-    AllocatableVector<int, MemorySpace> L_col_idx, U_col_idx; // Column indices for L and U
-    AllocatableVector<int, MemorySpace> L_row_ptr, U_row_ptr; // Row pointers for L and U
-    AllocatableVector<int, MemorySpace> perm; // Permutation vector (RCM ordering)
-    AllocatableVector<int, MemorySpace> perm_inv; // Inverse permutation
-    AllocatableVector<T, MemorySpace> U_diag; // Diagonal elements of U
+    AllocatableVector<T, MemorySpace> L_values_, U_values_; // Non-zero values for L and U
+    AllocatableVector<int, MemorySpace> L_col_idx_, U_col_idx_; // Column indices for L and U
+    AllocatableVector<int, MemorySpace> L_row_ptr_, U_row_ptr_; // Row pointers for L and U
+    AllocatableVector<int, MemorySpace> perm_; // Permutation vector (RCM ordering)
+    AllocatableVector<int, MemorySpace> perm_inv_; // Inverse permutation
+    AllocatableVector<T, MemorySpace> U_diag_; // Diagonal elements of U
     bool factorized_; // Factorization status flag
     T tolerance_abs_; // minimum allowed diagonal
     T tolerance_rel_; // relative to the max in the row
@@ -135,11 +135,11 @@ SparseLUSolver<T, MemorySpace>::SparseLUSolver(const SparseMatrixCSR<T, MemorySp
     assert(A.rows() == A.columns());
 
     // Compute RCM ordering
-    perm     = computeRCM(A);
-    perm_inv = build_perm_inv(perm);
+    perm_     = computeRCM(A);
+    perm_inv_ = build_perm_inv(perm_);
 
     // Permute matrix according to RCM ordering
-    SparseMatrixCSR<T, MemorySpace> A_perm = permuteMatrix(A, perm, perm_inv);
+    SparseMatrixCSR<T, MemorySpace> A_perm = permuteMatrix(A, perm_, perm_inv_);
     factorize(A_perm);
     factorized_ = true;
 }
@@ -152,21 +152,21 @@ template <typename T, class MemorySpace>
 void SparseLUSolver<T, MemorySpace>::solveInPlace(Vector<T, MemorySpace> b) const
 {
     assert(factorized_);
-    const int n = perm.size();
+    const int n = perm_.size();
     if (n == 0)
         return;
 
     // Permute RHS: b_perm = P * b
     Vector<T, MemorySpace> b_perm("b_perm", n);
     Kokkos::parallel_for(
-        "b permute", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) { b_perm[i] = b[perm[i]]; });
+        "b permute", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) { b_perm[i] = b[perm_[i]]; });
 
     // Solve permuted system
     solveInPlacePermuted(b_perm);
 
     // Unpermute solution: x = P^T * x_perm
     Kokkos::parallel_for(
-        "b unpermute", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) { b[i] = b_perm[perm_inv[i]]; });
+        "b unpermute", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) { b[i] = b_perm[perm_inv_[i]]; });
 }
 
 /**
@@ -176,27 +176,27 @@ void SparseLUSolver<T, MemorySpace>::solveInPlace(Vector<T, MemorySpace> b) cons
 template <typename T, class MemorySpace>
 void SparseLUSolver<T, MemorySpace>::solveInPlacePermuted(const Vector<T, MemorySpace>& b) const
 {
-    const int n = L_row_ptr.size() - 1;
+    const int n = L_row_ptr_.size() - 1;
 
     // A loop of size 1 so that calculations are run on GPU
     Kokkos::parallel_for(
         "solveInPlacePermuted", Kokkos::RangePolicy<>(0, 1), KOKKOS_LAMBDA(const int) {
             // Forward substitution: L * y = b
             for (int i(0); i < n; ++i) {
-                for (int idx = L_row_ptr[i]; idx < L_row_ptr[i + 1]; idx++) {
-                    b[i] -= L_values[idx] * b[L_col_idx[idx]];
+                for (int idx = L_row_ptr_[i]; idx < L_row_ptr_[i + 1]; idx++) {
+                    b[i] -= L_values_[idx] * b[L_col_idx_[idx]];
                 }
             }
 
             // Backward substitution: U * x = y
             for (int i = n - 1; i >= 0; i--) {
-                for (int idx = U_row_ptr[i]; idx < U_row_ptr[i + 1]; idx++) {
-                    const int col = U_col_idx[idx];
+                for (int idx = U_row_ptr_[i]; idx < U_row_ptr_[i + 1]; idx++) {
+                    const int col = U_col_idx_[idx];
                     if (col != i) { // Skip diagonal (handled separately)
-                        b[i] -= U_values[idx] * b[col];
+                        b[i] -= U_values_[idx] * b[col];
                     }
                 }
-                b[i] /= U_diag[i]; // Divide by diagonal element
+                b[i] /= U_diag_[i]; // Divide by diagonal element
             }
         });
 }
@@ -461,25 +461,25 @@ void SparseLUSolver<T, MemorySpace>::numericFactorization(const SparseMatrixCSR<
     const int n                                  = A.rows();
 
     // Initialize storage structures
-    L_row_ptr = Vector<int>("L_row_ptr", n + 1);
-    U_row_ptr = Vector<int>("U_row_ptr", n + 1);
-    U_diag    = Vector<T>("U_diag", n);
+    L_row_ptr_ = Vector<int>("L_row_ptr_", n + 1);
+    U_row_ptr_ = Vector<int>("U_row_ptr_", n + 1);
+    U_diag_    = Vector<T>("U_diag_", n);
 
-    Kokkos::deep_copy(L_row_ptr, 0);
-    Kokkos::deep_copy(U_row_ptr, 0);
-    Kokkos::deep_copy(U_diag, 0);
+    Kokkos::deep_copy(L_row_ptr_, 0);
+    Kokkos::deep_copy(U_row_ptr_, 0);
+    Kokkos::deep_copy(U_diag_, 0);
 
     // Compute row pointers
     for (int i = 0; i < n; i++) {
-        L_row_ptr[i + 1] = L_row_ptr[i] + L_pattern[i].size();
-        U_row_ptr[i + 1] = U_row_ptr[i] + U_pattern[i].size();
+        L_row_ptr_[i + 1] = L_row_ptr_[i] + L_pattern[i].size();
+        U_row_ptr_[i + 1] = U_row_ptr_[i] + U_pattern[i].size();
     }
 
     // Allocate memory for values and indices
-    L_values  = Vector<T>("L_values", L_row_ptr[n]);
-    L_col_idx = Vector<int>("L_col_idx", L_row_ptr[n]);
-    U_values  = Vector<T>("U_values", U_row_ptr[n]);
-    U_col_idx = Vector<int>("U_col_idx", U_row_ptr[n]);
+    L_values_  = Vector<T>("L_values_", L_row_ptr_[n]);
+    L_col_idx_ = Vector<int>("L_col_idx_", L_row_ptr_[n]);
+    U_values_  = Vector<T>("U_values_", U_row_ptr_[n]);
+    U_col_idx_ = Vector<int>("U_col_idx_", U_row_ptr_[n]);
 
     // Find start of upper triangular part in U patterns
     Vector<int> U_pattern_start_upper("U_pattern_start_upper", n);
@@ -508,24 +508,24 @@ void SparseLUSolver<T, MemorySpace>::numericFactorization(const SparseMatrixCSR<
         }
 
         // Compute L elements
-        int L_offset = L_row_ptr[i];
+        int L_offset = L_row_ptr_[i];
         for (const int j : L_pattern[i]) {
-            const T Lij = dense[j] / U_diag[j];
+            const T Lij = dense[j] / U_diag_[j];
 
-            L_values[L_offset]  = Lij;
-            L_col_idx[L_offset] = j;
+            L_values_[L_offset]  = Lij;
+            L_col_idx_[L_offset] = j;
             L_offset++;
 
             // Update dense row: dense -= Lij * U_row[j] (for columns k > j)
-            const int U_update_start_offset = U_row_ptr[j] + U_pattern_start_upper[j];
-            const int U_row_end_offset      = U_row_ptr[j + 1];
+            const int U_update_start_offset = U_row_ptr_[j] + U_pattern_start_upper[j];
+            const int U_row_end_offset      = U_row_ptr_[j + 1];
             const int update_len            = U_row_end_offset - U_update_start_offset;
 
             if (update_len <= 0) {
                 continue;
             }
-            const int* p_U_col = &U_col_idx[U_update_start_offset];
-            const T* p_U_val   = &U_values[U_update_start_offset];
+            const int* p_U_col = &U_col_idx_[U_update_start_offset];
+            const T* p_U_val   = &U_values_[U_update_start_offset];
 
             // This inner loop is the most performance-critical part.
             for (int idx = 0; idx < update_len; ++idx) {
@@ -543,13 +543,13 @@ void SparseLUSolver<T, MemorySpace>::numericFactorization(const SparseMatrixCSR<
         T max_val           = 0;
         bool diagonal_found = false;
         int diag_offset     = -1;
-        int U_offset        = U_row_ptr[i];
+        int U_offset        = U_row_ptr_[i];
         for (int j : U_pattern[i]) {
             T val               = dense[j];
-            U_values[U_offset]  = val;
-            U_col_idx[U_offset] = j;
+            U_values_[U_offset]  = val;
+            U_col_idx_[U_offset] = j;
             if (j == i) {
-                U_diag[i]      = val;
+                U_diag_[i]      = val;
                 diagonal_found = true;
                 diag_offset    = U_offset;
             }
@@ -562,10 +562,10 @@ void SparseLUSolver<T, MemorySpace>::numericFactorization(const SparseMatrixCSR<
 
         // Static pivoting for weak diagonals
         T threshold_val = std::max(tolerance_abs_, tolerance_rel_ * max_val);
-        if (std::abs(U_diag[i]) < threshold_val) {
-            U_diag[i] = std::copysign(threshold_val, U_diag[i]);
+        if (std::abs(U_diag_[i]) < threshold_val) {
+            U_diag_[i] = std::copysign(threshold_val, U_diag_[i]);
             if (diag_offset != -1) {
-                U_values[diag_offset] = U_diag[i];
+                U_values_[diag_offset] = U_diag_[i];
             }
         }
 
