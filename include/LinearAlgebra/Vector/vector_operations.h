@@ -12,8 +12,8 @@
 namespace gmgpolar
 {
 
-template <typename T>
-bool equals(ConstVector<T> lhs, ConstVector<T> rhs)
+template <typename T, class MemorySpace>
+bool equals(ConstVector<T, MemorySpace> lhs, ConstVector<T, MemorySpace> rhs)
 {
     if (lhs.size() != rhs.size()) {
         return false;
@@ -29,14 +29,14 @@ bool equals(ConstVector<T> lhs, ConstVector<T> rhs)
     return is_equal;
 }
 
-template <typename T>
-void assign(Vector<T> lhs, const T& value)
+template <typename T, class MemorySpace>
+void assign(Vector<T, MemorySpace> lhs, const T& value)
 {
     Kokkos::deep_copy(lhs, value);
 }
 
-template <typename T>
-void add(Vector<T> result, ConstVector<T> x)
+template <typename T, class MemorySpace>
+void add(Vector<T, MemorySpace> result, ConstVector<T, MemorySpace> x)
 {
     if (result.size() != x.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
@@ -46,8 +46,8 @@ void add(Vector<T> result, ConstVector<T> x)
         "Vector: add", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const std::size_t i) { result(i) += x(i); });
 }
 
-template <typename T>
-void subtract(Vector<T> result, ConstVector<T> x)
+template <typename T, class MemorySpace>
+void subtract(Vector<T, MemorySpace> result, ConstVector<T, MemorySpace> x)
 {
     if (result.size() != x.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
@@ -57,8 +57,8 @@ void subtract(Vector<T> result, ConstVector<T> x)
         "Vector: subtract", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const std::size_t i) { result(i) -= x(i); });
 }
 
-template <typename T>
-void linear_combination(Vector<T> x, const T& alpha, ConstVector<T> y, const T& beta)
+template <typename T, class MemorySpace>
+void linear_combination(Vector<T, MemorySpace> x, const T& alpha, ConstVector<T, MemorySpace> y, const T& beta)
 {
     if (x.size() != y.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
@@ -69,16 +69,16 @@ void linear_combination(Vector<T> x, const T& alpha, ConstVector<T> y, const T& 
         KOKKOS_LAMBDA(const std::size_t i) { x(i) = alpha * x(i) + beta * y(i); });
 }
 
-template <typename T>
-void multiply(Vector<T> x, const T& alpha)
+template <typename T, class MemorySpace>
+void multiply(Vector<T, MemorySpace> x, const T& alpha)
 {
     const std::size_t n = x.size();
     Kokkos::parallel_for(
         "Vector: multiply", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const std::size_t i) { x(i) *= alpha; });
 }
 
-template <typename T>
-T dot_product(ConstVector<T> lhs, ConstVector<T> rhs)
+template <typename T, class MemorySpace>
+T dot_product(ConstVector<T, MemorySpace> lhs, ConstVector<T, MemorySpace> rhs)
 {
     if (lhs.size() != rhs.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
@@ -91,8 +91,8 @@ T dot_product(ConstVector<T> lhs, ConstVector<T> rhs)
     return result;
 }
 
-template <typename T>
-T l1_norm(ConstVector<T> x)
+template <typename T, class MemorySpace>
+T l1_norm(ConstVector<T, MemorySpace> x)
 {
     const std::size_t n = x.size();
     T result            = T{0};
@@ -103,8 +103,8 @@ T l1_norm(ConstVector<T> x)
 }
 
 // Underflow- and overflow-resistant implementation of the L2 norm
-template <typename T>
-T l2_norm(ConstVector<T> x)
+template <typename T, class MemorySpace>
+T l2_norm(ConstVector<T, MemorySpace> x)
 {
     const std::size_t n = x.size();
 
@@ -118,7 +118,7 @@ T l2_norm(ConstVector<T> x)
                 local_max = abs_val;
             }
         },
-        Kokkos::Max<T>(scale));
+        Kokkos::Max<T, MemorySpace>(scale));
 
     // 2) If the largest absolute value is zero, the norm is zero
     if (scale == T{0})
@@ -138,8 +138,8 @@ T l2_norm(ConstVector<T> x)
     return scale * Kokkos::sqrt(sum);
 }
 
-template <typename T>
-T infinity_norm(ConstVector<T> x)
+template <typename T, class MemorySpace>
+T infinity_norm(ConstVector<T, MemorySpace> x)
 {
     const std::size_t n = x.size();
     T result            = T{0};
@@ -151,7 +151,7 @@ T infinity_norm(ConstVector<T> x)
                 local_max = abs_value;
             }
         },
-        Kokkos::Max<T>(result));
+        Kokkos::Max<T, MemorySpace>(result));
     return result;
 }
 
