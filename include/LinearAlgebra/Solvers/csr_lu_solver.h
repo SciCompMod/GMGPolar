@@ -160,23 +160,27 @@ void SparseLUSolver<T>::solveInPlacePermuted(const Vector<T>& b) const
 {
     const int n = L_row_ptr.size() - 1;
 
-    // Forward substitution: L * y = b
-    for (int i(0); i < n; ++i) {
-        for (int idx = L_row_ptr[i]; idx < L_row_ptr[i + 1]; idx++) {
-            b[i] -= L_values[idx] * b[L_col_idx[idx]];
-        }
-    }
-
-    // Backward substitution: U * x = y
-    for (int i = n - 1; i >= 0; i--) {
-        for (int idx = U_row_ptr[i]; idx < U_row_ptr[i + 1]; idx++) {
-            const int col = U_col_idx[idx];
-            if (col != i) { // Skip diagonal (handled separately)
-                b[i] -= U_values[idx] * b[col];
+    // A loop of size 1 so that calculations are run on GPU
+    Kokkos::parallel_for(
+        "solveInPlacePermuted", Kokkos::RangePolicy<>(0, 1), KOKKOS_LAMBDA(const int) {
+            // Forward substitution: L * y = b
+            for (int i(0); i < n; ++i) {
+                for (int idx = L_row_ptr[i]; idx < L_row_ptr[i + 1]; idx++) {
+                    b[i] -= L_values[idx] * b[L_col_idx[idx]];
+                }
             }
-        }
-        b[i] /= U_diag[i]; // Divide by diagonal element
-    }
+
+            // Backward substitution: U * x = y
+            for (int i = n - 1; i >= 0; i--) {
+                for (int idx = U_row_ptr[i]; idx < U_row_ptr[i + 1]; idx++) {
+                    const int col = U_col_idx[idx];
+                    if (col != i) { // Skip diagonal (handled separately)
+                        b[i] -= U_values[idx] * b[col];
+                    }
+                }
+                b[i] /= U_diag[i]; // Divide by diagonal element
+            }
+        });
 }
 
 /**
