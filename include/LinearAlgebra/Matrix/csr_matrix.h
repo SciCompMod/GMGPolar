@@ -214,12 +214,17 @@ SparseMatrixCSR<T, MemorySpace>::SparseMatrixCSR(int rows, int columns, const st
     KOKKOS_ASSERT(rows >= 0);
     KOKKOS_ASSERT(columns >= 0);
     KOKKOS_ASSERT(is_sorted_entries(entries) && "Entries must be sorted by row!");
+
+    auto h_values            = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, values_);
+    auto h_column_indices    = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, column_indices_);
+    auto h_row_start_indices = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, row_start_indices_);
+
     // fill values and column indexes
     for (int i = 0; i < nnz_; i++) {
         KOKKOS_ASSERT(0 <= std::get<0>(entries[i]) && std::get<0>(entries[i]) < rows);
-        values_(i)         = std::get<2>(entries[i]);
-        column_indices_(i) = std::get<1>(entries[i]);
-        KOKKOS_ASSERT(0 <= column_indices_(i) && column_indices_(i) < columns);
+        h_values(i)         = std::get<2>(entries[i]);
+        h_column_indices(i) = std::get<1>(entries[i]);
+        KOKKOS_ASSERT(0 <= h_column_indices(i) && h_column_indices(i) < columns);
     }
     //fill row indexes
     int count             = 0;
@@ -227,9 +232,13 @@ SparseMatrixCSR<T, MemorySpace>::SparseMatrixCSR(int rows, int columns, const st
     for (int r = 0; r < rows; r++) {
         while (count < nnz_ && std::get<0>(entries[count]) == r)
             count++;
-        row_start_indices_(r + 1) = count;
+        h_row_start_indices(r + 1) = count;
     }
-    KOKKOS_ASSERT(row_start_indices_(rows) == nnz_);
+    KOKKOS_ASSERT(h_row_start_indices(rows) == nnz_);
+
+    Kokkos::deep_copy(values_, h_values_);
+    Kokkos::deep_copy(column_indices_, h_column_indices);
+    Kokkos::deep_copy(row_start_indices_, h_row_start_indices);
 }
 
 template <typename T, class MemorySpace>
@@ -248,10 +257,18 @@ SparseMatrixCSR<T, MemorySpace>::SparseMatrixCSR(int rows, int columns, const st
     KOKKOS_ASSERT(row_start_indices.size() == static_cast<size_t>(rows + 1));
     KOKKOS_ASSERT(values.size() == column_indices.size());
 
+    auto h_values            = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, values_);
+    auto h_column_indices    = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, column_indices_);
+    auto h_row_start_indices = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, row_start_indices_);
+
     // Copy data to internal storage
-    std::copy(values.begin(), values.end(), values_.data());
-    std::copy(column_indices.begin(), column_indices.end(), column_indices_.data());
-    std::copy(row_start_indices.begin(), row_start_indices.end(), row_start_indices_.data());
+    std::copy(values.begin(), values.end(), h_values.data());
+    std::copy(column_indices.begin(), column_indices.end(), h_column_indices.data());
+    std::copy(row_start_indices.begin(), row_start_indices.end(), h_row_start_indices.data());
+
+    Kokkos::deep_copy(values_, h_values_);
+    Kokkos::deep_copy(column_indices_, h_column_indices);
+    Kokkos::deep_copy(row_start_indices_, h_row_start_indices);
 }
 
 template <typename T, class MemorySpace>

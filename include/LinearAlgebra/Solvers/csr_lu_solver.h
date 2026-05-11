@@ -465,28 +465,28 @@ void SparseLUSolver<T, MemorySpace>::numericFactorization(const SparseMatrixCSR<
     const int n                                  = A.rows();
 
     // Initialize storage structures
-    L_row_ptr_ = Vector<int>("L_row_ptr_", n + 1);
-    U_row_ptr_ = Vector<int>("U_row_ptr_", n + 1);
-    U_diag_    = Vector<T>("U_diag_", n);
+    Vector<int, Kokkos::HostSpace> L_row_ptr_host("L_row_ptr", n + 1);
+    Vector<int, Kokkos::HostSpace> U_row_ptr_host("U_row_ptr", n + 1);
+    Vector<T, Kokkos::HostSpace> U_diag_host("U_diag", n);
 
-    Kokkos::deep_copy(L_row_ptr_, 0);
-    Kokkos::deep_copy(U_row_ptr_, 0);
-    Kokkos::deep_copy(U_diag_, 0);
+    Kokkos::deep_copy(L_row_ptr_host, 0);
+    Kokkos::deep_copy(U_row_ptr_host, 0);
+    Kokkos::deep_copy(U_diag_host, 0);
 
     // Compute row pointers
     for (int i = 0; i < n; i++) {
-        L_row_ptr_[i + 1] = L_row_ptr_[i] + L_pattern[i].size();
-        U_row_ptr_[i + 1] = U_row_ptr_[i] + U_pattern[i].size();
+        L_row_ptr_host[i + 1] = L_row_ptr_host[i] + L_pattern[i].size();
+        U_row_ptr_host[i + 1] = U_row_ptr_host[i] + U_pattern[i].size();
     }
 
     // Allocate memory for values and indices
-    L_values_  = Vector<T>("L_values_", L_row_ptr_[n]);
-    L_col_idx_ = Vector<int>("L_col_idx_", L_row_ptr_[n]);
-    U_values_  = Vector<T>("U_values_", U_row_ptr_[n]);
-    U_col_idx_ = Vector<int>("U_col_idx_", U_row_ptr_[n]);
+    Vector<T, MemorySpace>   L_values_host  ("L_values", L_row_ptr_host[n]);
+    Vector<int, MemorySpace> L_col_idx_host ("L_col_idx", L_row_ptr_host[n]);
+    Vector<T, MemorySpace>   U_values_host  ("U_values", U_row_ptr_host[n]);
+    Vector<int, MemorySpace> U_col_idx_host ("U_col_idx", U_row_ptr_host[n]);
 
     // Find start of upper triangular part in U patterns
-    Vector<int> U_pattern_start_upper("U_pattern_start_upper", n);
+    Vector<int, MemorySpace> U_pattern_start_upper("U_pattern_start_upper", n);
     for (int j = 0; j < n; j++) {
         size_t pos = 0;
         while (pos < U_pattern[j].size() && U_pattern[j][pos] <= j)
@@ -512,24 +512,24 @@ void SparseLUSolver<T, MemorySpace>::numericFactorization(const SparseMatrixCSR<
         }
 
         // Compute L elements
-        int L_offset = L_row_ptr_[i];
+        int L_offset = L_row_ptr_host[i];
         for (const int j : L_pattern[i]) {
-            const T Lij = dense[j] / U_diag_[j];
+            const T Lij = dense[j] / U_diag_host[j];
 
-            L_values_[L_offset]  = Lij;
-            L_col_idx_[L_offset] = j;
+            L_values_host[L_offset]  = Lij;
+            L_col_idx_host[L_offset] = j;
             L_offset++;
 
             // Update dense row: dense -= Lij * U_row[j] (for columns k > j)
-            const int U_update_start_offset = U_row_ptr_[j] + U_pattern_start_upper[j];
-            const int U_row_end_offset      = U_row_ptr_[j + 1];
+            const int U_update_start_offset = U_row_ptr_host[j] + U_pattern_start_upper[j];
+            const int U_row_end_offset      = U_row_ptr_host[j + 1];
             const int update_len            = U_row_end_offset - U_update_start_offset;
 
             if (update_len <= 0) {
                 continue;
             }
-            const int* p_U_col = &U_col_idx_[U_update_start_offset];
-            const T* p_U_val   = &U_values_[U_update_start_offset];
+            const int* p_U_col = &U_col_idx_host[U_update_start_offset];
+            const T* p_U_val   = &U_values_host[U_update_start_offset];
 
             // This inner loop is the most performance-critical part.
             for (int idx = 0; idx < update_len; ++idx) {
@@ -547,13 +547,13 @@ void SparseLUSolver<T, MemorySpace>::numericFactorization(const SparseMatrixCSR<
         T max_val           = 0;
         bool diagonal_found = false;
         int diag_offset     = -1;
-        int U_offset        = U_row_ptr_[i];
+        int U_offset        = U_row_ptr_host[i];
         for (int j : U_pattern[i]) {
             T val               = dense[j];
-            U_values_[U_offset]  = val;
-            U_col_idx_[U_offset] = j;
+            U_values_host[U_offset]  = val;
+            U_col_idx_host[U_offset] = j;
             if (j == i) {
-                U_diag_[i]      = val;
+                U_diag_host[i]      = val;
                 diagonal_found = true;
                 diag_offset    = U_offset;
             }
@@ -566,10 +566,10 @@ void SparseLUSolver<T, MemorySpace>::numericFactorization(const SparseMatrixCSR<
 
         // Static pivoting for weak diagonals
         T threshold_val = std::max(tolerance_abs_, tolerance_rel_ * max_val);
-        if (std::abs(U_diag_[i]) < threshold_val) {
-            U_diag_[i] = std::copysign(threshold_val, U_diag_[i]);
+        if (std::abs(U_diag_host[i]) < threshold_val) {
+            U_diag_host[i] = std::copysign(threshold_val, U_diag_host[i]);
             if (diag_offset != -1) {
-                U_values_[diag_offset] = U_diag_[i];
+                U_values_host[diag_offset] = U_diag_host[i];
             }
         }
 
@@ -581,5 +581,15 @@ void SparseLUSolver<T, MemorySpace>::numericFactorization(const SparseMatrixCSR<
             marker[idx] = -1;
         }
     }
+
+	L_row_ptr_ = Kokkos::create_mirror_view_and_copy(MemorySpace(), L_row_ptr_host);
+	U_row_ptr_ = Kokkos::create_mirror_view_and_copy(MemorySpace(), U_row_ptr_host);
+	U_diag_ = Kokkos::create_mirror_view_and_copy(MemorySpace(), U_diag_host);
+
+	L_values_ = Kokkos::create_mirror_view_and_copy(MemorySpace(), L_values_host);
+	L_col_idx_ = Kokkos::create_mirror_view_and_copy(MemorySpace(), L_col_idx_host);
+	U_values_ = Kokkos::create_mirror_view_and_copy(MemorySpace(), U_values_host);
+	U_col_idx_ = Kokkos::create_mirror_view_and_copy(MemorySpace(), U_col_idx_host);
+
 }
 } // namespace gmgpolar
