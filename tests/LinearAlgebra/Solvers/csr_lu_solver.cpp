@@ -7,6 +7,8 @@
 #include "../../../include/LinearAlgebra/Solvers/csr_lu_solver.h"
 using namespace gmgpolar;
 
+using MemSpace = typename Kokkos::DefaultExecutionSpace::memory_space;
+
 // All tests that the custom LU solver was unable to solve have been commented out.
 // This typically happens when the matrix is singular, has zero diagonal entries,
 // or requires pivoting that the static-pivoting LU algorithm cannot handle.
@@ -47,16 +49,17 @@ std::vector<std::tuple<int, int, T>> sort_entries(std::vector<std::tuple<int, in
 }
 
 // Helper: Multiply CSR matrix by vector
-template <typename T>
-Vector<T> csr_matvec(const SparseMatrixCSR<T>& A, const Vector<T>& x)
+template <typename T, class MemorySpace>
+Vector<T, MemorySpace> csr_matvec(const SparseMatrixCSR<T, MemorySpace>& A, const Vector<T, MemorySpace>& x)
 {
-    Vector<T> y("y", A.rows());
-    for (int i = 0; i < A.rows(); ++i) {
-        T sum = 0;
-        for (int k = 0; k < A.row_nz_size(i); ++k)
-            sum += A.row_nz_entry(i, k) * x[A.row_nz_index(i, k)];
-        y(i) = sum;
-    }
+    Vector<T, MemorySpace> y("y", A.rows());
+    Kokkos::parallel_for(
+        "CSR matvec", Kokkos::RangePolicy<>(0, A.rows()), KOKKOS_LAMBDA(const int i) {
+            T sum = 0;
+            for (int k = 0; k < A.row_nz_size(i); ++k)
+                sum += A.row_nz_entry(i, k) * x[A.row_nz_index(i, k)];
+            y(i) = sum;
+        });
     return y;
 }
 
@@ -73,80 +76,90 @@ void expect_vector_near(const Vector<T>& a, const Vector<T>& b, double tol = 1e-
 TEST(SparseLUSolver, OneByOne)
 {
     using T = double;
-    SparseMatrixCSR<T> A(1, 1, sort_entries<T>({{0, 0, 2.0}}));
-    Vector<T> b("b", 1);
-    b(0) = 4.0;
-    SparseLUSolver<T> solver(A);
+    SparseMatrixCSR<T, MemSpace> A(1, 1, sort_entries<T>({{0, 0, 2.0}}));
+    Vector<T, MemSpace> b("b", 1);
+    Kokkos::parallel_for(
+        "fill_b", Kokkos::RangePolicy<>(0, 1), KOKKOS_LAMBDA(const int i) { b(i) = 4.0; });
+    SparseLUSolver<T, MemSpace> solver(A);
     solver.solveInPlace(b);
-    EXPECT_NEAR(b[0], 2.0, 1e-12);
+    auto b_host = Kokkos::create_mirror_view_and_copy(MemSpace(), b);
+    EXPECT_NEAR(b_host[0], 2.0, 1e-12);
 }
 
 // Test 2: 2x2 diagonal
 TEST(SparseLUSolver, TwoByTwoDiagonal)
 {
     using T = double;
-    SparseMatrixCSR<T> A(2, 2, sort_entries<T>({{0, 0, 3.0}, {1, 1, 4.0}}));
-    Vector<T> b("b", 2);
-    b(0) = 6.0;
-    b(1) = 8.0;
-    SparseLUSolver<T> solver(A);
+    SparseMatrixCSR<T, MemSpace> A(2, 2, sort_entries<T>({{0, 0, 3.0}, {1, 1, 4.0}}));
+    Vector<T, MemSpace> b("b", 2);
+    Kokkos::parallel_for(
+        "fill_b", Kokkos::RangePolicy<>(0, 1), KOKKOS_LAMBDA(const int) {
+            b(0) = 6.0;
+            b(1) = 8.0;
+        });
+    SparseLUSolver<T, MemSpace> solver(A);
     solver.solveInPlace(b);
-    EXPECT_NEAR(b[0], 2.0, 1e-12);
-    EXPECT_NEAR(b[1], 2.0, 1e-12);
+    auto b_host = Kokkos::create_mirror_view_and_copy(MemSpace(), b);
+    EXPECT_NEAR(b_host[0], 2.0, 1e-12);
+    EXPECT_NEAR(b_host[1], 2.0, 1e-12);
 }
 
 // Test 3: 2x2 off-diagonal
 TEST(SparseLUSolver, TwoByTwoOffDiagonal)
 {
     using T = double;
-    SparseMatrixCSR<T> A(2, 2, sort_entries<T>({{0, 0, 1.0}, {0, 1, 2.0}, {1, 0, 3.0}, {1, 1, 4.0}}));
-    Vector<T> b("b", 2);
-    b(0) = 1.0;
-    b(1) = 2.0;
+    SparseMatrixCSR<T, MemSpace> A(2, 2, sort_entries<T>({{0, 0, 1.0}, {0, 1, 2.0}, {1, 0, 3.0}, {1, 1, 4.0}}));
+    Vector<T, MemSpace> b("b", 2);
+    Kokkos::parallel_for(
+        "fill_b", Kokkos::RangePolicy<>(0, 1), KOKKOS_LAMBDA(const int) {
+            b(0) = 1.0;
+            b(1) = 2.0;
+        });
     Vector<T> x_true("x_true", 2);
     x_true(0) = 0.0;
     x_true(1) = 0.5;
-    SparseLUSolver<T> solver(A);
+    SparseLUSolver<T, MemSpace> solver(A);
     solver.solveInPlace(b);
-    expect_vector_near(b, x_true);
+    auto b_host = Kokkos::create_mirror_view_and_copy(MemSpace(), b);
+    expect_vector_near(b_host, x_true);
 }
 
 // Test 4: 3x3 lower triangular
 TEST(SparseLUSolver, ThreeByThreeLowerTriangular)
 {
     using T = double;
-    SparseMatrixCSR<T> A(
+    SparseMatrixCSR<T, MemSpace> A(
         3, 3, sort_entries<T>({{0, 0, 1.0}, {1, 0, 2.0}, {1, 1, 3.0}, {2, 0, 4.0}, {2, 1, 5.0}, {2, 2, 6.0}}));
-    Vector<T> b("b", 3);
-    b(0) = 1;
-    b(1) = 2;
-    b(2) = 3;
+    Vector<T, MemSpace> b("b", 3);
+    Kokkos::parallel_for(
+        "fill_b", Kokkos::RangePolicy<>(0, 3), KOKKOS_LAMBDA(const int i) { b(i) = i + 1; });
     Vector<T> x_true("x_true", 3);
     x_true(0) = 1.0;
     x_true(1) = 0.0;
     x_true(2) = -1.0 / 6.0;
-    SparseLUSolver<T> solver(A);
+    SparseLUSolver<T, MemSpace> solver(A);
     solver.solveInPlace(b);
-    expect_vector_near(b, x_true);
+    auto b_host = Kokkos::create_mirror_view_and_copy(MemSpace(), b);
+    expect_vector_near(b_host, x_true);
 }
 
 // Test 5: 3x3 upper triangular
 TEST(SparseLUSolver, ThreeByThreeUpperTriangular)
 {
     using T = double;
-    SparseMatrixCSR<T> A(
+    SparseMatrixCSR<T, MemSpace> A(
         3, 3, sort_entries<T>({{0, 0, 1.0}, {0, 1, 2.0}, {0, 2, 3.0}, {1, 1, 4.0}, {1, 2, 5.0}, {2, 2, 6.0}}));
-    Vector<T> b("b", 3);
-    b(0) = 1;
-    b(1) = 2;
-    b(2) = 3;
+    Vector<T, MemSpace> b("b", 3);
+    Kokkos::parallel_for(
+        "fill_b", Kokkos::RangePolicy<>(0, 3), KOKKOS_LAMBDA(const int i) { b(i) = i + 1; });
     Vector<T> x_true("x_true", 3);
     x_true(0) = -0.25;
     x_true(1) = -0.125;
     x_true(2) = 0.5;
-    SparseLUSolver<T> solver(A);
+    SparseLUSolver<T, MemSpace> solver(A);
     solver.solveInPlace(b);
-    expect_vector_near(b, x_true);
+    auto b_host = Kokkos::create_mirror_view_and_copy(MemSpace(), b);
+    expect_vector_near(b_host, x_true);
 }
 
 // Test 6: 3x3 with zero diagonal
