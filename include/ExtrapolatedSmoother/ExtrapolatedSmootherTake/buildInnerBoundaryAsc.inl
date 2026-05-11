@@ -112,7 +112,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildInteriorBoundarySolverMa
             const double center_value = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) +
                                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
-            const double left_value   = -coeff1 * (arr[center] + arr[left]);
+            const double left_value = -coeff1 * (arr[center] + arr[left]);
 
             /* Fill matrix row of (i,j) */
             row = center_index;
