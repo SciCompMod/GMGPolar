@@ -18,7 +18,8 @@ bool equals(ConstVector<T, MemorySpace> lhs, ConstVector<T, MemorySpace> rhs)
     if (lhs.size() != rhs.size()) {
         return false;
     }
-	using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>, Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+    using ExecSpace     = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                             Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
     const std::size_t n = lhs.size();
     bool is_equal       = true;
     Kokkos::parallel_reduce(
@@ -42,7 +43,8 @@ void add(Vector<T, MemorySpace> result, ConstVector<T, MemorySpace> x)
     if (result.size() != x.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
     }
-	using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>, Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+    using ExecSpace     = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                             Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
     const std::size_t n = result.size();
     Kokkos::parallel_for(
         "Vector: add", Kokkos::RangePolicy<ExecSpace>(0, n), KOKKOS_LAMBDA(const std::size_t i) { result(i) += x(i); });
@@ -54,10 +56,12 @@ void subtract(Vector<T, MemorySpace> result, ConstVector<T, MemorySpace> x)
     if (result.size() != x.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
     }
-	using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>, Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+    using ExecSpace     = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                             Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
     const std::size_t n = result.size();
     Kokkos::parallel_for(
-        "Vector: subtract", Kokkos::RangePolicy<ExecSpace>(0, n), KOKKOS_LAMBDA(const std::size_t i) { result(i) -= x(i); });
+        "Vector: subtract", Kokkos::RangePolicy<ExecSpace>(0, n),
+        KOKKOS_LAMBDA(const std::size_t i) { result(i) -= x(i); });
 }
 
 template <typename T, class MemorySpace>
@@ -66,7 +70,8 @@ void linear_combination(Vector<T, MemorySpace> x, const T& alpha, ConstVector<T,
     if (x.size() != y.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
     }
-	using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>, Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+    using ExecSpace     = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                             Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
     const std::size_t n = x.size();
     Kokkos::parallel_for(
         "Vector: linear_combination", Kokkos::RangePolicy<ExecSpace>(0, n),
@@ -76,10 +81,12 @@ void linear_combination(Vector<T, MemorySpace> x, const T& alpha, ConstVector<T,
 template <typename T, class MemorySpace>
 void multiply(Vector<T, MemorySpace> x, const T& alpha)
 {
-	using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>, Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+    using ExecSpace     = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                             Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
     const std::size_t n = x.size();
     Kokkos::parallel_for(
-        "Vector: multiply", Kokkos::RangePolicy<ExecSpace>(0, n), KOKKOS_LAMBDA(const std::size_t i) { x(i) *= alpha; });
+        "Vector: multiply", Kokkos::RangePolicy<ExecSpace>(0, n),
+        KOKKOS_LAMBDA(const std::size_t i) { x(i) *= alpha; });
 }
 
 template <typename T, class MemorySpace>
@@ -88,7 +95,8 @@ T dot_product(ConstVector<T, MemorySpace> lhs, ConstVector<T, MemorySpace> rhs)
     if (lhs.size() != rhs.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
     }
-	using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>, Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+    using ExecSpace     = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                             Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
     const std::size_t n = lhs.size();
     T result            = T{0};
     Kokkos::parallel_reduce(
@@ -100,7 +108,8 @@ T dot_product(ConstVector<T, MemorySpace> lhs, ConstVector<T, MemorySpace> rhs)
 template <typename T, class MemorySpace>
 T l1_norm(ConstVector<T, MemorySpace> x)
 {
-	using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>, Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+    using ExecSpace     = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                             Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
     const std::size_t n = x.size();
     T result            = T{0};
     Kokkos::parallel_reduce(
@@ -113,7 +122,8 @@ T l1_norm(ConstVector<T, MemorySpace> x)
 template <typename T, class MemorySpace>
 T l2_norm(ConstVector<T, MemorySpace> x)
 {
-	using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>, Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+    using ExecSpace     = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                             Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
     const std::size_t n = x.size();
 
     // 1) Find the largest absolute value
@@ -149,7 +159,8 @@ T l2_norm(ConstVector<T, MemorySpace> x)
 template <typename T, class MemorySpace>
 T infinity_norm(ConstVector<T, MemorySpace> x)
 {
-	using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>, Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+    using ExecSpace     = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                             Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
     const std::size_t n = x.size();
     T result            = T{0};
     Kokkos::parallel_reduce(

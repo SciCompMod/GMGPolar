@@ -94,7 +94,8 @@ public:
 
         if (!is_cyclic_) {
             Kokkos::parallel_for(
-                "SetupNonCyclic", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, batch_count_), KOKKOS_LAMBDA(const int batch_idx) {
+                "SetupNonCyclic", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, batch_count_),
+                KOKKOS_LAMBDA(const int batch_idx) {
                     // ----------------------------------- //
                     // Obtain offset for the current batch //
                     int offset = batch_idx * matrix_dimension;
@@ -110,7 +111,8 @@ public:
         }
         else {
             Kokkos::parallel_for(
-                "SetupCyclic", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, batch_count_), KOKKOS_LAMBDA(const int batch_idx) {
+                "SetupCyclic", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, batch_count_),
+                KOKKOS_LAMBDA(const int batch_idx) {
                     // ----------------------------------- //
                     // Obtain offset for the current batch //
                     int offset = batch_idx * matrix_dimension;
@@ -163,7 +165,8 @@ public:
 
         if (!is_cyclic_) {
             Kokkos::parallel_for(
-                "SolveNonCyclic", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, effective_batch_count), KOKKOS_LAMBDA(const int k) {
+                "SolveNonCyclic", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, effective_batch_count),
+                KOKKOS_LAMBDA(const int k) {
                     // ----------------------------------- //
                     // Obtain offset for the current batch //
                     int batch_idx = batch_stride * k + batch_offset;
@@ -190,7 +193,8 @@ public:
         }
         else {
             Kokkos::parallel_for(
-                "SolveCyclic", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, effective_batch_count), KOKKOS_LAMBDA(const int k) {
+                "SolveCyclic", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, effective_batch_count),
+                KOKKOS_LAMBDA(const int k) {
                     // ----------------------------------- //
                     // Obtain offset for the current batch //
                     int batch_idx = batch_stride * k + batch_offset;
@@ -262,7 +266,9 @@ public:
 
         if (!is_cyclic_) {
             Kokkos::parallel_for(
-                "SolveDiagonalNonCyclic", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, effective_batch_count), KOKKOS_LAMBDA(const int k) {
+                "SolveDiagonalNonCyclic",
+                Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, effective_batch_count),
+                KOKKOS_LAMBDA(const int k) {
                     // ----------------------------------- //
                     // Obtain offset for the current batch //
                     int batch_idx = batch_stride * k + batch_offset;
@@ -277,7 +283,8 @@ public:
         }
         else {
             Kokkos::parallel_for(
-                "SolveDiagonalCyclic", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, effective_batch_count), KOKKOS_LAMBDA(const int k) {
+                "SolveDiagonalCyclic", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, effective_batch_count),
+                KOKKOS_LAMBDA(const int k) {
                     // ----------------------------------- //
                     // Obtain offset for the current batch //
                     int batch_idx = batch_stride * k + batch_offset;
