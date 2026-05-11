@@ -13,6 +13,19 @@
 namespace gmgpolar
 {
 
+namespace sparse_lu_helpers {
+
+template <class MemorySpace>
+static inline Vector<int, MemorySpace> build_perm_inv(Vector<int, MemorySpace> const& perm) {
+    Vector<int, MemorySpace> perm_inv("perm_inv", perm.size());
+    Kokkos::parallel_for(
+        "Calculate perm_inv", Kokkos::RangePolicy<>(0, perm.size()),
+        KOKKOS_LAMBDA(const int i) { perm_inv[perm[i]] = i; });
+    return perm_inv;
+}
+
+}
+
 /**
  * @brief Sparse LU decomposition solver for symmetric positive definite matrices.
  *
@@ -78,14 +91,20 @@ private:
 
     // Core methods
     void factorize(const SparseMatrixCSR<T, MemorySpace>& A);
+// Public due to cuda restrictions
+public:
     void solveInPlacePermuted(const Vector<T, MemorySpace>& b) const;
 
+private:
     // Reordering and permutation utilities
     Vector<int, MemorySpace> computeRCM(const SparseMatrixCSR<T, MemorySpace>& A) const;
+// Public due to cuda restrictions
+public:
     SparseMatrixCSR<T, MemorySpace> permuteMatrix(const SparseMatrixCSR<T, MemorySpace>& A,
                                                   const Vector<int, MemorySpace>& perm,
                                                   const Vector<int, MemorySpace>& perm_inv) const;
 
+private:
     // Factorization components
     void symbolicFactorization(const SparseMatrixCSR<T, MemorySpace>& A, std::vector<std::vector<int>>& L_pattern,
                                std::vector<std::vector<int>>& U_pattern) const;
@@ -117,10 +136,7 @@ SparseLUSolver<T, MemorySpace>::SparseLUSolver(const SparseMatrixCSR<T, MemorySp
 
     // Compute RCM ordering
     perm     = computeRCM(A);
-    perm_inv = Vector<int, MemorySpace>("perm_inv", perm.size());
-    Kokkos::parallel_for(
-        "Calculate perm_inv", Kokkos::RangePolicy<>(0, perm.size()),
-        KOKKOS_LAMBDA(const int i) { perm_inv[perm[i]] = i; });
+    perm_inv = build_perm_inv(perm);
 
     // Permute matrix according to RCM ordering
     SparseMatrixCSR<T, MemorySpace> A_perm = permuteMatrix(A, perm, perm_inv);
