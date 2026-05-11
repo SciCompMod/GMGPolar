@@ -136,7 +136,7 @@ SparseLUSolver<T, MemorySpace>::SparseLUSolver(const SparseMatrixCSR<T, MemorySp
 
     // Compute RCM ordering
     perm_     = computeRCM(A);
-    perm_inv_ = build_perm_inv(perm_);
+    perm_inv_ = sparse_lu_helpers::build_perm_inv(perm_);
 
     // Permute matrix according to RCM ordering
     SparseMatrixCSR<T, MemorySpace> A_perm = permuteMatrix(A, perm_, perm_inv_);
@@ -156,17 +156,21 @@ void SparseLUSolver<T, MemorySpace>::solveInPlace(Vector<T, MemorySpace> b) cons
     if (n == 0)
         return;
 
+	// Create local accessors to avoid copying the whole class to GPU
+    Vector<int, MemorySpace> perm = perm_;
+    Vector<int, MemorySpace> perm_inv = perm_inv_;
+
     // Permute RHS: b_perm = P * b
     Vector<T, MemorySpace> b_perm("b_perm", n);
     Kokkos::parallel_for(
-        "b permute", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) { b_perm[i] = b[perm_[i]]; });
+        "b permute", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) { b_perm[i] = b[perm[i]]; });
 
     // Solve permuted system
     solveInPlacePermuted(b_perm);
 
     // Unpermute solution: x = P^T * x_perm
     Kokkos::parallel_for(
-        "b unpermute", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) { b[i] = b_perm[perm_inv_[i]]; });
+        "b unpermute", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) { b[i] = b_perm[perm_inv[i]]; });
 }
 
 /**
@@ -180,7 +184,7 @@ void SparseLUSolver<T, MemorySpace>::solveInPlacePermuted(const Vector<T, Memory
 
     // A loop of size 1 so that calculations are run on GPU
     Kokkos::parallel_for(
-        "solveInPlacePermuted", Kokkos::RangePolicy<>(0, 1), KOKKOS_LAMBDA(const int) {
+        "solveInPlacePermuted", Kokkos::RangePolicy<>(0, 1), KOKKOS_CLASS_LAMBDA(const int) {
             // Forward substitution: L * y = b
             for (int i(0); i < n; ++i) {
                 for (int idx = L_row_ptr_[i]; idx < L_row_ptr_[i + 1]; idx++) {
