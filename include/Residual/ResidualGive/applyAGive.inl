@@ -10,12 +10,12 @@ static inline void node_apply_a_give(int i_r, int i_theta, const PolarGrid& grid
     /* ---------------------------------------- */
     /* Compute or retrieve stencil coefficients */
     /* ---------------------------------------- */
-    const int center   = grid.index(i_r, i_theta);
-    const double r     = grid.radius(i_r);
-    const double theta = grid.theta(i_theta);
+    const int center    = grid.index(i_r, i_theta);
+    const double radius = grid.radius(i_r);
+    const double theta  = grid.theta(i_theta);
 
     double coeff_beta, arr, att, art, detDF;
-    level_cache.obtainValues(i_r, i_theta, center, r, theta, coeff_beta, arr, att, art, detDF);
+    level_cache.obtainValues(i_r, i_theta, center, radius, theta, coeff_beta, arr, att, art, detDF);
 
     /* -------------------- */
     /* Node in the interior */
@@ -83,14 +83,14 @@ static inline void node_apply_a_give(int i_r, int i_theta, const PolarGrid& grid
         /* ------------------------------------------------ */
         if (DirBC_Interior) {
             /* Fill result(i,j) */
-            result[center] += x[center];
+            result[center] = x[center];
 
             /* Give value to the interior nodes! */
-            double h2 = grid.radialSpacing(i_r);
-            double k1 = grid.angularSpacing(i_theta - 1);
-            double k2 = grid.angularSpacing(i_theta);
+            const double h2 = grid.radialSpacing(i_r);
+            const double k1 = grid.angularSpacing(i_theta - 1);
+            const double k2 = grid.angularSpacing(i_theta);
 
-            double coeff2 = 0.5 * (k1 + k2) / h2;
+            const double coeff2 = 0.5 * (k1 + k2) / h2;
 
             const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
             const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -168,14 +168,14 @@ static inline void node_apply_a_give(int i_r, int i_theta, const PolarGrid& grid
     /* ----------------------------- */
     else if (i_r == grid.nr() - 1) {
         /* Fill result of (i,j) */
-        result[center] += x[center];
+        result[center] = x[center];
 
         /* Give value to the interior nodes! */
-        double h1 = grid.radialSpacing(i_r - 1);
-        double k1 = grid.angularSpacing(i_theta - 1);
-        double k2 = grid.angularSpacing(i_theta);
+        const double h1 = grid.radialSpacing(i_r - 1);
+        const double k1 = grid.angularSpacing(i_theta - 1);
+        const double k2 = grid.angularSpacing(i_theta);
 
-        double coeff1 = 0.5 * (k1 + k2) / h1;
+        const double coeff1 = 0.5 * (k1 + k2) / h1;
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
