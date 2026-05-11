@@ -45,9 +45,11 @@ public:
 
     const int& row_index(int nz_index) const;
     void set_row_index(int nz_index, int row_index) const;
+    void increment_row_index(int nz_index) const;
 
     const int& col_index(int nz_index) const;
     void set_col_index(int nz_index, int col_index) const;
+    void increment_col_index(int nz_index) const;
 
     const T& value(int nz_index) const;
     void set_value(int nz_index, T value) const;
