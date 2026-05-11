@@ -897,8 +897,11 @@ void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoCircleSection(int i_
                                                                           ConstVector<double> x,
                                                                           ConstVector<double> rhs, Vector<double> temp)
 {
+    using extrapolated_smoother_give::nodeApplyAscOrthoCircleGive;
+
     const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
     assert(i_r >= 0 && i_r < grid.numberSmootherCircles() + 1);
 
@@ -912,9 +915,8 @@ void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoCircleSection(int i_
         level_cache.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Apply Asc Ortho at the current node
-        extrapolated_smoother_give::nodeApplyAscOrthoCircleGive(
-            i_r, i_theta, grid, ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_, smoother_color, x, rhs, temp,
-            arr, att, art, detDF, coeff_beta);
+        nodeApplyAscOrthoCircleGive(i_r, i_theta, grid, DirBC_Interior, smoother_color, x, rhs, temp, arr, att, art,
+                                    detDF, coeff_beta);
     }
 }
 
@@ -923,11 +925,15 @@ void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoRadialSection(int i_
                                                                           ConstVector<double> x,
                                                                           ConstVector<double> rhs, Vector<double> temp)
 {
+    using extrapolated_smoother_give::nodeApplyAscOrthoRadialGive;
+
     const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
     const double theta = grid.theta(i_theta);
 
+    /* We need to obtain left contributions from the circular section for AscOrtho. */
     /* !!! i_r = grid.numberSmootherCircles()-1 !!! */
     for (int i_r = grid.numberSmootherCircles() - 1; i_r < grid.nr(); i_r++) {
         const double r  = grid.radius(i_r);
@@ -937,8 +943,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoRadialSection(int i_
         level_cache.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Apply Asc Ortho at the current node
-        extrapolated_smoother_give::nodeApplyAscOrthoRadialGive(
-            i_r, i_theta, grid, ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_, smoother_color, x, rhs, temp,
-            arr, att, art, detDF, coeff_beta);
+        nodeApplyAscOrthoRadialGive(i_r, i_theta, grid, DirBC_Interior, smoother_color, x, rhs, temp, arr, att, art,
+                                    detDF, coeff_beta);
     }
 }
