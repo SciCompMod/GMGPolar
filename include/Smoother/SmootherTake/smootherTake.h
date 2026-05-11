@@ -165,6 +165,8 @@ private:
     /* Orthogonal application */
     /* ---------------------- */
 
+    // Public is required as Cuda needs to be abe to get the address of functions enclosing lambda functions
+public:
     // Compute temp = f_sc − A_sc^ortho * u_sc^ortho   (precomputed right-hand side)
     // where x = u_sc and rhs = f_sc
     void applyAscOrthoBlackCircleSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
@@ -172,6 +174,7 @@ private:
     void applyAscOrthoBlackRadialSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
     void applyAscOrthoWhiteRadialSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
 
+private:
     /* ----------------- */
     /* Line-wise solvers */
     /* ----------------- */

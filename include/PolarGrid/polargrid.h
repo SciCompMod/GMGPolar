@@ -39,40 +39,42 @@ public:
                        const int anisotropic_factor, const int divideBy2,
                        std::optional<double> splitting_radius = std::nullopt);
 
+    KOKKOS_DEFAULTED_FUNCTION PolarGrid(const PolarGrid&) = default;
+
     // Optimized, inlined indexing.
-    int wrapThetaIndex(const int unwrapped_theta_index) const;
-    int index(const int r_index, const int unwrapped_theta_index) const;
-    void multiIndex(const int node_index, int& r_index, int& theta_index) const;
+    KOKKOS_INLINE_FUNCTION int wrapThetaIndex(const int unwrapped_theta_index) const;
+    KOKKOS_INLINE_FUNCTION int index(const int r_index, const int unwrapped_theta_index) const;
+    KOKKOS_INLINE_FUNCTION void multiIndex(const int node_index, int& r_index, int& theta_index) const;
 
     // Grid Parameters
     // Number of grid nodes
-    int numberOfNodes() const;
+    KOKKOS_INLINE_FUNCTION int numberOfNodes() const;
     // Get the number of grid points in radial direction
-    int nr() const;
+    KOKKOS_INLINE_FUNCTION int nr() const;
     // Get the number of angular divisions
-    int ntheta() const;
+    KOKKOS_INLINE_FUNCTION int ntheta() const;
     // Get the radius at a specific radial index
-    double radius(const int r_index) const;
+    KOKKOS_INLINE_FUNCTION double radius(const int r_index) const;
     // Get the angle at a specific angular index
-    double theta(const int theta_index) const;
+    KOKKOS_INLINE_FUNCTION double theta(const int theta_index) const;
 
     // Grid distances
     // Get the radial distance to the next consecutive radial node at a specified radial index.
-    double radialSpacing(const int r_index) const;
+    KOKKOS_INLINE_FUNCTION double radialSpacing(const int r_index) const;
     // Get the angular distance to the next consecutive angular node at a specified unwrapped angular index.
-    double angularSpacing(const int unwrapped_theta_index) const;
+    KOKKOS_INLINE_FUNCTION double angularSpacing(const int unwrapped_theta_index) const;
 
     // Circle/radial smoother division
     // Get the radius which splits the grid into circular and radial smoothing
-    double smootherSplittingRadius() const;
+    KOKKOS_INLINE_FUNCTION double smootherSplittingRadius() const;
     // Get the number of circles in the circular smoother.
-    int numberSmootherCircles() const;
+    KOKKOS_INLINE_FUNCTION int numberSmootherCircles() const;
     // Get the length of the radial smoother lines.
-    int lengthRadialSmoother() const;
+    KOKKOS_INLINE_FUNCTION int lengthRadialSmoother() const;
     // Get the number of nodes in circular smoother.
-    int numberCircularSmootherNodes() const;
+    KOKKOS_INLINE_FUNCTION int numberCircularSmootherNodes() const;
     // Get the number of nodes in radial smoother.
-    int numberRadialSmootherNodes() const;
+    KOKKOS_INLINE_FUNCTION int numberRadialSmootherNodes() const;
 
 private:
     // We use the convention:

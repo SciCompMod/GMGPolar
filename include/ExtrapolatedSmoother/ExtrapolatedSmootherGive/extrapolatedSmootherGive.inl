@@ -7,21 +7,16 @@ ExtrapolatedSmootherGive<LevelCacheType>::ExtrapolatedSmootherGive(const PolarGr
     : ExtrapolatedSmoother<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
     , radial_tridiagonal_solver_(grid.lengthRadialSmoother(), grid.ntheta(), false)
-{
-    buildAscMatrices();
 #ifdef GMGPOLAR_USE_MUMPS
-    initializeMumpsSolver(inner_boundary_mumps_solver_, inner_boundary_circle_matrix_);
+    , inner_boundary_solver_(buildInteriorBoundarySolverMatrix())
 #else
-    inner_boundary_lu_solver_ = SparseLUSolver<double>(inner_boundary_circle_matrix_);
+    , inner_boundary_circle_matrix_(buildInteriorBoundarySolverMatrix())
+    , inner_boundary_solver_(inner_boundary_circle_matrix_)
 #endif
-}
-
-template <class LevelCacheType>
-ExtrapolatedSmootherGive<LevelCacheType>::~ExtrapolatedSmootherGive()
 {
-#ifdef GMGPOLAR_USE_MUMPS
-    finalizeMumpsSolver(inner_boundary_mumps_solver_);
-#endif
+    buildTridiagonalSolverMatrices();
+    circle_tridiagonal_solver_.setup();
+    radial_tridiagonal_solver_.setup();
 }
 
 // The smoothing solves linear systems of the form:
@@ -65,7 +60,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(Vector<doub
                 temp[index]     = (i_r & 1 || i_theta & 1) ? rhs[index] : x[index];
             }
         }
-#pragma omp for
+#pragma omp for nowait
         for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
             for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
                 const int index = grid.index(i_r, i_theta);

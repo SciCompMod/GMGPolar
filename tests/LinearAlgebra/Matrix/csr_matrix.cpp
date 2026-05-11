@@ -46,7 +46,7 @@ TEST(SparseMatrixCSR, copy_construct)
     const SparseMatrixCSR<double> m1(4, 3,
                                      {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0}, triplet{2, 0, 4.0},
                                       triplet{2, 1, 5.0}, triplet{2, 2, 6.0}, triplet{3, 2, 7.0}});
-    const SparseMatrixCSR<double> m2 = m1;
+    const SparseMatrixCSR<double> m2 = m1.copy();
 
     const double dense_values[4][3] = {{1.0, 0.0, 2.0}, {3.0, 0.0, 0.0}, {4.0, 5.0, 6.0}, {0.0, 0.0, 7.0}};
 
@@ -99,7 +99,7 @@ TEST(SparseMatrixCSR, copy_assign)
                                           triplet{2, 0, 4.0}, triplet{2, 1, 5.0}, triplet{2, 2, 6.0},
                                           triplet{3, 2, 7.0}});
 
-        m2 = m1;
+        m2 = m1.copy();
 
         EXPECT_EQ(m1.rows(), 4);
         EXPECT_EQ(m1.columns(), 3);
@@ -160,9 +160,9 @@ TEST(SparseMatrixCSR, move_construct)
 
     using triplet = SparseMatrixCSR<double>::triplet_type;
 
-    const SparseMatrixCSR<double> m1(4, 3,
-                                     {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0}, triplet{2, 0, 4.0},
-                                      triplet{2, 1, 5.0}, triplet{2, 2, 6.0}, triplet{3, 2, 7.0}});
+    SparseMatrixCSR<double> m1(4, 3,
+                               {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0}, triplet{2, 0, 4.0},
+                                triplet{2, 1, 5.0}, triplet{2, 2, 6.0}, triplet{3, 2, 7.0}});
 
     EXPECT_EQ(m1.rows(), 4);
     EXPECT_EQ(m1.columns(), 3);
@@ -210,10 +210,9 @@ TEST(SparseMatrixCSR, move_assign)
     SparseMatrixCSR<double> m2;
 
     {
-        const SparseMatrixCSR<double> m1(4, 3,
-                                         {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0},
-                                          triplet{2, 0, 4.0}, triplet{2, 1, 5.0}, triplet{2, 2, 6.0},
-                                          triplet{3, 2, 7.0}});
+        SparseMatrixCSR<double> m1(4, 3,
+                                   {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0}, triplet{2, 0, 4.0},
+                                    triplet{2, 1, 5.0}, triplet{2, 2, 6.0}, triplet{3, 2, 7.0}});
 
         EXPECT_EQ(m1.rows(), 4);
         EXPECT_EQ(m1.columns(), 3);
@@ -297,8 +296,8 @@ TEST(SparseMatrixCSR, value_construct_modify)
     EXPECT_DOUBLE_EQ(m.row_nz_entry(2, 2), dense_values[2][m.row_nz_index(2, 2)]);
     EXPECT_DOUBLE_EQ(m.row_nz_entry(3, 0), dense_values[3][m.row_nz_index(3, 0)]);
 
-    m.row_nz_entry(1, 0) = 8.0;
-    m.row_nz_entry(2, 2) = 9.0;
+    m.set_row_nz_entry(1, 0, 8.0);
+    m.set_row_nz_entry(2, 2, 9.0);
 
     EXPECT_EQ(m.rows(), 4);
     EXPECT_EQ(m.columns(), 3);
