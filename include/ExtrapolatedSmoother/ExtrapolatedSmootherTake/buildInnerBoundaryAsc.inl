@@ -10,7 +10,7 @@ static inline void update_CSR_COO_MatrixElement(SparseMatrixCOO<double>& matrix,
 {
     matrix.set_row_index(ptr + offset, row);
     matrix.set_col_index(ptr + offset, column);
-    matrix.set_value(ptr + offset   , value);
+    matrix.set_value(ptr + offset, value);
 }
 #else
 // When using the in-house solver, the matrix is stored in CSR format.
