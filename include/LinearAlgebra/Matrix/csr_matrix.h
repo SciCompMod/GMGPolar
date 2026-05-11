@@ -58,7 +58,7 @@ public:
 
     SparseMatrixCSR copy() const;
     template<class TargetMemorySpace>
-    SparseMatrixCSR mirror_and_copy() const;
+    SparseMatrixCSR<T, TargetMemorySpace> mirror_and_copy() const;
 
     KOKKOS_FUNCTION int rows() const;
     KOKKOS_FUNCTION int columns() const;
@@ -153,7 +153,7 @@ SparseMatrixCSR<T, MemorySpace> SparseMatrixCSR<T, MemorySpace>::copy() const
 
 template <typename T, class MemorySpace>
 template <class TargetMemorySpace>
-SparseMatrixCSR<T, MemorySpace> SparseMatrixCSR<T, MemorySpace>::mirror_and_copy() const
+SparseMatrixCSR<T, TargetMemorySpace> SparseMatrixCSR<T, MemorySpace>::mirror_and_copy() const
 {
     SparseMatrixCSR<T, TargetMemorySpace> new_copy;
     new_copy.rows_              = rows_;
