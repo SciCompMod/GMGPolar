@@ -19,8 +19,8 @@ static inline void update_CSR_COO_MatrixElement(SparseMatrixCOO<double>& matrix,
 static inline void update_CSR_COO_MatrixElement(SparseMatrixCSR<double>& matrix, int ptr, int offset, int row,
                                                 int column, double value)
 {
-    matrix.row_nz_index(row, offset) = column;
-    matrix.row_nz_entry(row, offset) += value;
+    matrix.set_row_nz_index(row, offset, column);
+    matrix.increase_row_nz_entry(row, offset, value);
 }
 #endif
 
