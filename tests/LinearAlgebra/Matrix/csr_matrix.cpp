@@ -6,7 +6,7 @@
 using namespace gmgpolar;
 
 using SparseMatrixCSRHost = SparseMatrixCSR<double, Kokkos::HostSpace>;
-using VectorHost = Vector<double, Kokkos::HostSpace>;
+using VectorHost          = Vector<double, Kokkos::HostSpace>;
 
 TEST(SparseMatrixCSR, default_construct)
 {

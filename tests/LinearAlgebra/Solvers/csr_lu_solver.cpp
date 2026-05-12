@@ -71,17 +71,19 @@ void expect_vector_near(const Vector<T, MemSpace>& a, const Vector<T, MemSpace>&
         auto h_a = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), a);
         auto h_b = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), b);
         expect_vector_near(h_a, h_b, tol);
-    } else {
-    ASSERT_EQ(a.size(), b.size());
-    for (uint i = 0; i < a.size(); ++i)
-        EXPECT_NEAR(a(i), b(i), tol);
+    }
+    else {
+        ASSERT_EQ(a.size(), b.size());
+        for (uint i = 0; i < a.size(); ++i)
+            EXPECT_NEAR(a(i), b(i), tol);
     }
 }
 
 template <typename T>
 void fill_vec(Vector<T, MemSpace> const& b, T mult = 1, T offset = 1)
 {
-    Kokkos::parallel_for("fill_vec", Kokkos::RangePolicy<>(0, b.size()), KOKKOS_LAMBDA(const int i) { b(i) = mult * i + offset; });
+    Kokkos::parallel_for(
+        "fill_vec", Kokkos::RangePolicy<>(0, b.size()), KOKKOS_LAMBDA(const int i) { b(i) = mult * i + offset; });
     Kokkos::fence();
 }
 
@@ -194,14 +196,14 @@ TEST(SparseLUSolver, FourByFourPermutation)
 {
     using T = double;
     SparseMatrixCSR<T, MemSpace> A(4, 4,
-                         sort_entries<T>({{0, 1, 1.0},
-                                          {1, 2, 1.0},
-                                          {2, 3, 1.0},
-                                          {3, 0, 1.0},
-                                          {0, 0, 10.0},
-                                          {1, 1, 10.0},
-                                          {2, 2, 10.0},
-                                          {3, 3, 10.0}}));
+                                   sort_entries<T>({{0, 1, 1.0},
+                                                    {1, 2, 1.0},
+                                                    {2, 3, 1.0},
+                                                    {3, 0, 1.0},
+                                                    {0, 0, 10.0},
+                                                    {1, 1, 10.0},
+                                                    {2, 2, 10.0},
+                                                    {3, 3, 10.0}}));
     Vector<T, MemSpace> x_true("x_true", 4);
     fill_vec(x_true);
     Vector<T, MemSpace> b = csr_matvec(A, x_true);
@@ -309,7 +311,7 @@ TEST(SparseLUSolver, TwentyByTwentyRandomSparse)
     Vector<T> h_x_true("x_true", 20);
     for (int i = 0; i < 20; ++i)
         h_x_true(i) = dist(gen);
-    auto x_true = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
+    auto x_true           = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
     Vector<T, MemSpace> b = csr_matvec(A, x_true);
     SparseLUSolver<T, MemSpace> solver(A);
     solver.solveInPlace(b);
@@ -357,7 +359,7 @@ TEST(SparseLUSolver, HundredByHundredRandomSparse)
     Vector<T> h_x_true("x_true", 100);
     for (int i = 0; i < 100; ++i)
         h_x_true(i) = dist(gen);
-    auto x_true = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
+    auto x_true           = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
     Vector<T, MemSpace> b = csr_matvec(A, x_true);
     SparseLUSolver<T, MemSpace> solver(A);
     solver.solveInPlace(b);
@@ -401,7 +403,7 @@ TEST(SparseLUSolver, TwentyByTwentyBanded)
     Vector<T> h_x_true("x_true", 20);
     for (int i = 0; i < 20; ++i)
         h_x_true(i) = std::sin(i);
-    auto x_true = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
+    auto x_true           = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
     Vector<T, MemSpace> b = csr_matvec(A, x_true);
     SparseLUSolver<T, MemSpace> solver(A);
     solver.solveInPlace(b);
@@ -417,12 +419,12 @@ TEST(SparseLUSolver, FiveByFiveMixedSigns)
         sort_entries<T>(
             {{0, 0, -2.0}, {0, 4, 1.0}, {1, 1, 3.0}, {2, 2, -4.0}, {3, 3, 5.0}, {4, 0, -1.0}, {4, 4, -6.0}}));
     Vector<T> h_x_true("x_true", 5);
-    h_x_true(0)   = 1.0;
-    h_x_true(1)   = -2.0;
-    h_x_true(2)   = 3.0;
-    h_x_true(3)   = -4.0;
-    h_x_true(4)   = 5.0;
-    auto x_true = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
+    h_x_true(0)           = 1.0;
+    h_x_true(1)           = -2.0;
+    h_x_true(2)           = 3.0;
+    h_x_true(3)           = -4.0;
+    h_x_true(4)           = 5.0;
+    auto x_true           = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
     Vector<T, MemSpace> b = csr_matvec(A, x_true);
     SparseLUSolver<T, MemSpace> solver(A);
     solver.solveInPlace(b);
@@ -432,9 +434,10 @@ TEST(SparseLUSolver, FiveByFiveMixedSigns)
 // 21. Test 1x1 matrix
 TEST(SparseLUSolver, 1x1)
 {
-    SparseMatrixCSR<double, MemSpace> A(1, 1, sort_entries(std::vector<SparseMatrixCSR<double>::triplet_type>{{0, 0, 5.0}}));
+    SparseMatrixCSR<double, MemSpace> A(1, 1,
+                                        sort_entries(std::vector<SparseMatrixCSR<double>::triplet_type>{{0, 0, 5.0}}));
     Vector<double, MemSpace> x_true("x_true", 1);
-	fill_vec(x_true, 1.0, 2.0);
+    fill_vec(x_true, 1.0, 2.0);
     Vector<double, MemSpace> b = csr_matvec(A, x_true);
     SparseLUSolver<double, MemSpace> solver(A);
     solver.solveInPlace(b);
@@ -447,9 +450,9 @@ TEST(SparseLUSolver, 2x2Diagonal)
     std::vector<SparseMatrixCSR<double>::triplet_type> triplets = sort_entries<double>({{0, 0, 2.0}, {1, 1, 3.0}});
     SparseMatrixCSR<double> A(2, 2, triplets);
     Vector<double> h_x_true("x_true", 2);
-    h_x_true(0)        = 1.0;
-    h_x_true(1)        = -1.0;
-    auto x_true = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
+    h_x_true(0)                = 1.0;
+    h_x_true(1)                = -1.0;
+    auto x_true                = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
     Vector<double, MemSpace> b = csr_matvec(A, x_true);
     SparseLUSolver<double> solver(A);
     solver.solveInPlace(b);
@@ -463,9 +466,9 @@ TEST(SparseLUSolver, 2x2General)
         sort_entries<double>({{0, 0, 4.0}, {0, 1, 1.0}, {1, 0, 2.0}, {1, 1, 3.0}});
     SparseMatrixCSR<double> A(2, 2, triplets);
     Vector<double> h_x_true("x_true", 2);
-    h_x_true(0)        = 3.0;
-    h_x_true(1)        = -2.0;
-    auto x_true = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
+    h_x_true(0)                = 3.0;
+    h_x_true(1)                = -2.0;
+    auto x_true                = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
     Vector<double, MemSpace> b = csr_matvec(A, x_true);
     SparseLUSolver<double> solver(A);
     solver.solveInPlace(b);
@@ -480,10 +483,10 @@ TEST(SparseLUSolver, 3x3Permutation)
         sort_entries<double>({{0, 1, 1.0}, {1, 0, 1.0}, {1, 1, 2.0}, {1, 2, 1.0}, {2, 1, 1.0}, {2, 2, 3.0}});
     SparseMatrixCSR<double> A(3, 3, triplets);
     Vector<double> h_x_true("x_true", 3);
-    h_x_true(0)        = 1.0;
-    h_x_true(1)        = 2.0;
-    h_x_true(2)        = -1.0;
-    auto x_true = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
+    h_x_true(0)                = 1.0;
+    h_x_true(1)                = 2.0;
+    h_x_true(2)                = -1.0;
+    auto x_true                = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
     Vector<double, MemSpace> b = csr_matvec(A, x_true);
     SparseLUSolver<double, MemSpace> solver(A);
     solver.solveInPlace(b);
@@ -497,11 +500,11 @@ TEST(SparseLUSolver, 4x4parse)
         sort_entries<double>({{0, 0, 10.0}, {0, 3, 2.0}, {1, 1, 5.0}, {2, 2, 3.0}, {3, 0, 1.0}, {3, 3, 4.0}});
     SparseMatrixCSR<double> A(4, 4, triplets);
     Vector<double> h_x_true("x_true", 4);
-    h_x_true(0)        = 1.0;
-    h_x_true(1)        = 2.0;
-    h_x_true(2)        = -1.0;
-    h_x_true(3)        = 3.0;
-    auto x_true = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
+    h_x_true(0)                = 1.0;
+    h_x_true(1)                = 2.0;
+    h_x_true(2)                = -1.0;
+    h_x_true(3)                = 3.0;
+    auto x_true                = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
     Vector<double, MemSpace> b = csr_matvec(A, x_true);
     SparseLUSolver<double> solver(A);
     solver.solveInPlace(b);
@@ -515,9 +518,9 @@ TEST(SparseLUSolver, 0Diagonal)
         sort_entries<double>({{0, 0, 0.0}, {0, 1, 1.0}, {1, 0, 1.0}, {1, 1, 2.0}});
     SparseMatrixCSR<double> A(2, 2, triplets);
     Vector<double> h_x_true("x_true", 2);
-    h_x_true(0)        = 1.5;
-    h_x_true(1)        = -0.5;
-    auto x_true = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
+    h_x_true(0)                = 1.5;
+    h_x_true(1)                = -0.5;
+    auto x_true                = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
     Vector<double, MemSpace> b = csr_matvec(A, x_true);
     SparseLUSolver<double> solver(A);
     solver.solveInPlace(b);
@@ -547,12 +550,12 @@ TEST(SparseLUSolver, 5x5Random)
     row_ptr[n] = idx;
     SparseMatrixCSR<double> B(n, n, values, cols, row_ptr);
     Vector<double> h_x_true("x_true", 5);
-    h_x_true(0)        = 1.0;
-    h_x_true(1)        = -2.0;
-    h_x_true(2)        = 3.0;
-    h_x_true(3)        = -4.0;
-    h_x_true(4)        = 5.0;
-    auto x_true = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
+    h_x_true(0)                = 1.0;
+    h_x_true(1)                = -2.0;
+    h_x_true(2)                = 3.0;
+    h_x_true(3)                = -4.0;
+    h_x_true(4)                = 5.0;
+    auto x_true                = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
     Vector<double, MemSpace> b = csr_matvec(B, x_true);
     SparseLUSolver<double> solver(B);
     solver.solveInPlace(b);
@@ -571,7 +574,7 @@ TEST(SparseLUSolver, 10x10Diagonal)
     Vector<double> h_x_true("x_true", n);
     for (int i = 0; i < n; ++i)
         h_x_true(i) = (i % 2 == 0 ? 1.0 : -1.0);
-    auto x_true = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
+    auto x_true                = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
     Vector<double, MemSpace> b = csr_matvec(A, x_true);
     SparseLUSolver<double> solver(A);
     solver.solveInPlace(b);
@@ -625,13 +628,13 @@ TEST(SparseLUSolver, 6x6Block)
     }
     SparseMatrixCSR<double> A(n, n, sort_entries(triplets));
     Vector<double> h_x_true("x_true", 6);
-    h_x_true(0)        = 1.0;
-    h_x_true(1)        = -1.0;
-    h_x_true(2)        = 2.0;
-    h_x_true(3)        = 0.5;
-    h_x_true(4)        = -0.5;
-    h_x_true(5)        = 1.5;
-    auto x_true = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
+    h_x_true(0)                = 1.0;
+    h_x_true(1)                = -1.0;
+    h_x_true(2)                = 2.0;
+    h_x_true(3)                = 0.5;
+    h_x_true(4)                = -0.5;
+    h_x_true(5)                = 1.5;
+    auto x_true                = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
     Vector<double, MemSpace> b = csr_matvec(A, x_true);
     SparseLUSolver<double> solver(A);
     solver.solveInPlace(b);
@@ -652,12 +655,12 @@ TEST(SparseLUSolver, 5x5MixedSigns)
     }
     SparseMatrixCSR<double> A(n, n, sort_entries(triplets));
     Vector<double> h_x_true("x_true", 5);
-    h_x_true(0)        = 2.0;
-    h_x_true(1)        = -1.0;
-    h_x_true(2)        = 0.5;
-    h_x_true(3)        = -0.5;
-    h_x_true(4)        = 1.0;
-    auto x_true = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
+    h_x_true(0)                = 2.0;
+    h_x_true(1)                = -1.0;
+    h_x_true(2)                = 0.5;
+    h_x_true(3)                = -0.5;
+    h_x_true(4)                = 1.0;
+    auto x_true                = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
     Vector<double, MemSpace> b = csr_matvec(A, x_true);
     SparseLUSolver<double> solver(A);
     solver.solveInPlace(b);
@@ -703,7 +706,7 @@ TEST(SparseLUSolver, 8x8ChainGraph)
     Vector<double> h_x_true("x_true", n);
     for (int i = 0; i < n; ++i)
         h_x_true(i) = (i % 2 == 0 ? 1.0 : -1.0);
-    auto x_true = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
+    auto x_true                = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
     Vector<double, MemSpace> b = csr_matvec(A, x_true);
     SparseLUSolver<double> solver(A);
     solver.solveInPlace(b);
@@ -733,10 +736,10 @@ TEST(SparseLUSolver, 3x3Identity)
         triplets.emplace_back(i, i, 1.0);
     SparseMatrixCSR<double> A(n, n, sort_entries(triplets));
     Vector<double> h_x_true("x_true", 3);
-    h_x_true(0)        = 5.0;
-    h_x_true(1)        = -3.0;
-    h_x_true(2)        = 2.0;
-    auto x_true = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
+    h_x_true(0)                = 5.0;
+    h_x_true(1)                = -3.0;
+    h_x_true(2)                = 2.0;
+    auto x_true                = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
     Vector<double, MemSpace> b = csr_matvec(A, x_true);
     SparseLUSolver<double> solver(A);
     solver.solveInPlace(b);
@@ -750,11 +753,11 @@ TEST(SparseLUSolver, 4x4SmallDiagonal)
                                                                    {1, 1, 2.0},   {2, 2, 3.0}, {3, 3, 4.0}};
     SparseMatrixCSR<double> A(4, 4, sort_entries(triplets));
     Vector<double> h_x_true("x_true", 4);
-    h_x_true(0)        = 1.0;
-    h_x_true(1)        = 2.0;
-    h_x_true(2)        = -1.0;
-    h_x_true(3)        = 0.5;
-    auto x_true = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
+    h_x_true(0)                = 1.0;
+    h_x_true(1)                = 2.0;
+    h_x_true(2)                = -1.0;
+    h_x_true(3)                = 0.5;
+    auto x_true                = Kokkos::create_mirror_view_and_copy(MemSpace(), h_x_true);
     Vector<double, MemSpace> b = csr_matvec(A, x_true);
     SparseLUSolver<double> solver(A);
     solver.solveInPlace(b);
