@@ -196,6 +196,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherDirBC_Interior)
             [&](uint i) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     });
+    Kokkos::fence();
 
     int iterations              = 0;
     bool max_iterations_reached = false;
@@ -210,6 +211,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherDirBC_Interior)
             [&](uint i) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         });
+    Kokkos::fence();
         iterations++;
         if (iterations >= max_iterations) {
             max_iterations_reached = true;
@@ -279,6 +281,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherAcrossOrigin)
             [&](uint i) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     });
+    Kokkos::fence();
 
     int iterations              = 0;
     bool max_iterations_reached = false;
@@ -293,6 +296,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherAcrossOrigin)
             [&](uint i) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         });
+    Kokkos::fence();
         iterations++;
         if (iterations >= max_iterations) {
             max_iterations_reached = true;
@@ -361,6 +365,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherDirBC_Interior_SmallestGrid)
             [&](uint i) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     });
+    Kokkos::fence();
 
     int iterations              = 0;
     bool max_iterations_reached = false;
@@ -375,6 +380,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherDirBC_Interior_SmallestGrid)
             [&](uint i) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         });
+    Kokkos::fence();
         iterations++;
         if (iterations >= max_iterations) {
             max_iterations_reached = true;
@@ -441,6 +447,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherAcrossOrigin_SmallestGrid)
             [&](uint i) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     });
+    Kokkos::fence();
 
     int iterations              = 0;
     bool max_iterations_reached = false;
@@ -455,6 +462,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherAcrossOrigin_SmallestGrid)
             [&](uint i) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         });
+    Kokkos::fence();
         iterations++;
         if (iterations >= max_iterations) {
             max_iterations_reached = true;
@@ -524,6 +532,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherTakeDirBC_Interior)
             [&](uint i) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     });
+    Kokkos::fence();
 
     int iterations              = 0;
     bool max_iterations_reached = false;
@@ -538,6 +547,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherTakeDirBC_Interior)
             [&](uint i) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         });
+    Kokkos::fence();
         iterations++;
         if (iterations >= max_iterations) {
             max_iterations_reached = true;
@@ -605,6 +615,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherTakeAcrossOrigin)
             [&](uint i) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     });
+    Kokkos::fence();
 
     int iterations              = 0;
     bool max_iterations_reached = false;
@@ -619,6 +630,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherTakeAcrossOrigin)
             [&](uint i) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         });
+    Kokkos::fence();
         iterations++;
         if (iterations >= max_iterations) {
             max_iterations_reached = true;
@@ -685,6 +697,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherTakeDirBC_Interior_SmallestGr
             [&](uint i) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     });
+    Kokkos::fence();
 
     int iterations              = 0;
     bool max_iterations_reached = false;
@@ -699,6 +712,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherTakeDirBC_Interior_SmallestGr
             [&](uint i) {
             error[i] = discrete_solution[i] - smoother_solution[i];
         });
+    Kokkos::fence();
         iterations++;
         if (iterations >= max_iterations) {
             max_iterations_reached = true;
@@ -765,6 +779,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherTakeAcrossOrigin_SmallestGrid
             [&](uint i) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     });
+    Kokkos::fence();
 
     int iterations              = 0;
     bool max_iterations_reached = false;
@@ -778,7 +793,8 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherTakeAcrossOrigin_SmallestGrid
             Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, error.size()),
             [&](uint i) {
             error[i] = discrete_solution[i] - smoother_solution[i];
-        }
+        });
+    Kokkos::fence();
         iterations++;
         if (iterations >= max_iterations) {
             max_iterations_reached = true;
