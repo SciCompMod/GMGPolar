@@ -118,8 +118,8 @@ private:
     using InnerBoundaryMatrix = SparseMatrixCOO<double>;
     using InnerBoundarySolver = CooMumpsSolver;
 #else
-    using InnerBoundaryMatrix = SparseMatrixCSR<double>;
-    using InnerBoundarySolver = SparseLUSolver<double>;
+    using InnerBoundaryMatrix = SparseMatrixCSR<double, Kokkos::HostSpace>;
+    using InnerBoundarySolver = SparseLUSolver<double, Kokkos::HostSpace>;
 
     // Stored only for the in-house solver (CSR).
     InnerBoundaryMatrix inner_boundary_circle_matrix_;

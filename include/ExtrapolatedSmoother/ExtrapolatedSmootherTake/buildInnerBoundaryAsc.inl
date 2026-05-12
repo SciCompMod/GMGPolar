@@ -14,8 +14,8 @@ static inline void update_CSR_COO_MatrixElement(SparseMatrixCOO<double>& matrix,
 }
 #else
 // When using the in-house solver, the matrix is stored in CSR format.
-static inline void update_CSR_COO_MatrixElement(SparseMatrixCSR<double>& matrix, int ptr, int offset, int row,
-                                                int column, double value)
+static inline void update_CSR_COO_MatrixElement(SparseMatrixCSR<double, Kokkos::HostSpace>& matrix, int ptr, int offset,
+                                                int row, int column, double value)
 {
     matrix.set_row_nz_index(row, offset, column);
     matrix.set_row_nz_entry(row, offset, value);
@@ -112,7 +112,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildInteriorBoundarySolverMa
             const double center_value = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) +
                                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
-            const double left_value   = -coeff1 * (arr[center] + arr[left]);
+            const double left_value = -coeff1 * (arr[center] + arr[left]);
 
             /* Fill matrix row of (i,j) */
             row = center_index;
@@ -181,7 +181,7 @@ ExtrapolatedSmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
         else
             return i_theta % 2 == 0 ? 1 : 2;
     };
-    SparseMatrixCSR<double> inner_boundary_solver_matrix(ntheta, ntheta, nnz_per_row);
+    SparseMatrixCSR<double, Kokkos::HostSpace> inner_boundary_solver_matrix(ntheta, ntheta, nnz_per_row);
 #endif
 
     assert(level_cache.cacheDensityProfileCoefficients());

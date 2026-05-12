@@ -15,8 +15,10 @@ bool DirectSolverTake<LevelCacheType>::validateSolverMatrixIndexing() const
             expected += getStencilSize(prior);
         }
 
-        if (getSolverMatrixIndex(i_r, i_theta) != expected) return false;
-        if (getStencilSize(global_index) != getStencil(i_r).size()) return false;
+        if (getSolverMatrixIndex(i_r, i_theta) != expected)
+            return false;
+        if (getStencilSize(global_index) != getStencil(i_r).size())
+            return false;
     }
 
     // 2. Check total non-zero count
@@ -24,7 +26,8 @@ bool DirectSolverTake<LevelCacheType>::validateSolverMatrixIndexing() const
     for (int global_index = 0; global_index < grid.numberOfNodes(); ++global_index) {
         total += getStencilSize(global_index);
     }
-    if (total != getNonZeroCountSolverMatrix()) return false;
+    if (total != getNonZeroCountSolverMatrix())
+        return false;
 
     return true;
 }
@@ -141,8 +144,8 @@ int DirectSolverTake<LevelCacheType>::getSolverMatrixIndex(const int i_r, const 
         const int prior_inner_boundary_nodes      = grid.ntheta();
         const int prior_next_inner_boundary_nodes = grid.ntheta();
         const int prior_interior_nodes            = grid.ntheta() * (grid.numberSmootherCircles() - 2) +
-                                                    i_theta * (grid.lengthRadialSmoother() - 2) + i_r -
-                                                    grid.numberSmootherCircles();
+                                         i_theta * (grid.lengthRadialSmoother() - 2) + i_r -
+                                         grid.numberSmootherCircles();
         const int prior_next_outer_boundary_nodes = i_theta;
         const int prior_outer_boundary_nodes      = i_theta;
         return size_stencil_inner_boundary * prior_inner_boundary_nodes +
