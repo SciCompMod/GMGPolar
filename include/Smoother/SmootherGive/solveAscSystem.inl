@@ -26,7 +26,7 @@ void SmootherGive<LevelCacheType>::solveBlackCircleSection(Vector<double> x, Vec
     const int num_black_circles   = (grid.numberSmootherCircles() - start_black_circles + 1) / 2;
     Kokkos::parallel_for(
         "SmootherGive: moveUpdatedValues (Black Circular)",
-        Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, 0}, {num_black_circles, grid.ntheta()}),
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, 0}, {num_black_circles, grid.ntheta()}),
         KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
             const int i_r   = start_black_circles + circle_task * 2;
             const int index = grid.index(i_r, i_theta);
@@ -61,7 +61,7 @@ void SmootherGive<LevelCacheType>::solveWhiteCircleSection(Vector<double> x, Vec
     const int num_white_circles   = (grid.numberSmootherCircles() - start_white_circles + 1) / 2;
     Kokkos::parallel_for(
         "SmootherGive: moveUpdatedValues (White Circular)",
-        Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, 0}, {num_white_circles, grid.ntheta()}),
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, 0}, {num_white_circles, grid.ntheta()}),
         KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
             const int i_r   = start_white_circles + circle_task * 2;
             const int index = grid.index(i_r, i_theta);
@@ -90,7 +90,7 @@ void SmootherGive<LevelCacheType>::solveBlackRadialSection(Vector<double> x, Vec
     const int num_black_radial_lines = grid.ntheta() / 2;
     Kokkos::parallel_for(
         "SmootherGive: moveUpdatedValues (Black Radial)",
-        Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, grid.numberSmootherCircles()}, {num_black_radial_lines, grid.nr()}),
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()}, {num_black_radial_lines, grid.nr()}),
         KOKKOS_LAMBDA(const int radial_task, const int i_r) {
             const int i_theta = start_black_radials + radial_task * 2;
             const int index   = grid.index(i_r, i_theta);
