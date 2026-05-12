@@ -14,7 +14,7 @@ static inline void update_CSR_COO_MatrixElement(SparseMatrixCOO<double>& matrix,
 }
 #else
 // When using the in-house solver, the matrix is stored in CSR format.
-static inline void update_CSR_COO_MatrixElement(SparseMatrixCSR<double>& matrix, int ptr, int offset, int row,
+static inline void update_CSR_COO_MatrixElement(SparseMatrixCSR<double, Kokkos::HostSpace>& matrix, int ptr, int offset, int row,
                                                 int column, double value)
 {
     matrix.set_row_nz_index(row, offset, column);
@@ -181,7 +181,7 @@ ExtrapolatedSmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
         else
             return i_theta % 2 == 0 ? 1 : 2;
     };
-    SparseMatrixCSR<double> inner_boundary_solver_matrix(ntheta, ntheta, nnz_per_row);
+    SparseMatrixCSR<double, Kokkos::HostSpace> inner_boundary_solver_matrix(ntheta, ntheta, nnz_per_row);
 #endif
 
     assert(level_cache.cacheDensityProfileCoefficients());

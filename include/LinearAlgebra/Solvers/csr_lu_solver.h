@@ -39,7 +39,7 @@ static inline Vector<int, MemorySpace> build_perm_inv(Vector<int, MemorySpace> c
  * @tparam T Numeric type (e.g. double, float).
  */
 
-template <typename T, class MemorySpace = Kokkos::HostSpace>
+template <typename T, class MemorySpace = Kokkos::DefaultExecutionSpace::memory_space>
 class SparseLUSolver
 {
 	using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>, Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;

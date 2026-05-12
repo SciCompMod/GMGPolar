@@ -48,7 +48,7 @@ void row_start_indices_from_nz_per_row(int& nnz, const Vector<int, MemorySpace>&
 }
 }
 
-template <typename T, class MemorySpace = Kokkos::HostSpace>
+template <typename T, class MemorySpace = Kokkos::DefaultExecutionSpace::memory_space>
 class SparseMatrixCSR
 {
 public:
