@@ -184,7 +184,7 @@ public:
     /* ----------------- */
     /* Line-wise solvers */
     /* ----------------- */
-private:
+
     // Solve the linear system:
     //     A_sc * u_sc = f_sc − A_sc^ortho * u_sc^ortho
     // Parameter mapping:
