@@ -41,7 +41,7 @@ TEST(OperatorATest, applyA_DirBC_Interior)
     ZoniShiftedCoefficients coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior  = true;
-    int maxOpenMPThreads = 16;
+    omp_set_num_threads(16);
 
     // "Take" requires cached values
     bool cache_density_rpofile_coefficients = true;
@@ -53,8 +53,8 @@ TEST(OperatorATest, applyA_DirBC_Interior)
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, false);
 
-    ResidualGive residualGive_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualTake residualTake_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ResidualGive residualGive_operator(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualTake residualTake_operator(level.grid(), level.levelCache(), DirBC_Interior);
 
     Vector<double> x   = generate_random_sample_data(level.grid(), 42);
     Vector<double> rhs = generate_random_sample_data(level.grid(), 69);
@@ -94,7 +94,7 @@ TEST(OperatorATest, applyA_AcrossOrigin)
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior  = false;
-    int maxOpenMPThreads = 16;
+    omp_set_num_threads(16);
 
     // "Take" requires cached values
     bool cache_density_rpofile_coefficients = true;
@@ -106,8 +106,8 @@ TEST(OperatorATest, applyA_AcrossOrigin)
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, false);
 
-    ResidualGive residualGive_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualTake residualTake_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ResidualGive residualGive_operator(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualTake residualTake_operator(level.grid(), level.levelCache(), DirBC_Interior);
 
     Vector<double> x   = generate_random_sample_data(level.grid(), 42);
     Vector<double> rhs = generate_random_sample_data(level.grid(), 69);

@@ -57,7 +57,7 @@ TEST(DirectSolverTest, directSolver_DirBC_Interior)
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior  = true;
-    int maxOpenMPThreads = 16;
+    omp_set_num_threads(16);
 
     // "Take" requires cached values
     bool cache_density_rpofile_coefficients = true;
@@ -69,8 +69,8 @@ TEST(DirectSolverTest, directSolver_DirBC_Interior)
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, false);
 
-    DirectSolverTake directSolverGive_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    DirectSolverGive directSolverTake_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverTake directSolverGive_operator(level.grid(), level.levelCache(), DirBC_Interior);
+    DirectSolverGive directSolverTake_operator(level.grid(), level.levelCache(), DirBC_Interior);
 
     Vector<double> solution_Give = generate_random_sample_data(level.grid(), 69);
     directSolverGive_operator.solveInPlace(solution_Give);
@@ -107,7 +107,7 @@ TEST(DirectSolverTest, directSolver_AcrossOrigin)
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior  = false;
-    int maxOpenMPThreads = 16;
+    omp_set_num_threads(16);
 
     // "Take" requires cached values
     bool cache_density_rpofile_coefficients = true;
@@ -119,8 +119,8 @@ TEST(DirectSolverTest, directSolver_AcrossOrigin)
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverGive directSolverGive_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    DirectSolverTake directSolverTake_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverGive directSolverGive_operator(level.grid(), level.levelCache(), DirBC_Interior);
+    DirectSolverTake directSolverTake_operator(level.grid(), level.levelCache(), DirBC_Interior);
 
     Vector<double> solution_Give = generate_random_sample_data(level.grid(), 69);
     directSolverGive_operator.solveInPlace(solution_Give);
@@ -161,7 +161,7 @@ TEST(DirectSolverTest_CircularGeometry, SequentialDirectSolverDirBC_Interior_Cir
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
-    int maxOpenMPThreads                    = 1;
+    omp_set_num_threads(1);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
@@ -171,8 +171,8 @@ TEST(DirectSolverTest_CircularGeometry, SequentialDirectSolverDirBC_Interior_Cir
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
@@ -203,7 +203,7 @@ TEST(DirectSolverTest_CircularGeometry, ParallelDirectSolverDirBC_Interior_Circu
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
-    int maxOpenMPThreads                    = 16;
+    omp_set_num_threads(16);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
@@ -213,8 +213,8 @@ TEST(DirectSolverTest_CircularGeometry, ParallelDirectSolverDirBC_Interior_Circu
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
@@ -245,7 +245,7 @@ TEST(DirectSolverTest_CircularGeometry, SequentialDirectSolverAcrossOrigin_Circu
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
-    int maxOpenMPThreads                    = 1;
+    omp_set_num_threads(1);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
@@ -255,8 +255,8 @@ TEST(DirectSolverTest_CircularGeometry, SequentialDirectSolverAcrossOrigin_Circu
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
@@ -287,7 +287,7 @@ TEST(DirectSolverTest_CircularGeometry, ParallelDirectSolverAcrossOrigin_Circula
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
-    int maxOpenMPThreads                    = 16;
+    omp_set_num_threads(16);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
@@ -297,8 +297,8 @@ TEST(DirectSolverTest_CircularGeometry, ParallelDirectSolverAcrossOrigin_Circula
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
@@ -335,7 +335,7 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverDirBC_Interior_ShafranovGeo
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
-    int maxOpenMPThreads                    = 16;
+    omp_set_num_threads(16);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
@@ -345,8 +345,8 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverDirBC_Interior_ShafranovGeo
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
@@ -379,7 +379,7 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovGeome
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
-    int maxOpenMPThreads                    = 16;
+    omp_set_num_threads(16);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
@@ -389,8 +389,8 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovGeome
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
@@ -427,7 +427,7 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeometry)
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
-    int maxOpenMPThreads                    = 16;
+    omp_set_num_threads(16);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
@@ -437,8 +437,8 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeometry)
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
@@ -471,7 +471,7 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometry)
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
-    int maxOpenMPThreads                    = 16;
+    omp_set_num_threads(16);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
@@ -481,8 +481,8 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometry)
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
@@ -517,7 +517,7 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeometry)
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
-    int maxOpenMPThreads                    = 16;
+    omp_set_num_threads(16);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
@@ -527,8 +527,8 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeometry)
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
@@ -559,7 +559,7 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometry)
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
-    int maxOpenMPThreads                    = 16;
+    omp_set_num_threads(16);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
@@ -569,8 +569,8 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometry)
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
@@ -613,7 +613,7 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
-    int maxOpenMPThreads                    = 1;
+    omp_set_num_threads(1);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
@@ -623,8 +623,8 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
@@ -655,7 +655,7 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision2
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
-    int maxOpenMPThreads                    = 1;
+    omp_set_num_threads(1);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
@@ -665,8 +665,8 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision2
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
@@ -698,7 +698,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, SequentialDirectSolverDirBC_Interior
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
-    int maxOpenMPThreads                    = 1;
+    omp_set_num_threads(1);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
@@ -708,8 +708,8 @@ TEST(DirectSolverTakeTest_CircularGeometry, SequentialDirectSolverDirBC_Interior
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
@@ -740,7 +740,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, ParallelDirectSolverDirBC_Interior_C
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
-    int maxOpenMPThreads                    = 16;
+    omp_set_num_threads(16);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
@@ -750,8 +750,8 @@ TEST(DirectSolverTakeTest_CircularGeometry, ParallelDirectSolverDirBC_Interior_C
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
@@ -782,7 +782,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, SequentialDirectSolverAcrossOrigin_C
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
-    int maxOpenMPThreads                    = 1;
+    omp_set_num_threads(1);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
@@ -792,8 +792,8 @@ TEST(DirectSolverTakeTest_CircularGeometry, SequentialDirectSolverAcrossOrigin_C
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
@@ -824,7 +824,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, ParallelDirectSolverAcrossOrigin_Cir
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
-    int maxOpenMPThreads                    = 16;
+    omp_set_num_threads(16);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
@@ -834,8 +834,8 @@ TEST(DirectSolverTakeTest_CircularGeometry, ParallelDirectSolverAcrossOrigin_Cir
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
@@ -872,7 +872,7 @@ TEST(DirectSolverTakeTest_ShafranovGeometry, DirectSolverDirBC_Interior_Shafrano
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
-    int maxOpenMPThreads                    = 16;
+    omp_set_num_threads(16);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
@@ -882,8 +882,8 @@ TEST(DirectSolverTakeTest_ShafranovGeometry, DirectSolverDirBC_Interior_Shafrano
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
@@ -916,7 +916,7 @@ TEST(DirectSolverTakeTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovG
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
-    int maxOpenMPThreads                    = 16;
+    omp_set_num_threads(16);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
@@ -926,8 +926,8 @@ TEST(DirectSolverTakeTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovG
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
@@ -964,7 +964,7 @@ TEST(DirectSolverTakeTest_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeome
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
-    int maxOpenMPThreads                    = 16;
+    omp_set_num_threads(16);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
@@ -974,8 +974,8 @@ TEST(DirectSolverTakeTest_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeome
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
@@ -1008,7 +1008,7 @@ TEST(DirectSolverTakeTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometr
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
-    int maxOpenMPThreads                    = 16;
+    omp_set_num_threads(16);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
@@ -1018,8 +1018,8 @@ TEST(DirectSolverTakeTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometr
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
@@ -1054,7 +1054,7 @@ TEST(DirectSolverTakeTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeome
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
-    int maxOpenMPThreads                    = 16;
+    omp_set_num_threads(16);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
@@ -1064,8 +1064,8 @@ TEST(DirectSolverTakeTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeome
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
@@ -1096,7 +1096,7 @@ TEST(DirectSolverTakeTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometr
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
-    int maxOpenMPThreads                    = 16;
+    omp_set_num_threads(16);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
@@ -1106,8 +1106,8 @@ TEST(DirectSolverTakeTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometr
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
@@ -1148,7 +1148,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecis
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
-    int maxOpenMPThreads                    = 1;
+    omp_set_num_threads(1);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
@@ -1158,8 +1158,8 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecis
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
@@ -1190,7 +1190,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecis
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
-    int maxOpenMPThreads                    = 1;
+    omp_set_num_threads(1);
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
@@ -1200,8 +1200,8 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecis
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
     Vector<double> solution("sol", rhs.size());
