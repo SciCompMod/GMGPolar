@@ -4,7 +4,7 @@ namespace residual_give
 {
 
 template <class LevelCacheType>
-static inline void node_apply_a_give(int i_r, int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache,
+static KOKKOS_INLINE_FUNCTION void node_apply_a_give(int i_r, int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache,
                                      bool DirBC_Interior, Vector<double>& result, ConstVector<double>& x)
 {
     /* ---------------------------------------- */

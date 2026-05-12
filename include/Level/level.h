@@ -19,6 +19,8 @@ class ExtrapolatedSmoother;
 #include <omp.h>
 #include <vector>
 
+#include <Kokkos_Core.hpp>
+
 #include "../PolarGrid/polargrid.h"
 
 #include "../InputFunctions/boundaryConditions.h"
@@ -153,7 +155,7 @@ public:
     ConstVector<double> art() const;
     ConstVector<double> detDF() const;
 
-    inline void obtainValues(const int i_r, const int i_theta, const int global_index, double r, double theta,
+    KOKKOS_INLINE_FUNCTION void obtainValues(const int i_r, const int i_theta, const int global_index, double r, double theta,
                              double& coeff_beta, double& arr, double& att, double& art, double& detDF) const
     {
         coeff_beta = cache_density_profile_coefficients_ ? coeff_beta_[global_index]
