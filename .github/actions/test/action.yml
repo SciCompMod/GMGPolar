@@ -22,7 +22,7 @@ runs:
       run: |
         apt-get -qq -y install gfortran
     - name: Download build test directory
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v7
       with:
         name: ${{ inputs.build-artifact }}${{ inputs.use-mumps == 'true' && '-mumps' || ''}}
     - name: extract build archive
@@ -44,14 +44,14 @@ runs:
         cd build
         cmake --build . --target coverage
     - name: Upload test report
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: test-report${{ inputs.use-mumps == 'true' && '-mumps' || ''}}
         path: build/tests/testreport.xml
         if-no-files-found: error
         retention-days: 3
     - name: Upload coverage reports
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: test-coverage-reports${{ inputs.use-mumps == 'true' && '-mumps' || ''}}
         path: |
