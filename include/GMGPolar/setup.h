@@ -412,7 +412,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printSettings(const P
     std::cout << "------ General Settings ------\n";
     std::cout << "------------------------------\n";
 
-    std::cout << "Maximum number of threads: " << max_omp_threads_ << "\n";
+    std::cout << "Maximum number of threads: " << Kokkos::DefaultHostExecutionSpace::concurrency() << "\n";
 
     if (DirBC_Interior_) {
         std::cout << "Dirichlet (Interior boundary condition)\n";

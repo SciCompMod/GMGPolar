@@ -97,9 +97,6 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
     solver.verbose(verbose);
     solver.paraview(paraview);
 
-    solver.maxOpenMPThreads(maxOpenMPThreads);
-    omp_set_num_threads(maxOpenMPThreads); // Global OpenMP thread limit
-
     solver.DirBC_Interior(DirBC_Interior);
     solver.stencilDistributionMethod(stencilDistributionMethod);
     solver.cacheDensityProfileCoefficients(cacheDensityProfileCoefficients);
@@ -153,7 +150,6 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
 int main(int argc, char* argv[])
 {
     Kokkos::ScopeGuard kokkos_scope(argc, argv);
-    omp_set_num_threads(omp_get_max_threads());
 
     std::ofstream outfile("strong_scaling_results.csv");
     outfile << "Threads,DivideBy2,nr,ntheta,geometry,"
