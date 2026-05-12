@@ -7,7 +7,7 @@
     #include <stdexcept>
 using namespace gmgpolar;
 
-CooMumpsSolver::CooMumpsSolver(SparseMatrixCOO<double> matrix)
+CooMumpsSolver::CooMumpsSolver(SparseMatrixCOO<double, Kokkos::HostSpace> matrix)
 {
     if (matrix.is_symmetric()) {
         matrix_ = extractUpperTriangle(matrix);
@@ -161,7 +161,7 @@ void CooMumpsSolver::configureCNTL()
     // CNTL(8-15) do not exist
 }
 
-SparseMatrixCOO<double> CooMumpsSolver::extractUpperTriangle(const SparseMatrixCOO<double>& matrix) const
+SparseMatrixCOO<double, Kokkos::HostSpace> CooMumpsSolver::extractUpperTriangle(const SparseMatrixCOO<double, Kokkos::HostSpace>& matrix) const
 {
     const int full_nnz = matrix.non_zero_size();
     const int rows     = matrix.rows();
@@ -174,7 +174,7 @@ SparseMatrixCOO<double> CooMumpsSolver::extractUpperTriangle(const SparseMatrixC
             symmetric_nnz++;
     }
 
-    SparseMatrixCOO<double> sym(rows, cols, symmetric_nnz);
+    SparseMatrixCOO<double, Kokkos::HostSpace> sym(rows, cols, symmetric_nnz);
     sym.is_symmetric(true);
 
     int current = 0;

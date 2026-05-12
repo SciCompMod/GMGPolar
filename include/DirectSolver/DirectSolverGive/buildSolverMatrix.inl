@@ -5,7 +5,7 @@ namespace direct_solver_coo_mumps_give
 
 #ifdef GMGPOLAR_USE_MUMPS
 // When using the MUMPS solver, the matrix is assembled in COO format.
-static inline void updateMatrixElement(SparseMatrixCOO<double>& matrix, int ptr, int offset, int row, int column,
+static inline void updateMatrixElement(SparseMatrixCOO<double, Kokkos::HostSpace>& matrix, int ptr, int offset, int row, int column,
                                        double value)
 {
     matrix.set_row_index(ptr + offset, row);
@@ -839,7 +839,7 @@ typename DirectSolverGive<LevelCacheType>::SystemMatrix DirectSolverGive<LevelCa
 
 #ifdef GMGPOLAR_USE_MUMPS
     const int nnz = getNonZeroCountSolverMatrix();
-    SparseMatrixCOO<double> solver_matrix(n, n, nnz);
+    SparseMatrixCOO<double, Kokkos::HostSpace> solver_matrix(n, n, nnz);
     solver_matrix.is_symmetric(true);
 #else
     std::function<int(int)> nnz_per_row = [&](int global_index) {

@@ -122,7 +122,7 @@ private:
     // - In-house: matrix stored in CSR; solver does not own the matrix.
 
 #ifdef GMGPOLAR_USE_MUMPS
-    using InnerBoundaryMatrix = SparseMatrixCOO<double>;
+    using InnerBoundaryMatrix = SparseMatrixCOO<double, Kokkos::HostSpace>;
     using InnerBoundarySolver = CooMumpsSolver;
 #else
     using InnerBoundaryMatrix = SparseMatrixCSR<double>;
