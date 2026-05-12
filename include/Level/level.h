@@ -132,7 +132,7 @@ private:
     Vector<double> error_correction_;
 };
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients, class MemorySpace = Kokkos::DefaultExecutionSpace::memory_space>
 class LevelCache
 {
 public:
@@ -144,16 +144,16 @@ public:
     const DensityProfileCoefficients& densityProfileCoefficients() const;
 
     bool cacheDensityProfileCoefficients() const;
-    ConstVector<double> coeff_alpha() const;
-    ConstVector<double> coeff_beta() const;
+    ConstVector<double, MemorySpace> coeff_alpha() const;
+    ConstVector<double, MemorySpace> coeff_beta() const;
 
     bool cacheDomainGeometry() const;
-    ConstVector<double> arr() const;
-    ConstVector<double> att() const;
-    ConstVector<double> art() const;
-    ConstVector<double> detDF() const;
+    ConstVector<double, MemorySpace> arr() const;
+    ConstVector<double, MemorySpace> att() const;
+    ConstVector<double, MemorySpace> art() const;
+    ConstVector<double, MemorySpace> detDF() const;
 
-    inline void obtainValues(const int i_r, const int i_theta, const int global_index, double r, double theta,
+    KOKKOS_INLINE_FUNCTION void obtainValues(const int i_r, const int i_theta, const int global_index, double r, double theta,
                              double& coeff_beta, double& arr, double& att, double& art, double& detDF) const
     {
         coeff_beta = cache_density_profile_coefficients_ ? coeff_beta_[global_index]
@@ -174,18 +174,18 @@ public:
     }
 
 private:
-    const DomainGeometry& domain_geometry_;
-    const DensityProfileCoefficients& density_profile_coefficients_;
+    const DomainGeometry domain_geometry_;
+    const DensityProfileCoefficients density_profile_coefficients_;
 
     bool cache_density_profile_coefficients_; // cache alpha(r, theta), beta(r, theta)
-    Vector<double> coeff_alpha_;
-    Vector<double> coeff_beta_;
+    Vector<double, MemorySpace> coeff_alpha_;
+    Vector<double, MemorySpace> coeff_beta_;
 
     bool cache_domain_geometry_; // cache arr, att, art, detDF
-    Vector<double> arr_;
-    Vector<double> att_;
-    Vector<double> art_;
-    Vector<double> detDF_;
+    Vector<double, MemorySpace> arr_;
+    Vector<double, MemorySpace> att_;
+    Vector<double, MemorySpace> art_;
+    Vector<double, MemorySpace> detDF_;
 };
 
 #include "levelCache.inl"
