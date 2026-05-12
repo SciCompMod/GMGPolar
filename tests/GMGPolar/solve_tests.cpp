@@ -681,7 +681,6 @@ void run_gmgpolar()
     solver.paraview(paraview);
     // --- Parallelization and threading settings --- //
     solver.maxOpenMPThreads(TestFixture::maxOpenMPThreads);
-    omp_set_num_threads(TestFixture::maxOpenMPThreads);
     // --- Numerical method setup --- //
     solver.DirBC_Interior(TestFixture::DirBC_Interior);
     solver.stencilDistributionMethod(TestFixture::stencilDistributionMethod);

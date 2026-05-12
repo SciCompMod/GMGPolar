@@ -47,8 +47,6 @@ TEST(ExtrapolatedRestrictionTest, ExtrapolatedRestrictionMatchesStencil)
     PolarGrid fine_grid(fine_radii, fine_angles);
     PolarGrid coarse_grid = coarseningGrid(fine_grid);
 
-    omp_set_num_threads(16);
-
     Interpolation I(/*DirBC*/ true);
 
     Vector<double> fine_values = generate_random_sample_data(fine_grid, 9012, 0.0, 1.0);

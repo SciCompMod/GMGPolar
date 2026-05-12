@@ -41,7 +41,6 @@ TEST(OperatorATest, applyA_DirBC_Interior)
     ZoniShiftedCoefficients coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior  = true;
-    omp_set_num_threads(16);
 
     // "Take" requires cached values
     bool cache_density_rpofile_coefficients = true;
@@ -94,7 +93,6 @@ TEST(OperatorATest, applyA_AcrossOrigin)
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior  = false;
-    omp_set_num_threads(16);
 
     // "Take" requires cached values
     bool cache_density_rpofile_coefficients = true;
