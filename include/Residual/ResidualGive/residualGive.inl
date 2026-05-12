@@ -2,8 +2,8 @@
 
 template <class LevelCacheType>
 ResidualGive<LevelCacheType>::ResidualGive(const PolarGrid& grid, const LevelCacheType& level_cache,
-                                           bool DirBC_Interior, int num_omp_threads)
-    : Residual<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
+                                           bool DirBC_Interior)
+    : Residual<LevelCacheType>(grid, level_cache, DirBC_Interior)
 {
 }
 
@@ -20,10 +20,8 @@ void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, Co
 
     const PolarGrid& grid = Residual<LevelCacheType>::grid_;
 
-    const int num_omp_threads = Residual<LevelCacheType>::num_omp_threads_;
-
     /* Single-threaded execution */
-    if (num_omp_threads == 1) {
+    if (omp_get_max_threads() == 1) {
         for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
             applyCircleSection(i_r, result, x);
         }
@@ -37,7 +35,7 @@ void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, Co
         const int additional_radial_tasks = grid.ntheta() % 3;
         const int num_radial_tasks        = grid.ntheta() - additional_radial_tasks;
 
-        #pragma omp parallel num_threads(num_omp_threads)
+        #pragma omp parallel
         {
             /* Circle Section 0 */
             #pragma omp for
@@ -117,9 +115,8 @@ void ResidualGive<LevelCacheType>::computeResidual(Vector<double> result, ConstV
     applySystemOperator(result, x);
 
     // Subtract A*x from rhs to get the residual.
-    const int n               = result.size();
-    const int num_omp_threads = Residual<LevelCacheType>::num_omp_threads_;
-#pragma omp parallel for num_threads(num_omp_threads)
+    const int n = result.size();
+#pragma omp parallel for
     for (int i = 0; i < n; i++) {
         result[i] = rhs[i] - result[i];
     }

@@ -515,7 +515,6 @@ void SmootherGive<LevelCacheType>::buildTridiagonalSolverMatrices()
     const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
-    const int num_omp_threads         = Smoother<LevelCacheType>::num_omp_threads_;
 
     const int num_smoother_circles    = grid.numberSmootherCircles();
     const int additional_radial_tasks = grid.ntheta() % 3;
@@ -525,7 +524,7 @@ void SmootherGive<LevelCacheType>::buildTridiagonalSolverMatrices()
     /* Circular section */
     /* ---------------- */
     // We parallelize the loop with step 3 to avoid data race conditions between adjacent circles.
-#pragma omp parallel num_threads(num_omp_threads)
+#pragma omp parallel
     {
 #pragma omp for
         for (int i_r = 0; i_r < num_smoother_circles; i_r += 3) {
@@ -551,7 +550,7 @@ void SmootherGive<LevelCacheType>::buildTridiagonalSolverMatrices()
         buildTridiagonalRadialSection(i_theta);
     }
 
-#pragma omp parallel num_threads(num_omp_threads)
+#pragma omp parallel
     {
 #pragma omp for
         for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {

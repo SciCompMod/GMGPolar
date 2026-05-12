@@ -2,8 +2,8 @@
 
 template <class LevelCacheType>
 ResidualTake<LevelCacheType>::ResidualTake(const PolarGrid& grid, const LevelCacheType& level_cache,
-                                           bool DirBC_Interior, int num_omp_threads)
-    : Residual<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
+                                           bool DirBC_Interior)
+    : Residual<LevelCacheType>(grid, level_cache, DirBC_Interior)
 {
 }
 
@@ -15,13 +15,11 @@ void ResidualTake<LevelCacheType>::computeResidual(Vector<double> result, ConstV
 {
     assert(result.size() == x.size());
 
-    const int num_omp_threads = Residual<LevelCacheType>::num_omp_threads_;
-
     applySystemOperator(result, x);
 
     // Subtract A*x from rhs to get the residual.
     const int n = result.size();
-#pragma omp parallel for num_threads(num_omp_threads)
+#pragma omp parallel for
     for (int i = 0; i < n; i++) {
         result[i] = rhs[i] - result[i];
     }

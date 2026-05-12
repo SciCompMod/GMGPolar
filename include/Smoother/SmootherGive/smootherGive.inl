@@ -2,8 +2,8 @@
 
 template <class LevelCacheType>
 SmootherGive<LevelCacheType>::SmootherGive(const PolarGrid& grid, const LevelCacheType& level_cache,
-                                           bool DirBC_Interior, int num_omp_threads)
-    : Smoother<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
+                                           bool DirBC_Interior)
+    : Smoother<LevelCacheType>(grid, level_cache, DirBC_Interior)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
     , radial_tridiagonal_solver_(grid.lengthRadialSmoother(), grid.ntheta(), false)
 #ifdef GMGPOLAR_USE_MUMPS
@@ -48,8 +48,7 @@ void SmootherGive<LevelCacheType>::smoothing(Vector<double> x, ConstVector<doubl
 
     Kokkos::deep_copy(temp, rhs);
 
-    const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
-    const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
+    const PolarGrid& grid = Smoother<LevelCacheType>::grid_;
 
     /* Multi-threaded execution */
     const int num_smoother_circles = grid.numberSmootherCircles();
@@ -59,7 +58,7 @@ void SmootherGive<LevelCacheType>::smoothing(Vector<double> x, ConstVector<doubl
     /* 1. Black-Circle update (u_bc):                  */
     /*    A_bc * u_bc = f_bc − A_bc^ortho * u_bc^ortho */
     /* ----------------------------------------------- */
-#pragma omp parallel num_threads(num_omp_threads)
+#pragma omp parallel
     {
         /* Inside Black Section */
 #pragma omp for
@@ -86,7 +85,7 @@ void SmootherGive<LevelCacheType>::smoothing(Vector<double> x, ConstVector<doubl
     /* 2. White-Circle update (u_wc):                  */
     /*    A_wc * u_wc = f_wc − A_wc^ortho * u_wc^ortho */
     /* ----------------------------------------------- */
-#pragma omp parallel num_threads(num_omp_threads)
+#pragma omp parallel
     {
         /* Inside White Section */
 #pragma omp for
@@ -113,7 +112,7 @@ void SmootherGive<LevelCacheType>::smoothing(Vector<double> x, ConstVector<doubl
     /* 3. Black-Radial update (u_br):                  */
     /*    A_br * u_br = f_br − A_br^ortho * u_br^ortho */
     /* ----------------------------------------------- */
-#pragma omp parallel num_threads(num_omp_threads)
+#pragma omp parallel
     {
         /* Inside Black Section */
 #pragma omp for
@@ -137,7 +136,7 @@ void SmootherGive<LevelCacheType>::smoothing(Vector<double> x, ConstVector<doubl
     /* 4. White-Radial update (u_wr):                  */
     /*    A_wr * u_wr = f_wr − A_wr^ortho * u_wr^ortho */
     /* ----------------------------------------------- */
-#pragma omp parallel num_threads(num_omp_threads)
+#pragma omp parallel
     {
         /* Inside Black Section */
 #pragma omp for

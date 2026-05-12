@@ -7,8 +7,8 @@ namespace extrapolated_smoother_give
 
 #ifdef GMGPOLAR_USE_MUMPS
 // When using the MUMPS solver, the matrix is assembled in COO format.
-static inline void update_CSR_COO_MatrixElement(SparseMatrixCOO<double, Kokkos::HostSpace>& matrix, int ptr, int offset, int row,
-                                                int column, double value)
+static inline void update_CSR_COO_MatrixElement(SparseMatrixCOO<double, Kokkos::HostSpace>& matrix, int ptr, int offset,
+                                                int row, int column, double value)
 {
     matrix.set_row_index(ptr + offset, row);
     matrix.set_col_index(ptr + offset, column);
@@ -245,7 +245,6 @@ ExtrapolatedSmootherGive<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
-    const int num_omp_threads         = ExtrapolatedSmoother<LevelCacheType>::num_omp_threads_;
 
     const int ntheta = grid.ntheta();
 

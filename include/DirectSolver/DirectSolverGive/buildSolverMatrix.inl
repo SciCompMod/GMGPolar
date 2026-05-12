@@ -5,8 +5,8 @@ namespace direct_solver_coo_mumps_give
 
 #ifdef GMGPOLAR_USE_MUMPS
 // When using the MUMPS solver, the matrix is assembled in COO format.
-static inline void updateMatrixElement(SparseMatrixCOO<double, Kokkos::HostSpace>& matrix, int ptr, int offset, int row, int column,
-                                       double value)
+static inline void updateMatrixElement(SparseMatrixCOO<double, Kokkos::HostSpace>& matrix, int ptr, int offset, int row,
+                                       int column, double value)
 {
     matrix.set_row_index(ptr + offset, row);
     matrix.set_col_index(ptr + offset, column);
@@ -830,8 +830,7 @@ void DirectSolverGive<LevelCacheType>::buildSolverMatrixRadialSection(const int 
 template <class LevelCacheType>
 typename DirectSolverGive<LevelCacheType>::SystemMatrix DirectSolverGive<LevelCacheType>::buildSolverMatrix()
 {
-    const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
-    const int num_omp_threads = DirectSolver<LevelCacheType>::num_omp_threads_;
+    const PolarGrid& grid = DirectSolver<LevelCacheType>::grid_;
 
     assert(validateSolverMatrixIndexing() && "Solver matrix indexing is inconsistent");
 
@@ -857,7 +856,7 @@ typename DirectSolverGive<LevelCacheType>::SystemMatrix DirectSolverGive<LevelCa
     /* Circular section */
     /* ---------------- */
     // We parallelize the loop with step 3 to avoid data race conditions between adjacent circles.
-#pragma omp parallel num_threads(num_omp_threads)
+#pragma omp parallel
     {
 #pragma omp for
         for (int i_r = 0; i_r < num_smoother_circles; i_r += 3) {
@@ -883,7 +882,7 @@ typename DirectSolverGive<LevelCacheType>::SystemMatrix DirectSolverGive<LevelCa
         buildSolverMatrixRadialSection(i_theta, solver_matrix);
     }
 
-#pragma omp parallel num_threads(num_omp_threads)
+#pragma omp parallel
     {
 #pragma omp for
         for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {

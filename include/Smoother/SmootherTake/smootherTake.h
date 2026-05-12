@@ -53,8 +53,7 @@ class SmootherTake : public Smoother<LevelCacheType>
 public:
     // Constructs the coupled circle-radial smoother.
     // Builds the A_sc smoother matrices and prepares the solvers.
-    explicit SmootherTake(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
-                          int num_omp_threads);
+    explicit SmootherTake(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior);
 
     // Performs one full coupled smoothing sweep:
     //   BC -> WC -> BR -> WR

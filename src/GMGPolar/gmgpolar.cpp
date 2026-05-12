@@ -75,6 +75,7 @@ int IGMGPolar::maxOpenMPThreads() const
 void IGMGPolar::maxOpenMPThreads(int max_omp_threads)
 {
     max_omp_threads_ = max_omp_threads;
+    omp_set_num_threads(max_omp_threads);
 }
 
 /* ---------------------------------------------------------------------- */

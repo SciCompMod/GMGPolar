@@ -5,12 +5,12 @@ namespace smoother_take
 
 #ifdef GMGPOLAR_USE_MUMPS
 // When using the MUMPS solver, the matrix is assembled in COO format.
-static inline void update_CSR_COO_MatrixElement(SparseMatrixCOO<double, Kokkos::HostSpace>& matrix, int ptr, int offset, int row,
-                                                int column, double value)
+static inline void update_CSR_COO_MatrixElement(SparseMatrixCOO<double, Kokkos::HostSpace>& matrix, int ptr, int offset,
+                                                int row, int column, double value)
 {
     matrix.set_row_index(ptr + offset, row);
     matrix.set_col_index(ptr + offset, column);
-    matrix.set_value(ptr + offset   , value);
+    matrix.set_value(ptr + offset, value);
 }
 #else
 // When using the in-house solver, the matrix is stored in CSR format.
@@ -137,7 +137,6 @@ SmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
-    const int num_omp_threads         = Smoother<LevelCacheType>::num_omp_threads_;
 
     const int i_r    = 0;
     const int ntheta = grid.ntheta();
@@ -169,7 +168,7 @@ SmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     ConstVector<double> detDF      = level_cache.detDF();
     ConstVector<double> coeff_beta = level_cache.coeff_beta();
 
-#pragma omp parallel for num_threads(num_omp_threads)
+#pragma omp parallel for
     for (int i_theta = 0; i_theta < ntheta; i_theta++) {
         nodeBuildInteriorBoundarySolverMatrix(i_theta, grid, DirBC_Interior, inner_boundary_solver_matrix, arr, att,
                                               art, detDF, coeff_beta);

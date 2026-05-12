@@ -3,8 +3,8 @@
 template <class LevelCacheType>
 ExtrapolatedSmootherGive<LevelCacheType>::ExtrapolatedSmootherGive(const PolarGrid& grid,
                                                                    const LevelCacheType& level_cache,
-                                                                   const bool DirBC_Interior, const int num_omp_threads)
-    : ExtrapolatedSmoother<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
+                                                                   const bool DirBC_Interior)
+    : ExtrapolatedSmoother<LevelCacheType>(grid, level_cache, DirBC_Interior)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
     , radial_tridiagonal_solver_(grid.lengthRadialSmoother(), grid.ntheta(), false)
 #ifdef GMGPOLAR_USE_MUMPS
@@ -48,10 +48,9 @@ void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(Vector<doub
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
-    const PolarGrid& grid     = ExtrapolatedSmoother<LevelCacheType>::grid_;
-    const int num_omp_threads = ExtrapolatedSmoother<LevelCacheType>::num_omp_threads_;
+    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
-#pragma omp parallel num_threads(num_omp_threads)
+#pragma omp parallel
     {
 #pragma omp for nowait
         for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
@@ -77,7 +76,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(Vector<doub
     /* 1. Black-Circle update (u_bc):                  */
     /*    A_bc * u_bc = f_bc − A_bc^ortho * u_bc^ortho */
     /* ----------------------------------------------- */
-#pragma omp parallel num_threads(num_omp_threads)
+#pragma omp parallel
     {
         /* Inside Black Section */
 #pragma omp for
@@ -104,7 +103,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(Vector<doub
     /* 2. White-Circle update (u_wc):                  */
     /*    A_wc * u_wc = f_wc − A_wc^ortho * u_wc^ortho */
     /* ----------------------------------------------- */
-#pragma omp parallel num_threads(num_omp_threads)
+#pragma omp parallel
     {
         /* Inside White Section */
 #pragma omp for
@@ -131,7 +130,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(Vector<doub
     /* 3. Black-Radial update (u_br):                  */
     /*    A_br * u_br = f_br − A_br^ortho * u_br^ortho */
     /* ----------------------------------------------- */
-#pragma omp parallel num_threads(num_omp_threads)
+#pragma omp parallel
     {
         /* Inside Black Section */
 #pragma omp for
@@ -155,7 +154,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(Vector<doub
     /* 4. White-Radial update (u_wr):                  */
     /*    A_wr * u_wr = f_wr − A_wr^ortho * u_wr^ortho */
     /* ----------------------------------------------- */
-#pragma omp parallel num_threads(num_omp_threads)
+#pragma omp parallel
     {
         /* Inside Black Section */
 #pragma omp for
