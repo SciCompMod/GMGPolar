@@ -617,11 +617,10 @@ TEST(SparseLUSolver, DoublePointerOverload)
     x_true(1) = -1.0;
 
     Vector<double> b_vec = multiply(A, x_true);
-    double b_raw[2]      = {b_vec[0], b_vec[1]};
     SparseLUSolver<double> solver(A);
-    solver.solveInPlace(b_raw);
+    solver.solveInPlace(b_vec);
     for (int i = 0; i < 2; ++i) {
-        EXPECT_NEAR(b_raw[i], x_true(i), 1e-8);
+        EXPECT_NEAR(b_vec[i], x_true(i), 1e-8);
     }
 }
 
