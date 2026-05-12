@@ -187,7 +187,7 @@ private:
     /* Line-wise solvers */
     /* ----------------- */
 
-	// Functions must be public due to cuda restriction
+    // Functions must be public due to cuda restriction
 public:
     // Solve the linear system:
     //     A_sc * u_sc = f_sc − A_sc^ortho * u_sc^ortho
