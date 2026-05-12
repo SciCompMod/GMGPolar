@@ -487,7 +487,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(C
 
     Kokkos::parallel_for(
         "ExtrapolatedSmootherTake: ApplyAscOrtho (Black Circular)",
-        Kokkos::MDRangePolicy<Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, 0}, // Starting point of the index space
             {num_black_circles, grid.ntheta()} // Ending point of the index space
             ),
@@ -528,7 +528,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(C
 
     Kokkos::parallel_for(
         "ExtrapolatedSmootherTake: ApplyAscOrtho (White Circular)",
-        Kokkos::MDRangePolicy<Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, 0}, // Starting point of the index space
             {num_white_circles, grid.ntheta()} // Ending point of the index space
             ),
@@ -569,7 +569,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(C
 
     Kokkos::parallel_for(
         "ExtrapolatedSmootherTake: ApplyAscOrtho (Black Radial)",
-        Kokkos::MDRangePolicy<Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, grid.numberSmootherCircles()}, // Starting point of the index space
             {num_black_radial_lines, grid.nr()} // Ending point of the index space
             ),
@@ -610,7 +610,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(C
 
     Kokkos::parallel_for(
         "ExtrapolatedSmootherTake: ApplyAscOrtho (White Radial)",
-        Kokkos::MDRangePolicy<Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, grid.numberSmootherCircles()}, // Starting point of the index space
             {num_white_radial_lines, grid.nr()} // Ending point of the index space
             ),
