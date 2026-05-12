@@ -183,7 +183,7 @@ TEST(SparseMatrixCSR, move_construct)
     EXPECT_DOUBLE_EQ(m1.row_nz_entry(2, 2), dense_values[2][m1.row_nz_index(2, 2)]);
     EXPECT_DOUBLE_EQ(m1.row_nz_entry(3, 0), dense_values[3][m1.row_nz_index(3, 0)]);
 
-    const SparseMatrixCSR<double> m2 = std::move(m1);
+    const SparseMatrixCSRHost m2 = std::move(m1);
 
     EXPECT_EQ(m2.rows(), 4);
     EXPECT_EQ(m2.columns(), 3);
