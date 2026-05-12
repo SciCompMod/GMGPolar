@@ -5,6 +5,7 @@
     #include <iostream>
     #include <cassert>
     #include <stdexcept>
+using namespace gmgpolar;
 
 CooMumpsSolver::CooMumpsSolver(SparseMatrixCOO<double> matrix)
 {

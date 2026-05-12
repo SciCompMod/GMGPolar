@@ -1,4 +1,5 @@
 #include "../include/InputFunctions/BoundaryConditions/refined_Boundary_ShafranovGeometry.h"
+using namespace gmgpolar;
 
 Refined_Boundary_ShafranovGeometry::Refined_Boundary_ShafranovGeometry(double Rmax, double elongation_kappa,
                                                                        double shift_delta)

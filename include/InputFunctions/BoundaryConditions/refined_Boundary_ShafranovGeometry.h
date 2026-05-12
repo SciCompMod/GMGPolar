@@ -4,6 +4,9 @@
 
 #include "../boundaryConditions.h"
 
+namespace gmgpolar
+{
+
 class Refined_Boundary_ShafranovGeometry
 {
 public:
@@ -19,3 +22,4 @@ private:
 };
 
 static_assert(concepts::BoundaryConditions<Refined_Boundary_ShafranovGeometry>);
+} // namespace gmgpolar

@@ -4,6 +4,9 @@
 
 #include "../boundaryConditions.h"
 
+namespace gmgpolar
+{
+
 class CartesianR6_Boundary_CzarnyGeometry
 {
 public:
@@ -24,3 +27,4 @@ private:
 };
 
 static_assert(concepts::BoundaryConditions<CartesianR6_Boundary_CzarnyGeometry>);
+} // namespace gmgpolar

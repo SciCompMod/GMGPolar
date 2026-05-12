@@ -1,5 +1,8 @@
 #pragma once
 
+namespace gmgpolar
+{
+
 class ExactSolution
 {
 public:
@@ -8,3 +11,4 @@ public:
 
     virtual double exact_solution(double r, double theta) const = 0;
 };
+} // namespace gmgpolar

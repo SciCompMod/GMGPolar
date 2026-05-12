@@ -6,6 +6,9 @@
 
 /* Strechted Ellipse with a Shafranov Shift */
 
+namespace gmgpolar
+{
+
 class ShafranovGeometry
 {
 public:
@@ -26,3 +29,4 @@ private:
 };
 
 #include "shafranovGeometry.inl"
+} // namespace gmgpolar

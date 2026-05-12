@@ -2,6 +2,9 @@
 
 #include "../smoother.h"
 
+namespace gmgpolar
+{
+
 // The smoother implements the coupled circle-radial smoothing procedure.
 // It performs iterative updates on different parts of the grid based
 // on the circle/radial section of the grid and black/white line coloring.
@@ -162,6 +165,8 @@ private:
     /* Orthogonal application */
     /* ---------------------- */
 
+    // Public is required as Cuda needs to be abe to get the address of functions enclosing lambda functions
+public:
     // Compute temp = f_sc − A_sc^ortho * u_sc^ortho   (precomputed right-hand side)
     // where x = u_sc and rhs = f_sc
     void applyAscOrthoBlackCircleSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
@@ -169,6 +174,7 @@ private:
     void applyAscOrthoBlackRadialSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
     void applyAscOrthoWhiteRadialSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
 
+private:
     /* ----------------- */
     /* Line-wise solvers */
     /* ----------------- */
@@ -193,3 +199,4 @@ private:
 #include "applyAscOrtho.inl"
 #include "solveAscSystem.inl"
 #include "matrixStencil.inl"
+} // namespace gmgpolar

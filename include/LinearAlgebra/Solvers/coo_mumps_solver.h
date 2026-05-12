@@ -30,6 +30,9 @@
  *   Not thread-safe. Each instance manages its own MUMPS communicator and
  *   must not be shared across threads.
  */
+namespace gmgpolar
+{
+
 class CooMumpsSolver
 {
 public:
@@ -94,4 +97,5 @@ private:
     DMUMPS_STRUC_C mumps_solver_ = {};
 };
 
+} // namespace gmgpolar
 #endif // GMGPOLAR_USE_MUMPS

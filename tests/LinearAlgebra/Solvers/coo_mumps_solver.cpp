@@ -5,6 +5,7 @@
     #include "../../../include/LinearAlgebra/Vector/vector.h"
     #include "../../../include/LinearAlgebra/Matrix/coo_matrix.h"
     #include "../../../include/LinearAlgebra/Solvers/coo_mumps_solver.h"
+using namespace gmgpolar;
 
 // -----------------------------------------------------------------------
 // Test 1: General (non-symmetric) 4x4 system

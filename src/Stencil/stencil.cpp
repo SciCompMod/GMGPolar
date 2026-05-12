@@ -1,4 +1,5 @@
 #include "../../include/Stencil/stencil.h"
+using namespace gmgpolar;
 
 Stencil::Stencil(std::initializer_list<int> init)
     : values_{}
@@ -14,4 +15,9 @@ Stencil::Stencil(std::initializer_list<int> init)
 int Stencil::operator[](StencilPosition type) const
 {
     return values_[static_cast<int>(type)];
+}
+
+int Stencil::size() const
+{
+    return stencil_size_;
 }

@@ -1,3 +1,5 @@
+#pragma once
+
 // =============================================================================
 //   Main Solver Routine
 // =============================================================================
@@ -321,7 +323,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
             Level<DomainGeometry, DensityProfileCoefficients>& next_level = levels_[level.level_depth() + 1];
             injection(0, next_level.solution(), pcg_search_direction_);
             next_level.applySystemOperator(next_level.residual(), next_level.solution());
-            extrapolatedResidual(0, level.residual(), next_level.residual());
+            applyExtrapolation(0, level.residual(), next_level.residual());
         }
 
         // alpha = (r^T * z) / (p^T * A*p)
@@ -456,7 +458,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::updateResidualNorms(
         Level<DomainGeometry, DensityProfileCoefficients>& next_level = levels_[level.level_depth() + 1];
         injection(level.level_depth(), next_level.solution(), level.solution());
         next_level.computeResidual(next_level.residual(), next_level.rhs(), next_level.solution());
-        extrapolatedResidual(level.level_depth(), level.residual(), next_level.residual());
+        applyExtrapolation(level.level_depth(), level.residual(), next_level.residual());
     }
 
     current_residual_norm = residualNorm(residual_norm_type_, level, level.residual());
@@ -499,15 +501,15 @@ double GMGPolar<DomainGeometry, DensityProfileCoefficients>::residualNorm(
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedResidual(int current_level,
-                                                                                Vector<double> residual,
-                                                                                ConstVector<double> residual_next_level)
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolation(int current_level,
+                                                                              Vector<double> fine_values,
+                                                                              ConstVector<double> coarse_values)
 {
     const PolarGrid& fineGrid   = levels_[current_level].grid();
     const PolarGrid& coarseGrid = levels_[current_level + 1].grid();
 
-    assert(std::ssize(residual) == fineGrid.numberOfNodes());
-    assert(std::ssize(residual_next_level) == coarseGrid.numberOfNodes());
+    assert(std::ssize(fine_values) == fineGrid.numberOfNodes());
+    assert(std::ssize(coarse_values) == coarseGrid.numberOfNodes());
 
 #pragma omp parallel num_threads(max_omp_threads_)
     {
@@ -520,12 +522,12 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedResidual(
                 int i_theta_coarse = i_theta / 2;
 
                 if (i_r & 1 || i_theta & 1) {
-                    residual[fineGrid.index(i_r, i_theta)] *= 4.0 / 3.0;
+                    fine_values[fineGrid.index(i_r, i_theta)] *= 4.0 / 3.0;
                 }
                 else {
-                    int fine_idx       = fineGrid.index(i_r, i_theta);
-                    int coarse_idx     = coarseGrid.index(i_r_coarse, i_theta_coarse);
-                    residual[fine_idx] = (4.0 * residual[fine_idx] - residual_next_level[coarse_idx]) / 3.0;
+                    int fine_idx          = fineGrid.index(i_r, i_theta);
+                    int coarse_idx        = coarseGrid.index(i_r_coarse, i_theta_coarse);
+                    fine_values[fine_idx] = (4.0 * fine_values[fine_idx] - coarse_values[coarse_idx]) / 3.0;
                 }
             }
         }
@@ -539,12 +541,12 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedResidual(
                 int i_r_coarse = i_r / 2;
 
                 if (i_r & 1 || i_theta & 1) {
-                    residual[fineGrid.index(i_r, i_theta)] *= 4.0 / 3.0;
+                    fine_values[fineGrid.index(i_r, i_theta)] *= 4.0 / 3.0;
                 }
                 else {
-                    int fine_idx       = fineGrid.index(i_r, i_theta);
-                    int coarse_idx     = coarseGrid.index(i_r_coarse, i_theta_coarse);
-                    residual[fine_idx] = (4.0 * residual[fine_idx] - residual_next_level[coarse_idx]) / 3.0;
+                    int fine_idx          = fineGrid.index(i_r, i_theta);
+                    int coarse_idx        = coarseGrid.index(i_r_coarse, i_theta_coarse);
+                    fine_values[fine_idx] = (4.0 * fine_values[fine_idx] - coarse_values[coarse_idx]) / 3.0;
                 }
             }
         }

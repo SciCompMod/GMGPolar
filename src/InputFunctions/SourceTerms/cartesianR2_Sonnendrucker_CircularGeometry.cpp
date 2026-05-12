@@ -1,4 +1,5 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR2_Sonnendrucker_CircularGeometry.h"
+using namespace gmgpolar;
 
 CartesianR2_Sonnendrucker_CircularGeometry::CartesianR2_Sonnendrucker_CircularGeometry(PolarGrid const& grid,
                                                                                        double Rmax)

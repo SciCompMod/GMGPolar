@@ -6,6 +6,9 @@
 
 /* Triangular Shape and Ellipticity */
 
+namespace gmgpolar
+{
+
 class CzarnyGeometry
 {
 public:
@@ -29,3 +32,4 @@ private:
 };
 
 #include "czarnyGeometry.inl"
+} // namespace gmgpolar

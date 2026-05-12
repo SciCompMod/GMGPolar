@@ -5,6 +5,7 @@
 #include "../../../include/LinearAlgebra/Vector/vector.h"
 #include "../../../include/LinearAlgebra/Vector/vector_operations.h"
 #include "../../../include/LinearAlgebra/Solvers/csr_lu_solver.h"
+using namespace gmgpolar;
 
 // All tests that the custom LU solver was unable to solve have been commented out.
 // This typically happens when the matrix is singular, has zero diagonal entries,

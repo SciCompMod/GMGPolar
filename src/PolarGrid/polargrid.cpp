@@ -1,5 +1,6 @@
 #include "../../include/PolarGrid/polargrid.h"
 #include <Kokkos_StdAlgorithms.hpp>
+using namespace gmgpolar;
 // ------------ //
 // Constructors //
 // ------------ //
@@ -207,7 +208,7 @@ void PolarGrid::initializeLineSplitting(std::optional<double> splitting_radius)
     else {
         number_smoother_circles_ = 2; /* We assume numberSmootherCircles_ >= 2 in the further implementation */
         for (int i_r = 2; i_r < nr() - 2;
-             i_r++) { /* We assume lengthSmootherRadial_ >= 3 in the further implementation */
+             i_r++) { /* We assume lengthRadialSmoother_ >= 3 in the further implementation */
             double uniform_theta_k = (2 * M_PI) / ntheta();
             double radius_r        = radius(i_r);
             double radial_dist_h   = radius(i_r) - radius(i_r - 1);
@@ -218,7 +219,7 @@ void PolarGrid::initializeLineSplitting(std::optional<double> splitting_radius)
                 break;
             }
         }
-        /* The ExtrapolatedSmoother requires numberSmootherCircles_ >= 3 and lengthSmootherRadial_ >= 3. */
+        /* The ExtrapolatedSmoother requires numberSmootherCircles_ >= 3 and lengthRadialSmoother_ >= 3. */
         if (number_smoother_circles_ < 3 && nr() > 5)
             number_smoother_circles_ = 3;
 
@@ -229,13 +230,16 @@ void PolarGrid::initializeLineSplitting(std::optional<double> splitting_radius)
     number_circular_smoother_nodes_ = number_smoother_circles_ * ntheta();
     number_radial_smoother_nodes_   = length_smoother_radial_ * ntheta();
 
-    assert(numberSmootherCircles() + lengthSmootherRadial() == nr());
+    assert(numberSmootherCircles() + lengthRadialSmoother() == nr());
     assert(numberCircularSmootherNodes() + numberRadialSmootherNodes() == numberOfNodes());
 }
 
 // ---------------------------------------------------- //
 // Generates a coarser PolarGrid from a finer PolarGrid //
 // ---------------------------------------------------- //
+
+namespace gmgpolar
+{
 
 PolarGrid coarseningGrid(const PolarGrid& fineGrid)
 {
@@ -262,6 +266,8 @@ PolarGrid coarseningGrid(const PolarGrid& fineGrid)
         return PolarGrid(coarse_r, coarse_theta);
     }
 }
+
+} // namespace gmgpolar
 
 // ------------------------ //
 // Check parameter validity //

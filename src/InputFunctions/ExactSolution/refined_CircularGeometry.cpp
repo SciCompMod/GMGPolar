@@ -1,4 +1,5 @@
 #include "../include/InputFunctions/ExactSolution/refined_CircularGeometry.h"
+using namespace gmgpolar;
 
 Refined_CircularGeometry::Refined_CircularGeometry(double Rmax)
     : Rmax(Rmax)

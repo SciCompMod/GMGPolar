@@ -13,6 +13,9 @@
 #include "../../include/GMGPolar/gmgpolar.h"
 #include "test_selection.h"
 
+namespace gmgpolar
+{
+
 class ConfigParser
 {
 public:
@@ -119,3 +122,4 @@ private:
     void selectTestCase(GeometryType geometry_type, ProblemType problem_type, AlphaCoeff alpha_type,
                         BetaCoeff beta_type, double Rmax, double kappa_eps, double delta_e, double alpha_jump);
 };
+} // namespace gmgpolar

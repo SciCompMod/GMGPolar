@@ -1,4 +1,5 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR2_ZoniGyro_CzarnyGeometry.h"
+using namespace gmgpolar;
 
 void CartesianR2_ZoniGyro_CzarnyGeometry::initializeGeometry()
 {

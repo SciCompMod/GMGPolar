@@ -1,4 +1,5 @@
 #include "../include/InputFunctions/DensityProfileCoefficients/sonnendruckerGyroCoefficients.h"
+using namespace gmgpolar;
 
 SonnendruckerGyroCoefficients::SonnendruckerGyroCoefficients(double _Rmax, double _alpha_jump)
     : Rmax(_Rmax)

@@ -1,4 +1,5 @@
 #include "../include/InputFunctions/ExactSolution/refined_CulhamGeometry.h"
+using namespace gmgpolar;
 
 Refined_CulhamGeometry::Refined_CulhamGeometry(double Rmax)
     : Rmax(Rmax)

@@ -1,4 +1,5 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR6_SonnendruckerGyro_CzarnyGeometry.h"
+using namespace gmgpolar;
 
 void CartesianR6_SonnendruckerGyro_CzarnyGeometry::initializeGeometry()
 {

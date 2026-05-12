@@ -1,10 +1,10 @@
 #pragma once
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-LevelCache<DomainGeometry, DensityProfileCoefficients>::LevelCache(const PolarGrid& grid,
-                                       const DensityProfileCoefficients& density_profile_coefficients,
-                                       const DomainGeometry& domain_geometry,
-                                       const bool cache_density_profile_coefficients, const bool cache_domain_geometry)
+LevelCache<DomainGeometry, DensityProfileCoefficients>::LevelCache(
+    const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients,
+    const DomainGeometry& domain_geometry, const bool cache_density_profile_coefficients,
+    const bool cache_domain_geometry)
     : domain_geometry_(domain_geometry)
     , density_profile_coefficients_(density_profile_coefficients)
     , cache_density_profile_coefficients_(cache_density_profile_coefficients)
@@ -79,7 +79,8 @@ LevelCache<DomainGeometry, DensityProfileCoefficients>::LevelCache(const PolarGr
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-const DensityProfileCoefficients& LevelCache<DomainGeometry, DensityProfileCoefficients>::densityProfileCoefficients() const
+const DensityProfileCoefficients&
+LevelCache<DomainGeometry, DensityProfileCoefficients>::densityProfileCoefficients() const
 {
     return density_profile_coefficients_;
 }

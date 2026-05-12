@@ -1,4 +1,5 @@
 #include "../include/InputFunctions/BoundaryConditions/polarR6_Boundary_ShafranovGeometry.h"
+using namespace gmgpolar;
 
 PolarR6_Boundary_ShafranovGeometry::PolarR6_Boundary_ShafranovGeometry(double Rmax, double elongation_kappa,
                                                                        double shift_delta)

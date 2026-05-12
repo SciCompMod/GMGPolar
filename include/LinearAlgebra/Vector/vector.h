@@ -2,9 +2,14 @@
 
 #include <Kokkos_Core.hpp>
 
-template <typename T>
-using AllocatableVector = Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace>;
-template <typename T>
-using Vector = Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> const;
-template <typename T>
-using ConstVector = Kokkos::View<const T*, Kokkos::LayoutRight, Kokkos::HostSpace> const;
+namespace gmgpolar
+{
+
+template <typename T, class MemorySpace = Kokkos::HostSpace>
+using AllocatableVector = Kokkos::View<T*, Kokkos::LayoutRight, MemorySpace>;
+template <typename T, class MemorySpace = Kokkos::HostSpace>
+using Vector = Kokkos::View<T*, Kokkos::LayoutRight, MemorySpace> const;
+template <typename T, class MemorySpace = Kokkos::HostSpace>
+using ConstVector = Kokkos::View<const T*, Kokkos::LayoutRight, MemorySpace> const;
+
+} // namespace gmgpolar

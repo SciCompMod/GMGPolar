@@ -4,6 +4,9 @@
 
 #include "../exactSolution.h"
 
+namespace gmgpolar
+{
+
 class Refined_ShafranovGeometry : public ExactSolution
 {
 public:
@@ -18,3 +21,4 @@ private:
     const double elongation_kappa = 0.3;
     const double shift_delta      = 0.2;
 };
+} // namespace gmgpolar

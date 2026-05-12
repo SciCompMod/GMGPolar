@@ -9,6 +9,9 @@
 #include "../LinearAlgebra/Vector/vector.h"
 #include "../LinearAlgebra/Vector/vector_operations.h"
 
+namespace gmgpolar
+{
+
 template <class LevelCacheType>
 class Residual
 {
@@ -35,3 +38,4 @@ protected:
     const bool DirBC_Interior_;
     const int num_omp_threads_;
 };
+} // namespace gmgpolar

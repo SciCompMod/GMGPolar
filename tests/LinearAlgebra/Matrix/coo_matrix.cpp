@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "../../../include/LinearAlgebra/Matrix/coo_matrix.h"
+using namespace gmgpolar;
 
 // Alias for readability
 using triplet = std::tuple<int, int, double>;

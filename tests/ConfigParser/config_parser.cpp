@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "../../include/ConfigParser/config_parser.h"
+using namespace gmgpolar;
 
 struct TestParams {
     int geometry;

@@ -6,6 +6,9 @@
 
 #include "../../PolarGrid/polargrid.h"
 
+namespace gmgpolar
+{
+
 class PolarR6_Poisson_ShafranovGeometry
 {
 public:
@@ -20,3 +23,4 @@ private:
     const double elongation_kappa = 0.3;
     const double shift_delta      = 0.2;
 };
+} // namespace gmgpolar

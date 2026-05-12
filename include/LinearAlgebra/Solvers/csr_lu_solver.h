@@ -10,6 +10,9 @@
 #include "../../LinearAlgebra/Matrix/csr_matrix.h"
 #include "../../LinearAlgebra/Vector/vector.h"
 
+namespace gmgpolar
+{
+
 /**
  * @brief Sparse LU decomposition solver for symmetric positive definite matrices.
  *
@@ -323,8 +326,8 @@ SparseMatrixCSR<T> SparseLUSolver<T>::permuteMatrix(const SparseMatrixCSR<T>& A,
             int j_new = perm_inv[j_old];
 
             // Find the position in the underlying storage
-            A_perm.row_nz_entry(i_new, idx) = val;
-            A_perm.row_nz_index(i_new, idx) = j_new;
+            A_perm.set_row_nz_entry(i_new, idx, val);
+            A_perm.set_row_nz_index(i_new, idx, j_new);
         }
     }
 
@@ -540,3 +543,4 @@ void SparseLUSolver<T>::numericFactorization(const SparseMatrixCSR<T>& A,
         }
     }
 }
+} // namespace gmgpolar
