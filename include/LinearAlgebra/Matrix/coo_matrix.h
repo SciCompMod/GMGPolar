@@ -146,7 +146,7 @@ SparseMatrixCOO<T, MemorySpace> SparseMatrixCOO<T, MemorySpace>::copy() const
     SparseMatrixCOO<T, MemorySpace> other;
     other.rows_           = rows_;
     other.columns_        = columns_;
-    other.nnz_            = other.nnz_;
+    other.nnz_            = nnz_;
     other.row_indices_    = Vector<int, MemorySpace>("COO row indices", nnz_);
     other.column_indices_ = Vector<int, MemorySpace>("COO column indices", nnz_);
     other.values_         = Vector<T, MemorySpace>("COO values", nnz_);
