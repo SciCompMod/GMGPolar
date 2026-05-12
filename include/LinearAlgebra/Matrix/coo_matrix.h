@@ -227,20 +227,20 @@ SparseMatrixCOO<T, MemorySpace>::SparseMatrixCOO(int rows, int columns, const st
     assert(rows_ >= 0);
     assert(columns_ >= 0);
     assert(nnz_ >= 0);
-	auto h_row_indices = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, row_indices_);
-	auto h_column_indices = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, column_indices_);
-	auto h_values = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, values_);
-    Kokkos::parallel_for(
-        "SparseMatrixCOO constructor", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, nnz_), [&](const int i) {
-            assert(0 <= std::get<0>(entries[i]) && std::get<0>(entries[i]) < rows_);
-            assert(0 <= std::get<1>(entries[i]) && std::get<1>(entries[i]) < columns_);
-            h_row_indices(i)    = std::get<0>(entries[i]);
-            h_column_indices(i) = std::get<1>(entries[i]);
-            h_values(i)         = std::get<2>(entries[i]);
-        });
-	Kokkos::deep_copy(row_indices_, h_row_indices);
-	Kokkos::deep_copy(column_indices_, h_column_indices);
-	Kokkos::deep_copy(values_, h_values);
+    auto h_row_indices    = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, row_indices_);
+    auto h_column_indices = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, column_indices_);
+    auto h_values         = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, values_);
+    Kokkos::parallel_for("SparseMatrixCOO constructor", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, nnz_),
+                         [&](const int i) {
+                             assert(0 <= std::get<0>(entries[i]) && std::get<0>(entries[i]) < rows_);
+                             assert(0 <= std::get<1>(entries[i]) && std::get<1>(entries[i]) < columns_);
+                             h_row_indices(i)    = std::get<0>(entries[i]);
+                             h_column_indices(i) = std::get<1>(entries[i]);
+                             h_values(i)         = std::get<2>(entries[i]);
+                         });
+    Kokkos::deep_copy(row_indices_, h_row_indices);
+    Kokkos::deep_copy(column_indices_, h_column_indices);
+    Kokkos::deep_copy(values_, h_values);
 }
 
 template <typename T, class MemorySpace>

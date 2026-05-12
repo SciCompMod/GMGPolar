@@ -64,7 +64,8 @@ private:
         return mumps_solver_.infog[i - 1];
     }
 
-    SparseMatrixCOO<double, Kokkos::HostSpace> extractUpperTriangle(const SparseMatrixCOO<double, Kokkos::HostSpace>& matrix) const;
+    SparseMatrixCOO<double, Kokkos::HostSpace>
+    extractUpperTriangle(const SparseMatrixCOO<double, Kokkos::HostSpace>& matrix) const;
 
     /* ----------------------------------- */
     /* MUMPS jobs and constant definitions */

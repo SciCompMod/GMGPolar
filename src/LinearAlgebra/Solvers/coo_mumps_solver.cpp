@@ -161,7 +161,8 @@ void CooMumpsSolver::configureCNTL()
     // CNTL(8-15) do not exist
 }
 
-SparseMatrixCOO<double, Kokkos::HostSpace> CooMumpsSolver::extractUpperTriangle(const SparseMatrixCOO<double, Kokkos::HostSpace>& matrix) const
+SparseMatrixCOO<double, Kokkos::HostSpace>
+CooMumpsSolver::extractUpperTriangle(const SparseMatrixCOO<double, Kokkos::HostSpace>& matrix) const
 {
     const int full_nnz = matrix.non_zero_size();
     const int rows     = matrix.rows();
