@@ -119,7 +119,7 @@ void Interpolation::applyProlongation(const PolarGrid& coarse_grid, const PolarG
     // The For loop matches circular access pattern */
     Kokkos::parallel_for(
         "Interpolation: Prolongation (Circular)",
-        Kokkos::MDRangePolicy<Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, 0}, // Starting point of the index space
             {fine_grid.numberSmootherCircles(), fine_grid.ntheta()} // Ending point of the index space
             ),
@@ -131,7 +131,7 @@ void Interpolation::applyProlongation(const PolarGrid& coarse_grid, const PolarG
     /* For loop matches radial access pattern */
     Kokkos::parallel_for(
         "Interpolation: Prolongation (Radial)",
-        Kokkos::MDRangePolicy<Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, fine_grid.numberSmootherCircles()}, // Starting point of the index space
             {fine_grid.ntheta(), fine_grid.nr()} // Ending point of the index space
             ),

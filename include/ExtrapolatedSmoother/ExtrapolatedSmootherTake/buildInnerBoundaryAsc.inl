@@ -5,17 +5,17 @@ namespace extrapolated_smoother_take
 
 #ifdef GMGPOLAR_USE_MUMPS
 // When using the MUMPS solver, the matrix is assembled in COO format.
-static inline void update_CSR_COO_MatrixElement(SparseMatrixCOO<double>& matrix, int ptr, int offset, int row,
-                                                int column, double value)
+static inline void update_CSR_COO_MatrixElement(SparseMatrixCOO<double, Kokkos::HostSpace>& matrix, int ptr, int offset,
+                                                int row, int column, double value)
 {
-    matrix.row_index(ptr + offset) = row;
-    matrix.col_index(ptr + offset) = column;
-    matrix.value(ptr + offset)     = value;
+    matrix.set_row_index(ptr + offset, row);
+    matrix.set_col_index(ptr + offset, column);
+    matrix.set_value(ptr + offset, value);
 }
 #else
 // When using the in-house solver, the matrix is stored in CSR format.
-static inline void update_CSR_COO_MatrixElement(SparseMatrixCSR<double>& matrix, int ptr, int offset, int row,
-                                                int column, double value)
+static inline void update_CSR_COO_MatrixElement(SparseMatrixCSR<double, Kokkos::HostSpace>& matrix, int ptr, int offset,
+                                                int row, int column, double value)
 {
     matrix.set_row_nz_index(row, offset, column);
     matrix.set_row_nz_entry(row, offset, value);
@@ -112,7 +112,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildInteriorBoundarySolverMa
             const double center_value = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) +
                                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
-            const double left_value   = -coeff1 * (arr[center] + arr[left]);
+            const double left_value = -coeff1 * (arr[center] + arr[left]);
 
             /* Fill matrix row of (i,j) */
             row = center_index;
@@ -172,7 +172,7 @@ ExtrapolatedSmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     // which is extracted by the COO_Mumps_Solver internally.
 #ifdef GMGPOLAR_USE_MUMPS
     const int nnz = getNonZeroCountCircleAsc(i_r);
-    SparseMatrixCOO<double> inner_boundary_solver_matrix(ntheta, ntheta, nnz);
+    SparseMatrixCOO<double, Kokkos::HostSpace> inner_boundary_solver_matrix(ntheta, ntheta, nnz);
     inner_boundary_solver_matrix.is_symmetric(true);
 #else
     std::function<int(int)> nnz_per_row = [&](int i_theta) {
@@ -181,7 +181,7 @@ ExtrapolatedSmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
         else
             return i_theta % 2 == 0 ? 1 : 2;
     };
-    SparseMatrixCSR<double> inner_boundary_solver_matrix(ntheta, ntheta, nnz_per_row);
+    SparseMatrixCSR<double, Kokkos::HostSpace> inner_boundary_solver_matrix(ntheta, ntheta, nnz_per_row);
 #endif
 
     assert(level_cache.cacheDensityProfileCoefficients());

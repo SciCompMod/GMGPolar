@@ -89,7 +89,7 @@ void ResidualTake<LevelCacheType>::applySystemOperator(Vector<double> result, Co
     // The For loop matches circular access pattern */
     Kokkos::parallel_for(
         "Residual Take: Apply System Operator (Circular)",
-        Kokkos::MDRangePolicy<Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, 0}, // Starting point of the index space
             {grid.numberSmootherCircles(), grid.ntheta()} // Ending point of the index space
             ),
@@ -101,7 +101,7 @@ void ResidualTake<LevelCacheType>::applySystemOperator(Vector<double> result, Co
     /* For loop matches radial access pattern */
     Kokkos::parallel_for(
         "Residual Take: Apply System Operator (Radial)",
-        Kokkos::MDRangePolicy<Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, grid.numberSmootherCircles()}, // Starting point of the index space
             {grid.ntheta(), grid.nr()} // Ending point of the index space
             ),
