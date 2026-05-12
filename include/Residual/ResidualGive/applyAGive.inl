@@ -252,7 +252,7 @@ void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, Co
         Kokkos::parallel_for(
             "ResidualGive: ApplyA (Radial)", Kokkos::RangePolicy<>(0, num_radial_batches),
             KOKKOS_LAMBDA(const int radial_task) {
-                const int i_theta = start_radial + radial_task * 3;
+                const int i_theta = additional_radial_tasks + start_radial + radial_task * 3;
                 for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
                     node_apply_a_give(i_r, i_theta, grid, level_cache, DirBC_Interior, result, x);
                 }
