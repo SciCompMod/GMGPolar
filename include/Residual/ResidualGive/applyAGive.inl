@@ -1,5 +1,4 @@
 #pragma once
-
 namespace residual_give
 {
 
@@ -217,7 +216,7 @@ void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, Co
     for (int start_circle = 0; start_circle < 3; ++start_circle) {
         const int num_circular_tasks = (num_circle_tasks - start_circle + 2) / 3;
         Kokkos::parallel_for(
-            "ResidualGive: ApplyA (Circular)", Kokkos::RangePolicy<>(0, num_circular_tasks),
+            "ResidualGive: ApplyA (Circular)", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, num_circular_tasks),
             KOKKOS_LAMBDA(const int circle_task) {
                 const int i_r = start_circle + circle_task * 3;
                 for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
@@ -239,7 +238,7 @@ void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, Co
 
     for (int i_theta = 0; i_theta < additional_radial_tasks; i_theta++) {
         Kokkos::parallel_for(
-            "ResidualGive: ApplyA (Radial, additional)", Kokkos::RangePolicy<>(0, 1), KOKKOS_LAMBDA(const int) {
+            "ResidualGive: ApplyA (Radial, additional)", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, 1), KOKKOS_LAMBDA(const int) {
                 for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
                     node_apply_a_give(i_r, i_theta, grid, level_cache, DirBC_Interior, result, x);
                 }
@@ -250,7 +249,7 @@ void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, Co
     for (int start_radial = 0; start_radial < 3; ++start_radial) {
         const int num_radial_batches = (num_radial_tasks - start_radial + 2) / 3;
         Kokkos::parallel_for(
-            "ResidualGive: ApplyA (Radial)", Kokkos::RangePolicy<>(0, num_radial_batches),
+            "ResidualGive: ApplyA (Radial)", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, num_radial_batches),
             KOKKOS_LAMBDA(const int radial_task) {
                 const int i_theta = additional_radial_tasks + start_radial + radial_task * 3;
                 for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
