@@ -48,8 +48,8 @@ void CooMumpsSolver::initialize()
      * MUMPS uses 1-based indexing; convert from 0-based.
      */
     for (int i = 0; i < matrix_.non_zero_size(); i++) {
-        matrix_.row_index(i) += 1;
-        matrix_.col_index(i) += 1;
+        matrix_.increment_row_index(i);
+        matrix_.increment_col_index(i);
     }
 
     mumps_solver_.job          = JOB_INIT;

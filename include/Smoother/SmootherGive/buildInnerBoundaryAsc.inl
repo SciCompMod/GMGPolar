@@ -8,9 +8,9 @@ namespace smoother_give
 static inline void update_CSR_COO_MatrixElement(SparseMatrixCOO<double>& matrix, int ptr, int offset, int row,
                                                 int column, double value)
 {
-    matrix.row_index(ptr + offset) = row;
-    matrix.col_index(ptr + offset) = column;
-    matrix.value(ptr + offset) += value;
+    matrix.set_row_index(ptr + offset, row);
+    matrix.set_col_index(ptr + offset, column);
+    matrix.increase_value(ptr + offset, value);
 }
 #else
 // When using the in-house solver, the matrix is stored in CSR format.
