@@ -119,7 +119,7 @@ void SmootherGive<LevelCacheType>::solveWhiteRadialSection(Vector<double> x, Vec
     const int num_white_radial_lines = grid.ntheta() / 2;
     Kokkos::parallel_for(
         "SmootherGive: moveUpdatedValues (White Radial)",
-        Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, grid.numberSmootherCircles()}, {num_white_radial_lines, grid.nr()}),
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()}, {num_white_radial_lines, grid.nr()}),
         KOKKOS_LAMBDA(const int radial_task, const int i_r) {
             const int i_theta = start_white_radials + radial_task * 2;
             const int index   = grid.index(i_r, i_theta);
