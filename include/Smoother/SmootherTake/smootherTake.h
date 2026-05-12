@@ -56,6 +56,8 @@ public:
     explicit SmootherTake(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
                           int num_omp_threads);
 
+    KOKKOS_DEFAULTED_FUNCTION SmootherTake(const SmootherTake&) = default;
+
     // Performs one full coupled smoothing sweep:
     //   BC -> WC -> BR -> WR
     // using temp as RHS workspace.
