@@ -83,7 +83,7 @@ public:
      *
      * @param b Right-hand side vector (modified in place to contain the solution).
      */
-    void solveInPlace(Vector<T, MemorySpace> b) const;
+    void solveInPlace(Vector<T, MemorySpace>& b) const;
 
 private:
     // LU decomposition data structures
@@ -157,7 +157,7 @@ SparseLUSolver<T, MemorySpace>::SparseLUSolver(const SparseMatrixCSR<T, MemorySp
  * @param b - Right-hand side vector (overwritten with solution)
  */
 template <typename T, class MemorySpace>
-void SparseLUSolver<T, MemorySpace>::solveInPlace(Vector<T, MemorySpace> b) const
+void SparseLUSolver<T, MemorySpace>::solveInPlace(Vector<T, MemorySpace>& b) const
 {
     assert(factorized_);
     const int n = perm_.size();
