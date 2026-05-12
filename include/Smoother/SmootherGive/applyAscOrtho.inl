@@ -434,6 +434,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoCircleSection(const int i_r, con
 
     const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 
     assert(i_r >= 0 && i_r < grid.numberSmootherCircles() + 1);
 
@@ -447,8 +448,8 @@ void SmootherGive<LevelCacheType>::applyAscOrthoCircleSection(const int i_r, con
         level_cache.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Apply Asc Ortho at the current node
-        nodeApplyAscOrthoCircleGive(i_r, i_theta, grid, Smoother<LevelCacheType>::DirBC_Interior_, smoother_color, x,
-                                    rhs, temp, arr, att, art, detDF, coeff_beta);
+        nodeApplyAscOrthoCircleGive(i_r, i_theta, grid, DirBC_Interior, smoother_color, x, rhs, temp, arr, att, art,
+                                    detDF, coeff_beta);
     }
 }
 
@@ -461,6 +462,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoRadialSection(const int i_theta,
 
     const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 
     const double theta = grid.theta(i_theta);
 
@@ -474,7 +476,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoRadialSection(const int i_theta,
         level_cache.obtainValues(i_r, i_theta, index, r, theta, coeff_beta, arr, att, art, detDF);
 
         // Apply Asc Ortho at the current node
-        nodeApplyAscOrthoRadialGive(i_r, i_theta, grid, Smoother<LevelCacheType>::DirBC_Interior_, smoother_color, x,
-                                    rhs, temp, arr, att, art, detDF, coeff_beta);
+        nodeApplyAscOrthoRadialGive(i_r, i_theta, grid, DirBC_Interior, smoother_color, x, rhs, temp, arr, att, art,
+                                    detDF, coeff_beta);
     }
 }

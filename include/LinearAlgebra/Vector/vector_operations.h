@@ -12,149 +12,166 @@
 namespace gmgpolar
 {
 
-template <typename T>
-bool equals(ConstVector<T> lhs, ConstVector<T> rhs)
+template <typename T, class MemorySpace>
+bool equals(ConstVector<T, MemorySpace> lhs, ConstVector<T, MemorySpace> rhs)
 {
     if (lhs.size() != rhs.size()) {
         return false;
     }
-
+    using ExecSpace     = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                             Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
     const std::size_t n = lhs.size();
-    for (std::size_t i = 0; i < n; ++i) {
-        if (!equals(lhs(i), rhs(i))) {
-            return false;
-        }
-    }
-    return true;
+    bool is_equal       = true;
+    Kokkos::parallel_reduce(
+        "Vector: equals", Kokkos::RangePolicy<ExecSpace>(0, n),
+        KOKKOS_LAMBDA(const std::size_t i, bool& local_is_equal) {
+            local_is_equal = local_is_equal && equals(lhs(i), rhs(i));
+        },
+        Kokkos::LAnd<bool>(is_equal));
+    return is_equal;
 }
 
-template <typename T>
-void assign(Vector<T> lhs, const T& value)
+template <typename T, class MemorySpace>
+void assign(Vector<T, MemorySpace> lhs, const T& value)
 {
-    std::size_t n = lhs.size();
-#pragma omp parallel for if (n > 10'000)
-    for (std::size_t i = 0; i < n; ++i) {
-        lhs(i) = value;
-    }
+    Kokkos::deep_copy(lhs, value);
 }
 
-template <typename T>
-void add(Vector<T> result, ConstVector<T> x)
+template <typename T, class MemorySpace>
+void add(Vector<T, MemorySpace> result, ConstVector<T, MemorySpace> x)
 {
     if (result.size() != x.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
     }
-    std::size_t n = result.size();
-#pragma omp parallel for if (n > 10'000)
-    for (std::size_t i = 0; i < n; ++i) {
-        result(i) += x(i);
-    }
+    using ExecSpace     = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                             Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+    const std::size_t n = result.size();
+    Kokkos::parallel_for(
+        "Vector: add", Kokkos::RangePolicy<ExecSpace>(0, n), KOKKOS_LAMBDA(const std::size_t i) { result(i) += x(i); });
 }
 
-template <typename T>
-void subtract(Vector<T> result, ConstVector<T> x)
+template <typename T, class MemorySpace>
+void subtract(Vector<T, MemorySpace> result, ConstVector<T, MemorySpace> x)
 {
     if (result.size() != x.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
     }
-    std::size_t n = result.size();
-#pragma omp parallel for if (n > 10'000)
-    for (std::size_t i = 0; i < n; ++i) {
-        result(i) -= x(i);
-    }
+    using ExecSpace     = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                             Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+    const std::size_t n = result.size();
+    Kokkos::parallel_for(
+        "Vector: subtract", Kokkos::RangePolicy<ExecSpace>(0, n),
+        KOKKOS_LAMBDA(const std::size_t i) { result(i) -= x(i); });
 }
 
-template <typename T>
-void linear_combination(Vector<T> x, const T& alpha, ConstVector<T> y, const T& beta)
+template <typename T, class MemorySpace>
+void linear_combination(Vector<T, MemorySpace> x, const T& alpha, ConstVector<T, MemorySpace> y, const T& beta)
 {
     if (x.size() != y.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
     }
-    std::size_t n = x.size();
-#pragma omp parallel for if (n > 10'000)
-    for (std::size_t i = 0; i < n; ++i) {
-        x(i) = alpha * x(i) + beta * y(i);
-    }
+    using ExecSpace     = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                             Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+    const std::size_t n = x.size();
+    Kokkos::parallel_for(
+        "Vector: linear_combination", Kokkos::RangePolicy<ExecSpace>(0, n),
+        KOKKOS_LAMBDA(const std::size_t i) { x(i) = alpha * x(i) + beta * y(i); });
 }
 
-template <typename T>
-void multiply(Vector<T> x, const T& alpha)
+template <typename T, class MemorySpace>
+void multiply(Vector<T, MemorySpace> x, const T& alpha)
 {
-    std::size_t n = x.size();
-#pragma omp parallel for if (n > 10'000)
-    for (std::size_t i = 0; i < n; ++i) {
-        x(i) *= alpha;
-    }
+    using ExecSpace     = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                             Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+    const std::size_t n = x.size();
+    Kokkos::parallel_for(
+        "Vector: multiply", Kokkos::RangePolicy<ExecSpace>(0, n),
+        KOKKOS_LAMBDA(const std::size_t i) { x(i) *= alpha; });
 }
 
-template <typename T>
-T dot_product(ConstVector<T> lhs, ConstVector<T> rhs)
+template <typename T, class MemorySpace>
+T dot_product(ConstVector<T, MemorySpace> lhs, ConstVector<T, MemorySpace> rhs)
 {
     if (lhs.size() != rhs.size()) {
         throw std::invalid_argument("Vectors must be of the same size.");
     }
-
-    T result      = 0.0;
-    std::size_t n = lhs.size();
-#pragma omp parallel for reduction(+ : result) if (n > 10'000)
-    for (std::size_t i = 0; i < n; ++i) {
-        result += lhs(i) * rhs(i);
-    }
+    using ExecSpace     = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                             Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+    const std::size_t n = lhs.size();
+    T result            = T{0};
+    Kokkos::parallel_reduce(
+        "Vector: dot_product", Kokkos::RangePolicy<ExecSpace>(0, n),
+        KOKKOS_LAMBDA(const std::size_t i, T& local_sum) { local_sum += lhs(i) * rhs(i); }, result);
     return result;
 }
 
-template <typename T>
-T l1_norm(ConstVector<T> x)
+template <typename T, class MemorySpace>
+T l1_norm(ConstVector<T, MemorySpace> x)
 {
-    T result      = 0.0;
-    std::size_t n = x.size();
-#pragma omp parallel for reduction(+ : result) if (n > 10'000)
-    for (std::size_t i = 0; i < n; ++i) {
-        result += std::abs(x(i));
-    }
+    using ExecSpace     = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                             Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+    const std::size_t n = x.size();
+    T result            = T{0};
+    Kokkos::parallel_reduce(
+        "Vector: l1_norm", Kokkos::RangePolicy<ExecSpace>(0, n),
+        KOKKOS_LAMBDA(const std::size_t i, T& local_sum) { local_sum += Kokkos::abs(x(i)); }, result);
     return result;
 }
 
 // Underflow- and overflow-resistant implementation of the L2 norm
-template <typename T>
-T l2_norm(ConstVector<T> x)
+template <typename T, class MemorySpace>
+T l2_norm(ConstVector<T, MemorySpace> x)
 {
+    using ExecSpace     = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                             Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
     const std::size_t n = x.size();
-    // 1) find the largest absolute value
-    T scale = 0.0;
-#pragma omp parallel for reduction(max : scale) if (n > 10'000)
-    for (std::size_t i = 0; i < n; ++i) {
-        T abs_val = std::abs(x(i));
-        if (abs_val > scale) {
-            scale = abs_val;
-        }
-    }
-    // 2) if the largest absolute value is zero, the norm is zero
+
+    // 1) Find the largest absolute value
+    T scale = T{0};
+    Kokkos::parallel_reduce(
+        "Vector: l2_norm_scale", Kokkos::RangePolicy<ExecSpace>(0, n),
+        KOKKOS_LAMBDA(const std::size_t i, T& local_max) {
+            const T abs_val = Kokkos::abs(x(i));
+            if (abs_val > local_max) {
+                local_max = abs_val;
+            }
+        },
+        Kokkos::Max<T, MemorySpace>(scale));
+
+    // 2) If the largest absolute value is zero, the norm is zero
     if (scale == T{0})
         return T{0};
-    // 3) accumulate sum of squares of scaled entries
-    T sum = 0.0;
-#pragma omp parallel for reduction(+ : sum) if (n > 10'000)
-    for (std::size_t i = 0; i < n; ++i) {
-        T value = x(i) / scale;
-        sum += value * value;
-    }
-    // 4) rescale
-    return scale * std::sqrt(sum);
+
+    // 3) Accumulate sum of squares of scaled entries
+    T sum = T{0};
+    Kokkos::parallel_reduce(
+        "Vector: l2_norm_sum", Kokkos::RangePolicy<ExecSpace>(0, n),
+        KOKKOS_LAMBDA(const std::size_t i, T& local_sum) {
+            const T value = x(i) / scale;
+            local_sum += value * value;
+        },
+        sum);
+
+    // 4) Rescale
+    return scale * Kokkos::sqrt(sum);
 }
 
-template <typename T>
-T infinity_norm(ConstVector<T> x)
+template <typename T, class MemorySpace>
+T infinity_norm(ConstVector<T, MemorySpace> x)
 {
-    T result      = 0.0;
-    std::size_t n = x.size();
-#pragma omp parallel for reduction(max : result) if (n > 10'000)
-    for (std::size_t i = 0; i < n; ++i) {
-        T abs_value = std::abs(x(i));
-        if (abs_value > result) {
-            result = abs_value;
-        }
-    }
+    using ExecSpace     = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                             Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+    const std::size_t n = x.size();
+    T result            = T{0};
+    Kokkos::parallel_reduce(
+        "Vector: infinity_norm", Kokkos::RangePolicy<ExecSpace>(0, n),
+        KOKKOS_LAMBDA(const std::size_t i, T& local_max) {
+            const T abs_value = Kokkos::abs(x(i));
+            if (abs_value > local_max) {
+                local_max = abs_value;
+            }
+        },
+        Kokkos::Max<T, MemorySpace>(result));
     return result;
 }
 
