@@ -16,34 +16,34 @@ public:
     CulhamGeometry();
     explicit CulhamGeometry(double Rmax);
 
-    double Fx(double r, double theta) const;
-    double Fy(double r, double theta) const;
-    double dFx_dr(double r, double theta) const;
-    double dFy_dr(double r, double theta) const;
-    double dFx_dt(double r, double theta) const;
-    double dFy_dt(double r, double theta) const;
+    KOKKOS_INLINE_FUNCTION double Fx(double r, double theta) const;
+    KOKKOS_INLINE_FUNCTION double Fy(double r, double theta) const;
+    KOKKOS_INLINE_FUNCTION double dFx_dr(double r, double theta) const;
+    KOKKOS_INLINE_FUNCTION double dFy_dr(double r, double theta) const;
+    KOKKOS_INLINE_FUNCTION double dFx_dt(double r, double theta) const;
+    KOKKOS_INLINE_FUNCTION double dFy_dt(double r, double theta) const;
 
 private:
     const double Rmax = 1.3;
 
     void initializeGeometry();
 
-    double my_sum(std::array<double, 1001>& f, int64_t start_idx, int64_t end_idx) const;
-    double q(double rr) const;
-    double dq(double rr) const;
-    double p(double rr) const;
-    double dp(double rr) const;
-    double dg(double rr, double g) const;
-    double double_deriv(double rr, double c, double g, double dg, double val, double d_val) const;
-    double g(double rr) const;
-    double Delta(double rr) const;
-    double Delta_prime(double rr) const;
-    double E(double rr) const;
-    double T(double rr) const;
-    double E_prime(double rr) const;
-    double T_prime(double rr) const;
-    double P(double rr) const;
-    double dP(double rr) const;
+    KOKKOS_INLINE_FUNCTION double my_sum(std::array<double, 1001>& f, int64_t start_idx, int64_t end_idx) const;
+    KOKKOS_INLINE_FUNCTION double q(double rr) const;
+    KOKKOS_INLINE_FUNCTION double dq(double rr) const;
+    KOKKOS_INLINE_FUNCTION double p(double rr) const;
+    KOKKOS_INLINE_FUNCTION double dp(double rr) const;
+    KOKKOS_INLINE_FUNCTION double dg(double rr, double g) const;
+    KOKKOS_INLINE_FUNCTION double double_deriv(double rr, double c, double g, double dg, double val, double d_val) const;
+    KOKKOS_INLINE_FUNCTION double g(double rr) const;
+    KOKKOS_INLINE_FUNCTION double Delta(double rr) const;
+    KOKKOS_INLINE_FUNCTION double Delta_prime(double rr) const;
+    KOKKOS_INLINE_FUNCTION double E(double rr) const;
+    KOKKOS_INLINE_FUNCTION double T(double rr) const;
+    KOKKOS_INLINE_FUNCTION double E_prime(double rr) const;
+    KOKKOS_INLINE_FUNCTION double T_prime(double rr) const;
+    KOKKOS_INLINE_FUNCTION double P(double rr) const;
+    KOKKOS_INLINE_FUNCTION double dP(double rr) const;
 
     double rr;
     double dr;
