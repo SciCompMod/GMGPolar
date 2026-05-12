@@ -3,10 +3,11 @@
 namespace residual_take
 {
 
-static KOKKOS_INLINE_FUNCTION void node_apply_a_take(const int i_r, const int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                     Vector<double>& result, ConstVector<double>& x, ConstVector<double>& arr,
-                                     ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF,
-                                     ConstVector<double>& coeff_beta)
+static KOKKOS_INLINE_FUNCTION void node_apply_a_take(const int i_r, const int i_theta, const PolarGrid& grid,
+                                                     bool DirBC_Interior, Vector<double>& result,
+                                                     ConstVector<double>& x, ConstVector<double>& arr,
+                                                     ConstVector<double>& att, ConstVector<double>& art,
+                                                     ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
 {
     const int center = grid.index(i_r, i_theta);
 
@@ -89,7 +90,7 @@ void ResidualTake<LevelCacheType>::applySystemOperator(Vector<double> result, Co
     // The For loop matches circular access pattern */
     Kokkos::parallel_for(
         "Residual Take: Apply System Operator (Circular)",
-        Kokkos::MDRangePolicy<Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, 0}, // Starting point of the index space
             {grid.numberSmootherCircles(), grid.ntheta()} // Ending point of the index space
             ),
@@ -101,7 +102,7 @@ void ResidualTake<LevelCacheType>::applySystemOperator(Vector<double> result, Co
     /* For loop matches radial access pattern */
     Kokkos::parallel_for(
         "Residual Take: Apply System Operator (Radial)",
-        Kokkos::MDRangePolicy<Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, grid.numberSmootherCircles()}, // Starting point of the index space
             {grid.ntheta(), grid.nr()} // Ending point of the index space
             ),

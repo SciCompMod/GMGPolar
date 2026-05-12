@@ -28,7 +28,7 @@ void Interpolation::applyInjection(const PolarGrid& fine_grid, const PolarGrid& 
     // The For loop matches circular access pattern */
     Kokkos::parallel_for(
         "Interpolation: Injection (Circular)",
-        Kokkos::MDRangePolicy<Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, 0}, // Starting point of the index space
             {coarse_grid.numberSmootherCircles(), coarse_grid.ntheta()} // Ending point of the index space
             ),
@@ -40,7 +40,7 @@ void Interpolation::applyInjection(const PolarGrid& fine_grid, const PolarGrid& 
     /* For loop matches radial access pattern */
     Kokkos::parallel_for(
         "Interpolation: Injection (Radial)",
-        Kokkos::MDRangePolicy<Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, coarse_grid.numberSmootherCircles()}, // Starting point of the index space
             {coarse_grid.ntheta(), coarse_grid.nr()} // Ending point of the index space
             ),
