@@ -27,26 +27,28 @@
 namespace gmgpolar
 {
 
-namespace sparse_csr_helpers {
-		template<class MemorySpace>
-void row_start_indices_from_nz_per_row(int& nnz, const Vector<int, MemorySpace>& nz_per_row, int rows, const Vector<int, MemorySpace>& row_start_indices)
+namespace sparse_csr_helpers
 {
-	using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>, Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
-    nnz = 0;
-	    Kokkos::parallel_reduce(
-        "compute nz_per_row", Kokkos::RangePolicy<ExecSpace>(0, 1),
-        KOKKOS_LAMBDA(const std::size_t i, int& local_nnz) {
-    for (int i = 0; i < rows; i++) {
-        row_start_indices(i) = local_nnz;
-        local_nnz += nz_per_row(i);
+    template <class MemorySpace>
+    void row_start_indices_from_nz_per_row(int& nnz, const Vector<int, MemorySpace>& nz_per_row, int rows,
+                                           const Vector<int, MemorySpace>& row_start_indices)
+    {
+        using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                             Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+        nnz             = 0;
+        Kokkos::parallel_reduce(
+            "compute nz_per_row", Kokkos::RangePolicy<ExecSpace>(0, 1),
+            KOKKOS_LAMBDA(const std::size_t i, int& local_nnz) {
+                for (int i = 0; i < rows; i++) {
+                    row_start_indices(i) = local_nnz;
+                    local_nnz += nz_per_row(i);
+                }
+                row_start_indices(rows) = local_nnz;
+            },
+            nnz);
+        Kokkos::fence();
     }
-    row_start_indices(rows) = local_nnz;
-        },
-        nnz);
-	Kokkos::fence();
-
-}
-}
+} // namespace sparse_csr_helpers
 
 template <typename T, class MemorySpace = Kokkos::DefaultExecutionSpace::memory_space>
 class SparseMatrixCSR
@@ -63,7 +65,7 @@ public:
     // Move constructor — takes ownership instead of sharing.
     KOKKOS_FUNCTION SparseMatrixCSR(SparseMatrixCSR&& other) noexcept;
 
-	SparseMatrixCSR(int rows, int columns, Vector<int, MemorySpace> nz_per_row);
+    SparseMatrixCSR(int rows, int columns, Vector<int, MemorySpace> nz_per_row);
     explicit SparseMatrixCSR(int rows, int columns, std::function<int(int)> nz_per_row);
     explicit SparseMatrixCSR(int rows, int columns, const std::vector<triplet_type>& entries);
     explicit SparseMatrixCSR(int rows, int columns, const std::vector<T>& values,
@@ -79,8 +81,10 @@ public:
     SparseMatrixCSR& operator=(SparseMatrixCSR&& other) noexcept = default;
 
     SparseMatrixCSR copy() const;
-    template<class TargetMemorySpace>
-    std::conditional_t<std::is_same_v<MemorySpace, TargetMemorySpace>, const SparseMatrixCSR&, SparseMatrixCSR<T, TargetMemorySpace>> mirror_view_and_copy() const;
+    template <class TargetMemorySpace>
+    std::conditional_t<std::is_same_v<MemorySpace, TargetMemorySpace>, const SparseMatrixCSR&,
+                       SparseMatrixCSR<T, TargetMemorySpace>>
+    mirror_view_and_copy() const;
 
     KOKKOS_FUNCTION int rows() const;
     KOKKOS_FUNCTION int columns() const;
@@ -175,20 +179,23 @@ SparseMatrixCSR<T, MemorySpace> SparseMatrixCSR<T, MemorySpace>::copy() const
 
 template <typename T, class MemorySpace>
 template <class TargetMemorySpace>
-std::conditional_t<std::is_same_v<MemorySpace, TargetMemorySpace>, const SparseMatrixCSR<T, MemorySpace>&, SparseMatrixCSR<T, TargetMemorySpace>> SparseMatrixCSR<T, MemorySpace>::mirror_view_and_copy() const
+std::conditional_t<std::is_same_v<MemorySpace, TargetMemorySpace>, const SparseMatrixCSR<T, MemorySpace>&,
+                   SparseMatrixCSR<T, TargetMemorySpace>>
+SparseMatrixCSR<T, MemorySpace>::mirror_view_and_copy() const
 {
-if constexpr(std::is_same_v<MemorySpace, TargetMemorySpace>) {
-		return *this;
-} else {
-    SparseMatrixCSR<T, TargetMemorySpace> new_copy;
-    new_copy.rows_              = rows_;
-    new_copy.columns_           = columns_;
-    new_copy.nnz_               = nnz_;
-    new_copy.values_            = Kokkos::create_mirror_view_and_copy(TargetMemorySpace(), values_);
-    new_copy.column_indices_    = Kokkos::create_mirror_view_and_copy(TargetMemorySpace(), column_indices_);
-    new_copy.row_start_indices_ = Kokkos::create_mirror_view_and_copy(TargetMemorySpace(), row_start_indices_);
-    return new_copy;
-}
+    if constexpr (std::is_same_v<MemorySpace, TargetMemorySpace>) {
+        return *this;
+    }
+    else {
+        SparseMatrixCSR<T, TargetMemorySpace> new_copy;
+        new_copy.rows_              = rows_;
+        new_copy.columns_           = columns_;
+        new_copy.nnz_               = nnz_;
+        new_copy.values_            = Kokkos::create_mirror_view_and_copy(TargetMemorySpace(), values_);
+        new_copy.column_indices_    = Kokkos::create_mirror_view_and_copy(TargetMemorySpace(), column_indices_);
+        new_copy.row_start_indices_ = Kokkos::create_mirror_view_and_copy(TargetMemorySpace(), row_start_indices_);
+        return new_copy;
+    }
 }
 
 // move construction
@@ -223,8 +230,8 @@ SparseMatrixCSR<T, MemorySpace>::SparseMatrixCSR(int rows, int columns, std::fun
         nnz_ += nz_per_row(i);
     }
     h_row_start_indices(rows) = nnz_;
-    values_                  = Vector<T, MemorySpace>("CSR values", nnz_);
-    column_indices_          = Vector<int, MemorySpace>("CSR column indices", nnz_);
+    values_                   = Vector<T, MemorySpace>("CSR values", nnz_);
+    column_indices_           = Vector<int, MemorySpace>("CSR column indices", nnz_);
 
     assign(values_, T(0));
     assign(column_indices_, 0);
@@ -240,9 +247,9 @@ SparseMatrixCSR<T, MemorySpace>::SparseMatrixCSR(int rows, int columns, Vector<i
     assert(rows >= 0);
     assert(columns >= 0);
 
-	sparse_csr_helpers::row_start_indices_from_nz_per_row(nnz_, nz_per_row, rows, row_start_indices_);
-    values_                  = Vector<T, MemorySpace>("CSR values", nnz_);
-    column_indices_          = Vector<int, MemorySpace>("CSR column indices", nnz_);
+    sparse_csr_helpers::row_start_indices_from_nz_per_row(nnz_, nz_per_row, rows, row_start_indices_);
+    values_         = Vector<T, MemorySpace>("CSR values", nnz_);
+    column_indices_ = Vector<int, MemorySpace>("CSR column indices", nnz_);
 
     assign(values_, T(0));
     assign(column_indices_, 0);
@@ -274,7 +281,7 @@ SparseMatrixCSR<T, MemorySpace>::SparseMatrixCSR(int rows, int columns, const st
         assert(0 <= h_column_indices(i) && h_column_indices(i) < columns);
     }
     //fill row indexes
-    int count             = 0;
+    int count              = 0;
     h_row_start_indices(0) = 0;
     for (int r = 0; r < rows; r++) {
         while (count < nnz_ && std::get<0>(entries[count]) == r)

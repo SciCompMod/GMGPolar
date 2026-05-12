@@ -14,8 +14,8 @@ static inline void updateMatrixElement(SparseMatrixCOO<double>& matrix, int ptr,
 }
 #else
 // When using the in-house solver, the matrix is stored in CSR format.
-static inline void updateMatrixElement(SparseMatrixCSR<double, Kokkos::HostSpace>& matrix, int ptr, int offset, int row, int column,
-                                       double value)
+static inline void updateMatrixElement(SparseMatrixCSR<double, Kokkos::HostSpace>& matrix, int ptr, int offset, int row,
+                                       int column, double value)
 {
     matrix.set_row_nz_index(row, offset, column);
     matrix.increase_row_nz_entry(row, offset, value);

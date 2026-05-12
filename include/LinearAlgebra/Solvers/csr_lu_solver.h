@@ -13,20 +13,23 @@
 namespace gmgpolar
 {
 
-namespace sparse_lu_helpers {
+namespace sparse_lu_helpers
+{
 
-template <class MemorySpace>
-static inline Vector<int, MemorySpace> build_perm_inv(Vector<int, MemorySpace> const& perm) {
-	using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>, Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
-    Vector<int, MemorySpace> perm_inv("perm_inv", perm.size());
-    Kokkos::parallel_for(
-        "Calculate perm_inv", Kokkos::RangePolicy<ExecSpace>(0, perm.size()),
-        KOKKOS_LAMBDA(const int i) { perm_inv[perm[i]] = i; });
-	Kokkos::fence();
-    return perm_inv;
-}
+    template <class MemorySpace>
+    static inline Vector<int, MemorySpace> build_perm_inv(Vector<int, MemorySpace> const& perm)
+    {
+        using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                             Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+        Vector<int, MemorySpace> perm_inv("perm_inv", perm.size());
+        Kokkos::parallel_for(
+            "Calculate perm_inv", Kokkos::RangePolicy<ExecSpace>(0, perm.size()),
+            KOKKOS_LAMBDA(const int i) { perm_inv[perm[i]] = i; });
+        Kokkos::fence();
+        return perm_inv;
+    }
 
-}
+} // namespace sparse_lu_helpers
 
 /**
  * @brief Sparse LU decomposition solver for symmetric positive definite matrices.
@@ -42,7 +45,9 @@ static inline Vector<int, MemorySpace> build_perm_inv(Vector<int, MemorySpace> c
 template <typename T, class MemorySpace = Kokkos::DefaultExecutionSpace::memory_space>
 class SparseLUSolver
 {
-	using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>, Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+    using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                         Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+
 public:
     /**
      * @brief Construct an empty solver with given tolerances.
@@ -94,14 +99,14 @@ private:
 
     // Core methods
     void factorize(const SparseMatrixCSR<T, MemorySpace>& A);
-// Public due to cuda restrictions
+    // Public due to cuda restrictions
 public:
     void solveInPlacePermuted(const Vector<T, MemorySpace>& b) const;
 
 private:
     // Reordering and permutation utilities
     Vector<int, MemorySpace> computeRCM(const SparseMatrixCSR<T, MemorySpace>& A) const;
-// Public due to cuda restrictions
+    // Public due to cuda restrictions
 public:
     SparseMatrixCSR<T, MemorySpace> permuteMatrix(const SparseMatrixCSR<T, MemorySpace>& A,
                                                   const Vector<int, MemorySpace>& perm,
@@ -159,23 +164,24 @@ void SparseLUSolver<T, MemorySpace>::solveInPlace(Vector<T, MemorySpace> b) cons
     if (n == 0)
         return;
 
-	// Create local accessors to avoid copying the whole class to GPU
-    Vector<int, MemorySpace> perm = perm_;
+    // Create local accessors to avoid copying the whole class to GPU
+    Vector<int, MemorySpace> perm     = perm_;
     Vector<int, MemorySpace> perm_inv = perm_inv_;
 
     // Permute RHS: b_perm = P * b
     Vector<T, MemorySpace> b_perm("b_perm", n);
     Kokkos::parallel_for(
         "b permute", Kokkos::RangePolicy<ExecSpace>(0, n), KOKKOS_LAMBDA(const int i) { b_perm[i] = b[perm[i]]; });
-	Kokkos::fence();
+    Kokkos::fence();
 
     // Solve permuted system
     solveInPlacePermuted(b_perm);
 
     // Unpermute solution: x = P^T * x_perm
     Kokkos::parallel_for(
-        "b unpermute", Kokkos::RangePolicy<ExecSpace>(0, n), KOKKOS_LAMBDA(const int i) { b[i] = b_perm[perm_inv[i]]; });
-	Kokkos::fence();
+        "b unpermute", Kokkos::RangePolicy<ExecSpace>(0, n),
+        KOKKOS_LAMBDA(const int i) { b[i] = b_perm[perm_inv[i]]; });
+    Kokkos::fence();
 }
 
 /**
@@ -208,7 +214,7 @@ void SparseLUSolver<T, MemorySpace>::solveInPlacePermuted(const Vector<T, Memory
                 b[i] /= U_diag_[i]; // Divide by diagonal element
             }
         });
-	Kokkos::fence();
+    Kokkos::fence();
 }
 
 /**
@@ -223,7 +229,7 @@ Vector<int, MemorySpace> SparseLUSolver<T, MemorySpace>::computeRCM(const Sparse
     if (n == 0)
         return {};
 
-	auto h_A = A.template mirror_view_and_copy<Kokkos::HostSpace>();
+    auto h_A = A.template mirror_view_and_copy<Kokkos::HostSpace>();
 
     // Build symmetric adjacency list
     std::vector<std::vector<int>> adj(n);
@@ -350,7 +356,7 @@ SparseLUSolver<T, MemorySpace>::permuteMatrix(const SparseMatrixCSR<T, MemorySpa
             int i_old         = perm[i_new];
             nz_per_row[i_new] = A.row_nz_size(i_old);
         });
-	Kokkos::fence();
+    Kokkos::fence();
 
     // Construct permuted matrix with preallocated storage
     SparseMatrixCSR<T, MemorySpace> A_perm(n, n, nz_per_row);
@@ -370,7 +376,7 @@ SparseLUSolver<T, MemorySpace>::permuteMatrix(const SparseMatrixCSR<T, MemorySpa
                 A_perm.set_row_nz_index(i_new, idx, j_new);
             }
         });
-	Kokkos::fence();
+    Kokkos::fence();
 
     return A_perm;
 }
@@ -399,8 +405,8 @@ void SparseLUSolver<T, MemorySpace>::symbolicFactorization(const SparseMatrixCSR
                                                            std::vector<std::vector<int>>& L_pattern,
                                                            std::vector<std::vector<int>>& U_pattern) const
 {
-    auto h_A = A.template mirror_view_and_copy<Kokkos::HostSpace>();
-    const int n                                  = A.rows();
+    auto h_A    = A.template mirror_view_and_copy<Kokkos::HostSpace>();
+    const int n = A.rows();
     L_pattern.resize(n);
     U_pattern.resize(n);
 
@@ -470,8 +476,8 @@ void SparseLUSolver<T, MemorySpace>::numericFactorization(const SparseMatrixCSR<
                                                           const std::vector<std::vector<int>>& L_pattern,
                                                           const std::vector<std::vector<int>>& U_pattern)
 {
-    auto h_A = A.template mirror_view_and_copy<Kokkos::HostSpace>();
-    const int n                                  = A.rows();
+    auto h_A    = A.template mirror_view_and_copy<Kokkos::HostSpace>();
+    const int n = A.rows();
 
     // Initialize storage structures
     Vector<int, Kokkos::HostSpace> h_L_row_ptr("L_row_ptr", n + 1);
@@ -489,10 +495,10 @@ void SparseLUSolver<T, MemorySpace>::numericFactorization(const SparseMatrixCSR<
     }
 
     // Allocate memory for values and indices
-    Vector<T, Kokkos::HostSpace>   h_L_values  ("L_values", h_L_row_ptr[n]);
-    Vector<int, Kokkos::HostSpace> h_L_col_idx ("L_col_idx", h_L_row_ptr[n]);
-    Vector<T, Kokkos::HostSpace>   h_U_values  ("U_values", h_U_row_ptr[n]);
-    Vector<int, Kokkos::HostSpace> h_U_col_idx ("U_col_idx", h_U_row_ptr[n]);
+    Vector<T, Kokkos::HostSpace> h_L_values("L_values", h_L_row_ptr[n]);
+    Vector<int, Kokkos::HostSpace> h_L_col_idx("L_col_idx", h_L_row_ptr[n]);
+    Vector<T, Kokkos::HostSpace> h_U_values("U_values", h_U_row_ptr[n]);
+    Vector<int, Kokkos::HostSpace> h_U_col_idx("U_col_idx", h_U_row_ptr[n]);
 
     // Find start of upper triangular part in U patterns
     Vector<int, Kokkos::HostSpace> U_pattern_start_upper("U_pattern_start_upper", n);
@@ -558,11 +564,11 @@ void SparseLUSolver<T, MemorySpace>::numericFactorization(const SparseMatrixCSR<
         int diag_offset     = -1;
         int U_offset        = h_U_row_ptr[i];
         for (int j : U_pattern[i]) {
-            T val               = dense[j];
+            T val                 = dense[j];
             h_U_values[U_offset]  = val;
             h_U_col_idx[U_offset] = j;
             if (j == i) {
-                h_U_diag[i]      = val;
+                h_U_diag[i]    = val;
                 diagonal_found = true;
                 diag_offset    = U_offset;
             }
@@ -591,14 +597,13 @@ void SparseLUSolver<T, MemorySpace>::numericFactorization(const SparseMatrixCSR<
         }
     }
 
-	L_row_ptr_ = Kokkos::create_mirror_view_and_copy(MemorySpace(), h_L_row_ptr);
-	U_row_ptr_ = Kokkos::create_mirror_view_and_copy(MemorySpace(), h_U_row_ptr);
-	U_diag_ = Kokkos::create_mirror_view_and_copy(MemorySpace(), h_U_diag);
+    L_row_ptr_ = Kokkos::create_mirror_view_and_copy(MemorySpace(), h_L_row_ptr);
+    U_row_ptr_ = Kokkos::create_mirror_view_and_copy(MemorySpace(), h_U_row_ptr);
+    U_diag_    = Kokkos::create_mirror_view_and_copy(MemorySpace(), h_U_diag);
 
-	L_values_ = Kokkos::create_mirror_view_and_copy(MemorySpace(), h_L_values);
-	L_col_idx_ = Kokkos::create_mirror_view_and_copy(MemorySpace(), h_L_col_idx);
-	U_values_ = Kokkos::create_mirror_view_and_copy(MemorySpace(), h_U_values);
-	U_col_idx_ = Kokkos::create_mirror_view_and_copy(MemorySpace(), h_U_col_idx);
-
+    L_values_  = Kokkos::create_mirror_view_and_copy(MemorySpace(), h_L_values);
+    L_col_idx_ = Kokkos::create_mirror_view_and_copy(MemorySpace(), h_L_col_idx);
+    U_values_  = Kokkos::create_mirror_view_and_copy(MemorySpace(), h_U_values);
+    U_col_idx_ = Kokkos::create_mirror_view_and_copy(MemorySpace(), h_U_col_idx);
 }
 } // namespace gmgpolar
