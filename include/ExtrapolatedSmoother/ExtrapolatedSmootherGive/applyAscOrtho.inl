@@ -3,10 +3,11 @@
 namespace extrapolated_smoother_give
 {
 
-static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleGive(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                               SmootherColor smoother_color, ConstVector<double>& x,
-                                               ConstVector<double>& rhs, Vector<double>& result, double arr, double att,
-                                               double art, double detDF, double coeff_beta)
+static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleGive(int i_r, int i_theta, const PolarGrid& grid,
+                                                               bool DirBC_Interior, SmootherColor smoother_color,
+                                                               ConstVector<double>& x, ConstVector<double>& rhs,
+                                                               Vector<double>& result, double arr, double att,
+                                                               double art, double detDF, double coeff_beta)
 {
     assert(i_r >= 0 && i_r <= grid.numberSmootherCircles());
 
@@ -400,10 +401,11 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleGive(int i_r, int i_th
 namespace extrapolated_smoother_give
 {
 
-static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialGive(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                               SmootherColor smoother_color, ConstVector<double>& x,
-                                               ConstVector<double>& rhs, Vector<double>& result, double arr, double att,
-                                               double art, double detDF, double coeff_beta)
+static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialGive(int i_r, int i_theta, const PolarGrid& grid,
+                                                               bool DirBC_Interior, SmootherColor smoother_color,
+                                                               ConstVector<double>& x, ConstVector<double>& rhs,
+                                                               Vector<double>& result, double arr, double att,
+                                                               double art, double detDF, double coeff_beta)
 {
     assert(i_r >= grid.numberSmootherCircles() - 1 && i_r < grid.nr());
 

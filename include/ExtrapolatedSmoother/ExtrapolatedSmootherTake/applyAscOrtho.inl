@@ -3,11 +3,12 @@
 namespace extrapolated_smoother_take
 {
 
-static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                               ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
-                                               ConstVector<double>& arr, ConstVector<double>& att,
-                                               ConstVector<double>& art, ConstVector<double>& detDF,
-                                               ConstVector<double>& coeff_beta)
+static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const PolarGrid& grid,
+                                                               bool DirBC_Interior, ConstVector<double>& x,
+                                                               ConstVector<double>& rhs, Vector<double>& result,
+                                                               ConstVector<double>& arr, ConstVector<double>& att,
+                                                               ConstVector<double>& art, ConstVector<double>& detDF,
+                                                               ConstVector<double>& coeff_beta)
 {
     assert(i_r >= 0 && i_r <= grid.numberSmootherCircles());
 
@@ -185,11 +186,11 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleTake(int i_r, int i_th
     }
 }
 
-static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                               ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
-                                               ConstVector<double>& arr, const ConstVector<double>& att,
-                                               ConstVector<double>& art, const ConstVector<double>& detDF,
-                                               ConstVector<double>& coeff_beta)
+static KOKKOS_INLINE_FUNCTION void
+nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior, ConstVector<double>& x,
+                            ConstVector<double>& rhs, Vector<double>& result, ConstVector<double>& arr,
+                            const ConstVector<double>& att, ConstVector<double>& art, const ConstVector<double>& detDF,
+                            ConstVector<double>& coeff_beta)
 {
     assert(i_r >= grid.numberSmootherCircles() - 1 && i_r < grid.nr());
 

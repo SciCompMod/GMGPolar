@@ -172,7 +172,7 @@ private:
     /* Orthogonal application */
     /* ---------------------- */
 
-	// Functions must be public due to cuda restriction
+    // Functions must be public due to cuda restriction
 public:
     // Compute temp = f_sc − A_sc^ortho * u_sc^ortho   (precomputed right-hand side)
     // where x = u_sc and rhs = f_sc
