@@ -5,12 +5,12 @@ namespace smoother_give
 
 #ifdef GMGPOLAR_USE_MUMPS
 // When using the MUMPS solver, the matrix is assembled in COO format.
-static inline void update_CSR_COO_MatrixElement(SparseMatrixCOO<double>& matrix, int ptr, int offset, int row,
+static inline void update_CSR_COO_MatrixElement(SparseMatrixCOO<double, Kokkos::HostSpace>& matrix, int ptr, int offset, int row,
                                                 int column, double value)
 {
-    matrix.row_index(ptr + offset) = row;
-    matrix.col_index(ptr + offset) = column;
-    matrix.value(ptr + offset) += value;
+    matrix.set_row_index(ptr + offset, row);
+    matrix.set_col_index(ptr + offset, column);
+    matrix.increase_value(ptr + offset, value);
 }
 #else
 // When using the in-house solver, the matrix is stored in CSR format.
@@ -247,7 +247,7 @@ SmootherGive<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     // which is extracted by the COO_Mumps_Solver internally.
 #ifdef GMGPOLAR_USE_MUMPS
     const int nnz = getNonZeroCountCircleAsc(i_r);
-    SparseMatrixCOO<double> inner_boundary_solver_matrix(ntheta, ntheta, nnz);
+    SparseMatrixCOO<double, Kokkos::HostSpace> inner_boundary_solver_matrix(ntheta, ntheta, nnz);
     inner_boundary_solver_matrix.is_symmetric(true);
 #else
     // The stencils size for the inner boundary matrix is either 1 (Dirichlet BC) or 4 (across-origin discretization).
