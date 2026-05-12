@@ -64,7 +64,8 @@ KOKKOS_INLINE_FUNCTION double CulhamGeometry::dFy_dt(double r, double theta) con
            2.0 * T((r / Rmax)) * cos_two_theta;
 }
 
-KOKKOS_INLINE_FUNCTION double CulhamGeometry::my_sum(std::array<double, 1001>& f, int64_t start_idx, int64_t end_idx) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::my_sum(std::array<double, 1001>& f, int64_t start_idx,
+                                                     int64_t end_idx) const
 {
     int64_t i;
     double result;
@@ -103,7 +104,8 @@ KOKKOS_INLINE_FUNCTION double CulhamGeometry::dg(double rr, double g) const
            (rr / (4.0 - 0.5 * (rr * rr)) + (4.0 - 0.5 * (rr * rr)) / (g * rr));
 }
 
-KOKKOS_INLINE_FUNCTION double CulhamGeometry::double_deriv(double rr, double c, double g, double dg, double val, double d_val) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::double_deriv(double rr, double c, double g, double dg, double val,
+                                                           double d_val) const
 {
     return c * val / (rr * rr) -
            d_val * (pow(rr, (double)((-1))) + (4.0 - 0.5 * (rr * rr)) *

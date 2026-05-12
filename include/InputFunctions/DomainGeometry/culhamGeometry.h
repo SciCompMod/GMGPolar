@@ -35,7 +35,8 @@ private:
     KOKKOS_INLINE_FUNCTION double p(double rr) const;
     KOKKOS_INLINE_FUNCTION double dp(double rr) const;
     KOKKOS_INLINE_FUNCTION double dg(double rr, double g) const;
-    KOKKOS_INLINE_FUNCTION double double_deriv(double rr, double c, double g, double dg, double val, double d_val) const;
+    KOKKOS_INLINE_FUNCTION double double_deriv(double rr, double c, double g, double dg, double val,
+                                               double d_val) const;
     KOKKOS_INLINE_FUNCTION double g(double rr) const;
     KOKKOS_INLINE_FUNCTION double Delta(double rr) const;
     KOKKOS_INLINE_FUNCTION double Delta_prime(double rr) const;
