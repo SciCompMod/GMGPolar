@@ -40,7 +40,7 @@ TEST(OperatorATest, applyA_DirBC_Interior)
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
     ZoniShiftedCoefficients coefficients(Rmax, alpha_jump);
 
-    bool DirBC_Interior  = true;
+    bool DirBC_Interior = true;
 
     // "Take" requires cached values
     bool cache_density_rpofile_coefficients = true;
@@ -92,7 +92,7 @@ TEST(OperatorATest, applyA_AcrossOrigin)
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
-    bool DirBC_Interior  = false;
+    bool DirBC_Interior = false;
 
     // "Take" requires cached values
     bool cache_density_rpofile_coefficients = true;

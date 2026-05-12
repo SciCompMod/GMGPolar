@@ -56,7 +56,7 @@ TEST(DirectSolverTest, directSolver_DirBC_Interior)
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
-    bool DirBC_Interior  = true;
+    bool DirBC_Interior = true;
 
     // "Take" requires cached values
     bool cache_density_rpofile_coefficients = true;
@@ -105,7 +105,7 @@ TEST(DirectSolverTest, directSolver_AcrossOrigin)
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
-    bool DirBC_Interior  = false;
+    bool DirBC_Interior = false;
 
     // "Take" requires cached values
     bool cache_density_rpofile_coefficients = true;
