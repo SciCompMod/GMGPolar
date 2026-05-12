@@ -3,7 +3,7 @@
 namespace smoother_give
 {
 
-static inline void nodeApplyAscOrthoCircleGive(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleGive(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                                SmootherColor smoother_color, ConstVector<double>& x,
                                                ConstVector<double>& rhs, Vector<double>& result, double arr, double att,
                                                double art, double detDF, double coeff_beta)
@@ -187,7 +187,7 @@ static inline void nodeApplyAscOrthoCircleGive(int i_r, int i_theta, const Polar
     }
 }
 
-static inline void nodeApplyAscOrthoRadialGive(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialGive(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                                SmootherColor smoother_color, ConstVector<double>& x,
                                                ConstVector<double>& rhs, Vector<double>& result, double arr, double att,
                                                double art, double detDF, double coeff_beta)

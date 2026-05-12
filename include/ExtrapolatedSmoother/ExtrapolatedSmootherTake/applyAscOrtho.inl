@@ -3,7 +3,7 @@
 namespace extrapolated_smoother_take
 {
 
-static inline void nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                                ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
                                                ConstVector<double>& arr, ConstVector<double>& att,
                                                ConstVector<double>& art, ConstVector<double>& detDF,
@@ -185,7 +185,7 @@ static inline void nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const Polar
     }
 }
 
-static inline void nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                                ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
                                                ConstVector<double>& arr, const ConstVector<double>& att,
                                                ConstVector<double>& art, const ConstVector<double>& detDF,
