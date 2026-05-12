@@ -21,7 +21,7 @@
 namespace gmgpolar
 {
 
-template <typename T>
+template <typename T, class MemorySpace = Kokkos::DefaultExecutionSpace::memory_space>
 class SparseMatrixCOO
 {
 public:
@@ -71,9 +71,9 @@ private:
     int rows_;
     int columns_;
     int nnz_;
-    AllocatableVector<int> row_indices_;
-    AllocatableVector<int> column_indices_;
-    AllocatableVector<T> values_;
+    AllocatableVector<int, MemorySpace> row_indices_;
+    AllocatableVector<int, MemorySpace> column_indices_;
+    AllocatableVector<T, MemorySpace> values_;
     bool is_symmetric_ = false;
 };
 
@@ -93,8 +93,8 @@ std::ostream& operator<<(std::ostream& stream, const SparseMatrixCOO<U>& matrix)
     return stream;
 }
 
-template <typename T>
-void SparseMatrixCOO<T>::write_to_file(const std::string& filename) const
+template <typename T, class MemorySpace>
+void SparseMatrixCOO<T, MemorySpace>::write_to_file(const std::string& filename) const
 {
     std::ofstream file(filename);
     if (!file.is_open()) {
@@ -112,7 +112,7 @@ void SparseMatrixCOO<T>::write_to_file(const std::string& filename) const
     file.close();
 }
 
-template <typename T>
+template <typename T, class MemorySpace>
 void sort_entries(std::vector<std::tuple<int, int, T>>& entries)
 {
     const auto compare = [](const auto entry1, const auto entry2) {
@@ -130,8 +130,8 @@ void sort_entries(std::vector<std::tuple<int, int, T>>& entries)
 }
 
 // default construction
-template <typename T>
-SparseMatrixCOO<T>::SparseMatrixCOO()
+template <typename T, class MemorySpace>
+SparseMatrixCOO<T, MemorySpace>::SparseMatrixCOO()
     : rows_(0)
     , columns_(0)
     , nnz_(0)
@@ -140,16 +140,16 @@ SparseMatrixCOO<T>::SparseMatrixCOO()
 }
 
 // copy construction
-template <typename T>
-SparseMatrixCOO<T> SparseMatrixCOO<T>::copy() const
+template <typename T, class MemorySpace>
+SparseMatrixCOO<T, MemorySpace> SparseMatrixCOO<T, MemorySpace>::copy() const
 {
-    SparseMatrixCOO<T> other;
+    SparseMatrixCOO<T, MemorySpace> other;
     other.rows_           = rows_;
     other.columns_        = columns_;
     other.nnz_            = other.nnz_;
-    other.row_indices_    = Vector<int>("COO row indices", nnz_);
-    other.column_indices_ = Vector<int>("COO column indices", nnz_);
-    other.values_         = Vector<T>("COO values", nnz_);
+    other.row_indices_    = Vector<int, MemorySpace>("COO row indices", nnz_);
+    other.column_indices_ = Vector<int, MemorySpace>("COO column indices", nnz_);
+    other.values_         = Vector<T, MemorySpace>("COO values", nnz_);
     other.is_symmetric_   = is_symmetric_;
 
     Kokkos::deep_copy(other.row_indices_, row_indices_);
@@ -160,8 +160,8 @@ SparseMatrixCOO<T> SparseMatrixCOO<T>::copy() const
 }
 
 // move construction
-template <typename T>
-SparseMatrixCOO<T>::SparseMatrixCOO(SparseMatrixCOO&& other) noexcept
+template <typename T, class MemorySpace>
+SparseMatrixCOO<T, MemorySpace>::SparseMatrixCOO(SparseMatrixCOO&& other) noexcept
     : rows_(other.rows_)
     , columns_(other.columns_)
     , nnz_(other.nnz_)
@@ -177,8 +177,8 @@ SparseMatrixCOO<T>::SparseMatrixCOO(SparseMatrixCOO&& other) noexcept
 }
 
 // move assignment
-template <typename T>
-SparseMatrixCOO<T>& SparseMatrixCOO<T>::operator=(SparseMatrixCOO&& other) noexcept
+template <typename T, class MemorySpace>
+SparseMatrixCOO<T, MemorySpace>& SparseMatrixCOO<T, MemorySpace>::operator=(SparseMatrixCOO&& other) noexcept
 {
     rows_               = other.rows_;
     columns_            = other.columns_;
@@ -194,8 +194,8 @@ SparseMatrixCOO<T>& SparseMatrixCOO<T>::operator=(SparseMatrixCOO&& other) noexc
     return *this;
 }
 
-template <typename T>
-SparseMatrixCOO<T>::SparseMatrixCOO(int rows, int columns, int nnz)
+template <typename T, class MemorySpace>
+SparseMatrixCOO<T, MemorySpace>::SparseMatrixCOO(int rows, int columns, int nnz)
     : rows_(rows)
     , columns_(columns)
     , nnz_(nnz)
@@ -213,8 +213,8 @@ SparseMatrixCOO<T>::SparseMatrixCOO(int rows, int columns, int nnz)
     assign(values_, T(0));
 }
 
-template <typename T>
-SparseMatrixCOO<T>::SparseMatrixCOO(int rows, int columns, const std::vector<triplet_type>& entries)
+template <typename T, class MemorySpace>
+SparseMatrixCOO<T, MemorySpace>::SparseMatrixCOO(int rows, int columns, const std::vector<triplet_type>& entries)
     : // entries: row_idx, col_idx, value
     rows_(rows)
     , columns_(columns)
@@ -227,127 +227,133 @@ SparseMatrixCOO<T>::SparseMatrixCOO(int rows, int columns, const std::vector<tri
     assert(rows_ >= 0);
     assert(columns_ >= 0);
     assert(nnz_ >= 0);
+	auto h_row_indices = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, row_indices_);
+	auto h_column_indices = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, column_indices_);
+	auto h_values = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, values_);
     Kokkos::parallel_for(
-        "SparseMatrixCOO constructor", nnz_, KOKKOS_LAMBDA(const int i) {
+        "SparseMatrixCOO constructor", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, nnz_), [&](const int i) {
             assert(0 <= std::get<0>(entries[i]) && std::get<0>(entries[i]) < rows_);
             assert(0 <= std::get<1>(entries[i]) && std::get<1>(entries[i]) < columns_);
-            row_indices_(i)    = std::get<0>(entries[i]);
-            column_indices_(i) = std::get<1>(entries[i]);
-            values_(i)         = std::get<2>(entries[i]);
+            h_row_indices(i)    = std::get<0>(entries[i]);
+            h_column_indices(i) = std::get<1>(entries[i]);
+            h_values(i)         = std::get<2>(entries[i]);
         });
+	Kokkos::deep_copy(row_indices_, h_row_indices);
+	Kokkos::deep_copy(column_indices_, h_column_indices);
+	Kokkos::deep_copy(values_, h_values);
 }
 
-template <typename T>
-int SparseMatrixCOO<T>::rows() const
+template <typename T, class MemorySpace>
+int SparseMatrixCOO<T, MemorySpace>::rows() const
 {
     assert(this->rows_ >= 0);
     return this->rows_;
 }
-template <typename T>
-int SparseMatrixCOO<T>::columns() const
+template <typename T, class MemorySpace>
+int SparseMatrixCOO<T, MemorySpace>::columns() const
 {
     assert(this->columns_ >= 0);
     return this->columns_;
 }
-template <typename T>
-int SparseMatrixCOO<T>::non_zero_size() const
+template <typename T, class MemorySpace>
+int SparseMatrixCOO<T, MemorySpace>::non_zero_size() const
 {
     assert(this->nnz_ >= 0);
     assert(static_cast<size_t>(this->nnz_) <= static_cast<size_t>(this->rows_) * static_cast<size_t>(this->columns_));
     return this->nnz_;
 }
 
-template <typename T>
-void SparseMatrixCOO<T>::set_row_index(int nz_index, int row_index) const
+template <typename T, class MemorySpace>
+void SparseMatrixCOO<T, MemorySpace>::set_row_index(int nz_index, int row_index) const
 {
     assert(nz_index >= 0);
     assert(nz_index < this->nnz_);
     row_indices_(nz_index) = row_index;
 }
-template <typename T>
-const int& SparseMatrixCOO<T>::row_index(int nz_index) const
+template <typename T, class MemorySpace>
+const int& SparseMatrixCOO<T, MemorySpace>::row_index(int nz_index) const
 {
     assert(nz_index >= 0);
     assert(nz_index < this->nnz_);
     return row_indices_(nz_index);
 }
-template <typename T>
-void SparseMatrixCOO<T>::increment_row_index(int nz_index) const
+template <typename T, class MemorySpace>
+void SparseMatrixCOO<T, MemorySpace>::increment_row_index(int nz_index) const
 {
     assert(nz_index >= 0);
     assert(nz_index < this->nnz_);
     row_indices_(nz_index)++;
 }
 
-template <typename T>
-void SparseMatrixCOO<T>::set_col_index(int nz_index, int col_index) const
+template <typename T, class MemorySpace>
+void SparseMatrixCOO<T, MemorySpace>::set_col_index(int nz_index, int col_index) const
 {
     assert(nz_index >= 0);
     assert(nz_index < nnz_);
     column_indices_(nz_index) = col_index;
 }
-template <typename T>
-const int& SparseMatrixCOO<T>::col_index(int nz_index) const
+template <typename T, class MemorySpace>
+const int& SparseMatrixCOO<T, MemorySpace>::col_index(int nz_index) const
 {
     assert(nz_index >= 0);
     assert(nz_index < nnz_);
     return column_indices_(nz_index);
 }
-template <typename T>
-void SparseMatrixCOO<T>::increment_col_index(int nz_index) const
+template <typename T, class MemorySpace>
+void SparseMatrixCOO<T, MemorySpace>::increment_col_index(int nz_index) const
 {
     assert(nz_index >= 0);
     assert(nz_index < nnz_);
     column_indices_(nz_index)++;
 }
 
-template <typename T>
-void SparseMatrixCOO<T>::set_value(int nz_index, T value) const
+template <typename T, class MemorySpace>
+void SparseMatrixCOO<T, MemorySpace>::set_value(int nz_index, T value) const
 {
     assert(nz_index >= 0);
     assert(nz_index < nnz_);
     values_(nz_index) = value;
 }
-template <typename T>
-const T& SparseMatrixCOO<T>::value(int nz_index) const
+template <typename T, class MemorySpace>
+const T& SparseMatrixCOO<T, MemorySpace>::value(int nz_index) const
 {
     assert(nz_index >= 0);
     assert(nz_index < nnz_);
     return values_(nz_index);
 }
-template <typename T>
-void SparseMatrixCOO<T>::increase_value(int nz_index, T value) const
+template <typename T, class MemorySpace>
+void SparseMatrixCOO<T, MemorySpace>::increase_value(int nz_index, T value) const
 {
     assert(nz_index >= 0);
     assert(nz_index < nnz_);
     values_(nz_index) += value;
 }
 
-template <typename T>
-bool SparseMatrixCOO<T>::is_symmetric() const
+template <typename T, class MemorySpace>
+bool SparseMatrixCOO<T, MemorySpace>::is_symmetric() const
 {
     return is_symmetric_;
 }
-template <typename T>
-void SparseMatrixCOO<T>::is_symmetric(bool value)
+template <typename T, class MemorySpace>
+void SparseMatrixCOO<T, MemorySpace>::is_symmetric(bool value)
 {
     is_symmetric_ = value;
 }
 
-template <typename T>
-int* SparseMatrixCOO<T>::row_indices_data() const
+template <typename T, class MemorySpace>
+int* SparseMatrixCOO<T, MemorySpace>::row_indices_data() const
 {
     return row_indices_.data();
 }
 
-template <typename T>
-int* SparseMatrixCOO<T>::column_indices_data() const
+template <typename T, class MemorySpace>
+int* SparseMatrixCOO<T, MemorySpace>::column_indices_data() const
 {
     return column_indices_.data();
 }
 
-template <typename T>
-T* SparseMatrixCOO<T>::values_data() const
+template <typename T, class MemorySpace>
+T* SparseMatrixCOO<T, MemorySpace>::values_data() const
 {
     return values_.data();
 }
