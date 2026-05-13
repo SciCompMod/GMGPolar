@@ -368,7 +368,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<d
     {
         /* Inside White Section */
         const int start  = (grid.numberSmootherCircles() % 2 == 0) ? 0 : 1;
-        const int end    = grid.numberSmootherCircles();
+        const int end    = grid.numberSmootherCircles() - 1;
         const int offset = 2;
 
         Kokkos::parallel_for(
@@ -386,7 +386,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<d
     {
         /* Outside White Section (Part 1)*/
         const int start  = (grid.numberSmootherCircles() % 2 == 0) ? 1 : 0;
-        const int end    = grid.numberSmootherCircles() + 1;
+        const int end    = grid.numberSmootherCircles();
         const int offset = 4;
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (White Circle - Outside: Part 1)",
@@ -403,7 +403,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<d
     {
         /* Outside White Section (Part 2)*/
         const int start  = (grid.numberSmootherCircles() % 2 == 0) ? 3 : 2;
-        const int end    = grid.numberSmootherCircles() + 1;
+        const int end    = grid.numberSmootherCircles();
         const int offset = 4;
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (White Circle - Outside: Part 2)",
