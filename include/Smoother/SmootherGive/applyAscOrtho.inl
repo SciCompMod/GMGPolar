@@ -168,54 +168,61 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialGiveInside(int i_r, in
 
     const int bottom = grid.index(i_r, i_theta_M1);
     const int top    = grid.index(i_r, i_theta_P1);
-    const int left   = grid.index(i_r - 1, i_theta);
 
-    /* h1, k1, k2 are always valid at this point */
-    const double h1     = grid.radialSpacing(i_r - 1);
-    const double k1     = grid.angularSpacing(i_theta_M1);
-    const double k2     = grid.angularSpacing(i_theta);
-    const double coeff1 = 0.5 * (k1 + k2) / h1;
+    const double k1 = grid.angularSpacing(i_theta_M1);
+    const double k2 = grid.angularSpacing(i_theta);
 
-    /* ------------------- */
-    /* Fill result(center) */
-    /* ------------------- */
-    if (grid.numberSmootherCircles() <= i_r && i_r < grid.nr() - 1) {
-        const double h2     = grid.radialSpacing(i_r); // safe: i_r < nr-1
+    if (grid.numberSmootherCircles() <= i_r && i_r <= grid.nr() - 2) {
+        const double h1     = grid.radialSpacing(i_r);
+        const double h2     = grid.radialSpacing(i_r);
         const double coeff3 = 0.5 * (h1 + h2) / k1;
         const double coeff4 = 0.5 * (h1 + h2) / k2;
         result[center] -= (-coeff3 * att * x[bottom] /* Bottom */
-                           - coeff4 * att * x[top]); /* Top   */
+                           - coeff4 * att * x[top]); /* Top */
     }
 
-    /* ----------------- */
-    /* Fill result(left) */
-    /* ----------------- */
-    if (grid.numberSmootherCircles() < i_r && i_r < grid.nr()) {
-        result[left] -= (-0.25 * art * x[top] /* Top Right    */
+    if (grid.numberSmootherCircles() <= i_r && i_r <= grid.nr() - 1) {
+        const int left = grid.index(i_r - 1, i_theta);
+        result[left] -= (-0.25 * art * x[top] /* Top Right */
                          + 0.25 * art * x[bottom]); /* Bottom Right */
     }
 
-    /* ------------------- */
-    /* Fill result(right): */
-    /* ------------------- */
     if (grid.numberSmootherCircles() - 1 <= i_r && i_r < grid.nr() - 2) {
         const int right = grid.index(i_r + 1, i_theta);
         result[right] -= (+0.25 * art * x[top] /* Top Left    */
                           - 0.25 * art * x[bottom]); /* Bottom Left */
     }
 
-    /* --------------- */
-    /* Symmetry shifts */
-    /* --------------- */
+    if (i_r == grid.numberSmootherCircles() - 1) {
+        const double h2     = grid.radialSpacing(i_r);
+        const double coeff2 = 0.5 * (k1 + k2) / h2;
+
+        const int right = grid.index(i_r + 1, i_theta);
+        result[right] -= (-coeff2 * arr * x[center]); /* Left */
+    }
+
+    if (i_r == grid.numberSmootherCircles()) {
+        const double h1     = grid.radialSpacing(i_r);
+        const double coeff1 = 0.5 * (k1 + k2) / h1;
+
+        const int left = grid.index(i_r - 1, i_theta);
+        result[center] -= (-coeff1 * arr * x[left]); /* Left */
+    }
+
     if (i_r == grid.nr() - 2) {
         const double h2     = grid.radialSpacing(i_r);
         const double coeff2 = 0.5 * (k1 + k2) / h2;
-        const int right     = grid.index(i_r + 1, i_theta);
-        result[center] -= -coeff2 * arr * rhs[right]; /* Right: Symmetry shift! */
+
+        const int right = grid.index(i_r + 1, i_theta);
+        result[center] -= (-coeff2 * arr * rhs[right]); /* Right: Symmetry shift! */
     }
 
     if (i_r == grid.nr() - 1) {
-        result[left] -= -coeff1 * arr * rhs[center]; /* Right: Symmetry shift! */
+        const double h1     = grid.radialSpacing(i_r);
+        const double coeff1 = 0.5 * (k1 + k2) / h1;
+
+        const int left = grid.index(i_r - 1, i_theta);
+        result[left] -= (-coeff1 * arr * rhs[center]); /* Right: Symmetry shift! */
     }
 }
 
