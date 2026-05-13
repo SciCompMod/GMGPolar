@@ -110,30 +110,33 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleGiveOutside(int i_r, i
     level_cache.obtainValues(i_r, i_theta, center, radius, theta, coeff_beta, arr, att, art, detDF);
 
     if (0 <= i_r && i_r <= grid.numberSmootherCircles()) {
-        const double h1 = grid.radialSpacing(i_r - 1);
-        const double h2 = grid.radialSpacing(i_r);
         const double k1 = grid.angularSpacing(i_theta - 1);
         const double k2 = grid.angularSpacing(i_theta);
-
-        const double coeff1 = 0.5 * (k1 + k2) / h1;
-        const double coeff2 = 0.5 * (k1 + k2) / h2;
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
 
-        const int left   = grid.index(i_r - 1, i_theta);
-        const int right  = grid.index(i_r + 1, i_theta);
         const int bottom = grid.index(i_r, i_theta_M1);
         const int top    = grid.index(i_r, i_theta_P1);
 
         /* Fill result(i-1,j) */
         if (i_r > 1 || (i_r == 1 && !DirBC_Interior)) {
+            const double h1     = grid.radialSpacing(i_r - 1);
+            const double coeff1 = 0.5 * (k1 + k2) / h1;
+
+            const int left = grid.index(i_r - 1, i_theta);
+
             result[left] -= (-coeff1 * arr * x[center] /* Right */
                              - 0.25 * art * x[top] /* Top Right */
                              + 0.25 * art * x[bottom]); /* Bottom Right */
         }
         /* Fill result(i+1,j) */
         if (i_r < grid.numberSmootherCircles() - 1) {
+            const double h2     = grid.radialSpacing(i_r);
+            const double coeff2 = 0.5 * (k1 + k2) / h2;
+
+            const int right = grid.index(i_r + 1, i_theta);
+
             result[right] -= (-coeff2 * arr * x[center] /* Left */
                               + 0.25 * art * x[top] /* Top Left */
                               - 0.25 * art * x[bottom]); /* Bottom Left */
