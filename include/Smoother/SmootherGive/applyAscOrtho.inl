@@ -173,7 +173,7 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialGiveInside(int i_r, in
     const double k2 = grid.angularSpacing(i_theta);
 
     if (grid.numberSmootherCircles() <= i_r && i_r <= grid.nr() - 2) {
-        const double h1     = grid.radialSpacing(i_r);
+        const double h1     = grid.radialSpacing(i_r - 1);
         const double h2     = grid.radialSpacing(i_r);
         const double coeff3 = 0.5 * (h1 + h2) / k1;
         const double coeff4 = 0.5 * (h1 + h2) / k2;
@@ -202,7 +202,7 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialGiveInside(int i_r, in
     }
 
     if (i_r == grid.numberSmootherCircles()) {
-        const double h1     = grid.radialSpacing(i_r);
+        const double h1     = grid.radialSpacing(i_r - 1);
         const double coeff1 = 0.5 * (k1 + k2) / h1;
 
         const int left = grid.index(i_r - 1, i_theta);
@@ -218,7 +218,7 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialGiveInside(int i_r, in
     }
 
     if (i_r == grid.nr() - 1) {
-        const double h1     = grid.radialSpacing(i_r);
+        const double h1     = grid.radialSpacing(i_r - 1);
         const double coeff1 = 0.5 * (k1 + k2) / h1;
 
         const int left = grid.index(i_r - 1, i_theta);
