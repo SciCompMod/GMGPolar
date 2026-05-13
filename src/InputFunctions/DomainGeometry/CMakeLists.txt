@@ -10,3 +10,4 @@ target_include_directories(InputFunctions_DomainGeometry PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/include/InputFunctions/DomainGeometry
 )
+target_link_libraries(InputFunctions_DomainGeometry PUBLIC Kokkos::kokkos)

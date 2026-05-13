@@ -3,7 +3,7 @@
 #include "culhamGeometry.h"
 
 // In earlier versions denoted by 'x'
-inline double CulhamGeometry::Fx(double r, double theta) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::Fx(double r, double theta) const
 {
     double sin_theta           = std::sin(theta);
     double cos_theta           = std::cos(theta);
@@ -13,7 +13,7 @@ inline double CulhamGeometry::Fx(double r, double theta) const
 }
 
 // In earlier versions denoted by 'y'
-inline double CulhamGeometry::Fy(double r, double theta) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::Fy(double r, double theta) const
 {
     double sin_theta           = std::sin(theta);
     double cos_theta           = std::cos(theta);
@@ -23,7 +23,7 @@ inline double CulhamGeometry::Fy(double r, double theta) const
 }
 
 // In earlier versions denoted by 'Jrr'
-inline double CulhamGeometry::dFx_dr(double r, double theta) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::dFx_dr(double r, double theta) const
 {
     double sin_theta           = std::sin(theta);
     double cos_theta           = std::cos(theta);
@@ -34,7 +34,7 @@ inline double CulhamGeometry::dFx_dr(double r, double theta) const
 }
 
 // In earlier versions denoted by 'Jtr'
-inline double CulhamGeometry::dFy_dr(double r, double theta) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::dFy_dr(double r, double theta) const
 {
     double sin_theta           = std::sin(theta);
     double cos_theta           = std::cos(theta);
@@ -45,7 +45,7 @@ inline double CulhamGeometry::dFy_dr(double r, double theta) const
 }
 
 // In earlier versions denoted by 'Jrt'
-inline double CulhamGeometry::dFx_dt(double r, double theta) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::dFx_dt(double r, double theta) const
 {
     double sin_theta           = std::sin(theta);
     double cos_theta           = std::cos(theta);
@@ -55,7 +55,7 @@ inline double CulhamGeometry::dFx_dt(double r, double theta) const
 }
 
 // In earlier versions denoted by 'Jtt'
-inline double CulhamGeometry::dFy_dt(double r, double theta) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::dFy_dt(double r, double theta) const
 {
     double sin_theta           = std::sin(theta);
     double cos_theta           = std::cos(theta);
@@ -64,7 +64,8 @@ inline double CulhamGeometry::dFy_dt(double r, double theta) const
            2.0 * T((r / Rmax)) * cos_two_theta;
 }
 
-inline double CulhamGeometry::my_sum(std::array<double, 1001>& f, int64_t start_idx, int64_t end_idx) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::my_sum(std::array<double, 1001>& f, int64_t start_idx,
+                                                     int64_t end_idx) const
 {
     int64_t i;
     double result;
@@ -75,27 +76,27 @@ inline double CulhamGeometry::my_sum(std::array<double, 1001>& f, int64_t start_
     return result;
 }
 
-inline double CulhamGeometry::q(double rr) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::q(double rr) const
 {
     return 0.8 - 0.1 * (rr * rr);
 }
 
-inline double CulhamGeometry::dq(double rr) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::dq(double rr) const
 {
     return (-0.2) * rr;
 }
 
-inline double CulhamGeometry::p(double rr) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::p(double rr) const
 {
     return 100000.0 - 90000.0 * (rr * rr);
 }
 
-inline double CulhamGeometry::dp(double rr) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::dp(double rr) const
 {
     return (-180000.0) * rr;
 }
 
-inline double CulhamGeometry::dg(double rr, double g) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::dg(double rr, double g) const
 {
     return ((-g) *
                 (0.0625000000000001 * (rr * rr) / pow((1.0 - 0.125 * (rr * rr)), 2.0) + 2.0 / (4.0 - 0.5 * (rr * rr))) +
@@ -103,7 +104,8 @@ inline double CulhamGeometry::dg(double rr, double g) const
            (rr / (4.0 - 0.5 * (rr * rr)) + (4.0 - 0.5 * (rr * rr)) / (g * rr));
 }
 
-inline double CulhamGeometry::double_deriv(double rr, double c, double g, double dg, double val, double d_val) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::double_deriv(double rr, double c, double g, double dg, double val,
+                                                           double d_val) const
 {
     return c * val / (rr * rr) -
            d_val * (pow(rr, (double)((-1))) + (4.0 - 0.5 * (rr * rr)) *
@@ -113,7 +115,7 @@ inline double CulhamGeometry::double_deriv(double rr, double c, double g, double
                                                   (g * rr));
 }
 
-inline double CulhamGeometry::g(double rr) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::g(double rr) const
 {
     int64_t ri;
     double dr;
@@ -131,7 +133,7 @@ inline double CulhamGeometry::g(double rr) const
     }
 }
 
-inline double CulhamGeometry::Delta(double rr) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::Delta(double rr) const
 {
     int64_t ri;
     double dr;
@@ -149,7 +151,7 @@ inline double CulhamGeometry::Delta(double rr) const
     }
 }
 
-inline double CulhamGeometry::Delta_prime(double rr) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::Delta_prime(double rr) const
 {
     int64_t ri;
     double dr;
@@ -167,7 +169,7 @@ inline double CulhamGeometry::Delta_prime(double rr) const
     }
 }
 
-inline double CulhamGeometry::E(double rr) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::E(double rr) const
 {
     int64_t ri;
     double dr;
@@ -185,7 +187,7 @@ inline double CulhamGeometry::E(double rr) const
     }
 }
 
-inline double CulhamGeometry::T(double rr) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::T(double rr) const
 {
     int64_t ri;
     double dr;
@@ -203,7 +205,7 @@ inline double CulhamGeometry::T(double rr) const
     }
 }
 
-inline double CulhamGeometry::E_prime(double rr) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::E_prime(double rr) const
 {
     int64_t ri;
     double dr;
@@ -221,7 +223,7 @@ inline double CulhamGeometry::E_prime(double rr) const
     }
 }
 
-inline double CulhamGeometry::T_prime(double rr) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::T_prime(double rr) const
 {
     int64_t ri;
     double dr;
@@ -239,7 +241,7 @@ inline double CulhamGeometry::T_prime(double rr) const
     }
 }
 
-inline double CulhamGeometry::P(double rr) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::P(double rr) const
 {
     if (rr == 0) {
         return 0.0;
@@ -249,7 +251,7 @@ inline double CulhamGeometry::P(double rr) const
     }
 }
 
-inline double CulhamGeometry::dP(double rr) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::dP(double rr) const
 {
     if (rr == 0) {
         return 0.0;

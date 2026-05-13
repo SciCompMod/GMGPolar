@@ -7,17 +7,17 @@ ZoniShiftedGyroCoefficients::ZoniShiftedGyroCoefficients(double Rmax, double alp
 {
 }
 
-double ZoniShiftedGyroCoefficients::alpha(double r, double theta) const
+KOKKOS_FUNCTION double ZoniShiftedGyroCoefficients::alpha(double r, double theta) const
 {
     return exp(-tanh(20.0 * (r / Rmax) - 14.0));
 }
 
-double ZoniShiftedGyroCoefficients::beta(double r, double theta) const
+KOKKOS_FUNCTION double ZoniShiftedGyroCoefficients::beta(double r, double theta) const
 {
     return exp(tanh(20.0 * (r / Rmax) - 14.0));
 }
 
-double ZoniShiftedGyroCoefficients::getAlphaJump() const
+KOKKOS_FUNCTION double ZoniShiftedGyroCoefficients::getAlphaJump() const
 {
     return alpha_jump;
 }
