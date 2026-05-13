@@ -263,4 +263,3 @@ void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, Co
         Kokkos::fence();
     }
 }
-// clang-format on
