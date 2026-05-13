@@ -15,14 +15,14 @@ void ResidualTake<LevelCacheType>::computeResidual(Vector<double> result, ConstV
 {
     assert(result.size() == x.size());
 
-    const int num_omp_threads = Residual<LevelCacheType>::num_omp_threads_;
-
     applySystemOperator(result, x);
 
     // Subtract A*x from rhs to get the residual.
     const int n = result.size();
-#pragma omp parallel for num_threads(num_omp_threads)
-    for (int i = 0; i < n; i++) {
-        result[i] = rhs[i] - result[i];
-    }
+
+    Kokkos::parallel_for(
+        "Residual Take: Subtract A*x from rhs", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, n),
+        KOKKOS_LAMBDA(const int i) { result[i] = rhs[i] - result[i]; });
+
+    Kokkos::fence();
 }

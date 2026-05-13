@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <Kokkos_Core.hpp>
 
 #include "../densityProfileCoefficients.h"
 
@@ -13,10 +14,10 @@ public:
     ZoniShiftedGyroCoefficients() = default;
     explicit ZoniShiftedGyroCoefficients(double Rmax, double alpha);
 
-    double alpha(double r, double theta) const;
-    double beta(double r, double theta) const;
+    KOKKOS_FUNCTION double alpha(double r, double theta) const;
+    KOKKOS_FUNCTION double beta(double r, double theta) const;
 
-    double getAlphaJump() const;
+    KOKKOS_FUNCTION double getAlphaJump() const;
 
 private:
     const double Rmax       = 1.3;
