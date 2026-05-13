@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <Kokkos_Core.hpp>
 
 #include "../domainGeometry.h"
 
@@ -13,12 +14,12 @@ public:
     CircularGeometry() = default;
     explicit CircularGeometry(double Rmax);
 
-    double Fx(double r, double theta) const;
-    double Fy(double r, double theta) const;
-    double dFx_dr(double r, double theta) const;
-    double dFy_dr(double r, double theta) const;
-    double dFx_dt(double r, double theta) const;
-    double dFy_dt(double r, double theta) const;
+    KOKKOS_INLINE_FUNCTION double Fx(double r, double theta) const;
+    KOKKOS_INLINE_FUNCTION double Fy(double r, double theta) const;
+    KOKKOS_INLINE_FUNCTION double dFx_dr(double r, double theta) const;
+    KOKKOS_INLINE_FUNCTION double dFy_dr(double r, double theta) const;
+    KOKKOS_INLINE_FUNCTION double dFx_dt(double r, double theta) const;
+    KOKKOS_INLINE_FUNCTION double dFy_dt(double r, double theta) const;
 
 private:
     const double Rmax = 1.3;

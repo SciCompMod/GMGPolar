@@ -5,19 +5,22 @@
 #include "../../../include/LinearAlgebra/Vector/vector.h"
 using namespace gmgpolar;
 
+using SparseMatrixCSRHost = SparseMatrixCSR<double, Kokkos::HostSpace>;
+using VectorHost          = Vector<double, Kokkos::HostSpace>;
+
 TEST(SparseMatrixCSR, default_construct)
 {
-    const SparseMatrixCSR<double> v;
+    const SparseMatrixCSRHost v;
     (void)v;
 }
 
 TEST(SparseMatrixCSR, value_construct)
 {
-    using triplet = SparseMatrixCSR<double>::triplet_type;
+    using triplet = SparseMatrixCSRHost::triplet_type;
 
-    const SparseMatrixCSR<double> m(4, 3,
-                                    {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0}, triplet{2, 0, 4.0},
-                                     triplet{2, 1, 5.0}, triplet{2, 2, 6.0}, triplet{3, 2, 7.0}});
+    const SparseMatrixCSRHost m(4, 3,
+                                {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0}, triplet{2, 0, 4.0},
+                                 triplet{2, 1, 5.0}, triplet{2, 2, 6.0}, triplet{3, 2, 7.0}});
 
     EXPECT_EQ(m.rows(), 4);
     EXPECT_EQ(m.columns(), 3);
@@ -43,10 +46,10 @@ TEST(SparseMatrixCSR, copy_construct)
 {
     using triplet = SparseMatrixCSR<double>::triplet_type;
 
-    const SparseMatrixCSR<double> m1(4, 3,
-                                     {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0}, triplet{2, 0, 4.0},
-                                      triplet{2, 1, 5.0}, triplet{2, 2, 6.0}, triplet{3, 2, 7.0}});
-    const SparseMatrixCSR<double> m2 = m1.copy();
+    const SparseMatrixCSRHost m1(4, 3,
+                                 {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0}, triplet{2, 0, 4.0},
+                                  triplet{2, 1, 5.0}, triplet{2, 2, 6.0}, triplet{3, 2, 7.0}});
+    const SparseMatrixCSRHost m2 = m1.copy();
 
     const double dense_values[4][3] = {{1.0, 0.0, 2.0}, {3.0, 0.0, 0.0}, {4.0, 5.0, 6.0}, {0.0, 0.0, 7.0}};
 
@@ -89,15 +92,14 @@ TEST(SparseMatrixCSR, copy_assign)
 {
     const double dense_values[4][3] = {{1.0, 0.0, 2.0}, {3.0, 0.0, 0.0}, {4.0, 5.0, 6.0}, {0.0, 0.0, 7.0}};
 
-    SparseMatrixCSR<double> m2;
+    SparseMatrixCSRHost m2;
 
     {
         using triplet = SparseMatrixCSR<double>::triplet_type;
 
-        const SparseMatrixCSR<double> m1(4, 3,
-                                         {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0},
-                                          triplet{2, 0, 4.0}, triplet{2, 1, 5.0}, triplet{2, 2, 6.0},
-                                          triplet{3, 2, 7.0}});
+        const SparseMatrixCSRHost m1(4, 3,
+                                     {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0}, triplet{2, 0, 4.0},
+                                      triplet{2, 1, 5.0}, triplet{2, 2, 6.0}, triplet{3, 2, 7.0}});
 
         m2 = m1.copy();
 
@@ -160,9 +162,9 @@ TEST(SparseMatrixCSR, move_construct)
 
     using triplet = SparseMatrixCSR<double>::triplet_type;
 
-    SparseMatrixCSR<double> m1(4, 3,
-                               {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0}, triplet{2, 0, 4.0},
-                                triplet{2, 1, 5.0}, triplet{2, 2, 6.0}, triplet{3, 2, 7.0}});
+    SparseMatrixCSRHost m1(4, 3,
+                           {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0}, triplet{2, 0, 4.0},
+                            triplet{2, 1, 5.0}, triplet{2, 2, 6.0}, triplet{3, 2, 7.0}});
 
     EXPECT_EQ(m1.rows(), 4);
     EXPECT_EQ(m1.columns(), 3);
@@ -181,7 +183,7 @@ TEST(SparseMatrixCSR, move_construct)
     EXPECT_DOUBLE_EQ(m1.row_nz_entry(2, 2), dense_values[2][m1.row_nz_index(2, 2)]);
     EXPECT_DOUBLE_EQ(m1.row_nz_entry(3, 0), dense_values[3][m1.row_nz_index(3, 0)]);
 
-    const SparseMatrixCSR<double> m2 = std::move(m1);
+    const SparseMatrixCSRHost m2 = std::move(m1);
 
     EXPECT_EQ(m2.rows(), 4);
     EXPECT_EQ(m2.columns(), 3);
@@ -207,12 +209,12 @@ TEST(SparseMatrixCSR, move_assign)
 
     using triplet = SparseMatrixCSR<double>::triplet_type;
 
-    SparseMatrixCSR<double> m2;
+    SparseMatrixCSRHost m2;
 
     {
-        SparseMatrixCSR<double> m1(4, 3,
-                                   {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0}, triplet{2, 0, 4.0},
-                                    triplet{2, 1, 5.0}, triplet{2, 2, 6.0}, triplet{3, 2, 7.0}});
+        SparseMatrixCSRHost m1(4, 3,
+                               {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0}, triplet{2, 0, 4.0},
+                                triplet{2, 1, 5.0}, triplet{2, 2, 6.0}, triplet{3, 2, 7.0}});
 
         EXPECT_EQ(m1.rows(), 4);
         EXPECT_EQ(m1.columns(), 3);
@@ -273,9 +275,9 @@ TEST(SparseMatrixCSR, value_construct_modify)
 {
     using triplet = SparseMatrixCSR<double>::triplet_type;
 
-    SparseMatrixCSR<double> m(4, 3,
-                              {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0}, triplet{2, 0, 4.0},
-                               triplet{2, 1, 5.0}, triplet{2, 2, 6.0}, triplet{3, 2, 7.0}});
+    SparseMatrixCSRHost m(4, 3,
+                          {triplet{0, 0, 1.0}, triplet{0, 2, 2.0}, triplet{1, 0, 3.0}, triplet{2, 0, 4.0},
+                           triplet{2, 1, 5.0}, triplet{2, 2, 6.0}, triplet{3, 2, 7.0}});
 
     EXPECT_EQ(m.rows(), 4);
     EXPECT_EQ(m.columns(), 3);
@@ -321,15 +323,15 @@ TEST(SparseMatrixCSR, lu_solver_3x3)
 {
     using triplet = SparseMatrixCSR<double>::triplet_type;
 
-    SparseMatrixCSR<double> matrix(3, 3,
-                                   {triplet{0, 0, 2.0}, triplet{0, 2, -10.0}, triplet{1, 0, -1.0}, triplet{1, 1, 2.0},
-                                    triplet{1, 2, -1.0}, triplet{2, 0, -7.0}, triplet{2, 2, 2.0}});
+    SparseMatrixCSRHost matrix(3, 3,
+                               {triplet{0, 0, 2.0}, triplet{0, 2, -10.0}, triplet{1, 0, -1.0}, triplet{1, 1, 2.0},
+                                triplet{1, 2, -1.0}, triplet{2, 0, -7.0}, triplet{2, 2, 2.0}});
 
-    Vector<double> rhs("rhs", 3);
+    VectorHost rhs("rhs", 3);
     rhs(0) = 1.0;
     rhs(1) = -5;
     rhs(2) = 3.0;
-    Vector<double> exact_solution("exact solution", 3);
+    VectorHost exact_solution("exact solution", 3);
     exact_solution(0) = -16.0 / 33.0;
     exact_solution(1) = -125.0 / 44.0;
     exact_solution(2) = -13.0 / 66.0;
@@ -346,20 +348,20 @@ TEST(SparseMatrixCSR, lu_solver_5x5)
 {
     using triplet = SparseMatrixCSR<double>::triplet_type;
 
-    SparseMatrixCSR<double> matrix(5, 5,
-                                   {triplet{0, 0, 2.0}, triplet{0, 3, 7.0}, triplet{0, 4, 3.0}, triplet{1, 0, -1.0},
-                                    triplet{1, 1, -5.0}, triplet{1, 2, -1.0}, triplet{1, 3, 5.0}, triplet{1, 4, 6.0},
-                                    triplet{2, 1, -7.0}, triplet{2, 2, 1.0}, triplet{2, 3, 2.0}, triplet{2, 4, -4.0},
-                                    triplet{3, 2, -4.0}, triplet{3, 3, 6.0}, triplet{3, 4, 9.0}, triplet{4, 0, 2.0},
-                                    triplet{4, 1, 4.0}, triplet{4, 3, -4.0}, triplet{4, 4, 9.0}});
+    SparseMatrixCSRHost matrix(5, 5,
+                               {triplet{0, 0, 2.0}, triplet{0, 3, 7.0}, triplet{0, 4, 3.0}, triplet{1, 0, -1.0},
+                                triplet{1, 1, -5.0}, triplet{1, 2, -1.0}, triplet{1, 3, 5.0}, triplet{1, 4, 6.0},
+                                triplet{2, 1, -7.0}, triplet{2, 2, 1.0}, triplet{2, 3, 2.0}, triplet{2, 4, -4.0},
+                                triplet{3, 2, -4.0}, triplet{3, 3, 6.0}, triplet{3, 4, 9.0}, triplet{4, 0, 2.0},
+                                triplet{4, 1, 4.0}, triplet{4, 3, -4.0}, triplet{4, 4, 9.0}});
 
-    Vector<double> rhs("rhs", 5);
+    VectorHost rhs("rhs", 5);
     rhs(0) = 1.0;
     rhs(1) = -5;
     rhs(2) = 3.0;
     rhs(3) = 7.0;
     rhs(4) = 2.0;
-    Vector<double> exact_solution("exact_solution", 5);
+    VectorHost exact_solution("exact_solution", 5);
     exact_solution(0) = 2792.0 / 567.0;
     exact_solution(1) = -589.0 / 648.0;
     exact_solution(2) = -7615.0 / 1512.0;

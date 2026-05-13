@@ -115,11 +115,11 @@ private:
     // - In-house: matrix stored in CSR; solver does not own the matrix.
 
 #ifdef GMGPOLAR_USE_MUMPS
-    using InnerBoundaryMatrix = SparseMatrixCOO<double>;
+    using InnerBoundaryMatrix = SparseMatrixCOO<double, Kokkos::HostSpace>;
     using InnerBoundarySolver = CooMumpsSolver;
 #else
-    using InnerBoundaryMatrix = SparseMatrixCSR<double>;
-    using InnerBoundarySolver = SparseLUSolver<double>;
+    using InnerBoundaryMatrix = SparseMatrixCSR<double, Kokkos::HostSpace>;
+    using InnerBoundarySolver = SparseLUSolver<double, Kokkos::HostSpace>;
 
     // Stored only for the in-house solver (CSR).
     InnerBoundaryMatrix inner_boundary_circle_matrix_;
@@ -165,7 +165,7 @@ private:
     /* Orthogonal application */
     /* ---------------------- */
 
-    // Public is required as Cuda needs to be abe to get the address of functions enclosing lambda functions
+    // Public is required as Cuda needs to be able to get the address of functions enclosing lambda functions
 public:
     // Compute temp = f_sc − A_sc^ortho * u_sc^ortho   (precomputed right-hand side)
     // where x = u_sc and rhs = f_sc
@@ -174,7 +174,6 @@ public:
     void applyAscOrthoBlackRadialSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
     void applyAscOrthoWhiteRadialSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
 
-private:
     /* ----------------- */
     /* Line-wise solvers */
     /* ----------------- */

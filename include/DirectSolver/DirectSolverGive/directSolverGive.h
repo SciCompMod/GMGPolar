@@ -48,11 +48,11 @@ private:
     // clang-format on
 
 #ifdef GMGPOLAR_USE_MUMPS
-    using SystemMatrix = SparseMatrixCOO<double>;
+    using SystemMatrix = SparseMatrixCOO<double, Kokkos::HostSpace>;
     using SystemSolver = CooMumpsSolver;
 #else
-    using SystemMatrix = SparseMatrixCSR<double>;
-    using SystemSolver = SparseLUSolver<double>;
+    using SystemMatrix = SparseMatrixCSR<double, Kokkos::HostSpace>;
+    using SystemSolver = SparseLUSolver<double, Kokkos::HostSpace>;
     // Stored only for the in-house solver (CSR).
     SystemMatrix system_matrix_;
 #endif

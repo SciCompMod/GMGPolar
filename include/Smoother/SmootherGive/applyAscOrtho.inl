@@ -4,10 +4,10 @@ namespace smoother_give
 {
 
 template <class LevelCacheType>
-static inline void nodeApplyAscOrthoCircleGiveInside(int i_r, int i_theta, const PolarGrid& grid,
-                                                     const LevelCacheType& level_cache, bool DirBC_Interior,
-                                                     ConstVector<double>& x, ConstVector<double>& rhs,
-                                                     Vector<double>& result)
+static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleGiveInside(int i_r, int i_theta, const PolarGrid& grid,
+                                                                     const LevelCacheType& level_cache,
+                                                                     bool DirBC_Interior, ConstVector<double>& x,
+                                                                     ConstVector<double>& rhs, Vector<double>& result)
 {
     assert(i_r >= 0 && i_r < grid.numberSmootherCircles());
 

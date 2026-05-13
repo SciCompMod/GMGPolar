@@ -3,7 +3,7 @@
 #include "czarnyGeometry.h"
 
 // In earlier versions denoted by 'x'
-inline double CzarnyGeometry::Fx(double r, double theta) const
+KOKKOS_INLINE_FUNCTION double CzarnyGeometry::Fx(double r, double theta) const
 {
     double cos_theta = std::cos(theta);
     return (1.0 -
@@ -12,7 +12,7 @@ inline double CzarnyGeometry::Fx(double r, double theta) const
 }
 
 // In earlier versions denoted by 'y'
-inline double CzarnyGeometry::Fy(double r, double theta) const
+KOKKOS_INLINE_FUNCTION double CzarnyGeometry::Fy(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
@@ -22,7 +22,7 @@ inline double CzarnyGeometry::Fy(double r, double theta) const
 }
 
 // In earlier versions denoted by 'Jrr'
-inline double CzarnyGeometry::dFx_dr(double r, double theta) const
+KOKKOS_INLINE_FUNCTION double CzarnyGeometry::dFx_dr(double r, double theta) const
 {
     double cos_theta = std::cos(theta);
     return -(cos_theta) /
@@ -31,7 +31,7 @@ inline double CzarnyGeometry::dFx_dr(double r, double theta) const
 }
 
 // In earlier versions denoted by 'Jtr'
-inline double CzarnyGeometry::dFy_dr(double r, double theta) const
+KOKKOS_INLINE_FUNCTION double CzarnyGeometry::dFy_dr(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
@@ -43,7 +43,7 @@ inline double CzarnyGeometry::dFy_dr(double r, double theta) const
 }
 
 // In earlier versions denoted by 'Jrt'
-inline double CzarnyGeometry::dFx_dt(double r, double theta) const
+KOKKOS_INLINE_FUNCTION double CzarnyGeometry::dFx_dt(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
@@ -52,7 +52,7 @@ inline double CzarnyGeometry::dFx_dt(double r, double theta) const
 }
 
 // In earlier versions denoted by 'Jtt'
-inline double CzarnyGeometry::dFy_dt(double r, double theta) const
+KOKKOS_INLINE_FUNCTION double CzarnyGeometry::dFy_dt(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
