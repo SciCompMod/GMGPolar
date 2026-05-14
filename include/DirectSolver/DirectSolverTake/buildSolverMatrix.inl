@@ -5,8 +5,8 @@ namespace direct_solver_coo_mumps_take
 
 #ifdef GMGPOLAR_USE_MUMPS
 // When using the MUMPS solver, the matrix is assembled in COO format.
-static inline void updateMatrixElement(SparseMatrixCOO<double, Kokkos::HostSpace>& matrix, int ptr, int offset, int row,
-                                       int column, double value)
+static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCOO<double, Kokkos::HostSpace>& matrix,
+                                                       int ptr, int offset, int row, int column, double value)
 {
     matrix.set_row_index(ptr + offset, row);
     matrix.set_col_index(ptr + offset, column);
@@ -14,8 +14,8 @@ static inline void updateMatrixElement(SparseMatrixCOO<double, Kokkos::HostSpace
 }
 #else
 // When using the in-house solver, the matrix is stored in CSR format.
-static inline void updateMatrixElement(SparseMatrixCSR<double, Kokkos::HostSpace>& matrix, int ptr, int offset, int row,
-                                       int column, double value)
+static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCSR<double, Kokkos::HostSpace>& matrix,
+                                                       int ptr, int offset, int row, int column, double value)
 {
     matrix.set_row_nz_index(row, offset, column);
     matrix.set_row_nz_entry(row, offset, value);
@@ -26,7 +26,7 @@ static inline void updateMatrixElement(SparseMatrixCSR<double, Kokkos::HostSpace
 
 template <class LevelCacheType>
 void DirectSolverTake<LevelCacheType>::nodeBuildSolverMatrixTake(int i_r, int i_theta, const PolarGrid& grid,
-                                                                 bool DirBC_Interior, SystemMatrix& solver_matrix,
+                                                                 bool DirBC_Interior, const SystemMatrix& solver_matrix,
                                                                  ConstVector<double>& arr, ConstVector<double>& att,
                                                                  ConstVector<double>& art, ConstVector<double>& detDF,
                                                                  ConstVector<double>& coeff_beta)
@@ -473,7 +473,6 @@ typename DirectSolverTake<LevelCacheType>::SystemMatrix DirectSolverTake<LevelCa
 {
     const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
-    const int num_omp_threads         = DirectSolver<LevelCacheType>::num_omp_threads_;
     const bool DirBC_Interior         = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
     assert(validateSolverMatrixIndexing() && "Solver matrix indexing is inconsistent");
@@ -501,25 +500,36 @@ typename DirectSolverTake<LevelCacheType>::SystemMatrix DirectSolverTake<LevelCa
     ConstVector<double> detDF      = level_cache.detDF();
     ConstVector<double> coeff_beta = level_cache.coeff_beta();
 
-#pragma omp parallel num_threads(num_omp_threads)
-    {
-/* Circle Section */
-#pragma omp for nowait
-        for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
-            for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF,
-                                          coeff_beta);
-            }
-        }
-/* Radial Section */
-#pragma omp for nowait
-        for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-            for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
-                nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF,
-                                          coeff_beta);
-            }
-        }
-    }
+    /* We split the loops into two regions to better respect the */
+    /* access patterns of the smoother and improve cache locality. */
+
+    // The For loop matches circular access pattern */
+    Kokkos::parallel_for(
+        "DirectSolverTake: BuildSolverMatrix (Circular)",
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            {0, 0}, // Starting point of the index space
+            {grid.numberSmootherCircles(), grid.ntheta()} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_CLASS_LAMBDA(const int i_r, const int i_theta) {
+            nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF,
+                                      coeff_beta);
+        });
+
+    /* For loop matches radial access pattern */
+    Kokkos::parallel_for(
+        "DirectSolverTake: BuildSolverMatrix (Radial)",
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            {0, grid.numberSmootherCircles()}, // Starting point of the index space
+            {grid.ntheta(), grid.nr()} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_CLASS_LAMBDA(const int i_theta, const int i_r) {
+            nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF,
+                                      coeff_beta);
+        });
+
+    Kokkos::fence();
 
     return solver_matrix;
 }

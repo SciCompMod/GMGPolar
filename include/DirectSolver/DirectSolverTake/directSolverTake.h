@@ -60,6 +60,7 @@ private:
     // Solver object (owns matrix if MUMPS, references if in-house solver).
     SystemSolver system_solver_;
 
+public:
     // Constructs a symmetric solver matrix.
     SystemMatrix buildSolverMatrix();
 
@@ -70,9 +71,9 @@ private:
     //    symmetric_DBc(A) * solution = rhs - applySymmetryShift(rhs).
     // The correction modifies the rhs to account for the influence of the Dirichlet boundary conditions,
     // ensuring that the solution at the boundary is correctly adjusted and maintains the required symmetry.
-    void applySymmetryShift(Vector<double> rhs) const;
-    void applySymmetryShiftInnerBoundary(Vector<double> x) const;
-    void applySymmetryShiftOuterBoundary(Vector<double> x) const;
+    void applySymmetryShift(Vector<double>& rhs) const;
+    void applySymmetryShiftInnerBoundary(Vector<double>& x) const;
+    void applySymmetryShiftOuterBoundary(Vector<double>& x) const;
 
     // Verify that solver matrix indexing is valid.
     bool validateSolverMatrixIndexing() const;
@@ -89,9 +90,9 @@ private:
     int getStencilSize(int global_index) const;
 
     void nodeBuildSolverMatrixTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                   SystemMatrix& solver_matrix, ConstVector<double>& arr, ConstVector<double>& att,
-                                   ConstVector<double>& art, ConstVector<double>& detDF,
-                                   ConstVector<double>& coeff_beta);
+                                   const SystemMatrix& solver_matrix, ConstVector<double>& arr,
+                                   ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF,
+                                   ConstVector<double>& coeff_beta) const;
 };
 
 #include "applySymmetryShift.inl"
