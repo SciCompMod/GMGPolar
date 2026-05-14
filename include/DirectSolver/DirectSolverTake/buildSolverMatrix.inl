@@ -29,7 +29,7 @@ void DirectSolverTake<LevelCacheType>::nodeBuildSolverMatrixTake(int i_r, int i_
                                                                  bool DirBC_Interior, const SystemMatrix& solver_matrix,
                                                                  ConstVector<double>& arr, ConstVector<double>& att,
                                                                  ConstVector<double>& art, ConstVector<double>& detDF,
-                                                                 ConstVector<double>& coeff_beta)
+                                                                 ConstVector<double>& coeff_beta) const
 {
     using direct_solver_coo_mumps_take::updateMatrixElement;
     int ptr, offset;
