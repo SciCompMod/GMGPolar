@@ -5,8 +5,8 @@
 namespace extrapolated_smoother_give
 {
 
-static KOKKOS_INLINE_FUNCTION void updateMatrixElement(BatchedTridiagonalSolver<double>& solver, int batch, int row,
-                                                       int column, double value)
+static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const BatchedTridiagonalSolver<double>& solver, int batch,
+                                                       int row, int column, double value)
 {
     if (row == column)
         solver.increase_main_diagonal(batch, row, value);
@@ -21,8 +21,8 @@ static KOKKOS_INLINE_FUNCTION void updateMatrixElement(BatchedTridiagonalSolver<
 template <class LevelCacheType>
 void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
     int i_r, int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
-    BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
-    BatchedTridiagonalSolver<double>& radial_tridiagonal_solver)
+    const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
+    const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver) const
 {
     using extrapolated_smoother_give::updateMatrixElement;
 
@@ -1056,6 +1056,9 @@ void ExtrapolatedSmootherGive<LevelCacheType>::buildTridiagonalSolverMatrices()
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
+    const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver = circle_tridiagonal_solver_;
+    const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver = radial_tridiagonal_solver_;
+
     /* ---------------- */
     /* Circular section */
     /* ---------------- */
@@ -1072,7 +1075,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::buildTridiagonalSolverMatrices()
                 const int i_r = start_circle + circle_task * 3;
                 for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
                     nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, level_cache, DirBC_Interior,
-                                                       circle_tridiagonal_solver_, radial_tridiagonal_solver_);
+                                                       circle_tridiagonal_solver, radial_tridiagonal_solver);
                 }
             });
         Kokkos::fence();
@@ -1094,7 +1097,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::buildTridiagonalSolverMatrices()
             Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, 1), KOKKOS_CLASS_LAMBDA(const int) {
                 for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
                     nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, level_cache, DirBC_Interior,
-                                                       circle_tridiagonal_solver_, radial_tridiagonal_solver_);
+                                                       circle_tridiagonal_solver, radial_tridiagonal_solver);
                 }
             });
         Kokkos::fence();
@@ -1109,7 +1112,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::buildTridiagonalSolverMatrices()
                 const int i_theta = additional_radial_tasks + start_radial + radial_task * 3;
                 for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
                     nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, level_cache, DirBC_Interior,
-                                                       circle_tridiagonal_solver_, radial_tridiagonal_solver_);
+                                                       circle_tridiagonal_solver, radial_tridiagonal_solver);
                 }
             });
         Kokkos::fence();

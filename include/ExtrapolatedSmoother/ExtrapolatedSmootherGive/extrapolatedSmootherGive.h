@@ -159,8 +159,8 @@ public:
     // Build the tridiagonal solver matrices for a specific node (i_r, i_theta)
     void nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid,
                                             const LevelCacheType& level_cache, bool DirBC_Interior,
-                                            BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
-                                            BatchedTridiagonalSolver<double>& radial_tridiagonal_solver);
+                                            const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
+                                            const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver) const;
 
     // Build the solver matrix for the interior boundary (i_r = 0) which is non-tridiagonal due to across-origin coupling.
     InnerBoundaryMatrix buildInteriorBoundarySolverMatrix();
