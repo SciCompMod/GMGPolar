@@ -135,6 +135,8 @@ private:
     // Solver object (owns matrix if MUMPS, references if in-house solver).
     InnerBoundarySolver inner_boundary_solver_;
 
+    // Public is required as Cuda needs to be able to get the address of functions enclosing lambda functions
+public:
     /* -------------- */
     /* Stencil access */
     /* -------------- */

@@ -3,25 +3,24 @@
 namespace smoother_give
 {
 
-static inline void updateMatrixElement(BatchedTridiagonalSolver<double>& solver, int batch, int row, int column,
-                                       double value)
+static KOKKOS_INLINE_FUNCTION void updateMatrixElement(BatchedTridiagonalSolver<double>& solver, int batch, int row,
+                                                       int column, double value)
 {
     if (row == column)
-        solver.main_diagonal(batch, row) += value;
+        solver.increase_main_diagonal(batch, row, value);
     else if (row == column - 1)
-        solver.sub_diagonal(batch, row) += value;
+        solver.increase_sub_diagonal(batch, row, value);
     else if (row == 0 && column == solver.matrixDimension() - 1)
-        solver.cyclic_corner(batch) += value;
+        solver.increase_cyclic_corner(batch, value);
 }
 
 } // namespace smoother_give
 
 template <class LevelCacheType>
 void SmootherGive<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
-    int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+    int i_r, int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
     BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
-    BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, double arr, double att, double art, double detDF,
-    double coeff_beta)
+    BatchedTridiagonalSolver<double>& radial_tridiagonal_solver)
 {
     using smoother_give::updateMatrixElement;
 
@@ -33,6 +32,16 @@ void SmootherGive<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
 
     assert(numberSmootherCircles >= 2);
     assert(lengthRadialSmoother >= 3);
+
+    /* ---------------------------------------- */
+    /* Compute or retrieve stencil coefficients */
+    /* ---------------------------------------- */
+    const int center    = grid.index(i_r, i_theta);
+    const double radius = grid.radius(i_r);
+    const double theta  = grid.theta(i_theta);
+
+    double coeff_beta, arr, att, art, detDF;
+    level_cache.obtainValues(i_r, i_theta, center, radius, theta, coeff_beta, arr, att, art, detDF);
 
     int ptr, offset;
     int row, column, col;
@@ -466,107 +475,68 @@ void SmootherGive<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
 }
 
 template <class LevelCacheType>
-void SmootherGive<LevelCacheType>::buildTridiagonalCircleSection(int i_r)
-{
-    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
-
-    // Access pattern is aligned with the memory layout of the grid data to maximize cache efficiency.
-    const double r = grid.radius(i_r);
-    for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-        const int global_index = grid.index(i_r, i_theta);
-        const double theta     = grid.theta(i_theta);
-
-        double coeff_beta, arr, att, art, detDF;
-        level_cache.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
-
-        // Build Asc at the current node
-        nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, DirBC_Interior, circle_tridiagonal_solver_,
-                                           radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
-    }
-}
-
-template <class LevelCacheType>
-void SmootherGive<LevelCacheType>::buildTridiagonalRadialSection(int i_theta)
-{
-    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
-
-    // Access pattern is aligned with the memory layout of the grid data to maximize cache efficiency.
-    const double theta = grid.theta(i_theta);
-    for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
-        const int global_index = grid.index(i_r, i_theta);
-        const double r         = grid.radius(i_r);
-
-        double coeff_beta, arr, att, art, detDF;
-        level_cache.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
-
-        // Build Asc at the current node
-        nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, DirBC_Interior, circle_tridiagonal_solver_,
-                                           radial_tridiagonal_solver_, arr, att, art, detDF, coeff_beta);
-    }
-}
-
-template <class LevelCacheType>
 void SmootherGive<LevelCacheType>::buildTridiagonalSolverMatrices()
 {
     const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
-    const int num_omp_threads         = Smoother<LevelCacheType>::num_omp_threads_;
-
-    const int num_smoother_circles    = grid.numberSmootherCircles();
-    const int additional_radial_tasks = grid.ntheta() % 3;
-    const int num_radial_tasks        = grid.ntheta() - additional_radial_tasks;
 
     /* ---------------- */
     /* Circular section */
     /* ---------------- */
-    // We parallelize the loop with step 3 to avoid data race conditions between adjacent circles.
-#pragma omp parallel num_threads(num_omp_threads)
-    {
-#pragma omp for
-        for (int i_r = 0; i_r < num_smoother_circles; i_r += 3) {
-            buildTridiagonalCircleSection(i_r);
-        } /* Implicit barrier */
-#pragma omp for
-        for (int i_r = 1; i_r < num_smoother_circles; i_r += 3) {
-            buildTridiagonalCircleSection(i_r);
-        } /* Implicit barrier */
-#pragma omp for
-        for (int i_r = 2; i_r < num_smoother_circles; i_r += 3) {
-            buildTridiagonalCircleSection(i_r);
-        } /* Implicit barrier */
+    // We parallelize over i_r (step 3) to avoid data race conditions between adjacent circles.
+    // The i_theta loop is sequential inside the kernel.
+    const int num_circle_tasks = grid.numberSmootherCircles();
+
+    for (int start_circle = 0; start_circle < 3; ++start_circle) {
+        const int num_circular_tasks = (num_circle_tasks - start_circle + 2) / 3;
+        Kokkos::parallel_for(
+            "SmootherGive: buildTridiagonalSolverMatrices (Circular)",
+            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, num_circular_tasks),
+            KOKKOS_CLASS_LAMBDA(const int circle_task) {
+                const int i_r = start_circle + circle_task * 3;
+                for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
+                    nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, level_cache, DirBC_Interior,
+                                                       circle_tridiagonal_solver_, radial_tridiagonal_solver_);
+                }
+            });
+        Kokkos::fence();
     }
 
-    /* ---------------- */
+    /* -------------- */
     /* Radial section */
-    /* ---------------- */
-    // We parallelize the loop with step 3 to avoid data race conditions between adjacent radial lines.
-    // Due to the periodicity in the angular direction, we can have at most 2 additional radial tasks
-    // that are handled serially before the parallel loops.
+    /* -------------- */
+    // We parallelize over i_theta (step 3) to avoid data race conditions between adjacent radial lines.
+    // The i_r loop is sequential inside the kernel.
+    // Due to periodicity in the angular direction, handle up to 2 additional
+    // radial lines (i_theta = 0 and 1) before the parallel passes.
+    const int additional_radial_tasks = grid.ntheta() % 3;
+    const int num_radial_tasks        = grid.ntheta() - additional_radial_tasks;
+
     for (int i_theta = 0; i_theta < additional_radial_tasks; i_theta++) {
-        buildTridiagonalRadialSection(i_theta);
+        Kokkos::parallel_for(
+            "SmootherGive: buildTridiagonalSolverMatrices (Radial, additional)",
+            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, 1), KOKKOS_CLASS_LAMBDA(const int) {
+                for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
+                    nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, level_cache, DirBC_Interior,
+                                                       circle_tridiagonal_solver_, radial_tridiagonal_solver_);
+                }
+            });
+        Kokkos::fence();
     }
 
-#pragma omp parallel num_threads(num_omp_threads)
-    {
-#pragma omp for
-        for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {
-            const int i_theta = radial_task + additional_radial_tasks;
-            buildTridiagonalRadialSection(i_theta);
-        } /* Implicit barrier */
-#pragma omp for
-        for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 3) {
-            const int i_theta = radial_task + additional_radial_tasks;
-            buildTridiagonalRadialSection(i_theta);
-        } /* Implicit barrier */
-#pragma omp for
-        for (int radial_task = 2; radial_task < num_radial_tasks; radial_task += 3) {
-            const int i_theta = radial_task + additional_radial_tasks;
-            buildTridiagonalRadialSection(i_theta);
-        } /* Implicit barrier */
+    for (int start_radial = 0; start_radial < 3; ++start_radial) {
+        const int num_radial_batches = (num_radial_tasks - start_radial + 2) / 3;
+        Kokkos::parallel_for(
+            "SmootherGive: buildTridiagonalSolverMatrices (Radial)",
+            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, num_radial_batches),
+            KOKKOS_CLASS_LAMBDA(const int radial_task) {
+                const int i_theta = additional_radial_tasks + start_radial + radial_task * 3;
+                for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
+                    nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, level_cache, DirBC_Interior,
+                                                       circle_tridiagonal_solver_, radial_tridiagonal_solver_);
+                }
+            });
+        Kokkos::fence();
     }
 }

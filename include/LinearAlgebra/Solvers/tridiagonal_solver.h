@@ -30,12 +30,12 @@ public:
     /* Accessors for sizes */
     /* ------------------- */
 
-    int matrixDimension() const
+    KOKKOS_INLINE_FUNCTION int matrixDimension() const
     {
         return matrix_dimension_;
     }
 
-    int batchCount() const
+    KOKKOS_INLINE_FUNCTION int batchCount() const
     {
         return batch_count_;
     }
@@ -44,38 +44,43 @@ public:
     /* Accessors for matrix entries */
     /* ---------------------------- */
 
-    KOKKOS_INLINE_FUNCTION
-    const T& main_diagonal(const int batch_idx, const int index) const
+    KOKKOS_INLINE_FUNCTION const T& main_diagonal(const int batch_idx, const int index) const
     {
         return main_diagonal_(batch_idx * matrix_dimension_ + index);
     }
-    KOKKOS_INLINE_FUNCTION
-    T& main_diagonal(const int batch_idx, const int index)
+    KOKKOS_INLINE_FUNCTION void set_main_diagonal(const int batch_idx, const int index, const T& value) const
     {
-        return main_diagonal_(batch_idx * matrix_dimension_ + index);
+        main_diagonal_(batch_idx * matrix_dimension_ + index) = value;
+    }
+    KOKKOS_INLINE_FUNCTION void increase_main_diagonal(const int batch_idx, const int index, const T& value) const
+    {
+        main_diagonal_(batch_idx * matrix_dimension_ + index) += value;
     }
 
-    KOKKOS_INLINE_FUNCTION
-    const T& sub_diagonal(const int batch_idx, const int index) const
+    KOKKOS_INLINE_FUNCTION const T& sub_diagonal(const int batch_idx, const int index) const
     {
         return sub_diagonal_(batch_idx * matrix_dimension_ + index);
     }
-    KOKKOS_INLINE_FUNCTION
-    T& sub_diagonal(const int batch_idx, const int index)
+    KOKKOS_INLINE_FUNCTION void set_sub_diagonal(const int batch_idx, const int index, const T& value) const
     {
-        return sub_diagonal_(batch_idx * matrix_dimension_ + index);
+        sub_diagonal_(batch_idx * matrix_dimension_ + index) = value;
+    }
+    KOKKOS_INLINE_FUNCTION void increase_sub_diagonal(const int batch_idx, const int index, const T& value) const
+    {
+        sub_diagonal_(batch_idx * matrix_dimension_ + index) += value;
     }
 
-    KOKKOS_INLINE_FUNCTION
-    const T& cyclic_corner(const int batch_idx) const
+    KOKKOS_INLINE_FUNCTION const T& cyclic_corner(const int batch_idx) const
     {
         return sub_diagonal_(batch_idx * matrix_dimension_ + (matrix_dimension_ - 1));
     }
-
-    KOKKOS_INLINE_FUNCTION
-    T& cyclic_corner(const int batch_idx)
+    KOKKOS_INLINE_FUNCTION T& set_cyclic_corner(const int batch_idx, const T& value) const
     {
-        return sub_diagonal_(batch_idx * matrix_dimension_ + (matrix_dimension_ - 1));
+        return sub_diagonal_(batch_idx * matrix_dimension_ + (matrix_dimension_ - 1)) = value;
+    }
+    KOKKOS_INLINE_FUNCTION void increase_cyclic_corner(const int batch_idx, const T& value) const
+    {
+        sub_diagonal_(batch_idx * matrix_dimension_ + (matrix_dimension_ - 1)) += value;
     }
 
     /* ---------------------------------------------- */
@@ -233,7 +238,7 @@ public:
                         rhs(offset + 0) + cyclic_corner_element / gamma(batch_idx) * rhs(offset + matrix_dimension - 1);
                     const T dot_product_u_v = buffer(offset + 0) + cyclic_corner_element / gamma(batch_idx) *
                                                                        buffer(offset + matrix_dimension - 1);
-                    const T factor = dot_product_x_v / (1.0 + dot_product_u_v);
+                    const T factor          = dot_product_x_v / (1.0 + dot_product_u_v);
 
                     for (int i = 0; i < matrix_dimension; i++) {
                         rhs(offset + i) -= factor * buffer(offset + i);
