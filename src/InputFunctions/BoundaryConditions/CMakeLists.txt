@@ -21,3 +21,4 @@ target_include_directories(InputFunctions_BoundaryConditions PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/include/InputFunctions/BoundaryConditions
 )
+target_link_libraries(InputFunctions_BoundaryConditions PUBLIC Kokkos::kokkos)

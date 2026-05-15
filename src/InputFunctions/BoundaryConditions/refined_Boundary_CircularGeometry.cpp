@@ -6,7 +6,7 @@ Refined_Boundary_CircularGeometry::Refined_Boundary_CircularGeometry(double Rmax
 {
 }
 
-double Refined_Boundary_CircularGeometry::u_D(double r, double theta) const
+KOKKOS_FUNCTION double Refined_Boundary_CircularGeometry::u_D(double r, double theta) const
 {
     return ((-3.33823779536505e-15) * ((r / Rmax) * (r / Rmax)) - 0.0 * (r / Rmax) - 0.0 +
             exp((-3333.33333333333) * pow(((r / Rmax) - 0.9), 2.0))) *
@@ -16,7 +16,7 @@ double Refined_Boundary_CircularGeometry::u_D(double r, double theta) const
                cos(9.0 * theta);
 }
 
-double Refined_Boundary_CircularGeometry::u_D_Interior(double r, double theta) const
+KOKKOS_FUNCTION double Refined_Boundary_CircularGeometry::u_D_Interior(double r, double theta) const
 {
     return ((-3.33823779536505e-15) * ((r / Rmax) * (r / Rmax)) - 0.0 * (r / Rmax) - 0.0 +
             exp((-3333.33333333333) * pow(((r / Rmax) - 0.9), 2.0))) *

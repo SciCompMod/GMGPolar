@@ -17,7 +17,7 @@ CartesianR6_Sonnendrucker_CzarnyGeometry::CartesianR6_Sonnendrucker_CzarnyGeomet
     initializeGeometry();
 }
 
-double CartesianR6_Sonnendrucker_CzarnyGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
+KOKKOS_FUNCTION double CartesianR6_Sonnendrucker_CzarnyGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
 {
     double r         = grid_.radius(i_r);
     double theta     = grid_.theta(i_theta);

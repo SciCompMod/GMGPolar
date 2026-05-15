@@ -7,7 +7,7 @@ Refined_ZoniShiftedGyro_CircularGeometry::Refined_ZoniShiftedGyro_CircularGeomet
 {
 }
 
-double Refined_ZoniShiftedGyro_CircularGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
+KOKKOS_FUNCTION double Refined_ZoniShiftedGyro_CircularGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
 {
     double r     = grid_.radius(i_r);
     double theta = grid_.theta(i_theta);

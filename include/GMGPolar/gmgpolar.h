@@ -139,10 +139,14 @@ private:
     /* --------------- */
     /* Setup Functions */
     int chooseNumberOfLevels(const PolarGrid& finest_grid);
+    // Public due to cuda restrictions
+public:
     template <concepts::BoundaryConditions BoundaryConditions, concepts::SourceTerm SourceTerm>
     void build_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f,
                      const BoundaryConditions& boundary_conditions, const SourceTerm& source_term);
     void discretize_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f);
+
+private:
     bool checkUniformRefinement(const PolarGrid& grid, double tolerance) const;
 
     /* --------------- */
