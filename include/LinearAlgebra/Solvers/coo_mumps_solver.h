@@ -36,7 +36,7 @@ namespace gmgpolar
 class CooMumpsSolver
 {
 public:
-    explicit CooMumpsSolver(SparseMatrixCOO<double, Kokkos::HostSpace> matrix);
+    explicit CooMumpsSolver(const SparseMatrixCOO<double>& matrix);
     ~CooMumpsSolver();
 
     // rhs is overwritten in-place with the solution on return.

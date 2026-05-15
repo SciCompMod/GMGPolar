@@ -7,13 +7,14 @@
     #include <stdexcept>
 using namespace gmgpolar;
 
-CooMumpsSolver::CooMumpsSolver(SparseMatrixCOO<double, Kokkos::HostSpace> matrix)
+CooMumpsSolver::CooMumpsSolver(const SparseMatrixCOO<double>& matrix)
 {
+    auto matrix_host = matrix.mirror_view_and_copy();
     if (matrix.is_symmetric()) {
-        matrix_ = extractUpperTriangle(matrix);
+        matrix_ = extractUpperTriangle(matrix_host);
     }
     else {
-        matrix_ = std::move(matrix);
+        matrix_ = matrix_host;
     }
 
     initialize();

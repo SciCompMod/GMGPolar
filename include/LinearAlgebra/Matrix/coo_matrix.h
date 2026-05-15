@@ -38,6 +38,10 @@ public:
     SparseMatrixCOO& operator=(SparseMatrixCOO&& other) noexcept;
 
     SparseMatrixCOO copy() const;
+    template <class TargetMemorySpace>
+    std::conditional_t<std::is_same_v<MemorySpace, TargetMemorySpace>, const SparseMatrixCOO&,
+                       SparseMatrixCOO<T, TargetMemorySpace>>
+    mirror_view_and_copy() const;
 
     int rows() const;
     int columns() const;
@@ -157,6 +161,25 @@ SparseMatrixCOO<T, MemorySpace> SparseMatrixCOO<T, MemorySpace>::copy() const
     Kokkos::deep_copy(other.values_, values_);
 
     return other;
+}
+
+template <typename T, class MemorySpace>
+template <class TargetMemorySpace>
+std::conditional_t<std::is_same_v<MemorySpace, TargetMemorySpace>, const SparseMatrixCOO&,
+                   SparseMatrixCOO<T, TargetMemorySpace>>
+SparseMatrixCOO<T, MemorySpace>::mirror_view_and_copy() const
+{
+    if constexpr (std::is_same_v<MemorySpace, TargetMemorySpace>) {
+        return *this;
+    }
+    else {
+        SparseMatrixCOO<T, TargetMemorySpace> matrix(rows_, columns_, nnz_);
+        matrix.row_indices_    = Kokkos::create_mirror_view_and_copy(TargetMemorySpace(), row_indices_);
+        matrix.column_indices_ = Kokkos::create_mirror_view_and_copy(TargetMemorySpace(), column_indices_);
+        matrix.values_         = Kokkos::create_mirror_view_and_copy(TargetMemorySpace(), values_);
+        matrix.is_symmetric(is_symmetric_);
+        return matrix;
+    }
 }
 
 // move construction
