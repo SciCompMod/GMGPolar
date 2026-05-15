@@ -15,7 +15,7 @@ public:
     explicit PolarR6_SonnendruckerGyro_CzarnyGeometry(PolarGrid const& grid, double Rmax,
                                                       double inverse_aspect_ratio_epsilon, double ellipticity_e);
 
-    double operator()(std::size_t i_r, std::size_t i_theta) const;
+    KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;
 
 private:
     PolarGrid const& grid_;

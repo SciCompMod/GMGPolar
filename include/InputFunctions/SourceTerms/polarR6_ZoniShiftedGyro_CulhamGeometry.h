@@ -14,7 +14,7 @@ class PolarR6_ZoniShiftedGyro_CulhamGeometry
 public:
     explicit PolarR6_ZoniShiftedGyro_CulhamGeometry(PolarGrid const& grid, double Rmax);
 
-    double operator()(std::size_t i_r, std::size_t i_theta) const;
+    KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;
 
 private:
     PolarGrid const& grid_;

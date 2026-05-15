@@ -15,7 +15,7 @@ public:
     explicit CartesianR2_SonnendruckerGyro_ShafranovGeometry(PolarGrid const& grid, double Rmax,
                                                              double elongation_kappa, double shift_delta);
 
-    double operator()(std::size_t i_r, std::size_t i_theta) const;
+    KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;
 
 private:
     PolarGrid const& grid_;

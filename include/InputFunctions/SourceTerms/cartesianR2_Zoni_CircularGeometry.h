@@ -14,7 +14,7 @@ class CartesianR2_Zoni_CircularGeometry
 public:
     explicit CartesianR2_Zoni_CircularGeometry(PolarGrid const& grid, double Rmax);
 
-    double operator()(std::size_t i_r, std::size_t i_theta) const;
+    KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;
 
 private:
     PolarGrid const& grid_;
