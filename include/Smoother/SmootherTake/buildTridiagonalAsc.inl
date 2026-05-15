@@ -93,7 +93,7 @@ nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, 
     /* ------------------------------------------ */
     /* Node in the interior of the Radial Section */
     /* ------------------------------------------ */
-    else if (i_r >= numberSmootherCircles && i_r < grid.nr() - 2) {
+    else if (i_r >= numberSmootherCircles && i_r < grid.nr() - 1) {
         const double h1 = grid.radialSpacing(i_r - 1);
         const double h2 = grid.radialSpacing(i_r);
         const double k1 = grid.angularSpacing(i_theta - 1);
