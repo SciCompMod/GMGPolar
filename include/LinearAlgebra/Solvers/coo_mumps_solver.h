@@ -39,7 +39,7 @@ public:
     template <class MemorySpace>
     explicit CooMumpsSolver(const SparseMatrixCOO<double, MemorySpace>& matrix)
     {
-        auto matrix_host = matrix.mirror_view_and_copy();
+        auto matrix_host = matrix.template mirror_view_and_copy<Kokkos::HostSpace>();
         if (matrix.is_symmetric()) {
             matrix_ = extractUpperTriangle(matrix_host);
         }
