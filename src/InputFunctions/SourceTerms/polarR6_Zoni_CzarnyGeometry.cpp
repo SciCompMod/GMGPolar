@@ -16,7 +16,7 @@ PolarR6_Zoni_CzarnyGeometry::PolarR6_Zoni_CzarnyGeometry(PolarGrid const& grid, 
     initializeGeometry();
 }
 
-double PolarR6_Zoni_CzarnyGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
+KOKKOS_FUNCTION double PolarR6_Zoni_CzarnyGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
 {
     double r         = grid_.radius(i_r);
     double theta     = grid_.theta(i_theta);
