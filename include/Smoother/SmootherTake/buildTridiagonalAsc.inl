@@ -23,14 +23,14 @@ nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, 
 {
     using smoother_take::updateMatrixElement;
 
-    assert(i_r >= 0 && i_r < grid.nr());
-    assert(i_theta >= 0 && i_theta < grid.ntheta());
+    KOKKOS_ASSERT(i_r >= 0 && i_r < grid.nr());
+    KOKKOS_ASSERT(i_theta >= 0 && i_theta < grid.ntheta());
 
     const int numberSmootherCircles = grid.numberSmootherCircles();
     const int lengthRadialSmoother  = grid.lengthRadialSmoother();
 
-    assert(numberSmootherCircles >= 2);
-    assert(lengthRadialSmoother >= 3);
+    KOKKOS_ASSERT(numberSmootherCircles >= 2);
+    KOKKOS_ASSERT(lengthRadialSmoother >= 3);
 
     int row, column;
     double value;
