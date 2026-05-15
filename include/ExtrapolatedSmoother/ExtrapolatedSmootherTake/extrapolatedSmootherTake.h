@@ -70,34 +70,6 @@ public:
 
 private:
     /* ------------------- */
-    /* Stencil definitions */
-    /* ------------------- */
-
-    // The stencil definitions must be defined before the declaration of the inner_boundary_mumps_solver_,
-    // since the mumps solver will be build in the member initializer of the Smoother class.
-
-    // Stencils encode neighborhood connectivity for A_sc matrix assembly.
-    // It is only used in the construction of COO/CSR matrices.
-    // Thus it is only used for the interior boundary matrix and not needed for the tridiagonal matrices.
-    // The Stencil class stores the offset for each position.
-    // - Non-zero matrix indicesare obtained via `ptr + offset`
-    // - A offset value of `-1` means the position is not included in the stencil pattern.
-    // - Other values (0, 1, 2, ..., stencil_size - 1) correspond to valid stencil indices.
-
-    // clang-format off
-        Stencil stencil_center_ = {
-        -1, -1, -1,
-        -1,  0, -1,
-        -1, -1, -1
-    };
-    Stencil stencil_center_left_ = {
-        -1, -1, -1,
-        1,  0, -1,
-        -1, -1, -1
-    };
-    // clang-format on
-
-    /* ------------------- */
     /* Tridiagonal solvers */
     /* ------------------- */
 
@@ -137,45 +109,18 @@ private:
 
     // Public is required as Cuda needs to be able to get the address of functions enclosing lambda functions
 public:
-    /* -------------- */
-    /* Stencil access */
-    /* -------------- */
-
-    // Select correct stencil depending on the grid position.
-    const Stencil& getStencil(int i_r, int i_theta) const; /* Only i_r = 0 implemented */
-    // Number of nonzero A_sc entries.
-    int getNonZeroCountCircleAsc(int i_r) const; /* Only i_r = 0 implemented */
-    // Obtain a ptr to index into COO matrices.
-    // It accumulates all stencil sizes within a line up to, but excluding the current node.
-    int getCircleAscIndex(int i_r, int i_theta) const; /* Only i_r = 0 implemented */
-
     /* --------------- */
     /* Matrix assembly */
     /* --------------- */
     // Build all A_sc matrices for circle and radial smoothers.
     void buildTridiagonalSolverMatrices();
-    // Build the tridiagonal solver matrices for a specific node (i_r, i_theta)
-    static KOKKOS_FUNCTION void
-    nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                       const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
-                                       const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver,
-                                       ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art,
-                                       ConstVector<double>& detDF, ConstVector<double>& coeff_beta);
-
     // Build the solver matrix for the interior boundary (i_r = 0) which is non-tridiagonal due to across-origin coupling.
     InnerBoundaryMatrix buildInteriorBoundarySolverMatrix();
-    // Build the solver matrix for a specific node (i_r = 0, i_theta) on the interior boundary.
-    void nodeBuildInteriorBoundarySolverMatrix(int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                               InnerBoundaryMatrix& matrix, ConstVector<double>& arr,
-                                               ConstVector<double>& att, ConstVector<double>& art,
-                                               ConstVector<double>& detDF, ConstVector<double>& coeff_beta);
 
     /* ---------------------- */
     /* Orthogonal application */
     /* ---------------------- */
 
-    // Functions must be public due to cuda restriction
-public:
     // Compute temp = f_sc − A_sc^ortho * u_sc^ortho   (precomputed right-hand side)
     // where x = u_sc and rhs = f_sc
     void applyAscOrthoBlackCircleSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);

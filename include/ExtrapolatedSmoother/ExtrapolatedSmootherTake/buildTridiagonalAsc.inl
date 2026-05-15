@@ -3,8 +3,8 @@
 namespace extrapolated_smoother_take
 {
 
-static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const BatchedTridiagonalSolver<double>& solver, int batch,
-                                                       int row, int column, double value)
+static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const BatchedTridiagonalSolver<double>& solver, const int batch,
+                                                       const int row, const int column, const double value)
 {
     if (row == column)
         solver.set_main_diagonal(batch, row, value);
@@ -16,23 +16,22 @@ static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const BatchedTridiagonalS
 
 } // namespace extrapolated_smoother_take
 
-template <class LevelCacheType>
-KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
-    int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+static KOKKOS_INLINE_FUNCTION void nodeBuildTridiagonalSolverMatricesCircleSection(
+    const int i_r, const int i_theta, const PolarGrid& grid, const bool DirBC_Interior,
     const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
     const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, ConstVector<double>& arr,
     ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
 {
     using extrapolated_smoother_take::updateMatrixElement;
 
-    assert(i_r >= 0 && i_r < grid.nr());
-    assert(i_theta >= 0 && i_theta < grid.ntheta());
+    KOKKOS_ASSERT(i_r >= 0 && i_r < grid.nr());
+    KOKKOS_ASSERT(i_theta >= 0 && i_theta < grid.ntheta());
 
     const int numberSmootherCircles = grid.numberSmootherCircles();
     const int lengthRadialSmoother  = grid.lengthRadialSmoother();
 
-    assert(numberSmootherCircles >= 3);
-    assert(lengthRadialSmoother >= 3);
+    KOKKOS_ASSERT(numberSmootherCircles >= 3);
+    KOKKOS_ASSERT(lengthRadialSmoother >= 3);
 
     int ptr, offset;
     int row, column, col;
@@ -43,19 +42,19 @@ KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiago
     /* ------------------------------------------ */
     if (i_r > 0 && i_r < numberSmootherCircles) {
         /* i_r = numberSmootherCircles-1 is included here! */
-        double h1 = grid.radialSpacing(i_r - 1);
-        double h2 = grid.radialSpacing(i_r);
-        double k1 = grid.angularSpacing(i_theta - 1);
-        double k2 = grid.angularSpacing(i_theta);
+        const double h1 = grid.radialSpacing(i_r - 1);
+        const double h2 = grid.radialSpacing(i_r);
+        const double k1 = grid.angularSpacing(i_theta - 1);
+        const double k2 = grid.angularSpacing(i_theta);
 
-        double coeff1 = 0.5 * (k1 + k2) / h1;
-        double coeff2 = 0.5 * (k1 + k2) / h2;
-        double coeff3 = 0.5 * (h1 + h2) / k1;
-        double coeff4 = 0.5 * (h1 + h2) / k2;
-        double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
+        const double coeff1 = 0.5 * (k1 + k2) / h1;
+        const double coeff2 = 0.5 * (k1 + k2) / h2;
+        const double coeff3 = 0.5 * (h1 + h2) / k1;
+        const double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
-        int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-        int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
+        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
 
         const int left   = grid.index(i_r - 1, i_theta);
         const int bottom = grid.index(i_r, i_theta_M1);
@@ -63,12 +62,12 @@ KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiago
         const int top    = grid.index(i_r, i_theta_P1);
         const int right  = grid.index(i_r + 1, i_theta);
 
-        int center_index = i_theta;
-        int bottom_index = i_theta_M1;
-        int top_index    = i_theta_P1;
+        const int center_index = i_theta;
+        const int bottom_index = i_theta_M1;
+        const int top_index    = i_theta_P1;
 
-        auto& solver = circle_tridiagonal_solver;
-        int batch    = i_r;
+        const auto& solver = circle_tridiagonal_solver;
+        const int batch    = i_r;
 
         /* -------------------------- */
         /* Cyclic Tridiagonal Section */
@@ -80,7 +79,8 @@ KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiago
             /* | o | O | o | */
             /* |   |   |   | */
             /* | x | o | x | */
-            /* or */ /* i_theta % 2 == 0 */
+            /* or */
+            /* i_theta % 2 == 0 */
             /* | o | o | o | */
             /* |   |   |   | */
             /* | x | O | x | */
@@ -90,9 +90,9 @@ KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiago
             /* Center: (Left, Right, Bottom, Top) */
             row    = center_index;
             column = center_index;
-            value  = coeff5 * coeff_beta[center] * std::fabs(detDF[center]) + coeff1 * (arr[center] + arr[left]) +
-                    coeff2 * (arr[center] + arr[right]) + coeff3 * (att[center] + att[bottom]) +
-                    coeff4 * (att[center] + att[top]);
+            value  = coeff5 * coeff_beta[center] * Kokkos::fabs(detDF[center]) + coeff1 * (arr[center] + arr[left]) +
+                     coeff2 * (arr[center] + arr[right]) + coeff3 * (att[center] + att[bottom]) +
+                     coeff4 * (att[center] + att[top]);
             updateMatrixElement(solver, batch, row, column, value);
 
             /* Bottom */
@@ -117,7 +117,9 @@ KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiago
             /* | o | O | o | */
             /* |   |   |   | */
             /* | o | x | o | */
-            /* or */ /* i_theta % 2 == 0 */ /* | o | o | o | */
+            /* or */
+            /* i_theta % 2 == 0 */
+            /* | o | o | o | */
             /* |   |   |   | */
             /* | o | X | o | */
             /* |   |   |   | */
@@ -129,7 +131,7 @@ KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiago
                 /* Center: (Left, Right, Bottom, Top) */
                 row    = center_index;
                 column = center_index;
-                value  = coeff5 * coeff_beta[center] * std::fabs(detDF[center]) + coeff1 * (arr[center] + arr[left]) +
+                value = coeff5 * coeff_beta[center] * Kokkos::fabs(detDF[center]) + coeff1 * (arr[center] + arr[left]) +
                         coeff2 * (arr[center] + arr[right]) + coeff3 * (att[center] + att[bottom]) +
                         coeff4 * (att[center] + att[top]);
                 updateMatrixElement(solver, batch, row, column, value);
@@ -150,48 +152,55 @@ KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiago
     /* ------------------------------------------ */
     else if (i_r == 0) {
         // The inner boundary circle line are is handled by the inner_boundary_solver, so we fill in the identity matrix.
-        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
-
-        auto& solver    = circle_tridiagonal_solver;
-        const int batch = i_r;
+        const auto& solver = circle_tridiagonal_solver;
+        const int batch    = i_r;
 
         const int center_index = i_theta;
-        const int bottom_index = i_theta_M1;
-        const int top_index    = i_theta_P1;
 
         /* Center: (Left, Right, Bottom, Top) */
         row    = center_index;
         column = center_index;
         value  = 1.0;
         updateMatrixElement(solver, batch, row, column, value);
-
-        /* Bottom */
-        row    = center_index;
-        column = bottom_index;
-        value  = 0.0;
-        updateMatrixElement(solver, batch, row, column, value);
-
-        /* Top */
-        row    = center_index;
-        column = top_index;
-        value  = 0.0;
-        updateMatrixElement(solver, batch, row, column, value);
     }
+}
+
+template <typename LevelCacheType>
+static KOKKOS_INLINE_FUNCTION void nodeBuildTridiagonalSolverMatricesRadialSection(
+    const int i_r, const int i_theta, const PolarGrid& grid, const bool DirBC_Interior,
+    const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
+    const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, ConstVector<double>& arr,
+    ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
+{
+    using extrapolated_smoother_take::updateMatrixElement;
+
+    KOKKOS_ASSERT(i_r >= 0 && i_r < grid.nr());
+    KOKKOS_ASSERT(i_theta >= 0 && i_theta < grid.ntheta());
+
+    const int numberSmootherCircles = grid.numberSmootherCircles();
+    const int lengthRadialSmoother  = grid.lengthRadialSmoother();
+
+    KOKKOS_ASSERT(numberSmootherCircles >= 3);
+    KOKKOS_ASSERT(lengthRadialSmoother >= 3);
+
+    int ptr, offset;
+    int row, column, col;
+    double value, val;
+
     /* ------------------------------------------ */
     /* Node in the interior of the Radial Section */
     /* ------------------------------------------ */
-    else if (i_r > numberSmootherCircles && i_r < grid.nr() - 2) {
-        double h1 = grid.radialSpacing(i_r - 1);
-        double h2 = grid.radialSpacing(i_r);
-        double k1 = grid.angularSpacing(i_theta - 1);
-        double k2 = grid.angularSpacing(i_theta);
+    if (i_r > numberSmootherCircles && i_r < grid.nr() - 2) {
+        const double h1 = grid.radialSpacing(i_r - 1);
+        const double h2 = grid.radialSpacing(i_r);
+        const double k1 = grid.angularSpacing(i_theta - 1);
+        const double k2 = grid.angularSpacing(i_theta);
 
-        double coeff1 = 0.5 * (k1 + k2) / h1;
-        double coeff2 = 0.5 * (k1 + k2) / h2;
-        double coeff3 = 0.5 * (h1 + h2) / k1;
-        double coeff4 = 0.5 * (h1 + h2) / k2;
-        double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
+        const double coeff1 = 0.5 * (k1 + k2) / h1;
+        const double coeff2 = 0.5 * (k1 + k2) / h2;
+        const double coeff3 = 0.5 * (h1 + h2) / k1;
+        const double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -206,8 +215,8 @@ KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiago
         const int left_index   = i_r - numberSmootherCircles - 1;
         const int right_index  = i_r - numberSmootherCircles + 1;
 
-        auto& solver = radial_tridiagonal_solver;
-        int batch    = i_theta;
+        const auto& solver = radial_tridiagonal_solver;
+        const int batch    = i_theta;
 
         /* ------------------- */
         /* Tridiagonal Section */
@@ -234,9 +243,9 @@ KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiago
             /* Center: (Left, Right, Bottom, Top) */
             row    = center_index;
             column = center_index;
-            value  = coeff5 * coeff_beta[center] * std::fabs(detDF[center]) + coeff1 * (arr[center] + arr[left]) +
-                    coeff2 * (arr[center] + arr[right]) + coeff3 * (att[center] + att[bottom]) +
-                    coeff4 * (att[center] + att[top]);
+            value  = coeff5 * coeff_beta[center] * Kokkos::fabs(detDF[center]) + coeff1 * (arr[center] + arr[left]) +
+                     coeff2 * (arr[center] + arr[right]) + coeff3 * (att[center] + att[bottom]) +
+                     coeff4 * (att[center] + att[top]);
             updateMatrixElement(solver, batch, row, column, value);
 
             /* Left */
@@ -263,7 +272,8 @@ KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiago
             /* ---------- */
             /* o   o   o  */
             /* ---------- */
-            /* or */ /* i_r % 2 == 0 */
+            /* or */
+            /* i_r % 2 == 0 */
             /* ---------- */
             /* o   o   o  */
             /* ---------- */
@@ -278,9 +288,9 @@ KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiago
                 /* Center: (Left, Right, Bottom, Top) */
                 row    = center_index;
                 column = center_index;
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) +
-                        coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
-                        coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * Kokkos::fabs(detDF[center]) +
+                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
+                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
                 updateMatrixElement(solver, batch, row, column, value);
             }
             else {
@@ -298,17 +308,16 @@ KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiago
     /* Radial Section: Node next to circular section */
     /* --------------------------------------------- */
     else if (i_r == numberSmootherCircles) {
+        const double h1 = grid.radialSpacing(i_r - 1);
+        const double h2 = grid.radialSpacing(i_r);
+        const double k1 = grid.angularSpacing(i_theta - 1);
+        const double k2 = grid.angularSpacing(i_theta);
 
-        double h1 = grid.radialSpacing(i_r - 1);
-        double h2 = grid.radialSpacing(i_r);
-        double k1 = grid.angularSpacing(i_theta - 1);
-        double k2 = grid.angularSpacing(i_theta);
-
-        double coeff1 = 0.5 * (k1 + k2) / h1;
-        double coeff2 = 0.5 * (k1 + k2) / h2;
-        double coeff3 = 0.5 * (h1 + h2) / k1;
-        double coeff4 = 0.5 * (h1 + h2) / k2;
-        double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
+        const double coeff1 = 0.5 * (k1 + k2) / h1;
+        const double coeff2 = 0.5 * (k1 + k2) / h2;
+        const double coeff3 = 0.5 * (h1 + h2) / k1;
+        const double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -322,8 +331,8 @@ KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiago
         const int center_index = i_r - numberSmootherCircles;
         const int right_index  = i_r - numberSmootherCircles + 1;
 
-        auto& solver = radial_tridiagonal_solver;
-        int batch    = i_theta;
+        const auto& solver = radial_tridiagonal_solver;
+        const int batch    = i_theta;
 
         if (i_theta & 1) {
             /* i_theta % 2 == 1 and i_r % 2 == 1 */
@@ -343,9 +352,9 @@ KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiago
             /* Center: (Left, Right, Bottom, Top) */
             row    = center_index;
             column = center_index;
-            value  = coeff5 * coeff_beta[center] * std::fabs(detDF[center]) + coeff1 * (arr[center] + arr[left]) +
-                    coeff2 * (arr[center] + arr[right]) + coeff3 * (att[center] + att[bottom]) +
-                    coeff4 * (att[center] + att[top]);
+            value  = coeff5 * coeff_beta[center] * Kokkos::fabs(detDF[center]) + coeff1 * (arr[center] + arr[left]) +
+                     coeff2 * (arr[center] + arr[right]) + coeff3 * (att[center] + att[bottom]) +
+                     coeff4 * (att[center] + att[top]);
             updateMatrixElement(solver, batch, row, column, value);
 
             /* Right */
@@ -366,7 +375,7 @@ KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiago
                 /* Center: (Left, Right, Bottom, Top) */
                 row    = center_index;
                 column = center_index;
-                value  = coeff5 * coeff_beta[center] * std::fabs(detDF[center]) + coeff1 * (arr[center] + arr[left]) +
+                value = coeff5 * coeff_beta[center] * Kokkos::fabs(detDF[center]) + coeff1 * (arr[center] + arr[left]) +
                         coeff2 * (arr[center] + arr[right]) + coeff3 * (att[center] + att[bottom]) +
                         coeff4 * (att[center] + att[top]);
                 updateMatrixElement(solver, batch, row, column, value);
@@ -391,18 +400,18 @@ KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiago
     /* Radial Section: Node next to outer boundary */
     /* ------------------------------------------- */
     else if (i_r == grid.nr() - 2) {
-        assert(i_r % 2 == 1);
+        KOKKOS_ASSERT(i_r % 2 == 1);
 
-        double h1 = grid.radialSpacing(i_r - 1);
-        double h2 = grid.radialSpacing(i_r);
-        double k1 = grid.angularSpacing(i_theta - 1);
-        double k2 = grid.angularSpacing(i_theta);
+        const double h1 = grid.radialSpacing(i_r - 1);
+        const double h2 = grid.radialSpacing(i_r);
+        const double k1 = grid.angularSpacing(i_theta - 1);
+        const double k2 = grid.angularSpacing(i_theta);
 
-        double coeff1 = 0.5 * (k1 + k2) / h1;
-        double coeff2 = 0.5 * (k1 + k2) / h2;
-        double coeff3 = 0.5 * (h1 + h2) / k1;
-        double coeff4 = 0.5 * (h1 + h2) / k2;
-        double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
+        const double coeff1 = 0.5 * (k1 + k2) / h1;
+        const double coeff2 = 0.5 * (k1 + k2) / h2;
+        const double coeff3 = 0.5 * (h1 + h2) / k1;
+        const double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -417,8 +426,8 @@ KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiago
         const int left_index   = i_r - numberSmootherCircles - 1;
         const int right_index  = i_r - numberSmootherCircles + 1;
 
-        auto& solver = radial_tridiagonal_solver;
-        int batch    = i_theta;
+        const auto& solver = radial_tridiagonal_solver;
+        const int batch    = i_theta;
 
         if (i_theta & 1) {
             /* i_theta % 2 == 1 */
@@ -433,9 +442,9 @@ KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiago
             /* Center: (Left, Right, Bottom, Top) */
             row    = center_index;
             column = center_index;
-            value  = coeff5 * coeff_beta[center] * std::fabs(detDF[center]) + coeff1 * (arr[center] + arr[left]) +
-                    coeff2 * (arr[center] + arr[right]) + coeff3 * (att[center] + att[bottom]) +
-                    coeff4 * (att[center] + att[top]);
+            value  = coeff5 * coeff_beta[center] * Kokkos::fabs(detDF[center]) + coeff1 * (arr[center] + arr[left]) +
+                     coeff2 * (arr[center] + arr[right]) + coeff3 * (att[center] + att[bottom]) +
+                     coeff4 * (att[center] + att[top]);
             updateMatrixElement(solver, batch, row, column, value);
 
             /* Left */
@@ -461,9 +470,9 @@ KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiago
             /* Center: (Left, Right, Bottom, Top) */
             row    = center_index;
             column = center_index;
-            value  = coeff5 * coeff_beta[center] * std::fabs(detDF[center]) + coeff1 * (arr[center] + arr[left]) +
-                    coeff2 * (arr[center] + arr[right]) + coeff3 * (att[center] + att[bottom]) +
-                    coeff4 * (att[center] + att[top]);
+            value  = coeff5 * coeff_beta[center] * Kokkos::fabs(detDF[center]) + coeff1 * (arr[center] + arr[left]) +
+                     coeff2 * (arr[center] + arr[right]) + coeff3 * (att[center] + att[bottom]) +
+                     coeff4 * (att[center] + att[top]);
             updateMatrixElement(solver, batch, row, column, value);
         }
     }
@@ -471,13 +480,13 @@ KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiago
     /* Radial Section: Node on the outer boundary */
     /* ------------------------------------------ */
     else if (i_r == grid.nr() - 1) {
-        assert(i_r % 2 == 0);
+        KOKKOS_ASSERT(i_r % 2 == 0);
 
-        int center_index = i_r - numberSmootherCircles;
-        int left_index   = i_r - numberSmootherCircles - 1;
+        const int center_index = i_r - numberSmootherCircles;
+        const int left_index   = i_r - numberSmootherCircles - 1;
 
-        auto& solver = radial_tridiagonal_solver;
-        int batch    = i_theta;
+        const auto& solver = radial_tridiagonal_solver;
+        const int batch    = i_theta;
 
         if (i_theta & 1) {
             /* i_theta % 2 == 1 */
@@ -522,9 +531,11 @@ KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiago
 template <class LevelCacheType>
 void ExtrapolatedSmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
 {
+    using extrapolated_smoother_take::nodeBuildTridiagonalSolverMatricesCircleSection;
+    using extrapolated_smoother_take::nodeBuildTridiagonalSolverMatricesRadialSection;
+
     const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
@@ -550,8 +561,9 @@ void ExtrapolatedSmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_r, const int i_theta) {
-            nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, DirBC_Interior, circle_tridiagonal_solver,
-                                               radial_tridiagonal_solver, arr, att, art, detDF, coeff_beta);
+            nodeBuildTridiagonalSolverMatricesCircleSection(i_r, i_theta, grid, DirBC_Interior,
+                                                            circle_tridiagonal_solver, radial_tridiagonal_solver, arr,
+                                                            att, art, detDF, coeff_beta);
         });
 
     /* For loop matches radial access pattern */
@@ -563,8 +575,9 @@ void ExtrapolatedSmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_theta, const int i_r) {
-            nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, DirBC_Interior, circle_tridiagonal_solver,
-                                               radial_tridiagonal_solver, arr, att, art, detDF, coeff_beta);
+            nodeBuildTridiagonalSolverMatricesRadialSection(i_r, i_theta, grid, DirBC_Interior,
+                                                            circle_tridiagonal_solver, radial_tridiagonal_solver, arr,
+                                                            att, art, detDF, coeff_beta);
         });
 
     Kokkos::fence();
