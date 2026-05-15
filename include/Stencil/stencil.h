@@ -58,7 +58,7 @@ public:
     }
 
 private:
-    int values_[9]; // plain array, not std::array (which isn't constexpr-friendly on device)
+    int values_[9];
     int stencil_size_;
 };
 
