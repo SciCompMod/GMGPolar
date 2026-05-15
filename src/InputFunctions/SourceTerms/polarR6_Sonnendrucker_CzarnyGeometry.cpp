@@ -17,7 +17,7 @@ PolarR6_Sonnendrucker_CzarnyGeometry::PolarR6_Sonnendrucker_CzarnyGeometry(Polar
     initializeGeometry();
 }
 
-double PolarR6_Sonnendrucker_CzarnyGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
+KOKKOS_FUNCTION double PolarR6_Sonnendrucker_CzarnyGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
 {
     double r         = grid_.radius(i_r);
     double theta     = grid_.theta(i_theta);

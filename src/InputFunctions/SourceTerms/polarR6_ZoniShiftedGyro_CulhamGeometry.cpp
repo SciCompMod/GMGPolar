@@ -7,7 +7,7 @@ PolarR6_ZoniShiftedGyro_CulhamGeometry::PolarR6_ZoniShiftedGyro_CulhamGeometry(P
 {
 }
 
-double PolarR6_ZoniShiftedGyro_CulhamGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
+KOKKOS_FUNCTION double PolarR6_ZoniShiftedGyro_CulhamGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
 {
     double r         = grid_.radius(i_r);
     double theta     = grid_.theta(i_theta);
