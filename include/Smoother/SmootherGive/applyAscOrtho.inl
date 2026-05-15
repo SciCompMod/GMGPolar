@@ -24,7 +24,7 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleGiveInside(int i_r, in
     /* -------------------- */
     /* Node in the interior */
     /* -------------------- */
-    if (i_r > 0 && i_r < grid.numberSmootherCircles()) {
+    if (i_r > 0) {
         const double h1 = grid.radialSpacing(i_r - 1);
         const double h2 = grid.radialSpacing(i_r);
         const double k1 = grid.angularSpacing(i_theta - 1);
