@@ -13,11 +13,13 @@ class PolarR6_SonnendruckerGyro_CircularGeometry
 {
 public:
     explicit PolarR6_SonnendruckerGyro_CircularGeometry(PolarGrid const& grid, double Rmax);
+    KOKKOS_DEFAULTED_FUNCTION
+    PolarR6_SonnendruckerGyro_CircularGeometry(const PolarR6_SonnendruckerGyro_CircularGeometry&) = default;
 
-    double operator()(std::size_t i_r, std::size_t i_theta) const;
+    KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;
 
 private:
-    PolarGrid const& grid_;
+    PolarGrid grid_;
     const double Rmax = 1.3;
 };
 } // namespace gmgpolar
