@@ -44,7 +44,7 @@ nodeBuildTridiagonalSolverMatricesCircleSection(const int i_r, const int i_theta
 
     int ptr, offset;
     int row, column;
-    double value, value;
+    double value;
 
     /* ------------------------------------------ */
     /* Node in the interior of the Circle Section */
@@ -220,7 +220,7 @@ nodeBuildTridiagonalSolverMatricesRadialSection(const int i_r, const int i_theta
 
     int ptr, offset;
     int row, column;
-    double value, value;
+    double value;
 
     /* ------------------------------------------ */
     /* Node in the interior of the Radial Section */

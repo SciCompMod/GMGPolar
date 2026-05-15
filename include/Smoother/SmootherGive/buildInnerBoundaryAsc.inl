@@ -25,9 +25,9 @@ static inline void update_CSR_COO_MatrixElement(SparseMatrixCSR<double, Kokkos::
 #endif
 
 template <typename InnerBoundaryMatrix>
-static KOKKOS_INLINE_FUNCTION void nodeBuildInteriorBoundarySolverMatrix_i_r_0(const int i_theta, const PolarGrid& grid,
-                                                                               const bool DirBC_Interior,
-                                                                               const InnerBoundaryMatrix& matrix)
+static KOKKOS_INLINE_FUNCTION void
+nodeBuildInteriorBoundarySolverMatrix_i_r_0(const int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache,
+                                            const bool DirBC_Interior, const InnerBoundaryMatrix& matrix)
 {
     using smoother_give::getCircleAscIndex;
     using smoother_give::getStencil;
@@ -60,7 +60,7 @@ static KOKKOS_INLINE_FUNCTION void nodeBuildInteriorBoundarySolverMatrix_i_r_0(c
 
         /* Fill matrix row of (i,j) */
         row = center_index;
-        ptr = getCircleAscIndex(i_r, i_theta);
+        ptr = getCircleAscIndex(i_r, i_theta, DirBC_Interior);
 
         const Stencil& CenterStencil = getStencil(i_r, DirBC_Interior);
 
@@ -197,9 +197,9 @@ static KOKKOS_INLINE_FUNCTION void nodeBuildInteriorBoundarySolverMatrix_i_r_0(c
 }
 
 template <typename InnerBoundaryMatrix>
-static KOKKOS_INLINE_FUNCTION void nodeBuildInteriorBoundarySolverMatrix_i_r_1(const int i_theta, const PolarGrid& grid,
-                                                                               const bool DirBC_Interior,
-                                                                               const InnerBoundaryMatrix& matrix)
+static KOKKOS_INLINE_FUNCTION void
+nodeBuildInteriorBoundarySolverMatrix_i_r_1(const int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache,
+                                            const bool DirBC_Interior, const InnerBoundaryMatrix& matrix)
 {
     using smoother_give::getCircleAscIndex;
     using smoother_give::getStencil;
@@ -289,7 +289,7 @@ SmootherGive<LevelCacheType>::buildInteriorBoundarySolverMatrix()
             "SmootherGive: BuildInnerBoundaryMatrix", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, 1),
             KOKKOS_LAMBDA(const int) {
                 for (int i_theta = 0; i_theta < ntheta; i_theta++) {
-                    nodeBuildInteriorBoundarySolverMatrix_i_r_0(i_theta, grid, DirBC_Interior,
+                    nodeBuildInteriorBoundarySolverMatrix_i_r_0(i_theta, grid, level_cache, DirBC_Interior,
                                                                 inner_boundary_solver_matrix);
                 }
             });
@@ -300,7 +300,7 @@ SmootherGive<LevelCacheType>::buildInteriorBoundarySolverMatrix()
             "SmootherGive: BuildInnerBoundaryMatrix", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, 1),
             KOKKOS_LAMBDA(const int) {
                 for (int i_theta = 0; i_theta < ntheta; i_theta++) {
-                    nodeBuildInteriorBoundarySolverMatrix_i_r_1(i_theta, grid, DirBC_Interior,
+                    nodeBuildInteriorBoundarySolverMatrix_i_r_1(i_theta, grid, level_cache, DirBC_Interior,
                                                                 inner_boundary_solver_matrix);
                 }
             });
