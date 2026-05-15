@@ -171,10 +171,10 @@ public:
 
     // Compute temp = f_sc − A_sc^ortho * u_sc^ortho   (precomputed right-hand side)
     // where x = u_sc and rhs = f_sc
-    void applyAscOrthoCircleSection(const int i_r, const SmootherColor smoother_color, ConstVector<double> x,
-                                    ConstVector<double> rhs, Vector<double> temp);
-    void applyAscOrthoRadialSection(const int i_theta, const SmootherColor smoother_color, ConstVector<double> x,
-                                    ConstVector<double> rhs, Vector<double> temp);
+    void applyAscOrthoBlackCircleSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
+    void applyAscOrthoWhiteCircleSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
+    void applyAscOrthoBlackRadialSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
+    void applyAscOrthoWhiteRadialSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
 
     /* ----------------- */
     /* Line-wise solvers */
