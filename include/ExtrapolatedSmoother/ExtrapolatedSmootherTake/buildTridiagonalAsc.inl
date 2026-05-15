@@ -17,12 +17,11 @@ static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const BatchedTridiagonalS
 } // namespace extrapolated_smoother_take
 
 template <class LevelCacheType>
-void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
+KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
     int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
     const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
     const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, ConstVector<double>& arr,
-    ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF,
-    ConstVector<double>& coeff_beta) const
+    ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
 {
     using extrapolated_smoother_take::updateMatrixElement;
 
@@ -550,7 +549,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
             {grid.numberSmootherCircles(), grid.ntheta()} // Ending point of the index space
             ),
         // Kokkos lambda function to execute for each point in the index space
-        KOKKOS_CLASS_LAMBDA(const int i_r, const int i_theta) {
+        KOKKOS_LAMBDA(const int i_r, const int i_theta) {
             nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, DirBC_Interior, circle_tridiagonal_solver,
                                                radial_tridiagonal_solver, arr, att, art, detDF, coeff_beta);
         });
@@ -563,7 +562,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
             {grid.ntheta(), grid.nr()} // Ending point of the index space
             ),
         // Kokkos lambda function to execute for each point in the index space
-        KOKKOS_CLASS_LAMBDA(const int i_theta, const int i_r) {
+        KOKKOS_LAMBDA(const int i_theta, const int i_r) {
             nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, DirBC_Interior, circle_tridiagonal_solver,
                                                radial_tridiagonal_solver, arr, att, art, detDF, coeff_beta);
         });
