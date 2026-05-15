@@ -246,7 +246,7 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<d
             {num_black_circles, grid.ntheta()} // Ending point of the index space
             ),
         // Kokkos lambda function to execute for each point in the index space
-        KOKKOS_CLASS_LAMBDA(const int circle_task, const int i_theta) {
+        KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
             int i_r = start_black_circles + circle_task * 2;
             nodeApplyAscOrthoCircleTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF,
                                         coeff_beta);
@@ -286,7 +286,7 @@ void SmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<d
             {num_white_circles, grid.ntheta()} // Ending point of the index space
             ),
         // Kokkos lambda function to execute for each point in the index space
-        KOKKOS_CLASS_LAMBDA(const int circle_task, const int i_theta) {
+        KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
             const int i_r = start_white_circles + circle_task * 2;
             nodeApplyAscOrthoCircleTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF,
                                         coeff_beta);
@@ -326,7 +326,7 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<d
             {num_black_radial_lines, grid.nr()} // Ending point of the index space
             ),
         // Kokkos lambda function to execute for each point in the index space
-        KOKKOS_CLASS_LAMBDA(const int radial_task, const int i_r) {
+        KOKKOS_LAMBDA(const int radial_task, const int i_r) {
             const int i_theta = start_black_radials + radial_task * 2;
             nodeApplyAscOrthoRadialTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF,
                                         coeff_beta);
@@ -366,7 +366,7 @@ void SmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<d
             {num_white_radial_lines, grid.nr()} // Ending point of the index space
             ),
         // Kokkos lambda function to execute for each point in the index space
-        KOKKOS_CLASS_LAMBDA(const int radial_task, const int i_r) {
+        KOKKOS_LAMBDA(const int radial_task, const int i_r) {
             const int i_theta = start_white_radials + radial_task * 2;
             nodeApplyAscOrthoRadialTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF,
                                         coeff_beta);
