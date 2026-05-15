@@ -511,7 +511,7 @@ typename DirectSolverTake<LevelCacheType>::SystemMatrix DirectSolverTake<LevelCa
             {grid.numberSmootherCircles(), grid.ntheta()} // Ending point of the index space
             ),
         // Kokkos lambda function to execute for each point in the index space
-        KOKKOS_CLASS_LAMBDA(const int i_r, const int i_theta) {
+        KOKKOS_LAMBDA(const int i_r, const int i_theta) {
             nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF,
                                       coeff_beta);
         });
