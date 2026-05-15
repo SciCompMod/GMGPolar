@@ -154,15 +154,10 @@ nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, 
     /* ------------------------------------------ */
     else if (i_r == 0) {
         // The inner boundary circle line are is handled by the inner_boundary_mumps_solver, so we fill in the identity matrix.
-        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
-
         const auto& solver = circle_tridiagonal_solver;
         const int batch    = i_r;
 
         const int center_index = i_theta;
-        const int bottom_index = i_theta_M1;
-        const int top_index    = i_theta_P1;
 
         /* Center: (Left, Right, Bottom, Top) */
         row    = center_index;
@@ -178,7 +173,6 @@ nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, 
         const int batch    = i_theta;
 
         const int center_index = i_r - numberSmootherCircles;
-        const int left_index   = i_r - numberSmootherCircles - 1;
 
         /* Fill matrix row of (i,j) */
         row    = center_index;
