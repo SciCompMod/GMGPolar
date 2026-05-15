@@ -13,8 +13,8 @@ class CartesianR2_ZoniShifted_CzarnyGeometry
 {
 public:
     explicit CartesianR2_ZoniShifted_CzarnyGeometry(PolarGrid const& grid, double Rmax,
-KOKKOS_DEFAULTED_FUNCTION CartesianR2_ZoniShifted_CzarnyGeometry(const CartesianR2_ZoniShifted_CzarnyGeometry&) = default;
                                                     double inverse_aspect_ratio_epsilon, double ellipticity_e);
+KOKKOS_DEFAULTED_FUNCTION CartesianR2_ZoniShifted_CzarnyGeometry(const CartesianR2_ZoniShifted_CzarnyGeometry&) = default;
 
     KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;
 

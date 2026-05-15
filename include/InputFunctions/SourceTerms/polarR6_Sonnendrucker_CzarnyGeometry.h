@@ -13,8 +13,8 @@ class PolarR6_Sonnendrucker_CzarnyGeometry
 {
 public:
     explicit PolarR6_Sonnendrucker_CzarnyGeometry(PolarGrid const& grid, double Rmax,
-KOKKOS_DEFAULTED_FUNCTION PolarR6_Sonnendrucker_CzarnyGeometry(const PolarR6_Sonnendrucker_CzarnyGeometry&) = default;
                                                   double inverse_aspect_ratio_epsilon, double ellipticity_e);
+KOKKOS_DEFAULTED_FUNCTION PolarR6_Sonnendrucker_CzarnyGeometry(const PolarR6_Sonnendrucker_CzarnyGeometry&) = default;
 
     KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;
 

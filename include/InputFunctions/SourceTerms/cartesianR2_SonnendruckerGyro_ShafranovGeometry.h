@@ -13,8 +13,8 @@ class CartesianR2_SonnendruckerGyro_ShafranovGeometry
 {
 public:
     explicit CartesianR2_SonnendruckerGyro_ShafranovGeometry(PolarGrid const& grid, double Rmax,
-KOKKOS_DEFAULTED_FUNCTION CartesianR2_SonnendruckerGyro_ShafranovGeometry(const CartesianR2_SonnendruckerGyro_ShafranovGeometry&) = default;
                                                              double elongation_kappa, double shift_delta);
+KOKKOS_DEFAULTED_FUNCTION CartesianR2_SonnendruckerGyro_ShafranovGeometry(const CartesianR2_SonnendruckerGyro_ShafranovGeometry&) = default;
 
     KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;
 

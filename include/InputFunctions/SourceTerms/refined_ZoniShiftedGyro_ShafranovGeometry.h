@@ -13,8 +13,8 @@ class Refined_ZoniShiftedGyro_ShafranovGeometry
 {
 public:
     explicit Refined_ZoniShiftedGyro_ShafranovGeometry(PolarGrid const& grid, double Rmax, double elongation_kappa,
-KOKKOS_DEFAULTED_FUNCTION Refined_ZoniShiftedGyro_ShafranovGeometry(const Refined_ZoniShiftedGyro_ShafranovGeometry&) = default;
                                                        double shift_delta);
+KOKKOS_DEFAULTED_FUNCTION Refined_ZoniShiftedGyro_ShafranovGeometry(const Refined_ZoniShiftedGyro_ShafranovGeometry&) = default;
 
     KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;
 

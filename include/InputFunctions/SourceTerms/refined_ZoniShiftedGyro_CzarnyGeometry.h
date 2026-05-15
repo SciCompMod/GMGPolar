@@ -13,8 +13,8 @@ class Refined_ZoniShiftedGyro_CzarnyGeometry
 {
 public:
     explicit Refined_ZoniShiftedGyro_CzarnyGeometry(PolarGrid const& grid, double Rmax,
-KOKKOS_DEFAULTED_FUNCTION Refined_ZoniShiftedGyro_CzarnyGeometry(const Refined_ZoniShiftedGyro_CzarnyGeometry&) = default;
                                                     double inverse_aspect_ratio_epsilon, double ellipticity_e);
+KOKKOS_DEFAULTED_FUNCTION Refined_ZoniShiftedGyro_CzarnyGeometry(const Refined_ZoniShiftedGyro_CzarnyGeometry&) = default;
 
     KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;
 
