@@ -7,8 +7,9 @@ namespace smoother_give
 
 #ifdef GMGPOLAR_USE_MUMPS
 // When using the MUMPS solver, the matrix is assembled in COO format.
-static inline void update_CSR_COO_MatrixElement(const SparseMatrixCOO<double, Kokkos::HostSpace>& matrix, const int ptr,
-                                                const int offset, const int row, const int column, const double value)
+static KOKKOS_INLINE_FUNCTION void
+update_CSR_COO_MatrixElement(const SparseMatrixCOO<double, Kokkos::HostSpace>& matrix, const int ptr, const int offset,
+                             const int row, const int column, const double value)
 {
     matrix.set_row_index(ptr + offset, row);
     matrix.set_col_index(ptr + offset, column);
@@ -16,8 +17,9 @@ static inline void update_CSR_COO_MatrixElement(const SparseMatrixCOO<double, Ko
 }
 #else
 // When using the in-house solver, the matrix is stored in CSR format.
-static inline void update_CSR_COO_MatrixElement(const SparseMatrixCSR<double, Kokkos::HostSpace>& matrix, const int ptr,
-                                                const int offset, const int row, const int column, const double value)
+static KOKKOS_INLINE_FUNCTION void
+update_CSR_COO_MatrixElement(const SparseMatrixCSR<double, Kokkos::HostSpace>& matrix, const int ptr, const int offset,
+                             const int row, const int column, const double value)
 {
     matrix.set_row_nz_index(row, offset, column);
     matrix.increase_row_nz_entry(row, offset, value);
