@@ -32,8 +32,8 @@ public:
 protected:
     /* ------------------- */
     /* Constructor members */
-    const PolarGrid& grid_;
-    const LevelCacheType& level_cache_;
+    const PolarGrid grid_;
+    const LevelCacheType level_cache_;
     const bool DirBC_Interior_;
     const int num_omp_threads_;
 };
