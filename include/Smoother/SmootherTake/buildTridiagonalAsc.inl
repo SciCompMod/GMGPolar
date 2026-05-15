@@ -76,7 +76,7 @@ void SmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
         row    = center_index;
         column = center_index;
         value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) -
-                 (left_value + right_value + bottom_value + top_value);
+                (left_value + right_value + bottom_value + top_value);
         updateMatrixElement(solver, batch, row, column, value);
 
         /* Bottom */
@@ -130,7 +130,7 @@ void SmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
         row    = center_index;
         column = center_index;
         value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) -
-                 (left_value + right_value + bottom_value + top_value);
+                (left_value + right_value + bottom_value + top_value);
         updateMatrixElement(solver, batch, row, column, value);
 
         /* Left */
@@ -216,7 +216,7 @@ void SmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
         row    = center_index;
         column = center_index;
         value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) -
-                 (left_value + right_value + bottom_value + top_value);
+                (left_value + right_value + bottom_value + top_value);
         updateMatrixElement(solver, batch, row, column, value);
 
         /* Right */
@@ -264,7 +264,7 @@ void SmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
         row    = center_index;
         column = center_index;
         value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) -
-                 (left_value + right_value + bottom_value + top_value);
+                (left_value + right_value + bottom_value + top_value);
         updateMatrixElement(solver, batch, row, column, value);
 
         /* Left */
