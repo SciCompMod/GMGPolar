@@ -33,13 +33,14 @@ public:
         , DirBC_Interior_(DirBC_Interior)
     {
     }
-    virtual ~Smoother() = default;
+    KOKKOS_DEFAULTED_FUNCTION Smoother(const Smoother&) = default;
+    virtual ~Smoother()                                 = default;
 
     virtual void smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) = 0;
 
 protected:
-    const PolarGrid& grid_;
-    const LevelCacheType& level_cache_;
+    const PolarGrid grid_;
+    const LevelCacheType level_cache_;
     const bool DirBC_Interior_;
 };
 } // namespace gmgpolar

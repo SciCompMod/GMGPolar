@@ -28,7 +28,7 @@ public:
     using triplet_type = std::tuple<int, int, T>;
 
     SparseMatrixCOO();
-    SparseMatrixCOO(const SparseMatrixCOO& other) = delete;
+    KOKKOS_DEFAULTED_FUNCTION SparseMatrixCOO(const SparseMatrixCOO& other) = default;
     SparseMatrixCOO(SparseMatrixCOO&& other) noexcept;
 
     explicit SparseMatrixCOO(int rows, int columns, int nnz);

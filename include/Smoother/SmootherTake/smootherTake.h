@@ -55,6 +55,8 @@ public:
     // Builds the A_sc smoother matrices and prepares the solvers.
     explicit SmootherTake(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior);
 
+    KOKKOS_DEFAULTED_FUNCTION SmootherTake(const SmootherTake&) = default;
+
     // Performs one full coupled smoothing sweep:
     //   BC -> WC -> BR -> WR
     // using temp as RHS workspace.
