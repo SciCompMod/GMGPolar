@@ -13,6 +13,7 @@ class CartesianR2_Poisson_CzarnyGeometry
 {
 public:
     explicit CartesianR2_Poisson_CzarnyGeometry(PolarGrid const& grid, double Rmax, double inverse_aspect_ratio_epsilon,
+KOKKOS_DEFAULTED_FUNCTION CartesianR2_Poisson_CzarnyGeometry(const CartesianR2_Poisson_CzarnyGeometry&) = default;
                                                 double ellipticity_e);
 
     KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;

@@ -13,6 +13,7 @@ class CartesianR6_ZoniGyro_ShafranovGeometry
 {
 public:
     explicit CartesianR6_ZoniGyro_ShafranovGeometry(PolarGrid const& grid, double Rmax, double elongation_kappa,
+KOKKOS_DEFAULTED_FUNCTION CartesianR6_ZoniGyro_ShafranovGeometry(const CartesianR6_ZoniGyro_ShafranovGeometry&) = default;
                                                     double shift_delta);
 
     KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;

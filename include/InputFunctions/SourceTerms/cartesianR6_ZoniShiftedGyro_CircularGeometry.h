@@ -13,6 +13,7 @@ class CartesianR6_ZoniShiftedGyro_CircularGeometry
 {
 public:
     explicit CartesianR6_ZoniShiftedGyro_CircularGeometry(PolarGrid const& grid, double Rmax);
+KOKKOS_DEFAULTED_FUNCTION CartesianR6_ZoniShiftedGyro_CircularGeometry(const CartesianR6_ZoniShiftedGyro_CircularGeometry&) = default;
 
     KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;
 

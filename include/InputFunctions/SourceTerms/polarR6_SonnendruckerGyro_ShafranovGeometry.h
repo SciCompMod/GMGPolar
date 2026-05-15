@@ -13,6 +13,7 @@ class PolarR6_SonnendruckerGyro_ShafranovGeometry
 {
 public:
     explicit PolarR6_SonnendruckerGyro_ShafranovGeometry(PolarGrid const& grid, double Rmax, double elongation_kappa,
+KOKKOS_DEFAULTED_FUNCTION PolarR6_SonnendruckerGyro_ShafranovGeometry(const PolarR6_SonnendruckerGyro_ShafranovGeometry&) = default;
                                                          double shift_delta);
 
     KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;

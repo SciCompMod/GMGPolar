@@ -13,6 +13,7 @@ class CartesianR6_Zoni_CzarnyGeometry
 {
 public:
     explicit CartesianR6_Zoni_CzarnyGeometry(PolarGrid const& grid, double Rmax, double inverse_aspect_ratio_epsilon,
+KOKKOS_DEFAULTED_FUNCTION CartesianR6_Zoni_CzarnyGeometry(const CartesianR6_Zoni_CzarnyGeometry&) = default;
                                              double ellipticity_e);
 
     KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;

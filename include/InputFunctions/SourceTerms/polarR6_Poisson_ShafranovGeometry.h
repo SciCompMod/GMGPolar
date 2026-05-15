@@ -13,6 +13,7 @@ class PolarR6_Poisson_ShafranovGeometry
 {
 public:
     explicit PolarR6_Poisson_ShafranovGeometry(PolarGrid const& grid, double Rmax, double elongation_kappa,
+KOKKOS_DEFAULTED_FUNCTION PolarR6_Poisson_ShafranovGeometry(const PolarR6_Poisson_ShafranovGeometry&) = default;
                                                double shift_delta);
 
     KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;
