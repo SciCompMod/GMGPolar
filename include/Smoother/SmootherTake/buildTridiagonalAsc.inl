@@ -58,8 +58,8 @@ nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, 
         const int top    = grid.index(i_r, i_theta_P1);
         const int right  = grid.index(i_r + 1, i_theta);
 
-        auto& solver    = circle_tridiagonal_solver;
-        const int batch = i_r;
+        const auto& solver = circle_tridiagonal_solver;
+        const int batch    = i_r;
 
         const int center_index = i_theta;
         const int bottom_index = i_theta_M1;
@@ -73,7 +73,7 @@ nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, 
         /* Center: (Left, Right, Bottom, Top) */
         row    = center_index;
         column = center_index;
-        value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) -
+        value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * Kokkos::fabs(detDF[center]) -
                  (left_value + right_value + bottom_value + top_value);
         updateMatrixElement(solver, batch, row, column, value);
 
@@ -113,8 +113,8 @@ nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, 
         const int top    = grid.index(i_r, i_theta_P1);
         const int right  = grid.index(i_r + 1, i_theta);
 
-        auto& solver    = radial_tridiagonal_solver;
-        const int batch = i_theta;
+        const auto& solver = radial_tridiagonal_solver;
+        const int batch    = i_theta;
 
         const int center_index = i_r - numberSmootherCircles;
         const int left_index   = i_r - numberSmootherCircles - 1;
@@ -156,8 +156,8 @@ nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
 
-        auto& solver    = circle_tridiagonal_solver;
-        const int batch = i_r;
+        const auto& solver = circle_tridiagonal_solver;
+        const int batch    = i_r;
 
         const int center_index = i_theta;
         const int bottom_index = i_theta_M1;
@@ -173,8 +173,8 @@ nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, 
     /* Radial Section: Node on the outer boundary */
     /* ------------------------------------------ */
     else if (i_r == grid.nr() - 1) {
-        auto& solver    = radial_tridiagonal_solver;
-        const int batch = i_theta;
+        const auto& solver = radial_tridiagonal_solver;
+        const int batch    = i_theta;
 
         const int center_index = i_r - numberSmootherCircles;
         const int left_index   = i_r - numberSmootherCircles - 1;

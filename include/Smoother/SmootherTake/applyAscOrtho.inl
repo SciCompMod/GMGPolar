@@ -86,7 +86,6 @@ nodeApplyAscOrthoRadialTake(const int i_r, const int i_theta, const PolarGrid& g
     const int left         = grid.index(i_r - 1, i_theta);
     const int top_left     = grid.index(i_r - 1, i_theta_P1);
     const int bottom       = grid.index(i_r, i_theta_M1);
-    const int center       = grid.index(i_r, i_theta);
     const int top          = grid.index(i_r, i_theta_P1);
     const int bottom_right = grid.index(i_r + 1, i_theta_M1);
     const int right        = grid.index(i_r + 1, i_theta);

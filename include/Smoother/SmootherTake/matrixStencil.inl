@@ -42,7 +42,7 @@ static KOKKOS_INLINE_FUNCTION const Stencil& getStencil(const int i_r, const boo
 }
 
 static KOKKOS_INLINE_FUNCTION int getNonZeroCountCircleAsc(const int i_r, const PolarGrid& grid,
-                                                           const bool DirBC_Interior) const
+                                                           const bool DirBC_Interior)
 {
     // Only i_r = 0 is implemented.
     // The number of nonzero elements is only needed to construct COO matrices.
@@ -54,7 +54,7 @@ static KOKKOS_INLINE_FUNCTION int getNonZeroCountCircleAsc(const int i_r, const 
     return size_stencil_inner_boundary * grid.ntheta();
 }
 
-static KOKKOS_INLINE_FUNCTION int getCircleAscIndex(const int i_r, const int i_theta, const bool DirBC_Interior) const
+static KOKKOS_INLINE_FUNCTION int getCircleAscIndex(const int i_r, const int i_theta, const bool DirBC_Interior)
 {
     // Only i_r = 0 is implemented.
     // getCircleAscIndex accumulates all stencil sizes within a line up to, but excluding the current node.
