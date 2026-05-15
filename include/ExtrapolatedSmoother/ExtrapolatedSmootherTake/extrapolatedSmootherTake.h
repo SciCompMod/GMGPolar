@@ -135,6 +135,8 @@ private:
     // Solver object (owns matrix if MUMPS, references if in-house solver).
     InnerBoundarySolver inner_boundary_solver_;
 
+    // Public is required as Cuda needs to be able to get the address of functions enclosing lambda functions
+public:
     /* -------------- */
     /* Stencil access */
     /* -------------- */
@@ -153,12 +155,12 @@ private:
     // Build all A_sc matrices for circle and radial smoothers.
     void buildTridiagonalSolverMatrices();
     // Build the tridiagonal solver matrices for a specific node (i_r, i_theta)
-    void nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                            BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
-                                            BatchedTridiagonalSolver<double>& radial_tridiagonal_solver,
-                                            ConstVector<double>& arr, ConstVector<double>& att,
-                                            ConstVector<double>& art, ConstVector<double>& detDF,
-                                            ConstVector<double>& coeff_beta);
+    static KOKKOS_FUNCTION void
+    nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+                                       const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
+                                       const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver,
+                                       ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art,
+                                       ConstVector<double>& detDF, ConstVector<double>& coeff_beta);
 
     // Build the solver matrix for the interior boundary (i_r = 0) which is non-tridiagonal due to across-origin coupling.
     InnerBoundaryMatrix buildInteriorBoundarySolverMatrix();
