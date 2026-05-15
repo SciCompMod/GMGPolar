@@ -32,7 +32,6 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleGiveInside(int i_r, in
     const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
     const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
 
-    const int center = grid.index(i_r, i_theta);
     const int bottom = grid.index(i_r, i_theta_M1);
     const int top    = grid.index(i_r, i_theta_P1);
 

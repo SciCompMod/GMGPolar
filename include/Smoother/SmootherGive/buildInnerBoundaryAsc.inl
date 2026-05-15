@@ -24,7 +24,7 @@ static inline void update_CSR_COO_MatrixElement(SparseMatrixCSR<double, Kokkos::
 }
 #endif
 
-template <typename InnerBoundaryMatrix>
+template <typename LevelCacheType, typename InnerBoundaryMatrix>
 static KOKKOS_INLINE_FUNCTION void
 nodeBuildInteriorBoundarySolverMatrix_i_r_0(const int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache,
                                             const bool DirBC_Interior, const InnerBoundaryMatrix& matrix)
@@ -196,7 +196,7 @@ nodeBuildInteriorBoundarySolverMatrix_i_r_0(const int i_theta, const PolarGrid& 
     }
 }
 
-template <typename InnerBoundaryMatrix>
+template <typename LevelCacheType, typename InnerBoundaryMatrix>
 static KOKKOS_INLINE_FUNCTION void
 nodeBuildInteriorBoundarySolverMatrix_i_r_1(const int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache,
                                             const bool DirBC_Interior, const InnerBoundaryMatrix& matrix)
