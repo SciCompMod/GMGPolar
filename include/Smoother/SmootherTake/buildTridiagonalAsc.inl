@@ -14,8 +14,6 @@ static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const BatchedTridiagonalS
         solver.set_cyclic_corner(batch, value);
 }
 
-} // namespace smoother_take
-
 static KOKKOS_INLINE_FUNCTION void
 nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                    const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
@@ -301,6 +299,8 @@ nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, 
         updateMatrixElement(solver, batch, row, column, value);
     }
 }
+
+} // namespace smoother_take
 
 template <class LevelCacheType>
 void SmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()

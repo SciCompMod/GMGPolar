@@ -1,5 +1,8 @@
 #pragma once
 
+namespace smoother_take
+{
+
 /* ------------------- */
 /* Stencil definitions */
 /* ------------------- */
@@ -63,3 +66,5 @@ static KOKKOS_INLINE_FUNCTION int getCircleAscIndex(const int i_r, const int i_t
     const int size_stencil_inner_boundary = DirBC_Interior ? 1 : 4;
     return size_stencil_inner_boundary * i_theta;
 }
+
+} // namespace smoother_take

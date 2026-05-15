@@ -1,9 +1,9 @@
 #pragma once
 
+#include "matrixStencil.inl"
+
 namespace smoother_take
 {
-
-#include "matrixStencil.inl"
 
 #ifdef GMGPOLAR_USE_MUMPS
 // When using the MUMPS solver, the matrix is assembled in COO format.
