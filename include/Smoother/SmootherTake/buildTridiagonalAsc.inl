@@ -16,12 +16,12 @@ static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const BatchedTridiagonalS
 
 } // namespace smoother_take
 
-template <class LevelCacheType>
-KOKKOS_FUNCTION void SmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
-    int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-    const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
-    const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, ConstVector<double>& arr,
-    ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
+static KOKKOS_INLINE_FUNCTION void
+nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+                                   const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
+                                   const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver,
+                                   ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art,
+                                   ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
 {
     using smoother_take::updateMatrixElement;
 
@@ -75,7 +75,7 @@ KOKKOS_FUNCTION void SmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMat
         row    = center_index;
         column = center_index;
         value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) -
-                (left_value + right_value + bottom_value + top_value);
+                 (left_value + right_value + bottom_value + top_value);
         updateMatrixElement(solver, batch, row, column, value);
 
         /* Bottom */
@@ -129,7 +129,7 @@ KOKKOS_FUNCTION void SmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMat
         row    = center_index;
         column = center_index;
         value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) -
-                (left_value + right_value + bottom_value + top_value);
+                 (left_value + right_value + bottom_value + top_value);
         updateMatrixElement(solver, batch, row, column, value);
 
         /* Left */
@@ -215,7 +215,7 @@ KOKKOS_FUNCTION void SmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMat
         row    = center_index;
         column = center_index;
         value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) -
-                (left_value + right_value + bottom_value + top_value);
+                 (left_value + right_value + bottom_value + top_value);
         updateMatrixElement(solver, batch, row, column, value);
 
         /* Right */
@@ -263,7 +263,7 @@ KOKKOS_FUNCTION void SmootherTake<LevelCacheType>::nodeBuildTridiagonalSolverMat
         row    = center_index;
         column = center_index;
         value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) -
-                (left_value + right_value + bottom_value + top_value);
+                 (left_value + right_value + bottom_value + top_value);
         updateMatrixElement(solver, batch, row, column, value);
 
         /* Left */
