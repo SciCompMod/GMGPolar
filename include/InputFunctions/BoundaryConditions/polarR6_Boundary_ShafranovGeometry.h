@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <Kokkos_Core.hpp>
 
 #include "../boundaryConditions.h"
 
