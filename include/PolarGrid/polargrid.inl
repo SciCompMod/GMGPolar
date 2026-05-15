@@ -120,7 +120,7 @@ KOKKOS_INLINE_FUNCTION void PolarGrid::multiIndex(const int node_index, int& r_i
     assert(0 <= node_index && node_index < numberOfNodes());
     if (node_index < numberCircularSmootherNodes()) {
         r_index     = node_index / ntheta();
-        theta_index = node_index - ntheta() * r_index;
+        theta_index = node_index % ntheta();
     }
     else {
         theta_index = (node_index - numberCircularSmootherNodes()) / lengthRadialSmoother();
