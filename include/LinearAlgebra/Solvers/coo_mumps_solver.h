@@ -36,7 +36,20 @@ namespace gmgpolar
 class CooMumpsSolver
 {
 public:
-    explicit CooMumpsSolver(const SparseMatrixCOO<double>& matrix);
+    template <class MemorySpace>
+    explicit CooMumpsSolver(const SparseMatrixCOO<double, MemorySpace>& matrix)
+    {
+        auto matrix_host = matrix.mirror_view_and_copy();
+        if (matrix.is_symmetric()) {
+            matrix_ = extractUpperTriangle(matrix_host);
+        }
+        else {
+            matrix_ = matrix_host;
+        }
+
+        initialize();
+    }
+
     ~CooMumpsSolver();
 
     // rhs is overwritten in-place with the solution on return.

@@ -7,18 +7,6 @@
     #include <stdexcept>
 using namespace gmgpolar;
 
-CooMumpsSolver::CooMumpsSolver(const SparseMatrixCOO<double>& matrix)
-{
-    auto matrix_host = matrix.mirror_view_and_copy();
-    if (matrix.is_symmetric()) {
-        matrix_ = extractUpperTriangle(matrix_host);
-    }
-    else {
-        matrix_ = matrix_host;
-    }
-
-    initialize();
-}
 
 CooMumpsSolver::~CooMumpsSolver()
 {
