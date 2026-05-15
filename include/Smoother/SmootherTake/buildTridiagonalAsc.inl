@@ -48,6 +48,7 @@ nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, 
         const double coeff2 = 0.5 * (k1 + k2) / h2;
         const double coeff3 = 0.5 * (h1 + h2) / k1;
         const double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -73,7 +74,7 @@ nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, 
         /* Center: (Left, Right, Bottom, Top) */
         row    = center_index;
         column = center_index;
-        value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * Kokkos::fabs(detDF[center]) -
+        value  = coeff5 * coeff_beta[center] * Kokkos::fabs(detDF[center]) -
                  (left_value + right_value + bottom_value + top_value);
         updateMatrixElement(solver, batch, row, column, value);
 
