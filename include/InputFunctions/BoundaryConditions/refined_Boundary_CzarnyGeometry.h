@@ -12,6 +12,7 @@ class Refined_Boundary_CzarnyGeometry
 public:
     explicit Refined_Boundary_CzarnyGeometry();
     explicit Refined_Boundary_CzarnyGeometry(double Rmax, double inverse_aspect_ratio_epsilon, double ellipticity_e);
+KOKKOS_DEFAULTED_FUNCTION Refined_Boundary_CzarnyGeometry(const Refined_Boundary_CzarnyGeometry&) = default;
 
     double u_D(double r, double theta) const;
     double u_D_Interior(double r, double theta) const;

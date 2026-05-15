@@ -11,6 +11,7 @@ class PolarR6_Boundary_ShafranovGeometry
 {
 public:
     explicit PolarR6_Boundary_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
+KOKKOS_DEFAULTED_FUNCTION PolarR6_Boundary_ShafranovGeometry(const PolarR6_Boundary_ShafranovGeometry&) = default;
 
     double u_D(double r, double theta) const;
     double u_D_Interior(double r, double theta) const;

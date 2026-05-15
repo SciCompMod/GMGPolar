@@ -11,6 +11,7 @@ class CartesianR2_Boundary_ShafranovGeometry
 {
 public:
     explicit CartesianR2_Boundary_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
+KOKKOS_DEFAULTED_FUNCTION CartesianR2_Boundary_ShafranovGeometry(const CartesianR2_Boundary_ShafranovGeometry&) = default;
 
     double u_D(double r, double theta) const;
     double u_D_Interior(double r, double theta) const;

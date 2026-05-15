@@ -11,6 +11,7 @@ class CartesianR6_Boundary_CircularGeometry
 {
 public:
     explicit CartesianR6_Boundary_CircularGeometry(double Rmax);
+KOKKOS_DEFAULTED_FUNCTION CartesianR6_Boundary_CircularGeometry(const CartesianR6_Boundary_CircularGeometry&) = default;
 
     double u_D(double r, double theta) const;
     double u_D_Interior(double r, double theta) const;
