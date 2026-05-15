@@ -24,6 +24,7 @@ static KOKKOS_INLINE_FUNCTION void update_CSR_COO_MatrixElement(SparseMatrixCSR<
 }
 #endif
 
+template <typename InnerBoundaryMatrix>
 static KOKKOS_INLINE_FUNCTION void
 nodeBuildInteriorBoundarySolverMatrix(const int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                       const InnerBoundaryMatrix& matrix, ConstVector<double>& arr,

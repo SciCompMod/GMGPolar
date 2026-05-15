@@ -34,6 +34,7 @@ nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, 
 
     int row, column;
     double value;
+
     /* ------------------------------------------ */
     /* Node in the interior of the Circle Section */
     /* ------------------------------------------ */
@@ -91,7 +92,7 @@ nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, 
     /* ------------------------------------------ */
     /* Node in the interior of the Radial Section */
     /* ------------------------------------------ */
-    else if (i_r > numberSmootherCircles && i_r < grid.nr() - 2) {
+    else if (i_r >= numberSmootherCircles && i_r < grid.nr() - 2) {
         const double h1 = grid.radialSpacing(i_r - 1);
         const double h2 = grid.radialSpacing(i_r);
         const double k1 = grid.angularSpacing(i_theta - 1);
@@ -101,6 +102,7 @@ nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, 
         const double coeff2 = 0.5 * (k1 + k2) / h2;
         const double coeff3 = 0.5 * (h1 + h2) / k1;
         const double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -126,21 +128,25 @@ nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, 
         /* Center: (Left, Right, Bottom, Top) */
         row    = center_index;
         column = center_index;
-        value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) -
+        value  = coeff5 * coeff_beta[center] * Kokkos::fabs(detDF[center]) -
                  (left_value + right_value + bottom_value + top_value);
         updateMatrixElement(solver, batch, row, column, value);
 
         /* Left */
-        row    = center_index;
-        column = left_index;
-        value  = left_value;
-        updateMatrixElement(solver, batch, row, column, value);
+        if (i_r > numberSmootherCircles) {
+            row    = center_index;
+            column = left_index;
+            value  = left_value;
+            updateMatrixElement(solver, batch, row, column, value);
+        }
 
         /* Right */
-        row    = center_index;
-        column = right_index;
-        value  = right_value;
-        updateMatrixElement(solver, batch, row, column, value);
+        if (i_r < grid.nr() - 2) {
+            row    = center_index;
+            column = right_index;
+            value  = right_value;
+            updateMatrixElement(solver, batch, row, column, value);
+        }
     }
     /* ------------------------------------------ */
     /* Circle Section: Node in the inner boundary */
@@ -162,119 +168,6 @@ nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, 
         column = center_index;
         value  = 1.0;
         updateMatrixElement(solver, batch, row, column, value);
-
-        /* Bottom */
-        row    = center_index;
-        column = bottom_index;
-        value  = 0.0;
-        updateMatrixElement(solver, batch, row, column, value);
-
-        /* Top */
-        row    = center_index;
-        column = top_index;
-        value  = 0.0;
-        updateMatrixElement(solver, batch, row, column, value);
-    }
-    /* --------------------------------------------- */
-    /* Radial Section: Node next to circular section */
-    /* --------------------------------------------- */
-    else if (i_r == numberSmootherCircles) {
-        const double h1 = grid.radialSpacing(i_r - 1);
-        const double h2 = grid.radialSpacing(i_r);
-        const double k1 = grid.angularSpacing(i_theta - 1);
-        const double k2 = grid.angularSpacing(i_theta);
-
-        const double coeff1 = 0.5 * (k1 + k2) / h1;
-        const double coeff2 = 0.5 * (k1 + k2) / h2;
-        const double coeff3 = 0.5 * (h1 + h2) / k1;
-        const double coeff4 = 0.5 * (h1 + h2) / k2;
-
-        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
-
-        const int left   = grid.index(i_r - 1, i_theta);
-        const int bottom = grid.index(i_r, i_theta_M1);
-        const int center = grid.index(i_r, i_theta);
-        const int top    = grid.index(i_r, i_theta_P1);
-        const int right  = grid.index(i_r + 1, i_theta);
-
-        auto& solver    = radial_tridiagonal_solver;
-        const int batch = i_theta;
-
-        const int center_index = i_r - numberSmootherCircles;
-        const int right_index  = i_r - numberSmootherCircles + 1;
-
-        const double left_value   = -coeff1 * (arr[center] + arr[left]);
-        const double right_value  = -coeff2 * (arr[center] + arr[right]);
-        const double bottom_value = -coeff3 * (att[center] + att[bottom]);
-        const double top_value    = -coeff4 * (att[center] + att[top]);
-
-        /* Center: (Left, Right, Bottom, Top) */
-        row    = center_index;
-        column = center_index;
-        value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) -
-                 (left_value + right_value + bottom_value + top_value);
-        updateMatrixElement(solver, batch, row, column, value);
-
-        /* Right */
-        row    = center_index;
-        column = right_index;
-        value  = right_value;
-        updateMatrixElement(solver, batch, row, column, value);
-    }
-    /* ------------------------------------------- */
-    /* Radial Section: Node next to outer boundary */
-    /* ------------------------------------------- */
-    else if (i_r == grid.nr() - 2) {
-        const double h1 = grid.radialSpacing(i_r - 1);
-        const double h2 = grid.radialSpacing(i_r);
-        const double k1 = grid.angularSpacing(i_theta - 1);
-        const double k2 = grid.angularSpacing(i_theta);
-
-        const double coeff1 = 0.5 * (k1 + k2) / h1;
-        const double coeff2 = 0.5 * (k1 + k2) / h2;
-        const double coeff3 = 0.5 * (h1 + h2) / k1;
-        const double coeff4 = 0.5 * (h1 + h2) / k2;
-
-        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
-
-        const int left   = grid.index(i_r - 1, i_theta);
-        const int bottom = grid.index(i_r, i_theta_M1);
-        const int center = grid.index(i_r, i_theta);
-        const int top    = grid.index(i_r, i_theta_P1);
-        const int right  = grid.index(i_r + 1, i_theta);
-
-        auto& solver    = radial_tridiagonal_solver;
-        const int batch = i_theta;
-
-        const int center_index = i_r - numberSmootherCircles;
-        const int left_index   = i_r - numberSmootherCircles - 1;
-        const int right_index  = i_r - numberSmootherCircles + 1;
-
-        const double left_value   = -coeff1 * (arr[center] + arr[left]);
-        const double right_value  = -coeff2 * (arr[center] + arr[right]);
-        const double bottom_value = -coeff3 * (att[center] + att[bottom]);
-        const double top_value    = -coeff4 * (att[center] + att[top]);
-
-        /* Center: (Left, Right, Bottom, Top) */
-        row    = center_index;
-        column = center_index;
-        value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) -
-                 (left_value + right_value + bottom_value + top_value);
-        updateMatrixElement(solver, batch, row, column, value);
-
-        /* Left */
-        row    = center_index;
-        column = left_index;
-        value  = left_value;
-        updateMatrixElement(solver, batch, row, column, value);
-
-        /* Right: NOT INCLUDED! */
-        row    = center_index;
-        column = right_index;
-        value  = 0.0;
-        updateMatrixElement(solver, batch, row, column, value);
     }
     /* ------------------------------------------ */
     /* Radial Section: Node on the outer boundary */
@@ -290,12 +183,6 @@ nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, 
         row    = center_index;
         column = center_index;
         value  = 1.0;
-        updateMatrixElement(solver, batch, row, column, value);
-
-        /* Left: NOT INCLUDED */
-        row    = center_index;
-        column = left_index;
-        value  = 0.0;
         updateMatrixElement(solver, batch, row, column, value);
     }
 }
