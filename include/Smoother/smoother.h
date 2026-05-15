@@ -36,7 +36,7 @@ public:
     {
     }
     KOKKOS_DEFAULTED_FUNCTION Smoother(const Smoother&) = default;
-    virtual ~Smoother() = default;
+    virtual ~Smoother()                                 = default;
 
     virtual void smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) = 0;
 
