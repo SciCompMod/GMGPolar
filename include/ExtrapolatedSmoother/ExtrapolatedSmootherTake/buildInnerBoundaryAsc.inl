@@ -53,13 +53,13 @@ nodeBuildInteriorBoundarySolverMatrix(const int i_theta, const PolarGrid& grid, 
     /* ------------------------------------------------ */
     if (DirBC_Interior) {
         const int center_index    = i_theta;
-        const int center_nz_index = getCircleAscIndex(i_r, i_theta);
+        const int center_nz_index = getCircleAscIndex(i_r, i_theta, grid, DirBC_Interior);
 
         /* Fill matrix row of (i,j) */
         row = center_index;
         ptr = center_nz_index;
 
-        const Stencil& CenterStencil = getStencil(i_r, i_theta);
+        const Stencil& CenterStencil = getStencil(i_r, i_theta, grid, DirBC_Interior);
 
         offset = CenterStencil[StencilPosition::Center];
         column = center_index;
@@ -94,10 +94,10 @@ nodeBuildInteriorBoundarySolverMatrix(const int i_theta, const PolarGrid& grid, 
         const int bottom_index = i_theta_M1;
         const int top_index    = i_theta_P1;
 
-        const int center_nz_index = getCircleAscIndex(i_r, i_theta);
-        const int bottom_nz_index = getCircleAscIndex(i_r, i_theta_M1);
-        const int top_nz_index    = getCircleAscIndex(i_r, i_theta_P1);
-        const int left_nz_index   = getCircleAscIndex(i_r, i_theta_AcrossOrigin);
+        const int center_nz_index = getCircleAscIndex(i_r, i_theta, grid, DirBC_Interior);
+        const int bottom_nz_index = getCircleAscIndex(i_r, i_theta_M1, grid, DirBC_Interior);
+        const int top_nz_index    = getCircleAscIndex(i_r, i_theta_P1, grid, DirBC_Interior);
+        const int left_nz_index   = getCircleAscIndex(i_r, i_theta_AcrossOrigin, grid, DirBC_Interior);
 
         int nz_index;
         const Stencil& CenterStencil = getStencil(i_r, i_theta);
@@ -149,7 +149,7 @@ nodeBuildInteriorBoundarySolverMatrix(const int i_theta, const PolarGrid& grid, 
             row = center_index;
             ptr = center_nz_index;
 
-            const Stencil& CenterStencil = getStencil(i_r, i_theta);
+            const Stencil& CenterStencil = getStencil(i_r, i_theta, grid, DirBC_Interior);
 
             offset = CenterStencil[StencilPosition::Center];
             column = center_index;
