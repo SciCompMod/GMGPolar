@@ -39,7 +39,7 @@ public:
 
     SparseMatrixCOO copy() const;
     template <class TargetMemorySpace>
-    std::conditional_t<std::is_same_v<MemorySpace, TargetMemorySpace>, const SparseMatrixCOO&,
+    std::conditional_t<std::is_same_v<MemorySpace, TargetMemorySpace>, const SparseMatrixCOO<T, TargetMemorySpace>&,
                        SparseMatrixCOO<T, TargetMemorySpace>>
     mirror_view_and_copy() const;
 
@@ -165,7 +165,7 @@ SparseMatrixCOO<T, MemorySpace> SparseMatrixCOO<T, MemorySpace>::copy() const
 
 template <typename T, class MemorySpace>
 template <class TargetMemorySpace>
-std::conditional_t<std::is_same_v<MemorySpace, TargetMemorySpace>, const SparseMatrixCOO&,
+std::conditional_t<std::is_same_v<MemorySpace, TargetMemorySpace>, const SparseMatrixCOO<T, TargetMemorySpace>&,
                    SparseMatrixCOO<T, TargetMemorySpace>>
 SparseMatrixCOO<T, MemorySpace>::mirror_view_and_copy() const
 {
