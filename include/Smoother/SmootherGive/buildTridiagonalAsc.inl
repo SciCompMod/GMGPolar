@@ -517,8 +517,8 @@ nodeBuildTridiagonalSolverMatricesRadialSection(const int i_r, const int i_theta
 template <class LevelCacheType>
 void SmootherGive<LevelCacheType>::buildTridiagonalSolverMatrices()
 {
-    using smoother_take::nodeBuildTridiagonalSolverMatricesCircleSection;
-    using smoother_take::nodeBuildTridiagonalSolverMatricesRadialSection;
+    using smoother_give::nodeBuildTridiagonalSolverMatricesCircleSection;
+    using smoother_give::nodeBuildTridiagonalSolverMatricesRadialSection;
 
     const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
