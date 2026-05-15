@@ -100,7 +100,7 @@ nodeBuildInteriorBoundarySolverMatrix(const int i_theta, const PolarGrid& grid, 
         const int left_nz_index   = getCircleAscIndex(i_r, i_theta_AcrossOrigin, grid, DirBC_Interior);
 
         int nz_index;
-        const Stencil& CenterStencil = getStencil(i_r, i_theta);
+        const Stencil& CenterStencil = getStencil(i_r, i_theta, grid, DirBC_Interior);
 
         if (i_theta & 1) {
             /* i_theta % 2 == 1 */
@@ -125,7 +125,7 @@ nodeBuildInteriorBoundarySolverMatrix(const int i_theta, const PolarGrid& grid, 
             row = center_index;
             ptr = center_nz_index;
 
-            const Stencil& CenterStencil = getStencil(i_r, i_theta);
+            const Stencil& CenterStencil = getStencil(i_r, i_theta, grid, DirBC_Interior);
 
             offset = CenterStencil[StencilPosition::Center];
             column = center_index;
