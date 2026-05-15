@@ -533,7 +533,7 @@ void SmootherGive<LevelCacheType>::buildTridiagonalSolverMatrices()
         Kokkos::parallel_for(
             "SmootherGive: buildTridiagonalSolverMatrices (Radial)",
             Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, num_radial_batches),
-            KOKKOS_CLASS_LAMBDA(const int radial_task) {
+            KOKKOS_LAMBDA(const int radial_task) {
                 const int i_theta = additional_radial_tasks + start_radial + radial_task * 3;
                 for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
                     nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, level_cache, DirBC_Interior,
