@@ -250,6 +250,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
     }
     else {
         /* DomainGeometry is not cached */
+			// Local copy is required to avoid copying the class
+			const DomainGeometry& domain_geometry = domain_geometry_;
 
         // ---------------------------------------------- //
         // Discretize rhs values (circular index section) //
@@ -270,10 +272,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
                     /* The Jacobian matrix is: */
                     /* [Jrr, Jrt] */
                     /* [Jtr, Jtt] */
-                    const double Jrr = domain_geometry_.dFx_dr(radius, theta);
-                    const double Jtr = domain_geometry_.dFy_dr(radius, theta);
-                    const double Jrt = domain_geometry_.dFx_dt(radius, theta);
-                    const double Jtt = domain_geometry_.dFy_dt(radius, theta);
+                    const double Jrr = domain_geometry.dFx_dr(radius, theta);
+                    const double Jtr = domain_geometry.dFy_dr(radius, theta);
+                    const double Jrt = domain_geometry.dFx_dt(radius, theta);
+                    const double Jtt = domain_geometry.dFy_dt(radius, theta);
                     /* Compute the determinant of the Jacobian matrix */
                     const double detDF = Jrr * Jtt - Jrt * Jtr;
                     rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * std::fabs(detDF);
@@ -305,10 +307,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
                     /* The Jacobian matrix is: */
                     /* [Jrr, Jrt] */
                     /* [Jtr, Jtt] */
-                    const double Jrr = domain_geometry_.dFx_dr(radius, theta);
-                    const double Jtr = domain_geometry_.dFy_dr(radius, theta);
-                    const double Jrt = domain_geometry_.dFx_dt(radius, theta);
-                    const double Jtt = domain_geometry_.dFy_dt(radius, theta);
+                    const double Jrr = domain_geometry.dFx_dr(radius, theta);
+                    const double Jtr = domain_geometry.dFy_dr(radius, theta);
+                    const double Jrt = domain_geometry.dFx_dt(radius, theta);
+                    const double Jtt = domain_geometry.dFy_dt(radius, theta);
                     /* Compute the determinant of the Jacobian matrix */
                     const double detDF = Jrr * Jtt - Jrt * Jtr;
                     rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * std::fabs(detDF);
