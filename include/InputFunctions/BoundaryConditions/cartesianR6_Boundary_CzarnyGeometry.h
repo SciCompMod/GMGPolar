@@ -15,8 +15,8 @@ public:
                                                  double ellipticity_e);
 KOKKOS_DEFAULTED_FUNCTION CartesianR6_Boundary_CzarnyGeometry(const CartesianR6_Boundary_CzarnyGeometry&) = default;
 
-    double u_D(double r, double theta) const;
-    double u_D_Interior(double r, double theta) const;
+    KOKKOS_FUNCTION double u_D(double r, double theta) const;
+    KOKKOS_FUNCTION double u_D_Interior(double r, double theta) const;
 
 private:
     const double Rmax                         = 1.3;

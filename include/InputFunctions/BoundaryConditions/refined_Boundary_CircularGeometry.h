@@ -13,8 +13,8 @@ public:
     explicit Refined_Boundary_CircularGeometry(double Rmax);
 KOKKOS_DEFAULTED_FUNCTION Refined_Boundary_CircularGeometry(const Refined_Boundary_CircularGeometry&) = default;
 
-    double u_D(double r, double theta) const;
-    double u_D_Interior(double r, double theta) const;
+    KOKKOS_FUNCTION double u_D(double r, double theta) const;
+    KOKKOS_FUNCTION double u_D_Interior(double r, double theta) const;
 
 private:
     const double Rmax = 1.3;
