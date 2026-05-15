@@ -19,8 +19,10 @@ void ResidualTake<LevelCacheType>::computeResidual(Vector<double> result, ConstV
 
     // Subtract A*x from rhs to get the residual.
     const int n = result.size();
-#pragma omp parallel for
-    for (int i = 0; i < n; i++) {
-        result[i] = rhs[i] - result[i];
-    }
+
+    Kokkos::parallel_for(
+        "Residual Take: Subtract A*x from rhs", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, n),
+        KOKKOS_LAMBDA(const int i) { result[i] = rhs[i] - result[i]; });
+
+    Kokkos::fence();
 }

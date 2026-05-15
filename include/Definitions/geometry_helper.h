@@ -4,10 +4,12 @@
 #include "../InputFunctions/domainGeometry.h"
 
 #include <cmath>
+#include <Kokkos_Core.hpp>
 
 template <concepts::DomainGeometry DomainGeometry>
-inline void compute_jacobian_elements(const DomainGeometry& domain_geometry, double r, double theta, double coeff_alpha,
-                                      double& arr, double& att, double& art, double& detDF)
+KOKKOS_INLINE_FUNCTION void compute_jacobian_elements(const DomainGeometry& domain_geometry, double r, double theta,
+                                                      double coeff_alpha, double& arr, double& att, double& art,
+                                                      double& detDF)
 {
     /* Calculate the elements of the Jacobian matrix for the transformation mapping */
     /* The Jacobian matrix is: */

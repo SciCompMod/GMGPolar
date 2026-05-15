@@ -12,15 +12,11 @@ public:
     explicit ResidualGive(const PolarGrid& grid, const LevelCacheType& level_cache, const bool DirBC_Interior);
     ~ResidualGive() override = default;
 
-    void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const final;
-
     void applySystemOperator(Vector<double> result, ConstVector<double> x) const final;
-
-private:
-    void applyCircleSection(const int i_r, Vector<double> result, ConstVector<double> x) const;
-    void applyRadialSection(const int i_theta, Vector<double> result, ConstVector<double> x) const;
+    void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const final;
 };
 
 #include "residualGive.inl"
 #include "applyAGive.inl"
+
 } // namespace gmgpolar
