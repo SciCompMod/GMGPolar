@@ -17,10 +17,10 @@ static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const BatchedTridiagonalS
 } // namespace smoother_give
 
 template <class LevelCacheType>
-void SmootherGive<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
+KOKKOS_FUNCTION void SmootherGive<LevelCacheType>::nodeBuildTridiagonalSolverMatrices(
     int i_r, int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
     const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
-    const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver) const
+    const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver)
 {
     using smoother_give::updateMatrixElement;
 
@@ -496,7 +496,7 @@ void SmootherGive<LevelCacheType>::buildTridiagonalSolverMatrices()
         Kokkos::parallel_for(
             "SmootherGive: buildTridiagonalSolverMatrices (Circular)",
             Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, num_circular_tasks),
-            KOKKOS_CLASS_LAMBDA(const int circle_task) {
+            KOKKOS_LAMBDA(const int circle_task) {
                 const int i_r = start_circle + circle_task * 3;
                 for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
                     nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, level_cache, DirBC_Interior,
@@ -519,7 +519,7 @@ void SmootherGive<LevelCacheType>::buildTridiagonalSolverMatrices()
     for (int i_theta = 0; i_theta < additional_radial_tasks; i_theta++) {
         Kokkos::parallel_for(
             "SmootherGive: buildTridiagonalSolverMatrices (Radial, additional)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, 1), KOKKOS_CLASS_LAMBDA(const int) {
+            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, 1), KOKKOS_LAMBDA(const int) {
                 for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
                     nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, level_cache, DirBC_Interior,
                                                        circle_tridiagonal_solver, radial_tridiagonal_solver);
