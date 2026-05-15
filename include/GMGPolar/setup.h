@@ -250,8 +250,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
     }
     else {
         /* DomainGeometry is not cached */
-			// Local copy is required to avoid copying the class
-			const DomainGeometry& domain_geometry = domain_geometry_;
+        // Local copy is required to avoid copying the class
+        const DomainGeometry& domain_geometry = domain_geometry_;
 
         // ---------------------------------------------- //
         // Discretize rhs values (circular index section) //

@@ -12,7 +12,8 @@ class CartesianR6_Boundary_ShafranovGeometry
 {
 public:
     explicit CartesianR6_Boundary_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
-KOKKOS_DEFAULTED_FUNCTION CartesianR6_Boundary_ShafranovGeometry(const CartesianR6_Boundary_ShafranovGeometry&) = default;
+    KOKKOS_DEFAULTED_FUNCTION
+    CartesianR6_Boundary_ShafranovGeometry(const CartesianR6_Boundary_ShafranovGeometry&) = default;
 
     KOKKOS_FUNCTION double u_D(double r, double theta) const;
     KOKKOS_FUNCTION double u_D_Interior(double r, double theta) const;

@@ -12,7 +12,7 @@ class Refined_Boundary_ShafranovGeometry
 {
 public:
     explicit Refined_Boundary_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
-KOKKOS_DEFAULTED_FUNCTION Refined_Boundary_ShafranovGeometry(const Refined_Boundary_ShafranovGeometry&) = default;
+    KOKKOS_DEFAULTED_FUNCTION Refined_Boundary_ShafranovGeometry(const Refined_Boundary_ShafranovGeometry&) = default;
 
     KOKKOS_FUNCTION double u_D(double r, double theta) const;
     KOKKOS_FUNCTION double u_D_Interior(double r, double theta) const;

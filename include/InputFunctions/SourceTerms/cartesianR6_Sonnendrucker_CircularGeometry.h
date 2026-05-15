@@ -13,7 +13,8 @@ class CartesianR6_Sonnendrucker_CircularGeometry
 {
 public:
     explicit CartesianR6_Sonnendrucker_CircularGeometry(PolarGrid const& grid, double Rmax);
-KOKKOS_DEFAULTED_FUNCTION CartesianR6_Sonnendrucker_CircularGeometry(const CartesianR6_Sonnendrucker_CircularGeometry&) = default;
+    KOKKOS_DEFAULTED_FUNCTION
+    CartesianR6_Sonnendrucker_CircularGeometry(const CartesianR6_Sonnendrucker_CircularGeometry&) = default;
 
     KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;
 
