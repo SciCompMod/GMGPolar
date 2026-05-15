@@ -14,8 +14,6 @@ static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const BatchedTridiagonalS
         solver.set_cyclic_corner(batch, value);
 }
 
-} // namespace extrapolated_smoother_take
-
 static KOKKOS_INLINE_FUNCTION void nodeBuildTridiagonalSolverMatricesCircleSection(
     const int i_r, const int i_theta, const PolarGrid& grid, const bool DirBC_Interior,
     const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
@@ -527,6 +525,8 @@ static KOKKOS_INLINE_FUNCTION void nodeBuildTridiagonalSolverMatricesRadialSecti
         }
     }
 }
+
+} // namespace extrapolated_smoother_take
 
 template <class LevelCacheType>
 void ExtrapolatedSmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
