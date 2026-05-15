@@ -7,7 +7,6 @@
     #include <stdexcept>
 using namespace gmgpolar;
 
-
 CooMumpsSolver::~CooMumpsSolver()
 {
     finalize();
