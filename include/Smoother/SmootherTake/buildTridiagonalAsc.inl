@@ -75,7 +75,7 @@ nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, 
         row    = center_index;
         column = center_index;
         value  = coeff5 * coeff_beta[center] * Kokkos::fabs(detDF[center]) -
-                 (left_value + right_value + bottom_value + top_value);
+                (left_value + right_value + bottom_value + top_value);
         updateMatrixElement(solver, batch, row, column, value);
 
         /* Bottom */
@@ -130,7 +130,7 @@ nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, 
         row    = center_index;
         column = center_index;
         value  = coeff5 * coeff_beta[center] * Kokkos::fabs(detDF[center]) -
-                 (left_value + right_value + bottom_value + top_value);
+                (left_value + right_value + bottom_value + top_value);
         updateMatrixElement(solver, batch, row, column, value);
 
         /* Left */
