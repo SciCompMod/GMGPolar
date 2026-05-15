@@ -5,8 +5,8 @@ namespace direct_solver_coo_mumps_give
 
 #ifdef GMGPOLAR_USE_MUMPS
 // When using the MUMPS solver, the matrix is assembled in COO format.
-static inline void updateMatrixElement(SparseMatrixCOO<double, Kokkos::HostSpace>& matrix, int ptr, int offset, int row, int column,
-                                       double value)
+static inline void updateMatrixElement(SparseMatrixCOO<double, Kokkos::HostSpace>& matrix, int ptr, int offset, int row,
+                                       int column, double value)
 {
     matrix.set_row_index(ptr + offset, row);
     matrix.set_col_index(ptr + offset, column);

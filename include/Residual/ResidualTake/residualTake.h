@@ -14,11 +14,11 @@ public:
     KOKKOS_DEFAULTED_FUNCTION ResidualTake(const ResidualTake&) = default;
     KOKKOS_DEFAULTED_FUNCTION ~ResidualTake() override = default;
 
-    void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const override;
-
-    void applySystemOperator(Vector<double> result, ConstVector<double> x) const override;
+    void applySystemOperator(Vector<double> result, ConstVector<double> x) const final;
+    void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const final;
 };
 
 #include "residualTake.inl"
 #include "applyATake.inl"
+
 } // namespace gmgpolar
