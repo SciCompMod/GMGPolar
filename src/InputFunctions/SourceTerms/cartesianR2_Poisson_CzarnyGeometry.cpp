@@ -17,7 +17,7 @@ CartesianR2_Poisson_CzarnyGeometry::CartesianR2_Poisson_CzarnyGeometry(PolarGrid
     initializeGeometry();
 }
 
-double CartesianR2_Poisson_CzarnyGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
+KOKKOS_FUNCTION double CartesianR2_Poisson_CzarnyGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
 {
     double r         = grid_.radius(i_r);
     double theta     = grid_.theta(i_theta);

@@ -8,7 +8,8 @@ CartesianR6_SonnendruckerGyro_CircularGeometry::CartesianR6_SonnendruckerGyro_Ci
 {
 }
 
-double CartesianR6_SonnendruckerGyro_CircularGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
+KOKKOS_FUNCTION double CartesianR6_SonnendruckerGyro_CircularGeometry::operator()(std::size_t i_r,
+                                                                                  std::size_t i_theta) const
 {
     double r         = grid_.radius(i_r);
     double theta     = grid_.theta(i_theta);

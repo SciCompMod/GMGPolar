@@ -7,7 +7,7 @@ Refined_ZoniShiftedGyro_CulhamGeometry::Refined_ZoniShiftedGyro_CulhamGeometry(P
 {
 }
 
-double Refined_ZoniShiftedGyro_CulhamGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
+KOKKOS_FUNCTION double Refined_ZoniShiftedGyro_CulhamGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
 {
     double r         = grid_.radius(i_r);
     double theta     = grid_.theta(i_theta);

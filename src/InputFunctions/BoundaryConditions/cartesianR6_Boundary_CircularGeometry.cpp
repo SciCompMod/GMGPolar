@@ -6,7 +6,7 @@ CartesianR6_Boundary_CircularGeometry::CartesianR6_Boundary_CircularGeometry(dou
 {
 }
 
-double CartesianR6_Boundary_CircularGeometry::u_D(double r, double theta) const
+KOKKOS_FUNCTION double CartesianR6_Boundary_CircularGeometry::u_D(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
@@ -14,7 +14,7 @@ double CartesianR6_Boundary_CircularGeometry::u_D(double r, double theta) const
            sin(2.0 * M_PI * (r / Rmax) * sin_theta) * cos(2.0 * M_PI * (r / Rmax) * cos_theta);
 }
 
-double CartesianR6_Boundary_CircularGeometry::u_D_Interior(double r, double theta) const
+KOKKOS_FUNCTION double CartesianR6_Boundary_CircularGeometry::u_D_Interior(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
