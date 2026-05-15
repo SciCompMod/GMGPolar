@@ -20,7 +20,7 @@ using namespace gmgpolar;
 // -----------------------------------------------------------------------
 TEST(CooMumpsSolverTest, GeneralNonSymmetric4x4)
 {
-    using triplet = SparseMatrixCOO<double, Kokkos::HostSpace>::triplet_type;
+    using triplet = SparseMatrixCOO<double>::triplet_type;
 
     // All non-zero entries (0-based row/col indices)
     std::vector<triplet> entries = {{0, 0, 1.0}, {0, 2, 2.0}, {1, 0, 3.0}, {1, 2, 4.0}, {1, 3, 5.0},
@@ -29,7 +29,7 @@ TEST(CooMumpsSolverTest, GeneralNonSymmetric4x4)
     SparseMatrixCOO<double> mat(4, 4, entries);
     mat.is_symmetric(false);
 
-    CooMumpsSolver solver(mat);
+    CooMumpsSolver solver(std::move(mat));
 
     Vector<double> rhs("rhs", 4);
     rhs(0) = 2.0;
@@ -73,7 +73,7 @@ TEST(CooMumpsSolverTest, SymmetricPositiveDefinite4x4)
     SparseMatrixCOO<double> mat(4, 4, entries);
     mat.is_symmetric(true);
 
-    CooMumpsSolver solver(mat);
+    CooMumpsSolver solver(std::move(mat));
 
     Vector<double> rhs("rhs", 4);
     rhs(0) = 2.0;
