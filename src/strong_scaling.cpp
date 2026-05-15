@@ -1,16 +1,12 @@
 #include <iostream>
-#include <iomanip>
-#include <vector>
 #include <fstream>
-#include <limits>
-#include <memory>
-#include <numeric>
+#include <cstdlib>
 
 #include "../include/GMGPolar/gmgpolar.h"
 #include "../include/GMGPolar/test_cases.h"
 using namespace gmgpolar;
 
-void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
+void runTest(int divideBy2, std::ostream& outfile)
 {
     const double R0                           = 1e-8;
     const double Rmax                         = 1.3;
@@ -135,8 +131,8 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
     int extrapolation_int = static_cast<int>(solver.extrapolation());
 
     // Write results to file
-    outfile << maxOpenMPThreads << "," << divideBy2 << "," << solver.grid().nr() << "," << solver.grid().ntheta() << ","
-            << geometry_string << "," << stencil_string << "," << cacheDensityProfileCoefficients << ","
+    outfile << Kokkos::num_threads() << "," << divideBy2 << "," << solver.grid().nr() << "," << solver.grid().ntheta()
+            << "," << geometry_string << "," << stencil_string << "," << cacheDensityProfileCoefficients << ","
             << cacheDomainGeometry << "," << FMG << "," << extrapolation_int << ","
             << solver.timeSetupTotal() + solver.timeSolveTotal() << "," << solver.timeSetupTotal() << ","
             << solver.timeSetupCreateLevels() << "," << solver.timeSetupSmoother() << ","
@@ -151,31 +147,12 @@ int main(int argc, char* argv[])
 {
     Kokkos::ScopeGuard kokkos_scope(argc, argv);
 
-    std::ofstream outfile("strong_scaling_results.csv");
-    outfile << "Threads,DivideBy2,nr,ntheta,geometry,"
-            << "stencil_method,cacheDensityProfileCoefficients,cacheDomainGeometry,FMG,extrapolation_int,"
-            << "TotalTime,t_setup_total,t_setup_createLevels,"
-            << "t_setup_smoother,t_setup_directSolver,t_solve_total,t_solve_initial_approximation,"
-            << "t_solve_multigrid_iterations,t_check_convergence,t_check_exact_error,"
-            << "t_avg_MGC_total,t_avg_MGC_preSmoothing,t_avg_MGC_postSmoothing,"
-            << "t_avg_MGC_residual,t_avg_MGC_directSolver\n"; // Header
-
-    // Define the constant parameters for the problem size
-    int divideBy2 = 7; // Keeping the domain division constant
-
-    // Vary only the number of threads for strong scaling
-    // std::vector<int> threadCounts = {1, 2, 4, 8, 16, 32};  // Thread counts to test strong scaling
-
-    int n = 56;
-    std::vector<int> threadCounts(n);
-    std::iota(threadCounts.begin(), threadCounts.end(), 1);
-
-    for (size_t i = 0; i < threadCounts.size(); i++) {
-        runTest(threadCounts[i], divideBy2, outfile); // Keep problem size fixed, vary threads
+    if (argc < 2) {
+        std::cerr << "Usage: strong_scaling_run <output_csv>\n";
+        return 1;
     }
 
-    outfile.close();
-    std::cout << "Results written to strong_scaling_results.csv" << std::endl;
-
+    std::ofstream outfile(argv[1], std::ios::app);
+    runTest(7, outfile);
     return 0;
 }
