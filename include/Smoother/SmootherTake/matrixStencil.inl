@@ -20,12 +20,12 @@ namespace smoother_take
 static KOKKOS_INLINE_FUNCTION const Stencil& getStencil(const int i_r, const bool DirBC_Interior)
 {
     // clang-format off
-    static const Stencil stencil_DB = {
+    static constexpr Stencil stencil_DB = {
         -1, -1, -1,
         -1,  0, -1,
         -1, -1, -1
     };
-    static const Stencil circle_stencil_across_origin = {
+    static constexpr Stencil circle_stencil_across_origin = {
         -1,  3, -1,
          1,  0, -1,
         -1,  2, -1
