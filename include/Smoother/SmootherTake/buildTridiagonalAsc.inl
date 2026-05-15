@@ -192,6 +192,8 @@ nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, 
 template <class LevelCacheType>
 void SmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
 {
+    using smoother_take::nodeBuildTridiagonalSolverMatrices;
+
     const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
