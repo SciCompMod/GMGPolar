@@ -194,9 +194,9 @@ nodeBuildInteriorBoundarySolverMatrix_i_r_0(const int i_theta, const PolarGrid& 
 }
 
 template <typename LevelCacheType, typename InnerBoundaryMatrix>
-void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildInteriorBoundarySolverMatrix_i_r_1(
-    const int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
-    const InnerBoundaryMatrix& matrix)
+static KOKKOS_INLINE_FUNCTION void
+nodeBuildInteriorBoundarySolverMatrix_i_r_1(const int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache,
+                                            bool DirBC_Interior, const InnerBoundaryMatrix& matrix)
 {
     using extrapolated_smoother_give::update_CSR_COO_MatrixElement;
 
