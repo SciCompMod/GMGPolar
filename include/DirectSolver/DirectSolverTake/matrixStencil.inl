@@ -5,10 +5,6 @@ namespace direct_solver_take
 
 static KOKKOS_INLINE_FUNCTION bool validateSolverMatrixIndexing(const PolarGrid& grid, const bool DirBC_Interior)
 {
-    using direct_solver_take::getSolverMatrixIndex;
-    using direct_solver_take::getStencil;
-    using direct_solver_take::getStencilSize;
-
     // 1. Check each node: getSolverMatrixIndex == cumulative sum of prior stencil sizes
     for (int global_index = 0; global_index < grid.numberOfNodes(); ++global_index) {
         int i_r, i_theta;

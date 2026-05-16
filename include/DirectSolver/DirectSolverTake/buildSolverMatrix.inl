@@ -477,13 +477,13 @@ nodeBuildSolverMatrixTake(const int i_r, const int i_theta, const PolarGrid& gri
 template <class LevelCacheType>
 typename DirectSolverTake<LevelCacheType>::SystemMatrix DirectSolverTake<LevelCacheType>::buildSolverMatrix()
 {
+    using direct_solver_take::getNonZeroCountSolverMatrix;
     using direct_solver_take::getStencilSize;
     using direct_solver_take::nodeBuildSolverMatrixTake;
     using direct_solver_take::validateSolverMatrixIndexing;
 
     const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
-    const int num_omp_threads         = DirectSolver<LevelCacheType>::num_omp_threads_;
     const bool DirBC_Interior         = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
     assert(validateSolverMatrixIndexing(grid, DirBC_Interior) && "Solver matrix indexing is inconsistent");
