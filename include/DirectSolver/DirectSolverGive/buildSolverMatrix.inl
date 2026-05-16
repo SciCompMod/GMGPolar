@@ -808,8 +808,8 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& gri
 template <class LevelCacheType>
 typename DirectSolverGive<LevelCacheType>::SystemMatrix DirectSolverGive<LevelCacheType>::buildSolverMatrix()
 {
-    using direct_solver_give::getNonZeroCountSolverMatrix;
     using direct_solver_give::getStencilSize;
+    using direct_solver_give::nodeBuildSolverMatrixGive;
     using direct_solver_give::nodeBuildSolverMatrixTake;
     using direct_solver_give::validateSolverMatrixIndexing;
 
