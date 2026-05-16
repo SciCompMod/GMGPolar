@@ -16,6 +16,8 @@ CooMumpsSolver::CooMumpsSolver(SparseMatrixCOO<double, Kokkos::HostSpace> matrix
         matrix_ = std::move(matrix);
     }
 
+    Kokkos::fence();
+
     initialize();
 }
 
