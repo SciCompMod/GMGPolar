@@ -2,13 +2,16 @@
 
 #include "../../../include/Definitions/geometry_helper.h"
 
+#include "smootherStenci.inl"
+
 namespace extrapolated_smoother_give
 {
 
 #ifdef GMGPOLAR_USE_MUMPS
 // When using the MUMPS solver, the matrix is assembled in COO format.
-static inline void update_CSR_COO_MatrixElement(SparseMatrixCOO<double, Kokkos::HostSpace>& matrix, int ptr, int offset,
-                                                int row, int column, double value)
+static KOKKOS_INLINE_FUNCTION void
+update_CSR_COO_MatrixElement(const SparseMatrixCOO<double, Kokkos::HostSpace>& matrix, const int ptr, const int offset,
+                             const int row, const int column, const double value)
 {
     matrix.set_row_index(ptr + offset, row);
     matrix.set_col_index(ptr + offset, column);
@@ -16,24 +19,23 @@ static inline void update_CSR_COO_MatrixElement(SparseMatrixCOO<double, Kokkos::
 }
 #else
 // When using the in-house solver, the matrix is stored in CSR format.
-static inline void update_CSR_COO_MatrixElement(SparseMatrixCSR<double, Kokkos::HostSpace>& matrix, int ptr, int offset,
-                                                int row, int column, double value)
+static KOKKOS_INLINE_FUNCTION void
+update_CSR_COO_MatrixElement(const SparseMatrixCSR<double, Kokkos::HostSpace>& matrix, const int ptr, const int offset,
+                             const int row, const int column, const double value)
 {
     matrix.set_row_nz_index(row, offset, column);
     matrix.increase_row_nz_entry(row, offset, value);
 }
 #endif
 
-} // namespace extrapolated_smoother_give
-
-template <class LevelCacheType>
-void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildInteriorBoundarySolverMatrix_i_r_0(
-    int i_theta, const PolarGrid& grid, bool DirBC_Interior, InnerBoundaryMatrix& matrix, double arr, double att,
-    double art, double detDF, double coeff_beta)
+template <typename LevelCacheType, typename InnerBoundaryMatrix>
+static KOKKOS_INLINE_FUNCTION void
+nodeBuildInteriorBoundarySolverMatrix_i_r_0(int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache,
+                                            bool DirBC_Interior, InnerBoundaryMatrix& matrix)
 {
     using extrapolated_smoother_give::update_CSR_COO_MatrixElement;
 
-    assert(i_theta >= 0 && i_theta < grid.ntheta());
+    KOKKOS_ASSERT(i_theta >= 0 && i_theta < grid.ntheta());
 
     int ptr, offset;
     int row, column;
@@ -50,9 +52,9 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildInteriorBoundarySolverMa
 
         /* Fill matrix row of (i,j) */
         row = center_index;
-        ptr = getCircleAscIndex(i_r, i_theta);
+        ptr = getCircleAscIndex(i_r, i_theta, grid, DirBC_Interior);
 
-        const Stencil& CenterStencil = getStencil(i_r, i_theta);
+        const Stencil& CenterStencil = getStencil(i_r, i_theta, grid, DirBC_Interior);
 
         offset = CenterStencil[StencilPosition::Center];
         column = center_index;
@@ -86,13 +88,13 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildInteriorBoundarySolverMa
         const int bottom_index = i_theta_M1;
         const int top_index    = i_theta_P1;
 
-        const int center_nz_index = getCircleAscIndex(i_r, i_theta);
-        const int bottom_nz_index = getCircleAscIndex(i_r, i_theta_M1);
-        const int top_nz_index    = getCircleAscIndex(i_r, i_theta_P1);
-        const int left_nz_index   = getCircleAscIndex(i_r, i_theta_AcrossOrigin);
+        const int center_nz_index = getCircleAscIndex(i_r, i_theta, grid, DirBC_Interior);
+        const int bottom_nz_index = getCircleAscIndex(i_r, i_theta_M1, grid, DirBC_Interior);
+        const int top_nz_index    = getCircleAscIndex(i_r, i_theta_P1, grid, DirBC_Interior);
+        const int left_nz_index   = getCircleAscIndex(i_r, i_theta_AcrossOrigin, grid, DirBC_Interior);
 
         int nz_index;
-        const Stencil& CenterStencil = getStencil(i_r, i_theta);
+        const Stencil& CenterStencil = getStencil(i_r, i_theta, grid, DirBC_Interior);
 
         if (i_theta & 1) {
             /* i_theta % 2 == 1 */
@@ -225,9 +227,9 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildInteriorBoundarySolverMa
             /* Only in the case of AcrossOrigin */
             if (!DirBC_Interior) {
                 row = left_index;
-                ptr = getCircleAscIndex(i_r - 1, i_theta);
+                ptr = getCircleAscIndex(i_r - 1, i_theta, grid, DirBC_Interior);
 
-                const Stencil& LeftStencil = getStencil(i_r - 1, i_theta);
+                const Stencil& LeftStencil = getStencil(i_r - 1, i_theta, grid, DirBC_Interior);
 
                 offset = LeftStencil[StencilPosition::Center];
                 column = left_index;
@@ -238,14 +240,19 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildInteriorBoundarySolverMa
     }
 }
 
+} // namespace extrapolated_smoother_give
+
 template <class LevelCacheType>
 typename ExtrapolatedSmootherGive<LevelCacheType>::InnerBoundaryMatrix
 ExtrapolatedSmootherGive<LevelCacheType>::buildInteriorBoundarySolverMatrix()
 {
+    using extrapolated_smoother_give::getNonZeroCountCircleAsc;
+    using extrapolated_smoother_give::nodeBuildInteriorBoundarySolverMatrix_i_r_0;
+    using extrapolated_smoother_give::nodeBuildInteriorBoundarySolverMatrix_i_r_1;
+
     const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
-    const int num_omp_threads         = ExtrapolatedSmoother<LevelCacheType>::num_omp_threads_;
 
     const int ntheta = grid.ntheta();
 
@@ -256,7 +263,7 @@ ExtrapolatedSmootherGive<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     // the COO_Mumps_Solver optimizes the factorization by only using the upper triangular part of the matrix,
     // which is extracted by the COO_Mumps_Solver internally.
 #ifdef GMGPOLAR_USE_MUMPS
-    const int nnz = getNonZeroCountCircleAsc(0);
+    const int nnz = getNonZeroCountCircleAsc(0, grid, DirBC_Interior);
     SparseMatrixCOO<double, Kokkos::HostSpace> inner_boundary_solver_matrix(ntheta, ntheta, nnz);
     inner_boundary_solver_matrix.is_symmetric(true);
 #else
@@ -270,37 +277,26 @@ ExtrapolatedSmootherGive<LevelCacheType>::buildInteriorBoundarySolverMatrix()
 #endif
 
     {
-        const int i_r  = 0;
-        const double r = grid.radius(i_r);
-        for (int i_theta = 0; i_theta < ntheta; i_theta++) {
-            {
-                const int global_index = grid.index(i_r, i_theta);
-                const double theta     = grid.theta(i_theta);
-
-                double coeff_beta, arr, att, art, detDF;
-                level_cache.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
-
-                nodeBuildInteriorBoundarySolverMatrix_i_r_0(i_theta, grid, DirBC_Interior, inner_boundary_solver_matrix,
-                                                            arr, att, art, detDF, coeff_beta);
-            }
-        }
+        Kokkos::parallel_for(
+            "ExtrapolatedSmootherGive: BuildInnerBoundaryMatrix",
+            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, 1), KOKKOS_LAMBDA(const int) {
+                for (int i_theta = 0; i_theta < ntheta; i_theta++) {
+                    nodeBuildInteriorBoundarySolverMatrix_i_r_0(i_theta, grid, level_cache, DirBC_Interior,
+                                                                inner_boundary_solver_matrix);
+                }
+            });
+        Kokkos::fence();
     }
-
     {
-        const int i_r  = 1;
-        const double r = grid.radius(i_r);
-        for (int i_theta = 0; i_theta < ntheta; i_theta++) {
-            {
-                const int global_index = grid.index(i_r, i_theta);
-                const double theta     = grid.theta(i_theta);
-
-                double coeff_beta, arr, att, art, detDF;
-                level_cache.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
-
-                nodeBuildInteriorBoundarySolverMatrix_i_r_1(i_theta, grid, DirBC_Interior, inner_boundary_solver_matrix,
-                                                            arr, att, art, detDF, coeff_beta);
-            }
-        }
+        Kokkos::parallel_for(
+            "ExtrapolatedSmootherGive: BuildInnerBoundaryMatrix",
+            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, 1), KOKKOS_LAMBDA(const int) {
+                for (int i_theta = 0; i_theta < ntheta; i_theta++) {
+                    nodeBuildInteriorBoundarySolverMatrix_i_r_1(i_theta, grid, level_cache, DirBC_Interior,
+                                                                inner_boundary_solver_matrix);
+                }
+            });
+        Kokkos::fence();
     }
 
     return inner_boundary_solver_matrix;
