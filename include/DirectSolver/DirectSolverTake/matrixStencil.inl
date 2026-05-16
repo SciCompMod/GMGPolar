@@ -3,7 +3,7 @@
 namespace direct_solver_take
 {
 
-static KOKKOS_INLINE_FUNCTION bool validateSolverMatrixIndexing(const PolarGrid& grid, const bool DirBC_Interior);
+static KOKKOS_INLINE_FUNCTION bool validateSolverMatrixIndexing(const PolarGrid& grid, const bool DirBC_Interior)
 {
     using direct_solver_take::getSolverMatrixIndex;
     using direct_solver_take::getStencil;
