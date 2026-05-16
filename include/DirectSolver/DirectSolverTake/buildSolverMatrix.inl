@@ -273,15 +273,15 @@ nodeBuildSolverMatrixTake(const int i_r, const int i_theta, const PolarGrid& gri
 
         const int center_nz_index = getSolverMatrixIndex(i_r, i_theta, grid, DirBC_Interior);
 
-        const int center_index             = grid.index(i_r, i_theta);
-        const int left_index               = grid.index(i_r - 1, i_theta);
-        const int right_index              = grid.index(i_r + 1, i_theta);
-        const int bottom_index             = grid.index(i_r, i_theta_M1);
-        const int top_index                = grid.index(i_r, i_theta_P1);
-        const int bottom_left_index        = grid.index(i_r - 1, i_theta_M1);
-        const const int bottom_right_index = grid.index(i_r + 1, i_theta_M1);
-        const int top_left_index           = grid.index(i_r - 1, i_theta_P1);
-        const int top_right_index          = grid.index(i_r + 1, i_theta_P1);
+        const int center_index       = grid.index(i_r, i_theta);
+        const int left_index         = grid.index(i_r - 1, i_theta);
+        const int right_index        = grid.index(i_r + 1, i_theta);
+        const int bottom_index       = grid.index(i_r, i_theta_M1);
+        const int top_index          = grid.index(i_r, i_theta_P1);
+        const int bottom_left_index  = grid.index(i_r - 1, i_theta_M1);
+        const int bottom_right_index = grid.index(i_r + 1, i_theta_M1);
+        const int top_left_index     = grid.index(i_r - 1, i_theta_P1);
+        const int top_right_index    = grid.index(i_r + 1, i_theta_P1);
 
         const double left_value   = -coeff1 * (arr(center_index) + arr(left_index)); /* Left */
         const double right_value  = -coeff2 * (arr(center_index) + arr(right_index)); /* Right */
