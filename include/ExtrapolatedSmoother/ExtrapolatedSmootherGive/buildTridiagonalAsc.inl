@@ -16,6 +16,7 @@ static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const BatchedTridiagonalS
         solver.increase_cyclic_corner(batch, value);
 }
 
+template <typename LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
 nodeBuildTridiagonalSolverMatricesCircleSection(const int i_r, const int i_theta, const PolarGrid& grid,
                                                 const LevelCacheType& level_cache, const bool DirBC_Interior,
