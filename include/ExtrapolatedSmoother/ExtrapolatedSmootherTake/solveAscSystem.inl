@@ -3,8 +3,7 @@
 template <class LevelCacheType>
 void ExtrapolatedSmootherTake<LevelCacheType>::solveBlackCircleSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid& grid     = ExtrapolatedSmoother<LevelCacheType>::grid_;
-    const int num_omp_threads = ExtrapolatedSmoother<LevelCacheType>::num_omp_threads_;
+    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
     int start                     = 0;
     int end                       = grid.numberCircularSmootherNodes();
@@ -47,8 +46,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::solveBlackCircleSection(Vector<do
 template <class LevelCacheType>
 void ExtrapolatedSmootherTake<LevelCacheType>::solveWhiteCircleSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid& grid     = ExtrapolatedSmoother<LevelCacheType>::grid_;
-    const int num_omp_threads = ExtrapolatedSmoother<LevelCacheType>::num_omp_threads_;
+    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
     int start                     = 0;
     int end                       = grid.numberCircularSmootherNodes();
@@ -91,8 +89,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::solveWhiteCircleSection(Vector<do
 template <class LevelCacheType>
 void ExtrapolatedSmootherTake<LevelCacheType>::solveBlackRadialSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid& grid     = ExtrapolatedSmoother<LevelCacheType>::grid_;
-    const int num_omp_threads = ExtrapolatedSmoother<LevelCacheType>::num_omp_threads_;
+    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
     int start                     = grid.numberCircularSmootherNodes();
     int end                       = grid.numberOfNodes();
@@ -122,8 +119,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::solveBlackRadialSection(Vector<do
 template <class LevelCacheType>
 void ExtrapolatedSmootherTake<LevelCacheType>::solveWhiteRadialSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid& grid     = ExtrapolatedSmoother<LevelCacheType>::grid_;
-    const int num_omp_threads = ExtrapolatedSmoother<LevelCacheType>::num_omp_threads_;
+    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
     int start                     = grid.numberCircularSmootherNodes();
     int end                       = grid.numberOfNodes();
