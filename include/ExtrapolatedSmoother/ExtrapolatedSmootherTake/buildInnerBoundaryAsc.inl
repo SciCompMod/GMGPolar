@@ -112,7 +112,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildInteriorBoundarySolverMa
             const double center_value = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center] * std::fabs(detDF[center]) +
                                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
-            const double left_value   = -coeff1 * (arr[center] + arr[left]);
+            const double left_value = -coeff1 * (arr[center] + arr[left]);
 
             /* Fill matrix row of (i,j) */
             row = center_index;
@@ -198,24 +198,6 @@ ExtrapolatedSmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
         nodeBuildInteriorBoundarySolverMatrix(i_theta, grid, DirBC_Interior, inner_boundary_solver_matrix, arr, att,
                                               art, detDF, coeff_beta);
     }
-
-    std::cout << "ExtrapolatedSmootherTake Matrix: " << std::endl;
-
-#ifdef GMGPOLAR_USE_MUMPS
-    for (int i = 0; i < inner_boundary_solver_matrix.non_zero_size(); i++) {
-        std::cout << "(" << inner_boundary_solver_matrix.row_index(i) << ", "
-                  << inner_boundary_solver_matrix.col_index(i) << "): " << inner_boundary_solver_matrix.value(i)
-                  << std::endl;
-    }
-#else
-    for (int row = 0; row < inner_boundary_solver_matrix.rows(); row++) {
-        for (int idx = 0; idx < inner_boundary_solver_matrix.row_nz_size(row); idx++) {
-            int col      = inner_boundary_solver_matrix.row_nz_index(row, idx);
-            double value = inner_boundary_solver_matrix.row_nz_entry(row, idx);
-            std::cout << "(" << row << ", " << col << "): " << value << std::endl;
-        }
-    }
-#endif
 
     return inner_boundary_solver_matrix;
 }
