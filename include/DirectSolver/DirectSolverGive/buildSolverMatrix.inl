@@ -507,7 +507,7 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& gri
             row = left_index;
             ptr = left_nz_index;
 
-            const Stencil& LeftStencil = getStencil(i_r - 1);
+            const Stencil& LeftStencil = getStencil(i_r - 1, grid, DirBC_interior);
 
             offset = LeftStencil[StencilPosition::Right];
             column = center_index;
@@ -534,7 +534,7 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& gri
         row = right_index;
         ptr = right_nz_index;
 
-        const Stencil& RightStencil = getStencil(i_r + 1);
+        const Stencil& RightStencil = getStencil(i_r + 1, grid, DirBC_interior);
 
         offset = RightStencil[StencilPosition::Left];
         column = center_index;
@@ -777,7 +777,7 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& gri
         row = center_index;
         ptr = center_nz_index;
 
-        const Stencil& CenterStencil = getStencil(i_r);
+        const Stencil& CenterStencil = getStencil(i_r, grid, DirBC_interior);
 
         offset = CenterStencil[StencilPosition::Center];
         column = center_index;
