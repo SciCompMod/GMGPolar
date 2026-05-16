@@ -23,9 +23,8 @@ void DirectSolverTake<LevelCacheType>::applySymmetryShiftInnerBoundary(Vector<do
     const int ntheta = grid.ntheta();
 
     Kokkos::parallel_for(
-        "DirectSolverTake: applySymmetryShiftInnerBoundary" Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(
-            0, ntheta),
-        KOKKOS_LAMBDA(const int i_theta) {
+        "DirectSolverTake: applySymmetryShiftInnerBoundary",
+        Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, ntheta), KOKKOS_LAMBDA(const int i_theta) {
             const double h1 = grid.radialSpacing(i_r - 1);
             const double k1 = grid.angularSpacing(i_theta - 1);
             const double k2 = grid.angularSpacing(i_theta);

@@ -463,7 +463,7 @@ nodeBuildSolverMatrixTake(const int i_r, const int i_theta, const PolarGrid& gri
         row = center_index;
         ptr = center_nz_index;
 
-        const Stencil &CenterStencil = getStencil(i_r), grid, DirBC_Interior;
+        const Stencil& CenterStencil = getStencil(i_r, grid, DirBC_Interior);
 
         offset = CenterStencil[StencilPosition::Center];
         col    = center_index;
@@ -486,12 +486,12 @@ typename DirectSolverTake<LevelCacheType>::SystemMatrix DirectSolverTake<LevelCa
     const int num_omp_threads         = DirectSolver<LevelCacheType>::num_omp_threads_;
     const bool DirBC_Interior         = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
-    assert(validateSolverMatrixIndexing() && "Solver matrix indexing is inconsistent");
+    assert(validateSolverMatrixIndexing(grid, DirBC_Interior) && "Solver matrix indexing is inconsistent");
 
     const int n = grid.numberOfNodes();
 
 #ifdef GMGPOLAR_USE_MUMPS
-    const int nnz = getNonZeroCountSolverMatrix();
+    const int nnz = getNonZeroCountSolverMatrix(grid, DirBC_Interior);
     SparseMatrixCOO<double, Kokkos::HostSpace> solver_matrix(n, n, nnz);
     solver_matrix.is_symmetric(true);
 #else

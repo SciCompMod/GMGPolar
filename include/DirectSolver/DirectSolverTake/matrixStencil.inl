@@ -3,8 +3,12 @@
 namespace direct_solver_take
 {
 
-static KOKKOS_INLINE_FUNCTION bool validateSolverMatrixIndexing(const PolarGrid& grid)
+static KOKKOS_INLINE_FUNCTION bool validateSolverMatrixIndexing(const PolarGrid& grid, const bool DirBC_Interior);
 {
+    using direct_solver_take::getSolverMatrixIndex;
+    using direct_solver_take::getStencil;
+    using direct_solver_take::getStencilSize;
+
     // 1. Check each node: getSolverMatrixIndex == cumulative sum of prior stencil sizes
     for (int global_index = 0; global_index < grid.numberOfNodes(); ++global_index) {
         int i_r, i_theta;
@@ -12,21 +16,21 @@ static KOKKOS_INLINE_FUNCTION bool validateSolverMatrixIndexing(const PolarGrid&
 
         int expected = 0;
         for (int prior = 0; prior < global_index; ++prior) {
-            expected += getStencilSize(prior);
+            expected += getStencilSize(prior, grid, DirBC_Interior);
         }
 
         if (getSolverMatrixIndex(i_r, i_theta) != expected)
             return false;
-        if (getStencilSize(global_index) != getStencil(i_r).size())
+        if (getStencilSize(global_index, grid, DirBC_Interior) != getStencil(i_r, grid, DirBC_Interior).size())
             return false;
     }
 
     // 2. Check total non-zero count
     int total = 0;
     for (int global_index = 0; global_index < grid.numberOfNodes(); ++global_index) {
-        total += getStencilSize(global_index);
+        total += getStencilSize(global_index, grid, DirBC_Interior);
     }
-    if (total != getNonZeroCountSolverMatrix())
+    if (total != getNonZeroCountSolverMatrix(grid, DirBC_Interior))
         return false;
 
     return true;
