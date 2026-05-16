@@ -511,46 +511,48 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolation(in
     assert(std::ssize(fine_values) == fineGrid.numberOfNodes());
     assert(std::ssize(coarse_values) == coarseGrid.numberOfNodes());
 
-#pragma omp parallel num_threads(max_omp_threads_)
-    {
-/* Circluar Indexing Section */
-/* For loop matches circular access pattern */
-#pragma omp for nowait
-        for (int i_r = 0; i_r < fineGrid.numberSmootherCircles(); i_r++) {
-            int i_r_coarse = i_r / 2;
-            for (int i_theta = 0; i_theta < fineGrid.ntheta(); i_theta++) {
-                int i_theta_coarse = i_theta / 2;
+    /* We split the loops into two regions to better respect the */
+    /* access patterns of the smoother and improve cache locality. */
 
-                if (i_r & 1 || i_theta & 1) {
-                    fine_values[fineGrid.index(i_r, i_theta)] *= 4.0 / 3.0;
-                }
-                else {
-                    int fine_idx          = fineGrid.index(i_r, i_theta);
-                    int coarse_idx        = coarseGrid.index(i_r_coarse, i_theta_coarse);
-                    fine_values[fine_idx] = (4.0 * fine_values[fine_idx] - coarse_values[coarse_idx]) / 3.0;
-                }
+    /* Circular Indexing Section */
+    /* For loop matches circular access pattern */
+    Kokkos::parallel_for(
+        "Extrapolation: Apply Extrapolation (Circular)",
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
+            {0, 0}, {fineGrid.numberSmootherCircles(), fineGrid.ntheta()}),
+        KOKKOS_CLASS_LAMBDA(const int i_r, const int i_theta) {
+            const int i_r_coarse     = i_r / 2;
+            const int i_theta_coarse = i_theta / 2;
+            if (i_r & 1 || i_theta & 1) {
+                fine_values[fineGrid.index(i_r, i_theta)] *= 4.0 / 3.0;
             }
-        }
-
-/* Radial Indexing Section */
-/* For loop matches radial access pattern */
-#pragma omp for nowait
-        for (int i_theta = 0; i_theta < fineGrid.ntheta(); i_theta++) {
-            int i_theta_coarse = i_theta / 2;
-            for (int i_r = fineGrid.numberSmootherCircles(); i_r < fineGrid.nr(); i_r++) {
-                int i_r_coarse = i_r / 2;
-
-                if (i_r & 1 || i_theta & 1) {
-                    fine_values[fineGrid.index(i_r, i_theta)] *= 4.0 / 3.0;
-                }
-                else {
-                    int fine_idx          = fineGrid.index(i_r, i_theta);
-                    int coarse_idx        = coarseGrid.index(i_r_coarse, i_theta_coarse);
-                    fine_values[fine_idx] = (4.0 * fine_values[fine_idx] - coarse_values[coarse_idx]) / 3.0;
-                }
+            else {
+                const int fine_idx    = fineGrid.index(i_r, i_theta);
+                const int coarse_idx  = coarseGrid.index(i_r_coarse, i_theta_coarse);
+                fine_values[fine_idx] = (4.0 * fine_values[fine_idx] - coarse_values[coarse_idx]) / 3.0;
             }
-        }
-    }
+        });
+
+    /* Radial Indexing Section */
+    /* For loop matches radial access pattern */
+    Kokkos::parallel_for(
+        "Extrapolation: Apply Extrapolation (Radial)",
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, fineGrid.numberSmootherCircles()},
+                                                                                  {fineGrid.ntheta(), fineGrid.nr()}),
+        KOKKOS_CLASS_LAMBDA(const int i_theta, const int i_r) {
+            const int i_r_coarse     = i_r / 2;
+            const int i_theta_coarse = i_theta / 2;
+            if (i_r & 1 || i_theta & 1) {
+                fine_values[fineGrid.index(i_r, i_theta)] *= 4.0 / 3.0;
+            }
+            else {
+                const int fine_idx    = fineGrid.index(i_r, i_theta);
+                const int coarse_idx  = coarseGrid.index(i_r_coarse, i_theta_coarse);
+                fine_values[fine_idx] = (4.0 * fine_values[fine_idx] - coarse_values[coarse_idx]) / 3.0;
+            }
+        });
+
+    Kokkos::fence();
 }
 
 // =============================================================================
@@ -592,31 +594,39 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
     assert(solution.size() == error.size());
     assert(std::ssize(solution) == grid.numberOfNodes());
 
-#pragma omp parallel num_threads(max_omp_threads_)
-    {
-#pragma omp for nowait
-        for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
-            double r = grid.radius(i_r);
-            for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                double theta = grid.theta(i_theta);
-                error[grid.index(i_r, i_theta)] =
-                    exact_solution.exact_solution(r, theta) - solution[grid.index(i_r, i_theta)];
-            }
-        }
-#pragma omp for nowait
-        for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-            double theta = grid.theta(i_theta);
-            for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
-                double r = grid.radius(i_r);
-                error[grid.index(i_r, i_theta)] =
-                    exact_solution.exact_solution(r, theta) - solution[grid.index(i_r, i_theta)];
-            }
-        }
-    }
-    ConstVector<double> c_error     = error;
-    double weighted_euclidean_error = l2_norm(c_error) / std::sqrt(grid.numberOfNodes());
-    double infinity_error           = infinity_norm(c_error);
+    /* We split the loops into two regions to better respect the */
+    /* access patterns of the smoother and improve cache locality. */
 
+    /* Circular Indexing Section */
+    /* For loop matches circular access pattern */
+    Kokkos::parallel_for(
+        "Exact Error: Compute Error (Circular)",
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
+            {0, 0}, {grid.numberSmootherCircles(), grid.ntheta()}),
+        KOKKOS_CLASS_LAMBDA(const int i_r, const int i_theta) {
+            const double radius = grid.radius(i_r);
+            const double theta  = grid.theta(i_theta);
+            error[grid.index(i_r, i_theta)] =
+                exact_solution.exact_solution(radius, theta) - solution[grid.index(i_r, i_theta)];
+        });
+
+    /* Radial Indexing Section */
+    /* For loop matches radial access pattern */
+    Kokkos::parallel_for(
+        "Exact Error: Compute Error (Radial)",
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
+                                                                                  {grid.ntheta(), grid.nr()}),
+        KOKKOS_CLASS_LAMBDA(const int i_theta, const int i_r) {
+            const double radius = grid.radius(i_r);
+            const double theta  = grid.theta(i_theta);
+            error[grid.index(i_r, i_theta)] =
+                exact_solution.exact_solution(radius, theta) - solution[grid.index(i_r, i_theta)];
+        });
+
+    Kokkos::fence();
+
+    const double weighted_euclidean_error = l2_norm(ConstVector<double>(error)) / std::sqrt(grid.numberOfNodes());
+    const double infinity_error           = infinity_norm(ConstVector<double>(error));
     return std::make_pair(weighted_euclidean_error, infinity_error);
 }
 
