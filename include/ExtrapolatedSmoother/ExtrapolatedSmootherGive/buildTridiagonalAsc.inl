@@ -98,7 +98,7 @@ nodeBuildTridiagonalSolverMatricesCircleSection(const int i_r, const int i_theta
             /* Fill matrix row of (i,j) */
             row    = center_index;
             column = center_index;
-            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * Kokkos::fabs(detDF); /* Center: beta_{i,j} */
             updateMatrixElement(center_solver, center_batch, row, column, value);
 
             row    = center_index;
@@ -184,7 +184,7 @@ nodeBuildTridiagonalSolverMatricesCircleSection(const int i_r, const int i_theta
                 /* Fill matrix row of (i,j) */
                 row    = center_index;
                 column = center_index;
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * Kokkos::fabs(detDF); /* Center: beta_{i,j} */
                 updateMatrixElement(center_solver, center_batch, row, column, value);
 
                 row    = center_index;
@@ -305,7 +305,7 @@ nodeBuildTridiagonalSolverMatricesCircleSection(const int i_r, const int i_theta
                 /* Fill matrix row of (i,j) */
                 row    = center_index;
                 column = center_index;
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * Kokkos::fabs(detDF); /* Center: beta_{i,j} */
                 updateMatrixElement(center_solver, center_batch, row, column, value);
 
                 row    = center_index;
@@ -368,7 +368,7 @@ nodeBuildTridiagonalSolverMatricesCircleSection(const int i_r, const int i_theta
                 /* Fill matrix row of (i,j) */
                 row    = center_index;
                 column = center_index;
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * Kokkos::fabs(detDF); /* Center: beta_{i,j} */
                 updateMatrixElement(center_solver, center_batch, row, column, value);
 
                 row    = center_index;
@@ -421,7 +421,7 @@ nodeBuildTridiagonalSolverMatricesCircleSection(const int i_r, const int i_theta
                 /* Fill matrix row of (i,j) */
                 row    = center_index;
                 column = center_index;
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * Kokkos::fabs(detDF); /* Center: beta_{i,j} */
                 updateMatrixElement(center_solver, center_batch, row, column, value);
 
                 row    = center_index;
@@ -570,7 +570,7 @@ nodeBuildTridiagonalSolverMatricesRadialSection(const int i_r, const int i_theta
             /* Fill matrix row of (i,j) */
             row    = center_index;
             column = center_index;
-            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * Kokkos::fabs(detDF); /* Center: beta_{i,j} */
             updateMatrixElement(center_solver, center_batch, row, column, value);
 
             row    = center_index;
@@ -657,7 +657,7 @@ nodeBuildTridiagonalSolverMatricesRadialSection(const int i_r, const int i_theta
                 /* Fill matrix row of (i,j) */
                 row    = center_index;
                 column = center_index;
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * Kokkos::fabs(detDF); /* Center: beta_{i,j} */
                 updateMatrixElement(center_solver, center_batch, row, column, value);
 
                 row    = center_index;
@@ -741,7 +741,7 @@ nodeBuildTridiagonalSolverMatricesRadialSection(const int i_r, const int i_theta
                 /* Fill matrix row of (i,j) */
                 row    = center_index;
                 column = center_index;
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * Kokkos::fabs(detDF); /* Center: beta_{i,j} */
                 updateMatrixElement(center_solver, center_batch, row, column, value);
 
                 row    = center_index;
@@ -794,7 +794,7 @@ nodeBuildTridiagonalSolverMatricesRadialSection(const int i_r, const int i_theta
                 /* Fill matrix row of (i,j) */
                 row    = center_index;
                 column = center_index;
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * Kokkos::fabs(detDF); /* Center: beta_{i,j} */
                 updateMatrixElement(center_solver, center_batch, row, column, value);
 
                 row    = center_index;
@@ -837,7 +837,7 @@ nodeBuildTridiagonalSolverMatricesRadialSection(const int i_r, const int i_theta
                 /* Fill matrix row of (i,j) */
                 row    = center_index;
                 column = center_index;
-                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
+                value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * Kokkos::fabs(detDF); /* Center: beta_{i,j} */
                 updateMatrixElement(center_solver, center_batch, row, column, value);
 
                 row    = center_index;
@@ -942,7 +942,7 @@ nodeBuildTridiagonalSolverMatricesRadialSection(const int i_r, const int i_theta
             /* Fill matrix row of (i,j) */
             row    = center_index;
             column = center_index;
-            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * Kokkos::fabs(detDF); /* Center: beta_{i,j} */
             updateMatrixElement(center_solver, center_batch, row, column, value);
 
             row    = center_index;
@@ -996,7 +996,7 @@ nodeBuildTridiagonalSolverMatricesRadialSection(const int i_r, const int i_theta
             /* Fill matrix row of (i,j) */
             row    = center_index;
             column = center_index;
-            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* Center: beta_{i,j} */
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * Kokkos::fabs(detDF); /* Center: beta_{i,j} */
             updateMatrixElement(center_solver, center_batch, row, column, value);
 
             row    = center_index;

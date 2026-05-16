@@ -120,7 +120,7 @@ nodeBuildInteriorBoundarySolverMatrix_i_r_0(const int i_theta, const PolarGrid& 
 
             offset = CenterStencil[StencilPosition::Center];
             column = center_index;
-            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* beta_{i,j} */
+            value  = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * Kokkos::fabs(detDF); /* beta_{i,j} */
             update_CSR_COO_MatrixElement(matrix, ptr, offset, row, column, value);
 
             offset = CenterStencil[StencilPosition::Left];
@@ -196,7 +196,7 @@ nodeBuildInteriorBoundarySolverMatrix_i_r_0(const int i_theta, const PolarGrid& 
 template <typename LevelCacheType, typename InnerBoundaryMatrix>
 static KOKKOS_INLINE_FUNCTION void
 nodeBuildInteriorBoundarySolverMatrix_i_r_1(const int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache,
-                                            bool DirBC_Interior, const InnerBoundaryMatrix& matrix)
+                                            const bool DirBC_Interior, const InnerBoundaryMatrix& matrix)
 {
     using extrapolated_smoother_give::update_CSR_COO_MatrixElement;
 
@@ -318,6 +318,9 @@ ExtrapolatedSmootherGive<LevelCacheType>::buildInteriorBoundarySolverMatrix()
             });
         Kokkos::fence();
     }
+
+    std::cout << "ExtrapolatedSmootherGive Matrix: " << std::endl;
+    std::cout << inner_boundary_solver_matrix << std::endl;
 
     return inner_boundary_solver_matrix;
 }
