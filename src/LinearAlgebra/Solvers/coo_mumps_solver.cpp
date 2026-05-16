@@ -98,6 +98,7 @@ void CooMumpsSolver::configureICNTL()
     // ICNTL(3) = 0: suppress global information output
     // ICNTL(6) = 7: automatically choose permutation/scaling strategy
     // ICNTL(7) = 5: use METIS for fill-reducing ordering
+    // ICNTL(16) = 1: run without multithreading
     // ICNTL(48) = 0: disable tree parallelism (conflicts with OpenMP in newer MUMPS releases)
 
     ICNTL(1)  = 0; // Output stream for error messages
@@ -115,7 +116,7 @@ void CooMumpsSolver::configureICNTL()
     ICNTL(13) = 0; // Controls the parallelism of the root node
     ICNTL(14) = matrix_.is_symmetric() ? 5 : 20; // Percentage increase in estimated working space
     ICNTL(15) = 0; // Exploits compression of the input matrix resulting from a block format
-    ICNTL(16) = 0; // Controls the setting of the number of OpenMP threads
+    ICNTL(16) = 1; // Controls the setting of the number of OpenMP threads
     // ICNTL(17) does not exist
     ICNTL(18) = 0; // Strategy for the distributed input matrix
     ICNTL(19) = 0; // Computes the Schur complement matrix
