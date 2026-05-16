@@ -32,10 +32,6 @@ nodeBuildSolverMatrixTake(const int i_r, const int i_theta, const PolarGrid& gri
                           const SystemMatrix& solver_matrix, ConstVector<double>& arr, ConstVector<double>& att,
                           ConstVector<double>& art, ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
 {
-    using direct_solver_take::getSolverMatrixIndex;
-    using direct_solver_take::getStencil;
-    using direct_solver_take::updateMatrixElement;
-
     int ptr, offset;
     int row, col;
     double val;
