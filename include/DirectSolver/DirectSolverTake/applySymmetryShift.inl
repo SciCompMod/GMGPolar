@@ -19,30 +19,35 @@ void DirectSolverTake<LevelCacheType>::applySymmetryShiftInnerBoundary(Vector<do
     ConstVector<double> att = level_cache.att();
     ConstVector<double> art = level_cache.art();
 
-    const int i_r = 1;
+    const int i_r    = 1;
+    const int ntheta = grid.ntheta();
 
-    for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-        double h1 = grid.radialSpacing(i_r - 1);
-        double k1 = grid.angularSpacing(i_theta - 1);
-        double k2 = grid.angularSpacing(i_theta);
+    Kokkos::parallel_for(
+        "DirectSolverTake: applySymmetryShiftInnerBoundary" Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(
+            0, ntheta),
+        KOKKOS_LAMBDA(const int i_theta) {
+            const double h1 = grid.radialSpacing(i_r - 1);
+            const double k1 = grid.angularSpacing(i_theta - 1);
+            const double k2 = grid.angularSpacing(i_theta);
 
-        double coeff1 = 0.5 * (k1 + k2) / h1;
+            const double coeff1 = 0.5 * (k1 + k2) / h1;
 
-        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
+            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
 
-        const int bottom_left = grid.index(i_r - 1, i_theta_M1);
-        const int left        = grid.index(i_r - 1, i_theta);
-        const int top_left    = grid.index(i_r - 1, i_theta_P1);
-        const int bottom      = grid.index(i_r, i_theta_M1);
-        const int center      = grid.index(i_r, i_theta);
-        const int top         = grid.index(i_r, i_theta_P1);
+            const int bottom_left = grid.index(i_r - 1, i_theta_M1);
+            const int left        = grid.index(i_r - 1, i_theta);
+            const int top_left    = grid.index(i_r - 1, i_theta_P1);
 
-        x[center] -= (-coeff1 * (arr[center] + arr[left]) * x[left] /* Left */
-                      - 0.25 * (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
-                      + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
-        );
-    }
+            const int bottom = grid.index(i_r, i_theta_M1);
+            const int center = grid.index(i_r, i_theta);
+            const int top    = grid.index(i_r, i_theta_P1);
+
+            x[center] -= (-coeff1 * (arr[center] + arr[left]) * x[left] /* Left */
+                          - 0.25 * (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
+                          + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
+            );
+        });
 }
 
 template <class LevelCacheType>
@@ -58,30 +63,34 @@ void DirectSolverTake<LevelCacheType>::applySymmetryShiftOuterBoundary(Vector<do
     ConstVector<double> att = level_cache.att();
     ConstVector<double> art = level_cache.art();
 
-    const int i_r = grid.nr() - 2;
+    const int i_r    = grid.nr() - 2;
+    const int ntheta = grid.ntheta();
 
-    for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-        double h2 = grid.radialSpacing(i_r);
-        double k1 = grid.angularSpacing(i_theta - 1);
-        double k2 = grid.angularSpacing(i_theta);
+    Kokkos::parallel_for(
+        "DirectSolverTake: applySymmetryShiftOuterBoundary",
+        Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, ntheta), KOKKOS_LAMBDA(const int i_theta) {
+            const double h2 = grid.radialSpacing(i_r);
+            const double k1 = grid.angularSpacing(i_theta - 1);
+            const double k2 = grid.angularSpacing(i_theta);
 
-        double coeff2 = 0.5 * (k1 + k2) / h2;
+            const double coeff2 = 0.5 * (k1 + k2) / h2;
 
-        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
+            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
 
-        const int bottom       = grid.index(i_r, i_theta_M1);
-        const int center       = grid.index(i_r, i_theta);
-        const int top          = grid.index(i_r, i_theta_P1);
-        const int bottom_right = grid.index(i_r + 1, i_theta_M1);
-        const int right        = grid.index(i_r + 1, i_theta);
-        const int top_right    = grid.index(i_r + 1, i_theta_P1);
+            const int bottom = grid.index(i_r, i_theta_M1);
+            const int center = grid.index(i_r, i_theta);
+            const int top    = grid.index(i_r, i_theta_P1);
 
-        x[center] -= (-coeff2 * (arr[center] + arr[right]) * x[right] /* Right */
-                      + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
-                      - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
-        );
-    }
+            const int bottom_right = grid.index(i_r + 1, i_theta_M1);
+            const int right        = grid.index(i_r + 1, i_theta);
+            const int top_right    = grid.index(i_r + 1, i_theta_P1);
+
+            x[center] -= (-coeff2 * (arr[center] + arr[right]) * x[right] /* Right */
+                          + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
+                          - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
+            );
+        });
 }
 
 template <class LevelCacheType>
@@ -98,4 +107,6 @@ void DirectSolverTake<LevelCacheType>::applySymmetryShift(Vector<double> x) cons
     }
 
     applySymmetryShiftOuterBoundary(x);
+
+    Kokkos::fence();
 }

@@ -1,10 +1,10 @@
 #pragma once
 
-template <class LevelCacheType>
-bool DirectSolverTake<LevelCacheType>::validateSolverMatrixIndexing() const
+namespace direct_solver_take
 {
-    const PolarGrid& grid = DirectSolver<LevelCacheType>::grid_;
 
+static KOKKOS_INLINE_FUNCTION bool validateSolverMatrixIndexing(const PolarGrid& grid)
+{
     // 1. Check each node: getSolverMatrixIndex == cumulative sum of prior stencil sizes
     for (int global_index = 0; global_index < grid.numberOfNodes(); ++global_index) {
         int i_r, i_theta;
@@ -32,12 +32,8 @@ bool DirectSolverTake<LevelCacheType>::validateSolverMatrixIndexing() const
     return true;
 }
 
-template <class LevelCacheType>
-int DirectSolverTake<LevelCacheType>::getStencilSize(int global_index) const
+static KOKKOS_INLINE_FUNCTION int getStencilSize(int global_index, const PolarGrid& grid, const bool DirBC_Interior)
 {
-    const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
-    const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;
-
     int i_r, i_theta;
     grid.multiIndex(global_index, i_r, i_theta);
 
@@ -66,14 +62,38 @@ int DirectSolverTake<LevelCacheType>::getStencilSize(int global_index) const
     throw std::out_of_range("Invalid index for stencil");
 }
 
-template <class LevelCacheType>
-const Stencil& DirectSolverTake<LevelCacheType>::getStencil(int i_r) const
+static KOKKOS_INLINE_FUNCTION const Stencil& getStencil(const int i_r, const PolarGrid& grid, const bool DirBC_Interior)
 {
-    const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
-    const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;
-
     assert(0 <= i_r && i_r < grid.nr());
     assert(grid.nr() >= 4);
+
+    // clang-format off
+    static constexpr Stencil stencil_interior_      = {
+        7, 4, 8,
+        1, 0, 2,
+        5, 3, 6
+    };
+    static constexpr Stencil stencil_across_origin_ = {
+        -1, 4, 6,
+        1, 0, 2,
+        -1, 3, 5
+    };
+    static constexpr Stencil stencil_DB_            = {
+        -1, -1, -1,
+        -1,  0, -1,
+        -1, -1, -1
+    };
+    static constexpr Stencil stencil_next_inner_DB_ = {
+        -1,  3,  5,
+        -1,  0,  1,
+        -1,  2,  4
+    };
+    static constexpr Stencil stencil_next_outer_DB_ = {
+        5,  3, -1,
+        1,  0, -1,
+        4,  2, -1
+    };
+    // clang-format on
 
     if ((i_r > 1 && i_r < grid.nr() - 2) || (i_r == 1 && !DirBC_Interior)) {
         return stencil_interior_;
@@ -93,12 +113,8 @@ const Stencil& DirectSolverTake<LevelCacheType>::getStencil(int i_r) const
     throw std::out_of_range("Invalid index for stencil");
 }
 
-template <class LevelCacheType>
-int DirectSolverTake<LevelCacheType>::getNonZeroCountSolverMatrix() const
+static KOKKOS_INLINE_FUNCTION int getNonZeroCountSolverMatrix(const PolarGrid& grid, const bool DirBC_Interior)
 {
-    const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
-    const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;
-
     const int size_stencil_inner_boundary      = DirBC_Interior ? 1 : 7;
     const int size_stencil_next_inner_boundary = DirBC_Interior ? 6 : 9;
     const int size_stencil_interior            = 9;
@@ -114,12 +130,9 @@ int DirectSolverTake<LevelCacheType>::getNonZeroCountSolverMatrix() const
 
 /* ----------------------------------------------------------------- */
 /* If the indexing is not smoother-based, please adjust the indexing */
-template <class LevelCacheType>
-int DirectSolverTake<LevelCacheType>::getSolverMatrixIndex(const int i_r, const int i_theta) const
+static KOKKOS_INLINE_FUNCTION int getSolverMatrixIndex(const int i_r, const int i_theta, const PolarGrid& grid,
+                                                       const bool DirBC_Interior)
 {
-    const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
-    const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;
-
     const int size_stencil_inner_boundary      = DirBC_Interior ? 1 : 7;
     const int size_stencil_next_inner_boundary = DirBC_Interior ? 6 : 9;
     const int size_stencil_interior            = 9;
@@ -144,8 +157,8 @@ int DirectSolverTake<LevelCacheType>::getSolverMatrixIndex(const int i_r, const 
         const int prior_inner_boundary_nodes      = grid.ntheta();
         const int prior_next_inner_boundary_nodes = grid.ntheta();
         const int prior_interior_nodes            = grid.ntheta() * (grid.numberSmootherCircles() - 2) +
-                                         i_theta * (grid.lengthRadialSmoother() - 2) + i_r -
-                                         grid.numberSmootherCircles();
+                                                    i_theta * (grid.lengthRadialSmoother() - 2) + i_r -
+                                                    grid.numberSmootherCircles();
         const int prior_next_outer_boundary_nodes = i_theta;
         const int prior_outer_boundary_nodes      = i_theta;
         return size_stencil_inner_boundary * prior_inner_boundary_nodes +
@@ -196,3 +209,5 @@ int DirectSolverTake<LevelCacheType>::getSolverMatrixIndex(const int i_r, const 
     }
     throw std::out_of_range("Invalid index for stencil");
 }
+
+} // namespace direct_solver_take

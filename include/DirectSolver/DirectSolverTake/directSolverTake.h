@@ -16,37 +16,6 @@ public:
     void solveInPlace(Vector<double> solution) override;
 
 private:
-    // The stencil definitions must be defined before the declaration of the mumps_solver,
-    // since the mumps solver will be built in the member initializer of the DirectSolver class.
-
-    // clang-format off
-    const Stencil stencil_interior_      = {
-        7, 4, 8,
-        1, 0, 2,
-        5, 3, 6
-    };
-    const Stencil stencil_across_origin_ = {
-        -1, 4, 6,
-        1, 0, 2,
-        -1, 3, 5
-    };
-    const Stencil stencil_DB_            = {
-        -1, -1, -1,
-        -1,  0, -1,
-        -1, -1, -1
-    };
-    const Stencil stencil_next_inner_DB_ = {
-        -1,  3,  5,
-        -1,  0,  1,
-        -1,  2,  4
-    };
-    const Stencil stencil_next_outer_DB_ = {
-        5,  3, -1,
-        1,  0, -1,
-        4,  2, -1
-    };
-    // clang-format on
-
 #ifdef GMGPOLAR_USE_MUMPS
     using SystemMatrix = SparseMatrixCOO<double, Kokkos::HostSpace>;
     using SystemSolver = CooMumpsSolver;
@@ -60,6 +29,7 @@ private:
     // Solver object (owns matrix if MUMPS, references if in-house solver).
     SystemSolver system_solver_;
 
+public:
     // Constructs a symmetric solver matrix.
     SystemMatrix buildSolverMatrix();
 
@@ -71,32 +41,12 @@ private:
     // The correction modifies the rhs to account for the influence of the Dirichlet boundary conditions,
     // ensuring that the solution at the boundary is correctly adjusted and maintains the required symmetry.
     void applySymmetryShift(Vector<double> rhs) const;
-    void applySymmetryShiftInnerBoundary(Vector<double> x) const;
-    void applySymmetryShiftOuterBoundary(Vector<double> x) const;
-
-    // Verify that solver matrix indexing is valid.
-    bool validateSolverMatrixIndexing() const;
-
-    // Returns the total number of non-zero elements in the solver matrix.
-    int getNonZeroCountSolverMatrix() const;
-
-    // Returns the index of the first non-zero element in the solver matrix for the given position.
-    int getSolverMatrixIndex(int i_r, int i_theta) const;
-
-    // Retrieves the stencil for the solver matrix at the given radial index.
-    const Stencil& getStencil(int i_r) const;
-
-    int getStencilSize(int global_index) const;
-
-    void nodeBuildSolverMatrixTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                   SystemMatrix& solver_matrix, ConstVector<double>& arr, ConstVector<double>& att,
-                                   ConstVector<double>& art, ConstVector<double>& detDF,
-                                   ConstVector<double>& coeff_beta);
+    void applySymmetryShiftInnerBoundary(Vector<double> rhs) const;
+    void applySymmetryShiftOuterBoundary(Vector<double> rhs) const;
 };
 
 #include "applySymmetryShift.inl"
 #include "buildSolverMatrix.inl"
 #include "directSolverTake.inl"
-#include "matrixStencil.inl"
 
 } // namespace gmgpolar

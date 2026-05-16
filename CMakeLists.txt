@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.12)
 # Options should be defined before they're used
 option(GMGPOLAR_BUILD_TESTS "Build GMGPolar unit tests." ON)
 option(GMGPOLAR_USE_LIKWID "Use LIKWID to measure code (regions)." OFF)
-option(GMGPOLAR_USE_MUMPS "Use MUMPS to solve linear systems." OFF)
+option(GMGPOLAR_USE_MUMPS "Use MUMPS to solve linear systems." ON)
 option(GMGPOLAR_ENABLE_COVERAGE "Enable code coverage reporting (requires GCC/Clang)" OFF)
 
 if (${GMGPOLAR_USE_MUMPS})
