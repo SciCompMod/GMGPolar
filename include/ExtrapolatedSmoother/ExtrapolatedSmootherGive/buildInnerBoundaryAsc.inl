@@ -30,8 +30,8 @@ update_CSR_COO_MatrixElement(const SparseMatrixCSR<double, Kokkos::HostSpace>& m
 
 template <typename LevelCacheType, typename InnerBoundaryMatrix>
 static KOKKOS_INLINE_FUNCTION void
-nodeBuildInteriorBoundarySolverMatrix_i_r_0(int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache,
-                                            bool DirBC_Interior, InnerBoundaryMatrix& matrix)
+nodeBuildInteriorBoundarySolverMatrix_i_r_0(const int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache,
+                                            const bool DirBC_Interior, const InnerBoundaryMatrix& matrix)
 {
     using extrapolated_smoother_give::update_CSR_COO_MatrixElement;
 
@@ -42,6 +42,16 @@ nodeBuildInteriorBoundarySolverMatrix_i_r_0(int i_theta, const PolarGrid& grid, 
     double value;
 
     const int i_r = 0;
+
+    /* ---------------------------------------- */
+    /* Compute or retrieve stencil coefficients */
+    /* ---------------------------------------- */
+    const int center    = grid.index(i_r, i_theta);
+    const double radius = grid.radius(i_r);
+    const double theta  = grid.theta(i_theta);
+
+    double coeff_beta, arr, att, art, detDF;
+    level_cache.obtainValues(i_r, i_theta, center, radius, theta, coeff_beta, arr, att, art, detDF);
 
     /* ------------------------------------------------ */
     /* Case 1: Dirichlet boundary on the inner boundary */
@@ -183,10 +193,10 @@ nodeBuildInteriorBoundarySolverMatrix_i_r_0(int i_theta, const PolarGrid& grid, 
     }
 }
 
-template <class LevelCacheType>
+template <typename LevelCacheType, typename InnerBoundaryMatrix>
 void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildInteriorBoundarySolverMatrix_i_r_1(
-    int i_theta, const PolarGrid& grid, bool DirBC_Interior, InnerBoundaryMatrix& matrix, double arr, double att,
-    double art, double detDF, double coeff_beta)
+    const int i_theta, const PolarGrid& grid, onst LevelCacheType& level_cache, bool DirBC_Interior,
+    const InnerBoundaryMatrix& matrix)
 {
     using extrapolated_smoother_give::update_CSR_COO_MatrixElement;
 
@@ -197,6 +207,16 @@ void ExtrapolatedSmootherGive<LevelCacheType>::nodeBuildInteriorBoundarySolverMa
     double value;
 
     const int i_r = 1;
+
+    /* ---------------------------------------- */
+    /* Compute or retrieve stencil coefficients */
+    /* ---------------------------------------- */
+    const int center    = grid.index(i_r, i_theta);
+    const double radius = grid.radius(i_r);
+    const double theta  = grid.theta(i_theta);
+
+    double coeff_beta, arr, att, art, detDF;
+    level_cache.obtainValues(i_r, i_theta, center, radius, theta, coeff_beta, arr, att, art, detDF);
 
     const double h1 = grid.radialSpacing(i_r - 1);
     const double h2 = grid.radialSpacing(i_r);
