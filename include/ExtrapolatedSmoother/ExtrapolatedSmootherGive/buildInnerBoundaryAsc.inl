@@ -320,7 +320,21 @@ ExtrapolatedSmootherGive<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     }
 
     std::cout << "ExtrapolatedSmootherGive Matrix: " << std::endl;
-    std::cout << inner_boundary_solver_matrix << std::endl;
+#ifdef GMGPOLAR_USE_MUMPS
+    for (int i = 0; i < inner_boundary_solver_matrix.non_zero_size(); i++) {
+        std::cout << "(" << inner_boundary_solver_matrix.row_index(i) << ", "
+                  << inner_boundary_solver_matrix.col_index(i) << "): " << inner_boundary_solver_matrix.value(i)
+                  << std::endl;
+    }
+#else
+    for (int row = 0; row < inner_boundary_solver_matrix.numRows(); row++) {
+        for (int idx = 0; idx < inner_boundary_solver_matrix.row_nz_size(row); idx++) {
+            int col      = inner_boundary_solver_matrix.row_nz_index(idx);
+            double value = inner_boundary_solver_matrix.row_nz_value(idx);
+            std::cout << "(" << row << ", " << col << "): " << value << std::endl;
+        }
+    }
+#endif
 
     return inner_boundary_solver_matrix;
 }
