@@ -41,7 +41,7 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleGiveInside(int i_r, in
         const int left      = grid.index(i_r - 1, i_theta);
         result[center] -= (-coeff1 * arr * x[left]); /* Left */
         result[bottom] -= (+0.25 * art * x[left]); /* Top Left */
-        result[bottom] -= (-0.25 * art * x[left]); /* Bottom Left */
+        result[top] -= (-0.25 * art * x[left]); /* Bottom Left */
     }
 
     const double h2     = grid.radialSpacing(i_r);
