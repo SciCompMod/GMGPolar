@@ -520,7 +520,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolation(in
         "Extrapolation: Apply Extrapolation (Circular)",
         Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
             {0, 0}, {fineGrid.numberSmootherCircles(), fineGrid.ntheta()}),
-        KOKKOS_CLASS_LAMBDA(const int i_r, const int i_theta) {
+        KOKKOS_LAMBDA(const int i_r, const int i_theta) {
             const int i_r_coarse     = i_r / 2;
             const int i_theta_coarse = i_theta / 2;
             if (i_r & 1 || i_theta & 1) {
@@ -539,7 +539,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolation(in
         "Extrapolation: Apply Extrapolation (Radial)",
         Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, fineGrid.numberSmootherCircles()},
                                                                                   {fineGrid.ntheta(), fineGrid.nr()}),
-        KOKKOS_CLASS_LAMBDA(const int i_theta, const int i_r) {
+        KOKKOS_LAMBDA(const int i_theta, const int i_r) {
             const int i_r_coarse     = i_r / 2;
             const int i_theta_coarse = i_theta / 2;
             if (i_r & 1 || i_theta & 1) {
@@ -603,7 +603,7 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
         "Exact Error: Compute Error (Circular)",
         Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
             {0, 0}, {grid.numberSmootherCircles(), grid.ntheta()}),
-        KOKKOS_CLASS_LAMBDA(const int i_r, const int i_theta) {
+        KOKKOS_LAMBDA(const int i_r, const int i_theta) {
             const double radius = grid.radius(i_r);
             const double theta  = grid.theta(i_theta);
             error[grid.index(i_r, i_theta)] =
@@ -616,7 +616,7 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
         "Exact Error: Compute Error (Radial)",
         Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
                                                                                   {grid.ntheta(), grid.nr()}),
-        KOKKOS_CLASS_LAMBDA(const int i_theta, const int i_r) {
+        KOKKOS_LAMBDA(const int i_theta, const int i_r) {
             const double radius = grid.radius(i_r);
             const double theta  = grid.theta(i_theta);
             error[grid.index(i_r, i_theta)] =
