@@ -208,10 +208,10 @@ ExtrapolatedSmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
                   << std::endl;
     }
 #else
-    for (int row = 0; row < inner_boundary_solver_matrix.numRows(); row++) {
+    for (int row = 0; row < inner_boundary_solver_matrix.rows(); row++) {
         for (int idx = 0; idx < inner_boundary_solver_matrix.row_nz_size(row); idx++) {
-            int col      = inner_boundary_solver_matrix.row_nz_index(idx);
-            double value = inner_boundary_solver_matrix.row_nz_value(idx);
+            int col      = inner_boundary_solver_matrix.row_nz_index(row, idx);
+            double value = inner_boundary_solver_matrix.row_nz_value(row, idx);
             std::cout << "(" << row << ", " << col << "): " << value << std::endl;
         }
     }
