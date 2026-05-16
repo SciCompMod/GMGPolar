@@ -2,7 +2,7 @@
 
 #include "../../../include/Definitions/geometry_helper.h"
 
-#include "smootherStenci.inl"
+#include "smootherStencil.inl"
 
 namespace extrapolated_smoother_give
 {
