@@ -1,5 +1,7 @@
 #pragma once
 
+#include "matrixStencil.inl"
+
 namespace direct_solver_give
 {
 
@@ -29,10 +31,6 @@ static KOKKOS_INLINE_FUNCTION void
 nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache,
                           const bool DirBC_Interior, const SystemMatrix& solver_matrix)
 {
-    using direct_solver_give::getSolverMatrixIndex;
-    using direct_solver_give::getStencil;
-    using direct_solver_give::updateMatrixElement;
-
     /* ---------------------------------------- */
     /* Compute or retrieve stencil coefficients */
     /* ---------------------------------------- */
