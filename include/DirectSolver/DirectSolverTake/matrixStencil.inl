@@ -3,35 +3,6 @@
 namespace direct_solver_take
 {
 
-static KOKKOS_INLINE_FUNCTION bool validateSolverMatrixIndexing(const PolarGrid& grid, const bool DirBC_Interior)
-{
-    // 1. Check each node: getSolverMatrixIndex == cumulative sum of prior stencil sizes
-    for (int global_index = 0; global_index < grid.numberOfNodes(); ++global_index) {
-        int i_r, i_theta;
-        grid.multiIndex(global_index, i_r, i_theta);
-
-        int expected = 0;
-        for (int prior = 0; prior < global_index; ++prior) {
-            expected += getStencilSize(prior, grid, DirBC_Interior);
-        }
-
-        if (getSolverMatrixIndex(i_r, i_theta) != expected)
-            return false;
-        if (getStencilSize(global_index, grid, DirBC_Interior) != getStencil(i_r, grid, DirBC_Interior).size())
-            return false;
-    }
-
-    // 2. Check total non-zero count
-    int total = 0;
-    for (int global_index = 0; global_index < grid.numberOfNodes(); ++global_index) {
-        total += getStencilSize(global_index, grid, DirBC_Interior);
-    }
-    if (total != getNonZeroCountSolverMatrix(grid, DirBC_Interior))
-        return false;
-
-    return true;
-}
-
 static KOKKOS_INLINE_FUNCTION int getStencilSize(int global_index, const PolarGrid& grid, const bool DirBC_Interior)
 {
     int i_r, i_theta;
@@ -208,6 +179,35 @@ static KOKKOS_INLINE_FUNCTION int getSolverMatrixIndex(const int i_r, const int 
                size_stencil_outer_boundary * prior_outer_boundary_nodes;
     }
     throw std::out_of_range("Invalid index for stencil");
+}
+
+static KOKKOS_INLINE_FUNCTION bool validateSolverMatrixIndexing(const PolarGrid& grid, const bool DirBC_Interior)
+{
+    // 1. Check each node: getSolverMatrixIndex == cumulative sum of prior stencil sizes
+    for (int global_index = 0; global_index < grid.numberOfNodes(); ++global_index) {
+        int i_r, i_theta;
+        grid.multiIndex(global_index, i_r, i_theta);
+
+        int expected = 0;
+        for (int prior = 0; prior < global_index; ++prior) {
+            expected += getStencilSize(prior, grid, DirBC_Interior);
+        }
+
+        if (getSolverMatrixIndex(i_r, i_theta) != expected)
+            return false;
+        if (getStencilSize(global_index, grid, DirBC_Interior) != getStencil(i_r, grid, DirBC_Interior).size())
+            return false;
+    }
+
+    // 2. Check total non-zero count
+    int total = 0;
+    for (int global_index = 0; global_index < grid.numberOfNodes(); ++global_index) {
+        total += getStencilSize(global_index, grid, DirBC_Interior);
+    }
+    if (total != getNonZeroCountSolverMatrix(grid, DirBC_Interior))
+        return false;
+
+    return true;
 }
 
 } // namespace direct_solver_take
