@@ -12,16 +12,17 @@ void DirectSolverGive<LevelCacheType>::applySymmetryShiftInnerBoundary(Vector<do
 
     assert(DirectSolver<LevelCacheType>::DirBC_Interior_);
 
-    int i_r;
-    double r;
-    int global_index;
-    double h1, h2, k1, k2;
-    double coeff1, coeff2;
-    double coeff_beta, arr, att, art, detDF;
-
     Kokkos::parallel_for(
         "DirectSolverGive: applySymmetryShiftInnerBoundary",
         Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, 1), KOKKOS_LAMBDA(const int) {
+
+            int i_r;
+            double r;
+            int global_index;
+            double h1, h2, k1, k2;
+            double coeff1, coeff2;
+            double coeff_beta, arr, att, art, detDF;
+
             for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
                 const double theta = grid.theta(i_theta);
                 /* -------------------------- */
@@ -75,16 +76,17 @@ void DirectSolverGive<LevelCacheType>::applySymmetryShiftOuterBoundary(Vector<do
     const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
 
-    int i_r;
-    double r;
-    int global_index;
-    double h1, h2, k1, k2;
-    double coeff1, coeff2;
-    double coeff_beta, arr, att, art, detDF;
-
     Kokkos::parallel_for(
         "DirectSolverGive: applySymmetryShiftOuterBoundary",
         Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, 1), KOKKOS_LAMBDA(const int) {
+
+            int i_r;
+            double r;
+            int global_index;
+            double h1, h2, k1, k2;
+            double coeff1, coeff2;
+            double coeff_beta, arr, att, art, detDF;
+
             for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
                 const double theta = grid.theta(i_theta);
                 /* --------------------------- */
