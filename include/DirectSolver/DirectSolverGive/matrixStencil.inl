@@ -193,7 +193,7 @@ static KOKKOS_INLINE_FUNCTION bool validateSolverMatrixIndexing(const PolarGrid&
             expected += getStencilSize(prior, grid, DirBC_Interior);
         }
 
-        if (getSolverMatrixIndex(i_r, i_theta) != expected)
+        if (getSolverMatrixIndex(i_r, i_theta, grid, DirBC_Interior) != expected)
             return false;
         if (getStencilSize(global_index, grid, DirBC_Interior) != getStencil(i_r, grid, DirBC_Interior).size())
             return false;

@@ -505,7 +505,7 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& gri
             row = left_index;
             ptr = left_nz_index;
 
-            const Stencil& LeftStencil = getStencil(i_r - 1, grid, DirBC_interior);
+            const Stencil& LeftStencil = getStencil(i_r - 1, grid, DirBC_Interior);
 
             offset = LeftStencil[StencilPosition::Right];
             column = center_index;
@@ -532,7 +532,7 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& gri
         row = right_index;
         ptr = right_nz_index;
 
-        const Stencil& RightStencil = getStencil(i_r + 1, grid, DirBC_interior);
+        const Stencil& RightStencil = getStencil(i_r + 1, grid, DirBC_Interior);
 
         offset = RightStencil[StencilPosition::Left];
         column = center_index;
@@ -775,7 +775,7 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& gri
         row = center_index;
         ptr = center_nz_index;
 
-        const Stencil& CenterStencil = getStencil(i_r, grid, DirBC_interior);
+        const Stencil& CenterStencil = getStencil(i_r, grid, DirBC_Interior);
 
         offset = CenterStencil[StencilPosition::Center];
         column = center_index;
@@ -806,9 +806,9 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& gri
 template <class LevelCacheType>
 typename DirectSolverGive<LevelCacheType>::SystemMatrix DirectSolverGive<LevelCacheType>::buildSolverMatrix()
 {
+    using direct_solver_give::getNonZeroCountSolverMatrix;
     using direct_solver_give::getStencilSize;
     using direct_solver_give::nodeBuildSolverMatrixGive;
-    using direct_solver_give::nodeBuildSolverMatrixTake;
     using direct_solver_give::validateSolverMatrixIndexing;
 
     const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
