@@ -211,7 +211,7 @@ void PolarGrid::initializeLineSplitting(std::optional<double> splitting_radius)
              i_r++) { /* We assume lengthRadialSmoother_ >= 3 in the further implementation */
             double uniform_theta_k = (2 * M_PI) / ntheta();
             double radius_r        = radius(i_r);
-            double radial_dist_h   = radius(i_r) - radius(i_r - 1);
+            double radial_dist_h   = radius(i_r + 1) - radius(i_r);
             ;
             double q = uniform_theta_k / radial_dist_h;
             if (q * radius_r > 1.0) {
