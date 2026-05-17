@@ -817,7 +817,7 @@ typename DirectSolverGive<LevelCacheType>::SystemMatrix DirectSolverGive<LevelCa
 
     assert(validateSolverMatrixIndexing(grid, DirBC_Interior) && "Solver matrix indexing is inconsistent");
 
-    const int n = grid.numberOfNodes(grid, DirBC_Interior);
+    const int n = grid.numberOfNodes();
 
 #ifdef GMGPOLAR_USE_MUMPS
     const int nnz = getNonZeroCountSolverMatrix(grid, DirBC_Interior);
