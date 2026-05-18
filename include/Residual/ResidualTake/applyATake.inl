@@ -4,11 +4,10 @@ namespace residual_take
 {
 
 static KOKKOS_INLINE_FUNCTION void node_apply_a_take(const int i_r, const int i_theta, const PolarGrid& grid,
-                                                     bool DirBC_Interior, HostVector<double>& result,
+                                                     const bool DirBC_Interior, HostVector<double>& result,
                                                      HostConstVector<double>& x, HostConstVector<double>& arr,
                                                      HostConstVector<double>& att, HostConstVector<double>& art,
-                                                     HostConstVector<double>& detDF,
-                                                     HostConstVector<double>& coeff_beta)
+                                                     HostConstVector<double>& detDF, const double coeff_beta)
 {
     const int center = grid.index(i_r, i_theta);
 
@@ -40,7 +39,7 @@ static KOKKOS_INLINE_FUNCTION void node_apply_a_take(const int i_r, const int i_
 
     double value = 0.0;
 
-    value += coeff5 * coeff_beta[center] * std::fabs(detDF[center]) * x[center]; /* beta_{i,j} */
+    value += coeff5 * coeff_beta * std::fabs(detDF[center]) * x[center]; /* beta_{i,j} */
 
     value += coeff1 * (arr[center] + arr[left]) * (x[center] - x[left]); /* Center: (Left) - Left */
     value += coeff2 * (arr[center] + arr[right]) * (x[center] - x[right]); /* Center: (Right) - Right */
@@ -72,17 +71,15 @@ void ResidualTake<LevelCacheType>::applySystemOperator(HostVector<double> result
 
     using residual_take::node_apply_a_take;
 
-    const PolarGrid& grid     = Residual<LevelCacheType>::grid_;
-    const bool DirBC_Interior = Residual<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid& grid             = Residual<LevelCacheType>::grid_;
+    const bool DirBC_Interior         = Residual<LevelCacheType>::DirBC_Interior_;
+    const LevelCacheType& level_cache = Residual<LevelCacheType>::level_cache_;
 
-    assert(Residual<LevelCacheType>::level_cache_.cacheDensityProfileCoefficients());
     assert(Residual<LevelCacheType>::level_cache_.cacheDomainGeometry());
-
-    HostConstVector<double> arr        = Residual<LevelCacheType>::level_cache_.arr();
-    HostConstVector<double> att        = Residual<LevelCacheType>::level_cache_.att();
-    HostConstVector<double> art        = Residual<LevelCacheType>::level_cache_.art();
-    HostConstVector<double> detDF      = Residual<LevelCacheType>::level_cache_.detDF();
-    HostConstVector<double> coeff_beta = Residual<LevelCacheType>::level_cache_.coeff_beta();
+    HostConstVector<double> arr   = Residual<LevelCacheType>::level_cache_.arr();
+    HostConstVector<double> att   = Residual<LevelCacheType>::level_cache_.att();
+    HostConstVector<double> art   = Residual<LevelCacheType>::level_cache_.art();
+    HostConstVector<double> detDF = Residual<LevelCacheType>::level_cache_.detDF();
 
     /* We split the loops into two regions to better respect the */
     /* access patterns of the smoother and improve cache locality. */
@@ -96,6 +93,7 @@ void ResidualTake<LevelCacheType>::applySystemOperator(HostVector<double> result
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_CLASS_LAMBDA(const int i_r, const int i_theta) {
+            const double coeff_beta = level_cache.obtainBeta(i_r, i_theta, grid);
             node_apply_a_take(i_r, i_theta, grid, DirBC_Interior, result, x, arr, att, art, detDF, coeff_beta);
         });
 
@@ -108,6 +106,7 @@ void ResidualTake<LevelCacheType>::applySystemOperator(HostVector<double> result
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_CLASS_LAMBDA(const int i_theta, const int i_r) {
+            const double coeff_beta = level_cache.obtainBeta(i_r, i_theta, grid);
             node_apply_a_take(i_r, i_theta, grid, DirBC_Interior, result, x, arr, att, art, detDF, coeff_beta);
         });
 

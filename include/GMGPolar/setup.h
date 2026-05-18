@@ -10,11 +10,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
 
     auto start_setup_createLevels = std::chrono::high_resolution_clock::now();
 
-    if (stencil_distribution_method_ == StencilDistributionMethod::CPU_TAKE) {
-        if (!cache_density_profile_coefficients_ || !cache_domain_geometry_) {
-            throw std::runtime_error("Error: Caching must be enabled for both density profile coefficients and domain "
-                                     "geometry in 'Take' implementation strategy.");
-        }
+    if (stencil_distribution_method_ == StencilDistributionMethod::CPU_TAKE && !cache_domain_geometry_) {
+        throw std::runtime_error(
+            "Error: Caching must be enabled for domain geometry in 'Take' implementation strategy.");
     }
 
     // -------------------------------- //

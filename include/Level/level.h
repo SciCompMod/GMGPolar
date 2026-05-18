@@ -176,6 +176,20 @@ public:
         }
     }
 
+    // Write on just for obtaining coeff beta
+    KOKKOS_INLINE_FUNCTION double obtainBeta(const int i_r, const int i_theta, const PolarGrid& grid) const
+    {
+        if (cache_density_profile_coefficients_) {
+            const int index = grid.index(i_r, i_theta);
+            return coeff_beta_[index];
+        }
+        else {
+            const double radius = grid.radius(i_r);
+            const double theta  = grid.theta(i_theta);
+            return density_profile_coefficients_.beta(radius, theta);
+        }
+    }
+
 private:
     const DomainGeometry& domain_geometry_;
     const DensityProfileCoefficients& density_profile_coefficients_;

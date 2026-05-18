@@ -3,8 +3,8 @@
 namespace smoother_take
 {
 
-static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const BatchedTridiagonalSolver<double>& solver, int batch,
-                                                       int row, int column, double value)
+static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const BatchedTridiagonalSolver<double>& solver, const int batch,
+                                                       const int row, const int column, const double value)
 {
     if (row == column)
         solver.set_main_diagonal(batch, row, value);
@@ -14,13 +14,11 @@ static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const BatchedTridiagonalS
         solver.set_cyclic_corner(batch, value);
 }
 
-static KOKKOS_INLINE_FUNCTION void
-nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                   const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
-                                   const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver,
-                                   HostConstVector<double>& arr, HostConstVector<double>& att,
-                                   HostConstVector<double>& art, HostConstVector<double>& detDF,
-                                   HostConstVector<double>& coeff_beta)
+static KOKKOS_INLINE_FUNCTION void nodeBuildTridiagonalSolverMatrices(
+    const int i_r, const int i_theta, const PolarGrid& grid, const bool DirBC_Interior,
+    const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
+    const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, HostConstVector<double>& arr,
+    HostConstVector<double>& att, HostConstVector<double>& art, HostConstVector<double>& detDF, const double coeff_beta)
 {
     using smoother_take::updateMatrixElement;
 
@@ -75,8 +73,8 @@ nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, 
         /* Center: (Left, Right, Bottom, Top) */
         row    = center_index;
         column = center_index;
-        value  = coeff5 * coeff_beta[center] * Kokkos::fabs(detDF[center]) -
-                (left_value + right_value + bottom_value + top_value);
+        value =
+            coeff5 * coeff_beta * Kokkos::fabs(detDF[center]) - (left_value + right_value + bottom_value + top_value);
         updateMatrixElement(solver, batch, row, column, value);
 
         /* Bottom */
@@ -130,8 +128,8 @@ nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, 
         /* Center: (Left, Right, Bottom, Top) */
         row    = center_index;
         column = center_index;
-        value  = coeff5 * coeff_beta[center] * Kokkos::fabs(detDF[center]) -
-                (left_value + right_value + bottom_value + top_value);
+        value =
+            coeff5 * coeff_beta * Kokkos::fabs(detDF[center]) - (left_value + right_value + bottom_value + top_value);
         updateMatrixElement(solver, batch, row, column, value);
 
         /* Left */
@@ -194,14 +192,11 @@ void SmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 
-    assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
-
-    HostConstVector<double> arr        = level_cache.arr();
-    HostConstVector<double> att        = level_cache.att();
-    HostConstVector<double> art        = level_cache.art();
-    HostConstVector<double> detDF      = level_cache.detDF();
-    HostConstVector<double> coeff_beta = level_cache.coeff_beta();
+    HostConstVector<double> arr   = level_cache.arr();
+    HostConstVector<double> att   = level_cache.att();
+    HostConstVector<double> art   = level_cache.art();
+    HostConstVector<double> detDF = level_cache.detDF();
 
     const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver = circle_tridiagonal_solver_;
     const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver = radial_tridiagonal_solver_;
@@ -218,6 +213,7 @@ void SmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_r, const int i_theta) {
+            const double coeff_beta = level_cache.obtainBeta(i_r, i_theta, grid);
             nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, DirBC_Interior, circle_tridiagonal_solver,
                                                radial_tridiagonal_solver, arr, att, art, detDF, coeff_beta);
         });
@@ -231,6 +227,7 @@ void SmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_theta, const int i_r) {
+            const double coeff_beta = level_cache.obtainBeta(i_r, i_theta, grid);
             nodeBuildTridiagonalSolverMatrices(i_r, i_theta, grid, DirBC_Interior, circle_tridiagonal_solver,
                                                radial_tridiagonal_solver, arr, att, art, detDF, coeff_beta);
         });

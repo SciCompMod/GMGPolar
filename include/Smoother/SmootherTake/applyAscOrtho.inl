@@ -7,7 +7,7 @@ static KOKKOS_INLINE_FUNCTION void
 nodeApplyAscOrthoCircleTake(const int i_r, const int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                             HostConstVector<double>& x, HostConstVector<double>& rhs, HostVector<double>& result,
                             HostConstVector<double>& arr, HostConstVector<double>& att, HostConstVector<double>& art,
-                            HostConstVector<double>& detDF, HostConstVector<double>& coeff_beta)
+                            HostConstVector<double>& detDF)
 {
     KOKKOS_ASSERT(i_r >= 0 && i_r < grid.numberSmootherCircles());
 
@@ -59,8 +59,7 @@ static KOKKOS_INLINE_FUNCTION void
 nodeApplyAscOrthoRadialTake(const int i_r, const int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                             HostConstVector<double>& x, HostConstVector<double>& rhs, HostVector<double>& result,
                             HostConstVector<double>& arr, const HostConstVector<double>& att,
-                            HostConstVector<double>& art, const HostConstVector<double>& detDF,
-                            HostConstVector<double>& coeff_beta)
+                            HostConstVector<double>& art, const HostConstVector<double>& detDF)
 {
     KOKKOS_ASSERT(i_r >= grid.numberSmootherCircles() && i_r < grid.nr());
 
@@ -127,14 +126,11 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(HostConstVect
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 
-    assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
-
-    HostConstVector<double> arr        = level_cache.arr();
-    HostConstVector<double> att        = level_cache.att();
-    HostConstVector<double> art        = level_cache.art();
-    HostConstVector<double> detDF      = level_cache.detDF();
-    HostConstVector<double> coeff_beta = level_cache.coeff_beta();
+    HostConstVector<double> arr   = level_cache.arr();
+    HostConstVector<double> att   = level_cache.att();
+    HostConstVector<double> art   = level_cache.art();
+    HostConstVector<double> detDF = level_cache.detDF();
 
     /* The outer most circle next to the radial section is defined to be black. */
     const int start_black_circles = (grid.numberSmootherCircles() % 2 == 0) ? 1 : 0;
@@ -149,8 +145,7 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(HostConstVect
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
             int i_r = start_black_circles + circle_task * 2;
-            nodeApplyAscOrthoCircleTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF,
-                                        coeff_beta);
+            nodeApplyAscOrthoCircleTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF);
         });
 
     Kokkos::fence();
@@ -166,14 +161,11 @@ void SmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(HostConstVect
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 
-    assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
-
-    HostConstVector<double> arr        = level_cache.arr();
-    HostConstVector<double> att        = level_cache.att();
-    HostConstVector<double> art        = level_cache.art();
-    HostConstVector<double> detDF      = level_cache.detDF();
-    HostConstVector<double> coeff_beta = level_cache.coeff_beta();
+    HostConstVector<double> arr   = level_cache.arr();
+    HostConstVector<double> att   = level_cache.att();
+    HostConstVector<double> art   = level_cache.art();
+    HostConstVector<double> detDF = level_cache.detDF();
 
     /* The outer most circle next to the radial section is defined to be black. */
     const int start_white_circles = (grid.numberSmootherCircles() % 2 == 0) ? 0 : 1;
@@ -188,8 +180,7 @@ void SmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(HostConstVect
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
             const int i_r = start_white_circles + circle_task * 2;
-            nodeApplyAscOrthoCircleTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF,
-                                        coeff_beta);
+            nodeApplyAscOrthoCircleTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF);
         });
 
     Kokkos::fence();
@@ -205,14 +196,12 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(HostConstVect
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 
-    assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
 
-    HostConstVector<double> arr        = level_cache.arr();
-    HostConstVector<double> att        = level_cache.att();
-    HostConstVector<double> art        = level_cache.art();
-    HostConstVector<double> detDF      = level_cache.detDF();
-    HostConstVector<double> coeff_beta = level_cache.coeff_beta();
+    HostConstVector<double> arr   = level_cache.arr();
+    HostConstVector<double> att   = level_cache.att();
+    HostConstVector<double> art   = level_cache.art();
+    HostConstVector<double> detDF = level_cache.detDF();
 
     assert(grid.ntheta() % 2 == 0);
     const int start_black_radials    = 0;
@@ -227,8 +216,7 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(HostConstVect
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int radial_task, const int i_r) {
             const int i_theta = start_black_radials + radial_task * 2;
-            nodeApplyAscOrthoRadialTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF,
-                                        coeff_beta);
+            nodeApplyAscOrthoRadialTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF);
         });
 
     Kokkos::fence();
@@ -244,14 +232,12 @@ void SmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(HostConstVect
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 
-    assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
 
-    HostConstVector<double> arr        = level_cache.arr();
-    HostConstVector<double> att        = level_cache.att();
-    HostConstVector<double> art        = level_cache.art();
-    HostConstVector<double> detDF      = level_cache.detDF();
-    HostConstVector<double> coeff_beta = level_cache.coeff_beta();
+    HostConstVector<double> arr   = level_cache.arr();
+    HostConstVector<double> att   = level_cache.att();
+    HostConstVector<double> art   = level_cache.art();
+    HostConstVector<double> detDF = level_cache.detDF();
 
     assert(grid.ntheta() % 2 == 0);
     const int start_white_radials    = 1;
@@ -266,8 +252,7 @@ void SmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(HostConstVect
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int radial_task, const int i_r) {
             const int i_theta = start_white_radials + radial_task * 2;
-            nodeApplyAscOrthoRadialTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF,
-                                        coeff_beta);
+            nodeApplyAscOrthoRadialTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF);
         });
 
     Kokkos::fence();

@@ -30,8 +30,7 @@ template <typename SystemMatrix>
 static KOKKOS_INLINE_FUNCTION void
 nodeBuildSolverMatrixTake(const int i_r, const int i_theta, const PolarGrid& grid, const bool DirBC_Interior,
                           const SystemMatrix& solver_matrix, HostConstVector<double>& arr, HostConstVector<double>& att,
-                          HostConstVector<double>& art, HostConstVector<double>& detDF,
-                          HostConstVector<double>& coeff_beta)
+                          HostConstVector<double>& art, HostConstVector<double>& detDF, const double coeff_beta)
 {
     int ptr, offset;
     int row, column;
@@ -71,13 +70,12 @@ nodeBuildSolverMatrixTake(const int i_r, const int i_theta, const PolarGrid& gri
         const double bottom_value = -coeff3 * (att(center_index) + att(bottom_index)); /* Bottom */
         const double top_value    = -coeff4 * (att(center_index) + att(top_index)); /* Top */
 
-        const double center_value =
-            (coeff5 * coeff_beta[center_index] * Kokkos::fabs(detDF(center_index)) /* beta_{i,j} */
-             - left_value /* Center: (Left) */
-             - right_value /* Center: (Right) */
-             - bottom_value /* Center: (Bottom) */
-             - top_value /* Center: (Top) */
-            );
+        const double center_value = (coeff5 * coeff_beta * Kokkos::fabs(detDF(center_index)) /* beta_{i,j} */
+                                     - left_value /* Center: (Left) */
+                                     - right_value /* Center: (Right) */
+                                     - bottom_value /* Center: (Bottom) */
+                                     - top_value /* Center: (Top) */
+        );
 
         const double bottom_left_value  = -0.25 * (art(left_index) + art(bottom_index)); /* Bottom Left */
         const double bottom_right_value = +0.25 * (art(right_index) + art(bottom_index)); /* Bottom Right */
@@ -197,13 +195,12 @@ nodeBuildSolverMatrixTake(const int i_r, const int i_theta, const PolarGrid& gri
             const double bottom_value = -coeff3 * (att(center_index) + att(bottom_index)); /* Bottom */
             const double top_value    = -coeff4 * (att(center_index) + att(top_index)); /* Top */
 
-            const double center_value =
-                (coeff5 * coeff_beta[center_index] * Kokkos::fabs(detDF(center_index)) /* beta_{i,j} */
-                 - left_value /* Center: (Left) */
-                 - right_value /* Center: (Right) */
-                 - bottom_value /* Center: (Bottom) */
-                 - top_value /* Center: (Top) */
-                );
+            const double center_value = (coeff5 * coeff_beta * Kokkos::fabs(detDF(center_index)) /* beta_{i,j} */
+                                         - left_value /* Center: (Left) */
+                                         - right_value /* Center: (Right) */
+                                         - bottom_value /* Center: (Bottom) */
+                                         - top_value /* Center: (Top) */
+            );
 
             const double bottom_right_value = +0.25 * (art(right_index) + art(bottom_index)); /* Bottom Right */
             const double top_right_value    = -0.25 * (art(right_index) + art(top_index)); /* Top Right */
@@ -289,13 +286,12 @@ nodeBuildSolverMatrixTake(const int i_r, const int i_theta, const PolarGrid& gri
         const double bottom_value = -coeff3 * (att(center_index) + att(bottom_index)); /* Bottom */
         const double top_value    = -coeff4 * (att(center_index) + att(top_index)); /* Top */
 
-        const double center_value =
-            (coeff5 * coeff_beta[center_index] * Kokkos::fabs(detDF(center_index)) /* beta_{i,j} */
-             - left_value /* Center: (Left) */
-             - right_value /* Center: (Right) */
-             - bottom_value /* Center: (Bottom) */
-             - top_value /* Center: (Top) */
-            );
+        const double center_value = (coeff5 * coeff_beta * Kokkos::fabs(detDF(center_index)) /* beta_{i,j} */
+                                     - left_value /* Center: (Left) */
+                                     - right_value /* Center: (Right) */
+                                     - bottom_value /* Center: (Bottom) */
+                                     - top_value /* Center: (Top) */
+        );
 
         const double bottom_left_value  = -0.25 * (art(left_index) + art(bottom_index)); /* Bottom Left */
         const double bottom_right_value = +0.25 * (art(right_index) + art(bottom_index)); /* Bottom Right */
@@ -397,13 +393,12 @@ nodeBuildSolverMatrixTake(const int i_r, const int i_theta, const PolarGrid& gri
         const double bottom_value = -coeff3 * (att(center_index) + att(bottom_index)); /* Bottom */
         const double top_value    = -coeff4 * (att(center_index) + att(top_index)); /* Top */
 
-        const double center_value =
-            (coeff5 * coeff_beta[center_index] * Kokkos::fabs(detDF(center_index)) /* beta_{i,j} */
-             - left_value /* Center: (Left) */
-             - right_value /* Center: (Right) */
-             - bottom_value /* Center: (Bottom) */
-             - top_value /* Center: (Top) */
-            );
+        const double center_value = (coeff5 * coeff_beta * Kokkos::fabs(detDF(center_index)) /* beta_{i,j} */
+                                     - left_value /* Center: (Left) */
+                                     - right_value /* Center: (Right) */
+                                     - bottom_value /* Center: (Bottom) */
+                                     - top_value /* Center: (Top) */
+        );
 
         const double bottom_left_value  = -0.25 * (art(left_index) + art(bottom_index)); /* Bottom Left */
         const double bottom_right_value = +0.25 * (art(right_index) + art(bottom_index)); /* Bottom Right */
@@ -503,14 +498,11 @@ typename DirectSolverTake<LevelCacheType>::SystemMatrix DirectSolverTake<LevelCa
     SparseMatrixCSR<double, Kokkos::HostSpace> solver_matrix(n, n, nnz_per_row);
 #endif
 
-    assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
-
-    HostConstVector<double> arr        = level_cache.arr();
-    HostConstVector<double> att        = level_cache.att();
-    HostConstVector<double> art        = level_cache.art();
-    HostConstVector<double> detDF      = level_cache.detDF();
-    HostConstVector<double> coeff_beta = level_cache.coeff_beta();
+    HostConstVector<double> arr   = level_cache.arr();
+    HostConstVector<double> att   = level_cache.att();
+    HostConstVector<double> art   = level_cache.art();
+    HostConstVector<double> detDF = level_cache.detDF();
 
     /* We split the loops into two regions to better respect the */
     /* access patterns of the smoother and improve cache locality. */
@@ -524,6 +516,7 @@ typename DirectSolverTake<LevelCacheType>::SystemMatrix DirectSolverTake<LevelCa
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_r, const int i_theta) {
+            const double coeff_beta = level_cache.obtainBeta(i_r, i_theta, grid);
             nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF,
                                       coeff_beta);
         });
@@ -537,6 +530,7 @@ typename DirectSolverTake<LevelCacheType>::SystemMatrix DirectSolverTake<LevelCa
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_theta, const int i_r) {
+            const double coeff_beta = level_cache.obtainBeta(i_r, i_theta, grid);
             nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF,
                                       coeff_beta);
         });

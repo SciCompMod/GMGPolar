@@ -12,9 +12,7 @@ void DirectSolverTake<LevelCacheType>::applySymmetryShiftInnerBoundary(HostVecto
 
     assert(DirectSolver<LevelCacheType>::DirBC_Interior_);
 
-    assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
-
     HostConstVector<double> arr = level_cache.arr();
     HostConstVector<double> att = level_cache.att();
     HostConstVector<double> art = level_cache.art();
@@ -55,9 +53,7 @@ void DirectSolverTake<LevelCacheType>::applySymmetryShiftOuterBoundary(HostVecto
     const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
 
-    assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
-
     HostConstVector<double> arr = level_cache.arr();
     HostConstVector<double> att = level_cache.att();
     HostConstVector<double> art = level_cache.art();

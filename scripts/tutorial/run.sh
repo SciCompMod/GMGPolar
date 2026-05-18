@@ -21,7 +21,7 @@ maxOpenMPThreads=1
 # Stencil distribution method:
 # 0 - CPU "Take": Each node independently applies the stencil
 # 1 - CPU "Give": The stencil operation is distributed across adjacent neighboring nodes
-stencilDistributionMethod=0
+stencilDistributionMethod=1
 # Caching behavior:
 # 0 - Recompute values on each iteration: Uses less memory but results in slower execution.
 # 1 - Reuse cached values: Consumes more memory but significantly improves performance.
@@ -31,8 +31,8 @@ cacheDomainGeometry=1
 # caching is required for optimal performance, 
 # so both density profile coefficients and domain geometry need to be cached.
 if [[ $stencilDistributionMethod -eq 0 ]]; then
-  if [[ $cacheDensityProfileCoefficients -ne 1 || $cacheDomainGeometry -ne 1 ]]; then
-    echo "Error: Caching must be enabled (set to 1) for both density profile coefficients and domain geometry in 'Take' approach (stencilDistributionMethod=0)."
+  if [[ $cacheDomainGeometry -ne 1 ]]; then
+    echo "Error: Caching of the domain geometry must be enabled for 'Take' approach."
     exit 1
   fi
 fi
