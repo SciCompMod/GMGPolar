@@ -3,10 +3,11 @@
 // =============================================================================
 //   Main Solver Routine
 // =============================================================================
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
 template <concepts::BoundaryConditions BoundaryConditions, concepts::SourceTerm SourceTerm>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryConditions& boundary_conditions,
-                                                                 const SourceTerm& source_term)
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::solve(
+    const BoundaryConditions& boundary_conditions, const SourceTerm& source_term)
 {
     auto start_setup_rhs = std::chrono::high_resolution_clock::now();
 
@@ -180,9 +181,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
 //   Full Multigrid Approximation
 // =============================================================================
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::fullMultigridApproximation(MultigridCycleType FMG_cycle,
-                                                                                      int FMG_iterations)
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::fullMultigridApproximation(
+    MultigridCycleType FMG_cycle, int FMG_iterations)
 {
     // Start from the coarsest level
     int coarsest_depth                                                = number_of_levels_ - 1;
@@ -212,10 +214,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::fullMultigridApproxim
 //   Solver Loops
 // =============================================================================
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solveMultigrid(double& initial_residual_norm,
-                                                                          double& current_residual_norm,
-                                                                          double& current_relative_residual_norm)
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::solveMultigrid(
+    double& initial_residual_norm, double& current_residual_norm, double& current_relative_residual_norm)
 {
     Level<DomainGeometry, DensityProfileCoefficients>& level = levels_[0];
 
@@ -285,10 +287,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solveMultigrid(double
  *   z    (preconditioned residual)        -> level.solution()
  *   A*p  (matrix applied to search dir.)  -> level.residual()
  */
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& initial_residual_norm,
-                                                                    double& current_residual_norm,
-                                                                    double& current_relative_residual_norm)
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::solvePCG(
+    double& initial_residual_norm, double& current_residual_norm, double& current_relative_residual_norm)
 {
     Level<DomainGeometry, DensityProfileCoefficients>& level = levels_[0];
 
@@ -400,8 +402,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
 //   Apply Multigrid Iterations
 // =============================================================================
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyMultigridIterations(
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::applyMultigridIterations(
     Level<DomainGeometry, DensityProfileCoefficients>& level, MultigridCycleType cycle, int iterations)
 {
     for (int i = 0; i < iterations; i++) {
@@ -422,8 +425,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyMultigridIterati
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolatedMultigridIterations(
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::applyExtrapolatedMultigridIterations(
     Level<DomainGeometry, DensityProfileCoefficients>& level, MultigridCycleType cycle, int iterations)
 {
     for (int i = 0; i < iterations; i++) {
@@ -448,8 +452,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolatedMult
 //   Residual Handling Functions
 // =============================================================================
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::updateResidualNorms(
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::updateResidualNorms(
     Level<DomainGeometry, DensityProfileCoefficients>& level, int iteration, double& initial_residual_norm,
     double& current_residual_norm, double& current_relative_residual_norm)
 {
@@ -483,8 +488,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::updateResidualNorms(
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-double GMGPolar<DomainGeometry, DensityProfileCoefficients>::residualNorm(
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+double GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::residualNorm(
     const ResidualNormType& norm_type, const Level<DomainGeometry, DensityProfileCoefficients>& level,
     ConstVector<double> residual) const
 {
@@ -500,10 +506,10 @@ double GMGPolar<DomainGeometry, DensityProfileCoefficients>::residualNorm(
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolation(int current_level,
-                                                                              Vector<double> fine_values,
-                                                                              ConstVector<double> coarse_values)
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::applyExtrapolation(
+    int current_level, Vector<double> fine_values, ConstVector<double> coarse_values)
 {
     const PolarGrid& fineGrid   = levels_[current_level].grid();
     const PolarGrid& coarseGrid = levels_[current_level + 1].grid();
@@ -557,8 +563,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolation(in
 //   RHS Hierarchy
 // =============================================================================
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::initRhsHierarchy(Vector<double> rhs)
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::initRhsHierarchy(Vector<double> rhs)
 {
     Kokkos::deep_copy(levels_[0].rhs(), rhs);
     for (int level_depth = 0; level_depth < number_of_levels_ - 1; ++level_depth) {
@@ -572,8 +579,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::initRhsHierarchy(Vect
 //   Convergence and Error Analysis Functions
 // =============================================================================
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::evaluateExactError(
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::evaluateExactError(
     Level<DomainGeometry, DensityProfileCoefficients>& level, const ExactSolution& exact_solution)
 {
     // Compute the weighted L2 norm and infinity norm of the error between the numerical and exact solution.
@@ -581,8 +589,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::evaluateExactError(
     exact_errors_.push_back(computeExactError(level, level.solution(), level.residual(), exact_solution));
 }
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::computeExactError(
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::computeExactError(
     Level<DomainGeometry, DensityProfileCoefficients>& level, ConstVector<double> solution, Vector<double> error,
     const ExactSolution& exact_solution)
 {
@@ -624,9 +633,10 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
 //   Convergence Functions
 // =============================================================================
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-bool GMGPolar<DomainGeometry, DensityProfileCoefficients>::converged(double residual_norm,
-                                                                     double relative_residual_norm)
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+bool GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::converged(double residual_norm,
+                                                                                    double relative_residual_norm)
 {
     if (relative_tolerance_.has_value()) {
         if (!(relative_residual_norm > relative_tolerance_.value())) {
@@ -645,8 +655,10 @@ bool GMGPolar<DomainGeometry, DensityProfileCoefficients>::converged(double resi
 //   Output and Logging Functions
 // =============================================================================
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printIterationHeader(const ExactSolution* exact_solution)
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::printIterationHeader(
+    const ExactSolution* exact_solution)
 {
     if (verbose_ <= 0)
         return;
@@ -672,11 +684,11 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printIterationHeader(
     std::cout << std::right << std::setfill(' ');
 }
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printIterationInfo(int iteration,
-                                                                              double current_residual_norm,
-                                                                              double current_relative_residual_norm,
-                                                                              const ExactSolution* exact_solution)
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::printIterationInfo(
+    int iteration, double current_residual_norm, double current_relative_residual_norm,
+    const ExactSolution* exact_solution)
 {
     if (verbose_ <= 0)
         return;

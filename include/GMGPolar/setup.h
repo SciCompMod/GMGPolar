@@ -1,7 +1,8 @@
 #pragma once
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::setup()
 {
     LIKWID_START("Setup");
     auto start_setup = std::chrono::high_resolution_clock::now();
@@ -147,8 +148,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     LIKWID_STOP("Setup");
 }
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-int GMGPolar<DomainGeometry, DensityProfileCoefficients>::chooseNumberOfLevels(const PolarGrid& finestGrid)
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+int GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::chooseNumberOfLevels(
+    const PolarGrid& finestGrid)
 {
     constexpr int minRadialNodes      = 5;
     constexpr int minAngularDivisions = 4;
@@ -187,8 +190,9 @@ int GMGPolar<DomainGeometry, DensityProfileCoefficients>::chooseNumberOfLevels(c
     return levels;
 }
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::discretize_rhs_f(
     const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f)
 {
     const PolarGrid& grid = level.grid();
@@ -327,9 +331,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
     Kokkos::fence();
 }
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
 template <concepts::BoundaryConditions BoundaryConditions, concepts::SourceTerm SourceTerm>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::build_rhs_f(
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::build_rhs_f(
     const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f,
     const BoundaryConditions& boundary_conditions, const SourceTerm& source_term)
 {
@@ -383,9 +388,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::build_rhs_f(
     Kokkos::fence();
 }
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printSettings(const PolarGrid& finest_grid,
-                                                                         const PolarGrid& coarsest_grid) const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::printSettings(
+    const PolarGrid& finest_grid, const PolarGrid& coarsest_grid) const
 {
 
     std::cout << "------------------------------\n";
@@ -429,10 +435,11 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printSettings(const P
         std::cout << "A-Give (Stencil Distribution)\n";
     }
 
-    std::cout << "Domain geometry mode:" << " " << (cache_domain_geometry_ ? "Precomputed" : "On-the-fly") << "\n";
+    std::cout << "Domain geometry mode:"
+              << " " << (cache_domain_geometry_ ? "Precomputed" : "On-the-fly") << "\n";
 
-    std::cout << "Density profile mode:" << " " << (cache_density_profile_coefficients_ ? "Precomputed" : "On-the-fly")
-              << "\n";
+    std::cout << "Density profile mode:"
+              << " " << (cache_density_profile_coefficients_ ? "Precomputed" : "On-the-fly") << "\n";
 
     std::cout << "------------------------------\n";
     std::cout << "---------- PolarGrid ---------\n";
@@ -582,9 +589,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printSettings(const P
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-bool GMGPolar<DomainGeometry, DensityProfileCoefficients>::checkUniformRefinement(const PolarGrid& grid,
-                                                                                  double tolerance) const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+bool GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::checkUniformRefinement(const PolarGrid& grid,
+                                                                                                 double tolerance) const
 {
     // Radial direction
     for (int i_r = 1; i_r < grid.nr() - 1; i_r += 2) {

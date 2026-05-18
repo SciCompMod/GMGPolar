@@ -8,6 +8,7 @@
 #include "../InputFunctions/densityProfileCoefficients.h"
 #include "../InputFunctions/domainGeometry.h"
 #include "../InputFunctions/sourceTerm.h"
+#include "../InputFunctions/exactSolution.h"
 #include "../Level/level.h"
 
 #include "igmgpolar.h"
@@ -15,7 +16,8 @@
 namespace gmgpolar
 {
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
 class GMGPolar : public IGMGPolar
 {
 public:
@@ -90,7 +92,7 @@ private:
     /* ------------------------------------ */
     const DomainGeometry& domain_geometry_;
     const DensityProfileCoefficients& density_profile_coefficients_;
-    const ExactSolution* exact_solution_; // Optional exact solution for validation
+    const ExactSolution& exact_solution_; // Optional exact solution for validation
 
     /* ---------------- */
     /* Multigrid levels */

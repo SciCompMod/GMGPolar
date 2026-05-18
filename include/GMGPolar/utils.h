@@ -3,9 +3,11 @@
 /* ---------------------------------------------------------------------- */
 /* Interpolation                                                          */
 /* ---------------------------------------------------------------------- */
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::prolongation(int current_level, Vector<double> result,
-                                                                        ConstVector<double> x) const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::prolongation(int current_level,
+                                                                                       Vector<double> result,
+                                                                                       ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ && 1 <= current_level);
     if (!interpolation_)
@@ -14,9 +16,11 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::prolongation(int curr
     interpolation_->applyProlongation(levels_[current_level].grid(), levels_[current_level - 1].grid(), result, x);
 }
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::restriction(int current_level, Vector<double> result,
-                                                                       ConstVector<double> x) const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::restriction(int current_level,
+                                                                                      Vector<double> result,
+                                                                                      ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ - 1 && 0 <= current_level);
     if (!interpolation_)
@@ -25,9 +29,11 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::restriction(int curre
     interpolation_->applyRestriction(levels_[current_level].grid(), levels_[current_level + 1].grid(), result, x);
 }
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::injection(int current_level, Vector<double> result,
-                                                                     ConstVector<double> x) const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::injection(int current_level,
+                                                                                    Vector<double> result,
+                                                                                    ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ - 1 && 0 <= current_level);
     if (!interpolation_)
@@ -36,10 +42,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::injection(int current
     interpolation_->applyInjection(levels_[current_level].grid(), levels_[current_level + 1].grid(), result, x);
 }
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedProlongation(int current_level,
-                                                                                    Vector<double> result,
-                                                                                    ConstVector<double> x) const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::extrapolatedProlongation(
+    int current_level, Vector<double> result, ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ && 1 <= current_level);
     if (!interpolation_)
@@ -49,10 +55,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedProlongat
                                                   result, x);
 }
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedRestriction(int current_level,
-                                                                                   Vector<double> result,
-                                                                                   ConstVector<double> x) const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::extrapolatedRestriction(
+    int current_level, Vector<double> result, ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ - 1 && 0 <= current_level);
     if (!interpolation_)
@@ -62,9 +68,11 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedRestricti
                                                  result, x);
 }
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::FMGInterpolation(int current_level, Vector<double> result,
-                                                                            ConstVector<double> x) const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::FMGInterpolation(int current_level,
+                                                                                           Vector<double> result,
+                                                                                           ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ && 1 <= current_level);
     if (!interpolation_)
@@ -76,35 +84,41 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::FMGInterpolation(int 
 /* ---------------------------------------------------------------------- */
 /* Solution & Grid Access                                                 */
 /* ---------------------------------------------------------------------- */
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-Vector<double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::solution()
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+Vector<double> GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::solution()
 {
     int level_depth = 0;
     return levels_[level_depth].solution();
 }
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-ConstVector<double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::solution() const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+ConstVector<double> GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::solution() const
 {
     int level_depth = 0;
     return levels_[level_depth].solution();
 }
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-const PolarGrid& GMGPolar<DomainGeometry, DensityProfileCoefficients>::grid() const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+const PolarGrid& GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::grid() const
 {
     return grid_;
 }
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setSolution(const ExactSolution* exact_solution)
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::setSolution(
+    const ExactSolution* exact_solution)
 {
     exact_solution_ = exact_solution;
 }
 
 // Print timing breakdown for setup, smoothing, coarse solve, etc.
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printTimings() const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::printTimings() const
 {
     // t_setup_rhs_ is neither included in t_setup_total_ and t_solve_total_.
     std::cout << "\n------------------" << std::endl;
@@ -143,30 +157,35 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printTimings() const
 }
 
 // Number of iterations taken by last solve.
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-int GMGPolar<DomainGeometry, DensityProfileCoefficients>::numberOfIterations() const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+int GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::numberOfIterations() const
 {
     return number_of_iterations_;
 }
 
 // Mean residual reduction factor per iteration.
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-double GMGPolar<DomainGeometry, DensityProfileCoefficients>::meanResidualReductionFactor() const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+double GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::meanResidualReductionFactor() const
 {
     return mean_residual_reduction_factor_;
 }
 
 // Error norms (only available if exact solution was set).
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-std::optional<double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::exactErrorWeightedEuclidean() const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+std::optional<double>
+GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::exactErrorWeightedEuclidean() const
 {
     if (exact_solution_) {
         return exact_errors_.back().first;
     }
     return std::nullopt;
 }
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-std::optional<double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::exactErrorInfinity() const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+std::optional<double> GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::exactErrorInfinity() const
 {
     if (exact_solution_) {
         return exact_errors_.back().second;
@@ -177,9 +196,10 @@ std::optional<double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::exac
 /* ---------------------------------------------------------------------- */
 /* Visualization                                                          */
 /* ---------------------------------------------------------------------- */
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(const std::filesystem::path& file_path,
-                                                                      const PolarGrid& grid)
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::writeToVTK(
+    const std::filesystem::path& file_path, const PolarGrid& grid)
 {
     const auto filename = file_path.stem().string() + ".vtu";
 
@@ -237,8 +257,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(const std:
          << "</VTKFile>\n";
 }
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::writeToVTK(
     const std::filesystem::path& file_path, const Level<DomainGeometry, DensityProfileCoefficients>& level,
     ConstVector<double> grid_function)
 {

@@ -1,9 +1,11 @@
 #pragma once
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_F_Cycle(int level_depth, Vector<double> solution,
-                                                                             ConstVector<double> rhs,
-                                                                             Vector<double> residual)
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution ExactSolution>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>::multigrid_F_Cycle(int level_depth,
+                                                                                            Vector<double> solution,
+                                                                                            ConstVector<double> rhs,
+                                                                                            Vector<double> residual)
 {
     assert(0 <= level_depth && level_depth < number_of_levels_);
 
