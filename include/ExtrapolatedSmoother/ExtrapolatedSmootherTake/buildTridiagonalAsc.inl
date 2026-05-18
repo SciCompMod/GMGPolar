@@ -17,8 +17,9 @@ static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const BatchedTridiagonalS
 static KOKKOS_INLINE_FUNCTION void nodeBuildTridiagonalSolverMatricesCircleSection(
     const int i_r, const int i_theta, const PolarGrid& grid, const bool DirBC_Interior,
     const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
-    const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, ConstVector<double>& arr,
-    ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
+    const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, HostConstVector<double>& arr,
+    HostConstVector<double>& att, HostConstVector<double>& art, HostConstVector<double>& detDF,
+    HostConstVector<double>& coeff_beta)
 {
     using extrapolated_smoother_take::updateMatrixElement;
 
@@ -540,11 +541,11 @@ void ExtrapolatedSmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
 
-    ConstVector<double> arr        = level_cache.arr();
-    ConstVector<double> att        = level_cache.att();
-    ConstVector<double> art        = level_cache.art();
-    ConstVector<double> detDF      = level_cache.detDF();
-    ConstVector<double> coeff_beta = level_cache.coeff_beta();
+    HostConstVector<double> arr        = level_cache.arr();
+    HostConstVector<double> att        = level_cache.att();
+    HostConstVector<double> art        = level_cache.art();
+    HostConstVector<double> detDF      = level_cache.detDF();
+    HostConstVector<double> coeff_beta = level_cache.coeff_beta();
 
     const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver = circle_tridiagonal_solver_;
     const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver = radial_tridiagonal_solver_;
