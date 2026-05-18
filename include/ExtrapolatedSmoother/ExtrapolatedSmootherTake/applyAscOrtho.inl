@@ -4,12 +4,12 @@ namespace extrapolated_smoother_take
 {
 
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+nodeApplyAscOrthoCircleTake(const int i_r, const int i_theta, const PolarGrid& grid, const bool DirBC_Interior,
                             HostConstVector<double>& x, HostConstVector<double>& rhs, HostVector<double>& result,
                             HostConstVector<double>& arr, HostConstVector<double>& att, HostConstVector<double>& art,
                             HostConstVector<double>& detDF, HostConstVector<double>& coeff_beta)
 {
-    assert(i_r >= 0 && i_r <= grid.numberSmootherCircles());
+    KOKKOS_ASSERT(i_r >= 0 && i_r <= grid.numberSmootherCircles());
 
     /* -------------------- */
     /* Node in the interior */
@@ -18,15 +18,15 @@ nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const PolarGrid& grid, bool Di
         /* -------------------------- */
         /* Cyclic Tridiagonal Section */
         /* i_r % 2 == 1 */
-        double h1 = grid.radialSpacing(i_r - 1);
-        double h2 = grid.radialSpacing(i_r);
-        double k1 = grid.angularSpacing(i_theta - 1);
-        double k2 = grid.angularSpacing(i_theta);
+        const double h1 = grid.radialSpacing(i_r - 1);
+        const double h2 = grid.radialSpacing(i_r);
+        const double k1 = grid.angularSpacing(i_theta - 1);
+        const double k2 = grid.angularSpacing(i_theta);
 
-        double coeff1 = 0.5 * (k1 + k2) / h1;
-        double coeff2 = 0.5 * (k1 + k2) / h2;
-        double coeff3 = 0.5 * (h1 + h2) / k1;
-        double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff1 = 0.5 * (k1 + k2) / h1;
+        const double coeff2 = 0.5 * (k1 + k2) / h2;
+        const double coeff3 = 0.5 * (h1 + h2) / k1;
+        const double coeff4 = 0.5 * (h1 + h2) / k2;
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -130,15 +130,15 @@ nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const PolarGrid& grid, bool Di
             // h1 gets replaced with 2 * R0.
             // (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()/2)).
             // Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil.
-            double h1 = 2.0 * grid.radius(0);
-            double h2 = grid.radialSpacing(i_r);
-            double k1 = grid.angularSpacing(i_theta - 1);
-            double k2 = grid.angularSpacing(i_theta);
+            const double h1 = 2.0 * grid.radius(0);
+            const double h2 = grid.radialSpacing(i_r);
+            const double k1 = grid.angularSpacing(i_theta - 1);
+            const double k2 = grid.angularSpacing(i_theta);
 
-            double coeff1 = 0.5 * (k1 + k2) / h1;
-            double coeff2 = 0.5 * (k1 + k2) / h2;
-            double coeff3 = 0.5 * (h1 + h2) / k1;
-            double coeff4 = 0.5 * (h1 + h2) / k2;
+            const double coeff1 = 0.5 * (k1 + k2) / h1;
+            const double coeff2 = 0.5 * (k1 + k2) / h2;
+            const double coeff3 = 0.5 * (h1 + h2) / k1;
+            const double coeff4 = 0.5 * (h1 + h2) / k2;
 
             const int i_theta_M1     = grid.wrapThetaIndex(i_theta - 1);
             const int i_theta_P1     = grid.wrapThetaIndex(i_theta + 1);
@@ -198,15 +198,15 @@ nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& grid, bool Di
     /* Node in the interior */
     /* -------------------- */
     if (i_r > grid.numberSmootherCircles() && i_r < grid.nr() - 2) {
-        double h1 = grid.radialSpacing(i_r - 1);
-        double h2 = grid.radialSpacing(i_r);
-        double k1 = grid.angularSpacing(i_theta - 1);
-        double k2 = grid.angularSpacing(i_theta);
+        const double h1 = grid.radialSpacing(i_r - 1);
+        const double h2 = grid.radialSpacing(i_r);
+        const double k1 = grid.angularSpacing(i_theta - 1);
+        const double k2 = grid.angularSpacing(i_theta);
 
-        double coeff1 = 0.5 * (k1 + k2) / h1;
-        double coeff2 = 0.5 * (k1 + k2) / h2;
-        double coeff3 = 0.5 * (h1 + h2) / k1;
-        double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff1 = 0.5 * (k1 + k2) / h1;
+        const double coeff2 = 0.5 * (k1 + k2) / h2;
+        const double coeff3 = 0.5 * (h1 + h2) / k1;
+        const double coeff4 = 0.5 * (h1 + h2) / k2;
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -283,15 +283,15 @@ nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& grid, bool Di
         }
     }
     else if (i_r == grid.numberSmootherCircles()) {
-        double h1 = grid.radialSpacing(i_r - 1);
-        double h2 = grid.radialSpacing(i_r);
-        double k1 = grid.angularSpacing(i_theta - 1);
-        double k2 = grid.angularSpacing(i_theta);
+        const double h1 = grid.radialSpacing(i_r - 1);
+        const double h2 = grid.radialSpacing(i_r);
+        const double k1 = grid.angularSpacing(i_theta - 1);
+        const double k2 = grid.angularSpacing(i_theta);
 
-        double coeff1 = 0.5 * (k1 + k2) / h1;
-        double coeff2 = 0.5 * (k1 + k2) / h2;
-        double coeff3 = 0.5 * (h1 + h2) / k1;
-        double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff1 = 0.5 * (k1 + k2) / h1;
+        const double coeff2 = 0.5 * (k1 + k2) / h2;
+        const double coeff3 = 0.5 * (h1 + h2) / k1;
+        const double coeff4 = 0.5 * (h1 + h2) / k2;
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -361,17 +361,17 @@ nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& grid, bool Di
         }
     }
     else if (i_r == grid.nr() - 2) {
-        assert(i_r & 1);
+        KOKKOS_ASSERT(i_r & 1);
 
-        double h1 = grid.radialSpacing(i_r - 1);
-        double h2 = grid.radialSpacing(i_r);
-        double k1 = grid.angularSpacing(i_theta - 1);
-        double k2 = grid.angularSpacing(i_theta);
+        const double h1 = grid.radialSpacing(i_r - 1);
+        const double h2 = grid.radialSpacing(i_r);
+        const double k1 = grid.angularSpacing(i_theta - 1);
+        const double k2 = grid.angularSpacing(i_theta);
 
-        double coeff1 = 0.5 * (k1 + k2) / h1;
-        double coeff2 = 0.5 * (k1 + k2) / h2;
-        double coeff3 = 0.5 * (h1 + h2) / k1;
-        double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff1 = 0.5 * (k1 + k2) / h1;
+        const double coeff2 = 0.5 * (k1 + k2) / h2;
+        const double coeff3 = 0.5 * (h1 + h2) / k1;
+        const double coeff4 = 0.5 * (h1 + h2) / k2;
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -431,7 +431,7 @@ nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& grid, bool Di
         }
     }
     else if (i_r == grid.nr() - 1) {
-        assert(!(i_r & 1));
+        KOKKOS_ASSERT(!(i_r & 1));
 
         const int center = grid.index(i_r, i_theta);
 
@@ -471,7 +471,6 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(H
     const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
-    const int num_omp_threads         = ExtrapolatedSmoother<LevelCacheType>::num_omp_threads_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
