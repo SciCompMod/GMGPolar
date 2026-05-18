@@ -5,7 +5,7 @@
 /* ----------------------- */
 
 template <class LevelCacheType>
-void DirectSolverTake<LevelCacheType>::applySymmetryShiftInnerBoundary(Vector<double> x) const
+void DirectSolverTake<LevelCacheType>::applySymmetryShiftInnerBoundary(HostVector<double> x) const
 {
     const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
@@ -15,9 +15,9 @@ void DirectSolverTake<LevelCacheType>::applySymmetryShiftInnerBoundary(Vector<do
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
 
-    ConstVector<double> arr = level_cache.arr();
-    ConstVector<double> att = level_cache.att();
-    ConstVector<double> art = level_cache.art();
+    HostConstVector<double> arr = level_cache.arr();
+    HostConstVector<double> att = level_cache.att();
+    HostConstVector<double> art = level_cache.art();
 
     const int i_r    = 1;
     const int ntheta = grid.ntheta();
@@ -50,7 +50,7 @@ void DirectSolverTake<LevelCacheType>::applySymmetryShiftInnerBoundary(Vector<do
 }
 
 template <class LevelCacheType>
-void DirectSolverTake<LevelCacheType>::applySymmetryShiftOuterBoundary(Vector<double> x) const
+void DirectSolverTake<LevelCacheType>::applySymmetryShiftOuterBoundary(HostVector<double> x) const
 {
     const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
@@ -58,9 +58,9 @@ void DirectSolverTake<LevelCacheType>::applySymmetryShiftOuterBoundary(Vector<do
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
 
-    ConstVector<double> arr = level_cache.arr();
-    ConstVector<double> att = level_cache.att();
-    ConstVector<double> art = level_cache.art();
+    HostConstVector<double> arr = level_cache.arr();
+    HostConstVector<double> att = level_cache.att();
+    HostConstVector<double> art = level_cache.art();
 
     const int i_r    = grid.nr() - 2;
     const int ntheta = grid.ntheta();
@@ -93,7 +93,7 @@ void DirectSolverTake<LevelCacheType>::applySymmetryShiftOuterBoundary(Vector<do
 }
 
 template <class LevelCacheType>
-void DirectSolverTake<LevelCacheType>::applySymmetryShift(Vector<double> x) const
+void DirectSolverTake<LevelCacheType>::applySymmetryShift(HostVector<double> x) const
 {
     const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
     const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;
