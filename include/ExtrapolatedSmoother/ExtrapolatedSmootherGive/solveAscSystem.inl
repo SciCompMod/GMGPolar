@@ -1,13 +1,13 @@
 #pragma once
 
 template <class LevelCacheType>
-void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackCircleSection(Vector<double> x, Vector<double> temp)
+void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackCircleSection(HostVector<double> x, HostVector<double> temp)
 {
     const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
-    int start                     = 0;
-    int end                       = grid.numberCircularSmootherNodes();
-    Vector<double> circle_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
+    int start                         = 0;
+    int end                           = grid.numberCircularSmootherNodes();
+    HostVector<double> circle_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     bool is_inner_circle_black = grid.numberSmootherCircles() % 2 != 0;
 
@@ -24,7 +24,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackCircleSection(Vector<do
         circle_tridiagonal_solver_.solve_diagonal(circle_section, batch_offset, batch_stride);
 
         // Inner Boundary Solve
-        Vector<double> inner_boundary = Kokkos::subview(temp, Kokkos::make_pair(0, grid.ntheta()));
+        HostVector<double> inner_boundary = Kokkos::subview(temp, Kokkos::make_pair(0, grid.ntheta()));
         inner_boundary_solver_.solveInPlace(inner_boundary);
     }
 
@@ -44,13 +44,13 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackCircleSection(Vector<do
 }
 
 template <class LevelCacheType>
-void ExtrapolatedSmootherGive<LevelCacheType>::solveWhiteCircleSection(Vector<double> x, Vector<double> temp)
+void ExtrapolatedSmootherGive<LevelCacheType>::solveWhiteCircleSection(HostVector<double> x, HostVector<double> temp)
 {
     const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
-    int start                     = 0;
-    int end                       = grid.numberCircularSmootherNodes();
-    Vector<double> circle_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
+    int start                         = 0;
+    int end                           = grid.numberCircularSmootherNodes();
+    HostVector<double> circle_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     bool is_inner_circle_white = grid.numberSmootherCircles() % 2 == 0;
 
@@ -67,7 +67,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveWhiteCircleSection(Vector<do
         circle_tridiagonal_solver_.solve_diagonal(circle_section, batch_offset, batch_stride);
 
         // Inner Boundary Solve
-        Vector<double> inner_boundary = Kokkos::subview(temp, Kokkos::make_pair(0, grid.ntheta()));
+        HostVector<double> inner_boundary = Kokkos::subview(temp, Kokkos::make_pair(0, grid.ntheta()));
         inner_boundary_solver_.solveInPlace(inner_boundary);
     }
 
@@ -87,13 +87,13 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveWhiteCircleSection(Vector<do
 }
 
 template <class LevelCacheType>
-void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackRadialSection(Vector<double> x, Vector<double> temp)
+void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackRadialSection(HostVector<double> x, HostVector<double> temp)
 {
     const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
-    int start                     = grid.numberCircularSmootherNodes();
-    int end                       = grid.numberOfNodes();
-    Vector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
+    int start                         = grid.numberCircularSmootherNodes();
+    int end                           = grid.numberOfNodes();
+    HostVector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     // Diagonal Solve
     int batch_offset = 0;
@@ -117,13 +117,13 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackRadialSection(Vector<do
 }
 
 template <class LevelCacheType>
-void ExtrapolatedSmootherGive<LevelCacheType>::solveWhiteRadialSection(Vector<double> x, Vector<double> temp)
+void ExtrapolatedSmootherGive<LevelCacheType>::solveWhiteRadialSection(HostVector<double> x, HostVector<double> temp)
 {
     const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
-    int start                     = grid.numberCircularSmootherNodes();
-    int end                       = grid.numberOfNodes();
-    Vector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
+    int start                         = grid.numberCircularSmootherNodes();
+    int end                           = grid.numberOfNodes();
+    HostVector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     // Tridiagonal Solve
     int batch_offset = 1;

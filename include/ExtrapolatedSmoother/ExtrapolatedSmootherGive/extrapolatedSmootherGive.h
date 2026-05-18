@@ -68,7 +68,7 @@ public:
     // Parallel implementation using OpenMP:
     // Scedule every 2nd/4th line in parallel to avoid race conditions arising from the A-Give distribution.
     // Sceduling every 3rd line in parallel would also be possible, but is less natural for the 2 coloring.
-    void extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) override;
+    void extrapolatedSmoothing(HostVector<double> x, HostConstVector<double> rhs, HostVector<double> temp) override;
 
 private:
     /* ------------------- */
@@ -124,10 +124,14 @@ public: // Public is required as Cuda needs to be able to get the address of fun
 
     // Compute temp = f_sc − A_sc^ortho * u_sc^ortho   (precomputed right-hand side)
     // where x = u_sc and rhs = f_sc
-    void applyAscOrthoBlackCircleSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
-    void applyAscOrthoWhiteCircleSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
-    void applyAscOrthoBlackRadialSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
-    void applyAscOrthoWhiteRadialSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
+    void applyAscOrthoBlackCircleSection(HostConstVector<double> x, HostConstVector<double> rhs,
+                                         HostVector<double> temp);
+    void applyAscOrthoWhiteCircleSection(HostConstVector<double> x, HostConstVector<double> rhs,
+                                         HostVector<double> temp);
+    void applyAscOrthoBlackRadialSection(HostConstVector<double> x, HostConstVector<double> rhs,
+                                         HostVector<double> temp);
+    void applyAscOrthoWhiteRadialSection(HostConstVector<double> x, HostConstVector<double> rhs,
+                                         HostVector<double> temp);
 
     /* ----------------- */
     /* Line-wise solvers */
@@ -141,10 +145,10 @@ public: // Public is required as Cuda needs to be able to get the address of fun
     // where:
     //   s in {Circle, Radial}  denotes the smoother section type,
     //   c in {Black, White}    denotes the line coloring.
-    void solveBlackCircleSection(Vector<double> x, Vector<double> temp);
-    void solveWhiteCircleSection(Vector<double> x, Vector<double> temp);
-    void solveBlackRadialSection(Vector<double> x, Vector<double> temp);
-    void solveWhiteRadialSection(Vector<double> x, Vector<double> temp);
+    void solveBlackCircleSection(HostVector<double> x, HostVector<double> temp);
+    void solveWhiteCircleSection(HostVector<double> x, HostVector<double> temp);
+    void solveBlackRadialSection(HostVector<double> x, HostVector<double> temp);
+    void solveWhiteRadialSection(HostVector<double> x, HostVector<double> temp);
 };
 
 #include "extrapolatedSmootherGive.inl"

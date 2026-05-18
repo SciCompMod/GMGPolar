@@ -6,8 +6,8 @@ namespace extrapolated_smoother_give
 template <typename LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
 nodeApplyAscOrthoCircleGiveInside(const int i_r, const int i_theta, const PolarGrid& grid,
-                                  const LevelCacheType& level_cache, const bool DirBC_Interior, ConstVector<double>& x,
-                                  ConstVector<double>& rhs, Vector<double>& result)
+                                  const LevelCacheType& level_cache, const bool DirBC_Interior, HostConstVector<double>& x,
+                                  HostConstVector<double>& rhs, HostVector<double>& result)
 {
     KOKKOS_ASSERT(i_r >= 0 && i_r < grid.numberSmootherCircles());
 
@@ -198,8 +198,8 @@ nodeApplyAscOrthoCircleGiveInside(const int i_r, const int i_theta, const PolarG
 template <typename LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
 nodeApplyAscOrthoCircleGiveOutside(const int i_r, const int i_theta, const PolarGrid& grid,
-                                   const LevelCacheType& level_cache, const bool DirBC_Interior, ConstVector<double>& x,
-                                   ConstVector<double>& rhs, Vector<double>& result)
+                                   const LevelCacheType& level_cache, const bool DirBC_Interior, HostConstVector<double>& x,
+                                   HostConstVector<double>& rhs, HostVector<double>& result)
 {
     KOKKOS_ASSERT(i_r >= 0 && i_r <= grid.numberSmootherCircles());
 
@@ -365,8 +365,8 @@ nodeApplyAscOrthoCircleGiveOutside(const int i_r, const int i_theta, const Polar
 template <typename LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
 nodeApplyAscOrthoRadialGiveInside(const int i_r, const int i_theta, const PolarGrid& grid,
-                                  const LevelCacheType& level_cache, const bool DirBC_Interior, ConstVector<double>& x,
-                                  ConstVector<double>& rhs, Vector<double>& result)
+                                  const LevelCacheType& level_cache, const bool DirBC_Interior, HostConstVector<double>& x,
+                                  HostConstVector<double>& rhs, HostVector<double>& result)
 {
     KOKKOS_ASSERT(i_r >= grid.numberSmootherCircles() - 1 && i_r < grid.nr());
 
@@ -704,8 +704,8 @@ nodeApplyAscOrthoRadialGiveInside(const int i_r, const int i_theta, const PolarG
 template <typename LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
 nodeApplyAscOrthoRadialGiveOutside(const int i_r, const int i_theta, const PolarGrid& grid,
-                                   const LevelCacheType& level_cache, const bool DirBC_Interior, ConstVector<double>& x,
-                                   ConstVector<double>& rhs, Vector<double>& result)
+                                   const LevelCacheType& level_cache, const bool DirBC_Interior, HostConstVector<double>& x,
+                                   HostConstVector<double>& rhs, HostVector<double>& result)
 {
     KOKKOS_ASSERT(i_r >= grid.numberSmootherCircles() && i_r < grid.nr());
 
@@ -840,9 +840,9 @@ nodeApplyAscOrthoRadialGiveOutside(const int i_r, const int i_theta, const Polar
 } // namespace extrapolated_smoother_give
 
 template <class LevelCacheType>
-void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<double> x,
-                                                                               ConstVector<double> rhs,
-                                                                               Vector<double> temp)
+void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoBlackCircleSection(HostConstVector<double> x,
+                                                                               HostConstVector<double> rhs,
+                                                                               HostVector<double> temp)
 {
     using extrapolated_smoother_give::nodeApplyAscOrthoCircleGiveInside;
     using extrapolated_smoother_give::nodeApplyAscOrthoCircleGiveOutside;
@@ -924,9 +924,9 @@ void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoBlackCircleSection(C
 }
 
 template <class LevelCacheType>
-void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<double> x,
-                                                                               ConstVector<double> rhs,
-                                                                               Vector<double> temp)
+void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoWhiteCircleSection(HostConstVector<double> x,
+                                                                               HostConstVector<double> rhs,
+                                                                               HostVector<double> temp)
 {
     using extrapolated_smoother_give::nodeApplyAscOrthoCircleGiveInside;
     using extrapolated_smoother_give::nodeApplyAscOrthoCircleGiveOutside;
@@ -1009,9 +1009,9 @@ void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoWhiteCircleSection(C
 }
 
 template <class LevelCacheType>
-void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<double> x,
-                                                                               ConstVector<double> rhs,
-                                                                               Vector<double> temp)
+void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoBlackRadialSection(HostConstVector<double> x,
+                                                                               HostConstVector<double> rhs,
+                                                                               HostVector<double> temp)
 {
     using extrapolated_smoother_give::nodeApplyAscOrthoRadialGiveInside;
     using extrapolated_smoother_give::nodeApplyAscOrthoRadialGiveOutside;
@@ -1094,9 +1094,9 @@ void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoBlackRadialSection(C
 }
 
 template <class LevelCacheType>
-void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<double> x,
-                                                                               ConstVector<double> rhs,
-                                                                               Vector<double> temp)
+void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoWhiteRadialSection(HostConstVector<double> x,
+                                                                               HostConstVector<double> rhs,
+                                                                               HostVector<double> temp)
 {
     using extrapolated_smoother_give::nodeApplyAscOrthoRadialGiveInside;
     using extrapolated_smoother_give::nodeApplyAscOrthoRadialGiveOutside;

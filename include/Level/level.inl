@@ -41,49 +41,49 @@ Level<DomainGeometry, DensityProfileCoefficients>::levelCache() const
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-Vector<double> Level<DomainGeometry, DensityProfileCoefficients>::rhs()
+HostVector<double> Level<DomainGeometry, DensityProfileCoefficients>::rhs()
 {
     return rhs_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-ConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::rhs() const
+HostConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::rhs() const
 {
     return rhs_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-Vector<double> Level<DomainGeometry, DensityProfileCoefficients>::solution()
+HostVector<double> Level<DomainGeometry, DensityProfileCoefficients>::solution()
 {
     return solution_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-ConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::solution() const
+HostConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::solution() const
 {
     return solution_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-Vector<double> Level<DomainGeometry, DensityProfileCoefficients>::residual()
+HostVector<double> Level<DomainGeometry, DensityProfileCoefficients>::residual()
 {
     return residual_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-ConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::residual() const
+HostConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::residual() const
 {
     return residual_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-Vector<double> Level<DomainGeometry, DensityProfileCoefficients>::error_correction()
+HostVector<double> Level<DomainGeometry, DensityProfileCoefficients>::error_correction()
 {
     return error_correction_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-ConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::error_correction() const
+HostConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::error_correction() const
 {
     return error_correction_;
 }
@@ -107,16 +107,17 @@ void Level<DomainGeometry, DensityProfileCoefficients>::initializeResidual(
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void Level<DomainGeometry, DensityProfileCoefficients>::computeResidual(Vector<double> result, ConstVector<double> rhs,
-                                                                        ConstVector<double> x) const
+void Level<DomainGeometry, DensityProfileCoefficients>::computeResidual(HostVector<double> result,
+                                                                        HostConstVector<double> rhs,
+                                                                        HostConstVector<double> x) const
 {
     if (!op_residual_)
         throw std::runtime_error("Residual not initialized.");
     op_residual_->computeResidual(result, rhs, x);
 }
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void Level<DomainGeometry, DensityProfileCoefficients>::applySystemOperator(Vector<double> result,
-                                                                            ConstVector<double> x) const
+void Level<DomainGeometry, DensityProfileCoefficients>::applySystemOperator(HostVector<double> result,
+                                                                            HostConstVector<double> x) const
 {
     if (!op_residual_)
         throw std::runtime_error("Residual not initialized.");
@@ -143,7 +144,7 @@ void Level<DomainGeometry, DensityProfileCoefficients>::initializeDirectSolver(
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void Level<DomainGeometry, DensityProfileCoefficients>::directSolveInPlace(Vector<double> x) const
+void Level<DomainGeometry, DensityProfileCoefficients>::directSolveInPlace(HostVector<double> x) const
 {
     if (!op_directSolver_)
         throw std::runtime_error("Coarse Solver not initialized.");
@@ -169,8 +170,8 @@ void Level<DomainGeometry, DensityProfileCoefficients>::initializeSmoothing(
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void Level<DomainGeometry, DensityProfileCoefficients>::smoothing(Vector<double> x, ConstVector<double> rhs,
-                                                                  Vector<double> temp) const
+void Level<DomainGeometry, DensityProfileCoefficients>::smoothing(HostVector<double> x, HostConstVector<double> rhs,
+                                                                  HostVector<double> temp) const
 {
     if (!op_smoother_)
         throw std::runtime_error("Smoother not initialized.");
@@ -196,8 +197,9 @@ void Level<DomainGeometry, DensityProfileCoefficients>::initializeExtrapolatedSm
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void Level<DomainGeometry, DensityProfileCoefficients>::extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs,
-                                                                              Vector<double> temp) const
+void Level<DomainGeometry, DensityProfileCoefficients>::extrapolatedSmoothing(HostVector<double> x,
+                                                                              HostConstVector<double> rhs,
+                                                                              HostVector<double> temp) const
 {
     if (!op_extrapolated_smoother_)
         throw std::runtime_error("Extrapolated Smoother not initialized.");

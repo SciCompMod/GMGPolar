@@ -3,12 +3,11 @@
 namespace smoother_take
 {
 
-static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const PolarGrid& grid,
-                                                               bool DirBC_Interior, ConstVector<double>& x,
-                                                               ConstVector<double>& rhs, Vector<double>& result,
-                                                               ConstVector<double>& arr, ConstVector<double>& att,
-                                                               ConstVector<double>& art, ConstVector<double>& detDF,
-                                                               ConstVector<double>& coeff_beta)
+static KOKKOS_INLINE_FUNCTION void
+nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+                            HostConstVector<double>& x, HostConstVector<double>& rhs, HostVector<double>& result,
+                            HostConstVector<double>& arr, HostConstVector<double>& att, HostConstVector<double>& art,
+                            HostConstVector<double>& detDF, HostConstVector<double>& coeff_beta)
 {
     assert(i_r >= 0 && i_r < grid.numberSmootherCircles());
 
@@ -93,10 +92,11 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleTake(int i_r, int i_th
 }
 
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior, ConstVector<double>& x,
-                            ConstVector<double>& rhs, Vector<double>& result, ConstVector<double>& arr,
-                            const ConstVector<double>& att, ConstVector<double>& art, const ConstVector<double>& detDF,
-                            ConstVector<double>& coeff_beta)
+nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+                            HostConstVector<double>& x, HostConstVector<double>& rhs, HostVector<double>& result,
+                            HostConstVector<double>& arr, const HostConstVector<double>& att,
+                            HostConstVector<double>& art, const HostConstVector<double>& detDF,
+                            HostConstVector<double>& coeff_beta)
 {
     assert(i_r >= grid.numberSmootherCircles() && i_r < grid.nr());
     /* -------------------- */
@@ -216,8 +216,8 @@ nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& grid, bool Di
 } // namespace smoother_take
 
 template <class LevelCacheType>
-void SmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<double> x, ConstVector<double> rhs,
-                                                                   Vector<double> temp)
+void SmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(HostConstVector<double> x,
+                                                                   HostConstVector<double> rhs, HostVector<double> temp)
 {
     using smoother_take::nodeApplyAscOrthoCircleTake;
 
@@ -229,11 +229,11 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<d
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
 
-    ConstVector<double> arr        = level_cache.arr();
-    ConstVector<double> att        = level_cache.att();
-    ConstVector<double> art        = level_cache.art();
-    ConstVector<double> detDF      = level_cache.detDF();
-    ConstVector<double> coeff_beta = level_cache.coeff_beta();
+    HostConstVector<double> arr        = level_cache.arr();
+    HostConstVector<double> att        = level_cache.att();
+    HostConstVector<double> art        = level_cache.art();
+    HostConstVector<double> detDF      = level_cache.detDF();
+    HostConstVector<double> coeff_beta = level_cache.coeff_beta();
 
     /* The outer most circle next to the radial section is defined to be black. */
     const int start_black_circles = (grid.numberSmootherCircles() % 2 == 0) ? 1 : 0;
@@ -256,8 +256,8 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<d
 }
 
 template <class LevelCacheType>
-void SmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<double> x, ConstVector<double> rhs,
-                                                                   Vector<double> temp)
+void SmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(HostConstVector<double> x,
+                                                                   HostConstVector<double> rhs, HostVector<double> temp)
 {
     using smoother_take::nodeApplyAscOrthoCircleTake;
 
@@ -269,11 +269,11 @@ void SmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<d
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
 
-    ConstVector<double> arr        = level_cache.arr();
-    ConstVector<double> att        = level_cache.att();
-    ConstVector<double> art        = level_cache.art();
-    ConstVector<double> detDF      = level_cache.detDF();
-    ConstVector<double> coeff_beta = level_cache.coeff_beta();
+    HostConstVector<double> arr        = level_cache.arr();
+    HostConstVector<double> att        = level_cache.att();
+    HostConstVector<double> art        = level_cache.art();
+    HostConstVector<double> detDF      = level_cache.detDF();
+    HostConstVector<double> coeff_beta = level_cache.coeff_beta();
 
     /* The outer most circle next to the radial section is defined to be black. */
     const int start_white_circles = (grid.numberSmootherCircles() % 2 == 0) ? 0 : 1;
@@ -296,8 +296,8 @@ void SmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<d
 }
 
 template <class LevelCacheType>
-void SmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<double> x, ConstVector<double> rhs,
-                                                                   Vector<double> temp)
+void SmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(HostConstVector<double> x,
+                                                                   HostConstVector<double> rhs, HostVector<double> temp)
 {
     using smoother_take::nodeApplyAscOrthoRadialTake;
 
@@ -309,11 +309,11 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<d
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
 
-    ConstVector<double> arr        = level_cache.arr();
-    ConstVector<double> att        = level_cache.att();
-    ConstVector<double> art        = level_cache.art();
-    ConstVector<double> detDF      = level_cache.detDF();
-    ConstVector<double> coeff_beta = level_cache.coeff_beta();
+    HostConstVector<double> arr        = level_cache.arr();
+    HostConstVector<double> att        = level_cache.att();
+    HostConstVector<double> art        = level_cache.art();
+    HostConstVector<double> detDF      = level_cache.detDF();
+    HostConstVector<double> coeff_beta = level_cache.coeff_beta();
 
     assert(grid.ntheta() % 2 == 0);
     const int start_black_radials    = 0;
@@ -336,8 +336,8 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<d
 }
 
 template <class LevelCacheType>
-void SmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<double> x, ConstVector<double> rhs,
-                                                                   Vector<double> temp)
+void SmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(HostConstVector<double> x,
+                                                                   HostConstVector<double> rhs, HostVector<double> temp)
 {
     using smoother_take::nodeApplyAscOrthoRadialTake;
 
@@ -349,11 +349,11 @@ void SmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<d
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
 
-    ConstVector<double> arr        = level_cache.arr();
-    ConstVector<double> att        = level_cache.att();
-    ConstVector<double> art        = level_cache.art();
-    ConstVector<double> detDF      = level_cache.detDF();
-    ConstVector<double> coeff_beta = level_cache.coeff_beta();
+    HostConstVector<double> arr        = level_cache.arr();
+    HostConstVector<double> att        = level_cache.att();
+    HostConstVector<double> art        = level_cache.art();
+    HostConstVector<double> detDF      = level_cache.detDF();
+    HostConstVector<double> coeff_beta = level_cache.coeff_beta();
 
     assert(grid.ntheta() % 2 == 0);
     const int start_white_radials    = 1;
