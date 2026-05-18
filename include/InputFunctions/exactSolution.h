@@ -1,14 +1,11 @@
 #pragma once
 
-namespace gmgpolar
+namespace concepts
 {
 
-class ExactSolution
-{
-public:
-    ExactSolution()          = default;
-    virtual ~ExactSolution() = default;
-
-    virtual double exact_solution(double r, double theta) const = 0;
+template <typename T>
+concept ExactSolution = requires(const T solution, double r, double theta) {
+    { solution.exact_solution(r, theta) } -> std::convertible_to<double>;
 };
-} // namespace gmgpolar
+
+} // namespace concepts

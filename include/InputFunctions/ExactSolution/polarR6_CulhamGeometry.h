@@ -7,14 +7,14 @@
 namespace gmgpolar
 {
 
-class PolarR6_CulhamGeometry : public ExactSolution
+class PolarR6_CulhamGeometry
 {
 public:
     PolarR6_CulhamGeometry() = default;
     explicit PolarR6_CulhamGeometry(double Rmax);
     virtual ~PolarR6_CulhamGeometry() = default;
 
-    double exact_solution(double r, double theta) const override;
+    double exact_solution(double r, double theta) const;
 
 private:
     const double Rmax = 1.3;

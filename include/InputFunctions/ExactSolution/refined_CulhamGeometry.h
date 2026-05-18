@@ -7,14 +7,14 @@
 namespace gmgpolar
 {
 
-class Refined_CulhamGeometry : public ExactSolution
+class Refined_CulhamGeometry
 {
 public:
     Refined_CulhamGeometry() = default;
     explicit Refined_CulhamGeometry(double Rmax);
     virtual ~Refined_CulhamGeometry() = default;
 
-    double exact_solution(double r, double theta) const override;
+    double exact_solution(double r, double theta) const;
 
 private:
     const double Rmax = 1.3;

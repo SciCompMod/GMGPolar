@@ -7,14 +7,14 @@
 namespace gmgpolar
 {
 
-class CartesianR2_ShafranovGeometry : public ExactSolution
+class CartesianR2_ShafranovGeometry
 {
 public:
     CartesianR2_ShafranovGeometry() = default;
     explicit CartesianR2_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
     virtual ~CartesianR2_ShafranovGeometry() = default;
 
-    double exact_solution(double r, double theta) const override;
+    double exact_solution(double r, double theta) const;
 
 private:
     const double Rmax             = 1.3;

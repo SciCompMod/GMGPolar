@@ -7,14 +7,14 @@
 namespace gmgpolar
 {
 
-class PolarR6_ShafranovGeometry : public ExactSolution
+class PolarR6_ShafranovGeometry
 {
 public:
     PolarR6_ShafranovGeometry() = default;
     explicit PolarR6_ShafranovGeometry(double Rmax, double elongation_kappa, double shift_delta);
     virtual ~PolarR6_ShafranovGeometry() = default;
 
-    double exact_solution(double r, double theta) const override;
+    double exact_solution(double r, double theta) const;
 
 private:
     const double Rmax             = 1.3;

@@ -7,14 +7,14 @@
 namespace gmgpolar
 {
 
-class Refined_CircularGeometry : public ExactSolution
+class Refined_CircularGeometry
 {
 public:
     Refined_CircularGeometry() = default;
     explicit Refined_CircularGeometry(double Rmax);
     virtual ~Refined_CircularGeometry() = default;
 
-    double exact_solution(double r, double theta) const override;
+    double exact_solution(double r, double theta) const;
 
 private:
     const double Rmax = 1.3;

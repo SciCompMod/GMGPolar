@@ -7,7 +7,7 @@
 namespace gmgpolar
 {
 
-class CartesianR2_CzarnyGeometry : public ExactSolution
+class CartesianR2_CzarnyGeometry
 {
 public:
     explicit CartesianR2_CzarnyGeometry();
@@ -15,7 +15,7 @@ public:
 
     virtual ~CartesianR2_CzarnyGeometry() = default;
 
-    double exact_solution(double r, double theta) const override;
+    double exact_solution(double r, double theta) const;
 
 private:
     const double Rmax                         = 1.3;

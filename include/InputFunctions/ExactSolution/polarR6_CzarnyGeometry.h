@@ -7,7 +7,7 @@
 namespace gmgpolar
 {
 
-class PolarR6_CzarnyGeometry : public ExactSolution
+class PolarR6_CzarnyGeometry
 {
 public:
     explicit PolarR6_CzarnyGeometry();
@@ -15,7 +15,7 @@ public:
 
     virtual ~PolarR6_CzarnyGeometry() = default;
 
-    double exact_solution(double r, double theta) const override;
+    double exact_solution(double r, double theta) const;
 
 private:
     const double Rmax                         = 1.3;
