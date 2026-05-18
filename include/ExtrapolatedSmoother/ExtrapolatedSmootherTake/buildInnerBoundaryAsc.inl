@@ -119,7 +119,7 @@ nodeBuildInteriorBoundarySolverMatrix(const int i_theta, const PolarGrid& grid, 
             const double center_value = coeff5 * coeff_beta[center] * Kokkos::fabs(detDF[center]) +
                                         coeff1 * (arr[center] + arr[left]) + coeff2 * (arr[center] + arr[right]) +
                                         coeff3 * (att[center] + att[bottom]) + coeff4 * (att[center] + att[top]);
-            const double left_value   = -coeff1 * (arr[center] + arr[left]);
+            const double left_value = -coeff1 * (arr[center] + arr[left]);
 
             /* Fill matrix row of (i,j) */
             row = center_index;
