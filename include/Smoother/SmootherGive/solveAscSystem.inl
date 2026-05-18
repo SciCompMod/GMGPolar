@@ -6,8 +6,8 @@ void SmootherGive<LevelCacheType>::solveBlackCircleSection(HostVector<double> x,
     const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
     const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
-    const int start               = 0;
-    const int end                 = grid.numberCircularSmootherNodes();
+    const int start                   = 0;
+    const int end                     = grid.numberCircularSmootherNodes();
     HostVector<double> circle_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     const bool is_inner_circle_black = grid.numberSmootherCircles() % 2 != 0;
@@ -47,8 +47,8 @@ void SmootherGive<LevelCacheType>::solveWhiteCircleSection(HostVector<double> x,
     const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
     const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
-    const int start               = 0;
-    const int end                 = grid.numberCircularSmootherNodes();
+    const int start                   = 0;
+    const int end                     = grid.numberCircularSmootherNodes();
     HostVector<double> circle_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     const bool is_inner_circle_white = grid.numberSmootherCircles() % 2 == 0;
@@ -88,8 +88,8 @@ void SmootherGive<LevelCacheType>::solveBlackRadialSection(HostVector<double> x,
     const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
     const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
-    const int start               = grid.numberCircularSmootherNodes();
-    const int end                 = grid.numberOfNodes();
+    const int start                   = grid.numberCircularSmootherNodes();
+    const int end                     = grid.numberOfNodes();
     HostVector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     // Tridiagonal Solve
@@ -122,8 +122,8 @@ void SmootherGive<LevelCacheType>::solveWhiteRadialSection(HostVector<double> x,
     const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
     const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
-    const int start               = grid.numberCircularSmootherNodes();
-    const int end                 = grid.numberOfNodes();
+    const int start                   = grid.numberCircularSmootherNodes();
+    const int end                     = grid.numberOfNodes();
     HostVector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     // Tridiagonal Solve

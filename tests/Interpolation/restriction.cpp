@@ -8,8 +8,8 @@
 using namespace gmgpolar;
 
 // Helper that computes the mathematically expected restriction value
-static double expected_restriction_value(const PolarGrid& fine, const PolarGrid& coarse, HostConstVector<double> fine_vals,
-                                         int i_r_coarse, int i_theta_coarse)
+static double expected_restriction_value(const PolarGrid& fine, const PolarGrid& coarse,
+                                         HostConstVector<double> fine_vals, int i_r_coarse, int i_theta_coarse)
 {
     int i_r     = i_r_coarse * 2;
     int i_theta = i_theta_coarse * 2;

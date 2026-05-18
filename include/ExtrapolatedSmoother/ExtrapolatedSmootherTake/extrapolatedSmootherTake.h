@@ -159,8 +159,9 @@ public:
     nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                        const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
                                        const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver,
-                                       HostConstVector<double>& arr, HostConstVector<double>& att, HostConstVector<double>& art,
-                                       HostConstVector<double>& detDF, HostConstVector<double>& coeff_beta);
+                                       HostConstVector<double>& arr, HostConstVector<double>& att,
+                                       HostConstVector<double>& art, HostConstVector<double>& detDF,
+                                       HostConstVector<double>& coeff_beta);
 
     // Build the solver matrix for the interior boundary (i_r = 0) which is non-tridiagonal due to across-origin coupling.
     InnerBoundaryMatrix buildInteriorBoundarySolverMatrix();
@@ -178,10 +179,14 @@ public:
 public:
     // Compute temp = f_sc − A_sc^ortho * u_sc^ortho   (precomputed right-hand side)
     // where x = u_sc and rhs = f_sc
-    void applyAscOrthoBlackCircleSection(HostConstVector<double> x, HostConstVector<double> rhs, HostVector<double> temp);
-    void applyAscOrthoWhiteCircleSection(HostConstVector<double> x, HostConstVector<double> rhs, HostVector<double> temp);
-    void applyAscOrthoBlackRadialSection(HostConstVector<double> x, HostConstVector<double> rhs, HostVector<double> temp);
-    void applyAscOrthoWhiteRadialSection(HostConstVector<double> x, HostConstVector<double> rhs, HostVector<double> temp);
+    void applyAscOrthoBlackCircleSection(HostConstVector<double> x, HostConstVector<double> rhs,
+                                         HostVector<double> temp);
+    void applyAscOrthoWhiteCircleSection(HostConstVector<double> x, HostConstVector<double> rhs,
+                                         HostVector<double> temp);
+    void applyAscOrthoBlackRadialSection(HostConstVector<double> x, HostConstVector<double> rhs,
+                                         HostVector<double> temp);
+    void applyAscOrthoWhiteRadialSection(HostConstVector<double> x, HostConstVector<double> rhs,
+                                         HostVector<double> temp);
 
     /* ----------------- */
     /* Line-wise solvers */

@@ -117,10 +117,14 @@ public: // Public is required as Cuda needs to be able to get the address of fun
 
     // Compute temp = f_sc − A_sc^ortho * u_sc^ortho   (precomputed right-hand side)
     // where x = u_sc and rhs = f_sc
-    void applyAscOrthoBlackCircleSection(HostConstVector<double> x, HostConstVector<double> rhs, HostVector<double> temp);
-    void applyAscOrthoWhiteCircleSection(HostConstVector<double> x, HostConstVector<double> rhs, HostVector<double> temp);
-    void applyAscOrthoBlackRadialSection(HostConstVector<double> x, HostConstVector<double> rhs, HostVector<double> temp);
-    void applyAscOrthoWhiteRadialSection(HostConstVector<double> x, HostConstVector<double> rhs, HostVector<double> temp);
+    void applyAscOrthoBlackCircleSection(HostConstVector<double> x, HostConstVector<double> rhs,
+                                         HostVector<double> temp);
+    void applyAscOrthoWhiteCircleSection(HostConstVector<double> x, HostConstVector<double> rhs,
+                                         HostVector<double> temp);
+    void applyAscOrthoBlackRadialSection(HostConstVector<double> x, HostConstVector<double> rhs,
+                                         HostVector<double> temp);
+    void applyAscOrthoWhiteRadialSection(HostConstVector<double> x, HostConstVector<double> rhs,
+                                         HostVector<double> temp);
 
     /* ----------------- */
     /* Line-wise solvers */

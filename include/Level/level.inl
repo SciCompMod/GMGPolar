@@ -107,7 +107,8 @@ void Level<DomainGeometry, DensityProfileCoefficients>::initializeResidual(
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void Level<DomainGeometry, DensityProfileCoefficients>::computeResidual(HostVector<double> result, HostConstVector<double> rhs,
+void Level<DomainGeometry, DensityProfileCoefficients>::computeResidual(HostVector<double> result,
+                                                                        HostConstVector<double> rhs,
                                                                         HostConstVector<double> x) const
 {
     if (!op_residual_)
@@ -196,7 +197,8 @@ void Level<DomainGeometry, DensityProfileCoefficients>::initializeExtrapolatedSm
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void Level<DomainGeometry, DensityProfileCoefficients>::extrapolatedSmoothing(HostVector<double> x, HostConstVector<double> rhs,
+void Level<DomainGeometry, DensityProfileCoefficients>::extrapolatedSmoothing(HostVector<double> x,
+                                                                              HostConstVector<double> rhs,
                                                                               HostVector<double> temp) const
 {
     if (!op_extrapolated_smoother_)

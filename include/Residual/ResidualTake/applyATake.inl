@@ -7,7 +7,8 @@ static KOKKOS_INLINE_FUNCTION void node_apply_a_take(const int i_r, const int i_
                                                      bool DirBC_Interior, HostVector<double>& result,
                                                      HostConstVector<double>& x, HostConstVector<double>& arr,
                                                      HostConstVector<double>& att, HostConstVector<double>& art,
-                                                     HostConstVector<double>& detDF, HostConstVector<double>& coeff_beta)
+                                                     HostConstVector<double>& detDF,
+                                                     HostConstVector<double>& coeff_beta)
 {
     const int center = grid.index(i_r, i_theta);
 

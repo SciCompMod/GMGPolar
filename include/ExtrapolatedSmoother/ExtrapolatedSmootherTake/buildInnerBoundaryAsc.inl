@@ -27,7 +27,8 @@ static inline void update_CSR_COO_MatrixElement(SparseMatrixCSR<double, Kokkos::
 template <class LevelCacheType>
 void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildInteriorBoundarySolverMatrix(
     int i_theta, const PolarGrid& grid, bool DirBC_Interior, InnerBoundaryMatrix& matrix, HostConstVector<double>& arr,
-    HostConstVector<double>& att, HostConstVector<double>& art, HostConstVector<double>& detDF, HostConstVector<double>& coeff_beta)
+    HostConstVector<double>& att, HostConstVector<double>& art, HostConstVector<double>& detDF,
+    HostConstVector<double>& coeff_beta)
 {
     using extrapolated_smoother_take::update_CSR_COO_MatrixElement;
 

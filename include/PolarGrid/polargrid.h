@@ -29,7 +29,8 @@ public:
     explicit PolarGrid() = default;
 
     // Constructor to initialize grid using kokkos views of radii and angles.
-    PolarGrid(HostVector<double> radii, HostVector<double> angles, std::optional<double> splitting_radius = std::nullopt);
+    PolarGrid(HostVector<double> radii, HostVector<double> angles,
+              std::optional<double> splitting_radius = std::nullopt);
     // Constructor to initialize grid using std::vectors of radii and angles.
     PolarGrid(std::vector<double> radii, std::vector<double> angles,
               std::optional<double> splitting_radius = std::nullopt);
@@ -136,7 +137,7 @@ private:
     // Help constrcut radii_ when an anisotropic radial division is requested
     // Implementation in src/PolarGrid/anisotropic_division.cpp
     HostVector<double> RadialAnisotropicDivision(double R0, double R, const int nr_exp, double refinement_radius,
-                                             const int anisotropic_factor) const;
+                                                 const int anisotropic_factor) const;
 };
 
 // ---------------------------------------------------- //

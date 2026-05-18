@@ -897,7 +897,8 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialGive(int i_r, int i_th
 template <class LevelCacheType>
 void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoCircleSection(int i_r, SmootherColor smoother_color,
                                                                           HostConstVector<double> x,
-                                                                          HostConstVector<double> rhs, HostVector<double> temp)
+                                                                          HostConstVector<double> rhs,
+                                                                          HostVector<double> temp)
 {
     using extrapolated_smoother_give::nodeApplyAscOrthoCircleGive;
 
@@ -925,7 +926,8 @@ void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoCircleSection(int i_
 template <class LevelCacheType>
 void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoRadialSection(int i_theta, SmootherColor smoother_color,
                                                                           HostConstVector<double> x,
-                                                                          HostConstVector<double> rhs, HostVector<double> temp)
+                                                                          HostConstVector<double> rhs,
+                                                                          HostVector<double> temp)
 {
     using extrapolated_smoother_give::nodeApplyAscOrthoRadialGive;
 

@@ -25,11 +25,10 @@ static inline void updateMatrixElement(SparseMatrixCSR<double, Kokkos::HostSpace
 } // namespace direct_solver_coo_mumps_take
 
 template <class LevelCacheType>
-void DirectSolverTake<LevelCacheType>::nodeBuildSolverMatrixTake(int i_r, int i_theta, const PolarGrid& grid,
-                                                                 bool DirBC_Interior, SystemMatrix& solver_matrix,
-                                                                 HostConstVector<double>& arr, HostConstVector<double>& att,
-                                                                 HostConstVector<double>& art, HostConstVector<double>& detDF,
-                                                                 HostConstVector<double>& coeff_beta)
+void DirectSolverTake<LevelCacheType>::nodeBuildSolverMatrixTake(
+    int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior, SystemMatrix& solver_matrix,
+    HostConstVector<double>& arr, HostConstVector<double>& att, HostConstVector<double>& art,
+    HostConstVector<double>& detDF, HostConstVector<double>& coeff_beta)
 {
     using direct_solver_coo_mumps_take::updateMatrixElement;
     int ptr, offset;

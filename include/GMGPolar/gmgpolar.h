@@ -180,9 +180,12 @@ private:
 
     /* ------------------- */
     /* Multigrid Functions */
-    void multigrid_V_Cycle(int level_depth, HostVector<double> solution, HostConstVector<double> rhs, HostVector<double> residual);
-    void multigrid_W_Cycle(int level_depth, HostVector<double> solution, HostConstVector<double> rhs, HostVector<double> residual);
-    void multigrid_F_Cycle(int level_depth, HostVector<double> solution, HostConstVector<double> rhs, HostVector<double> residual);
+    void multigrid_V_Cycle(int level_depth, HostVector<double> solution, HostConstVector<double> rhs,
+                           HostVector<double> residual);
+    void multigrid_W_Cycle(int level_depth, HostVector<double> solution, HostConstVector<double> rhs,
+                           HostVector<double> residual);
+    void multigrid_F_Cycle(int level_depth, HostVector<double> solution, HostConstVector<double> rhs,
+                           HostVector<double> residual);
     void extrapolated_multigrid_V_Cycle(int level_depth, HostVector<double> solution, HostConstVector<double> rhs,
                                         HostVector<double> residual);
     void extrapolated_multigrid_W_Cycle(int level_depth, HostVector<double> solution, HostConstVector<double> rhs,
@@ -203,7 +206,8 @@ private:
     /* Visualization */
     void writeToVTK(const std::filesystem::path& file_path, const PolarGrid& grid);
     void writeToVTK(const std::filesystem::path& file_path,
-                    const Level<DomainGeometry, DensityProfileCoefficients>& level, HostConstVector<double> grid_function);
+                    const Level<DomainGeometry, DensityProfileCoefficients>& level,
+                    HostConstVector<double> grid_function);
 };
 
 #include "utils.h"

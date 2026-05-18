@@ -6,8 +6,8 @@ void SmootherTake<LevelCacheType>::solveBlackCircleSection(HostVector<double> x,
     const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
     const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
-    int start                     = 0;
-    int end                       = grid.numberCircularSmootherNodes();
+    int start                         = 0;
+    int end                           = grid.numberCircularSmootherNodes();
     HostVector<double> circle_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     bool is_inner_circle_black = grid.numberSmootherCircles() % 2 != 0;
@@ -42,8 +42,8 @@ void SmootherTake<LevelCacheType>::solveWhiteCircleSection(HostVector<double> x,
     const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
     const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
-    int start                     = 0;
-    int end                       = grid.numberCircularSmootherNodes();
+    int start                         = 0;
+    int end                           = grid.numberCircularSmootherNodes();
     HostVector<double> circle_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     bool is_inner_circle_white = grid.numberSmootherCircles() % 2 == 0;
@@ -78,8 +78,8 @@ void SmootherTake<LevelCacheType>::solveBlackRadialSection(HostVector<double> x,
     const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
     const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
-    int start                     = grid.numberCircularSmootherNodes();
-    int end                       = grid.numberOfNodes();
+    int start                         = grid.numberCircularSmootherNodes();
+    int end                           = grid.numberOfNodes();
     HostVector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     int batch_offset = 0;
@@ -108,8 +108,8 @@ void SmootherTake<LevelCacheType>::solveWhiteRadialSection(HostVector<double> x,
     const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
     const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
-    int start                     = grid.numberCircularSmootherNodes();
-    int end                       = grid.numberOfNodes();
+    int start                         = grid.numberCircularSmootherNodes();
+    int end                           = grid.numberOfNodes();
     HostVector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     int batch_offset = 1;

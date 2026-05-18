@@ -3,12 +3,11 @@
 namespace smoother_take
 {
 
-static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const PolarGrid& grid,
-                                                               bool DirBC_Interior, HostConstVector<double>& x,
-                                                               HostConstVector<double>& rhs, HostVector<double>& result,
-                                                               HostConstVector<double>& arr, HostConstVector<double>& att,
-                                                               HostConstVector<double>& art, HostConstVector<double>& detDF,
-                                                               HostConstVector<double>& coeff_beta)
+static KOKKOS_INLINE_FUNCTION void
+nodeApplyAscOrthoCircleTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+                            HostConstVector<double>& x, HostConstVector<double>& rhs, HostVector<double>& result,
+                            HostConstVector<double>& arr, HostConstVector<double>& att, HostConstVector<double>& art,
+                            HostConstVector<double>& detDF, HostConstVector<double>& coeff_beta)
 {
     assert(i_r >= 0 && i_r < grid.numberSmootherCircles());
 
@@ -93,9 +92,10 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleTake(int i_r, int i_th
 }
 
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior, HostConstVector<double>& x,
-                            HostConstVector<double>& rhs, HostVector<double>& result, HostConstVector<double>& arr,
-                            const HostConstVector<double>& att, HostConstVector<double>& art, const HostConstVector<double>& detDF,
+nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+                            HostConstVector<double>& x, HostConstVector<double>& rhs, HostVector<double>& result,
+                            HostConstVector<double>& arr, const HostConstVector<double>& att,
+                            HostConstVector<double>& art, const HostConstVector<double>& detDF,
                             HostConstVector<double>& coeff_beta)
 {
     assert(i_r >= grid.numberSmootherCircles() && i_r < grid.nr());
@@ -216,8 +216,8 @@ nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& grid, bool Di
 } // namespace smoother_take
 
 template <class LevelCacheType>
-void SmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(HostConstVector<double> x, HostConstVector<double> rhs,
-                                                                   HostVector<double> temp)
+void SmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(HostConstVector<double> x,
+                                                                   HostConstVector<double> rhs, HostVector<double> temp)
 {
     using smoother_take::nodeApplyAscOrthoCircleTake;
 
@@ -256,8 +256,8 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(HostConstVect
 }
 
 template <class LevelCacheType>
-void SmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(HostConstVector<double> x, HostConstVector<double> rhs,
-                                                                   HostVector<double> temp)
+void SmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(HostConstVector<double> x,
+                                                                   HostConstVector<double> rhs, HostVector<double> temp)
 {
     using smoother_take::nodeApplyAscOrthoCircleTake;
 
@@ -296,8 +296,8 @@ void SmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(HostConstVect
 }
 
 template <class LevelCacheType>
-void SmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(HostConstVector<double> x, HostConstVector<double> rhs,
-                                                                   HostVector<double> temp)
+void SmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(HostConstVector<double> x,
+                                                                   HostConstVector<double> rhs, HostVector<double> temp)
 {
     using smoother_take::nodeApplyAscOrthoRadialTake;
 
@@ -336,8 +336,8 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(HostConstVect
 }
 
 template <class LevelCacheType>
-void SmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(HostConstVector<double> x, HostConstVector<double> rhs,
-                                                                   HostVector<double> temp)
+void SmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(HostConstVector<double> x,
+                                                                   HostConstVector<double> rhs, HostVector<double> temp)
 {
     using smoother_take::nodeApplyAscOrthoRadialTake;
 

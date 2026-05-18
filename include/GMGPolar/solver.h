@@ -327,8 +327,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
         }
 
         // alpha = (r^T * z) / (p^T * A*p)
-        double alpha =
-            r_z / dot_product(HostConstVector<double>(pcg_search_direction_), HostConstVector<double>(level.residual()));
+        double alpha = r_z / dot_product(HostConstVector<double>(pcg_search_direction_),
+                                         HostConstVector<double>(level.residual()));
 
         // x += alpha * p
         linear_combination(pcg_solution_, 1.0, HostConstVector<double>(pcg_search_direction_), alpha);
@@ -583,8 +583,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::evaluateExactError(
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::computeExactError(
-    Level<DomainGeometry, DensityProfileCoefficients>& level, HostConstVector<double> solution, HostVector<double> error,
-    const ExactSolution& exact_solution)
+    Level<DomainGeometry, DensityProfileCoefficients>& level, HostConstVector<double> solution,
+    HostVector<double> error, const ExactSolution& exact_solution)
 {
     const PolarGrid& grid                                                    = level.grid();
     const LevelCache<DomainGeometry, DensityProfileCoefficients>& levelCache = level.levelCache();
@@ -613,7 +613,7 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
             }
         }
     }
-    HostConstVector<double> c_error     = error;
+    HostConstVector<double> c_error = error;
     double weighted_euclidean_error = l2_norm(c_error) / std::sqrt(grid.numberOfNodes());
     double infinity_error           = infinity_norm(c_error);
 

@@ -63,7 +63,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedRestricti
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::FMGInterpolation(int current_level, HostVector<double> result,
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::FMGInterpolation(int current_level,
+                                                                            HostVector<double> result,
                                                                             HostConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ && 1 <= current_level);

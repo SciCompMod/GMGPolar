@@ -21,7 +21,8 @@ KOKKOS_FUNCTION void ExtrapolatedSmootherTake<LevelCacheType>::nodeBuildTridiago
     int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
     const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
     const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, HostConstVector<double>& arr,
-    HostConstVector<double>& att, HostConstVector<double>& art, HostConstVector<double>& detDF, HostConstVector<double>& coeff_beta)
+    HostConstVector<double>& att, HostConstVector<double>& art, HostConstVector<double>& detDF,
+    HostConstVector<double>& coeff_beta)
 {
     using extrapolated_smoother_take::updateMatrixElement;
 

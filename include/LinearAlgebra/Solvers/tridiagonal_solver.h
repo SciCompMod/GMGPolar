@@ -92,7 +92,7 @@ public:
     void setup()
     {
         // Create local copies for lambda capture
-        int matrix_dimension    = matrix_dimension_;
+        int matrix_dimension        = matrix_dimension_;
         HostVector<T> main_diagonal = main_diagonal_;
         HostVector<T> sub_diagonal  = sub_diagonal_;
         HostVector<T> gamma         = gamma_;
@@ -162,7 +162,7 @@ public:
         int effective_batch_count = (batch_count_ - batch_offset + batch_stride - 1) / batch_stride;
 
         // Create local copies for lambda capture
-        int matrix_dimension    = matrix_dimension_;
+        int matrix_dimension        = matrix_dimension_;
         HostVector<T> main_diagonal = main_diagonal_;
         HostVector<T> sub_diagonal  = sub_diagonal_;
         HostVector<T> buffer        = buffer_;
@@ -265,7 +265,7 @@ public:
         int effective_batch_count = (batch_count_ - batch_offset + batch_stride - 1) / batch_stride;
 
         // Create local copies for lambda capture
-        int matrix_dimension    = matrix_dimension_;
+        int matrix_dimension        = matrix_dimension_;
         HostVector<T> main_diagonal = main_diagonal_;
         HostVector<T> gamma         = gamma_;
 

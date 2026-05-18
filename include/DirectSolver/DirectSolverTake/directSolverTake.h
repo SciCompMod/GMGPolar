@@ -89,9 +89,9 @@ private:
     int getStencilSize(int global_index) const;
 
     void nodeBuildSolverMatrixTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                   SystemMatrix& solver_matrix, HostConstVector<double>& arr, HostConstVector<double>& att,
-                                   HostConstVector<double>& art, HostConstVector<double>& detDF,
-                                   HostConstVector<double>& coeff_beta);
+                                   SystemMatrix& solver_matrix, HostConstVector<double>& arr,
+                                   HostConstVector<double>& att, HostConstVector<double>& art,
+                                   HostConstVector<double>& detDF, HostConstVector<double>& coeff_beta);
 };
 
 #include "applySymmetryShift.inl"
