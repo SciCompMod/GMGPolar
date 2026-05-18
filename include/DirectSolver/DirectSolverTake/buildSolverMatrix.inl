@@ -25,11 +25,10 @@ static inline void updateMatrixElement(SparseMatrixCSR<double, Kokkos::HostSpace
 } // namespace direct_solver_coo_mumps_take
 
 template <class LevelCacheType>
-void DirectSolverTake<LevelCacheType>::nodeBuildSolverMatrixTake(int i_r, int i_theta, const PolarGrid& grid,
-                                                                 bool DirBC_Interior, SystemMatrix& solver_matrix,
-                                                                 ConstVector<double>& arr, ConstVector<double>& att,
-                                                                 ConstVector<double>& art, ConstVector<double>& detDF,
-                                                                 ConstVector<double>& coeff_beta)
+void DirectSolverTake<LevelCacheType>::nodeBuildSolverMatrixTake(
+    int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior, SystemMatrix& solver_matrix,
+    HostConstVector<double>& arr, HostConstVector<double>& att, HostConstVector<double>& art,
+    HostConstVector<double>& detDF, HostConstVector<double>& coeff_beta)
 {
     using direct_solver_coo_mumps_take::updateMatrixElement;
     int ptr, offset;
@@ -495,11 +494,11 @@ typename DirectSolverTake<LevelCacheType>::SystemMatrix DirectSolverTake<LevelCa
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
 
-    ConstVector<double> arr        = level_cache.arr();
-    ConstVector<double> att        = level_cache.att();
-    ConstVector<double> art        = level_cache.art();
-    ConstVector<double> detDF      = level_cache.detDF();
-    ConstVector<double> coeff_beta = level_cache.coeff_beta();
+    HostConstVector<double> arr        = level_cache.arr();
+    HostConstVector<double> att        = level_cache.att();
+    HostConstVector<double> art        = level_cache.art();
+    HostConstVector<double> detDF      = level_cache.detDF();
+    HostConstVector<double> coeff_beta = level_cache.coeff_beta();
 
 #pragma omp parallel num_threads(num_omp_threads)
     {

@@ -45,7 +45,7 @@ TEST(BatchedTridiagonalSolvers, non_cyclic_tridiagonal_n_4)
     solver.set_main_diagonal(3,2, 9.0); solver.set_sub_diagonal(3,2, 3.0);
     solver.set_main_diagonal(3,3, 11.0);
 
-    Vector<double> rhs("rhs", matrix_dimension * batch_count);
+    HostVector<double> rhs("rhs", matrix_dimension * batch_count);
 
     // Initialize RHS for each system
     rhs(0) = 1.0; rhs(1) = 2.0; rhs(2) = 3.0; rhs(3) = 4.0;
@@ -124,7 +124,7 @@ TEST(BatchedTridiagonalSolvers, cyclic_tridiagonal_n_4)
     solver.set_main_diagonal(3,2, 9.0); solver.set_sub_diagonal(3,2, 3.0);
     solver.set_main_diagonal(3,3, 11.0); solver.set_cyclic_corner(3, -4.0);
 
-    Vector<double> rhs("rhs", matrix_dimension * batch_count);
+    HostVector<double> rhs("rhs", matrix_dimension * batch_count);
 
     // Initialize RHS for each system
     rhs(0) = 1.0; rhs(1) = 2.0; rhs(2) = 3.0; rhs(3) = 4.0;
@@ -194,7 +194,7 @@ TEST(BatchedTridiagonalSolvers, non_cyclic_diagonal_n_4)
     solver.set_main_diagonal(3,2, 9.0);
     solver.set_main_diagonal(3,3, 11.0);
 
-    Vector<double> rhs("rhs", matrix_dimension * batch_count);
+    HostVector<double> rhs("rhs", matrix_dimension * batch_count);
 
     // Initialize RHS for each system
     rhs(0) = 1.0; rhs(1) = 2.0; rhs(2) = 3.0; rhs(3) = 4.0;
@@ -264,7 +264,7 @@ TEST(BatchedTridiagonalSolvers, cyclic_diagonal_n_4)
     solver.set_main_diagonal(3,2, 9.0);
     solver.set_main_diagonal(3,3, 11.0);
 
-    Vector<double> rhs("rhs", matrix_dimension * batch_count);
+    HostVector<double> rhs("rhs", matrix_dimension * batch_count);
 
     // Initialize RHS for each system
     rhs(0) = 1.0; rhs(1) = 2.0; rhs(2) = 3.0; rhs(3) = 4.0;

@@ -29,9 +29,9 @@ update_CSR_COO_MatrixElement(const SparseMatrixCSR<double, Kokkos::HostSpace>& m
 template <typename InnerBoundaryMatrix>
 static KOKKOS_INLINE_FUNCTION void
 nodeBuildInteriorBoundarySolverMatrix(const int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                      const InnerBoundaryMatrix& matrix, ConstVector<double>& arr,
-                                      ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF,
-                                      ConstVector<double>& coeff_beta)
+                                      const InnerBoundaryMatrix& matrix, HostConstVector<double>& arr,
+                                      HostConstVector<double>& att, HostConstVector<double>& art, HostConstVector<double>& detDF,
+                                      HostConstVector<double>& coeff_beta)
 {
     using smoother_take::getCircleAscIndex;
     using smoother_take::getStencil;
@@ -175,11 +175,11 @@ SmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
 
-    ConstVector<double> arr        = level_cache.arr();
-    ConstVector<double> att        = level_cache.att();
-    ConstVector<double> art        = level_cache.art();
-    ConstVector<double> detDF      = level_cache.detDF();
-    ConstVector<double> coeff_beta = level_cache.coeff_beta();
+    HostConstVector<double> arr        = level_cache.arr();
+    HostConstVector<double> att        = level_cache.att();
+    HostConstVector<double> art        = level_cache.art();
+    HostConstVector<double> detDF      = level_cache.detDF();
+    HostConstVector<double> coeff_beta = level_cache.coeff_beta();
 
     Kokkos::parallel_for(
         "SmootherTake: BuildInnerBoundaryMatrix", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, ntheta),
