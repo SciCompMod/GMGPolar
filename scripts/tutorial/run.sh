@@ -25,7 +25,7 @@ stencilDistributionMethod=1
 # Caching behavior:
 # 0 - Recompute values on each iteration: Uses less memory but results in slower execution.
 # 1 - Reuse cached values: Consumes more memory but significantly improves performance.
-cacheDensityProfileCoefficients=1
+cacheDensityProfileCoefficients=0
 cacheDomainGeometry=1
 # Note: In the "Take" approach (stencilDistributionMethod=0), 
 # caching is required for optimal performance, 

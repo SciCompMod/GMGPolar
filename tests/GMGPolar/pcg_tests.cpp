@@ -290,7 +290,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 8>, // maxOpenMPThreads
         std::integral_constant<bool, false>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_TAKE>, // StencilDistributionMethod
-        std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
+        std::integral_constant<bool, false>, // cacheDensityProfileCoefficient
         std::integral_constant<bool, true>, // cacheDomainGeometry
         std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, // extrapolation
         std::integral_constant<int, 2>, // maxLevels
