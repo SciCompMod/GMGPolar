@@ -29,6 +29,8 @@ static KOKKOS_INLINE_FUNCTION int getStencilSize(int global_index, const PolarGr
     else if (i_r == grid.nr() - 2) {
         return size_stencil_next_outer_boundary;
     }
+
+    Kokkos::abort("Invalid index for stencil");
 }
 
 static KOKKOS_INLINE_FUNCTION const Stencil& getStencil(const int i_r, const PolarGrid& grid, const bool DirBC_Interior)
@@ -79,6 +81,8 @@ static KOKKOS_INLINE_FUNCTION const Stencil& getStencil(const int i_r, const Pol
     else if (i_r == grid.nr() - 2) {
         return stencil_next_outer_DB_;
     }
+
+    Kokkos::abort("Invalid index for stencil");
 }
 
 static KOKKOS_INLINE_FUNCTION int getNonZeroCountSolverMatrix(const PolarGrid& grid, const bool DirBC_Interior)
@@ -175,6 +179,7 @@ static KOKKOS_INLINE_FUNCTION int getSolverMatrixIndex(const int i_r, const int 
                size_stencil_next_outer_boundary * prior_next_outer_boundary_nodes +
                size_stencil_outer_boundary * prior_outer_boundary_nodes;
     }
+    Kokkos::abort("Invalid index for stencil");
 }
 
 static KOKKOS_INLINE_FUNCTION bool validateSolverMatrixIndexing(const PolarGrid& grid, const bool DirBC_Interior)
