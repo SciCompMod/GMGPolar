@@ -6,7 +6,6 @@
 using namespace gmgpolar;
 
 using SparseMatrixCSRHost = SparseMatrixCSR<double, Kokkos::HostSpace>;
-using VectorHost          = Vector<double, Kokkos::HostSpace>;
 
 TEST(SparseMatrixCSR, default_construct)
 {
@@ -327,11 +326,11 @@ TEST(SparseMatrixCSR, lu_solver_3x3)
                                {triplet{0, 0, 2.0}, triplet{0, 2, -10.0}, triplet{1, 0, -1.0}, triplet{1, 1, 2.0},
                                 triplet{1, 2, -1.0}, triplet{2, 0, -7.0}, triplet{2, 2, 2.0}});
 
-    VectorHost rhs("rhs", 3);
+    HostVector<double> rhs("rhs", 3);
     rhs(0) = 1.0;
     rhs(1) = -5;
     rhs(2) = 3.0;
-    VectorHost exact_solution("exact solution", 3);
+    HostVector<double> exact_solution("exact solution", 3);
     exact_solution(0) = -16.0 / 33.0;
     exact_solution(1) = -125.0 / 44.0;
     exact_solution(2) = -13.0 / 66.0;
@@ -355,13 +354,13 @@ TEST(SparseMatrixCSR, lu_solver_5x5)
                                 triplet{3, 2, -4.0}, triplet{3, 3, 6.0}, triplet{3, 4, 9.0}, triplet{4, 0, 2.0},
                                 triplet{4, 1, 4.0}, triplet{4, 3, -4.0}, triplet{4, 4, 9.0}});
 
-    VectorHost rhs("rhs", 5);
+    HostVector<double> rhs("rhs", 5);
     rhs(0) = 1.0;
     rhs(1) = -5;
     rhs(2) = 3.0;
     rhs(3) = 7.0;
     rhs(4) = 2.0;
-    VectorHost exact_solution("exact_solution", 5);
+    HostVector<double> exact_solution("exact_solution", 5);
     exact_solution(0) = 2792.0 / 567.0;
     exact_solution(1) = -589.0 / 648.0;
     exact_solution(2) = -7615.0 / 1512.0;

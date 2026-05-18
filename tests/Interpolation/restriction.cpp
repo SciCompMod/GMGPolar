@@ -8,7 +8,7 @@
 using namespace gmgpolar;
 
 // Helper that computes the mathematically expected restriction value
-static double expected_restriction_value(const PolarGrid& fine, const PolarGrid& coarse, ConstVector<double> fine_vals,
+static double expected_restriction_value(const PolarGrid& fine, const PolarGrid& coarse, HostConstVector<double> fine_vals,
                                          int i_r_coarse, int i_theta_coarse)
 {
     int i_r     = i_r_coarse * 2;
@@ -61,8 +61,8 @@ TEST(RestrictionTest, RestrictionMatchesStencil)
 
     Interpolation I(/*threads*/ 16, /*DirBC*/ true);
 
-    Vector<double> fine_values = generate_random_sample_data(fine_grid, 5678, 0.0, 1.0);
-    Vector<double> coarse_result("coarse_result", coarse_grid.numberOfNodes());
+    HostVector<double> fine_values = generate_random_sample_data(fine_grid, 5678, 0.0, 1.0);
+    HostVector<double> coarse_result("coarse_result", coarse_grid.numberOfNodes());
 
     I.applyRestriction(fine_grid, coarse_grid, coarse_result, fine_values);
 

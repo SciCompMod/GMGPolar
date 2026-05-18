@@ -1,14 +1,14 @@
 #pragma once
 
 template <class LevelCacheType>
-void SmootherGive<LevelCacheType>::solveBlackCircleSection(Vector<double> x, Vector<double> temp)
+void SmootherGive<LevelCacheType>::solveBlackCircleSection(HostVector<double> x, HostVector<double> temp)
 {
     const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
     const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
     const int start               = 0;
     const int end                 = grid.numberCircularSmootherNodes();
-    Vector<double> circle_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
+    HostVector<double> circle_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     const bool is_inner_circle_black = grid.numberSmootherCircles() % 2 != 0;
 
@@ -19,7 +19,7 @@ void SmootherGive<LevelCacheType>::solveBlackCircleSection(Vector<double> x, Vec
 
     // Inner Boundary Solve
     if (is_inner_circle_black) {
-        Vector<double> inner_boundary = Kokkos::subview(temp, Kokkos::make_pair(0, grid.ntheta()));
+        HostVector<double> inner_boundary = Kokkos::subview(temp, Kokkos::make_pair(0, grid.ntheta()));
         inner_boundary_solver_.solveInPlace(inner_boundary);
     }
 
@@ -42,14 +42,14 @@ void SmootherGive<LevelCacheType>::solveBlackCircleSection(Vector<double> x, Vec
 }
 
 template <class LevelCacheType>
-void SmootherGive<LevelCacheType>::solveWhiteCircleSection(Vector<double> x, Vector<double> temp)
+void SmootherGive<LevelCacheType>::solveWhiteCircleSection(HostVector<double> x, HostVector<double> temp)
 {
     const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
     const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
     const int start               = 0;
     const int end                 = grid.numberCircularSmootherNodes();
-    Vector<double> circle_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
+    HostVector<double> circle_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     const bool is_inner_circle_white = grid.numberSmootherCircles() % 2 == 0;
 
@@ -60,7 +60,7 @@ void SmootherGive<LevelCacheType>::solveWhiteCircleSection(Vector<double> x, Vec
 
     // Inner Boundary Solve
     if (is_inner_circle_white) {
-        Vector<double> inner_boundary = Kokkos::subview(temp, Kokkos::make_pair(0, grid.ntheta()));
+        HostVector<double> inner_boundary = Kokkos::subview(temp, Kokkos::make_pair(0, grid.ntheta()));
         inner_boundary_solver_.solveInPlace(inner_boundary);
     }
 
@@ -83,14 +83,14 @@ void SmootherGive<LevelCacheType>::solveWhiteCircleSection(Vector<double> x, Vec
 }
 
 template <class LevelCacheType>
-void SmootherGive<LevelCacheType>::solveBlackRadialSection(Vector<double> x, Vector<double> temp)
+void SmootherGive<LevelCacheType>::solveBlackRadialSection(HostVector<double> x, HostVector<double> temp)
 {
     const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
     const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
     const int start               = grid.numberCircularSmootherNodes();
     const int end                 = grid.numberOfNodes();
-    Vector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
+    HostVector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     // Tridiagonal Solve
     const int batch_offset = 0;
@@ -117,14 +117,14 @@ void SmootherGive<LevelCacheType>::solveBlackRadialSection(Vector<double> x, Vec
 }
 
 template <class LevelCacheType>
-void SmootherGive<LevelCacheType>::solveWhiteRadialSection(Vector<double> x, Vector<double> temp)
+void SmootherGive<LevelCacheType>::solveWhiteRadialSection(HostVector<double> x, HostVector<double> temp)
 {
     const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
     const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
     const int start               = grid.numberCircularSmootherNodes();
     const int end                 = grid.numberOfNodes();
-    Vector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
+    HostVector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     // Tridiagonal Solve
     const int batch_offset = 1;

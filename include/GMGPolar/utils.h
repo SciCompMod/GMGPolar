@@ -4,8 +4,8 @@
 /* Interpolation                                                          */
 /* ---------------------------------------------------------------------- */
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::prolongation(int current_level, Vector<double> result,
-                                                                        ConstVector<double> x) const
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::prolongation(int current_level, HostVector<double> result,
+                                                                        HostConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ && 1 <= current_level);
     if (!interpolation_)
@@ -15,8 +15,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::prolongation(int curr
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::restriction(int current_level, Vector<double> result,
-                                                                       ConstVector<double> x) const
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::restriction(int current_level, HostVector<double> result,
+                                                                       HostConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ - 1 && 0 <= current_level);
     if (!interpolation_)
@@ -26,8 +26,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::restriction(int curre
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::injection(int current_level, Vector<double> result,
-                                                                     ConstVector<double> x) const
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::injection(int current_level, HostVector<double> result,
+                                                                     HostConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ - 1 && 0 <= current_level);
     if (!interpolation_)
@@ -38,8 +38,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::injection(int current
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedProlongation(int current_level,
-                                                                                    Vector<double> result,
-                                                                                    ConstVector<double> x) const
+                                                                                    HostVector<double> result,
+                                                                                    HostConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ && 1 <= current_level);
     if (!interpolation_)
@@ -51,8 +51,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedProlongat
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedRestriction(int current_level,
-                                                                                   Vector<double> result,
-                                                                                   ConstVector<double> x) const
+                                                                                   HostVector<double> result,
+                                                                                   HostConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ - 1 && 0 <= current_level);
     if (!interpolation_)
@@ -63,8 +63,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedRestricti
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::FMGInterpolation(int current_level, Vector<double> result,
-                                                                            ConstVector<double> x) const
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::FMGInterpolation(int current_level, HostVector<double> result,
+                                                                            HostConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ && 1 <= current_level);
     if (!interpolation_)
@@ -77,14 +77,14 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::FMGInterpolation(int 
 /* Solution & Grid Access                                                 */
 /* ---------------------------------------------------------------------- */
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-Vector<double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::solution()
+HostVector<double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::solution()
 {
     int level_depth = 0;
     return levels_[level_depth].solution();
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-ConstVector<double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::solution() const
+HostConstVector<double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::solution() const
 {
     int level_depth = 0;
     return levels_[level_depth].solution();
@@ -240,7 +240,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(const std:
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(
     const std::filesystem::path& file_path, const Level<DomainGeometry, DensityProfileCoefficients>& level,
-    ConstVector<double> grid_function)
+    HostConstVector<double> grid_function)
 {
     const PolarGrid& grid                                                     = level.grid();
     const LevelCache<DomainGeometry, DensityProfileCoefficients>& level_cache = level.levelCache();

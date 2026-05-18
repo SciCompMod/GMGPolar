@@ -5,7 +5,7 @@
 /* ----------------------- */
 
 template <class LevelCacheType>
-void DirectSolverGive<LevelCacheType>::applySymmetryShiftInnerBoundary(Vector<double> x) const
+void DirectSolverGive<LevelCacheType>::applySymmetryShiftInnerBoundary(HostVector<double> x) const
 {
     const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
@@ -66,7 +66,7 @@ void DirectSolverGive<LevelCacheType>::applySymmetryShiftInnerBoundary(Vector<do
 }
 
 template <class LevelCacheType>
-void DirectSolverGive<LevelCacheType>::applySymmetryShiftOuterBoundary(Vector<double> x) const
+void DirectSolverGive<LevelCacheType>::applySymmetryShiftOuterBoundary(HostVector<double> x) const
 {
     const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
@@ -125,7 +125,7 @@ void DirectSolverGive<LevelCacheType>::applySymmetryShiftOuterBoundary(Vector<do
 }
 
 template <class LevelCacheType>
-void DirectSolverGive<LevelCacheType>::applySymmetryShift(Vector<double> x) const
+void DirectSolverGive<LevelCacheType>::applySymmetryShift(HostVector<double> x) const
 {
     const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
     const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;

@@ -26,8 +26,8 @@ static inline void update_CSR_COO_MatrixElement(SparseMatrixCSR<double, Kokkos::
 
 template <class LevelCacheType>
 void SmootherTake<LevelCacheType>::nodeBuildInteriorBoundarySolverMatrix(
-    int i_theta, const PolarGrid& grid, bool DirBC_Interior, InnerBoundaryMatrix& matrix, ConstVector<double>& arr,
-    ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
+    int i_theta, const PolarGrid& grid, bool DirBC_Interior, InnerBoundaryMatrix& matrix, HostConstVector<double>& arr,
+    HostConstVector<double>& att, HostConstVector<double>& art, HostConstVector<double>& detDF, HostConstVector<double>& coeff_beta)
 {
     using smoother_take::update_CSR_COO_MatrixElement;
 
@@ -163,11 +163,11 @@ SmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
 
-    ConstVector<double> arr        = level_cache.arr();
-    ConstVector<double> att        = level_cache.att();
-    ConstVector<double> art        = level_cache.art();
-    ConstVector<double> detDF      = level_cache.detDF();
-    ConstVector<double> coeff_beta = level_cache.coeff_beta();
+    HostConstVector<double> arr        = level_cache.arr();
+    HostConstVector<double> att        = level_cache.att();
+    HostConstVector<double> art        = level_cache.art();
+    HostConstVector<double> detDF      = level_cache.detDF();
+    HostConstVector<double> coeff_beta = level_cache.coeff_beta();
 
 #pragma omp parallel for num_threads(num_omp_threads)
     for (int i_theta = 0; i_theta < ntheta; i_theta++) {

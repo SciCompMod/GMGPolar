@@ -61,7 +61,7 @@ public:
     // Performs one full coupled smoothing sweep:
     //   BC -> WC -> BR -> WR
     // using temp as RHS workspace.
-    void smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) override;
+    void smoothing(HostVector<double> x, HostConstVector<double> rhs, HostVector<double> temp) override;
 
 private:
     /* ------------------- */
@@ -154,16 +154,16 @@ public:
     nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                        const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
                                        const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver,
-                                       ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art,
-                                       ConstVector<double>& detDF, ConstVector<double>& coeff_beta);
+                                       HostConstVector<double>& arr, HostConstVector<double>& att, HostConstVector<double>& art,
+                                       HostConstVector<double>& detDF, HostConstVector<double>& coeff_beta);
 
     // Build the solver matrix for the interior boundary (i_r = 0) which is non-tridiagonal due to across-origin coupling.
     InnerBoundaryMatrix buildInteriorBoundarySolverMatrix();
     // Build the solver matrix for a specific node (i_r = 0, i_theta) on the interior boundary.
     void nodeBuildInteriorBoundarySolverMatrix(int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                               InnerBoundaryMatrix& matrix, ConstVector<double>& arr,
-                                               ConstVector<double>& att, ConstVector<double>& art,
-                                               ConstVector<double>& detDF, ConstVector<double>& coeff_beta);
+                                               InnerBoundaryMatrix& matrix, HostConstVector<double>& arr,
+                                               HostConstVector<double>& att, HostConstVector<double>& art,
+                                               HostConstVector<double>& detDF, HostConstVector<double>& coeff_beta);
 
     /* ---------------------- */
     /* Orthogonal application */
@@ -171,10 +171,10 @@ public:
 
     // Compute temp = f_sc − A_sc^ortho * u_sc^ortho   (precomputed right-hand side)
     // where x = u_sc and rhs = f_sc
-    void applyAscOrthoBlackCircleSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
-    void applyAscOrthoWhiteCircleSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
-    void applyAscOrthoBlackRadialSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
-    void applyAscOrthoWhiteRadialSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
+    void applyAscOrthoBlackCircleSection(HostConstVector<double> x, HostConstVector<double> rhs, HostVector<double> temp);
+    void applyAscOrthoWhiteCircleSection(HostConstVector<double> x, HostConstVector<double> rhs, HostVector<double> temp);
+    void applyAscOrthoBlackRadialSection(HostConstVector<double> x, HostConstVector<double> rhs, HostVector<double> temp);
+    void applyAscOrthoWhiteRadialSection(HostConstVector<double> x, HostConstVector<double> rhs, HostVector<double> temp);
 
     /* ----------------- */
     /* Line-wise solvers */
@@ -188,10 +188,10 @@ public:
     // where:
     //   s in {Circle, Radial}  denotes the smoother section type,
     //   c in {Black, White}    denotes the line coloring.
-    void solveBlackCircleSection(Vector<double> x, Vector<double> temp);
-    void solveWhiteCircleSection(Vector<double> x, Vector<double> temp);
-    void solveBlackRadialSection(Vector<double> x, Vector<double> temp);
-    void solveWhiteRadialSection(Vector<double> x, Vector<double> temp);
+    void solveBlackCircleSection(HostVector<double> x, HostVector<double> temp);
+    void solveWhiteCircleSection(HostVector<double> x, HostVector<double> temp);
+    void solveBlackRadialSection(HostVector<double> x, HostVector<double> temp);
+    void solveWhiteRadialSection(HostVector<double> x, HostVector<double> temp);
 };
 
 #include "smootherTake.inl"
