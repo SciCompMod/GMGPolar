@@ -438,7 +438,7 @@ const DensityProfileCoefficientsVariant& ConfigParser::densityProfileCoefficient
     return *density_profile_coefficients_.get();
 }
 
-const ExactSolution& ConfigParser::exactSolution() const
+const ExactSolutionVariant& ConfigParser::exactSolution() const
 {
     return *exact_solution_.get();
 }

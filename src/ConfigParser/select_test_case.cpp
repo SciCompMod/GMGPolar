@@ -10,19 +10,20 @@ std::unique_ptr<IGMGPolar> ConfigParser::solver() const
 
     // Create a solver specialized to the active domain geometry.
     return std::visit(
-        [&grid](auto const& domain_geometry, auto const& density_profile_coefficients) {
+        [&grid](auto const& domain_geometry, auto const& density_profile_coefficients, auto const& exact_solution) {
             using DomainGeomType                 = std::decay_t<decltype(domain_geometry)>;
             using DensityProfileCoefficientsType = std::decay_t<decltype(density_profile_coefficients)>;
+            using ExactSolutionType              = std::decay_t<decltype(exact_solution)>;
 
             // Construct the solver specialized for this geometry type.
             std::unique_ptr<IGMGPolar> solver =
-                std::make_unique<GMGPolar<DomainGeomType, DensityProfileCoefficientsType>>(
+                std::make_unique<GMGPolar<DomainGeomType, DensityProfileCoefficientsType, ExactSolutionType>>(
                     grid, domain_geometry, density_profile_coefficients);
 
             // The lambdas must return objects of identical type
             return solver;
         },
-        *domain_geometry_, *density_profile_coefficients_);
+        *domain_geometry_, *density_profile_coefficients_, *exact_solution_);
 }
 
 void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType problem_type, AlphaCoeff alpha_type,
@@ -123,13 +124,15 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
     case ProblemType::CARTESIAN_R2:
         switch (geometry_type) {
         case GeometryType::CIRCULAR:
-            exact_solution_ = std::make_unique<CartesianR2_CircularGeometry>(Rmax);
+            exact_solution_ = std::make_unique<ExactSolutionVariant>(CartesianR2_CircularGeometry(Rmax));
             break;
         case GeometryType::SHAFRANOV:
-            exact_solution_ = std::make_unique<CartesianR2_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+            exact_solution_ =
+                std::make_unique<ExactSolutionVariant>(CartesianR2_ShafranovGeometry(Rmax, kappa_eps, delta_e));
             break;
         case GeometryType::CZARNY:
-            exact_solution_ = std::make_unique<CartesianR2_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+            exact_solution_ =
+                std::make_unique<ExactSolutionVariant>(CartesianR2_CzarnyGeometry(Rmax, kappa_eps, delta_e));
             break;
         default:
             throw std::runtime_error("Invalid geometry for configuration.\n");
@@ -139,13 +142,15 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
     case ProblemType::CARTESIAN_R6:
         switch (geometry_type) {
         case GeometryType::CIRCULAR:
-            exact_solution_ = std::make_unique<CartesianR6_CircularGeometry>(Rmax);
+            exact_solution_ = std::make_unique<ExactSolutionVariant>(CartesianR6_CircularGeometry(Rmax));
             break;
         case GeometryType::SHAFRANOV:
-            exact_solution_ = std::make_unique<CartesianR6_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+            exact_solution_ =
+                std::make_unique<ExactSolutionVariant>(CartesianR6_ShafranovGeometry(Rmax, kappa_eps, delta_e));
             break;
         case GeometryType::CZARNY:
-            exact_solution_ = std::make_unique<CartesianR6_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+            exact_solution_ =
+                std::make_unique<ExactSolutionVariant>(CartesianR6_CzarnyGeometry(Rmax, kappa_eps, delta_e));
             break;
         default:
             throw std::runtime_error("Invalid geometry for configuration.\n");
@@ -155,16 +160,17 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
     case ProblemType::POLAR_R6:
         switch (geometry_type) {
         case GeometryType::CIRCULAR:
-            exact_solution_ = std::make_unique<PolarR6_CircularGeometry>(Rmax);
+            exact_solution_ = std::make_unique<ExactSolutionVariant>(PolarR6_CircularGeometry(Rmax));
             break;
         case GeometryType::SHAFRANOV:
-            exact_solution_ = std::make_unique<PolarR6_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+            exact_solution_ =
+                std::make_unique<ExactSolutionVariant>(PolarR6_ShafranovGeometry(Rmax, kappa_eps, delta_e));
             break;
         case GeometryType::CZARNY:
-            exact_solution_ = std::make_unique<PolarR6_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+            exact_solution_ = std::make_unique<ExactSolutionVariant>(PolarR6_CzarnyGeometry(Rmax, kappa_eps, delta_e));
             break;
         case GeometryType::CULHAM:
-            exact_solution_ = std::make_unique<PolarR6_CulhamGeometry>(Rmax);
+            exact_solution_ = std::make_unique<ExactSolutionVariant>(PolarR6_CulhamGeometry(Rmax));
             break;
         default:
             throw std::runtime_error("Invalid geometry for configuration.\n");
@@ -174,16 +180,17 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
     case ProblemType::REFINED_RADIUS:
         switch (geometry_type) {
         case GeometryType::CIRCULAR:
-            exact_solution_ = std::make_unique<Refined_CircularGeometry>(Rmax);
+            exact_solution_ = std::make_unique<ExactSolutionVariant>(Refined_CircularGeometry(Rmax));
             break;
         case GeometryType::SHAFRANOV:
-            exact_solution_ = std::make_unique<Refined_ShafranovGeometry>(Rmax, kappa_eps, delta_e);
+            exact_solution_ =
+                std::make_unique<ExactSolutionVariant>(Refined_ShafranovGeometry(Rmax, kappa_eps, delta_e));
             break;
         case GeometryType::CZARNY:
-            exact_solution_ = std::make_unique<Refined_CzarnyGeometry>(Rmax, kappa_eps, delta_e);
+            exact_solution_ = std::make_unique<ExactSolutionVariant>(Refined_CzarnyGeometry(Rmax, kappa_eps, delta_e));
             break;
         case GeometryType::CULHAM:
-            exact_solution_ = std::make_unique<Refined_CulhamGeometry>(Rmax);
+            exact_solution_ = std::make_unique<ExactSolutionVariant>(Refined_CulhamGeometry(Rmax));
             break;
         default:
             throw std::runtime_error("Invalid geometry for configuration.\n");
@@ -195,8 +202,9 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
     }
 }
 
-template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void ConfigParser::solve(GMGPolar<DomainGeometry, DensityProfileCoefficients>& solver) const
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+          concepts::ExactSolution>
+void ConfigParser::solve(GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>& solver) const
 {
     assert(domain_geometry_ != nullptr);
     /* ------------------------------------------ */

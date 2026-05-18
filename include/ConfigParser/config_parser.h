@@ -30,11 +30,12 @@ public:
     // Test Case
     const DomainGeometryVariant& domainGeometry() const;
     const DensityProfileCoefficientsVariant& densityProfileCoefficients() const;
-    const ExactSolution& exactSolution() const;
+    const ExactSolutionVariant& exactSolution() const;
     std::unique_ptr<IGMGPolar> solver() const;
 
-    template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-    void solve(GMGPolar<DomainGeometry, DensityProfileCoefficients>& solver) const;
+    template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients,
+              concepts::ExactSolution ExactSolution>
+    void solve(GMGPolar<DomainGeometry, DensityProfileCoefficients, ExactSolution>& solver) const;
 
     // Control Parameters
     int verbose() const;
@@ -77,7 +78,7 @@ private:
     // Input Functions
     std::unique_ptr<const DomainGeometryVariant> domain_geometry_;
     std::unique_ptr<const DensityProfileCoefficientsVariant> density_profile_coefficients_;
-    std::unique_ptr<const ExactSolution> exact_solution_;
+    std::unique_ptr<const ExactSolutionVariant> exact_solution_;
     GeometryType geometry_type_;
     ProblemType problem_type_;
     AlphaCoeff alpha_type_;
