@@ -5,8 +5,8 @@ namespace extrapolated_smoother_give
 
 static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleGive(int i_r, int i_theta, const PolarGrid& grid,
                                                                bool DirBC_Interior, SmootherColor smoother_color,
-                                                               ConstVector<double>& x, ConstVector<double>& rhs,
-                                                               Vector<double>& result, double arr, double att,
+                                                               HostConstVector<double>& x, HostConstVector<double>& rhs,
+                                                               HostVector<double>& result, double arr, double att,
                                                                double art, double detDF, double coeff_beta)
 {
     assert(i_r >= 0 && i_r <= grid.numberSmootherCircles());
@@ -403,8 +403,8 @@ namespace extrapolated_smoother_give
 
 static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialGive(int i_r, int i_theta, const PolarGrid& grid,
                                                                bool DirBC_Interior, SmootherColor smoother_color,
-                                                               ConstVector<double>& x, ConstVector<double>& rhs,
-                                                               Vector<double>& result, double arr, double att,
+                                                               HostConstVector<double>& x, HostConstVector<double>& rhs,
+                                                               HostVector<double>& result, double arr, double att,
                                                                double art, double detDF, double coeff_beta)
 {
     assert(i_r >= grid.numberSmootherCircles() - 1 && i_r < grid.nr());
@@ -896,8 +896,9 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialGive(int i_r, int i_th
 
 template <class LevelCacheType>
 void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoCircleSection(int i_r, SmootherColor smoother_color,
-                                                                          ConstVector<double> x,
-                                                                          ConstVector<double> rhs, Vector<double> temp)
+                                                                          HostConstVector<double> x,
+                                                                          HostConstVector<double> rhs,
+                                                                          HostVector<double> temp)
 {
     using extrapolated_smoother_give::nodeApplyAscOrthoCircleGive;
 
@@ -924,8 +925,9 @@ void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoCircleSection(int i_
 
 template <class LevelCacheType>
 void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoRadialSection(int i_theta, SmootherColor smoother_color,
-                                                                          ConstVector<double> x,
-                                                                          ConstVector<double> rhs, Vector<double> temp)
+                                                                          HostConstVector<double> x,
+                                                                          HostConstVector<double> rhs,
+                                                                          HostVector<double> temp)
 {
     using extrapolated_smoother_give::nodeApplyAscOrthoRadialGive;
 

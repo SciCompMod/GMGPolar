@@ -14,7 +14,7 @@ DirectSolverGive<LevelCacheType>::DirectSolverGive(const PolarGrid& grid, const 
 }
 
 template <class LevelCacheType>
-void DirectSolverGive<LevelCacheType>::solveInPlace(Vector<double> solution)
+void DirectSolverGive<LevelCacheType>::solveInPlace(HostVector<double> solution)
 {
     // Adjusts the right-hand side vector to account for symmetry corrections.
     // This transforms the system matrixA * solution = rhs into the equivalent system:

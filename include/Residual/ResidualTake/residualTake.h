@@ -13,8 +13,8 @@ public:
     KOKKOS_DEFAULTED_FUNCTION ResidualTake(const ResidualTake&) = default;
     KOKKOS_DEFAULTED_FUNCTION ~ResidualTake() override          = default;
 
-    void applySystemOperator(Vector<double> result, ConstVector<double> x) const final;
-    void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const final;
+    void applySystemOperator(HostVector<double> result, HostConstVector<double> x) const final;
+    void computeResidual(HostVector<double> result, HostConstVector<double> rhs, HostConstVector<double> x) const final;
 };
 
 #include "residualTake.inl"

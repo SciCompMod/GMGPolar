@@ -35,7 +35,7 @@ public:
     }
     virtual ~ExtrapolatedSmoother() = default;
 
-    virtual void extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) = 0;
+    virtual void extrapolatedSmoothing(HostVector<double> x, HostConstVector<double> rhs, HostVector<double> temp) = 0;
 
 protected:
     const PolarGrid& grid_;

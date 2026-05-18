@@ -12,7 +12,7 @@ public:
     explicit DirectSolverGive(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior);
 
     // Note: The rhs (right-hand side) vector gets overwritten during the solution process.
-    void solveInPlace(Vector<double> solution) override;
+    void solveInPlace(HostVector<double> solution) override;
 
 private:
     // The stencil definitions must be defined before the declaration of the mumps_solver,
@@ -71,9 +71,9 @@ private:
     //    symmetric_DBc(A) * solution = rhs - applySymmetryShift(rhs).
     // The correction modifies the rhs to account for the influence of the Dirichlet boundary conditions,
     // ensuring that the solution at the boundary is correctly adjusted and maintains the required symmetry.
-    void applySymmetryShift(Vector<double> rhs) const;
-    void applySymmetryShiftInnerBoundary(Vector<double> x) const;
-    void applySymmetryShiftOuterBoundary(Vector<double> x) const;
+    void applySymmetryShift(HostVector<double> rhs) const;
+    void applySymmetryShiftInnerBoundary(HostVector<double> x) const;
+    void applySymmetryShiftOuterBoundary(HostVector<double> x) const;
 
     // Verify that solver matrix indexing is valid.
     bool validateSolverMatrixIndexing() const;

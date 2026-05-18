@@ -42,8 +42,8 @@ ExtrapolatedSmootherGive<LevelCacheType>::ExtrapolatedSmootherGive(const PolarGr
 //   - The system is then solved in-place in temp, and the results
 //     are copied back to x.
 template <class LevelCacheType>
-void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs,
-                                                                     Vector<double> temp)
+void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(HostVector<double> x, HostConstVector<double> rhs,
+                                                                     HostVector<double> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
