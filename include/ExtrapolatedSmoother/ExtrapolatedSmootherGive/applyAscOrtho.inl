@@ -6,8 +6,8 @@ namespace extrapolated_smoother_give
 template <typename LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
 nodeApplyAscOrthoCircleGiveInside(const int i_r, const int i_theta, const PolarGrid& grid,
-                                  const LevelCacheType& level_cache, const bool DirBC_Interior, HostConstVector<double>& x,
-                                  HostConstVector<double>& rhs, HostVector<double>& result)
+                                  const LevelCacheType& level_cache, const bool DirBC_Interior,
+                                  HostConstVector<double>& x, HostConstVector<double>& rhs, HostVector<double>& result)
 {
     KOKKOS_ASSERT(i_r >= 0 && i_r < grid.numberSmootherCircles());
 
@@ -198,8 +198,8 @@ nodeApplyAscOrthoCircleGiveInside(const int i_r, const int i_theta, const PolarG
 template <typename LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
 nodeApplyAscOrthoCircleGiveOutside(const int i_r, const int i_theta, const PolarGrid& grid,
-                                   const LevelCacheType& level_cache, const bool DirBC_Interior, HostConstVector<double>& x,
-                                   HostConstVector<double>& rhs, HostVector<double>& result)
+                                   const LevelCacheType& level_cache, const bool DirBC_Interior,
+                                   HostConstVector<double>& x, HostConstVector<double>& rhs, HostVector<double>& result)
 {
     KOKKOS_ASSERT(i_r >= 0 && i_r <= grid.numberSmootherCircles());
 
@@ -365,8 +365,8 @@ nodeApplyAscOrthoCircleGiveOutside(const int i_r, const int i_theta, const Polar
 template <typename LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
 nodeApplyAscOrthoRadialGiveInside(const int i_r, const int i_theta, const PolarGrid& grid,
-                                  const LevelCacheType& level_cache, const bool DirBC_Interior, HostConstVector<double>& x,
-                                  HostConstVector<double>& rhs, HostVector<double>& result)
+                                  const LevelCacheType& level_cache, const bool DirBC_Interior,
+                                  HostConstVector<double>& x, HostConstVector<double>& rhs, HostVector<double>& result)
 {
     KOKKOS_ASSERT(i_r >= grid.numberSmootherCircles() - 1 && i_r < grid.nr());
 
@@ -704,8 +704,8 @@ nodeApplyAscOrthoRadialGiveInside(const int i_r, const int i_theta, const PolarG
 template <typename LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
 nodeApplyAscOrthoRadialGiveOutside(const int i_r, const int i_theta, const PolarGrid& grid,
-                                   const LevelCacheType& level_cache, const bool DirBC_Interior, HostConstVector<double>& x,
-                                   HostConstVector<double>& rhs, HostVector<double>& result)
+                                   const LevelCacheType& level_cache, const bool DirBC_Interior,
+                                   HostConstVector<double>& x, HostConstVector<double>& rhs, HostVector<double>& result)
 {
     KOKKOS_ASSERT(i_r >= grid.numberSmootherCircles() && i_r < grid.nr());
 
