@@ -7,24 +7,12 @@
     #include <stdexcept>
 using namespace gmgpolar;
 
-CooMumpsSolver::CooMumpsSolver(SparseMatrixCOO<double, Kokkos::HostSpace> matrix)
-{
-    if (matrix.is_symmetric()) {
-        matrix_ = extractUpperTriangle(matrix);
-    }
-    else {
-        matrix_ = std::move(matrix);
-    }
-
-    initialize();
-}
-
 CooMumpsSolver::~CooMumpsSolver()
 {
     finalize();
 }
 
-void CooMumpsSolver::solveInPlace(Vector<double>& rhs)
+void CooMumpsSolver::solveInPlace(HostVector<double>& rhs)
 {
     assert(std::ssize(rhs) == mumps_solver_.n);
 

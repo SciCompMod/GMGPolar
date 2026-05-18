@@ -41,7 +41,7 @@ SmootherGive<LevelCacheType>::SmootherGive(const PolarGrid& grid, const LevelCac
 //   - The system is then solved in-place in temp, and the results
 //     are copied back to x.
 template <class LevelCacheType>
-void SmootherGive<LevelCacheType>::smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp)
+void SmootherGive<LevelCacheType>::smoothing(HostVector<double> x, HostConstVector<double> rhs, HostVector<double> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());

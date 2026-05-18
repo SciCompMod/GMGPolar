@@ -8,8 +8,8 @@
 using namespace gmgpolar;
 
 // Helper that computes the mathematically expected prolongation value
-static double expected_value(const PolarGrid& coarse, const PolarGrid& fine, ConstVector<double> coarse_vals, int i_r,
-                             int i_theta)
+static double expected_value(const PolarGrid& coarse, const PolarGrid& fine, HostConstVector<double> coarse_vals,
+                             int i_r, int i_theta)
 {
     int i_r_coarse     = i_r / 2;
     int i_theta_coarse = i_theta / 2;
@@ -66,8 +66,8 @@ TEST(ProlongationTest, ProlongationMatchesStencil)
 
     Interpolation I(/*threads*/ 16, /*DirBC*/ true);
 
-    Vector<double> coarse_values = generate_random_sample_data(coarse_grid, 1234);
-    Vector<double> fine_result("fine_result", fine_grid.numberOfNodes());
+    HostVector<double> coarse_values = generate_random_sample_data(coarse_grid, 1234);
+    HostVector<double> fine_result("fine_result", fine_grid.numberOfNodes());
 
     I.applyProlongation(coarse_grid, fine_grid, fine_result, coarse_values);
 

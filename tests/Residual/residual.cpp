@@ -56,13 +56,13 @@ TEST(OperatorATest, applyA_DirBC_Interior)
     ResidualGive residualGive_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualTake residualTake_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
-    Vector<double> x   = generate_random_sample_data(level.grid(), 42);
-    Vector<double> rhs = generate_random_sample_data(level.grid(), 69);
+    HostVector<double> x   = generate_random_sample_data(level.grid(), 42);
+    HostVector<double> rhs = generate_random_sample_data(level.grid(), 69);
 
-    Vector<double> result_Give("result_Give", level.grid().numberOfNodes());
+    HostVector<double> result_Give("result_Give", level.grid().numberOfNodes());
     residualGive_operator.computeResidual(result_Give, rhs, x);
 
-    Vector<double> result_Take("result_Take", level.grid().numberOfNodes());
+    HostVector<double> result_Take("result_Take", level.grid().numberOfNodes());
     residualTake_operator.computeResidual(result_Take, rhs, x);
 
     ASSERT_EQ(result_Give.size(), result_Take.size());
@@ -109,13 +109,13 @@ TEST(OperatorATest, applyA_AcrossOrigin)
     ResidualGive residualGive_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
     ResidualTake residualTake_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
 
-    Vector<double> x   = generate_random_sample_data(level.grid(), 42);
-    Vector<double> rhs = generate_random_sample_data(level.grid(), 69);
+    HostVector<double> x   = generate_random_sample_data(level.grid(), 42);
+    HostVector<double> rhs = generate_random_sample_data(level.grid(), 69);
 
-    Vector<double> result_Give("result_Give", level.grid().numberOfNodes());
+    HostVector<double> result_Give("result_Give", level.grid().numberOfNodes());
     residualGive_operator.computeResidual(result_Give, rhs, x);
 
-    Vector<double> result_Take("result_Take", level.grid().numberOfNodes());
+    HostVector<double> result_Take("result_Take", level.grid().numberOfNodes());
     residualTake_operator.computeResidual(result_Take, rhs, x);
 
     ASSERT_EQ(result_Give.size(), result_Take.size());

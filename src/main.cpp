@@ -75,8 +75,8 @@ int main(int argc, char* argv[])
             parser.solve(solver);
 
             // --- Retrieve solution and associated grid --- //
-            Vector<double> solution = solver.solution();
-            const PolarGrid& grid   = solver.grid();
+            HostVector<double> solution = solver.solution();
+            const PolarGrid& grid       = solver.grid();
 
             // Print timing statistics for each solver phase
             solver.printTimings();
