@@ -15,7 +15,6 @@ void DirectSolverGive<LevelCacheType>::applySymmetryShiftInnerBoundary(Vector<do
     Kokkos::parallel_for(
         "DirectSolverGive: applySymmetryShiftInnerBoundary",
         Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, 1), KOKKOS_LAMBDA(const int) {
-
             int i_r;
             double r;
             int global_index;
@@ -79,7 +78,6 @@ void DirectSolverGive<LevelCacheType>::applySymmetryShiftOuterBoundary(Vector<do
     Kokkos::parallel_for(
         "DirectSolverGive: applySymmetryShiftOuterBoundary",
         Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, 1), KOKKOS_LAMBDA(const int) {
-
             int i_r;
             double r;
             int global_index;

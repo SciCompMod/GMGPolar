@@ -125,8 +125,8 @@ static KOKKOS_INLINE_FUNCTION int getSolverMatrixIndex(const int i_r, const int 
         const int prior_inner_boundary_nodes      = grid.ntheta();
         const int prior_next_inner_boundary_nodes = grid.ntheta();
         const int prior_interior_nodes            = grid.ntheta() * (grid.numberSmootherCircles() - 2) +
-                                                    i_theta * (grid.lengthRadialSmoother() - 2) + i_r -
-                                                    grid.numberSmootherCircles();
+                                         i_theta * (grid.lengthRadialSmoother() - 2) + i_r -
+                                         grid.numberSmootherCircles();
         const int prior_next_outer_boundary_nodes = i_theta;
         const int prior_outer_boundary_nodes      = i_theta;
         return size_stencil_inner_boundary * prior_inner_boundary_nodes +
