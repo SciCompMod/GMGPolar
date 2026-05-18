@@ -1,9 +1,10 @@
 #pragma once
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_W_Cycle(int level_depth, Vector<double> solution,
-                                                                             ConstVector<double> rhs,
-                                                                             Vector<double> residual)
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_W_Cycle(int level_depth,
+                                                                             HostVector<double> solution,
+                                                                             HostConstVector<double> rhs,
+                                                                             HostVector<double> residual)
 {
     assert(0 <= level_depth && level_depth < number_of_levels_);
 
@@ -90,7 +91,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_W_Cycle(int
         /* ----------------------------------- */
         /* Compute the corrected approximation */
         /* ----------------------------------- */
-        add(solution, ConstVector<double>(residual));
+        add(solution, HostConstVector<double>(residual));
 
         /* ------------- */
         /* Postsmoothing */

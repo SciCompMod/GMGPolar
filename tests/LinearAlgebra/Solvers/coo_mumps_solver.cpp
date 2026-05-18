@@ -31,7 +31,7 @@ TEST(CooMumpsSolverTest, GeneralNonSymmetric4x4)
 
     CooMumpsSolver solver(std::move(mat));
 
-    Vector<double> rhs("rhs", 4);
+    HostVector<double> rhs("rhs", 4);
     rhs(0) = 2.0;
     rhs(1) = 4.0;
     rhs(2) = 6.0;
@@ -39,7 +39,7 @@ TEST(CooMumpsSolverTest, GeneralNonSymmetric4x4)
 
     solver.solveInPlace(rhs);
 
-    Vector<double> solution("solution", 4);
+    HostVector<double> solution("solution", 4);
     solution(0) = 140.0 / 43.0;
     solution(1) = 149.0 / 86.0;
     solution(2) = -27.0 / 43.0;
@@ -75,7 +75,7 @@ TEST(CooMumpsSolverTest, SymmetricPositiveDefinite4x4)
 
     CooMumpsSolver solver(std::move(mat));
 
-    Vector<double> rhs("rhs", 4);
+    HostVector<double> rhs("rhs", 4);
     rhs(0) = 2.0;
     rhs(1) = 4.0;
     rhs(2) = 6.0;
@@ -83,7 +83,7 @@ TEST(CooMumpsSolverTest, SymmetricPositiveDefinite4x4)
 
     solver.solveInPlace(rhs);
 
-    Vector<double> solution("solution", 4);
+    HostVector<double> solution("solution", 4);
     solution(0) = 9.0 / 46.0;
     solution(1) = 3.0 / 23.0;
     solution(2) = 14.0 / 23.0;

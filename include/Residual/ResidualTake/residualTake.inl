@@ -10,8 +10,8 @@ ResidualTake<LevelCacheType>::ResidualTake(const PolarGrid& grid, const LevelCac
 /* ------------------ */
 /* result = rhs - A*x */
 template <class LevelCacheType>
-void ResidualTake<LevelCacheType>::computeResidual(Vector<double> result, ConstVector<double> rhs,
-                                                   ConstVector<double> x) const
+void ResidualTake<LevelCacheType>::computeResidual(HostVector<double> result, HostConstVector<double> rhs,
+                                                   HostConstVector<double> x) const
 {
     assert(result.size() == x.size());
 

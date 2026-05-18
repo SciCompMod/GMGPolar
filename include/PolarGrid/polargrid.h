@@ -29,7 +29,8 @@ public:
     explicit PolarGrid() = default;
 
     // Constructor to initialize grid using kokkos views of radii and angles.
-    PolarGrid(Vector<double> radii, Vector<double> angles, std::optional<double> splitting_radius = std::nullopt);
+    PolarGrid(HostVector<double> radii, HostVector<double> angles,
+              std::optional<double> splitting_radius = std::nullopt);
     // Constructor to initialize grid using std::vectors of radii and angles.
     PolarGrid(std::vector<double> radii, std::vector<double> angles,
               std::optional<double> splitting_radius = std::nullopt);
@@ -83,19 +84,19 @@ private:
     int nr_; // number of nodes in radial direction
     int ntheta_; // number of (unique) nodes in angular direction
     bool is_ntheta_PowerOfTwo_;
-    AllocatableVector<double> radii_; // Vector of radial coordiantes
-    AllocatableVector<double> angles_; // Vector of angular coordinates
+    HostAllocatableVector<double> radii_; // HostVector of radial coordiantes
+    HostAllocatableVector<double> angles_; // HostVector of angular coordinates
 
     // radial_spacings_ contains the distances between each consecutive radii division.
     // radial_spacings_ = [r_{1}-r_{0}, ..., r_{N}-r_{N-1}].
-    AllocatableVector<double> radial_spacings_; // size(radial_spacings_) = nr() - 1
+    HostAllocatableVector<double> radial_spacings_; // size(radial_spacings_) = nr() - 1
 
     // angular_spacings_ contains the angles between each consecutive theta division.
     // Since we have a periodic boundary in theta direction,
     // we have to make sure the index wraps around correctly when accessing it.
     // Here theta_0 = 0.0 and theta_N = 2*pi refer to the same point.
     // angular_spacings_ = [theta_{1}-theta_{0}, ..., theta_{N}-theta_{N-1}].
-    AllocatableVector<double> angular_spacings_; // size(angular_spacings_) = ntheta()
+    HostAllocatableVector<double> angular_spacings_; // size(angular_spacings_) = ntheta()
 
     // Circle/radial smoother division
     double smoother_splitting_radius_; // Radius at which the grid is split into circular and radial smoothing
@@ -112,7 +113,7 @@ private:
      */
 
     // Check parameter validity
-    void checkParameters(Vector<double> radii, Vector<double> angles) const;
+    void checkParameters(HostVector<double> radii, HostVector<double> angles) const;
 
     // Initialize radial_spacings_, angular_spacings_
     void initializeDistances();
@@ -131,12 +132,12 @@ private:
 
     // Refine the grid by dividing radial and angular divisions by 2.
     void refineGrid(const int divideBy2);
-    Vector<double> divideVector(Vector<double> vec, const int divideBy2) const;
+    HostVector<double> divideVector(HostVector<double> vec, const int divideBy2) const;
 
     // Help constrcut radii_ when an anisotropic radial division is requested
     // Implementation in src/PolarGrid/anisotropic_division.cpp
-    Vector<double> RadialAnisotropicDivision(double R0, double R, const int nr_exp, double refinement_radius,
-                                             const int anisotropic_factor) const;
+    HostVector<double> RadialAnisotropicDivision(double R0, double R, const int nr_exp, double refinement_radius,
+                                                 const int anisotropic_factor) const;
 };
 
 // ---------------------------------------------------- //
