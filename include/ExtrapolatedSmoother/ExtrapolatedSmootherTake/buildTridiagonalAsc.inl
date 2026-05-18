@@ -167,8 +167,9 @@ static KOKKOS_INLINE_FUNCTION void nodeBuildTridiagonalSolverMatricesCircleSecti
 static KOKKOS_INLINE_FUNCTION void nodeBuildTridiagonalSolverMatricesRadialSection(
     const int i_r, const int i_theta, const PolarGrid& grid, const bool DirBC_Interior,
     const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
-    const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, ConstVector<double>& arr,
-    ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
+    const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, HostConstVector<double>& arr,
+    HostConstVector<double>& att, HostConstVector<double>& art, HostConstVector<double>& detDF,
+    HostConstVector<double>& coeff_beta)
 {
     using extrapolated_smoother_take::updateMatrixElement;
 
