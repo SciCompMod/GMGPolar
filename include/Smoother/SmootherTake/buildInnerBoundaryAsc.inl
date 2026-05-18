@@ -30,8 +30,8 @@ template <typename InnerBoundaryMatrix>
 static KOKKOS_INLINE_FUNCTION void
 nodeBuildInteriorBoundarySolverMatrix(const int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                                       const InnerBoundaryMatrix& matrix, HostConstVector<double>& arr,
-                                      HostConstVector<double>& att, HostConstVector<double>& art, HostConstVector<double>& detDF,
-                                      HostConstVector<double>& coeff_beta)
+                                      HostConstVector<double>& att, HostConstVector<double>& art,
+                                      HostConstVector<double>& detDF, HostConstVector<double>& coeff_beta)
 {
     using smoother_take::getCircleAscIndex;
     using smoother_take::getStencil;
