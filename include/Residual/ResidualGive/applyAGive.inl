@@ -5,7 +5,7 @@ namespace residual_give
 template <class LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void node_apply_a_give(int i_r, int i_theta, const PolarGrid& grid,
                                                      const LevelCacheType& level_cache, bool DirBC_Interior,
-                                                     Vector<double>& result, ConstVector<double>& x)
+                                                     HostVector<double>& result, HostConstVector<double>& x)
 {
     /* ---------------------------------------- */
     /* Compute or retrieve stencil coefficients */
@@ -195,7 +195,7 @@ static KOKKOS_INLINE_FUNCTION void node_apply_a_give(int i_r, int i_theta, const
 } // namespace residual_give
 
 template <class LevelCacheType>
-void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, ConstVector<double> x) const
+void ResidualGive<LevelCacheType>::applySystemOperator(HostVector<double> result, HostConstVector<double> x) const
 {
     assert(result.size() == x.size());
 

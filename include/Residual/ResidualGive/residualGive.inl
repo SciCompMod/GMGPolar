@@ -10,8 +10,8 @@ ResidualGive<LevelCacheType>::ResidualGive(const PolarGrid& grid, const LevelCac
 /* ------------------ */
 /* result = rhs - A*x */
 template <class LevelCacheType>
-void ResidualGive<LevelCacheType>::computeResidual(Vector<double> result, ConstVector<double> rhs,
-                                                   ConstVector<double> x) const
+void ResidualGive<LevelCacheType>::computeResidual(HostVector<double> result, HostConstVector<double> rhs,
+                                                   HostConstVector<double> x) const
 {
     assert(result.size() == x.size());
 

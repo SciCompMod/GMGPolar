@@ -312,7 +312,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
     Kokkos::deep_copy(pcg_search_direction_, level.solution());
 
     // r^T * z
-    double r_z = dot_product(ConstVector<double>(level.rhs()), ConstVector<double>(level.solution()));
+    double r_z = dot_product(HostConstVector<double>(level.rhs()), HostConstVector<double>(level.solution()));
 
     while (number_of_iterations_ < max_iterations_) {
 
@@ -327,14 +327,14 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
         }
 
         // alpha = (r^T * z) / (p^T * A*p)
-        double alpha =
-            r_z / dot_product(ConstVector<double>(pcg_search_direction_), ConstVector<double>(level.residual()));
+        double alpha = r_z / dot_product(HostConstVector<double>(pcg_search_direction_),
+                                         HostConstVector<double>(level.residual()));
 
         // x += alpha * p
-        linear_combination(pcg_solution_, 1.0, ConstVector<double>(pcg_search_direction_), alpha);
+        linear_combination(pcg_solution_, 1.0, HostConstVector<double>(pcg_search_direction_), alpha);
 
         // r -= alpha * A*p
-        linear_combination(level.rhs(), 1.0, ConstVector<double>(level.residual()), -alpha);
+        linear_combination(level.rhs(), 1.0, HostConstVector<double>(level.residual()), -alpha);
 
         /* ---------------------------- */
         /* Compute convergence criteria */
@@ -381,7 +381,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
         applyMultigridIterations(level, PCG_MG_cycle_, PCG_MG_iterations_);
 
         // r^T * z
-        double r_z_new = dot_product(ConstVector<double>(level.rhs()), ConstVector<double>(level.solution()));
+        double r_z_new = dot_product(HostConstVector<double>(level.rhs()), HostConstVector<double>(level.solution()));
         // beta = (current r^T * z) / (previous r^T * z)
         double beta = r_z_new / r_z;
         // r_z = r^T * z for next iteration
@@ -390,7 +390,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
         // p *= beta
         multiply(pcg_search_direction_, beta);
         // p += z
-        add(pcg_search_direction_, ConstVector<double>(level.solution()));
+        add(pcg_search_direction_, HostConstVector<double>(level.solution()));
     }
     // level.solution() = x
     Kokkos::deep_copy(level.solution(), pcg_solution_);
@@ -486,7 +486,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::updateResidualNorms(
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 double GMGPolar<DomainGeometry, DensityProfileCoefficients>::residualNorm(
     const ResidualNormType& norm_type, const Level<DomainGeometry, DensityProfileCoefficients>& level,
-    ConstVector<double> residual) const
+    HostConstVector<double> residual) const
 {
     switch (norm_type) {
     case ResidualNormType::EUCLIDEAN:
@@ -502,8 +502,8 @@ double GMGPolar<DomainGeometry, DensityProfileCoefficients>::residualNorm(
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolation(int current_level,
-                                                                              Vector<double> fine_values,
-                                                                              ConstVector<double> coarse_values)
+                                                                              HostVector<double> fine_values,
+                                                                              HostConstVector<double> coarse_values)
 {
     const PolarGrid& fineGrid   = levels_[current_level].grid();
     const PolarGrid& coarseGrid = levels_[current_level + 1].grid();
@@ -558,7 +558,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolation(in
 // =============================================================================
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::initRhsHierarchy(Vector<double> rhs)
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::initRhsHierarchy(HostVector<double> rhs)
 {
     Kokkos::deep_copy(levels_[0].rhs(), rhs);
     for (int level_depth = 0; level_depth < number_of_levels_ - 1; ++level_depth) {
@@ -583,8 +583,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::evaluateExactError(
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::computeExactError(
-    Level<DomainGeometry, DensityProfileCoefficients>& level, ConstVector<double> solution, Vector<double> error,
-    const ExactSolution& exact_solution)
+    Level<DomainGeometry, DensityProfileCoefficients>& level, HostConstVector<double> solution,
+    HostVector<double> error, const ExactSolution& exact_solution)
 {
     const PolarGrid& grid                                                    = level.grid();
     const LevelCache<DomainGeometry, DensityProfileCoefficients>& levelCache = level.levelCache();
@@ -613,7 +613,7 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
             }
         }
     }
-    ConstVector<double> c_error     = error;
+    HostConstVector<double> c_error = error;
     double weighted_euclidean_error = l2_norm(c_error) / std::sqrt(grid.numberOfNodes());
     double infinity_error           = infinity_norm(c_error);
 
