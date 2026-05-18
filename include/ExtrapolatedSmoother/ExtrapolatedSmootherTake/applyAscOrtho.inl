@@ -3,12 +3,11 @@
 namespace extrapolated_smoother_take
 {
 
-static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleTake(const int i_r, const int i_theta, const PolarGrid& grid,
-                                                               const bool DirBC_Interior, HostConstVector<double>& x,
-                                                               HostConstVector<double>& rhs, HostVector<double>& result,
-                                                               HostConstVector<double>& arr, HostConstVector<double>& att,
-                                                               HostConstVector<double>& art, HostConstVector<double>& detDF,
-                                                               HostConstVector<double>& coeff_beta)
+static KOKKOS_INLINE_FUNCTION void
+nodeApplyAscOrthoCircleTake(const int i_r, const int i_theta, const PolarGrid& grid, const bool DirBC_Interior,
+                            HostConstVector<double>& x, HostConstVector<double>& rhs, HostVector<double>& result,
+                            HostConstVector<double>& arr, HostConstVector<double>& att, HostConstVector<double>& art,
+                            HostConstVector<double>& detDF, HostConstVector<double>& coeff_beta)
 {
     KOKKOS_ASSERT(i_r >= 0 && i_r <= grid.numberSmootherCircles());
 
