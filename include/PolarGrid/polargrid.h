@@ -44,6 +44,22 @@ public:
 
     KOKKOS_DEFAULTED_FUNCTION PolarGrid(const PolarGrid&) = default;
 
+    template<class MemorySpace2>
+	PolarGrid(const PolarGrid<MemorySpace2>& other)
+	: nr_(other.nr_)
+		, ntheta_(other.ntheta_)
+		, is_ntheta_PowerOfTwo_(other.is_ntheta_PowerOfTwo_)
+		, radii_(Kokkos::create_mirror_view_and_copy(MemorySpace(), other.radii_))
+		, angles_(Kokkos::create_mirror_view_and_copy(MemorySpace(), other.angles_))
+		, radial_spacings_(Kokkos::create_mirror_view_and_copy(MemorySpace(), other.radial_spacings_))
+		, angular_spacings_(Kokkos::create_mirror_view_and_copy(MemorySpace(), other.angular_spacings_))
+		, smoother_splitting_radius_(other.smoother_splitting_radius_)
+		, number_smoother_circles_(other.number_smoother_circles_)
+		, length_smoother_radial_(other.length_smoother_radial_)
+		, number_circular_smoother_nodes_(other.number_circular_smoother_nodes_)
+		, number_radial_smoother_nodes_(other.number_radial_smoother_nodes_)
+	{}
+
     // Optimized, inlined indexing.
     KOKKOS_INLINE_FUNCTION int wrapThetaIndex(const int unwrapped_theta_index) const;
     KOKKOS_INLINE_FUNCTION int index(const int r_index, const int unwrapped_theta_index) const;
