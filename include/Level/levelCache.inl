@@ -2,7 +2,7 @@
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 LevelCache<DomainGeometry, DensityProfileCoefficients>::LevelCache(
-    const PolarGrid<Kokkos::HostSpace>& grid, const DensityProfileCoefficients& density_profile_coefficients,
+    const PolarGrid<DefaultMemorySpace>& grid, const DensityProfileCoefficients& density_profile_coefficients,
     const DomainGeometry& domain_geometry, const bool cache_density_profile_coefficients,
     const bool cache_domain_geometry)
     : domain_geometry_(domain_geometry)
@@ -21,18 +21,22 @@ LevelCache<DomainGeometry, DensityProfileCoefficients>::LevelCache(
     // Pre-compute and store alpha/beta coefficients at all grid nodes to avoid
     // repeated expensive evaluations during runtime computations
     if (cache_density_profile_coefficients_) {
-#pragma omp parallel for
-        for (int i_r = 0; i_r < grid.nr(); i_r++) {
+	    Kokkos::parallel_for(
+						"Cache density profile coefficients",
+Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+                {0, 0}, // Starting point of the index space
+                {grid.nr(), grid.ntheta()} // Ending point of the index space
+                ),
+            // Kokkos lambda function to execute for each point in the index space
+            KOKKOS_LAMBDA(const int i_r, const int i_theta) {
             const double r = grid.radius(i_r);
-            for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
                 const double theta = grid.theta(i_theta);
                 const int index    = grid.index(i_r, i_theta);
                 if (!cache_domain_geometry_) {
                     coeff_alpha_(index) = density_profile_coefficients.alpha(r, theta);
                 }
                 coeff_beta_(index) = density_profile_coefficients.beta(r, theta);
-            }
-        }
+        });
     }
 
     // Pre-compute and store Jacobian matrix elements (arr, att, art, detDF) at all grid nodes
@@ -42,10 +46,15 @@ LevelCache<DomainGeometry, DensityProfileCoefficients>::LevelCache(
         // access patterns of the smoother and improve cache locality
 
         // Circular Indexing Section
-#pragma omp parallel for
-        for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
+	    Kokkos::parallel_for(
+						"Cache domain geometry (circular indexing)",
+Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+                {0, 0}, // Starting point of the index space
+                {grid.numberSmootherCircles(), grid.ntheta()} // Ending point of the index space
+                ),
+            // Kokkos lambda function to execute for each point in the index space
+            KOKKOS_LAMBDA(const int i_r, const int i_theta) {
             const double r = grid.radius(i_r);
-            for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
                 const double theta       = grid.theta(i_theta);
                 const int index          = grid.index(i_r, i_theta);
                 const double coeff_alpha = density_profile_coefficients.alpha(r, theta);
@@ -56,13 +65,17 @@ LevelCache<DomainGeometry, DensityProfileCoefficients>::LevelCache(
                 arr_(index)   = arr;
                 att_(index)   = att;
                 art_(index)   = art;
-            }
-        }
+        });
         // Radial Indexing Section
-#pragma omp parallel for
-        for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
+	    Kokkos::parallel_for(
+						"Cache domain geometry (radial indexing)",
+Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+                {0, grid.numberSmootherCircles()}, // Starting point of the index space
+                {grid.ntheta(), grid.nr()} // Ending point of the index space
+                ),
+            // Kokkos lambda function to execute for each point in the index space
+            KOKKOS_LAMBDA(const int i_theta, const int i_r) {
             const double theta = grid.theta(i_theta);
-            for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
                 const double r           = grid.radius(i_r);
                 const int index          = grid.index(i_r, i_theta);
                 const double coeff_alpha = density_profile_coefficients.alpha(r, theta);
@@ -73,9 +86,9 @@ LevelCache<DomainGeometry, DensityProfileCoefficients>::LevelCache(
                 arr_(index)   = arr;
                 att_(index)   = att;
                 art_(index)   = art;
-            }
-        }
+        });
     }
+    Kokkos::fence();
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
@@ -98,13 +111,13 @@ bool LevelCache<DomainGeometry, DensityProfileCoefficients>::cacheDensityProfile
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-HostConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::coeff_alpha() const
+ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::coeff_alpha() const
 {
     return coeff_alpha_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-HostConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::coeff_beta() const
+ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::coeff_beta() const
 {
     return coeff_beta_;
 }
@@ -116,25 +129,25 @@ bool LevelCache<DomainGeometry, DensityProfileCoefficients>::cacheDomainGeometry
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-HostConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::arr() const
+ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::arr() const
 {
     return arr_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-HostConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::att() const
+ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::att() const
 {
     return att_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-HostConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::art() const
+ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::art() const
 {
     return art_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-HostConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::detDF() const
+ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::detDF() const
 {
     return detDF_;
 }
