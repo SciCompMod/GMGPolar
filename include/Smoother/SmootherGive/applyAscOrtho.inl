@@ -5,9 +5,9 @@ namespace smoother_give
 
 template <class LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoCircleGiveInside(int i_r, int i_theta, const PolarGrid<Kokkos::HostSpace>& grid, const LevelCacheType& level_cache,
-                                  bool DirBC_Interior, HostConstVector<double>& x, HostConstVector<double>& rhs,
-                                  HostVector<double>& result)
+nodeApplyAscOrthoCircleGiveInside(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
+                                  bool DirBC_Interior, ConstVector<double>& x, ConstVector<double>& rhs,
+                                  Vector<double>& result)
 {
     assert(i_r >= 0 && i_r < grid.numberSmootherCircles());
 
@@ -54,9 +54,9 @@ nodeApplyAscOrthoCircleGiveInside(int i_r, int i_theta, const PolarGrid<Kokkos::
 
 template <class LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoCircleGiveOutside(int i_r, int i_theta, const PolarGrid<Kokkos::HostSpace>& grid, const LevelCacheType& level_cache,
-                                   bool DirBC_Interior, HostConstVector<double>& x, HostConstVector<double>& rhs,
-                                   HostVector<double>& result)
+nodeApplyAscOrthoCircleGiveOutside(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
+                                   bool DirBC_Interior, ConstVector<double>& x, ConstVector<double>& rhs,
+                                   Vector<double>& result)
 {
     assert(0 <= i_r && i_r <= grid.numberSmootherCircles());
 
@@ -101,9 +101,9 @@ nodeApplyAscOrthoCircleGiveOutside(int i_r, int i_theta, const PolarGrid<Kokkos:
 
 template <class LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoRadialGiveInside(int i_r, int i_theta, const PolarGrid<Kokkos::HostSpace>& grid, const LevelCacheType& level_cache,
-                                  bool DirBC_Interior, HostConstVector<double>& x, HostConstVector<double>& rhs,
-                                  HostVector<double>& result)
+nodeApplyAscOrthoRadialGiveInside(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
+                                  bool DirBC_Interior, ConstVector<double>& x, ConstVector<double>& rhs,
+                                  Vector<double>& result)
 {
     assert(grid.numberSmootherCircles() - 1 <= i_r && i_r < grid.nr());
 
@@ -179,9 +179,9 @@ nodeApplyAscOrthoRadialGiveInside(int i_r, int i_theta, const PolarGrid<Kokkos::
 
 template <class LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoRadialGiveOutside(int i_r, int i_theta, const PolarGrid<Kokkos::HostSpace>& grid, const LevelCacheType& level_cache,
-                                   bool DirBC_Interior, HostConstVector<double>& x, HostConstVector<double>& rhs,
-                                   HostVector<double>& result)
+nodeApplyAscOrthoRadialGiveOutside(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
+                                   bool DirBC_Interior, ConstVector<double>& x, ConstVector<double>& rhs,
+                                   Vector<double>& result)
 {
     assert(grid.numberSmootherCircles() <= i_r && i_r < grid.nr());
 
@@ -226,8 +226,8 @@ nodeApplyAscOrthoRadialGiveOutside(int i_r, int i_theta, const PolarGrid<Kokkos:
 } // namespace smoother_give
 
 template <class LevelCacheType>
-void SmootherGive<LevelCacheType>::applyAscOrthoBlackCircleSection(HostConstVector<double> x,
-                                                                   HostConstVector<double> rhs, HostVector<double> temp)
+void SmootherGive<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<double> x,
+                                                                   ConstVector<double> rhs, Vector<double> temp)
 {
     using smoother_give::nodeApplyAscOrthoCircleGiveInside;
     using smoother_give::nodeApplyAscOrthoCircleGiveOutside;
@@ -239,7 +239,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoBlackCircleSection(HostConstVect
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid<Kokkos::HostSpace>& grid             = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<DefaultMemorySpace>& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 
@@ -255,7 +255,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoBlackCircleSection(HostConstVect
 
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (Black Circle - Inside)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, getBatchCount(start, end, offset)),
+            Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, getBatchCount(start, end, offset)),
             KOKKOS_LAMBDA(const int circle_task) {
                 const int i_r = start + circle_task * offset;
                 // Serial loop to avoid race conditions
@@ -274,7 +274,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoBlackCircleSection(HostConstVect
 
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (Black Circle - Outside: Part 1)",
-            Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
                 {0, 0}, // Starting point of the index space
                 {getBatchCount(start, end, offset), grid.ntheta()} // Ending point of the index space
                 ),
@@ -294,7 +294,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoBlackCircleSection(HostConstVect
 
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (Black Circle - Outside: Part 2)",
-            Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
                 {0, 0}, // Starting point of the index space
                 {getBatchCount(start, end, offset), grid.ntheta()} // Ending point of the index space
                 ),
@@ -309,8 +309,8 @@ void SmootherGive<LevelCacheType>::applyAscOrthoBlackCircleSection(HostConstVect
 }
 
 template <class LevelCacheType>
-void SmootherGive<LevelCacheType>::applyAscOrthoWhiteCircleSection(HostConstVector<double> x,
-                                                                   HostConstVector<double> rhs, HostVector<double> temp)
+void SmootherGive<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<double> x,
+                                                                   ConstVector<double> rhs, Vector<double> temp)
 {
     using smoother_give::nodeApplyAscOrthoCircleGiveInside;
     using smoother_give::nodeApplyAscOrthoCircleGiveOutside;
@@ -322,7 +322,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoWhiteCircleSection(HostConstVect
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid<Kokkos::HostSpace>& grid             = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<DefaultMemorySpace>& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 
@@ -339,7 +339,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoWhiteCircleSection(HostConstVect
 
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (White Circle - Inside)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, getBatchCount(start, end, offset)),
+            Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, getBatchCount(start, end, offset)),
             KOKKOS_LAMBDA(const int circle_task) {
                 const int i_r = start + circle_task * offset;
                 // Serial loop to avoid race conditions
@@ -358,7 +358,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoWhiteCircleSection(HostConstVect
 
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (White Circle - Outside: Part 1)",
-            Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
                 {0, 0}, // Starting point of the index space
                 {getBatchCount(start, end, offset), grid.ntheta()} // Ending point of the index space
                 ),
@@ -378,7 +378,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoWhiteCircleSection(HostConstVect
 
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (White Circle - Outside: Part 2)",
-            Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
                 {0, 0}, // Starting point of the index space
                 {getBatchCount(start, end, offset), grid.ntheta()} // Ending point of the index space
                 ),
@@ -393,8 +393,8 @@ void SmootherGive<LevelCacheType>::applyAscOrthoWhiteCircleSection(HostConstVect
 }
 
 template <class LevelCacheType>
-void SmootherGive<LevelCacheType>::applyAscOrthoBlackRadialSection(HostConstVector<double> x,
-                                                                   HostConstVector<double> rhs, HostVector<double> temp)
+void SmootherGive<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<double> x,
+                                                                   ConstVector<double> rhs, Vector<double> temp)
 {
     using smoother_give::nodeApplyAscOrthoRadialGiveInside;
     using smoother_give::nodeApplyAscOrthoRadialGiveOutside;
@@ -406,7 +406,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoBlackRadialSection(HostConstVect
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid<Kokkos::HostSpace>& grid             = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<DefaultMemorySpace>& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 
@@ -423,7 +423,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoBlackRadialSection(HostConstVect
 
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (Black Radial - Inside)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, getBatchCount(start, end, offset)),
+            Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, getBatchCount(start, end, offset)),
             KOKKOS_LAMBDA(const int radial_task) {
                 const int i_theta = start + radial_task * offset;
                 // Serial loop to avoid race conditions
@@ -442,7 +442,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoBlackRadialSection(HostConstVect
 
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (Black Radial - Outside: Part 1)",
-            Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
                 {0, grid.numberSmootherCircles()}, // Starting point of the index space
                 {getBatchCount(start, end, offset), grid.nr()} // Ending point of the index space
                 ),
@@ -462,7 +462,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoBlackRadialSection(HostConstVect
 
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (Black Radial - Outside: Part 2)",
-            Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
                 {0, grid.numberSmootherCircles()}, // Starting point of the index space
                 {getBatchCount(start, end, offset), grid.nr()} // Ending point of the index space
                 ),
@@ -477,8 +477,8 @@ void SmootherGive<LevelCacheType>::applyAscOrthoBlackRadialSection(HostConstVect
 }
 
 template <class LevelCacheType>
-void SmootherGive<LevelCacheType>::applyAscOrthoWhiteRadialSection(HostConstVector<double> x,
-                                                                   HostConstVector<double> rhs, HostVector<double> temp)
+void SmootherGive<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<double> x,
+                                                                   ConstVector<double> rhs, Vector<double> temp)
 {
     using smoother_give::nodeApplyAscOrthoRadialGiveInside;
     using smoother_give::nodeApplyAscOrthoRadialGiveOutside;
@@ -490,7 +490,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoWhiteRadialSection(HostConstVect
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid<Kokkos::HostSpace>& grid             = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<DefaultMemorySpace>& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 
@@ -507,7 +507,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoWhiteRadialSection(HostConstVect
 
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (White Radial - Inside)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, getBatchCount(start, end, offset)),
+            Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, getBatchCount(start, end, offset)),
             KOKKOS_LAMBDA(const int radial_task) {
                 const int i_theta = start + radial_task * offset;
                 // Serial loop to avoid race conditions
@@ -526,7 +526,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoWhiteRadialSection(HostConstVect
 
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (White Radial - Outside: Part 1)",
-            Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
                 {0, grid.numberSmootherCircles()}, // Starting point of the index space
                 {getBatchCount(start, end, offset), grid.nr()} // Ending point of the index space
                 ),
@@ -546,7 +546,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoWhiteRadialSection(HostConstVect
 
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (White Radial - Outside: Part 2)",
-            Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
                 {0, grid.numberSmootherCircles()}, // Starting point of the index space
                 {getBatchCount(start, end, offset), grid.nr()} // Ending point of the index space
                 ),

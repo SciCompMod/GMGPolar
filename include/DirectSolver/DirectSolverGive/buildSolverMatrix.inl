@@ -7,7 +7,7 @@ namespace direct_solver_give
 
 #ifdef GMGPOLAR_USE_MUMPS
 // When using the MUMPS solver, the matrix is assembled in COO format.
-static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCOO<double, Kokkos::HostSpace>& matrix,
+static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCOO<double>& matrix,
                                                        int ptr, const int offset, const int row, const int column,
                                                        const double value)
 {
@@ -17,7 +17,7 @@ static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCOO<dou
 }
 #else
 // When using the in-house solver, the matrix is stored in CSR format.
-static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCSR<double, Kokkos::HostSpace>& matrix,
+static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCSR<double>& matrix,
                                                        int ptr, const int offset, const int row, const int column,
                                                        const double value)
 {
@@ -28,7 +28,7 @@ static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCSR<dou
 
 template <typename LevelCacheType, typename SystemMatrix>
 static KOKKOS_INLINE_FUNCTION void
-nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid<Kokkos::HostSpace>& grid, const LevelCacheType& level_cache,
+nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
                           const bool DirBC_Interior, const SystemMatrix& solver_matrix)
 {
     /* ---------------------------------------- */
@@ -811,7 +811,7 @@ typename DirectSolverGive<LevelCacheType>::SystemMatrix DirectSolverGive<LevelCa
     using direct_solver_give::nodeBuildSolverMatrixGive;
     using direct_solver_give::validateSolverMatrixIndexing;
 
-    const PolarGrid<Kokkos::HostSpace>& grid             = DirectSolver<LevelCacheType>::grid_;
+    const PolarGrid<DefaultMemorySpace>& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
@@ -821,14 +821,14 @@ typename DirectSolverGive<LevelCacheType>::SystemMatrix DirectSolverGive<LevelCa
 
 #ifdef GMGPOLAR_USE_MUMPS
     const int nnz = getNonZeroCountSolverMatrix(grid, DirBC_Interior);
-    SparseMatrixCOO<double, Kokkos::HostSpace> solver_matrix(n, n, nnz);
+    SparseMatrixCOO<double> solver_matrix(n, n, nnz);
     solver_matrix.is_symmetric(true);
 #else
     std::function<int(int)> nnz_per_row = [&](int global_index) {
         return getStencilSize(global_index, grid, DirBC_Interior);
     };
 
-    SparseMatrixCSR<double, Kokkos::HostSpace> solver_matrix(n, n, nnz_per_row);
+    SparseMatrixCSR<double> solver_matrix(n, n, nnz_per_row);
 #endif
 
     /* ---------------- */
@@ -842,7 +842,7 @@ typename DirectSolverGive<LevelCacheType>::SystemMatrix DirectSolverGive<LevelCa
         const int num_circular_tasks = (num_circle_tasks - start_circle + 2) / 3;
         Kokkos::parallel_for(
             "DirectSolverGive: BuildSolverMatrix (Circular)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, num_circular_tasks),
+            Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, num_circular_tasks),
             KOKKOS_LAMBDA(const int circle_task) {
                 const int i_r = start_circle + circle_task * 3;
                 for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
@@ -865,7 +865,7 @@ typename DirectSolverGive<LevelCacheType>::SystemMatrix DirectSolverGive<LevelCa
     for (int i_theta = 0; i_theta < additional_radial_tasks; i_theta++) {
         Kokkos::parallel_for(
             "DirectSolverGive: BuildSolverMatrix (Radial, additional)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, 1), KOKKOS_LAMBDA(const int) {
+            Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, 1), KOKKOS_LAMBDA(const int) {
                 for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
                     nodeBuildSolverMatrixGive(i_r, i_theta, grid, level_cache, DirBC_Interior, solver_matrix);
                 }
@@ -877,7 +877,7 @@ typename DirectSolverGive<LevelCacheType>::SystemMatrix DirectSolverGive<LevelCa
         const int num_radial_batches = (num_radial_tasks - start_radial + 2) / 3;
         Kokkos::parallel_for(
             "DirectSolverGive: BuildSolverMatrix (Radial)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, num_radial_batches),
+            Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, num_radial_batches),
             KOKKOS_LAMBDA(const int radial_task) {
                 const int i_theta = additional_radial_tasks + start_radial + radial_task * 3;
                 for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {

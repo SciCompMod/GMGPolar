@@ -7,7 +7,7 @@ namespace direct_solver_take
 
 #ifdef GMGPOLAR_USE_MUMPS
 // When using the MUMPS solver, the matrix is assembled in COO format.
-static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCOO<double, Kokkos::HostSpace>& matrix,
+static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCOO<double>& matrix,
                                                        const int ptr, const int offset, const int row, const int column,
                                                        const double value)
 {
@@ -17,7 +17,7 @@ static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCOO<dou
 }
 #else
 // When using the in-house solver, the matrix is stored in CSR format.
-static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCSR<double, Kokkos::HostSpace>& matrix,
+static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCSR<double>& matrix,
                                                        const int ptr, const int offset, const int row, const int column,
                                                        const double value)
 {
@@ -28,10 +28,10 @@ static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCSR<dou
 
 template <typename SystemMatrix>
 static KOKKOS_INLINE_FUNCTION void
-nodeBuildSolverMatrixTake(const int i_r, const int i_theta, const PolarGrid<Kokkos::HostSpace>& grid, const bool DirBC_Interior,
-                          const SystemMatrix& solver_matrix, HostConstVector<double>& arr, HostConstVector<double>& att,
-                          HostConstVector<double>& art, HostConstVector<double>& detDF,
-                          HostConstVector<double>& coeff_beta)
+nodeBuildSolverMatrixTake(const int i_r, const int i_theta, const PolarGrid<DefaultMemorySpace>& grid, const bool DirBC_Interior,
+                          const SystemMatrix& solver_matrix, ConstVector<double>& arr, ConstVector<double>& att,
+                          ConstVector<double>& art, ConstVector<double>& detDF,
+                          ConstVector<double>& coeff_beta)
 {
     int ptr, offset;
     int row, column;
@@ -483,7 +483,7 @@ typename DirectSolverTake<LevelCacheType>::SystemMatrix DirectSolverTake<LevelCa
     using direct_solver_take::nodeBuildSolverMatrixTake;
     using direct_solver_take::validateSolverMatrixIndexing;
 
-    const PolarGrid<Kokkos::HostSpace>& grid             = DirectSolver<LevelCacheType>::grid_;
+    const PolarGrid<DefaultMemorySpace>& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
@@ -493,24 +493,24 @@ typename DirectSolverTake<LevelCacheType>::SystemMatrix DirectSolverTake<LevelCa
 
 #ifdef GMGPOLAR_USE_MUMPS
     const int nnz = getNonZeroCountSolverMatrix(grid, DirBC_Interior);
-    SparseMatrixCOO<double, Kokkos::HostSpace> solver_matrix(n, n, nnz);
+    SparseMatrixCOO<double> solver_matrix(n, n, nnz);
     solver_matrix.is_symmetric(true);
 #else
     std::function<int(int)> nnz_per_row = [&](int global_index) {
         return getStencilSize(global_index, grid, DirBC_Interior);
     };
 
-    SparseMatrixCSR<double, Kokkos::HostSpace> solver_matrix(n, n, nnz_per_row);
+    SparseMatrixCSR<double> solver_matrix(n, n, nnz_per_row);
 #endif
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
 
-    HostConstVector<double> arr        = level_cache.arr();
-    HostConstVector<double> att        = level_cache.att();
-    HostConstVector<double> art        = level_cache.art();
-    HostConstVector<double> detDF      = level_cache.detDF();
-    HostConstVector<double> coeff_beta = level_cache.coeff_beta();
+    ConstVector<double> arr        = level_cache.arr();
+    ConstVector<double> att        = level_cache.att();
+    ConstVector<double> art        = level_cache.art();
+    ConstVector<double> detDF      = level_cache.detDF();
+    ConstVector<double> coeff_beta = level_cache.coeff_beta();
 
     /* We split the loops into two regions to better respect the */
     /* access patterns of the smoother and improve cache locality. */
@@ -518,7 +518,7 @@ typename DirectSolverTake<LevelCacheType>::SystemMatrix DirectSolverTake<LevelCa
     // The For loop matches circular access pattern */
     Kokkos::parallel_for(
         "Residual Take: Apply System Operator (Circular)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, 0}, // Starting point of the index space
             {grid.numberSmootherCircles(), grid.ntheta()} // Ending point of the index space
             ),
@@ -531,7 +531,7 @@ typename DirectSolverTake<LevelCacheType>::SystemMatrix DirectSolverTake<LevelCa
     /* For loop matches radial access pattern */
     Kokkos::parallel_for(
         "Residual Take: Apply System Operator (Radial)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, grid.numberSmootherCircles()}, // Starting point of the index space
             {grid.ntheta(), grid.nr()} // Ending point of the index space
             ),

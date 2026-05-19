@@ -1,7 +1,7 @@
 #pragma once
 
 template <class LevelCacheType>
-ExtrapolatedSmootherTake<LevelCacheType>::ExtrapolatedSmootherTake(const PolarGrid<Kokkos::HostSpace>& grid,
+ExtrapolatedSmootherTake<LevelCacheType>::ExtrapolatedSmootherTake(const PolarGrid<DefaultMemorySpace>& grid,
                                                                    const LevelCacheType& level_cache,
                                                                    const bool DirBC_Interior, const int num_omp_threads)
     : ExtrapolatedSmoother<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
@@ -43,9 +43,13 @@ ExtrapolatedSmootherTake<LevelCacheType>::ExtrapolatedSmootherTake(const PolarGr
 //     are copied back to x.
 
 template <class LevelCacheType>
-void ExtrapolatedSmootherTake<LevelCacheType>::extrapolatedSmoothing(HostVector<double> x, HostConstVector<double> rhs,
-                                                                     HostVector<double> temp)
+void ExtrapolatedSmootherTake<LevelCacheType>::extrapolatedSmoothing(HostVector<double> h_x, HostConstVector<double> h_rhs,
+                                                                     HostVector<double> h_temp)
 {
+	auto x = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_x);
+	auto rhs = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs);
+	auto temp = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_temp);
+
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
@@ -60,4 +64,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::extrapolatedSmoothing(HostVector<
 
     applyAscOrthoWhiteRadialSection(x, rhs, temp);
     solveWhiteRadialSection(x, temp);
+
+	Kokkos::deep_copy(h_x, x);
+	Kokkos::deep_copy(h_temp, temp);
 }

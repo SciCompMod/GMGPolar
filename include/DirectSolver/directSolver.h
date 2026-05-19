@@ -26,7 +26,7 @@ template <class LevelCacheType>
 class DirectSolver
 {
 public:
-    explicit DirectSolver(const PolarGrid<Kokkos::HostSpace>& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
+    explicit DirectSolver(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
                           int num_omp_threads)
         : grid_(grid)
         , level_cache_(level_cache)
@@ -41,7 +41,7 @@ public:
     virtual void solveInPlace(HostVector<double> solution) = 0;
 
 protected:
-    const PolarGrid<Kokkos::HostSpace>& grid_;
+    const PolarGrid<DefaultMemorySpace>& grid_;
     const LevelCacheType& level_cache_;
     const bool DirBC_Interior_;
     const int num_omp_threads_;

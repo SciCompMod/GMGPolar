@@ -15,11 +15,11 @@ static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const BatchedTridiagonalS
 }
 
 static KOKKOS_INLINE_FUNCTION void nodeBuildTridiagonalSolverMatricesCircleSection(
-    const int i_r, const int i_theta, const PolarGrid<Kokkos::HostSpace>& grid, const bool DirBC_Interior,
+    const int i_r, const int i_theta, const PolarGrid<DefaultMemorySpace>& grid, const bool DirBC_Interior,
     const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
-    const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, HostConstVector<double>& arr,
-    HostConstVector<double>& att, HostConstVector<double>& art, HostConstVector<double>& detDF,
-    HostConstVector<double>& coeff_beta)
+    const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, ConstVector<double>& arr,
+    ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF,
+    ConstVector<double>& coeff_beta)
 {
     using extrapolated_smoother_take::updateMatrixElement;
 
@@ -165,11 +165,11 @@ static KOKKOS_INLINE_FUNCTION void nodeBuildTridiagonalSolverMatricesCircleSecti
 }
 
 static KOKKOS_INLINE_FUNCTION void nodeBuildTridiagonalSolverMatricesRadialSection(
-    const int i_r, const int i_theta, const PolarGrid<Kokkos::HostSpace>& grid, const bool DirBC_Interior,
+    const int i_r, const int i_theta, const PolarGrid<DefaultMemorySpace>& grid, const bool DirBC_Interior,
     const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
-    const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, HostConstVector<double>& arr,
-    HostConstVector<double>& att, HostConstVector<double>& art, HostConstVector<double>& detDF,
-    HostConstVector<double>& coeff_beta)
+    const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, ConstVector<double>& arr,
+    ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF,
+    ConstVector<double>& coeff_beta)
 {
     using extrapolated_smoother_take::updateMatrixElement;
 
@@ -535,18 +535,18 @@ void ExtrapolatedSmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
     using extrapolated_smoother_take::nodeBuildTridiagonalSolverMatricesCircleSection;
     using extrapolated_smoother_take::nodeBuildTridiagonalSolverMatricesRadialSection;
 
-    const PolarGrid<Kokkos::HostSpace>& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid<DefaultMemorySpace>& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
 
-    HostConstVector<double> arr        = level_cache.arr();
-    HostConstVector<double> att        = level_cache.att();
-    HostConstVector<double> art        = level_cache.art();
-    HostConstVector<double> detDF      = level_cache.detDF();
-    HostConstVector<double> coeff_beta = level_cache.coeff_beta();
+    ConstVector<double> arr        = level_cache.arr();
+    ConstVector<double> att        = level_cache.att();
+    ConstVector<double> art        = level_cache.art();
+    ConstVector<double> detDF      = level_cache.detDF();
+    ConstVector<double> coeff_beta = level_cache.coeff_beta();
 
     const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver = circle_tridiagonal_solver_;
     const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver = radial_tridiagonal_solver_;
@@ -557,7 +557,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
     // The For loop matches circular access pattern */
     Kokkos::parallel_for(
         "Extrapolated Smoother Take: Build Tridiagonal Matrices (Circular)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, 0}, // Starting point of the index space
             {grid.numberSmootherCircles(), grid.ntheta()} // Ending point of the index space
             ),
@@ -571,7 +571,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
     /* For loop matches radial access pattern */
     Kokkos::parallel_for(
         "Extrapolated Smoother Take: Build Tridiagonal Matrices (Radial)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, grid.numberSmootherCircles()}, // Starting point of the index space
             {grid.ntheta(), grid.nr()} // Ending point of the index space
             ),

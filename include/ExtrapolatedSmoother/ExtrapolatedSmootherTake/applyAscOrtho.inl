@@ -4,10 +4,10 @@ namespace extrapolated_smoother_take
 {
 
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoCircleTake(const int i_r, const int i_theta, const PolarGrid<Kokkos::HostSpace>& grid, const bool DirBC_Interior,
-                            HostConstVector<double>& x, HostConstVector<double>& rhs, HostVector<double>& result,
-                            HostConstVector<double>& arr, HostConstVector<double>& att, HostConstVector<double>& art,
-                            HostConstVector<double>& detDF, HostConstVector<double>& coeff_beta)
+nodeApplyAscOrthoCircleTake(const int i_r, const int i_theta, const PolarGrid<DefaultMemorySpace>& grid, const bool DirBC_Interior,
+                            ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
+                            ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art,
+                            ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
 {
     KOKKOS_ASSERT(i_r >= 0 && i_r <= grid.numberSmootherCircles());
 
@@ -186,11 +186,11 @@ nodeApplyAscOrthoCircleTake(const int i_r, const int i_theta, const PolarGrid<Ko
 }
 
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid<Kokkos::HostSpace>& grid, bool DirBC_Interior,
-                            HostConstVector<double>& x, HostConstVector<double>& rhs, HostVector<double>& result,
-                            HostConstVector<double>& arr, const HostConstVector<double>& att,
-                            HostConstVector<double>& art, const HostConstVector<double>& detDF,
-                            HostConstVector<double>& coeff_beta)
+nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid, bool DirBC_Interior,
+                            ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
+                            ConstVector<double>& arr, const ConstVector<double>& att,
+                            ConstVector<double>& art, const ConstVector<double>& detDF,
+                            ConstVector<double>& coeff_beta)
 {
     assert(i_r >= grid.numberSmootherCircles() - 1 && i_r < grid.nr());
 
@@ -462,24 +462,24 @@ nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid<Kokkos::HostSp
 } // namespace extrapolated_smoother_take
 
 template <class LevelCacheType>
-void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(HostConstVector<double> x,
-                                                                               HostConstVector<double> rhs,
-                                                                               HostVector<double> temp)
+void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<double> x,
+                                                                               ConstVector<double> rhs,
+                                                                               Vector<double> temp)
 {
     using extrapolated_smoother_take::nodeApplyAscOrthoCircleTake;
 
-    const PolarGrid<Kokkos::HostSpace>& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid<DefaultMemorySpace>& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
 
-    HostConstVector<double> arr        = level_cache.arr();
-    HostConstVector<double> att        = level_cache.att();
-    HostConstVector<double> art        = level_cache.art();
-    HostConstVector<double> detDF      = level_cache.detDF();
-    HostConstVector<double> coeff_beta = level_cache.coeff_beta();
+    ConstVector<double> arr        = level_cache.arr();
+    ConstVector<double> att        = level_cache.att();
+    ConstVector<double> art        = level_cache.art();
+    ConstVector<double> detDF      = level_cache.detDF();
+    ConstVector<double> coeff_beta = level_cache.coeff_beta();
 
     /* The outer most circle next to the radial section is defined to be black. */
     const int start_black_circles = (grid.numberSmootherCircles() % 2 == 0) ? 1 : 0;
@@ -487,7 +487,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(H
 
     Kokkos::parallel_for(
         "ExtrapolatedSmootherTake: ApplyAscOrtho (Black Circular)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, 0}, // Starting point of the index space
             {num_black_circles, grid.ntheta()} // Ending point of the index space
             ),
@@ -502,13 +502,13 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(H
 }
 
 template <class LevelCacheType>
-void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(HostConstVector<double> x,
-                                                                               HostConstVector<double> rhs,
-                                                                               HostVector<double> temp)
+void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<double> x,
+                                                                               ConstVector<double> rhs,
+                                                                               Vector<double> temp)
 {
     using extrapolated_smoother_take::nodeApplyAscOrthoCircleTake;
 
-    const PolarGrid<Kokkos::HostSpace>& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid<DefaultMemorySpace>& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
     const int num_omp_threads         = ExtrapolatedSmoother<LevelCacheType>::num_omp_threads_;
@@ -516,11 +516,11 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(H
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
 
-    HostConstVector<double> arr        = level_cache.arr();
-    HostConstVector<double> att        = level_cache.att();
-    HostConstVector<double> art        = level_cache.art();
-    HostConstVector<double> detDF      = level_cache.detDF();
-    HostConstVector<double> coeff_beta = level_cache.coeff_beta();
+    ConstVector<double> arr        = level_cache.arr();
+    ConstVector<double> att        = level_cache.att();
+    ConstVector<double> art        = level_cache.art();
+    ConstVector<double> detDF      = level_cache.detDF();
+    ConstVector<double> coeff_beta = level_cache.coeff_beta();
 
     /* The outer most circle next to the radial section is defined to be black. */
     const int start_white_circles = (grid.numberSmootherCircles() % 2 == 0) ? 0 : 1;
@@ -528,7 +528,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(H
 
     Kokkos::parallel_for(
         "ExtrapolatedSmootherTake: ApplyAscOrtho (White Circular)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, 0}, // Starting point of the index space
             {num_white_circles, grid.ntheta()} // Ending point of the index space
             ),
@@ -543,13 +543,13 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(H
 }
 
 template <class LevelCacheType>
-void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(HostConstVector<double> x,
-                                                                               HostConstVector<double> rhs,
-                                                                               HostVector<double> temp)
+void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<double> x,
+                                                                               ConstVector<double> rhs,
+                                                                               Vector<double> temp)
 {
     using extrapolated_smoother_take::nodeApplyAscOrthoRadialTake;
 
-    const PolarGrid<Kokkos::HostSpace>& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid<DefaultMemorySpace>& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
     const int num_omp_threads         = ExtrapolatedSmoother<LevelCacheType>::num_omp_threads_;
@@ -557,11 +557,11 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(H
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
 
-    HostConstVector<double> arr        = level_cache.arr();
-    HostConstVector<double> att        = level_cache.att();
-    HostConstVector<double> art        = level_cache.art();
-    HostConstVector<double> detDF      = level_cache.detDF();
-    HostConstVector<double> coeff_beta = level_cache.coeff_beta();
+    ConstVector<double> arr        = level_cache.arr();
+    ConstVector<double> att        = level_cache.att();
+    ConstVector<double> art        = level_cache.art();
+    ConstVector<double> detDF      = level_cache.detDF();
+    ConstVector<double> coeff_beta = level_cache.coeff_beta();
 
     assert(grid.ntheta() % 2 == 0);
     const int start_black_radials    = 0;
@@ -569,7 +569,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(H
 
     Kokkos::parallel_for(
         "ExtrapolatedSmootherTake: ApplyAscOrtho (Black Radial)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, grid.numberSmootherCircles()}, // Starting point of the index space
             {num_black_radial_lines, grid.nr()} // Ending point of the index space
             ),
@@ -584,13 +584,13 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(H
 }
 
 template <class LevelCacheType>
-void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(HostConstVector<double> x,
-                                                                               HostConstVector<double> rhs,
-                                                                               HostVector<double> temp)
+void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<double> x,
+                                                                               ConstVector<double> rhs,
+                                                                               Vector<double> temp)
 {
     using extrapolated_smoother_take::nodeApplyAscOrthoRadialTake;
 
-    const PolarGrid<Kokkos::HostSpace>& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid<DefaultMemorySpace>& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
     const int num_omp_threads         = ExtrapolatedSmoother<LevelCacheType>::num_omp_threads_;
@@ -598,11 +598,11 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(H
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
 
-    HostConstVector<double> arr        = level_cache.arr();
-    HostConstVector<double> att        = level_cache.att();
-    HostConstVector<double> art        = level_cache.art();
-    HostConstVector<double> detDF      = level_cache.detDF();
-    HostConstVector<double> coeff_beta = level_cache.coeff_beta();
+    ConstVector<double> arr        = level_cache.arr();
+    ConstVector<double> att        = level_cache.att();
+    ConstVector<double> art        = level_cache.art();
+    ConstVector<double> detDF      = level_cache.detDF();
+    ConstVector<double> coeff_beta = level_cache.coeff_beta();
 
     assert(grid.ntheta() % 2 == 0);
     const int start_white_radials    = 1;
@@ -610,7 +610,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(H
 
     Kokkos::parallel_for(
         "ExtrapolatedSmootherTake: ApplyAscOrtho (White Radial)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, grid.numberSmootherCircles()}, // Starting point of the index space
             {num_white_radial_lines, grid.nr()} // Ending point of the index space
             ),

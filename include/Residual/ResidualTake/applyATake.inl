@@ -3,12 +3,12 @@
 namespace residual_take
 {
 
-static KOKKOS_INLINE_FUNCTION void node_apply_a_take(const int i_r, const int i_theta, const PolarGrid<Kokkos::HostSpace>& grid,
-                                                     bool DirBC_Interior, HostVector<double>& result,
-                                                     HostConstVector<double>& x, HostConstVector<double>& arr,
-                                                     HostConstVector<double>& att, HostConstVector<double>& art,
-                                                     HostConstVector<double>& detDF,
-                                                     HostConstVector<double>& coeff_beta)
+static KOKKOS_INLINE_FUNCTION void node_apply_a_take(const int i_r, const int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
+                                                     bool DirBC_Interior, Vector<double>& result,
+                                                     ConstVector<double>& x, ConstVector<double>& arr,
+                                                     ConstVector<double>& att, ConstVector<double>& art,
+                                                     ConstVector<double>& detDF,
+                                                     ConstVector<double>& coeff_beta)
 {
     const int center = grid.index(i_r, i_theta);
 
@@ -66,23 +66,26 @@ static KOKKOS_INLINE_FUNCTION void node_apply_a_take(const int i_r, const int i_
 } // namespace residual_take
 
 template <class LevelCacheType>
-void ResidualTake<LevelCacheType>::applySystemOperator(HostVector<double> result, HostConstVector<double> x) const
+void ResidualTake<LevelCacheType>::applySystemOperator(HostVector<double> h_result, HostConstVector<double> h_x) const
 {
-    assert(result.size() == x.size());
-
     using residual_take::node_apply_a_take;
 
-    const PolarGrid<Kokkos::HostSpace>& grid     = Residual<LevelCacheType>::grid_;
+	auto x = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_x);
+	auto result = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_result);
+
+    assert(result.size() == x.size());
+
+    const PolarGrid<DefaultMemorySpace>& grid     = Residual<LevelCacheType>::grid_;
     const bool DirBC_Interior = Residual<LevelCacheType>::DirBC_Interior_;
 
     assert(Residual<LevelCacheType>::level_cache_.cacheDensityProfileCoefficients());
     assert(Residual<LevelCacheType>::level_cache_.cacheDomainGeometry());
 
-    HostConstVector<double> arr        = Residual<LevelCacheType>::level_cache_.arr();
-    HostConstVector<double> att        = Residual<LevelCacheType>::level_cache_.att();
-    HostConstVector<double> art        = Residual<LevelCacheType>::level_cache_.art();
-    HostConstVector<double> detDF      = Residual<LevelCacheType>::level_cache_.detDF();
-    HostConstVector<double> coeff_beta = Residual<LevelCacheType>::level_cache_.coeff_beta();
+    ConstVector<double> arr        = Residual<LevelCacheType>::level_cache_.arr();
+    ConstVector<double> att        = Residual<LevelCacheType>::level_cache_.att();
+    ConstVector<double> art        = Residual<LevelCacheType>::level_cache_.art();
+    ConstVector<double> detDF      = Residual<LevelCacheType>::level_cache_.detDF();
+    ConstVector<double> coeff_beta = Residual<LevelCacheType>::level_cache_.coeff_beta();
 
     /* We split the loops into two regions to better respect the */
     /* access patterns of the smoother and improve cache locality. */
@@ -90,7 +93,7 @@ void ResidualTake<LevelCacheType>::applySystemOperator(HostVector<double> result
     // The For loop matches circular access pattern */
     Kokkos::parallel_for(
         "Residual Take: Apply System Operator (Circular)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, 0}, // Starting point of the index space
             {grid.numberSmootherCircles(), grid.ntheta()} // Ending point of the index space
             ),
@@ -102,7 +105,7 @@ void ResidualTake<LevelCacheType>::applySystemOperator(HostVector<double> result
     /* For loop matches radial access pattern */
     Kokkos::parallel_for(
         "Residual Take: Apply System Operator (Radial)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, grid.numberSmootherCircles()}, // Starting point of the index space
             {grid.ntheta(), grid.nr()} // Ending point of the index space
             ),
@@ -112,4 +115,6 @@ void ResidualTake<LevelCacheType>::applySystemOperator(HostVector<double> result
         });
 
     Kokkos::fence();
+
+	Kokkos::deep_copy(h_result, result);
 }

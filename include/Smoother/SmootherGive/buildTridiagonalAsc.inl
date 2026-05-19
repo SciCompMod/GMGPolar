@@ -16,7 +16,7 @@ static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const BatchedTridiagonalS
 
 template <typename LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
-nodeBuildTridiagonalSolverMatricesCircleSection(const int i_r, const int i_theta, const PolarGrid<Kokkos::HostSpace>& grid,
+nodeBuildTridiagonalSolverMatricesCircleSection(const int i_r, const int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
                                                 const LevelCacheType& level_cache, const bool DirBC_Interior,
                                                 const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
                                                 const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver)
@@ -192,7 +192,7 @@ nodeBuildTridiagonalSolverMatricesCircleSection(const int i_r, const int i_theta
 
 template <typename LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
-nodeBuildTridiagonalSolverMatricesRadialSection(const int i_r, const int i_theta, const PolarGrid<Kokkos::HostSpace>& grid,
+nodeBuildTridiagonalSolverMatricesRadialSection(const int i_r, const int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
                                                 const LevelCacheType& level_cache, const bool DirBC_Interior,
                                                 const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
                                                 const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver)
@@ -520,7 +520,7 @@ void SmootherGive<LevelCacheType>::buildTridiagonalSolverMatrices()
     using smoother_give::nodeBuildTridiagonalSolverMatricesCircleSection;
     using smoother_give::nodeBuildTridiagonalSolverMatricesRadialSection;
 
-    const PolarGrid<Kokkos::HostSpace>& grid             = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<DefaultMemorySpace>& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 
@@ -538,7 +538,7 @@ void SmootherGive<LevelCacheType>::buildTridiagonalSolverMatrices()
         const int num_circular_tasks = (num_circle_tasks - start_circle + 2) / 3;
         Kokkos::parallel_for(
             "SmootherGive: buildTridiagonalSolverMatrices (Circular)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, num_circular_tasks),
+            Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, num_circular_tasks),
             KOKKOS_LAMBDA(const int circle_task) {
                 const int i_r = start_circle + circle_task * 3;
                 for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
@@ -563,7 +563,7 @@ void SmootherGive<LevelCacheType>::buildTridiagonalSolverMatrices()
     for (int i_theta = 0; i_theta < additional_radial_tasks; i_theta++) {
         Kokkos::parallel_for(
             "SmootherGive: buildTridiagonalSolverMatrices (Radial, additional)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, 1), KOKKOS_LAMBDA(const int) {
+            Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, 1), KOKKOS_LAMBDA(const int) {
                 for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
                     nodeBuildTridiagonalSolverMatricesRadialSection(i_r, i_theta, grid, level_cache, DirBC_Interior,
                                                                     circle_tridiagonal_solver,
@@ -577,7 +577,7 @@ void SmootherGive<LevelCacheType>::buildTridiagonalSolverMatrices()
         const int num_radial_batches = (num_radial_tasks - start_radial + 2) / 3;
         Kokkos::parallel_for(
             "SmootherGive: buildTridiagonalSolverMatrices (Radial)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, num_radial_batches),
+            Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, num_radial_batches),
             KOKKOS_LAMBDA(const int radial_task) {
                 const int i_theta = additional_radial_tasks + start_radial + radial_task * 3;
                 for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {

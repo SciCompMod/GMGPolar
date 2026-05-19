@@ -8,7 +8,7 @@ namespace smoother_give
 #ifdef GMGPOLAR_USE_MUMPS
 // When using the MUMPS solver, the matrix is assembled in COO format.
 static KOKKOS_INLINE_FUNCTION void
-update_CSR_COO_MatrixElement(const SparseMatrixCOO<double, Kokkos::HostSpace>& matrix, const int ptr, const int offset,
+update_CSR_COO_MatrixElement(const SparseMatrixCOO<double>& matrix, const int ptr, const int offset,
                              const int row, const int column, const double value)
 {
     matrix.set_row_index(ptr + offset, row);
@@ -18,7 +18,7 @@ update_CSR_COO_MatrixElement(const SparseMatrixCOO<double, Kokkos::HostSpace>& m
 #else
 // When using the in-house solver, the matrix is stored in CSR format.
 static KOKKOS_INLINE_FUNCTION void
-update_CSR_COO_MatrixElement(const SparseMatrixCSR<double, Kokkos::HostSpace>& matrix, const int ptr, const int offset,
+update_CSR_COO_MatrixElement(const SparseMatrixCSR<double>& matrix, const int ptr, const int offset,
                              const int row, const int column, const double value)
 {
     matrix.set_row_nz_index(row, offset, column);
@@ -28,7 +28,7 @@ update_CSR_COO_MatrixElement(const SparseMatrixCSR<double, Kokkos::HostSpace>& m
 
 template <typename LevelCacheType, typename InnerBoundaryMatrix>
 static KOKKOS_INLINE_FUNCTION void
-nodeBuildInteriorBoundarySolverMatrix_i_r_0(const int i_theta, const PolarGrid<Kokkos::HostSpace>& grid, const LevelCacheType& level_cache,
+nodeBuildInteriorBoundarySolverMatrix_i_r_0(const int i_theta, const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
                                             const bool DirBC_Interior, const InnerBoundaryMatrix& matrix)
 {
     using smoother_give::getCircleAscIndex;
@@ -200,7 +200,7 @@ nodeBuildInteriorBoundarySolverMatrix_i_r_0(const int i_theta, const PolarGrid<K
 
 template <typename LevelCacheType, typename InnerBoundaryMatrix>
 static KOKKOS_INLINE_FUNCTION void
-nodeBuildInteriorBoundarySolverMatrix_i_r_1(const int i_theta, const PolarGrid<Kokkos::HostSpace>& grid, const LevelCacheType& level_cache,
+nodeBuildInteriorBoundarySolverMatrix_i_r_1(const int i_theta, const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
                                             const bool DirBC_Interior, const InnerBoundaryMatrix& matrix)
 {
     using smoother_give::getCircleAscIndex;
@@ -261,7 +261,7 @@ SmootherGive<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     using smoother_give::nodeBuildInteriorBoundarySolverMatrix_i_r_0;
     using smoother_give::nodeBuildInteriorBoundarySolverMatrix_i_r_1;
 
-    const PolarGrid<Kokkos::HostSpace>& grid             = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<DefaultMemorySpace>& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 
@@ -276,19 +276,19 @@ SmootherGive<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     // which is extracted by the COO_Mumps_Solver internally.
 #ifdef GMGPOLAR_USE_MUMPS
     const int nnz = getNonZeroCountCircleAsc(i_r, grid, DirBC_Interior);
-    SparseMatrixCOO<double, Kokkos::HostSpace> inner_boundary_solver_matrix(ntheta, ntheta, nnz);
+    SparseMatrixCOO<double> inner_boundary_solver_matrix(ntheta, ntheta, nnz);
     inner_boundary_solver_matrix.is_symmetric(true);
 #else
     // The stencils size for the inner boundary matrix is either 1 (Dirichlet BC) or 4 (across-origin discretization).
     std::function<int(int)> nnz_per_row = [&](int i_theta) {
         return DirBC_Interior ? 1 : 4;
     };
-    SparseMatrixCSR<double, Kokkos::HostSpace> inner_boundary_solver_matrix(ntheta, ntheta, nnz_per_row);
+    SparseMatrixCSR<double> inner_boundary_solver_matrix(ntheta, ntheta, nnz_per_row);
 #endif
 
     {
         Kokkos::parallel_for(
-            "SmootherGive: BuildInnerBoundaryMatrix", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, 1),
+            "SmootherGive: BuildInnerBoundaryMatrix", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, 1),
             KOKKOS_LAMBDA(const int) {
                 for (int i_theta = 0; i_theta < ntheta; i_theta++) {
                     nodeBuildInteriorBoundarySolverMatrix_i_r_0(i_theta, grid, level_cache, DirBC_Interior,
@@ -299,7 +299,7 @@ SmootherGive<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     }
     {
         Kokkos::parallel_for(
-            "SmootherGive: BuildInnerBoundaryMatrix", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, 1),
+            "SmootherGive: BuildInnerBoundaryMatrix", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, 1),
             KOKKOS_LAMBDA(const int) {
                 for (int i_theta = 0; i_theta < ntheta; i_theta++) {
                     nodeBuildInteriorBoundarySolverMatrix_i_r_1(i_theta, grid, level_cache, DirBC_Interior,

@@ -9,7 +9,7 @@ template <class LevelCacheType>
 class ResidualTake : public Residual<LevelCacheType>
 {
 public:
-    explicit ResidualTake(const PolarGrid<Kokkos::HostSpace>& grid, const LevelCacheType& level_cache, const bool DirBC_Interior,
+    explicit ResidualTake(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache, const bool DirBC_Interior,
                           const int num_omp_threads);
     KOKKOS_DEFAULTED_FUNCTION ResidualTake(const ResidualTake&) = default;
     KOKKOS_DEFAULTED_FUNCTION ~ResidualTake() override          = default;
