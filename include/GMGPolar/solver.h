@@ -95,7 +95,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
     /* ---------------------------------------------- */
     LIKWID_STOP("Solver");
     auto start_check_exact_error = std::chrono::high_resolution_clock::now();
-    // fill exact solution on host to avoid repeat same comptuation
+    // fill exact solution on host to avoid repeat same computation
     HostVector<double> exact_sol("exact_sol", level.solution().size());
     const PolarGrid& grid = level.grid();
     Kokkos::parallel_for(
