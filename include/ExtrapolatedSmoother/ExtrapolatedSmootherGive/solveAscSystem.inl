@@ -11,16 +11,19 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackCircleSection(HostVecto
 
     bool is_inner_circle_black = grid.numberSmootherCircles() % 2 != 0;
 
+    // Tridiagonal Solve
     if (!is_inner_circle_black) {
         int batch_offset = 1;
         int batch_stride = 2;
         circle_tridiagonal_solver_.solve(circle_section, batch_offset, batch_stride);
     }
     else {
+        // Diagonal Solve
         int batch_offset = 2;
         int batch_stride = 2;
         circle_tridiagonal_solver_.solve_diagonal(circle_section, batch_offset, batch_stride);
 
+        // Inner Boundary Solve
         HostVector<double> inner_boundary = Kokkos::subview(temp, Kokkos::make_pair(0, grid.ntheta()));
         inner_boundary_solver_.solveInPlace(inner_boundary);
     }
@@ -51,16 +54,19 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveWhiteCircleSection(HostVecto
 
     bool is_inner_circle_white = grid.numberSmootherCircles() % 2 == 0;
 
+    // Tridiagonal Solve
     if (!is_inner_circle_white) {
         int batch_offset = 1;
         int batch_stride = 2;
         circle_tridiagonal_solver_.solve(circle_section, batch_offset, batch_stride);
     }
     else {
+        // Diagonal Solve
         int batch_offset = 2;
         int batch_stride = 2;
         circle_tridiagonal_solver_.solve_diagonal(circle_section, batch_offset, batch_stride);
 
+        // Inner Boundary Solve
         HostVector<double> inner_boundary = Kokkos::subview(temp, Kokkos::make_pair(0, grid.ntheta()));
         inner_boundary_solver_.solveInPlace(inner_boundary);
     }
@@ -89,6 +95,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackRadialSection(HostVecto
     int end                           = grid.numberOfNodes();
     HostVector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
+    // Diagonal Solve
     int batch_offset = 0;
     int batch_stride = 2;
     radial_tridiagonal_solver_.solve_diagonal(radial_section, batch_offset, batch_stride);
@@ -118,6 +125,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveWhiteRadialSection(HostVecto
     int end                           = grid.numberOfNodes();
     HostVector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
+    // Tridiagonal Solve
     int batch_offset = 1;
     int batch_stride = 2;
     radial_tridiagonal_solver_.solve(radial_section, batch_offset, batch_stride);
