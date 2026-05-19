@@ -3,8 +3,7 @@
 template <class LevelCacheType>
 void SmootherTake<LevelCacheType>::solveBlackCircleSection(HostVector<double> x, HostVector<double> temp)
 {
-    const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
-    const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
+    const PolarGrid& grid = Smoother<LevelCacheType>::grid_;
 
     int start                         = 0;
     int end                           = grid.numberCircularSmootherNodes();
@@ -44,8 +43,7 @@ void SmootherTake<LevelCacheType>::solveBlackCircleSection(HostVector<double> x,
 template <class LevelCacheType>
 void SmootherTake<LevelCacheType>::solveWhiteCircleSection(HostVector<double> x, HostVector<double> temp)
 {
-    const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
-    const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
+    const PolarGrid& grid = Smoother<LevelCacheType>::grid_;
 
     int start                         = 0;
     int end                           = grid.numberCircularSmootherNodes();
@@ -85,8 +83,7 @@ void SmootherTake<LevelCacheType>::solveWhiteCircleSection(HostVector<double> x,
 template <class LevelCacheType>
 void SmootherTake<LevelCacheType>::solveBlackRadialSection(HostVector<double> x, HostVector<double> temp)
 {
-    const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
-    const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
+    const PolarGrid& grid = Smoother<LevelCacheType>::grid_;
 
     int start                         = grid.numberCircularSmootherNodes();
     int end                           = grid.numberOfNodes();
@@ -119,8 +116,7 @@ void SmootherTake<LevelCacheType>::solveBlackRadialSection(HostVector<double> x,
 template <class LevelCacheType>
 void SmootherTake<LevelCacheType>::solveWhiteRadialSection(HostVector<double> x, HostVector<double> temp)
 {
-    const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
-    const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
+    const PolarGrid& grid = Smoother<LevelCacheType>::grid_;
 
     int start                         = grid.numberCircularSmootherNodes();
     int end                           = grid.numberOfNodes();

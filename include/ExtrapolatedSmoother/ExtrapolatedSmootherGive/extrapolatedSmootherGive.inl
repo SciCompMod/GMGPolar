@@ -3,8 +3,8 @@
 template <class LevelCacheType>
 ExtrapolatedSmootherGive<LevelCacheType>::ExtrapolatedSmootherGive(const PolarGrid& grid,
                                                                    const LevelCacheType& level_cache,
-                                                                   const bool DirBC_Interior, const int num_omp_threads)
-    : ExtrapolatedSmoother<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
+                                                                   const bool DirBC_Interior)
+    : ExtrapolatedSmoother<LevelCacheType>(grid, level_cache, DirBC_Interior)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
     , radial_tridiagonal_solver_(grid.lengthRadialSmoother(), grid.ntheta(), false)
 #ifdef GMGPOLAR_USE_MUMPS
@@ -56,7 +56,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(HostVector<
     // The For loop matches circular access pattern
     Kokkos::parallel_for(
         "ExtrapolatedSmootherGive: Init Temp (Circular)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>(
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
             {0, 0}, {grid.numberSmootherCircles(), grid.ntheta()}),
         KOKKOS_LAMBDA(const int i_r, const int i_theta) {
             const int index = grid.index(i_r, i_theta);
@@ -66,8 +66,8 @@ void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(HostVector<
     // The For loop matches radial access pattern
     Kokkos::parallel_for(
         "ExtrapolatedSmootherGive: Init Temp (Radial)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
-                                                                              {grid.ntheta(), grid.nr()}),
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
+                                                                                  {grid.ntheta(), grid.nr()}),
         KOKKOS_LAMBDA(const int i_theta, const int i_r) {
             const int index = grid.index(i_r, i_theta);
             temp[index]     = (i_r & 1 || i_theta & 1) ? rhs[index] : x[index];

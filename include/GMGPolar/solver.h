@@ -524,7 +524,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolation(in
     assert(std::ssize(fine_values) == fineGrid.numberOfNodes());
     assert(std::ssize(coarse_values) == coarseGrid.numberOfNodes());
 
-#pragma omp parallel num_threads(max_omp_threads_)
+#pragma omp parallel
     {
 /* Circluar Indexing Section */
 /* For loop matches circular access pattern */
@@ -606,7 +606,7 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
     assert(std::ssize(solution) == grid.numberOfNodes());
 
     Kokkos::parallel_for(
-        "compute error on device",
+        "compute error on host",
         Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, 0}, {grid.nr(), grid.ntheta()}),
         KOKKOS_LAMBDA(const int i_r, const int i_theta) {
             double r     = grid.radius(i_r);
