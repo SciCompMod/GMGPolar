@@ -511,7 +511,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolation(in
     assert(std::ssize(fine_values) == fineGrid.numberOfNodes());
     assert(std::ssize(coarse_values) == coarseGrid.numberOfNodes());
 
-#pragma omp parallel num_threads(max_omp_threads_)
+#pragma omp parallel
     {
 /* Circluar Indexing Section */
 /* For loop matches circular access pattern */
@@ -592,7 +592,7 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
     assert(solution.size() == error.size());
     assert(std::ssize(solution) == grid.numberOfNodes());
 
-#pragma omp parallel num_threads(max_omp_threads_)
+#pragma omp parallel
     {
 #pragma omp for nowait
         for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {

@@ -64,7 +64,7 @@ TEST(ProlongationTest, ProlongationMatchesStencil)
     PolarGrid<Kokkos::HostSpace> fine_grid(fine_radii, fine_angles);
     PolarGrid<Kokkos::HostSpace> coarse_grid = coarseningGrid(fine_grid);
 
-    Interpolation I(/*threads*/ 16, /*DirBC*/ true);
+    Interpolation I(/*DirBC*/ true);
 
     HostVector<double> coarse_values = generate_random_sample_data(coarse_grid, 1234);
     HostVector<double> fine_result("fine_result", fine_grid.numberOfNodes());

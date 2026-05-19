@@ -149,7 +149,6 @@ SmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     const PolarGrid<DefaultMemorySpace>& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
-    const int num_omp_threads         = Smoother<LevelCacheType>::num_omp_threads_;
 
     const int i_r    = 0;
     const int ntheta = grid.ntheta();

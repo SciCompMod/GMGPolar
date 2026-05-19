@@ -171,9 +171,6 @@ get_gmgpolar_error(PolarGrid<Kokkos::HostSpace> const& grid, CzarnyGeometry cons
     gmgpolar.verbose(0);
     gmgpolar.paraview(false);
 
-    // --- Parallelization settings --- //
-    gmgpolar.maxOpenMPThreads(1);
-
     // --- Discretization and method settings --- //
     gmgpolar.DirBC_Interior(false); // Use across-origin calculation
     gmgpolar.stencilDistributionMethod(StencilDistributionMethod::CPU_TAKE);

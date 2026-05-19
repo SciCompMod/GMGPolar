@@ -27,12 +27,10 @@ template <class LevelCacheType>
 class Smoother
 {
 public:
-    explicit Smoother(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
-                      int num_omp_threads)
+    explicit Smoother(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache, bool DirBC_Interior)
         : grid_(grid)
         , level_cache_(level_cache)
         , DirBC_Interior_(DirBC_Interior)
-        , num_omp_threads_(num_omp_threads)
     {
     }
     KOKKOS_DEFAULTED_FUNCTION Smoother(const Smoother&) = default;
@@ -44,6 +42,5 @@ protected:
     const PolarGrid<DefaultMemorySpace> grid_;
     const LevelCacheType level_cache_;
     const bool DirBC_Interior_;
-    const int num_omp_threads_;
 };
 } // namespace gmgpolar

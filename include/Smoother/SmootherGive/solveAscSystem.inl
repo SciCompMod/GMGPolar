@@ -3,8 +3,7 @@
 template <class LevelCacheType>
 void SmootherGive<LevelCacheType>::solveBlackCircleSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid<DefaultMemorySpace>& grid     = Smoother<LevelCacheType>::grid_;
-    const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
+    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
 
     const int start                   = 0;
     const int end                     = grid.numberCircularSmootherNodes();
@@ -45,7 +44,6 @@ template <class LevelCacheType>
 void SmootherGive<LevelCacheType>::solveWhiteCircleSection(Vector<double> x, Vector<double> temp)
 {
     const PolarGrid<DefaultMemorySpace>& grid     = Smoother<LevelCacheType>::grid_;
-    const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
     const int start                   = 0;
     const int end                     = grid.numberCircularSmootherNodes();
@@ -86,7 +84,6 @@ template <class LevelCacheType>
 void SmootherGive<LevelCacheType>::solveBlackRadialSection(Vector<double> x, Vector<double> temp)
 {
     const PolarGrid<DefaultMemorySpace>& grid     = Smoother<LevelCacheType>::grid_;
-    const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
     const int start                   = grid.numberCircularSmootherNodes();
     const int end                     = grid.numberOfNodes();
@@ -120,7 +117,6 @@ template <class LevelCacheType>
 void SmootherGive<LevelCacheType>::solveWhiteRadialSection(Vector<double> x, Vector<double> temp)
 {
     const PolarGrid<DefaultMemorySpace>& grid     = Smoother<LevelCacheType>::grid_;
-    const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
     const int start                   = grid.numberCircularSmootherNodes();
     const int end                     = grid.numberOfNodes();

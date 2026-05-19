@@ -39,7 +39,6 @@ public:
     // Control Parameters
     int verbose() const;
     bool paraview() const;
-    int maxOpenMPThreads() const;
     bool DirBC_Interior() const;
     StencilDistributionMethod stencilDistributionMethod() const;
     bool cacheDensityProfileCoefficients() const;
@@ -89,8 +88,6 @@ private:
     // General solver output and visualization settings
     int verbose_;
     bool paraview_;
-    // Parallelization and threading settings
-    int max_omp_threads_;
     // Numerical method setup
     bool DirBC_Interior_;
     StencilDistributionMethod stencil_distribution_method_;

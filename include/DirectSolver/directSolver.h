@@ -26,12 +26,10 @@ template <class LevelCacheType>
 class DirectSolver
 {
 public:
-    explicit DirectSolver(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
-                          int num_omp_threads)
+    explicit DirectSolver(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache, bool DirBC_Interior)
         : grid_(grid)
         , level_cache_(level_cache)
         , DirBC_Interior_(DirBC_Interior)
-        , num_omp_threads_(num_omp_threads)
     {
     }
 
@@ -44,6 +42,5 @@ protected:
     const PolarGrid<DefaultMemorySpace>& grid_;
     const LevelCacheType& level_cache_;
     const bool DirBC_Interior_;
-    const int num_omp_threads_;
 };
 } // namespace gmgpolar
