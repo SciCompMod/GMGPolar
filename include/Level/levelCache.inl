@@ -23,7 +23,7 @@ LevelCache<DomainGeometry, DensityProfileCoefficients>::LevelCache(
     if (cache_density_profile_coefficients_) {
 	    Kokkos::parallel_for(
 						"Cache density profile coefficients",
-Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
                 {0, 0}, // Starting point of the index space
                 {grid.nr(), grid.ntheta()} // Ending point of the index space
                 ),
@@ -48,7 +48,7 @@ Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Ra
         // Circular Indexing Section
 	    Kokkos::parallel_for(
 						"Cache domain geometry (circular indexing)",
-Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
                 {0, 0}, // Starting point of the index space
                 {grid.numberSmootherCircles(), grid.ntheta()} // Ending point of the index space
                 ),
@@ -69,7 +69,7 @@ Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Ra
         // Radial Indexing Section
 	    Kokkos::parallel_for(
 						"Cache domain geometry (radial indexing)",
-Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
                 {0, grid.numberSmootherCircles()}, // Starting point of the index space
                 {grid.ntheta(), grid.nr()} // Ending point of the index space
                 ),
