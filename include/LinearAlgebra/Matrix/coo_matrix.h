@@ -21,7 +21,7 @@
 namespace gmgpolar
 {
 
-template <typename T, class MemorySpace = Kokkos::DefaultExecutionSpace::memory_space>
+template <typename T, class MemorySpace = DefaultMemorySpace>
 class SparseMatrixCOO
 {
 public:
