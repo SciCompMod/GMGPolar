@@ -1,5 +1,86 @@
 #pragma once
 
+namespace level_cache_helpers
+{
+template <concepts::DensityProfileCoefficients DensityProfileCoefficients>
+static KOKKOS_INLINE_FUNCTION void cache_density_profile_coefficients(
+    const PolarGrid<DefaultMemorySpace>& grid, const DensityProfileCoefficients& density_profile_coefficients,
+    const Vector<double>& coeff_alpha, const Vector<double>& coeff_beta, const bool cache_domain_geometry)
+{
+    Kokkos::parallel_for(
+        "Cache density profile coefficients",
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            {0, 0}, // Starting point of the index space
+            {grid.nr(), grid.ntheta()} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int i_r, const int i_theta) {
+            const double r     = grid.radius(i_r);
+            const double theta = grid.theta(i_theta);
+            const int index    = grid.index(i_r, i_theta);
+            if (!cache_domain_geometry) {
+                coeff_alpha(index) = density_profile_coefficients.alpha(r, theta);
+            }
+            coeff_beta(index) = density_profile_coefficients.beta(r, theta);
+        });
+}
+
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+static KOKKOS_INLINE_FUNCTION void cache_domain_geometry(const PolarGrid<DefaultMemorySpace>& grid,
+                                                    const DensityProfileCoefficients& density_profile_coefficients,
+                                                    const DomainGeometry& domain_geometry,
+                                                    const Vector<double>& vec_arr, const Vector<double>& vec_att,
+                                                    const Vector<double>& vec_art, const Vector<double>& vec_detDF)
+{
+    // We split the loops into two regions to better respect the
+    // access patterns of the smoother and improve cache locality
+
+    // Circular Indexing Section
+    Kokkos::parallel_for(
+        "Cache domain geometry (circular indexing)",
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            {0, 0}, // Starting point of the index space
+            {grid.numberSmootherCircles(), grid.ntheta()} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int i_r, const int i_theta) {
+            const double r           = grid.radius(i_r);
+            const double theta       = grid.theta(i_theta);
+            const int index          = grid.index(i_r, i_theta);
+            const double coeff_alpha = density_profile_coefficients.alpha(r, theta);
+
+            double arr, att, art, detDF;
+            compute_jacobian_elements(domain_geometry, r, theta, coeff_alpha, arr, att, art, detDF);
+            vec_detDF(index) = detDF;
+            vec_arr(index)   = arr;
+            vec_att(index)   = att;
+            vec_art(index)   = art;
+        });
+    // Radial Indexing Section
+    Kokkos::parallel_for(
+        "Cache domain geometry (radial indexing)",
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            {0, grid.numberSmootherCircles()}, // Starting point of the index space
+            {grid.ntheta(), grid.nr()} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int i_theta, const int i_r) {
+            const double theta       = grid.theta(i_theta);
+            const double r           = grid.radius(i_r);
+            const int index          = grid.index(i_r, i_theta);
+            const double coeff_alpha = density_profile_coefficients.alpha(r, theta);
+
+            double arr, att, art, detDF;
+            compute_jacobian_elements(domain_geometry, r, theta, coeff_alpha, arr, att, art, detDF);
+            vec_detDF(index) = detDF;
+            vec_arr(index)   = arr;
+            vec_att(index)   = att;
+            vec_art(index)   = art;
+        });
+}
+
+} // namespace level_cache_helpers
+
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 LevelCache<DomainGeometry, DensityProfileCoefficients>::LevelCache(
     const PolarGrid<DefaultMemorySpace>& grid, const DensityProfileCoefficients& density_profile_coefficients,
@@ -21,72 +102,15 @@ LevelCache<DomainGeometry, DensityProfileCoefficients>::LevelCache(
     // Pre-compute and store alpha/beta coefficients at all grid nodes to avoid
     // repeated expensive evaluations during runtime computations
     if (cache_density_profile_coefficients_) {
-	    Kokkos::parallel_for(
-						"Cache density profile coefficients",
-Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
-                {0, 0}, // Starting point of the index space
-                {grid.nr(), grid.ntheta()} // Ending point of the index space
-                ),
-            // Kokkos lambda function to execute for each point in the index space
-            KOKKOS_LAMBDA(const int i_r, const int i_theta) {
-            const double r = grid.radius(i_r);
-                const double theta = grid.theta(i_theta);
-                const int index    = grid.index(i_r, i_theta);
-                if (!cache_domain_geometry_) {
-                    coeff_alpha_(index) = density_profile_coefficients.alpha(r, theta);
-                }
-                coeff_beta_(index) = density_profile_coefficients.beta(r, theta);
-        });
+        level_cache_helpers::cache_density_profile_coefficients(grid, density_profile_coefficients, coeff_alpha_,
+                                                                coeff_beta_, cache_domain_geometry);
     }
 
     // Pre-compute and store Jacobian matrix elements (arr, att, art, detDF) at all grid nodes
     // to avoid repeated coordinate transformation calculations during domain operations
     if (cache_domain_geometry_) {
-        // We split the loops into two regions to better respect the
-        // access patterns of the smoother and improve cache locality
-
-        // Circular Indexing Section
-	    Kokkos::parallel_for(
-						"Cache domain geometry (circular indexing)",
-Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
-                {0, 0}, // Starting point of the index space
-                {grid.numberSmootherCircles(), grid.ntheta()} // Ending point of the index space
-                ),
-            // Kokkos lambda function to execute for each point in the index space
-            KOKKOS_LAMBDA(const int i_r, const int i_theta) {
-            const double r = grid.radius(i_r);
-                const double theta       = grid.theta(i_theta);
-                const int index          = grid.index(i_r, i_theta);
-                const double coeff_alpha = density_profile_coefficients.alpha(r, theta);
-
-                double arr, att, art, detDF;
-                compute_jacobian_elements(domain_geometry_, r, theta, coeff_alpha, arr, att, art, detDF);
-                detDF_(index) = detDF;
-                arr_(index)   = arr;
-                att_(index)   = att;
-                art_(index)   = art;
-        });
-        // Radial Indexing Section
-	    Kokkos::parallel_for(
-						"Cache domain geometry (radial indexing)",
-Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
-                {0, grid.numberSmootherCircles()}, // Starting point of the index space
-                {grid.ntheta(), grid.nr()} // Ending point of the index space
-                ),
-            // Kokkos lambda function to execute for each point in the index space
-            KOKKOS_LAMBDA(const int i_theta, const int i_r) {
-            const double theta = grid.theta(i_theta);
-                const double r           = grid.radius(i_r);
-                const int index          = grid.index(i_r, i_theta);
-                const double coeff_alpha = density_profile_coefficients.alpha(r, theta);
-
-                double arr, att, art, detDF;
-                compute_jacobian_elements(domain_geometry_, r, theta, coeff_alpha, arr, att, art, detDF);
-                detDF_(index) = detDF;
-                arr_(index)   = arr;
-                att_(index)   = att;
-                art_(index)   = art;
-        });
+        level_cache_helpers::cache_domain_geometry(grid, density_profile_coefficients, domain_geometry, arr_, att_,
+                                                   art_, detDF_);
     }
     Kokkos::fence();
 }
