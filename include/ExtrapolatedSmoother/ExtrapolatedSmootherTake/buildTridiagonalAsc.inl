@@ -15,7 +15,7 @@ static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const BatchedTridiagonalS
 }
 
 static KOKKOS_INLINE_FUNCTION void nodeBuildTridiagonalSolverMatricesCircleSection(
-    const int i_r, const int i_theta, const PolarGrid& grid, const bool DirBC_Interior,
+    const int i_r, const int i_theta, const PolarGrid<Kokkos::HostSpace>& grid, const bool DirBC_Interior,
     const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
     const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, HostConstVector<double>& arr,
     HostConstVector<double>& att, HostConstVector<double>& art, HostConstVector<double>& detDF,
@@ -165,7 +165,7 @@ static KOKKOS_INLINE_FUNCTION void nodeBuildTridiagonalSolverMatricesCircleSecti
 }
 
 static KOKKOS_INLINE_FUNCTION void nodeBuildTridiagonalSolverMatricesRadialSection(
-    const int i_r, const int i_theta, const PolarGrid& grid, const bool DirBC_Interior,
+    const int i_r, const int i_theta, const PolarGrid<Kokkos::HostSpace>& grid, const bool DirBC_Interior,
     const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
     const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver, HostConstVector<double>& arr,
     HostConstVector<double>& att, HostConstVector<double>& art, HostConstVector<double>& detDF,
@@ -535,7 +535,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
     using extrapolated_smoother_take::nodeBuildTridiagonalSolverMatricesCircleSection;
     using extrapolated_smoother_take::nodeBuildTridiagonalSolverMatricesRadialSection;
 
-    const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
 

@@ -3,7 +3,7 @@
 template <class LevelCacheType>
 void SmootherGive<LevelCacheType>::solveBlackCircleSection(HostVector<double> x, HostVector<double> temp)
 {
-    const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid     = Smoother<LevelCacheType>::grid_;
     const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
     const int start                   = 0;
@@ -44,7 +44,7 @@ void SmootherGive<LevelCacheType>::solveBlackCircleSection(HostVector<double> x,
 template <class LevelCacheType>
 void SmootherGive<LevelCacheType>::solveWhiteCircleSection(HostVector<double> x, HostVector<double> temp)
 {
-    const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid     = Smoother<LevelCacheType>::grid_;
     const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
     const int start                   = 0;
@@ -85,7 +85,7 @@ void SmootherGive<LevelCacheType>::solveWhiteCircleSection(HostVector<double> x,
 template <class LevelCacheType>
 void SmootherGive<LevelCacheType>::solveBlackRadialSection(HostVector<double> x, HostVector<double> temp)
 {
-    const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid     = Smoother<LevelCacheType>::grid_;
     const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
     const int start                   = grid.numberCircularSmootherNodes();
@@ -119,7 +119,7 @@ void SmootherGive<LevelCacheType>::solveBlackRadialSection(HostVector<double> x,
 template <class LevelCacheType>
 void SmootherGive<LevelCacheType>::solveWhiteRadialSection(HostVector<double> x, HostVector<double> temp)
 {
-    const PolarGrid& grid     = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid     = Smoother<LevelCacheType>::grid_;
     const int num_omp_threads = Smoother<LevelCacheType>::num_omp_threads_;
 
     const int start                   = grid.numberCircularSmootherNodes();

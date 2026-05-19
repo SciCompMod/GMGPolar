@@ -1,7 +1,7 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR6_Sonnendrucker_ShafranovGeometry.h"
 using namespace gmgpolar;
 
-CartesianR6_Sonnendrucker_ShafranovGeometry::CartesianR6_Sonnendrucker_ShafranovGeometry(PolarGrid const& grid,
+CartesianR6_Sonnendrucker_ShafranovGeometry::CartesianR6_Sonnendrucker_ShafranovGeometry(PolarGrid<Kokkos::HostSpace> const& grid,
                                                                                          double Rmax,
                                                                                          double elongation_kappa,
                                                                                          double shift_delta)

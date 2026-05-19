@@ -15,7 +15,7 @@ static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const BatchedTridiagonalS
 }
 
 static KOKKOS_INLINE_FUNCTION void
-nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid<Kokkos::HostSpace>& grid, bool DirBC_Interior,
                                    const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
                                    const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver,
                                    HostConstVector<double>& arr, HostConstVector<double>& att,
@@ -190,7 +190,7 @@ void SmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
 {
     using smoother_take::nodeBuildTridiagonalSolverMatrices;
 
-    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 

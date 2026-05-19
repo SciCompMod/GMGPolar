@@ -45,7 +45,7 @@ public:
     bool cacheDensityProfileCoefficients() const;
     bool cacheDomainGeometry() const;
 
-    const PolarGrid& grid() const;
+    const PolarGrid<Kokkos::HostSpace>& grid() const;
 
     // Full Multigrid Method
     bool FMG() const;
@@ -97,7 +97,7 @@ private:
     bool cache_density_profile_coefficients_;
     bool cache_domain_geometry_;
     // Grid configuration
-    PolarGrid grid_;
+    PolarGrid<Kokkos::HostSpace> grid_;
     // Multigrid settings
     ExtrapolationType extrapolation_;
     int max_levels_;

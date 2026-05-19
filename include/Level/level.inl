@@ -4,7 +4,7 @@
 // Constructor //
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 Level<DomainGeometry, DensityProfileCoefficients>::Level(
-    const int level_depth, std::unique_ptr<const PolarGrid> grid,
+    const int level_depth, std::unique_ptr<const PolarGrid<Kokkos::HostSpace>> grid,
     std::unique_ptr<const LevelCache<DomainGeometry, DensityProfileCoefficients>> level_cache,
     const ExtrapolationType extrapolation, const bool FMG, const bool PCG_FMG)
     : level_depth_(level_depth)
@@ -28,7 +28,7 @@ int Level<DomainGeometry, DensityProfileCoefficients>::level_depth() const
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-const PolarGrid& Level<DomainGeometry, DensityProfileCoefficients>::grid() const
+const PolarGrid<Kokkos::HostSpace>& Level<DomainGeometry, DensityProfileCoefficients>::grid() const
 {
     return *grid_;
 }

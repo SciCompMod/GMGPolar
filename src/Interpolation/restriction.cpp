@@ -24,7 +24,7 @@ using namespace gmgpolar;
  */
 
 static KOKKOS_INLINE_FUNCTION void coarseNodeRestriction(const int i_r_coarse, const int i_theta_coarse,
-                                                         const PolarGrid& fine_grid, const PolarGrid& coarse_grid,
+                                                         const PolarGrid<Kokkos::HostSpace>& fine_grid, const PolarGrid<Kokkos::HostSpace>& coarse_grid,
                                                          HostVector<double>& coarse_result,
                                                          HostConstVector<double>& fine_values)
 {
@@ -68,7 +68,7 @@ static KOKKOS_INLINE_FUNCTION void coarseNodeRestriction(const int i_r_coarse, c
     coarse_result[coarse_grid.index(i_r_coarse, i_theta_coarse)] = value;
 }
 
-void Interpolation::applyRestriction(const PolarGrid& fine_grid, const PolarGrid& coarse_grid,
+void Interpolation::applyRestriction(const PolarGrid<Kokkos::HostSpace>& fine_grid, const PolarGrid<Kokkos::HostSpace>& coarse_grid,
                                      HostVector<double> coarse_result, HostConstVector<double> fine_values) const
 {
     assert(std::ssize(fine_values) == fine_grid.numberOfNodes());

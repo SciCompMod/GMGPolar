@@ -29,7 +29,7 @@ public:
     // - grid: Cartesian mesh discretizing the computational domain.
     // - domain_geometry: Mapping from the reference domain to the physical domain \Omega.
     // - density_profile_coefficients: Coefficients \alpha and \beta defining the PDE.
-    GMGPolar(const PolarGrid& grid, const DomainGeometry& domain_geometry,
+    GMGPolar(const PolarGrid<Kokkos::HostSpace>& grid, const DomainGeometry& domain_geometry,
              const DensityProfileCoefficients& density_profile_coefficients)
         : IGMGPolar(grid)
         , domain_geometry_(domain_geometry)
@@ -66,7 +66,7 @@ public:
     HostConstVector<double> solution() const;
 
     // Return the underlying cartesian mesh used for discretization.
-    const PolarGrid& grid() const;
+    const PolarGrid<Kokkos::HostSpace>& grid() const;
 
     /* ---------------------------------------------------------------------- */
     /* Diagnostics & statistics                                               */
@@ -138,7 +138,7 @@ private:
 
     /* --------------- */
     /* Setup Functions */
-    int chooseNumberOfLevels(const PolarGrid& finest_grid);
+    int chooseNumberOfLevels(const PolarGrid<Kokkos::HostSpace>& finest_grid);
     // Public due to cuda restrictions
 public:
     template <concepts::BoundaryConditions BoundaryConditions, concepts::SourceTerm SourceTerm>
@@ -147,7 +147,7 @@ public:
     void discretize_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, HostVector<double> rhs_f);
 
 private:
-    bool checkUniformRefinement(const PolarGrid& grid, double tolerance) const;
+    bool checkUniformRefinement(const PolarGrid<Kokkos::HostSpace>& grid, double tolerance) const;
 
     /* --------------- */
     /* Solve Functions */
@@ -173,7 +173,7 @@ private:
 
     /* ----------------- */
     /* Print information */
-    void printSettings(const PolarGrid& finest_grid, const PolarGrid& coarsest_grid) const;
+    void printSettings(const PolarGrid<Kokkos::HostSpace>& finest_grid, const PolarGrid<Kokkos::HostSpace>& coarsest_grid) const;
     void printIterationHeader(const ExactSolution* exact_solution);
     void printIterationInfo(int iteration, double current_residual_norm, double current_relative_residual_norm,
                             const ExactSolution* exact_solution);
@@ -204,7 +204,7 @@ private:
 
     /* ------------- */
     /* Visualization */
-    void writeToVTK(const std::filesystem::path& file_path, const PolarGrid& grid);
+    void writeToVTK(const std::filesystem::path& file_path, const PolarGrid<Kokkos::HostSpace>& grid);
     void writeToVTK(const std::filesystem::path& file_path,
                     const Level<DomainGeometry, DensityProfileCoefficients>& level,
                     HostConstVector<double> grid_function);

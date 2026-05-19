@@ -224,10 +224,10 @@ bool ConfigParser::parse(int argc, char* argv[])
         throw std::runtime_error("Invalid beta coefficient.");
     }
 
-    // Construct PolarGrid
+    // Construct PolarGrid<Kokkos::HostSpace>
     double refinement_radius               = alpha_jump;
     std::optional<double> splitting_radius = std::nullopt;
-    grid_ = PolarGrid(R0, Rmax, nr_exp, ntheta_exp, refinement_radius, anisotropic_factor, divideBy2, splitting_radius);
+    grid_ = PolarGrid<Kokkos::HostSpace>(R0, Rmax, nr_exp, ntheta_exp, refinement_radius, anisotropic_factor, divideBy2, splitting_radius);
 
     selectTestCase(geometry_type, problem_type, alpha_type, beta_type, Rmax, kappa_eps, delta_e, alpha_jump);
 
@@ -306,7 +306,7 @@ bool ConfigParser::parse(int argc, char* argv[])
         }
 
         std::cout << "------------------------------\n";
-        std::cout << "---- PolarGrid Generation ----\n";
+        std::cout << "---- PolarGrid<Kokkos::HostSpace> Generation ----\n";
         std::cout << "------------------------------\n";
         std::cout << "nr_exp = " << nr_exp << ", nθ_exp = " << ntheta_exp << "\n";
         std::cout << "divideBy2 = " << divideBy2 << ", anisotropy = " << anisotropic_factor << "\n";
@@ -348,7 +348,7 @@ bool ConfigParser::cacheDomainGeometry() const
     return cache_domain_geometry_;
 }
 
-const PolarGrid& ConfigParser::grid() const
+const PolarGrid<Kokkos::HostSpace>& ConfigParser::grid() const
 {
     return grid_;
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 template <class LevelCacheType>
-ExtrapolatedSmootherTake<LevelCacheType>::ExtrapolatedSmootherTake(const PolarGrid& grid,
+ExtrapolatedSmootherTake<LevelCacheType>::ExtrapolatedSmootherTake(const PolarGrid<Kokkos::HostSpace>& grid,
                                                                    const LevelCacheType& level_cache,
                                                                    const bool DirBC_Interior, const int num_omp_threads)
     : ExtrapolatedSmoother<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)

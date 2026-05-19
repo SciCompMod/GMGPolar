@@ -73,14 +73,14 @@ public:
 public:
     // ----------- //
     // Constructor //
-    explicit Level(const int level_depth, std::unique_ptr<const PolarGrid> grid,
+    explicit Level(const int level_depth, std::unique_ptr<const PolarGrid<Kokkos::HostSpace>> grid,
                    std::unique_ptr<const LevelCacheType> level_cache, const ExtrapolationType extrapolation,
                    const bool FMG, const bool PCG_FMG = false);
 
     // ---------------- //
     // Getter Functions //
     int level_depth() const;
-    const PolarGrid& grid() const;
+    const PolarGrid<Kokkos::HostSpace>& grid() const;
     const LevelCacheType& levelCache() const;
 
     HostVector<double> rhs();
@@ -120,7 +120,7 @@ public:
 
 private:
     const int level_depth_;
-    std::unique_ptr<const PolarGrid> grid_;
+    std::unique_ptr<const PolarGrid<Kokkos::HostSpace>> grid_;
     std::unique_ptr<const LevelCacheType> level_cache_;
 
     std::unique_ptr<DirectSolver<LevelCacheType>> op_directSolver_;
@@ -138,7 +138,7 @@ template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoeff
 class LevelCache
 {
 public:
-    explicit LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients,
+    explicit LevelCache(const PolarGrid<Kokkos::HostSpace>& grid, const DensityProfileCoefficients& density_profile_coefficients,
                         const DomainGeometry& domain_geometry, const bool cache_density_profile_coefficients,
                         const bool cache_domain_geometry);
 

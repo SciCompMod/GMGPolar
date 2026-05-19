@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
     for (divideBy2 = 0; divideBy2 < MAX_DIVIDE_BY_2; divideBy2++) {
         double refinement_radius               = alpha_jump;
         std::optional<double> splitting_radius = std::nullopt;
-        PolarGrid grid(R0, Rmax, nr_exp, ntheta_exp, refinement_radius, anisotropic_factor, divideBy2,
+        PolarGrid<Kokkos::HostSpace> grid(R0, Rmax, nr_exp, ntheta_exp, refinement_radius, anisotropic_factor, divideBy2,
                        splitting_radius);
         GMGPolar solver(grid, domain_geometry, coefficients);
 

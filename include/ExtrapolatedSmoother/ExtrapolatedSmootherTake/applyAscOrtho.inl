@@ -4,7 +4,7 @@ namespace extrapolated_smoother_take
 {
 
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoCircleTake(const int i_r, const int i_theta, const PolarGrid& grid, const bool DirBC_Interior,
+nodeApplyAscOrthoCircleTake(const int i_r, const int i_theta, const PolarGrid<Kokkos::HostSpace>& grid, const bool DirBC_Interior,
                             HostConstVector<double>& x, HostConstVector<double>& rhs, HostVector<double>& result,
                             HostConstVector<double>& arr, HostConstVector<double>& att, HostConstVector<double>& art,
                             HostConstVector<double>& detDF, HostConstVector<double>& coeff_beta)
@@ -186,7 +186,7 @@ nodeApplyAscOrthoCircleTake(const int i_r, const int i_theta, const PolarGrid& g
 }
 
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid<Kokkos::HostSpace>& grid, bool DirBC_Interior,
                             HostConstVector<double>& x, HostConstVector<double>& rhs, HostVector<double>& result,
                             HostConstVector<double>& arr, const HostConstVector<double>& att,
                             HostConstVector<double>& art, const HostConstVector<double>& detDF,
@@ -468,7 +468,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(H
 {
     using extrapolated_smoother_take::nodeApplyAscOrthoCircleTake;
 
-    const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
@@ -508,7 +508,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(H
 {
     using extrapolated_smoother_take::nodeApplyAscOrthoCircleTake;
 
-    const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
     const int num_omp_threads         = ExtrapolatedSmoother<LevelCacheType>::num_omp_threads_;
@@ -549,7 +549,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(H
 {
     using extrapolated_smoother_take::nodeApplyAscOrthoRadialTake;
 
-    const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
     const int num_omp_threads         = ExtrapolatedSmoother<LevelCacheType>::num_omp_threads_;
@@ -590,7 +590,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(H
 {
     using extrapolated_smoother_take::nodeApplyAscOrthoRadialTake;
 
-    const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
     const int num_omp_threads         = ExtrapolatedSmoother<LevelCacheType>::num_omp_threads_;

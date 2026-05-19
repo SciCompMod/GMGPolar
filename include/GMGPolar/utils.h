@@ -92,7 +92,7 @@ HostConstVector<double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::so
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-const PolarGrid& GMGPolar<DomainGeometry, DensityProfileCoefficients>::grid() const
+const PolarGrid<Kokkos::HostSpace>& GMGPolar<DomainGeometry, DensityProfileCoefficients>::grid() const
 {
     return grid_;
 }
@@ -180,7 +180,7 @@ std::optional<double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::exac
 /* ---------------------------------------------------------------------- */
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(const std::filesystem::path& file_path,
-                                                                      const PolarGrid& grid)
+                                                                      const PolarGrid<Kokkos::HostSpace>& grid)
 {
     const auto filename = file_path.stem().string() + ".vtu";
 
@@ -243,7 +243,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(
     const std::filesystem::path& file_path, const Level<DomainGeometry, DensityProfileCoefficients>& level,
     HostConstVector<double> grid_function)
 {
-    const PolarGrid& grid                                                     = level.grid();
+    const PolarGrid<Kokkos::HostSpace>& grid                                                     = level.grid();
     const LevelCache<DomainGeometry, DensityProfileCoefficients>& level_cache = level.levelCache();
 
     assert(std::ssize(grid_function) == grid.numberOfNodes());

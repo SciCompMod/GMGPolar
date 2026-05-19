@@ -9,7 +9,7 @@ template <class LevelCacheType>
 class ResidualGive : public Residual<LevelCacheType>
 {
 public:
-    explicit ResidualGive(const PolarGrid& grid, const LevelCacheType& level_cache, const bool DirBC_Interior,
+    explicit ResidualGive(const PolarGrid<Kokkos::HostSpace>& grid, const LevelCacheType& level_cache, const bool DirBC_Interior,
                           const int num_omp_threads);
     ~ResidualGive() override = default;
 

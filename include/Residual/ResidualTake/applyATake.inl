@@ -3,7 +3,7 @@
 namespace residual_take
 {
 
-static KOKKOS_INLINE_FUNCTION void node_apply_a_take(const int i_r, const int i_theta, const PolarGrid& grid,
+static KOKKOS_INLINE_FUNCTION void node_apply_a_take(const int i_r, const int i_theta, const PolarGrid<Kokkos::HostSpace>& grid,
                                                      bool DirBC_Interior, HostVector<double>& result,
                                                      HostConstVector<double>& x, HostConstVector<double>& arr,
                                                      HostConstVector<double>& att, HostConstVector<double>& art,
@@ -72,7 +72,7 @@ void ResidualTake<LevelCacheType>::applySystemOperator(HostVector<double> result
 
     using residual_take::node_apply_a_take;
 
-    const PolarGrid& grid     = Residual<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid     = Residual<LevelCacheType>::grid_;
     const bool DirBC_Interior = Residual<LevelCacheType>::DirBC_Interior_;
 
     assert(Residual<LevelCacheType>::level_cache_.cacheDensityProfileCoefficients());

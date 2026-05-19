@@ -16,7 +16,7 @@ template <class LevelCacheType>
 class Residual
 {
 public:
-    explicit Residual(const PolarGrid& grid, const LevelCacheType& level_cache, const bool DirBC_Interior,
+    explicit Residual(const PolarGrid<Kokkos::HostSpace>& grid, const LevelCacheType& level_cache, const bool DirBC_Interior,
                       const int num_omp_threads)
         : grid_(grid)
         , level_cache_(level_cache)
@@ -33,7 +33,7 @@ public:
 protected:
     /* ------------------- */
     /* Constructor members */
-    const PolarGrid grid_;
+    const PolarGrid<Kokkos::HostSpace> grid_;
     const LevelCacheType level_cache_;
     const bool DirBC_Interior_;
     const int num_omp_threads_;

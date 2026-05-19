@@ -48,8 +48,8 @@ using namespace gmgpolar;
  */
 
 static KOKKOS_INLINE_FUNCTION void fineNodeExtrapolatedProlongation(const int i_r, const int i_theta,
-                                                                    const PolarGrid& coarse_grid,
-                                                                    const PolarGrid& fine_grid,
+                                                                    const PolarGrid<Kokkos::HostSpace>& coarse_grid,
+                                                                    const PolarGrid<Kokkos::HostSpace>& fine_grid,
                                                                     HostVector<double>& fine_result,
                                                                     HostConstVector<double>& coarse_values)
 {
@@ -85,7 +85,7 @@ static KOKKOS_INLINE_FUNCTION void fineNodeExtrapolatedProlongation(const int i_
     }
 }
 
-void Interpolation::applyExtrapolatedProlongation(const PolarGrid& coarse_grid, const PolarGrid& fine_grid,
+void Interpolation::applyExtrapolatedProlongation(const PolarGrid<Kokkos::HostSpace>& coarse_grid, const PolarGrid<Kokkos::HostSpace>& fine_grid,
                                                   HostVector<double> fine_result,
                                                   HostConstVector<double> coarse_values) const
 {

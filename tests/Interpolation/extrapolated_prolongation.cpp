@@ -9,7 +9,7 @@
 using namespace gmgpolar;
 
 // Helper that computes the mathematically expected extrapolated prolongation value
-static double expected_extrapolated_value(const PolarGrid& coarse, const PolarGrid& fine,
+static double expected_extrapolated_value(const PolarGrid<Kokkos::HostSpace>& coarse, const PolarGrid<Kokkos::HostSpace>& fine,
                                           HostConstVector<double> coarse_vals, int i_r, int i_theta)
 {
     int i_r_coarse     = i_r / 2;
@@ -46,8 +46,8 @@ TEST(ExtrapolatedProlongationTest, ExtrapolatedProlongationMatchesStencil)
     std::vector<double> fine_angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, 2 * M_PI};
 
-    PolarGrid fine_grid(fine_radii, fine_angles);
-    PolarGrid coarse_grid = coarseningGrid(fine_grid);
+    PolarGrid<Kokkos::HostSpace> fine_grid(fine_radii, fine_angles);
+    PolarGrid<Kokkos::HostSpace> coarse_grid = coarseningGrid(fine_grid);
 
     Interpolation I(/*threads*/ 16, /*DirBC*/ true);
 

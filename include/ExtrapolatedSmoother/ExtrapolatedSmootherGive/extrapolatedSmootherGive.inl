@@ -1,7 +1,7 @@
 #pragma once
 
 template <class LevelCacheType>
-ExtrapolatedSmootherGive<LevelCacheType>::ExtrapolatedSmootherGive(const PolarGrid& grid,
+ExtrapolatedSmootherGive<LevelCacheType>::ExtrapolatedSmootherGive(const PolarGrid<Kokkos::HostSpace>& grid,
                                                                    const LevelCacheType& level_cache,
                                                                    const bool DirBC_Interior, const int num_omp_threads)
     : ExtrapolatedSmoother<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
@@ -48,7 +48,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(HostVector<
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
-    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
     /* We split the loops into two regions to better respect the */
     /* access patterns of the smoother and improve cache locality. */

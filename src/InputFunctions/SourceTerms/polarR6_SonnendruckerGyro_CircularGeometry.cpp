@@ -1,7 +1,7 @@
 #include "../include/InputFunctions/SourceTerms/polarR6_SonnendruckerGyro_CircularGeometry.h"
 using namespace gmgpolar;
 
-PolarR6_SonnendruckerGyro_CircularGeometry::PolarR6_SonnendruckerGyro_CircularGeometry(PolarGrid const& grid,
+PolarR6_SonnendruckerGyro_CircularGeometry::PolarR6_SonnendruckerGyro_CircularGeometry(PolarGrid<Kokkos::HostSpace> const& grid,
                                                                                        double Rmax)
     : grid_(grid)
     , Rmax(Rmax)

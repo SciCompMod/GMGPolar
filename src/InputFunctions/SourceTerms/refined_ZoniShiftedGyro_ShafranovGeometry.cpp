@@ -1,7 +1,7 @@
 #include "../include/InputFunctions/SourceTerms/refined_ZoniShiftedGyro_ShafranovGeometry.h"
 using namespace gmgpolar;
 
-Refined_ZoniShiftedGyro_ShafranovGeometry::Refined_ZoniShiftedGyro_ShafranovGeometry(PolarGrid const& grid, double Rmax,
+Refined_ZoniShiftedGyro_ShafranovGeometry::Refined_ZoniShiftedGyro_ShafranovGeometry(PolarGrid<Kokkos::HostSpace> const& grid, double Rmax,
                                                                                      double elongation_kappa,
                                                                                      double shift_delta)
     : grid_(grid)

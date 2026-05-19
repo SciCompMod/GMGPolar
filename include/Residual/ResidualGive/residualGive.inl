@@ -1,7 +1,7 @@
 #pragma once
 
 template <class LevelCacheType>
-ResidualGive<LevelCacheType>::ResidualGive(const PolarGrid& grid, const LevelCacheType& level_cache,
+ResidualGive<LevelCacheType>::ResidualGive(const PolarGrid<Kokkos::HostSpace>& grid, const LevelCacheType& level_cache,
                                            bool DirBC_Interior, int num_omp_threads)
     : Residual<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
 {

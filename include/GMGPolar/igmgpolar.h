@@ -32,7 +32,7 @@ public:
     // with Dirichlet boundary condition        u = u_D    on \partial \Omega.
     // Parameters:
     // - grid: Cartesian mesh discretizing the computational domain.
-    IGMGPolar(const PolarGrid& grid);
+    IGMGPolar(const PolarGrid<Kokkos::HostSpace>& grid);
 
     /* ---------------------------------------------------------------------- */
     /* General output & visualization                                         */
@@ -161,7 +161,7 @@ protected:
     /* ------------------------------------ */
     /* Grid Configuration & Input Functions */
     /* ------------------------------------ */
-    const PolarGrid& grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid_;
 
     /* ------------------ */
     /* Control Parameters */

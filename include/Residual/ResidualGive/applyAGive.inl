@@ -3,7 +3,7 @@ namespace residual_give
 {
 
 template <class LevelCacheType>
-static KOKKOS_INLINE_FUNCTION void node_apply_a_give(int i_r, int i_theta, const PolarGrid& grid,
+static KOKKOS_INLINE_FUNCTION void node_apply_a_give(int i_r, int i_theta, const PolarGrid<Kokkos::HostSpace>& grid,
                                                      const LevelCacheType& level_cache, bool DirBC_Interior,
                                                      HostVector<double>& result, HostConstVector<double>& x)
 {
@@ -199,7 +199,7 @@ void ResidualGive<LevelCacheType>::applySystemOperator(HostVector<double> result
 {
     assert(result.size() == x.size());
 
-    const PolarGrid& grid             = Residual<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid             = Residual<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Residual<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Residual<LevelCacheType>::DirBC_Interior_;
 

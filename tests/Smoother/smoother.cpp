@@ -40,7 +40,7 @@ TEST(SmootherTest, smoother_DirBC_Interior)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -97,7 +97,7 @@ TEST(SmootherTest, smoother_AcrossOrigin)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -157,7 +157,7 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -232,7 +232,7 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -307,7 +307,7 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -382,7 +382,7 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -456,7 +456,7 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior_SmallestGrid)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -530,7 +530,7 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior_SmallestGrid)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -604,7 +604,7 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin_SmallestGrid)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -678,7 +678,7 @@ TEST(SmootherTest, ParallelSmootherAcrossOrigin_SmallestGrid)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -755,7 +755,7 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -830,7 +830,7 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -905,7 +905,7 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -980,7 +980,7 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -1054,7 +1054,7 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior_SmallestGrid)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -1128,7 +1128,7 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior_SmallestGrid)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -1202,7 +1202,7 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin_SmallestGrid)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -1276,7 +1276,7 @@ TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin_SmallestGrid)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;

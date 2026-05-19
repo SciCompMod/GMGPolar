@@ -63,7 +63,7 @@ TEST(DirectSolverTest, directSolver_DirBC_Interior)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -113,7 +113,7 @@ TEST(DirectSolverTest, directSolver_AcrossOrigin)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -165,7 +165,7 @@ TEST(DirectSolverTest_CircularGeometry, SequentialDirectSolverDirBC_Interior_Cir
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -207,7 +207,7 @@ TEST(DirectSolverTest_CircularGeometry, ParallelDirectSolverDirBC_Interior_Circu
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -249,7 +249,7 @@ TEST(DirectSolverTest_CircularGeometry, SequentialDirectSolverAcrossOrigin_Circu
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -291,7 +291,7 @@ TEST(DirectSolverTest_CircularGeometry, ParallelDirectSolverAcrossOrigin_Circula
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -339,7 +339,7 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverDirBC_Interior_ShafranovGeo
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -383,7 +383,7 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovGeome
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -431,7 +431,7 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeometry)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -475,7 +475,7 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometry)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -521,7 +521,7 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeometry)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -563,7 +563,7 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometry)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -585,7 +585,7 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometry)
     ASSERT_NEAR(infinity_norm(HostConstVector<double>(residuum)), 0.0, 1e-8);
 }
 
-/* We adjust the PolarGrid to increase the precision */
+/* We adjust the PolarGrid<Kokkos::HostSpace> to increase the precision */
 
 TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_CircularGeometry)
 {
@@ -617,7 +617,7 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -659,7 +659,7 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision2
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -702,7 +702,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, SequentialDirectSolverDirBC_Interior
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -744,7 +744,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, ParallelDirectSolverDirBC_Interior_C
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -786,7 +786,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, SequentialDirectSolverAcrossOrigin_C
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -828,7 +828,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, ParallelDirectSolverAcrossOrigin_Cir
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -876,7 +876,7 @@ TEST(DirectSolverTakeTest_ShafranovGeometry, DirectSolverDirBC_Interior_Shafrano
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -920,7 +920,7 @@ TEST(DirectSolverTakeTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovG
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -968,7 +968,7 @@ TEST(DirectSolverTakeTest_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeome
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -1012,7 +1012,7 @@ TEST(DirectSolverTakeTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometr
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -1058,7 +1058,7 @@ TEST(DirectSolverTakeTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeome
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -1100,7 +1100,7 @@ TEST(DirectSolverTakeTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometr
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -1152,7 +1152,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecis
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -1194,7 +1194,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecis
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<Kokkos::HostSpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),

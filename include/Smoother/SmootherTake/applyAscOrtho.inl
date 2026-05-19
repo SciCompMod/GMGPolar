@@ -4,7 +4,7 @@ namespace smoother_take
 {
 
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoCircleTake(const int i_r, const int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+nodeApplyAscOrthoCircleTake(const int i_r, const int i_theta, const PolarGrid<Kokkos::HostSpace>& grid, bool DirBC_Interior,
                             HostConstVector<double>& x, HostConstVector<double>& rhs, HostVector<double>& result,
                             HostConstVector<double>& arr, HostConstVector<double>& att, HostConstVector<double>& art,
                             HostConstVector<double>& detDF, HostConstVector<double>& coeff_beta)
@@ -56,7 +56,7 @@ nodeApplyAscOrthoCircleTake(const int i_r, const int i_theta, const PolarGrid& g
 }
 
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoRadialTake(const int i_r, const int i_theta, const PolarGrid& grid, bool DirBC_Interior,
+nodeApplyAscOrthoRadialTake(const int i_r, const int i_theta, const PolarGrid<Kokkos::HostSpace>& grid, bool DirBC_Interior,
                             HostConstVector<double>& x, HostConstVector<double>& rhs, HostVector<double>& result,
                             HostConstVector<double>& arr, const HostConstVector<double>& att,
                             HostConstVector<double>& art, const HostConstVector<double>& detDF,
@@ -123,7 +123,7 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(HostConstVect
 {
     using smoother_take::nodeApplyAscOrthoCircleTake;
 
-    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 
@@ -162,7 +162,7 @@ void SmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(HostConstVect
 {
     using smoother_take::nodeApplyAscOrthoCircleTake;
 
-    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 
@@ -201,7 +201,7 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(HostConstVect
 {
     using smoother_take::nodeApplyAscOrthoRadialTake;
 
-    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 
@@ -240,7 +240,7 @@ void SmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(HostConstVect
 {
     using smoother_take::nodeApplyAscOrthoRadialTake;
 
-    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 

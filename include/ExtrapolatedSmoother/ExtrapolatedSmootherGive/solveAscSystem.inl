@@ -3,7 +3,7 @@
 template <class LevelCacheType>
 void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackCircleSection(HostVector<double> x, HostVector<double> temp)
 {
-    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
     int start                         = 0;
     int end                           = grid.numberCircularSmootherNodes();
@@ -46,7 +46,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackCircleSection(HostVecto
 template <class LevelCacheType>
 void ExtrapolatedSmootherGive<LevelCacheType>::solveWhiteCircleSection(HostVector<double> x, HostVector<double> temp)
 {
-    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
     int start                         = 0;
     int end                           = grid.numberCircularSmootherNodes();
@@ -89,7 +89,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveWhiteCircleSection(HostVecto
 template <class LevelCacheType>
 void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackRadialSection(HostVector<double> x, HostVector<double> temp)
 {
-    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
     int start                         = grid.numberCircularSmootherNodes();
     int end                           = grid.numberOfNodes();
@@ -119,7 +119,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackRadialSection(HostVecto
 template <class LevelCacheType>
 void ExtrapolatedSmootherGive<LevelCacheType>::solveWhiteRadialSection(HostVector<double> x, HostVector<double> temp)
 {
-    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
     int start                         = grid.numberCircularSmootherNodes();
     int end                           = grid.numberOfNodes();

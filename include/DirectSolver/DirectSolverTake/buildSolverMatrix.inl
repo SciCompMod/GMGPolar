@@ -28,7 +28,7 @@ static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCSR<dou
 
 template <typename SystemMatrix>
 static KOKKOS_INLINE_FUNCTION void
-nodeBuildSolverMatrixTake(const int i_r, const int i_theta, const PolarGrid& grid, const bool DirBC_Interior,
+nodeBuildSolverMatrixTake(const int i_r, const int i_theta, const PolarGrid<Kokkos::HostSpace>& grid, const bool DirBC_Interior,
                           const SystemMatrix& solver_matrix, HostConstVector<double>& arr, HostConstVector<double>& att,
                           HostConstVector<double>& art, HostConstVector<double>& detDF,
                           HostConstVector<double>& coeff_beta)
@@ -483,7 +483,7 @@ typename DirectSolverTake<LevelCacheType>::SystemMatrix DirectSolverTake<LevelCa
     using direct_solver_take::nodeBuildSolverMatrixTake;
     using direct_solver_take::validateSolverMatrixIndexing;
 
-    const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = DirectSolver<LevelCacheType>::DirBC_Interior_;
 

@@ -1,7 +1,7 @@
 #pragma once
 
 template <class LevelCacheType>
-DirectSolverTake<LevelCacheType>::DirectSolverTake(const PolarGrid& grid, const LevelCacheType& level_cache,
+DirectSolverTake<LevelCacheType>::DirectSolverTake(const PolarGrid<Kokkos::HostSpace>& grid, const LevelCacheType& level_cache,
                                                    bool DirBC_Interior, int num_omp_threads)
     : DirectSolver<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
 #ifdef GMGPOLAR_USE_MUMPS

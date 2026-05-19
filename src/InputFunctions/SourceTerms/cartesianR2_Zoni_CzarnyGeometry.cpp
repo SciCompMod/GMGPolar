@@ -6,7 +6,7 @@ void CartesianR2_Zoni_CzarnyGeometry::initializeGeometry()
     factor_xi = 1.0 / sqrt(1.0 - inverse_aspect_ratio_epsilon * inverse_aspect_ratio_epsilon / 4.0);
 }
 
-CartesianR2_Zoni_CzarnyGeometry::CartesianR2_Zoni_CzarnyGeometry(PolarGrid const& grid, double Rmax,
+CartesianR2_Zoni_CzarnyGeometry::CartesianR2_Zoni_CzarnyGeometry(PolarGrid<Kokkos::HostSpace> const& grid, double Rmax,
                                                                  double inverse_aspect_ratio_epsilon,
                                                                  double ellipticity_e)
     : grid_(grid)

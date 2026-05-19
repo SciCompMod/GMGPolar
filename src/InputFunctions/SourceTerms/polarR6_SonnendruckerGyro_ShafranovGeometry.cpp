@@ -1,7 +1,7 @@
 #include "../include/InputFunctions/SourceTerms/polarR6_SonnendruckerGyro_ShafranovGeometry.h"
 using namespace gmgpolar;
 
-PolarR6_SonnendruckerGyro_ShafranovGeometry::PolarR6_SonnendruckerGyro_ShafranovGeometry(PolarGrid const& grid,
+PolarR6_SonnendruckerGyro_ShafranovGeometry::PolarR6_SonnendruckerGyro_ShafranovGeometry(PolarGrid<Kokkos::HostSpace> const& grid,
                                                                                          double Rmax,
                                                                                          double elongation_kappa,
                                                                                          double shift_delta)

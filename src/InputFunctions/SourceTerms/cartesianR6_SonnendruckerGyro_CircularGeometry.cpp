@@ -1,7 +1,7 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR6_SonnendruckerGyro_CircularGeometry.h"
 using namespace gmgpolar;
 
-CartesianR6_SonnendruckerGyro_CircularGeometry::CartesianR6_SonnendruckerGyro_CircularGeometry(PolarGrid const& grid,
+CartesianR6_SonnendruckerGyro_CircularGeometry::CartesianR6_SonnendruckerGyro_CircularGeometry(PolarGrid<Kokkos::HostSpace> const& grid,
                                                                                                double Rmax)
     : grid_(grid)
     , Rmax(Rmax)

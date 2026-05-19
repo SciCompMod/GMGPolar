@@ -2,7 +2,7 @@
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 LevelCache<DomainGeometry, DensityProfileCoefficients>::LevelCache(
-    const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients,
+    const PolarGrid<Kokkos::HostSpace>& grid, const DensityProfileCoefficients& density_profile_coefficients,
     const DomainGeometry& domain_geometry, const bool cache_density_profile_coefficients,
     const bool cache_domain_geometry)
     : domain_geometry_(domain_geometry)

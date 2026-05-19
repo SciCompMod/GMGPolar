@@ -16,7 +16,7 @@ static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const BatchedTridiagonalS
 
 template <typename LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
-nodeBuildTridiagonalSolverMatricesCircleSection(const int i_r, const int i_theta, const PolarGrid& grid,
+nodeBuildTridiagonalSolverMatricesCircleSection(const int i_r, const int i_theta, const PolarGrid<Kokkos::HostSpace>& grid,
                                                 const LevelCacheType& level_cache, const bool DirBC_Interior,
                                                 const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
                                                 const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver)
@@ -192,7 +192,7 @@ nodeBuildTridiagonalSolverMatricesCircleSection(const int i_r, const int i_theta
 
 template <typename LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
-nodeBuildTridiagonalSolverMatricesRadialSection(const int i_r, const int i_theta, const PolarGrid& grid,
+nodeBuildTridiagonalSolverMatricesRadialSection(const int i_r, const int i_theta, const PolarGrid<Kokkos::HostSpace>& grid,
                                                 const LevelCacheType& level_cache, const bool DirBC_Interior,
                                                 const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
                                                 const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver)
@@ -520,7 +520,7 @@ void SmootherGive<LevelCacheType>::buildTridiagonalSolverMatrices()
     using smoother_give::nodeBuildTridiagonalSolverMatricesCircleSection;
     using smoother_give::nodeBuildTridiagonalSolverMatricesRadialSection;
 
-    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 

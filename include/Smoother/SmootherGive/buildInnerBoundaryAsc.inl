@@ -28,7 +28,7 @@ update_CSR_COO_MatrixElement(const SparseMatrixCSR<double, Kokkos::HostSpace>& m
 
 template <typename LevelCacheType, typename InnerBoundaryMatrix>
 static KOKKOS_INLINE_FUNCTION void
-nodeBuildInteriorBoundarySolverMatrix_i_r_0(const int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache,
+nodeBuildInteriorBoundarySolverMatrix_i_r_0(const int i_theta, const PolarGrid<Kokkos::HostSpace>& grid, const LevelCacheType& level_cache,
                                             const bool DirBC_Interior, const InnerBoundaryMatrix& matrix)
 {
     using smoother_give::getCircleAscIndex;
@@ -200,7 +200,7 @@ nodeBuildInteriorBoundarySolverMatrix_i_r_0(const int i_theta, const PolarGrid& 
 
 template <typename LevelCacheType, typename InnerBoundaryMatrix>
 static KOKKOS_INLINE_FUNCTION void
-nodeBuildInteriorBoundarySolverMatrix_i_r_1(const int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache,
+nodeBuildInteriorBoundarySolverMatrix_i_r_1(const int i_theta, const PolarGrid<Kokkos::HostSpace>& grid, const LevelCacheType& level_cache,
                                             const bool DirBC_Interior, const InnerBoundaryMatrix& matrix)
 {
     using smoother_give::getCircleAscIndex;
@@ -261,7 +261,7 @@ SmootherGive<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     using smoother_give::nodeBuildInteriorBoundarySolverMatrix_i_r_0;
     using smoother_give::nodeBuildInteriorBoundarySolverMatrix_i_r_1;
 
-    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid             = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 

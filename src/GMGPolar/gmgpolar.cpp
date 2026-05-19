@@ -4,7 +4,7 @@ using namespace gmgpolar;
 /* ---------------------------------------------------------------------- */
 /* Constructor & Initialization                                           */
 /* ---------------------------------------------------------------------- */
-IGMGPolar::IGMGPolar(const PolarGrid& grid)
+IGMGPolar::IGMGPolar(const PolarGrid<Kokkos::HostSpace>& grid)
     : grid_(grid)
     // General solver output and visualization settings
     , verbose_(0)

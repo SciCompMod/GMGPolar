@@ -27,7 +27,7 @@ template <class LevelCacheType>
 class ExtrapolatedSmoother
 {
 public:
-    explicit ExtrapolatedSmoother(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
+    explicit ExtrapolatedSmoother(const PolarGrid<Kokkos::HostSpace>& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
                                   int num_omp_threads)
         : grid_(grid)
         , level_cache_(level_cache)
@@ -40,7 +40,7 @@ public:
     virtual void extrapolatedSmoothing(HostVector<double> x, HostConstVector<double> rhs, HostVector<double> temp) = 0;
 
 protected:
-    const PolarGrid& grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid_;
     const LevelCacheType& level_cache_;
     const bool DirBC_Interior_;
     const int num_omp_threads_;

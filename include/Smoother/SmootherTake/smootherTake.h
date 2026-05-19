@@ -53,7 +53,7 @@ class SmootherTake : public Smoother<LevelCacheType>
 public:
     // Constructs the coupled circle-radial smoother.
     // Builds the A_sc smoother matrices and prepares the solvers.
-    explicit SmootherTake(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
+    explicit SmootherTake(const PolarGrid<Kokkos::HostSpace>& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
                           int num_omp_threads);
 
     KOKKOS_DEFAULTED_FUNCTION SmootherTake(const SmootherTake&) = default;
