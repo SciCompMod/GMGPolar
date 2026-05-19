@@ -71,8 +71,19 @@ bool ConfigParser::parse(int argc, char* argv[])
 {
 
     if (argc != 0) {
+        // Filter out Kokkos arguments before cmdline parser sees them
+        std::vector<char*> filtered_argv;
+        for (int i = 0; i < argc; ++i) {
+            std::string arg(argv[i]);
+            if (arg.rfind("--kokkos-", 0) == 0 || arg.rfind("--kokkos_", 0) == 0) {
+                continue;
+            }
+            filtered_argv.push_back(argv[i]);
+        }
+        int filtered_argc = static_cast<int>(filtered_argv.size());
+
         try {
-            parser_.parse_check(argc, argv);
+            parser_.parse_check(filtered_argc, filtered_argv.data());
         }
         catch (const cmdline::cmdline_error& parse_error) {
             std::cerr << "Error: " << parse_error.what() << std::endl;
