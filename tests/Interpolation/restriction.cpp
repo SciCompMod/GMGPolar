@@ -59,7 +59,7 @@ TEST(RestrictionTest, RestrictionMatchesStencil)
     PolarGrid fine_grid(fine_radii, fine_angles);
     PolarGrid coarse_grid = coarseningGrid(fine_grid);
 
-    Interpolation I(/*threads*/ 16, /*DirBC*/ true);
+    Interpolation I(/*DirBC*/ true);
 
     HostVector<double> fine_values = generate_random_sample_data(fine_grid, 5678, 0.0, 1.0);
     HostVector<double> coarse_result("coarse_result", coarse_grid.numberOfNodes());

@@ -94,27 +94,24 @@ public:
 
     // -------------- //
     // Apply Residual //
-    void initializeResidual(const bool DirBC_Interior, const int num_omp_threads,
-                            const StencilDistributionMethod stencil_distribution_method);
+    void initializeResidual(const bool DirBC_Interior, const StencilDistributionMethod stencil_distribution_method);
     void computeResidual(HostVector<double> result, HostConstVector<double> rhs, HostConstVector<double> x) const;
     void applySystemOperator(HostVector<double> result, HostConstVector<double> x) const;
 
     // ------------------- //
     // Solve coarse System //
-    void initializeDirectSolver(const bool DirBC_Interior, const int num_omp_threads,
-                                const StencilDistributionMethod stencil_distribution_method);
+    void initializeDirectSolver(const bool DirBC_Interior, const StencilDistributionMethod stencil_distribution_method);
     // Note: The rhs (right-hand side) vector gets overwritten by the solution.
     void directSolveInPlace(HostVector<double> x) const;
 
     // --------------- //
     // Apply Smoothing //
-    void initializeSmoothing(const bool DirBC_Interior, const int num_omp_threads,
-                             const StencilDistributionMethod stencil_distribution_method);
+    void initializeSmoothing(const bool DirBC_Interior, const StencilDistributionMethod stencil_distribution_method);
     void smoothing(HostVector<double> x, HostConstVector<double> rhs, HostVector<double> temp) const;
 
     // ---------------------------- //
     // Apply Extrapolated Smoothing //
-    void initializeExtrapolatedSmoothing(const bool DirBC_Interior, const int num_omp_threads,
+    void initializeExtrapolatedSmoothing(const bool DirBC_Interior,
                                          const StencilDistributionMethod stencil_distribution_method);
     void extrapolatedSmoothing(HostVector<double> x, HostConstVector<double> rhs, HostVector<double> temp) const;
 
