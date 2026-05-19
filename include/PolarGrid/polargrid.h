@@ -91,14 +91,14 @@ private:
 
     // radial_spacings_ contains the distances between each consecutive radii division.
     // radial_spacings_ = [r_{1}-r_{0}, ..., r_{N}-r_{N-1}].
-    AllocatableVector<double> radial_spacings_; // size(radial_spacings_) = nr() - 1
+    AllocatableVector<double, MemorySpace> radial_spacings_; // size(radial_spacings_) = nr() - 1
 
     // angular_spacings_ contains the angles between each consecutive theta division.
     // Since we have a periodic boundary in theta direction,
     // we have to make sure the index wraps around correctly when accessing it.
     // Here theta_0 = 0.0 and theta_N = 2*pi refer to the same point.
     // angular_spacings_ = [theta_{1}-theta_{0}, ..., theta_{N}-theta_{N-1}].
-    AllocatableVector<double> angular_spacings_; // size(angular_spacings_) = ntheta()
+    AllocatableVector<double, MemorySpace> angular_spacings_; // size(angular_spacings_) = ntheta()
 
     // Circle/radial smoother division
     double smoother_splitting_radius_; // Radius at which the grid is split into circular and radial smoothing

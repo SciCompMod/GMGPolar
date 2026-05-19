@@ -2,7 +2,7 @@
 using namespace gmgpolar;
 
 template<class MemorySpace>
-Vector<double, MemorySpace> PolarGrid::RadialAnisotropicDivision(double R0, double R, const int nr_exp, double refinement_radius,
+Vector<double, MemorySpace> PolarGrid<MemorySpace>::RadialAnisotropicDivision(double R0, double R, const int nr_exp, double refinement_radius,
                                                         const int anisotropic_factor) const
 {
     // Calculate the percentage of refinement_radius.

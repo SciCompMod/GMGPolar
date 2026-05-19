@@ -252,12 +252,15 @@ PolarGrid<MemorySpace> coarseningGrid(const PolarGrid<MemorySpace>& fineGrid)
     const bool use_same_splitting_radius = false;
 
     if (use_same_splitting_radius) {
-        return PolarGrid(coarse_r, coarse_theta, fineGrid.smootherSplittingRadius());
+        return PolarGrid<MemorySpace>(coarse_r, coarse_theta, fineGrid.smootherSplittingRadius());
     }
     else {
-        return PolarGrid(coarse_r, coarse_theta);
+        return PolarGrid<MemorySpace>(coarse_r, coarse_theta);
     }
 }
+
+template PolarGrid<Kokkos::HostSpace> coarseningGrid<Kokkos::HostSpace>(const PolarGrid<Kokkos::HostSpace>& grid);
+template PolarGrid<DefaultMemorySpace> coarseningGrid<DefaultMemorySpace>(const PolarGrid<DefaultMemorySpace>& grid);
 
 } // namespace gmgpolar
 
