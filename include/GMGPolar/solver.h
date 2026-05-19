@@ -591,28 +591,34 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
 
     assert(solution.size() == error.size());
     assert(std::ssize(solution) == grid.numberOfNodes());
+    Vector<double> solution_d("solution_d", solution.size());
+    HostVector<double> exact_sol_h("exact_sol_h", solution.size());
+    Vector<double> exact_sol_d("exact_sol", solution.size());
+    Vector<double> error_d("error_d", solution.size());
 
-#pragma omp parallel num_threads(max_omp_threads_)
-    {
-#pragma omp for nowait
-        for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
-            double r = grid.radius(i_r);
-            for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                double theta = grid.theta(i_theta);
-                error[grid.index(i_r, i_theta)] =
-                    exact_solution.exact_solution(r, theta) - solution[grid.index(i_r, i_theta)];
-            }
-        }
-#pragma omp for nowait
-        for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
+    Kokkos::parallel_for(
+        "fill exact sol on host",
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, 0}, {grid.nr(), grid.ntheta()}),
+        KOKKOS_LAMBDA(const int i_r, const int i_theta) {
+            double r                              = grid.radius(i_r);
+            double theta                          = grid.theta(i_theta);
+            exact_sol_h(grid.index(i_r, i_theta)) = exact_solution.exact_solution(r, theta);
+        });
+
+    Kokkos::deep_copy(exact_sol_d, exact_sol_h);
+    Kokkos::deep_copy(solution_d, solution);
+
+    Kokkos::parallel_for(
+        "compute error on device",
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0, 0}, {grid.nr(), grid.ntheta()}),
+        KOKKOS_LAMBDA(const int i_r, const int i_theta) {
+            double r     = grid.radius(i_r);
             double theta = grid.theta(i_theta);
-            for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
-                double r = grid.radius(i_r);
-                error[grid.index(i_r, i_theta)] =
-                    exact_solution.exact_solution(r, theta) - solution[grid.index(i_r, i_theta)];
-            }
-        }
-    }
+            error_d[grid.index(i_r, i_theta)] =
+                exact_sol_d(grid.index(i_r, i_theta)) - solution_d[grid.index(i_r, i_theta)];
+        });
+
+    Kokkos::deep_copy(error, error_d);
     HostConstVector<double> c_error = error;
     double weighted_euclidean_error = l2_norm(c_error) / std::sqrt(grid.numberOfNodes());
     double infinity_error           = infinity_norm(c_error);
