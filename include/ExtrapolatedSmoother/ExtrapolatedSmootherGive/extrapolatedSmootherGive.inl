@@ -56,7 +56,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(HostVector<
     // The For loop matches circular access pattern
     Kokkos::parallel_for(
         "ExtrapolatedSmootherGive: Init Temp (Circular)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>(
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
             {0, 0}, {grid.numberSmootherCircles(), grid.ntheta()}),
         KOKKOS_LAMBDA(const int i_r, const int i_theta) {
             const int index = grid.index(i_r, i_theta);
@@ -66,8 +66,8 @@ void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(HostVector<
     // The For loop matches radial access pattern
     Kokkos::parallel_for(
         "ExtrapolatedSmootherGive: Init Temp (Radial)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
-                                                                              {grid.ntheta(), grid.nr()}),
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
+                                                                                  {grid.ntheta(), grid.nr()}),
         KOKKOS_LAMBDA(const int i_theta, const int i_r) {
             const int index = grid.index(i_r, i_theta);
             temp[index]     = (i_r & 1 || i_theta & 1) ? rhs[index] : x[index];
