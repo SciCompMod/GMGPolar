@@ -67,7 +67,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(HostVector<
     Kokkos::parallel_for(
         "ExtrapolatedSmootherGive: Init Temp (Radial)",
         Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
-                                                                              {grid.ntheta(), grid.nr()}),
+                                                                                  {grid.ntheta(), grid.nr()}),
         KOKKOS_LAMBDA(const int i_theta, const int i_r) {
             const int index = grid.index(i_r, i_theta);
             temp[index]     = (i_r & 1 || i_theta & 1) ? rhs[index] : x[index];
