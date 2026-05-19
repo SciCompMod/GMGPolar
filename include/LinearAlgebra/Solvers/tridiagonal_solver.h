@@ -93,13 +93,13 @@ public:
     {
         // Create local copies for lambda capture
         int matrix_dimension        = matrix_dimension_;
-        HostVector<T> main_diagonal = main_diagonal_;
-        HostVector<T> sub_diagonal  = sub_diagonal_;
-        HostVector<T> gamma         = gamma_;
+        Vector<T> main_diagonal = main_diagonal_;
+        Vector<T> sub_diagonal  = sub_diagonal_;
+        Vector<T> gamma         = gamma_;
 
         if (!is_cyclic_) {
             Kokkos::parallel_for(
-                "SetupNonCyclic", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, batch_count_),
+                "SetupNonCyclic", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, batch_count_),
                 KOKKOS_LAMBDA(const int batch_idx) {
                     // ----------------------------------- //
                     // Obtain offset for the current batch //
@@ -116,7 +116,7 @@ public:
         }
         else {
             Kokkos::parallel_for(
-                "SetupCyclic", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, batch_count_),
+                "SetupCyclic", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, batch_count_),
                 KOKKOS_LAMBDA(const int batch_idx) {
                     // ----------------------------------- //
                     // Obtain offset for the current batch //
@@ -152,7 +152,7 @@ public:
     // This step solves the system Ax = b using the factorized form of A.
     // For cyclic systems, it also performs the Shermann-Morrison reconstruction to obtain the final solution.
 
-    void solve(HostVector<T> rhs, int batch_offset = 0, int batch_stride = 1)
+    void solve(Vector<T> rhs, int batch_offset = 0, int batch_stride = 1)
     {
         if (!is_factorized_) {
             throw std::runtime_error("Error: Matrix must be factorized before solving.");
@@ -163,14 +163,14 @@ public:
 
         // Create local copies for lambda capture
         int matrix_dimension        = matrix_dimension_;
-        HostVector<T> main_diagonal = main_diagonal_;
-        HostVector<T> sub_diagonal  = sub_diagonal_;
-        HostVector<T> buffer        = buffer_;
-        HostVector<T> gamma         = gamma_;
+        Vector<T> main_diagonal = main_diagonal_;
+        Vector<T> sub_diagonal  = sub_diagonal_;
+        Vector<T> buffer        = buffer_;
+        Vector<T> gamma         = gamma_;
 
         if (!is_cyclic_) {
             Kokkos::parallel_for(
-                "SolveNonCyclic", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, effective_batch_count),
+                "SolveNonCyclic", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, effective_batch_count),
                 KOKKOS_LAMBDA(const int k) {
                     // ----------------------------------- //
                     // Obtain offset for the current batch //
@@ -198,7 +198,7 @@ public:
         }
         else {
             Kokkos::parallel_for(
-                "SolveCyclic", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, effective_batch_count),
+                "SolveCyclic", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, effective_batch_count),
                 KOKKOS_LAMBDA(const int k) {
                     // ----------------------------------- //
                     // Obtain offset for the current batch //
@@ -255,7 +255,7 @@ public:
     // It is useful when the matrix has a non-zero diagonal but zero off-diagonal entries.
     // Note that .setup() modifies main_diagonal(0) in the cyclic case.
 
-    void solve_diagonal(HostVector<T> rhs, int batch_offset = 0, int batch_stride = 1)
+    void solve_diagonal(Vector<T> rhs, int batch_offset = 0, int batch_stride = 1)
     {
         if (!is_factorized_) {
             throw std::runtime_error("Error: Matrix must be factorized before solving.");
@@ -266,13 +266,13 @@ public:
 
         // Create local copies for lambda capture
         int matrix_dimension        = matrix_dimension_;
-        HostVector<T> main_diagonal = main_diagonal_;
-        HostVector<T> gamma         = gamma_;
+        Vector<T> main_diagonal = main_diagonal_;
+        Vector<T> gamma         = gamma_;
 
         if (!is_cyclic_) {
             Kokkos::parallel_for(
                 "SolveDiagonalNonCyclic",
-                Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, effective_batch_count),
+                Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, effective_batch_count),
                 KOKKOS_LAMBDA(const int k) {
                     // ----------------------------------- //
                     // Obtain offset for the current batch //
@@ -288,7 +288,7 @@ public:
         }
         else {
             Kokkos::parallel_for(
-                "SolveDiagonalCyclic", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, effective_batch_count),
+                "SolveDiagonalCyclic", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, effective_batch_count),
                 KOKKOS_LAMBDA(const int k) {
                     // ----------------------------------- //
                     // Obtain offset for the current batch //
@@ -310,10 +310,10 @@ private:
     int matrix_dimension_;
     int batch_count_;
 
-    HostVector<T> main_diagonal_;
-    HostVector<T> sub_diagonal_;
-    HostVector<T> buffer_;
-    HostVector<T> gamma_;
+    Vector<T> main_diagonal_;
+    Vector<T> sub_diagonal_;
+    Vector<T> buffer_;
+    Vector<T> gamma_;
 
     bool is_cyclic_;
     bool is_factorized_;
