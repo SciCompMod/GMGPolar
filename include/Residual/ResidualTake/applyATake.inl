@@ -95,7 +95,7 @@ void ResidualTake<LevelCacheType>::applySystemOperator(HostVector<double> result
             {grid.numberSmootherCircles(), grid.ntheta()} // Ending point of the index space
             ),
         // Kokkos lambda function to execute for each point in the index space
-        KOKKOS_CLASS_LAMBDA(const int i_r, const int i_theta) {
+        KOKKOS_LAMBDA(const int i_r, const int i_theta) {
             node_apply_a_take(i_r, i_theta, grid, DirBC_Interior, result, x, arr, att, art, detDF, coeff_beta);
         });
 
@@ -107,7 +107,7 @@ void ResidualTake<LevelCacheType>::applySystemOperator(HostVector<double> result
             {grid.ntheta(), grid.nr()} // Ending point of the index space
             ),
         // Kokkos lambda function to execute for each point in the index space
-        KOKKOS_CLASS_LAMBDA(const int i_theta, const int i_r) {
+        KOKKOS_LAMBDA(const int i_theta, const int i_r) {
             node_apply_a_take(i_r, i_theta, grid, DirBC_Interior, result, x, arr, att, art, detDF, coeff_beta);
         });
 
