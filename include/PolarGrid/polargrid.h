@@ -60,6 +60,9 @@ public:
 		, number_radial_smoother_nodes_(other.number_radial_smoother_nodes_)
 	{}
 
+	template<class>
+	friend class PolarGrid;
+
     // Optimized, inlined indexing.
     KOKKOS_INLINE_FUNCTION int wrapThetaIndex(const int unwrapped_theta_index) const;
     KOKKOS_INLINE_FUNCTION int index(const int r_index, const int unwrapped_theta_index) const;
