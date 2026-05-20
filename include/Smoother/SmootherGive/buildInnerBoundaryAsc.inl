@@ -108,7 +108,7 @@ nodeBuildInteriorBoundarySolverMatrix_i_r_0(const int i_theta, const PolarGrid& 
         const int top_nz_index    = getCircleAscIndex(i_r, i_theta_P1, DirBC_Interior);
         const int left_nz_index   = getCircleAscIndex(i_r, i_theta_AcrossOrigin, DirBC_Interior);
 
-        int nz_index; /* Fill matrix row of (i,j) */
+        /* Fill matrix row of (i,j) */
         row = center_index;
         ptr = center_nz_index;
 
@@ -226,14 +226,10 @@ nodeBuildInteriorBoundarySolverMatrix_i_r_1(const int i_theta, const PolarGrid& 
     level_cache.obtainValues(i_r, i_theta, center, radius, theta, coeff_beta, arr, att, art, detDF);
 
     const double h1 = grid.radialSpacing(i_r - 1);
-    const double h2 = grid.radialSpacing(i_r);
     const double k1 = grid.angularSpacing(i_theta - 1);
     const double k2 = grid.angularSpacing(i_theta);
 
     const double coeff1 = 0.5 * (k1 + k2) / h1;
-
-    const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-    const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
 
     const int left_index = i_theta;
 
@@ -265,7 +261,6 @@ SmootherGive<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 
-    const int i_r    = 0;
     const int ntheta = grid.ntheta();
 
     // The interior boundary matrix is symmetric due to the periodicity in the theta direction
@@ -275,6 +270,7 @@ SmootherGive<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     // the COO_Mumps_Solver optimizes the factorization by only using the upper triangular part of the matrix,
     // which is extracted by the COO_Mumps_Solver internally.
 #ifdef GMGPOLAR_USE_MUMPS
+    const int i_r    = 0;
     const int nnz = getNonZeroCountCircleAsc(i_r, grid, DirBC_Interior);
     SparseMatrixCOO<double, Kokkos::HostSpace> inner_boundary_solver_matrix(ntheta, ntheta, nnz);
     inner_boundary_solver_matrix.is_symmetric(true);

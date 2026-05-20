@@ -11,8 +11,6 @@ KOKKOS_FUNCTION double Refined_ZoniShiftedGyro_CulhamGeometry::operator()(std::s
 {
     double r         = grid_.radius(i_r);
     double theta     = grid_.theta(i_theta);
-    double sin_theta = std::sin(theta);
-    double cos_theta = std::cos(theta);
     return ((-3.33823779536505e-15) * ((r / Rmax) * (r / Rmax)) - 0.0 * (r / Rmax) - 0.0 +
             exp((-3333.33333333333) * pow(((r / Rmax) - 0.9), 2.0))) *
                cos(21.0 * theta) +

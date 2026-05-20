@@ -90,16 +90,9 @@ nodeBuildInteriorBoundarySolverMatrix(const int i_theta, const PolarGrid& grid, 
 
         const int center_index = i_theta;
         const int left_index   = i_theta_AcrossOrigin;
-        const int right_index  = i_theta;
-        const int bottom_index = i_theta_M1;
-        const int top_index    = i_theta_P1;
 
         const int center_nz_index = getCircleAscIndex(i_r, i_theta, grid, DirBC_Interior);
-        const int bottom_nz_index = getCircleAscIndex(i_r, i_theta_M1, grid, DirBC_Interior);
-        const int top_nz_index    = getCircleAscIndex(i_r, i_theta_P1, grid, DirBC_Interior);
-        const int left_nz_index   = getCircleAscIndex(i_r, i_theta_AcrossOrigin, grid, DirBC_Interior);
 
-        int nz_index;
         const Stencil& CenterStencil = getStencil(i_r, i_theta, grid, DirBC_Interior);
 
         if (i_theta & 1) {
@@ -125,8 +118,6 @@ nodeBuildInteriorBoundarySolverMatrix(const int i_theta, const PolarGrid& grid, 
             row = center_index;
             ptr = center_nz_index;
 
-            const Stencil& CenterStencil = getStencil(i_r, i_theta, grid, DirBC_Interior);
-
             offset = CenterStencil[StencilPosition::Center];
             column = center_index;
             value  = center_value;
@@ -149,8 +140,6 @@ nodeBuildInteriorBoundarySolverMatrix(const int i_theta, const PolarGrid& grid, 
             row = center_index;
             ptr = center_nz_index;
 
-            const Stencil& CenterStencil = getStencil(i_r, i_theta, grid, DirBC_Interior);
-
             offset = CenterStencil[StencilPosition::Center];
             column = center_index;
             value  = 1.0;
@@ -172,7 +161,6 @@ ExtrapolatedSmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
-    const int i_r    = 0;
     const int ntheta = grid.ntheta();
 
     // The interior boundary matrix is symmetric due to the periodicity in the theta direction
@@ -182,6 +170,7 @@ ExtrapolatedSmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     // the COO_Mumps_Solver optimizes the factorization by only using the upper triangular part of the matrix,
     // which is extracted by the COO_Mumps_Solver internally.
 #ifdef GMGPOLAR_USE_MUMPS
+    const int i_r    = 0;
     const int nnz = getNonZeroCountCircleAsc(i_r, grid, DirBC_Interior);
     SparseMatrixCOO<double, Kokkos::HostSpace> inner_boundary_solver_matrix(ntheta, ntheta, nnz);
     inner_boundary_solver_matrix.is_symmetric(true);

@@ -135,16 +135,15 @@ nodeApplyAscOrthoCircleTake(const int i_r, const int i_theta, const PolarGrid& g
             const double k1 = grid.angularSpacing(i_theta - 1);
             const double k2 = grid.angularSpacing(i_theta);
 
-            const double coeff1 = 0.5 * (k1 + k2) / h1;
             const double coeff2 = 0.5 * (k1 + k2) / h2;
             const double coeff3 = 0.5 * (h1 + h2) / k1;
             const double coeff4 = 0.5 * (h1 + h2) / k2;
 
             const int i_theta_M1     = grid.wrapThetaIndex(i_theta - 1);
             const int i_theta_P1     = grid.wrapThetaIndex(i_theta + 1);
-            const int i_theta_Across = grid.wrapThetaIndex(i_theta + grid.ntheta() / 2);
+            //const int i_theta_Across = grid.wrapThetaIndex(i_theta + grid.ntheta() / 2);
 
-            const int left         = grid.index(i_r, i_theta_Across);
+            //const int left         = grid.index(i_r, i_theta_Across);
             const int bottom       = grid.index(i_r, i_theta_M1);
             const int center       = grid.index(i_r, i_theta);
             const int top          = grid.index(i_r, i_theta_P1);

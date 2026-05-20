@@ -26,7 +26,6 @@ KOKKOS_FUNCTION double CartesianR2_Poisson_CzarnyGeometry::operator()(std::size_
     double temp =
         sqrt(inverse_aspect_ratio_epsilon * (inverse_aspect_ratio_epsilon + 2.0 * (r / Rmax) * cos_theta) + 1.0);
     double sin_theta_pow2 = pow(sin_theta, 2.0);
-    double cos_theta_pow2 = pow(cos_theta, 2.0);
     double temp1          = pow((2.0 - temp), 2.0);
     double temp2          = pow((2.0 - temp), 3.0);
 
