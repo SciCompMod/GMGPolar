@@ -601,7 +601,7 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
     //       As it is planned that the solution and error vector will use device memory during GPU porting,
     //       we need to transfer the exact solution values from host to device using the Kokkos::deep_copy operation.
     HostVector<double> exact_solution_values_host("Exact Solution Values Host", grid.numberOfNodes());
-  
+
     Kokkos::parallel_for(
         "Exact Error: Compute Exact Solution Values (Circular)",
         Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Host parallel loop
