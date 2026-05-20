@@ -16,8 +16,7 @@ jobs:
     strategy:
       matrix:
         USE_MUMPS: [false, true]
-        #backend: ['openmp', 'cuda']
-        backend: ['cuda']
+        backend: ['openmp', 'cuda']
         exclude:
           - backend: cuda
             USE_MUMPS: true
