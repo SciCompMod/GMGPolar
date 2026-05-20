@@ -587,7 +587,6 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
     HostVector<double> error, const ExactSolution& exact_solution)
 {
     const PolarGrid<Kokkos::HostSpace>& grid                                                    = level.grid();
-    const LevelCache<DomainGeometry, DensityProfileCoefficients>& levelCache = level.levelCache();
 
     assert(solution.size() == error.size());
     assert(std::ssize(solution) == grid.numberOfNodes());

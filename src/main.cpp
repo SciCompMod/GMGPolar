@@ -72,7 +72,6 @@ int main(int argc, char* argv[])
 
             // --- Retrieve solution and associated grid --- //
             HostVector<double> solution = solver.solution();
-            const PolarGrid<Kokkos::HostSpace>& grid       = solver.grid();
 
             // Print timing statistics for each solver phase
             solver.printTimings();

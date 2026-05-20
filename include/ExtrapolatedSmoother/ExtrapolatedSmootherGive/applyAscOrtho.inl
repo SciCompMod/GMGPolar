@@ -149,11 +149,11 @@ nodeApplyAscOrthoCircleGiveInside(const int i_r, const int i_theta, const PolarG
             const double coeff3 = 0.5 * (h1 + h2) / k1;
             const double coeff4 = 0.5 * (h1 + h2) / k2;
 
-            const int i_theta_M1     = grid.wrapThetaIndex(i_theta - 1);
-            const int i_theta_P1     = grid.wrapThetaIndex(i_theta + 1);
-            const int i_theta_Across = grid.wrapThetaIndex(i_theta + grid.ntheta() / 2);
+            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
+            //const int i_theta_Across = grid.wrapThetaIndex(i_theta + grid.ntheta() / 2);
 
-            const int left   = grid.index(i_r, i_theta_Across);
+            //const int left   = grid.index(i_r, i_theta_Across);
             const int bottom = grid.index(i_r, i_theta_M1);
             const int top    = grid.index(i_r, i_theta_P1);
             const int right  = grid.index(i_r + 1, i_theta);
@@ -471,7 +471,6 @@ nodeApplyAscOrthoRadialGiveInside(const int i_r, const int i_theta, const PolarG
         }
     }
     else if (i_r == grid.numberSmootherCircles() - 1) {
-        const double h1 = grid.radialSpacing(i_r - 1);
         const double h2 = grid.radialSpacing(i_r);
         const double k1 = grid.angularSpacing(i_theta - 1);
         const double k2 = grid.angularSpacing(i_theta);

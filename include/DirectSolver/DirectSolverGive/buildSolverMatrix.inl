@@ -227,16 +227,11 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid<Defa
             const double k2     = grid.angularSpacing(i_theta);
             const double coeff2 = 0.5 * (k1 + k2) / h2;
 
-            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
-
             const int center_nz_index = getSolverMatrixIndex(i_r, i_theta, grid, DirBC_Interior);
             const int right_nz_index  = getSolverMatrixIndex(i_r + 1, i_theta, grid, DirBC_Interior);
 
             const int center_index = grid.index(i_r, i_theta);
             const int right_index  = grid.index(i_r + 1, i_theta);
-            const int bottom_index = grid.index(i_r, i_theta_M1);
-            const int top_index    = grid.index(i_r, i_theta_P1);
 
             /* Fill matrix row of (i,j) */
             row = center_index;
@@ -632,13 +627,11 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid<Defa
 
         const int center_nz_index = getSolverMatrixIndex(i_r, i_theta, grid, DirBC_Interior);
         const int left_nz_index   = getSolverMatrixIndex(i_r - 1, i_theta, grid, DirBC_Interior);
-        const int right_nz_index  = getSolverMatrixIndex(i_r + 1, i_theta, grid, DirBC_Interior);
         const int bottom_nz_index = getSolverMatrixIndex(i_r, i_theta_M1, grid, DirBC_Interior);
         const int top_nz_index    = getSolverMatrixIndex(i_r, i_theta_P1, grid, DirBC_Interior);
 
         const int center_index = grid.index(i_r, i_theta);
         const int left_index   = grid.index(i_r - 1, i_theta);
-        const int right_index  = grid.index(i_r + 1, i_theta);
         const int bottom_index = grid.index(i_r, i_theta_M1);
         const int top_index    = grid.index(i_r, i_theta_P1);
 
@@ -760,16 +753,11 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid<Defa
 
         const double coeff1 = 0.5 * (k1 + k2) / h1;
 
-        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
-
         const int center_nz_index = getSolverMatrixIndex(i_r, i_theta, grid, DirBC_Interior);
         const int left_nz_index   = getSolverMatrixIndex(i_r - 1, i_theta, grid, DirBC_Interior);
 
         const int center_index = grid.index(i_r, i_theta);
         const int left_index   = grid.index(i_r - 1, i_theta);
-        const int bottom_index = grid.index(i_r, i_theta_M1);
-        const int top_index    = grid.index(i_r, i_theta_P1);
 
         /* Fill matrix row of (i,j) */
         row = center_index;
