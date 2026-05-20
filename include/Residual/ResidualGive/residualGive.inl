@@ -24,7 +24,7 @@ void ResidualGive<LevelCacheType>::computeResidual(HostVector<double> h_result, 
     const int n = result.size();
 
     Kokkos::parallel_for(
-        "Residual Give: Subtract A*x from rhs", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, n),
+        "Residual Give: Subtract A*x from rhs", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, n),
         KOKKOS_LAMBDA(const int i) { result[i] = rhs[i] - result[i]; });
 
     Kokkos::fence();
