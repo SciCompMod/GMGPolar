@@ -1,12 +1,15 @@
 #pragma once
 
-namespace direct_solver_coo_mumps_take
+#include "matrixStencil.inl"
+
+namespace direct_solver_take
 {
 
 #ifdef GMGPOLAR_USE_MUMPS
 // When using the MUMPS solver, the matrix is assembled in COO format.
-static inline void updateMatrixElement(SparseMatrixCOO<double, Kokkos::HostSpace>& matrix, int ptr, int offset, int row,
-                                       int column, double value)
+static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCOO<double, Kokkos::HostSpace>& matrix,
+                                                       const int ptr, const int offset, const int row, const int column,
+                                                       const double value)
 {
     matrix.set_row_index(ptr + offset, row);
     matrix.set_col_index(ptr + offset, column);
@@ -14,123 +17,123 @@ static inline void updateMatrixElement(SparseMatrixCOO<double, Kokkos::HostSpace
 }
 #else
 // When using the in-house solver, the matrix is stored in CSR format.
-static inline void updateMatrixElement(SparseMatrixCSR<double, Kokkos::HostSpace>& matrix, int ptr, int offset, int row,
-                                       int column, double value)
+static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCSR<double, Kokkos::HostSpace>& matrix,
+                                                       const int ptr, const int offset, const int row, const int column,
+                                                       const double value)
 {
     matrix.set_row_nz_index(row, offset, column);
     matrix.set_row_nz_entry(row, offset, value);
 }
 #endif
 
-} // namespace direct_solver_coo_mumps_take
-
-template <class LevelCacheType>
-void DirectSolverTake<LevelCacheType>::nodeBuildSolverMatrixTake(
-    int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior, SystemMatrix& solver_matrix,
-    HostConstVector<double>& arr, HostConstVector<double>& att, HostConstVector<double>& art,
-    HostConstVector<double>& detDF, HostConstVector<double>& coeff_beta)
+template <typename SystemMatrix>
+static KOKKOS_INLINE_FUNCTION void
+nodeBuildSolverMatrixTake(const int i_r, const int i_theta, const PolarGrid& grid, const bool DirBC_Interior,
+                          const SystemMatrix& solver_matrix, HostConstVector<double>& arr, HostConstVector<double>& att,
+                          HostConstVector<double>& art, HostConstVector<double>& detDF,
+                          HostConstVector<double>& coeff_beta)
 {
-    using direct_solver_coo_mumps_take::updateMatrixElement;
     int ptr, offset;
-    int row, col;
-    double val;
+    int row, column;
+    double value;
     /* -------------------- */
     /* Node in the interior */
     /* -------------------- */
     if (i_r > 1 && i_r < grid.nr() - 2) {
-        int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-        int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
+        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
 
-        double h1 = grid.radialSpacing(i_r - 1);
-        double h2 = grid.radialSpacing(i_r);
-        double k1 = grid.angularSpacing(i_theta_M1);
-        double k2 = grid.angularSpacing(i_theta);
+        const double h1 = grid.radialSpacing(i_r - 1);
+        const double h2 = grid.radialSpacing(i_r);
+        const double k1 = grid.angularSpacing(i_theta_M1);
+        const double k2 = grid.angularSpacing(i_theta);
 
-        double coeff1 = 0.5 * (k1 + k2) / h1;
-        double coeff2 = 0.5 * (k1 + k2) / h2;
-        double coeff3 = 0.5 * (h1 + h2) / k1;
-        double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff1 = 0.5 * (k1 + k2) / h1;
+        const double coeff2 = 0.5 * (k1 + k2) / h2;
+        const double coeff3 = 0.5 * (h1 + h2) / k1;
+        const double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
-        int center_nz_index = getSolverMatrixIndex(i_r, i_theta);
+        const int center_nz_index = getSolverMatrixIndex(i_r, i_theta, grid, DirBC_Interior);
 
-        int center_index       = grid.index(i_r, i_theta);
-        int left_index         = grid.index(i_r - 1, i_theta);
-        int right_index        = grid.index(i_r + 1, i_theta);
-        int bottom_index       = grid.index(i_r, i_theta_M1);
-        int top_index          = grid.index(i_r, i_theta_P1);
-        int bottom_left_index  = grid.index(i_r - 1, i_theta_M1);
-        int bottom_right_index = grid.index(i_r + 1, i_theta_M1);
-        int top_left_index     = grid.index(i_r - 1, i_theta_P1);
-        int top_right_index    = grid.index(i_r + 1, i_theta_P1);
+        const int center_index       = grid.index(i_r, i_theta);
+        const int left_index         = grid.index(i_r - 1, i_theta);
+        const int right_index        = grid.index(i_r + 1, i_theta);
+        const int bottom_index       = grid.index(i_r, i_theta_M1);
+        const int top_index          = grid.index(i_r, i_theta_P1);
+        const int bottom_left_index  = grid.index(i_r - 1, i_theta_M1);
+        const int bottom_right_index = grid.index(i_r + 1, i_theta_M1);
+        const int top_left_index     = grid.index(i_r - 1, i_theta_P1);
+        const int top_right_index    = grid.index(i_r + 1, i_theta_P1);
 
-        double left_value   = -coeff1 * (arr(center_index) + arr(left_index)); /* Left */
-        double right_value  = -coeff2 * (arr(center_index) + arr(right_index)); /* Right */
-        double bottom_value = -coeff3 * (att(center_index) + att(bottom_index)); /* Bottom */
-        double top_value    = -coeff4 * (att(center_index) + att(top_index)); /* Top */
+        const double left_value   = -coeff1 * (arr(center_index) + arr(left_index)); /* Left */
+        const double right_value  = -coeff2 * (arr(center_index) + arr(right_index)); /* Right */
+        const double bottom_value = -coeff3 * (att(center_index) + att(bottom_index)); /* Bottom */
+        const double top_value    = -coeff4 * (att(center_index) + att(top_index)); /* Top */
 
-        double center_value =
-            (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] * std::fabs(detDF(center_index)) /* beta_{i,j} */
+        const double center_value =
+            (coeff5 * coeff_beta[center_index] * Kokkos::fabs(detDF(center_index)) /* beta_{i,j} */
              - left_value /* Center: (Left) */
              - right_value /* Center: (Right) */
              - bottom_value /* Center: (Bottom) */
              - top_value /* Center: (Top) */
             );
 
-        double bottom_left_value  = -0.25 * (art(left_index) + art(bottom_index)); /* Bottom Left */
-        double bottom_right_value = +0.25 * (art(right_index) + art(bottom_index)); /* Bottom Right */
-        double top_left_value     = +0.25 * (art(left_index) + art(top_index)); /* Top Left */
-        double top_right_value    = -0.25 * (art(right_index) + art(top_index)); /* Top Right */
+        const double bottom_left_value  = -0.25 * (art(left_index) + art(bottom_index)); /* Bottom Left */
+        const double bottom_right_value = +0.25 * (art(right_index) + art(bottom_index)); /* Bottom Right */
+        const double top_left_value     = +0.25 * (art(left_index) + art(top_index)); /* Top Left */
+        const double top_right_value    = -0.25 * (art(right_index) + art(top_index)); /* Top Right */
 
         /* Fill matrix row of (i,j) */
         row = center_index;
         ptr = center_nz_index;
 
-        const Stencil& CenterStencil = getStencil(i_r);
+        const Stencil& CenterStencil = getStencil(i_r, grid, DirBC_Interior);
 
         offset = CenterStencil[StencilPosition::Center];
-        col    = center_index;
-        val    = center_value;
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = center_index;
+        value  = center_value;
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::Left];
-        col    = left_index;
-        val    = left_value;
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = left_index;
+        value  = left_value;
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::Right];
-        col    = right_index;
-        val    = right_value;
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = right_index;
+        value  = right_value;
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::Bottom];
-        col    = bottom_index;
-        val    = bottom_value;
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = bottom_index;
+        value  = bottom_value;
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::Top];
-        col    = top_index;
-        val    = top_value;
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = top_index;
+        value  = top_value;
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::BottomLeft];
-        col    = bottom_left_index;
-        val    = bottom_left_value;
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = bottom_left_index;
+        value  = bottom_left_value;
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::BottomRight];
-        col    = bottom_right_index;
-        val    = bottom_right_value;
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = bottom_right_index;
+        value  = bottom_right_value;
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::TopLeft];
-        col    = top_left_index;
-        val    = top_left_value;
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = top_left_index;
+        value  = top_left_value;
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::TopRight];
-        col    = top_right_index;
-        val    = top_right_value;
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = top_right_index;
+        value  = top_right_value;
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
     }
     /* -------------------------- */
     /* Node on the inner boundary */
@@ -140,20 +143,20 @@ void DirectSolverTake<LevelCacheType>::nodeBuildSolverMatrixTake(
         /* Case 1: Dirichlet boundary on the inner boundary */
         /* ------------------------------------------------ */
         if (DirBC_Interior) {
-            int center_nz_index = getSolverMatrixIndex(i_r, i_theta);
+            const int center_nz_index = getSolverMatrixIndex(i_r, i_theta, grid, DirBC_Interior);
 
-            int center_index = grid.index(i_r, i_theta);
+            const int center_index = grid.index(i_r, i_theta);
 
             /* Fill matrix row of (i,j) */
             row = center_index;
             ptr = center_nz_index;
 
-            const Stencil& CenterStencil = getStencil(i_r);
+            const Stencil& CenterStencil = getStencil(i_r, grid, DirBC_Interior);
 
             offset = CenterStencil[StencilPosition::Center];
-            col    = center_index;
-            val    = 1.0;
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = center_index;
+            value  = 1.0;
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
         }
         else {
             /* ------------------------------------------------------------- */
@@ -165,284 +168,283 @@ void DirectSolverTake<LevelCacheType>::nodeBuildSolverMatrixTake(
             const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
             const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
 
-            assert(grid.ntheta() % 2 == 0);
+            KOKKOS_ASSERT(grid.ntheta() % 2 == 0);
             const int i_theta_AcrossOrigin = grid.wrapThetaIndex(i_theta + grid.ntheta() / 2);
 
-            double h1 = 2.0 * grid.radius(0);
-            double h2 = grid.radialSpacing(i_r);
-            double k1 = grid.angularSpacing(i_theta_M1);
-            double k2 = grid.angularSpacing(i_theta);
+            const double h1 = 2.0 * grid.radius(0);
+            const double h2 = grid.radialSpacing(i_r);
+            const double k1 = grid.angularSpacing(i_theta_M1);
+            const double k2 = grid.angularSpacing(i_theta);
 
-            double coeff1 = 0.5 * (k1 + k2) / h1;
-            double coeff2 = 0.5 * (k1 + k2) / h2;
-            double coeff3 = 0.5 * (h1 + h2) / k1;
-            double coeff4 = 0.5 * (h1 + h2) / k2;
+            const double coeff1 = 0.5 * (k1 + k2) / h1;
+            const double coeff2 = 0.5 * (k1 + k2) / h2;
+            const double coeff3 = 0.5 * (h1 + h2) / k1;
+            const double coeff4 = 0.5 * (h1 + h2) / k2;
+            const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
-            int center_nz_index = getSolverMatrixIndex(i_r, i_theta);
+            const int center_nz_index = getSolverMatrixIndex(i_r, i_theta, grid, DirBC_Interior);
 
-            int center_index       = grid.index(i_r, i_theta);
-            int left_index         = grid.index(i_r, i_theta_AcrossOrigin);
-            int right_index        = grid.index(i_r + 1, i_theta);
-            int bottom_index       = grid.index(i_r, i_theta_M1);
-            int top_index          = grid.index(i_r, i_theta_P1);
-            int bottom_right_index = grid.index(i_r + 1, i_theta_M1);
-            int top_right_index    = grid.index(i_r + 1, i_theta_P1);
+            const int center_index       = grid.index(i_r, i_theta);
+            const int left_index         = grid.index(i_r, i_theta_AcrossOrigin);
+            const int right_index        = grid.index(i_r + 1, i_theta);
+            const int bottom_index       = grid.index(i_r, i_theta_M1);
+            const int top_index          = grid.index(i_r, i_theta_P1);
+            const int bottom_right_index = grid.index(i_r + 1, i_theta_M1);
+            const int top_right_index    = grid.index(i_r + 1, i_theta_P1);
 
-            double left_value   = -coeff1 * (arr(center_index) + arr(left_index)); /* Left */
-            double right_value  = -coeff2 * (arr(center_index) + arr(right_index)); /* Right */
-            double bottom_value = -coeff3 * (att(center_index) + att(bottom_index)); /* Bottom */
-            double top_value    = -coeff4 * (att(center_index) + att(top_index)); /* Top */
+            const double left_value   = -coeff1 * (arr(center_index) + arr(left_index)); /* Left */
+            const double right_value  = -coeff2 * (arr(center_index) + arr(right_index)); /* Right */
+            const double bottom_value = -coeff3 * (att(center_index) + att(bottom_index)); /* Bottom */
+            const double top_value    = -coeff4 * (att(center_index) + att(top_index)); /* Top */
 
-            double center_value = (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] *
-                                       std::fabs(detDF(center_index)) /* beta_{i,j} */
-                                   - left_value /* Center: (Left) */
-                                   - right_value /* Center: (Right) */
-                                   - bottom_value /* Center: (Bottom) */
-                                   - top_value /* Center: (Top) */
-            );
+            const double center_value =
+                (coeff5 * coeff_beta[center_index] * Kokkos::fabs(detDF(center_index)) /* beta_{i,j} */
+                 - left_value /* Center: (Left) */
+                 - right_value /* Center: (Right) */
+                 - bottom_value /* Center: (Bottom) */
+                 - top_value /* Center: (Top) */
+                );
 
-            double bottom_right_value = +0.25 * (art(right_index) + art(bottom_index)); /* Bottom Right */
-            double top_right_value    = -0.25 * (art(right_index) + art(top_index)); /* Top Right */
+            const double bottom_right_value = +0.25 * (art(right_index) + art(bottom_index)); /* Bottom Right */
+            const double top_right_value    = -0.25 * (art(right_index) + art(top_index)); /* Top Right */
 
             /* Fill matrix row of (i,j) */
             row = center_index;
             ptr = center_nz_index;
 
-            const Stencil& CenterStencil = getStencil(i_r);
+            const Stencil& CenterStencil = getStencil(i_r, grid, DirBC_Interior);
 
             offset = CenterStencil[StencilPosition::Center];
-            col    = center_index;
-            val    = center_value;
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = center_index;
+            value  = center_value;
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             offset = CenterStencil[StencilPosition::Left];
-            col    = left_index;
-            val    = left_value;
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = left_index;
+            value  = left_value;
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             offset = CenterStencil[StencilPosition::Right];
-            col    = right_index;
-            val    = right_value;
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = right_index;
+            value  = right_value;
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             offset = CenterStencil[StencilPosition::Bottom];
-            col    = bottom_index;
-            val    = bottom_value;
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = bottom_index;
+            value  = bottom_value;
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             offset = CenterStencil[StencilPosition::Top];
-            col    = top_index;
-            val    = top_value;
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = top_index;
+            value  = top_value;
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             /* BottomLeft: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
 
             offset = CenterStencil[StencilPosition::BottomRight];
-            col    = bottom_right_index;
-            val    = bottom_right_value;
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = bottom_right_index;
+            value  = bottom_right_value;
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             /* TopLeft: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
 
             offset = CenterStencil[StencilPosition::TopRight];
-            col    = top_right_index;
-            val    = top_right_value;
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = top_right_index;
+            value  = top_right_value;
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
         }
     }
     /* ------------------------------- */
     /* Node next to the inner boundary */
     /* ------------------------------- */
     else if (i_r == 1) {
-        int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-        int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
+        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
 
-        double h1 = grid.radialSpacing(i_r - 1);
-        double h2 = grid.radialSpacing(i_r);
-        double k1 = grid.angularSpacing(i_theta_M1);
-        double k2 = grid.angularSpacing(i_theta);
+        const double h1 = grid.radialSpacing(i_r - 1);
+        const double h2 = grid.radialSpacing(i_r);
+        const double k1 = grid.angularSpacing(i_theta_M1);
+        const double k2 = grid.angularSpacing(i_theta);
 
-        double coeff1 = 0.5 * (k1 + k2) / h1;
-        double coeff2 = 0.5 * (k1 + k2) / h2;
-        double coeff3 = 0.5 * (h1 + h2) / k1;
-        double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff1 = 0.5 * (k1 + k2) / h1;
+        const double coeff2 = 0.5 * (k1 + k2) / h2;
+        const double coeff3 = 0.5 * (h1 + h2) / k1;
+        const double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
-        int center_nz_index = getSolverMatrixIndex(i_r, i_theta);
+        const int center_nz_index = getSolverMatrixIndex(i_r, i_theta, grid, DirBC_Interior);
 
-        int center_index             = grid.index(i_r, i_theta);
-        int left_index               = grid.index(i_r - 1, i_theta);
-        int right_index              = grid.index(i_r + 1, i_theta);
-        int bottom_index             = grid.index(i_r, i_theta_M1);
-        int top_index                = grid.index(i_r, i_theta_P1);
-        int bottom_left_index        = grid.index(i_r - 1, i_theta_M1);
+        const int center_index       = grid.index(i_r, i_theta);
+        const int left_index         = grid.index(i_r - 1, i_theta);
+        const int right_index        = grid.index(i_r + 1, i_theta);
+        const int bottom_index       = grid.index(i_r, i_theta_M1);
+        const int top_index          = grid.index(i_r, i_theta_P1);
+        const int bottom_left_index  = grid.index(i_r - 1, i_theta_M1);
         const int bottom_right_index = grid.index(i_r + 1, i_theta_M1);
-        int top_left_index           = grid.index(i_r - 1, i_theta_P1);
-        int top_right_index          = grid.index(i_r + 1, i_theta_P1);
+        const int top_left_index     = grid.index(i_r - 1, i_theta_P1);
+        const int top_right_index    = grid.index(i_r + 1, i_theta_P1);
 
-        double left_value   = -coeff1 * (arr(center_index) + arr(left_index)); /* Left */
-        double right_value  = -coeff2 * (arr(center_index) + arr(right_index)); /* Right */
-        double bottom_value = -coeff3 * (att(center_index) + att(bottom_index)); /* Bottom */
-        double top_value    = -coeff4 * (att(center_index) + att(top_index)); /* Top */
+        const double left_value   = -coeff1 * (arr(center_index) + arr(left_index)); /* Left */
+        const double right_value  = -coeff2 * (arr(center_index) + arr(right_index)); /* Right */
+        const double bottom_value = -coeff3 * (att(center_index) + att(bottom_index)); /* Bottom */
+        const double top_value    = -coeff4 * (att(center_index) + att(top_index)); /* Top */
 
-        double center_value =
-            (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] * std::fabs(detDF(center_index)) /* beta_{i,j} */
+        const double center_value =
+            (coeff5 * coeff_beta[center_index] * Kokkos::fabs(detDF(center_index)) /* beta_{i,j} */
              - left_value /* Center: (Left) */
              - right_value /* Center: (Right) */
              - bottom_value /* Center: (Bottom) */
              - top_value /* Center: (Top) */
             );
 
-        double bottom_left_value  = -0.25 * (art(left_index) + art(bottom_index)); /* Bottom Left */
-        double bottom_right_value = +0.25 * (art(right_index) + art(bottom_index)); /* Bottom Right */
-        double top_left_value     = +0.25 * (art(left_index) + art(top_index)); /* Top Left */
-        double top_right_value    = -0.25 * (art(right_index) + art(top_index)); /* Top Right */
+        const double bottom_left_value  = -0.25 * (art(left_index) + art(bottom_index)); /* Bottom Left */
+        const double bottom_right_value = +0.25 * (art(right_index) + art(bottom_index)); /* Bottom Right */
+        const double top_left_value     = +0.25 * (art(left_index) + art(top_index)); /* Top Left */
+        const double top_right_value    = -0.25 * (art(right_index) + art(top_index)); /* Top Right */
 
         /* Fill matrix row of (i,j) */
         row = center_index;
         ptr = center_nz_index;
 
-        const Stencil& CenterStencil = getStencil(i_r);
+        const Stencil& CenterStencil = getStencil(i_r, grid, DirBC_Interior);
 
         offset = CenterStencil[StencilPosition::Center];
-        col    = center_index;
-        val    = center_value;
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = center_index;
+        value  = center_value;
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* REMOVED: Moved to the right hand side to make the matrix symmetric */
         if (!DirBC_Interior) {
             offset = CenterStencil[StencilPosition::Left];
-            col    = left_index;
-            val    = left_value;
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = left_index;
+            value  = left_value;
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
         }
 
         offset = CenterStencil[StencilPosition::Right];
-        col    = right_index;
-        val    = right_value;
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = right_index;
+        value  = right_value;
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::Bottom];
-        col    = bottom_index;
-        val    = bottom_value;
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = bottom_index;
+        value  = bottom_value;
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::Top];
-        col    = top_index;
-        val    = top_value;
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = top_index;
+        value  = top_value;
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* REMOVED: Moved to the right hand side to make the matrix symmetric */
         if (!DirBC_Interior) {
             offset = CenterStencil[StencilPosition::BottomLeft];
-            col    = bottom_left_index;
-            val    = bottom_left_value;
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = bottom_left_index;
+            value  = bottom_left_value;
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
         }
 
         offset = CenterStencil[StencilPosition::BottomRight];
-        col    = bottom_right_index;
-        val    = bottom_right_value;
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = bottom_right_index;
+        value  = bottom_right_value;
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* REMOVED: Moved to the right hand side to make the matrix symmetric */
         if (!DirBC_Interior) {
             offset = CenterStencil[StencilPosition::TopLeft];
-            col    = top_left_index;
-            val    = top_left_value;
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = top_left_index;
+            value  = top_left_value;
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
         }
 
         offset = CenterStencil[StencilPosition::TopRight];
-        col    = top_right_index;
-        val    = top_right_value;
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = top_right_index;
+        value  = top_right_value;
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
     }
     /* ------------------------------- */
     /* Node next to the outer boundary */
     /* ------------------------------- */
     else if (i_r == grid.nr() - 2) {
-        int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-        int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
+        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
 
-        double h1 = grid.radialSpacing(i_r - 1);
-        double h2 = grid.radialSpacing(i_r);
-        double k1 = grid.angularSpacing(i_theta_M1);
-        double k2 = grid.angularSpacing(i_theta);
+        const double h1 = grid.radialSpacing(i_r - 1);
+        const double h2 = grid.radialSpacing(i_r);
+        const double k1 = grid.angularSpacing(i_theta_M1);
+        const double k2 = grid.angularSpacing(i_theta);
 
-        double coeff1 = 0.5 * (k1 + k2) / h1;
-        double coeff2 = 0.5 * (k1 + k2) / h2;
-        double coeff3 = 0.5 * (h1 + h2) / k1;
-        double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff1 = 0.5 * (k1 + k2) / h1;
+        const double coeff2 = 0.5 * (k1 + k2) / h2;
+        const double coeff3 = 0.5 * (h1 + h2) / k1;
+        const double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
-        int center_nz_index = getSolverMatrixIndex(i_r, i_theta);
+        const int center_nz_index = getSolverMatrixIndex(i_r, i_theta, grid, DirBC_Interior);
 
-        int center_index       = grid.index(i_r, i_theta);
-        int left_index         = grid.index(i_r - 1, i_theta);
-        int right_index        = grid.index(i_r + 1, i_theta);
-        int bottom_index       = grid.index(i_r, i_theta_M1);
-        int top_index          = grid.index(i_r, i_theta_P1);
-        int bottom_left_index  = grid.index(i_r - 1, i_theta_M1);
-        int bottom_right_index = grid.index(i_r + 1, i_theta_M1);
-        int top_left_index     = grid.index(i_r - 1, i_theta_P1);
-        int top_right_index    = grid.index(i_r + 1, i_theta_P1);
+        const int center_index      = grid.index(i_r, i_theta);
+        const int left_index        = grid.index(i_r - 1, i_theta);
+        const int right_index       = grid.index(i_r + 1, i_theta);
+        const int bottom_index      = grid.index(i_r, i_theta_M1);
+        const int top_index         = grid.index(i_r, i_theta_P1);
+        const int bottom_left_index = grid.index(i_r - 1, i_theta_M1);
+        const int top_left_index    = grid.index(i_r - 1, i_theta_P1);
 
-        double left_value   = -coeff1 * (arr(center_index) + arr(left_index)); /* Left */
-        double right_value  = -coeff2 * (arr(center_index) + arr(right_index)); /* Right */
-        double bottom_value = -coeff3 * (att(center_index) + att(bottom_index)); /* Bottom */
-        double top_value    = -coeff4 * (att(center_index) + att(top_index)); /* Top */
+        const double left_value   = -coeff1 * (arr(center_index) + arr(left_index)); /* Left */
+        const double right_value  = -coeff2 * (arr(center_index) + arr(right_index)); /* Right */
+        const double bottom_value = -coeff3 * (att(center_index) + att(bottom_index)); /* Bottom */
+        const double top_value    = -coeff4 * (att(center_index) + att(top_index)); /* Top */
 
-        double center_value =
-            (+0.25 * (h1 + h2) * (k1 + k2) * coeff_beta[center_index] * std::fabs(detDF(center_index)) /* beta_{i,j} */
+        const double center_value =
+            (coeff5 * coeff_beta[center_index] * Kokkos::fabs(detDF(center_index)) /* beta_{i,j} */
              - left_value /* Center: (Left) */
              - right_value /* Center: (Right) */
              - bottom_value /* Center: (Bottom) */
              - top_value /* Center: (Top) */
             );
 
-        double bottom_left_value  = -0.25 * (art(left_index) + art(bottom_index)); /* Bottom Left */
-        double bottom_right_value = +0.25 * (art(right_index) + art(bottom_index)); /* Bottom Right */
-        double top_left_value     = +0.25 * (art(left_index) + art(top_index)); /* Top Left */
-        double top_right_value    = -0.25 * (art(right_index) + art(top_index)); /* Top Right */
+        const double bottom_left_value = -0.25 * (art(left_index) + art(bottom_index)); /* Bottom Left */
+        const double top_left_value    = +0.25 * (art(left_index) + art(top_index)); /* Top Left */
 
         /* Fill matrix row of (i,j) */
         row = center_index;
         ptr = center_nz_index;
 
-        const Stencil& CenterStencil = getStencil(i_r);
+        const Stencil& CenterStencil = getStencil(i_r, grid, DirBC_Interior);
 
         offset = CenterStencil[StencilPosition::Center];
-        col    = center_index;
-        val    = center_value;
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = center_index;
+        value  = center_value;
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::Left];
-        col    = left_index;
-        val    = left_value;
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = left_index;
+        value  = left_value;
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* Right REMOVED: Moved to the right hand side to make the matrix symmetric */
 
         offset = CenterStencil[StencilPosition::Bottom];
-        col    = bottom_index;
-        val    = bottom_value;
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = bottom_index;
+        value  = bottom_value;
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::Top];
-        col    = top_index;
-        val    = top_value;
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = top_index;
+        value  = top_value;
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::BottomLeft];
-        col    = bottom_left_index;
-        val    = bottom_left_value;
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = bottom_left_index;
+        value  = bottom_left_value;
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* BottomRight REMOVED: Moved to the right hand side to make the matrix symmetric */
 
         offset = CenterStencil[StencilPosition::TopLeft];
-        col    = top_left_index;
-        val    = top_left_value;
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = top_left_index;
+        value  = top_left_value;
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* TopRight REMOVED: Moved to the right hand side to make the matrix symmetric */
     }
@@ -450,42 +452,48 @@ void DirectSolverTake<LevelCacheType>::nodeBuildSolverMatrixTake(
     /* Node on the outer dirichlet boundary */
     /* ------------------------------------ */
     else if (i_r == grid.nr() - 1) {
-        int center_nz_index = getSolverMatrixIndex(i_r, i_theta);
+        const int center_nz_index = getSolverMatrixIndex(i_r, i_theta, grid, DirBC_Interior);
 
-        int center_index = grid.index(i_r, i_theta);
+        const int center_index = grid.index(i_r, i_theta);
 
         /* Fill matrix row of (i,j) */
         row = center_index;
         ptr = center_nz_index;
 
-        const Stencil& CenterStencil = getStencil(i_r);
+        const Stencil& CenterStencil = getStencil(i_r, grid, DirBC_Interior);
 
         offset = CenterStencil[StencilPosition::Center];
-        col    = center_index;
-        val    = 1.0;
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = center_index;
+        value  = 1.0;
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
     }
 }
+
+} // namespace direct_solver_take
 
 template <class LevelCacheType>
 typename DirectSolverTake<LevelCacheType>::SystemMatrix DirectSolverTake<LevelCacheType>::buildSolverMatrix()
 {
+    using direct_solver_take::getNonZeroCountSolverMatrix;
+    using direct_solver_take::getStencilSize;
+    using direct_solver_take::nodeBuildSolverMatrixTake;
+    using direct_solver_take::validateSolverMatrixIndexing;
+
     const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
-    const int num_omp_threads         = DirectSolver<LevelCacheType>::num_omp_threads_;
     const bool DirBC_Interior         = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
-    assert(validateSolverMatrixIndexing() && "Solver matrix indexing is inconsistent");
+    assert(validateSolverMatrixIndexing(grid, DirBC_Interior) && "Solver matrix indexing is inconsistent");
 
     const int n = grid.numberOfNodes();
 
 #ifdef GMGPOLAR_USE_MUMPS
-    const int nnz = getNonZeroCountSolverMatrix();
+    const int nnz = getNonZeroCountSolverMatrix(grid, DirBC_Interior);
     SparseMatrixCOO<double, Kokkos::HostSpace> solver_matrix(n, n, nnz);
     solver_matrix.is_symmetric(true);
 #else
     std::function<int(int)> nnz_per_row = [&](int global_index) {
-        return getStencilSize(global_index);
+        return getStencilSize(global_index, grid, DirBC_Interior);
     };
 
     SparseMatrixCSR<double, Kokkos::HostSpace> solver_matrix(n, n, nnz_per_row);
@@ -500,25 +508,36 @@ typename DirectSolverTake<LevelCacheType>::SystemMatrix DirectSolverTake<LevelCa
     HostConstVector<double> detDF      = level_cache.detDF();
     HostConstVector<double> coeff_beta = level_cache.coeff_beta();
 
-#pragma omp parallel num_threads(num_omp_threads)
-    {
-/* Circle Section */
-#pragma omp for nowait
-        for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
-            for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF,
-                                          coeff_beta);
-            }
-        }
-/* Radial Section */
-#pragma omp for nowait
-        for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-            for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
-                nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF,
-                                          coeff_beta);
-            }
-        }
-    }
+    /* We split the loops into two regions to better respect the */
+    /* access patterns of the smoother and improve cache locality. */
+
+    // The For loop matches circular access pattern */
+    Kokkos::parallel_for(
+        "Residual Take: Apply System Operator (Circular)",
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            {0, 0}, // Starting point of the index space
+            {grid.numberSmootherCircles(), grid.ntheta()} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int i_r, const int i_theta) {
+            nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF,
+                                      coeff_beta);
+        });
+
+    /* For loop matches radial access pattern */
+    Kokkos::parallel_for(
+        "Residual Take: Apply System Operator (Radial)",
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            {0, grid.numberSmootherCircles()}, // Starting point of the index space
+            {grid.ntheta(), grid.nr()} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int i_theta, const int i_r) {
+            nodeBuildSolverMatrixTake(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF,
+                                      coeff_beta);
+        });
+
+    Kokkos::fence();
 
     return solver_matrix;
 }

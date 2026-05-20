@@ -44,6 +44,10 @@ set(INTERPOLATION_SOURCES
 set(CONFIG_PARSER_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/ConfigParser/config_parser.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ConfigParser/select_test_case.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ConfigParser/select_solver_circular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ConfigParser/select_solver_shafranov.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ConfigParser/select_solver_czarny.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ConfigParser/select_solver_culham.cpp
 )
 
 # Create the main library

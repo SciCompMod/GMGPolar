@@ -588,8 +588,7 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
     Level<DomainGeometry, DensityProfileCoefficients>& level, HostConstVector<double> solution,
     HostVector<double> error, const ExactSolution& exact_solution)
 {
-    const PolarGrid& grid                                                    = level.grid();
-    const LevelCache<DomainGeometry, DensityProfileCoefficients>& levelCache = level.levelCache();
+    const PolarGrid& grid = level.grid();
 
     assert(solution.size() == error.size());
     assert(std::ssize(solution) == grid.numberOfNodes());

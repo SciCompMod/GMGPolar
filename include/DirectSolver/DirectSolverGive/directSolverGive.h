@@ -9,44 +9,12 @@ template <class LevelCacheType>
 class DirectSolverGive : public DirectSolver<LevelCacheType>
 {
 public:
-    explicit DirectSolverGive(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
-                              int num_omp_threads);
+    explicit DirectSolverGive(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior);
 
     // Note: The rhs (right-hand side) vector gets overwritten during the solution process.
     void solveInPlace(HostVector<double> solution) override;
 
 private:
-    // The stencil definitions must be defined before the declaration of the mumps_solver,
-    // since the mumps solver will be built in the member initializer of the DirectSolver class.
-
-    // clang-format off
-    const Stencil stencil_interior_      = {
-        7, 4, 8,
-        1, 0, 2,
-        5, 3, 6
-    };
-    const Stencil stencil_across_origin_ = {
-        -1, 4, 6,
-        1, 0, 2,
-        -1, 3, 5
-    };
-    const Stencil stencil_DB_            = {
-        -1, -1, -1,
-        -1,  0, -1,
-        -1, -1, -1
-    };
-    const Stencil stencil_next_inner_DB_ = {
-        -1,  3,  5,
-        -1,  0,  1,
-        -1,  2,  4
-    };
-    const Stencil stencil_next_outer_DB_ = {
-        5,  3, -1,
-        1,  0, -1,
-        4,  2, -1
-    };
-    // clang-format on
-
 #ifdef GMGPOLAR_USE_MUMPS
     using SystemMatrix = SparseMatrixCOO<double, Kokkos::HostSpace>;
     using SystemSolver = CooMumpsSolver;
@@ -60,10 +28,9 @@ private:
     // Solver object (owns matrix if MUMPS, references if in-house solver).
     SystemSolver system_solver_;
 
+public:
     // Constructs a symmetric solver matrix.
     SystemMatrix buildSolverMatrix();
-    void buildSolverMatrixCircleSection(const int i_r, SystemMatrix& solver_matrix);
-    void buildSolverMatrixRadialSection(const int i_theta, SystemMatrix& solver_matrix);
 
     // Adjusts the right-hand side vector for symmetry corrections.
     // This modifies the system from
@@ -75,29 +42,10 @@ private:
     void applySymmetryShift(HostVector<double> rhs) const;
     void applySymmetryShiftInnerBoundary(HostVector<double> x) const;
     void applySymmetryShiftOuterBoundary(HostVector<double> x) const;
-
-    // Verify that solver matrix indexing is valid.
-    bool validateSolverMatrixIndexing() const;
-
-    // Returns the total number of non-zero elements in the solver matrix.
-    int getNonZeroCountSolverMatrix() const;
-
-    // Returns the index of the first non-zero element in the solver matrix for the given position.
-    int getSolverMatrixIndex(int i_r, int i_theta) const;
-
-    // Retrieves the stencil for the solver matrix at the given radial index.
-    const Stencil& getStencil(int i_r) const;
-
-    int getStencilSize(int global_index) const;
-
-    void nodeBuildSolverMatrixGive(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                   SystemMatrix& solver_matrix, double arr, double att, double art, double detDF,
-                                   double coeff_beta);
 };
 
 #include "applySymmetryShift.inl"
 #include "buildSolverMatrix.inl"
 #include "directSolverGive.inl"
-#include "matrixStencil.inl"
 
 } // namespace gmgpolar

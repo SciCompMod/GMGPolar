@@ -16,7 +16,7 @@ namespace gmgpolar
 class Interpolation
 {
 public:
-    explicit Interpolation(int max_omp_threads, bool DirBC_Interior);
+    explicit Interpolation(bool DirBC_Interior);
 
     /* Remark: This injection is not scaled. */
     void applyInjection(const PolarGrid& fine_grid, const PolarGrid& coarse_grid, HostVector<double> coarse_result,
@@ -41,7 +41,6 @@ public:
                                HostConstVector<double> coarse_values) const;
 
 private:
-    const int max_omp_threads_;
     const bool DirBC_Interior_;
 };
 } // namespace gmgpolar

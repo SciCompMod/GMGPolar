@@ -131,10 +131,9 @@ fi
 
 export OMP_NUM_THREADS=$maxOpenMPThreads
 
-"$GMGPOLAR_EXEC" \
+"$GMGPOLAR_EXEC" --kokkos-threads $maxOpenMPThreads \
     --verbose $verbose \
     --paraview $paraview \
-    --maxOpenMPThreads $maxOpenMPThreads \
     --stencilDistributionMethod $stencilDistributionMethod \
     --cacheDensityProfileCoefficients $cacheDensityProfileCoefficients \
     --cacheDomainGeometry $cacheDomainGeometry \

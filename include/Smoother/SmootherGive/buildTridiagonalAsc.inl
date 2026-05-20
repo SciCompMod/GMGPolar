@@ -42,7 +42,6 @@ nodeBuildTridiagonalSolverMatricesCircleSection(const int i_r, const int i_theta
     double coeff_beta, arr, att, art, detDF;
     level_cache.obtainValues(i_r, i_theta, center, radius, theta, coeff_beta, arr, att, art, detDF);
 
-    int ptr, offset;
     int row, column;
     double value;
 
@@ -163,9 +162,6 @@ nodeBuildTridiagonalSolverMatricesCircleSection(const int i_r, const int i_theta
 
         const double coeff2 = 0.5 * (k1 + k2) / h2;
 
-        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
-
         const auto& center_solver = circle_tridiagonal_solver;
         const int center_batch    = i_r;
         const auto& right_solver  = circle_tridiagonal_solver;
@@ -173,8 +169,6 @@ nodeBuildTridiagonalSolverMatricesCircleSection(const int i_r, const int i_theta
 
         const int center_index = i_theta;
         const int right_index  = i_theta;
-        const int bottom_index = i_theta_M1;
-        const int top_index    = i_theta_P1;
 
         /* Fill matrix row of (i,j) */
         row    = center_index;
@@ -218,7 +212,6 @@ nodeBuildTridiagonalSolverMatricesRadialSection(const int i_r, const int i_theta
     double coeff_beta, arr, att, art, detDF;
     level_cache.obtainValues(i_r, i_theta, center, radius, theta, coeff_beta, arr, att, art, detDF);
 
-    int ptr, offset;
     int row, column;
     double value;
 
@@ -432,7 +425,6 @@ nodeBuildTridiagonalSolverMatricesRadialSection(const int i_r, const int i_theta
 
         const int center_index = i_r - numberSmootherCircles;
         const int left_index   = i_r - numberSmootherCircles - 1;
-        const int right_index  = i_r - numberSmootherCircles + 1;
         const int bottom_index = i_r - numberSmootherCircles;
         const int top_index    = i_r - numberSmootherCircles;
 

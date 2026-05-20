@@ -1,12 +1,15 @@
 #pragma once
 
-namespace direct_solver_coo_mumps_give
+#include "matrixStencil.inl"
+
+namespace direct_solver_give
 {
 
 #ifdef GMGPOLAR_USE_MUMPS
 // When using the MUMPS solver, the matrix is assembled in COO format.
-static inline void updateMatrixElement(SparseMatrixCOO<double, Kokkos::HostSpace>& matrix, int ptr, int offset, int row,
-                                       int column, double value)
+static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCOO<double, Kokkos::HostSpace>& matrix,
+                                                       int ptr, const int offset, const int row, const int column,
+                                                       const double value)
 {
     matrix.set_row_index(ptr + offset, row);
     matrix.set_col_index(ptr + offset, column);
@@ -14,26 +17,33 @@ static inline void updateMatrixElement(SparseMatrixCOO<double, Kokkos::HostSpace
 }
 #else
 // When using the in-house solver, the matrix is stored in CSR format.
-static inline void updateMatrixElement(SparseMatrixCSR<double, Kokkos::HostSpace>& matrix, int ptr, int offset, int row,
-                                       int column, double value)
+static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCSR<double, Kokkos::HostSpace>& matrix,
+                                                       int ptr, const int offset, const int row, const int column,
+                                                       const double value)
 {
     matrix.set_row_nz_index(row, offset, column);
     matrix.increase_row_nz_entry(row, offset, value);
 }
 #endif
 
-} // namespace direct_solver_coo_mumps_give
-
-template <class LevelCacheType>
-void DirectSolverGive<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_theta, const PolarGrid& grid,
-                                                                 bool DirBC_Interior, SystemMatrix& solver_matrix,
-                                                                 double arr, double att, double art, double detDF,
-                                                                 double coeff_beta)
+template <typename LevelCacheType, typename SystemMatrix>
+static KOKKOS_INLINE_FUNCTION void
+nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache,
+                          const bool DirBC_Interior, const SystemMatrix& solver_matrix)
 {
-    using direct_solver_coo_mumps_give::updateMatrixElement;
+    /* ---------------------------------------- */
+    /* Compute or retrieve stencil coefficients */
+    /* ---------------------------------------- */
+    const int center    = grid.index(i_r, i_theta);
+    const double radius = grid.radius(i_r);
+    const double theta  = grid.theta(i_theta);
+
+    double coeff_beta, arr, att, art, detDF;
+    level_cache.obtainValues(i_r, i_theta, center, radius, theta, coeff_beta, arr, att, art, detDF);
+
     int ptr, offset;
-    int row, col;
-    double val;
+    int row, column;
+    double value;
     /* -------------------- */
     /* Node in the interior */
     /* -------------------- */
@@ -50,12 +60,13 @@ void DirectSolverGive<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_
         const double coeff2 = 0.5 * (k1 + k2) / h2;
         const double coeff3 = 0.5 * (h1 + h2) / k1;
         const double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
-        const int center_nz_index = getSolverMatrixIndex(i_r, i_theta);
-        const int left_nz_index   = getSolverMatrixIndex(i_r - 1, i_theta);
-        const int right_nz_index  = getSolverMatrixIndex(i_r + 1, i_theta);
-        const int bottom_nz_index = getSolverMatrixIndex(i_r, i_theta_M1);
-        const int top_nz_index    = getSolverMatrixIndex(i_r, i_theta_P1);
+        const int center_nz_index = getSolverMatrixIndex(i_r, i_theta, grid, DirBC_Interior);
+        const int left_nz_index   = getSolverMatrixIndex(i_r - 1, i_theta, grid, DirBC_Interior);
+        const int right_nz_index  = getSolverMatrixIndex(i_r + 1, i_theta, grid, DirBC_Interior);
+        const int bottom_nz_index = getSolverMatrixIndex(i_r, i_theta_M1, grid, DirBC_Interior);
+        const int top_nz_index    = getSolverMatrixIndex(i_r, i_theta_P1, grid, DirBC_Interior);
 
         const int center_index = grid.index(i_r, i_theta);
         const int left_index   = grid.index(i_r - 1, i_theta);
@@ -67,89 +78,89 @@ void DirectSolverGive<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_
         row = center_index;
         ptr = center_nz_index;
 
-        const Stencil& CenterStencil = getStencil(i_r);
+        const Stencil& CenterStencil = getStencil(i_r, grid, DirBC_Interior);
 
         offset = CenterStencil[StencilPosition::Center];
-        col    = center_index;
-        val    = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* beta_{i,j} */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = center_index;
+        value  = coeff5 * coeff_beta * Kokkos::fabs(detDF); /* beta_{i,j} */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::Left];
-        col    = left_index;
-        val    = -coeff1 * arr; /* Left */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = left_index;
+        value  = -coeff1 * arr; /* Left */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::Right];
-        col    = right_index;
-        val    = -coeff2 * arr; /* Right */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = right_index;
+        value  = -coeff2 * arr; /* Right */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::Bottom];
-        col    = bottom_index;
-        val    = -coeff3 * att; /* Bottom */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = bottom_index;
+        value  = -coeff3 * att; /* Bottom */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::Top];
-        col    = top_index;
-        val    = -coeff4 * att; /* Top */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = top_index;
+        value  = -coeff4 * att; /* Top */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::Center];
-        col    = center_index;
-        val    = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = center_index;
+        value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* Fill matrix row of (i-1,j) */
         row = left_index;
         ptr = left_nz_index;
 
-        const Stencil& LeftStencil = getStencil(i_r - 1);
+        const Stencil& LeftStencil = getStencil(i_r - 1, grid, DirBC_Interior);
 
         offset = LeftStencil[StencilPosition::Right];
-        col    = center_index;
-        val    = -coeff1 * arr; /* Right */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = center_index;
+        value  = -coeff1 * arr; /* Right */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = LeftStencil[StencilPosition::Center];
-        col    = left_index;
-        val    = +coeff1 * arr; /* Center: (Right) */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = left_index;
+        value  = +coeff1 * arr; /* Center: (Right) */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = LeftStencil[StencilPosition::TopRight];
-        col    = top_index;
-        val    = -0.25 * art; /* Top Right */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = top_index;
+        value  = -0.25 * art; /* Top Right */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = LeftStencil[StencilPosition::BottomRight];
-        col    = bottom_index;
-        val    = +0.25 * art; /* Bottom Right */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = bottom_index;
+        value  = +0.25 * art; /* Bottom Right */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* Fill matrix row of (i+1,j) */
         row = right_index;
         ptr = right_nz_index;
 
-        const Stencil& RightStencil = getStencil(i_r + 1);
+        const Stencil& RightStencil = getStencil(i_r + 1, grid, DirBC_Interior);
 
         offset = RightStencil[StencilPosition::Left];
-        col    = center_index;
-        val    = -coeff2 * arr; /* Left */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = center_index;
+        value  = -coeff2 * arr; /* Left */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = RightStencil[StencilPosition::Center];
-        col    = right_index;
-        val    = +coeff2 * arr; /* Center: (Left) */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = right_index;
+        value  = +coeff2 * arr; /* Center: (Left) */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = RightStencil[StencilPosition::TopLeft];
-        col    = top_index;
-        val    = +0.25 * art; /* Top Left */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = top_index;
+        value  = +0.25 * art; /* Top Left */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = RightStencil[StencilPosition::BottomLeft];
-        col    = bottom_index;
-        val    = -0.25 * art; /* Bottom Left */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = bottom_index;
+        value  = -0.25 * art; /* Bottom Left */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* Fill matrix row of (i,j-1) */
         row = bottom_index;
@@ -158,24 +169,24 @@ void DirectSolverGive<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_
         const Stencil& BottomStencil = CenterStencil;
 
         offset = BottomStencil[StencilPosition::Top];
-        col    = center_index;
-        val    = -coeff3 * att; /* Top */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = center_index;
+        value  = -coeff3 * att; /* Top */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = BottomStencil[StencilPosition::Center];
-        col    = bottom_index;
-        val    = +coeff3 * att; /* Center: (Top) */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = bottom_index;
+        value  = +coeff3 * att; /* Center: (Top) */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = BottomStencil[StencilPosition::TopRight];
-        col    = right_index;
-        val    = -0.25 * art; /* Top Right */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = right_index;
+        value  = -0.25 * art; /* Top Right */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = BottomStencil[StencilPosition::TopLeft];
-        col    = left_index;
-        val    = +0.25 * art; /* Top Left */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = left_index;
+        value  = +0.25 * art; /* Top Left */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* Fill matrix row of (i,j+1) */
         row = top_index;
@@ -184,24 +195,24 @@ void DirectSolverGive<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_
         const Stencil& TopStencil = CenterStencil;
 
         offset = TopStencil[StencilPosition::Bottom];
-        col    = center_index;
-        val    = -coeff4 * att; /* Bottom */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = center_index;
+        value  = -coeff4 * att; /* Bottom */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = TopStencil[StencilPosition::Center];
-        col    = top_index;
-        val    = +coeff4 * att; /* Center: (Bottom) */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = top_index;
+        value  = +coeff4 * att; /* Center: (Bottom) */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = TopStencil[StencilPosition::BottomRight];
-        col    = right_index;
-        val    = +0.25 * art; /* Bottom Right */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = right_index;
+        value  = +0.25 * art; /* Bottom Right */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = TopStencil[StencilPosition::BottomLeft];
-        col    = left_index;
-        val    = -0.25 * art; /* Bottom Left */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = left_index;
+        value  = -0.25 * art; /* Bottom Left */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
     }
     /* -------------------------- */
     /* Node on the inner boundary */
@@ -216,40 +227,35 @@ void DirectSolverGive<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_
             const double k2     = grid.angularSpacing(i_theta);
             const double coeff2 = 0.5 * (k1 + k2) / h2;
 
-            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
-
-            const int center_nz_index = getSolverMatrixIndex(i_r, i_theta);
-            const int right_nz_index  = getSolverMatrixIndex(i_r + 1, i_theta);
+            const int center_nz_index = getSolverMatrixIndex(i_r, i_theta, grid, DirBC_Interior);
+            const int right_nz_index  = getSolverMatrixIndex(i_r + 1, i_theta, grid, DirBC_Interior);
 
             const int center_index = grid.index(i_r, i_theta);
             const int right_index  = grid.index(i_r + 1, i_theta);
-            const int bottom_index = grid.index(i_r, i_theta_M1);
-            const int top_index    = grid.index(i_r, i_theta_P1);
 
             /* Fill matrix row of (i,j) */
             row = center_index;
             ptr = center_nz_index;
 
-            const Stencil& CenterStencil = getStencil(i_r);
+            const Stencil& CenterStencil = getStencil(i_r, grid, DirBC_Interior);
 
             offset = CenterStencil[StencilPosition::Center];
-            col    = center_index;
-            val    = 1.0;
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = center_index;
+            value  = 1.0;
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             /* Fill matrix row of (i+1,j) */
             row = right_index;
             ptr = right_nz_index;
 
-            const Stencil& RightStencil = getStencil(i_r + 1);
+            const Stencil& RightStencil = getStencil(i_r + 1, grid, DirBC_Interior);
 
             /* Left REMOVED: Moved to the right hand side to make the matrix symmetric */
 
             offset = RightStencil[StencilPosition::Center];
-            col    = right_index;
-            val    = +coeff2 * arr; /* Center: (Left) */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = right_index;
+            value  = +coeff2 * arr; /* Center: (Left) */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             /* TopLeft REMOVED: Moved to the right hand side to make the matrix symmetric */
 
@@ -273,16 +279,17 @@ void DirectSolverGive<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_
             double k1 = grid.angularSpacing(i_theta_M1);
             double k2 = grid.angularSpacing(i_theta);
 
-            double coeff1 = 0.5 * (k1 + k2) / h1;
-            double coeff2 = 0.5 * (k1 + k2) / h2;
-            double coeff3 = 0.5 * (h1 + h2) / k1;
-            double coeff4 = 0.5 * (h1 + h2) / k2;
+            double coeff1       = 0.5 * (k1 + k2) / h1;
+            double coeff2       = 0.5 * (k1 + k2) / h2;
+            double coeff3       = 0.5 * (h1 + h2) / k1;
+            double coeff4       = 0.5 * (h1 + h2) / k2;
+            const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
-            const int center_nz_index = getSolverMatrixIndex(i_r, i_theta);
-            const int left_nz_index   = getSolverMatrixIndex(i_r, i_theta_AcrossOrigin);
-            const int right_nz_index  = getSolverMatrixIndex(i_r + 1, i_theta);
-            const int bottom_nz_index = getSolverMatrixIndex(i_r, i_theta_M1);
-            const int top_nz_index    = getSolverMatrixIndex(i_r, i_theta_P1);
+            const int center_nz_index = getSolverMatrixIndex(i_r, i_theta, grid, DirBC_Interior);
+            const int left_nz_index   = getSolverMatrixIndex(i_r, i_theta_AcrossOrigin, grid, DirBC_Interior);
+            const int right_nz_index  = getSolverMatrixIndex(i_r + 1, i_theta, grid, DirBC_Interior);
+            const int bottom_nz_index = getSolverMatrixIndex(i_r, i_theta_M1, grid, DirBC_Interior);
+            const int top_nz_index    = getSolverMatrixIndex(i_r, i_theta_P1, grid, DirBC_Interior);
 
             const int center_index = grid.index(i_r, i_theta);
             const int left_index   = grid.index(i_r, i_theta_AcrossOrigin);
@@ -293,37 +300,37 @@ void DirectSolverGive<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_
             /* Fill matrix row of (i,j) */
             row                          = center_index;
             ptr                          = center_nz_index;
-            const Stencil& CenterStencil = getStencil(i_r);
+            const Stencil& CenterStencil = getStencil(i_r, grid, DirBC_Interior);
 
             offset = CenterStencil[StencilPosition::Center];
-            col    = center_index;
-            val    = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* beta_{i,j} */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = center_index;
+            value  = coeff5 * coeff_beta * Kokkos::fabs(detDF); /* beta_{i,j} */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             offset = CenterStencil[StencilPosition::Left];
-            col    = left_index;
-            val    = -coeff1 * arr; /* Left */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = left_index;
+            value  = -coeff1 * arr; /* Left */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             offset = CenterStencil[StencilPosition::Right];
-            col    = right_index;
-            val    = -coeff2 * arr; /* Right */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = right_index;
+            value  = -coeff2 * arr; /* Right */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             offset = CenterStencil[StencilPosition::Bottom];
-            col    = bottom_index;
-            val    = -coeff3 * att; /* Bottom */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = bottom_index;
+            value  = -coeff3 * att; /* Bottom */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             offset = CenterStencil[StencilPosition::Top];
-            col    = top_index;
-            val    = -coeff4 * att; /* Top */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = top_index;
+            value  = -coeff4 * att; /* Top */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             offset = CenterStencil[StencilPosition::Center];
-            col    = center_index;
-            val    = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = center_index;
+            value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             /* Fill matrix row of (i-1,j) */
             /* From view the view of the across origin node, */
@@ -334,14 +341,14 @@ void DirectSolverGive<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_
             const Stencil& LeftStencil = CenterStencil;
 
             offset = LeftStencil[StencilPosition::Left];
-            col    = center_index;
-            val    = -coeff1 * arr; /* Right -> Left*/
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = center_index;
+            value  = -coeff1 * arr; /* Right -> Left*/
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             offset = LeftStencil[StencilPosition::Center];
-            col    = left_index;
-            val    = +coeff1 * arr; /* Center: (Right) -> Center: (Left) */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = left_index;
+            value  = +coeff1 * arr; /* Center: (Right) -> Center: (Left) */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             /* Top Right -> Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
 
@@ -350,27 +357,27 @@ void DirectSolverGive<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_
             /* Fill matrix row of (i+1,j) */
             row                         = right_index;
             ptr                         = right_nz_index;
-            const Stencil& RightStencil = getStencil(i_r + 1);
+            const Stencil& RightStencil = getStencil(i_r + 1, grid, DirBC_Interior);
 
             offset = RightStencil[StencilPosition::Left];
-            col    = center_index;
-            val    = -coeff2 * arr; /* Left */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = center_index;
+            value  = -coeff2 * arr; /* Left */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             offset = RightStencil[StencilPosition::Center];
-            col    = right_index;
-            val    = +coeff2 * arr; /* Center: (Left) */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = right_index;
+            value  = +coeff2 * arr; /* Center: (Left) */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             offset = RightStencil[StencilPosition::TopLeft];
-            col    = top_index;
-            val    = +0.25 * art; /* Top Left */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = top_index;
+            value  = +0.25 * art; /* Top Left */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             offset = RightStencil[StencilPosition::BottomLeft];
-            col    = bottom_index;
-            val    = -0.25 * art; /* Bottom Left */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = bottom_index;
+            value  = -0.25 * art; /* Bottom Left */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             /* Fill matrix row of (i,j-1) */
             row = bottom_index;
@@ -379,19 +386,19 @@ void DirectSolverGive<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_
             const Stencil& BottomStencil = CenterStencil;
 
             offset = BottomStencil[StencilPosition::Top];
-            col    = center_index;
-            val    = -coeff3 * att; /* Top */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = center_index;
+            value  = -coeff3 * att; /* Top */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             offset = BottomStencil[StencilPosition::Center];
-            col    = bottom_index;
-            val    = +coeff3 * att; /* Center: (Top) */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = bottom_index;
+            value  = +coeff3 * att; /* Center: (Top) */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             offset = BottomStencil[StencilPosition::TopRight];
-            col    = right_index;
-            val    = -0.25 * art; /* Top Right */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = right_index;
+            value  = -0.25 * art; /* Top Right */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             /* TopLeft REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
 
@@ -402,19 +409,19 @@ void DirectSolverGive<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_
             const Stencil& TopStencil = CenterStencil;
 
             offset = TopStencil[StencilPosition::Bottom];
-            col    = center_index;
-            val    = -coeff4 * att; /* Bottom */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = center_index;
+            value  = -coeff4 * att; /* Bottom */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             offset = TopStencil[StencilPosition::Center];
-            col    = top_index;
-            val    = +coeff4 * att; /* Center: (Bottom) */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = top_index;
+            value  = +coeff4 * att; /* Center: (Bottom) */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             offset = TopStencil[StencilPosition::BottomRight];
-            col    = right_index;
-            val    = +0.25 * art; /* Bottom Right */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = right_index;
+            value  = +0.25 * art; /* Bottom Right */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             /* BottomLeft REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
         }
@@ -432,15 +439,16 @@ void DirectSolverGive<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_
         const double coeff2 = 0.5 * (k1 + k2) / h2;
         const double coeff3 = 0.5 * (h1 + h2) / k1;
         const double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
 
-        const int center_nz_index = getSolverMatrixIndex(i_r, i_theta);
-        const int left_nz_index   = getSolverMatrixIndex(i_r - 1, i_theta);
-        const int right_nz_index  = getSolverMatrixIndex(i_r + 1, i_theta);
-        const int bottom_nz_index = getSolverMatrixIndex(i_r, i_theta_M1);
-        const int top_nz_index    = getSolverMatrixIndex(i_r, i_theta_P1);
+        const int center_nz_index = getSolverMatrixIndex(i_r, i_theta, grid, DirBC_Interior);
+        const int left_nz_index   = getSolverMatrixIndex(i_r - 1, i_theta, grid, DirBC_Interior);
+        const int right_nz_index  = getSolverMatrixIndex(i_r + 1, i_theta, grid, DirBC_Interior);
+        const int bottom_nz_index = getSolverMatrixIndex(i_r, i_theta_M1, grid, DirBC_Interior);
+        const int top_nz_index    = getSolverMatrixIndex(i_r, i_theta_P1, grid, DirBC_Interior);
 
         const int center_index = grid.index(i_r, i_theta);
         const int left_index   = grid.index(i_r - 1, i_theta);
@@ -452,94 +460,94 @@ void DirectSolverGive<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_
         row = center_index;
         ptr = center_nz_index;
 
-        const Stencil& CenterStencil = getStencil(i_r);
+        const Stencil& CenterStencil = getStencil(i_r, grid, DirBC_Interior);
 
         offset = CenterStencil[StencilPosition::Center];
-        col    = center_index;
-        val    = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* beta_{i,j} */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = center_index;
+        value  = coeff5 * coeff_beta * Kokkos::fabs(detDF); /* beta_{i,j} */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* REMOVED: Moved to the right hand side to make the matrix symmetric */
         if (!DirBC_Interior) {
             offset = CenterStencil[StencilPosition::Left];
-            col    = left_index;
-            val    = -coeff1 * arr; /* Left */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = left_index;
+            value  = -coeff1 * arr; /* Left */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
         }
 
         offset = CenterStencil[StencilPosition::Right];
-        col    = right_index;
-        val    = -coeff2 * arr; /* Right */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = right_index;
+        value  = -coeff2 * arr; /* Right */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::Bottom];
-        col    = bottom_index;
-        val    = -coeff3 * att; /* Bottom */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = bottom_index;
+        value  = -coeff3 * att; /* Bottom */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::Top];
-        col    = top_index;
-        val    = -coeff4 * att; /* Top */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = top_index;
+        value  = -coeff4 * att; /* Top */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::Center];
-        col    = center_index;
-        val    = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = center_index;
+        value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         if (!DirBC_Interior) { /* Don't give to the inner Dirichlet boundary! */
             /* Fill matrix row of (i-1,j) */
             row = left_index;
             ptr = left_nz_index;
 
-            const Stencil& LeftStencil = getStencil(i_r - 1);
+            const Stencil& LeftStencil = getStencil(i_r - 1, grid, DirBC_Interior);
 
             offset = LeftStencil[StencilPosition::Right];
-            col    = center_index;
-            val    = -coeff1 * arr; /* Right */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = center_index;
+            value  = -coeff1 * arr; /* Right */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             offset = LeftStencil[StencilPosition::Center];
-            col    = left_index;
-            val    = +coeff1 * arr; /* Center: (Right) */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = left_index;
+            value  = +coeff1 * arr; /* Center: (Right) */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             offset = LeftStencil[StencilPosition::TopRight];
-            col    = top_index;
-            val    = -0.25 * art; /* Top Right */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = top_index;
+            value  = -0.25 * art; /* Top Right */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             offset = LeftStencil[StencilPosition::BottomRight];
-            col    = bottom_index;
-            val    = +0.25 * art; /* Bottom Right */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = bottom_index;
+            value  = +0.25 * art; /* Bottom Right */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
         }
 
         /* Fill matrix row of (i+1,j) */
         row = right_index;
         ptr = right_nz_index;
 
-        const Stencil& RightStencil = getStencil(i_r + 1);
+        const Stencil& RightStencil = getStencil(i_r + 1, grid, DirBC_Interior);
 
         offset = RightStencil[StencilPosition::Left];
-        col    = center_index;
-        val    = -coeff2 * arr; /* Left */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = center_index;
+        value  = -coeff2 * arr; /* Left */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = RightStencil[StencilPosition::Center];
-        col    = right_index;
-        val    = +coeff2 * arr; /* Center: (Left) */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = right_index;
+        value  = +coeff2 * arr; /* Center: (Left) */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = RightStencil[StencilPosition::TopLeft];
-        col    = top_index;
-        val    = +0.25 * art; /* Top Left */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = top_index;
+        value  = +0.25 * art; /* Top Left */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = RightStencil[StencilPosition::BottomLeft];
-        col    = bottom_index;
-        val    = -0.25 * art; /* Bottom Left */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = bottom_index;
+        value  = -0.25 * art; /* Bottom Left */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* Fill matrix row of (i,j-1) */
         row = bottom_index;
@@ -548,26 +556,26 @@ void DirectSolverGive<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_
         const Stencil& BottomStencil = CenterStencil;
 
         offset = BottomStencil[StencilPosition::Top];
-        col    = center_index;
-        val    = -coeff3 * att; /* Top */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = center_index;
+        value  = -coeff3 * att; /* Top */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = BottomStencil[StencilPosition::Center];
-        col    = bottom_index;
-        val    = +coeff3 * att; /* Center: (Top) */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = bottom_index;
+        value  = +coeff3 * att; /* Center: (Top) */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = BottomStencil[StencilPosition::TopRight];
-        col    = right_index;
-        val    = -0.25 * art; /* Top Right */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = right_index;
+        value  = -0.25 * art; /* Top Right */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* REMOVED: Moved to the right hand side to make the matrix symmetric */
         if (!DirBC_Interior) {
             offset = BottomStencil[StencilPosition::TopLeft];
-            col    = left_index;
-            val    = +0.25 * art; /* Top Left */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = left_index;
+            value  = +0.25 * art; /* Top Left */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
         }
 
         /* Fill matrix row of (i,j+1) */
@@ -577,26 +585,26 @@ void DirectSolverGive<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_
         const Stencil& TopStencil = CenterStencil;
 
         offset = TopStencil[StencilPosition::Bottom];
-        col    = center_index;
-        val    = -coeff4 * att; /* Bottom */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = center_index;
+        value  = -coeff4 * att; /* Bottom */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = TopStencil[StencilPosition::Center];
-        col    = top_index;
-        val    = +coeff4 * att; /* Center: (Bottom) */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = top_index;
+        value  = +coeff4 * att; /* Center: (Bottom) */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = TopStencil[StencilPosition::BottomRight];
-        col    = right_index;
-        val    = +0.25 * art; /* Bottom Right */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = right_index;
+        value  = +0.25 * art; /* Bottom Right */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* REMOVED: Moved to the right hand side to make the matrix symmetric */
         if (!DirBC_Interior) {
             offset = TopStencil[StencilPosition::BottomLeft];
-            col    = left_index;
-            val    = -0.25 * art; /* Bottom Left */
-            updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+            column = left_index;
+            value  = -0.25 * art; /* Bottom Left */
+            updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
         }
     }
     /* ------------------------------- */
@@ -612,19 +620,18 @@ void DirectSolverGive<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_
         const double coeff2 = 0.5 * (k1 + k2) / h2;
         const double coeff3 = 0.5 * (h1 + h2) / k1;
         const double coeff4 = 0.5 * (h1 + h2) / k2;
+        const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
 
-        const int center_nz_index = getSolverMatrixIndex(i_r, i_theta);
-        const int left_nz_index   = getSolverMatrixIndex(i_r - 1, i_theta);
-        const int right_nz_index  = getSolverMatrixIndex(i_r + 1, i_theta);
-        const int bottom_nz_index = getSolverMatrixIndex(i_r, i_theta_M1);
-        const int top_nz_index    = getSolverMatrixIndex(i_r, i_theta_P1);
+        const int center_nz_index = getSolverMatrixIndex(i_r, i_theta, grid, DirBC_Interior);
+        const int left_nz_index   = getSolverMatrixIndex(i_r - 1, i_theta, grid, DirBC_Interior);
+        const int bottom_nz_index = getSolverMatrixIndex(i_r, i_theta_M1, grid, DirBC_Interior);
+        const int top_nz_index    = getSolverMatrixIndex(i_r, i_theta_P1, grid, DirBC_Interior);
 
         const int center_index = grid.index(i_r, i_theta);
         const int left_index   = grid.index(i_r - 1, i_theta);
-        const int right_index  = grid.index(i_r + 1, i_theta);
         const int bottom_index = grid.index(i_r, i_theta_M1);
         const int top_index    = grid.index(i_r, i_theta_P1);
 
@@ -632,60 +639,60 @@ void DirectSolverGive<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_
         row = center_index;
         ptr = center_nz_index;
 
-        const Stencil& CenterStencil = getStencil(i_r);
+        const Stencil& CenterStencil = getStencil(i_r, grid, DirBC_Interior);
 
         offset = CenterStencil[StencilPosition::Center];
-        col    = center_index;
-        val    = 0.25 * (h1 + h2) * (k1 + k2) * coeff_beta * std::fabs(detDF); /* beta_{i,j} */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = center_index;
+        value  = coeff5 * coeff_beta * Kokkos::fabs(detDF); /* beta_{i,j} */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::Left];
-        col    = left_index;
-        val    = -coeff1 * arr; /* Left */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = left_index;
+        value  = -coeff1 * arr; /* Left */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* Right REMOVED: Moved to the right hand side to make the matrix symmetric */
 
         offset = CenterStencil[StencilPosition::Bottom];
-        col    = bottom_index;
-        val    = -coeff3 * att; /* Bottom */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = bottom_index;
+        value  = -coeff3 * att; /* Bottom */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::Top];
-        col    = top_index;
-        val    = -coeff4 * att; /* Top */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = top_index;
+        value  = -coeff4 * att; /* Top */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = CenterStencil[StencilPosition::Center];
-        col    = center_index;
-        val    = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = center_index;
+        value  = (coeff1 + coeff2) * arr + (coeff3 + coeff4) * att; /* Center: (Left, Right, Bottom, Top) */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* Fill matrix row of (i-1,j) */
         row = left_index;
         ptr = left_nz_index;
 
-        const Stencil& LeftStencil = getStencil(i_r - 1);
+        const Stencil& LeftStencil = getStencil(i_r - 1, grid, DirBC_Interior);
 
         offset = LeftStencil[StencilPosition::Right];
-        col    = center_index;
-        val    = -coeff1 * arr; /* Right */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = center_index;
+        value  = -coeff1 * arr; /* Right */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = LeftStencil[StencilPosition::Center];
-        col    = left_index;
-        val    = coeff1 * arr; /* Center: (Right) */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = left_index;
+        value  = coeff1 * arr; /* Center: (Right) */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = LeftStencil[StencilPosition::TopRight];
-        col    = top_index;
-        val    = -0.25 * art; /* Top Right */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = top_index;
+        value  = -0.25 * art; /* Top Right */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = LeftStencil[StencilPosition::BottomRight];
-        col    = bottom_index;
-        val    = 0.25 * art; /* Bottom Right */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = bottom_index;
+        value  = 0.25 * art; /* Bottom Right */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* Fill matrix row of (i+1,j) */
         /* Don't give to the outer dirichlet boundary! */
@@ -697,21 +704,21 @@ void DirectSolverGive<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_
         const Stencil& BottomStencil = CenterStencil;
 
         offset = BottomStencil[StencilPosition::Top];
-        col    = center_index;
-        val    = -coeff3 * att; /* Top */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = center_index;
+        value  = -coeff3 * att; /* Top */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = BottomStencil[StencilPosition::Center];
-        col    = bottom_index;
-        val    = coeff3 * att; /* Center: (Top) */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = bottom_index;
+        value  = coeff3 * att; /* Center: (Top) */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* TopRight REMOVED: Moved to the right hand side to make the matrix symmetric */
 
         offset = BottomStencil[StencilPosition::TopLeft];
-        col    = left_index;
-        val    = 0.25 * art; /* Top Left */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = left_index;
+        value  = 0.25 * art; /* Top Left */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* Fill matrix row of (i,j+1) */
         row = top_index;
@@ -720,66 +727,61 @@ void DirectSolverGive<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_
         const Stencil& TopStencil = CenterStencil;
 
         offset = TopStencil[StencilPosition::Bottom];
-        col    = center_index;
-        val    = -coeff4 * att; /* Bottom */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = center_index;
+        value  = -coeff4 * att; /* Bottom */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = TopStencil[StencilPosition::Center];
-        col    = top_index;
-        val    = coeff4 * att; /* Center: (Bottom) */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = top_index;
+        value  = coeff4 * att; /* Center: (Bottom) */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* BottomRight REMOVED: Moved to the right hand side to make the matrix symmetric */
 
         offset = TopStencil[StencilPosition::BottomLeft];
-        col    = left_index;
-        val    = -0.25 * art; /* Bottom Left */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = left_index;
+        value  = -0.25 * art; /* Bottom Left */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
     }
     /* ------------------------------------ */
     /* Node on the outer dirichlet boundary */
     /* ------------------------------------ */
     else if (i_r == grid.nr() - 1) {
-        double h1 = grid.radialSpacing(i_r - 1);
-        double k1 = grid.angularSpacing(i_theta - 1);
-        double k2 = grid.angularSpacing(i_theta);
+        const double h1 = grid.radialSpacing(i_r - 1);
+        const double k1 = grid.angularSpacing(i_theta - 1);
+        const double k2 = grid.angularSpacing(i_theta);
 
-        double coeff1 = 0.5 * (k1 + k2) / h1;
+        const double coeff1 = 0.5 * (k1 + k2) / h1;
 
-        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
-
-        const int center_nz_index = getSolverMatrixIndex(i_r, i_theta);
-        const int left_nz_index   = getSolverMatrixIndex(i_r - 1, i_theta);
+        const int center_nz_index = getSolverMatrixIndex(i_r, i_theta, grid, DirBC_Interior);
+        const int left_nz_index   = getSolverMatrixIndex(i_r - 1, i_theta, grid, DirBC_Interior);
 
         const int center_index = grid.index(i_r, i_theta);
         const int left_index   = grid.index(i_r - 1, i_theta);
-        const int bottom_index = grid.index(i_r, i_theta_M1);
-        const int top_index    = grid.index(i_r, i_theta_P1);
 
         /* Fill matrix row of (i,j) */
         row = center_index;
         ptr = center_nz_index;
 
-        const Stencil& CenterStencil = getStencil(i_r);
+        const Stencil& CenterStencil = getStencil(i_r, grid, DirBC_Interior);
 
         offset = CenterStencil[StencilPosition::Center];
-        col    = center_index;
-        val    = 1.0;
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = center_index;
+        value  = 1.0;
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* Give value to the interior nodes! */
         /* Fill matrix row of (i-1,j) */
         row                        = left_index;
         ptr                        = left_nz_index;
-        const Stencil& LeftStencil = getStencil(i_r - 1);
+        const Stencil& LeftStencil = getStencil(i_r - 1, grid, DirBC_Interior);
 
         /* Right REMOVED: Moved to the right hand side to make the matrix symmetric */
 
         offset = LeftStencil[StencilPosition::Center];
-        col    = left_index;
-        val    = coeff1 * arr; /* Center: (Right) */
-        updateMatrixElement(solver_matrix, ptr, offset, row, col, val);
+        column = left_index;
+        value  = coeff1 * arr; /* Center: (Right) */
+        updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* TopRight REMOVED: Moved to the right hand side to make the matrix symmetric */
 
@@ -787,119 +789,90 @@ void DirectSolverGive<LevelCacheType>::nodeBuildSolverMatrixGive(int i_r, int i_
     }
 }
 
-template <class LevelCacheType>
-void DirectSolverGive<LevelCacheType>::buildSolverMatrixCircleSection(const int i_r, SystemMatrix& solver_matrix)
-{
-    const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = DirectSolver<LevelCacheType>::DirBC_Interior_;
-
-    const double r = grid.radius(i_r);
-    for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-        const int global_index = grid.index(i_r, i_theta);
-        const double theta     = grid.theta(i_theta);
-
-        double coeff_beta, arr, att, art, detDF;
-        level_cache.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
-
-        // Build solver matrix at the current node
-        nodeBuildSolverMatrixGive(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF, coeff_beta);
-    }
-}
-
-template <class LevelCacheType>
-void DirectSolverGive<LevelCacheType>::buildSolverMatrixRadialSection(const int i_theta, SystemMatrix& solver_matrix)
-{
-    const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = DirectSolver<LevelCacheType>::DirBC_Interior_;
-
-    const double theta = grid.theta(i_theta);
-    for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
-        const int global_index = grid.index(i_r, i_theta);
-        const double r         = grid.radius(i_r);
-
-        double coeff_beta, arr, att, art, detDF;
-        level_cache.obtainValues(i_r, i_theta, global_index, r, theta, coeff_beta, arr, att, art, detDF);
-
-        // Build solver matrix at the current node
-        nodeBuildSolverMatrixGive(i_r, i_theta, grid, DirBC_Interior, solver_matrix, arr, att, art, detDF, coeff_beta);
-    }
-}
+} // namespace direct_solver_give
 
 template <class LevelCacheType>
 typename DirectSolverGive<LevelCacheType>::SystemMatrix DirectSolverGive<LevelCacheType>::buildSolverMatrix()
 {
-    const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
-    const int num_omp_threads = DirectSolver<LevelCacheType>::num_omp_threads_;
+    using direct_solver_give::getNonZeroCountSolverMatrix;
+    using direct_solver_give::getStencilSize;
+    using direct_solver_give::nodeBuildSolverMatrixGive;
+    using direct_solver_give::validateSolverMatrixIndexing;
 
-    assert(validateSolverMatrixIndexing() && "Solver matrix indexing is inconsistent");
+    const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = DirectSolver<LevelCacheType>::DirBC_Interior_;
+
+    assert(validateSolverMatrixIndexing(grid, DirBC_Interior) && "Solver matrix indexing is inconsistent");
 
     const int n = grid.numberOfNodes();
 
 #ifdef GMGPOLAR_USE_MUMPS
-    const int nnz = getNonZeroCountSolverMatrix();
+    const int nnz = getNonZeroCountSolverMatrix(grid, DirBC_Interior);
     SparseMatrixCOO<double, Kokkos::HostSpace> solver_matrix(n, n, nnz);
     solver_matrix.is_symmetric(true);
 #else
     std::function<int(int)> nnz_per_row = [&](int global_index) {
-        return getStencilSize(global_index);
+        return getStencilSize(global_index, grid, DirBC_Interior);
     };
 
     SparseMatrixCSR<double, Kokkos::HostSpace> solver_matrix(n, n, nnz_per_row);
 #endif
 
-    const int num_smoother_circles    = grid.numberSmootherCircles();
-    const int additional_radial_tasks = grid.ntheta() % 3;
-    const int num_radial_tasks        = grid.ntheta() - additional_radial_tasks;
-
     /* ---------------- */
     /* Circular section */
     /* ---------------- */
-    // We parallelize the loop with step 3 to avoid data race conditions between adjacent circles.
-#pragma omp parallel num_threads(num_omp_threads)
-    {
-#pragma omp for
-        for (int i_r = 0; i_r < num_smoother_circles; i_r += 3) {
-            buildSolverMatrixCircleSection(i_r, solver_matrix);
-        } /* Implicit barrier */
-#pragma omp for
-        for (int i_r = 1; i_r < num_smoother_circles; i_r += 3) {
-            buildSolverMatrixCircleSection(i_r, solver_matrix);
-        } /* Implicit barrier */
-#pragma omp for
-        for (int i_r = 2; i_r < num_smoother_circles; i_r += 3) {
-            buildSolverMatrixCircleSection(i_r, solver_matrix);
-        } /* Implicit barrier */
+    // We parallelize over i_r (step 3) to avoid data race conditions between adjacent circles.
+    // The i_theta loop is sequential inside the kernel.
+    const int num_circle_tasks = grid.numberSmootherCircles();
+
+    for (int start_circle = 0; start_circle < 3; ++start_circle) {
+        const int num_circular_tasks = (num_circle_tasks - start_circle + 2) / 3;
+        Kokkos::parallel_for(
+            "DirectSolverGive: BuildSolverMatrix (Circular)",
+            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, num_circular_tasks),
+            KOKKOS_LAMBDA(const int circle_task) {
+                const int i_r = start_circle + circle_task * 3;
+                for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
+                    nodeBuildSolverMatrixGive(i_r, i_theta, grid, level_cache, DirBC_Interior, solver_matrix);
+                }
+            });
+        Kokkos::fence();
     }
 
-    /* ---------------- */
+    /* -------------- */
     /* Radial section */
-    /* ---------------- */
-    // We parallelize the loop with step 3 to avoid data race conditions between adjacent radial lines.
-    // Due to the periodicity in the angular direction, we can have at most 2 additional radial tasks
-    // that are handled serially before the parallel loops.
+    /* -------------- */
+    // We parallelize over i_theta (step 3) to avoid data race conditions between adjacent radial lines.
+    // The i_r loop is sequential inside the kernel.
+    // Due to periodicity in the angular direction, handle up to 2 additional
+    // radial lines (i_theta = 0 and 1) before the parallel passes.
+    const int additional_radial_tasks = grid.ntheta() % 3;
+    const int num_radial_tasks        = grid.ntheta() - additional_radial_tasks;
+
     for (int i_theta = 0; i_theta < additional_radial_tasks; i_theta++) {
-        buildSolverMatrixRadialSection(i_theta, solver_matrix);
+        Kokkos::parallel_for(
+            "DirectSolverGive: BuildSolverMatrix (Radial, additional)",
+            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, 1), KOKKOS_LAMBDA(const int) {
+                for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
+                    nodeBuildSolverMatrixGive(i_r, i_theta, grid, level_cache, DirBC_Interior, solver_matrix);
+                }
+            });
+        Kokkos::fence();
     }
 
-#pragma omp parallel num_threads(num_omp_threads)
-    {
-#pragma omp for
-        for (int radial_task = 0; radial_task < num_radial_tasks; radial_task += 3) {
-            const int i_theta = radial_task + additional_radial_tasks;
-            buildSolverMatrixRadialSection(i_theta, solver_matrix);
-        } /* Implicit barrier */
-#pragma omp for
-        for (int radial_task = 1; radial_task < num_radial_tasks; radial_task += 3) {
-            const int i_theta = radial_task + additional_radial_tasks;
-            buildSolverMatrixRadialSection(i_theta, solver_matrix);
-        } /* Implicit barrier */
-#pragma omp for
-        for (int radial_task = 2; radial_task < num_radial_tasks; radial_task += 3) {
-            const int i_theta = radial_task + additional_radial_tasks;
-            buildSolverMatrixRadialSection(i_theta, solver_matrix);
-        } /* Implicit barrier */
+    for (int start_radial = 0; start_radial < 3; ++start_radial) {
+        const int num_radial_batches = (num_radial_tasks - start_radial + 2) / 3;
+        Kokkos::parallel_for(
+            "DirectSolverGive: BuildSolverMatrix (Radial)",
+            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, num_radial_batches),
+            KOKKOS_LAMBDA(const int radial_task) {
+                const int i_theta = additional_radial_tasks + start_radial + radial_task * 3;
+                for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
+                    nodeBuildSolverMatrixGive(i_r, i_theta, grid, level_cache, DirBC_Interior, solver_matrix);
+                }
+            });
+        Kokkos::fence();
     }
 
     return solver_matrix;
