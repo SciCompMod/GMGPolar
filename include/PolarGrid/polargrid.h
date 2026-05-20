@@ -162,7 +162,10 @@ private:
 };
 
 template class PolarGrid<Kokkos::HostSpace>;
+
+#if KOKKOS_ENABLE_CUDA
 template class PolarGrid<DefaultMemorySpace>;
+#endif
 
 // ---------------------------------------------------- //
 // Generates a coarser PolarGrid from a finer PolarGrid //
