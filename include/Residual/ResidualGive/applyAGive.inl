@@ -197,14 +197,14 @@ static KOKKOS_INLINE_FUNCTION void node_apply_a_give(int i_r, int i_theta, const
 template <class LevelCacheType>
 void ResidualGive<LevelCacheType>::applySystemOperator(HostVector<double> h_result, HostConstVector<double> h_x) const
 {
-	auto x = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_x);
-	auto result = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_result);
+    auto x      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_x);
+    auto result = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_result);
 
     assert(result.size() == x.size());
 
-    const PolarGrid<DefaultMemorySpace>& grid             = Residual<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = Residual<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = Residual<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid<DefaultMemorySpace>& grid = Residual<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = Residual<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                 = Residual<LevelCacheType>::DirBC_Interior_;
 
     using residual_give::node_apply_a_give;
 
@@ -255,8 +255,7 @@ void ResidualGive<LevelCacheType>::applySystemOperator(HostVector<double> h_resu
     for (int start_radial = 0; start_radial < 3; ++start_radial) {
         const int num_radial_batches = (num_radial_tasks - start_radial + 2) / 3;
         Kokkos::parallel_for(
-            "ResidualGive: ApplyA (Radial)",
-            Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, num_radial_batches),
+            "ResidualGive: ApplyA (Radial)", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, num_radial_batches),
             KOKKOS_LAMBDA(const int radial_task) {
                 const int i_theta = additional_radial_tasks + start_radial + radial_task * 3;
                 for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
@@ -266,5 +265,5 @@ void ResidualGive<LevelCacheType>::applySystemOperator(HostVector<double> h_resu
         Kokkos::fence();
     }
 
-	Kokkos::deep_copy(h_result, result);
+    Kokkos::deep_copy(h_result, result);
 }

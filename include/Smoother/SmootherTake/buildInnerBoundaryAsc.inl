@@ -7,9 +7,8 @@ namespace smoother_take
 
 #ifdef GMGPOLAR_USE_MUMPS
 // When using the MUMPS solver, the matrix is assembled in COO format.
-static KOKKOS_INLINE_FUNCTION void
-update_CSR_COO_MatrixElement(const SparseMatrixCOO<double>& matrix, int ptr, int offset, int row,
-                             int column, double value)
+static KOKKOS_INLINE_FUNCTION void update_CSR_COO_MatrixElement(const SparseMatrixCOO<double>& matrix, int ptr,
+                                                                int offset, int row, int column, double value)
 {
     matrix.set_row_index(ptr + offset, row);
     matrix.set_col_index(ptr + offset, column);
@@ -17,9 +16,8 @@ update_CSR_COO_MatrixElement(const SparseMatrixCOO<double>& matrix, int ptr, int
 }
 #else
 // When using the in-house solver, the matrix is stored in CSR format.
-static KOKKOS_INLINE_FUNCTION void
-update_CSR_COO_MatrixElement(const SparseMatrixCSR<double>& matrix, int ptr, int offset, int row,
-                             int column, double value)
+static KOKKOS_INLINE_FUNCTION void update_CSR_COO_MatrixElement(const SparseMatrixCSR<double>& matrix, int ptr,
+                                                                int offset, int row, int column, double value)
 {
     matrix.set_row_nz_index(row, offset, column);
     matrix.set_row_nz_entry(row, offset, value);
@@ -30,8 +28,8 @@ template <typename InnerBoundaryMatrix>
 static KOKKOS_INLINE_FUNCTION void
 nodeBuildInteriorBoundarySolverMatrix(const int i_theta, const PolarGrid<DefaultMemorySpace>& grid, bool DirBC_Interior,
                                       const InnerBoundaryMatrix& matrix, ConstVector<double>& arr,
-                                      ConstVector<double>& att, ConstVector<double>& art,
-                                      ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
+                                      ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF,
+                                      ConstVector<double>& coeff_beta)
 {
     using smoother_take::getCircleAscIndex;
     using smoother_take::getStencil;
@@ -146,9 +144,9 @@ SmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     using smoother_take::getNonZeroCountCircleAsc;
     using smoother_take::nodeBuildInteriorBoundarySolverMatrix;
 
-    const PolarGrid<DefaultMemorySpace>& grid             = Smoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                 = Smoother<LevelCacheType>::DirBC_Interior_;
 
     const int ntheta = grid.ntheta();
 

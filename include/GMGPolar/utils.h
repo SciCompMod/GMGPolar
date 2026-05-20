@@ -243,7 +243,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(
     const std::filesystem::path& file_path, const Level<DomainGeometry, DensityProfileCoefficients>& level,
     HostConstVector<double> grid_function)
 {
-    const PolarGrid<Kokkos::HostSpace>& grid                                                     = level.grid();
+    const PolarGrid<Kokkos::HostSpace>& grid = level.grid();
 
     assert(std::ssize(grid_function) == grid.numberOfNodes());
 

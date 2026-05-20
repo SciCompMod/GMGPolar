@@ -5,8 +5,8 @@ void SmootherGive<LevelCacheType>::solveBlackCircleSection(Vector<double> x, Vec
 {
     const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
 
-    const int start                   = 0;
-    const int end                     = grid.numberCircularSmootherNodes();
+    const int start               = 0;
+    const int end                 = grid.numberCircularSmootherNodes();
     Vector<double> circle_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     const bool is_inner_circle_black = grid.numberSmootherCircles() % 2 != 0;
@@ -43,10 +43,10 @@ void SmootherGive<LevelCacheType>::solveBlackCircleSection(Vector<double> x, Vec
 template <class LevelCacheType>
 void SmootherGive<LevelCacheType>::solveWhiteCircleSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid<DefaultMemorySpace>& grid     = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
 
-    const int start                   = 0;
-    const int end                     = grid.numberCircularSmootherNodes();
+    const int start               = 0;
+    const int end                 = grid.numberCircularSmootherNodes();
     Vector<double> circle_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     const bool is_inner_circle_white = grid.numberSmootherCircles() % 2 == 0;
@@ -83,10 +83,10 @@ void SmootherGive<LevelCacheType>::solveWhiteCircleSection(Vector<double> x, Vec
 template <class LevelCacheType>
 void SmootherGive<LevelCacheType>::solveBlackRadialSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid<DefaultMemorySpace>& grid     = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
 
-    const int start                   = grid.numberCircularSmootherNodes();
-    const int end                     = grid.numberOfNodes();
+    const int start               = grid.numberCircularSmootherNodes();
+    const int end                 = grid.numberOfNodes();
     Vector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     // Tridiagonal Solve
@@ -116,10 +116,10 @@ void SmootherGive<LevelCacheType>::solveBlackRadialSection(Vector<double> x, Vec
 template <class LevelCacheType>
 void SmootherGive<LevelCacheType>::solveWhiteRadialSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid<DefaultMemorySpace>& grid     = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
 
-    const int start                   = grid.numberCircularSmootherNodes();
-    const int end                     = grid.numberOfNodes();
+    const int start               = grid.numberCircularSmootherNodes();
+    const int end                 = grid.numberOfNodes();
     Vector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     // Tridiagonal Solve

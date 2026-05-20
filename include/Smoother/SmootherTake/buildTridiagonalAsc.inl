@@ -18,9 +18,8 @@ static KOKKOS_INLINE_FUNCTION void
 nodeBuildTridiagonalSolverMatrices(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid, bool DirBC_Interior,
                                    const BatchedTridiagonalSolver<double>& circle_tridiagonal_solver,
                                    const BatchedTridiagonalSolver<double>& radial_tridiagonal_solver,
-                                   ConstVector<double>& arr, ConstVector<double>& att,
-                                   ConstVector<double>& art, ConstVector<double>& detDF,
-                                   ConstVector<double>& coeff_beta)
+                                   ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art,
+                                   ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
 {
     using smoother_take::updateMatrixElement;
 
@@ -190,9 +189,9 @@ void SmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
 {
     using smoother_take::nodeBuildTridiagonalSolverMatrices;
 
-    const PolarGrid<DefaultMemorySpace>& grid             = Smoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                 = Smoother<LevelCacheType>::DirBC_Interior_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());

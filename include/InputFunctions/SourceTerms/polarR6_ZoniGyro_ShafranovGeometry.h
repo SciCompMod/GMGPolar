@@ -12,8 +12,8 @@ namespace gmgpolar
 class PolarR6_ZoniGyro_ShafranovGeometry
 {
 public:
-    explicit PolarR6_ZoniGyro_ShafranovGeometry(PolarGrid<Kokkos::HostSpace> const& grid, double Rmax, double elongation_kappa,
-                                                double shift_delta);
+    explicit PolarR6_ZoniGyro_ShafranovGeometry(PolarGrid<Kokkos::HostSpace> const& grid, double Rmax,
+                                                double elongation_kappa, double shift_delta);
     KOKKOS_DEFAULTED_FUNCTION PolarR6_ZoniGyro_ShafranovGeometry(const PolarR6_ZoniGyro_ShafranovGeometry&) = default;
 
     KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;

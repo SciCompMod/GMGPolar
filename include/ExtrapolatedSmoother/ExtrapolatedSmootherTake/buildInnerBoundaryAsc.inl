@@ -7,9 +7,9 @@ namespace extrapolated_smoother_take
 
 #ifdef GMGPOLAR_USE_MUMPS
 // When using the MUMPS solver, the matrix is assembled in COO format.
-static KOKKOS_INLINE_FUNCTION void
-update_CSR_COO_MatrixElement(const SparseMatrixCOO<double>& matrix, const int ptr, const int offset,
-                             const int row, const int column, const double value)
+static KOKKOS_INLINE_FUNCTION void update_CSR_COO_MatrixElement(const SparseMatrixCOO<double>& matrix, const int ptr,
+                                                                const int offset, const int row, const int column,
+                                                                const double value)
 {
     matrix.set_row_index(ptr + offset, row);
     matrix.set_col_index(ptr + offset, column);
@@ -17,9 +17,9 @@ update_CSR_COO_MatrixElement(const SparseMatrixCOO<double>& matrix, const int pt
 }
 #else
 // When using the in-house solver, the matrix is stored in CSR format.
-static KOKKOS_INLINE_FUNCTION void
-update_CSR_COO_MatrixElement(const SparseMatrixCSR<double>& matrix, const int ptr, const int offset,
-                             const int row, const int column, const double value)
+static KOKKOS_INLINE_FUNCTION void update_CSR_COO_MatrixElement(const SparseMatrixCSR<double>& matrix, const int ptr,
+                                                                const int offset, const int row, const int column,
+                                                                const double value)
 {
     matrix.set_row_nz_index(row, offset, column);
     matrix.set_row_nz_entry(row, offset, value);
@@ -28,9 +28,9 @@ update_CSR_COO_MatrixElement(const SparseMatrixCSR<double>& matrix, const int pt
 
 template <class InnerBoundaryMatrix>
 static KOKKOS_INLINE_FUNCTION void
-nodeBuildInteriorBoundarySolverMatrix(const int i_theta, const PolarGrid<DefaultMemorySpace>& grid, const bool DirBC_Interior,
-                                      const InnerBoundaryMatrix& matrix, ConstVector<double>& arr,
-                                      ConstVector<double>& att, ConstVector<double>& art,
+nodeBuildInteriorBoundarySolverMatrix(const int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
+                                      const bool DirBC_Interior, const InnerBoundaryMatrix& matrix,
+                                      ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art,
                                       ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
 {
     using extrapolated_smoother_take::getCircleAscIndex;
@@ -157,9 +157,9 @@ ExtrapolatedSmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     using extrapolated_smoother_take::getNonZeroCountCircleAsc;
     using extrapolated_smoother_take::nodeBuildInteriorBoundarySolverMatrix;
 
-    const PolarGrid<DefaultMemorySpace>& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid<DefaultMemorySpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                 = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
     const int ntheta = grid.ntheta();
 

@@ -5,9 +5,9 @@ namespace smoother_give
 
 template <class LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoCircleGiveInside(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
-                                  bool DirBC_Interior, ConstVector<double>& x, ConstVector<double>& rhs,
-                                  Vector<double>& result)
+nodeApplyAscOrthoCircleGiveInside(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
+                                  const LevelCacheType& level_cache, bool DirBC_Interior, ConstVector<double>& x,
+                                  ConstVector<double>& rhs, Vector<double>& result)
 {
     assert(i_r >= 0 && i_r < grid.numberSmootherCircles());
 
@@ -54,9 +54,9 @@ nodeApplyAscOrthoCircleGiveInside(int i_r, int i_theta, const PolarGrid<DefaultM
 
 template <class LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoCircleGiveOutside(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
-                                   bool DirBC_Interior, ConstVector<double>& x, ConstVector<double>& rhs,
-                                   Vector<double>& result)
+nodeApplyAscOrthoCircleGiveOutside(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
+                                   const LevelCacheType& level_cache, bool DirBC_Interior, ConstVector<double>& x,
+                                   ConstVector<double>& rhs, Vector<double>& result)
 {
     assert(0 <= i_r && i_r <= grid.numberSmootherCircles());
 
@@ -101,9 +101,9 @@ nodeApplyAscOrthoCircleGiveOutside(int i_r, int i_theta, const PolarGrid<Default
 
 template <class LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoRadialGiveInside(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
-                                  bool DirBC_Interior, ConstVector<double>& x, ConstVector<double>& rhs,
-                                  Vector<double>& result)
+nodeApplyAscOrthoRadialGiveInside(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
+                                  const LevelCacheType& level_cache, bool DirBC_Interior, ConstVector<double>& x,
+                                  ConstVector<double>& rhs, Vector<double>& result)
 {
     assert(grid.numberSmootherCircles() - 1 <= i_r && i_r < grid.nr());
 
@@ -179,9 +179,9 @@ nodeApplyAscOrthoRadialGiveInside(int i_r, int i_theta, const PolarGrid<DefaultM
 
 template <class LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoRadialGiveOutside(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
-                                   bool DirBC_Interior, ConstVector<double>& x, ConstVector<double>& rhs,
-                                   Vector<double>& result)
+nodeApplyAscOrthoRadialGiveOutside(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
+                                   const LevelCacheType& level_cache, bool DirBC_Interior, ConstVector<double>& x,
+                                   ConstVector<double>& rhs, Vector<double>& result)
 {
     assert(grid.numberSmootherCircles() <= i_r && i_r < grid.nr());
 
@@ -226,8 +226,8 @@ nodeApplyAscOrthoRadialGiveOutside(int i_r, int i_theta, const PolarGrid<Default
 } // namespace smoother_give
 
 template <class LevelCacheType>
-void SmootherGive<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<double> x,
-                                                                   ConstVector<double> rhs, Vector<double> temp)
+void SmootherGive<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<double> x, ConstVector<double> rhs,
+                                                                   Vector<double> temp)
 {
     using smoother_give::nodeApplyAscOrthoCircleGiveInside;
     using smoother_give::nodeApplyAscOrthoCircleGiveOutside;
@@ -239,9 +239,9 @@ void SmootherGive<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<d
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid<DefaultMemorySpace>& grid             = Smoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                 = Smoother<LevelCacheType>::DirBC_Interior_;
 
     /* ----------------------------------------------- */
     /* 1. Black-Circle update (u_bc):                  */
@@ -309,8 +309,8 @@ void SmootherGive<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<d
 }
 
 template <class LevelCacheType>
-void SmootherGive<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<double> x,
-                                                                   ConstVector<double> rhs, Vector<double> temp)
+void SmootherGive<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<double> x, ConstVector<double> rhs,
+                                                                   Vector<double> temp)
 {
     using smoother_give::nodeApplyAscOrthoCircleGiveInside;
     using smoother_give::nodeApplyAscOrthoCircleGiveOutside;
@@ -322,9 +322,9 @@ void SmootherGive<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<d
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid<DefaultMemorySpace>& grid             = Smoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                 = Smoother<LevelCacheType>::DirBC_Interior_;
 
     /* ----------------------------------------------- */
     /* 2. White-Circle update (u_wc):                  */
@@ -393,8 +393,8 @@ void SmootherGive<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<d
 }
 
 template <class LevelCacheType>
-void SmootherGive<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<double> x,
-                                                                   ConstVector<double> rhs, Vector<double> temp)
+void SmootherGive<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<double> x, ConstVector<double> rhs,
+                                                                   Vector<double> temp)
 {
     using smoother_give::nodeApplyAscOrthoRadialGiveInside;
     using smoother_give::nodeApplyAscOrthoRadialGiveOutside;
@@ -406,9 +406,9 @@ void SmootherGive<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<d
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid<DefaultMemorySpace>& grid             = Smoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                 = Smoother<LevelCacheType>::DirBC_Interior_;
 
     /* ----------------------------------------------- */
     /* 3. Black-Radial update (u_br):                  */
@@ -477,8 +477,8 @@ void SmootherGive<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<d
 }
 
 template <class LevelCacheType>
-void SmootherGive<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<double> x,
-                                                                   ConstVector<double> rhs, Vector<double> temp)
+void SmootherGive<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<double> x, ConstVector<double> rhs,
+                                                                   Vector<double> temp)
 {
     using smoother_give::nodeApplyAscOrthoRadialGiveInside;
     using smoother_give::nodeApplyAscOrthoRadialGiveOutside;
@@ -490,9 +490,9 @@ void SmootherGive<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<d
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid<DefaultMemorySpace>& grid             = Smoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                 = Smoother<LevelCacheType>::DirBC_Interior_;
 
     /* ----------------------------------------------- */
     /* 4. White-Radial update (u_wr):                  */

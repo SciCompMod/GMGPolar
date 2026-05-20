@@ -173,7 +173,8 @@ private:
 
     /* ----------------- */
     /* Print information */
-    void printSettings(const PolarGrid<Kokkos::HostSpace>& finest_grid, const PolarGrid<Kokkos::HostSpace>& coarsest_grid) const;
+    void printSettings(const PolarGrid<Kokkos::HostSpace>& finest_grid,
+                       const PolarGrid<Kokkos::HostSpace>& coarsest_grid) const;
     void printIterationHeader(const ExactSolution* exact_solution);
     void printIterationInfo(int iteration, double current_residual_norm, double current_relative_residual_norm,
                             const ExactSolution* exact_solution);

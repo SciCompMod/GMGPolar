@@ -92,7 +92,7 @@ public:
     void setup()
     {
         // Create local copies for lambda capture
-        int matrix_dimension        = matrix_dimension_;
+        int matrix_dimension    = matrix_dimension_;
         Vector<T> main_diagonal = main_diagonal_;
         Vector<T> sub_diagonal  = sub_diagonal_;
         Vector<T> gamma         = gamma_;
@@ -162,7 +162,7 @@ public:
         int effective_batch_count = (batch_count_ - batch_offset + batch_stride - 1) / batch_stride;
 
         // Create local copies for lambda capture
-        int matrix_dimension        = matrix_dimension_;
+        int matrix_dimension    = matrix_dimension_;
         Vector<T> main_diagonal = main_diagonal_;
         Vector<T> sub_diagonal  = sub_diagonal_;
         Vector<T> buffer        = buffer_;
@@ -265,14 +265,13 @@ public:
         int effective_batch_count = (batch_count_ - batch_offset + batch_stride - 1) / batch_stride;
 
         // Create local copies for lambda capture
-        int matrix_dimension        = matrix_dimension_;
+        int matrix_dimension    = matrix_dimension_;
         Vector<T> main_diagonal = main_diagonal_;
         Vector<T> gamma         = gamma_;
 
         if (!is_cyclic_) {
             Kokkos::parallel_for(
-                "SolveDiagonalNonCyclic",
-                Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, effective_batch_count),
+                "SolveDiagonalNonCyclic", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, effective_batch_count),
                 KOKKOS_LAMBDA(const int k) {
                     // ----------------------------------- //
                     // Obtain offset for the current batch //

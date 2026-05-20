@@ -17,8 +17,8 @@ namespace extrapolated_smoother_give
 // - Non-zero matrix indicesare obtained via `ptr + offset`
 // - A offset value of `-1` means the position is not included in the stencil pattern.
 // - Other values (0, 1, 2, ..., stencil_size - 1) correspond to valid stencil indices.
-static KOKKOS_INLINE_FUNCTION const Stencil& getStencil(const int i_r, const int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
-                                                        const bool DirBC_Interior)
+static KOKKOS_INLINE_FUNCTION const Stencil&
+getStencil(const int i_r, const int i_theta, const PolarGrid<DefaultMemorySpace>& grid, const bool DirBC_Interior)
 {
     // clang-format off
     static constexpr Stencil    stencil_center = {
@@ -83,7 +83,8 @@ static KOKKOS_INLINE_FUNCTION int getNonZeroCountCircleAsc(const int i_r, const 
     }
 }
 
-static KOKKOS_INLINE_FUNCTION int getCircleAscIndex(const int i_r, const int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
+static KOKKOS_INLINE_FUNCTION int getCircleAscIndex(const int i_r, const int i_theta,
+                                                    const PolarGrid<DefaultMemorySpace>& grid,
                                                     const bool DirBC_Interior)
 {
     // Only i_r = 0 is implemented.

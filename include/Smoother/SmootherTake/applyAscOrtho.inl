@@ -4,10 +4,10 @@ namespace smoother_take
 {
 
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoCircleTake(const int i_r, const int i_theta, const PolarGrid<DefaultMemorySpace>& grid, bool DirBC_Interior,
-                            ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
-                            ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art,
-                            ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
+nodeApplyAscOrthoCircleTake(const int i_r, const int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
+                            bool DirBC_Interior, ConstVector<double>& x, ConstVector<double>& rhs,
+                            Vector<double>& result, ConstVector<double>& arr, ConstVector<double>& att,
+                            ConstVector<double>& art, ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
 {
     KOKKOS_ASSERT(i_r >= 0 && i_r < grid.numberSmootherCircles());
 
@@ -56,11 +56,10 @@ nodeApplyAscOrthoCircleTake(const int i_r, const int i_theta, const PolarGrid<De
 }
 
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoRadialTake(const int i_r, const int i_theta, const PolarGrid<DefaultMemorySpace>& grid, bool DirBC_Interior,
-                            ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
-                            ConstVector<double>& arr, const ConstVector<double>& att,
-                            ConstVector<double>& art, const ConstVector<double>& detDF,
-                            ConstVector<double>& coeff_beta)
+nodeApplyAscOrthoRadialTake(const int i_r, const int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
+                            bool DirBC_Interior, ConstVector<double>& x, ConstVector<double>& rhs,
+                            Vector<double>& result, ConstVector<double>& arr, const ConstVector<double>& att,
+                            ConstVector<double>& art, const ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
 {
     KOKKOS_ASSERT(i_r >= grid.numberSmootherCircles() && i_r < grid.nr());
 
@@ -118,14 +117,14 @@ nodeApplyAscOrthoRadialTake(const int i_r, const int i_theta, const PolarGrid<De
 } // namespace smoother_take
 
 template <class LevelCacheType>
-void SmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<double> x,
-                                                                   ConstVector<double> rhs, Vector<double> temp)
+void SmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<double> x, ConstVector<double> rhs,
+                                                                   Vector<double> temp)
 {
     using smoother_take::nodeApplyAscOrthoCircleTake;
 
-    const PolarGrid<DefaultMemorySpace>& grid             = Smoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                 = Smoother<LevelCacheType>::DirBC_Interior_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
@@ -157,14 +156,14 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<d
 }
 
 template <class LevelCacheType>
-void SmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<double> x,
-                                                                   ConstVector<double> rhs, Vector<double> temp)
+void SmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<double> x, ConstVector<double> rhs,
+                                                                   Vector<double> temp)
 {
     using smoother_take::nodeApplyAscOrthoCircleTake;
 
-    const PolarGrid<DefaultMemorySpace>& grid             = Smoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                 = Smoother<LevelCacheType>::DirBC_Interior_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
@@ -196,14 +195,14 @@ void SmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<d
 }
 
 template <class LevelCacheType>
-void SmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<double> x,
-                                                                   ConstVector<double> rhs, Vector<double> temp)
+void SmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<double> x, ConstVector<double> rhs,
+                                                                   Vector<double> temp)
 {
     using smoother_take::nodeApplyAscOrthoRadialTake;
 
-    const PolarGrid<DefaultMemorySpace>& grid             = Smoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                 = Smoother<LevelCacheType>::DirBC_Interior_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
@@ -235,14 +234,14 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<d
 }
 
 template <class LevelCacheType>
-void SmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<double> x,
-                                                                   ConstVector<double> rhs, Vector<double> temp)
+void SmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<double> x, ConstVector<double> rhs,
+                                                                   Vector<double> temp)
 {
     using smoother_take::nodeApplyAscOrthoRadialTake;
 
-    const PolarGrid<DefaultMemorySpace>& grid             = Smoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                 = Smoother<LevelCacheType>::DirBC_Interior_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());

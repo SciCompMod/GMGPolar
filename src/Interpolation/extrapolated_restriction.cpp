@@ -50,7 +50,8 @@ static KOKKOS_INLINE_FUNCTION void coarseNodeExtrapolatedRestriction(const int i
     coarse_result[coarse_grid.index(i_r_coarse, i_theta_coarse)] = value;
 }
 
-void Interpolation::applyExtrapolatedRestriction(const PolarGrid<Kokkos::HostSpace>& fine_grid, const PolarGrid<Kokkos::HostSpace>& coarse_grid,
+void Interpolation::applyExtrapolatedRestriction(const PolarGrid<Kokkos::HostSpace>& fine_grid,
+                                                 const PolarGrid<Kokkos::HostSpace>& coarse_grid,
                                                  HostVector<double> coarse_result,
                                                  HostConstVector<double> fine_values) const
 {

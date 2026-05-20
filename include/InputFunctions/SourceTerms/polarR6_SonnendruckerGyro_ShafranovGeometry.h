@@ -12,8 +12,8 @@ namespace gmgpolar
 class PolarR6_SonnendruckerGyro_ShafranovGeometry
 {
 public:
-    explicit PolarR6_SonnendruckerGyro_ShafranovGeometry(PolarGrid<Kokkos::HostSpace> const& grid, double Rmax, double elongation_kappa,
-                                                         double shift_delta);
+    explicit PolarR6_SonnendruckerGyro_ShafranovGeometry(PolarGrid<Kokkos::HostSpace> const& grid, double Rmax,
+                                                         double elongation_kappa, double shift_delta);
     KOKKOS_DEFAULTED_FUNCTION
     PolarR6_SonnendruckerGyro_ShafranovGeometry(const PolarR6_SonnendruckerGyro_ShafranovGeometry&) = default;
 

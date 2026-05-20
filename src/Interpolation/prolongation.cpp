@@ -52,8 +52,10 @@ using namespace gmgpolar;
  *  - k1, k2 in angular direction
  */
 
-static KOKKOS_INLINE_FUNCTION void fineNodeProlongation(const int i_r, const int i_theta, const PolarGrid<Kokkos::HostSpace>& coarse_grid,
-                                                        const PolarGrid<Kokkos::HostSpace>& fine_grid, HostVector<double>& fine_result,
+static KOKKOS_INLINE_FUNCTION void fineNodeProlongation(const int i_r, const int i_theta,
+                                                        const PolarGrid<Kokkos::HostSpace>& coarse_grid,
+                                                        const PolarGrid<Kokkos::HostSpace>& fine_grid,
+                                                        HostVector<double>& fine_result,
                                                         HostConstVector<double>& coarse_values)
 {
     const int i_r_coarse     = i_r / 2;
@@ -107,8 +109,9 @@ static KOKKOS_INLINE_FUNCTION void fineNodeProlongation(const int i_r, const int
     }
 }
 
-void Interpolation::applyProlongation(const PolarGrid<Kokkos::HostSpace>& coarse_grid, const PolarGrid<Kokkos::HostSpace>& fine_grid,
-                                      HostVector<double> fine_result, HostConstVector<double> coarse_values) const
+void Interpolation::applyProlongation(const PolarGrid<Kokkos::HostSpace>& coarse_grid,
+                                      const PolarGrid<Kokkos::HostSpace>& fine_grid, HostVector<double> fine_result,
+                                      HostConstVector<double> coarse_values) const
 {
     assert(std::ssize(coarse_values) == coarse_grid.numberOfNodes());
     assert(std::ssize(fine_result) == fine_grid.numberOfNodes());

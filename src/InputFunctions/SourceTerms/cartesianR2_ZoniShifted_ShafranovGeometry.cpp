@@ -1,9 +1,8 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR2_ZoniShifted_ShafranovGeometry.h"
 using namespace gmgpolar;
 
-CartesianR2_ZoniShifted_ShafranovGeometry::CartesianR2_ZoniShifted_ShafranovGeometry(PolarGrid<Kokkos::HostSpace> const& grid, double Rmax,
-                                                                                     double elongation_kappa,
-                                                                                     double shift_delta)
+CartesianR2_ZoniShifted_ShafranovGeometry::CartesianR2_ZoniShifted_ShafranovGeometry(
+    PolarGrid<Kokkos::HostSpace> const& grid, double Rmax, double elongation_kappa, double shift_delta)
     : grid_(grid)
     , Rmax(Rmax)
     , elongation_kappa(elongation_kappa)

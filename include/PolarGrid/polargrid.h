@@ -22,7 +22,7 @@
 namespace gmgpolar
 {
 
-template<class MemorySpace>
+template <class MemorySpace>
 class PolarGrid
 {
 public:
@@ -30,7 +30,7 @@ public:
     explicit PolarGrid() = default;
 
     // Constructor to initialize grid using kokkos views of radii and angles.
-    template<class MemorySpace2>
+    template <class MemorySpace2>
     PolarGrid(Vector<double, MemorySpace2> radii, Vector<double, MemorySpace2> angles,
               std::optional<double> splitting_radius = std::nullopt);
     // Constructor to initialize grid using std::vectors of radii and angles.
@@ -44,24 +44,25 @@ public:
 
     KOKKOS_DEFAULTED_FUNCTION PolarGrid(const PolarGrid&) = default;
 
-    template<class MemorySpace2>
-	PolarGrid(const PolarGrid<MemorySpace2>& other)
-	: nr_(other.nr_)
-		, ntheta_(other.ntheta_)
-		, is_ntheta_PowerOfTwo_(other.is_ntheta_PowerOfTwo_)
-		, radii_(Kokkos::create_mirror_view_and_copy(MemorySpace(), other.radii_))
-		, angles_(Kokkos::create_mirror_view_and_copy(MemorySpace(), other.angles_))
-		, radial_spacings_(Kokkos::create_mirror_view_and_copy(MemorySpace(), other.radial_spacings_))
-		, angular_spacings_(Kokkos::create_mirror_view_and_copy(MemorySpace(), other.angular_spacings_))
-		, smoother_splitting_radius_(other.smoother_splitting_radius_)
-		, number_smoother_circles_(other.number_smoother_circles_)
-		, length_smoother_radial_(other.length_smoother_radial_)
-		, number_circular_smoother_nodes_(other.number_circular_smoother_nodes_)
-		, number_radial_smoother_nodes_(other.number_radial_smoother_nodes_)
-	{}
+    template <class MemorySpace2>
+    PolarGrid(const PolarGrid<MemorySpace2>& other)
+        : nr_(other.nr_)
+        , ntheta_(other.ntheta_)
+        , is_ntheta_PowerOfTwo_(other.is_ntheta_PowerOfTwo_)
+        , radii_(Kokkos::create_mirror_view_and_copy(MemorySpace(), other.radii_))
+        , angles_(Kokkos::create_mirror_view_and_copy(MemorySpace(), other.angles_))
+        , radial_spacings_(Kokkos::create_mirror_view_and_copy(MemorySpace(), other.radial_spacings_))
+        , angular_spacings_(Kokkos::create_mirror_view_and_copy(MemorySpace(), other.angular_spacings_))
+        , smoother_splitting_radius_(other.smoother_splitting_radius_)
+        , number_smoother_circles_(other.number_smoother_circles_)
+        , length_smoother_radial_(other.length_smoother_radial_)
+        , number_circular_smoother_nodes_(other.number_circular_smoother_nodes_)
+        , number_radial_smoother_nodes_(other.number_radial_smoother_nodes_)
+    {
+    }
 
-	template<class>
-	friend class PolarGrid;
+    template <class>
+    friend class PolarGrid;
 
     // Optimized, inlined indexing.
     KOKKOS_INLINE_FUNCTION int wrapThetaIndex(const int unwrapped_theta_index) const;
@@ -157,8 +158,8 @@ private:
 
     // Help constrcut radii_ when an anisotropic radial division is requested
     // Implementation in src/PolarGrid/anisotropic_division.cpp
-    Vector<double, MemorySpace> RadialAnisotropicDivision(double R0, double R, const int nr_exp, double refinement_radius,
-                                                 const int anisotropic_factor) const;
+    Vector<double, MemorySpace> RadialAnisotropicDivision(double R0, double R, const int nr_exp,
+                                                          double refinement_radius, const int anisotropic_factor) const;
 };
 
 template class PolarGrid<Kokkos::HostSpace>;
@@ -170,7 +171,7 @@ template class PolarGrid<DefaultMemorySpace>;
 // ---------------------------------------------------- //
 // Generates a coarser PolarGrid from a finer PolarGrid //
 // ---------------------------------------------------- //
-template<class MemorySpace = Kokkos::HostSpace>
+template <class MemorySpace = Kokkos::HostSpace>
 PolarGrid<MemorySpace> coarseningGrid(const PolarGrid<MemorySpace>& grid);
 
 #include "polargrid.inl" // Include the inline function definitions

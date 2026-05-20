@@ -6,8 +6,9 @@ using namespace gmgpolar;
 // ------------ //
 
 // Constructor to initialize grid using vectors of radii and angles.
-template<class MemorySpace>
-PolarGrid<MemorySpace>::PolarGrid(std::vector<double> radii, std::vector<double> angles, std::optional<double> splitting_radius)
+template <class MemorySpace>
+PolarGrid<MemorySpace>::PolarGrid(std::vector<double> radii, std::vector<double> angles,
+                                  std::optional<double> splitting_radius)
     : nr_(radii.size())
     , ntheta_(angles.size() - 1)
     , is_ntheta_PowerOfTwo_((ntheta_ & (ntheta_ - 1)) == 0)
@@ -33,9 +34,10 @@ PolarGrid<MemorySpace>::PolarGrid(std::vector<double> radii, std::vector<double>
 }
 
 // Constructor to initialize grid using parameters from GMGPolar.
-template<class MemorySpace>
-PolarGrid<MemorySpace>::PolarGrid(double R0, double Rmax, const int nr_exp, const int ntheta_exp, double refinement_radius,
-                     const int anisotropic_factor, const int divideBy2, std::optional<double> splitting_radius)
+template <class MemorySpace>
+PolarGrid<MemorySpace>::PolarGrid(double R0, double Rmax, const int nr_exp, const int ntheta_exp,
+                                  double refinement_radius, const int anisotropic_factor, const int divideBy2,
+                                  std::optional<double> splitting_radius)
 {
     assert(R0 > 0.0 && Rmax > R0 && !equals(R0, Rmax));
     // Construct radii_ and angles_
@@ -56,9 +58,9 @@ PolarGrid<MemorySpace>::PolarGrid(double R0, double Rmax, const int nr_exp, cons
 // ------------------- //
 
 // Construct radial divisions for grid generation.
-template<class MemorySpace>
+template <class MemorySpace>
 void PolarGrid<MemorySpace>::constructRadialDivisions(double R0, double R, const int nr_exp, double refinement_radius,
-                                         const int anisotropic_factor)
+                                                      const int anisotropic_factor)
 {
     // r_temp contains the values before we refine one last time for extrapolation.
     // Therefore we first consider 2^(nr_exp-1) points.
@@ -91,7 +93,7 @@ void PolarGrid<MemorySpace>::constructRadialDivisions(double R0, double R, const
 
 // Construct angular divisions for grid generation.
 // Currently we dont allow anisotropic refinement in angular direction
-template<class MemorySpace>
+template <class MemorySpace>
 void PolarGrid<MemorySpace>::constructAngularDivisions(const int ntheta_exp, const int nr)
 {
     if (ntheta_exp < 0) {
@@ -115,7 +117,7 @@ void PolarGrid<MemorySpace>::constructAngularDivisions(const int ntheta_exp, con
 }
 
 // divideBy2: Number of times to divide both radial and angular divisions by 2.
-template<class MemorySpace>
+template <class MemorySpace>
 void PolarGrid<MemorySpace>::refineGrid(const int divideBy2)
 {
     radii_                = divideVector(radii_, divideBy2);
@@ -125,8 +127,9 @@ void PolarGrid<MemorySpace>::refineGrid(const int divideBy2)
     is_ntheta_PowerOfTwo_ = (ntheta_ & (ntheta_ - 1)) == 0;
 }
 
-template<class MemorySpace>
-Vector<double, MemorySpace> PolarGrid<MemorySpace>::divideVector(Vector<double, MemorySpace> vec, const int divideBy2) const
+template <class MemorySpace>
+Vector<double, MemorySpace> PolarGrid<MemorySpace>::divideVector(Vector<double, MemorySpace> vec,
+                                                                 const int divideBy2) const
 {
     const int powerOfTwo = 1 << divideBy2;
     size_t vecSize       = vec.size();
@@ -145,7 +148,7 @@ Vector<double, MemorySpace> PolarGrid<MemorySpace>::divideVector(Vector<double, 
     return result;
 }
 
-template<class MemorySpace>
+template <class MemorySpace>
 void PolarGrid<MemorySpace>::initializeDistances()
 {
     // radial_spacings contains the distances between each consecutive radii division.
@@ -170,7 +173,7 @@ void PolarGrid<MemorySpace>::initializeDistances()
 //      If std::nullopt, automatic line-splitting is enabled.
 //      If the splitting radius is less than R0, only Radial indexing is used.
 //      If the splitting radius is greater than or equal to R, only Circular indexing is used.
-template<class MemorySpace>
+template <class MemorySpace>
 void PolarGrid<MemorySpace>::initializeLineSplitting(std::optional<double> splitting_radius)
 {
     if (splitting_radius.has_value()) {
@@ -232,7 +235,7 @@ void PolarGrid<MemorySpace>::initializeLineSplitting(std::optional<double> split
 namespace gmgpolar
 {
 
-template<class MemorySpace>
+template <class MemorySpace>
 PolarGrid<MemorySpace> coarseningGrid(const PolarGrid<MemorySpace>& fineGrid)
 {
     assert((fineGrid.nr() - 1) % 2 == 0 && (fineGrid.ntheta()) % 2 == 0);
@@ -270,8 +273,9 @@ template PolarGrid<DefaultMemorySpace> coarseningGrid<DefaultMemorySpace>(const 
 // Check parameter validity //
 // ------------------------ //
 
-template<class MemorySpace>
-void PolarGrid<MemorySpace>::checkParameters(Vector<double, MemorySpace> radii, Vector<double, MemorySpace> angles) const
+template <class MemorySpace>
+void PolarGrid<MemorySpace>::checkParameters(Vector<double, MemorySpace> radii,
+                                             Vector<double, MemorySpace> angles) const
 {
     auto radii_start = Kokkos::Experimental::begin(radii);
     auto radii_end   = Kokkos::Experimental::end(radii);

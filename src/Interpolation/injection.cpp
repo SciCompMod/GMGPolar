@@ -4,7 +4,8 @@ using namespace gmgpolar;
 
 /* Remark: This injection is not scaled. */
 static KOKKOS_INLINE_FUNCTION void coarseNodeInjection(const int i_r_coarse, const int i_theta_coarse,
-                                                       const PolarGrid<Kokkos::HostSpace>& fine_grid, const PolarGrid<Kokkos::HostSpace>& coarse_grid,
+                                                       const PolarGrid<Kokkos::HostSpace>& fine_grid,
+                                                       const PolarGrid<Kokkos::HostSpace>& coarse_grid,
                                                        HostVector<double>& coarse_result,
                                                        HostConstVector<double>& fine_values)
 {
@@ -17,8 +18,9 @@ static KOKKOS_INLINE_FUNCTION void coarseNodeInjection(const int i_r_coarse, con
     coarse_result[coarse_index] = fine_values[fine_index];
 }
 
-void Interpolation::applyInjection(const PolarGrid<Kokkos::HostSpace>& fine_grid, const PolarGrid<Kokkos::HostSpace>& coarse_grid,
-                                   HostVector<double> coarse_result, HostConstVector<double> fine_values) const
+void Interpolation::applyInjection(const PolarGrid<Kokkos::HostSpace>& fine_grid,
+                                   const PolarGrid<Kokkos::HostSpace>& coarse_grid, HostVector<double> coarse_result,
+                                   HostConstVector<double> fine_values) const
 {
     assert(std::ssize(fine_values) == fine_grid.numberOfNodes());
     assert(std::ssize(coarse_result) == coarse_grid.numberOfNodes());

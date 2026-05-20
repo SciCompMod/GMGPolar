@@ -9,7 +9,8 @@
 using namespace gmgpolar;
 
 // Helper that computes the mathematically expected extrapolated restriction value
-static double expected_extrapolated_restriction_value(const PolarGrid<Kokkos::HostSpace>& fine, const PolarGrid<Kokkos::HostSpace>& coarse,
+static double expected_extrapolated_restriction_value(const PolarGrid<Kokkos::HostSpace>& fine,
+                                                      const PolarGrid<Kokkos::HostSpace>& coarse,
                                                       HostConstVector<double> fine_vals, int i_r_coarse,
                                                       int i_theta_coarse)
 {

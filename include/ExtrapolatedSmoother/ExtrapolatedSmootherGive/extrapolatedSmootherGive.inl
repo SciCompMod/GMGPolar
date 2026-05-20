@@ -42,12 +42,13 @@ ExtrapolatedSmootherGive<LevelCacheType>::ExtrapolatedSmootherGive(const PolarGr
 //   - The system is then solved in-place in temp, and the results
 //     are copied back to x.
 template <class LevelCacheType>
-void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(HostVector<double> h_x, HostConstVector<double> h_rhs,
+void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(HostVector<double> h_x,
+                                                                     HostConstVector<double> h_rhs,
                                                                      HostVector<double> h_temp)
 {
-	auto x = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_x);
-	auto rhs = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs);
-	auto temp = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_temp);
+    auto x    = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_x);
+    auto rhs  = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs);
+    auto temp = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_temp);
 
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
@@ -71,7 +72,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(HostVector<
     Kokkos::parallel_for(
         "ExtrapolatedSmootherGive: Init Temp (Radial)",
         Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
-                                                                                  {grid.ntheta(), grid.nr()}),
+                                                                              {grid.ntheta(), grid.nr()}),
         KOKKOS_LAMBDA(const int i_theta, const int i_r) {
             const int index = grid.index(i_r, i_theta);
             temp[index]     = (i_r & 1 || i_theta & 1) ? rhs[index] : x[index];
@@ -91,6 +92,6 @@ void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(HostVector<
     applyAscOrthoWhiteRadialSection(x, rhs, temp);
     solveWhiteRadialSection(x, temp);
 
-	Kokkos::deep_copy(h_x, x);
-	Kokkos::deep_copy(h_temp, temp);
+    Kokkos::deep_copy(h_x, x);
+    Kokkos::deep_copy(h_temp, temp);
 }

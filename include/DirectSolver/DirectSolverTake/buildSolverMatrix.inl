@@ -7,8 +7,8 @@ namespace direct_solver_take
 
 #ifdef GMGPOLAR_USE_MUMPS
 // When using the MUMPS solver, the matrix is assembled in COO format.
-static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCOO<double>& matrix,
-                                                       const int ptr, const int offset, const int row, const int column,
+static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCOO<double>& matrix, const int ptr,
+                                                       const int offset, const int row, const int column,
                                                        const double value)
 {
     matrix.set_row_index(ptr + offset, row);
@@ -17,8 +17,8 @@ static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCOO<dou
 }
 #else
 // When using the in-house solver, the matrix is stored in CSR format.
-static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCSR<double>& matrix,
-                                                       const int ptr, const int offset, const int row, const int column,
+static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCSR<double>& matrix, const int ptr,
+                                                       const int offset, const int row, const int column,
                                                        const double value)
 {
     matrix.set_row_nz_index(row, offset, column);
@@ -28,9 +28,9 @@ static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCSR<dou
 
 template <typename SystemMatrix>
 static KOKKOS_INLINE_FUNCTION void
-nodeBuildSolverMatrixTake(const int i_r, const int i_theta, const PolarGrid<DefaultMemorySpace>& grid, const bool DirBC_Interior,
-                          const SystemMatrix& solver_matrix, ConstVector<double>& arr, ConstVector<double>& att,
-                          ConstVector<double>& art, ConstVector<double>& detDF,
+nodeBuildSolverMatrixTake(const int i_r, const int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
+                          const bool DirBC_Interior, const SystemMatrix& solver_matrix, ConstVector<double>& arr,
+                          ConstVector<double>& att, ConstVector<double>& art, ConstVector<double>& detDF,
                           ConstVector<double>& coeff_beta)
 {
     int ptr, offset;
@@ -479,9 +479,9 @@ typename DirectSolverTake<LevelCacheType>::SystemMatrix DirectSolverTake<LevelCa
     using direct_solver_take::nodeBuildSolverMatrixTake;
     using direct_solver_take::validateSolverMatrixIndexing;
 
-    const PolarGrid<DefaultMemorySpace>& grid             = DirectSolver<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = DirectSolver<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid<DefaultMemorySpace>& grid = DirectSolver<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = DirectSolver<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                 = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
     assert(validateSolverMatrixIndexing(grid, DirBC_Interior) && "Solver matrix indexing is inconsistent");
 

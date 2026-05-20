@@ -6,8 +6,8 @@
 
 using namespace gmgpolar;
 
-inline HostVector<double> generate_random_sample_data(const PolarGrid<Kokkos::HostSpace>& grid, unsigned int seed, double min_val = -100.0,
-                                                      double max_val = 100.0)
+inline HostVector<double> generate_random_sample_data(const PolarGrid<Kokkos::HostSpace>& grid, unsigned int seed,
+                                                      double min_val = -100.0, double max_val = 100.0)
 {
     HostVector<double> x("x", grid.numberOfNodes());
     std::mt19937 gen(seed);

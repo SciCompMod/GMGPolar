@@ -6,8 +6,8 @@ namespace extrapolated_smoother_give
 template <typename LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
 nodeApplyAscOrthoCircleGiveInside(const int i_r, const int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
-                                  const LevelCacheType& level_cache, const bool DirBC_Interior,
-                                  ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result)
+                                  const LevelCacheType& level_cache, const bool DirBC_Interior, ConstVector<double>& x,
+                                  ConstVector<double>& rhs, Vector<double>& result)
 {
     KOKKOS_ASSERT(i_r >= 0 && i_r < grid.numberSmootherCircles());
 
@@ -198,8 +198,8 @@ nodeApplyAscOrthoCircleGiveInside(const int i_r, const int i_theta, const PolarG
 template <typename LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
 nodeApplyAscOrthoCircleGiveOutside(const int i_r, const int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
-                                   const LevelCacheType& level_cache, const bool DirBC_Interior,
-                                   ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result)
+                                   const LevelCacheType& level_cache, const bool DirBC_Interior, ConstVector<double>& x,
+                                   ConstVector<double>& rhs, Vector<double>& result)
 {
     KOKKOS_ASSERT(i_r >= 0 && i_r <= grid.numberSmootherCircles());
 
@@ -365,8 +365,8 @@ nodeApplyAscOrthoCircleGiveOutside(const int i_r, const int i_theta, const Polar
 template <typename LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
 nodeApplyAscOrthoRadialGiveInside(const int i_r, const int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
-                                  const LevelCacheType& level_cache, const bool DirBC_Interior,
-                                  ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result)
+                                  const LevelCacheType& level_cache, const bool DirBC_Interior, ConstVector<double>& x,
+                                  ConstVector<double>& rhs, Vector<double>& result)
 {
     KOKKOS_ASSERT(i_r >= grid.numberSmootherCircles() - 1 && i_r < grid.nr());
 
@@ -703,8 +703,8 @@ nodeApplyAscOrthoRadialGiveInside(const int i_r, const int i_theta, const PolarG
 template <typename LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
 nodeApplyAscOrthoRadialGiveOutside(const int i_r, const int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
-                                   const LevelCacheType& level_cache, const bool DirBC_Interior,
-                                   ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result)
+                                   const LevelCacheType& level_cache, const bool DirBC_Interior, ConstVector<double>& x,
+                                   ConstVector<double>& rhs, Vector<double>& result)
 {
     KOKKOS_ASSERT(i_r >= grid.numberSmootherCircles() && i_r < grid.nr());
 
@@ -853,9 +853,9 @@ void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoBlackCircleSection(C
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid<DefaultMemorySpace>& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid<DefaultMemorySpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                 = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
     /* ----------------------------------------------- */
     /* 1. Black-Circle update (u_bc):                  */
@@ -937,9 +937,9 @@ void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoWhiteCircleSection(C
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid<DefaultMemorySpace>& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid<DefaultMemorySpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                 = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
     /* ----------------------------------------------- */
     /* 2. White-Circle update (u_wc):                  */
@@ -1022,9 +1022,9 @@ void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoBlackRadialSection(C
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid<DefaultMemorySpace>& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid<DefaultMemorySpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                 = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
     /* ----------------------------------------------- */
     /* 3. Black-Radial update (u_br):                  */
@@ -1107,9 +1107,9 @@ void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoWhiteRadialSection(C
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid<DefaultMemorySpace>& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid<DefaultMemorySpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                 = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
     /* ----------------------------------------------- */
     /* 4. White-Radial update (u_wr):                  */

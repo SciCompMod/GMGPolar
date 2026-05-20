@@ -60,7 +60,8 @@ class ExtrapolatedSmootherTake : public ExtrapolatedSmoother<LevelCacheType>
 public:
     // Constructs the coupled circle-radial extrapolated smoother.
     // Builds the A_sc smoother matrices and prepares the solvers.
-    explicit ExtrapolatedSmootherTake(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache, bool DirBC_Interior);
+    explicit ExtrapolatedSmootherTake(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
+                                      bool DirBC_Interior);
 
     // Performs one full coupled extrapolated smoothing sweep:
     //   BC -> WC -> BR -> WR
@@ -122,14 +123,10 @@ public:
 
     // Compute temp = f_sc − A_sc^ortho * u_sc^ortho   (precomputed right-hand side)
     // where x = u_sc and rhs = f_sc
-    void applyAscOrthoBlackCircleSection(ConstVector<double> x, ConstVector<double> rhs,
-                                         Vector<double> temp);
-    void applyAscOrthoWhiteCircleSection(ConstVector<double> x, ConstVector<double> rhs,
-                                         Vector<double> temp);
-    void applyAscOrthoBlackRadialSection(ConstVector<double> x, ConstVector<double> rhs,
-                                         Vector<double> temp);
-    void applyAscOrthoWhiteRadialSection(ConstVector<double> x, ConstVector<double> rhs,
-                                         Vector<double> temp);
+    void applyAscOrthoBlackCircleSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
+    void applyAscOrthoWhiteCircleSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
+    void applyAscOrthoBlackRadialSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
+    void applyAscOrthoWhiteRadialSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
 
     /* ----------------- */
     /* Line-wise solvers */

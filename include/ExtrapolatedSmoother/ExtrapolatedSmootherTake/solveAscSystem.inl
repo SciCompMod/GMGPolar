@@ -5,8 +5,8 @@ void ExtrapolatedSmootherTake<LevelCacheType>::solveBlackCircleSection(Vector<do
 {
     const PolarGrid<DefaultMemorySpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
-    int start                         = 0;
-    int end                           = grid.numberCircularSmootherNodes();
+    int start                     = 0;
+    int end                       = grid.numberCircularSmootherNodes();
     Vector<double> circle_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     bool is_inner_circle_black = grid.numberSmootherCircles() % 2 != 0;
@@ -34,7 +34,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::solveBlackCircleSection(Vector<do
     Kokkos::parallel_for(
         "ExtrapolatedSmootherTake: moveUpdatedValues (Black Circular)",
         Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0, 0},
-                                                                                  {num_black_circles, grid.ntheta()}),
+                                                                              {num_black_circles, grid.ntheta()}),
         KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
             const int i_r   = start_black_circles + circle_task * 2;
             const int index = grid.index(i_r, i_theta);
@@ -48,8 +48,8 @@ void ExtrapolatedSmootherTake<LevelCacheType>::solveWhiteCircleSection(Vector<do
 {
     const PolarGrid<DefaultMemorySpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
-    int start                         = 0;
-    int end                           = grid.numberCircularSmootherNodes();
+    int start                     = 0;
+    int end                       = grid.numberCircularSmootherNodes();
     Vector<double> circle_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     bool is_inner_circle_white = grid.numberSmootherCircles() % 2 == 0;
@@ -77,7 +77,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::solveWhiteCircleSection(Vector<do
     Kokkos::parallel_for(
         "ExtrapolatedSmootherTake: moveUpdatedValues (White Circular)",
         Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0, 0},
-                                                                                  {num_white_circles, grid.ntheta()}),
+                                                                              {num_white_circles, grid.ntheta()}),
         KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
             const int i_r   = start_white_circles + circle_task * 2;
             const int index = grid.index(i_r, i_theta);
@@ -91,8 +91,8 @@ void ExtrapolatedSmootherTake<LevelCacheType>::solveBlackRadialSection(Vector<do
 {
     const PolarGrid<DefaultMemorySpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
-    int start                         = grid.numberCircularSmootherNodes();
-    int end                           = grid.numberOfNodes();
+    int start                     = grid.numberCircularSmootherNodes();
+    int end                       = grid.numberOfNodes();
     Vector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     // Diagonal Solve
@@ -107,7 +107,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::solveBlackRadialSection(Vector<do
     Kokkos::parallel_for(
         "ExtrapolatedSmootherTake: moveUpdatedValues (Black Radial)",
         Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
-                                                                                  {num_black_radial_lines, grid.nr()}),
+                                                                              {num_black_radial_lines, grid.nr()}),
         KOKKOS_LAMBDA(const int radial_task, const int i_r) {
             const int i_theta = start_black_radials + radial_task * 2;
             const int index   = grid.index(i_r, i_theta);
@@ -121,8 +121,8 @@ void ExtrapolatedSmootherTake<LevelCacheType>::solveWhiteRadialSection(Vector<do
 {
     const PolarGrid<DefaultMemorySpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
-    int start                         = grid.numberCircularSmootherNodes();
-    int end                           = grid.numberOfNodes();
+    int start                     = grid.numberCircularSmootherNodes();
+    int end                       = grid.numberOfNodes();
     Vector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     // Tridiagonal Solve
@@ -137,7 +137,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::solveWhiteRadialSection(Vector<do
     Kokkos::parallel_for(
         "ExtrapolatedSmootherTake: moveUpdatedValues (White Radial)",
         Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
-                                                                                  {num_white_radial_lines, grid.nr()}),
+                                                                              {num_white_radial_lines, grid.nr()}),
         KOKKOS_LAMBDA(const int radial_task, const int i_r) {
             const int i_theta = start_white_radials + radial_task * 2;
             const int index   = grid.index(i_r, i_theta);

@@ -12,8 +12,8 @@ namespace gmgpolar
 class PolarR6_ZoniShifted_ShafranovGeometry
 {
 public:
-    explicit PolarR6_ZoniShifted_ShafranovGeometry(PolarGrid<Kokkos::HostSpace> const& grid, double Rmax, double elongation_kappa,
-                                                   double shift_delta);
+    explicit PolarR6_ZoniShifted_ShafranovGeometry(PolarGrid<Kokkos::HostSpace> const& grid, double Rmax,
+                                                   double elongation_kappa, double shift_delta);
     KOKKOS_DEFAULTED_FUNCTION
     PolarR6_ZoniShifted_ShafranovGeometry(const PolarR6_ZoniShifted_ShafranovGeometry&) = default;
 

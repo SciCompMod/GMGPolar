@@ -17,8 +17,8 @@ void ResidualTake<LevelCacheType>::computeResidual(HostVector<double> h_result, 
 
     applySystemOperator(h_result, h_x);
 
-	auto rhs = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs);
-	auto result = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_result);
+    auto rhs    = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs);
+    auto result = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_result);
 
     // Subtract A*x from rhs to get the residual.
     const int n = result.size();
@@ -29,5 +29,5 @@ void ResidualTake<LevelCacheType>::computeResidual(HostVector<double> h_result, 
 
     Kokkos::fence();
 
-	Kokkos::deep_copy(h_result, result);
+    Kokkos::deep_copy(h_result, result);
 }

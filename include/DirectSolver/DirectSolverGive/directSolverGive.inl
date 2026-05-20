@@ -1,8 +1,8 @@
 #pragma once
 
 template <class LevelCacheType>
-DirectSolverGive<LevelCacheType>::DirectSolverGive(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
-                                                   bool DirBC_Interior)
+DirectSolverGive<LevelCacheType>::DirectSolverGive(const PolarGrid<DefaultMemorySpace>& grid,
+                                                   const LevelCacheType& level_cache, bool DirBC_Interior)
     : DirectSolver<LevelCacheType>(grid, level_cache, DirBC_Interior)
 #ifdef GMGPOLAR_USE_MUMPS
     , system_solver_(buildSolverMatrix())
@@ -16,7 +16,7 @@ DirectSolverGive<LevelCacheType>::DirectSolverGive(const PolarGrid<DefaultMemory
 template <class LevelCacheType>
 void DirectSolverGive<LevelCacheType>::solveInPlace(HostVector<double> h_solution)
 {
-	auto solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_solution);
+    auto solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_solution);
     // Adjusts the right-hand side vector to account for symmetry corrections.
     // This transforms the system matrixA * solution = rhs into the equivalent system:
     // symmetric_DBc(matrixA) * solution = rhs - applySymmetryShift(rhs).
@@ -26,5 +26,5 @@ void DirectSolverGive<LevelCacheType>::solveInPlace(HostVector<double> h_solutio
     // Solves the adjusted system symmetric(matrixA) * solution = rhs using the MUMPS solver.
     system_solver_.solveInPlace(solution);
 
-	Kokkos::deep_copy(h_solution, solution);
+    Kokkos::deep_copy(h_solution, solution);
 }

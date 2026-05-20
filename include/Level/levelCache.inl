@@ -3,9 +3,10 @@
 namespace level_cache_helpers
 {
 template <concepts::DensityProfileCoefficients DensityProfileCoefficients>
-static void cache_density_profile_coefficients(
-    const PolarGrid<DefaultMemorySpace>& grid, const DensityProfileCoefficients& density_profile_coefficients,
-    const Vector<double>& coeff_alpha, const Vector<double>& coeff_beta, const bool cache_domain_geometry)
+static void cache_density_profile_coefficients(const PolarGrid<DefaultMemorySpace>& grid,
+                                               const DensityProfileCoefficients& density_profile_coefficients,
+                                               const Vector<double>& coeff_alpha, const Vector<double>& coeff_beta,
+                                               const bool cache_domain_geometry)
 {
     Kokkos::parallel_for(
         "Cache density profile coefficients",
@@ -27,10 +28,10 @@ static void cache_density_profile_coefficients(
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 static void cache_domain_geometry(const PolarGrid<DefaultMemorySpace>& grid,
-                                                    const DensityProfileCoefficients& density_profile_coefficients,
-                                                    const DomainGeometry& domain_geometry,
-                                                    const Vector<double>& vec_arr, const Vector<double>& vec_att,
-                                                    const Vector<double>& vec_art, const Vector<double>& vec_detDF)
+                                  const DensityProfileCoefficients& density_profile_coefficients,
+                                  const DomainGeometry& domain_geometry, const Vector<double>& vec_arr,
+                                  const Vector<double>& vec_att, const Vector<double>& vec_art,
+                                  const Vector<double>& vec_detDF)
 {
     // We split the loops into two regions to better respect the
     // access patterns of the smoother and improve cache locality
