@@ -144,7 +144,13 @@ public: // Public due to cuda restrictions
                      const BoundaryConditions& boundary_conditions, const SourceTerm& source_term);
     void discretize_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, HostVector<double> rhs_f);
 
+    /* --------------- */
+    /* Solve Functions */
+    void applyExtrapolation(int current_level, HostVector<double> fine_values, HostConstVector<double> coarse_values);
+
 private:
+    /* --------------- */
+    /* Setup Functions */
     int chooseNumberOfLevels(const PolarGrid& finest_grid);
     bool checkUniformRefinement(const PolarGrid& grid, double tolerance) const;
 
@@ -167,8 +173,6 @@ private:
                                   int iterations);
     void applyExtrapolatedMultigridIterations(Level<DomainGeometry, DensityProfileCoefficients>& level,
                                               MultigridCycleType cycle, int iterations);
-    // Compute the extrapolated values: u_ex = 4/3 u_fine - 1/3 u_coarse
-    void applyExtrapolation(int current_level, HostVector<double> fine_values, HostConstVector<double> coarse_values);
 
     /* ----------------- */
     /* Print information */
@@ -218,4 +222,5 @@ private:
 #include "MultigridMethods/extrapolated_multigrid_V_Cycle.h"
 #include "MultigridMethods/multigrid_F_Cycle.h"
 #include "MultigridMethods/multigrid_W_Cycle.h"
+
 } // namespace gmgpolar
