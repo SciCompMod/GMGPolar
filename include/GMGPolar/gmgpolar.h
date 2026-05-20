@@ -174,9 +174,9 @@ private:
     /* ----------------- */
     /* Print information */
     void printSettings(const PolarGrid& finest_grid, const PolarGrid& coarsest_grid) const;
-    void printIterationHeader(const ExactSolution* exact_solution);
+    void printIterationHeader(const bool is_exact_solution_provided);
     void printIterationInfo(int iteration, double current_residual_norm, double current_relative_residual_norm,
-                            const ExactSolution* exact_solution);
+                            const bool is_exact_solution_provided);
 
     /* ------------------- */
     /* Multigrid Functions */
