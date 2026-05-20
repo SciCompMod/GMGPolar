@@ -607,7 +607,7 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
         Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Host parallel loop
             {0, 0}, // Starting index
             {grid.numberSmootherCircles(), grid.ntheta()}), // Ending index
-        KOKKOS_LAMBDA(const int i_r, const int i_theta) {
+        [&](const int i_r, const int i_theta) {
             const double radius               = grid.radius(i_r);
             const double theta                = grid.theta(i_theta);
             const int index                   = grid.index(i_r, i_theta);
@@ -618,7 +618,7 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
         Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Host parallel loop
             {0, grid.numberSmootherCircles()}, // Starting index
             {grid.ntheta(), grid.nr()}), // Ending index
-        KOKKOS_LAMBDA(const int i_theta, const int i_r) {
+        [&](const int i_theta, const int i_r) {
             const double radius               = grid.radius(i_r);
             const double theta                = grid.theta(i_theta);
             const int index                   = grid.index(i_r, i_theta);
