@@ -608,7 +608,7 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
     Kokkos::parallel_for(
         "compute error on host",
         Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, 0}, {grid.nr(), grid.ntheta()}),
-        KOKKOS_LAMBDA(const int i_r, const int i_theta) {
+        KOKKOS_CLASS_LAMBDA(const int i_r, const int i_theta) {
             double r     = grid.radius(i_r);
             double theta = grid.theta(i_theta);
             error[grid.index(i_r, i_theta)] =
