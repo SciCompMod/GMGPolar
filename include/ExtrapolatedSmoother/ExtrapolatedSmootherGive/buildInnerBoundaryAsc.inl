@@ -94,7 +94,6 @@ nodeBuildInteriorBoundarySolverMatrix_i_r_0(const int i_theta, const PolarGrid& 
 
         const int center_index = i_theta;
         const int left_index   = i_theta_AcrossOrigin;
-        const int right_index  = i_theta;
         const int bottom_index = i_theta_M1;
         const int top_index    = i_theta_P1;
 
@@ -103,7 +102,6 @@ nodeBuildInteriorBoundarySolverMatrix_i_r_0(const int i_theta, const PolarGrid& 
         const int top_nz_index    = getCircleAscIndex(i_r, i_theta_P1, grid, DirBC_Interior);
         const int left_nz_index   = getCircleAscIndex(i_r, i_theta_AcrossOrigin, grid, DirBC_Interior);
 
-        int nz_index;
         const Stencil& CenterStencil = getStencil(i_r, i_theta, grid, DirBC_Interior);
 
         if (i_theta & 1) {
@@ -219,14 +217,10 @@ nodeBuildInteriorBoundarySolverMatrix_i_r_1(const int i_theta, const PolarGrid& 
     level_cache.obtainValues(i_r, i_theta, center, radius, theta, coeff_beta, arr, att, art, detDF);
 
     const double h1 = grid.radialSpacing(i_r - 1);
-    const double h2 = grid.radialSpacing(i_r);
     const double k1 = grid.angularSpacing(i_theta - 1);
     const double k2 = grid.angularSpacing(i_theta);
 
     const double coeff1 = 0.5 * (k1 + k2) / h1;
-
-    const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-    const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
 
     const int left_index = i_theta;
 

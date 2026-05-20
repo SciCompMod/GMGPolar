@@ -29,12 +29,14 @@ static KOKKOS_INLINE_FUNCTION int getStencilSize(int global_index, const PolarGr
     else if (i_r == grid.nr() - 2) {
         return size_stencil_next_outer_boundary;
     }
+    Kokkos::abort("Invalid stencil index");
+    return -1;
 }
 
 static KOKKOS_INLINE_FUNCTION const Stencil& getStencil(const int i_r, const PolarGrid& grid, const bool DirBC_Interior)
 {
-    assert(0 <= i_r && i_r < grid.nr());
-    assert(grid.nr() >= 4);
+    KOKKOS_ASSERT(0 <= i_r && i_r < grid.nr());
+    KOKKOS_ASSERT(grid.nr() >= 4);
 
     // clang-format off
     static constexpr Stencil stencil_interior_      = {
@@ -76,7 +78,8 @@ static KOKKOS_INLINE_FUNCTION const Stencil& getStencil(const int i_r, const Pol
     else if (i_r == 1 && DirBC_Interior) {
         return stencil_next_inner_DB_;
     }
-    else if (i_r == grid.nr() - 2) {
+    else {
+        //if (i_r == grid.nr() - 2)
         return stencil_next_outer_DB_;
     }
 }
@@ -175,6 +178,8 @@ static KOKKOS_INLINE_FUNCTION int getSolverMatrixIndex(const int i_r, const int 
                size_stencil_next_outer_boundary * prior_next_outer_boundary_nodes +
                size_stencil_outer_boundary * prior_outer_boundary_nodes;
     }
+    Kokkos::abort("Invalid stencil index");
+    return -1;
 }
 
 static KOKKOS_INLINE_FUNCTION bool validateSolverMatrixIndexing(const PolarGrid& grid, const bool DirBC_Interior)
