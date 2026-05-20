@@ -128,6 +128,7 @@ private:
     double mean_residual_reduction_factor_;
     bool converged(double current_residual_norm, double first_residual_norm);
 
+public: // Public due to cuda restrictions
     /* ---------------------------------------------------- */
     /* Compute exact error if an exact solution is provided */
     // The results are stored as a pair: (weighted L2 error, infinity error).
@@ -138,15 +139,13 @@ private:
 
     /* --------------- */
     /* Setup Functions */
-    int chooseNumberOfLevels(const PolarGrid& finest_grid);
-    // Public due to cuda restrictions
-public:
     template <concepts::BoundaryConditions BoundaryConditions, concepts::SourceTerm SourceTerm>
     void build_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, HostVector<double> rhs_f,
                      const BoundaryConditions& boundary_conditions, const SourceTerm& source_term);
     void discretize_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, HostVector<double> rhs_f);
 
 private:
+    int chooseNumberOfLevels(const PolarGrid& finest_grid);
     bool checkUniformRefinement(const PolarGrid& grid, double tolerance) const;
 
     /* --------------- */
