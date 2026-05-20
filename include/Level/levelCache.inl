@@ -5,8 +5,8 @@ namespace level_cache_helpers
 template <concepts::DensityProfileCoefficients DensityProfileCoefficients>
 static void cache_density_profile_coefficients(const PolarGrid& grid,
                                                const DensityProfileCoefficients& density_profile_coefficients,
-                                               const HostVector<double>& coeff_alpha, const HostVector<double>& coeff_beta,
-                                               const bool cache_domain_geometry)
+                                               const HostVector<double>& coeff_alpha,
+                                               const HostVector<double>& coeff_beta, const bool cache_domain_geometry)
 {
     Kokkos::parallel_for(
         "Cache density profile coefficients",
@@ -27,8 +27,7 @@ static void cache_density_profile_coefficients(const PolarGrid& grid,
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-static void cache_domain_geometry(const PolarGrid& grid,
-                                  const DensityProfileCoefficients& density_profile_coefficients,
+static void cache_domain_geometry(const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients,
                                   const DomainGeometry& domain_geometry, const HostVector<double>& vec_arr,
                                   const HostVector<double>& vec_att, const HostVector<double>& vec_art,
                                   const HostVector<double>& vec_detDF)
