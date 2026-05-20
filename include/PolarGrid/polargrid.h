@@ -164,7 +164,7 @@ private:
 
 template class PolarGrid<Kokkos::HostSpace>;
 
-#if KOKKOS_ENABLE_CUDA
+#ifdef KOKKOS_ENABLE_CUDA
 template class PolarGrid<DefaultMemorySpace>;
 #endif
 
