@@ -134,7 +134,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
         if (!PCG_) {
             // Solve A*x = b directly using multigrid cycles (V/W/F-cycle)
             // until convergence or max_iterations_ is reached.
-            solveMultigrid(initial_residual_norm, current_residual_norm, current_relative_residual_norm, exact_sol);
+            solveMultigrid(initial_residual_norm, current_residual_norm, current_relative_residual_norm);
         }
         else {
             // Solve A*x = b using Preconditioned Conjugate Gradient (PCG),
@@ -142,7 +142,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
             // cycle approximates the action of A^{-1} at each PCG iteration).
             auto start_conjugate_gradient = std::chrono::high_resolution_clock::now();
 
-            solvePCG(initial_residual_norm, current_residual_norm, current_relative_residual_norm, exact_sol);
+            solvePCG(initial_residual_norm, current_residual_norm, current_relative_residual_norm);
 
             auto end_conjugate_gradient = std::chrono::high_resolution_clock::now();
             t_conjugate_gradient_ +=
@@ -228,8 +228,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::fullMultigridApproxim
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solveMultigrid(double& initial_residual_norm,
                                                                           double& current_residual_norm,
-                                                                          double& current_relative_residual_norm,
-                                                                          HostConstVector<double> exact_solution)
+                                                                          double& current_relative_residual_norm)
 {
     Level<DomainGeometry, DensityProfileCoefficients>& level = levels_[0];
 
@@ -304,8 +303,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solveMultigrid(double
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& initial_residual_norm,
                                                                     double& current_residual_norm,
-                                                                    double& current_relative_residual_norm,
-                                                                    HostConstVector<double> exact_solution)
+                                                                    double& current_relative_residual_norm)
 {
     Level<DomainGeometry, DensityProfileCoefficients>& level = levels_[0];
 

@@ -164,9 +164,8 @@ private:
     /* Solve Functions */
     void fullMultigridApproximation(MultigridCycleType FMG_cycle, int FMG_iterations);
     void solveMultigrid(double& initial_residual_norm, double& current_residual_norm,
-                        double& current_relative_residual_norm, HostConstVector<double> exact_solution);
-    void solvePCG(double& initial_residual_norm, double& current_residual_norm, double& current_relative_residual_norm,
-                  HostConstVector<double> exact_solution);
+                        double& current_relative_residual_norm);
+    void solvePCG(double& initial_residual_norm, double& current_residual_norm, double& current_relative_residual_norm);
     double residualNorm(const ResidualNormType& norm_type,
                         const Level<DomainGeometry, DensityProfileCoefficients>& level,
                         HostConstVector<double> residual) const;
