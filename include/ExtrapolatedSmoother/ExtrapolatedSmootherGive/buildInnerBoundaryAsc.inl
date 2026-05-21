@@ -1,6 +1,6 @@
-#include "../../../include/ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h"
+#include <ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h>
 
-#include "../../../include/Definitions/geometry_helper.h"
+#include <Definitions/geometry_helper.h>
 
 #include "smootherStencil.inl"
 

@@ -1,4 +1,4 @@
-#include "../../../include/LinearAlgebra/Solvers/coo_mumps_solver.h"
+#include <LinearAlgebra/Solvers/coo_mumps_solver.h>
 
 #ifdef GMGPOLAR_USE_MUMPS
 

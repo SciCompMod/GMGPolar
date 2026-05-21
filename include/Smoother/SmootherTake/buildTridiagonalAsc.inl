@@ -1,4 +1,4 @@
-#include "../../../include/Smoother/SmootherTake/smootherTake.h"
+#include <Smoother/SmootherTake/smootherTake.h>
 
 namespace smoother_take
 {

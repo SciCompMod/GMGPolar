@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "../../../include/LinearAlgebra/Vector/vector.h"
-#include "../../../include/LinearAlgebra/Vector/vector_operations.h"
+#include <LinearAlgebra/Vector/vector.h>
+#include <LinearAlgebra/Vector/vector_operations.h>
 using namespace gmgpolar;
 
 /* bool equals(HostConstVector<T>& lhs, HostConstVector<T>& rhs); */
