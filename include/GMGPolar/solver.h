@@ -100,7 +100,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
         // fill exact solution on host to avoid repeat same computation
         const PolarGrid& grid = level.grid();
 
-        Kokkos::parallel_for("fill exact sol outter loop on r",
+        Kokkos::parallel_for("fill exact sol outer loop on r",
                              Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
                                  {0, 0}, {grid.numberSmootherCircles(), grid.ntheta()}),
                              [&](const int i_r, const int i_theta) {
@@ -109,7 +109,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
                                  const int grid_idx  = grid.index(i_r, i_theta);
                                  exact_sol(grid_idx) = exact_solution_->exact_solution(r, theta);
                              });
-        Kokkos::parallel_for("fill exact sol outter loop on theta",
+        Kokkos::parallel_for("fill exact sol outer loop on theta",
                              Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
                                  {0, grid.numberSmootherCircles()}, {grid.ntheta(), grid.nr()}),
                              [&](const int i_theta, const int i_r) {
