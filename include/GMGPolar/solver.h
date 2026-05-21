@@ -593,7 +593,7 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
     HostVector<double> error)
 {
     // Transfer the exact solution values from host to device memory for error computation.
-    Kokkos::deep_copy(error, analytical_solution_host);
+    Kokkos::deep_copy(error, analytical_solution_host_);
 
     // Compute the error as the difference between the exact and numerical solutions.
     subtract(error, discrete_solution);
@@ -608,7 +608,7 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::computeAnalyticalSolutionOnHost(
-    const PolarGrid& grid, HostConstVector<double> analytical_solution_host, const ExactSolution& exact_solution)
+    const PolarGrid& grid, HostVector<double> analytical_solution_host, const ExactSolution& exact_solution)
 {
     assert(std::ssize(analytical_solution_host) == grid.numberOfNodes());
 

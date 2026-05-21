@@ -140,7 +140,7 @@ public: // Public due to cuda restrictions
     std::pair<double, double> evaluateExactError(const PolarGrid& grid, HostConstVector<double> discrete_solution,
                                                  HostConstVector<double> analytical_solution_host,
                                                  HostVector<double> error);
-    void computeAnalyticalSolutionOnHost(const PolarGrid& grid, HostConstVector<double> analytical_solution_host,
+    void computeAnalyticalSolutionOnHost(const PolarGrid& grid, HostVector<double> analytical_solution_host,
                                          const ExactSolution& exact_solution);
 
     /* --------------- */
