@@ -32,9 +32,8 @@ static KOKKOS_INLINE_FUNCTION void nodeBuildTridiagonalSolverMatricesCircleSecti
     KOKKOS_ASSERT(numberSmootherCircles >= 3);
     KOKKOS_ASSERT(lengthRadialSmoother >= 3);
 
-    int ptr, offset;
-    int row, column, col;
-    double value, val;
+    int row, column;
+    double value;
 
     /* ------------------------------------------ */
     /* Node in the interior of the Circle Section */
@@ -182,9 +181,8 @@ static KOKKOS_INLINE_FUNCTION void nodeBuildTridiagonalSolverMatricesRadialSecti
     KOKKOS_ASSERT(numberSmootherCircles >= 3);
     KOKKOS_ASSERT(lengthRadialSmoother >= 3);
 
-    int ptr, offset;
-    int row, column, col;
-    double value, val;
+    int row, column;
+    double value;
 
     /* ------------------------------------------ */
     /* Node in the interior of the Radial Section */

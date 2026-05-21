@@ -10,11 +10,13 @@
 #include "../../include/PolarGrid/polargrid.h"
 #include "../../include/GMGPolar/test_cases.h"
 #include "../../include/GMGPolar/igmgpolar.h"
-#include "../../include/GMGPolar/gmgpolar.h"
 #include "test_selection.h"
 
 namespace gmgpolar
 {
+
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+class GMGPolar;
 
 class ConfigParser
 {

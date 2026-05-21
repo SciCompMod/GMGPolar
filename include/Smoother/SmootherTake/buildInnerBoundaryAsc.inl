@@ -150,7 +150,6 @@ SmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 
-    const int i_r    = 0;
     const int ntheta = grid.ntheta();
 
     // The interior boundary matrix is symmetric due to the periodicity in the theta direction
@@ -160,6 +159,7 @@ SmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     // the COO_Mumps_Solver optimizes the factorization by only using the upper triangular part of the matrix,
     // which is extracted by the COO_Mumps_Solver internally.
 #ifdef GMGPOLAR_USE_MUMPS
+    const int i_r = 0;
     const int nnz = getNonZeroCountCircleAsc(i_r, grid, DirBC_Interior);
     SparseMatrixCOO<double, Kokkos::HostSpace> inner_boundary_solver_matrix(ntheta, ntheta, nnz);
     inner_boundary_solver_matrix.is_symmetric(true);
