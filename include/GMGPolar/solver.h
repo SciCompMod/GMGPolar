@@ -95,21 +95,23 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
     /* ---------------------------------------------- */
     LIKWID_STOP("Solver");
     auto start_check_exact_error = std::chrono::high_resolution_clock::now();
-    // fill exact solution on host to avoid repeat same computation
     HostVector<double> exact_sol("exact_sol", level.solution().size());
-    const PolarGrid& grid = level.grid();
-    Kokkos::parallel_for(
-        "fill exact sol on host",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, 0}, {grid.nr(), grid.ntheta()}),
-        [&](const int i_r, const int i_theta) {
-            double r                            = grid.radius(i_r);
-            double theta                        = grid.theta(i_theta);
-            exact_sol(grid.index(i_r, i_theta)) = exact_solution_->exact_solution(r, theta);
-        });
+    if (exact_solution_ != nullptr) {
+        // fill exact solution on host to avoid repeat same computation
+        const PolarGrid& grid = level.grid();
 
-    if (exact_solution_ != nullptr)
+        Kokkos::parallel_for("fill exact sol on host",
+                             Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>({0, exact_sol.size()}),
+                             [&](const int grid_idx) {
+                                 int i_r, i_theta;
+                                 grid.multiIndex(grid_idx, i_r, i_theta);
+                                 double r            = grid.radius(i_r);
+                                 double theta        = grid.theta(i_theta);
+                                 exact_sol(grid_idx) = exact_solution_->exact_solution(r, theta);
+                             });
+
         evaluateExactError(level, exact_sol);
-
+    }
     auto end_check_exact_error = std::chrono::high_resolution_clock::now();
     t_check_exact_error_ += std::chrono::duration<double>(end_check_exact_error - start_check_exact_error).count();
     LIKWID_START("Solver");
@@ -604,15 +606,11 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
     assert(solution.size() == error.size());
     assert(std::ssize(solution) == grid.numberOfNodes());
 
-    Kokkos::parallel_for(
-        "compute error on host",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, 0}, {grid.nr(), grid.ntheta()}),
-        [&](const int i_r, const int i_theta) {
-            double r     = grid.radius(i_r);
-            double theta = grid.theta(i_theta);
-            error[grid.index(i_r, i_theta)] =
-                exact_solution(grid.index(i_r, i_theta)) - solution[grid.index(i_r, i_theta)];
-        });
+    Kokkos::parallel_for("compute error on host",
+                         Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>({0, exact_solution.size()}),
+                         [&](const int grid_idx) {
+                             error[grid_idx] = exact_solution(grid_idx) - solution[grid_idx];
+                         });
 
     HostConstVector<double> c_error = error;
     double weighted_euclidean_error = l2_norm(c_error) / std::sqrt(grid.numberOfNodes());
