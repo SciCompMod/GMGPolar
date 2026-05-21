@@ -101,12 +101,12 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
         const PolarGrid& grid = level.grid();
 
         Kokkos::parallel_for("fill exact sol on host",
-                             Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>({0, exact_sol.size()}),
-                             [&](const int grid_idx) {
-                                 int i_r, i_theta;
-                                 grid.multiIndex(grid_idx, i_r, i_theta);
+                             Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
+                                 {0, 0}, {grid.nr(), grid.ntheta()}),
+                             [&](const int i_r, const int i_theta) {
                                  double r            = grid.radius(i_r);
                                  double theta        = grid.theta(i_theta);
+                                 const int grid_idx  = grid.index(i_r, i_theta);
                                  exact_sol(grid_idx) = exact_solution_->exact_solution(r, theta);
                              });
 
