@@ -103,7 +103,7 @@ private:
 
     /* ------------------------------------------------------------------------- */
     /* Chooses if full grid smoothing is active on level 0 for extrapolation > 0 */
-    bool full_grid_smoothing_ = false;
+    bool full_grid_smoothing_;
 
     /* -------------------------------------------------- */
     /* Vectors for PCG (Preconditioned Conjugate Gradient)
@@ -121,6 +121,11 @@ private:
     HostAllocatableVector<double> pcg_solution_; // x (solution)
     HostAllocatableVector<double> pcg_search_direction_; // p (search direction)
 
+    /* ---------------------------------------------------------------------------------------------- */
+    /* Store analytical solution values on host to avoid repeated computation during error evaluation */
+    HostAllocatableVector<double> analytical_solution_host_;
+    std::vector<std::pair<double, double>> exact_errors_;
+
     /* -------------------- */
     /* Convergence criteria */
     int number_of_iterations_;
@@ -128,25 +133,31 @@ private:
     double mean_residual_reduction_factor_;
     bool converged(double current_residual_norm, double first_residual_norm);
 
+public: // Public due to cuda restrictions
     /* ---------------------------------------------------- */
     /* Compute exact error if an exact solution is provided */
     // The results are stored as a pair: (weighted L2 error, infinity error).
-    std::vector<std::pair<double, double>> exact_errors_;
-    std::pair<double, double> computeExactError(Level<DomainGeometry, DensityProfileCoefficients>& level,
-                                                HostConstVector<double> solution, HostVector<double> error,
-                                                HostConstVector<double> exact_solution);
+    std::pair<double, double> evaluateExactError(const PolarGrid& grid, ConstHostVector<double> discrete_solution,
+                                                 HostConstVector<double> analytical_solution_host,
+                                                 HostVector<double> error);
+    void computeAnalyticalSolutionOnHost(const PolarGrid& grid, HostConstVector<double> analytical_solution_host,
+                                         const ExactSolution& exact_solution);
 
     /* --------------- */
     /* Setup Functions */
-    int chooseNumberOfLevels(const PolarGrid& finest_grid);
-    // Public due to cuda restrictions
-public:
     template <concepts::BoundaryConditions BoundaryConditions, concepts::SourceTerm SourceTerm>
     void build_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, HostVector<double> rhs_f,
                      const BoundaryConditions& boundary_conditions, const SourceTerm& source_term);
     void discretize_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, HostVector<double> rhs_f);
 
+    /* --------------- */
+    /* Solve Functions */
+    void applyExtrapolation(int current_level, HostVector<double> fine_values, HostConstVector<double> coarse_values);
+
 private:
+    /* --------------- */
+    /* Setup Functions */
+    int chooseNumberOfLevels(const PolarGrid& finest_grid);
     bool checkUniformRefinement(const PolarGrid& grid, double tolerance) const;
 
     /* --------------- */
@@ -169,15 +180,13 @@ private:
                                   int iterations);
     void applyExtrapolatedMultigridIterations(Level<DomainGeometry, DensityProfileCoefficients>& level,
                                               MultigridCycleType cycle, int iterations);
-    // Compute the extrapolated values: u_ex = 4/3 u_fine - 1/3 u_coarse
-    void applyExtrapolation(int current_level, HostVector<double> fine_values, HostConstVector<double> coarse_values);
 
     /* ----------------- */
     /* Print information */
     void printSettings(const PolarGrid& finest_grid, const PolarGrid& coarsest_grid) const;
-    void printIterationHeader(const ExactSolution* exact_solution);
+    void printIterationHeader(bool is_exact_solution_provided);
     void printIterationInfo(int iteration, double current_residual_norm, double current_relative_residual_norm,
-                            const ExactSolution* exact_solution);
+                            bool is_exact_solution_provided);
 
     /* ------------------- */
     /* Multigrid Functions */
