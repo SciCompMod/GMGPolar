@@ -95,8 +95,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
     /* ---------------------------------------------- */
     LIKWID_STOP("Solver");
     auto start_check_exact_error = std::chrono::high_resolution_clock::now();
-    HostVector<double> exact_sol("exact_sol", level.solution().size());
+    HostAllocatableVector<double> exact_sol;
     if (exact_solution_) {
+        exact_sol = HostVector<double>("exact_sol", level.solution().size());
         // fill exact solution on host to avoid repeat same computation
         const PolarGrid& grid = level.grid();
 
