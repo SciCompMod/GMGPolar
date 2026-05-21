@@ -96,7 +96,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
     LIKWID_STOP("Solver");
     auto start_check_exact_error = std::chrono::high_resolution_clock::now();
     HostVector<double> exact_sol("exact_sol", level.solution().size());
-    if (exact_solution_ != nullptr) {
+    if (exact_solution_) {
         // fill exact solution on host to avoid repeat same computation
         const PolarGrid& grid = level.grid();
 
@@ -182,7 +182,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
 
     if (paraview_) {
         writeToVTK("output_solution", level, level.solution());
-        if (exact_solution_ != nullptr) {
+        if (exact_solution_) {
             computeExactError(level, level.solution(), level.residual(), exact_sol);
             writeToVTK("output_error", level, level.residual());
         }
@@ -258,7 +258,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solveMultigrid(double
         LIKWID_STOP("Solver");
         auto start_check_exact_error = std::chrono::high_resolution_clock::now();
 
-        if (exact_solution_ != nullptr)
+        if (exact_solution_)
             evaluateExactError(level, exact_solution);
 
         auto end_check_exact_error = std::chrono::high_resolution_clock::now();
@@ -369,7 +369,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
         LIKWID_STOP("Solver");
         auto start_check_exact_error = std::chrono::high_resolution_clock::now();
 
-        if (exact_solution_ != nullptr)
+        if (exact_solution_)
             exact_errors_.push_back(computeExactError(level, pcg_solution_, level.residual(), exact_solution));
 
         auto end_check_exact_error = std::chrono::high_resolution_clock::now();
