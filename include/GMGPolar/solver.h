@@ -100,10 +100,19 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
         // fill exact solution on host to avoid repeat same computation
         const PolarGrid& grid = level.grid();
 
-        Kokkos::parallel_for("fill exact sol on host",
+        Kokkos::parallel_for("fill exact sol outter loop on r",
                              Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
-                                 {0, 0}, {grid.nr(), grid.ntheta()}),
+                                 {0, 0}, {grid.numberSmootherCircles(), grid.ntheta()}),
                              [&](const int i_r, const int i_theta) {
+                                 double r            = grid.radius(i_r);
+                                 double theta        = grid.theta(i_theta);
+                                 const int grid_idx  = grid.index(i_r, i_theta);
+                                 exact_sol(grid_idx) = exact_solution_->exact_solution(r, theta);
+                             });
+        Kokkos::parallel_for("fill exact sol outter loop on theta",
+                             Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
+                                 {0, grid.numberSmootherCircles()}, {grid.ntheta(), grid.nr()}),
+                             [&](const int i_theta, const int i_r) {
                                  double r            = grid.radius(i_r);
                                  double theta        = grid.theta(i_theta);
                                  const int grid_idx  = grid.index(i_r, i_theta);
@@ -606,11 +615,9 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
     assert(solution.size() == error.size());
     assert(std::ssize(solution) == grid.numberOfNodes());
 
-    Kokkos::parallel_for("compute error on host",
-                         Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>({0, exact_solution.size()}),
-                         [&](const int grid_idx) {
-                             error[grid_idx] = exact_solution(grid_idx) - solution[grid_idx];
-                         });
+    Kokkos::deep_copy(error, solution);
+    // Compute the error as the difference between exact and numerical solution
+    subtract(error, exact_solution);
 
     HostConstVector<double> c_error = error;
     double weighted_euclidean_error = l2_norm(c_error) / std::sqrt(grid.numberOfNodes());
