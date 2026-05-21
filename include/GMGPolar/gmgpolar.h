@@ -134,7 +134,7 @@ private:
     std::vector<std::pair<double, double>> exact_errors_;
     std::pair<double, double> computeExactError(Level<DomainGeometry, DensityProfileCoefficients>& level,
                                                 HostConstVector<double> solution, HostVector<double> error,
-                                                const ExactSolution& exact_solution);
+                                                HostConstVector<double> exact_solution);
 
     /* --------------- */
     /* Setup Functions */
@@ -153,13 +153,14 @@ private:
     /* Solve Functions */
     void fullMultigridApproximation(MultigridCycleType FMG_cycle, int FMG_iterations);
     void solveMultigrid(double& initial_residual_norm, double& current_residual_norm,
-                        double& current_relative_residual_norm);
-    void solvePCG(double& initial_residual_norm, double& current_residual_norm, double& current_relative_residual_norm);
+                        double& current_relative_residual_norm, HostConstVector<double> exact_solution);
+    void solvePCG(double& initial_residual_norm, double& current_residual_norm, double& current_relative_residual_norm,
+                  HostConstVector<double> exact_solution);
     double residualNorm(const ResidualNormType& norm_type,
                         const Level<DomainGeometry, DensityProfileCoefficients>& level,
                         HostConstVector<double> residual) const;
     void evaluateExactError(Level<DomainGeometry, DensityProfileCoefficients>& level,
-                            const ExactSolution& exact_solution);
+                            HostConstVector<double> exact_solution);
     void updateResidualNorms(Level<DomainGeometry, DensityProfileCoefficients>& level, int iteration,
                              double& initial_residual_norm, double& current_residual_norm,
                              double& current_relative_residual_norm);
