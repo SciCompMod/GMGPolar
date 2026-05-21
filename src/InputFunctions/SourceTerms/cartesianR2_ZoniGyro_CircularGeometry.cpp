@@ -7,7 +7,7 @@ CartesianR2_ZoniGyro_CircularGeometry::CartesianR2_ZoniGyro_CircularGeometry(Pol
 {
 }
 
-double CartesianR2_ZoniGyro_CircularGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
+KOKKOS_FUNCTION double CartesianR2_ZoniGyro_CircularGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
 {
     double r         = grid_.radius(i_r);
     double theta     = grid_.theta(i_theta);

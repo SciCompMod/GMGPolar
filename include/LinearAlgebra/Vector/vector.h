@@ -5,11 +5,18 @@
 namespace gmgpolar
 {
 
+template <typename T, class MemorySpace = Kokkos::DefaultExecutionSpace::memory_space>
+using AllocatableVector = Kokkos::View<T*, Kokkos::LayoutRight, MemorySpace>;
+template <typename T, class MemorySpace = Kokkos::DefaultExecutionSpace::memory_space>
+using Vector = Kokkos::View<T*, Kokkos::LayoutRight, MemorySpace> const;
+template <typename T, class MemorySpace = Kokkos::DefaultExecutionSpace::memory_space>
+using ConstVector = Kokkos::View<const T*, Kokkos::LayoutRight, MemorySpace> const;
+
 template <typename T>
-using AllocatableVector = Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace>;
+using HostAllocatableVector = AllocatableVector<T, Kokkos::HostSpace>;
 template <typename T>
-using Vector = Kokkos::View<T*, Kokkos::LayoutRight, Kokkos::HostSpace> const;
+using HostVector = Vector<T, Kokkos::HostSpace>;
 template <typename T>
-using ConstVector = Kokkos::View<const T*, Kokkos::LayoutRight, Kokkos::HostSpace> const;
+using HostConstVector = ConstVector<T, Kokkos::HostSpace>;
 
 } // namespace gmgpolar

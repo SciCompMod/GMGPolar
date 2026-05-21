@@ -9,19 +9,14 @@ template <class LevelCacheType>
 class ResidualGive : public Residual<LevelCacheType>
 {
 public:
-    explicit ResidualGive(const PolarGrid& grid, const LevelCacheType& level_cache, const bool DirBC_Interior,
-                          const int num_omp_threads);
+    explicit ResidualGive(const PolarGrid& grid, const LevelCacheType& level_cache, const bool DirBC_Interior);
     ~ResidualGive() override = default;
 
-    void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const final;
-
-    void applySystemOperator(Vector<double> result, ConstVector<double> x) const final;
-
-private:
-    void applyCircleSection(const int i_r, Vector<double> result, ConstVector<double> x) const;
-    void applyRadialSection(const int i_theta, Vector<double> result, ConstVector<double> x) const;
+    void applySystemOperator(HostVector<double> result, HostConstVector<double> x) const final;
+    void computeResidual(HostVector<double> result, HostConstVector<double> rhs, HostConstVector<double> x) const final;
 };
 
 #include "residualGive.inl"
 #include "applyAGive.inl"
+
 } // namespace gmgpolar

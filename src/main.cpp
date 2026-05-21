@@ -27,10 +27,6 @@ int main(int argc, char* argv[])
             solver.verbose(parser.verbose()); // Enable/disable verbose output
             solver.paraview(parser.paraview()); // Enable/disable ParaView output
 
-            // --- Parallelization and threading settings --- //
-            solver.maxOpenMPThreads(parser.maxOpenMPThreads()); // Maximum OpenMP threads to use
-            omp_set_num_threads(parser.maxOpenMPThreads()); // Global OpenMP thread limit
-
             // --- Numerical method setup --- //
             solver.DirBC_Interior(
                 parser.DirBC_Interior()); // Interior boundary conditions: Dirichlet, Across-the-origin
@@ -75,8 +71,7 @@ int main(int argc, char* argv[])
             parser.solve(solver);
 
             // --- Retrieve solution and associated grid --- //
-            Vector<double> solution = solver.solution();
-            const PolarGrid& grid   = solver.grid();
+            HostVector<double> solution = solver.solution();
 
             // Print timing statistics for each solver phase
             solver.printTimings();

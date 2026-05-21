@@ -62,7 +62,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     // ------------------------------------- //
     // Initialize the interpolation operator //
     // ------------------------------------- //
-    interpolation_ = std::make_unique<Interpolation>(max_omp_threads_, DirBC_Interior_);
+    interpolation_ = std::make_unique<Interpolation>(DirBC_Interior_);
 
     if (verbose_ > 0)
         printSettings(levels_[0].grid(), levels_[number_of_levels_ - 1].grid());
@@ -73,10 +73,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     if (PCG_) {
         const int grid_size = levels_[0].grid().numberOfNodes();
         if (std::ssize(pcg_solution_) != grid_size) {
-            pcg_solution_ = Vector<double>("pcg_solution", grid_size);
+            pcg_solution_ = HostVector<double>("pcg_solution", grid_size);
         }
         if (std::ssize(pcg_search_direction_) != grid_size) {
-            pcg_search_direction_ = Vector<double>("pcg_search_direction", grid_size);
+            pcg_search_direction_ = HostVector<double>("pcg_search_direction", grid_size);
         }
     }
 
@@ -84,15 +84,14 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     // Define residual operator on all multigrid levels //
     // ------------------------------------------------ //
     for (int level_depth = 0; level_depth < number_of_levels_; level_depth++) {
-        levels_[level_depth].initializeResidual(DirBC_Interior_, max_omp_threads_, stencil_distribution_method_);
+        levels_[level_depth].initializeResidual(DirBC_Interior_, stencil_distribution_method_);
     }
 
     // ----------------------------------------- //
     // Build direct solver on the coarsest level //
     // ----------------------------------------- //
     auto start_setup_directSolver = std::chrono::high_resolution_clock::now();
-    levels_[number_of_levels_ - 1].initializeDirectSolver(DirBC_Interior_, max_omp_threads_,
-                                                          stencil_distribution_method_);
+    levels_[number_of_levels_ - 1].initializeDirectSolver(DirBC_Interior_, stencil_distribution_method_);
     auto end_setup_directSolver = std::chrono::high_resolution_clock::now();
     t_setup_directSolver_ += std::chrono::duration<double>(end_setup_directSolver - start_setup_directSolver).count();
 
@@ -129,14 +128,14 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     if (number_of_levels_ > 1) {
         // PCG uses non-extrapolated smoothing on level 0, so we need to initialize it if PCG is enabled.
         if (do_full_grid_smoothing || (PCG_ && PCG_MG_iterations_ > 0)) {
-            levels_[0].initializeSmoothing(DirBC_Interior_, max_omp_threads_, stencil_distribution_method_);
+            levels_[0].initializeSmoothing(DirBC_Interior_, stencil_distribution_method_);
         }
         // PCG doesn't use extrapolated smoothing, so we only initialize it if PCG is disabled.
         if (do_extrapolated_smoothing && !PCG_) {
-            levels_[0].initializeExtrapolatedSmoothing(DirBC_Interior_, max_omp_threads_, stencil_distribution_method_);
+            levels_[0].initializeExtrapolatedSmoothing(DirBC_Interior_, stencil_distribution_method_);
         }
         for (int level_depth = 1; level_depth < number_of_levels_ - 1; level_depth++) {
-            levels_[level_depth].initializeSmoothing(DirBC_Interior_, max_omp_threads_, stencil_distribution_method_);
+            levels_[level_depth].initializeSmoothing(DirBC_Interior_, stencil_distribution_method_);
         }
     }
     auto end_setup_smoother = std::chrono::high_resolution_clock::now();
@@ -189,198 +188,198 @@ int GMGPolar<DomainGeometry, DensityProfileCoefficients>::chooseNumberOfLevels(c
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
-    const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f)
+    const Level<DomainGeometry, DensityProfileCoefficients>& level, HostVector<double> rhs_f)
 {
     const PolarGrid& grid = level.grid();
     assert(std::ssize(rhs_f) == grid.numberOfNodes());
 
+    const bool DirBC_Interior = DirBC_Interior_;
+
     if (level.levelCache().cacheDomainGeometry()) {
         /* DomainGeometry is cached */
         const auto& detDF_cache = level.levelCache().detDF();
-#pragma omp parallel
-        {
-// ---------------------------------------------- //
-// Discretize rhs values (circular index section) //
-// ---------------------------------------------- //
-#pragma omp for nowait
-            for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
-                double r = grid.radius(i_r);
-                for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                    double theta = grid.theta(i_theta);
-                    if ((0 < i_r && i_r < grid.nr() - 1) || (i_r == 0 && !DirBC_Interior_)) {
-                        double h1          = (i_r == 0) ? 2.0 * grid.radius(0) : grid.radialSpacing(i_r - 1);
-                        double h2          = grid.radialSpacing(i_r);
-                        double k1          = grid.angularSpacing(i_theta - 1);
-                        double k2          = grid.angularSpacing(i_theta);
-                        const double detDF = detDF_cache[grid.index(i_r, i_theta)];
-                        rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * fabs(detDF);
-                    }
-                    else if (i_r == 0 && DirBC_Interior_) {
-                        rhs_f[grid.index(i_r, i_theta)] *= 1.0;
-                    }
-                    else if (i_r == grid.nr() - 1) {
-                        rhs_f[grid.index(i_r, i_theta)] *= 1.0;
-                    }
-                }
-            }
 
-// -------------------------------------------- //
-// Discretize rhs values (radial index section) //
-// -------------------------------------------- //
-#pragma omp for nowait
-            for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                double theta = grid.theta(i_theta);
-                for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
-                    double r = grid.radius(i_r);
-                    if ((0 < i_r && i_r < grid.nr() - 1) || (i_r == 0 && !DirBC_Interior_)) {
-                        double h1          = (i_r == 0) ? 2.0 * grid.radius(0) : grid.radialSpacing(i_r - 1);
-                        double h2          = grid.radialSpacing(i_r);
-                        double k1          = grid.angularSpacing(i_theta - 1);
-                        double k2          = grid.angularSpacing(i_theta);
-                        const double detDF = detDF_cache[grid.index(i_r, i_theta)];
-                        rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * fabs(detDF);
-                    }
-                    else if (i_r == 0 && DirBC_Interior_) {
-                        rhs_f[grid.index(i_r, i_theta)] *= 1.0;
-                    }
-                    else if (i_r == grid.nr() - 1) {
-                        rhs_f[grid.index(i_r, i_theta)] *= 1.0;
-                    }
+        // ---------------------------------------------- //
+        // Discretize rhs values (circular index section) //
+        // ---------------------------------------------- //
+        Kokkos::parallel_for(
+            "discretize_rhs_f: Circular (cached)",
+            Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
+                {0, 0}, {grid.numberSmootherCircles(), grid.ntheta()}),
+            KOKKOS_LAMBDA(const int i_r, const int i_theta) {
+                if ((0 < i_r && i_r < grid.nr() - 1) || (i_r == 0 && !DirBC_Interior)) {
+                    const double h1    = (i_r == 0) ? 2.0 * grid.radius(0) : grid.radialSpacing(i_r - 1);
+                    const double h2    = grid.radialSpacing(i_r);
+                    const double k1    = grid.angularSpacing(i_theta - 1);
+                    const double k2    = grid.angularSpacing(i_theta);
+                    const double detDF = detDF_cache[grid.index(i_r, i_theta)];
+                    rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * std::fabs(detDF);
                 }
-            }
-        }
+                else if (i_r == 0 && DirBC_Interior) {
+                    rhs_f[grid.index(i_r, i_theta)] *= 1.0;
+                }
+                else if (i_r == grid.nr() - 1) {
+                    rhs_f[grid.index(i_r, i_theta)] *= 1.0;
+                }
+            });
+
+        // -------------------------------------------- //
+        // Discretize rhs values (radial index section) //
+        // -------------------------------------------- //
+        Kokkos::parallel_for(
+            "discretize_rhs_f: Radial (cached)",
+            Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
+                                                                                      {grid.ntheta(), grid.nr()}),
+            KOKKOS_LAMBDA(const int i_theta, const int i_r) {
+                if ((0 < i_r && i_r < grid.nr() - 1) || (i_r == 0 && !DirBC_Interior)) {
+                    const double h1    = (i_r == 0) ? 2.0 * grid.radius(0) : grid.radialSpacing(i_r - 1);
+                    const double h2    = grid.radialSpacing(i_r);
+                    const double k1    = grid.angularSpacing(i_theta - 1);
+                    const double k2    = grid.angularSpacing(i_theta);
+                    const double detDF = detDF_cache[grid.index(i_r, i_theta)];
+                    rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * std::fabs(detDF);
+                }
+                else if (i_r == 0 && DirBC_Interior) {
+                    rhs_f[grid.index(i_r, i_theta)] *= 1.0;
+                }
+                else if (i_r == grid.nr() - 1) {
+                    rhs_f[grid.index(i_r, i_theta)] *= 1.0;
+                }
+            });
     }
     else {
         /* DomainGeometry is not cached */
+        // Local copy is required to avoid copying the class
+        const DomainGeometry& domain_geometry = domain_geometry_;
 
-#pragma omp parallel
-        {
-// ---------------------------------------------- //
-// Discretize rhs values (circular index section) //
-// ---------------------------------------------- //
-#pragma omp for nowait
-            for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
-                double r = grid.radius(i_r);
-                for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                    double theta = grid.theta(i_theta);
-
-                    if ((0 < i_r && i_r < grid.nr() - 1) || (i_r == 0 && !DirBC_Interior_)) {
-                        double h1 = (i_r == 0) ? 2.0 * grid.radius(0) : grid.radialSpacing(i_r - 1);
-                        double h2 = grid.radialSpacing(i_r);
-                        double k1 = grid.angularSpacing(i_theta - 1);
-                        double k2 = grid.angularSpacing(i_theta);
-                        /* Calculate the elements of the Jacobian matrix for the transformation mapping */
-                        /* The Jacobian matrix is: */
-                        /* [Jrr, Jrt] */
-                        /* [Jtr, Jtt] */
-                        double Jrr = domain_geometry_.dFx_dr(r, theta);
-                        double Jtr = domain_geometry_.dFy_dr(r, theta);
-                        double Jrt = domain_geometry_.dFx_dt(r, theta);
-                        double Jtt = domain_geometry_.dFy_dt(r, theta);
-                        /* Compute the determinant of the Jacobian matrix */
-                        double detDF = Jrr * Jtt - Jrt * Jtr;
-                        rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * fabs(detDF);
-                    }
-                    else if (i_r == 0 && DirBC_Interior_) {
-                        rhs_f[grid.index(i_r, i_theta)] *= 1.0;
-                    }
-                    else if (i_r == grid.nr() - 1) {
-                        rhs_f[grid.index(i_r, i_theta)] *= 1.0;
-                    }
+        // ---------------------------------------------- //
+        // Discretize rhs values (circular index section) //
+        // ---------------------------------------------- //
+        Kokkos::parallel_for(
+            "discretize_rhs_f: Circular (uncached)",
+            Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
+                {0, 0}, {grid.numberSmootherCircles(), grid.ntheta()}),
+            KOKKOS_LAMBDA(const int i_r, const int i_theta) {
+                const double radius = grid.radius(i_r);
+                const double theta  = grid.theta(i_theta);
+                if ((0 < i_r && i_r < grid.nr() - 1) || (i_r == 0 && !DirBC_Interior)) {
+                    const double h1 = (i_r == 0) ? 2.0 * grid.radius(0) : grid.radialSpacing(i_r - 1);
+                    const double h2 = grid.radialSpacing(i_r);
+                    const double k1 = grid.angularSpacing(i_theta - 1);
+                    const double k2 = grid.angularSpacing(i_theta);
+                    /* Calculate the elements of the Jacobian matrix for the transformation mapping */
+                    /* The Jacobian matrix is: */
+                    /* [Jrr, Jrt] */
+                    /* [Jtr, Jtt] */
+                    const double Jrr = domain_geometry.dFx_dr(radius, theta);
+                    const double Jtr = domain_geometry.dFy_dr(radius, theta);
+                    const double Jrt = domain_geometry.dFx_dt(radius, theta);
+                    const double Jtt = domain_geometry.dFy_dt(radius, theta);
+                    /* Compute the determinant of the Jacobian matrix */
+                    const double detDF = Jrr * Jtt - Jrt * Jtr;
+                    rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * std::fabs(detDF);
                 }
-            }
-
-// -------------------------------------------- //
-// Discretize rhs values (radial index section) //
-// -------------------------------------------- //
-#pragma omp for nowait
-            for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                double theta = grid.theta(i_theta);
-
-                for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
-                    double r = grid.radius(i_r);
-                    if ((0 < i_r && i_r < grid.nr() - 1) || (i_r == 0 && !DirBC_Interior_)) {
-                        double h1 = (i_r == 0) ? 2.0 * grid.radius(0) : grid.radialSpacing(i_r - 1);
-                        double h2 = grid.radialSpacing(i_r);
-                        double k1 = grid.angularSpacing(i_theta - 1);
-                        double k2 = grid.angularSpacing(i_theta);
-                        /* Calculate the elements of the Jacobian matrix for the transformation mapping */
-                        /* The Jacobian matrix is: */
-                        /* [Jrr, Jrt] */
-                        /* [Jtr, Jtt] */
-                        double Jrr = domain_geometry_.dFx_dr(r, theta);
-                        double Jtr = domain_geometry_.dFy_dr(r, theta);
-                        double Jrt = domain_geometry_.dFx_dt(r, theta);
-                        double Jtt = domain_geometry_.dFy_dt(r, theta);
-                        /* Compute the determinant of the Jacobian matrix */
-                        double detDF = Jrr * Jtt - Jrt * Jtr;
-                        rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * fabs(detDF);
-                    }
-                    else if (i_r == 0 && DirBC_Interior_) {
-                        rhs_f[grid.index(i_r, i_theta)] *= 1.0;
-                    }
-                    else if (i_r == grid.nr() - 1) {
-                        rhs_f[grid.index(i_r, i_theta)] *= 1.0;
-                    }
+                else if (i_r == 0 && DirBC_Interior) {
+                    rhs_f[grid.index(i_r, i_theta)] *= 1.0;
                 }
-            }
-        }
+                else if (i_r == grid.nr() - 1) {
+                    rhs_f[grid.index(i_r, i_theta)] *= 1.0;
+                }
+            });
+
+        // -------------------------------------------- //
+        // Discretize rhs values (radial index section) //
+        // -------------------------------------------- //
+        Kokkos::parallel_for(
+            "discretize_rhs_f: Radial (uncached)",
+            Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
+                                                                                      {grid.ntheta(), grid.nr()}),
+            KOKKOS_LAMBDA(const int i_theta, const int i_r) {
+                const double radius = grid.radius(i_r);
+                const double theta  = grid.theta(i_theta);
+                if ((0 < i_r && i_r < grid.nr() - 1) || (i_r == 0 && !DirBC_Interior)) {
+                    const double h1 = (i_r == 0) ? 2.0 * grid.radius(0) : grid.radialSpacing(i_r - 1);
+                    const double h2 = grid.radialSpacing(i_r);
+                    const double k1 = grid.angularSpacing(i_theta - 1);
+                    const double k2 = grid.angularSpacing(i_theta);
+                    /* Calculate the elements of the Jacobian matrix for the transformation mapping */
+                    /* The Jacobian matrix is: */
+                    /* [Jrr, Jrt] */
+                    /* [Jtr, Jtt] */
+                    const double Jrr = domain_geometry.dFx_dr(radius, theta);
+                    const double Jtr = domain_geometry.dFy_dr(radius, theta);
+                    const double Jrt = domain_geometry.dFx_dt(radius, theta);
+                    const double Jtt = domain_geometry.dFy_dt(radius, theta);
+                    /* Compute the determinant of the Jacobian matrix */
+                    const double detDF = Jrr * Jtt - Jrt * Jtr;
+                    rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * std::fabs(detDF);
+                }
+                else if (i_r == 0 && DirBC_Interior) {
+                    rhs_f[grid.index(i_r, i_theta)] *= 1.0;
+                }
+                else if (i_r == grid.nr() - 1) {
+                    rhs_f[grid.index(i_r, i_theta)] *= 1.0;
+                }
+            });
     }
+
+    Kokkos::fence();
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 template <concepts::BoundaryConditions BoundaryConditions, concepts::SourceTerm SourceTerm>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::build_rhs_f(
-    const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f,
+    const Level<DomainGeometry, DensityProfileCoefficients>& level, HostVector<double> rhs_f,
     const BoundaryConditions& boundary_conditions, const SourceTerm& source_term)
 {
     const PolarGrid& grid = level.grid();
     assert(std::ssize(rhs_f) == grid.numberOfNodes());
 
-#pragma omp parallel
-    {
-// ----------------------------------------- //
-// Store rhs values (circular index section) //
-// ----------------------------------------- //
-#pragma omp for nowait
-        for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
-            double r = grid.radius(i_r);
-            for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                double theta = grid.theta(i_theta);
+    const bool DirBC_Interior = DirBC_Interior_;
 
-                if ((0 < i_r && i_r < grid.nr() - 1) || (i_r == 0 && !DirBC_Interior_)) {
-                    rhs_f[grid.index(i_r, i_theta)] = source_term(i_r, i_theta);
-                }
-                else if (i_r == 0 && DirBC_Interior_) {
-                    rhs_f[grid.index(i_r, i_theta)] = boundary_conditions.u_D_Interior(r, theta);
-                }
-                else if (i_r == grid.nr() - 1) {
-                    rhs_f[grid.index(i_r, i_theta)] = boundary_conditions.u_D(r, theta);
-                }
+    // ----------------------------------------- //
+    // Store rhs values (circular index section) //
+    // ----------------------------------------- //
+    Kokkos::parallel_for(
+        "build_rhs_f: Circular",
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
+            {0, 0}, {grid.numberSmootherCircles(), grid.ntheta()}),
+        KOKKOS_LAMBDA(const int i_r, const int i_theta) {
+            const double radius = grid.radius(i_r);
+            const double theta  = grid.theta(i_theta);
+            if ((0 < i_r && i_r < grid.nr() - 1) || (i_r == 0 && !DirBC_Interior)) {
+                rhs_f[grid.index(i_r, i_theta)] = source_term(i_r, i_theta);
             }
-        }
-
-// --------------------------------------- //
-// Store rhs values (radial index section) //
-// --------------------------------------- //
-#pragma omp for
-        for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-            double theta = grid.theta(i_theta);
-
-            for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
-                double r = grid.radius(i_r);
-                if ((0 < i_r && i_r < grid.nr() - 1) || (i_r == 0 && !DirBC_Interior_)) {
-                    rhs_f[grid.index(i_r, i_theta)] = source_term(i_r, i_theta);
-                }
-                else if (i_r == 0 && DirBC_Interior_) {
-                    rhs_f[grid.index(i_r, i_theta)] = boundary_conditions.u_D_Interior(r, theta);
-                }
-                else if (i_r == grid.nr() - 1) {
-                    rhs_f[grid.index(i_r, i_theta)] = boundary_conditions.u_D(r, theta);
-                }
+            else if (i_r == 0 && DirBC_Interior) {
+                rhs_f[grid.index(i_r, i_theta)] = boundary_conditions.u_D_Interior(radius, theta);
             }
-        }
-    }
+            else if (i_r == grid.nr() - 1) {
+                rhs_f[grid.index(i_r, i_theta)] = boundary_conditions.u_D(radius, theta);
+            }
+        });
+
+    // --------------------------------------- //
+    // Store rhs values (radial index section) //
+    // --------------------------------------- //
+    Kokkos::parallel_for(
+        "build_rhs_f: Radial",
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
+                                                                                  {grid.ntheta(), grid.nr()}),
+        KOKKOS_LAMBDA(const int i_theta, const int i_r) {
+            const double radius = grid.radius(i_r);
+            const double theta  = grid.theta(i_theta);
+            if ((0 < i_r && i_r < grid.nr() - 1) || (i_r == 0 && !DirBC_Interior)) {
+                rhs_f[grid.index(i_r, i_theta)] = source_term(i_r, i_theta);
+            }
+            else if (i_r == 0 && DirBC_Interior) {
+                rhs_f[grid.index(i_r, i_theta)] = boundary_conditions.u_D_Interior(radius, theta);
+            }
+            else if (i_r == grid.nr() - 1) {
+                rhs_f[grid.index(i_r, i_theta)] = boundary_conditions.u_D(radius, theta);
+            }
+        });
+
+    Kokkos::fence();
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
@@ -413,7 +412,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printSettings(const P
     std::cout << "------ General Settings ------\n";
     std::cout << "------------------------------\n";
 
-    std::cout << "Maximum number of threads: " << max_omp_threads_ << "\n";
+    std::cout << "Maximum number of threads: " << Kokkos::num_threads() << "\n";
 
     if (DirBC_Interior_) {
         std::cout << "Dirichlet (Interior boundary condition)\n";

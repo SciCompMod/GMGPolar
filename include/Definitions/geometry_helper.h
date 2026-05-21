@@ -4,10 +4,12 @@
 #include "../InputFunctions/domainGeometry.h"
 
 #include <cmath>
+#include <Kokkos_Core.hpp>
 
 template <concepts::DomainGeometry DomainGeometry>
-inline void compute_jacobian_elements(const DomainGeometry& domain_geometry, double r, double theta, double coeff_alpha,
-                                      double& arr, double& att, double& art, double& detDF)
+KOKKOS_INLINE_FUNCTION void compute_jacobian_elements(const DomainGeometry& domain_geometry, double r, double theta,
+                                                      double coeff_alpha, double& arr, double& att, double& art,
+                                                      double& detDF)
 {
     /* Calculate the elements of the Jacobian matrix for the transformation mapping */
     /* The Jacobian matrix is: */
@@ -24,9 +26,9 @@ inline void compute_jacobian_elements(const DomainGeometry& domain_geometry, dou
     /* which is represented by: */
     /*  [arr, 0.5*art]  */
     /*  [0.5*atr, att]  */
-    arr = 0.5 * (Jtt * Jtt + Jrt * Jrt) * coeff_alpha / fabs(detDF);
-    att = 0.5 * (Jtr * Jtr + Jrr * Jrr) * coeff_alpha / fabs(detDF);
-    art = (-Jtt * Jtr - Jrt * Jrr) * coeff_alpha / fabs(detDF);
+    arr = 0.5 * (Jtt * Jtt + Jrt * Jrt) * coeff_alpha / std::fabs(detDF);
+    att = 0.5 * (Jtr * Jtr + Jrr * Jrr) * coeff_alpha / std::fabs(detDF);
+    art = (-Jtt * Jtr - Jrt * Jrr) * coeff_alpha / std::fabs(detDF);
     /* Note that the inverse Jacobian matrix DF^{-1} is: */
     /*  1.0 / det(DF) *  */
     /*  [Jtt, -Jrt]      */

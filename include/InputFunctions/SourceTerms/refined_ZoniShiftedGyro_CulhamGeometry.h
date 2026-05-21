@@ -13,11 +13,13 @@ class Refined_ZoniShiftedGyro_CulhamGeometry
 {
 public:
     explicit Refined_ZoniShiftedGyro_CulhamGeometry(PolarGrid const& grid, double Rmax);
+    KOKKOS_DEFAULTED_FUNCTION
+    Refined_ZoniShiftedGyro_CulhamGeometry(const Refined_ZoniShiftedGyro_CulhamGeometry&) = default;
 
-    double operator()(std::size_t i_r, std::size_t i_theta) const;
+    KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;
 
 private:
-    PolarGrid const& grid_;
+    PolarGrid grid_;
     const double Rmax = 1.3;
 };
 } // namespace gmgpolar

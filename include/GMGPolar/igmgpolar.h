@@ -46,13 +46,6 @@ public:
     void paraview(bool paraview);
 
     /* ---------------------------------------------------------------------- */
-    /* Parallelization                                                        */
-    /* ---------------------------------------------------------------------- */
-    // Maximum number of OpenMP threads to use.
-    int maxOpenMPThreads() const;
-    void maxOpenMPThreads(int max_omp_threads);
-
-    /* ---------------------------------------------------------------------- */
     /* Numerical method options                                               */
     /* ---------------------------------------------------------------------- */
     // Treatment of the interior boundary at the origin:
@@ -169,8 +162,6 @@ protected:
     // General solver output and visualization settings
     int verbose_;
     bool paraview_;
-    // Parallelization and threading settings
-    int max_omp_threads_;
     // Numerical method setup
     bool DirBC_Interior_;
     StencilDistributionMethod stencil_distribution_method_;

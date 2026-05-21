@@ -9,7 +9,7 @@ CartesianR6_Boundary_ShafranovGeometry::CartesianR6_Boundary_ShafranovGeometry(d
 {
 }
 
-double CartesianR6_Boundary_ShafranovGeometry::u_D(double r, double theta) const
+KOKKOS_FUNCTION double CartesianR6_Boundary_ShafranovGeometry::u_D(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
@@ -19,7 +19,7 @@ double CartesianR6_Boundary_ShafranovGeometry::u_D(double r, double theta) const
                        2.0 * elongation_kappa * (r / Rmax) * cos_theta + 2.0 * (r / Rmax) * cos_theta));
 }
 
-double CartesianR6_Boundary_ShafranovGeometry::u_D_Interior(double r, double theta) const
+KOKKOS_FUNCTION double CartesianR6_Boundary_ShafranovGeometry::u_D_Interior(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

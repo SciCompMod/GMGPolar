@@ -28,7 +28,6 @@ template <
     int anisotropicFactor_,
     int divideBy2_,
     int verbose_,
-    int maxOpenMPThreads_,
     bool DirBC_Interior_,
     StencilDistributionMethod stencilDistributionMethod_,
     bool cacheDensityProfileCoefficients_,
@@ -70,7 +69,6 @@ class PCGTestCase<
         std::integral_constant<int, anisotropicFactor_>,
         std::integral_constant<int, divideBy2_>,
         std::integral_constant<int, verbose_>,
-        std::integral_constant<int, maxOpenMPThreads_>,
         std::integral_constant<bool, DirBC_Interior_>,
         std::integral_constant<StencilDistributionMethod, stencilDistributionMethod_>,
         std::integral_constant<bool, cacheDensityProfileCoefficients_>,
@@ -112,7 +110,6 @@ public:
     static constexpr int anisotropicFactor                               = anisotropicFactor_;
     static constexpr int divideBy2                                       = divideBy2_;
     static constexpr int verbose                                         = verbose_;
-    static constexpr int maxOpenMPThreads                                = maxOpenMPThreads_;
     static constexpr bool DirBC_Interior                                 = DirBC_Interior_;
     static constexpr StencilDistributionMethod stencilDistributionMethod = stencilDistributionMethod_;
     static constexpr bool cacheDensityProfileCoefficients                = cacheDensityProfileCoefficients_;
@@ -158,7 +155,6 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 2>, // anisotropicFactor
         std::integral_constant<int, 1>, // divideBy2
         std::integral_constant<int, 1>, // verbose
-        std::integral_constant<int, 1>, // maxOpenMPThreads
         std::integral_constant<bool, true>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, false>, // cacheDensityProfileCoefficient
@@ -201,7 +197,6 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 1>, // anisotropicFactor
         std::integral_constant<int, 0>, // divideBy2
         std::integral_constant<int, 0>, // verbose
-        std::integral_constant<int, 8>, // maxOpenMPThreads
         std::integral_constant<bool, false>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, false>, // cacheDensityProfileCoefficient
@@ -244,7 +239,6 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 1>, // anisotropicFactor
         std::integral_constant<int, 0>, // divideBy2
         std::integral_constant<int, 0>, // verbose
-        std::integral_constant<int, 8>, // maxOpenMPThreads
         std::integral_constant<bool, false>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
@@ -287,7 +281,6 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 1>, // anisotropicFactor
         std::integral_constant<int, 0>, // divideBy2
         std::integral_constant<int, 0>, // verbose
-        std::integral_constant<int, 8>, // maxOpenMPThreads
         std::integral_constant<bool, false>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_TAKE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
@@ -328,7 +321,6 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 3>, // anisotropicFactor
         std::integral_constant<int, 0>, // divideBy2
         std::integral_constant<int, 0>, // verbose
-        std::integral_constant<int, 8>, // maxOpenMPThreads
         std::integral_constant<bool, false>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_TAKE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
@@ -369,7 +361,6 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 0>, // anisotropicFactor
         std::integral_constant<int, 0>, // divideBy2
         std::integral_constant<int, 0>, // verbose
-        std::integral_constant<int, 1>, // maxOpenMPThreads
         std::integral_constant<bool, false>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
@@ -410,7 +401,6 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 1>, // anisotropicFactor
         std::integral_constant<int, 0>, // divideBy2
         std::integral_constant<int, 0>, // verbose
-        std::integral_constant<int, 6>, // maxOpenMPThreads
         std::integral_constant<bool, true>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, false>, // cacheDensityProfileCoefficient
@@ -451,7 +441,6 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 1>, // anisotropicFactor
         std::integral_constant<int, 0>, // divideBy2
         std::integral_constant<int, 0>, // verbose
-        std::integral_constant<int, 6>, // maxOpenMPThreads
         std::integral_constant<bool, true>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, false>, // cacheDensityProfileCoefficient
@@ -491,7 +480,6 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 1>, // anisotropicFactor
         std::integral_constant<int, 0>, // divideBy2
         std::integral_constant<int, 0>, // verbose
-        std::integral_constant<int, 12>, // maxOpenMPThreads
         std::integral_constant<bool, true>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
@@ -531,7 +519,6 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 2>, // anisotropicFactor
         std::integral_constant<int, 0>, // divideBy2
         std::integral_constant<int, 0>, // verbose
-        std::integral_constant<int, 12>, // maxOpenMPThreads
         std::integral_constant<bool, false>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_TAKE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
@@ -571,7 +558,6 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 2>, // anisotropicFactor
         std::integral_constant<int, 0>, // divideBy2
         std::integral_constant<int, 0>, // verbose
-        std::integral_constant<int, 1>, // maxOpenMPThreads
         std::integral_constant<bool, false>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
@@ -611,7 +597,6 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 0>, // anisotropicFactor
         std::integral_constant<int, 1>, // divideBy2
         std::integral_constant<int, 0>, // verbose
-        std::integral_constant<int, 1>, // maxOpenMPThreads
         std::integral_constant<bool, false>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
@@ -667,9 +652,6 @@ void run_gmgpolar()
     // --- General solver output and visualization settings --- //
     solver.verbose(TestFixture::verbose);
     solver.paraview(paraview);
-    // --- Parallelization and threading settings --- //
-    solver.maxOpenMPThreads(TestFixture::maxOpenMPThreads);
-    omp_set_num_threads(TestFixture::maxOpenMPThreads);
     // --- Numerical method setup --- //
     solver.DirBC_Interior(TestFixture::DirBC_Interior);
     solver.stencilDistributionMethod(TestFixture::stencilDistributionMethod);
@@ -705,7 +687,7 @@ void run_gmgpolar()
     solver.solve(boundary_conditions, source_term);
 
     // --- Retrieve solution and associated grid --- //
-    Vector<double> solution        = solver.solution();
+    HostVector<double> solution    = solver.solution();
     const PolarGrid& solution_grid = solver.grid();
 
     if (TestFixture::verbose > 0) {
@@ -714,7 +696,6 @@ void run_gmgpolar()
 
     EXPECT_EQ(solver.verbose(), TestFixture::verbose);
     EXPECT_EQ(solver.paraview(), paraview);
-    EXPECT_EQ(solver.maxOpenMPThreads(), TestFixture::maxOpenMPThreads);
     EXPECT_EQ(solver.DirBC_Interior(), TestFixture::DirBC_Interior);
     EXPECT_EQ(solver.stencilDistributionMethod(), TestFixture::stencilDistributionMethod);
     EXPECT_EQ(solver.cacheDensityProfileCoefficients(), TestFixture::cacheDensityProfileCoefficients);

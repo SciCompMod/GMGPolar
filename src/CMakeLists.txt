@@ -21,11 +21,6 @@ set(GMG_POLAR_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/GMGPolar/gmgpolar.cpp
 )
 
-# file(GLOB_RECURSE STENCIL_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Stencil/*.cpp)
-set(STENCIL_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/Stencil/stencil.cpp
-)
-
 # file(GLOB_RECURSE INTERPOLATION_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/Interpolation/*.cpp)
 set(INTERPOLATION_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Interpolation/extrapolated_prolongation.cpp
@@ -42,6 +37,10 @@ set(INTERPOLATION_SOURCES
 set(CONFIG_PARSER_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/ConfigParser/config_parser.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ConfigParser/select_test_case.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ConfigParser/select_solver_circular.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ConfigParser/select_solver_shafranov.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ConfigParser/select_solver_czarny.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ConfigParser/select_solver_culham.cpp
 )
 
 # Create the main library
@@ -49,7 +48,6 @@ add_library(GMGPolarLib STATIC
     ${POLAR_GRID_SOURCES}
     ${LINEAR_ALGEBRA_SOURCES}
     ${GMG_POLAR_SOURCES}
-    ${STENCIL_SOURCES}
     ${INTERPOLATION_SOURCES}
 )
 

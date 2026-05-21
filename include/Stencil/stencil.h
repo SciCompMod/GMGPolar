@@ -35,11 +35,31 @@ namespace gmgpolar
 class Stencil
 {
 public:
-    Stencil(std::initializer_list<int> init);
-    int operator[](StencilPosition type) const;
+    KOKKOS_INLINE_FUNCTION constexpr Stencil(std::initializer_list<int> init)
+        : values_{}
+        , stencil_size_(0)
+    {
+        int i = 0;
+        for (int v : init) {
+            values_[i++] = v;
+            if (v != -1)
+                stencil_size_++;
+        }
+    }
+
+    KOKKOS_INLINE_FUNCTION constexpr int operator[](StencilPosition type) const
+    {
+        return values_[static_cast<int>(type)];
+    }
+
+    KOKKOS_INLINE_FUNCTION constexpr int size() const
+    {
+        return stencil_size_;
+    }
 
 private:
     std::array<int, 9> values_;
     int stencil_size_;
 };
+
 } // namespace gmgpolar

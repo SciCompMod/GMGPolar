@@ -98,13 +98,13 @@ bool LevelCache<DomainGeometry, DensityProfileCoefficients>::cacheDensityProfile
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::coeff_alpha() const
+HostConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::coeff_alpha() const
 {
     return coeff_alpha_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::coeff_beta() const
+HostConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::coeff_beta() const
 {
     return coeff_beta_;
 }
@@ -116,25 +116,25 @@ bool LevelCache<DomainGeometry, DensityProfileCoefficients>::cacheDomainGeometry
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::arr() const
+HostConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::arr() const
 {
     return arr_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::att() const
+HostConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::att() const
 {
     return att_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::art() const
+HostConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::art() const
 {
     return art_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::detDF() const
+HostConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::detDF() const
 {
     return detDF_;
 }

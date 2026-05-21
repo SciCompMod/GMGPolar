@@ -41,49 +41,49 @@ Level<DomainGeometry, DensityProfileCoefficients>::levelCache() const
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-Vector<double> Level<DomainGeometry, DensityProfileCoefficients>::rhs()
+HostVector<double> Level<DomainGeometry, DensityProfileCoefficients>::rhs()
 {
     return rhs_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-ConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::rhs() const
+HostConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::rhs() const
 {
     return rhs_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-Vector<double> Level<DomainGeometry, DensityProfileCoefficients>::solution()
+HostVector<double> Level<DomainGeometry, DensityProfileCoefficients>::solution()
 {
     return solution_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-ConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::solution() const
+HostConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::solution() const
 {
     return solution_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-Vector<double> Level<DomainGeometry, DensityProfileCoefficients>::residual()
+HostVector<double> Level<DomainGeometry, DensityProfileCoefficients>::residual()
 {
     return residual_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-ConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::residual() const
+HostConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::residual() const
 {
     return residual_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-Vector<double> Level<DomainGeometry, DensityProfileCoefficients>::error_correction()
+HostVector<double> Level<DomainGeometry, DensityProfileCoefficients>::error_correction()
 {
     return error_correction_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-ConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::error_correction() const
+HostConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::error_correction() const
 {
     return error_correction_;
 }
@@ -92,31 +92,30 @@ ConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::error_cor
 // Apply Residual //
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void Level<DomainGeometry, DensityProfileCoefficients>::initializeResidual(
-    const bool DirBC_Interior, const int num_omp_threads, const StencilDistributionMethod stencil_distribution_method)
+    const bool DirBC_Interior, const StencilDistributionMethod stencil_distribution_method)
 {
     if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
-        op_residual_ =
-            std::make_unique<ResidualTake<LevelCacheType>>(*grid_, *level_cache_, DirBC_Interior, num_omp_threads);
+        op_residual_ = std::make_unique<ResidualTake<LevelCacheType>>(*grid_, *level_cache_, DirBC_Interior);
     }
     else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
-        op_residual_ =
-            std::make_unique<ResidualGive<LevelCacheType>>(*grid_, *level_cache_, DirBC_Interior, num_omp_threads);
+        op_residual_ = std::make_unique<ResidualGive<LevelCacheType>>(*grid_, *level_cache_, DirBC_Interior);
     }
     if (!op_residual_)
         throw std::runtime_error("Failed to initialize Residual.");
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void Level<DomainGeometry, DensityProfileCoefficients>::computeResidual(Vector<double> result, ConstVector<double> rhs,
-                                                                        ConstVector<double> x) const
+void Level<DomainGeometry, DensityProfileCoefficients>::computeResidual(HostVector<double> result,
+                                                                        HostConstVector<double> rhs,
+                                                                        HostConstVector<double> x) const
 {
     if (!op_residual_)
         throw std::runtime_error("Residual not initialized.");
     op_residual_->computeResidual(result, rhs, x);
 }
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void Level<DomainGeometry, DensityProfileCoefficients>::applySystemOperator(Vector<double> result,
-                                                                            ConstVector<double> x) const
+void Level<DomainGeometry, DensityProfileCoefficients>::applySystemOperator(HostVector<double> result,
+                                                                            HostConstVector<double> x) const
 {
     if (!op_residual_)
         throw std::runtime_error("Residual not initialized.");
@@ -127,33 +126,21 @@ void Level<DomainGeometry, DensityProfileCoefficients>::applySystemOperator(Vect
 // Solve coarse System //
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void Level<DomainGeometry, DensityProfileCoefficients>::initializeDirectSolver(
-    const bool DirBC_Interior, const int num_omp_threads, const StencilDistributionMethod stencil_distribution_method)
+    const bool DirBC_Interior, const StencilDistributionMethod stencil_distribution_method)
 {
-#ifdef GMGPOLAR_USE_MUMPS
     if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
-        op_directSolver_ = std::make_unique<DirectSolver_COO_MUMPS_Take<LevelCacheType>>(
-            *grid_, *level_cache_, DirBC_Interior, num_omp_threads);
+        op_directSolver_ = std::make_unique<DirectSolverTake<LevelCacheType>>(*grid_, *level_cache_, DirBC_Interior);
     }
     else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
-        op_directSolver_ = std::make_unique<DirectSolver_COO_MUMPS_Give<LevelCacheType>>(
-            *grid_, *level_cache_, DirBC_Interior, num_omp_threads);
+        op_directSolver_ = std::make_unique<DirectSolverGive<LevelCacheType>>(*grid_, *level_cache_, DirBC_Interior);
     }
-#else
-    if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
-        op_directSolver_ = std::make_unique<DirectSolver_CSR_LU_Take<LevelCacheType>>(*grid_, *level_cache_,
-                                                                                      DirBC_Interior, num_omp_threads);
-    }
-    else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
-        op_directSolver_ = std::make_unique<DirectSolver_CSR_LU_Give<LevelCacheType>>(*grid_, *level_cache_,
-                                                                                      DirBC_Interior, num_omp_threads);
-    }
-#endif
+
     if (!op_directSolver_)
         throw std::runtime_error("Failed to initialize Direct Solver.");
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void Level<DomainGeometry, DensityProfileCoefficients>::directSolveInPlace(Vector<double> x) const
+void Level<DomainGeometry, DensityProfileCoefficients>::directSolveInPlace(HostVector<double> x) const
 {
     if (!op_directSolver_)
         throw std::runtime_error("Coarse Solver not initialized.");
@@ -164,23 +151,21 @@ void Level<DomainGeometry, DensityProfileCoefficients>::directSolveInPlace(Vecto
 // Apply Smoothing //
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void Level<DomainGeometry, DensityProfileCoefficients>::initializeSmoothing(
-    const bool DirBC_Interior, const int num_omp_threads, const StencilDistributionMethod stencil_distribution_method)
+    const bool DirBC_Interior, const StencilDistributionMethod stencil_distribution_method)
 {
     if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
-        op_smoother_ =
-            std::make_unique<SmootherTake<LevelCacheType>>(*grid_, *level_cache_, DirBC_Interior, num_omp_threads);
+        op_smoother_ = std::make_unique<SmootherTake<LevelCacheType>>(*grid_, *level_cache_, DirBC_Interior);
     }
     else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
-        op_smoother_ =
-            std::make_unique<SmootherGive<LevelCacheType>>(*grid_, *level_cache_, DirBC_Interior, num_omp_threads);
+        op_smoother_ = std::make_unique<SmootherGive<LevelCacheType>>(*grid_, *level_cache_, DirBC_Interior);
     }
     if (!op_smoother_)
         throw std::runtime_error("Failed to initialize Smoother.");
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void Level<DomainGeometry, DensityProfileCoefficients>::smoothing(Vector<double> x, ConstVector<double> rhs,
-                                                                  Vector<double> temp) const
+void Level<DomainGeometry, DensityProfileCoefficients>::smoothing(HostVector<double> x, HostConstVector<double> rhs,
+                                                                  HostVector<double> temp) const
 {
     if (!op_smoother_)
         throw std::runtime_error("Smoother not initialized.");
@@ -191,23 +176,24 @@ void Level<DomainGeometry, DensityProfileCoefficients>::smoothing(Vector<double>
 // Apply Extrapolated Smoothing //
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void Level<DomainGeometry, DensityProfileCoefficients>::initializeExtrapolatedSmoothing(
-    const bool DirBC_Interior, const int num_omp_threads, const StencilDistributionMethod stencil_distribution_method)
+    const bool DirBC_Interior, const StencilDistributionMethod stencil_distribution_method)
 {
     if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
-        op_extrapolated_smoother_ = std::make_unique<ExtrapolatedSmootherTake<LevelCacheType>>(
-            *grid_, *level_cache_, DirBC_Interior, num_omp_threads);
+        op_extrapolated_smoother_ =
+            std::make_unique<ExtrapolatedSmootherTake<LevelCacheType>>(*grid_, *level_cache_, DirBC_Interior);
     }
     else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
-        op_extrapolated_smoother_ = std::make_unique<ExtrapolatedSmootherGive<LevelCacheType>>(
-            *grid_, *level_cache_, DirBC_Interior, num_omp_threads);
+        op_extrapolated_smoother_ =
+            std::make_unique<ExtrapolatedSmootherGive<LevelCacheType>>(*grid_, *level_cache_, DirBC_Interior);
     }
     if (!op_extrapolated_smoother_)
         throw std::runtime_error("Failed to initialize Extrapolated Smoother.");
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void Level<DomainGeometry, DensityProfileCoefficients>::extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs,
-                                                                              Vector<double> temp) const
+void Level<DomainGeometry, DensityProfileCoefficients>::extrapolatedSmoothing(HostVector<double> x,
+                                                                              HostConstVector<double> rhs,
+                                                                              HostVector<double> temp) const
 {
     if (!op_extrapolated_smoother_)
         throw std::runtime_error("Extrapolated Smoother not initialized.");

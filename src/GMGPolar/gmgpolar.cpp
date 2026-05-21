@@ -9,8 +9,6 @@ IGMGPolar::IGMGPolar(const PolarGrid& grid)
     // General solver output and visualization settings
     , verbose_(0)
     , paraview_(false)
-    // Parallelization and threading settings
-    , max_omp_threads_(omp_get_max_threads())
     // Numerical method setup
     , DirBC_Interior_(true)
     , stencil_distribution_method_(StencilDistributionMethod::CPU_GIVE)
@@ -63,18 +61,6 @@ bool IGMGPolar::paraview() const
 void IGMGPolar::paraview(bool paraview)
 {
     paraview_ = paraview;
-}
-
-/* ---------------------------------------------------------------------- */
-/* Parallelization                                                        */
-/* ---------------------------------------------------------------------- */
-int IGMGPolar::maxOpenMPThreads() const
-{
-    return max_omp_threads_;
-}
-void IGMGPolar::maxOpenMPThreads(int max_omp_threads)
-{
-    max_omp_threads_ = max_omp_threads;
 }
 
 /* ---------------------------------------------------------------------- */

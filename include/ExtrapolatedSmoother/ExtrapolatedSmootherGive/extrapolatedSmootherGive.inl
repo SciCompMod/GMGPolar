@@ -3,25 +3,20 @@
 template <class LevelCacheType>
 ExtrapolatedSmootherGive<LevelCacheType>::ExtrapolatedSmootherGive(const PolarGrid& grid,
                                                                    const LevelCacheType& level_cache,
-                                                                   const bool DirBC_Interior, const int num_omp_threads)
-    : ExtrapolatedSmoother<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
+                                                                   const bool DirBC_Interior)
+    : ExtrapolatedSmoother<LevelCacheType>(grid, level_cache, DirBC_Interior)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
     , radial_tridiagonal_solver_(grid.lengthRadialSmoother(), grid.ntheta(), false)
-{
-    buildAscMatrices();
 #ifdef GMGPOLAR_USE_MUMPS
-    initializeMumpsSolver(inner_boundary_mumps_solver_, inner_boundary_circle_matrix_);
+    , inner_boundary_solver_(buildInteriorBoundarySolverMatrix())
 #else
-    inner_boundary_lu_solver_ = SparseLUSolver<double>(inner_boundary_circle_matrix_);
+    , inner_boundary_circle_matrix_(buildInteriorBoundarySolverMatrix())
+    , inner_boundary_solver_(inner_boundary_circle_matrix_)
 #endif
-}
-
-template <class LevelCacheType>
-ExtrapolatedSmootherGive<LevelCacheType>::~ExtrapolatedSmootherGive()
 {
-#ifdef GMGPOLAR_USE_MUMPS
-    finalizeMumpsSolver(inner_boundary_mumps_solver_);
-#endif
+    buildTridiagonalSolverMatrices();
+    circle_tridiagonal_solver_.setup();
+    radial_tridiagonal_solver_.setup();
 }
 
 // The smoothing solves linear systems of the form:
@@ -47,136 +42,48 @@ ExtrapolatedSmootherGive<LevelCacheType>::~ExtrapolatedSmootherGive()
 //   - The system is then solved in-place in temp, and the results
 //     are copied back to x.
 template <class LevelCacheType>
-void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs,
-                                                                     Vector<double> temp)
+void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(HostVector<double> x, HostConstVector<double> rhs,
+                                                                     HostVector<double> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
-    const PolarGrid& grid     = ExtrapolatedSmoother<LevelCacheType>::grid_;
-    const int num_omp_threads = ExtrapolatedSmoother<LevelCacheType>::num_omp_threads_;
+    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
-#pragma omp parallel num_threads(num_omp_threads)
-    {
-#pragma omp for nowait
-        for (int i_r = 0; i_r < grid.numberSmootherCircles(); i_r++) {
-            for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                const int index = grid.index(i_r, i_theta);
-                temp[index]     = (i_r & 1 || i_theta & 1) ? rhs[index] : x[index];
-            }
-        }
-#pragma omp for
-        for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-            for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
-                const int index = grid.index(i_r, i_theta);
-                temp[index]     = (i_r & 1 || i_theta & 1) ? rhs[index] : x[index];
-            }
-        }
-    }
+    /* We split the loops into two regions to better respect the */
+    /* access patterns of the smoother and improve cache locality. */
 
-    /* Multi-threaded execution */
-    const int num_smoother_circles = grid.numberSmootherCircles();
-    const int num_radial_lines     = grid.ntheta();
+    // The For loop matches circular access pattern
+    Kokkos::parallel_for(
+        "ExtrapolatedSmootherGive: Init Temp (Circular)",
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
+            {0, 0}, {grid.numberSmootherCircles(), grid.ntheta()}),
+        KOKKOS_LAMBDA(const int i_r, const int i_theta) {
+            const int index = grid.index(i_r, i_theta);
+            temp[index]     = (i_r & 1 || i_theta & 1) ? rhs[index] : x[index];
+        });
 
-    /* ----------------------------------------------- */
-    /* 1. Black-Circle update (u_bc):                  */
-    /*    A_bc * u_bc = f_bc − A_bc^ortho * u_bc^ortho */
-    /* ----------------------------------------------- */
-#pragma omp parallel num_threads(num_omp_threads)
-    {
-        /* Inside Black Section */
-#pragma omp for
-        for (int circle_task = 0; circle_task < num_smoother_circles; circle_task += 2) {
-            int i_r = num_smoother_circles - circle_task - 1;
-            applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
-        }
-        /* Outside Black Section (Part 1)*/
-#pragma omp for
-        for (int circle_task = -1; circle_task < num_smoother_circles; circle_task += 4) {
-            int i_r = num_smoother_circles - circle_task - 1;
-            applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
-        }
-        /* Outside Black Section (Part 2)*/
-#pragma omp for
-        for (int circle_task = 1; circle_task < num_smoother_circles; circle_task += 4) {
-            int i_r = num_smoother_circles - circle_task - 1;
-            applyAscOrthoCircleSection(i_r, SmootherColor::Black, x, rhs, temp);
-        }
-    }
+    // The For loop matches radial access pattern
+    Kokkos::parallel_for(
+        "ExtrapolatedSmootherGive: Init Temp (Radial)",
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
+                                                                                  {grid.ntheta(), grid.nr()}),
+        KOKKOS_LAMBDA(const int i_theta, const int i_r) {
+            const int index = grid.index(i_r, i_theta);
+            temp[index]     = (i_r & 1 || i_theta & 1) ? rhs[index] : x[index];
+        });
+
+    Kokkos::fence();
+
+    applyAscOrthoBlackCircleSection(x, rhs, temp);
     solveBlackCircleSection(x, temp);
 
-    /* ----------------------------------------------- */
-    /* 2. White-Circle update (u_wc):                  */
-    /*    A_wc * u_wc = f_wc − A_wc^ortho * u_wc^ortho */
-    /* ----------------------------------------------- */
-#pragma omp parallel num_threads(num_omp_threads)
-    {
-        /* Inside White Section */
-#pragma omp for
-        for (int circle_task = 1; circle_task < num_smoother_circles; circle_task += 2) {
-            int i_r = num_smoother_circles - circle_task - 1;
-            applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
-        }
-        /* Outside White Section (Part 1)*/
-#pragma omp for
-        for (int circle_task = 0; circle_task < num_smoother_circles; circle_task += 4) {
-            int i_r = num_smoother_circles - circle_task - 1;
-            applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
-        }
-        /* Outside White Section (Part 2)*/
-#pragma omp for
-        for (int circle_task = 2; circle_task < num_smoother_circles; circle_task += 4) {
-            int i_r = num_smoother_circles - circle_task - 1;
-            applyAscOrthoCircleSection(i_r, SmootherColor::White, x, rhs, temp);
-        }
-    }
+    applyAscOrthoWhiteCircleSection(x, rhs, temp);
     solveWhiteCircleSection(x, temp);
 
-    /* ----------------------------------------------- */
-    /* 3. Black-Radial update (u_br):                  */
-    /*    A_br * u_br = f_br − A_br^ortho * u_br^ortho */
-    /* ----------------------------------------------- */
-#pragma omp parallel num_threads(num_omp_threads)
-    {
-        /* Inside Black Section */
-#pragma omp for
-        for (int i_theta = 0; i_theta < num_radial_lines; i_theta += 2) {
-            applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
-        }
-        /* Outside Black Section (Part 1) */
-#pragma omp for
-        for (int i_theta = 1; i_theta < num_radial_lines; i_theta += 4) {
-            applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
-        }
-        /* Outside Black Section (Part 2) */
-#pragma omp for
-        for (int i_theta = 3; i_theta < num_radial_lines; i_theta += 4) {
-            applyAscOrthoRadialSection(i_theta, SmootherColor::Black, x, rhs, temp);
-        }
-    }
+    applyAscOrthoBlackRadialSection(x, rhs, temp);
     solveBlackRadialSection(x, temp);
 
-    /* ----------------------------------------------- */
-    /* 4. White-Radial update (u_wr):                  */
-    /*    A_wr * u_wr = f_wr − A_wr^ortho * u_wr^ortho */
-    /* ----------------------------------------------- */
-#pragma omp parallel num_threads(num_omp_threads)
-    {
-        /* Inside Black Section */
-#pragma omp for
-        for (int i_theta = 1; i_theta < num_radial_lines; i_theta += 2) {
-            applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
-        }
-        /* Outside Black Section (Part 1) */
-#pragma omp for
-        for (int i_theta = 0; i_theta < num_radial_lines; i_theta += 4) {
-            applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
-        }
-        /* Outside Black Section (Part 2) */
-#pragma omp for
-        for (int i_theta = 2; i_theta < num_radial_lines; i_theta += 4) {
-            applyAscOrthoRadialSection(i_theta, SmootherColor::White, x, rhs, temp);
-        }
-    }
+    applyAscOrthoWhiteRadialSection(x, rhs, temp);
     solveWhiteRadialSection(x, temp);
 }

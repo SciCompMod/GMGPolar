@@ -7,17 +7,17 @@ PoissonCoefficients::PoissonCoefficients(double Rmax, double alpha_jump)
 {
 }
 
-double PoissonCoefficients::alpha(double r, double theta) const
+KOKKOS_FUNCTION double PoissonCoefficients::alpha(double r, double theta) const
 {
     return 1.0;
 }
 
-double PoissonCoefficients::beta(double r, double theta) const
+KOKKOS_FUNCTION double PoissonCoefficients::beta(double r, double theta) const
 {
     return 0.0;
 }
 
-double PoissonCoefficients::getAlphaJump() const
+KOKKOS_FUNCTION double PoissonCoefficients::getAlphaJump() const
 {
     return alpha_jump;
 }

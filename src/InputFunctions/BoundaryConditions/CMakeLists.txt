@@ -20,3 +20,4 @@ add_library(InputFunctions_BoundaryConditions STATIC ${BOUNDARY_CONDITIONS_SOURC
 target_include_directories(InputFunctions_BoundaryConditions PUBLIC
     ${GMGPOLAR_INCLUDE_DIRS}
 )
+target_link_libraries(InputFunctions_BoundaryConditions PUBLIC Kokkos::kokkos)

@@ -19,6 +19,8 @@ class ExtrapolatedSmoother;
 #include <omp.h>
 #include <vector>
 
+#include <Kokkos_Core.hpp>
+
 #include "../PolarGrid/polargrid.h"
 
 #include "../InputFunctions/boundaryConditions.h"
@@ -36,10 +38,8 @@ class ExtrapolatedSmoother;
 #include "../Residual/ResidualGive/residualGive.h"
 #include "../Residual/ResidualTake/residualTake.h"
 
-#include "../DirectSolver/DirectSolver-COO-MUMPS-Give/directSolverGive.h"
-#include "../DirectSolver/DirectSolver-COO-MUMPS-Take/directSolverTake.h"
-#include "../DirectSolver/DirectSolver-CSR-LU-Give/directSolverGiveCustomLU.h"
-#include "../DirectSolver/DirectSolver-CSR-LU-Take/directSolverTakeCustomLU.h"
+#include "../DirectSolver/DirectSolverGive/directSolverGive.h"
+#include "../DirectSolver/DirectSolverTake/directSolverTake.h"
 
 #include "../Smoother/SmootherGive/smootherGive.h"
 #include "../Smoother/SmootherTake/smootherTake.h"
@@ -83,40 +83,37 @@ public:
     const PolarGrid& grid() const;
     const LevelCacheType& levelCache() const;
 
-    Vector<double> rhs();
-    ConstVector<double> rhs() const;
-    Vector<double> solution();
-    ConstVector<double> solution() const;
-    Vector<double> residual();
-    ConstVector<double> residual() const;
-    Vector<double> error_correction();
-    ConstVector<double> error_correction() const;
+    HostVector<double> rhs();
+    HostConstVector<double> rhs() const;
+    HostVector<double> solution();
+    HostConstVector<double> solution() const;
+    HostVector<double> residual();
+    HostConstVector<double> residual() const;
+    HostVector<double> error_correction();
+    HostConstVector<double> error_correction() const;
 
     // -------------- //
     // Apply Residual //
-    void initializeResidual(const bool DirBC_Interior, const int num_omp_threads,
-                            const StencilDistributionMethod stencil_distribution_method);
-    void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const;
-    void applySystemOperator(Vector<double> result, ConstVector<double> x) const;
+    void initializeResidual(const bool DirBC_Interior, const StencilDistributionMethod stencil_distribution_method);
+    void computeResidual(HostVector<double> result, HostConstVector<double> rhs, HostConstVector<double> x) const;
+    void applySystemOperator(HostVector<double> result, HostConstVector<double> x) const;
 
     // ------------------- //
     // Solve coarse System //
-    void initializeDirectSolver(const bool DirBC_Interior, const int num_omp_threads,
-                                const StencilDistributionMethod stencil_distribution_method);
+    void initializeDirectSolver(const bool DirBC_Interior, const StencilDistributionMethod stencil_distribution_method);
     // Note: The rhs (right-hand side) vector gets overwritten by the solution.
-    void directSolveInPlace(Vector<double> x) const;
+    void directSolveInPlace(HostVector<double> x) const;
 
     // --------------- //
     // Apply Smoothing //
-    void initializeSmoothing(const bool DirBC_Interior, const int num_omp_threads,
-                             const StencilDistributionMethod stencil_distribution_method);
-    void smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) const;
+    void initializeSmoothing(const bool DirBC_Interior, const StencilDistributionMethod stencil_distribution_method);
+    void smoothing(HostVector<double> x, HostConstVector<double> rhs, HostVector<double> temp) const;
 
     // ---------------------------- //
     // Apply Extrapolated Smoothing //
-    void initializeExtrapolatedSmoothing(const bool DirBC_Interior, const int num_omp_threads,
+    void initializeExtrapolatedSmoothing(const bool DirBC_Interior,
                                          const StencilDistributionMethod stencil_distribution_method);
-    void extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) const;
+    void extrapolatedSmoothing(HostVector<double> x, HostConstVector<double> rhs, HostVector<double> temp) const;
 
 private:
     const int level_depth_;
@@ -128,10 +125,10 @@ private:
     std::unique_ptr<Smoother<LevelCacheType>> op_smoother_;
     std::unique_ptr<ExtrapolatedSmoother<LevelCacheType>> op_extrapolated_smoother_;
 
-    Vector<double> rhs_;
-    Vector<double> solution_;
-    Vector<double> residual_;
-    Vector<double> error_correction_;
+    HostVector<double> rhs_;
+    HostVector<double> solution_;
+    HostVector<double> residual_;
+    HostVector<double> error_correction_;
 };
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
@@ -146,17 +143,18 @@ public:
     const DensityProfileCoefficients& densityProfileCoefficients() const;
 
     bool cacheDensityProfileCoefficients() const;
-    ConstVector<double> coeff_alpha() const;
-    ConstVector<double> coeff_beta() const;
+    HostConstVector<double> coeff_alpha() const;
+    HostConstVector<double> coeff_beta() const;
 
     bool cacheDomainGeometry() const;
-    ConstVector<double> arr() const;
-    ConstVector<double> att() const;
-    ConstVector<double> art() const;
-    ConstVector<double> detDF() const;
+    HostConstVector<double> arr() const;
+    HostConstVector<double> att() const;
+    HostConstVector<double> art() const;
+    HostConstVector<double> detDF() const;
 
-    inline void obtainValues(const int i_r, const int i_theta, const int global_index, double r, double theta,
-                             double& coeff_beta, double& arr, double& att, double& art, double& detDF) const
+    KOKKOS_INLINE_FUNCTION void obtainValues(const int i_r, const int i_theta, const int global_index, double r,
+                                             double theta, double& coeff_beta, double& arr, double& att, double& art,
+                                             double& detDF) const
     {
         coeff_beta = cache_density_profile_coefficients_ ? coeff_beta_[global_index]
                                                          : density_profile_coefficients_.beta(r, theta);
@@ -180,14 +178,14 @@ private:
     const DensityProfileCoefficients& density_profile_coefficients_;
 
     bool cache_density_profile_coefficients_; // cache alpha(r, theta), beta(r, theta)
-    Vector<double> coeff_alpha_;
-    Vector<double> coeff_beta_;
+    HostVector<double> coeff_alpha_;
+    HostVector<double> coeff_beta_;
 
     bool cache_domain_geometry_; // cache arr, att, art, detDF
-    Vector<double> arr_;
-    Vector<double> att_;
-    Vector<double> art_;
-    Vector<double> detDF_;
+    HostVector<double> arr_;
+    HostVector<double> att_;
+    HostVector<double> art_;
+    HostVector<double> detDF_;
 };
 
 #include "levelCache.inl"

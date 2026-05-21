@@ -6,7 +6,6 @@ ConfigParser::ConfigParser()
     // Initialize command-line options for general parameters
     parser_.add<int>("verbose", '\0', "Verbosity level.", OPTIONAL, 1);
     parser_.add<int>("paraview", '\0', "Generate ParaView output (0/1).", OPTIONAL, 0);
-    parser_.add<int>("maxOpenMPThreads", '\0', "Max OpenMP threads.", OPTIONAL, 1);
     parser_.add<int>("DirBC_Interior", '\0', "Interior BC type (0=Across-origin, 1=Dirichlet).", OPTIONAL, 0,
                      cmdline::oneof(0, 1));
     parser_.add<int>("stencilDistributionMethod", '\0', "Stencil distribution (0=CPU_Take,1=CPU_Give)", OPTIONAL, 0,
@@ -72,8 +71,19 @@ bool ConfigParser::parse(int argc, char* argv[])
 {
 
     if (argc != 0) {
+        // Filter out Kokkos arguments before cmdline parser sees them
+        std::vector<char*> filtered_argv;
+        for (int i = 0; i < argc; ++i) {
+            std::string arg(argv[i]);
+            if (arg.rfind("--kokkos-", 0) == 0 || arg.rfind("--kokkos_", 0) == 0) {
+                continue;
+            }
+            filtered_argv.push_back(argv[i]);
+        }
+        int filtered_argc = static_cast<int>(filtered_argv.size());
+
         try {
-            parser_.parse_check(argc, argv);
+            parser_.parse_check(filtered_argc, filtered_argv.data());
         }
         catch (const cmdline::cmdline_error& parse_error) {
             std::cerr << "Error: " << parse_error.what() << std::endl;
@@ -85,7 +95,6 @@ bool ConfigParser::parse(int argc, char* argv[])
     // Parse general parameters from command-line arguments
     verbose_              = parser_.get<int>("verbose");
     paraview_             = parser_.get<int>("paraview") != 0;
-    max_omp_threads_      = parser_.get<int>("maxOpenMPThreads");
     DirBC_Interior_       = parser_.get<int>("DirBC_Interior") != 0;
     const int methodValue = parser_.get<int>("stencilDistributionMethod");
     if (methodValue == static_cast<int>(StencilDistributionMethod::CPU_TAKE) ||
@@ -323,11 +332,6 @@ int ConfigParser::verbose() const
 bool ConfigParser::paraview() const
 {
     return paraview_;
-}
-
-int ConfigParser::maxOpenMPThreads() const
-{
-    return max_omp_threads_;
 }
 
 bool ConfigParser::DirBC_Interior() const

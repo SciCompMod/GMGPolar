@@ -8,7 +8,8 @@ CartesianR2_ZoniShiftedGyro_CircularGeometry::CartesianR2_ZoniShiftedGyro_Circul
 {
 }
 
-double CartesianR2_ZoniShiftedGyro_CircularGeometry::operator()(std::size_t i_r, std::size_t i_theta) const
+KOKKOS_FUNCTION double CartesianR2_ZoniShiftedGyro_CircularGeometry::operator()(std::size_t i_r,
+                                                                                std::size_t i_theta) const
 {
     double r         = grid_.radius(i_r);
     double theta     = grid_.theta(i_theta);

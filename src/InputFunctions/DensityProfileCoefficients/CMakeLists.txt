@@ -12,3 +12,4 @@ add_library(InputFunctions_DensityProfileCoefficients STATIC ${DENSITY_PROFILE_C
 target_include_directories(InputFunctions_DensityProfileCoefficients PUBLIC
     ${GMGPOLAR_INCLUDE_DIRS}
 )
+target_link_libraries(InputFunctions_DensityProfileCoefficients PUBLIC Kokkos::kokkos)
