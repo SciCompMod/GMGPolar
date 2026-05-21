@@ -137,7 +137,7 @@ public: // Public due to cuda restrictions
     /* ---------------------------------------------------- */
     /* Compute exact error if an exact solution is provided */
     // The results are stored as a pair: (weighted L2 error, infinity error).
-    std::pair<double, double> evaluateExactError(const PolarGrid& grid, ConstHostVector<double> discrete_solution,
+    std::pair<double, double> evaluateExactError(const PolarGrid& grid, HostConstVector<double> discrete_solution,
                                                  HostConstVector<double> analytical_solution_host,
                                                  HostVector<double> error);
     void computeAnalyticalSolutionOnHost(const PolarGrid& grid, HostConstVector<double> analytical_solution_host,

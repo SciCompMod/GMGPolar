@@ -591,7 +591,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::initRhsHierarchy(Host
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::evaluateExactError(
-    const PolarGrid& grid, ConstHostVector<double> discrete_solution, HostConstVector<double> analytical_solution_host,
+    const PolarGrid& grid, HostConstVector<double> discrete_solution, HostConstVector<double> analytical_solution_host,
     HostVector<double> error)
 {
     // Transfer the exact solution values from host to device memory for error computation.
@@ -602,8 +602,8 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
 
     // Compute the weighted L2 norm and infinity norm of the error between the numerical and exact solution.
     // The results are stored as a pair: (weighted L2 error, infinity error).
-    const double weighted_euclidean_error = l2_norm(ConstHostVector<double>(error)) / std::sqrt(grid.numberOfNodes());
-    const double infinity_error           = infinity_norm(ConstHostVector<double>(error));
+    const double weighted_euclidean_error = l2_norm(HostConstVector<double>(error)) / std::sqrt(grid.numberOfNodes());
+    const double infinity_error           = infinity_norm(HostConstVector<double>(error));
 
     return std::make_pair(weighted_euclidean_error, infinity_error);
 }
