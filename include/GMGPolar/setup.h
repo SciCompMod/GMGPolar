@@ -20,14 +20,14 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     // -------------------------------- //
     // Create the finest mesh (level 0) //
     // -------------------------------- //
-    auto finest_grid = std::make_unique<PolarGrid<Kokkos::HostSpace>>(grid_);
+    auto finest_grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(grid_);
 
     if (paraview_)
-        writeToVTK("output_finest_grid", *finest_grid);
+        writeToVTK("output_finest_grid", grid_);
 
     if (extrapolation_ != ExtrapolationType::NONE) {
         const double precision = 1e-12;
-        if (!checkUniformRefinement(*finest_grid, precision)) {
+        if (!checkUniformRefinement(grid_, precision)) {
             std::cerr << "[Extrapolation Warning] Finest PolarGrid<Kokkos::HostSpace> is not from a single uniform "
                          "refinement.\n";
         }
@@ -36,7 +36,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     // ---------------------------------------------------------- //
     // Building PolarGrid<Kokkos::HostSpace> and LevelCache for all multigrid levels //
     // ---------------------------------------------------------- //
-    number_of_levels_ = chooseNumberOfLevels(*finest_grid); /* Implementation below */
+    number_of_levels_ = chooseNumberOfLevels(grid_); /* Implementation below */
     levels_.clear();
     levels_.reserve(number_of_levels_);
 
@@ -47,7 +47,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
 
     for (int level_depth = 1; level_depth < number_of_levels_; level_depth++) {
         auto current_grid =
-            std::make_unique<PolarGrid<Kokkos::HostSpace>>(coarseningGrid(levels_[level_depth - 1].grid()));
+            std::make_unique<PolarGrid<DefaultMemorySpace>>(coarseningGrid(levels_[level_depth - 1].grid()));
         auto current_levelCache = std::make_unique<LevelCache<DomainGeometry, DensityProfileCoefficients>>(
             *current_grid, density_profile_coefficients_, domain_geometry_, cache_density_profile_coefficients_,
             cache_domain_geometry_);
@@ -58,16 +58,21 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     auto end_setup_createLevels = std::chrono::high_resolution_clock::now();
     t_setup_createLevels_ = std::chrono::duration<double>(end_setup_createLevels - start_setup_createLevels).count();
 
-    if (paraview_)
-        writeToVTK("output_coarsest_grid", levels_.back().grid());
+    if (paraview_) {
+        PolarGrid<Kokkos::HostSpace> finestGrid(levels_.back().grid());
+        writeToVTK("output_coarsest_grid", finestGrid);
+    }
 
     // ------------------------------------- //
     // Initialize the interpolation operator //
     // ------------------------------------- //
     interpolation_ = std::make_unique<Interpolation>(DirBC_Interior_);
 
-    if (verbose_ > 0)
-        printSettings(levels_[0].grid(), levels_[number_of_levels_ - 1].grid());
+    if (verbose_ > 0) {
+        PolarGrid<Kokkos::HostSpace> coarsestGrid(levels_[0].grid());
+        PolarGrid<Kokkos::HostSpace> finestGrid(levels_[number_of_levels_ - 1].grid());
+        printSettings(coarsestGrid, finestGrid);
+    }
 
     // ------------------------------- //
     // PCG-specific vector allocations //
@@ -193,7 +198,7 @@ template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoeff
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
     const Level<DomainGeometry, DensityProfileCoefficients>& level, HostVector<double> rhs_f)
 {
-    const PolarGrid<Kokkos::HostSpace> grid = level.grid();
+    const PolarGrid<Kokkos::HostSpace> grid(level.grid());
     assert(std::ssize(rhs_f) == grid.numberOfNodes());
 
     const bool DirBC_Interior = DirBC_Interior_;
@@ -335,7 +340,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::build_rhs_f(
     const Level<DomainGeometry, DensityProfileCoefficients>& level, HostVector<double> rhs_f,
     const BoundaryConditions& boundary_conditions, const SourceTerm& source_term)
 {
-    const PolarGrid<Kokkos::HostSpace> grid = level.grid();
+    const PolarGrid<Kokkos::HostSpace> grid(level.grid());
     assert(std::ssize(rhs_f) == grid.numberOfNodes());
 
     const bool DirBC_Interior = DirBC_Interior_;

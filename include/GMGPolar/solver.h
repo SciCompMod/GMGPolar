@@ -505,8 +505,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolation(in
                                                                               HostVector<double> fine_values,
                                                                               HostConstVector<double> coarse_values)
 {
-    const PolarGrid<Kokkos::HostSpace>& fineGrid   = levels_[current_level].grid();
-    const PolarGrid<Kokkos::HostSpace>& coarseGrid = levels_[current_level + 1].grid();
+    const PolarGrid<Kokkos::HostSpace> fineGrid   (levels_[current_level].grid());
+    const PolarGrid<Kokkos::HostSpace> coarseGrid (levels_[current_level + 1].grid());
 
     assert(std::ssize(fine_values) == fineGrid.numberOfNodes());
     assert(std::ssize(coarse_values) == coarseGrid.numberOfNodes());
@@ -586,7 +586,7 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
     Level<DomainGeometry, DensityProfileCoefficients>& level, HostConstVector<double> solution,
     HostVector<double> error, const ExactSolution& exact_solution)
 {
-    const PolarGrid<Kokkos::HostSpace> grid = level.grid();
+    const PolarGrid<Kokkos::HostSpace> grid (level.grid());
 
     assert(solution.size() == error.size());
     assert(std::ssize(solution) == grid.numberOfNodes());
