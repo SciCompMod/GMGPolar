@@ -16,7 +16,7 @@ PolarGrid<MemorySpace>::PolarGrid(Vector<double, MemorySpace2> radii, Vector<dou
     , angles_(angles)
 {
     // Check parameter validity
-    checkParameters(radii, angles);
+    checkParameters(Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), radii), Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), angles));
     // Store distances to adjacent neighboring nodes.
     // Initializes radial_spacings_, angular_spacings_
     initializeDistances();

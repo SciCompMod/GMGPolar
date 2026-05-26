@@ -144,10 +144,14 @@ private:
      */
 
     // Check parameter validity
-    void checkParameters(Vector<double, MemorySpace> radii, Vector<double, MemorySpace> angles) const;
+    void checkParameters(Vector<double, Kokkos::HostSpace> radii, Vector<double, Kokkos::HostSpace> angles) const;
 
+	// Cuda restriction: functions containing a KOKKOS_LAMBDA must be public
+public:
     // Initialize radial_spacings_, angular_spacings_
     void initializeDistances();
+
+private:
     // Initializes line splitting parameters for Circle/radial indexing.
     // splitting_radius: The radius value used for dividing the smoother into a circular and radial section.
     //      If std::nullopt, automatic line-splitting is enabled.

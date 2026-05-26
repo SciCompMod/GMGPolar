@@ -16,16 +16,20 @@ PolarGrid<MemorySpace>::PolarGrid(std::vector<double> radii, std::vector<double>
     , angles_("angles", angles.size())
 
 {
+    auto radii_host = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), radii_);
+    auto angles_host = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), angles_);
     // Copy from std vector to Kokkos view
     for (std::size_t i(0); i < radii.size(); ++i) {
-        radii_(i) = radii[i];
+        radii_host(i) = radii[i];
     }
     for (std::size_t i(0); i < angles.size(); ++i) {
-        angles_(i) = angles[i];
+        angles_host(i) = angles[i];
     }
+	Kokkos::deep_copy(radii_, radii_host);
+	Kokkos::deep_copy(angles_, angles_host);
 
     // Check parameter validity
-    checkParameters(radii_, angles_);
+    checkParameters(radii_host, angles_host);
     // Store distances to adjacent neighboring nodes.
     // Initializes radial_spacings_, angular_spacings_
     initializeDistances();
@@ -40,12 +44,13 @@ PolarGrid<MemorySpace>::PolarGrid(double R0, double Rmax, const int nr_exp, cons
                                   std::optional<double> splitting_radius)
 {
     assert(R0 > 0.0 && Rmax > R0 && !equals(R0, Rmax));
+	assert((std::is_same_v<MemorySpace, Kokkos::HostSpace>));
     // Construct radii_ and angles_
     constructRadialDivisions(R0, Rmax, nr_exp, refinement_radius, anisotropic_factor);
     constructAngularDivisions(ntheta_exp, nr_);
     refineGrid(divideBy2);
     // Check parameter validity
-    checkParameters(radii_, angles_);
+    checkParameters(Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), radii_), Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), angles_));
     // Store distances to adjacent neighboring nodes.
     // Initializes radial_spacings_, angular_spacings_
     initializeDistances();
@@ -151,21 +156,32 @@ Vector<double, MemorySpace> PolarGrid<MemorySpace>::divideVector(Vector<double, 
 template <class MemorySpace>
 void PolarGrid<MemorySpace>::initializeDistances()
 {
+		using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+			  Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
     // radial_spacings contains the distances between each consecutive radii division.
     // radial_spacings = [R_1-R0, ..., R_{N} - R_{N-1}].
     Kokkos::resize(radial_spacings_, nr() - 1);
-    for (int i = 0; i < nr() - 1; i++) {
-        radial_spacings_[i] = radius(i + 1) - radius(i);
-    }
+	const Vector<double, MemorySpace>& radii = radii_;
+	const Vector<double, MemorySpace>& radial_spacings = radial_spacings_;
+	Kokkos::parallel_for(
+					"init radial_spacings_",
+					Kokkos::RangePolicy<ExecSpace>(0, nr() - 1), KOKKOS_LAMBDA(int i) {
+        radial_spacings[i] = radii[i + 1] - radii[i];
+    });
     // angular_spacings contains the angles between each consecutive theta division.
     // Since we have a periodic boundary in theta direction,
     // we have to make sure the index wraps around correctly when accessing it.
     // Here theta_0 = 0.0 and theta_N = 2*pi refer to the same point.
     // angular_spacings = [theta_{1}-theta_{0}, ..., theta_{N}-theta_{N-1}].
     Kokkos::resize(angular_spacings_, ntheta());
-    for (int i = 0; i < ntheta(); i++) {
-        angular_spacings_[i] = theta(i + 1) - theta(i);
-    }
+	const Vector<double, MemorySpace>& angles = angles_;
+	const Vector<double, MemorySpace>& angular_spacings = angular_spacings_;
+	Kokkos::parallel_for(
+					"init angular_spacings_",
+					Kokkos::RangePolicy<ExecSpace>(0, ntheta()), KOKKOS_LAMBDA(int i) {
+        angular_spacings[i] = angles[i + 1] - angles[i];
+    });
+	Kokkos::fence();
 }
 
 // Initializes line splitting parameters for Circle/radial indexing.
@@ -176,6 +192,7 @@ void PolarGrid<MemorySpace>::initializeDistances()
 template <class MemorySpace>
 void PolarGrid<MemorySpace>::initializeLineSplitting(std::optional<double> splitting_radius)
 {
+    auto radii_host(Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), radii_));
     if (splitting_radius.has_value()) {
         if (splitting_radius.value() < radii_(0)) {
             number_smoother_circles_   = 0;
@@ -183,8 +200,8 @@ void PolarGrid<MemorySpace>::initializeLineSplitting(std::optional<double> split
             smoother_splitting_radius_ = -1.0;
         }
         else {
-            auto start = Kokkos::Experimental::begin(radii_);
-            auto end   = Kokkos::Experimental::end(radii_);
+            auto start = Kokkos::Experimental::begin(radii_host);
+            auto end   = Kokkos::Experimental::end(radii_host);
             auto it    = std::lower_bound(start, end, splitting_radius.value());
 
             if (it != end) {
@@ -195,7 +212,7 @@ void PolarGrid<MemorySpace>::initializeLineSplitting(std::optional<double> split
             else {
                 number_smoother_circles_   = nr();
                 length_smoother_radial_    = 0;
-                smoother_splitting_radius_ = radii_(radii_.size() - 1) + 1.0;
+                smoother_splitting_radius_ = radii_host(radii_host.size() - 1) + 1.0;
             }
         }
     }
@@ -204,8 +221,8 @@ void PolarGrid<MemorySpace>::initializeLineSplitting(std::optional<double> split
         for (int i_r = 2; i_r < nr() - 2;
              i_r++) { /* We assume lengthRadialSmoother_ >= 3 in the further implementation */
             double uniform_theta_k = (2 * M_PI) / ntheta();
-            double radius_r        = radius(i_r);
-            double radial_dist_h   = radius(i_r) - radius(i_r - 1);
+            double radius_r        = radii_host(i_r);
+            double radial_dist_h   = radii_host(i_r) - radii_host(i_r - 1);
             ;
             double q = uniform_theta_k / radial_dist_h;
             if (q * radius_r > 1.0) {
@@ -218,7 +235,7 @@ void PolarGrid<MemorySpace>::initializeLineSplitting(std::optional<double> split
             number_smoother_circles_ = 3;
 
         length_smoother_radial_    = nr() - number_smoother_circles_;
-        smoother_splitting_radius_ = radius(number_smoother_circles_);
+        smoother_splitting_radius_ = radii_host(number_smoother_circles_);
     }
 
     number_circular_smoother_nodes_ = number_smoother_circles_ * ntheta();
@@ -274,8 +291,8 @@ template PolarGrid<DefaultMemorySpace> coarseningGrid<DefaultMemorySpace>(const 
 // ------------------------ //
 
 template <class MemorySpace>
-void PolarGrid<MemorySpace>::checkParameters(Vector<double, MemorySpace> radii,
-                                             Vector<double, MemorySpace> angles) const
+void PolarGrid<MemorySpace>::checkParameters(Vector<double, Kokkos::HostSpace> radii,
+                                             Vector<double, Kokkos::HostSpace> angles) const
 {
     auto radii_start = Kokkos::Experimental::begin(radii);
     auto radii_end   = Kokkos::Experimental::end(radii);
