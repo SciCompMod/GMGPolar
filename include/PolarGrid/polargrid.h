@@ -62,12 +62,13 @@ public:
     }
 
     template <class MemorySpace2>
-    PolarGrid& operator=(const PolarGrid<MemorySpace2>& other) {
-		*this = PolarGrid<MemorySpace>(other);
-		return *this;
-	}
+    PolarGrid& operator=(const PolarGrid<MemorySpace2>& other)
+    {
+        *this = PolarGrid<MemorySpace>(other);
+        return *this;
+    }
 
-	KOKKOS_DEFAULTED_FUNCTION PolarGrid& operator=(const PolarGrid&) = default;
+    KOKKOS_DEFAULTED_FUNCTION PolarGrid& operator=(const PolarGrid&) = default;
 
     template <class>
     friend class PolarGrid;
