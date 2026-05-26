@@ -45,7 +45,7 @@ public:
     KOKKOS_DEFAULTED_FUNCTION PolarGrid(const PolarGrid&) = default;
 
     template <class MemorySpace2>
-    PolarGrid(const PolarGrid<MemorySpace2>& other)
+    explicit PolarGrid(const PolarGrid<MemorySpace2>& other)
         : nr_(other.nr_)
         , ntheta_(other.ntheta_)
         , is_ntheta_PowerOfTwo_(other.is_ntheta_PowerOfTwo_)
