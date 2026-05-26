@@ -193,7 +193,7 @@ template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoeff
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
     const Level<DomainGeometry, DensityProfileCoefficients>& level, HostVector<double> rhs_f)
 {
-    const PolarGrid<Kokkos::HostSpace>& grid = level.grid();
+    const PolarGrid<Kokkos::HostSpace> grid = level.grid();
     assert(std::ssize(rhs_f) == grid.numberOfNodes());
 
     const bool DirBC_Interior = DirBC_Interior_;
@@ -335,7 +335,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::build_rhs_f(
     const Level<DomainGeometry, DensityProfileCoefficients>& level, HostVector<double> rhs_f,
     const BoundaryConditions& boundary_conditions, const SourceTerm& source_term)
 {
-    const PolarGrid<Kokkos::HostSpace>& grid = level.grid();
+    const PolarGrid<Kokkos::HostSpace> grid = level.grid();
     assert(std::ssize(rhs_f) == grid.numberOfNodes());
 
     const bool DirBC_Interior = DirBC_Interior_;
