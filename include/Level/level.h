@@ -175,8 +175,8 @@ public:
     }
 
 private:
-    const DomainGeometry& domain_geometry_;
-    const DensityProfileCoefficients& density_profile_coefficients_;
+    const DomainGeometry domain_geometry_;
+    const DensityProfileCoefficients density_profile_coefficients_;
 
     bool cache_density_profile_coefficients_; // cache alpha(r, theta), beta(r, theta)
     Vector<double> coeff_alpha_;
