@@ -46,6 +46,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     levels_.emplace_back(0, std::move(finest_grid), std::move(finest_levelCache), extrapolation_, FMG_, PCG_FMG_);
 
     for (int level_depth = 1; level_depth < number_of_levels_; level_depth++) {
+
         auto current_grid =
             std::make_unique<PolarGrid<DefaultMemorySpace>>(coarseningGrid(levels_[level_depth - 1].grid()));
         auto current_levelCache = std::make_unique<LevelCache<DomainGeometry, DensityProfileCoefficients>>(
@@ -205,7 +206,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
 
     if (level.levelCache().cacheDomainGeometry()) {
         /* DomainGeometry is cached */
-        const auto& detDF_cache = level.levelCache().detDF();
+        const ConstVector<double>& detDF_cache = level.levelCache().detDF();
+        HostConstVector<double> detDF_cache_host = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, detDF_cache);
 
         // ---------------------------------------------- //
         // Discretize rhs values (circular index section) //
@@ -220,7 +222,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
                     const double h2    = grid.radialSpacing(i_r);
                     const double k1    = grid.angularSpacing(i_theta - 1);
                     const double k2    = grid.angularSpacing(i_theta);
-                    const double detDF = detDF_cache[grid.index(i_r, i_theta)];
+                    const double detDF = detDF_cache_host[grid.index(i_r, i_theta)];
                     rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * std::fabs(detDF);
                 }
                 else if (i_r == 0 && DirBC_Interior) {
@@ -244,7 +246,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
                     const double h2    = grid.radialSpacing(i_r);
                     const double k1    = grid.angularSpacing(i_theta - 1);
                     const double k2    = grid.angularSpacing(i_theta);
-                    const double detDF = detDF_cache[grid.index(i_r, i_theta)];
+                    const double detDF = detDF_cache_host[grid.index(i_r, i_theta)];
                     rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * std::fabs(detDF);
                 }
                 else if (i_r == 0 && DirBC_Interior) {
