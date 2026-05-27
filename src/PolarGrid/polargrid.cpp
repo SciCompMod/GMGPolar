@@ -255,6 +255,9 @@ namespace gmgpolar
 template <class MemorySpace>
 PolarGrid<MemorySpace> coarseningGrid(const PolarGrid<MemorySpace>& fineGrid)
 {
+		using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+			  Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+
     assert((fineGrid.nr() - 1) % 2 == 0 && (fineGrid.ntheta()) % 2 == 0);
     const int coarse_nr     = (fineGrid.nr() + 1) / 2;
     const int coarse_ntheta = fineGrid.ntheta() / 2;
@@ -262,12 +265,16 @@ PolarGrid<MemorySpace> coarseningGrid(const PolarGrid<MemorySpace>& fineGrid)
     Vector<double, MemorySpace> coarse_r("coarse_r", coarse_nr);
     Vector<double, MemorySpace> coarse_theta("coarse_theta", coarse_ntheta + 1);
 
-    for (int i = 0; i < coarse_nr; i++) {
+	Kokkos::parallel_for(
+					"coarse r",
+					Kokkos::RangePolicy<ExecSpace>(0, coarse_nr), KOKKOS_LAMBDA(int i) {
         coarse_r[i] = fineGrid.radius(2 * i);
-    }
-    for (int j = 0; j < coarse_ntheta + 1; j++) {
+    });
+	Kokkos::parallel_for(
+					"coarse theta",
+					Kokkos::RangePolicy<ExecSpace>(0, coarse_ntheta + 1), KOKKOS_LAMBDA(int j) {
         coarse_theta[j] = fineGrid.theta(2 * j);
-    }
+    });
 
     const bool use_same_splitting_radius = false;
 
