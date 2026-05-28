@@ -12,20 +12,24 @@ CooMumpsSolver::~CooMumpsSolver()
     finalize();
 }
 
-void CooMumpsSolver::solveInPlace(HostVector<double>& rhs)
+void CooMumpsSolver::solveInPlace(Vector<double>& rhs)
 {
     assert(std::ssize(rhs) == mumps_solver_.n);
+
+	auto rhs_host = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), rhs);
 
     mumps_solver_.job  = JOB_COMPUTE_SOLUTION;
     mumps_solver_.nrhs = 1;
     mumps_solver_.lrhs = mumps_solver_.n;
-    mumps_solver_.rhs  = rhs.data();
+    mumps_solver_.rhs  = rhs_host.data();
 
     dmumps_c(&mumps_solver_);
 
     if (INFOG(1) != 0) {
         std::cerr << "MUMPS reported an error during solution phase " << "(INFOG(1) = " << INFOG(1) << ").\n";
     }
+
+	Kokkos::deep_copy(rhs, rhs_host);
 }
 
 void CooMumpsSolver::initialize()
