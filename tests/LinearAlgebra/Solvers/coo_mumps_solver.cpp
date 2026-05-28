@@ -7,13 +7,9 @@
     #include "../../../include/LinearAlgebra/Solvers/coo_mumps_solver.h"
 using namespace gmgpolar;
 
-void fill_rhs(Vector<double>& rhs) {
-	Kokkos::parallel_for(
-					"fill rhs",
-					rhs.size(),
-					KOKKOS_LAMBDA(int i) {
-					rhs(i) = (i+1)*2.0;
-					});
+void fill_rhs(Vector<double>& rhs)
+{
+    Kokkos::parallel_for("fill rhs", rhs.size(), KOKKOS_LAMBDA(int i) { rhs(i) = (i + 1) * 2.0; });
 }
 
 // -----------------------------------------------------------------------
@@ -41,7 +37,7 @@ TEST(CooMumpsSolverTest, GeneralNonSymmetric4x4)
     CooMumpsSolver solver(std::move(mat));
 
     Vector<double> rhs("rhs", 4);
-	fill_rhs(rhs);
+    fill_rhs(rhs);
 
     solver.solveInPlace(rhs);
 
@@ -51,7 +47,7 @@ TEST(CooMumpsSolverTest, GeneralNonSymmetric4x4)
     solution(2) = -27.0 / 43.0;
     solution(3) = -28.0 / 43.0;
 
-	auto rhs_host = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), rhs);
+    auto rhs_host = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), rhs);
 
     const double tol = 1e-10;
     EXPECT_NEAR(rhs_host(0), solution(0), tol);
@@ -84,7 +80,7 @@ TEST(CooMumpsSolverTest, SymmetricPositiveDefinite4x4)
     CooMumpsSolver solver(std::move(mat));
 
     Vector<double> rhs("rhs", 4);
-	fill_rhs(rhs);
+    fill_rhs(rhs);
 
     solver.solveInPlace(rhs);
 
@@ -94,7 +90,7 @@ TEST(CooMumpsSolverTest, SymmetricPositiveDefinite4x4)
     solution(2) = 14.0 / 23.0;
     solution(3) = 21.0 / 23.0;
 
-	auto rhs_host = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), rhs);
+    auto rhs_host = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), rhs);
 
     const double tol = 1e-10;
     EXPECT_NEAR(rhs_host(0), solution(0), tol);

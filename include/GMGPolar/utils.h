@@ -53,8 +53,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedProlongat
 
     PolarGrid<Kokkos::HostSpace> current_grid(levels_[current_level].grid());
     PolarGrid<Kokkos::HostSpace> previous_grid(levels_[current_level - 1].grid());
-    interpolation_->applyExtrapolatedProlongation(current_grid, previous_grid,
-                                                  result, x);
+    interpolation_->applyExtrapolatedProlongation(current_grid, previous_grid, result, x);
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
@@ -68,8 +67,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedRestricti
 
     PolarGrid<Kokkos::HostSpace> current_grid(levels_[current_level].grid());
     PolarGrid<Kokkos::HostSpace> next_grid(levels_[current_level + 1].grid());
-    interpolation_->applyExtrapolatedRestriction(current_grid, next_grid,
-                                                 result, x);
+    interpolation_->applyExtrapolatedRestriction(current_grid, next_grid, result, x);
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>

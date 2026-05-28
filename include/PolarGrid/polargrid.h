@@ -146,7 +146,7 @@ private:
     // Check parameter validity
     void checkParameters(Vector<double, Kokkos::HostSpace> radii, Vector<double, Kokkos::HostSpace> angles) const;
 
-	// Cuda restriction: functions containing a KOKKOS_LAMBDA must be public
+    // Cuda restriction: functions containing a KOKKOS_LAMBDA must be public
 public:
     // Initialize radial_spacings_, angular_spacings_
     void initializeDistances();

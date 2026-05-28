@@ -207,7 +207,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
     if (level.levelCache().cacheDomainGeometry()) {
         /* DomainGeometry is cached */
         const ConstVector<double>& detDF_cache = level.levelCache().detDF();
-        HostConstVector<double> detDF_cache_host = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, detDF_cache);
+        HostConstVector<double> detDF_cache_host =
+            Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, detDF_cache);
 
         // ---------------------------------------------- //
         // Discretize rhs values (circular index section) //

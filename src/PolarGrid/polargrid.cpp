@@ -16,7 +16,7 @@ PolarGrid<MemorySpace>::PolarGrid(std::vector<double> radii, std::vector<double>
     , angles_("angles", angles.size())
 
 {
-    auto radii_host = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), radii_);
+    auto radii_host  = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), radii_);
     auto angles_host = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), angles_);
     // Copy from std vector to Kokkos view
     for (std::size_t i(0); i < radii.size(); ++i) {
@@ -25,8 +25,8 @@ PolarGrid<MemorySpace>::PolarGrid(std::vector<double> radii, std::vector<double>
     for (std::size_t i(0); i < angles.size(); ++i) {
         angles_host(i) = angles[i];
     }
-	Kokkos::deep_copy(radii_, radii_host);
-	Kokkos::deep_copy(angles_, angles_host);
+    Kokkos::deep_copy(radii_, radii_host);
+    Kokkos::deep_copy(angles_, angles_host);
 
     // Check parameter validity
     checkParameters(radii_host, angles_host);
@@ -44,13 +44,14 @@ PolarGrid<MemorySpace>::PolarGrid(double R0, double Rmax, const int nr_exp, cons
                                   std::optional<double> splitting_radius)
 {
     assert(R0 > 0.0 && Rmax > R0 && !equals(R0, Rmax));
-	assert((std::is_same_v<MemorySpace, Kokkos::HostSpace>));
+    assert((std::is_same_v<MemorySpace, Kokkos::HostSpace>));
     // Construct radii_ and angles_
     constructRadialDivisions(R0, Rmax, nr_exp, refinement_radius, anisotropic_factor);
     constructAngularDivisions(ntheta_exp, nr_);
     refineGrid(divideBy2);
     // Check parameter validity
-    checkParameters(Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), radii_), Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), angles_));
+    checkParameters(Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), radii_),
+                    Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), angles_));
     // Store distances to adjacent neighboring nodes.
     // Initializes radial_spacings_, angular_spacings_
     initializeDistances();
@@ -156,32 +157,28 @@ Vector<double, MemorySpace> PolarGrid<MemorySpace>::divideVector(Vector<double, 
 template <class MemorySpace>
 void PolarGrid<MemorySpace>::initializeDistances()
 {
-		using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
-			  Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+    using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                         Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
     // radial_spacings contains the distances between each consecutive radii division.
     // radial_spacings = [R_1-R0, ..., R_{N} - R_{N-1}].
     Kokkos::resize(radial_spacings_, nr() - 1);
-	const Vector<double, MemorySpace>& radii = radii_;
-	const Vector<double, MemorySpace>& radial_spacings = radial_spacings_;
-	Kokkos::parallel_for(
-					"init radial_spacings_",
-					Kokkos::RangePolicy<ExecSpace>(0, nr() - 1), KOKKOS_LAMBDA(int i) {
-        radial_spacings[i] = radii[i + 1] - radii[i];
-    });
+    const Vector<double, MemorySpace>& radii           = radii_;
+    const Vector<double, MemorySpace>& radial_spacings = radial_spacings_;
+    Kokkos::parallel_for(
+        "init radial_spacings_", Kokkos::RangePolicy<ExecSpace>(0, nr() - 1),
+        KOKKOS_LAMBDA(int i) { radial_spacings[i] = radii[i + 1] - radii[i]; });
     // angular_spacings contains the angles between each consecutive theta division.
     // Since we have a periodic boundary in theta direction,
     // we have to make sure the index wraps around correctly when accessing it.
     // Here theta_0 = 0.0 and theta_N = 2*pi refer to the same point.
     // angular_spacings = [theta_{1}-theta_{0}, ..., theta_{N}-theta_{N-1}].
     Kokkos::resize(angular_spacings_, ntheta());
-	const Vector<double, MemorySpace>& angles = angles_;
-	const Vector<double, MemorySpace>& angular_spacings = angular_spacings_;
-	Kokkos::parallel_for(
-					"init angular_spacings_",
-					Kokkos::RangePolicy<ExecSpace>(0, ntheta()), KOKKOS_LAMBDA(int i) {
-        angular_spacings[i] = angles[i + 1] - angles[i];
-    });
-	Kokkos::fence();
+    const Vector<double, MemorySpace>& angles           = angles_;
+    const Vector<double, MemorySpace>& angular_spacings = angular_spacings_;
+    Kokkos::parallel_for(
+        "init angular_spacings_", Kokkos::RangePolicy<ExecSpace>(0, ntheta()),
+        KOKKOS_LAMBDA(int i) { angular_spacings[i] = angles[i + 1] - angles[i]; });
+    Kokkos::fence();
 }
 
 // Initializes line splitting parameters for Circle/radial indexing.
@@ -255,8 +252,8 @@ namespace gmgpolar
 template <class MemorySpace>
 PolarGrid<MemorySpace> coarseningGrid(const PolarGrid<MemorySpace>& fineGrid)
 {
-		using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
-			  Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+    using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                         Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
 
     assert((fineGrid.nr() - 1) % 2 == 0 && (fineGrid.ntheta()) % 2 == 0);
     const int coarse_nr     = (fineGrid.nr() + 1) / 2;
@@ -265,16 +262,12 @@ PolarGrid<MemorySpace> coarseningGrid(const PolarGrid<MemorySpace>& fineGrid)
     Vector<double, MemorySpace> coarse_r("coarse_r", coarse_nr);
     Vector<double, MemorySpace> coarse_theta("coarse_theta", coarse_ntheta + 1);
 
-	Kokkos::parallel_for(
-					"coarse r",
-					Kokkos::RangePolicy<ExecSpace>(0, coarse_nr), KOKKOS_LAMBDA(int i) {
-        coarse_r[i] = fineGrid.radius(2 * i);
-    });
-	Kokkos::parallel_for(
-					"coarse theta",
-					Kokkos::RangePolicy<ExecSpace>(0, coarse_ntheta + 1), KOKKOS_LAMBDA(int j) {
-        coarse_theta[j] = fineGrid.theta(2 * j);
-    });
+    Kokkos::parallel_for(
+        "coarse r", Kokkos::RangePolicy<ExecSpace>(0, coarse_nr),
+        KOKKOS_LAMBDA(int i) { coarse_r[i] = fineGrid.radius(2 * i); });
+    Kokkos::parallel_for(
+        "coarse theta", Kokkos::RangePolicy<ExecSpace>(0, coarse_ntheta + 1),
+        KOKKOS_LAMBDA(int j) { coarse_theta[j] = fineGrid.theta(2 * j); });
 
     const bool use_same_splitting_radius = false;
 

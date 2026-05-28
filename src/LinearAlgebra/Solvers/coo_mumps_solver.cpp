@@ -16,7 +16,7 @@ void CooMumpsSolver::solveInPlace(Vector<double>& rhs)
 {
     assert(std::ssize(rhs) == mumps_solver_.n);
 
-	auto rhs_host = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), rhs);
+    auto rhs_host = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), rhs);
 
     mumps_solver_.job  = JOB_COMPUTE_SOLUTION;
     mumps_solver_.nrhs = 1;
@@ -29,7 +29,7 @@ void CooMumpsSolver::solveInPlace(Vector<double>& rhs)
         std::cerr << "MUMPS reported an error during solution phase " << "(INFOG(1) = " << INFOG(1) << ").\n";
     }
 
-	Kokkos::deep_copy(rhs, rhs_host);
+    Kokkos::deep_copy(rhs, rhs_host);
 }
 
 void CooMumpsSolver::initialize()
