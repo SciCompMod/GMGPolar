@@ -6,7 +6,7 @@ void PolarR6_ZoniGyro_CzarnyGeometry::initializeGeometry()
     factor_xi = 1.0 / sqrt(1.0 - inverse_aspect_ratio_epsilon * inverse_aspect_ratio_epsilon / 4.0);
 }
 
-PolarR6_ZoniGyro_CzarnyGeometry::PolarR6_ZoniGyro_CzarnyGeometry(PolarGrid<Kokkos::HostSpace> const& grid, double Rmax,
+PolarR6_ZoniGyro_CzarnyGeometry::PolarR6_ZoniGyro_CzarnyGeometry(PolarGrid<DefaultMemorySpace> const& grid, double Rmax,
                                                                  double inverse_aspect_ratio_epsilon,
                                                                  double ellipticity_e)
     : grid_(grid)

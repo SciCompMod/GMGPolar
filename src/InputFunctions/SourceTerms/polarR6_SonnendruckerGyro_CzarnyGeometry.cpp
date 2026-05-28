@@ -7,7 +7,7 @@ void PolarR6_SonnendruckerGyro_CzarnyGeometry::initializeGeometry()
 }
 
 PolarR6_SonnendruckerGyro_CzarnyGeometry::PolarR6_SonnendruckerGyro_CzarnyGeometry(
-    PolarGrid<Kokkos::HostSpace> const& grid, double Rmax, double inverse_aspect_ratio_epsilon, double ellipticity_e)
+    PolarGrid<DefaultMemorySpace> const& grid, double Rmax, double inverse_aspect_ratio_epsilon, double ellipticity_e)
     : grid_(grid)
     , Rmax(Rmax)
     , inverse_aspect_ratio_epsilon(inverse_aspect_ratio_epsilon)

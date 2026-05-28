@@ -1,7 +1,7 @@
 #include "../include/InputFunctions/SourceTerms/polarR6_ZoniGyro_ShafranovGeometry.h"
 using namespace gmgpolar;
 
-PolarR6_ZoniGyro_ShafranovGeometry::PolarR6_ZoniGyro_ShafranovGeometry(PolarGrid<Kokkos::HostSpace> const& grid,
+PolarR6_ZoniGyro_ShafranovGeometry::PolarR6_ZoniGyro_ShafranovGeometry(PolarGrid<DefaultMemorySpace> const& grid,
                                                                        double Rmax, double elongation_kappa,
                                                                        double shift_delta)
     : grid_(grid)

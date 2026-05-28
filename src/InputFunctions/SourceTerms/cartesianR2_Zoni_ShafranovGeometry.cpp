@@ -1,7 +1,7 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR2_Zoni_ShafranovGeometry.h"
 using namespace gmgpolar;
 
-CartesianR2_Zoni_ShafranovGeometry::CartesianR2_Zoni_ShafranovGeometry(PolarGrid<Kokkos::HostSpace> const& grid,
+CartesianR2_Zoni_ShafranovGeometry::CartesianR2_Zoni_ShafranovGeometry(PolarGrid<DefaultMemorySpace> const& grid,
                                                                        double Rmax, double elongation_kappa,
                                                                        double shift_delta)
     : grid_(grid)
