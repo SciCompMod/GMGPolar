@@ -85,9 +85,10 @@ int main(int argc, char* argv[])
     for (divideBy2 = 0; divideBy2 < MAX_DIVIDE_BY_2; divideBy2++) {
         double refinement_radius               = alpha_jump;
         std::optional<double> splitting_radius = std::nullopt;
-        PolarGrid<Kokkos::HostSpace> grid(R0, Rmax, nr_exp, ntheta_exp, refinement_radius, anisotropic_factor,
+        PolarGrid<Kokkos::HostSpace> grid_host(R0, Rmax, nr_exp, ntheta_exp, refinement_radius, anisotropic_factor,
                                           divideBy2, splitting_radius);
-        GMGPolar solver(grid, domain_geometry, coefficients);
+	PolarGrid<DefaultMemorySpace> grid(grid_host);
+        GMGPolar solver(grid_host, domain_geometry, coefficients);
 
         PolarR6_ZoniGyro_ShafranovGeometry source_term(grid, Rmax, elongation_kappa, shift_delta);
         // CartesianR2_SonnendruckerGyro_CzarnyGeometry source_term(grid, Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
