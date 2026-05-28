@@ -99,7 +99,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
     if (exact_solution_) {
         exact_sol = HostVector<double>("exact_sol", level.solution().size());
         // fill exact solution on host to avoid repeat same computation
-        const PolarGrid& grid = level.grid();
+        const PolarGrid<Kokkos::HostSpace>& grid = level.grid();
 
         Kokkos::parallel_for("fill exact sol outer loop on r",
                              Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
