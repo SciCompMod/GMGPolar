@@ -27,18 +27,18 @@ public:
                            const PolarGrid<Kokkos::HostSpace>& fine_grid, HostVector<double> fine_result,
                            HostConstVector<double> coarse_values) const;
 
-    void applyExtrapolatedProlongation(const PolarGrid<Kokkos::HostSpace>& coarse_grid,
-                                       const PolarGrid<Kokkos::HostSpace>& fine_grid, HostVector<double> fine_result,
-                                       HostConstVector<double> coarse_values) const;
+    void applyExtrapolatedProlongation(const PolarGrid<DefaultMemorySpace>& coarse_grid,
+                                       const PolarGrid<DefaultMemorySpace>& fine_grid, Vector<double> fine_result,
+                                       ConstVector<double> coarse_values) const;
 
     /* Scaled full weighting (FW) restriction operator. */
     void applyRestriction(const PolarGrid<Kokkos::HostSpace>& fine_grid,
                           const PolarGrid<Kokkos::HostSpace>& coarse_grid, HostVector<double> coarse_result,
                           HostConstVector<double> fine_values) const;
 
-    void applyExtrapolatedRestriction(const PolarGrid<Kokkos::HostSpace>& fine_grid,
-                                      const PolarGrid<Kokkos::HostSpace>& coarse_grid, HostVector<double> coarse_result,
-                                      HostConstVector<double> fine_values) const;
+    void applyExtrapolatedRestriction(const PolarGrid<DefaultMemorySpace>& fine_grid,
+                                      const PolarGrid<DefaultMemorySpace>& coarse_grid, Vector<double> coarse_result,
+                                      ConstVector<double> fine_values) const;
 
     /* Bicubic FMG interpolator 1/16 * [-1, 9, 9, -1] */
     void applyFMGInterpolation(const PolarGrid<Kokkos::HostSpace>& coarse_grid,
