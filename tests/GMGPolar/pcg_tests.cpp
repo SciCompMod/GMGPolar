@@ -630,9 +630,9 @@ TYPED_TEST_SUITE(PCGTestCase, gmgpolar_test_suite);
 template <class TestFixture>
 void run_gmgpolar()
 {
-    PolarGrid<Kokkos::HostSpace> grid_host(TestFixture::R0, TestFixture::Rmax, TestFixture::nrExp, TestFixture::nthetaExp,
-                                      TestFixture::refinementRadius, TestFixture::anisotropicFactor,
-                                      TestFixture::divideBy2);
+    PolarGrid<Kokkos::HostSpace> grid_host(TestFixture::R0, TestFixture::Rmax, TestFixture::nrExp,
+                                           TestFixture::nthetaExp, TestFixture::refinementRadius,
+                                           TestFixture::anisotropicFactor, TestFixture::divideBy2);
 
     PolarGrid<DefaultMemorySpace> grid(grid_host);
 

@@ -374,7 +374,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::build_rhs_f(
     Kokkos::parallel_for(
         "build_rhs_f: Radial",
         Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
-                                                                                  {grid.ntheta(), grid.nr()}),
+                                                                              {grid.ntheta(), grid.nr()}),
         KOKKOS_LAMBDA(const int i_theta, const int i_r) {
             const double radius = grid.radius(i_r);
             const double theta  = grid.theta(i_theta);

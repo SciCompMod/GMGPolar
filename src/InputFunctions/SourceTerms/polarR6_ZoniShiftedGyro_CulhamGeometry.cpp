@@ -1,8 +1,8 @@
 #include "../include/InputFunctions/SourceTerms/polarR6_ZoniShiftedGyro_CulhamGeometry.h"
 using namespace gmgpolar;
 
-PolarR6_ZoniShiftedGyro_CulhamGeometry::PolarR6_ZoniShiftedGyro_CulhamGeometry(PolarGrid<DefaultMemorySpace> const& grid,
-                                                                               double Rmax)
+PolarR6_ZoniShiftedGyro_CulhamGeometry::PolarR6_ZoniShiftedGyro_CulhamGeometry(
+    PolarGrid<DefaultMemorySpace> const& grid, double Rmax)
     : grid_(grid)
     , Rmax(Rmax)
 {
