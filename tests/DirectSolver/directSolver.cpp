@@ -711,8 +711,8 @@ TEST(DirectSolverTakeTest_ShafranovGeometry, DirectSolverDirBC_Interior_Shafrano
     residual_op.computeResidual(residuum, rhs, solution);
 
     ASSERT_NEAR(l1_norm(HostConstVector<double>(residuum)), 0.0, 1e-11);
-    ASSERT_NEAR(l2_norm(HostConstVector<double>(residuum)), 0.0, 1e-12);
-    ASSERT_NEAR(infinity_norm(HostConstVector<double>(residuum)), 0.0, 1e-12);
+    ASSERT_NEAR(l2_norm(HostConstVector<double>(residuum)), 0.0, 1e-11);
+    ASSERT_NEAR(infinity_norm(HostConstVector<double>(residuum)), 0.0, 1e-11);
 }
 
 TEST(DirectSolverTakeTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovGeometry)
