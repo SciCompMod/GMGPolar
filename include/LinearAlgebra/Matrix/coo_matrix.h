@@ -67,7 +67,7 @@ public:
     T* values_data() const;
 
     template <typename U>
-    friend std::ostream& operator<<(std::ostream& stream, const SparseMatrixCOO<U>& matrix);
+    friend std::ostream& operator<<(std::ostream& stream, const SparseMatrixCOO<U, Kokkos::HostSpace>& matrix);
 
     void write_to_file(const std::string& filename) const;
 
@@ -82,7 +82,7 @@ private:
 };
 
 template <typename U>
-std::ostream& operator<<(std::ostream& stream, const SparseMatrixCOO<U>& matrix)
+std::ostream& operator<<(std::ostream& stream, const SparseMatrixCOO<U, Kokkos::HostSpace>& matrix)
 {
     stream << "SparseMatrixCOO: " << matrix.rows_ << " x " << matrix.columns_ << "\n";
     stream << "Number of non-zeros (nnz): " << matrix.nnz_ << "\n";
