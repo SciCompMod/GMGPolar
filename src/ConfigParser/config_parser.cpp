@@ -316,7 +316,7 @@ bool ConfigParser::parse(int argc, char* argv[])
         }
 
         std::cout << "------------------------------\n";
-        std::cout << "---- PolarGrid<Kokkos::HostSpace> Generation ----\n";
+        std::cout << "---- PolarGrid Generation ----\n";
         std::cout << "------------------------------\n";
         std::cout << "nr_exp = " << nr_exp << ", nθ_exp = " << ntheta_exp << "\n";
         std::cout << "divideBy2 = " << divideBy2 << ", anisotropy = " << anisotropic_factor << "\n";
