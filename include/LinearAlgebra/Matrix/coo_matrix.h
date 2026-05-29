@@ -69,6 +69,7 @@ public:
     template <typename U>
     friend std::ostream& operator<<(std::ostream& stream, const SparseMatrixCOO<U>& matrix);
 
+    // SparseMatrixCOO is a friend to versions of itself on different memory spaces to simplify the implementation of the copy operator
     template <class, class>
     friend class SparseMatrixCOO;
 
