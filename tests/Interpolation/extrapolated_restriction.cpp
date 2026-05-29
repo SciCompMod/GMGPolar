@@ -57,11 +57,11 @@ TEST(ExtrapolatedRestrictionTest, ExtrapolatedRestrictionMatchesStencil)
     HostVector<double> h_fine_values = generate_random_sample_data(h_fine_grid, 9012, 0.0, 1.0);
     Vector<double> coarse_result("coarse_result", coarse_grid.numberOfNodes());
 
-	auto fine_values = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_fine_values);
+    auto fine_values = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_fine_values);
 
     I.applyExtrapolatedRestriction(fine_grid, coarse_grid, coarse_result, fine_values);
 
-	auto h_coarse_result = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), coarse_result);
+    auto h_coarse_result = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), coarse_result);
 
     for (int i_r_coarse = 0; i_r_coarse < coarse_grid.nr(); ++i_r_coarse) {
         for (int i_theta_coarse = 0; i_theta_coarse < coarse_grid.ntheta(); ++i_theta_coarse) {

@@ -58,11 +58,11 @@ TEST(ExtrapolatedProlongationTest, ExtrapolatedProlongationMatchesStencil)
     HostVector<double> h_coarse_values = generate_random_sample_data(h_coarse_grid, 1234, 0.0, 1.0);
     Vector<double> fine_result("fine_result", fine_grid.numberOfNodes());
 
-	auto coarse_values = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_coarse_values);
+    auto coarse_values = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_coarse_values);
 
     I.applyExtrapolatedProlongation(coarse_grid, fine_grid, fine_result, coarse_values);
 
-	auto h_fine_result = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), fine_result);
+    auto h_fine_result = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), fine_result);
 
     for (int i_r = 0; i_r < fine_grid.nr(); ++i_r) {
         for (int i_theta = 0; i_theta < fine_grid.ntheta(); ++i_theta) {
