@@ -445,7 +445,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printSettings(
               << "\n";
 
     std::cout << "------------------------------\n";
-    std::cout << "---------- PolarGrid<Kokkos::HostSpace> ---------\n";
+    std::cout << "---------- PolarGrid ---------\n";
     std::cout << "------------------------------\n";
 
     std::cout << "r ∈ [" << finest_grid.radius(0) << ", " << finest_grid.radius(finest_grid.nr() - 1)
