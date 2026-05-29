@@ -98,32 +98,23 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
     /* ---------------------------------------------- */
     LIKWID_STOP("Solver");
     auto start_check_exact_error = std::chrono::high_resolution_clock::now();
-    HostAllocatableVector<double> exact_sol;
+
     if (exact_solution_) {
-        exact_sol = HostVector<double>("exact_sol", level.solution().size());
-        // fill exact solution on host to avoid repeat same computation
+        /* Fill analytical solution on the host. */
+        // Note: We must compute the analytical solution values on the host because the
+        //       ExactSolution object is not designed to be used on the device.
+        //       As it is planned that the solution and error vector will use device memory during GPU porting,
+        //       we need to transfer the exact solution values from host to device using the Kokkos::deep_copy operation.
+        if (std::ssize(analytical_solution_host_) != level.grid().numberOfNodes()) {
+            analytical_solution_host_ = HostVector<double>("Analytical Solution", level.solution().size());
+        }
         const PolarGrid<Kokkos::HostSpace> grid(level.grid());
+        computeAnalyticalSolutionOnHost(grid, analytical_solution_host_, *exact_solution_);
 
-        Kokkos::parallel_for("fill exact sol outer loop on r",
-                             Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
-                                 {0, 0}, {grid.numberSmootherCircles(), grid.ntheta()}),
-                             [&](const int i_r, const int i_theta) {
-                                 double r            = grid.radius(i_r);
-                                 double theta        = grid.theta(i_theta);
-                                 const int grid_idx  = grid.index(i_r, i_theta);
-                                 exact_sol(grid_idx) = exact_solution_->exact_solution(r, theta);
-                             });
-        Kokkos::parallel_for("fill exact sol outer loop on theta",
-                             Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
-                                 {0, grid.numberSmootherCircles()}, {grid.ntheta(), grid.nr()}),
-                             [&](const int i_theta, const int i_r) {
-                                 double r            = grid.radius(i_r);
-                                 double theta        = grid.theta(i_theta);
-                                 const int grid_idx  = grid.index(i_r, i_theta);
-                                 exact_sol(grid_idx) = exact_solution_->exact_solution(r, theta);
-                             });
-
-        evaluateExactError(level, exact_sol);
+        // Evaluate the error of the initial approximation against the exact solution, if provided.
+        // We use level.residual() as a temporary vector to store the error values.
+        exact_errors_.push_back(
+            evaluateExactError(level.grid(), level.solution(), analytical_solution_host_, level.residual()));
     }
     auto end_check_exact_error = std::chrono::high_resolution_clock::now();
     t_check_exact_error_ += std::chrono::duration<double>(end_check_exact_error - start_check_exact_error).count();
@@ -147,7 +138,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
         if (!PCG_) {
             // Solve A*x = b directly using multigrid cycles (V/W/F-cycle)
             // until convergence or max_iterations_ is reached.
-            solveMultigrid(initial_residual_norm, current_residual_norm, current_relative_residual_norm, exact_sol);
+            solveMultigrid(initial_residual_norm, current_residual_norm, current_relative_residual_norm);
         }
         else {
             // Solve A*x = b using Preconditioned Conjugate Gradient (PCG),
@@ -155,7 +146,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
             // cycle approximates the action of A^{-1} at each PCG iteration).
             auto start_conjugate_gradient = std::chrono::high_resolution_clock::now();
 
-            solvePCG(initial_residual_norm, current_residual_norm, current_relative_residual_norm, exact_sol);
+            solvePCG(initial_residual_norm, current_residual_norm, current_relative_residual_norm);
 
             auto end_conjugate_gradient = std::chrono::high_resolution_clock::now();
             t_conjugate_gradient_ +=
@@ -196,7 +187,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
     if (paraview_) {
         writeToVTK("output_solution", level, level.solution());
         if (exact_solution_) {
-            computeExactError(level, level.solution(), level.residual(), exact_sol);
+            evaluateExactError(level.grid(), level.solution(), analytical_solution_host_, level.residual());
             writeToVTK("output_error", level, level.residual());
         }
     }
@@ -241,8 +232,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::fullMultigridApproxim
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solveMultigrid(double& initial_residual_norm,
                                                                           double& current_residual_norm,
-                                                                          double& current_relative_residual_norm,
-                                                                          HostConstVector<double> exact_solution)
+                                                                          double& current_relative_residual_norm)
 {
     Level<DomainGeometry, DensityProfileCoefficients>& level = levels_[0];
 
@@ -271,8 +261,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solveMultigrid(double
         LIKWID_STOP("Solver");
         auto start_check_exact_error = std::chrono::high_resolution_clock::now();
 
-        if (exact_solution_)
-            evaluateExactError(level, exact_solution);
+        if (exact_solution_) {
+            exact_errors_.push_back(
+                evaluateExactError(level.grid(), level.solution(), analytical_solution_host_, level.residual()));
+        }
 
         auto end_check_exact_error = std::chrono::high_resolution_clock::now();
         t_check_exact_error_ += std::chrono::duration<double>(end_check_exact_error - start_check_exact_error).count();
@@ -315,8 +307,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solveMultigrid(double
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& initial_residual_norm,
                                                                     double& current_residual_norm,
-                                                                    double& current_relative_residual_norm,
-                                                                    HostConstVector<double> exact_solution)
+                                                                    double& current_relative_residual_norm)
 {
     Level<DomainGeometry, DensityProfileCoefficients>& level = levels_[0];
 
@@ -382,8 +373,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
         LIKWID_STOP("Solver");
         auto start_check_exact_error = std::chrono::high_resolution_clock::now();
 
-        if (exact_solution_)
-            exact_errors_.push_back(computeExactError(level, pcg_solution_, level.residual(), exact_solution));
+        if (exact_solution_) {
+            exact_errors_.push_back(
+                evaluateExactError(level.grid(), pcg_solution_, analytical_solution_host_, level.residual()));
+        }
 
         auto end_check_exact_error = std::chrono::high_resolution_clock::now();
         t_check_exact_error_ += std::chrono::duration<double>(end_check_exact_error - start_check_exact_error).count();
@@ -539,46 +532,44 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolation(in
     assert(std::ssize(fine_values) == fineGrid.numberOfNodes());
     assert(std::ssize(coarse_values) == coarseGrid.numberOfNodes());
 
-#pragma omp parallel
-    {
-/* Circluar Indexing Section */
-/* For loop matches circular access pattern */
-#pragma omp for nowait
-        for (int i_r = 0; i_r < fineGrid.numberSmootherCircles(); i_r++) {
-            int i_r_coarse = i_r / 2;
-            for (int i_theta = 0; i_theta < fineGrid.ntheta(); i_theta++) {
-                int i_theta_coarse = i_theta / 2;
+    /* We split the loops into two regions to better respect the */
+    /* access patterns of the smoother and improve cache locality. */
 
-                if (i_r & 1 || i_theta & 1) {
-                    fine_values[fineGrid.index(i_r, i_theta)] *= 4.0 / 3.0;
-                }
-                else {
-                    int fine_idx          = fineGrid.index(i_r, i_theta);
-                    int coarse_idx        = coarseGrid.index(i_r_coarse, i_theta_coarse);
-                    fine_values[fine_idx] = (4.0 * fine_values[fine_idx] - coarse_values[coarse_idx]) / 3.0;
-                }
+    /* Circular Indexing Section */
+    /* For loop matches circular access pattern */
+    Kokkos::parallel_for(
+        "Extrapolation: Apply Extrapolation (Circular)",
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
+            {0, 0}, {fineGrid.numberSmootherCircles(), fineGrid.ntheta()}),
+        KOKKOS_LAMBDA(const int i_r, const int i_theta) {
+            const int fine_idx = fineGrid.index(i_r, i_theta);
+            if (i_r & 1 || i_theta & 1) {
+                fine_values[fine_idx] *= 4.0 / 3.0;
             }
-        }
-
-/* Radial Indexing Section */
-/* For loop matches radial access pattern */
-#pragma omp for nowait
-        for (int i_theta = 0; i_theta < fineGrid.ntheta(); i_theta++) {
-            int i_theta_coarse = i_theta / 2;
-            for (int i_r = fineGrid.numberSmootherCircles(); i_r < fineGrid.nr(); i_r++) {
-                int i_r_coarse = i_r / 2;
-
-                if (i_r & 1 || i_theta & 1) {
-                    fine_values[fineGrid.index(i_r, i_theta)] *= 4.0 / 3.0;
-                }
-                else {
-                    int fine_idx          = fineGrid.index(i_r, i_theta);
-                    int coarse_idx        = coarseGrid.index(i_r_coarse, i_theta_coarse);
-                    fine_values[fine_idx] = (4.0 * fine_values[fine_idx] - coarse_values[coarse_idx]) / 3.0;
-                }
+            else {
+                const int coarse_idx  = coarseGrid.index(i_r / 2, i_theta / 2);
+                fine_values[fine_idx] = (4.0 * fine_values[fine_idx] - coarse_values[coarse_idx]) / 3.0;
             }
-        }
-    }
+        });
+
+    /* Radial Indexing Section */
+    /* For loop matches radial access pattern */
+    Kokkos::parallel_for(
+        "Extrapolation: Apply Extrapolation (Radial)",
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, fineGrid.numberSmootherCircles()},
+                                                                                  {fineGrid.ntheta(), fineGrid.nr()}),
+        KOKKOS_LAMBDA(const int i_theta, const int i_r) {
+            const int fine_idx = fineGrid.index(i_r, i_theta);
+            if (i_r & 1 || i_theta & 1) {
+                fine_values[fine_idx] *= 4.0 / 3.0;
+            }
+            else {
+                const int coarse_idx  = coarseGrid.index(i_r / 2, i_theta / 2);
+                fine_values[fine_idx] = (4.0 * fine_values[fine_idx] - coarse_values[coarse_idx]) / 3.0;
+            }
+        });
+
+    Kokkos::fence();
 }
 
 // =============================================================================
@@ -601,33 +592,61 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::initRhsHierarchy(Host
 // =============================================================================
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::evaluateExactError(
-    Level<DomainGeometry, DensityProfileCoefficients>& level, HostConstVector<double> exact_solution)
+std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::evaluateExactError(
+    const PolarGrid<DefaultMemorySpace>& grid, HostConstVector<double> discrete_solution,
+    HostConstVector<double> analytical_solution_host, HostVector<double> error)
 {
+    // Transfer the exact solution values from host to device memory for error computation.
+    Kokkos::deep_copy(error, analytical_solution_host_);
+
+    // Compute the error as the difference between the exact and numerical solutions.
+    subtract(error, discrete_solution);
+
     // Compute the weighted L2 norm and infinity norm of the error between the numerical and exact solution.
     // The results are stored as a pair: (weighted L2 error, infinity error).
-    exact_errors_.push_back(computeExactError(level, level.solution(), level.residual(), exact_solution));
+    const double weighted_euclidean_error = l2_norm(HostConstVector<double>(error)) / std::sqrt(grid.numberOfNodes());
+    const double infinity_error           = infinity_norm(HostConstVector<double>(error));
+
+    return std::make_pair(weighted_euclidean_error, infinity_error);
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::computeExactError(
-    Level<DomainGeometry, DensityProfileCoefficients>& level, HostConstVector<double> solution,
-    HostVector<double> error, HostConstVector<double> exact_solution)
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::computeAnalyticalSolutionOnHost(
+    const PolarGrid<Kokkos::HostSpace>& grid, HostVector<double> analytical_solution_host,
+    const ExactSolution& exact_solution)
 {
-    const PolarGrid<Kokkos::HostSpace> grid(level.grid());
+    assert(std::ssize(analytical_solution_host) == grid.numberOfNodes());
 
-    assert(solution.size() == error.size());
-    assert(std::ssize(solution) == grid.numberOfNodes());
+    /* We split the loops into two regions to better respect the */
+    /* access patterns of the smoother and improve cache locality. */
 
-    Kokkos::deep_copy(error, solution);
-    // Compute the error as the difference between exact and numerical solution
-    subtract(error, exact_solution);
+    // The For loop matches circular access pattern */
+    Kokkos::parallel_for(
+        "Analytical Solution: Compute Values on Host (Circular)",
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Host parallel loop
+            {0, 0}, // Starting index
+            {grid.numberSmootherCircles(), grid.ntheta()}), // Ending index
+        [&](const int i_r, const int i_theta) {
+            const int index                 = grid.index(i_r, i_theta);
+            const double radius             = grid.radius(i_r);
+            const double theta              = grid.theta(i_theta);
+            analytical_solution_host[index] = exact_solution.exact_solution(radius, theta);
+        });
 
-    HostConstVector<double> c_error = error;
-    double weighted_euclidean_error = l2_norm(c_error) / std::sqrt(grid.numberOfNodes());
-    double infinity_error           = infinity_norm(c_error);
+    /* For loop matches radial access pattern */
+    Kokkos::parallel_for(
+        "Analytical Solution: Compute Values on Host (Radial)",
+        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Host parallel loop
+            {0, grid.numberSmootherCircles()}, // Starting index
+            {grid.ntheta(), grid.nr()}), // Ending index
+        [&](const int i_theta, const int i_r) {
+            const int index                 = grid.index(i_r, i_theta);
+            const double radius             = grid.radius(i_r);
+            const double theta              = grid.theta(i_theta);
+            analytical_solution_host[index] = exact_solution.exact_solution(radius, theta);
+        });
 
-    return std::make_pair(weighted_euclidean_error, infinity_error);
+    /* Kokkos::fence() is not needed here since everything is computed on the host */
 }
 
 // =============================================================================
@@ -656,7 +675,7 @@ bool GMGPolar<DomainGeometry, DensityProfileCoefficients>::converged(double resi
 // =============================================================================
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printIterationHeader(const ExactSolution* exact_solution)
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printIterationHeader(bool is_exact_solution_provided)
 {
     if (verbose_ <= 0)
         return;
@@ -674,7 +693,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printIterationHeader(
         else
             std::cout << std::setw(15 + table_spacing) << "||r_k||/||rhs||";
     }
-    if (exact_solution != nullptr) {
+    if (is_exact_solution_provided) {
         std::cout << std::setw(12 + table_spacing) << "||u-u_k||_l2";
         std::cout << std::setw(13 + table_spacing) << "||u-u_k||_inf";
     }
@@ -686,7 +705,7 @@ template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoeff
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printIterationInfo(int iteration,
                                                                               double current_residual_norm,
                                                                               double current_relative_residual_norm,
-                                                                              const ExactSolution* exact_solution)
+                                                                              bool is_exact_solution_provided)
 {
     if (verbose_ <= 0)
         return;
@@ -698,7 +717,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printIterationInfo(in
         std::cout << std::setw(9 + table_spacing + 2) << current_residual_norm;
         std::cout << std::setw(15 + table_spacing) << current_relative_residual_norm;
     }
-    if (exact_solution != nullptr) {
+    if (is_exact_solution_provided) {
         std::cout << std::setw(12 + table_spacing) << exact_errors_.back().first;
         std::cout << std::setw(13 + table_spacing) << exact_errors_.back().second;
     }
