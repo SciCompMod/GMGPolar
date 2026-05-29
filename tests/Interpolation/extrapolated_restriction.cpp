@@ -61,8 +61,8 @@ TEST(ExtrapolatedRestrictionTest, ExtrapolatedRestrictionMatchesStencil)
 
     for (int i_r_coarse = 0; i_r_coarse < coarse_grid.nr(); ++i_r_coarse) {
         for (int i_theta_coarse = 0; i_theta_coarse < coarse_grid.ntheta(); ++i_theta_coarse) {
-            double expected = expected_extrapolated_restriction_value(h_fine_grid, h_coarse_grid, fine_values, i_r_coarse,
-                                                                      i_theta_coarse);
+            double expected = expected_extrapolated_restriction_value(h_fine_grid, h_coarse_grid, fine_values,
+                                                                      i_r_coarse, i_theta_coarse);
             double got      = coarse_result[h_coarse_grid.index(i_r_coarse, i_theta_coarse)];
             ASSERT_NEAR(expected, got, 1e-10) << "Mismatch at (" << i_r_coarse << ", " << i_theta_coarse << ")";
         }

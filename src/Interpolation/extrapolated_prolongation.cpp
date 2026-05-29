@@ -87,8 +87,7 @@ static KOKKOS_INLINE_FUNCTION void fineNodeExtrapolatedProlongation(const int i_
 
 void Interpolation::applyExtrapolatedProlongation(const PolarGrid<DefaultMemorySpace>& coarse_grid,
                                                   const PolarGrid<DefaultMemorySpace>& fine_grid,
-                                                  Vector<double> fine_result,
-                                                  ConstVector<double> coarse_values) const
+                                                  Vector<double> fine_result, ConstVector<double> coarse_values) const
 {
     assert(std::ssize(coarse_values) == coarse_grid.numberOfNodes());
     assert(std::ssize(fine_result) == fine_grid.numberOfNodes());
