@@ -36,7 +36,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     // ---------------------------------------------------------- //
     // Building PolarGrid and LevelCache for all multigrid levels //
     // ---------------------------------------------------------- //
-    number_of_levels_ = chooseNumberOfLevels(grid_); /* Implementation below */
+    number_of_levels_ = chooseNumberOfLevels(grid_);
     levels_.clear();
     levels_.reserve(number_of_levels_);
 
