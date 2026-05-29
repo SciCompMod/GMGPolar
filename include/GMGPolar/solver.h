@@ -590,7 +590,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::initRhsHierarchy(Host
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::evaluateExactError(
-    const PolarGrid<Kokkos::HostSpace>& grid, HostConstVector<double> discrete_solution, HostConstVector<double> analytical_solution_host,
+    const PolarGrid<DefaultMemorySpace>& grid, HostConstVector<double> discrete_solution, HostConstVector<double> analytical_solution_host,
     HostVector<double> error)
 {
     // Transfer the exact solution values from host to device memory for error computation.
