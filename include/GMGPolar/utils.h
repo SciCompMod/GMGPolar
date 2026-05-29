@@ -58,7 +58,6 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedProlongat
     interpolation_->applyExtrapolatedProlongation(current_grid, previous_grid, result, x);
 
     Kokkos::deep_copy(result_host, result);
-    Kokkos::deep_copy(x_host, x);
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
