@@ -46,7 +46,6 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     levels_.emplace_back(0, std::move(finest_grid), std::move(finest_levelCache), extrapolation_, FMG_, PCG_FMG_);
 
     for (int level_depth = 1; level_depth < number_of_levels_; level_depth++) {
-
         auto current_grid =
             std::make_unique<PolarGrid<DefaultMemorySpace>>(coarseningGrid(levels_[level_depth - 1].grid()));
         auto current_levelCache = std::make_unique<LevelCache<DomainGeometry, DensityProfileCoefficients>>(
