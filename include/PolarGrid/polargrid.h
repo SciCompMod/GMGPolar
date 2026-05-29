@@ -22,6 +22,7 @@
 namespace gmgpolar
 {
 
+// Template to be removed after porting is completed
 template <class MemorySpace>
 class PolarGrid
 {
@@ -70,6 +71,7 @@ public:
 
     KOKKOS_DEFAULTED_FUNCTION PolarGrid& operator=(const PolarGrid&) = default;
 
+    // Friend of class on a different memory space for easy copying
     template <class>
     friend class PolarGrid;
 
