@@ -34,7 +34,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     }
 
     // ---------------------------------------------------------- //
-    // Building PolarGrid<Kokkos::HostSpace> and LevelCache for all multigrid levels //
+    // Building PolarGrid and LevelCache for all multigrid levels //
     // ---------------------------------------------------------- //
     number_of_levels_ = chooseNumberOfLevels(grid_); /* Implementation below */
     levels_.clear();
