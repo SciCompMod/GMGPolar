@@ -104,8 +104,8 @@ public:
     KOKKOS_FUNCTION int* column_indices_data() const;
     KOKKOS_FUNCTION int* row_start_indices_data() const;
 
-    template <typename U>
-    friend std::ostream& operator<<(std::ostream& stream, const SparseMatrixCSR<U, MemorySpace>& matrix);
+    template <typename U, class MemorySpace2>
+    friend std::ostream& operator<<(std::ostream& stream, const SparseMatrixCSR<U, MemorySpace2>& matrix);
 
     template <class, class>
     friend class SparseMatrixCSR;
