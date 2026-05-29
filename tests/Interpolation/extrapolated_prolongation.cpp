@@ -50,8 +50,8 @@ TEST(ExtrapolatedProlongationTest, ExtrapolatedProlongationMatchesStencil)
     PolarGrid<DefaultMemorySpace> fine_grid(fine_radii, fine_angles);
     PolarGrid<DefaultMemorySpace> coarse_grid = coarseningGrid(fine_grid);
 
-    PolarGrid<DefaultMemorySpace> h_fine_grid(fine_grid);
-    PolarGrid<DefaultMemorySpace> h_coarse_grid(coarse_grid);
+    PolarGrid<Kokkos::HostSpace> h_fine_grid(fine_grid);
+    PolarGrid<Kokkos::HostSpace> h_coarse_grid(coarse_grid);
 
     Interpolation I(/*DirBC*/ true);
 
