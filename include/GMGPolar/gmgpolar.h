@@ -29,7 +29,7 @@ public:
     // - grid: Cartesian mesh discretizing the computational domain.
     // - domain_geometry: Mapping from the reference domain to the physical domain \Omega.
     // - density_profile_coefficients: Coefficients \alpha and \beta defining the PDE.
-    GMGPolar(const PolarGrid& grid, const DomainGeometry& domain_geometry,
+    GMGPolar(const PolarGrid<Kokkos::HostSpace>& grid, const DomainGeometry& domain_geometry,
              const DensityProfileCoefficients& density_profile_coefficients)
         : IGMGPolar(grid)
         , domain_geometry_(domain_geometry)
@@ -66,7 +66,7 @@ public:
     HostConstVector<double> solution() const;
 
     // Return the underlying cartesian mesh used for discretization.
-    const PolarGrid& grid() const;
+    const PolarGrid<Kokkos::HostSpace>& grid() const;
 
     /* ---------------------------------------------------------------------- */
     /* Diagnostics & statistics                                               */
@@ -137,10 +137,10 @@ public: // Public due to cuda restrictions
     /* ---------------------------------------------------- */
     /* Compute exact error if an exact solution is provided */
     // The results are stored as a pair: (weighted L2 error, infinity error).
-    std::pair<double, double> evaluateExactError(const PolarGrid& grid, HostConstVector<double> discrete_solution,
+    std::pair<double, double> evaluateExactError(const PolarGrid<Kokkos::HostSpace>& grid, HostConstVector<double> discrete_solution,
                                                  HostConstVector<double> analytical_solution_host,
                                                  HostVector<double> error);
-    void computeAnalyticalSolutionOnHost(const PolarGrid& grid, HostVector<double> analytical_solution_host,
+    void computeAnalyticalSolutionOnHost(const PolarGrid<Kokkos::HostSpace>& grid, HostVector<double> analytical_solution_host,
                                          const ExactSolution& exact_solution);
 
     /* --------------- */
@@ -157,8 +157,8 @@ public: // Public due to cuda restrictions
 private:
     /* --------------- */
     /* Setup Functions */
-    int chooseNumberOfLevels(const PolarGrid& finest_grid);
-    bool checkUniformRefinement(const PolarGrid& grid, double tolerance) const;
+    int chooseNumberOfLevels(const PolarGrid<Kokkos::HostSpace>& finest_grid);
+    bool checkUniformRefinement(const PolarGrid<Kokkos::HostSpace>& grid, double tolerance) const;
 
     /* --------------- */
     /* Solve Functions */
@@ -182,7 +182,8 @@ private:
 
     /* ----------------- */
     /* Print information */
-    void printSettings(const PolarGrid& finest_grid, const PolarGrid& coarsest_grid) const;
+    void printSettings(const PolarGrid<Kokkos::HostSpace>& finest_grid,
+                       const PolarGrid<Kokkos::HostSpace>& coarsest_grid) const;
     void printIterationHeader(bool is_exact_solution_provided);
     void printIterationInfo(int iteration, double current_residual_norm, double current_relative_residual_norm,
                             bool is_exact_solution_provided);
@@ -213,7 +214,7 @@ private:
 
     /* ------------- */
     /* Visualization */
-    void writeToVTK(const std::filesystem::path& file_path, const PolarGrid& grid);
+    void writeToVTK(const std::filesystem::path& file_path, const PolarGrid<Kokkos::HostSpace>& grid);
     void writeToVTK(const std::filesystem::path& file_path,
                     const Level<DomainGeometry, DensityProfileCoefficients>& level,
                     HostConstVector<double> grid_function);

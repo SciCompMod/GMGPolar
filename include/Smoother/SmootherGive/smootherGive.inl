@@ -1,7 +1,7 @@
 #pragma once
 
 template <class LevelCacheType>
-SmootherGive<LevelCacheType>::SmootherGive(const PolarGrid& grid, const LevelCacheType& level_cache,
+SmootherGive<LevelCacheType>::SmootherGive(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
                                            bool DirBC_Interior)
     : Smoother<LevelCacheType>(grid, level_cache, DirBC_Interior)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
@@ -41,8 +41,13 @@ SmootherGive<LevelCacheType>::SmootherGive(const PolarGrid& grid, const LevelCac
 //   - The system is then solved in-place in temp, and the results
 //     are copied back to x.
 template <class LevelCacheType>
-void SmootherGive<LevelCacheType>::smoothing(HostVector<double> x, HostConstVector<double> rhs, HostVector<double> temp)
+void SmootherGive<LevelCacheType>::smoothing(HostVector<double> h_x, HostConstVector<double> h_rhs,
+                                             HostVector<double> h_temp)
 {
+    auto x    = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_x);
+    auto rhs  = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs);
+    auto temp = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_temp);
+
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
@@ -59,4 +64,7 @@ void SmootherGive<LevelCacheType>::smoothing(HostVector<double> x, HostConstVect
 
     applyAscOrthoWhiteRadialSection(x, rhs, temp);
     solveWhiteRadialSection(x, temp);
+
+    Kokkos::deep_copy(h_x, x);
+    Kokkos::deep_copy(h_temp, temp);
 }

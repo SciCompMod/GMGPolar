@@ -105,7 +105,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
         if (std::ssize(analytical_solution_host_) != level.grid().numberOfNodes()) {
             analytical_solution_host_ = HostVector<double>("Analytical Solution", level.solution().size());
         }
-        computeAnalyticalSolutionOnHost(level.grid(), analytical_solution_host_, *exact_solution_);
+        const PolarGrid<Kokkos::HostSpace> grid(level.grid());
+        computeAnalyticalSolutionOnHost(grid, analytical_solution_host_, *exact_solution_);
 
         // Evaluate the error of the initial approximation against the exact solution, if provided.
         // We use level.residual() as a temporary vector to store the error values.
@@ -522,8 +523,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolation(in
                                                                               HostVector<double> fine_values,
                                                                               HostConstVector<double> coarse_values)
 {
-    const PolarGrid& fineGrid   = levels_[current_level].grid();
-    const PolarGrid& coarseGrid = levels_[current_level + 1].grid();
+    const PolarGrid<Kokkos::HostSpace> fineGrid(levels_[current_level].grid());
+    const PolarGrid<Kokkos::HostSpace> coarseGrid(levels_[current_level + 1].grid());
 
     assert(std::ssize(fine_values) == fineGrid.numberOfNodes());
     assert(std::ssize(coarse_values) == coarseGrid.numberOfNodes());
@@ -589,7 +590,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::initRhsHierarchy(Host
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::evaluateExactError(
-    const PolarGrid& grid, HostConstVector<double> discrete_solution, HostConstVector<double> analytical_solution_host,
+    const PolarGrid<Kokkos::HostSpace>& grid, HostConstVector<double> discrete_solution, HostConstVector<double> analytical_solution_host,
     HostVector<double> error)
 {
     // Transfer the exact solution values from host to device memory for error computation.
@@ -608,7 +609,7 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::computeAnalyticalSolutionOnHost(
-    const PolarGrid& grid, HostVector<double> analytical_solution_host, const ExactSolution& exact_solution)
+    const PolarGrid<Kokkos::HostSpace>& grid, HostVector<double> analytical_solution_host, const ExactSolution& exact_solution)
 {
     assert(std::ssize(analytical_solution_host) == grid.numberOfNodes());
 

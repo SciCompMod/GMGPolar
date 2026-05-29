@@ -2,7 +2,7 @@
 using namespace gmgpolar;
 
 CartesianR2_SonnendruckerGyro_ShafranovGeometry::CartesianR2_SonnendruckerGyro_ShafranovGeometry(
-    PolarGrid const& grid, double Rmax, double elongation_kappa, double shift_delta)
+    PolarGrid<Kokkos::HostSpace> const& grid, double Rmax, double elongation_kappa, double shift_delta)
     : grid_(grid)
     , Rmax(Rmax)
     , elongation_kappa(elongation_kappa)

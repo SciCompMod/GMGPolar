@@ -46,7 +46,7 @@ TEST(OperatorATest, applyA_DirBC_Interior)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -55,8 +55,8 @@ TEST(OperatorATest, applyA_DirBC_Interior)
     ResidualGive residualGive_operator(level.grid(), level.levelCache(), DirBC_Interior);
     ResidualTake residualTake_operator(level.grid(), level.levelCache(), DirBC_Interior);
 
-    HostVector<double> x   = generate_random_sample_data(level.grid(), 42);
-    HostVector<double> rhs = generate_random_sample_data(level.grid(), 69);
+    HostVector<double> x   = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
+    HostVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
 
     HostVector<double> result_Give("result_Give", level.grid().numberOfNodes());
     residualGive_operator.computeResidual(result_Give, rhs, x);
@@ -98,7 +98,7 @@ TEST(OperatorATest, applyA_AcrossOrigin)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -107,8 +107,8 @@ TEST(OperatorATest, applyA_AcrossOrigin)
     ResidualGive residualGive_operator(level.grid(), level.levelCache(), DirBC_Interior);
     ResidualTake residualTake_operator(level.grid(), level.levelCache(), DirBC_Interior);
 
-    HostVector<double> x   = generate_random_sample_data(level.grid(), 42);
-    HostVector<double> rhs = generate_random_sample_data(level.grid(), 69);
+    HostVector<double> x   = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
+    HostVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
 
     HostVector<double> result_Give("result_Give", level.grid().numberOfNodes());
     residualGive_operator.computeResidual(result_Give, rhs, x);

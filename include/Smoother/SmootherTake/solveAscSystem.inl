@@ -1,13 +1,13 @@
 #pragma once
 
 template <class LevelCacheType>
-void SmootherTake<LevelCacheType>::solveBlackCircleSection(HostVector<double> x, HostVector<double> temp)
+void SmootherTake<LevelCacheType>::solveBlackCircleSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid& grid = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
 
-    int start                         = 0;
-    int end                           = grid.numberCircularSmootherNodes();
-    HostVector<double> circle_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
+    int start                     = 0;
+    int end                       = grid.numberCircularSmootherNodes();
+    Vector<double> circle_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     const bool is_inner_circle_black = grid.numberSmootherCircles() % 2 != 0;
 
@@ -18,7 +18,7 @@ void SmootherTake<LevelCacheType>::solveBlackCircleSection(HostVector<double> x,
 
     // Inner Boundary Solve
     if (is_inner_circle_black) {
-        HostVector<double> inner_boundary = Kokkos::subview(temp, Kokkos::make_pair(0, grid.ntheta()));
+        Vector<double> inner_boundary = Kokkos::subview(temp, Kokkos::make_pair(0, grid.ntheta()));
         inner_boundary_solver_.solveInPlace(inner_boundary);
     }
 
@@ -27,7 +27,7 @@ void SmootherTake<LevelCacheType>::solveBlackCircleSection(HostVector<double> x,
     const int num_black_circles   = (grid.numberSmootherCircles() - start_black_circles + 1) / 2;
     Kokkos::parallel_for(
         "SmootherTake: moveUpdatedValues (Black Circular)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, 0}, // Starting point of the index space
             {num_black_circles, grid.ntheta()} // Ending point of the index space
             ),
@@ -41,13 +41,13 @@ void SmootherTake<LevelCacheType>::solveBlackCircleSection(HostVector<double> x,
 }
 
 template <class LevelCacheType>
-void SmootherTake<LevelCacheType>::solveWhiteCircleSection(HostVector<double> x, HostVector<double> temp)
+void SmootherTake<LevelCacheType>::solveWhiteCircleSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid& grid = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
 
-    int start                         = 0;
-    int end                           = grid.numberCircularSmootherNodes();
-    HostVector<double> circle_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
+    int start                     = 0;
+    int end                       = grid.numberCircularSmootherNodes();
+    Vector<double> circle_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     const bool is_inner_circle_white = grid.numberSmootherCircles() % 2 == 0;
 
@@ -58,7 +58,7 @@ void SmootherTake<LevelCacheType>::solveWhiteCircleSection(HostVector<double> x,
 
     // Inner Boundary Solve
     if (is_inner_circle_white) {
-        HostVector<double> inner_boundary = Kokkos::subview(temp, Kokkos::make_pair(0, grid.ntheta()));
+        Vector<double> inner_boundary = Kokkos::subview(temp, Kokkos::make_pair(0, grid.ntheta()));
         inner_boundary_solver_.solveInPlace(inner_boundary);
     }
 
@@ -67,7 +67,7 @@ void SmootherTake<LevelCacheType>::solveWhiteCircleSection(HostVector<double> x,
     const int num_white_circles   = (grid.numberSmootherCircles() - start_white_circles + 1) / 2;
     Kokkos::parallel_for(
         "SmootherTake: moveUpdatedValues (White Circular)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, 0}, // Starting point of the index space
             {num_white_circles, grid.ntheta()} // Ending point of the index space
             ),
@@ -81,13 +81,13 @@ void SmootherTake<LevelCacheType>::solveWhiteCircleSection(HostVector<double> x,
 }
 
 template <class LevelCacheType>
-void SmootherTake<LevelCacheType>::solveBlackRadialSection(HostVector<double> x, HostVector<double> temp)
+void SmootherTake<LevelCacheType>::solveBlackRadialSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid& grid = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
 
-    int start                         = grid.numberCircularSmootherNodes();
-    int end                           = grid.numberOfNodes();
-    HostVector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
+    int start                     = grid.numberCircularSmootherNodes();
+    int end                       = grid.numberOfNodes();
+    Vector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     // Tridiagonal Solve
     const int batch_offset = 0;
@@ -100,7 +100,7 @@ void SmootherTake<LevelCacheType>::solveBlackRadialSection(HostVector<double> x,
     const int num_black_radial_lines = grid.ntheta() / 2;
     Kokkos::parallel_for(
         "SmootherTake: moveUpdatedValues (Black Radial)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, grid.numberSmootherCircles()}, // Starting point of the index space
             {num_black_radial_lines, grid.nr()} // Ending point of the index space
             ),
@@ -114,13 +114,13 @@ void SmootherTake<LevelCacheType>::solveBlackRadialSection(HostVector<double> x,
 }
 
 template <class LevelCacheType>
-void SmootherTake<LevelCacheType>::solveWhiteRadialSection(HostVector<double> x, HostVector<double> temp)
+void SmootherTake<LevelCacheType>::solveWhiteRadialSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid& grid = Smoother<LevelCacheType>::grid_;
+    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
 
-    int start                         = grid.numberCircularSmootherNodes();
-    int end                           = grid.numberOfNodes();
-    HostVector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
+    int start                     = grid.numberCircularSmootherNodes();
+    int end                       = grid.numberOfNodes();
+    Vector<double> radial_section = Kokkos::subview(temp, Kokkos::make_pair(start, end));
 
     // Tridiagonal Solve
     const int batch_offset = 1;
@@ -133,7 +133,7 @@ void SmootherTake<LevelCacheType>::solveWhiteRadialSection(HostVector<double> x,
     const int num_white_radial_lines = grid.ntheta() / 2;
     Kokkos::parallel_for(
         "SmootherTake: moveUpdatedValues (White Radial)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, grid.numberSmootherCircles()}, // Starting point of the index space
             {num_white_radial_lines, grid.nr()} // Ending point of the index space
             ),

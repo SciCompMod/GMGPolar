@@ -26,7 +26,8 @@ template <class LevelCacheType>
 class DirectSolver
 {
 public:
-    explicit DirectSolver(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior)
+    explicit DirectSolver(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
+                          bool DirBC_Interior)
         : grid_(grid)
         , level_cache_(level_cache)
         , DirBC_Interior_(DirBC_Interior)
@@ -39,7 +40,7 @@ public:
     virtual void solveInPlace(HostVector<double> solution) = 0;
 
 protected:
-    const PolarGrid& grid_;
+    const PolarGrid<DefaultMemorySpace>& grid_;
     const LevelCacheType& level_cache_;
     const bool DirBC_Interior_;
 };

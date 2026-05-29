@@ -1,7 +1,8 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR2_ZoniShifted_CircularGeometry.h"
 using namespace gmgpolar;
 
-CartesianR2_ZoniShifted_CircularGeometry::CartesianR2_ZoniShifted_CircularGeometry(PolarGrid const& grid, double Rmax)
+CartesianR2_ZoniShifted_CircularGeometry::CartesianR2_ZoniShifted_CircularGeometry(
+    PolarGrid<Kokkos::HostSpace> const& grid, double Rmax)
     : grid_(grid)
     , Rmax(Rmax)
 {

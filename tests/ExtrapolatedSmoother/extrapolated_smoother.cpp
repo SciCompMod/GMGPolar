@@ -41,7 +41,7 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_DirBC_Interior)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -61,9 +61,9 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_DirBC_Interior)
     ExtrapolatedSmootherGive smootherGive_operator(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherTake smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior);
 
-    HostVector<double> rhs   = generate_random_sample_data(level.grid(), 69);
-    HostVector<double> start = generate_random_sample_data(level.grid(), 24);
-    HostVector<double> temp  = generate_random_sample_data(level.grid(), 8);
+    HostVector<double> rhs   = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
+    HostVector<double> start = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 24);
+    HostVector<double> temp  = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 8);
 
     HostVector<double> solution_Give("solution_Give", start.size());
     Kokkos::deep_copy(solution_Give, start);
@@ -98,7 +98,7 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_AcossOrigin)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -118,9 +118,9 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_AcossOrigin)
     ExtrapolatedSmootherGive smootherGive_operator(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherTake smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior);
 
-    HostVector<double> rhs   = generate_random_sample_data(level.grid(), 69);
-    HostVector<double> start = generate_random_sample_data(level.grid(), 24);
-    HostVector<double> temp  = generate_random_sample_data(level.grid(), 8);
+    HostVector<double> rhs   = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
+    HostVector<double> start = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 24);
+    HostVector<double> temp  = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 8);
 
     HostVector<double> solution_Give("solution_Give", start.size());
     Kokkos::deep_copy(solution_Give, start);
@@ -157,7 +157,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherDirBC_Interior)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -177,14 +177,14 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherDirBC_Interior)
     ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
-    HostConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    HostConstVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
     HostVector<double> discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
     HostVector<double> temp("temp", level.grid().numberOfNodes());
     HostVector<double> error("error", level.grid().numberOfNodes());
-    HostVector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
+    HostVector<double> smoother_solution = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -238,7 +238,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherAcrossOrigin)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -258,7 +258,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherAcrossOrigin)
     ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
-    HostConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    HostConstVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
     HostVector<double> discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
@@ -267,7 +267,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherAcrossOrigin)
 
     HostVector<double> error("error", level.grid().numberOfNodes());
 
-    HostVector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
+    HostVector<double> smoother_solution = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -320,7 +320,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherDirBC_Interior_SmallestGrid)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -340,7 +340,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherDirBC_Interior_SmallestGrid)
     ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
-    HostConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    HostConstVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
     HostVector<double> discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
@@ -349,7 +349,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherDirBC_Interior_SmallestGrid)
 
     HostVector<double> error("error", level.grid().numberOfNodes());
 
-    HostVector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
+    HostVector<double> smoother_solution = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -402,7 +402,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherAcrossOrigin_SmallestGrid)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -422,14 +422,14 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherAcrossOrigin_SmallestGrid)
     ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
-    HostConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    HostConstVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
     HostVector<double> discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
     HostVector<double> temp("temp", level.grid().numberOfNodes());
     HostVector<double> error("error", level.grid().numberOfNodes());
-    HostVector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
+    HostVector<double> smoother_solution = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -485,7 +485,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherTakeDirBC_Interior)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -505,14 +505,14 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherTakeDirBC_Interior)
     ResidualTake residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
-    HostConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    HostConstVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
     HostVector<double> discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
     HostVector<double> temp("temp", level.grid().numberOfNodes());
     HostVector<double> error("error", level.grid().numberOfNodes());
-    HostVector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
+    HostVector<double> smoother_solution = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -566,7 +566,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherTakeAcrossOrigin)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -586,14 +586,14 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherTakeAcrossOrigin)
     ResidualTake residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
-    HostConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    HostConstVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
     HostVector<double> discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
     HostVector<double> temp("temp", level.grid().numberOfNodes());
     HostVector<double> error("error", level.grid().numberOfNodes());
-    HostVector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
+    HostVector<double> smoother_solution = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -646,7 +646,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherTakeDirBC_Interior_SmallestGr
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -666,14 +666,14 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherTakeDirBC_Interior_SmallestGr
     ResidualTake residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
-    HostConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    HostConstVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
     HostVector<double> discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
     HostVector<double> temp("temp", level.grid().numberOfNodes());
     HostVector<double> error("error", level.grid().numberOfNodes());
-    HostVector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
+    HostVector<double> smoother_solution = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];
@@ -726,7 +726,7 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherTakeAcrossOrigin_SmallestGrid
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -746,14 +746,14 @@ TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherTakeAcrossOrigin_SmallestGrid
     ResidualTake residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
-    HostConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
+    HostConstVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
     HostVector<double> discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
     HostVector<double> temp("temp", level.grid().numberOfNodes());
     HostVector<double> error("error", level.grid().numberOfNodes());
-    HostVector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
+    HostVector<double> smoother_solution = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
     for (int i_r = 0; i_r < level.grid().nr(); i_r += 2) {
         for (int i_theta = 0; i_theta < level.grid().ntheta(); i_theta += 2) {
             smoother_solution[level.grid().index(i_r, i_theta)] = discrete_solution[level.grid().index(i_r, i_theta)];

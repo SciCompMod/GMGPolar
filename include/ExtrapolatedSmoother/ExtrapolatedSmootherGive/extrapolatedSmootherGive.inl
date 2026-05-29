@@ -1,7 +1,7 @@
 #pragma once
 
 template <class LevelCacheType>
-ExtrapolatedSmootherGive<LevelCacheType>::ExtrapolatedSmootherGive(const PolarGrid& grid,
+ExtrapolatedSmootherGive<LevelCacheType>::ExtrapolatedSmootherGive(const PolarGrid<DefaultMemorySpace>& grid,
                                                                    const LevelCacheType& level_cache,
                                                                    const bool DirBC_Interior)
     : ExtrapolatedSmoother<LevelCacheType>(grid, level_cache, DirBC_Interior)
@@ -42,13 +42,18 @@ ExtrapolatedSmootherGive<LevelCacheType>::ExtrapolatedSmootherGive(const PolarGr
 //   - The system is then solved in-place in temp, and the results
 //     are copied back to x.
 template <class LevelCacheType>
-void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(HostVector<double> x, HostConstVector<double> rhs,
-                                                                     HostVector<double> temp)
+void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(HostVector<double> h_x,
+                                                                     HostConstVector<double> h_rhs,
+                                                                     HostVector<double> h_temp)
 {
+    auto x    = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_x);
+    auto rhs  = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs);
+    auto temp = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_temp);
+
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
-    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid<DefaultMemorySpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
     /* We split the loops into two regions to better respect the */
     /* access patterns of the smoother and improve cache locality. */
@@ -56,7 +61,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(HostVector<
     // The For loop matches circular access pattern
     Kokkos::parallel_for(
         "ExtrapolatedSmootherGive: Init Temp (Circular)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>(
             {0, 0}, {grid.numberSmootherCircles(), grid.ntheta()}),
         KOKKOS_LAMBDA(const int i_r, const int i_theta) {
             const int index = grid.index(i_r, i_theta);
@@ -66,8 +71,8 @@ void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(HostVector<
     // The For loop matches radial access pattern
     Kokkos::parallel_for(
         "ExtrapolatedSmootherGive: Init Temp (Radial)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
-                                                                                  {grid.ntheta(), grid.nr()}),
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
+                                                                              {grid.ntheta(), grid.nr()}),
         KOKKOS_LAMBDA(const int i_theta, const int i_r) {
             const int index = grid.index(i_r, i_theta);
             temp[index]     = (i_r & 1 || i_theta & 1) ? rhs[index] : x[index];
@@ -86,4 +91,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(HostVector<
 
     applyAscOrthoWhiteRadialSection(x, rhs, temp);
     solveWhiteRadialSection(x, temp);
+
+    Kokkos::deep_copy(h_x, x);
+    Kokkos::deep_copy(h_temp, temp);
 }

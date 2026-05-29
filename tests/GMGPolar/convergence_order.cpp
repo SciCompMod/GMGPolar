@@ -160,7 +160,7 @@ std::vector<double> refine(std::vector<double> const& original_points)
 template <concepts::DensityProfileCoefficients DensityProfileCoefficients,
           concepts::BoundaryConditions BoundaryConditions, concepts::SourceTerm SourceTerm>
 std::tuple<double, double>
-get_gmgpolar_error(PolarGrid const& grid, CzarnyGeometry const& domain_geometry,
+get_gmgpolar_error(PolarGrid<Kokkos::HostSpace> const& grid, CzarnyGeometry const& domain_geometry,
                    DensityProfileCoefficients const& coefficients, BoundaryConditions const& boundary_conditions,
                    SourceTerm const& source_term, ExactSolution const& solution, ExtrapolationType extrapolation)
 {
@@ -224,8 +224,8 @@ void test_convergence(double non_uniformity)
     std::vector<double> radii_refined  = refine(radii);
     std::vector<double> angles_refined = refine(angles);
 
-    PolarGrid grid(radii, angles);
-    PolarGrid grid_refined(radii_refined, angles_refined);
+    PolarGrid<Kokkos::HostSpace> grid(radii, angles);
+    PolarGrid<Kokkos::HostSpace> grid_refined(radii_refined, angles_refined);
 
     const double alpha_jump = 0.0; // Unused value
     typename TestFixture::DensityProfileCoefficients coefficients(Rmax, alpha_jump);

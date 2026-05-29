@@ -11,7 +11,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::prolongation(int curr
     if (!interpolation_)
         throw std::runtime_error("Interpolation not initialized.");
 
-    interpolation_->applyProlongation(levels_[current_level].grid(), levels_[current_level - 1].grid(), result, x);
+    PolarGrid<Kokkos::HostSpace> current_grid(levels_[current_level].grid());
+    PolarGrid<Kokkos::HostSpace> previous_grid(levels_[current_level - 1].grid());
+    interpolation_->applyProlongation(current_grid, previous_grid, result, x);
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
@@ -22,7 +24,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::restriction(int curre
     if (!interpolation_)
         throw std::runtime_error("Interpolation not initialized.");
 
-    interpolation_->applyRestriction(levels_[current_level].grid(), levels_[current_level + 1].grid(), result, x);
+    PolarGrid<Kokkos::HostSpace> current_grid(levels_[current_level].grid());
+    PolarGrid<Kokkos::HostSpace> next_grid(levels_[current_level + 1].grid());
+    interpolation_->applyRestriction(current_grid, next_grid, result, x);
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
@@ -33,7 +37,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::injection(int current
     if (!interpolation_)
         throw std::runtime_error("Interpolation not initialized.");
 
-    interpolation_->applyInjection(levels_[current_level].grid(), levels_[current_level + 1].grid(), result, x);
+    PolarGrid<Kokkos::HostSpace> current_grid(levels_[current_level].grid());
+    PolarGrid<Kokkos::HostSpace> next_grid(levels_[current_level + 1].grid());
+    interpolation_->applyInjection(current_grid, next_grid, result, x);
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
@@ -45,8 +51,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedProlongat
     if (!interpolation_)
         throw std::runtime_error("Interpolation not initialized.");
 
-    interpolation_->applyExtrapolatedProlongation(levels_[current_level].grid(), levels_[current_level - 1].grid(),
-                                                  result, x);
+    PolarGrid<Kokkos::HostSpace> current_grid(levels_[current_level].grid());
+    PolarGrid<Kokkos::HostSpace> previous_grid(levels_[current_level - 1].grid());
+    interpolation_->applyExtrapolatedProlongation(current_grid, previous_grid, result, x);
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
@@ -58,8 +65,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedRestricti
     if (!interpolation_)
         throw std::runtime_error("Interpolation not initialized.");
 
-    interpolation_->applyExtrapolatedRestriction(levels_[current_level].grid(), levels_[current_level + 1].grid(),
-                                                 result, x);
+    PolarGrid<Kokkos::HostSpace> current_grid(levels_[current_level].grid());
+    PolarGrid<Kokkos::HostSpace> next_grid(levels_[current_level + 1].grid());
+    interpolation_->applyExtrapolatedRestriction(current_grid, next_grid, result, x);
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
@@ -71,7 +79,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::FMGInterpolation(int 
     if (!interpolation_)
         throw std::runtime_error("Interpolation not initialized.");
 
-    interpolation_->applyFMGInterpolation(levels_[current_level].grid(), levels_[current_level - 1].grid(), result, x);
+    PolarGrid<Kokkos::HostSpace> current_grid(levels_[current_level].grid());
+    PolarGrid<Kokkos::HostSpace> previous_grid(levels_[current_level - 1].grid());
+    interpolation_->applyFMGInterpolation(current_grid, previous_grid, result, x);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -92,7 +102,7 @@ HostConstVector<double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::so
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-const PolarGrid& GMGPolar<DomainGeometry, DensityProfileCoefficients>::grid() const
+const PolarGrid<Kokkos::HostSpace>& GMGPolar<DomainGeometry, DensityProfileCoefficients>::grid() const
 {
     return grid_;
 }
@@ -180,7 +190,7 @@ std::optional<double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::exac
 /* ---------------------------------------------------------------------- */
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(const std::filesystem::path& file_path,
-                                                                      const PolarGrid& grid)
+                                                                      const PolarGrid<Kokkos::HostSpace>& grid)
 {
     const auto filename = file_path.stem().string() + ".vtu";
 
@@ -243,7 +253,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(
     const std::filesystem::path& file_path, const Level<DomainGeometry, DensityProfileCoefficients>& level,
     HostConstVector<double> grid_function)
 {
-    const PolarGrid& grid = level.grid();
+    const PolarGrid<DefaultMemorySpace>& grid = level.grid();
 
     assert(std::ssize(grid_function) == grid.numberOfNodes());
 

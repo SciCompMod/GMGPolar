@@ -9,7 +9,8 @@ template <class LevelCacheType>
 class ResidualGive : public Residual<LevelCacheType>
 {
 public:
-    explicit ResidualGive(const PolarGrid& grid, const LevelCacheType& level_cache, const bool DirBC_Interior);
+    explicit ResidualGive(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
+                          const bool DirBC_Interior);
     ~ResidualGive() override = default;
 
     void applySystemOperator(HostVector<double> result, HostConstVector<double> x) const final;

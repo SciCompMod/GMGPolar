@@ -20,22 +20,23 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     // -------------------------------- //
     // Create the finest mesh (level 0) //
     // -------------------------------- //
-    auto finest_grid = std::make_unique<PolarGrid>(grid_);
+    auto finest_grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(grid_);
 
     if (paraview_)
-        writeToVTK("output_finest_grid", *finest_grid);
+        writeToVTK("output_finest_grid", grid_);
 
     if (extrapolation_ != ExtrapolationType::NONE) {
         const double precision = 1e-12;
-        if (!checkUniformRefinement(*finest_grid, precision)) {
-            std::cerr << "[Extrapolation Warning] Finest PolarGrid is not from a single uniform refinement.\n";
+        if (!checkUniformRefinement(grid_, precision)) {
+            std::cerr << "[Extrapolation Warning] Finest PolarGrid<Kokkos::HostSpace> is not from a single uniform "
+                         "refinement.\n";
         }
     }
 
     // ---------------------------------------------------------- //
     // Building PolarGrid and LevelCache for all multigrid levels //
     // ---------------------------------------------------------- //
-    number_of_levels_ = chooseNumberOfLevels(*finest_grid); /* Implementation below */
+    number_of_levels_ = chooseNumberOfLevels(grid_);
     levels_.clear();
     levels_.reserve(number_of_levels_);
 
@@ -45,7 +46,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     levels_.emplace_back(0, std::move(finest_grid), std::move(finest_levelCache), extrapolation_, FMG_, PCG_FMG_);
 
     for (int level_depth = 1; level_depth < number_of_levels_; level_depth++) {
-        auto current_grid       = std::make_unique<PolarGrid>(coarseningGrid(levels_[level_depth - 1].grid()));
+        auto current_grid =
+            std::make_unique<PolarGrid<DefaultMemorySpace>>(coarseningGrid(levels_[level_depth - 1].grid()));
         auto current_levelCache = std::make_unique<LevelCache<DomainGeometry, DensityProfileCoefficients>>(
             *current_grid, density_profile_coefficients_, domain_geometry_, cache_density_profile_coefficients_,
             cache_domain_geometry_);
@@ -56,16 +58,21 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     auto end_setup_createLevels = std::chrono::high_resolution_clock::now();
     t_setup_createLevels_ = std::chrono::duration<double>(end_setup_createLevels - start_setup_createLevels).count();
 
-    if (paraview_)
-        writeToVTK("output_coarsest_grid", levels_.back().grid());
+    if (paraview_) {
+        PolarGrid<Kokkos::HostSpace> coarsestGrid(levels_.back().grid());
+        writeToVTK("output_coarsest_grid", coarsestGrid);
+    }
 
     // ------------------------------------- //
     // Initialize the interpolation operator //
     // ------------------------------------- //
     interpolation_ = std::make_unique<Interpolation>(DirBC_Interior_);
 
-    if (verbose_ > 0)
-        printSettings(levels_[0].grid(), levels_[number_of_levels_ - 1].grid());
+    if (verbose_ > 0) {
+        PolarGrid<Kokkos::HostSpace> coarsestGrid(levels_[0].grid());
+        PolarGrid<Kokkos::HostSpace> finestGrid(levels_[number_of_levels_ - 1].grid());
+        printSettings(finestGrid, coarsestGrid);
+    }
 
     // ------------------------------- //
     // PCG-specific vector allocations //
@@ -147,7 +154,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-int GMGPolar<DomainGeometry, DensityProfileCoefficients>::chooseNumberOfLevels(const PolarGrid& finestGrid)
+int GMGPolar<DomainGeometry, DensityProfileCoefficients>::chooseNumberOfLevels(
+    const PolarGrid<Kokkos::HostSpace>& finestGrid)
 {
     constexpr int minRadialNodes      = 5;
     constexpr int minAngularDivisions = 4;
@@ -190,14 +198,16 @@ template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoeff
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
     const Level<DomainGeometry, DensityProfileCoefficients>& level, HostVector<double> rhs_f)
 {
-    const PolarGrid& grid = level.grid();
+    const PolarGrid<Kokkos::HostSpace> grid(level.grid());
     assert(std::ssize(rhs_f) == grid.numberOfNodes());
 
     const bool DirBC_Interior = DirBC_Interior_;
 
     if (level.levelCache().cacheDomainGeometry()) {
         /* DomainGeometry is cached */
-        const auto& detDF_cache = level.levelCache().detDF();
+        const ConstVector<double>& detDF_cache = level.levelCache().detDF();
+        HostConstVector<double> detDF_cache_host =
+            Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, detDF_cache);
 
         // ---------------------------------------------- //
         // Discretize rhs values (circular index section) //
@@ -212,7 +222,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
                     const double h2    = grid.radialSpacing(i_r);
                     const double k1    = grid.angularSpacing(i_theta - 1);
                     const double k2    = grid.angularSpacing(i_theta);
-                    const double detDF = detDF_cache[grid.index(i_r, i_theta)];
+                    const double detDF = detDF_cache_host[grid.index(i_r, i_theta)];
                     rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * std::fabs(detDF);
                 }
                 else if (i_r == 0 && DirBC_Interior) {
@@ -236,7 +246,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
                     const double h2    = grid.radialSpacing(i_r);
                     const double k1    = grid.angularSpacing(i_theta - 1);
                     const double k2    = grid.angularSpacing(i_theta);
-                    const double detDF = detDF_cache[grid.index(i_r, i_theta)];
+                    const double detDF = detDF_cache_host[grid.index(i_r, i_theta)];
                     rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * std::fabs(detDF);
                 }
                 else if (i_r == 0 && DirBC_Interior) {
@@ -332,7 +342,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::build_rhs_f(
     const Level<DomainGeometry, DensityProfileCoefficients>& level, HostVector<double> rhs_f,
     const BoundaryConditions& boundary_conditions, const SourceTerm& source_term)
 {
-    const PolarGrid& grid = level.grid();
+    const PolarGrid<Kokkos::HostSpace> grid(level.grid());
     assert(std::ssize(rhs_f) == grid.numberOfNodes());
 
     const bool DirBC_Interior = DirBC_Interior_;
@@ -383,8 +393,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::build_rhs_f(
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printSettings(const PolarGrid& finest_grid,
-                                                                         const PolarGrid& coarsest_grid) const
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printSettings(
+    const PolarGrid<Kokkos::HostSpace>& finest_grid, const PolarGrid<Kokkos::HostSpace>& coarsest_grid) const
 {
 
     std::cout << "------------------------------\n";
@@ -582,8 +592,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printSettings(const P
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-bool GMGPolar<DomainGeometry, DensityProfileCoefficients>::checkUniformRefinement(const PolarGrid& grid,
-                                                                                  double tolerance) const
+bool GMGPolar<DomainGeometry, DensityProfileCoefficients>::checkUniformRefinement(
+    const PolarGrid<Kokkos::HostSpace>& grid, double tolerance) const
 {
     // Radial direction
     for (int i_r = 1; i_r < grid.nr() - 1; i_r += 2) {
