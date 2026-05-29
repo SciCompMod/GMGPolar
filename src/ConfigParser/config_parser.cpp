@@ -233,7 +233,7 @@ bool ConfigParser::parse(int argc, char* argv[])
         throw std::runtime_error("Invalid beta coefficient.");
     }
 
-    // Construct PolarGrid<Kokkos::HostSpace>
+    // Construct PolarGrid
     double refinement_radius               = alpha_jump;
     std::optional<double> splitting_radius = std::nullopt;
     grid_ = PolarGrid<Kokkos::HostSpace>(R0, Rmax, nr_exp, ntheta_exp, refinement_radius, anisotropic_factor, divideBy2,
