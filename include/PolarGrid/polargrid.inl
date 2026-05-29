@@ -45,7 +45,7 @@ PolarGrid<MemorySpace>::PolarGrid(const PolarGrid<MemorySpace2>& other)
 
 template <class MemorySpace>
 template <class MemorySpace2>
-PolarGrid& PolarGrid<MemorySpace>::operator=(const PolarGrid<MemorySpace2>& other)
+PolarGrid<MemorySpace>& PolarGrid<MemorySpace>::operator=(const PolarGrid<MemorySpace2>& other)
 {
     *this = PolarGrid<MemorySpace>(other);
     return *this;
