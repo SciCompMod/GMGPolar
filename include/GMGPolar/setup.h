@@ -339,10 +339,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 template <concepts::BoundaryConditions BoundaryConditions, concepts::SourceTerm SourceTerm>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::build_rhs_f(
-    const Level<DomainGeometry, DensityProfileCoefficients>& level, HostVector<double> rhs_f,
+    const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f,
     const BoundaryConditions& boundary_conditions, const SourceTerm& source_term)
 {
-    const PolarGrid<Kokkos::HostSpace> grid(level.grid());
+    const PolarGrid<DefaultMemorySpace>& grid(level.grid());
     assert(std::ssize(rhs_f) == grid.numberOfNodes());
 
     const bool DirBC_Interior = DirBC_Interior_;
@@ -352,7 +352,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::build_rhs_f(
     // ----------------------------------------- //
     Kokkos::parallel_for(
         "build_rhs_f: Circular",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>(
             {0, 0}, {grid.numberSmootherCircles(), grid.ntheta()}),
         KOKKOS_LAMBDA(const int i_r, const int i_theta) {
             const double radius = grid.radius(i_r);
@@ -373,8 +373,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::build_rhs_f(
     // --------------------------------------- //
     Kokkos::parallel_for(
         "build_rhs_f: Radial",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
-                                                                                  {grid.ntheta(), grid.nr()}),
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
+                                                                              {grid.ntheta(), grid.nr()}),
         KOKKOS_LAMBDA(const int i_theta, const int i_r) {
             const double radius = grid.radius(i_r);
             const double theta  = grid.theta(i_theta);

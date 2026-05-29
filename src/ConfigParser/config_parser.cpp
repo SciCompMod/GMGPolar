@@ -353,7 +353,7 @@ bool ConfigParser::cacheDomainGeometry() const
     return cache_domain_geometry_;
 }
 
-const PolarGrid<Kokkos::HostSpace>& ConfigParser::grid() const
+const PolarGrid<DefaultMemorySpace>& ConfigParser::grid() const
 {
     return grid_;
 }

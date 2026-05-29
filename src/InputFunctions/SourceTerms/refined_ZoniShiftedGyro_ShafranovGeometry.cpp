@@ -2,7 +2,7 @@
 using namespace gmgpolar;
 
 Refined_ZoniShiftedGyro_ShafranovGeometry::Refined_ZoniShiftedGyro_ShafranovGeometry(
-    PolarGrid<Kokkos::HostSpace> const& grid, double Rmax, double elongation_kappa, double shift_delta)
+    PolarGrid<DefaultMemorySpace> const& grid, double Rmax, double elongation_kappa, double shift_delta)
     : grid_(grid)
     , Rmax(Rmax)
     , elongation_kappa(elongation_kappa)

@@ -12,14 +12,14 @@ namespace gmgpolar
 class CartesianR6_Zoni_ShafranovGeometry
 {
 public:
-    explicit CartesianR6_Zoni_ShafranovGeometry(PolarGrid<Kokkos::HostSpace> const& grid, double Rmax,
+    explicit CartesianR6_Zoni_ShafranovGeometry(PolarGrid<DefaultMemorySpace> const& grid, double Rmax,
                                                 double elongation_kappa, double shift_delta);
     KOKKOS_DEFAULTED_FUNCTION CartesianR6_Zoni_ShafranovGeometry(const CartesianR6_Zoni_ShafranovGeometry&) = default;
 
     KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;
 
 private:
-    PolarGrid<Kokkos::HostSpace> grid_;
+    PolarGrid<DefaultMemorySpace> grid_;
     const double Rmax             = 1.3;
     const double elongation_kappa = 0.3;
     const double shift_delta      = 0.2;

@@ -639,9 +639,11 @@ TYPED_TEST_SUITE(GMGPolarTestCase, gmgpolar_test_suite);
 template <class TestFixture>
 void run_gmgpolar()
 {
-    PolarGrid<Kokkos::HostSpace> grid(TestFixture::R0, TestFixture::Rmax, TestFixture::nrExp, TestFixture::nthetaExp,
-                                      TestFixture::refinementRadius, TestFixture::anisotropicFactor,
-                                      TestFixture::divideBy2);
+    PolarGrid<Kokkos::HostSpace> grid_host(TestFixture::R0, TestFixture::Rmax, TestFixture::nrExp,
+                                           TestFixture::nthetaExp, TestFixture::refinementRadius,
+                                           TestFixture::anisotropicFactor, TestFixture::divideBy2);
+
+    PolarGrid<DefaultMemorySpace> grid(grid_host);
 
     const double inverse_aspect_ratio_epsilon = 0.3;
     const double ellipticity_e                = 1.4;
@@ -653,7 +655,7 @@ void run_gmgpolar()
     typename TestFixture::SourceTerm source_term(grid, TestFixture::Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
     typename TestFixture::ExactSolution exact_solution(TestFixture::Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
 
-    GMGPolar solver(grid, domain, profile_coefficients);
+    GMGPolar solver(grid_host, domain, profile_coefficients);
 
     bool paraview          = false;
     int preSmoothingSteps  = 1;

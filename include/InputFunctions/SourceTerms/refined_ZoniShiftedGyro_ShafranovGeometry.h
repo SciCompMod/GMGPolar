@@ -12,7 +12,7 @@ namespace gmgpolar
 class Refined_ZoniShiftedGyro_ShafranovGeometry
 {
 public:
-    explicit Refined_ZoniShiftedGyro_ShafranovGeometry(PolarGrid<Kokkos::HostSpace> const& grid, double Rmax,
+    explicit Refined_ZoniShiftedGyro_ShafranovGeometry(PolarGrid<DefaultMemorySpace> const& grid, double Rmax,
                                                        double elongation_kappa, double shift_delta);
     KOKKOS_DEFAULTED_FUNCTION
     Refined_ZoniShiftedGyro_ShafranovGeometry(const Refined_ZoniShiftedGyro_ShafranovGeometry&) = default;
@@ -20,7 +20,7 @@ public:
     KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;
 
 private:
-    PolarGrid<Kokkos::HostSpace> grid_;
+    PolarGrid<DefaultMemorySpace> grid_;
     const double Rmax             = 1.3;
     const double elongation_kappa = 0.3;
     const double shift_delta      = 0.2;

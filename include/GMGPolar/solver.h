@@ -13,7 +13,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
     /* ------------------------------------- */
     /* Build rhs_f on Level 0 (finest Level) */
     /* ------------------------------------- */
-    build_rhs_f(levels_[0], levels_[0].rhs(), boundary_conditions, source_term);
+    HostVector<double> rhs_f_host = levels_[0].rhs();
+    auto rhs_f                    = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), rhs_f_host);
+    build_rhs_f(levels_[0], rhs_f, boundary_conditions, source_term);
+    Kokkos::deep_copy(rhs_f_host, rhs_f);
 
     /* ---------------- */
     /* Discretize rhs_f */
