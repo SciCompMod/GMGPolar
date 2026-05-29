@@ -60,8 +60,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     t_setup_createLevels_ = std::chrono::duration<double>(end_setup_createLevels - start_setup_createLevels).count();
 
     if (paraview_) {
-        PolarGrid<Kokkos::HostSpace> finestGrid(levels_.back().grid());
-        writeToVTK("output_coarsest_grid", finestGrid);
+        PolarGrid<Kokkos::HostSpace> coarsestGrid(levels_.back().grid());
+        writeToVTK("output_coarsest_grid", coarsestGrid);
     }
 
     // ------------------------------------- //
@@ -72,7 +72,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     if (verbose_ > 0) {
         PolarGrid<Kokkos::HostSpace> coarsestGrid(levels_[0].grid());
         PolarGrid<Kokkos::HostSpace> finestGrid(levels_[number_of_levels_ - 1].grid());
-        printSettings(coarsestGrid, finestGrid);
+        printSettings(finestGrid, coarsestGrid);
     }
 
     // ------------------------------- //
