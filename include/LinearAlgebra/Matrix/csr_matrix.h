@@ -50,7 +50,7 @@ namespace sparse_csr_helpers
     }
 } // namespace sparse_csr_helpers
 
-template <typename T, class MemorySpace = Kokkos::DefaultExecutionSpace::memory_space>
+template <typename T, class MemorySpace = DefaultMemorySpace>
 class SparseMatrixCSR
 {
 public:

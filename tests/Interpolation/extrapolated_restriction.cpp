@@ -9,7 +9,8 @@
 using namespace gmgpolar;
 
 // Helper that computes the mathematically expected extrapolated restriction value
-static double expected_extrapolated_restriction_value(const PolarGrid& fine, const PolarGrid& coarse,
+static double expected_extrapolated_restriction_value(const PolarGrid<Kokkos::HostSpace>& fine,
+                                                      const PolarGrid<Kokkos::HostSpace>& coarse,
                                                       HostConstVector<double> fine_vals, int i_r_coarse,
                                                       int i_theta_coarse)
 {
@@ -45,8 +46,8 @@ TEST(ExtrapolatedRestrictionTest, ExtrapolatedRestrictionMatchesStencil)
     std::vector<double> fine_angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, 2 * M_PI};
 
-    PolarGrid fine_grid(fine_radii, fine_angles);
-    PolarGrid coarse_grid = coarseningGrid(fine_grid);
+    PolarGrid<Kokkos::HostSpace> fine_grid(fine_radii, fine_angles);
+    PolarGrid<Kokkos::HostSpace> coarse_grid = coarseningGrid(fine_grid);
 
     Interpolation I(/*DirBC*/ true);
 

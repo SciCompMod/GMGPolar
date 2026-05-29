@@ -639,8 +639,9 @@ TYPED_TEST_SUITE(GMGPolarTestCase, gmgpolar_test_suite);
 template <class TestFixture>
 void run_gmgpolar()
 {
-    PolarGrid grid(TestFixture::R0, TestFixture::Rmax, TestFixture::nrExp, TestFixture::nthetaExp,
-                   TestFixture::refinementRadius, TestFixture::anisotropicFactor, TestFixture::divideBy2);
+    PolarGrid<Kokkos::HostSpace> grid(TestFixture::R0, TestFixture::Rmax, TestFixture::nrExp, TestFixture::nthetaExp,
+                                      TestFixture::refinementRadius, TestFixture::anisotropicFactor,
+                                      TestFixture::divideBy2);
 
     const double inverse_aspect_ratio_epsilon = 0.3;
     const double ellipticity_e                = 1.4;
@@ -690,8 +691,8 @@ void run_gmgpolar()
     solver.solve(boundary_conditions, source_term);
 
     // --- Retrieve solution and associated grid --- //
-    HostVector<double> solution    = solver.solution();
-    const PolarGrid& solution_grid = solver.grid();
+    HostVector<double> solution                       = solver.solution();
+    const PolarGrid<Kokkos::HostSpace>& solution_grid = solver.grid();
 
     if (TestFixture::verbose > 0) {
         solver.printTimings();

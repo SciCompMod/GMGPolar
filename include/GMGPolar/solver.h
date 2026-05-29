@@ -99,7 +99,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
     if (exact_solution_) {
         exact_sol = HostVector<double>("exact_sol", level.solution().size());
         // fill exact solution on host to avoid repeat same computation
-        const PolarGrid& grid = level.grid();
+        const PolarGrid<Kokkos::HostSpace> grid(level.grid());
 
         Kokkos::parallel_for("fill exact sol outer loop on r",
                              Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
@@ -530,8 +530,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolation(in
                                                                               HostVector<double> fine_values,
                                                                               HostConstVector<double> coarse_values)
 {
-    const PolarGrid& fineGrid   = levels_[current_level].grid();
-    const PolarGrid& coarseGrid = levels_[current_level + 1].grid();
+    const PolarGrid<Kokkos::HostSpace> fineGrid(levels_[current_level].grid());
+    const PolarGrid<Kokkos::HostSpace> coarseGrid(levels_[current_level + 1].grid());
 
     assert(std::ssize(fine_values) == fineGrid.numberOfNodes());
     assert(std::ssize(coarse_values) == coarseGrid.numberOfNodes());
@@ -611,7 +611,7 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
     Level<DomainGeometry, DensityProfileCoefficients>& level, HostConstVector<double> solution,
     HostVector<double> error, HostConstVector<double> exact_solution)
 {
-    const PolarGrid& grid = level.grid();
+    const PolarGrid<Kokkos::HostSpace> grid(level.grid());
 
     assert(solution.size() == error.size());
     assert(std::ssize(solution) == grid.numberOfNodes());

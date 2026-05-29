@@ -1,8 +1,8 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR6_ZoniShiftedGyro_CircularGeometry.h"
 using namespace gmgpolar;
 
-CartesianR6_ZoniShiftedGyro_CircularGeometry::CartesianR6_ZoniShiftedGyro_CircularGeometry(PolarGrid const& grid,
-                                                                                           double Rmax)
+CartesianR6_ZoniShiftedGyro_CircularGeometry::CartesianR6_ZoniShiftedGyro_CircularGeometry(
+    PolarGrid<Kokkos::HostSpace> const& grid, double Rmax)
     : grid_(grid)
     , Rmax(Rmax)
 {

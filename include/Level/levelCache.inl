@@ -3,14 +3,14 @@
 namespace level_cache_helpers
 {
 template <concepts::DensityProfileCoefficients DensityProfileCoefficients>
-static void cache_density_profile_coefficients(const PolarGrid& grid,
+static void cache_density_profile_coefficients(const PolarGrid<DefaultMemorySpace>& grid,
                                                const DensityProfileCoefficients& density_profile_coefficients,
-                                               const HostVector<double>& coeff_alpha,
-                                               const HostVector<double>& coeff_beta, const bool cache_domain_geometry)
+                                               const Vector<double>& coeff_alpha, const Vector<double>& coeff_beta,
+                                               const bool cache_domain_geometry)
 {
     Kokkos::parallel_for(
         "Cache density profile coefficients",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, 0}, // Starting point of the index space
             {grid.nr(), grid.ntheta()} // Ending point of the index space
             ),
@@ -27,10 +27,11 @@ static void cache_density_profile_coefficients(const PolarGrid& grid,
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-static void cache_domain_geometry(const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients,
-                                  const DomainGeometry& domain_geometry, const HostVector<double>& vec_arr,
-                                  const HostVector<double>& vec_att, const HostVector<double>& vec_art,
-                                  const HostVector<double>& vec_detDF)
+static void cache_domain_geometry(const PolarGrid<DefaultMemorySpace>& grid,
+                                  const DensityProfileCoefficients& density_profile_coefficients,
+                                  const DomainGeometry& domain_geometry, const Vector<double>& vec_arr,
+                                  const Vector<double>& vec_att, const Vector<double>& vec_art,
+                                  const Vector<double>& vec_detDF)
 {
     // We split the loops into two regions to better respect the
     // access patterns of the smoother and improve cache locality
@@ -38,7 +39,7 @@ static void cache_domain_geometry(const PolarGrid& grid, const DensityProfileCoe
     // Circular Indexing Section
     Kokkos::parallel_for(
         "Cache domain geometry (circular indexing)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, 0}, // Starting point of the index space
             {grid.numberSmootherCircles(), grid.ntheta()} // Ending point of the index space
             ),
@@ -59,7 +60,7 @@ static void cache_domain_geometry(const PolarGrid& grid, const DensityProfileCoe
     // Radial Indexing Section
     Kokkos::parallel_for(
         "Cache domain geometry (radial indexing)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, grid.numberSmootherCircles()}, // Starting point of the index space
             {grid.ntheta(), grid.nr()} // Ending point of the index space
             ),
@@ -83,7 +84,7 @@ static void cache_domain_geometry(const PolarGrid& grid, const DensityProfileCoe
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 LevelCache<DomainGeometry, DensityProfileCoefficients>::LevelCache(
-    const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients,
+    const PolarGrid<DefaultMemorySpace>& grid, const DensityProfileCoefficients& density_profile_coefficients,
     const DomainGeometry& domain_geometry, const bool cache_density_profile_coefficients,
     const bool cache_domain_geometry)
     : domain_geometry_(domain_geometry)
@@ -135,13 +136,13 @@ bool LevelCache<DomainGeometry, DensityProfileCoefficients>::cacheDensityProfile
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-HostConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::coeff_alpha() const
+ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::coeff_alpha() const
 {
     return coeff_alpha_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-HostConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::coeff_beta() const
+ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::coeff_beta() const
 {
     return coeff_beta_;
 }
@@ -153,25 +154,25 @@ bool LevelCache<DomainGeometry, DensityProfileCoefficients>::cacheDomainGeometry
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-HostConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::arr() const
+ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::arr() const
 {
     return arr_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-HostConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::att() const
+ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::att() const
 {
     return att_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-HostConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::art() const
+ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::art() const
 {
     return art_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-HostConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::detDF() const
+ConstVector<double> LevelCache<DomainGeometry, DensityProfileCoefficients>::detDF() const
 {
     return detDF_;
 }

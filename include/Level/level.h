@@ -73,14 +73,14 @@ public:
 public:
     // ----------- //
     // Constructor //
-    explicit Level(const int level_depth, std::unique_ptr<const PolarGrid> grid,
+    explicit Level(const int level_depth, std::unique_ptr<const PolarGrid<DefaultMemorySpace>> grid,
                    std::unique_ptr<const LevelCacheType> level_cache, const ExtrapolationType extrapolation,
                    const bool FMG, const bool PCG_FMG = false);
 
     // ---------------- //
     // Getter Functions //
     int level_depth() const;
-    const PolarGrid& grid() const;
+    const PolarGrid<DefaultMemorySpace>& grid() const;
     const LevelCacheType& levelCache() const;
 
     HostVector<double> rhs();
@@ -117,7 +117,7 @@ public:
 
 private:
     const int level_depth_;
-    std::unique_ptr<const PolarGrid> grid_;
+    std::unique_ptr<const PolarGrid<DefaultMemorySpace>> grid_;
     std::unique_ptr<const LevelCacheType> level_cache_;
 
     std::unique_ptr<DirectSolver<LevelCacheType>> op_directSolver_;
@@ -135,7 +135,8 @@ template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoeff
 class LevelCache
 {
 public:
-    explicit LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients,
+    explicit LevelCache(const PolarGrid<DefaultMemorySpace>& grid,
+                        const DensityProfileCoefficients& density_profile_coefficients,
                         const DomainGeometry& domain_geometry, const bool cache_density_profile_coefficients,
                         const bool cache_domain_geometry);
 
@@ -143,14 +144,14 @@ public:
     const DensityProfileCoefficients& densityProfileCoefficients() const;
 
     bool cacheDensityProfileCoefficients() const;
-    HostConstVector<double> coeff_alpha() const;
-    HostConstVector<double> coeff_beta() const;
+    ConstVector<double> coeff_alpha() const;
+    ConstVector<double> coeff_beta() const;
 
     bool cacheDomainGeometry() const;
-    HostConstVector<double> arr() const;
-    HostConstVector<double> att() const;
-    HostConstVector<double> art() const;
-    HostConstVector<double> detDF() const;
+    ConstVector<double> arr() const;
+    ConstVector<double> att() const;
+    ConstVector<double> art() const;
+    ConstVector<double> detDF() const;
 
     KOKKOS_INLINE_FUNCTION void obtainValues(const int i_r, const int i_theta, const int global_index, double r,
                                              double theta, double& coeff_beta, double& arr, double& att, double& art,
@@ -174,18 +175,18 @@ public:
     }
 
 private:
-    const DomainGeometry& domain_geometry_;
-    const DensityProfileCoefficients& density_profile_coefficients_;
+    const DomainGeometry domain_geometry_;
+    const DensityProfileCoefficients density_profile_coefficients_;
 
     bool cache_density_profile_coefficients_; // cache alpha(r, theta), beta(r, theta)
-    HostVector<double> coeff_alpha_;
-    HostVector<double> coeff_beta_;
+    Vector<double> coeff_alpha_;
+    Vector<double> coeff_beta_;
 
     bool cache_domain_geometry_; // cache arr, att, art, detDF
-    HostVector<double> arr_;
-    HostVector<double> att_;
-    HostVector<double> art_;
-    HostVector<double> detDF_;
+    Vector<double> arr_;
+    Vector<double> att_;
+    Vector<double> art_;
+    Vector<double> detDF_;
 };
 
 #include "levelCache.inl"
