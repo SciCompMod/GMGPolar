@@ -217,7 +217,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<ResidualNormType, ResidualNormType::EUCLIDEAN>, // residualNormType
         std::integral_constant<double, 1e-8>, // absoluteTolerance
         std::integral_constant<double, 1e-8>, // relativeTolerance
-        std::integral_constant<int, 8>, // expected_iterations
+        std::integral_constant<int, 7>, // expected_iterations
         std::integral_constant<double, 2e-6>, // expected_l2_error
         std::integral_constant<double, 9e-6>, // expected_inf_error
         std::integral_constant<double, 0.7> // expected_residual_reduction
@@ -341,7 +341,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<ResidualNormType, ResidualNormType::INFINITY_NORM>, // residualNormType
         std::integral_constant<double, 1e-12>, // absoluteTolerance
         std::integral_constant<double, 1e-10>, // relativeTolerance
-        std::integral_constant<int, 4>, // expected_iterations
+        std::integral_constant<int, 3>, // expected_iterations
         std::integral_constant<double, 6e-6>, // expected_l2_error
         std::integral_constant<double, 2e-5>, // expected_inf_error
         std::integral_constant<double, 0.3> // expected_residual_reduction
