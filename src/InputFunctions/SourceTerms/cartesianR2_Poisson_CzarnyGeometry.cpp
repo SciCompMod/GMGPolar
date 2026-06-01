@@ -6,8 +6,8 @@ void CartesianR2_Poisson_CzarnyGeometry::initializeGeometry()
     factor_xi = 1.0 / sqrt(1.0 - inverse_aspect_ratio_epsilon * inverse_aspect_ratio_epsilon / 4.0);
 }
 
-CartesianR2_Poisson_CzarnyGeometry::CartesianR2_Poisson_CzarnyGeometry(PolarGrid const& grid, double Rmax,
-                                                                       double inverse_aspect_ratio_epsilon,
+CartesianR2_Poisson_CzarnyGeometry::CartesianR2_Poisson_CzarnyGeometry(PolarGrid<DefaultMemorySpace> const& grid,
+                                                                       double Rmax, double inverse_aspect_ratio_epsilon,
                                                                        double ellipticity_e)
     : grid_(grid)
     , Rmax(Rmax)
@@ -26,7 +26,6 @@ KOKKOS_FUNCTION double CartesianR2_Poisson_CzarnyGeometry::operator()(std::size_
     double temp =
         sqrt(inverse_aspect_ratio_epsilon * (inverse_aspect_ratio_epsilon + 2.0 * (r / Rmax) * cos_theta) + 1.0);
     double sin_theta_pow2 = pow(sin_theta, 2.0);
-    double cos_theta_pow2 = pow(cos_theta, 2.0);
     double temp1          = pow((2.0 - temp), 2.0);
     double temp2          = pow((2.0 - temp), 3.0);
 

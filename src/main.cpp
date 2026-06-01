@@ -20,16 +20,13 @@ int main(int argc, char* argv[])
             // Get the types of the domain geometry and the density profile coefficients
             using DG = std::decay_t<decltype(domain_geometry)>;
             using DC = std::decay_t<decltype(density_profile_coeffs)>;
+            PolarGrid<Kokkos::HostSpace> grid(parser.grid());
             // Create GMGPolar solver for the selected geometry and coefficient types
-            GMGPolar<DG, DC> solver(parser.grid(), domain_geometry, density_profile_coeffs);
+            GMGPolar<DG, DC> solver(grid, domain_geometry, density_profile_coeffs);
 
             // --- General solver output and visualization settings --- //
             solver.verbose(parser.verbose()); // Enable/disable verbose output
             solver.paraview(parser.paraview()); // Enable/disable ParaView output
-
-            // --- Parallelization and threading settings --- //
-            solver.maxOpenMPThreads(parser.maxOpenMPThreads()); // Maximum OpenMP threads to use
-            omp_set_num_threads(parser.maxOpenMPThreads()); // Global OpenMP thread limit
 
             // --- Numerical method setup --- //
             solver.DirBC_Interior(
@@ -75,8 +72,7 @@ int main(int argc, char* argv[])
             parser.solve(solver);
 
             // --- Retrieve solution and associated grid --- //
-            Vector<double> solution = solver.solution();
-            const PolarGrid& grid   = solver.grid();
+            HostVector<double> solution = solver.solution();
 
             // Print timing statistics for each solver phase
             solver.printTimings();

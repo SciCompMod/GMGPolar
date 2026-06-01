@@ -27,22 +27,20 @@ template <class LevelCacheType>
 class ExtrapolatedSmoother
 {
 public:
-    explicit ExtrapolatedSmoother(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior,
-                                  int num_omp_threads)
+    explicit ExtrapolatedSmoother(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
+                                  bool DirBC_Interior)
         : grid_(grid)
         , level_cache_(level_cache)
         , DirBC_Interior_(DirBC_Interior)
-        , num_omp_threads_(num_omp_threads)
     {
     }
     virtual ~ExtrapolatedSmoother() = default;
 
-    virtual void extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) = 0;
+    virtual void extrapolatedSmoothing(HostVector<double> x, HostConstVector<double> rhs, HostVector<double> temp) = 0;
 
 protected:
-    const PolarGrid& grid_;
+    const PolarGrid<DefaultMemorySpace>& grid_;
     const LevelCacheType& level_cache_;
     const bool DirBC_Interior_;
-    const int num_omp_threads_;
 };
 } // namespace gmgpolar

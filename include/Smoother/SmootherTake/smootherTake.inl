@@ -1,9 +1,9 @@
 #pragma once
 
 template <class LevelCacheType>
-SmootherTake<LevelCacheType>::SmootherTake(const PolarGrid& grid, const LevelCacheType& level_cache,
-                                           bool DirBC_Interior, int num_omp_threads)
-    : Smoother<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
+SmootherTake<LevelCacheType>::SmootherTake(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
+                                           bool DirBC_Interior)
+    : Smoother<LevelCacheType>(grid, level_cache, DirBC_Interior)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
     , radial_tridiagonal_solver_(grid.lengthRadialSmoother(), grid.ntheta(), false)
 #ifdef GMGPOLAR_USE_MUMPS
@@ -41,8 +41,13 @@ SmootherTake<LevelCacheType>::SmootherTake(const PolarGrid& grid, const LevelCac
 //   - The system is then solved in-place in temp, and the results
 //     are copied back to x.
 template <class LevelCacheType>
-void SmootherTake<LevelCacheType>::smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp)
+void SmootherTake<LevelCacheType>::smoothing(HostVector<double> h_x, HostConstVector<double> h_rhs,
+                                             HostVector<double> h_temp)
 {
+    auto x    = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_x);
+    auto rhs  = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs);
+    auto temp = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_temp);
+
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
@@ -57,4 +62,7 @@ void SmootherTake<LevelCacheType>::smoothing(Vector<double> x, ConstVector<doubl
 
     applyAscOrthoWhiteRadialSection(x, rhs, temp);
     solveWhiteRadialSection(x, temp);
+
+    Kokkos::deep_copy(h_x, x);
+    Kokkos::deep_copy(h_temp, temp);
 }

@@ -9,8 +9,10 @@
 using namespace gmgpolar;
 
 // Helper that computes the mathematically expected extrapolated restriction value
-static double expected_extrapolated_restriction_value(const PolarGrid& fine, const PolarGrid& coarse,
-                                                      ConstVector<double> fine_vals, int i_r_coarse, int i_theta_coarse)
+static double expected_extrapolated_restriction_value(const PolarGrid<Kokkos::HostSpace>& fine,
+                                                      const PolarGrid<Kokkos::HostSpace>& coarse,
+                                                      HostConstVector<double> fine_vals, int i_r_coarse,
+                                                      int i_theta_coarse)
 {
     int i_r     = i_r_coarse * 2;
     int i_theta = i_theta_coarse * 2;
@@ -44,13 +46,13 @@ TEST(ExtrapolatedRestrictionTest, ExtrapolatedRestrictionMatchesStencil)
     std::vector<double> fine_angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, 2 * M_PI};
 
-    PolarGrid fine_grid(fine_radii, fine_angles);
-    PolarGrid coarse_grid = coarseningGrid(fine_grid);
+    PolarGrid<Kokkos::HostSpace> fine_grid(fine_radii, fine_angles);
+    PolarGrid<Kokkos::HostSpace> coarse_grid = coarseningGrid(fine_grid);
 
-    Interpolation I(/*threads*/ 16, /*DirBC*/ true);
+    Interpolation I(/*DirBC*/ true);
 
-    Vector<double> fine_values = generate_random_sample_data(fine_grid, 9012, 0.0, 1.0);
-    Vector<double> coarse_result("coarse_result", coarse_grid.numberOfNodes());
+    HostVector<double> fine_values = generate_random_sample_data(fine_grid, 9012, 0.0, 1.0);
+    HostVector<double> coarse_result("coarse_result", coarse_grid.numberOfNodes());
 
     I.applyExtrapolatedRestriction(fine_grid, coarse_grid, coarse_result, fine_values);
 

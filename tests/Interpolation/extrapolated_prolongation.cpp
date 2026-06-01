@@ -9,8 +9,9 @@
 using namespace gmgpolar;
 
 // Helper that computes the mathematically expected extrapolated prolongation value
-static double expected_extrapolated_value(const PolarGrid& coarse, const PolarGrid& fine,
-                                          ConstVector<double> coarse_vals, int i_r, int i_theta)
+static double expected_extrapolated_value(const PolarGrid<Kokkos::HostSpace>& coarse,
+                                          const PolarGrid<Kokkos::HostSpace>& fine, HostConstVector<double> coarse_vals,
+                                          int i_r, int i_theta)
 {
     int i_r_coarse     = i_r / 2;
     int i_theta_coarse = i_theta / 2;
@@ -46,13 +47,13 @@ TEST(ExtrapolatedProlongationTest, ExtrapolatedProlongationMatchesStencil)
     std::vector<double> fine_angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, 2 * M_PI};
 
-    PolarGrid fine_grid(fine_radii, fine_angles);
-    PolarGrid coarse_grid = coarseningGrid(fine_grid);
+    PolarGrid<Kokkos::HostSpace> fine_grid(fine_radii, fine_angles);
+    PolarGrid<Kokkos::HostSpace> coarse_grid = coarseningGrid(fine_grid);
 
-    Interpolation I(/*threads*/ 16, /*DirBC*/ true);
+    Interpolation I(/*DirBC*/ true);
 
-    Vector<double> coarse_values = generate_random_sample_data(coarse_grid, 1234, 0.0, 1.0);
-    Vector<double> fine_result("fine_result", fine_grid.numberOfNodes());
+    HostVector<double> coarse_values = generate_random_sample_data(coarse_grid, 1234, 0.0, 1.0);
+    HostVector<double> fine_result("fine_result", fine_grid.numberOfNodes());
 
     I.applyExtrapolatedProlongation(coarse_grid, fine_grid, fine_result, coarse_values);
 

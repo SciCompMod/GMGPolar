@@ -160,7 +160,7 @@ std::vector<double> refine(std::vector<double> const& original_points)
 template <concepts::DensityProfileCoefficients DensityProfileCoefficients,
           concepts::BoundaryConditions BoundaryConditions, concepts::SourceTerm SourceTerm>
 std::tuple<double, double>
-get_gmgpolar_error(PolarGrid const& grid, CzarnyGeometry const& domain_geometry,
+get_gmgpolar_error(PolarGrid<Kokkos::HostSpace> const& grid, CzarnyGeometry const& domain_geometry,
                    DensityProfileCoefficients const& coefficients, BoundaryConditions const& boundary_conditions,
                    SourceTerm const& source_term, ExactSolution const& solution, ExtrapolationType extrapolation)
 {
@@ -170,9 +170,6 @@ get_gmgpolar_error(PolarGrid const& grid, CzarnyGeometry const& domain_geometry,
     // --- General solver output and visualization settings --- //
     gmgpolar.verbose(0);
     gmgpolar.paraview(false);
-
-    // --- Parallelization settings --- //
-    gmgpolar.maxOpenMPThreads(1);
 
     // --- Discretization and method settings --- //
     gmgpolar.DirBC_Interior(false); // Use across-origin calculation
@@ -227,8 +224,10 @@ void test_convergence(double non_uniformity)
     std::vector<double> radii_refined  = refine(radii);
     std::vector<double> angles_refined = refine(angles);
 
-    PolarGrid grid(radii, angles);
-    PolarGrid grid_refined(radii_refined, angles_refined);
+    PolarGrid<Kokkos::HostSpace> grid_host(radii, angles);
+    PolarGrid<Kokkos::HostSpace> grid_refined_host(radii_refined, angles_refined);
+    PolarGrid<DefaultMemorySpace> grid(radii, angles);
+    PolarGrid<DefaultMemorySpace> grid_refined(radii_refined, angles_refined);
 
     const double alpha_jump = 0.0; // Unused value
     typename TestFixture::DensityProfileCoefficients coefficients(Rmax, alpha_jump);
@@ -237,10 +236,10 @@ void test_convergence(double non_uniformity)
     typename TestFixture::SourceTerm source_term_refined(grid_refined, Rmax, kappa_eps, delta_e);
     typename TestFixture::ExactSolution solution(Rmax, kappa_eps, delta_e);
 
-    auto [euclid_error, inf_error] = get_gmgpolar_error(grid, domain_geometry, coefficients, boundary_conditions,
+    auto [euclid_error, inf_error] = get_gmgpolar_error(grid_host, domain_geometry, coefficients, boundary_conditions,
                                                         source_term, solution, TestFixture::extrapolation);
     auto [euclid_error_refined, inf_error_refined] =
-        get_gmgpolar_error(grid_refined, domain_geometry, coefficients, boundary_conditions, source_term_refined,
+        get_gmgpolar_error(grid_refined_host, domain_geometry, coefficients, boundary_conditions, source_term_refined,
                            solution, TestFixture::extrapolation);
 
     double euclid_order = log(euclid_error / euclid_error_refined) / log(2);

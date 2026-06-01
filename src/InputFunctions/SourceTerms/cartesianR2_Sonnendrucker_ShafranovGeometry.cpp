@@ -1,10 +1,8 @@
 #include "../include/InputFunctions/SourceTerms/cartesianR2_Sonnendrucker_ShafranovGeometry.h"
 using namespace gmgpolar;
 
-CartesianR2_Sonnendrucker_ShafranovGeometry::CartesianR2_Sonnendrucker_ShafranovGeometry(PolarGrid const& grid,
-                                                                                         double Rmax,
-                                                                                         double elongation_kappa,
-                                                                                         double shift_delta)
+CartesianR2_Sonnendrucker_ShafranovGeometry::CartesianR2_Sonnendrucker_ShafranovGeometry(
+    PolarGrid<DefaultMemorySpace> const& grid, double Rmax, double elongation_kappa, double shift_delta)
     : grid_(grid)
     , Rmax(Rmax)
     , elongation_kappa(elongation_kappa)

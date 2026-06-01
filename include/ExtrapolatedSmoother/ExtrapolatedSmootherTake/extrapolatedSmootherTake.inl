@@ -1,10 +1,10 @@
 #pragma once
 
 template <class LevelCacheType>
-ExtrapolatedSmootherTake<LevelCacheType>::ExtrapolatedSmootherTake(const PolarGrid& grid,
+ExtrapolatedSmootherTake<LevelCacheType>::ExtrapolatedSmootherTake(const PolarGrid<DefaultMemorySpace>& grid,
                                                                    const LevelCacheType& level_cache,
-                                                                   const bool DirBC_Interior, const int num_omp_threads)
-    : ExtrapolatedSmoother<LevelCacheType>(grid, level_cache, DirBC_Interior, num_omp_threads)
+                                                                   const bool DirBC_Interior)
+    : ExtrapolatedSmoother<LevelCacheType>(grid, level_cache, DirBC_Interior)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
     , radial_tridiagonal_solver_(grid.lengthRadialSmoother(), grid.ntheta(), false)
 #ifdef GMGPOLAR_USE_MUMPS
@@ -43,9 +43,14 @@ ExtrapolatedSmootherTake<LevelCacheType>::ExtrapolatedSmootherTake(const PolarGr
 //     are copied back to x.
 
 template <class LevelCacheType>
-void ExtrapolatedSmootherTake<LevelCacheType>::extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs,
-                                                                     Vector<double> temp)
+void ExtrapolatedSmootherTake<LevelCacheType>::extrapolatedSmoothing(HostVector<double> h_x,
+                                                                     HostConstVector<double> h_rhs,
+                                                                     HostVector<double> h_temp)
 {
+    auto x    = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_x);
+    auto rhs  = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs);
+    auto temp = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_temp);
+
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
@@ -60,4 +65,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::extrapolatedSmoothing(Vector<doub
 
     applyAscOrthoWhiteRadialSection(x, rhs, temp);
     solveWhiteRadialSection(x, temp);
+
+    Kokkos::deep_copy(h_x, x);
+    Kokkos::deep_copy(h_temp, temp);
 }

@@ -1,15 +1,12 @@
 #include <iostream>
-#include <iomanip>
-#include <vector>
 #include <fstream>
-#include <limits>
-#include <memory>
+#include <cstdlib>
 
 #include "../include/GMGPolar/gmgpolar.h"
 #include "../include/GMGPolar/test_cases.h"
 using namespace gmgpolar;
 
-void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
+void runTest(int divideBy2, std::ostream& outfile)
 {
     const double R0                           = 1e-8;
     const double Rmax                         = 1.3;
@@ -86,8 +83,10 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
 
     double refinement_radius               = alpha_jump;
     std::optional<double> splitting_radius = std::nullopt;
-    PolarGrid grid(R0, Rmax, nr_exp, ntheta_exp, refinement_radius, anisotropic_factor, divideBy2, splitting_radius);
-    GMGPolar solver(grid, domain_geometry, coefficients);
+    PolarGrid<Kokkos::HostSpace> grid_host(R0, Rmax, nr_exp, ntheta_exp, refinement_radius, anisotropic_factor,
+                                           divideBy2, splitting_radius);
+    PolarGrid<DefaultMemorySpace> grid(grid_host);
+    GMGPolar solver(grid_host, domain_geometry, coefficients);
 
     // PolarR6_ZoniGyro_ShafranovGeometry source_term(grid, Rmax, elongation_kappa, shift_delta);
     CartesianR2_SonnendruckerGyro_CzarnyGeometry source_term(grid, Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
@@ -95,9 +94,6 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
 
     solver.verbose(verbose);
     solver.paraview(paraview);
-
-    solver.maxOpenMPThreads(maxOpenMPThreads);
-    omp_set_num_threads(maxOpenMPThreads); // Global OpenMP thread limit
 
     solver.DirBC_Interior(DirBC_Interior);
     solver.stencilDistributionMethod(stencilDistributionMethod);
@@ -135,8 +131,8 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
     int extrapolation_int = static_cast<int>(solver.extrapolation());
 
     // Write results to file
-    outfile << maxOpenMPThreads << "," << divideBy2 << "," << solver.grid().nr() << "," << solver.grid().ntheta() << ","
-            << geometry_string << "," << stencil_string << "," << cacheDensityProfileCoefficients << ","
+    outfile << Kokkos::num_threads() << "," << divideBy2 << "," << solver.grid().nr() << "," << solver.grid().ntheta()
+            << "," << geometry_string << "," << stencil_string << "," << cacheDensityProfileCoefficients << ","
             << cacheDomainGeometry << "," << FMG << "," << extrapolation_int << ","
             << solver.timeSetupTotal() + solver.timeSolveTotal() << "," << solver.timeSetupTotal() << ","
             << solver.timeSetupCreateLevels() << "," << solver.timeSetupSmoother() << ","
@@ -150,27 +146,15 @@ void runTest(int maxOpenMPThreads, int divideBy2, std::ofstream& outfile)
 int main(int argc, char* argv[])
 {
     Kokkos::ScopeGuard kokkos_scope(argc, argv);
-    omp_set_num_threads(omp_get_max_threads());
 
-    std::ofstream outfile("weak_scaling_results.csv");
-    outfile << "Threads,DivideBy2,nr,ntheta,geometry,"
-            << "stencil_method,cacheDensityProfileCoefficients,cacheDomainGeometry,FMG,extrapolation_int,"
-            << "TotalTime,t_setup_total,t_setup_createLevels,"
-            << "t_setup_smoother,t_setup_directSolver,t_solve_total,t_solve_initial_approximation,"
-            << "t_solve_multigrid_iterations,t_check_convergence,t_check_exact_error,"
-            << "t_avg_MGC_total,t_avg_MGC_preSmoothing,t_avg_MGC_postSmoothing,"
-            << "t_avg_MGC_residual,t_avg_MGC_directSolver\n"; // Header
-
-    // Define the parameters for testing
-    std::vector<int> threadCounts = {1, 4, 16, 56};
-    std::vector<int> divideCounts = {5, 6, 7, 8};
-
-    for (size_t i = 0; i < threadCounts.size(); i++) {
-        runTest(threadCounts[i], divideCounts[i], outfile);
+    if (argc < 3) {
+        std::cerr << "Usage: weak_scaling_run <output_csv> <divideBy2>\n";
+        return 1;
     }
 
-    outfile.close();
-    std::cout << "Results written to weak_scaling_results.csv" << std::endl;
+    std::ofstream outfile(argv[1], std::ios::app);
+    int divideBy2 = std::atoi(argv[2]);
 
+    runTest(divideBy2, outfile);
     return 0;
 }

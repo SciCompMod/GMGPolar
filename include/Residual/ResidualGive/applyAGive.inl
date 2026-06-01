@@ -3,7 +3,7 @@ namespace residual_give
 {
 
 template <class LevelCacheType>
-static KOKKOS_INLINE_FUNCTION void node_apply_a_give(int i_r, int i_theta, const PolarGrid& grid,
+static KOKKOS_INLINE_FUNCTION void node_apply_a_give(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
                                                      const LevelCacheType& level_cache, bool DirBC_Interior,
                                                      Vector<double>& result, ConstVector<double>& x)
 {
@@ -195,13 +195,16 @@ static KOKKOS_INLINE_FUNCTION void node_apply_a_give(int i_r, int i_theta, const
 } // namespace residual_give
 
 template <class LevelCacheType>
-void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, ConstVector<double> x) const
+void ResidualGive<LevelCacheType>::applySystemOperator(HostVector<double> h_result, HostConstVector<double> h_x) const
 {
+    auto x      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_x);
+    auto result = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_result);
+
     assert(result.size() == x.size());
 
-    const PolarGrid& grid             = Residual<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = Residual<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = Residual<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid<DefaultMemorySpace>& grid = Residual<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = Residual<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                 = Residual<LevelCacheType>::DirBC_Interior_;
 
     using residual_give::node_apply_a_give;
 
@@ -218,7 +221,7 @@ void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, Co
         const int num_circular_tasks = (num_circle_tasks - start_circle + 2) / 3;
         Kokkos::parallel_for(
             "ResidualGive: ApplyA (Circular)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, num_circular_tasks),
+            Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, num_circular_tasks),
             KOKKOS_LAMBDA(const int circle_task) {
                 const int i_r = start_circle + circle_task * 3;
                 for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
@@ -240,7 +243,7 @@ void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, Co
 
     for (int i_theta = 0; i_theta < additional_radial_tasks; i_theta++) {
         Kokkos::parallel_for(
-            "ResidualGive: ApplyA (Radial, additional)", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, 1),
+            "ResidualGive: ApplyA (Radial, additional)", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, 1),
             KOKKOS_LAMBDA(const int) {
                 for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
                     node_apply_a_give(i_r, i_theta, grid, level_cache, DirBC_Interior, result, x);
@@ -252,8 +255,7 @@ void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, Co
     for (int start_radial = 0; start_radial < 3; ++start_radial) {
         const int num_radial_batches = (num_radial_tasks - start_radial + 2) / 3;
         Kokkos::parallel_for(
-            "ResidualGive: ApplyA (Radial)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, num_radial_batches),
+            "ResidualGive: ApplyA (Radial)", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, num_radial_batches),
             KOKKOS_LAMBDA(const int radial_task) {
                 const int i_theta = additional_radial_tasks + start_radial + radial_task * 3;
                 for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
@@ -262,4 +264,6 @@ void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, Co
             });
         Kokkos::fence();
     }
+
+    Kokkos::deep_copy(h_result, result);
 }

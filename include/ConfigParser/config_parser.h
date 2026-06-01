@@ -10,11 +10,13 @@
 #include "../../include/PolarGrid/polargrid.h"
 #include "../../include/GMGPolar/test_cases.h"
 #include "../../include/GMGPolar/igmgpolar.h"
-#include "../../include/GMGPolar/gmgpolar.h"
 #include "test_selection.h"
 
 namespace gmgpolar
 {
+
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+class GMGPolar;
 
 class ConfigParser
 {
@@ -39,13 +41,12 @@ public:
     // Control Parameters
     int verbose() const;
     bool paraview() const;
-    int maxOpenMPThreads() const;
     bool DirBC_Interior() const;
     StencilDistributionMethod stencilDistributionMethod() const;
     bool cacheDensityProfileCoefficients() const;
     bool cacheDomainGeometry() const;
 
-    const PolarGrid& grid() const;
+    const PolarGrid<DefaultMemorySpace>& grid() const;
 
     // Full Multigrid Method
     bool FMG() const;
@@ -89,15 +90,13 @@ private:
     // General solver output and visualization settings
     int verbose_;
     bool paraview_;
-    // Parallelization and threading settings
-    int max_omp_threads_;
     // Numerical method setup
     bool DirBC_Interior_;
     StencilDistributionMethod stencil_distribution_method_;
     bool cache_density_profile_coefficients_;
     bool cache_domain_geometry_;
     // Grid configuration
-    PolarGrid grid_;
+    PolarGrid<DefaultMemorySpace> grid_;
     // Multigrid settings
     ExtrapolationType extrapolation_;
     int max_levels_;

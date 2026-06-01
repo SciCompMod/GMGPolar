@@ -40,29 +40,28 @@ TEST(OperatorATest, applyA_DirBC_Interior)
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
     ZoniShiftedCoefficients coefficients(Rmax, alpha_jump);
 
-    bool DirBC_Interior  = true;
-    int maxOpenMPThreads = 16;
+    bool DirBC_Interior = true;
 
     // "Take" requires cached values
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, false);
 
-    ResidualGive residualGive_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualTake residualTake_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ResidualGive residualGive_operator(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualTake residualTake_operator(level.grid(), level.levelCache(), DirBC_Interior);
 
-    Vector<double> x   = generate_random_sample_data(level.grid(), 42);
-    Vector<double> rhs = generate_random_sample_data(level.grid(), 69);
+    HostVector<double> x   = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
+    HostVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
 
-    Vector<double> result_Give("result_Give", level.grid().numberOfNodes());
+    HostVector<double> result_Give("result_Give", level.grid().numberOfNodes());
     residualGive_operator.computeResidual(result_Give, rhs, x);
 
-    Vector<double> result_Take("result_Take", level.grid().numberOfNodes());
+    HostVector<double> result_Take("result_Take", level.grid().numberOfNodes());
     residualTake_operator.computeResidual(result_Take, rhs, x);
 
     ASSERT_EQ(result_Give.size(), result_Take.size());
@@ -93,29 +92,28 @@ TEST(OperatorATest, applyA_AcrossOrigin)
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
-    bool DirBC_Interior  = false;
-    int maxOpenMPThreads = 16;
+    bool DirBC_Interior = false;
 
     // "Take" requires cached values
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid       = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, false);
 
-    ResidualGive residualGive_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualTake residualTake_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    ResidualGive residualGive_operator(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualTake residualTake_operator(level.grid(), level.levelCache(), DirBC_Interior);
 
-    Vector<double> x   = generate_random_sample_data(level.grid(), 42);
-    Vector<double> rhs = generate_random_sample_data(level.grid(), 69);
+    HostVector<double> x   = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
+    HostVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
 
-    Vector<double> result_Give("result_Give", level.grid().numberOfNodes());
+    HostVector<double> result_Give("result_Give", level.grid().numberOfNodes());
     residualGive_operator.computeResidual(result_Give, rhs, x);
 
-    Vector<double> result_Take("result_Take", level.grid().numberOfNodes());
+    HostVector<double> result_Take("result_Take", level.grid().numberOfNodes());
     residualTake_operator.computeResidual(result_Take, rhs, x);
 
     ASSERT_EQ(result_Give.size(), result_Take.size());

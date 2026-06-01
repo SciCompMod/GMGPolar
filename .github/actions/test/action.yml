@@ -35,8 +35,7 @@ runs:
       # does not return an error if a test fails
       run: |
         cd build/tests
-        chmod a+x gmgpolar_tests
-        ./gmgpolar_tests  --gtest_output="xml:testreport.xml"
+        ctest --output-junit "testreport.xml" --output-on-failure
     - name: Compute code coverage
       shell: bash
       # compute code coverage

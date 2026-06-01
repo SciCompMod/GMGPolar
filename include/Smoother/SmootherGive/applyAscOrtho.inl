@@ -4,12 +4,17 @@ namespace smoother_give
 {
 
 template <class LevelCacheType>
-static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleGiveInside(int i_r, int i_theta, const PolarGrid& grid,
-                                                                     const LevelCacheType& level_cache,
-                                                                     bool DirBC_Interior, ConstVector<double>& x,
-                                                                     ConstVector<double>& rhs, Vector<double>& result)
+static KOKKOS_INLINE_FUNCTION void
+nodeApplyAscOrthoCircleGiveInside(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
+                                  const LevelCacheType& level_cache, bool DirBC_Interior, ConstVector<double>& x,
+                                  ConstVector<double>& rhs, Vector<double>& result)
 {
     assert(i_r >= 0 && i_r < grid.numberSmootherCircles());
+
+    if ((i_r == 0) && DirBC_Interior) {
+        /* Nothing to be done here */
+        return;
+    }
 
     /* ---------------------------------------- */
     /* Compute or retrieve stencil coefficients */
@@ -21,81 +26,37 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleGiveInside(int i_r, in
     double coeff_beta, arr, att, art, detDF;
     level_cache.obtainValues(i_r, i_theta, center, radius, theta, coeff_beta, arr, att, art, detDF);
 
-    /* -------------------- */
-    /* Node in the interior */
-    /* -------------------- */
+    const double k1 = grid.angularSpacing(i_theta - 1);
+    const double k2 = grid.angularSpacing(i_theta);
+
+    const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+    const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
+
+    const int bottom = grid.index(i_r, i_theta_M1);
+    const int top    = grid.index(i_r, i_theta_P1);
+
     if (i_r > 0) {
-        const double h1 = grid.radialSpacing(i_r - 1);
-        const double h2 = grid.radialSpacing(i_r);
-        const double k1 = grid.angularSpacing(i_theta - 1);
-        const double k2 = grid.angularSpacing(i_theta);
-
+        const double h1     = grid.radialSpacing(i_r - 1);
         const double coeff1 = 0.5 * (k1 + k2) / h1;
-        const double coeff2 = 0.5 * (k1 + k2) / h2;
-
-        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
-
-        const int center = grid.index(i_r, i_theta);
-        const int left   = grid.index(i_r - 1, i_theta);
-        const int right  = grid.index(i_r + 1, i_theta);
-        const int bottom = grid.index(i_r, i_theta_M1);
-        const int top    = grid.index(i_r, i_theta_P1);
-
-        /* Fill result(i,j) */
-        result[center] -= (-coeff1 * arr * x[left] /* Left */
-                           - coeff2 * arr * x[right]); /* Right */
-        /* Fill result(i,j-1) */
-        result[bottom] -= (-0.25 * art * x[right] /* Top Right */
-                           + 0.25 * art * x[left]); /* Top Left */
-        /* Fill result(i,j+1) */
-        result[top] -= (+0.25 * art * x[right] /* Bottom Right */
-                        - 0.25 * art * x[left]); /* Bottom Left */
+        const int left      = grid.index(i_r - 1, i_theta);
+        result[center] -= (-coeff1 * arr * x[left]); /* Left */
+        result[bottom] -= (+0.25 * art * x[left]); /* Top Left */
+        result[top] -= (-0.25 * art * x[left]); /* Bottom Left */
     }
-    /* -------------------- */
-    /* Node on the boundary */
-    /* -------------------- */
-    else if (i_r == 0) {
-        /* ------------------------------------------------ */
-        /* Case 1: Dirichlet boundary on the inner boundary */
-        /* ------------------------------------------------ */
-        if (DirBC_Interior) {
-            /* Nothing to be done here */
-        }
-        else {
-            /* ------------------------------------------------------------- */
-            /* Case 2: Across origin discretization on the interior boundary */
-            /* ------------------------------------------------------------- */
-            const double h2 = grid.radialSpacing(i_r);
-            const double k1 = grid.angularSpacing(i_theta - 1);
-            const double k2 = grid.angularSpacing(i_theta);
 
-            const double coeff2 = 0.5 * (k1 + k2) / h2;
-
-            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
-
-            const int bottom = grid.index(i_r, i_theta_M1);
-            const int top    = grid.index(i_r, i_theta_P1);
-            const int right  = grid.index(i_r + 1, i_theta);
-
-            /* Fill result(i,j) */
-            result[center] -= (-coeff2 * arr * x[right]); /* Right */
-
-            /* Fill result(i,j-1) */
-            result[bottom] -= (-0.25 * art * x[right]); /* Top Right */
-
-            /* Fill result(i,j+1) */
-            result[top] -= (+0.25 * art * x[right]); /* Bottom Right */
-        }
-    }
+    const double h2     = grid.radialSpacing(i_r);
+    const double coeff2 = 0.5 * (k1 + k2) / h2;
+    const int right     = grid.index(i_r + 1, i_theta);
+    result[center] -= (-coeff2 * arr * x[right]); /* Right */
+    result[bottom] -= (-0.25 * art * x[right]); /* Top Right */
+    result[top] -= (+0.25 * art * x[right]); /* Bottom Right */
 }
 
 template <class LevelCacheType>
-static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleGiveOutside(int i_r, int i_theta, const PolarGrid& grid,
-                                                                      const LevelCacheType& level_cache,
-                                                                      bool DirBC_Interior, ConstVector<double>& x,
-                                                                      ConstVector<double>& rhs, Vector<double>& result)
+static KOKKOS_INLINE_FUNCTION void
+nodeApplyAscOrthoCircleGiveOutside(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
+                                   const LevelCacheType& level_cache, bool DirBC_Interior, ConstVector<double>& x,
+                                   ConstVector<double>& rhs, Vector<double>& result)
 {
     assert(0 <= i_r && i_r <= grid.numberSmootherCircles());
 
@@ -122,9 +83,7 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleGiveOutside(int i_r, i
     if (i_r > 1 || (i_r == 1 && !DirBC_Interior)) {
         const double h1     = grid.radialSpacing(i_r - 1);
         const double coeff1 = 0.5 * (k1 + k2) / h1;
-
-        const int left = grid.index(i_r - 1, i_theta);
-
+        const int left      = grid.index(i_r - 1, i_theta);
         result[left] -= (-coeff1 * arr * x[center] /* Right */
                          - 0.25 * art * x[top] /* Top Right */
                          + 0.25 * art * x[bottom]); /* Bottom Right */
@@ -133,9 +92,7 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleGiveOutside(int i_r, i
     if (i_r < grid.numberSmootherCircles() - 1) {
         const double h2     = grid.radialSpacing(i_r);
         const double coeff2 = 0.5 * (k1 + k2) / h2;
-
-        const int right = grid.index(i_r + 1, i_theta);
-
+        const int right     = grid.index(i_r + 1, i_theta);
         result[right] -= (-coeff2 * arr * x[center] /* Left */
                           + 0.25 * art * x[top] /* Top Left */
                           - 0.25 * art * x[bottom]); /* Bottom Left */
@@ -143,10 +100,10 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleGiveOutside(int i_r, i
 }
 
 template <class LevelCacheType>
-static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialGiveInside(int i_r, int i_theta, const PolarGrid& grid,
-                                                                     const LevelCacheType& level_cache,
-                                                                     bool DirBC_Interior, ConstVector<double>& x,
-                                                                     ConstVector<double>& rhs, Vector<double>& result)
+static KOKKOS_INLINE_FUNCTION void
+nodeApplyAscOrthoRadialGiveInside(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
+                                  const LevelCacheType& level_cache, bool DirBC_Interior, ConstVector<double>& x,
+                                  ConstVector<double>& rhs, Vector<double>& result)
 {
     assert(grid.numberSmootherCircles() - 1 <= i_r && i_r < grid.nr());
 
@@ -194,41 +151,37 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialGiveInside(int i_r, in
     if (i_r == grid.numberSmootherCircles() - 1) {
         const double h2     = grid.radialSpacing(i_r);
         const double coeff2 = 0.5 * (k1 + k2) / h2;
-
-        const int right = grid.index(i_r + 1, i_theta);
+        const int right     = grid.index(i_r + 1, i_theta);
         result[right] -= (-coeff2 * arr * x[center]); /* Left */
     }
 
     if (i_r == grid.numberSmootherCircles()) {
         const double h1     = grid.radialSpacing(i_r - 1);
         const double coeff1 = 0.5 * (k1 + k2) / h1;
-
-        const int left = grid.index(i_r - 1, i_theta);
+        const int left      = grid.index(i_r - 1, i_theta);
         result[center] -= (-coeff1 * arr * x[left]); /* Left */
     }
 
     if (i_r == grid.nr() - 2) {
         const double h2     = grid.radialSpacing(i_r);
         const double coeff2 = 0.5 * (k1 + k2) / h2;
-
-        const int right = grid.index(i_r + 1, i_theta);
+        const int right     = grid.index(i_r + 1, i_theta);
         result[center] -= (-coeff2 * arr * rhs[right]); /* Right: Symmetry shift! */
     }
 
     if (i_r == grid.nr() - 1) {
         const double h1     = grid.radialSpacing(i_r - 1);
         const double coeff1 = 0.5 * (k1 + k2) / h1;
-
-        const int left = grid.index(i_r - 1, i_theta);
+        const int left      = grid.index(i_r - 1, i_theta);
         result[left] -= (-coeff1 * arr * rhs[center]); /* Right: Symmetry shift! */
     }
 }
 
 template <class LevelCacheType>
-static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialGiveOutside(int i_r, int i_theta, const PolarGrid& grid,
-                                                                      const LevelCacheType& level_cache,
-                                                                      bool DirBC_Interior, ConstVector<double>& x,
-                                                                      ConstVector<double>& rhs, Vector<double>& result)
+static KOKKOS_INLINE_FUNCTION void
+nodeApplyAscOrthoRadialGiveOutside(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
+                                   const LevelCacheType& level_cache, bool DirBC_Interior, ConstVector<double>& x,
+                                   ConstVector<double>& rhs, Vector<double>& result)
 {
     assert(grid.numberSmootherCircles() <= i_r && i_r < grid.nr());
 
@@ -286,9 +239,9 @@ void SmootherGive<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<d
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                 = Smoother<LevelCacheType>::DirBC_Interior_;
 
     /* ----------------------------------------------- */
     /* 1. Black-Circle update (u_bc):                  */
@@ -302,47 +255,55 @@ void SmootherGive<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<d
 
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (Black Circle - Inside)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, getBatchCount(start, end, offset)),
+            Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, getBatchCount(start, end, offset)),
             KOKKOS_LAMBDA(const int circle_task) {
                 const int i_r = start + circle_task * offset;
+                // Serial loop to avoid race conditions
                 for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
                     nodeApplyAscOrthoCircleGiveInside(i_r, i_theta, grid, level_cache, DirBC_Interior, x, rhs, temp);
                 }
             });
+
         Kokkos::fence();
     }
-
     {
         /* Outside Black Section (Part 1)*/
         const int start  = (grid.numberSmootherCircles() % 2 == 0) ? 0 : 1;
         const int end    = grid.numberSmootherCircles() + 1;
         const int offset = 4;
+
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (Black Circle - Outside: Part 1)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, getBatchCount(start, end, offset)),
-            KOKKOS_LAMBDA(const int circle_task) {
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+                {0, 0}, // Starting point of the index space
+                {getBatchCount(start, end, offset), grid.ntheta()} // Ending point of the index space
+                ),
+            // Kokkos lambda function to execute for each point in the index space
+            KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
                 const int i_r = start + circle_task * offset;
-                for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                    nodeApplyAscOrthoCircleGiveOutside(i_r, i_theta, grid, level_cache, DirBC_Interior, x, rhs, temp);
-                }
+                nodeApplyAscOrthoCircleGiveOutside(i_r, i_theta, grid, level_cache, DirBC_Interior, x, rhs, temp);
             });
+
         Kokkos::fence();
     }
-
     {
         /* Outside Black Section (Part 2)*/
         const int start  = (grid.numberSmootherCircles() % 2 == 0) ? 2 : 3;
         const int end    = grid.numberSmootherCircles() + 1;
         const int offset = 4;
+
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (Black Circle - Outside: Part 2)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, getBatchCount(start, end, offset)),
-            KOKKOS_LAMBDA(const int circle_task) {
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+                {0, 0}, // Starting point of the index space
+                {getBatchCount(start, end, offset), grid.ntheta()} // Ending point of the index space
+                ),
+            // Kokkos lambda function to execute for each point in the index space
+            KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
                 const int i_r = start + circle_task * offset;
-                for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                    nodeApplyAscOrthoCircleGiveOutside(i_r, i_theta, grid, level_cache, DirBC_Interior, x, rhs, temp);
-                }
+                nodeApplyAscOrthoCircleGiveOutside(i_r, i_theta, grid, level_cache, DirBC_Interior, x, rhs, temp);
             });
+
         Kokkos::fence();
     }
 }
@@ -361,9 +322,9 @@ void SmootherGive<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<d
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                 = Smoother<LevelCacheType>::DirBC_Interior_;
 
     /* ----------------------------------------------- */
     /* 2. White-Circle update (u_wc):                  */
@@ -378,47 +339,55 @@ void SmootherGive<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<d
 
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (White Circle - Inside)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, getBatchCount(start, end, offset)),
+            Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, getBatchCount(start, end, offset)),
             KOKKOS_LAMBDA(const int circle_task) {
                 const int i_r = start + circle_task * offset;
+                // Serial loop to avoid race conditions
                 for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
                     nodeApplyAscOrthoCircleGiveInside(i_r, i_theta, grid, level_cache, DirBC_Interior, x, rhs, temp);
                 }
             });
+
         Kokkos::fence();
     }
-
     {
         /* Outside White Section (Part 1)*/
         const int start  = (grid.numberSmootherCircles() % 2 == 0) ? 1 : 0;
         const int end    = grid.numberSmootherCircles();
         const int offset = 4;
+
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (White Circle - Outside: Part 1)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, getBatchCount(start, end, offset)),
-            KOKKOS_LAMBDA(const int circle_task) {
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+                {0, 0}, // Starting point of the index space
+                {getBatchCount(start, end, offset), grid.ntheta()} // Ending point of the index space
+                ),
+            // Kokkos lambda function to execute for each point in the index space
+            KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
                 const int i_r = start + circle_task * offset;
-                for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                    nodeApplyAscOrthoCircleGiveOutside(i_r, i_theta, grid, level_cache, DirBC_Interior, x, rhs, temp);
-                }
+                nodeApplyAscOrthoCircleGiveOutside(i_r, i_theta, grid, level_cache, DirBC_Interior, x, rhs, temp);
             });
+
         Kokkos::fence();
     }
-
     {
         /* Outside White Section (Part 2)*/
         const int start  = (grid.numberSmootherCircles() % 2 == 0) ? 3 : 2;
         const int end    = grid.numberSmootherCircles();
         const int offset = 4;
+
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (White Circle - Outside: Part 2)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, getBatchCount(start, end, offset)),
-            KOKKOS_LAMBDA(const int circle_task) {
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+                {0, 0}, // Starting point of the index space
+                {getBatchCount(start, end, offset), grid.ntheta()} // Ending point of the index space
+                ),
+            // Kokkos lambda function to execute for each point in the index space
+            KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
                 const int i_r = start + circle_task * offset;
-                for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
-                    nodeApplyAscOrthoCircleGiveOutside(i_r, i_theta, grid, level_cache, DirBC_Interior, x, rhs, temp);
-                }
+                nodeApplyAscOrthoCircleGiveOutside(i_r, i_theta, grid, level_cache, DirBC_Interior, x, rhs, temp);
             });
+
         Kokkos::fence();
     }
 }
@@ -437,9 +406,9 @@ void SmootherGive<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<d
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                 = Smoother<LevelCacheType>::DirBC_Interior_;
 
     /* ----------------------------------------------- */
     /* 3. Black-Radial update (u_br):                  */
@@ -454,16 +423,17 @@ void SmootherGive<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<d
 
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (Black Radial - Inside)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, getBatchCount(start, end, offset)),
+            Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, getBatchCount(start, end, offset)),
             KOKKOS_LAMBDA(const int radial_task) {
                 const int i_theta = start + radial_task * offset;
+                // Serial loop to avoid race conditions
                 for (int i_r = grid.numberSmootherCircles() - 1; i_r < grid.nr(); i_r++) {
                     nodeApplyAscOrthoRadialGiveInside(i_r, i_theta, grid, level_cache, DirBC_Interior, x, rhs, temp);
                 }
             });
+
         Kokkos::fence();
     }
-
     {
         /* Outside Black Section (Part 1) */
         const int start  = 1;
@@ -472,16 +442,18 @@ void SmootherGive<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<d
 
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (Black Radial - Outside: Part 1)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, getBatchCount(start, end, offset)),
-            KOKKOS_LAMBDA(const int radial_task) {
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+                {0, grid.numberSmootherCircles()}, // Starting point of the index space
+                {getBatchCount(start, end, offset), grid.nr()} // Ending point of the index space
+                ),
+            // Kokkos lambda function to execute for each point in the index space
+            KOKKOS_LAMBDA(const int radial_task, const int i_r) {
                 const int i_theta = start + radial_task * offset;
-                for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
-                    nodeApplyAscOrthoRadialGiveOutside(i_r, i_theta, grid, level_cache, DirBC_Interior, x, rhs, temp);
-                }
+                nodeApplyAscOrthoRadialGiveOutside(i_r, i_theta, grid, level_cache, DirBC_Interior, x, rhs, temp);
             });
+
         Kokkos::fence();
     }
-
     {
         /* Outside Black Section (Part 1) */
         const int start  = 3;
@@ -489,14 +461,17 @@ void SmootherGive<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<d
         const int offset = 4;
 
         Kokkos::parallel_for(
-            "SmootherGive: ApplyAscOrtho (Black Radial - Outside: Part 1)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, getBatchCount(start, end, offset)),
-            KOKKOS_LAMBDA(const int radial_task) {
+            "SmootherGive: ApplyAscOrtho (Black Radial - Outside: Part 2)",
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+                {0, grid.numberSmootherCircles()}, // Starting point of the index space
+                {getBatchCount(start, end, offset), grid.nr()} // Ending point of the index space
+                ),
+            // Kokkos lambda function to execute for each point in the index space
+            KOKKOS_LAMBDA(const int radial_task, const int i_r) {
                 const int i_theta = start + radial_task * offset;
-                for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
-                    nodeApplyAscOrthoRadialGiveOutside(i_r, i_theta, grid, level_cache, DirBC_Interior, x, rhs, temp);
-                }
+                nodeApplyAscOrthoRadialGiveOutside(i_r, i_theta, grid, level_cache, DirBC_Interior, x, rhs, temp);
             });
+
         Kokkos::fence();
     }
 }
@@ -515,9 +490,9 @@ void SmootherGive<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<d
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior                 = Smoother<LevelCacheType>::DirBC_Interior_;
 
     /* ----------------------------------------------- */
     /* 4. White-Radial update (u_wr):                  */
@@ -532,16 +507,17 @@ void SmootherGive<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<d
 
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (White Radial - Inside)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, getBatchCount(start, end, offset)),
+            Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, getBatchCount(start, end, offset)),
             KOKKOS_LAMBDA(const int radial_task) {
                 const int i_theta = start + radial_task * offset;
+                // Serial loop to avoid race conditions
                 for (int i_r = grid.numberSmootherCircles() - 1; i_r < grid.nr(); i_r++) {
                     nodeApplyAscOrthoRadialGiveInside(i_r, i_theta, grid, level_cache, DirBC_Interior, x, rhs, temp);
                 }
             });
+
         Kokkos::fence();
     }
-
     {
         /* Outside White Section (Part 1) */
         const int start  = 0;
@@ -550,16 +526,18 @@ void SmootherGive<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<d
 
         Kokkos::parallel_for(
             "SmootherGive: ApplyAscOrtho (White Radial - Outside: Part 1)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, getBatchCount(start, end, offset)),
-            KOKKOS_LAMBDA(const int radial_task) {
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+                {0, grid.numberSmootherCircles()}, // Starting point of the index space
+                {getBatchCount(start, end, offset), grid.nr()} // Ending point of the index space
+                ),
+            // Kokkos lambda function to execute for each point in the index space
+            KOKKOS_LAMBDA(const int radial_task, const int i_r) {
                 const int i_theta = start + radial_task * offset;
-                for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
-                    nodeApplyAscOrthoRadialGiveOutside(i_r, i_theta, grid, level_cache, DirBC_Interior, x, rhs, temp);
-                }
+                nodeApplyAscOrthoRadialGiveOutside(i_r, i_theta, grid, level_cache, DirBC_Interior, x, rhs, temp);
             });
+
         Kokkos::fence();
     }
-
     {
         /* Outside White Section (Part 1) */
         const int start  = 2;
@@ -567,14 +545,17 @@ void SmootherGive<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<d
         const int offset = 4;
 
         Kokkos::parallel_for(
-            "SmootherGive: ApplyAscOrtho (White Radial - Outside: Part 1)",
-            Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, getBatchCount(start, end, offset)),
-            KOKKOS_LAMBDA(const int radial_task) {
+            "SmootherGive: ApplyAscOrtho (White Radial - Outside: Part 2)",
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+                {0, grid.numberSmootherCircles()}, // Starting point of the index space
+                {getBatchCount(start, end, offset), grid.nr()} // Ending point of the index space
+                ),
+            // Kokkos lambda function to execute for each point in the index space
+            KOKKOS_LAMBDA(const int radial_task, const int i_r) {
                 const int i_theta = start + radial_task * offset;
-                for (int i_r = grid.numberSmootherCircles(); i_r < grid.nr(); i_r++) {
-                    nodeApplyAscOrthoRadialGiveOutside(i_r, i_theta, grid, level_cache, DirBC_Interior, x, rhs, temp);
-                }
+                nodeApplyAscOrthoRadialGiveOutside(i_r, i_theta, grid, level_cache, DirBC_Interior, x, rhs, temp);
             });
+
         Kokkos::fence();
     }
 }

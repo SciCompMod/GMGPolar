@@ -8,7 +8,7 @@
 using namespace gmgpolar;
 
 // clang-format off
-TEST(BatchedTridiagonalSolvers, non_cyclic_tridiagonal_n_4)
+void test_non_cyclic_tridiagonal_n_4()
 {
     int batch_count = 4;
     int matrix_dimension = 4;
@@ -25,6 +25,10 @@ TEST(BatchedTridiagonalSolvers, non_cyclic_tridiagonal_n_4)
     // System 4: {{5,1,0,0},{1,7,2,0},{0,2,9,3},{0,0,3,11}} * {{a},{b},{c},{d}} = {{4},{5},{6},{7}}
     // a = 248/355, b = 36/71, c = 267/710, d = 379/710
 
+	Kokkos::parallel_for(
+					"Test",
+					1,
+					KOKKOS_LAMBDA(const int) {
     solver.set_main_diagonal(0,0, 2.0); solver.set_sub_diagonal(0,0, 1.0);
     solver.set_main_diagonal(0,1, 4.0); solver.set_sub_diagonal(0,1, 2.0);
     solver.set_main_diagonal(0,2, 6.0); solver.set_sub_diagonal(0,2, 3.0);
@@ -44,16 +48,19 @@ TEST(BatchedTridiagonalSolvers, non_cyclic_tridiagonal_n_4)
     solver.set_main_diagonal(3,1, 7.0); solver.set_sub_diagonal(3,1, 2.0);
     solver.set_main_diagonal(3,2, 9.0); solver.set_sub_diagonal(3,2, 3.0);
     solver.set_main_diagonal(3,3, 11.0);
+					});
 
-    Vector<double> rhs("rhs", matrix_dimension * batch_count);
+    HostVector<double> h_rhs("h_rhs", matrix_dimension * batch_count);
 
     // Initialize RHS for each system
-    rhs(0) = 1.0; rhs(1) = 2.0; rhs(2) = 3.0; rhs(3) = 4.0;
-    rhs(4) = 2.0; rhs(5) = 3.0; rhs(6) = 4.0; rhs(7) = 5.0;
-    rhs(8) = 3.0; rhs(9) = 4.0; rhs(10) = 5.0; rhs(11) = 6.0;
-    rhs(12) = 4.0; rhs(13) = 5.0; rhs(14) = 6.0; rhs(15) = 7.0; 
+    h_rhs(0) = 1.0; h_rhs(1) = 2.0; h_rhs(2) = 3.0; h_rhs(3) = 4.0;
+    h_rhs(4) = 2.0; h_rhs(5) = 3.0; h_rhs(6) = 4.0; h_rhs(7) = 5.0;
+    h_rhs(8) = 3.0; h_rhs(9) = 4.0; h_rhs(10) = 5.0; h_rhs(11) = 6.0;
+    h_rhs(12) = 4.0; h_rhs(13) = 5.0; h_rhs(14) = 6.0; h_rhs(15) = 7.0; 
 
     solver.setup();
+
+	auto rhs = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs);
 
     int offset, stride;
     // Solve each even system separately
@@ -63,31 +70,38 @@ TEST(BatchedTridiagonalSolvers, non_cyclic_tridiagonal_n_4)
     offset = 1; stride = 2;
     solver.solve(rhs, offset, stride);
 
+	Kokkos::deep_copy(h_rhs, rhs);
+
     // Verify solutions
     double tol = 1e-12;
 
-    EXPECT_NEAR(rhs(0), 70.0/209.0, tol);
-    EXPECT_NEAR(rhs(1), 69.0/209.0, tol);
-    EXPECT_NEAR(rhs(2), 36.0/209.0, tol);
-    EXPECT_NEAR(rhs(3), 91.0/209.0, tol);
+    EXPECT_NEAR(h_rhs(0), 70.0/209.0, tol);
+    EXPECT_NEAR(h_rhs(1), 69.0/209.0, tol);
+    EXPECT_NEAR(h_rhs(2), 36.0/209.0, tol);
+    EXPECT_NEAR(h_rhs(3), 91.0/209.0, tol);
 
-    EXPECT_NEAR(rhs(4), 29.0/54.0, tol);
-    EXPECT_NEAR(rhs(5), 7.0/18.0, tol);
-    EXPECT_NEAR(rhs(6), 7.0/27.0, tol);
-    EXPECT_NEAR(rhs(7), 38.0/81.0, tol);
+    EXPECT_NEAR(h_rhs(4), 29.0/54.0, tol);
+    EXPECT_NEAR(h_rhs(5), 7.0/18.0, tol);
+    EXPECT_NEAR(h_rhs(6), 7.0/27.0, tol);
+    EXPECT_NEAR(h_rhs(7), 38.0/81.0, tol);
 
-    EXPECT_NEAR(rhs(8), 938.0/1473.0, tol);
-    EXPECT_NEAR(rhs(9), 667.0/1473.0, tol);
-    EXPECT_NEAR(rhs(10), 476.0/1473.0, tol);
-    EXPECT_NEAR(rhs(11), 247.0/491.0, tol);
+    EXPECT_NEAR(h_rhs(8), 938.0/1473.0, tol);
+    EXPECT_NEAR(h_rhs(9), 667.0/1473.0, tol);
+    EXPECT_NEAR(h_rhs(10), 476.0/1473.0, tol);
+    EXPECT_NEAR(h_rhs(11), 247.0/491.0, tol);
 
-    EXPECT_NEAR(rhs(12), 248.0/355.0, tol);
-    EXPECT_NEAR(rhs(13), 36.0/71.0, tol);
-    EXPECT_NEAR(rhs(14), 267.0/710.0, tol);
-    EXPECT_NEAR(rhs(15), 379.0/710.0, tol);
+    EXPECT_NEAR(h_rhs(12), 248.0/355.0, tol);
+    EXPECT_NEAR(h_rhs(13), 36.0/71.0, tol);
+    EXPECT_NEAR(h_rhs(14), 267.0/710.0, tol);
+    EXPECT_NEAR(h_rhs(15), 379.0/710.0, tol);
+}
+TEST(BatchedTridiagonalSolvers, non_cyclic_tridiagonal_n_4)
+{
+		// Call a function named function due to cuda restriction
+		test_non_cyclic_tridiagonal_n_4();
 }
 
-TEST(BatchedTridiagonalSolvers, cyclic_tridiagonal_n_4)
+void test_cyclic_tridiagonal_n_4()
 {
     int batch_count = 4;
     int matrix_dimension = 4;
@@ -104,6 +118,10 @@ TEST(BatchedTridiagonalSolvers, cyclic_tridiagonal_n_4)
     // System 4: {{5,1,0,-4},{1,7,2,0},{0,2,9,3},{-4,0,3,11}} * {{a},{b},{c},{d}} = {{4},{5},{6},{7}}
     // a = 271/162, b = 23/54, c = 14/81, d = 97/81
 
+	Kokkos::parallel_for(
+					"Test",
+					1,
+					KOKKOS_LAMBDA(const int) {
     solver.set_main_diagonal(0,0, 2.0); solver.set_sub_diagonal(0,0, 1.0);
     solver.set_main_diagonal(0,1, 4.0); solver.set_sub_diagonal(0,1, 2.0);
     solver.set_main_diagonal(0,2, 6.0); solver.set_sub_diagonal(0,2, 3.0);
@@ -123,14 +141,17 @@ TEST(BatchedTridiagonalSolvers, cyclic_tridiagonal_n_4)
     solver.set_main_diagonal(3,1, 7.0); solver.set_sub_diagonal(3,1, 2.0);
     solver.set_main_diagonal(3,2, 9.0); solver.set_sub_diagonal(3,2, 3.0);
     solver.set_main_diagonal(3,3, 11.0); solver.set_cyclic_corner(3, -4.0);
+					});
 
-    Vector<double> rhs("rhs", matrix_dimension * batch_count);
+    HostVector<double> h_rhs("h_rhs", matrix_dimension * batch_count);
 
     // Initialize RHS for each system
-    rhs(0) = 1.0; rhs(1) = 2.0; rhs(2) = 3.0; rhs(3) = 4.0;
-    rhs(4) = 2.0; rhs(5) = 3.0; rhs(6) = 4.0; rhs(7) = 5.0;
-    rhs(8) = 3.0; rhs(9) = 4.0; rhs(10) = 5.0; rhs(11) = 6.0;
-    rhs(12) = 4.0; rhs(13) = 5.0; rhs(14) = 6.0; rhs(15) = 7.0; 
+    h_rhs(0) = 1.0; h_rhs(1) = 2.0; h_rhs(2) = 3.0; h_rhs(3) = 4.0;
+    h_rhs(4) = 2.0; h_rhs(5) = 3.0; h_rhs(6) = 4.0; h_rhs(7) = 5.0;
+    h_rhs(8) = 3.0; h_rhs(9) = 4.0; h_rhs(10) = 5.0; h_rhs(11) = 6.0;
+    h_rhs(12) = 4.0; h_rhs(13) = 5.0; h_rhs(14) = 6.0; h_rhs(15) = 7.0; 
+
+	auto rhs = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs);
 
     solver.setup();
 
@@ -142,38 +163,47 @@ TEST(BatchedTridiagonalSolvers, cyclic_tridiagonal_n_4)
     offset = 1; stride = 2;
     solver.solve(rhs, offset, stride);
 
+	Kokkos::deep_copy(h_rhs, rhs);
+
     // Verify solutions
     double tol = 1e-12;
 
-    EXPECT_NEAR(rhs(0), 42.0/67.0, tol);
-    EXPECT_NEAR(rhs(1), 18.0/67.0, tol);
-    EXPECT_NEAR(rhs(2), 10.0/67.0, tol);
-    EXPECT_NEAR(rhs(3), 35.0/67.0, tol);
+    EXPECT_NEAR(h_rhs(0), 42.0/67.0, tol);
+    EXPECT_NEAR(h_rhs(1), 18.0/67.0, tol);
+    EXPECT_NEAR(h_rhs(2), 10.0/67.0, tol);
+    EXPECT_NEAR(h_rhs(3), 35.0/67.0, tol);
 
-    EXPECT_NEAR(rhs(4), 287.0/274.0, tol);
-    EXPECT_NEAR(rhs(5), 89.0/274.0, tol);
-    EXPECT_NEAR(rhs(6), 45.0/274.0, tol);
-    EXPECT_NEAR(rhs(7), 201.0/274.0, tol);
+    EXPECT_NEAR(h_rhs(4), 287.0/274.0, tol);
+    EXPECT_NEAR(h_rhs(5), 89.0/274.0, tol);
+    EXPECT_NEAR(h_rhs(6), 45.0/274.0, tol);
+    EXPECT_NEAR(h_rhs(7), 201.0/274.0, tol);
 
-    EXPECT_NEAR(rhs(8), 1532.0/1113.0, tol);
-    EXPECT_NEAR(rhs(9), 8.0/21.0, tol);
-    EXPECT_NEAR(rhs(10), 188.0/1113.0, tol);
-    EXPECT_NEAR(rhs(11), 51.0/53.0, tol);
+    EXPECT_NEAR(h_rhs(8), 1532.0/1113.0, tol);
+    EXPECT_NEAR(h_rhs(9), 8.0/21.0, tol);
+    EXPECT_NEAR(h_rhs(10), 188.0/1113.0, tol);
+    EXPECT_NEAR(h_rhs(11), 51.0/53.0, tol);
 
-    EXPECT_NEAR(rhs(12), 271.0/162.0, tol);
-    EXPECT_NEAR(rhs(13), 23.0/54.0, tol);
-    EXPECT_NEAR(rhs(14), 14.0/81.0, tol);
-    EXPECT_NEAR(rhs(15), 97.0/81.0, tol);
+    EXPECT_NEAR(h_rhs(12), 271.0/162.0, tol);
+    EXPECT_NEAR(h_rhs(13), 23.0/54.0, tol);
+    EXPECT_NEAR(h_rhs(14), 14.0/81.0, tol);
+    EXPECT_NEAR(h_rhs(15), 97.0/81.0, tol);
+}
+TEST(BatchedTridiagonalSolvers, cyclic_tridiagonal_n_4) {
+		// Call a function named function due to cuda restriction
+		test_cyclic_tridiagonal_n_4();
 }
 
-TEST(BatchedTridiagonalSolvers, non_cyclic_diagonal_n_4)
-{
+void test_non_cyclic_diagonal_n_4() {
     int batch_count = 4;
     int matrix_dimension = 4;
     bool is_cyclic = false;
 
     BatchedTridiagonalSolver<double> solver(matrix_dimension, batch_count, is_cyclic);
 
+	Kokkos::parallel_for(
+					"Test",
+					1,
+					KOKKOS_LAMBDA(const int) {
     solver.set_main_diagonal(0,0, 2.0);
     solver.set_main_diagonal(0,1, 4.0);
     solver.set_main_diagonal(0,2, 6.0);
@@ -193,14 +223,17 @@ TEST(BatchedTridiagonalSolvers, non_cyclic_diagonal_n_4)
     solver.set_main_diagonal(3,1, 7.0);
     solver.set_main_diagonal(3,2, 9.0);
     solver.set_main_diagonal(3,3, 11.0);
+					});
 
-    Vector<double> rhs("rhs", matrix_dimension * batch_count);
+    HostVector<double> h_rhs("h_rhs", matrix_dimension * batch_count);
 
     // Initialize RHS for each system
-    rhs(0) = 1.0; rhs(1) = 2.0; rhs(2) = 3.0; rhs(3) = 4.0;
-    rhs(4) = 2.0; rhs(5) = 3.0; rhs(6) = 4.0; rhs(7) = 5.0;
-    rhs(8) = 3.0; rhs(9) = 4.0; rhs(10) = 5.0; rhs(11) = 6.0;
-    rhs(12) = 4.0; rhs(13) = 5.0; rhs(14) = 6.0; rhs(15) = 7.0; 
+    h_rhs(0) = 1.0; h_rhs(1) = 2.0; h_rhs(2) = 3.0; h_rhs(3) = 4.0;
+    h_rhs(4) = 2.0; h_rhs(5) = 3.0; h_rhs(6) = 4.0; h_rhs(7) = 5.0;
+    h_rhs(8) = 3.0; h_rhs(9) = 4.0; h_rhs(10) = 5.0; h_rhs(11) = 6.0;
+    h_rhs(12) = 4.0; h_rhs(13) = 5.0; h_rhs(14) = 6.0; h_rhs(15) = 7.0; 
+
+	auto rhs = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs);
 
     solver.setup();
 
@@ -212,38 +245,47 @@ TEST(BatchedTridiagonalSolvers, non_cyclic_diagonal_n_4)
     offset = 1; stride = 2;
     solver.solve_diagonal(rhs, offset, stride);
 
+	Kokkos::deep_copy(h_rhs, rhs);
+
     // Verify solutions
     double tol = 1e-12;
 
-    EXPECT_NEAR(rhs(0), 1.0/2.0, tol);
-    EXPECT_NEAR(rhs(1), 2.0/4.0, tol);
-    EXPECT_NEAR(rhs(2), 3.0/6.0, tol);
-    EXPECT_NEAR(rhs(3), 4.0/8.0, tol);
+    EXPECT_NEAR(h_rhs(0), 1.0/2.0, tol);
+    EXPECT_NEAR(h_rhs(1), 2.0/4.0, tol);
+    EXPECT_NEAR(h_rhs(2), 3.0/6.0, tol);
+    EXPECT_NEAR(h_rhs(3), 4.0/8.0, tol);
 
-    EXPECT_NEAR(rhs(4), 2.0/3.0, tol);
-    EXPECT_NEAR(rhs(5), 3.0/5.0, tol);
-    EXPECT_NEAR(rhs(6), 4.0/7.0, tol);
-    EXPECT_NEAR(rhs(7), 5.0/9.0, tol);
+    EXPECT_NEAR(h_rhs(4), 2.0/3.0, tol);
+    EXPECT_NEAR(h_rhs(5), 3.0/5.0, tol);
+    EXPECT_NEAR(h_rhs(6), 4.0/7.0, tol);
+    EXPECT_NEAR(h_rhs(7), 5.0/9.0, tol);
 
-    EXPECT_NEAR(rhs(8), 3.0/4.0, tol);
-    EXPECT_NEAR(rhs(9), 4.0/6.0, tol);
-    EXPECT_NEAR(rhs(10), 5.0/8.0, tol);
-    EXPECT_NEAR(rhs(11), 6.0/10.0, tol);
+    EXPECT_NEAR(h_rhs(8), 3.0/4.0, tol);
+    EXPECT_NEAR(h_rhs(9), 4.0/6.0, tol);
+    EXPECT_NEAR(h_rhs(10), 5.0/8.0, tol);
+    EXPECT_NEAR(h_rhs(11), 6.0/10.0, tol);
 
-    EXPECT_NEAR(rhs(12), 4.0/5.0, tol);
-    EXPECT_NEAR(rhs(13), 5.0/7.0, tol);
-    EXPECT_NEAR(rhs(14), 6.0/9.0, tol);
-    EXPECT_NEAR(rhs(15), 7.0/11.0, tol);
+    EXPECT_NEAR(h_rhs(12), 4.0/5.0, tol);
+    EXPECT_NEAR(h_rhs(13), 5.0/7.0, tol);
+    EXPECT_NEAR(h_rhs(14), 6.0/9.0, tol);
+    EXPECT_NEAR(h_rhs(15), 7.0/11.0, tol);
+}
+TEST(BatchedTridiagonalSolvers, non_cyclic_diagonal_n_4) {
+		// Call a function named function due to cuda restriction
+		test_non_cyclic_diagonal_n_4();
 }
 
-TEST(BatchedTridiagonalSolvers, cyclic_diagonal_n_4)
-{
+void test_cyclic_diagonal_n_4() {
     int batch_count = 4;
     int matrix_dimension = 4;
     bool is_cyclic = true;
 
     BatchedTridiagonalSolver<double> solver(matrix_dimension, batch_count, is_cyclic);
 
+	Kokkos::parallel_for(
+					"Test",
+					1,
+					KOKKOS_LAMBDA(const int) {
     solver.set_main_diagonal(0,0, 2.0);
     solver.set_main_diagonal(0,1, 4.0);
     solver.set_main_diagonal(0,2, 6.0);
@@ -263,14 +305,17 @@ TEST(BatchedTridiagonalSolvers, cyclic_diagonal_n_4)
     solver.set_main_diagonal(3,1, 7.0);
     solver.set_main_diagonal(3,2, 9.0);
     solver.set_main_diagonal(3,3, 11.0);
+					});
 
-    Vector<double> rhs("rhs", matrix_dimension * batch_count);
+    HostVector<double> h_rhs("h_rhs", matrix_dimension * batch_count);
 
     // Initialize RHS for each system
-    rhs(0) = 1.0; rhs(1) = 2.0; rhs(2) = 3.0; rhs(3) = 4.0;
-    rhs(4) = 2.0; rhs(5) = 3.0; rhs(6) = 4.0; rhs(7) = 5.0;
-    rhs(8) = 3.0; rhs(9) = 4.0; rhs(10) = 5.0; rhs(11) = 6.0;
-    rhs(12) = 4.0; rhs(13) = 5.0; rhs(14) = 6.0; rhs(15) = 7.0; 
+    h_rhs(0) = 1.0; h_rhs(1) = 2.0; h_rhs(2) = 3.0; h_rhs(3) = 4.0;
+    h_rhs(4) = 2.0; h_rhs(5) = 3.0; h_rhs(6) = 4.0; h_rhs(7) = 5.0;
+    h_rhs(8) = 3.0; h_rhs(9) = 4.0; h_rhs(10) = 5.0; h_rhs(11) = 6.0;
+    h_rhs(12) = 4.0; h_rhs(13) = 5.0; h_rhs(14) = 6.0; h_rhs(15) = 7.0; 
+
+	auto rhs = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs);
 
     solver.setup();
 
@@ -282,26 +327,32 @@ TEST(BatchedTridiagonalSolvers, cyclic_diagonal_n_4)
     offset = 1; stride = 2;
     solver.solve_diagonal(rhs, offset, stride);
 
+	Kokkos::deep_copy(h_rhs, rhs);
+
     // Verify solutions
     double tol = 1e-12;
 
-    EXPECT_NEAR(rhs(0), 1.0/2.0, tol);
-    EXPECT_NEAR(rhs(1), 2.0/4.0, tol);
-    EXPECT_NEAR(rhs(2), 3.0/6.0, tol);
-    EXPECT_NEAR(rhs(3), 4.0/8.0, tol);
+    EXPECT_NEAR(h_rhs(0), 1.0/2.0, tol);
+    EXPECT_NEAR(h_rhs(1), 2.0/4.0, tol);
+    EXPECT_NEAR(h_rhs(2), 3.0/6.0, tol);
+    EXPECT_NEAR(h_rhs(3), 4.0/8.0, tol);
 
-    EXPECT_NEAR(rhs(4), 2.0/3.0, tol);
-    EXPECT_NEAR(rhs(5), 3.0/5.0, tol);
-    EXPECT_NEAR(rhs(6), 4.0/7.0, tol);
-    EXPECT_NEAR(rhs(7), 5.0/9.0, tol);
+    EXPECT_NEAR(h_rhs(4), 2.0/3.0, tol);
+    EXPECT_NEAR(h_rhs(5), 3.0/5.0, tol);
+    EXPECT_NEAR(h_rhs(6), 4.0/7.0, tol);
+    EXPECT_NEAR(h_rhs(7), 5.0/9.0, tol);
 
-    EXPECT_NEAR(rhs(8), 3.0/4.0, tol);
-    EXPECT_NEAR(rhs(9), 4.0/6.0, tol);
-    EXPECT_NEAR(rhs(10), 5.0/8.0, tol);
-    EXPECT_NEAR(rhs(11), 6.0/10.0, tol);
+    EXPECT_NEAR(h_rhs(8), 3.0/4.0, tol);
+    EXPECT_NEAR(h_rhs(9), 4.0/6.0, tol);
+    EXPECT_NEAR(h_rhs(10), 5.0/8.0, tol);
+    EXPECT_NEAR(h_rhs(11), 6.0/10.0, tol);
 
-    EXPECT_NEAR(rhs(12), 4.0/5.0, tol);
-    EXPECT_NEAR(rhs(13), 5.0/7.0, tol);
-    EXPECT_NEAR(rhs(14), 6.0/9.0, tol);
-    EXPECT_NEAR(rhs(15), 7.0/11.0, tol);
+    EXPECT_NEAR(h_rhs(12), 4.0/5.0, tol);
+    EXPECT_NEAR(h_rhs(13), 5.0/7.0, tol);
+    EXPECT_NEAR(h_rhs(14), 6.0/9.0, tol);
+    EXPECT_NEAR(h_rhs(15), 7.0/11.0, tol);
+}
+TEST(BatchedTridiagonalSolvers, cyclic_diagonal_n_4) {
+		// Call a function named function due to cuda restriction
+		test_cyclic_diagonal_n_4();
 }

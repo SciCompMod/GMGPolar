@@ -1,9 +1,8 @@
 #include "../include/InputFunctions/SourceTerms/polarR6_ZoniShiftedGyro_ShafranovGeometry.h"
 using namespace gmgpolar;
 
-PolarR6_ZoniShiftedGyro_ShafranovGeometry::PolarR6_ZoniShiftedGyro_ShafranovGeometry(PolarGrid const& grid, double Rmax,
-                                                                                     double elongation_kappa,
-                                                                                     double shift_delta)
+PolarR6_ZoniShiftedGyro_ShafranovGeometry::PolarR6_ZoniShiftedGyro_ShafranovGeometry(
+    PolarGrid<DefaultMemorySpace> const& grid, double Rmax, double elongation_kappa, double shift_delta)
     : grid_(grid)
     , Rmax(Rmax)
     , elongation_kappa(elongation_kappa)

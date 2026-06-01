@@ -12,12 +12,9 @@ using namespace gmgpolar;
 int main(int argc, char* argv[])
 {
     Kokkos::ScopeGuard kokkos_scope(argc, argv);
-    omp_set_num_threads(omp_get_max_threads());
 
     const int verbose   = 0;
     const bool paraview = false;
-
-    const int maxOpenMPThreads = 16;
 
     const StencilDistributionMethod stencilDistributionMethod = StencilDistributionMethod::CPU_TAKE;
     const bool cacheDensityProfileCoefficients                = true;
@@ -88,9 +85,10 @@ int main(int argc, char* argv[])
     for (divideBy2 = 0; divideBy2 < MAX_DIVIDE_BY_2; divideBy2++) {
         double refinement_radius               = alpha_jump;
         std::optional<double> splitting_radius = std::nullopt;
-        PolarGrid grid(R0, Rmax, nr_exp, ntheta_exp, refinement_radius, anisotropic_factor, divideBy2,
-                       splitting_radius);
-        GMGPolar solver(grid, domain_geometry, coefficients);
+        PolarGrid<Kokkos::HostSpace> grid_host(R0, Rmax, nr_exp, ntheta_exp, refinement_radius, anisotropic_factor,
+                                               divideBy2, splitting_radius);
+        PolarGrid<DefaultMemorySpace> grid(grid_host);
+        GMGPolar solver(grid_host, domain_geometry, coefficients);
 
         PolarR6_ZoniGyro_ShafranovGeometry source_term(grid, Rmax, elongation_kappa, shift_delta);
         // CartesianR2_SonnendruckerGyro_CzarnyGeometry source_term(grid, Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
@@ -98,9 +96,6 @@ int main(int argc, char* argv[])
 
         solver.verbose(verbose);
         solver.paraview(paraview);
-
-        solver.maxOpenMPThreads(maxOpenMPThreads);
-        omp_set_num_threads(maxOpenMPThreads); // Global OpenMP thread limit
 
         solver.DirBC_Interior(DirBC_Interior);
         solver.stencilDistributionMethod(stencilDistributionMethod);

@@ -73,54 +73,51 @@ public:
 public:
     // ----------- //
     // Constructor //
-    explicit Level(const int level_depth, std::unique_ptr<const PolarGrid> grid,
+    explicit Level(const int level_depth, std::unique_ptr<const PolarGrid<DefaultMemorySpace>> grid,
                    std::unique_ptr<const LevelCacheType> level_cache, const ExtrapolationType extrapolation,
                    const bool FMG, const bool PCG_FMG = false);
 
     // ---------------- //
     // Getter Functions //
     int level_depth() const;
-    const PolarGrid& grid() const;
+    const PolarGrid<DefaultMemorySpace>& grid() const;
     const LevelCacheType& levelCache() const;
 
-    Vector<double> rhs();
-    ConstVector<double> rhs() const;
-    Vector<double> solution();
-    ConstVector<double> solution() const;
-    Vector<double> residual();
-    ConstVector<double> residual() const;
-    Vector<double> error_correction();
-    ConstVector<double> error_correction() const;
+    HostVector<double> rhs();
+    HostConstVector<double> rhs() const;
+    HostVector<double> solution();
+    HostConstVector<double> solution() const;
+    HostVector<double> residual();
+    HostConstVector<double> residual() const;
+    HostVector<double> error_correction();
+    HostConstVector<double> error_correction() const;
 
     // -------------- //
     // Apply Residual //
-    void initializeResidual(const bool DirBC_Interior, const int num_omp_threads,
-                            const StencilDistributionMethod stencil_distribution_method);
-    void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const;
-    void applySystemOperator(Vector<double> result, ConstVector<double> x) const;
+    void initializeResidual(const bool DirBC_Interior, const StencilDistributionMethod stencil_distribution_method);
+    void computeResidual(HostVector<double> result, HostConstVector<double> rhs, HostConstVector<double> x) const;
+    void applySystemOperator(HostVector<double> result, HostConstVector<double> x) const;
 
     // ------------------- //
     // Solve coarse System //
-    void initializeDirectSolver(const bool DirBC_Interior, const int num_omp_threads,
-                                const StencilDistributionMethod stencil_distribution_method);
+    void initializeDirectSolver(const bool DirBC_Interior, const StencilDistributionMethod stencil_distribution_method);
     // Note: The rhs (right-hand side) vector gets overwritten by the solution.
-    void directSolveInPlace(Vector<double> x) const;
+    void directSolveInPlace(HostVector<double> x) const;
 
     // --------------- //
     // Apply Smoothing //
-    void initializeSmoothing(const bool DirBC_Interior, const int num_omp_threads,
-                             const StencilDistributionMethod stencil_distribution_method);
-    void smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) const;
+    void initializeSmoothing(const bool DirBC_Interior, const StencilDistributionMethod stencil_distribution_method);
+    void smoothing(HostVector<double> x, HostConstVector<double> rhs, HostVector<double> temp) const;
 
     // ---------------------------- //
     // Apply Extrapolated Smoothing //
-    void initializeExtrapolatedSmoothing(const bool DirBC_Interior, const int num_omp_threads,
+    void initializeExtrapolatedSmoothing(const bool DirBC_Interior,
                                          const StencilDistributionMethod stencil_distribution_method);
-    void extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) const;
+    void extrapolatedSmoothing(HostVector<double> x, HostConstVector<double> rhs, HostVector<double> temp) const;
 
 private:
     const int level_depth_;
-    std::unique_ptr<const PolarGrid> grid_;
+    std::unique_ptr<const PolarGrid<DefaultMemorySpace>> grid_;
     std::unique_ptr<const LevelCacheType> level_cache_;
 
     std::unique_ptr<DirectSolver<LevelCacheType>> op_directSolver_;
@@ -128,17 +125,18 @@ private:
     std::unique_ptr<Smoother<LevelCacheType>> op_smoother_;
     std::unique_ptr<ExtrapolatedSmoother<LevelCacheType>> op_extrapolated_smoother_;
 
-    Vector<double> rhs_;
-    Vector<double> solution_;
-    Vector<double> residual_;
-    Vector<double> error_correction_;
+    HostVector<double> rhs_;
+    HostVector<double> solution_;
+    HostVector<double> residual_;
+    HostVector<double> error_correction_;
 };
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 class LevelCache
 {
 public:
-    explicit LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients,
+    explicit LevelCache(const PolarGrid<DefaultMemorySpace>& grid,
+                        const DensityProfileCoefficients& density_profile_coefficients,
                         const DomainGeometry& domain_geometry, const bool cache_density_profile_coefficients,
                         const bool cache_domain_geometry);
 
@@ -177,8 +175,8 @@ public:
     }
 
 private:
-    const DomainGeometry& domain_geometry_;
-    const DensityProfileCoefficients& density_profile_coefficients_;
+    const DomainGeometry domain_geometry_;
+    const DensityProfileCoefficients density_profile_coefficients_;
 
     bool cache_density_profile_coefficients_; // cache alpha(r, theta), beta(r, theta)
     Vector<double> coeff_alpha_;

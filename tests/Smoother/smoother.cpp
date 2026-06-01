@@ -40,14 +40,14 @@ TEST(SmootherTest, smoother_DirBC_Interior)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
-    bool DirBC_Interior  = true;
-    int maxOpenMPThreads = 16;
+    bool DirBC_Interior = true;
+    omp_set_num_threads(16);
 
     // "Take" requires cached values
     bool cache_density_rpofile_coefficients = true;
@@ -58,18 +58,18 @@ TEST(SmootherTest, smoother_DirBC_Interior)
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    SmootherGive smootherGive_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherTake smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    SmootherGive smootherGive_operator(level.grid(), level.levelCache(), DirBC_Interior);
+    SmootherTake smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior);
 
-    Vector<double> rhs   = generate_random_sample_data(level.grid(), 69);
-    Vector<double> start = generate_random_sample_data(level.grid(), 24);
-    Vector<double> temp  = generate_random_sample_data(level.grid(), 8);
+    HostVector<double> rhs   = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
+    HostVector<double> start = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 24);
+    HostVector<double> temp  = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 8);
 
-    Vector<double> solution_Give("solution_Give", start.size());
+    HostVector<double> solution_Give("solution_Give", start.size());
     Kokkos::deep_copy(solution_Give, start);
     smootherGive_operator.smoothing(solution_Give, rhs, temp);
 
-    Vector<double> solution_Take("solution_Take", start.size());
+    HostVector<double> solution_Take("solution_Take", start.size());
     Kokkos::deep_copy(solution_Take, start);
     smootherTake_operator.smoothing(solution_Take, rhs, temp);
 
@@ -97,14 +97,14 @@ TEST(SmootherTest, smoother_AcrossOrigin)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
-    bool DirBC_Interior  = false;
-    int maxOpenMPThreads = 16;
+    bool DirBC_Interior = false;
+    omp_set_num_threads(16);
 
     // "Take" requires cached values
     bool cache_density_rpofile_coefficients = true;
@@ -115,18 +115,18 @@ TEST(SmootherTest, smoother_AcrossOrigin)
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    SmootherGive smootherGive_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherTake smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    SmootherGive smootherGive_operator(level.grid(), level.levelCache(), DirBC_Interior);
+    SmootherTake smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior);
 
-    Vector<double> rhs   = generate_random_sample_data(level.grid(), 69);
-    Vector<double> start = generate_random_sample_data(level.grid(), 24);
-    Vector<double> temp  = generate_random_sample_data(level.grid(), 8);
+    HostVector<double> rhs   = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
+    HostVector<double> start = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 24);
+    HostVector<double> temp  = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 8);
 
-    Vector<double> solution_Give("solution_Give", start.size());
+    HostVector<double> solution_Give("solution_Give", start.size());
     Kokkos::deep_copy(solution_Give, start);
     smootherGive_operator.smoothing(solution_Give, rhs, temp);
 
-    Vector<double> solution_Take("solution_Take", start.size());
+    HostVector<double> solution_Take("solution_Take", start.size());
     Kokkos::deep_copy(solution_Take, start);
     smootherTake_operator.smoothing(solution_Take, rhs, temp);
 
@@ -144,7 +144,7 @@ TEST(SmootherTest, smoother_AcrossOrigin)
 /* Test 2/2: */
 /* Does the smoother converge to the directSolver solution? */
 
-TEST(SmootherTest, SequentialSmootherDirBC_Interior)
+TEST(SmootherTest, SmootherDirBC_Interior)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -157,15 +157,13 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
-    bool DirBC_Interior  = true;
-    int maxOpenMPThreads = 1;
-
+    bool DirBC_Interior                     = true;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
@@ -174,36 +172,38 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior)
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
+    SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
-    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    HostConstVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
+    HostVector<double> discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> error("error", level.grid().numberOfNodes());
-    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
+    HostVector<double> temp("temp", level.grid().numberOfNodes());
+    HostVector<double> error("error", level.grid().numberOfNodes());
+    HostVector<double> smoother_solution = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
 
-#pragma omp parallel for
-    for (uint i = 0; i < error.size(); i++) {
-        error(i) = discrete_solution(i) - smoother_solution(i);
-    }
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, error.size()),
+                         [&](uint i) {
+                             error(i) = discrete_solution(i) - smoother_solution(i);
+                         });
+    Kokkos::fence();
 
     int iterations              = 0;
     bool max_iterations_reached = false;
     const int max_iterations    = 10000;
     const double precision      = 1e-12;
 
-    while (infinity_norm(ConstVector<double>(error)) > precision) {
+    while (infinity_norm(HostConstVector<double>(error)) > precision) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
-#pragma omp parallel for
-        for (uint i = 0; i < error.size(); i++) {
-            error(i) = discrete_solution(i) - smoother_solution(i);
-        }
+        Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, error.size()),
+                             [&](uint i) {
+                                 error(i) = discrete_solution(i) - smoother_solution(i);
+                             });
+        Kokkos::fence();
         iterations++;
         if (iterations >= max_iterations) {
             max_iterations_reached = true;
@@ -216,10 +216,10 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 300);
-    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(HostConstVector<double>(error)), 0.0, precision);
 }
 
-TEST(SmootherTest, ParallelSmootherDirBC_Interior)
+TEST(SmootherTest, SmootherAcrossOrigin)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -232,15 +232,13 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
-    bool DirBC_Interior  = true;
-    int maxOpenMPThreads = 16;
-
+    bool DirBC_Interior                     = false;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
@@ -249,111 +247,38 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior)
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
+    SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
-    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    HostConstVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
+    HostVector<double> discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> error("error", level.grid().numberOfNodes());
-    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
+    HostVector<double> temp("temp", level.grid().numberOfNodes());
+    HostVector<double> error("error", level.grid().numberOfNodes());
+    HostVector<double> smoother_solution = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
 
-#pragma omp parallel for
-    for (uint i = 0; i < error.size(); i++) {
-        error(i) = discrete_solution(i) - smoother_solution(i);
-    }
-
-    int iterations              = 0;
-    bool max_iterations_reached = false;
-    const int max_iterations    = 10000;
-    const double precision      = 1e-12;
-
-    while (infinity_norm(ConstVector<double>(error)) > precision) {
-        smoother_op.smoothing(smoother_solution, rhs, temp);
-
-#pragma omp parallel for
-        for (uint i = 0; i < error.size(); i++) {
-            error(i) = discrete_solution(i) - smoother_solution(i);
-        }
-        iterations++;
-        if (iterations >= max_iterations) {
-            max_iterations_reached = true;
-            std::cerr << "Max iterations reached without convergence." << std::endl;
-            break;
-        }
-    }
-
-    std::cout << "Convergence reached after " << iterations << " iterations." << std::endl;
-
-    ASSERT_TRUE(!max_iterations_reached);
-    ASSERT_LT(iterations, 300);
-    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
-}
-
-TEST(SmootherTest, SequentialSmootherAcrossOrigin)
-{
-    std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
-    std::vector<double> angles = {
-        0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
-
-    double Rmax      = radii.back();
-    double kappa_eps = 0.3;
-    double delta_e   = 1.4;
-
-    using DomainGeometryType = CzarnyGeometry;
-    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
-
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
-
-    double alpha_jump                    = 0.678 * Rmax;
-    using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
-
-    bool DirBC_Interior  = false;
-    int maxOpenMPThreads = 1;
-
-    bool cache_density_rpofile_coefficients = true;
-    bool cache_domain_geometry              = false;
-
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
-                                                                    ExtrapolationType::NONE, 0);
-
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-
-    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
-    solver_op.solveInPlace(discrete_solution);
-
-    Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> error("error", level.grid().numberOfNodes());
-    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
-
-#pragma omp parallel for
-    for (uint i = 0; i < error.size(); i++) {
-        error(i) = discrete_solution(i) - smoother_solution(i);
-    }
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, error.size()),
+                         [&](uint i) {
+                             error(i) = discrete_solution(i) - smoother_solution(i);
+                         });
+    Kokkos::fence();
 
     int iterations              = 0;
     bool max_iterations_reached = false;
     const int max_iterations    = 10000;
     const double precision      = 1e-8;
 
-    while (infinity_norm(ConstVector<double>(error)) > precision) {
+    while (infinity_norm(HostConstVector<double>(error)) > precision) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
-#pragma omp parallel for
-        for (uint i = 0; i < error.size(); i++) {
-            error(i) = discrete_solution(i) - smoother_solution(i);
-        }
+        Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, error.size()),
+                             [&](uint i) {
+                                 error(i) = discrete_solution(i) - smoother_solution(i);
+                             });
+        Kokkos::fence();
         iterations++;
         if (iterations >= max_iterations) {
             max_iterations_reached = true;
@@ -366,85 +291,10 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 600);
-    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(HostConstVector<double>(error)), 0.0, precision);
 }
 
-TEST(SmootherTest, ParallelSmootherAcrossOrigin)
-{
-    std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
-    std::vector<double> angles = {
-        0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
-
-    double Rmax      = radii.back();
-    double kappa_eps = 0.3;
-    double delta_e   = 1.4;
-
-    using DomainGeometryType = CzarnyGeometry;
-    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
-
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
-
-    double alpha_jump                    = 0.678 * Rmax;
-    using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
-
-    bool DirBC_Interior  = false;
-    int maxOpenMPThreads = 16;
-
-    bool cache_density_rpofile_coefficients = true;
-    bool cache_domain_geometry              = false;
-
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
-                                                                    ExtrapolationType::NONE, 0);
-
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-
-    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
-    solver_op.solveInPlace(discrete_solution);
-
-    Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> error("error", level.grid().numberOfNodes());
-    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
-
-#pragma omp parallel for
-    for (uint i = 0; i < error.size(); i++) {
-        error(i) = discrete_solution(i) - smoother_solution(i);
-    }
-
-    int iterations              = 0;
-    bool max_iterations_reached = false;
-    const int max_iterations    = 10000;
-    const double precision      = 1e-8;
-
-    while (infinity_norm(ConstVector<double>(error)) > 1e-8) {
-        smoother_op.smoothing(smoother_solution, rhs, temp);
-
-#pragma omp parallel for
-        for (uint i = 0; i < error.size(); i++) {
-            error(i) = discrete_solution(i) - smoother_solution(i);
-        }
-        iterations++;
-        if (iterations >= max_iterations) {
-            max_iterations_reached = true;
-            std::cerr << "Max iterations reached without convergence." << std::endl;
-            break;
-        }
-    }
-
-    std::cout << "Convergence reached after " << iterations << " iterations." << std::endl;
-
-    ASSERT_TRUE(!max_iterations_reached);
-    ASSERT_LT(iterations, 600);
-    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
-}
-
-TEST(SmootherTest, SequentialSmootherDirBC_Interior_SmallestGrid)
+TEST(SmootherTest, SmootherDirBC_Interior_SmallestGrid)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.9, 1.2, 1.3};
     std::vector<double> angles = {0, M_PI / 8, M_PI, M_PI + M_PI / 8, M_PI + M_PI};
@@ -456,15 +306,13 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior_SmallestGrid)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
-    bool DirBC_Interior  = true;
-    int maxOpenMPThreads = 1;
-
+    bool DirBC_Interior                     = true;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
@@ -473,110 +321,38 @@ TEST(SmootherTest, SequentialSmootherDirBC_Interior_SmallestGrid)
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
+    SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
-    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    HostConstVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
+    HostVector<double> discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> error("error", level.grid().numberOfNodes());
-    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
+    HostVector<double> temp("temp", level.grid().numberOfNodes());
+    HostVector<double> error("error", level.grid().numberOfNodes());
+    HostVector<double> smoother_solution = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
 
-#pragma omp parallel for
-    for (uint i = 0; i < error.size(); i++) {
-        error(i) = discrete_solution(i) - smoother_solution(i);
-    }
-
-    int iterations              = 0;
-    bool max_iterations_reached = false;
-    const int max_iterations    = 10000;
-    const double precision      = 1e-12;
-
-    while (infinity_norm(ConstVector<double>(error)) > 1e-12) {
-        smoother_op.smoothing(smoother_solution, rhs, temp);
-
-#pragma omp parallel for
-        for (uint i = 0; i < error.size(); i++) {
-            error(i) = discrete_solution(i) - smoother_solution(i);
-        }
-        iterations++;
-        if (iterations >= max_iterations) {
-            max_iterations_reached = true;
-            std::cerr << "Max iterations reached without convergence." << std::endl;
-            break;
-        }
-    }
-
-    std::cout << "Convergence reached after " << iterations << " iterations." << std::endl;
-
-    ASSERT_TRUE(!max_iterations_reached);
-    ASSERT_LT(iterations, 30);
-    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
-}
-
-TEST(SmootherTest, ParallelSmootherDirBC_Interior_SmallestGrid)
-{
-    std::vector<double> radii  = {1e-5, 0.2, 0.9, 1.2, 1.3};
-    std::vector<double> angles = {0, M_PI / 8, M_PI, M_PI + M_PI / 8, M_PI + M_PI};
-
-    double Rmax      = radii.back();
-    double kappa_eps = 0.3;
-    double delta_e   = 1.4;
-
-    using DomainGeometryType = CzarnyGeometry;
-    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
-
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
-
-    double alpha_jump                    = 0.678 * Rmax;
-    using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
-
-    bool DirBC_Interior  = true;
-    int maxOpenMPThreads = 16;
-
-    bool cache_density_rpofile_coefficients = true;
-    bool cache_domain_geometry              = false;
-
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
-                                                                    ExtrapolationType::NONE, 0);
-
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-
-    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
-    solver_op.solveInPlace(discrete_solution);
-
-    Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> error("error", level.grid().numberOfNodes());
-    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
-
-#pragma omp parallel for
-    for (uint i = 0; i < error.size(); i++) {
-        error(i) = discrete_solution(i) - smoother_solution(i);
-    }
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, error.size()),
+                         [&](uint i) {
+                             error(i) = discrete_solution(i) - smoother_solution(i);
+                         });
+    Kokkos::fence();
 
     int iterations              = 0;
     bool max_iterations_reached = false;
     const int max_iterations    = 10000;
     double precision            = 1e-12;
 
-    while (infinity_norm(ConstVector<double>(error)) > precision) {
+    while (infinity_norm(HostConstVector<double>(error)) > precision) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
-#pragma omp parallel for
-        for (uint i = 0; i < error.size(); i++) {
-            error(i) = discrete_solution(i) - smoother_solution(i);
-        }
+        Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, error.size()),
+                             [&](uint i) {
+                                 error(i) = discrete_solution(i) - smoother_solution(i);
+                             });
+        Kokkos::fence();
         iterations++;
         if (iterations >= max_iterations) {
             max_iterations_reached = true;
@@ -589,10 +365,10 @@ TEST(SmootherTest, ParallelSmootherDirBC_Interior_SmallestGrid)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 30);
-    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(HostConstVector<double>(error)), 0.0, precision);
 }
 
-TEST(SmootherTest, SequentialSmootherAcrossOrigin_SmallestGrid)
+TEST(SmootherTest, SmootherAcrossOrigin_SmallestGrid)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.9, 1.2, 1.3};
     std::vector<double> angles = {0, M_PI / 8, M_PI, M_PI + M_PI / 8, M_PI + M_PI};
@@ -604,15 +380,13 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin_SmallestGrid)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
-    bool DirBC_Interior  = false;
-    int maxOpenMPThreads = 1;
-
+    bool DirBC_Interior                     = false;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
@@ -621,36 +395,38 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin_SmallestGrid)
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
+    SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
-    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    HostConstVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
+    HostVector<double> discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> error("error", level.grid().numberOfNodes());
-    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
+    HostVector<double> temp("temp", level.grid().numberOfNodes());
+    HostVector<double> error("error", level.grid().numberOfNodes());
+    HostVector<double> smoother_solution = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
 
-#pragma omp parallel for
-    for (uint i = 0; i < error.size(); i++) {
-        error(i) = discrete_solution(i) - smoother_solution(i);
-    }
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, error.size()),
+                         [&](uint i) {
+                             error(i) = discrete_solution(i) - smoother_solution(i);
+                         });
+    Kokkos::fence();
 
     int iterations              = 0;
     bool max_iterations_reached = false;
     const int max_iterations    = 10000;
     const double precision      = 1e-8;
 
-    while (infinity_norm(ConstVector<double>(error)) > 1e-8) {
+    while (infinity_norm(HostConstVector<double>(error)) > 1e-8) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
-#pragma omp parallel for
-        for (uint i = 0; i < error.size(); i++) {
-            error(i) = discrete_solution(i) - smoother_solution(i);
-        }
+        Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, error.size()),
+                             [&](uint i) {
+                                 error(i) = discrete_solution(i) - smoother_solution(i);
+                             });
+        Kokkos::fence();
         iterations++;
         if (iterations >= max_iterations) {
             max_iterations_reached = true;
@@ -663,86 +439,12 @@ TEST(SmootherTest, SequentialSmootherAcrossOrigin_SmallestGrid)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 80);
-    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
-}
-
-TEST(SmootherTest, ParallelSmootherAcrossOrigin_SmallestGrid)
-{
-    std::vector<double> radii  = {1e-5, 0.2, 0.9, 1.2, 1.3};
-    std::vector<double> angles = {0, M_PI / 8, M_PI, M_PI + M_PI / 8, M_PI + M_PI};
-
-    double Rmax      = radii.back();
-    double kappa_eps = 0.3;
-    double delta_e   = 1.4;
-
-    using DomainGeometryType = CzarnyGeometry;
-    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
-
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
-
-    double alpha_jump                    = 0.678 * Rmax;
-    using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
-
-    bool DirBC_Interior  = false;
-    int maxOpenMPThreads = 16;
-
-    bool cache_density_rpofile_coefficients = true;
-    bool cache_domain_geometry              = false;
-
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
-                                                                    ExtrapolationType::NONE, 0);
-
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-
-    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
-    solver_op.solveInPlace(discrete_solution);
-
-    Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> error("error", level.grid().numberOfNodes());
-    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
-
-#pragma omp parallel for
-    for (uint i = 0; i < error.size(); i++) {
-        error(i) = discrete_solution(i) - smoother_solution(i);
-    }
-
-    int iterations              = 0;
-    bool max_iterations_reached = false;
-    const int max_iterations    = 10000;
-    const double precision      = 1e-8;
-
-    while (infinity_norm(ConstVector<double>(error)) > 1e-8) {
-        smoother_op.smoothing(smoother_solution, rhs, temp);
-
-#pragma omp parallel for
-        for (uint i = 0; i < error.size(); i++) {
-            error(i) = discrete_solution(i) - smoother_solution(i);
-        }
-        iterations++;
-        if (iterations >= max_iterations) {
-            max_iterations_reached = true;
-            std::cerr << "Max iterations reached without convergence." << std::endl;
-            break;
-        }
-    }
-
-    std::cout << "Convergence reached after " << iterations << " iterations." << std::endl;
-
-    ASSERT_TRUE(!max_iterations_reached);
-    ASSERT_LT(iterations, 80);
-    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(HostConstVector<double>(error)), 0.0, precision);
 }
 
 /* Using "Take" */
 
-TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior)
+TEST(SmootherTest, SmootherTakeDirBC_Interior)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -755,15 +457,13 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
-    bool DirBC_Interior  = true;
-    int maxOpenMPThreads = 1;
-
+    bool DirBC_Interior                     = true;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
@@ -772,36 +472,38 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior)
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
+    SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
-    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    HostConstVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
+    HostVector<double> discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> error("error", level.grid().numberOfNodes());
-    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
+    HostVector<double> temp("temp", level.grid().numberOfNodes());
+    HostVector<double> error("error", level.grid().numberOfNodes());
+    HostVector<double> smoother_solution = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
 
-#pragma omp parallel for
-    for (uint i = 0; i < error.size(); i++) {
-        error(i) = discrete_solution(i) - smoother_solution(i);
-    }
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, error.size()),
+                         [&](uint i) {
+                             error(i) = discrete_solution(i) - smoother_solution(i);
+                         });
+    Kokkos::fence();
 
     int iterations              = 0;
     bool max_iterations_reached = false;
     const int max_iterations    = 10000;
     const double precision      = 1e-12;
 
-    while (infinity_norm(ConstVector<double>(error)) > precision) {
+    while (infinity_norm(HostConstVector<double>(error)) > precision) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
-#pragma omp parallel for
-        for (uint i = 0; i < error.size(); i++) {
-            error(i) = discrete_solution(i) - smoother_solution(i);
-        }
+        Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, error.size()),
+                             [&](uint i) {
+                                 error(i) = discrete_solution(i) - smoother_solution(i);
+                             });
+        Kokkos::fence();
         iterations++;
         if (iterations >= max_iterations) {
             max_iterations_reached = true;
@@ -814,10 +516,10 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 300);
-    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(HostConstVector<double>(error)), 0.0, precision);
 }
 
-TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior)
+TEST(SmootherTest, SmootherTakeAcrossOrigin)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
     std::vector<double> angles = {
@@ -830,15 +532,13 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
-    bool DirBC_Interior  = true;
-    int maxOpenMPThreads = 16;
-
+    bool DirBC_Interior                     = false;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
@@ -847,111 +547,38 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior)
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
+    SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
-    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    HostConstVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
+    HostVector<double> discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> error("error", level.grid().numberOfNodes());
-    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
+    HostVector<double> temp("temp", level.grid().numberOfNodes());
+    HostVector<double> error("error", level.grid().numberOfNodes());
+    HostVector<double> smoother_solution = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
 
-#pragma omp parallel for
-    for (uint i = 0; i < error.size(); i++) {
-        error(i) = discrete_solution(i) - smoother_solution(i);
-    }
-
-    int iterations              = 0;
-    bool max_iterations_reached = false;
-    const int max_iterations    = 10000;
-    const double precision      = 1e-12;
-
-    while (infinity_norm(ConstVector<double>(error)) > precision) {
-        smoother_op.smoothing(smoother_solution, rhs, temp);
-
-#pragma omp parallel for
-        for (uint i = 0; i < error.size(); i++) {
-            error(i) = discrete_solution(i) - smoother_solution(i);
-        }
-        iterations++;
-        if (iterations >= max_iterations) {
-            max_iterations_reached = true;
-            std::cerr << "Max iterations reached without convergence." << std::endl;
-            break;
-        }
-    }
-
-    std::cout << "Convergence reached after " << iterations << " iterations." << std::endl;
-
-    ASSERT_TRUE(!max_iterations_reached);
-    ASSERT_LT(iterations, 300);
-    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
-}
-
-TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin)
-{
-    std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
-    std::vector<double> angles = {
-        0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
-
-    double Rmax      = radii.back();
-    double kappa_eps = 0.3;
-    double delta_e   = 1.4;
-
-    using DomainGeometryType = CzarnyGeometry;
-    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
-
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
-
-    double alpha_jump                    = 0.678 * Rmax;
-    using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
-
-    bool DirBC_Interior  = false;
-    int maxOpenMPThreads = 1;
-
-    bool cache_density_rpofile_coefficients = true;
-    bool cache_domain_geometry              = true;
-
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
-                                                                    ExtrapolationType::NONE, 0);
-
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-
-    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
-    solver_op.solveInPlace(discrete_solution);
-
-    Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> error("error", level.grid().numberOfNodes());
-    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
-
-#pragma omp parallel for
-    for (uint i = 0; i < error.size(); i++) {
-        error(i) = discrete_solution(i) - smoother_solution(i);
-    }
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, error.size()),
+                         [&](uint i) {
+                             error(i) = discrete_solution(i) - smoother_solution(i);
+                         });
+    Kokkos::fence();
 
     int iterations              = 0;
     bool max_iterations_reached = false;
     const int max_iterations    = 10000;
     const double precision      = 1e-8;
 
-    while (infinity_norm(ConstVector<double>(error)) > precision) {
+    while (infinity_norm(HostConstVector<double>(error)) > precision) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
-#pragma omp parallel for
-        for (uint i = 0; i < error.size(); i++) {
-            error(i) = discrete_solution(i) - smoother_solution(i);
-        }
+        Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, error.size()),
+                             [&](uint i) {
+                                 error(i) = discrete_solution(i) - smoother_solution(i);
+                             });
+        Kokkos::fence();
         iterations++;
         if (iterations >= max_iterations) {
             max_iterations_reached = true;
@@ -964,85 +591,10 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 600);
-    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(HostConstVector<double>(error)), 0.0, precision);
 }
 
-TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin)
-{
-    std::vector<double> radii  = {1e-5, 0.2, 0.25, 0.5, 0.8, 0.9, 0.95, 1.2, 1.3};
-    std::vector<double> angles = {
-        0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
-
-    double Rmax      = radii.back();
-    double kappa_eps = 0.3;
-    double delta_e   = 1.4;
-
-    using DomainGeometryType = CzarnyGeometry;
-    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
-
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
-
-    double alpha_jump                    = 0.678 * Rmax;
-    using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
-
-    bool DirBC_Interior  = false;
-    int maxOpenMPThreads = 16;
-
-    bool cache_density_rpofile_coefficients = true;
-    bool cache_domain_geometry              = true;
-
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
-                                                                    ExtrapolationType::NONE, 0);
-
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-
-    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
-    solver_op.solveInPlace(discrete_solution);
-
-    Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> error("error", level.grid().numberOfNodes());
-    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
-
-#pragma omp parallel for
-    for (uint i = 0; i < error.size(); i++) {
-        error(i) = discrete_solution(i) - smoother_solution(i);
-    }
-
-    int iterations              = 0;
-    bool max_iterations_reached = false;
-    const int max_iterations    = 10000;
-    const double precision      = 1e-8;
-
-    while (infinity_norm(ConstVector<double>(error)) > 1e-8) {
-        smoother_op.smoothing(smoother_solution, rhs, temp);
-
-#pragma omp parallel for
-        for (uint i = 0; i < error.size(); i++) {
-            error(i) = discrete_solution(i) - smoother_solution(i);
-        }
-        iterations++;
-        if (iterations >= max_iterations) {
-            max_iterations_reached = true;
-            std::cerr << "Max iterations reached without convergence." << std::endl;
-            break;
-        }
-    }
-
-    std::cout << "Convergence reached after " << iterations << " iterations." << std::endl;
-
-    ASSERT_TRUE(!max_iterations_reached);
-    ASSERT_LT(iterations, 600);
-    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
-}
-
-TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior_SmallestGrid)
+TEST(SmootherTest, SmootherTakeDirBC_Interior_SmallestGrid)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.9, 1.2, 1.3};
     std::vector<double> angles = {0, M_PI / 8, M_PI, M_PI + M_PI / 8, M_PI + M_PI};
@@ -1054,15 +606,13 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior_SmallestGrid)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
-    bool DirBC_Interior  = true;
-    int maxOpenMPThreads = 1;
-
+    bool DirBC_Interior                     = true;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
@@ -1071,110 +621,38 @@ TEST(SmootherTest, SequentialSmootherTakeDirBC_Interior_SmallestGrid)
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
+    SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
-    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    HostConstVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
+    HostVector<double> discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> error("error", level.grid().numberOfNodes());
-    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
+    HostVector<double> temp("temp", level.grid().numberOfNodes());
+    HostVector<double> error("error", level.grid().numberOfNodes());
+    HostVector<double> smoother_solution = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
 
-#pragma omp parallel for
-    for (uint i = 0; i < error.size(); i++) {
-        error(i) = discrete_solution(i) - smoother_solution(i);
-    }
-
-    int iterations              = 0;
-    bool max_iterations_reached = false;
-    const int max_iterations    = 10000;
-    const double precision      = 1e-12;
-
-    while (infinity_norm(ConstVector<double>(error)) > 1e-12) {
-        smoother_op.smoothing(smoother_solution, rhs, temp);
-
-#pragma omp parallel for
-        for (uint i = 0; i < error.size(); i++) {
-            error(i) = discrete_solution(i) - smoother_solution(i);
-        }
-        iterations++;
-        if (iterations >= max_iterations) {
-            max_iterations_reached = true;
-            std::cerr << "Max iterations reached without convergence." << std::endl;
-            break;
-        }
-    }
-
-    std::cout << "Convergence reached after " << iterations << " iterations." << std::endl;
-
-    ASSERT_TRUE(!max_iterations_reached);
-    ASSERT_LT(iterations, 30);
-    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
-}
-
-TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior_SmallestGrid)
-{
-    std::vector<double> radii  = {1e-5, 0.2, 0.9, 1.2, 1.3};
-    std::vector<double> angles = {0, M_PI / 8, M_PI, M_PI + M_PI / 8, M_PI + M_PI};
-
-    double Rmax      = radii.back();
-    double kappa_eps = 0.3;
-    double delta_e   = 1.4;
-
-    using DomainGeometryType = CzarnyGeometry;
-    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
-
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
-
-    double alpha_jump                    = 0.678 * Rmax;
-    using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
-
-    bool DirBC_Interior  = true;
-    int maxOpenMPThreads = 16;
-
-    bool cache_density_rpofile_coefficients = true;
-    bool cache_domain_geometry              = true;
-
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
-                                                                    ExtrapolationType::NONE, 0);
-
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-
-    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
-    solver_op.solveInPlace(discrete_solution);
-
-    Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> error("error", level.grid().numberOfNodes());
-    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
-
-#pragma omp parallel for
-    for (uint i = 0; i < error.size(); i++) {
-        error(i) = discrete_solution(i) - smoother_solution(i);
-    }
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, error.size()),
+                         [&](uint i) {
+                             error(i) = discrete_solution(i) - smoother_solution(i);
+                         });
+    Kokkos::fence();
 
     int iterations              = 0;
     bool max_iterations_reached = false;
     const int max_iterations    = 10000;
     double precision            = 1e-12;
 
-    while (infinity_norm(ConstVector<double>(error)) > precision) {
+    while (infinity_norm(HostConstVector<double>(error)) > precision) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
-#pragma omp parallel for
-        for (uint i = 0; i < error.size(); i++) {
-            error(i) = discrete_solution(i) - smoother_solution(i);
-        }
+        Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, error.size()),
+                             [&](uint i) {
+                                 error(i) = discrete_solution(i) - smoother_solution(i);
+                             });
+        Kokkos::fence();
         iterations++;
         if (iterations >= max_iterations) {
             max_iterations_reached = true;
@@ -1187,10 +665,10 @@ TEST(SmootherTest, ParallelSmootherTakeDirBC_Interior_SmallestGrid)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 30);
-    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(HostConstVector<double>(error)), 0.0, precision);
 }
 
-TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin_SmallestGrid)
+TEST(SmootherTest, SmootherTakeAcrossOrigin_SmallestGrid)
 {
     std::vector<double> radii  = {1e-5, 0.2, 0.9, 1.2, 1.3};
     std::vector<double> angles = {0, M_PI / 8, M_PI, M_PI + M_PI / 8, M_PI + M_PI};
@@ -1202,15 +680,13 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin_SmallestGrid)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
     DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
-    bool DirBC_Interior  = false;
-    int maxOpenMPThreads = 1;
-
+    bool DirBC_Interior                     = false;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
@@ -1219,36 +695,38 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin_SmallestGrid)
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
+    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
+    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
+    SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
-    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    HostConstVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
+    HostVector<double> discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(discrete_solution, rhs);
     solver_op.solveInPlace(discrete_solution);
 
-    Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> error("error", level.grid().numberOfNodes());
-    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
+    HostVector<double> temp("temp", level.grid().numberOfNodes());
+    HostVector<double> error("error", level.grid().numberOfNodes());
+    HostVector<double> smoother_solution = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
 
-#pragma omp parallel for
-    for (uint i = 0; i < error.size(); i++) {
-        error(i) = discrete_solution(i) - smoother_solution(i);
-    }
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, error.size()),
+                         [&](uint i) {
+                             error(i) = discrete_solution(i) - smoother_solution(i);
+                         });
+    Kokkos::fence();
 
     int iterations              = 0;
     bool max_iterations_reached = false;
     const int max_iterations    = 10000;
     const double precision      = 1e-8;
 
-    while (infinity_norm(ConstVector<double>(error)) > 1e-8) {
+    while (infinity_norm(HostConstVector<double>(error)) > 1e-8) {
         smoother_op.smoothing(smoother_solution, rhs, temp);
 
-#pragma omp parallel for
-        for (uint i = 0; i < error.size(); i++) {
-            error(i) = discrete_solution(i) - smoother_solution(i);
-        }
+        Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, error.size()),
+                             [&](uint i) {
+                                 error(i) = discrete_solution(i) - smoother_solution(i);
+                             });
+        Kokkos::fence();
         iterations++;
         if (iterations >= max_iterations) {
             max_iterations_reached = true;
@@ -1261,79 +739,5 @@ TEST(SmootherTest, SequentialSmootherTakeAcrossOrigin_SmallestGrid)
 
     ASSERT_TRUE(!max_iterations_reached);
     ASSERT_LT(iterations, 80);
-    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
-}
-
-TEST(SmootherTest, ParallelSmootherTakeAcrossOrigin_SmallestGrid)
-{
-    std::vector<double> radii  = {1e-5, 0.2, 0.9, 1.2, 1.3};
-    std::vector<double> angles = {0, M_PI / 8, M_PI, M_PI + M_PI / 8, M_PI + M_PI};
-
-    double Rmax      = radii.back();
-    double kappa_eps = 0.3;
-    double delta_e   = 1.4;
-
-    using DomainGeometryType = CzarnyGeometry;
-    DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
-
-    auto grid = std::make_unique<PolarGrid>(radii, angles);
-
-    double alpha_jump                    = 0.678 * Rmax;
-    using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
-
-    bool DirBC_Interior  = false;
-    int maxOpenMPThreads = 16;
-
-    bool cache_density_rpofile_coefficients = true;
-    bool cache_domain_geometry              = true;
-
-    auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
-    Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
-                                                                    ExtrapolationType::NONE, 0);
-
-    DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-    SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior, maxOpenMPThreads);
-
-    ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    Vector<double> discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(discrete_solution, rhs);
-    solver_op.solveInPlace(discrete_solution);
-
-    Vector<double> temp("temp", level.grid().numberOfNodes());
-    Vector<double> error("error", level.grid().numberOfNodes());
-    Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
-
-#pragma omp parallel for
-    for (uint i = 0; i < error.size(); i++) {
-        error(i) = discrete_solution(i) - smoother_solution(i);
-    }
-
-    int iterations              = 0;
-    bool max_iterations_reached = false;
-    const int max_iterations    = 10000;
-    const double precision      = 1e-8;
-
-    while (infinity_norm(ConstVector<double>(error)) > 1e-8) {
-        smoother_op.smoothing(smoother_solution, rhs, temp);
-
-#pragma omp parallel for
-        for (uint i = 0; i < error.size(); i++) {
-            error(i) = discrete_solution(i) - smoother_solution(i);
-        }
-        iterations++;
-        if (iterations >= max_iterations) {
-            max_iterations_reached = true;
-            std::cerr << "Max iterations reached without convergence." << std::endl;
-            break;
-        }
-    }
-
-    std::cout << "Convergence reached after " << iterations << " iterations." << std::endl;
-
-    ASSERT_TRUE(!max_iterations_reached);
-    ASSERT_LT(iterations, 80);
-    ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
+    ASSERT_NEAR(infinity_norm(HostConstVector<double>(error)), 0.0, precision);
 }

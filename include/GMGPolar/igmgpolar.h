@@ -32,7 +32,7 @@ public:
     // with Dirichlet boundary condition        u = u_D    on \partial \Omega.
     // Parameters:
     // - grid: Cartesian mesh discretizing the computational domain.
-    IGMGPolar(const PolarGrid& grid);
+    IGMGPolar(const PolarGrid<Kokkos::HostSpace>& grid);
 
     /* ---------------------------------------------------------------------- */
     /* General output & visualization                                         */
@@ -44,13 +44,6 @@ public:
     // Enable/disable ParaView output for visualization.
     bool paraview() const;
     void paraview(bool paraview);
-
-    /* ---------------------------------------------------------------------- */
-    /* Parallelization                                                        */
-    /* ---------------------------------------------------------------------- */
-    // Maximum number of OpenMP threads to use.
-    int maxOpenMPThreads() const;
-    void maxOpenMPThreads(int max_omp_threads);
 
     /* ---------------------------------------------------------------------- */
     /* Numerical method options                                               */
@@ -161,7 +154,7 @@ protected:
     /* ------------------------------------ */
     /* Grid Configuration & Input Functions */
     /* ------------------------------------ */
-    const PolarGrid& grid_;
+    const PolarGrid<Kokkos::HostSpace>& grid_;
 
     /* ------------------ */
     /* Control Parameters */
@@ -169,8 +162,6 @@ protected:
     // General solver output and visualization settings
     int verbose_;
     bool paraview_;
-    // Parallelization and threading settings
-    int max_omp_threads_;
     // Numerical method setup
     bool DirBC_Interior_;
     StencilDistributionMethod stencil_distribution_method_;
