@@ -28,7 +28,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
         // Inject rhs if there is a next level
         if (level_depth + 1 < initial_rhs_f_levels) {
             Level<DomainGeometry, DensityProfileCoefficients>& next_level = levels_[level_depth + 1];
-            injection(level_depth, next_level.rhs(), current_level.rhs());
+	        auto current_level_rhs = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), current_level.rhs());
+	        auto next_level_rhs = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.rhs());
+            injection(level_depth, next_level_rhs, current_level_rhs);
+	        Kokkos::deep_copy(next_level.rhs(), next_level_rhs);
         }
         // Discretize the rhs for the current level
         discretize_rhs_f(current_level, current_level.rhs());
@@ -343,9 +346,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
         if (extrapolation_ != ExtrapolationType::NONE) {
             assert(number_of_levels_ > 1);
             Level<DomainGeometry, DensityProfileCoefficients>& next_level = levels_[level.level_depth() + 1];
-            injection(0, next_level.solution(), pcg_search_direction_);
-			auto next_level_residual      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.residual());
 			auto next_level_solution      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.solution());
+			auto next_level_residual      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.residual());
+            injection(0, next_level_solution, pcg_search_direction);
             next_level.applySystemOperator(next_level_residual, next_level_solution);
             applyExtrapolation(0, level_residual, next_level_residual);
 			Kokkos::deep_copy(level.residual(), level_residual);
@@ -484,7 +487,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::updateResidualNorms(
     level.computeResidual(level.residual(), level.rhs(), level.solution());
     if (extrapolation_ != ExtrapolationType::NONE) {
         Level<DomainGeometry, DensityProfileCoefficients>& next_level = levels_[level.level_depth() + 1];
-        injection(level.level_depth(), next_level.solution(), level.solution());
+	    auto solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), level.solution());
+	    auto next_level_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.solution());
+        injection(level.level_depth(), next_level_solution, solution);
+	    Kokkos::deep_copy(next_level.solution(), next_level_solution);
         next_level.computeResidual(next_level.residual(), next_level.rhs(), next_level.solution());
 			auto next_level_residual      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.residual());
 			auto level_residual      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), level.residual());
