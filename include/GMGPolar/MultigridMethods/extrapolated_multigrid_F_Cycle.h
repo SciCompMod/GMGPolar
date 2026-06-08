@@ -2,9 +2,9 @@
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigrid_F_Cycle(int level_depth,
-                                                                                          HostVector<double> solution,
-                                                                                          HostConstVector<double> rhs,
-                                                                                          HostVector<double> residual)
+                                                                                          HostVector<double> h_solution,
+                                                                                          HostConstVector<double> h_rhs,
+                                                                                          HostVector<double> h_residual)
 {
     assert(level_depth == 0);
     assert(number_of_levels_ >= 2);
@@ -27,10 +27,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
 
     for (int i = 0; i < pre_smoothing_steps_; i++) {
         if (level.level_depth() == 0 && !full_grid_smoothing_) {
-            level.extrapolatedSmoothing(solution, rhs, residual);
+            level.extrapolatedSmoothing(h_solution, h_rhs, h_residual);
         }
         else {
-            level.smoothing(solution, rhs, residual);
+            level.smoothing(h_solution, h_rhs, h_residual);
         }
     }
 
@@ -38,18 +38,21 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     t_avg_MGC_preSmoothing_ += std::chrono::duration<double>(end_MGC_preSmoothing - start_MGC_preSmoothing).count();
 
     /* -------------------------------------------- */
-    /* Compute the restricted extrapolated residual */
+    /* Compute the restricted extrapolated h_residual */
     /* -------------------------------------------- */
     auto start_MGC_residual = std::chrono::high_resolution_clock::now();
 
     // P_ex^T (f_l - A_l*u_l)
-    level.computeResidual(residual, rhs, solution);
-    extrapolatedRestriction(level.level_depth(), next_level.residual(), residual);
+    level.computeResidual(h_residual, h_rhs, h_solution);
+	auto next_level_residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.residual());
+	auto residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_residual);
+    extrapolatedRestriction(level.level_depth(), next_level_residual, residual);
+	Kokkos::deep_copy(next_level.residual(), next_level_residual);
 
     // f_{l-1} - A_{l-1}* Inject(u_l)
-	auto d_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), solution);
+	auto solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_solution);
 	auto next_level_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.solution());
-    injection(level.level_depth(), next_level_solution, d_solution);
+    injection(level.level_depth(), next_level_solution, solution);
 	Kokkos::deep_copy(next_level.solution(), next_level_solution);
     next_level.computeResidual(next_level.error_correction(), next_level.rhs(), next_level.solution());
 
@@ -61,7 +64,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     t_avg_MGC_residual_ += std::chrono::duration<double>(end_MGC_residual - start_MGC_residual).count();
 
     /* -------------------------------------------------- */
-    /* Solve A * error = restricted extrapolated residual */
+    /* Solve A * error = restricted extrapolated h_residual */
     /* -------------------------------------------------- */
     // Note: We deliberately use the non-extrapolated multigrid cycle here.
 
@@ -81,14 +84,14 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     /* -------------------------- */
     /* Interpolate the correction */
     /* -------------------------- */
-    // Use 'residual' instead of 'level.error_correction()' as a temporary buffer.
+    // Use 'h_residual' instead of 'level.error_correction()' as a temporary buffer.
     // Note: 'level.error_correction()' has size 0 at level depth = 0.
-    extrapolatedProlongation(next_level.level_depth(), residual, next_level.error_correction());
+    extrapolatedProlongation(next_level.level_depth(), h_residual, next_level.error_correction());
 
     /* ----------------------------------- */
     /* Compute the corrected approximation */
     /* ----------------------------------- */
-    add(solution, HostConstVector<double>(residual));
+    add(h_solution, HostConstVector<double>(h_residual));
 
     /* ------------- */
     /* Postsmoothing */
@@ -97,10 +100,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
 
     for (int i = 0; i < post_smoothing_steps_; i++) {
         if (level.level_depth() == 0 && !full_grid_smoothing_) {
-            level.extrapolatedSmoothing(solution, rhs, residual);
+            level.extrapolatedSmoothing(h_solution, h_rhs, h_residual);
         }
         else {
-            level.smoothing(solution, rhs, residual);
+            level.smoothing(h_solution, h_rhs, h_residual);
         }
     }
 

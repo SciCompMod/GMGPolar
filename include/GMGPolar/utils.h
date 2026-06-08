@@ -62,11 +62,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedProlongat
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedRestriction(int current_level,
-                                                                                   HostVector<double> result_host,
-                                                                                   HostConstVector<double> x_host) const
+                                                                                   Vector<double> result,
+                                                                                   ConstVector<double> x) const
 {
-    auto result = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), result_host);
-    auto x      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), x_host);
     assert(current_level < number_of_levels_ - 1 && 0 <= current_level);
     if (!interpolation_)
         throw std::runtime_error("Interpolation not initialized.");
@@ -74,8 +72,6 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedRestricti
     PolarGrid<DefaultMemorySpace> current_grid = levels_[current_level].grid();
     PolarGrid<DefaultMemorySpace> next_grid    = levels_[current_level + 1].grid();
     interpolation_->applyExtrapolatedRestriction(current_grid, next_grid, result, x);
-
-    Kokkos::deep_copy(result_host, result);
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
