@@ -207,7 +207,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior()
             smoother_solution[grid.index(i_r, i_theta)] = discrete_solution[grid.index(i_r, i_theta)];
         });
 
-    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), [&](uint i) {
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), KOKKOS_LAMBDA(uint i) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     });
     Kokkos::fence();
@@ -221,7 +221,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior()
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
         Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()),
-                             [&](uint i) {
+                             KOKKOS_LAMBDA(uint i) {
                                  error[i] = discrete_solution[i] - smoother_solution[i];
                              });
         Kokkos::fence();
@@ -302,7 +302,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin()
             smoother_solution[grid.index(i_r, i_theta)] = discrete_solution[grid.index(i_r, i_theta)];
         });
 
-    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), [&](uint i) {
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), KOKKOS_LAMBDA(uint i) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     });
     Kokkos::fence();
@@ -316,7 +316,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin()
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
         Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()),
-                             [&](uint i) {
+                             KOKKOS_LAMBDA(uint i) {
                                  error[i] = discrete_solution[i] - smoother_solution[i];
                              });
         Kokkos::fence();
@@ -396,7 +396,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior_SmallestGrid()
             smoother_solution[grid.index(i_r, i_theta)] = discrete_solution[grid.index(i_r, i_theta)];
         });
 
-    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), [&](uint i) {
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), KOKKOS_LAMBDA(uint i) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     });
     Kokkos::fence();
@@ -410,7 +410,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior_SmallestGrid()
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
         Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()),
-                             [&](uint i) {
+                             KOKKOS_LAMBDA(uint i) {
                                  error[i] = discrete_solution[i] - smoother_solution[i];
                              });
         Kokkos::fence();
@@ -488,7 +488,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin_SmallestGrid()
             smoother_solution[grid.index(i_r, i_theta)] = discrete_solution[grid.index(i_r, i_theta)];
         });
 
-    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), [&](uint i) {
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), KOKKOS_LAMBDA(uint i) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     });
     Kokkos::fence();
@@ -502,7 +502,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin_SmallestGrid()
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
         Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()),
-                             [&](uint i) {
+                             KOKKOS_LAMBDA(uint i) {
                                  error[i] = discrete_solution[i] - smoother_solution[i];
                              });
         Kokkos::fence();
@@ -583,7 +583,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior()
             smoother_solution[grid.index(i_r, i_theta)] = discrete_solution[grid.index(i_r, i_theta)];
         });
 
-    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), [&](uint i) {
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), KOKKOS_LAMBDA(uint i) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     });
     Kokkos::fence();
@@ -597,7 +597,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior()
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
         Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()),
-                             [&](uint i) {
+                             KOKKOS_LAMBDA(uint i) {
                                  error[i] = discrete_solution[i] - smoother_solution[i];
                              });
         Kokkos::fence();
@@ -676,7 +676,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin()
             smoother_solution[grid.index(i_r, i_theta)] = discrete_solution[grid.index(i_r, i_theta)];
         });
 
-    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), [&](uint i) {
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), KOKKOS_LAMBDA(uint i) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     });
     Kokkos::fence();
@@ -690,7 +690,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin()
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
         Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()),
-                             [&](uint i) {
+                             KOKKOS_LAMBDA(uint i) {
                                  error[i] = discrete_solution[i] - smoother_solution[i];
                              });
         Kokkos::fence();
@@ -768,7 +768,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior_SmallestGri
             smoother_solution[grid.index(i_r, i_theta)] = discrete_solution[grid.index(i_r, i_theta)];
         });
 
-    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), [&](uint i) {
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), KOKKOS_LAMBDA(uint i) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     });
     Kokkos::fence();
@@ -782,7 +782,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior_SmallestGri
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
         Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()),
-                             [&](uint i) {
+                             KOKKOS_LAMBDA(uint i) {
                                  error[i] = discrete_solution[i] - smoother_solution[i];
                              });
         Kokkos::fence();
@@ -860,7 +860,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin_SmallestGrid(
             smoother_solution[grid.index(i_r, i_theta)] = discrete_solution[grid.index(i_r, i_theta)];
         });
 
-    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), [&](uint i) {
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), KOKKOS_LAMBDA(uint i) {
         error[i] = discrete_solution[i] - smoother_solution[i];
     });
     Kokkos::fence();
@@ -874,7 +874,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin_SmallestGrid(
         extrapolated_smoother_op.extrapolatedSmoothing(smoother_solution, rhs, temp);
 
         Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()),
-                             [&](uint i) {
+                             KOKKOS_LAMBDA(uint i) {
                                  error[i] = discrete_solution[i] - smoother_solution[i];
                              });
         Kokkos::fence();
