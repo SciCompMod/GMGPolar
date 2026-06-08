@@ -191,9 +191,9 @@ void Level<DomainGeometry, DensityProfileCoefficients>::initializeExtrapolatedSm
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void Level<DomainGeometry, DensityProfileCoefficients>::extrapolatedSmoothing(HostVector<double> x,
-                                                                              HostConstVector<double> rhs,
-                                                                              HostVector<double> temp) const
+void Level<DomainGeometry, DensityProfileCoefficients>::extrapolatedSmoothing(Vector<double> x,
+                                                                              ConstVector<double> rhs,
+                                                                              Vector<double> temp) const
 {
     if (!op_extrapolated_smoother_)
         throw std::runtime_error("Extrapolated Smoother not initialized.");

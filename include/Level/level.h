@@ -113,7 +113,7 @@ public:
     // Apply Extrapolated Smoothing //
     void initializeExtrapolatedSmoothing(const bool DirBC_Interior,
                                          const StencilDistributionMethod stencil_distribution_method);
-    void extrapolatedSmoothing(HostVector<double> x, HostConstVector<double> rhs, HostVector<double> temp) const;
+    void extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) const;
 
 private:
     const int level_depth_;

@@ -42,14 +42,10 @@ ExtrapolatedSmootherGive<LevelCacheType>::ExtrapolatedSmootherGive(const PolarGr
 //   - The system is then solved in-place in temp, and the results
 //     are copied back to x.
 template <class LevelCacheType>
-void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(HostVector<double> h_x,
-                                                                     HostConstVector<double> h_rhs,
-                                                                     HostVector<double> h_temp)
+void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(Vector<double> x,
+                                                                     ConstVector<double> rhs,
+                                                                     Vector<double> temp)
 {
-    auto x    = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_x);
-    auto rhs  = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs);
-    auto temp = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_temp);
-
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
@@ -91,7 +87,4 @@ void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(HostVector<
 
     applyAscOrthoWhiteRadialSection(x, rhs, temp);
     solveWhiteRadialSection(x, temp);
-
-    Kokkos::deep_copy(h_x, x);
-    Kokkos::deep_copy(h_temp, temp);
 }
