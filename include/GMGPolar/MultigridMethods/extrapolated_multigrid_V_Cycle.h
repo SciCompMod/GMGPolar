@@ -31,6 +31,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
 
     for (int i = 0; i < pre_smoothing_steps_; i++) {
         if (level.level_depth() == 0 && !full_grid_smoothing_) {
+            Kokkos::deep_copy(residual, h_residual);
+            Kokkos::deep_copy(solution, h_solution);
             level.extrapolatedSmoothing(solution, rhs, residual);
             Kokkos::deep_copy(h_residual, residual);
             Kokkos::deep_copy(h_solution, solution);
