@@ -6,8 +6,7 @@ using namespace gmgpolar;
 static KOKKOS_INLINE_FUNCTION void coarseNodeInjection(const int i_r_coarse, const int i_theta_coarse,
                                                        const PolarGrid<DefaultMemorySpace>& fine_grid,
                                                        const PolarGrid<DefaultMemorySpace>& coarse_grid,
-                                                       Vector<double>& coarse_result,
-                                                       ConstVector<double>& fine_values)
+                                                       Vector<double>& coarse_result, ConstVector<double>& fine_values)
 {
     const int i_r_fine     = i_r_coarse * 2;
     const int i_theta_fine = i_theta_coarse * 2;

@@ -17,7 +17,7 @@ void ResidualGive<LevelCacheType>::computeResidual(HostVector<double> h_result, 
 
     auto rhs    = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs);
     auto result = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_result);
-    auto x = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_x);
+    auto x      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_x);
 
     applySystemOperator(result, x);
 

@@ -19,8 +19,9 @@ public:
     explicit Interpolation(bool DirBC_Interior);
 
     /* Remark: This injection is not scaled. */
-    void applyInjection(const PolarGrid<DefaultMemorySpace>& fine_grid, const PolarGrid<DefaultMemorySpace>& coarse_grid,
-                        Vector<double> coarse_result, ConstVector<double> fine_values) const;
+    void applyInjection(const PolarGrid<DefaultMemorySpace>& fine_grid,
+                        const PolarGrid<DefaultMemorySpace>& coarse_grid, Vector<double> coarse_result,
+                        ConstVector<double> fine_values) const;
 
     /* Bilinear interpolation operator */
     void applyProlongation(const PolarGrid<Kokkos::HostSpace>& coarse_grid,

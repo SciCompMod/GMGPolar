@@ -19,7 +19,8 @@ inline HostVector<double> generate_random_sample_data(const PolarGrid<Kokkos::Ho
 }
 
 inline Vector<double> generate_random_sample_data(const PolarGrid<DefaultMemorySpace>& grid, unsigned int seed,
-                                                      double min_val = -100.0, double max_val = 100.0) {
-	HostVector<double> h_x = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(grid), seed, min_val, max_val);
-	return Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_x);
+                                                  double min_val = -100.0, double max_val = 100.0)
+{
+    HostVector<double> h_x = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(grid), seed, min_val, max_val);
+    return Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_x);
 }

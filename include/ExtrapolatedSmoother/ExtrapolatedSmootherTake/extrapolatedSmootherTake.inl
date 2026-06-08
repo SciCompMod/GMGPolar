@@ -43,8 +43,7 @@ ExtrapolatedSmootherTake<LevelCacheType>::ExtrapolatedSmootherTake(const PolarGr
 //     are copied back to x.
 
 template <class LevelCacheType>
-void ExtrapolatedSmootherTake<LevelCacheType>::extrapolatedSmoothing(Vector<double> x,
-                                                                     ConstVector<double> rhs,
+void ExtrapolatedSmootherTake<LevelCacheType>::extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs,
                                                                      Vector<double> temp)
 {
     assert(x.size() == rhs.size());

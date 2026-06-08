@@ -191,8 +191,7 @@ void Level<DomainGeometry, DensityProfileCoefficients>::initializeExtrapolatedSm
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void Level<DomainGeometry, DensityProfileCoefficients>::extrapolatedSmoothing(Vector<double> x,
-                                                                              ConstVector<double> rhs,
+void Level<DomainGeometry, DensityProfileCoefficients>::extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs,
                                                                               Vector<double> temp) const
 {
     if (!op_extrapolated_smoother_)

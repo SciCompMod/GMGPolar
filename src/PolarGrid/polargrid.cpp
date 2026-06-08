@@ -214,7 +214,7 @@ void PolarGrid<MemorySpace>::initializeLineSplitting(std::optional<double> split
         }
     }
     else {
-		auto h_radius = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, radii_);
+        auto h_radius            = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, radii_);
         number_smoother_circles_ = 2; /* We assume numberSmootherCircles_ >= 2 in the further implementation */
         for (int i_r = 2; i_r < nr() - 2;
              i_r++) { /* We assume lengthRadialSmoother_ >= 3 in the further implementation */

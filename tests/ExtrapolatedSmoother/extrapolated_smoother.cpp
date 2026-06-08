@@ -58,13 +58,13 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_DirBC_Interior)
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-	const PolarGrid<DefaultMemorySpace>& grid = level.grid();
+    const PolarGrid<DefaultMemorySpace>& grid = level.grid();
     ExtrapolatedSmootherGive smootherGive_operator(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherTake smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior);
 
-    Vector<double> rhs   = generate_random_sample_data(level.grid(), 69);
+    Vector<double> rhs       = generate_random_sample_data(level.grid(), 69);
     HostVector<double> start = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 24);
-    Vector<double> temp  = generate_random_sample_data(level.grid(), 8);
+    Vector<double> temp      = generate_random_sample_data(level.grid(), 8);
 
     Vector<double> solution_Give("solution_Give", start.size());
     Kokkos::deep_copy(solution_Give, start);
@@ -75,8 +75,8 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_DirBC_Interior)
 
     smootherTake_operator.extrapolatedSmoothing(solution_Take, rhs, temp);
 
-	auto h_solution_Give = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, solution_Give);
-	auto h_solution_Take = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, solution_Take);
+    auto h_solution_Give = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, solution_Give);
+    auto h_solution_Take = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, solution_Take);
 
     ASSERT_EQ(h_solution_Give.size(), h_solution_Take.size());
     for (uint index = 0; index < h_solution_Give.size(); index++) {
@@ -122,9 +122,9 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_AcossOrigin)
     ExtrapolatedSmootherGive smootherGive_operator(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherTake smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior);
 
-    Vector<double> rhs   = generate_random_sample_data(level.grid(), 69);
+    Vector<double> rhs       = generate_random_sample_data(level.grid(), 69);
     HostVector<double> start = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 24);
-    Vector<double> temp  = generate_random_sample_data(level.grid(), 8);
+    Vector<double> temp      = generate_random_sample_data(level.grid(), 8);
 
     Vector<double> solution_Give("solution_Give", start.size());
     Kokkos::deep_copy(solution_Give, start);
@@ -134,8 +134,8 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_AcossOrigin)
     Kokkos::deep_copy(solution_Take, start);
     smootherTake_operator.extrapolatedSmoothing(solution_Take, rhs, temp);
 
-	auto h_solution_Give = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, solution_Give);
-	auto h_solution_Take = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, solution_Take);
+    auto h_solution_Give = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, solution_Give);
+    auto h_solution_Take = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, solution_Take);
 
     ASSERT_EQ(h_solution_Give.size(), h_solution_Take.size());
     for (uint index = 0; index < h_solution_Give.size(); index++) {
@@ -180,7 +180,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior()
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
-	const PolarGrid<DefaultMemorySpace>& grid = level.grid();
+    const PolarGrid<DefaultMemorySpace>& grid = level.grid();
     DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
     ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
@@ -189,28 +189,27 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior()
     HostVector<double> h_discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(h_discrete_solution, rhs);
     solver_op.solveInPlace(h_discrete_solution);
-	auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
+    auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
     Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
-	        Kokkos::parallel_for(
-            "Fill smoother_solution",
-            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
-                {0, 0}, // Starting point of the index space
-                {(grid.nr()+1)/2, (grid.ntheta()+1)/2} // Ending point of the index space
-                ),
-            // Kokkos lambda function to execute for each point in the index space
-            KOKKOS_LAMBDA(const int i_r_half, const int i_theta_half) {
-                const int i_r = 2*i_r_half;
-				const int i_theta = 2 * i_theta_half;
+    Kokkos::parallel_for(
+        "Fill smoother_solution",
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            {0, 0}, // Starting point of the index space
+            {(grid.nr() + 1) / 2, (grid.ntheta() + 1) / 2} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int i_r_half, const int i_theta_half) {
+            const int i_r                               = 2 * i_r_half;
+            const int i_theta                           = 2 * i_theta_half;
             smoother_solution[grid.index(i_r, i_theta)] = discrete_solution[grid.index(i_r, i_theta)];
         });
 
-    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()),
-                         [&](uint i) {
-                             error[i] = discrete_solution[i] - smoother_solution[i];
-                         });
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), [&](uint i) {
+        error[i] = discrete_solution[i] - smoother_solution[i];
+    });
     Kokkos::fence();
 
     int iterations              = 0;
@@ -241,7 +240,9 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior()
     ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherDirBC_Interior)
-{ ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior();}
+{
+    ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior();
+}
 
 void ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin()
 {
@@ -272,7 +273,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin()
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
-	const PolarGrid<DefaultMemorySpace>& grid = level.grid();
+    const PolarGrid<DefaultMemorySpace>& grid = level.grid();
     DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
     ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
@@ -281,30 +282,29 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin()
     HostVector<double> h_discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(h_discrete_solution, rhs);
     solver_op.solveInPlace(h_discrete_solution);
-	auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
+    auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
 
     Vector<double> error("error", level.grid().numberOfNodes());
 
     Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
-	        Kokkos::parallel_for(
-            "Fill smoother_solution",
-            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
-                {0, 0}, // Starting point of the index space
-                {(grid.nr()+1)/2, (grid.ntheta()+1)/2} // Ending point of the index space
-                ),
-            // Kokkos lambda function to execute for each point in the index space
-            KOKKOS_LAMBDA(const int i_r_half, const int i_theta_half) {
-                const int i_r = 2*i_r_half;
-				const int i_theta = 2 * i_theta_half;
+    Kokkos::parallel_for(
+        "Fill smoother_solution",
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            {0, 0}, // Starting point of the index space
+            {(grid.nr() + 1) / 2, (grid.ntheta() + 1) / 2} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int i_r_half, const int i_theta_half) {
+            const int i_r                               = 2 * i_r_half;
+            const int i_theta                           = 2 * i_theta_half;
             smoother_solution[grid.index(i_r, i_theta)] = discrete_solution[grid.index(i_r, i_theta)];
-    });
+        });
 
-    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()),
-                         [&](uint i) {
-                             error[i] = discrete_solution[i] - smoother_solution[i];
-                         });
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), [&](uint i) {
+        error[i] = discrete_solution[i] - smoother_solution[i];
+    });
     Kokkos::fence();
 
     int iterations              = 0;
@@ -335,7 +335,9 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin()
     ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherAcrossOrigin)
-{ ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin();}
+{
+    ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin();
+}
 
 void ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior_SmallestGrid()
 {
@@ -365,7 +367,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior_SmallestGrid()
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
-	const PolarGrid<DefaultMemorySpace>& grid = level.grid();
+    const PolarGrid<DefaultMemorySpace>& grid = level.grid();
     DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
     ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
@@ -374,30 +376,29 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior_SmallestGrid()
     HostVector<double> h_discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(h_discrete_solution, rhs);
     solver_op.solveInPlace(h_discrete_solution);
-	auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
+    auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
 
     Vector<double> error("error", level.grid().numberOfNodes());
 
     Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
-	        Kokkos::parallel_for(
-            "Fill smoother_solution",
-            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
-                {0, 0}, // Starting point of the index space
-                {(grid.nr()+1)/2, (grid.ntheta()+1)/2} // Ending point of the index space
-                ),
-            // Kokkos lambda function to execute for each point in the index space
-            KOKKOS_LAMBDA(const int i_r_half, const int i_theta_half) {
-                const int i_r = 2*i_r_half;
-				const int i_theta = 2 * i_theta_half;
+    Kokkos::parallel_for(
+        "Fill smoother_solution",
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            {0, 0}, // Starting point of the index space
+            {(grid.nr() + 1) / 2, (grid.ntheta() + 1) / 2} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int i_r_half, const int i_theta_half) {
+            const int i_r                               = 2 * i_r_half;
+            const int i_theta                           = 2 * i_theta_half;
             smoother_solution[grid.index(i_r, i_theta)] = discrete_solution[grid.index(i_r, i_theta)];
         });
 
-    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()),
-                         [&](uint i) {
-                             error[i] = discrete_solution[i] - smoother_solution[i];
-                         });
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), [&](uint i) {
+        error[i] = discrete_solution[i] - smoother_solution[i];
+    });
     Kokkos::fence();
 
     int iterations              = 0;
@@ -428,7 +429,9 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior_SmallestGrid()
     ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherDirBC_Interior_SmallestGrid)
-{ ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior_SmallestGrid();}
+{
+    ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior_SmallestGrid();
+}
 
 void ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin_SmallestGrid()
 {
@@ -458,7 +461,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin_SmallestGrid()
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
-	const PolarGrid<DefaultMemorySpace>& grid = level.grid();
+    const PolarGrid<DefaultMemorySpace>& grid = level.grid();
     DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
     ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
@@ -467,28 +470,27 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin_SmallestGrid()
     HostVector<double> h_discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(h_discrete_solution, rhs);
     solver_op.solveInPlace(h_discrete_solution);
-	auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
+    auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
     Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
-	        Kokkos::parallel_for(
-            "Fill smoother_solution",
-            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
-                {0, 0}, // Starting point of the index space
-                {(grid.nr()+1)/2, (grid.ntheta()+1)/2} // Ending point of the index space
-                ),
-            // Kokkos lambda function to execute for each point in the index space
-            KOKKOS_LAMBDA(const int i_r_half, const int i_theta_half) {
-                const int i_r = 2*i_r_half;
-				const int i_theta = 2 * i_theta_half;
+    Kokkos::parallel_for(
+        "Fill smoother_solution",
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            {0, 0}, // Starting point of the index space
+            {(grid.nr() + 1) / 2, (grid.ntheta() + 1) / 2} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int i_r_half, const int i_theta_half) {
+            const int i_r                               = 2 * i_r_half;
+            const int i_theta                           = 2 * i_theta_half;
             smoother_solution[grid.index(i_r, i_theta)] = discrete_solution[grid.index(i_r, i_theta)];
-    });
+        });
 
-    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()),
-                         [&](uint i) {
-                             error[i] = discrete_solution[i] - smoother_solution[i];
-                         });
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), [&](uint i) {
+        error[i] = discrete_solution[i] - smoother_solution[i];
+    });
     Kokkos::fence();
 
     int iterations              = 0;
@@ -519,7 +521,9 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin_SmallestGrid()
     ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherAcrossOrigin_SmallestGrid)
-{ ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin_SmallestGrid();}
+{
+    ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin_SmallestGrid();
+}
 
 /* We now test using "Take" */
 
@@ -552,7 +556,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior()
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
-	const PolarGrid<DefaultMemorySpace>& grid = level.grid();
+    const PolarGrid<DefaultMemorySpace>& grid = level.grid();
     DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior);
     ResidualTake residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
@@ -561,28 +565,27 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior()
     HostVector<double> h_discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(h_discrete_solution, rhs);
     solver_op.solveInPlace(h_discrete_solution);
-	auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
+    auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
     Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
-	        Kokkos::parallel_for(
-            "Fill smoother_solution",
-            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
-                {0, 0}, // Starting point of the index space
-                {(grid.nr()+1)/2, (grid.ntheta()+1)/2} // Ending point of the index space
-                ),
-            // Kokkos lambda function to execute for each point in the index space
-            KOKKOS_LAMBDA(const int i_r_half, const int i_theta_half) {
-                const int i_r = 2*i_r_half;
-				const int i_theta = 2 * i_theta_half;
+    Kokkos::parallel_for(
+        "Fill smoother_solution",
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            {0, 0}, // Starting point of the index space
+            {(grid.nr() + 1) / 2, (grid.ntheta() + 1) / 2} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int i_r_half, const int i_theta_half) {
+            const int i_r                               = 2 * i_r_half;
+            const int i_theta                           = 2 * i_theta_half;
             smoother_solution[grid.index(i_r, i_theta)] = discrete_solution[grid.index(i_r, i_theta)];
-    });
+        });
 
-    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()),
-                         [&](uint i) {
-                             error[i] = discrete_solution[i] - smoother_solution[i];
-                         });
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), [&](uint i) {
+        error[i] = discrete_solution[i] - smoother_solution[i];
+    });
     Kokkos::fence();
 
     int iterations              = 0;
@@ -613,7 +616,9 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior()
     ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherTakeDirBC_Interior)
-{ ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior();}
+{
+    ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior();
+}
 
 void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin()
 {
@@ -644,7 +649,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin()
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
-	const PolarGrid<DefaultMemorySpace>& grid = level.grid();
+    const PolarGrid<DefaultMemorySpace>& grid = level.grid();
     DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior);
     ResidualTake residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
@@ -653,28 +658,27 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin()
     HostVector<double> h_discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(h_discrete_solution, rhs);
     solver_op.solveInPlace(h_discrete_solution);
-	auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
+    auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
     Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
-	        Kokkos::parallel_for(
-            "Fill smoother_solution",
-            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
-                {0, 0}, // Starting point of the index space
-                {(grid.nr()+1)/2, (grid.ntheta()+1)/2} // Ending point of the index space
-                ),
-            // Kokkos lambda function to execute for each point in the index space
-            KOKKOS_LAMBDA(const int i_r_half, const int i_theta_half) {
-                const int i_r = 2*i_r_half;
-				const int i_theta = 2 * i_theta_half;
+    Kokkos::parallel_for(
+        "Fill smoother_solution",
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            {0, 0}, // Starting point of the index space
+            {(grid.nr() + 1) / 2, (grid.ntheta() + 1) / 2} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int i_r_half, const int i_theta_half) {
+            const int i_r                               = 2 * i_r_half;
+            const int i_theta                           = 2 * i_theta_half;
             smoother_solution[grid.index(i_r, i_theta)] = discrete_solution[grid.index(i_r, i_theta)];
-    });
+        });
 
-    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()),
-                         [&](uint i) {
-                             error[i] = discrete_solution[i] - smoother_solution[i];
-                         });
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), [&](uint i) {
+        error[i] = discrete_solution[i] - smoother_solution[i];
+    });
     Kokkos::fence();
 
     int iterations              = 0;
@@ -705,7 +709,9 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin()
     ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherTakeAcrossOrigin)
-{ ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin();}
+{
+    ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin();
+}
 
 void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior_SmallestGrid()
 {
@@ -735,7 +741,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior_SmallestGri
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
-	const PolarGrid<DefaultMemorySpace>& grid = level.grid();
+    const PolarGrid<DefaultMemorySpace>& grid = level.grid();
     DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior);
     ResidualTake residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
@@ -744,28 +750,27 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior_SmallestGri
     HostVector<double> h_discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(h_discrete_solution, rhs);
     solver_op.solveInPlace(h_discrete_solution);
-	auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
+    auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
     Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
-	        Kokkos::parallel_for(
-            "Fill smoother_solution",
-            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
-                {0, 0}, // Starting point of the index space
-                {(grid.nr()+1)/2, (grid.ntheta()+1)/2} // Ending point of the index space
-                ),
-            // Kokkos lambda function to execute for each point in the index space
-            KOKKOS_LAMBDA(const int i_r_half, const int i_theta_half) {
-                const int i_r = 2*i_r_half;
-				const int i_theta = 2 * i_theta_half;
+    Kokkos::parallel_for(
+        "Fill smoother_solution",
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            {0, 0}, // Starting point of the index space
+            {(grid.nr() + 1) / 2, (grid.ntheta() + 1) / 2} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int i_r_half, const int i_theta_half) {
+            const int i_r                               = 2 * i_r_half;
+            const int i_theta                           = 2 * i_theta_half;
             smoother_solution[grid.index(i_r, i_theta)] = discrete_solution[grid.index(i_r, i_theta)];
-    });
+        });
 
-    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()),
-                         [&](uint i) {
-                             error[i] = discrete_solution[i] - smoother_solution[i];
-                         });
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), [&](uint i) {
+        error[i] = discrete_solution[i] - smoother_solution[i];
+    });
     Kokkos::fence();
 
     int iterations              = 0;
@@ -796,7 +801,9 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior_SmallestGri
     ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherTakeDirBC_Interior_SmallestGrid)
-{ ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior_SmallestGrid(); }
+{
+    ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior_SmallestGrid();
+}
 
 void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin_SmallestGrid()
 {
@@ -826,7 +833,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin_SmallestGrid(
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
-	const PolarGrid<DefaultMemorySpace>& grid = level.grid();
+    const PolarGrid<DefaultMemorySpace>& grid = level.grid();
     DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior);
     ResidualTake residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
@@ -835,28 +842,27 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin_SmallestGrid(
     HostVector<double> h_discrete_solution("discrete_solution", rhs.size());
     Kokkos::deep_copy(h_discrete_solution, rhs);
     solver_op.solveInPlace(h_discrete_solution);
-	auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
+    auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
     Vector<double> smoother_solution = generate_random_sample_data(level.grid(), 69);
-	        Kokkos::parallel_for(
-            "Fill smoother_solution",
-            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
-                {0, 0}, // Starting point of the index space
-                {(grid.nr()+1)/2, (grid.ntheta()+1)/2} // Ending point of the index space
-                ),
-            // Kokkos lambda function to execute for each point in the index space
-            KOKKOS_LAMBDA(const int i_r_half, const int i_theta_half) {
-                const int i_r = 2*i_r_half;
-				const int i_theta = 2 * i_theta_half;
+    Kokkos::parallel_for(
+        "Fill smoother_solution",
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            {0, 0}, // Starting point of the index space
+            {(grid.nr() + 1) / 2, (grid.ntheta() + 1) / 2} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int i_r_half, const int i_theta_half) {
+            const int i_r                               = 2 * i_r_half;
+            const int i_theta                           = 2 * i_theta_half;
             smoother_solution[grid.index(i_r, i_theta)] = discrete_solution[grid.index(i_r, i_theta)];
-    });
+        });
 
-    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()),
-                         [&](uint i) {
-                             error[i] = discrete_solution[i] - smoother_solution[i];
-                         });
+    Kokkos::parallel_for("get error", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, error.size()), [&](uint i) {
+        error[i] = discrete_solution[i] - smoother_solution[i];
+    });
     Kokkos::fence();
 
     int iterations              = 0;
@@ -887,5 +893,6 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin_SmallestGrid(
     ASSERT_NEAR(infinity_norm(ConstVector<double>(error)), 0.0, precision);
 }
 TEST(ExtrapolatedSmootherTest, ExtrapolatedSmootherTakeAcrossOrigin_SmallestGrid)
-{ ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin_SmallestGrid();
+{
+    ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin_SmallestGrid();
 }
