@@ -15,10 +15,11 @@ void ResidualGive<LevelCacheType>::computeResidual(HostVector<double> h_result, 
 {
     assert(h_result.size() == h_x.size());
 
-    applySystemOperator(h_result, h_x);
-
     auto rhs    = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs);
     auto result = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_result);
+    auto x = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_x);
+
+    applySystemOperator(result, x);
 
     // Subtract A*x from rhs to get the residual.
     const int n = result.size();

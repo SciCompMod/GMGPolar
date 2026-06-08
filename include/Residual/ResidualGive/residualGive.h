@@ -13,7 +13,7 @@ public:
                           const bool DirBC_Interior);
     ~ResidualGive() override = default;
 
-    void applySystemOperator(HostVector<double> result, HostConstVector<double> x) const final;
+    void applySystemOperator(Vector<double> result, ConstVector<double> x) const final;
     void computeResidual(HostVector<double> result, HostConstVector<double> rhs, HostConstVector<double> x) const final;
 };
 

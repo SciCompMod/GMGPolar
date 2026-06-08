@@ -336,13 +336,20 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
     while (number_of_iterations_ < max_iterations_) {
 
         // A_p = A * p
-        level.applySystemOperator(level.residual(), pcg_search_direction_);
+		auto level_residual      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), level.residual());
+		auto pcg_search_direction = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), pcg_search_direction_);
+        level.applySystemOperator(level_residual, pcg_search_direction);
+		Kokkos::deep_copy(level.residual(), level_residual);
         if (extrapolation_ != ExtrapolationType::NONE) {
             assert(number_of_levels_ > 1);
             Level<DomainGeometry, DensityProfileCoefficients>& next_level = levels_[level.level_depth() + 1];
             injection(0, next_level.solution(), pcg_search_direction_);
-            next_level.applySystemOperator(next_level.residual(), next_level.solution());
-            applyExtrapolation(0, level.residual(), next_level.residual());
+			auto next_level_residual      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.residual());
+			auto next_level_solution      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.solution());
+            next_level.applySystemOperator(next_level_residual, next_level_solution);
+            applyExtrapolation(0, level_residual, next_level_residual);
+			Kokkos::deep_copy(level.residual(), level_residual);
+			Kokkos::deep_copy(next_level.residual(), next_level_residual);
         }
 
         // alpha = (r^T * z) / (p^T * A*p)
@@ -479,7 +486,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::updateResidualNorms(
         Level<DomainGeometry, DensityProfileCoefficients>& next_level = levels_[level.level_depth() + 1];
         injection(level.level_depth(), next_level.solution(), level.solution());
         next_level.computeResidual(next_level.residual(), next_level.rhs(), next_level.solution());
-        applyExtrapolation(level.level_depth(), level.residual(), next_level.residual());
+			auto next_level_residual      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.residual());
+			auto level_residual      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), level.residual());
+        applyExtrapolation(level.level_depth(), level_residual, next_level_residual);
+			Kokkos::deep_copy(level.residual(), level_residual);
     }
 
     current_residual_norm = residualNorm(residual_norm_type_, level, level.residual());
@@ -523,11 +533,11 @@ double GMGPolar<DomainGeometry, DensityProfileCoefficients>::residualNorm(
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolation(int current_level,
-                                                                              HostVector<double> fine_values,
-                                                                              HostConstVector<double> coarse_values)
+                                                                              Vector<double> fine_values,
+                                                                              ConstVector<double> coarse_values)
 {
-    const PolarGrid<Kokkos::HostSpace> fineGrid(levels_[current_level].grid());
-    const PolarGrid<Kokkos::HostSpace> coarseGrid(levels_[current_level + 1].grid());
+    const PolarGrid<DefaultMemorySpace>& fineGrid(levels_[current_level].grid());
+    const PolarGrid<DefaultMemorySpace>& coarseGrid(levels_[current_level + 1].grid());
 
     assert(std::ssize(fine_values) == fineGrid.numberOfNodes());
     assert(std::ssize(coarse_values) == coarseGrid.numberOfNodes());
@@ -539,7 +549,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolation(in
     /* For loop matches circular access pattern */
     Kokkos::parallel_for(
         "Extrapolation: Apply Extrapolation (Circular)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>(
             {0, 0}, {fineGrid.numberSmootherCircles(), fineGrid.ntheta()}),
         KOKKOS_LAMBDA(const int i_r, const int i_theta) {
             const int fine_idx = fineGrid.index(i_r, i_theta);
@@ -556,7 +566,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolation(in
     /* For loop matches radial access pattern */
     Kokkos::parallel_for(
         "Extrapolation: Apply Extrapolation (Radial)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, fineGrid.numberSmootherCircles()},
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0, fineGrid.numberSmootherCircles()},
                                                                                   {fineGrid.ntheta(), fineGrid.nr()}),
         KOKKOS_LAMBDA(const int i_theta, const int i_r) {
             const int fine_idx = fineGrid.index(i_r, i_theta);

@@ -195,11 +195,8 @@ static KOKKOS_INLINE_FUNCTION void node_apply_a_give(int i_r, int i_theta, const
 } // namespace residual_give
 
 template <class LevelCacheType>
-void ResidualGive<LevelCacheType>::applySystemOperator(HostVector<double> h_result, HostConstVector<double> h_x) const
+void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, ConstVector<double> x) const
 {
-    auto x      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_x);
-    auto result = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_result);
-
     assert(result.size() == x.size());
 
     const PolarGrid<DefaultMemorySpace>& grid = Residual<LevelCacheType>::grid_;
@@ -264,6 +261,4 @@ void ResidualGive<LevelCacheType>::applySystemOperator(HostVector<double> h_resu
             });
         Kokkos::fence();
     }
-
-    Kokkos::deep_copy(h_result, result);
 }

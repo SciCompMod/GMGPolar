@@ -154,7 +154,7 @@ public: // Public due to cuda restrictions
 
     /* --------------- */
     /* Solve Functions */
-    void applyExtrapolation(int current_level, HostVector<double> fine_values, HostConstVector<double> coarse_values);
+    void applyExtrapolation(int current_level, Vector<double> fine_values, ConstVector<double> coarse_values);
 
 private:
     /* --------------- */
