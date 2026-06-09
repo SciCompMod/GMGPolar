@@ -62,13 +62,12 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
                        -1.0 / 3.0);
     Kokkos::deep_copy(next_level.residual(), next_level_residual);
     Kokkos::deep_copy(next_level.solution(), next_level_solution);
-	Kokkos::deep_copy(h_residual, residual);
 
     auto end_MGC_residual = std::chrono::high_resolution_clock::now();
     t_avg_MGC_residual_ += std::chrono::duration<double>(end_MGC_residual - start_MGC_residual).count();
 
     /* -------------------------------------------------- */
-    /* Solve A * error = restricted extrapolated h_residual */
+    /* Solve A * error = restricted extrapolated residual */
     /* -------------------------------------------------- */
     // Note: We deliberately use the non-extrapolated multigrid cycle here.
 
@@ -88,14 +87,14 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     /* -------------------------- */
     /* Interpolate the correction */
     /* -------------------------- */
-    // Use 'h_residual' instead of 'level.error_correction()' as a temporary buffer.
+    // Use 'residual' instead of 'level.error_correction()' as a temporary buffer.
     // Note: 'level.error_correction()' has size 0 at level depth = 0.
-    extrapolatedProlongation(next_level.level_depth(), h_residual, next_level.error_correction());
+	Kokkos::deep_copy(next_level_error_correction, next_level.error_correction());
+	extrapolatedProlongation(next_level.level_depth(), residual, next_level_error_correction);
 
     /* ----------------------------------- */
     /* Compute the corrected approximation */
     /* ----------------------------------- */
-	Kokkos::deep_copy(residual, h_residual);
     add(solution, ConstVector<double>(residual));
 
     /* ------------- */

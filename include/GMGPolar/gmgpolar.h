@@ -210,7 +210,7 @@ private:
     void prolongation(int current_level, HostVector<double> result, HostConstVector<double> x) const;
     void restriction(int current_level, Vector<double> result, ConstVector<double> x) const;
     void injection(int current_level, Vector<double> result, ConstVector<double> x) const;
-    void extrapolatedProlongation(int current_level, HostVector<double> result, HostConstVector<double> x) const;
+    void extrapolatedProlongation(int current_level, Vector<double> result, ConstVector<double> x) const;
     void extrapolatedRestriction(int current_level, Vector<double> result, ConstVector<double> x) const;
     void FMGInterpolation(int current_level, HostVector<double> result, HostConstVector<double> x) const;
 
