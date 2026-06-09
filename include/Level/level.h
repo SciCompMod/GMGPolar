@@ -107,7 +107,7 @@ public:
     // --------------- //
     // Apply Smoothing //
     void initializeSmoothing(const bool DirBC_Interior, const StencilDistributionMethod stencil_distribution_method);
-    void smoothing(HostVector<double> x, HostConstVector<double> rhs, HostVector<double> temp) const;
+    void smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) const;
 
     // ---------------------------- //
     // Apply Extrapolated Smoothing //

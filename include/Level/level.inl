@@ -164,8 +164,8 @@ void Level<DomainGeometry, DensityProfileCoefficients>::initializeSmoothing(
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void Level<DomainGeometry, DensityProfileCoefficients>::smoothing(HostVector<double> x, HostConstVector<double> rhs,
-                                                                  HostVector<double> temp) const
+void Level<DomainGeometry, DensityProfileCoefficients>::smoothing(Vector<double> x, ConstVector<double> rhs,
+                                                                  Vector<double> temp) const
 {
     if (!op_smoother_)
         throw std::runtime_error("Smoother not initialized.");

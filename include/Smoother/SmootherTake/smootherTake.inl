@@ -41,13 +41,9 @@ SmootherTake<LevelCacheType>::SmootherTake(const PolarGrid<DefaultMemorySpace>& 
 //   - The system is then solved in-place in temp, and the results
 //     are copied back to x.
 template <class LevelCacheType>
-void SmootherTake<LevelCacheType>::smoothing(HostVector<double> h_x, HostConstVector<double> h_rhs,
-                                             HostVector<double> h_temp)
+void SmootherTake<LevelCacheType>::smoothing(Vector<double> x, ConstVector<double> rhs,
+                                             Vector<double> temp)
 {
-    auto x    = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_x);
-    auto rhs  = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs);
-    auto temp = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_temp);
-
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
@@ -62,7 +58,4 @@ void SmootherTake<LevelCacheType>::smoothing(HostVector<double> h_x, HostConstVe
 
     applyAscOrthoWhiteRadialSection(x, rhs, temp);
     solveWhiteRadialSection(x, temp);
-
-    Kokkos::deep_copy(h_x, x);
-    Kokkos::deep_copy(h_temp, temp);
 }
