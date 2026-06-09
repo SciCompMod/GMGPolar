@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "../include/ConfigParser/config_parser.h"
-#include "../include/GMGPolar/gmgpolar.h"
+#include <ConfigParser/config_parser.h>
+#include <GMGPolar/gmgpolar.h>
 using namespace gmgpolar;
 
 int main(int argc, char* argv[])

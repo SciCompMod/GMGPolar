@@ -2,9 +2,9 @@
 
     #include <gtest/gtest.h>
 
-    #include "../../../include/LinearAlgebra/Vector/vector.h"
-    #include "../../../include/LinearAlgebra/Matrix/coo_matrix.h"
-    #include "../../../include/LinearAlgebra/Solvers/coo_mumps_solver.h"
+    #include <LinearAlgebra/Vector/vector.h>
+    #include <LinearAlgebra/Matrix/coo_matrix.h>
+    #include <LinearAlgebra/Solvers/coo_mumps_solver.h>
 using namespace gmgpolar;
 
 void fill_rhs(Vector<double>& rhs)

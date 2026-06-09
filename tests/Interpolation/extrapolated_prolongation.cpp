@@ -3,9 +3,9 @@
 
 #include "../test_tools.h"
 
-#include "../../include/GMGPolar/gmgpolar.h"
-#include "../../include/Interpolation/interpolation.h"
-#include "../../include/InputFunctions/DensityProfileCoefficients/poissonCoefficients.h"
+#include <GMGPolar/gmgpolar.h>
+#include <Interpolation/interpolation.h>
+#include <InputFunctions/DensityProfileCoefficients/poissonCoefficients.h>
 using namespace gmgpolar;
 
 // Helper that computes the mathematically expected extrapolated prolongation value

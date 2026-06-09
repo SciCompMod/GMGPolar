@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/cartesianR6_ZoniShifted_CzarnyGeometry.h"
+#include <InputFunctions/SourceTerms/cartesianR6_ZoniShifted_CzarnyGeometry.h>
 using namespace gmgpolar;
 
 void CartesianR6_ZoniShifted_CzarnyGeometry::initializeGeometry()

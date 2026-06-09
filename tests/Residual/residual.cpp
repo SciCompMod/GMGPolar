@@ -5,19 +5,19 @@
 
 #include "../test_tools.h"
 
-#include "../../include/GMGPolar/gmgpolar.h"
+#include <GMGPolar/gmgpolar.h>
 
-#include "../../include/Residual/ResidualGive/residualGive.h"
-#include "../../include/Residual/ResidualTake/residualTake.h"
+#include <Residual/ResidualGive/residualGive.h>
+#include <Residual/ResidualTake/residualTake.h>
 
-#include "../../include/InputFunctions/domainGeometry.h"
-#include "../../include/InputFunctions/densityProfileCoefficients.h"
-#include "../../include/InputFunctions/boundaryConditions.h"
+#include <InputFunctions/domainGeometry.h>
+#include <InputFunctions/densityProfileCoefficients.h>
+#include <InputFunctions/boundaryConditions.h>
 /* --------- */
 /* Test Case */
 /* --------- */
-#include "../include/InputFunctions/DomainGeometry/czarnyGeometry.h"
-#include "../include/InputFunctions/DensityProfileCoefficients/zoniShiftedCoefficients.h"
+#include <InputFunctions/DomainGeometry/czarnyGeometry.h>
+#include <InputFunctions/DensityProfileCoefficients/zoniShiftedCoefficients.h>
 using namespace gmgpolar;
 
 /* Test 1/1: */

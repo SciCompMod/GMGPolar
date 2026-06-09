@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include "../../../include/LinearAlgebra/Matrix/csr_matrix.h"
-#include "../../../include/LinearAlgebra/Solvers/csr_lu_solver.h"
-#include "../../../include/LinearAlgebra/Vector/vector.h"
+#include <LinearAlgebra/Matrix/csr_matrix.h>
+#include <LinearAlgebra/Solvers/csr_lu_solver.h>
+#include <LinearAlgebra/Vector/vector.h>
 using namespace gmgpolar;
 
 using SparseMatrixCSRHost = SparseMatrixCSR<double, Kokkos::HostSpace>;

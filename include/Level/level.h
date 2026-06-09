@@ -35,17 +35,17 @@ class ExtrapolatedSmoother;
 
 #include "../Definitions/geometry_helper.h"
 
-#include "../../include/Residual/ResidualGive/residualGive.h"
-#include "../../include/Residual/ResidualTake/residualTake.h"
+#include "../Residual/ResidualGive/residualGive.h"
+#include "../Residual/ResidualTake/residualTake.h"
 
-#include "../../include/DirectSolver/DirectSolverGive/directSolverGive.h"
-#include "../../include/DirectSolver/DirectSolverTake/directSolverTake.h"
+#include "../DirectSolver/DirectSolverGive/directSolverGive.h"
+#include "../DirectSolver/DirectSolverTake/directSolverTake.h"
 
-#include "../../include/Smoother/SmootherGive/smootherGive.h"
-#include "../../include/Smoother/SmootherTake/smootherTake.h"
+#include "../Smoother/SmootherGive/smootherGive.h"
+#include "../Smoother/SmootherTake/smootherTake.h"
 
-#include "../../include/ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h"
-#include "../../include/ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.h"
+#include "../ExtrapolatedSmoother/ExtrapolatedSmootherGive/extrapolatedSmootherGive.h"
+#include "../ExtrapolatedSmoother/ExtrapolatedSmootherTake/extrapolatedSmootherTake.h"
 
 namespace gmgpolar
 {

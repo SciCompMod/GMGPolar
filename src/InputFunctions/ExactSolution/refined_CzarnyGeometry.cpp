@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/ExactSolution/refined_CzarnyGeometry.h"
+#include <InputFunctions/ExactSolution/refined_CzarnyGeometry.h>
 using namespace gmgpolar;
 
 void Refined_CzarnyGeometry::initializeGeometry()
