@@ -28,6 +28,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     auto residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_residual);
     auto solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_solution);
     auto rhs      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs); // const
+    auto next_level_residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.residual());
+    auto next_level_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.solution());
+    auto next_level_rhs = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.rhs());
+	auto next_level_error_correction = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.error_correction());
 
     for (int i = 0; i < pre_smoothing_steps_; i++) {
         if (level.level_depth() == 0 && !full_grid_smoothing_) {
@@ -37,8 +41,6 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
             level.smoothing(solution, rhs, residual);
         }
     }
-	Kokkos::deep_copy(h_residual, residual);
-	Kokkos::deep_copy(h_solution, solution);
 
     auto end_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
     t_avg_MGC_preSmoothing_ += std::chrono::duration<double>(end_MGC_preSmoothing - start_MGC_preSmoothing).count();
@@ -49,22 +51,20 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     auto start_MGC_residual = std::chrono::high_resolution_clock::now();
 
     // P_ex^T (f_l - A_l*u_l)
-    level.computeResidual(h_residual, h_rhs, h_solution);
-    auto next_level_residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.residual());
-	Kokkos::deep_copy(residual, h_residual);
+    level.computeResidual(residual, rhs, solution);
     extrapolatedRestriction(level.level_depth(), next_level_residual, residual);
-    Kokkos::deep_copy(next_level.residual(), next_level_residual);
 
     // f_{l-1} - A_{l-1}* Inject(u_l)
-    Kokkos::deep_copy(solution, h_solution);
-    auto next_level_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.solution());
     injection(level.level_depth(), next_level_solution, solution);
-    Kokkos::deep_copy(next_level.solution(), next_level_solution);
-    next_level.computeResidual(next_level.error_correction(), next_level.rhs(), next_level.solution());
+    next_level.computeResidual(next_level_error_correction, next_level_rhs, next_level_solution);
 
     // res_ex = 4/3 * P_ex^T (f_l - A_l*u_l) - 1/3 * (f_{l-1} - A_{l-1}* Inject(u_l))
-    linear_combination(next_level.residual(), 4.0 / 3.0, HostConstVector<double>(next_level.error_correction()),
+    linear_combination(next_level_residual, 4.0 / 3.0, ConstVector<double>(next_level_error_correction),
                        -1.0 / 3.0);
+    Kokkos::deep_copy(next_level.residual(), next_level_residual);
+    Kokkos::deep_copy(next_level.rhs(), next_level_rhs);
+    Kokkos::deep_copy(next_level.solution(), next_level_solution);
+	Kokkos::deep_copy(h_residual, residual);
 
     auto end_MGC_residual = std::chrono::high_resolution_clock::now();
     t_avg_MGC_residual_ += std::chrono::duration<double>(end_MGC_residual - start_MGC_residual).count();
@@ -97,15 +97,14 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     /* ----------------------------------- */
     /* Compute the corrected approximation */
     /* ----------------------------------- */
-    add(h_solution, HostConstVector<double>(h_residual));
+	Kokkos::deep_copy(residual, h_residual);
+    add(solution, ConstVector<double>(residual));
 
     /* ------------- */
     /* Postsmoothing */
     /* ------------- */
     auto start_MGC_postSmoothing = std::chrono::high_resolution_clock::now();
 
-	Kokkos::deep_copy(residual, h_residual);
-	Kokkos::deep_copy(solution, h_solution);
     for (int i = 0; i < post_smoothing_steps_; i++) {
         if (level.level_depth() == 0 && !full_grid_smoothing_) {
             level.extrapolatedSmoothing(solution, rhs, residual);

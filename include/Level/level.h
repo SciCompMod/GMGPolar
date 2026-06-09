@@ -95,7 +95,7 @@ public:
     // -------------- //
     // Apply Residual //
     void initializeResidual(const bool DirBC_Interior, const StencilDistributionMethod stencil_distribution_method);
-    void computeResidual(HostVector<double> result, HostConstVector<double> rhs, HostConstVector<double> x) const;
+    void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const;
     void applySystemOperator(Vector<double> result, ConstVector<double> x) const;
 
     // ------------------- //

@@ -105,9 +105,9 @@ void Level<DomainGeometry, DensityProfileCoefficients>::initializeResidual(
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void Level<DomainGeometry, DensityProfileCoefficients>::computeResidual(HostVector<double> result,
-                                                                        HostConstVector<double> rhs,
-                                                                        HostConstVector<double> x) const
+void Level<DomainGeometry, DensityProfileCoefficients>::computeResidual(Vector<double> result,
+                                                                        ConstVector<double> rhs,
+                                                                        ConstVector<double> x) const
 {
     if (!op_residual_)
         throw std::runtime_error("Residual not initialized.");

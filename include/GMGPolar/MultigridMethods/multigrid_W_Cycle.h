@@ -48,8 +48,6 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_W_Cycle(int
         for (int i = 0; i < pre_smoothing_steps_; i++) {
             level.smoothing(solution, rhs, residual);
         }
-		Kokkos::deep_copy(h_solution, solution);
-		Kokkos::deep_copy(h_residual, residual);
 
         auto end_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
         t_avg_MGC_preSmoothing_ += std::chrono::duration<double>(end_MGC_preSmoothing - start_MGC_preSmoothing).count();
@@ -59,7 +57,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_W_Cycle(int
         /* -------------------- */
         auto start_MGC_residual = std::chrono::high_resolution_clock::now();
 
-        level.computeResidual(h_residual, h_rhs, h_solution);
+        level.computeResidual(residual, rhs, solution);
+		Kokkos::deep_copy(h_residual, residual);
 
         auto end_MGC_residual = std::chrono::high_resolution_clock::now();
         t_avg_MGC_residual_ += std::chrono::duration<double>(end_MGC_residual - start_MGC_residual).count();
@@ -96,7 +95,6 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_W_Cycle(int
         /* ----------------------------------- */
         /* Compute the corrected approximation */
         /* ----------------------------------- */
-		Kokkos::deep_copy(solution, h_solution);
 		Kokkos::deep_copy(residual, h_residual);
         add(solution, ConstVector<double>(residual));
 

@@ -55,23 +55,26 @@ TEST(OperatorATest, applyA_DirBC_Interior)
     ResidualGive residualGive_operator(level.grid(), level.levelCache(), DirBC_Interior);
     ResidualTake residualTake_operator(level.grid(), level.levelCache(), DirBC_Interior);
 
-    HostVector<double> x   = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
-    HostVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
+    Vector<double> x   = generate_random_sample_data(level.grid(), 42);
+    Vector<double> rhs = generate_random_sample_data(level.grid(), 69);
 
-    HostVector<double> result_Give("result_Give", level.grid().numberOfNodes());
+    Vector<double> result_Give("result_Give", level.grid().numberOfNodes());
     residualGive_operator.computeResidual(result_Give, rhs, x);
 
-    HostVector<double> result_Take("result_Take", level.grid().numberOfNodes());
+    Vector<double> result_Take("result_Take", level.grid().numberOfNodes());
     residualTake_operator.computeResidual(result_Take, rhs, x);
+
+	auto h_result_Give = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, result_Give);
+	auto h_result_Take = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, result_Take);
 
     ASSERT_EQ(result_Give.size(), result_Take.size());
     for (uint index = 0; index < result_Give.size(); index++) {
         int i_r, i_theta;
         level.grid().multiIndex(index, i_r, i_theta);
         if (i_r == 0 && !DirBC_Interior)
-            ASSERT_NEAR(result_Give[index], result_Take[index], 1e-8);
+            ASSERT_NEAR(h_result_Give[index], h_result_Take[index], 1e-8);
         else
-            ASSERT_NEAR(result_Give[index], result_Take[index], 1e-11);
+            ASSERT_NEAR(h_result_Give[index], h_result_Take[index], 1e-11);
     }
 }
 
@@ -107,22 +110,25 @@ TEST(OperatorATest, applyA_AcrossOrigin)
     ResidualGive residualGive_operator(level.grid(), level.levelCache(), DirBC_Interior);
     ResidualTake residualTake_operator(level.grid(), level.levelCache(), DirBC_Interior);
 
-    HostVector<double> x   = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
-    HostVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
+    Vector<double> x   = generate_random_sample_data(level.grid(), 42);
+    Vector<double> rhs = generate_random_sample_data(level.grid(), 69);
 
-    HostVector<double> result_Give("result_Give", level.grid().numberOfNodes());
+    Vector<double> result_Give("result_Give", level.grid().numberOfNodes());
     residualGive_operator.computeResidual(result_Give, rhs, x);
 
-    HostVector<double> result_Take("result_Take", level.grid().numberOfNodes());
+    Vector<double> result_Take("result_Take", level.grid().numberOfNodes());
     residualTake_operator.computeResidual(result_Take, rhs, x);
+
+	auto h_result_Give = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, result_Give);
+	auto h_result_Take = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, result_Take);
 
     ASSERT_EQ(result_Give.size(), result_Take.size());
     for (uint index = 0; index < result_Give.size(); index++) {
         int i_r, i_theta;
         level.grid().multiIndex(index, i_r, i_theta);
         if (i_r == 0 && !DirBC_Interior)
-            ASSERT_NEAR(result_Give[index], result_Take[index], 1e-8);
+            ASSERT_NEAR(h_result_Give[index], h_result_Take[index], 1e-8);
         else
-            ASSERT_NEAR(result_Give[index], result_Take[index], 1e-11);
+            ASSERT_NEAR(h_result_Give[index], h_result_Take[index], 1e-11);
     }
 }

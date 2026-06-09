@@ -14,7 +14,7 @@ public:
     ~ResidualGive() override = default;
 
     void applySystemOperator(Vector<double> result, ConstVector<double> x) const final;
-    void computeResidual(HostVector<double> result, HostConstVector<double> rhs, HostConstVector<double> x) const final;
+    void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const final;
 };
 
 #include "residualGive.inl"

@@ -10,14 +10,10 @@ ResidualGive<LevelCacheType>::ResidualGive(const PolarGrid<DefaultMemorySpace>& 
 /* ------------------ */
 /* result = rhs - A*x */
 template <class LevelCacheType>
-void ResidualGive<LevelCacheType>::computeResidual(HostVector<double> h_result, HostConstVector<double> h_rhs,
-                                                   HostConstVector<double> h_x) const
+void ResidualGive<LevelCacheType>::computeResidual(Vector<double> result, ConstVector<double> rhs,
+                                                   ConstVector<double> x) const
 {
-    assert(h_result.size() == h_x.size());
-
-    auto rhs    = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs);
-    auto result = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_result);
-    auto x      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_x);
+    assert(result.size() == x.size());
 
     applySystemOperator(result, x);
 
@@ -29,6 +25,4 @@ void ResidualGive<LevelCacheType>::computeResidual(HostVector<double> h_result, 
         KOKKOS_LAMBDA(const int i) { result[i] = rhs[i] - result[i]; });
 
     Kokkos::fence();
-
-    Kokkos::deep_copy(h_result, result);
 }

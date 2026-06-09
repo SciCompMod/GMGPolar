@@ -484,19 +484,22 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::updateResidualNorms(
     Level<DomainGeometry, DensityProfileCoefficients>& level, int iteration, double& initial_residual_norm,
     double& current_residual_norm, double& current_relative_residual_norm)
 {
-    level.computeResidual(level.residual(), level.rhs(), level.solution());
+    auto solution            = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), level.solution());
+    auto residual      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), level.residual());
+    auto rhs      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), level.rhs());
+    level.computeResidual(residual, rhs, solution);
     if (extrapolation_ != ExtrapolationType::NONE) {
         Level<DomainGeometry, DensityProfileCoefficients>& next_level = levels_[level.level_depth() + 1];
-        auto solution            = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), level.solution());
         auto next_level_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.solution());
-        injection(level.level_depth(), next_level_solution, solution);
-        Kokkos::deep_copy(next_level.solution(), next_level_solution);
-        next_level.computeResidual(next_level.residual(), next_level.rhs(), next_level.solution());
         auto next_level_residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.residual());
-        auto level_residual      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), level.residual());
-        applyExtrapolation(level.level_depth(), level_residual, next_level_residual);
-        Kokkos::deep_copy(level.residual(), level_residual);
+        auto next_level_rhs = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.rhs());
+        injection(level.level_depth(), next_level_solution, solution);
+        next_level.computeResidual(next_level_residual, next_level_rhs, next_level_solution);
+        applyExtrapolation(level.level_depth(), residual, next_level_residual);
+        Kokkos::deep_copy(next_level.solution(), next_level_solution);
     }
+    Kokkos::deep_copy(level.residual(), residual);
+    Kokkos::deep_copy(level.solution(), solution);
 
     current_residual_norm = residualNorm(residual_norm_type_, level, level.residual());
     residual_norms_.push_back(current_residual_norm);
