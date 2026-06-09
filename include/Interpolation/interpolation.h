@@ -33,9 +33,9 @@ public:
                                        ConstVector<double> coarse_values) const;
 
     /* Scaled full weighting (FW) restriction operator. */
-    void applyRestriction(const PolarGrid<Kokkos::HostSpace>& fine_grid,
-                          const PolarGrid<Kokkos::HostSpace>& coarse_grid, HostVector<double> coarse_result,
-                          HostConstVector<double> fine_values) const;
+    void applyRestriction(const PolarGrid<DefaultMemorySpace>& fine_grid,
+                          const PolarGrid<DefaultMemorySpace>& coarse_grid, Vector<double> coarse_result,
+                          ConstVector<double> fine_values) const;
 
     void applyExtrapolatedRestriction(const PolarGrid<DefaultMemorySpace>& fine_grid,
                                       const PolarGrid<DefaultMemorySpace>& coarse_grid, Vector<double> coarse_result,

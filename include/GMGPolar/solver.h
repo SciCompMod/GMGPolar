@@ -602,7 +602,11 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::initRhsHierarchy(Host
     for (int level_depth = 0; level_depth < number_of_levels_ - 1; ++level_depth) {
         Level<DomainGeometry, DensityProfileCoefficients>& current_level = levels_[level_depth];
         Level<DomainGeometry, DensityProfileCoefficients>& next_level    = levels_[level_depth + 1];
-        restriction(level_depth, next_level.rhs(), current_level.rhs());
+		auto rhs = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), current_level.rhs());
+		auto next_level_rhs = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.rhs());
+        restriction(level_depth, next_level_rhs, rhs);
+		Kokkos::deep_copy(current_level.rhs(), rhs);
+		Kokkos::deep_copy(next_level.rhs(), next_level_rhs);
     }
 }
 

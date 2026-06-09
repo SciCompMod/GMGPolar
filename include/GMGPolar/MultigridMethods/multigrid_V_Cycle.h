@@ -45,6 +45,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_V_Cycle(int
 		auto solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_solution);
 		auto residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_residual);
 		auto rhs = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs); // const
+		auto next_level_residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.residual());
         for (int i = 0; i < pre_smoothing_steps_; i++) {
             level.smoothing(solution, rhs, residual);
         }
@@ -53,23 +54,23 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_V_Cycle(int
         t_avg_MGC_preSmoothing_ += std::chrono::duration<double>(end_MGC_preSmoothing - start_MGC_preSmoothing).count();
 
         /* -------------------- */
-        /* Compute the h_residual */
+        /* Compute the residual */
         /* -------------------- */
         auto start_MGC_residual = std::chrono::high_resolution_clock::now();
 
         level.computeResidual(residual, rhs, solution);
-		Kokkos::deep_copy(h_residual, residual);
 
         auto end_MGC_residual = std::chrono::high_resolution_clock::now();
         t_avg_MGC_residual_ += std::chrono::duration<double>(end_MGC_residual - start_MGC_residual).count();
 
         /* --------------------- */
-        /* Restrict the h_residual */
+        /* Restrict the residual */
         /* --------------------- */
-        restriction(level.level_depth(), next_level.residual(), h_residual);
+        restriction(level.level_depth(), next_level_residual, residual);
+		Kokkos::deep_copy(next_level.residual(), next_level_residual);
 
         /* ------------------------------------- */
-        /* Solve A * error = restricted h_residual */
+        /* Solve A * error = restricted residual */
         /* ------------------------------------- */
 
         /* Set starting error to zero. */
@@ -82,8 +83,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_V_Cycle(int
         /* -------------------------- */
         /* Interpolate the correction */
         /* -------------------------- */
-        // Use 'h_residual' instead of 'level.error_correction()' as a temporary buffer.
+        // Use 'residual' instead of 'level.error_correction()' as a temporary buffer.
         // Note: 'level.error_correction()' has size 0 at level depth = 0.
+		Kokkos::deep_copy(residual, residual);
         prolongation(next_level.level_depth(), h_residual, next_level.error_correction());
 
         /* ----------------------------------- */

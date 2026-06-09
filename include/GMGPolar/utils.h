@@ -17,15 +17,15 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::prolongation(int curr
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::restriction(int current_level, HostVector<double> result,
-                                                                       HostConstVector<double> x) const
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::restriction(int current_level, Vector<double> result,
+                                                                       ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ - 1 && 0 <= current_level);
     if (!interpolation_)
         throw std::runtime_error("Interpolation not initialized.");
 
-    PolarGrid<Kokkos::HostSpace> current_grid(levels_[current_level].grid());
-    PolarGrid<Kokkos::HostSpace> next_grid(levels_[current_level + 1].grid());
+    const PolarGrid<DefaultMemorySpace>& current_grid = levels_[current_level].grid();
+    const PolarGrid<DefaultMemorySpace>& next_grid = levels_[current_level + 1].grid();
     interpolation_->applyRestriction(current_grid, next_grid, result, x);
 }
 
@@ -37,8 +37,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::injection(int current
     if (!interpolation_)
         throw std::runtime_error("Interpolation not initialized.");
 
-    PolarGrid<DefaultMemorySpace> current_grid(levels_[current_level].grid());
-    PolarGrid<DefaultMemorySpace> next_grid(levels_[current_level + 1].grid());
+    const PolarGrid<DefaultMemorySpace>& current_grid = levels_[current_level].grid();
+    const PolarGrid<DefaultMemorySpace>& next_grid = levels_[current_level + 1].grid();
     interpolation_->applyInjection(current_grid, next_grid, result, x);
 }
 
@@ -53,8 +53,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedProlongat
     if (!interpolation_)
         throw std::runtime_error("Interpolation not initialized.");
 
-    PolarGrid<DefaultMemorySpace> current_grid  = levels_[current_level].grid();
-    PolarGrid<DefaultMemorySpace> previous_grid = levels_[current_level - 1].grid();
+    const PolarGrid<DefaultMemorySpace>& current_grid  = levels_[current_level].grid();
+    const PolarGrid<DefaultMemorySpace>& previous_grid = levels_[current_level - 1].grid();
     interpolation_->applyExtrapolatedProlongation(current_grid, previous_grid, result, x);
 
     Kokkos::deep_copy(result_host, result);
@@ -69,8 +69,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedRestricti
     if (!interpolation_)
         throw std::runtime_error("Interpolation not initialized.");
 
-    PolarGrid<DefaultMemorySpace> current_grid = levels_[current_level].grid();
-    PolarGrid<DefaultMemorySpace> next_grid    = levels_[current_level + 1].grid();
+    const PolarGrid<DefaultMemorySpace>& current_grid = levels_[current_level].grid();
+    const PolarGrid<DefaultMemorySpace>& next_grid    = levels_[current_level + 1].grid();
     interpolation_->applyExtrapolatedRestriction(current_grid, next_grid, result, x);
 }
 
