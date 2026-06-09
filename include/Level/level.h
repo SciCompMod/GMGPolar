@@ -83,8 +83,8 @@ public:
     const PolarGrid<DefaultMemorySpace>& grid() const;
     const LevelCacheType& levelCache() const;
 
-    HostVector<double> rhs();
-    HostConstVector<double> rhs() const;
+    Vector<double> rhs();
+    ConstVector<double> rhs() const;
     HostVector<double> solution();
     HostConstVector<double> solution() const;
     HostVector<double> residual();
@@ -125,7 +125,7 @@ private:
     std::unique_ptr<Smoother<LevelCacheType>> op_smoother_;
     std::unique_ptr<ExtrapolatedSmoother<LevelCacheType>> op_extrapolated_smoother_;
 
-    HostVector<double> rhs_;
+    Vector<double> rhs_;
     HostVector<double> solution_;
     HostVector<double> residual_;
     HostVector<double> error_correction_;

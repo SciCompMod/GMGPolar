@@ -30,7 +30,6 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     auto rhs      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs); // const
     auto next_level_residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.residual());
     auto next_level_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.solution());
-    auto next_level_rhs = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.rhs());
 	auto next_level_error_correction = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.error_correction());
 
     for (int i = 0; i < pre_smoothing_steps_; i++) {
@@ -56,13 +55,12 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
 
     // f_{l-1} - A_{l-1}* Inject(u_l)
     injection(level.level_depth(), next_level_solution, solution);
-    next_level.computeResidual(next_level_error_correction, next_level_rhs, next_level_solution);
+    next_level.computeResidual(next_level_error_correction, next_level.rhs(), next_level_solution);
 
     // res_ex = 4/3 * P_ex^T (f_l - A_l*u_l) - 1/3 * (f_{l-1} - A_{l-1}* Inject(u_l))
     linear_combination(next_level_residual, 4.0 / 3.0, ConstVector<double>(next_level_error_correction),
                        -1.0 / 3.0);
     Kokkos::deep_copy(next_level.residual(), next_level_residual);
-    Kokkos::deep_copy(next_level.rhs(), next_level_rhs);
     Kokkos::deep_copy(next_level.solution(), next_level_solution);
 	Kokkos::deep_copy(h_residual, residual);
 
