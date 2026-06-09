@@ -53,6 +53,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     // P_ex^T (f_l - A_l*u_l)
     level.computeResidual(h_residual, h_rhs, h_solution);
     auto next_level_residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.residual());
+	Kokkos::deep_copy(residual, h_residual);
     extrapolatedRestriction(level.level_depth(), next_level_residual, residual);
     Kokkos::deep_copy(next_level.residual(), next_level_residual);
 
