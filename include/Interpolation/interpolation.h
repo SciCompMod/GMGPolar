@@ -24,9 +24,9 @@ public:
                         ConstVector<double> fine_values) const;
 
     /* Bilinear interpolation operator */
-    void applyProlongation(const PolarGrid<Kokkos::HostSpace>& coarse_grid,
-                           const PolarGrid<Kokkos::HostSpace>& fine_grid, HostVector<double> fine_result,
-                           HostConstVector<double> coarse_values) const;
+    void applyProlongation(const PolarGrid<DefaultMemorySpace>& coarse_grid,
+                           const PolarGrid<DefaultMemorySpace>& fine_grid, Vector<double> fine_result,
+                           ConstVector<double> coarse_values) const;
 
     void applyExtrapolatedProlongation(const PolarGrid<DefaultMemorySpace>& coarse_grid,
                                        const PolarGrid<DefaultMemorySpace>& fine_grid, Vector<double> fine_result,

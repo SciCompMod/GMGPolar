@@ -61,20 +61,26 @@ TEST(ProlongationTest, ProlongationMatchesStencil)
     std::vector<double> fine_angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, 2 * M_PI};
 
-    PolarGrid<Kokkos::HostSpace> fine_grid(fine_radii, fine_angles);
-    PolarGrid<Kokkos::HostSpace> coarse_grid = coarseningGrid(fine_grid);
+    PolarGrid<DefaultMemorySpace> fine_grid(fine_radii, fine_angles);
+    PolarGrid<DefaultMemorySpace> coarse_grid = coarseningGrid(fine_grid);
 
     Interpolation I(/*DirBC*/ true);
 
-    HostVector<double> coarse_values = generate_random_sample_data(coarse_grid, 1234);
-    HostVector<double> fine_result("fine_result", fine_grid.numberOfNodes());
+    Vector<double> coarse_values = generate_random_sample_data(coarse_grid, 1234);
+    Vector<double> fine_result("fine_result", fine_grid.numberOfNodes());
 
     I.applyProlongation(coarse_grid, fine_grid, fine_result, coarse_values);
 
+	PolarGrid<Kokkos::HostSpace> h_fine_grid(fine_grid);
+	PolarGrid<Kokkos::HostSpace> h_coarse_grid(coarse_grid);
+
+	auto h_coarse_values = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, coarse_values);
+	auto h_fine_result = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, fine_result);
+
     for (int i_r = 0; i_r < fine_grid.nr(); ++i_r) {
         for (int i_theta = 0; i_theta < fine_grid.ntheta(); ++i_theta) {
-            double expected = expected_value(coarse_grid, fine_grid, coarse_values, i_r, i_theta);
-            double got      = fine_result[fine_grid.index(i_r, i_theta)];
+            double expected = expected_value(h_coarse_grid, h_fine_grid, h_coarse_values, i_r, i_theta);
+            double got      = h_fine_result[h_fine_grid.index(i_r, i_theta)];
             ASSERT_NEAR(expected, got, 1e-10) << "Mismatch at (" << i_r << ", " << i_theta << ")";
         }
     }

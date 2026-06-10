@@ -92,10 +92,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_W_Cycle(int
         /* -------------------------- */
         // Use 'residual' instead of 'level.error_correction()' as a temporary buffer.
         // Note: 'level.error_correction()' has size 0 at level depth = 0.
-		Kokkos::deep_copy(h_residual, residual);
-        prolongation(next_level.level_depth(), h_residual, h_next_level_error_correction);
 		Kokkos::deep_copy(next_level.error_correction(), h_next_level_error_correction);
-		Kokkos::deep_copy(residual, h_residual);
+        prolongation(next_level.level_depth(), residual, next_level.error_correction());
 
         /* ----------------------------------- */
         /* Compute the corrected approximation */

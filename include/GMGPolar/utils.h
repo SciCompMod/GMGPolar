@@ -4,15 +4,15 @@
 /* Interpolation                                                          */
 /* ---------------------------------------------------------------------- */
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::prolongation(int current_level, HostVector<double> result,
-                                                                        HostConstVector<double> x) const
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::prolongation(int current_level, Vector<double> result,
+                                                                        ConstVector<double> x) const
 {
     assert(current_level < number_of_levels_ && 1 <= current_level);
     if (!interpolation_)
         throw std::runtime_error("Interpolation not initialized.");
 
-    PolarGrid<Kokkos::HostSpace> current_grid(levels_[current_level].grid());
-    PolarGrid<Kokkos::HostSpace> previous_grid(levels_[current_level - 1].grid());
+    const PolarGrid<DefaultMemorySpace>& current_grid = levels_[current_level].grid();
+    const PolarGrid<DefaultMemorySpace>& previous_grid = levels_[current_level - 1].grid();
     interpolation_->applyProlongation(current_grid, previous_grid, result, x);
 }
 
