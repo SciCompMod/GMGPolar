@@ -102,7 +102,7 @@ public:
     // Solve coarse System //
     void initializeDirectSolver(const bool DirBC_Interior, const StencilDistributionMethod stencil_distribution_method);
     // Note: The rhs (right-hand side) vector gets overwritten by the solution.
-    void directSolveInPlace(HostVector<double> x) const;
+    void directSolveInPlace(Vector<double> x) const;
 
     // --------------- //
     // Apply Smoothing //

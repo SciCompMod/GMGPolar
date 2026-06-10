@@ -140,7 +140,7 @@ void Level<DomainGeometry, DensityProfileCoefficients>::initializeDirectSolver(
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void Level<DomainGeometry, DensityProfileCoefficients>::directSolveInPlace(HostVector<double> x) const
+void Level<DomainGeometry, DensityProfileCoefficients>::directSolveInPlace(Vector<double> x) const
 {
     if (!op_directSolver_)
         throw std::runtime_error("Coarse Solver not initialized.");

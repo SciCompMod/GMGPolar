@@ -187,10 +187,9 @@ void SmootherTest_SmootherDirBC_Interior()
     SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    HostVector<double> h_discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(h_discrete_solution, rhs);
-    solver_op.solveInPlace(h_discrete_solution);
-	auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
+    solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
@@ -265,10 +264,9 @@ void SmootherTest_SmootherAcrossOrigin()
     SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    HostVector<double> h_discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(h_discrete_solution, rhs);
-    solver_op.solveInPlace(h_discrete_solution);
-	auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
+    solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
@@ -344,10 +342,9 @@ void SmootherTest_SmootherDirBC_Interior_SmallestGrid()
     SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    HostVector<double> h_discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(h_discrete_solution, rhs);
-    solver_op.solveInPlace(h_discrete_solution);
-	auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
+    solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
@@ -421,10 +418,9 @@ void SmootherTest_SmootherAcrossOrigin_SmallestGrid()
     SmootherGive smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    HostVector<double> h_discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(h_discrete_solution, rhs);
-    solver_op.solveInPlace(h_discrete_solution);
-	auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
+    solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
@@ -501,10 +497,9 @@ void SmootherTest_SmootherTakeDirBC_Interior()
     SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    HostVector<double> h_discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(h_discrete_solution, rhs);
-    solver_op.solveInPlace(h_discrete_solution);
-	auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
+    solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
@@ -579,10 +574,9 @@ void SmootherTest_SmootherTakeAcrossOrigin()
     SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    HostVector<double> h_discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(h_discrete_solution, rhs);
-    solver_op.solveInPlace(h_discrete_solution);
-	auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
+    solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
@@ -656,10 +650,9 @@ void SmootherTest_SmootherTakeDirBC_Interior_SmallestGrid()
     SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    HostVector<double> h_discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(h_discrete_solution, rhs);
-    solver_op.solveInPlace(h_discrete_solution);
-	auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
+    solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());
@@ -733,10 +726,9 @@ void SmootherTest_SmootherTakeAcrossOrigin_SmallestGrid()
     SmootherTake smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
 
     ConstVector<double> rhs = generate_random_sample_data(level.grid(), 42);
-    HostVector<double> h_discrete_solution("discrete_solution", rhs.size());
-    Kokkos::deep_copy(h_discrete_solution, rhs);
-    solver_op.solveInPlace(h_discrete_solution);
-	auto discrete_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_discrete_solution);
+    Vector<double> discrete_solution("discrete_solution", rhs.size());
+    Kokkos::deep_copy(discrete_solution, rhs);
+    solver_op.solveInPlace(discrete_solution);
 
     Vector<double> temp("temp", level.grid().numberOfNodes());
     Vector<double> error("error", level.grid().numberOfNodes());

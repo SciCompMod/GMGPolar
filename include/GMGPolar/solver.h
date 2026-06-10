@@ -207,7 +207,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::fullMultigridApproxim
 
     // Solve directly on the coarsest level
     Kokkos::deep_copy(coarsest_level.solution(), coarsest_level.rhs());
-    coarsest_level.directSolveInPlace(coarsest_level.solution());
+	auto coarsest_level_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), coarsest_level.solution());
+    coarsest_level.directSolveInPlace(coarsest_level_solution);
+	Kokkos::deep_copy(coarsest_level.solution(), coarsest_level_solution);
 
     // Prolongate the solution from the coarsest level up to the finest, while applying Multigrid Cycles on each level
     for (int depth = coarsest_depth; depth > 0; --depth) {
