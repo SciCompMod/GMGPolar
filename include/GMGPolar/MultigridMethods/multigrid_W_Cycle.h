@@ -77,27 +77,29 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_W_Cycle(int
         assign(next_level.error_correction(), 0.0);
 
         /* Solve for the error by recursively calling the multigrid cycle. */
-        multigrid_W_Cycle(next_level.level_depth(), next_level.error_correction(), next_level.residual(),
+    	auto h_next_level_error_correction = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), next_level.error_correction());
+        multigrid_W_Cycle(next_level.level_depth(), h_next_level_error_correction, next_level.residual(),
                           next_level.solution());
 
         /* Don't do a second recursion on the coarsest level since the DirectSolver is exact. */
         if (next_level.level_depth() != number_of_levels_ - 1) {
-            multigrid_W_Cycle(next_level.level_depth(), next_level.error_correction(), next_level.residual(),
+            multigrid_W_Cycle(next_level.level_depth(), h_next_level_error_correction, next_level.residual(),
                               next_level.solution());
         }
 
         /* -------------------------- */
         /* Interpolate the correction */
         /* -------------------------- */
-        // Use 'h_residual' instead of 'level.error_correction()' as a temporary buffer.
+        // Use 'residual' instead of 'level.error_correction()' as a temporary buffer.
         // Note: 'level.error_correction()' has size 0 at level depth = 0.
 		Kokkos::deep_copy(h_residual, residual);
-        prolongation(next_level.level_depth(), h_residual, next_level.error_correction());
+        prolongation(next_level.level_depth(), h_residual, h_next_level_error_correction);
+		Kokkos::deep_copy(next_level.error_correction(), h_next_level_error_correction);
+		Kokkos::deep_copy(residual, h_residual);
 
         /* ----------------------------------- */
         /* Compute the corrected approximation */
         /* ----------------------------------- */
-		Kokkos::deep_copy(residual, h_residual);
         add(solution, ConstVector<double>(residual));
 
         /* ------------- */

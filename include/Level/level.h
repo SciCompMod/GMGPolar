@@ -89,8 +89,8 @@ public:
     HostConstVector<double> solution() const;
     HostVector<double> residual();
     HostConstVector<double> residual() const;
-    HostVector<double> error_correction();
-    HostConstVector<double> error_correction() const;
+    Vector<double> error_correction();
+    ConstVector<double> error_correction() const;
 
     // -------------- //
     // Apply Residual //
@@ -128,7 +128,7 @@ private:
     Vector<double> rhs_;
     HostVector<double> solution_;
     HostVector<double> residual_;
-    HostVector<double> error_correction_;
+    Vector<double> error_correction_;
 };
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>

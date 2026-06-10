@@ -77,13 +77,13 @@ HostConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::resid
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-HostVector<double> Level<DomainGeometry, DensityProfileCoefficients>::error_correction()
+Vector<double> Level<DomainGeometry, DensityProfileCoefficients>::error_correction()
 {
     return error_correction_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-HostConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::error_correction() const
+ConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::error_correction() const
 {
     return error_correction_;
 }

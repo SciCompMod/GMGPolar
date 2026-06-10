@@ -30,7 +30,6 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     auto rhs      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs); // const
     auto next_level_residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.residual());
     auto next_level_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.solution());
-    auto next_level_error_correction = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.error_correction());
 
     for (int i = 0; i < pre_smoothing_steps_; i++) {
         if (level.level_depth() == 0 && !full_grid_smoothing_) {
@@ -55,10 +54,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
 
     // f_{l-1} - A_{l-1}* Inject(u_l)
     injection(level.level_depth(), next_level_solution, solution);
-    next_level.computeResidual(next_level_error_correction, next_level.rhs(), next_level_solution);
+    next_level.computeResidual(next_level.error_correction(), next_level.rhs(), next_level_solution);
 
     // res_ex = 4/3 * P_ex^T (f_l - A_l*u_l) - 1/3 * (f_{l-1} - A_{l-1}* Inject(u_l))
-    linear_combination(next_level_residual, 4.0 / 3.0, ConstVector<double>(next_level_error_correction),
+    linear_combination(next_level_residual, 4.0 / 3.0, ConstVector<double>(next_level.error_correction()),
                        -1.0 / 3.0);
     Kokkos::deep_copy(next_level.residual(), next_level_residual);
     Kokkos::deep_copy(next_level.solution(), next_level_solution);
@@ -75,7 +74,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     assign(next_level.error_correction(), 0.0);
 
     /* Solve for the error by recursively calling the multigrid cycle. */
-    multigrid_V_Cycle(next_level.level_depth(), next_level.error_correction(), next_level.residual(),
+	auto h_next_level_error_correction = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, next_level.error_correction());
+    multigrid_V_Cycle(next_level.level_depth(), h_next_level_error_correction, next_level.residual(),
                       next_level.solution());
 
     /* -------------------------- */
@@ -83,8 +83,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     /* -------------------------- */
     // Use 'residual' instead of 'level.error_correction()' as a temporary buffer.
     // Note: 'level.error_correction()' has size 0 at level depth = 0.
-	Kokkos::deep_copy(next_level_error_correction, next_level.error_correction());
-    extrapolatedProlongation(next_level.level_depth(), residual, next_level_error_correction);
+	Kokkos::deep_copy(next_level.error_correction(), h_next_level_error_correction);
+    extrapolatedProlongation(next_level.level_depth(), residual, next_level.error_correction());
 
     /* ----------------------------------- */
     /* Compute the corrected approximation */

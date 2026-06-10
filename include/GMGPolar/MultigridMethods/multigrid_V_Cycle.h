@@ -77,7 +77,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_V_Cycle(int
         assign(next_level.error_correction(), 0.0);
 
         /* Solve for the error by recursively calling the multigrid cycle. */
-        multigrid_V_Cycle(next_level.level_depth(), next_level.error_correction(), next_level.residual(),
+    	auto h_next_level_error_correction = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), next_level.error_correction());
+        multigrid_V_Cycle(next_level.level_depth(), h_next_level_error_correction, next_level.residual(),
                           next_level.solution());
 
         /* -------------------------- */
@@ -85,13 +86,14 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_V_Cycle(int
         /* -------------------------- */
         // Use 'residual' instead of 'level.error_correction()' as a temporary buffer.
         // Note: 'level.error_correction()' has size 0 at level depth = 0.
-		Kokkos::deep_copy(residual, residual);
-        prolongation(next_level.level_depth(), h_residual, next_level.error_correction());
+		Kokkos::deep_copy(h_residual, residual);
+        prolongation(next_level.level_depth(), h_residual, h_next_level_error_correction);
+		Kokkos::deep_copy(next_level.error_correction(), h_next_level_error_correction);
+		Kokkos::deep_copy(residual, h_residual);
 
         /* ----------------------------------- */
         /* Compute the corrected approximation */
         /* ----------------------------------- */
-		Kokkos::deep_copy(residual, h_residual);
         add(solution, ConstVector<double>(residual));
 
         /* ------------- */
