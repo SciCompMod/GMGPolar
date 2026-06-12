@@ -69,8 +69,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     interpolation_ = std::make_unique<Interpolation>(DirBC_Interior_);
 
     if (verbose_ > 0) {
-        PolarGrid<Kokkos::HostSpace> coarsestGrid(levels_[0].grid());
-        PolarGrid<Kokkos::HostSpace> finestGrid(levels_[number_of_levels_ - 1].grid());
+        PolarGrid<Kokkos::HostSpace> finestGrid(levels_[0].grid());
+        PolarGrid<Kokkos::HostSpace> coarsestGrid(levels_[number_of_levels_ - 1].grid());
         printSettings(finestGrid, coarsestGrid);
     }
 
