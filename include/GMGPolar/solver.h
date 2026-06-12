@@ -444,7 +444,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyMultigridIterati
 		auto solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace{}, level.solution());
         switch (cycle) {
         case MultigridCycleType::V_CYCLE:
-            multigrid_V_Cycle(level.level_depth(), level.solution(), h_rhs, level.residual());
+            multigrid_V_Cycle(level.level_depth(), solution, level.rhs(), residual);
+			Kokkos::deep_copy(level.residual(), residual);
+			Kokkos::deep_copy(level.solution(), solution);
             break;
         case MultigridCycleType::W_CYCLE:
             multigrid_W_Cycle(level.level_depth(), solution, level.rhs(), residual);
