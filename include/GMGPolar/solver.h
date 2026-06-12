@@ -379,13 +379,14 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
         // r -= alpha * A*p
 		Kokkos::deep_copy(h_rhs, level.rhs());
         linear_combination(h_rhs, 1.0, HostConstVector<double>(level.residual()), -alpha);
+		Kokkos::deep_copy(level.rhs(), h_rhs);
 
         /* ---------------------------- */
         /* Compute convergence criteria */
         /* ---------------------------- */
         auto start_check_convergence = std::chrono::high_resolution_clock::now();
 
-        current_residual_norm = residualNorm(residual_norm_type_, level, h_rhs);
+        current_residual_norm = residualNorm(residual_norm_type_, level, level.rhs());
         residual_norms_.push_back(current_residual_norm);
         current_relative_residual_norm = current_residual_norm / initial_residual_norm;
 
@@ -524,15 +525,14 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::updateResidualNorms(
         applyExtrapolation(level.level_depth(), residual, next_level_residual);
         Kokkos::deep_copy(next_level.solution(), next_level_solution);
     }
-    Kokkos::deep_copy(level.residual(), residual);
     Kokkos::deep_copy(level.solution(), solution);
 
-    current_residual_norm = residualNorm(residual_norm_type_, level, level.residual());
+    current_residual_norm = residualNorm(residual_norm_type_, level, residual);
     residual_norms_.push_back(current_residual_norm);
+    Kokkos::deep_copy(level.residual(), residual);
 
     if (number_of_iterations_ == 0) {
-	    auto h_rhs = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, level.rhs());
-        initial_residual_norm = !FMG_ ? current_residual_norm : residualNorm(residual_norm_type_, level, h_rhs);
+        initial_residual_norm = !FMG_ ? current_residual_norm : residualNorm(residual_norm_type_, level, level.rhs());
     }
     current_relative_residual_norm = current_residual_norm / initial_residual_norm;
 
@@ -553,7 +553,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::updateResidualNorms(
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 double GMGPolar<DomainGeometry, DensityProfileCoefficients>::residualNorm(
     const ResidualNormType& norm_type, const Level<DomainGeometry, DensityProfileCoefficients>& level,
-    HostConstVector<double> residual) const
+    ConstVector<double> residual) const
 {
     switch (norm_type) {
     case ResidualNormType::EUCLIDEAN:

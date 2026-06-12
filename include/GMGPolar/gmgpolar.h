@@ -170,7 +170,7 @@ private:
     void solvePCG(double& initial_residual_norm, double& current_residual_norm, double& current_relative_residual_norm);
     double residualNorm(const ResidualNormType& norm_type,
                         const Level<DomainGeometry, DensityProfileCoefficients>& level,
-                        HostConstVector<double> residual) const;
+                        ConstVector<double> residual) const;
     void evaluateExactError(Level<DomainGeometry, DensityProfileCoefficients>& level,
                             HostConstVector<double> exact_solution);
     void updateResidualNorms(Level<DomainGeometry, DensityProfileCoefficients>& level, int iteration,
