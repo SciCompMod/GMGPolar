@@ -438,36 +438,32 @@ template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoeff
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyMultigridIterations(
     Level<DomainGeometry, DensityProfileCoefficients>& level, MultigridCycleType cycle, int iterations)
 {
-    for (int i = 0; i < iterations; i++) {
-	    auto h_rhs = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, level.rhs());
 		auto residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace{}, level.residual());
 		auto solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace{}, level.solution());
+    for (int i = 0; i < iterations; i++) {
         switch (cycle) {
         case MultigridCycleType::V_CYCLE:
             multigrid_V_Cycle(level.level_depth(), solution, level.rhs(), residual);
-			Kokkos::deep_copy(level.residual(), residual);
-			Kokkos::deep_copy(level.solution(), solution);
             break;
         case MultigridCycleType::W_CYCLE:
             multigrid_W_Cycle(level.level_depth(), solution, level.rhs(), residual);
-			Kokkos::deep_copy(level.residual(), residual);
-			Kokkos::deep_copy(level.solution(), solution);
             break;
         case MultigridCycleType::F_CYCLE:
-            multigrid_F_Cycle(level.level_depth(), level.solution(), h_rhs, level.residual());
+            multigrid_F_Cycle(level.level_depth(), solution, level.rhs(), residual);
             break;
         default:
             std::cerr << "Error: Unknown multigrid cycle type!" << std::endl;
             break;
         }
     }
+			Kokkos::deep_copy(level.residual(), residual);
+			Kokkos::deep_copy(level.solution(), solution);
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolatedMultigridIterations(
     Level<DomainGeometry, DensityProfileCoefficients>& level, MultigridCycleType cycle, int iterations)
 {
-    auto h_rhs = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, level.rhs());
     auto residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace{}, level.residual());
     auto solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace{}, level.solution());
     for (int i = 0; i < iterations; i++) {
