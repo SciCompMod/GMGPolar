@@ -215,10 +215,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::fullMultigridApproxim
         Level<DomainGeometry, DensityProfileCoefficients>& fine_level   = levels_[depth - 1]; // Next finer level
 
         // The bi-cubic FMG interpolation is of higher order
-		auto h_fine_level_solution = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, fine_level.solution());
-		auto h_coarse_level_solution = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, coarse_level.solution());
-        FMGInterpolation(coarse_level.level_depth(), h_fine_level_solution, h_coarse_level_solution);
-		Kokkos::deep_copy(fine_level.solution(), h_fine_level_solution);
+        FMGInterpolation(coarse_level.level_depth(), fine_level.solution(), coarse_level.solution());
 
         // Apply some FMG iterations, except on the finest level,
         // where the interpolated solution is sufficiently accurate as an initial guess

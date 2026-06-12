@@ -42,9 +42,9 @@ public:
                                       ConstVector<double> fine_values) const;
 
     /* Bicubic FMG interpolator 1/16 * [-1, 9, 9, -1] */
-    void applyFMGInterpolation(const PolarGrid<Kokkos::HostSpace>& coarse_grid,
-                               const PolarGrid<Kokkos::HostSpace>& fine_grid, HostVector<double> fine_result,
-                               HostConstVector<double> coarse_values) const;
+    void applyFMGInterpolation(const PolarGrid<DefaultMemorySpace>& coarse_grid,
+                               const PolarGrid<DefaultMemorySpace>& fine_grid, Vector<double> fine_result,
+                               ConstVector<double> coarse_values) const;
 
 private:
     const bool DirBC_Interior_;
