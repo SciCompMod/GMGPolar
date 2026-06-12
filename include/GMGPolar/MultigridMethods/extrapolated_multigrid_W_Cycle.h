@@ -56,7 +56,6 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     // res_ex = 4/3 * P_ex^T (f_l - A_l*u_l) - 1/3 * (f_{l-1} - A_{l-1}* Inject(u_l))
     linear_combination(next_level_residual, 4.0 / 3.0, ConstVector<double>(next_level.error_correction()),
                        -1.0 / 3.0);
-    Kokkos::deep_copy(next_level.residual(), next_level_residual);
     Kokkos::deep_copy(next_level.solution(), next_level_solution);
 
     auto end_MGC_residual = std::chrono::high_resolution_clock::now();
@@ -71,22 +70,21 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     assign(next_level.error_correction(), 0.0);
 
     /* Solve for the error by recursively calling the multigrid cycle. */
-    auto h_next_level_error_correction = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), next_level.error_correction());
-    multigrid_W_Cycle(next_level.level_depth(), h_next_level_error_correction, next_level.residual(),
+    multigrid_W_Cycle(next_level.level_depth(), next_level.error_correction(), next_level_residual,
                       next_level.solution());
 
     /* Don't do a second recursion on the coarsest level since the DirectSolver is exact. */
     if (next_level.level_depth() != number_of_levels_ - 1) {
-        multigrid_W_Cycle(next_level.level_depth(), h_next_level_error_correction, next_level.residual(),
+        multigrid_W_Cycle(next_level.level_depth(), next_level.error_correction(), next_level_residual,
                           next_level.solution());
     }
+    Kokkos::deep_copy(next_level.residual(), next_level_residual);
 
     /* -------------------------- */
     /* Interpolate the correction */
     /* -------------------------- */
     // Use 'residual' instead of 'level.error_correction()' as a temporary buffer.
     // Note: 'level.error_correction()' has size 0 at level depth = 0.
-	Kokkos::deep_copy(next_level.error_correction(), h_next_level_error_correction);
     extrapolatedProlongation(next_level.level_depth(), residual, next_level.error_correction());
 
     /* ----------------------------------- */

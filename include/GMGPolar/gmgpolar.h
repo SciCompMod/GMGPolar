@@ -194,7 +194,7 @@ private:
     /* Multigrid Functions */
     void multigrid_V_Cycle(int level_depth, HostVector<double> solution, HostConstVector<double> rhs,
                            HostVector<double> residual);
-    void multigrid_W_Cycle(int level_depth, HostVector<double> solution, HostConstVector<double> rhs,
+    void multigrid_W_Cycle(int level_depth, Vector<double> solution, ConstVector<double> rhs,
                            HostVector<double> residual);
     void multigrid_F_Cycle(int level_depth, HostVector<double> solution, HostConstVector<double> rhs,
                            HostVector<double> residual);
