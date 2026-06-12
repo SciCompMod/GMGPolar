@@ -113,8 +113,12 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
 
         // Evaluate the error of the initial approximation against the exact solution, if provided.
         // We use level.residual() as a temporary vector to store the error values.
+        auto level_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), level.solution());
+        auto level_residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), level.residual());
         exact_errors_.push_back(
-            evaluateExactError(level.grid(), level.solution(), analytical_solution_host_, level.residual()));
+            evaluateExactError(level.grid(), level_solution, analytical_solution_host_, level_residual));
+		Kokkos::deep_copy(level.solution(), level_solution);
+		Kokkos::deep_copy(level.residual(), level_residual);
     }
     auto end_check_exact_error = std::chrono::high_resolution_clock::now();
     t_check_exact_error_ += std::chrono::duration<double>(end_check_exact_error - start_check_exact_error).count();
@@ -187,7 +191,11 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
     if (paraview_) {
         writeToVTK("output_solution", level, level.solution());
         if (exact_solution_) {
-            evaluateExactError(level.grid(), level.solution(), analytical_solution_host_, level.residual());
+        auto level_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), level.solution());
+        auto level_residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), level.residual());
+            evaluateExactError(level.grid(), level_solution, analytical_solution_host_, level_residual);
+		Kokkos::deep_copy(level.solution(), level_solution);
+		Kokkos::deep_copy(level.residual(), level_residual);
             writeToVTK("output_error", level, level.residual());
         }
     }
@@ -264,8 +272,12 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solveMultigrid(double
         auto start_check_exact_error = std::chrono::high_resolution_clock::now();
 
         if (exact_solution_) {
+        auto level_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), level.solution());
+        auto level_residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), level.residual());
             exact_errors_.push_back(
-                evaluateExactError(level.grid(), level.solution(), analytical_solution_host_, level.residual()));
+                evaluateExactError(level.grid(), level_solution, analytical_solution_host_, level_residual));
+		Kokkos::deep_copy(level.solution(), level_solution);
+		Kokkos::deep_copy(level.residual(), level_residual);
         }
 
         auto end_check_exact_error = std::chrono::high_resolution_clock::now();
@@ -387,8 +399,12 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
         auto start_check_exact_error = std::chrono::high_resolution_clock::now();
 
         if (exact_solution_) {
+        auto pcg_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), pcg_solution_);
+        auto level_residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), level.residual());
             exact_errors_.push_back(
-                evaluateExactError(level.grid(), pcg_solution_, analytical_solution_host_, level.residual()));
+                evaluateExactError(level.grid(), pcg_solution, analytical_solution_host_, level_residual));
+		Kokkos::deep_copy(pcg_solution_, pcg_solution);
+		Kokkos::deep_copy(level.residual(), level_residual);
         }
 
         auto end_check_exact_error = std::chrono::high_resolution_clock::now();
@@ -623,8 +639,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::initRhsHierarchy(Host
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::evaluateExactError(
-    const PolarGrid<DefaultMemorySpace>& grid, HostConstVector<double> discrete_solution,
-    HostConstVector<double> analytical_solution_host, HostVector<double> error)
+    const PolarGrid<DefaultMemorySpace>& grid, ConstVector<double> discrete_solution,
+    HostConstVector<double> analytical_solution_host, Vector<double> error)
 {
     // Transfer the exact solution values from host to device memory for error computation.
     Kokkos::deep_copy(error, analytical_solution_host_);
@@ -634,8 +650,8 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
 
     // Compute the weighted L2 norm and infinity norm of the error between the numerical and exact solution.
     // The results are stored as a pair: (weighted L2 error, infinity error).
-    const double weighted_euclidean_error = l2_norm(HostConstVector<double>(error)) / std::sqrt(grid.numberOfNodes());
-    const double infinity_error           = infinity_norm(HostConstVector<double>(error));
+    const double weighted_euclidean_error = l2_norm(ConstVector<double>(error)) / std::sqrt(grid.numberOfNodes());
+    const double infinity_error           = infinity_norm(ConstVector<double>(error));
 
     return std::make_pair(weighted_euclidean_error, infinity_error);
 }
