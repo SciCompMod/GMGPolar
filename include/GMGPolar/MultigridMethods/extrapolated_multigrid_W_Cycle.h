@@ -56,7 +56,6 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     // res_ex = 4/3 * P_ex^T (f_l - A_l*u_l) - 1/3 * (f_{l-1} - A_{l-1}* Inject(u_l))
     linear_combination(next_level_residual, 4.0 / 3.0, ConstVector<double>(next_level.error_correction()),
                        -1.0 / 3.0);
-    Kokkos::deep_copy(next_level.solution(), next_level_solution);
 
     auto end_MGC_residual = std::chrono::high_resolution_clock::now();
     t_avg_MGC_residual_ += std::chrono::duration<double>(end_MGC_residual - start_MGC_residual).count();
@@ -71,14 +70,15 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
 
     /* Solve for the error by recursively calling the multigrid cycle. */
     multigrid_W_Cycle(next_level.level_depth(), next_level.error_correction(), next_level_residual,
-                      next_level.solution());
+                      next_level_solution);
 
     /* Don't do a second recursion on the coarsest level since the DirectSolver is exact. */
     if (next_level.level_depth() != number_of_levels_ - 1) {
         multigrid_W_Cycle(next_level.level_depth(), next_level.error_correction(), next_level_residual,
-                          next_level.solution());
+                          next_level_solution);
     }
     Kokkos::deep_copy(next_level.residual(), next_level_residual);
+    Kokkos::deep_copy(next_level.solution(), next_level_solution);
 
     /* -------------------------- */
     /* Interpolate the correction */

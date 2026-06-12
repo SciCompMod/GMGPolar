@@ -4,7 +4,7 @@ template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoeff
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_W_Cycle(int level_depth,
                                                                              Vector<double> solution,
                                                                              ConstVector<double> rhs,
-                                                                             HostVector<double> h_residual)
+                                                                             Vector<double> residual)
 {
     assert(0 <= level_depth && level_depth < number_of_levels_);
 
@@ -42,7 +42,6 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_W_Cycle(int
         /* ------------ */
         auto start_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
 
-		auto residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_residual);
 		auto next_level_residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.residual());
         for (int i = 0; i < pre_smoothing_steps_; i++) {
             level.smoothing(solution, rhs, residual);
@@ -74,15 +73,17 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_W_Cycle(int
         assign(next_level.error_correction(), 0.0);
 
         /* Solve for the error by recursively calling the multigrid cycle. */
+        auto next_level_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.solution());
         multigrid_W_Cycle(next_level.level_depth(), next_level.error_correction(), next_level_residual,
-                          next_level.solution());
+                          next_level_solution);
 
         /* Don't do a second recursion on the coarsest level since the DirectSolver is exact. */
         if (next_level.level_depth() != number_of_levels_ - 1) {
             multigrid_W_Cycle(next_level.level_depth(), next_level.error_correction(), next_level_residual,
-                              next_level.solution());
+                              next_level_solution);
         }
 		Kokkos::deep_copy(next_level.residual(), next_level_residual);
+		Kokkos::deep_copy(next_level.solution(), next_level_solution);
 
         /* -------------------------- */
         /* Interpolate the correction */
@@ -104,7 +105,6 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_W_Cycle(int
         for (int i = 0; i < post_smoothing_steps_; i++) {
             level.smoothing(solution, rhs, residual);
         }
-		Kokkos::deep_copy(h_residual, residual);
 
         auto end_MGC_postSmoothing = std::chrono::high_resolution_clock::now();
         t_avg_MGC_postSmoothing_ +=
