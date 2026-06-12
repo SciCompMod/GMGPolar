@@ -65,13 +65,13 @@ HostConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::solut
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-HostVector<double> Level<DomainGeometry, DensityProfileCoefficients>::residual()
+Vector<double> Level<DomainGeometry, DensityProfileCoefficients>::residual()
 {
     return residual_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-HostConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::residual() const
+ConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::residual() const
 {
     return residual_;
 }

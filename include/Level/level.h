@@ -87,8 +87,8 @@ public:
     ConstVector<double> rhs() const;
     HostVector<double> solution();
     HostConstVector<double> solution() const;
-    HostVector<double> residual();
-    HostConstVector<double> residual() const;
+    Vector<double> residual();
+    ConstVector<double> residual() const;
     Vector<double> error_correction();
     ConstVector<double> error_correction() const;
 
@@ -127,7 +127,7 @@ private:
 
     Vector<double> rhs_;
     HostVector<double> solution_;
-    HostVector<double> residual_;
+    Vector<double> residual_;
     Vector<double> error_correction_;
 };
 

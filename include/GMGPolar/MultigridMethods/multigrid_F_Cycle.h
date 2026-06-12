@@ -42,7 +42,6 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_F_Cycle(int
         /* ------------ */
         auto start_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
 
-		auto next_level_residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.residual());
         for (int i = 0; i < pre_smoothing_steps_; i++) {
             level.smoothing(solution, rhs, residual);
         }
@@ -63,8 +62,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_F_Cycle(int
         /* --------------------- */
         /* Restrict the residual */
         /* --------------------- */
-        restriction(level.level_depth(), next_level_residual, residual);
-		Kokkos::deep_copy(next_level.residual(), next_level_residual);
+        restriction(level.level_depth(), next_level.residual(), residual);
 
         /* ------------------------------------- */
         /* Solve A * error = restricted residual */
@@ -75,15 +73,14 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_F_Cycle(int
 
         /* Solve for the error by recursively calling the multigrid cycle. */
 		auto next_level_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.solution());
-        multigrid_F_Cycle(next_level.level_depth(), next_level.error_correction(), next_level_residual,
+        multigrid_F_Cycle(next_level.level_depth(), next_level.error_correction(), next_level.residual(),
                           next_level_solution);
 
         /* Don't do a second recursion on the coarsest level since the DirectSolver is exact. */
         if (next_level.level_depth() != number_of_levels_ - 1) {
-            multigrid_V_Cycle(next_level.level_depth(), next_level.error_correction(), next_level_residual,
+            multigrid_V_Cycle(next_level.level_depth(), next_level.error_correction(), next_level.residual(),
                               next_level_solution);
         }
-		Kokkos::deep_copy(next_level.residual(), next_level_residual);
 		Kokkos::deep_copy(next_level.solution(), next_level_solution);
 
         /* -------------------------- */

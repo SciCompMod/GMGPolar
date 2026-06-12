@@ -25,7 +25,6 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     /* ------------ */
     auto start_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
 
-    auto next_level_residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.residual());
     auto next_level_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.solution());
 
     for (int i = 0; i < pre_smoothing_steps_; i++) {
@@ -47,14 +46,14 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
 
     // P_ex^T (f_l - A_l*u_l)
     level.computeResidual(residual, rhs, solution);
-    extrapolatedRestriction(level.level_depth(), next_level_residual, residual);
+    extrapolatedRestriction(level.level_depth(), next_level.residual(), residual);
 
     // f_{l-1} - A_{l-1}* Inject(u_l)
     injection(level.level_depth(), next_level_solution, solution);
     next_level.computeResidual(next_level.error_correction(), next_level.rhs(), next_level_solution);
 
     // res_ex = 4/3 * P_ex^T (f_l - A_l*u_l) - 1/3 * (f_{l-1} - A_{l-1}* Inject(u_l))
-    linear_combination(next_level_residual, 4.0 / 3.0, ConstVector<double>(next_level.error_correction()),
+    linear_combination(next_level.residual(), 4.0 / 3.0, ConstVector<double>(next_level.error_correction()),
                        -1.0 / 3.0);
 
     auto end_MGC_residual = std::chrono::high_resolution_clock::now();
@@ -69,15 +68,14 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     assign(next_level.error_correction(), 0.0);
 
     /* Solve for the error by recursively calling the multigrid cycle. */
-    multigrid_F_Cycle(next_level.level_depth(), next_level.error_correction(), next_level_residual,
+    multigrid_F_Cycle(next_level.level_depth(), next_level.error_correction(), next_level.residual(),
                       next_level_solution);
 
     /* Don't do a second recursion on the coarsest level since the DirectSolver is exact. */
     if (next_level.level_depth() != number_of_levels_ - 1) {
-        multigrid_V_Cycle(next_level.level_depth(), next_level.error_correction(), next_level_residual,
+        multigrid_V_Cycle(next_level.level_depth(), next_level.error_correction(), next_level.residual(),
                           next_level_solution);
     }
-    Kokkos::deep_copy(next_level.residual(), next_level_residual);
     Kokkos::deep_copy(next_level.solution(), next_level_solution);
 
     /* -------------------------- */
