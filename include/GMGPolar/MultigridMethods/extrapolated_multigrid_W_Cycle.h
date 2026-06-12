@@ -2,9 +2,9 @@
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigrid_W_Cycle(int level_depth,
-                                                                                          HostVector<double> h_solution,
-                                                                                          HostConstVector<double> h_rhs,
-                                                                                          HostVector<double> h_residual)
+                                                                                          Vector<double> solution,
+                                                                                          ConstVector<double> rhs,
+                                                                                          Vector<double> residual)
 {
     assert(level_depth == 0);
     assert(number_of_levels_ >= 2);
@@ -25,9 +25,6 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     /* ------------ */
     auto start_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
 
-    auto residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_residual);
-    auto solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_solution);
-    auto rhs      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs); // const
     auto next_level_residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.residual());
     auto next_level_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.solution());
 
@@ -110,8 +107,6 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
             level.smoothing(solution, rhs, residual);
         }
     }
-	Kokkos::deep_copy(h_residual, residual);
-	Kokkos::deep_copy(h_solution, solution);
 
     auto end_MGC_postSmoothing = std::chrono::high_resolution_clock::now();
     t_avg_MGC_postSmoothing_ += std::chrono::duration<double>(end_MGC_postSmoothing - start_MGC_postSmoothing).count();
