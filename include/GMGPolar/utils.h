@@ -87,14 +87,14 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::FMGInterpolation(int 
 /* Solution & Grid Access                                                 */
 /* ---------------------------------------------------------------------- */
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-HostVector<double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::solution()
+Vector<double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::solution()
 {
     int level_depth = 0;
     return levels_[level_depth].solution();
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-HostConstVector<double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::solution() const
+ConstVector<double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::solution() const
 {
     int level_depth = 0;
     return levels_[level_depth].solution();

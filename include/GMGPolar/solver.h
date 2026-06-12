@@ -113,10 +113,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
 
         // Evaluate the error of the initial approximation against the exact solution, if provided.
         // We use level.residual() as a temporary vector to store the error values.
-        auto level_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), level.solution());
         exact_errors_.push_back(
-            evaluateExactError(level.grid(), level_solution, analytical_solution_host_, level.residual()));
-		Kokkos::deep_copy(level.solution(), level_solution);
+            evaluateExactError(level.grid(), level.solution(), analytical_solution_host_, level.residual()));
     }
     auto end_check_exact_error = std::chrono::high_resolution_clock::now();
     t_check_exact_error_ += std::chrono::duration<double>(end_check_exact_error - start_check_exact_error).count();
@@ -187,11 +185,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
     LIKWID_STOP("Solve");
 
     if (paraview_) {
-        writeToVTK("output_solution", level, level.solution());
+        auto h_level_solution = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), level.solution());
+        writeToVTK("output_solution", level, h_level_solution);
         if (exact_solution_) {
-        auto level_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), level.solution());
-            evaluateExactError(level.grid(), level_solution, analytical_solution_host_, level.residual());
-		Kokkos::deep_copy(level.solution(), level_solution);
+            evaluateExactError(level.grid(), level.solution(), analytical_solution_host_, level.residual());
         	auto h_level_residual = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), level.residual());
             writeToVTK("output_error", level, h_level_residual);
         }
@@ -212,9 +209,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::fullMultigridApproxim
 
     // Solve directly on the coarsest level
     Kokkos::deep_copy(coarsest_level.solution(), coarsest_level.rhs());
-	auto coarsest_level_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), coarsest_level.solution());
-    coarsest_level.directSolveInPlace(coarsest_level_solution);
-	Kokkos::deep_copy(coarsest_level.solution(), coarsest_level_solution);
+    coarsest_level.directSolveInPlace(coarsest_level.solution());
 
     // Prolongate the solution from the coarsest level up to the finest, while applying Multigrid Cycles on each level
     for (int depth = coarsest_depth; depth > 0; --depth) {
@@ -222,7 +217,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::fullMultigridApproxim
         Level<DomainGeometry, DensityProfileCoefficients>& fine_level   = levels_[depth - 1]; // Next finer level
 
         // The bi-cubic FMG interpolation is of higher order
-        FMGInterpolation(coarse_level.level_depth(), fine_level.solution(), coarse_level.solution());
+		auto h_fine_level_solution = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, fine_level.solution());
+		auto h_coarse_level_solution = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, coarse_level.solution());
+        FMGInterpolation(coarse_level.level_depth(), h_fine_level_solution, h_coarse_level_solution);
+		Kokkos::deep_copy(fine_level.solution(), h_fine_level_solution);
 
         // Apply some FMG iterations, except on the finest level,
         // where the interpolated solution is sufficiently accurate as an initial guess
@@ -269,10 +267,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solveMultigrid(double
         auto start_check_exact_error = std::chrono::high_resolution_clock::now();
 
         if (exact_solution_) {
-        auto level_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), level.solution());
             exact_errors_.push_back(
-                evaluateExactError(level.grid(), level_solution, analytical_solution_host_, level.residual()));
-		Kokkos::deep_copy(level.solution(), level_solution);
+                evaluateExactError(level.grid(), level.solution(), analytical_solution_host_, level.residual()));
         }
 
         auto end_check_exact_error = std::chrono::high_resolution_clock::now();
@@ -342,8 +338,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
     Kokkos::deep_copy(pcg_search_direction_, level.solution());
 
     // r^T * z
-	auto h_rhs = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, level.rhs());
-    double r_z = dot_product(HostConstVector<double>(h_rhs), HostConstVector<double>(level.solution()));
+    double r_z = dot_product(ConstVector<double>(level.rhs()), ConstVector<double>(level.solution()));
 
     while (number_of_iterations_ < max_iterations_) {
 
@@ -353,9 +348,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
         if (extrapolation_ != ExtrapolationType::NONE) {
             assert(number_of_levels_ > 1);
             Level<DomainGeometry, DensityProfileCoefficients>& next_level = levels_[level.level_depth() + 1];
-            auto next_level_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.solution());
-            injection(0, next_level_solution, pcg_search_direction);
-            next_level.applySystemOperator(next_level.residual(), next_level_solution);
+            injection(0, next_level.solution(), pcg_search_direction);
+            next_level.applySystemOperator(next_level.residual(), next_level.solution());
             applyExtrapolation(0, level.residual(), next_level.residual());
 		    Kokkos::deep_copy(pcg_search_direction,pcg_search_direction_);
         }
@@ -369,7 +363,6 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
 
         // r -= alpha * A*p
         linear_combination(level.rhs(), 1.0, ConstVector<double>(level.residual()), -alpha);
-		Kokkos::deep_copy(h_rhs, level.rhs());
 
         /* ---------------------------- */
         /* Compute convergence criteria */
@@ -410,17 +403,18 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
 
         // z = M^{-1} * r (preconditioned residual)
         if (PCG_FMG_) {
+	        auto h_rhs = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, level.rhs());
             initRhsHierarchy(h_rhs);
             fullMultigridApproximation(PCG_FMG_cycle_, PCG_FMG_iterations_);
         }
         else {
             // z = I^{-1} * r (no preconditioning)
-            Kokkos::deep_copy(level.solution(), h_rhs);
+            Kokkos::deep_copy(level.solution(), level.rhs());
         }
         applyMultigridIterations(level, PCG_MG_cycle_, PCG_MG_iterations_);
 
         // r^T * z
-        double r_z_new = dot_product(HostConstVector<double>(h_rhs), HostConstVector<double>(level.solution()));
+        double r_z_new = dot_product(ConstVector<double>(level.rhs()), ConstVector<double>(level.solution()));
         // beta = (current r^T * z) / (previous r^T * z)
         double beta = r_z_new / r_z;
         // r_z = r^T * z for next iteration
@@ -429,7 +423,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
         // p *= beta
         multiply(pcg_search_direction_, beta);
         // p += z
-        add(pcg_search_direction_, HostConstVector<double>(level.solution()));
+		Kokkos::deep_copy(pcg_search_direction, pcg_search_direction_);
+        add(pcg_search_direction, ConstVector<double>(level.solution()));
+		Kokkos::deep_copy(pcg_search_direction_, pcg_search_direction);
     }
     // level.solution() = x
     Kokkos::deep_copy(level.solution(), pcg_solution_);
@@ -443,48 +439,44 @@ template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoeff
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyMultigridIterations(
     Level<DomainGeometry, DensityProfileCoefficients>& level, MultigridCycleType cycle, int iterations)
 {
-		auto solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace{}, level.solution());
     for (int i = 0; i < iterations; i++) {
         switch (cycle) {
         case MultigridCycleType::V_CYCLE:
-            multigrid_V_Cycle(level.level_depth(), solution, level.rhs(), level.residual());
+            multigrid_V_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
             break;
         case MultigridCycleType::W_CYCLE:
-            multigrid_W_Cycle(level.level_depth(), solution, level.rhs(), level.residual());
+            multigrid_W_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
             break;
         case MultigridCycleType::F_CYCLE:
-            multigrid_F_Cycle(level.level_depth(), solution, level.rhs(), level.residual());
+            multigrid_F_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
             break;
         default:
             std::cerr << "Error: Unknown multigrid cycle type!" << std::endl;
             break;
         }
     }
-			Kokkos::deep_copy(level.solution(), solution);
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolatedMultigridIterations(
     Level<DomainGeometry, DensityProfileCoefficients>& level, MultigridCycleType cycle, int iterations)
 {
-    auto solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace{}, level.solution());
     for (int i = 0; i < iterations; i++) {
         switch (cycle) {
         case MultigridCycleType::V_CYCLE:
-            extrapolated_multigrid_V_Cycle(level.level_depth(), solution, level.rhs(), level.residual());
+            extrapolated_multigrid_V_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
             break;
         case MultigridCycleType::W_CYCLE:
-            extrapolated_multigrid_W_Cycle(level.level_depth(), solution, level.rhs(), level.residual());
+            extrapolated_multigrid_W_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
             break;
         case MultigridCycleType::F_CYCLE:
-            extrapolated_multigrid_F_Cycle(level.level_depth(), solution, level.rhs(), level.residual());
+            extrapolated_multigrid_F_Cycle(level.level_depth(), level.solution(), level.rhs(), level.residual());
             break;
         default:
             std::cerr << "Error: Unknown multigrid cycle type!" << std::endl;
             break;
         }
     }
-	Kokkos::deep_copy(level.solution(), solution);
 }
 
 // =============================================================================
@@ -496,18 +488,13 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::updateResidualNorms(
     Level<DomainGeometry, DensityProfileCoefficients>& level, int iteration, double& initial_residual_norm,
     double& current_residual_norm, double& current_relative_residual_norm)
 {
-    auto solution            = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), level.solution());
-    level.computeResidual(level.residual(), level.rhs(), solution);
+    level.computeResidual(level.residual(), level.rhs(), level.solution());
     if (extrapolation_ != ExtrapolationType::NONE) {
         Level<DomainGeometry, DensityProfileCoefficients>& next_level = levels_[level.level_depth() + 1];
-        auto next_level_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.solution());
-        auto next_level_rhs = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.rhs());
-        injection(level.level_depth(), next_level_solution, solution);
-        next_level.computeResidual(next_level.residual(), next_level_rhs, next_level_solution);
+        injection(level.level_depth(), next_level.solution(), level.solution());
+        next_level.computeResidual(next_level.residual(), next_level.rhs(), next_level.solution());
         applyExtrapolation(level.level_depth(), level.residual(), next_level.residual());
-        Kokkos::deep_copy(next_level.solution(), next_level_solution);
     }
-    Kokkos::deep_copy(level.solution(), solution);
 
     current_residual_norm = residualNorm(residual_norm_type_, level, level.residual());
     residual_norms_.push_back(current_residual_norm);

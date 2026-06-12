@@ -25,8 +25,6 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     /* ------------ */
     auto start_MGC_preSmoothing = std::chrono::high_resolution_clock::now();
 
-    auto next_level_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.solution());
-
     for (int i = 0; i < pre_smoothing_steps_; i++) {
         if (level.level_depth() == 0 && !full_grid_smoothing_) {
             level.extrapolatedSmoothing(solution, rhs, residual);
@@ -49,8 +47,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     extrapolatedRestriction(level.level_depth(), next_level.residual(), residual);
 
     // f_{l-1} - A_{l-1}* Inject(u_l)
-    injection(level.level_depth(), next_level_solution, solution);
-    next_level.computeResidual(next_level.error_correction(), next_level.rhs(), next_level_solution);
+    injection(level.level_depth(), next_level.solution(), solution);
+    next_level.computeResidual(next_level.error_correction(), next_level.rhs(), next_level.solution());
 
     // res_ex = 4/3 * P_ex^T (f_l - A_l*u_l) - 1/3 * (f_{l-1} - A_{l-1}* Inject(u_l))
     linear_combination(next_level.residual(), 4.0 / 3.0, ConstVector<double>(next_level.error_correction()),
@@ -69,8 +67,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
 
     /* Solve for the error by recursively calling the multigrid cycle. */
     multigrid_V_Cycle(next_level.level_depth(), next_level.error_correction(), next_level.residual(),
-                      next_level_solution);
-    Kokkos::deep_copy(next_level.solution(), next_level_solution);
+                      next_level.solution());
 
     /* -------------------------- */
     /* Interpolate the correction */

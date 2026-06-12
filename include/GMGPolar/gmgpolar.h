@@ -62,8 +62,8 @@ public:
     /* Solution & Grid Access                                                 */
     /* ---------------------------------------------------------------------- */
     // Return a reference to the computed solution vector.
-    HostVector<double> solution();
-    HostConstVector<double> solution() const;
+    Vector<double> solution();
+    ConstVector<double> solution() const;
 
     // Return the underlying cartesian mesh used for discretization.
     const PolarGrid<Kokkos::HostSpace>& grid() const;

@@ -53,13 +53,13 @@ ConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::rhs() con
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-HostVector<double> Level<DomainGeometry, DensityProfileCoefficients>::solution()
+Vector<double> Level<DomainGeometry, DensityProfileCoefficients>::solution()
 {
     return solution_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-HostConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::solution() const
+ConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::solution() const
 {
     return solution_;
 }

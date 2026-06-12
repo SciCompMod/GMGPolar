@@ -85,8 +85,8 @@ public:
 
     Vector<double> rhs();
     ConstVector<double> rhs() const;
-    HostVector<double> solution();
-    HostConstVector<double> solution() const;
+    Vector<double> solution();
+    ConstVector<double> solution() const;
     Vector<double> residual();
     ConstVector<double> residual() const;
     Vector<double> error_correction();
@@ -126,7 +126,7 @@ private:
     std::unique_ptr<ExtrapolatedSmoother<LevelCacheType>> op_extrapolated_smoother_;
 
     Vector<double> rhs_;
-    HostVector<double> solution_;
+    Vector<double> solution_;
     Vector<double> residual_;
     Vector<double> error_correction_;
 };

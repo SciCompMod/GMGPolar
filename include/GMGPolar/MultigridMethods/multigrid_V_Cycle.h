@@ -72,10 +72,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_V_Cycle(int
         assign(next_level.error_correction(), 0.0);
 
         /* Solve for the error by recursively calling the multigrid cycle. */
-		auto next_level_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), next_level.solution());
         multigrid_V_Cycle(next_level.level_depth(), next_level.error_correction(), next_level.residual(),
-                          next_level_solution);
-		Kokkos::deep_copy(next_level.solution(), next_level_solution);
+                          next_level.solution());
 
         /* -------------------------- */
         /* Interpolate the correction */
