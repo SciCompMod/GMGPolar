@@ -29,9 +29,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
             injection(level_depth, next_level.rhs(), current_level.rhs());
         }
         // Discretize the rhs for the current level
-		auto h_rhs = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, current_level.rhs());
-        discretize_rhs_f(current_level, h_rhs);
-		Kokkos::deep_copy(current_level.rhs(), h_rhs);
+        discretize_rhs_f(current_level, current_level.rhs());
     }
 
     auto end_setup_rhs = std::chrono::high_resolution_clock::now();
@@ -323,9 +321,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
 
     // z = M^{-1} * r (preconditioned residual)
     if (PCG_FMG_) {
-		auto h_rhs = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, level.rhs());
-        initRhsHierarchy(h_rhs);
-		Kokkos::deep_copy(level.rhs(), h_rhs);
+        initRhsHierarchy(level.rhs());
         fullMultigridApproximation(PCG_FMG_cycle_, PCG_FMG_iterations_);
     }
     else {
@@ -403,8 +399,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
 
         // z = M^{-1} * r (preconditioned residual)
         if (PCG_FMG_) {
-	        auto h_rhs = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, level.rhs());
-            initRhsHierarchy(h_rhs);
+            initRhsHierarchy(level.rhs());
             fullMultigridApproximation(PCG_FMG_cycle_, PCG_FMG_iterations_);
         }
         else {
@@ -591,7 +586,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolation(in
 // =============================================================================
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::initRhsHierarchy(HostVector<double> rhs)
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::initRhsHierarchy(Vector<double> rhs)
 {
     Kokkos::deep_copy(levels_[0].rhs(), rhs);
     for (int level_depth = 0; level_depth < number_of_levels_ - 1; ++level_depth) {

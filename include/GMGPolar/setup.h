@@ -196,9 +196,9 @@ int GMGPolar<DomainGeometry, DensityProfileCoefficients>::chooseNumberOfLevels(
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
-    const Level<DomainGeometry, DensityProfileCoefficients>& level, HostVector<double> rhs_f)
+    const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f)
 {
-    const PolarGrid<Kokkos::HostSpace> grid(level.grid());
+    const PolarGrid<DefaultMemorySpace>& grid = level.grid();
     assert(std::ssize(rhs_f) == grid.numberOfNodes());
 
     const bool DirBC_Interior = DirBC_Interior_;
@@ -206,15 +206,13 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
     if (level.levelCache().cacheDomainGeometry()) {
         /* DomainGeometry is cached */
         const ConstVector<double>& detDF_cache = level.levelCache().detDF();
-        HostConstVector<double> detDF_cache_host =
-            Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, detDF_cache);
 
         // ---------------------------------------------- //
         // Discretize rhs values (circular index section) //
         // ---------------------------------------------- //
         Kokkos::parallel_for(
             "discretize_rhs_f: Circular (cached)",
-            Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>(
                 {0, 0}, {grid.numberSmootherCircles(), grid.ntheta()}),
             KOKKOS_LAMBDA(const int i_r, const int i_theta) {
                 if ((0 < i_r && i_r < grid.nr() - 1) || (i_r == 0 && !DirBC_Interior)) {
@@ -222,7 +220,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
                     const double h2    = grid.radialSpacing(i_r);
                     const double k1    = grid.angularSpacing(i_theta - 1);
                     const double k2    = grid.angularSpacing(i_theta);
-                    const double detDF = detDF_cache_host[grid.index(i_r, i_theta)];
+                    const double detDF = detDF_cache[grid.index(i_r, i_theta)];
                     rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * std::fabs(detDF);
                 }
                 else if (i_r == 0 && DirBC_Interior) {
@@ -238,7 +236,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
         // -------------------------------------------- //
         Kokkos::parallel_for(
             "discretize_rhs_f: Radial (cached)",
-            Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
                                                                                       {grid.ntheta(), grid.nr()}),
             KOKKOS_LAMBDA(const int i_theta, const int i_r) {
                 if ((0 < i_r && i_r < grid.nr() - 1) || (i_r == 0 && !DirBC_Interior)) {
@@ -246,7 +244,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
                     const double h2    = grid.radialSpacing(i_r);
                     const double k1    = grid.angularSpacing(i_theta - 1);
                     const double k2    = grid.angularSpacing(i_theta);
-                    const double detDF = detDF_cache_host[grid.index(i_r, i_theta)];
+                    const double detDF = detDF_cache[grid.index(i_r, i_theta)];
                     rhs_f[grid.index(i_r, i_theta)] *= 0.25 * (h1 + h2) * (k1 + k2) * std::fabs(detDF);
                 }
                 else if (i_r == 0 && DirBC_Interior) {
@@ -267,7 +265,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
         // ---------------------------------------------- //
         Kokkos::parallel_for(
             "discretize_rhs_f: Circular (uncached)",
-            Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>(
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>(
                 {0, 0}, {grid.numberSmootherCircles(), grid.ntheta()}),
             KOKKOS_LAMBDA(const int i_r, const int i_theta) {
                 const double radius = grid.radius(i_r);
@@ -302,7 +300,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
         // -------------------------------------------- //
         Kokkos::parallel_for(
             "discretize_rhs_f: Radial (uncached)",
-            Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
                                                                                       {grid.ntheta(), grid.nr()}),
             KOKKOS_LAMBDA(const int i_theta, const int i_r) {
                 const double radius = grid.radius(i_r);

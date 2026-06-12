@@ -150,7 +150,7 @@ public: // Public due to cuda restrictions
     template <concepts::BoundaryConditions BoundaryConditions, concepts::SourceTerm SourceTerm>
     void build_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f,
                      const BoundaryConditions& boundary_conditions, const SourceTerm& source_term);
-    void discretize_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, HostVector<double> rhs_f);
+    void discretize_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f);
 
     /* --------------- */
     /* Solve Functions */
@@ -176,7 +176,7 @@ private:
     void updateResidualNorms(Level<DomainGeometry, DensityProfileCoefficients>& level, int iteration,
                              double& initial_residual_norm, double& current_residual_norm,
                              double& current_relative_residual_norm);
-    void initRhsHierarchy(HostVector<double> rhs);
+    void initRhsHierarchy(Vector<double> rhs);
     void applyMultigridIterations(Level<DomainGeometry, DensityProfileCoefficients>& level, MultigridCycleType cycle,
                                   int iterations);
     void applyExtrapolatedMultigridIterations(Level<DomainGeometry, DensityProfileCoefficients>& level,
