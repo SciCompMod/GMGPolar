@@ -336,23 +336,21 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
     while (number_of_iterations_ < max_iterations_) {
 
         // A_p = A * p
-        auto pcg_search_direction = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), pcg_search_direction_);
-        level.applySystemOperator(level.residual(), pcg_search_direction);
+        level.applySystemOperator(level.residual(), pcg_search_direction_);
         if (extrapolation_ != ExtrapolationType::NONE) {
             assert(number_of_levels_ > 1);
             Level<DomainGeometry, DensityProfileCoefficients>& next_level = levels_[level.level_depth() + 1];
-            injection(0, next_level.solution(), pcg_search_direction);
+            injection(0, next_level.solution(), pcg_search_direction_);
             next_level.applySystemOperator(next_level.residual(), next_level.solution());
             applyExtrapolation(0, level.residual(), next_level.residual());
-		    Kokkos::deep_copy(pcg_search_direction,pcg_search_direction_);
         }
 
         // alpha = (r^T * z) / (p^T * A*p)
-        double alpha = r_z / dot_product(ConstVector<double>(pcg_search_direction),
+        double alpha = r_z / dot_product(ConstVector<double>(pcg_search_direction_),
                                          ConstVector<double>(level.residual()));
 
         // x += alpha * p
-        linear_combination(pcg_solution_, 1.0, HostConstVector<double>(pcg_search_direction_), alpha);
+        linear_combination(pcg_solution_, 1.0, ConstVector<double>(pcg_search_direction_), alpha);
 
         // r -= alpha * A*p
         linear_combination(level.rhs(), 1.0, ConstVector<double>(level.residual()), -alpha);
@@ -376,10 +374,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
         auto start_check_exact_error = std::chrono::high_resolution_clock::now();
 
         if (exact_solution_) {
-        auto pcg_solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), pcg_solution_);
             exact_errors_.push_back(
-                evaluateExactError(level.grid(), pcg_solution, analytical_solution_host_, level.residual()));
-		Kokkos::deep_copy(pcg_solution_, pcg_solution);
+                evaluateExactError(level.grid(), pcg_solution_, analytical_solution_host_, level.residual()));
         }
 
         auto end_check_exact_error = std::chrono::high_resolution_clock::now();
@@ -415,9 +411,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
         // p *= beta
         multiply(pcg_search_direction_, beta);
         // p += z
-		Kokkos::deep_copy(pcg_search_direction, pcg_search_direction_);
-        add(pcg_search_direction, ConstVector<double>(level.solution()));
-		Kokkos::deep_copy(pcg_search_direction_, pcg_search_direction);
+        add(pcg_search_direction_, ConstVector<double>(level.solution()));
     }
     // level.solution() = x
     Kokkos::deep_copy(level.solution(), pcg_solution_);

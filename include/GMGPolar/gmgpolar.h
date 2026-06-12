@@ -118,8 +118,8 @@ private:
     *   z    (preconditioned residual)        -> level.solution()
     *   A*p  (matrix applied to search dir.)  -> level.residual()
     */
-    HostAllocatableVector<double> pcg_solution_; // x (solution)
-    HostAllocatableVector<double> pcg_search_direction_; // p (search direction)
+    AllocatableVector<double> pcg_solution_; // x (solution)
+    AllocatableVector<double> pcg_search_direction_; // p (search direction)
 
     /* ---------------------------------------------------------------------------------------------- */
     /* Store analytical solution values on host to avoid repeated computation during error evaluation */

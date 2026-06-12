@@ -80,10 +80,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     if (PCG_) {
         const int grid_size = levels_[0].grid().numberOfNodes();
         if (std::ssize(pcg_solution_) != grid_size) {
-            pcg_solution_ = HostVector<double>("pcg_solution", grid_size);
+            pcg_solution_ = Vector<double>("pcg_solution", grid_size);
         }
         if (std::ssize(pcg_search_direction_) != grid_size) {
-            pcg_search_direction_ = HostVector<double>("pcg_search_direction", grid_size);
+            pcg_search_direction_ = Vector<double>("pcg_search_direction", grid_size);
         }
     }
 
