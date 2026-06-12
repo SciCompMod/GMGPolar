@@ -467,29 +467,27 @@ template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoeff
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolatedMultigridIterations(
     Level<DomainGeometry, DensityProfileCoefficients>& level, MultigridCycleType cycle, int iterations)
 {
+    auto h_rhs = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, level.rhs());
+    auto residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace{}, level.residual());
+    auto solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace{}, level.solution());
     for (int i = 0; i < iterations; i++) {
-		auto h_rhs = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, level.rhs());
-		auto residual = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace{}, level.residual());
-		auto solution = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace{}, level.solution());
         switch (cycle) {
         case MultigridCycleType::V_CYCLE:
             extrapolated_multigrid_V_Cycle(level.level_depth(), solution, level.rhs(), residual);
-			Kokkos::deep_copy(level.residual(), residual);
-			Kokkos::deep_copy(level.solution(), solution);
             break;
         case MultigridCycleType::W_CYCLE:
             extrapolated_multigrid_W_Cycle(level.level_depth(), solution, level.rhs(), residual);
-			Kokkos::deep_copy(level.residual(), residual);
-			Kokkos::deep_copy(level.solution(), solution);
             break;
         case MultigridCycleType::F_CYCLE:
-            extrapolated_multigrid_F_Cycle(level.level_depth(), level.solution(), h_rhs, level.residual());
+            extrapolated_multigrid_F_Cycle(level.level_depth(), solution, level.rhs(), residual);
             break;
         default:
             std::cerr << "Error: Unknown multigrid cycle type!" << std::endl;
             break;
         }
     }
+	Kokkos::deep_copy(level.residual(), residual);
+	Kokkos::deep_copy(level.solution(), solution);
 }
 
 // =============================================================================
