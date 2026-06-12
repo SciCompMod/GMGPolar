@@ -66,7 +66,7 @@ TEST(ProlongationTest, ProlongationMatchesStencil)
 
     Interpolation I(/*DirBC*/ true);
 
-    HostVector<double> coarse_values = generate_random_sample_data(coarse_grid, 1234);
+    HostVector<double> coarse_values = generate_random_sample_data(coarse_grid.numberOfNodes(), 1234);
     HostVector<double> fine_result("fine_result", fine_grid.numberOfNodes());
 
     I.applyProlongation(coarse_grid, fine_grid, fine_result, coarse_values);

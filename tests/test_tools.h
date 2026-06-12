@@ -6,10 +6,10 @@
 
 using namespace gmgpolar;
 
-inline HostVector<double> generate_random_sample_data(const PolarGrid<Kokkos::HostSpace>& grid, unsigned int seed,
-                                                      double min_val = -100.0, double max_val = 100.0)
+inline HostVector<double> generate_random_sample_data(const int n_nodes, unsigned int seed, double min_val = -100.0,
+                                                      double max_val = 100.0)
 {
-    HostVector<double> x("x", grid.numberOfNodes());
+    HostVector<double> x("x", n_nodes);
     std::mt19937 gen(seed);
     std::uniform_real_distribution<double> dist(min_val, max_val);
     for (std::size_t i = 0; i < x.size(); ++i) {

@@ -55,8 +55,8 @@ TEST(OperatorATest, applyA_DirBC_Interior)
     ResidualGive residualGive_operator(level.grid(), level.levelCache(), DirBC_Interior);
     ResidualTake residualTake_operator(level.grid(), level.levelCache(), DirBC_Interior);
 
-    HostVector<double> x   = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
-    HostVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
+    HostVector<double> x   = generate_random_sample_data(level.grid().numberOfNodes(), 42);
+    HostVector<double> rhs = generate_random_sample_data(level.grid().numberOfNodes(), 69);
 
     HostVector<double> result_Give("result_Give", level.grid().numberOfNodes());
     residualGive_operator.computeResidual(result_Give, rhs, x);
@@ -107,8 +107,8 @@ TEST(OperatorATest, applyA_AcrossOrigin)
     ResidualGive residualGive_operator(level.grid(), level.levelCache(), DirBC_Interior);
     ResidualTake residualTake_operator(level.grid(), level.levelCache(), DirBC_Interior);
 
-    HostVector<double> x   = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 42);
-    HostVector<double> rhs = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 69);
+    HostVector<double> x   = generate_random_sample_data(level.grid().numberOfNodes(), 42);
+    HostVector<double> rhs = generate_random_sample_data(level.grid().numberOfNodes(), 69);
 
     HostVector<double> result_Give("result_Give", level.grid().numberOfNodes());
     residualGive_operator.computeResidual(result_Give, rhs, x);

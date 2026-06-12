@@ -62,7 +62,7 @@ TEST(RestrictionTest, RestrictionMatchesStencil)
 
     Interpolation I(/*DirBC*/ true);
 
-    HostVector<double> fine_values = generate_random_sample_data(fine_grid, 5678, 0.0, 1.0);
+    HostVector<double> fine_values = generate_random_sample_data(fine_grid.numberOfNodes(), 5678, 0.0, 1.0);
     HostVector<double> coarse_result("coarse_result", coarse_grid.numberOfNodes());
 
     I.applyRestriction(fine_grid, coarse_grid, coarse_result, fine_values);

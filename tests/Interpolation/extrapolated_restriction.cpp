@@ -54,7 +54,7 @@ TEST(ExtrapolatedRestrictionTest, ExtrapolatedRestrictionMatchesStencil)
 
     Interpolation I(/*DirBC*/ true);
 
-    HostVector<double> h_fine_values = generate_random_sample_data(h_fine_grid, 9012, 0.0, 1.0);
+    HostVector<double> h_fine_values = generate_random_sample_data(fine_grid.numberOfNodes(), 9012, 0.0, 1.0);
     Vector<double> coarse_result("coarse_result", coarse_grid.numberOfNodes());
 
     auto fine_values = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_fine_values);
