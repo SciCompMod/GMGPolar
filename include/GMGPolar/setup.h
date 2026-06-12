@@ -237,7 +237,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
         Kokkos::parallel_for(
             "discretize_rhs_f: Radial (cached)",
             Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
-                                                                                      {grid.ntheta(), grid.nr()}),
+                                                                                  {grid.ntheta(), grid.nr()}),
             KOKKOS_LAMBDA(const int i_theta, const int i_r) {
                 if ((0 < i_r && i_r < grid.nr() - 1) || (i_r == 0 && !DirBC_Interior)) {
                     const double h1    = (i_r == 0) ? 2.0 * grid.radius(0) : grid.radialSpacing(i_r - 1);
@@ -301,7 +301,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
         Kokkos::parallel_for(
             "discretize_rhs_f: Radial (uncached)",
             Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0, grid.numberSmootherCircles()},
-                                                                                      {grid.ntheta(), grid.nr()}),
+                                                                                  {grid.ntheta(), grid.nr()}),
             KOKKOS_LAMBDA(const int i_theta, const int i_r) {
                 const double radius = grid.radius(i_r);
                 const double theta  = grid.theta(i_theta);

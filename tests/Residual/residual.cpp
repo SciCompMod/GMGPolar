@@ -64,8 +64,8 @@ TEST(OperatorATest, applyA_DirBC_Interior)
     Vector<double> result_Take("result_Take", level.grid().numberOfNodes());
     residualTake_operator.computeResidual(result_Take, rhs, x);
 
-	auto h_result_Give = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, result_Give);
-	auto h_result_Take = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, result_Take);
+    auto h_result_Give = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, result_Give);
+    auto h_result_Take = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, result_Take);
 
     ASSERT_EQ(result_Give.size(), result_Take.size());
     for (uint index = 0; index < result_Give.size(); index++) {
@@ -119,8 +119,8 @@ TEST(OperatorATest, applyA_AcrossOrigin)
     Vector<double> result_Take("result_Take", level.grid().numberOfNodes());
     residualTake_operator.computeResidual(result_Take, rhs, x);
 
-	auto h_result_Give = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, result_Give);
-	auto h_result_Take = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, result_Take);
+    auto h_result_Give = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, result_Give);
+    auto h_result_Take = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, result_Take);
 
     ASSERT_EQ(result_Give.size(), result_Take.size());
     for (uint index = 0; index < result_Give.size(); index++) {

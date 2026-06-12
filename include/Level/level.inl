@@ -105,8 +105,7 @@ void Level<DomainGeometry, DensityProfileCoefficients>::initializeResidual(
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void Level<DomainGeometry, DensityProfileCoefficients>::computeResidual(Vector<double> result,
-                                                                        ConstVector<double> rhs,
+void Level<DomainGeometry, DensityProfileCoefficients>::computeResidual(Vector<double> result, ConstVector<double> rhs,
                                                                         ConstVector<double> x) const
 {
     if (!op_residual_)

@@ -67,10 +67,10 @@ TEST(RestrictionTest, RestrictionMatchesStencil)
 
     I.applyRestriction(fine_grid, coarse_grid, coarse_result, fine_values);
 
-	PolarGrid<Kokkos::HostSpace> h_fine_grid(fine_grid);
-	PolarGrid<Kokkos::HostSpace> h_coarse_grid(coarse_grid);
-	auto h_fine_values = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, fine_values);
-	auto h_coarse_result = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, coarse_result);
+    PolarGrid<Kokkos::HostSpace> h_fine_grid(fine_grid);
+    PolarGrid<Kokkos::HostSpace> h_coarse_grid(coarse_grid);
+    auto h_fine_values   = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, fine_values);
+    auto h_coarse_result = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, coarse_result);
 
     for (int i_r_coarse = 0; i_r_coarse < coarse_grid.nr(); ++i_r_coarse) {
         for (int i_theta_coarse = 0; i_theta_coarse < coarse_grid.ntheta(); ++i_theta_coarse) {

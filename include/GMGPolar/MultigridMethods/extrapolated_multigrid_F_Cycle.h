@@ -80,7 +80,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     /* -------------------------- */
     // Use 'residual' instead of 'level.error_correction()' as a temporary buffer.
     // Note: 'level.error_correction()' has size 0 at level depth = 0.
-	extrapolatedProlongation(next_level.level_depth(), residual, next_level.error_correction());
+    extrapolatedProlongation(next_level.level_depth(), residual, next_level.error_correction());
 
     /* ----------------------------------- */
     /* Compute the corrected approximation */

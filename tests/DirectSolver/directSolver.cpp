@@ -77,8 +77,8 @@ TEST(DirectSolverTest, directSolver_DirBC_Interior)
     Vector<double> solution_Take = generate_random_sample_data(level.grid(), 69);
     directSolverTake_operator.solveInPlace(solution_Take);
 
-	auto h_solution_Give = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), solution_Give);
-	auto h_solution_Take = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), solution_Take);
+    auto h_solution_Give = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), solution_Give);
+    auto h_solution_Take = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), solution_Take);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
     for (uint index = 0; index < solution_Give.size(); index++) {
@@ -129,8 +129,8 @@ TEST(DirectSolverTest, directSolver_AcrossOrigin)
     Vector<double> solution_Take = generate_random_sample_data(level.grid(), 69);
     directSolverTake_operator.solveInPlace(solution_Take);
 
-	auto h_solution_Give = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), solution_Give);
-	auto h_solution_Take = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), solution_Take);
+    auto h_solution_Give = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), solution_Give);
+    auto h_solution_Take = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), solution_Take);
 
     ASSERT_EQ(solution_Give.size(), solution_Take.size());
     for (uint index = 0; index < solution_Give.size(); index++) {

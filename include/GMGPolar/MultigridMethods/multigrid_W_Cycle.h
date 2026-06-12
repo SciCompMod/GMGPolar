@@ -1,8 +1,7 @@
 #pragma once
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_W_Cycle(int level_depth,
-                                                                             Vector<double> solution,
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::multigrid_W_Cycle(int level_depth, Vector<double> solution,
                                                                              ConstVector<double> rhs,
                                                                              Vector<double> residual)
 {

@@ -187,7 +187,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
         writeToVTK("output_solution", level, h_level_solution);
         if (exact_solution_) {
             evaluateExactError(level.grid(), level.solution(), analytical_solution_host_, level.residual());
-        	auto h_level_residual = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), level.residual());
+            auto h_level_residual = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), level.residual());
             writeToVTK("output_error", level, h_level_residual);
         }
     }
@@ -346,8 +346,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
         }
 
         // alpha = (r^T * z) / (p^T * A*p)
-        double alpha = r_z / dot_product(ConstVector<double>(pcg_search_direction_),
-                                         ConstVector<double>(level.residual()));
+        double alpha =
+            r_z / dot_product(ConstVector<double>(pcg_search_direction_), ConstVector<double>(level.residual()));
 
         // x += alpha * p
         linear_combination(pcg_solution_, 1.0, ConstVector<double>(pcg_search_direction_), alpha);
