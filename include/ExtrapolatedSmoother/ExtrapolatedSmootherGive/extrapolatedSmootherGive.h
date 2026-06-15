@@ -68,7 +68,7 @@ public:
     // Parallel implementation using OpenMP:
     // Scedule every 2nd/4th line in parallel to avoid race conditions arising from the A-Give distribution.
     // Sceduling every 3rd line in parallel would also be possible, but is less natural for the 2 coloring.
-    void extrapolatedSmoothing(HostVector<double> x, HostConstVector<double> rhs, HostVector<double> temp) override;
+    void extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) override;
 
 private:
     /* ------------------- */

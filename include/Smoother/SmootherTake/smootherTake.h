@@ -61,7 +61,7 @@ public:
     // Performs one full coupled smoothing sweep:
     //   BC -> WC -> BR -> WR
     // using temp as RHS workspace.
-    void smoothing(HostVector<double> x, HostConstVector<double> rhs, HostVector<double> temp) final;
+    void smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) final;
 
 private:
     /* ------------------- */

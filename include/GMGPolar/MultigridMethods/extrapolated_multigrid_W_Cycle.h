@@ -2,9 +2,9 @@
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigrid_W_Cycle(int level_depth,
-                                                                                          HostVector<double> solution,
-                                                                                          HostConstVector<double> rhs,
-                                                                                          HostVector<double> residual)
+                                                                                          Vector<double> solution,
+                                                                                          ConstVector<double> rhs,
+                                                                                          Vector<double> residual)
 {
     assert(level_depth == 0);
     assert(number_of_levels_ >= 2);
@@ -51,7 +51,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     next_level.computeResidual(next_level.error_correction(), next_level.rhs(), next_level.solution());
 
     // res_ex = 4/3 * P_ex^T (f_l - A_l*u_l) - 1/3 * (f_{l-1} - A_{l-1}* Inject(u_l))
-    linear_combination(next_level.residual(), 4.0 / 3.0, HostConstVector<double>(next_level.error_correction()),
+    linear_combination(next_level.residual(), 4.0 / 3.0, ConstVector<double>(next_level.error_correction()),
                        -1.0 / 3.0);
 
     auto end_MGC_residual = std::chrono::high_resolution_clock::now();
@@ -85,7 +85,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     /* ----------------------------------- */
     /* Compute the corrected approximation */
     /* ----------------------------------- */
-    add(solution, HostConstVector<double>(residual));
+    add(solution, ConstVector<double>(residual));
 
     /* ------------- */
     /* Postsmoothing */
