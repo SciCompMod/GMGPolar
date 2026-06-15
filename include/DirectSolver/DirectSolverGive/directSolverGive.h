@@ -13,7 +13,7 @@ public:
                               bool DirBC_Interior);
 
     // Note: The rhs (right-hand side) vector gets overwritten during the solution process.
-    void solveInPlace(HostVector<double> solution) override;
+    void solveInPlace(Vector<double> solution) override;
 
 private:
 #ifdef GMGPOLAR_USE_MUMPS

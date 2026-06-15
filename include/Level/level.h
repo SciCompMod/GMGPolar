@@ -83,37 +83,37 @@ public:
     const PolarGrid<DefaultMemorySpace>& grid() const;
     const LevelCacheType& levelCache() const;
 
-    HostVector<double> rhs();
-    HostConstVector<double> rhs() const;
-    HostVector<double> solution();
-    HostConstVector<double> solution() const;
-    HostVector<double> residual();
-    HostConstVector<double> residual() const;
-    HostVector<double> error_correction();
-    HostConstVector<double> error_correction() const;
+    Vector<double> rhs();
+    ConstVector<double> rhs() const;
+    Vector<double> solution();
+    ConstVector<double> solution() const;
+    Vector<double> residual();
+    ConstVector<double> residual() const;
+    Vector<double> error_correction();
+    ConstVector<double> error_correction() const;
 
     // -------------- //
     // Apply Residual //
     void initializeResidual(const bool DirBC_Interior, const StencilDistributionMethod stencil_distribution_method);
-    void computeResidual(HostVector<double> result, HostConstVector<double> rhs, HostConstVector<double> x) const;
-    void applySystemOperator(HostVector<double> result, HostConstVector<double> x) const;
+    void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const;
+    void applySystemOperator(Vector<double> result, ConstVector<double> x) const;
 
     // ------------------- //
     // Solve coarse System //
     void initializeDirectSolver(const bool DirBC_Interior, const StencilDistributionMethod stencil_distribution_method);
     // Note: The rhs (right-hand side) vector gets overwritten by the solution.
-    void directSolveInPlace(HostVector<double> x) const;
+    void directSolveInPlace(Vector<double> x) const;
 
     // --------------- //
     // Apply Smoothing //
     void initializeSmoothing(const bool DirBC_Interior, const StencilDistributionMethod stencil_distribution_method);
-    void smoothing(HostVector<double> x, HostConstVector<double> rhs, HostVector<double> temp) const;
+    void smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) const;
 
     // ---------------------------- //
     // Apply Extrapolated Smoothing //
     void initializeExtrapolatedSmoothing(const bool DirBC_Interior,
                                          const StencilDistributionMethod stencil_distribution_method);
-    void extrapolatedSmoothing(HostVector<double> x, HostConstVector<double> rhs, HostVector<double> temp) const;
+    void extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) const;
 
 private:
     const int level_depth_;
@@ -125,10 +125,10 @@ private:
     std::unique_ptr<Smoother<LevelCacheType>> op_smoother_;
     std::unique_ptr<ExtrapolatedSmoother<LevelCacheType>> op_extrapolated_smoother_;
 
-    HostVector<double> rhs_;
-    HostVector<double> solution_;
-    HostVector<double> residual_;
-    HostVector<double> error_correction_;
+    Vector<double> rhs_;
+    Vector<double> solution_;
+    Vector<double> residual_;
+    Vector<double> error_correction_;
 };
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>

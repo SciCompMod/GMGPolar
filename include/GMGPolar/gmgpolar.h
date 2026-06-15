@@ -62,8 +62,8 @@ public:
     /* Solution & Grid Access                                                 */
     /* ---------------------------------------------------------------------- */
     // Return a reference to the computed solution vector.
-    HostVector<double> solution();
-    HostConstVector<double> solution() const;
+    Vector<double> solution();
+    ConstVector<double> solution() const;
 
     // Return the underlying cartesian mesh used for discretization.
     const PolarGrid<Kokkos::HostSpace>& grid() const;
@@ -118,8 +118,8 @@ private:
     *   z    (preconditioned residual)        -> level.solution()
     *   A*p  (matrix applied to search dir.)  -> level.residual()
     */
-    HostAllocatableVector<double> pcg_solution_; // x (solution)
-    HostAllocatableVector<double> pcg_search_direction_; // p (search direction)
+    AllocatableVector<double> pcg_solution_; // x (solution)
+    AllocatableVector<double> pcg_search_direction_; // p (search direction)
 
     /* ---------------------------------------------------------------------------------------------- */
     /* Store analytical solution values on host to avoid repeated computation during error evaluation */
@@ -138,9 +138,9 @@ public: // Public due to cuda restrictions
     /* Compute exact error if an exact solution is provided */
     // The results are stored as a pair: (weighted L2 error, infinity error).
     std::pair<double, double> evaluateExactError(const PolarGrid<DefaultMemorySpace>& grid,
-                                                 HostConstVector<double> discrete_solution,
+                                                 ConstVector<double> discrete_solution,
                                                  HostConstVector<double> analytical_solution_host,
-                                                 HostVector<double> error);
+                                                 Vector<double> error);
     void computeAnalyticalSolutionOnHost(const PolarGrid<Kokkos::HostSpace>& grid,
                                          HostVector<double> analytical_solution_host,
                                          const ExactSolution& exact_solution);
@@ -150,11 +150,11 @@ public: // Public due to cuda restrictions
     template <concepts::BoundaryConditions BoundaryConditions, concepts::SourceTerm SourceTerm>
     void build_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f,
                      const BoundaryConditions& boundary_conditions, const SourceTerm& source_term);
-    void discretize_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, HostVector<double> rhs_f);
+    void discretize_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f);
 
     /* --------------- */
     /* Solve Functions */
-    void applyExtrapolation(int current_level, HostVector<double> fine_values, HostConstVector<double> coarse_values);
+    void applyExtrapolation(int current_level, Vector<double> fine_values, ConstVector<double> coarse_values);
 
 private:
     /* --------------- */
@@ -170,13 +170,13 @@ private:
     void solvePCG(double& initial_residual_norm, double& current_residual_norm, double& current_relative_residual_norm);
     double residualNorm(const ResidualNormType& norm_type,
                         const Level<DomainGeometry, DensityProfileCoefficients>& level,
-                        HostConstVector<double> residual) const;
+                        ConstVector<double> residual) const;
     void evaluateExactError(Level<DomainGeometry, DensityProfileCoefficients>& level,
                             HostConstVector<double> exact_solution);
     void updateResidualNorms(Level<DomainGeometry, DensityProfileCoefficients>& level, int iteration,
                              double& initial_residual_norm, double& current_residual_norm,
                              double& current_relative_residual_norm);
-    void initRhsHierarchy(HostVector<double> rhs);
+    void initRhsHierarchy(Vector<double> rhs);
     void applyMultigridIterations(Level<DomainGeometry, DensityProfileCoefficients>& level, MultigridCycleType cycle,
                                   int iterations);
     void applyExtrapolatedMultigridIterations(Level<DomainGeometry, DensityProfileCoefficients>& level,
@@ -192,27 +192,24 @@ private:
 
     /* ------------------- */
     /* Multigrid Functions */
-    void multigrid_V_Cycle(int level_depth, HostVector<double> solution, HostConstVector<double> rhs,
-                           HostVector<double> residual);
-    void multigrid_W_Cycle(int level_depth, HostVector<double> solution, HostConstVector<double> rhs,
-                           HostVector<double> residual);
-    void multigrid_F_Cycle(int level_depth, HostVector<double> solution, HostConstVector<double> rhs,
-                           HostVector<double> residual);
-    void extrapolated_multigrid_V_Cycle(int level_depth, HostVector<double> solution, HostConstVector<double> rhs,
-                                        HostVector<double> residual);
-    void extrapolated_multigrid_W_Cycle(int level_depth, HostVector<double> solution, HostConstVector<double> rhs,
-                                        HostVector<double> residual);
-    void extrapolated_multigrid_F_Cycle(int level_depth, HostVector<double> solution, HostConstVector<double> rhs,
-                                        HostVector<double> residual);
+    void multigrid_V_Cycle(int level_depth, Vector<double> solution, ConstVector<double> rhs, Vector<double> residual);
+    void multigrid_W_Cycle(int level_depth, Vector<double> solution, ConstVector<double> rhs, Vector<double> residual);
+    void multigrid_F_Cycle(int level_depth, Vector<double> solution, ConstVector<double> rhs, Vector<double> residual);
+    void extrapolated_multigrid_V_Cycle(int level_depth, Vector<double> solution, ConstVector<double> rhs,
+                                        Vector<double> residual);
+    void extrapolated_multigrid_W_Cycle(int level_depth, Vector<double> solution, ConstVector<double> rhs,
+                                        Vector<double> residual);
+    void extrapolated_multigrid_F_Cycle(int level_depth, Vector<double> solution, ConstVector<double> rhs,
+                                        Vector<double> residual);
 
     /* ----------------------- */
     /* Interpolation functions */
-    void prolongation(int current_level, HostVector<double> result, HostConstVector<double> x) const;
-    void restriction(int current_level, HostVector<double> result, HostConstVector<double> x) const;
-    void injection(int current_level, HostVector<double> result, HostConstVector<double> x) const;
-    void extrapolatedProlongation(int current_level, HostVector<double> result, HostConstVector<double> x) const;
-    void extrapolatedRestriction(int current_level, HostVector<double> result, HostConstVector<double> x) const;
-    void FMGInterpolation(int current_level, HostVector<double> result, HostConstVector<double> x) const;
+    void prolongation(int current_level, Vector<double> result, ConstVector<double> x) const;
+    void restriction(int current_level, Vector<double> result, ConstVector<double> x) const;
+    void injection(int current_level, Vector<double> result, ConstVector<double> x) const;
+    void extrapolatedProlongation(int current_level, Vector<double> result, ConstVector<double> x) const;
+    void extrapolatedRestriction(int current_level, Vector<double> result, ConstVector<double> x) const;
+    void FMGInterpolation(int current_level, Vector<double> result, ConstVector<double> x) const;
 
     /* ------------- */
     /* Visualization */

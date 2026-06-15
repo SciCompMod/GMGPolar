@@ -10,15 +10,12 @@ ResidualTake<LevelCacheType>::ResidualTake(const PolarGrid<DefaultMemorySpace>& 
 /* ------------------ */
 /* result = rhs - A*x */
 template <class LevelCacheType>
-void ResidualTake<LevelCacheType>::computeResidual(HostVector<double> h_result, HostConstVector<double> h_rhs,
-                                                   HostConstVector<double> h_x) const
+void ResidualTake<LevelCacheType>::computeResidual(Vector<double> result, ConstVector<double> rhs,
+                                                   ConstVector<double> x) const
 {
-    assert(h_result.size() == h_x.size());
+    assert(result.size() == x.size());
 
-    applySystemOperator(h_result, h_x);
-
-    auto rhs    = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs);
-    auto result = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_result);
+    applySystemOperator(result, x);
 
     // Subtract A*x from rhs to get the residual.
     const int n = result.size();
@@ -28,6 +25,4 @@ void ResidualTake<LevelCacheType>::computeResidual(HostVector<double> h_result, 
         KOKKOS_LAMBDA(const int i) { result[i] = rhs[i] - result[i]; });
 
     Kokkos::fence();
-
-    Kokkos::deep_copy(h_result, result);
 }

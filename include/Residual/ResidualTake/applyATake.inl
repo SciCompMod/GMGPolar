@@ -64,12 +64,9 @@ node_apply_a_take(const int i_r, const int i_theta, const PolarGrid<DefaultMemor
 } // namespace residual_take
 
 template <class LevelCacheType>
-void ResidualTake<LevelCacheType>::applySystemOperator(HostVector<double> h_result, HostConstVector<double> h_x) const
+void ResidualTake<LevelCacheType>::applySystemOperator(Vector<double> result, ConstVector<double> x) const
 {
     using residual_take::node_apply_a_take;
-
-    auto x      = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_x);
-    auto result = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_result);
 
     assert(result.size() == x.size());
 
@@ -113,6 +110,4 @@ void ResidualTake<LevelCacheType>::applySystemOperator(HostVector<double> h_resu
         });
 
     Kokkos::fence();
-
-    Kokkos::deep_copy(h_result, result);
 }

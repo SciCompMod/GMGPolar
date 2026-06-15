@@ -66,7 +66,7 @@ public:
     // Performs one full coupled extrapolated smoothing sweep:
     //   BC -> WC -> BR -> WR
     // using temp as RHS workspace.
-    void extrapolatedSmoothing(HostVector<double> x, HostConstVector<double> rhs, HostVector<double> temp) override;
+    void extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) override;
 
 private:
     /* ------------------- */
