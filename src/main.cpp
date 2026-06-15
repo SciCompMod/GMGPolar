@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
             parser.solve(solver);
 
             // --- Retrieve solution and associated grid --- //
-            HostVector<double> solution = solver.solution();
+            Vector<double> solution = solver.solution();
 
             // Print timing statistics for each solver phase
             solver.printTimings();

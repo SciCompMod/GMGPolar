@@ -55,10 +55,10 @@ TEST(ExtrapolatedProlongationTest, ExtrapolatedProlongationMatchesStencil)
 
     Interpolation I(/*DirBC*/ true);
 
-    HostVector<double> h_coarse_values = generate_random_sample_data(coarse_grid.numberOfNodes(), 1234, 0.0, 1.0);
+    Vector<double> coarse_values = generate_random_sample_data(coarse_grid, 1234, 0.0, 1.0);
     Vector<double> fine_result("fine_result", fine_grid.numberOfNodes());
 
-    auto coarse_values = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_coarse_values);
+    auto h_coarse_values = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), coarse_values);
 
     I.applyExtrapolatedProlongation(coarse_grid, fine_grid, fine_result, coarse_values);
 

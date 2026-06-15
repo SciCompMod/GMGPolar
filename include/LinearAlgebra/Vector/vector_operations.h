@@ -136,7 +136,7 @@ T l2_norm(ConstVector<T, MemorySpace> x)
                 local_max = abs_val;
             }
         },
-        Kokkos::Max<T, MemorySpace>(scale));
+        Kokkos::Max<T>(scale));
 
     // 2) If the largest absolute value is zero, the norm is zero
     if (scale == T{0})
@@ -171,7 +171,7 @@ T infinity_norm(ConstVector<T, MemorySpace> x)
                 local_max = abs_value;
             }
         },
-        Kokkos::Max<T, MemorySpace>(result));
+        Kokkos::Max<T>(result));
     return result;
 }
 

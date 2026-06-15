@@ -58,10 +58,10 @@ using namespace gmgpolar;
  */
 
 static KOKKOS_INLINE_FUNCTION void fineNodeFMGInterpolation(const int i_r, const int i_theta,
-                                                            const PolarGrid<Kokkos::HostSpace>& coarse_grid,
-                                                            const PolarGrid<Kokkos::HostSpace>& fine_grid,
-                                                            HostVector<double>& fine_result,
-                                                            HostConstVector<double>& coarse_values)
+                                                            const PolarGrid<DefaultMemorySpace>& coarse_grid,
+                                                            const PolarGrid<DefaultMemorySpace>& fine_grid,
+                                                            Vector<double>& fine_result,
+                                                            ConstVector<double>& coarse_values)
 {
     const int i_r_coarse     = i_r / 2;
     const int i_theta_coarse = i_theta / 2;
@@ -227,9 +227,9 @@ static KOKKOS_INLINE_FUNCTION void fineNodeFMGInterpolation(const int i_r, const
     }
 }
 
-void Interpolation::applyFMGInterpolation(const PolarGrid<Kokkos::HostSpace>& coarse_grid,
-                                          const PolarGrid<Kokkos::HostSpace>& fine_grid, HostVector<double> fine_result,
-                                          HostConstVector<double> coarse_values) const
+void Interpolation::applyFMGInterpolation(const PolarGrid<DefaultMemorySpace>& coarse_grid,
+                                          const PolarGrid<DefaultMemorySpace>& fine_grid, Vector<double> fine_result,
+                                          ConstVector<double> coarse_values) const
 {
     assert(std::ssize(coarse_values) == coarse_grid.numberOfNodes());
     assert(std::ssize(fine_result) == fine_grid.numberOfNodes());
@@ -240,7 +240,7 @@ void Interpolation::applyFMGInterpolation(const PolarGrid<Kokkos::HostSpace>& co
     // The For loop matches circular access pattern */
     Kokkos::parallel_for(
         "Interpolation: FMG-Interpolation (Circular)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, 0}, // Starting point of the index space
             {fine_grid.numberSmootherCircles(), fine_grid.ntheta()} // Ending point of the index space
             ),
@@ -252,7 +252,7 @@ void Interpolation::applyFMGInterpolation(const PolarGrid<Kokkos::HostSpace>& co
     /* For loop matches radial access pattern */
     Kokkos::parallel_for(
         "Interpolation: FMG-Interpolation (Radial)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, fine_grid.numberSmootherCircles()}, // Starting point of the index space
             {fine_grid.ntheta(), fine_grid.nr()} // Ending point of the index space
             ),
