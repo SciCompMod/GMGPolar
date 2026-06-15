@@ -318,7 +318,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
 
     // z = M^{-1} * r (preconditioned residual)
     if (PCG_FMG_) {
-        initRhsHierarchy(level.rhs());
+        initRhsHierarchy();
         fullMultigridApproximation(PCG_FMG_cycle_, PCG_FMG_iterations_);
     }
     else {
@@ -392,7 +392,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
 
         // z = M^{-1} * r (preconditioned residual)
         if (PCG_FMG_) {
-            initRhsHierarchy(level.rhs());
+            initRhsHierarchy();
             fullMultigridApproximation(PCG_FMG_cycle_, PCG_FMG_iterations_);
         }
         else {
@@ -577,9 +577,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolation(in
 // =============================================================================
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::initRhsHierarchy(Vector<double> rhs)
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::initRhsHierarchy()
 {
-    Kokkos::deep_copy(levels_[0].rhs(), rhs);
     for (int level_depth = 0; level_depth < number_of_levels_ - 1; ++level_depth) {
         Level<DomainGeometry, DensityProfileCoefficients>& current_level = levels_[level_depth];
         Level<DomainGeometry, DensityProfileCoefficients>& next_level    = levels_[level_depth + 1];
