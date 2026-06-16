@@ -23,7 +23,7 @@ static double expected_extrapolated_value(const PolarGrid<DefaultMemorySpace>& c
     Vector<double> result_d("device_res", 1);
 
     Kokkos::parallel_for(
-        "loop", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, 1), KOKKOS_LAMBDA(int idx) {
+        "extrap_prolongation_test", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, 1), KOKKOS_LAMBDA(int idx) {
             if (r_even && t_even) {
                 // Node coincides with a coarse node
                 result_d(0) = coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)];
