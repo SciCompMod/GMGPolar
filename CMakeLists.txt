@@ -96,6 +96,9 @@ install(EXPORT GMGPolarTargets
 
 add_subdirectory(src)
 
+# Create the executables. These test specific cases and are not very useful
+# without access to the source code so they are not installed with the
+# library
 add_executable(gmgpolar src/main.cpp)
 add_executable(convergence_order src/convergence_order.cpp)
 target_link_libraries(gmgpolar PRIVATE GMGPolarLib GMGPolarInterface)
