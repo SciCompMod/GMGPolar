@@ -72,7 +72,6 @@ TEST(RestrictionTest, RestrictionMatchesStencil)
 
     I.applyRestriction(fine_grid, coarse_grid, coarse_result, fine_values);
 
-    auto h_fine_values   = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, fine_values);
     auto h_coarse_result = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, coarse_result);
 
     for (int i_r_coarse = 0; i_r_coarse < coarse_grid.nr(); ++i_r_coarse) {

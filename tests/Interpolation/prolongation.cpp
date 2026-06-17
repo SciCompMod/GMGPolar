@@ -79,8 +79,7 @@ TEST(ProlongationTest, ProlongationMatchesStencil)
 
     I.applyProlongation(coarse_grid, fine_grid, fine_result, coarse_values);
 
-    auto h_coarse_values = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, coarse_values);
-    auto h_fine_result   = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, fine_result);
+    auto h_fine_result = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, fine_result);
 
     for (int i_r = 0; i_r < fine_grid.nr(); ++i_r) {
         for (int i_theta = 0; i_theta < fine_grid.ntheta(); ++i_theta) {
