@@ -29,7 +29,7 @@ public:
     // - grid: Cartesian mesh discretizing the computational domain.
     // - domain_geometry: Mapping from the reference domain to the physical domain \Omega.
     // - density_profile_coefficients: Coefficients \alpha and \beta defining the PDE.
-    GMGPolar(const PolarGrid& grid, const DomainGeometry& domain_geometry,
+    GMGPolar(const PolarGrid<Kokkos::HostSpace>& grid, const DomainGeometry& domain_geometry,
              const DensityProfileCoefficients& density_profile_coefficients)
         : IGMGPolar(grid)
         , domain_geometry_(domain_geometry)
@@ -62,11 +62,11 @@ public:
     /* Solution & Grid Access                                                 */
     /* ---------------------------------------------------------------------- */
     // Return a reference to the computed solution vector.
-    HostVector<double> solution();
-    HostConstVector<double> solution() const;
+    Vector<double> solution();
+    ConstVector<double> solution() const;
 
     // Return the underlying cartesian mesh used for discretization.
-    const PolarGrid& grid() const;
+    const PolarGrid<Kokkos::HostSpace>& grid() const;
 
     /* ---------------------------------------------------------------------- */
     /* Diagnostics & statistics                                               */
@@ -103,7 +103,7 @@ private:
 
     /* ------------------------------------------------------------------------- */
     /* Chooses if full grid smoothing is active on level 0 for extrapolation > 0 */
-    bool full_grid_smoothing_ = false;
+    bool full_grid_smoothing_;
 
     /* -------------------------------------------------- */
     /* Vectors for PCG (Preconditioned Conjugate Gradient)
@@ -118,8 +118,13 @@ private:
     *   z    (preconditioned residual)        -> level.solution()
     *   A*p  (matrix applied to search dir.)  -> level.residual()
     */
-    HostAllocatableVector<double> pcg_solution_; // x (solution)
-    HostAllocatableVector<double> pcg_search_direction_; // p (search direction)
+    AllocatableVector<double> pcg_solution_; // x (solution)
+    AllocatableVector<double> pcg_search_direction_; // p (search direction)
+
+    /* ---------------------------------------------------------------------------------------------- */
+    /* Store analytical solution values on host to avoid repeated computation during error evaluation */
+    HostAllocatableVector<double> analytical_solution_host_;
+    std::vector<std::pair<double, double>> exact_errors_;
 
     /* -------------------- */
     /* Convergence criteria */
@@ -128,26 +133,34 @@ private:
     double mean_residual_reduction_factor_;
     bool converged(double current_residual_norm, double first_residual_norm);
 
+public: // Public due to cuda restrictions
     /* ---------------------------------------------------- */
     /* Compute exact error if an exact solution is provided */
     // The results are stored as a pair: (weighted L2 error, infinity error).
-    std::vector<std::pair<double, double>> exact_errors_;
-    std::pair<double, double> computeExactError(Level<DomainGeometry, DensityProfileCoefficients>& level,
-                                                HostConstVector<double> solution, HostVector<double> error,
-                                                const ExactSolution& exact_solution);
+    std::pair<double, double> evaluateExactError(const PolarGrid<DefaultMemorySpace>& grid,
+                                                 ConstVector<double> discrete_solution,
+                                                 HostConstVector<double> analytical_solution_host,
+                                                 Vector<double> error);
+    void computeAnalyticalSolutionOnHost(const PolarGrid<Kokkos::HostSpace>& grid,
+                                         HostVector<double> analytical_solution_host,
+                                         const ExactSolution& exact_solution);
 
     /* --------------- */
     /* Setup Functions */
-    int chooseNumberOfLevels(const PolarGrid& finest_grid);
-    // Public due to cuda restrictions
-public:
     template <concepts::BoundaryConditions BoundaryConditions, concepts::SourceTerm SourceTerm>
-    void build_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, HostVector<double> rhs_f,
+    void build_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f,
                      const BoundaryConditions& boundary_conditions, const SourceTerm& source_term);
-    void discretize_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, HostVector<double> rhs_f);
+    void discretize_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f);
+
+    /* --------------- */
+    /* Solve Functions */
+    void applyExtrapolation(int current_level, Vector<double> fine_values, ConstVector<double> coarse_values);
 
 private:
-    bool checkUniformRefinement(const PolarGrid& grid, double tolerance) const;
+    /* --------------- */
+    /* Setup Functions */
+    int chooseNumberOfLevels(const PolarGrid<Kokkos::HostSpace>& finest_grid);
+    bool checkUniformRefinement(const PolarGrid<Kokkos::HostSpace>& grid, double tolerance) const;
 
     /* --------------- */
     /* Solve Functions */
@@ -157,54 +170,50 @@ private:
     void solvePCG(double& initial_residual_norm, double& current_residual_norm, double& current_relative_residual_norm);
     double residualNorm(const ResidualNormType& norm_type,
                         const Level<DomainGeometry, DensityProfileCoefficients>& level,
-                        HostConstVector<double> residual) const;
+                        ConstVector<double> residual) const;
     void evaluateExactError(Level<DomainGeometry, DensityProfileCoefficients>& level,
-                            const ExactSolution& exact_solution);
+                            HostConstVector<double> exact_solution);
     void updateResidualNorms(Level<DomainGeometry, DensityProfileCoefficients>& level, int iteration,
                              double& initial_residual_norm, double& current_residual_norm,
                              double& current_relative_residual_norm);
-    void initRhsHierarchy(HostVector<double> rhs);
+    void initRhsHierarchy();
     void applyMultigridIterations(Level<DomainGeometry, DensityProfileCoefficients>& level, MultigridCycleType cycle,
                                   int iterations);
     void applyExtrapolatedMultigridIterations(Level<DomainGeometry, DensityProfileCoefficients>& level,
                                               MultigridCycleType cycle, int iterations);
-    // Compute the extrapolated values: u_ex = 4/3 u_fine - 1/3 u_coarse
-    void applyExtrapolation(int current_level, HostVector<double> fine_values, HostConstVector<double> coarse_values);
 
     /* ----------------- */
     /* Print information */
-    void printSettings(const PolarGrid& finest_grid, const PolarGrid& coarsest_grid) const;
-    void printIterationHeader(const ExactSolution* exact_solution);
+    void printSettings(const PolarGrid<Kokkos::HostSpace>& finest_grid,
+                       const PolarGrid<Kokkos::HostSpace>& coarsest_grid) const;
+    void printIterationHeader(bool is_exact_solution_provided);
     void printIterationInfo(int iteration, double current_residual_norm, double current_relative_residual_norm,
-                            const ExactSolution* exact_solution);
+                            bool is_exact_solution_provided);
 
     /* ------------------- */
     /* Multigrid Functions */
-    void multigrid_V_Cycle(int level_depth, HostVector<double> solution, HostConstVector<double> rhs,
-                           HostVector<double> residual);
-    void multigrid_W_Cycle(int level_depth, HostVector<double> solution, HostConstVector<double> rhs,
-                           HostVector<double> residual);
-    void multigrid_F_Cycle(int level_depth, HostVector<double> solution, HostConstVector<double> rhs,
-                           HostVector<double> residual);
-    void extrapolated_multigrid_V_Cycle(int level_depth, HostVector<double> solution, HostConstVector<double> rhs,
-                                        HostVector<double> residual);
-    void extrapolated_multigrid_W_Cycle(int level_depth, HostVector<double> solution, HostConstVector<double> rhs,
-                                        HostVector<double> residual);
-    void extrapolated_multigrid_F_Cycle(int level_depth, HostVector<double> solution, HostConstVector<double> rhs,
-                                        HostVector<double> residual);
+    void multigrid_V_Cycle(int level_depth, Vector<double> solution, ConstVector<double> rhs, Vector<double> residual);
+    void multigrid_W_Cycle(int level_depth, Vector<double> solution, ConstVector<double> rhs, Vector<double> residual);
+    void multigrid_F_Cycle(int level_depth, Vector<double> solution, ConstVector<double> rhs, Vector<double> residual);
+    void extrapolated_multigrid_V_Cycle(int level_depth, Vector<double> solution, ConstVector<double> rhs,
+                                        Vector<double> residual);
+    void extrapolated_multigrid_W_Cycle(int level_depth, Vector<double> solution, ConstVector<double> rhs,
+                                        Vector<double> residual);
+    void extrapolated_multigrid_F_Cycle(int level_depth, Vector<double> solution, ConstVector<double> rhs,
+                                        Vector<double> residual);
 
     /* ----------------------- */
     /* Interpolation functions */
-    void prolongation(int current_level, HostVector<double> result, HostConstVector<double> x) const;
-    void restriction(int current_level, HostVector<double> result, HostConstVector<double> x) const;
-    void injection(int current_level, HostVector<double> result, HostConstVector<double> x) const;
-    void extrapolatedProlongation(int current_level, HostVector<double> result, HostConstVector<double> x) const;
-    void extrapolatedRestriction(int current_level, HostVector<double> result, HostConstVector<double> x) const;
-    void FMGInterpolation(int current_level, HostVector<double> result, HostConstVector<double> x) const;
+    void prolongation(int current_level, Vector<double> result, ConstVector<double> x) const;
+    void restriction(int current_level, Vector<double> result, ConstVector<double> x) const;
+    void injection(int current_level, Vector<double> result, ConstVector<double> x) const;
+    void extrapolatedProlongation(int current_level, Vector<double> result, ConstVector<double> x) const;
+    void extrapolatedRestriction(int current_level, Vector<double> result, ConstVector<double> x) const;
+    void FMGInterpolation(int current_level, Vector<double> result, ConstVector<double> x) const;
 
     /* ------------- */
     /* Visualization */
-    void writeToVTK(const std::filesystem::path& file_path, const PolarGrid& grid);
+    void writeToVTK(const std::filesystem::path& file_path, const PolarGrid<Kokkos::HostSpace>& grid);
     void writeToVTK(const std::filesystem::path& file_path,
                     const Level<DomainGeometry, DensityProfileCoefficients>& level,
                     HostConstVector<double> grid_function);

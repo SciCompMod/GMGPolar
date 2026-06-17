@@ -6,7 +6,7 @@ std::unique_ptr<IGMGPolar> ConfigParser::solver() const
 {
     // Create local aliases so the class doesn't need to be captured by the lamda
     // These are references, not copies.
-    const PolarGrid& grid = grid_;
+    const PolarGrid<Kokkos::HostSpace> grid(grid_);
 
     // Create a solver specialized to the active domain geometry.
     return std::visit(

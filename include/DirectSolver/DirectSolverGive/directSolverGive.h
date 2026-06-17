@@ -9,18 +9,19 @@ template <class LevelCacheType>
 class DirectSolverGive : public DirectSolver<LevelCacheType>
 {
 public:
-    explicit DirectSolverGive(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior);
+    explicit DirectSolverGive(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
+                              bool DirBC_Interior);
 
     // Note: The rhs (right-hand side) vector gets overwritten during the solution process.
-    void solveInPlace(HostVector<double> solution) override;
+    void solveInPlace(Vector<double> solution) override;
 
 private:
 #ifdef GMGPOLAR_USE_MUMPS
-    using SystemMatrix = SparseMatrixCOO<double, Kokkos::HostSpace>;
+    using SystemMatrix = SparseMatrixCOO<double>;
     using SystemSolver = CooMumpsSolver;
 #else
-    using SystemMatrix = SparseMatrixCSR<double, Kokkos::HostSpace>;
-    using SystemSolver = SparseLUSolver<double, Kokkos::HostSpace>;
+    using SystemMatrix = SparseMatrixCSR<double>;
+    using SystemSolver = SparseLUSolver<double>;
     // Stored only for the in-house solver (CSR).
     SystemMatrix system_matrix_;
 #endif
@@ -39,9 +40,9 @@ public:
     //    symmetric_DBc(A) * solution = rhs - applySymmetryShift(rhs).
     // The correction modifies the rhs to account for the influence of the Dirichlet boundary conditions,
     // ensuring that the solution at the boundary is correctly adjusted and maintains the required symmetry.
-    void applySymmetryShift(HostVector<double> rhs) const;
-    void applySymmetryShiftInnerBoundary(HostVector<double> x) const;
-    void applySymmetryShiftOuterBoundary(HostVector<double> x) const;
+    void applySymmetryShift(Vector<double> rhs) const;
+    void applySymmetryShiftInnerBoundary(Vector<double> x) const;
+    void applySymmetryShiftOuterBoundary(Vector<double> x) const;
 };
 
 #include "applySymmetryShift.inl"

@@ -1,7 +1,7 @@
 #pragma once
 
 template <class LevelCacheType>
-ExtrapolatedSmootherTake<LevelCacheType>::ExtrapolatedSmootherTake(const PolarGrid& grid,
+ExtrapolatedSmootherTake<LevelCacheType>::ExtrapolatedSmootherTake(const PolarGrid<DefaultMemorySpace>& grid,
                                                                    const LevelCacheType& level_cache,
                                                                    const bool DirBC_Interior)
     : ExtrapolatedSmoother<LevelCacheType>(grid, level_cache, DirBC_Interior)
@@ -43,8 +43,8 @@ ExtrapolatedSmootherTake<LevelCacheType>::ExtrapolatedSmootherTake(const PolarGr
 //     are copied back to x.
 
 template <class LevelCacheType>
-void ExtrapolatedSmootherTake<LevelCacheType>::extrapolatedSmoothing(HostVector<double> x, HostConstVector<double> rhs,
-                                                                     HostVector<double> temp)
+void ExtrapolatedSmootherTake<LevelCacheType>::extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs,
+                                                                     Vector<double> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());

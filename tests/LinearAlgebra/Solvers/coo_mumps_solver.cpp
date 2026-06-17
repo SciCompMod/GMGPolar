@@ -7,6 +7,11 @@
     #include <LinearAlgebra/Solvers/coo_mumps_solver.h>
 using namespace gmgpolar;
 
+void fill_rhs(Vector<double>& rhs)
+{
+    Kokkos::parallel_for("fill rhs", rhs.size(), KOKKOS_LAMBDA(int i) { rhs(i) = (i + 1) * 2.0; });
+}
+
 // -----------------------------------------------------------------------
 // Test 1: General (non-symmetric) 4x4 system
 //
@@ -31,11 +36,8 @@ TEST(CooMumpsSolverTest, GeneralNonSymmetric4x4)
 
     CooMumpsSolver solver(std::move(mat));
 
-    HostVector<double> rhs("rhs", 4);
-    rhs(0) = 2.0;
-    rhs(1) = 4.0;
-    rhs(2) = 6.0;
-    rhs(3) = 8.0;
+    Vector<double> rhs("rhs", 4);
+    fill_rhs(rhs);
 
     solver.solveInPlace(rhs);
 
@@ -45,11 +47,13 @@ TEST(CooMumpsSolverTest, GeneralNonSymmetric4x4)
     solution(2) = -27.0 / 43.0;
     solution(3) = -28.0 / 43.0;
 
+    auto rhs_host = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), rhs);
+
     const double tol = 1e-10;
-    EXPECT_NEAR(rhs(0), solution(0), tol);
-    EXPECT_NEAR(rhs(1), solution(1), tol);
-    EXPECT_NEAR(rhs(2), solution(2), tol);
-    EXPECT_NEAR(rhs(3), solution(3), tol);
+    EXPECT_NEAR(rhs_host(0), solution(0), tol);
+    EXPECT_NEAR(rhs_host(1), solution(1), tol);
+    EXPECT_NEAR(rhs_host(2), solution(2), tol);
+    EXPECT_NEAR(rhs_host(3), solution(3), tol);
 }
 
 // -----------------------------------------------------------------------
@@ -75,11 +79,8 @@ TEST(CooMumpsSolverTest, SymmetricPositiveDefinite4x4)
 
     CooMumpsSolver solver(std::move(mat));
 
-    HostVector<double> rhs("rhs", 4);
-    rhs(0) = 2.0;
-    rhs(1) = 4.0;
-    rhs(2) = 6.0;
-    rhs(3) = 8.0;
+    Vector<double> rhs("rhs", 4);
+    fill_rhs(rhs);
 
     solver.solveInPlace(rhs);
 
@@ -89,11 +90,13 @@ TEST(CooMumpsSolverTest, SymmetricPositiveDefinite4x4)
     solution(2) = 14.0 / 23.0;
     solution(3) = 21.0 / 23.0;
 
+    auto rhs_host = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), rhs);
+
     const double tol = 1e-10;
-    EXPECT_NEAR(rhs(0), solution(0), tol);
-    EXPECT_NEAR(rhs(1), solution(1), tol);
-    EXPECT_NEAR(rhs(2), solution(2), tol);
-    EXPECT_NEAR(rhs(3), solution(3), tol);
+    EXPECT_NEAR(rhs_host(0), solution(0), tol);
+    EXPECT_NEAR(rhs_host(1), solution(1), tol);
+    EXPECT_NEAR(rhs_host(2), solution(2), tol);
+    EXPECT_NEAR(rhs_host(3), solution(3), tol);
 }
 
 #endif // GMGPOLAR_USE_MUMPS

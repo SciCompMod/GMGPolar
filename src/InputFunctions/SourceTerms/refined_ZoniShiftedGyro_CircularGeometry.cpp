@@ -1,7 +1,8 @@
 #include <InputFunctions/SourceTerms/refined_ZoniShiftedGyro_CircularGeometry.h>
 using namespace gmgpolar;
 
-Refined_ZoniShiftedGyro_CircularGeometry::Refined_ZoniShiftedGyro_CircularGeometry(PolarGrid const& grid, double Rmax)
+Refined_ZoniShiftedGyro_CircularGeometry::Refined_ZoniShiftedGyro_CircularGeometry(
+    PolarGrid<DefaultMemorySpace> const& grid, double Rmax)
     : grid_(grid)
     , Rmax(Rmax)
 {

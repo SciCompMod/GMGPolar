@@ -12,14 +12,14 @@ namespace gmgpolar
 class CartesianR6_Poisson_CircularGeometry
 {
 public:
-    explicit CartesianR6_Poisson_CircularGeometry(PolarGrid const& grid, double Rmax);
+    explicit CartesianR6_Poisson_CircularGeometry(PolarGrid<DefaultMemorySpace> const& grid, double Rmax);
     KOKKOS_DEFAULTED_FUNCTION
     CartesianR6_Poisson_CircularGeometry(const CartesianR6_Poisson_CircularGeometry&) = default;
 
     KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;
 
 private:
-    PolarGrid grid_;
+    PolarGrid<DefaultMemorySpace> grid_;
     const double Rmax = 1.3;
 };
 } // namespace gmgpolar

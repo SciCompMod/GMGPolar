@@ -16,7 +16,8 @@ template <class LevelCacheType>
 class Residual
 {
 public:
-    explicit Residual(const PolarGrid& grid, const LevelCacheType& level_cache, const bool DirBC_Interior)
+    explicit Residual(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
+                      const bool DirBC_Interior)
         : grid_(grid)
         , level_cache_(level_cache)
         , DirBC_Interior_(DirBC_Interior)
@@ -24,14 +25,13 @@ public:
     }
     virtual ~Residual() = default;
 
-    virtual void applySystemOperator(HostVector<double> result, HostConstVector<double> x) const = 0;
-    virtual void computeResidual(HostVector<double> result, HostConstVector<double> rhs,
-                                 HostConstVector<double> x) const                                = 0;
+    virtual void applySystemOperator(Vector<double> result, ConstVector<double> x) const                      = 0;
+    virtual void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const = 0;
 
 protected:
     /* ------------------- */
     /* Constructor members */
-    const PolarGrid grid_;
+    const PolarGrid<DefaultMemorySpace> grid_;
     const LevelCacheType level_cache_;
     const bool DirBC_Interior_;
 };

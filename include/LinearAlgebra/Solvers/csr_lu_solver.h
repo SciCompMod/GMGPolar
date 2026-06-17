@@ -42,7 +42,7 @@ namespace sparse_lu_helpers
  * @tparam T Numeric type (e.g. double, float).
  */
 
-template <typename T, class MemorySpace = Kokkos::DefaultExecutionSpace::memory_space>
+template <typename T, class MemorySpace = DefaultMemorySpace>
 class SparseLUSolver
 {
     using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,

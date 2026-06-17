@@ -3,9 +3,9 @@ using namespace gmgpolar;
 
 /* Remark: This injection is not scaled. */
 static KOKKOS_INLINE_FUNCTION void coarseNodeInjection(const int i_r_coarse, const int i_theta_coarse,
-                                                       const PolarGrid& fine_grid, const PolarGrid& coarse_grid,
-                                                       HostVector<double>& coarse_result,
-                                                       HostConstVector<double>& fine_values)
+                                                       const PolarGrid<DefaultMemorySpace>& fine_grid,
+                                                       const PolarGrid<DefaultMemorySpace>& coarse_grid,
+                                                       Vector<double>& coarse_result, ConstVector<double>& fine_values)
 {
     const int i_r_fine     = i_r_coarse * 2;
     const int i_theta_fine = i_theta_coarse * 2;
@@ -16,8 +16,9 @@ static KOKKOS_INLINE_FUNCTION void coarseNodeInjection(const int i_r_coarse, con
     coarse_result[coarse_index] = fine_values[fine_index];
 }
 
-void Interpolation::applyInjection(const PolarGrid& fine_grid, const PolarGrid& coarse_grid,
-                                   HostVector<double> coarse_result, HostConstVector<double> fine_values) const
+void Interpolation::applyInjection(const PolarGrid<DefaultMemorySpace>& fine_grid,
+                                   const PolarGrid<DefaultMemorySpace>& coarse_grid, Vector<double> coarse_result,
+                                   ConstVector<double> fine_values) const
 {
     assert(std::ssize(fine_values) == fine_grid.numberOfNodes());
     assert(std::ssize(coarse_result) == coarse_grid.numberOfNodes());
@@ -28,7 +29,7 @@ void Interpolation::applyInjection(const PolarGrid& fine_grid, const PolarGrid& 
     // The For loop matches circular access pattern */
     Kokkos::parallel_for(
         "Interpolation: Injection (Circular)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, 0}, // Starting point of the index space
             {coarse_grid.numberSmootherCircles(), coarse_grid.ntheta()} // Ending point of the index space
             ),
@@ -40,7 +41,7 @@ void Interpolation::applyInjection(const PolarGrid& fine_grid, const PolarGrid& 
     /* For loop matches radial access pattern */
     Kokkos::parallel_for(
         "Interpolation: Injection (Radial)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, coarse_grid.numberSmootherCircles()}, // Starting point of the index space
             {coarse_grid.ntheta(), coarse_grid.nr()} // Ending point of the index space
             ),

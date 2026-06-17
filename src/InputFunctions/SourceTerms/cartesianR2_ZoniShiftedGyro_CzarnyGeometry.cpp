@@ -7,7 +7,7 @@ void CartesianR2_ZoniShiftedGyro_CzarnyGeometry::initializeGeometry()
 }
 
 CartesianR2_ZoniShiftedGyro_CzarnyGeometry::CartesianR2_ZoniShiftedGyro_CzarnyGeometry(
-    PolarGrid const& grid, double Rmax, double inverse_aspect_ratio_epsilon, double ellipticity_e)
+    PolarGrid<DefaultMemorySpace> const& grid, double Rmax, double inverse_aspect_ratio_epsilon, double ellipticity_e)
     : grid_(grid)
     , Rmax(Rmax)
     , inverse_aspect_ratio_epsilon(inverse_aspect_ratio_epsilon)

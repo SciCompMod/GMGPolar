@@ -1,7 +1,7 @@
 #pragma once
 
 template <class LevelCacheType>
-ResidualTake<LevelCacheType>::ResidualTake(const PolarGrid& grid, const LevelCacheType& level_cache,
+ResidualTake<LevelCacheType>::ResidualTake(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
                                            bool DirBC_Interior)
     : Residual<LevelCacheType>(grid, level_cache, DirBC_Interior)
 {
@@ -10,8 +10,8 @@ ResidualTake<LevelCacheType>::ResidualTake(const PolarGrid& grid, const LevelCac
 /* ------------------ */
 /* result = rhs - A*x */
 template <class LevelCacheType>
-void ResidualTake<LevelCacheType>::computeResidual(HostVector<double> result, HostConstVector<double> rhs,
-                                                   HostConstVector<double> x) const
+void ResidualTake<LevelCacheType>::computeResidual(Vector<double> result, ConstVector<double> rhs,
+                                                   ConstVector<double> x) const
 {
     assert(result.size() == x.size());
 
@@ -21,7 +21,7 @@ void ResidualTake<LevelCacheType>::computeResidual(HostVector<double> result, Ho
     const int n = result.size();
 
     Kokkos::parallel_for(
-        "Residual Take: Subtract A*x from rhs", Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, n),
+        "Residual Take: Subtract A*x from rhs", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, n),
         KOKKOS_LAMBDA(const int i) { result[i] = rhs[i] - result[i]; });
 
     Kokkos::fence();

@@ -23,10 +23,10 @@ using namespace gmgpolar;
  */
 
 static KOKKOS_INLINE_FUNCTION void coarseNodeExtrapolatedRestriction(const int i_r_coarse, const int i_theta_coarse,
-                                                                     const PolarGrid& fine_grid,
-                                                                     const PolarGrid& coarse_grid,
-                                                                     HostVector<double>& coarse_result,
-                                                                     HostConstVector<double>& fine_values)
+                                                                     const PolarGrid<DefaultMemorySpace>& fine_grid,
+                                                                     const PolarGrid<DefaultMemorySpace>& coarse_grid,
+                                                                     Vector<double>& coarse_result,
+                                                                     ConstVector<double>& fine_values)
 {
     const int i_r     = i_r_coarse * 2;
     const int i_theta = i_theta_coarse * 2;
@@ -50,9 +50,9 @@ static KOKKOS_INLINE_FUNCTION void coarseNodeExtrapolatedRestriction(const int i
     coarse_result[coarse_grid.index(i_r_coarse, i_theta_coarse)] = value;
 }
 
-void Interpolation::applyExtrapolatedRestriction(const PolarGrid& fine_grid, const PolarGrid& coarse_grid,
-                                                 HostVector<double> coarse_result,
-                                                 HostConstVector<double> fine_values) const
+void Interpolation::applyExtrapolatedRestriction(const PolarGrid<DefaultMemorySpace>& fine_grid,
+                                                 const PolarGrid<DefaultMemorySpace>& coarse_grid,
+                                                 Vector<double> coarse_result, ConstVector<double> fine_values) const
 {
     assert(std::ssize(fine_values) == fine_grid.numberOfNodes());
     assert(std::ssize(coarse_result) == coarse_grid.numberOfNodes());
@@ -63,7 +63,7 @@ void Interpolation::applyExtrapolatedRestriction(const PolarGrid& fine_grid, con
     // The For loop matches circular access pattern */
     Kokkos::parallel_for(
         "Interpolation: Extrapolated Restriction (Circular)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, 0}, // Starting point of the index space
             {coarse_grid.numberSmootherCircles(), coarse_grid.ntheta()} // Ending point of the index space
             ),
@@ -76,7 +76,7 @@ void Interpolation::applyExtrapolatedRestriction(const PolarGrid& fine_grid, con
     /* For loop matches radial access pattern */
     Kokkos::parallel_for(
         "Interpolation: Extrapolated Restriction (Radial)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultHostExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, coarse_grid.numberSmootherCircles()}, // Starting point of the index space
             {coarse_grid.ntheta(), coarse_grid.nr()} // Ending point of the index space
             ),

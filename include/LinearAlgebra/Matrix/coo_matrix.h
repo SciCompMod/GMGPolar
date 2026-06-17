@@ -21,7 +21,7 @@
 namespace gmgpolar
 {
 
-template <typename T, class MemorySpace = Kokkos::DefaultExecutionSpace::memory_space>
+template <typename T, class MemorySpace = DefaultMemorySpace>
 class SparseMatrixCOO
 {
 public:
@@ -47,17 +47,17 @@ public:
     int columns() const;
     int non_zero_size() const;
 
-    const int& row_index(int nz_index) const;
-    void set_row_index(int nz_index, int row_index) const;
-    void increment_row_index(int nz_index) const;
+    KOKKOS_INLINE_FUNCTION const int& row_index(int nz_index) const;
+    KOKKOS_INLINE_FUNCTION void set_row_index(int nz_index, int row_index) const;
+    KOKKOS_INLINE_FUNCTION void increment_row_index(int nz_index) const;
 
-    const int& col_index(int nz_index) const;
-    void set_col_index(int nz_index, int col_index) const;
-    void increment_col_index(int nz_index) const;
+    KOKKOS_INLINE_FUNCTION const int& col_index(int nz_index) const;
+    KOKKOS_INLINE_FUNCTION void set_col_index(int nz_index, int col_index) const;
+    KOKKOS_INLINE_FUNCTION void increment_col_index(int nz_index) const;
 
-    const T& value(int nz_index) const;
-    void set_value(int nz_index, T value) const;
-    void increase_value(int nz_index, T value) const;
+    KOKKOS_INLINE_FUNCTION const T& value(int nz_index) const;
+    KOKKOS_INLINE_FUNCTION void set_value(int nz_index, T value) const;
+    KOKKOS_INLINE_FUNCTION void increase_value(int nz_index, T value) const;
 
     bool is_symmetric() const;
     void is_symmetric(bool value);
@@ -66,8 +66,12 @@ public:
     int* column_indices_data() const;
     T* values_data() const;
 
-    template <typename U>
-    friend std::ostream& operator<<(std::ostream& stream, const SparseMatrixCOO<U>& matrix);
+    template <typename U, class MemorySpace2>
+    friend std::ostream& operator<<(std::ostream& stream, const SparseMatrixCOO<U, MemorySpace2>& matrix);
+
+    // SparseMatrixCOO is a friend to versions of itself on different memory spaces to simplify the implementation of the copy operator
+    template <class, class>
+    friend class SparseMatrixCOO;
 
     void write_to_file(const std::string& filename) const;
 
@@ -81,18 +85,22 @@ private:
     bool is_symmetric_ = false;
 };
 
-template <typename U>
-std::ostream& operator<<(std::ostream& stream, const SparseMatrixCOO<U>& matrix)
+template <typename U, class MemorySpace>
+std::ostream& operator<<(std::ostream& stream, const SparseMatrixCOO<U, MemorySpace>& matrix)
 {
     stream << "SparseMatrixCOO: " << matrix.rows_ << " x " << matrix.columns_ << "\n";
     stream << "Number of non-zeros (nnz): " << matrix.nnz_ << "\n";
     if (matrix.is_symmetric_) {
         stream << "Matrix is symmetric.\n";
     }
+    // Create host mirrors and deep_copy from device if necessary.
+    // If the View is already on host, deep_copy is a no-op.
+    auto h_values         = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, matrix.values_);
+    auto h_column_indices = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, matrix.column_indices_);
+    auto h_row_indices    = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, matrix.row_indices_);
     stream << "Non-zero elements (row, column, value):\n";
     for (int i = 0; i < matrix.nnz_; ++i) {
-        stream << "(" << matrix.row_indices_(i) << ", " << matrix.column_indices_(i) << ", " << matrix.values_(i)
-               << ")\n";
+        stream << "(" << h_row_indices(i) << ", " << h_column_indices(i) << ", " << h_values(i) << ")\n";
     }
     return stream;
 }
@@ -287,21 +295,21 @@ int SparseMatrixCOO<T, MemorySpace>::non_zero_size() const
 }
 
 template <typename T, class MemorySpace>
-void SparseMatrixCOO<T, MemorySpace>::set_row_index(int nz_index, int row_index) const
+KOKKOS_INLINE_FUNCTION void SparseMatrixCOO<T, MemorySpace>::set_row_index(int nz_index, int row_index) const
 {
     assert(nz_index >= 0);
     assert(nz_index < this->nnz_);
     row_indices_(nz_index) = row_index;
 }
 template <typename T, class MemorySpace>
-const int& SparseMatrixCOO<T, MemorySpace>::row_index(int nz_index) const
+KOKKOS_INLINE_FUNCTION const int& SparseMatrixCOO<T, MemorySpace>::row_index(int nz_index) const
 {
     assert(nz_index >= 0);
     assert(nz_index < this->nnz_);
     return row_indices_(nz_index);
 }
 template <typename T, class MemorySpace>
-void SparseMatrixCOO<T, MemorySpace>::increment_row_index(int nz_index) const
+KOKKOS_INLINE_FUNCTION void SparseMatrixCOO<T, MemorySpace>::increment_row_index(int nz_index) const
 {
     assert(nz_index >= 0);
     assert(nz_index < this->nnz_);
@@ -309,21 +317,21 @@ void SparseMatrixCOO<T, MemorySpace>::increment_row_index(int nz_index) const
 }
 
 template <typename T, class MemorySpace>
-void SparseMatrixCOO<T, MemorySpace>::set_col_index(int nz_index, int col_index) const
+KOKKOS_INLINE_FUNCTION void SparseMatrixCOO<T, MemorySpace>::set_col_index(int nz_index, int col_index) const
 {
     assert(nz_index >= 0);
     assert(nz_index < nnz_);
     column_indices_(nz_index) = col_index;
 }
 template <typename T, class MemorySpace>
-const int& SparseMatrixCOO<T, MemorySpace>::col_index(int nz_index) const
+KOKKOS_INLINE_FUNCTION const int& SparseMatrixCOO<T, MemorySpace>::col_index(int nz_index) const
 {
     assert(nz_index >= 0);
     assert(nz_index < nnz_);
     return column_indices_(nz_index);
 }
 template <typename T, class MemorySpace>
-void SparseMatrixCOO<T, MemorySpace>::increment_col_index(int nz_index) const
+KOKKOS_INLINE_FUNCTION void SparseMatrixCOO<T, MemorySpace>::increment_col_index(int nz_index) const
 {
     assert(nz_index >= 0);
     assert(nz_index < nnz_);
@@ -331,21 +339,21 @@ void SparseMatrixCOO<T, MemorySpace>::increment_col_index(int nz_index) const
 }
 
 template <typename T, class MemorySpace>
-void SparseMatrixCOO<T, MemorySpace>::set_value(int nz_index, T value) const
+KOKKOS_INLINE_FUNCTION void SparseMatrixCOO<T, MemorySpace>::set_value(int nz_index, T value) const
 {
     assert(nz_index >= 0);
     assert(nz_index < nnz_);
     values_(nz_index) = value;
 }
 template <typename T, class MemorySpace>
-const T& SparseMatrixCOO<T, MemorySpace>::value(int nz_index) const
+KOKKOS_INLINE_FUNCTION const T& SparseMatrixCOO<T, MemorySpace>::value(int nz_index) const
 {
     assert(nz_index >= 0);
     assert(nz_index < nnz_);
     return values_(nz_index);
 }
 template <typename T, class MemorySpace>
-void SparseMatrixCOO<T, MemorySpace>::increase_value(int nz_index, T value) const
+KOKKOS_INLINE_FUNCTION void SparseMatrixCOO<T, MemorySpace>::increase_value(int nz_index, T value) const
 {
     assert(nz_index >= 0);
     assert(nz_index < nnz_);

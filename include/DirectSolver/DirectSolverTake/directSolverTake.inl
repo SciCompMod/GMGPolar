@@ -1,8 +1,8 @@
 #pragma once
 
 template <class LevelCacheType>
-DirectSolverTake<LevelCacheType>::DirectSolverTake(const PolarGrid& grid, const LevelCacheType& level_cache,
-                                                   bool DirBC_Interior)
+DirectSolverTake<LevelCacheType>::DirectSolverTake(const PolarGrid<DefaultMemorySpace>& grid,
+                                                   const LevelCacheType& level_cache, bool DirBC_Interior)
     : DirectSolver<LevelCacheType>(grid, level_cache, DirBC_Interior)
 #ifdef GMGPOLAR_USE_MUMPS
     , system_solver_(buildSolverMatrix())
@@ -14,7 +14,7 @@ DirectSolverTake<LevelCacheType>::DirectSolverTake(const PolarGrid& grid, const 
 }
 
 template <class LevelCacheType>
-void DirectSolverTake<LevelCacheType>::solveInPlace(HostVector<double> solution)
+void DirectSolverTake<LevelCacheType>::solveInPlace(Vector<double> solution)
 {
     // Adjusts the right-hand side vector to account for symmetry corrections.
     // This transforms the system matrixA * solution = rhs into the equivalent system:

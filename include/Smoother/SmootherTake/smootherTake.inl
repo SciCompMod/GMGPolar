@@ -1,7 +1,7 @@
 #pragma once
 
 template <class LevelCacheType>
-SmootherTake<LevelCacheType>::SmootherTake(const PolarGrid& grid, const LevelCacheType& level_cache,
+SmootherTake<LevelCacheType>::SmootherTake(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
                                            bool DirBC_Interior)
     : Smoother<LevelCacheType>(grid, level_cache, DirBC_Interior)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)
@@ -41,7 +41,7 @@ SmootherTake<LevelCacheType>::SmootherTake(const PolarGrid& grid, const LevelCac
 //   - The system is then solved in-place in temp, and the results
 //     are copied back to x.
 template <class LevelCacheType>
-void SmootherTake<LevelCacheType>::smoothing(HostVector<double> x, HostConstVector<double> rhs, HostVector<double> temp)
+void SmootherTake<LevelCacheType>::smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp)
 {
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());

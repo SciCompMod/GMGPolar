@@ -4,21 +4,21 @@ using namespace gmgpolar;
 
 TEST(PolarGridTest, DefaultConstructor)
 {
-    PolarGrid grid;
+    PolarGrid<Kokkos::HostSpace> grid;
 }
 
 TEST(PolarGridTest, VectorConstructor)
 {
     std::vector<double> radii  = {0.1, 0.2, 0.5, 0.9, 1.3};
     std::vector<double> angles = {0, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
-    PolarGrid grid(radii, angles);
+    PolarGrid<Kokkos::HostSpace> grid(radii, angles);
 }
 
 TEST(PolarGridTest, NumberOfNodes)
 {
     std::vector<double> radii  = {0.1, 0.2, 0.5, 0.9, 1.3};
     std::vector<double> angles = {0, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
-    PolarGrid grid(radii, angles);
+    PolarGrid<Kokkos::HostSpace> grid(radii, angles);
     ASSERT_EQ(grid.numberOfNodes(), radii.size() * (angles.size() - 1));
 }
 
@@ -26,7 +26,7 @@ TEST(PolarGridTest, AccessorsTest)
 {
     std::vector<double> radii  = {0.1, 0.2, 0.5, 0.9, 1.3};
     std::vector<double> angles = {0, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
-    PolarGrid grid(radii, angles);
+    PolarGrid<Kokkos::HostSpace> grid(radii, angles);
     ASSERT_DOUBLE_EQ(grid.radius(0), 0.1);
     ASSERT_DOUBLE_EQ(grid.radius(1), 0.2);
     ASSERT_DOUBLE_EQ(grid.radius(4), 1.3);
@@ -40,7 +40,7 @@ TEST(PolarGridTest, GridJumpTest)
     std::vector<double> radii  = {0.1, 0.2, 0.5, 0.9, 1.3};
     std::vector<double> angles = {0, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
     double splitting_radius    = 0.4;
-    PolarGrid grid(radii, angles, splitting_radius);
+    PolarGrid<Kokkos::HostSpace> grid(radii, angles, splitting_radius);
     ASSERT_DOUBLE_EQ(grid.radius(0), 0.1);
     ASSERT_DOUBLE_EQ(grid.radius(1), 0.2);
     ASSERT_DOUBLE_EQ(grid.radius(4), 1.3);
@@ -55,7 +55,7 @@ TEST(PolarGridTest, IndexingTest)
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
     double splitting_radius = 0.6;
-    PolarGrid grid(radii, angles, splitting_radius);
+    PolarGrid<Kokkos::HostSpace> grid(radii, angles, splitting_radius);
 
     for (int i = 0; i < grid.nr(); i++) {
         for (int j = 0; j < grid.ntheta(); j++) {
@@ -81,7 +81,7 @@ TEST(PolarGridTest, IndexingValuesTest)
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
     double splitting_radius = 0.6;
-    PolarGrid grid(radii, angles, splitting_radius);
+    PolarGrid<Kokkos::HostSpace> grid(radii, angles, splitting_radius);
 
     {
         int node_index = grid.index(2, 6);
@@ -126,7 +126,7 @@ TEST(PolarGridTest, CoordinatesTest)
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
     double splitting_radius = 0.6;
-    PolarGrid grid(radii, angles, splitting_radius);
+    PolarGrid<Kokkos::HostSpace> grid(radii, angles, splitting_radius);
 
     ASSERT_DOUBLE_EQ(grid.radius(3), 0.5);
     ASSERT_DOUBLE_EQ(grid.theta(2), M_PI / 8);
@@ -140,7 +140,7 @@ TEST(PolarGridTest, SpacingTest)
     std::vector<double> radii  = {0.1, 0.2, 0.25, 0.5, 0.8, 0.9, 1.3, 1.4, 2.0};
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
-    PolarGrid grid(radii, angles);
+    PolarGrid<Kokkos::HostSpace> grid(radii, angles);
 
     // Test radial spacings
     ASSERT_DOUBLE_EQ(grid.radialSpacing(0), 0.2 - 0.1);

@@ -217,7 +217,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<ResidualNormType, ResidualNormType::EUCLIDEAN>, // residualNormType
         std::integral_constant<double, 1e-8>, // absoluteTolerance
         std::integral_constant<double, 1e-8>, // relativeTolerance
-        std::integral_constant<int, 8>, // expected_iterations
+        std::integral_constant<int, 7>, // expected_iterations
         std::integral_constant<double, 2e-6>, // expected_l2_error
         std::integral_constant<double, 9e-6>, // expected_inf_error
         std::integral_constant<double, 0.7> // expected_residual_reduction
@@ -341,7 +341,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<ResidualNormType, ResidualNormType::INFINITY_NORM>, // residualNormType
         std::integral_constant<double, 1e-12>, // absoluteTolerance
         std::integral_constant<double, 1e-10>, // relativeTolerance
-        std::integral_constant<int, 4>, // expected_iterations
+        std::integral_constant<int, 3>, // expected_iterations
         std::integral_constant<double, 6e-6>, // expected_l2_error
         std::integral_constant<double, 2e-5>, // expected_inf_error
         std::integral_constant<double, 0.3> // expected_residual_reduction
@@ -630,8 +630,11 @@ TYPED_TEST_SUITE(PCGTestCase, gmgpolar_test_suite);
 template <class TestFixture>
 void run_gmgpolar()
 {
-    PolarGrid grid(TestFixture::R0, TestFixture::Rmax, TestFixture::nrExp, TestFixture::nthetaExp,
-                   TestFixture::refinementRadius, TestFixture::anisotropicFactor, TestFixture::divideBy2);
+    PolarGrid<Kokkos::HostSpace> grid_host(TestFixture::R0, TestFixture::Rmax, TestFixture::nrExp,
+                                           TestFixture::nthetaExp, TestFixture::refinementRadius,
+                                           TestFixture::anisotropicFactor, TestFixture::divideBy2);
+
+    PolarGrid<DefaultMemorySpace> grid(grid_host);
 
     const double inverse_aspect_ratio_epsilon = 0.3;
     const double ellipticity_e                = 1.4;
@@ -643,7 +646,7 @@ void run_gmgpolar()
     typename TestFixture::SourceTerm source_term(grid, TestFixture::Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
     typename TestFixture::ExactSolution exact_solution(TestFixture::Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
 
-    GMGPolar solver(grid, domain, profile_coefficients);
+    GMGPolar solver(grid_host, domain, profile_coefficients);
 
     bool paraview          = false;
     int preSmoothingSteps  = 1;
@@ -687,8 +690,8 @@ void run_gmgpolar()
     solver.solve(boundary_conditions, source_term);
 
     // --- Retrieve solution and associated grid --- //
-    HostVector<double> solution    = solver.solution();
-    const PolarGrid& solution_grid = solver.grid();
+    Vector<double> solution                           = solver.solution();
+    const PolarGrid<Kokkos::HostSpace>& solution_grid = solver.grid();
 
     if (TestFixture::verbose > 0) {
         solver.printTimings();

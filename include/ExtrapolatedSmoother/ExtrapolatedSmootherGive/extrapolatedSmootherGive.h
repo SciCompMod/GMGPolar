@@ -60,14 +60,15 @@ class ExtrapolatedSmootherGive : public ExtrapolatedSmoother<LevelCacheType>
 public:
     // Constructs the coupled circle-radial extrapolated smoother.
     // Builds the A_sc smoother matrices and prepares the solvers.
-    explicit ExtrapolatedSmootherGive(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior);
+    explicit ExtrapolatedSmootherGive(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
+                                      bool DirBC_Interior);
 
     // Performs one full coupled extrapolated smoothing sweep:
     //   BC -> WC -> BR -> WR
     // Parallel implementation using OpenMP:
     // Scedule every 2nd/4th line in parallel to avoid race conditions arising from the A-Give distribution.
     // Sceduling every 3rd line in parallel would also be possible, but is less natural for the 2 coloring.
-    void extrapolatedSmoothing(HostVector<double> x, HostConstVector<double> rhs, HostVector<double> temp) override;
+    void extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) override;
 
 private:
     /* ------------------- */
@@ -95,11 +96,11 @@ private:
     // - In-house: matrix stored in CSR; solver does not own the matrix.
 
 #ifdef GMGPOLAR_USE_MUMPS
-    using InnerBoundaryMatrix = SparseMatrixCOO<double, Kokkos::HostSpace>;
+    using InnerBoundaryMatrix = SparseMatrixCOO<double>;
     using InnerBoundarySolver = CooMumpsSolver;
 #else
-    using InnerBoundaryMatrix = SparseMatrixCSR<double, Kokkos::HostSpace>;
-    using InnerBoundarySolver = SparseLUSolver<double, Kokkos::HostSpace>;
+    using InnerBoundaryMatrix = SparseMatrixCSR<double>;
+    using InnerBoundarySolver = SparseLUSolver<double>;
 
     // Stored only for the in-house solver (CSR).
     InnerBoundaryMatrix inner_boundary_circle_matrix_;
@@ -123,14 +124,10 @@ public: // Public is required as Cuda needs to be able to get the address of fun
 
     // Compute temp = f_sc − A_sc^ortho * u_sc^ortho   (precomputed right-hand side)
     // where x = u_sc and rhs = f_sc
-    void applyAscOrthoBlackCircleSection(HostConstVector<double> x, HostConstVector<double> rhs,
-                                         HostVector<double> temp);
-    void applyAscOrthoWhiteCircleSection(HostConstVector<double> x, HostConstVector<double> rhs,
-                                         HostVector<double> temp);
-    void applyAscOrthoBlackRadialSection(HostConstVector<double> x, HostConstVector<double> rhs,
-                                         HostVector<double> temp);
-    void applyAscOrthoWhiteRadialSection(HostConstVector<double> x, HostConstVector<double> rhs,
-                                         HostVector<double> temp);
+    void applyAscOrthoBlackCircleSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
+    void applyAscOrthoWhiteCircleSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
+    void applyAscOrthoBlackRadialSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
+    void applyAscOrthoWhiteRadialSection(ConstVector<double> x, ConstVector<double> rhs, Vector<double> temp);
 
     /* ----------------- */
     /* Line-wise solvers */
@@ -144,10 +141,10 @@ public: // Public is required as Cuda needs to be able to get the address of fun
     // where:
     //   s in {Circle, Radial}  denotes the smoother section type,
     //   c in {Black, White}    denotes the line coloring.
-    void solveBlackCircleSection(HostVector<double> x, HostVector<double> temp);
-    void solveWhiteCircleSection(HostVector<double> x, HostVector<double> temp);
-    void solveBlackRadialSection(HostVector<double> x, HostVector<double> temp);
-    void solveWhiteRadialSection(HostVector<double> x, HostVector<double> temp);
+    void solveBlackCircleSection(Vector<double> x, Vector<double> temp);
+    void solveWhiteCircleSection(Vector<double> x, Vector<double> temp);
+    void solveBlackRadialSection(Vector<double> x, Vector<double> temp);
+    void solveWhiteRadialSection(Vector<double> x, Vector<double> temp);
 };
 
 #include "extrapolatedSmootherGive.inl"

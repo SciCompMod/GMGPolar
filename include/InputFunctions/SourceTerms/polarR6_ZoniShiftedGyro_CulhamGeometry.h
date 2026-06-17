@@ -12,14 +12,14 @@ namespace gmgpolar
 class PolarR6_ZoniShiftedGyro_CulhamGeometry
 {
 public:
-    explicit PolarR6_ZoniShiftedGyro_CulhamGeometry(PolarGrid const& grid, double Rmax);
+    explicit PolarR6_ZoniShiftedGyro_CulhamGeometry(PolarGrid<DefaultMemorySpace> const& grid, double Rmax);
     KOKKOS_DEFAULTED_FUNCTION
     PolarR6_ZoniShiftedGyro_CulhamGeometry(const PolarR6_ZoniShiftedGyro_CulhamGeometry&) = default;
 
     KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;
 
 private:
-    PolarGrid grid_;
+    PolarGrid<DefaultMemorySpace> grid_;
     const double Rmax = 1.3;
 };
 } // namespace gmgpolar

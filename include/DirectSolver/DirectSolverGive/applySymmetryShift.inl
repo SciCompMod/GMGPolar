@@ -5,16 +5,16 @@
 /* ----------------------- */
 
 template <class LevelCacheType>
-void DirectSolverGive<LevelCacheType>::applySymmetryShiftInnerBoundary(HostVector<double> x) const
+void DirectSolverGive<LevelCacheType>::applySymmetryShiftInnerBoundary(Vector<double> x) const
 {
-    const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
+    const PolarGrid<DefaultMemorySpace>& grid = DirectSolver<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = DirectSolver<LevelCacheType>::level_cache_;
 
     assert(DirectSolver<LevelCacheType>::DirBC_Interior_);
 
     Kokkos::parallel_for(
-        "DirectSolverGive: applySymmetryShiftInnerBoundary",
-        Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, 1), KOKKOS_LAMBDA(const int) {
+        "DirectSolverGive: applySymmetryShiftInnerBoundary", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, 1),
+        KOKKOS_LAMBDA(const int) {
             int i_r;
             double r;
             int global_index;
@@ -70,14 +70,14 @@ void DirectSolverGive<LevelCacheType>::applySymmetryShiftInnerBoundary(HostVecto
 }
 
 template <class LevelCacheType>
-void DirectSolverGive<LevelCacheType>::applySymmetryShiftOuterBoundary(HostVector<double> x) const
+void DirectSolverGive<LevelCacheType>::applySymmetryShiftOuterBoundary(Vector<double> x) const
 {
-    const PolarGrid& grid             = DirectSolver<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache = DirectSolver<LevelCacheType>::level_cache_;
+    const PolarGrid<DefaultMemorySpace>& grid = DirectSolver<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache         = DirectSolver<LevelCacheType>::level_cache_;
 
     Kokkos::parallel_for(
-        "DirectSolverGive: applySymmetryShiftOuterBoundary",
-        Kokkos::RangePolicy<Kokkos::DefaultHostExecutionSpace>(0, 1), KOKKOS_LAMBDA(const int) {
+        "DirectSolverGive: applySymmetryShiftOuterBoundary", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, 1),
+        KOKKOS_LAMBDA(const int) {
             int i_r;
             double r;
             int global_index;
@@ -133,10 +133,10 @@ void DirectSolverGive<LevelCacheType>::applySymmetryShiftOuterBoundary(HostVecto
 }
 
 template <class LevelCacheType>
-void DirectSolverGive<LevelCacheType>::applySymmetryShift(HostVector<double> x) const
+void DirectSolverGive<LevelCacheType>::applySymmetryShift(Vector<double> x) const
 {
-    const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
-    const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid<DefaultMemorySpace>& grid = DirectSolver<LevelCacheType>::grid_;
+    const bool DirBC_Interior                 = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
     assert(std::ssize(x) == grid.numberOfNodes());
     assert(grid.nr() >= 4);
