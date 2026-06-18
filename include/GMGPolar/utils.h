@@ -101,7 +101,7 @@ ConstVector<double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::soluti
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-const PolarGrid<Kokkos::HostSpace>& GMGPolar<DomainGeometry, DensityProfileCoefficients>::grid() const
+const PolarGrid<DefaultMemorySpace>& GMGPolar<DomainGeometry, DensityProfileCoefficients>::grid() const
 {
     return grid_;
 }
@@ -189,7 +189,7 @@ std::optional<double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::exac
 /* ---------------------------------------------------------------------- */
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(const std::filesystem::path& file_path,
-                                                                      const PolarGrid<Kokkos::HostSpace>& grid)
+                                                                      const PolarGrid<DefaultMemorySpace>& grid)
 {
     const auto filename = file_path.stem().string() + ".vtu";
 
@@ -207,13 +207,20 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(const std:
     // Write points
     file << "<Points>\n"
          << "<DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\">\n";
+    Vector < double Fx("Fx", grid.numberOfNodes());
+    Vector < double Fy("Fy", grid.numberOfNodes());
     int i_r, i_theta;
     double r, theta;
+    Kokkos::parallel_for(
+        "collect Fx,Fy", Kokkos::RangePolicy<ExecSpace>(0, grid.numberOfNodes()), KOKKOS_LAMBDA(int index) {
+            grid.multiIndex(index, i_r, i_theta);
+            r         = grid.radius(i_r);
+            theta     = grid.theta(i_theta);
+            Fx(index) = domain_geometry_.Fx(r, theta);
+            Fy(index) = domain_geometry_.Fy(r, theta);
+        });
     for (int index = 0; index < grid.numberOfNodes(); index++) {
-        grid.multiIndex(index, i_r, i_theta);
-        r     = grid.radius(i_r);
-        theta = grid.theta(i_theta);
-        file << domain_geometry_.Fx(r, theta) << " " << domain_geometry_.Fy(r, theta) << " " << 0 << "\n";
+        file << Fx(index) << " " << Fy(index) << " " << 0 << "\n";
     }
     file << "</DataArray>\n"
          << "</Points>\n";
