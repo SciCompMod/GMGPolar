@@ -207,8 +207,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(const std:
     // Write points
     file << "<Points>\n"
          << "<DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\">\n";
-    Vector < double Fx("Fx", grid.numberOfNodes());
-    Vector < double Fy("Fy", grid.numberOfNodes());
+    Vector < double> Fx("Fx", grid.numberOfNodes());
+    Vector < double> Fy("Fy", grid.numberOfNodes());
     int i_r, i_theta;
     double r, theta;
     Kokkos::parallel_for(

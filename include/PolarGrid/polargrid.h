@@ -75,10 +75,10 @@ public:
     KOKKOS_INLINE_FUNCTION double theta(const int theta_index) const;
 
     // Get all radii on the host
-    HostConstVector<double> radii_host() const;
+    HostConstVector<double> host_radii() const;
 
     // Get all angles on the host
-    HostConstVector<double> theta_host() const;
+    HostConstVector<double> host_theta() const;
 
     // Grid distances
     // Get the radial distance to the next consecutive radial node at a specified radial index.
