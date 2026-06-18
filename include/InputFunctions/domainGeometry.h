@@ -14,13 +14,13 @@ namespace concepts
 {
 
 template <typename T>
-concept DomainGeometry = requires(const T geom, double r, double theta) {
-    { geom.Fx(r, theta) } -> std::convertible_to<double>;
-    { geom.Fy(r, theta) } -> std::convertible_to<double>;
-    { geom.dFx_dr(r, theta) } -> std::convertible_to<double>;
-    { geom.dFy_dr(r, theta) } -> std::convertible_to<double>;
-    { geom.dFx_dt(r, theta) } -> std::convertible_to<double>;
-    { geom.dFy_dt(r, theta) } -> std::convertible_to<double>;
+concept DomainGeometry = requires(const T geometry, double r, double theta) {
+    { geometry.Fx(r, theta) } -> std::convertible_to<double>;
+    { geometry.Fy(r, theta) } -> std::convertible_to<double>;
+    { geometry.dFx_dr(r, theta) } -> std::convertible_to<double>;
+    { geometry.dFy_dr(r, theta) } -> std::convertible_to<double>;
+    { geometry.dFx_dtheta(r, theta) } -> std::convertible_to<double>;
+    { geometry.dFy_dtheta(r, theta) } -> std::convertible_to<double>;
 };
 
 } // namespace concepts

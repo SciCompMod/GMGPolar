@@ -20,8 +20,8 @@ public:
     KOKKOS_INLINE_FUNCTION double Fy(double r, double theta) const;
     KOKKOS_INLINE_FUNCTION double dFx_dr(double r, double theta) const;
     KOKKOS_INLINE_FUNCTION double dFy_dr(double r, double theta) const;
-    KOKKOS_INLINE_FUNCTION double dFx_dt(double r, double theta) const;
-    KOKKOS_INLINE_FUNCTION double dFy_dt(double r, double theta) const;
+    KOKKOS_INLINE_FUNCTION double dFx_dtheta(double r, double theta) const;
+    KOKKOS_INLINE_FUNCTION double dFy_dtheta(double r, double theta) const;
 
 private:
     const double Rmax                         = 1.3;

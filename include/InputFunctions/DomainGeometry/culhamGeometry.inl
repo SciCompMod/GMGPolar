@@ -45,7 +45,7 @@ KOKKOS_INLINE_FUNCTION double CulhamGeometry::dFy_dr(double r, double theta) con
 }
 
 // In earlier versions denoted by 'Jrt'
-KOKKOS_INLINE_FUNCTION double CulhamGeometry::dFx_dt(double r, double theta) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::dFx_dtheta(double r, double theta) const
 {
     double sin_theta           = std::sin(theta);
     double cos_theta           = std::cos(theta);
@@ -55,7 +55,7 @@ KOKKOS_INLINE_FUNCTION double CulhamGeometry::dFx_dt(double r, double theta) con
 }
 
 // In earlier versions denoted by 'Jtt'
-KOKKOS_INLINE_FUNCTION double CulhamGeometry::dFy_dt(double r, double theta) const
+KOKKOS_INLINE_FUNCTION double CulhamGeometry::dFy_dtheta(double r, double theta) const
 {
     double sin_theta           = std::sin(theta);
     double cos_theta           = std::cos(theta);
