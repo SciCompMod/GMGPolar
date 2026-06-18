@@ -62,9 +62,9 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_DirBC_Interior)
     ExtrapolatedSmootherGive smootherGive_operator(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherTake smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior);
 
-    Vector<double> rhs       = generate_random_sample_data(level.grid(), 69);
+    Vector<double> rhs   = generate_random_sample_data(level.grid(), 69);
     Vector<double> start = generate_random_sample_data(level.grid(), 24);
-    Vector<double> temp      = generate_random_sample_data(level.grid(), 8);
+    Vector<double> temp  = generate_random_sample_data(level.grid(), 8);
 
     Vector<double> solution_Give("solution_Give", start.size());
     Kokkos::deep_copy(solution_Give, start);
@@ -122,9 +122,9 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_AcossOrigin)
     ExtrapolatedSmootherGive smootherGive_operator(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherTake smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior);
 
-    Vector<double> rhs       = generate_random_sample_data(level.grid(), 69);
+    Vector<double> rhs   = generate_random_sample_data(level.grid(), 69);
     Vector<double> start = generate_random_sample_data(level.grid(), 24);
-    Vector<double> temp      = generate_random_sample_data(level.grid(), 8);
+    Vector<double> temp  = generate_random_sample_data(level.grid(), 8);
 
     Vector<double> solution_Give("solution_Give", start.size());
     Kokkos::deep_copy(solution_Give, start);
