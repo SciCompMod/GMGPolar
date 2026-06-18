@@ -2,8 +2,14 @@
 #include "../../include/PolarGrid/polargrid.h"
 using namespace gmgpolar;
 
-double compare_coords(PolarGrid<DefaultMemorySpace> grid, Vector<double> expected_r, Vector<double> expected_theta)
+double compare_coords(PolarGrid<DefaultMemorySpace> grid, std::vector<double> radii, std::vector<double> angles)
 {
+    Kokkos::View<double*, Kokkos::HostSpace> host_vector_radi(radii.data(), radii.size());
+    Kokkos::View<double*, Kokkos::HostSpace> host_vector_angles(angles.data(), angles.size());
+
+    auto expected_r     = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), host_vector_radi);
+    auto expected_theta = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), host_vector_angles);
+
     double r_err     = 0;
     double theta_err = 0;
 
@@ -78,13 +84,7 @@ TEST(PolarGridTest, AccessorsTest)
     std::vector<double> angles = {0, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
     PolarGrid<DefaultMemorySpace> grid(radii, angles);
 
-    Kokkos::View<double*, Kokkos::HostSpace> host_vector_radi(radii.data(), radii.size());
-    Kokkos::View<double*, Kokkos::HostSpace> host_vector_angles(angles.data(), angles.size());
-
-    auto expected_radii  = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), host_vector_radi);
-    auto expected_angles = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), host_vector_angles);
-
-    ASSERT_DOUBLE_EQ(compare_coords(grid, expected_radii, expected_angles), 0.);
+    ASSERT_DOUBLE_EQ(compare_coords(grid, radii, angles), 0.);
 }
 
 TEST(PolarGridTest, GridJumpTest)
@@ -93,12 +93,8 @@ TEST(PolarGridTest, GridJumpTest)
     std::vector<double> angles = {0, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
     double splitting_radius    = 0.4;
     PolarGrid<DefaultMemorySpace> grid(radii, angles, splitting_radius);
-    ASSERT_DOUBLE_EQ(grid.radius(0), 0.1);
-    ASSERT_DOUBLE_EQ(grid.radius(1), 0.2);
-    ASSERT_DOUBLE_EQ(grid.radius(4), 1.3);
-    ASSERT_DOUBLE_EQ(grid.theta(0), 0);
-    ASSERT_DOUBLE_EQ(grid.theta(1), M_PI / 8);
-    ASSERT_DOUBLE_EQ(grid.theta(4), M_PI + M_PI / 8);
+
+    ASSERT_DOUBLE_EQ(compare_coords(grid, radii, angles), 0.);
 }
 
 TEST(PolarGridTest, IndexingTest)
@@ -171,12 +167,8 @@ TEST(PolarGridTest, CoordinatesTest)
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
     double splitting_radius = 0.6;
     PolarGrid<DefaultMemorySpace> grid(radii, angles, splitting_radius);
-
-    ASSERT_DOUBLE_EQ(grid.radius(3), 0.5);
-    ASSERT_DOUBLE_EQ(grid.theta(2), M_PI / 8);
-
-    ASSERT_DOUBLE_EQ(grid.radius(7), 1.4);
-    ASSERT_DOUBLE_EQ(grid.theta(1), M_PI / 16);
+    // Check that coordinates are correct
+    ASSERT_DOUBLE_EQ(compare_coords(grid, radii, angles), 0.);
 }
 
 TEST(PolarGridTest, SpacingTest)
