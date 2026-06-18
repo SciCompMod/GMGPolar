@@ -4,8 +4,8 @@ using namespace gmgpolar;
 
 double compare_coords(PolarGrid<DefaultMemorySpace> grid, std::vector<double> radii, std::vector<double> angles)
 {
-    Kokkos::View<double*, Kokkos::HostSpace> host_vector_radi(radii.data(), radii.size());
-    Kokkos::View<double*, Kokkos::HostSpace> host_vector_angles(angles.data(), angles.size());
+    HostVector<double> host_vector_radi(radii.data(), radii.size());
+    HostVector<double> host_vector_angles(angles.data(), angles.size());
 
     auto expected_r     = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), host_vector_radi);
     auto expected_theta = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), host_vector_angles);
