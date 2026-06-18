@@ -83,8 +83,8 @@ void runTest(int divideBy2, std::ostream& outfile)
 
     double refinement_radius               = alpha_jump;
     std::optional<double> splitting_radius = std::nullopt;
-    PolarGrid<DefaultMemorySpace> grid(R0, Rmax, nr_exp, ntheta_exp, refinement_radius, anisotropic_factor,
-                                           divideBy2, splitting_radius);
+    PolarGrid<DefaultMemorySpace> grid(R0, Rmax, nr_exp, ntheta_exp, refinement_radius, anisotropic_factor, divideBy2,
+                                       splitting_radius);
     GMGPolar solver(grid, domain_geometry, coefficients);
 
     // PolarR6_ZoniGyro_ShafranovGeometry source_term(grid, Rmax, elongation_kappa, shift_delta);
