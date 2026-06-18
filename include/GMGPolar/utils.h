@@ -207,17 +207,18 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(const std:
     // Write points
     file << "<Points>\n"
          << "<DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\">\n";
-    Vector < double> Fx("Fx", grid.numberOfNodes());
-    Vector < double> Fy("Fy", grid.numberOfNodes());
+    Vector<double> Fx("Fx", grid.numberOfNodes());
+    Vector<double> Fy("Fy", grid.numberOfNodes());
     const DomainGeometry& domain_geometry = domain_geometry_;
     Kokkos::parallel_for(
-        "collect Fx,Fy", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, grid.numberOfNodes()), KOKKOS_LAMBDA(int index) {
-    int i_r, i_theta;
+        "collect Fx,Fy", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, grid.numberOfNodes()),
+        KOKKOS_LAMBDA(int index) {
+            int i_r, i_theta;
             grid.multiIndex(index, i_r, i_theta);
-            double r         = grid.radius(i_r);
-            double theta     = grid.theta(i_theta);
-            Fx(index) = domain_geometry.Fx(r, theta);
-            Fy(index) = domain_geometry.Fy(r, theta);
+            double r     = grid.radius(i_r);
+            double theta = grid.theta(i_theta);
+            Fx(index)    = domain_geometry.Fx(r, theta);
+            Fy(index)    = domain_geometry.Fy(r, theta);
         });
     for (int index = 0; index < grid.numberOfNodes(); index++) {
         file << Fx(index) << " " << Fy(index) << " " << 0 << "\n";
