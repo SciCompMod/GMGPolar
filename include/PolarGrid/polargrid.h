@@ -74,6 +74,12 @@ public:
     // Get the angle at a specific angular index
     KOKKOS_INLINE_FUNCTION double theta(const int theta_index) const;
 
+    // Get all radii on the host
+    HostConstVector<double> radii_host() const;
+
+    // Get all angles on the host
+    HostConstVector<double> theta_host() const;
+
     // Grid distances
     // Get the radial distance to the next consecutive radial node at a specified radial index.
     KOKKOS_INLINE_FUNCTION double radialSpacing(const int r_index) const;
