@@ -8,47 +8,54 @@
 using namespace gmgpolar;
 
 // Helper that computes the mathematically expected restriction value
-static double expected_restriction_value(const PolarGrid<Kokkos::HostSpace>& fine,
-                                         const PolarGrid<Kokkos::HostSpace>& coarse, HostConstVector<double> fine_vals,
+static double expected_restriction_value(const PolarGrid<DefaultMemorySpace>& fine,
+                                         const PolarGrid<DefaultMemorySpace>& coarse, ConstVector<double> fine_vals,
                                          int i_r_coarse, int i_theta_coarse)
 {
     int i_r     = i_r_coarse * 2;
     int i_theta = i_theta_coarse * 2;
 
-    // Angular indices with periodic wrapping
-    int i_theta_M2 = fine.wrapThetaIndex(i_theta - 2);
-    int i_theta_M1 = fine.wrapThetaIndex(i_theta - 1);
-    int i_theta_P1 = fine.wrapThetaIndex(i_theta + 1);
+    double result = 0;
+    Kokkos::parallel_reduce(
+        "restriction_test", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, 1),
+        KOKKOS_LAMBDA(int idx, double& local_result) {
+            // Angular indices with periodic wrapping
+            int i_theta_M2 = fine.wrapThetaIndex(i_theta - 2);
+            int i_theta_M1 = fine.wrapThetaIndex(i_theta - 1);
+            int i_theta_P1 = fine.wrapThetaIndex(i_theta + 1);
 
-    // Angular spacings
-    double k1 = fine.angularSpacing(i_theta_M2);
-    double k2 = fine.angularSpacing(i_theta_M1);
-    double k3 = fine.angularSpacing(i_theta);
-    double k4 = fine.angularSpacing(i_theta_P1);
+            // Angular spacings
+            double k1 = fine.angularSpacing(i_theta_M2);
+            double k2 = fine.angularSpacing(i_theta_M1);
+            double k3 = fine.angularSpacing(i_theta);
+            double k4 = fine.angularSpacing(i_theta_P1);
 
-    // Center + Angular contributions (always present)
-    double value = fine_vals[fine.index(i_r, i_theta)] + k2 / (k1 + k2) * fine_vals[fine.index(i_r, i_theta_M1)] +
-                   k3 / (k3 + k4) * fine_vals[fine.index(i_r, i_theta_P1)];
+            // Center + Angular contributions (always present)
+            local_result = fine_vals[fine.index(i_r, i_theta)] +
+                           k2 / (k1 + k2) * fine_vals[fine.index(i_r, i_theta_M1)] +
+                           k3 / (k3 + k4) * fine_vals[fine.index(i_r, i_theta_P1)];
 
-    // Left contributions (if not at inner boundary)
-    if (i_r_coarse > 0) {
-        double h1 = fine.radialSpacing(i_r - 2);
-        double h2 = fine.radialSpacing(i_r - 1);
-        value += h2 / (h1 + h2) * fine_vals[fine.index(i_r - 1, i_theta)] +
-                 h2 * k2 / ((h1 + h2) * (k1 + k2)) * fine_vals[fine.index(i_r - 1, i_theta_M1)] +
-                 h2 * k3 / ((h1 + h2) * (k3 + k4)) * fine_vals[fine.index(i_r - 1, i_theta_P1)];
-    }
+            // Left contributions (if not at inner boundary)
+            if (i_r_coarse > 0) {
+                double h1 = fine.radialSpacing(i_r - 2);
+                double h2 = fine.radialSpacing(i_r - 1);
+                local_result += h2 / (h1 + h2) * fine_vals[fine.index(i_r - 1, i_theta)] +
+                                h2 * k2 / ((h1 + h2) * (k1 + k2)) * fine_vals[fine.index(i_r - 1, i_theta_M1)] +
+                                h2 * k3 / ((h1 + h2) * (k3 + k4)) * fine_vals[fine.index(i_r - 1, i_theta_P1)];
+            }
 
-    // Right contributions (if not at outer boundary)
-    if (i_r_coarse < coarse.nr() - 1) {
-        double h3 = fine.radialSpacing(i_r);
-        double h4 = fine.radialSpacing(i_r + 1);
-        value += h3 / (h3 + h4) * fine_vals[fine.index(i_r + 1, i_theta)] +
-                 h3 * k2 / ((h3 + h4) * (k1 + k2)) * fine_vals[fine.index(i_r + 1, i_theta_M1)] +
-                 h3 * k3 / ((h3 + h4) * (k3 + k4)) * fine_vals[fine.index(i_r + 1, i_theta_P1)];
-    }
+            // Right contributions (if not at outer boundary)
+            if (i_r_coarse < coarse.nr() - 1) {
+                double h3 = fine.radialSpacing(i_r);
+                double h4 = fine.radialSpacing(i_r + 1);
+                local_result += h3 / (h3 + h4) * fine_vals[fine.index(i_r + 1, i_theta)] +
+                                h3 * k2 / ((h3 + h4) * (k1 + k2)) * fine_vals[fine.index(i_r + 1, i_theta_M1)] +
+                                h3 * k3 / ((h3 + h4) * (k3 + k4)) * fine_vals[fine.index(i_r + 1, i_theta_P1)];
+            }
+        },
+        result);
 
-    return value;
+    return result;
 }
 
 TEST(RestrictionTest, RestrictionMatchesStencil)
@@ -67,16 +74,13 @@ TEST(RestrictionTest, RestrictionMatchesStencil)
 
     I.applyRestriction(fine_grid, coarse_grid, coarse_result, fine_values);
 
-    PolarGrid<Kokkos::HostSpace> h_fine_grid(fine_grid);
-    PolarGrid<Kokkos::HostSpace> h_coarse_grid(coarse_grid);
-    auto h_fine_values   = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, fine_values);
     auto h_coarse_result = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, coarse_result);
 
     for (int i_r_coarse = 0; i_r_coarse < coarse_grid.nr(); ++i_r_coarse) {
         for (int i_theta_coarse = 0; i_theta_coarse < coarse_grid.ntheta(); ++i_theta_coarse) {
             double expected =
-                expected_restriction_value(h_fine_grid, h_coarse_grid, h_fine_values, i_r_coarse, i_theta_coarse);
-            double got = h_coarse_result[h_coarse_grid.index(i_r_coarse, i_theta_coarse)];
+                expected_restriction_value(fine_grid, coarse_grid, fine_values, i_r_coarse, i_theta_coarse);
+            double got = h_coarse_result[coarse_grid.index(i_r_coarse, i_theta_coarse)];
             ASSERT_NEAR(expected, got, 1e-10) << "Mismatch at (" << i_r_coarse << ", " << i_theta_coarse << ")";
         }
     }

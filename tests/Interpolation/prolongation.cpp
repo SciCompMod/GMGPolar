@@ -8,8 +8,8 @@
 using namespace gmgpolar;
 
 // Helper that computes the mathematically expected prolongation value
-static double expected_value(const PolarGrid<Kokkos::HostSpace>& coarse, const PolarGrid<Kokkos::HostSpace>& fine,
-                             HostConstVector<double> coarse_vals, int i_r, int i_theta)
+static double expected_value(const PolarGrid<DefaultMemorySpace>& coarse, const PolarGrid<DefaultMemorySpace>& fine,
+                             ConstVector<double> coarse_vals, int i_r, int i_theta)
 {
     int i_r_coarse     = i_r / 2;
     int i_theta_coarse = i_theta / 2;
@@ -17,42 +17,51 @@ static double expected_value(const PolarGrid<Kokkos::HostSpace>& coarse, const P
     bool r_even = (i_r % 2 == 0);
     bool t_even = (i_theta % 2 == 0);
 
-    if (r_even && t_even) {
-        // Node coincides with a coarse node
-        return coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)];
-    }
+    double result = 0;
+    Kokkos::parallel_reduce(
+        "prolongation_test", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, 1),
+        KOKKOS_LAMBDA(int idx, double& local_result) {
+            if (r_even && t_even) {
+                // Node coincides with a coarse node
+                local_result = coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)];
+            }
 
-    if (!r_even && t_even) {
-        // Radial midpoint
-        double h1 = fine.radialSpacing(i_r - 1);
-        double h2 = fine.radialSpacing(i_r);
+            else if (!r_even && t_even) {
+                // Radial midpoint
+                double h1 = fine.radialSpacing(i_r - 1);
+                double h2 = fine.radialSpacing(i_r);
 
-        return (h1 * coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)] +
-                h2 * coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse)]) /
-               (h1 + h2);
-    }
+                local_result = (h1 * coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)] +
+                                h2 * coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse)]) /
+                               (h1 + h2);
+            }
 
-    if (r_even && !t_even) {
-        // Angular midpoint
-        double k1 = fine.angularSpacing(i_theta - 1);
-        double k2 = fine.angularSpacing(i_theta);
+            else if (r_even && !t_even) {
+                // Angular midpoint
+                double k1 = fine.angularSpacing(i_theta - 1);
+                double k2 = fine.angularSpacing(i_theta);
 
-        return (k1 * coarse_vals[coarse.index(i_r_coarse, t_even ? i_theta_coarse : i_theta_coarse)] +
-                k2 * coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)]) /
-               (k1 + k2);
-    }
+                local_result = (k1 * coarse_vals[coarse.index(i_r_coarse, t_even ? i_theta_coarse : i_theta_coarse)] +
+                                k2 * coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)]) /
+                               (k1 + k2);
+            }
+            else {
+                // Center of coarse cell
+                double h1 = fine.radialSpacing(i_r - 1);
+                double h2 = fine.radialSpacing(i_r);
+                double k1 = fine.angularSpacing(i_theta - 1);
+                double k2 = fine.angularSpacing(i_theta);
 
-    // Center of coarse cell
-    double h1 = fine.radialSpacing(i_r - 1);
-    double h2 = fine.radialSpacing(i_r);
-    double k1 = fine.angularSpacing(i_theta - 1);
-    double k2 = fine.angularSpacing(i_theta);
+                local_result = (h1 * k1 * coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)] +
+                                h2 * k1 * coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse)] +
+                                h1 * k2 * coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)] +
+                                h2 * k2 * coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse + 1)]) /
+                               ((h1 + h2) * (k1 + k2));
+            }
+        },
+        result);
 
-    return (h1 * k1 * coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)] +
-            h2 * k1 * coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse)] +
-            h1 * k2 * coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)] +
-            h2 * k2 * coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse + 1)]) /
-           ((h1 + h2) * (k1 + k2));
+    return result;
 }
 
 TEST(ProlongationTest, ProlongationMatchesStencil)
@@ -71,16 +80,12 @@ TEST(ProlongationTest, ProlongationMatchesStencil)
 
     I.applyProlongation(coarse_grid, fine_grid, fine_result, coarse_values);
 
-    PolarGrid<Kokkos::HostSpace> h_fine_grid(fine_grid);
-    PolarGrid<Kokkos::HostSpace> h_coarse_grid(coarse_grid);
-
-    auto h_coarse_values = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, coarse_values);
-    auto h_fine_result   = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, fine_result);
+    auto h_fine_result = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, fine_result);
 
     for (int i_r = 0; i_r < fine_grid.nr(); ++i_r) {
         for (int i_theta = 0; i_theta < fine_grid.ntheta(); ++i_theta) {
-            double expected = expected_value(h_coarse_grid, h_fine_grid, h_coarse_values, i_r, i_theta);
-            double got      = h_fine_result[h_fine_grid.index(i_r, i_theta)];
+            double expected = expected_value(coarse_grid, fine_grid, coarse_values, i_r, i_theta);
+            double got      = h_fine_result[fine_grid.index(i_r, i_theta)];
             ASSERT_NEAR(expected, got, 1e-10) << "Mismatch at (" << i_r << ", " << i_theta << ")";
         }
     }

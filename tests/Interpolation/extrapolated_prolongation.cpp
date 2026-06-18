@@ -9,8 +9,8 @@
 using namespace gmgpolar;
 
 // Helper that computes the mathematically expected extrapolated prolongation value
-static double expected_extrapolated_value(const PolarGrid<Kokkos::HostSpace>& coarse,
-                                          const PolarGrid<Kokkos::HostSpace>& fine, HostConstVector<double> coarse_vals,
+static double expected_extrapolated_value(const PolarGrid<DefaultMemorySpace>& coarse,
+                                          const PolarGrid<DefaultMemorySpace>& fine, ConstVector<double> coarse_vals,
                                           int i_r, int i_theta)
 {
     int i_r_coarse     = i_r / 2;
@@ -19,26 +19,35 @@ static double expected_extrapolated_value(const PolarGrid<Kokkos::HostSpace>& co
     bool r_even = (i_r % 2 == 0);
     bool t_even = (i_theta % 2 == 0);
 
-    if (r_even && t_even) {
-        // Node coincides with a coarse node
-        return coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)];
-    }
+    double result = 0;
+    Kokkos::parallel_reduce(
+        "extrap_prolongation_test", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, 1),
+        KOKKOS_LAMBDA(int idx, double& local_result) {
+            if (r_even && t_even) {
+                // Node coincides with a coarse node
+                local_result = coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)];
+            }
 
-    if (!r_even && t_even) {
-        // Radial midpoint - arithmetic mean of left and right
-        return 0.5 * (coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)] +
-                      coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse)]);
-    }
+            else if (!r_even && t_even) {
+                // Radial midpoint - arithmetic mean of left and right
+                local_result = 0.5 * (coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)] +
+                                      coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse)]);
+            }
 
-    if (r_even && !t_even) {
-        // Angular midpoint - arithmetic mean of bottom and top
-        return 0.5 * (coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)] +
-                      coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)]);
-    }
+            else if (r_even && !t_even) {
+                // Angular midpoint - arithmetic mean of bottom and top
+                local_result = 0.5 * (coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)] +
+                                      coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)]);
+            }
+            else {
+                // Center of coarse cell - arithmetic mean of diagonal nodes (bottom-right + top-left)
+                local_result = 0.5 * (coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse)] +
+                                      coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)]);
+            }
+        },
+        result);
 
-    // Center of coarse cell - arithmetic mean of diagonal nodes (bottom-right + top-left)
-    return 0.5 * (coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse)] +
-                  coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)]);
+    return result;
 }
 
 TEST(ExtrapolatedProlongationTest, ExtrapolatedProlongationMatchesStencil)
@@ -50,15 +59,10 @@ TEST(ExtrapolatedProlongationTest, ExtrapolatedProlongationMatchesStencil)
     PolarGrid<DefaultMemorySpace> fine_grid(fine_radii, fine_angles);
     PolarGrid<DefaultMemorySpace> coarse_grid = coarseningGrid(fine_grid);
 
-    PolarGrid<Kokkos::HostSpace> h_fine_grid(fine_grid);
-    PolarGrid<Kokkos::HostSpace> h_coarse_grid(coarse_grid);
-
     Interpolation I(/*DirBC*/ true);
 
-    HostVector<double> h_coarse_values = generate_random_sample_data(h_coarse_grid, 1234, 0.0, 1.0);
+    Vector<double> coarse_values = generate_random_sample_data(coarse_grid, 1234, 0.0, 1.0);
     Vector<double> fine_result("fine_result", fine_grid.numberOfNodes());
-
-    auto coarse_values = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_coarse_values);
 
     I.applyExtrapolatedProlongation(coarse_grid, fine_grid, fine_result, coarse_values);
 
@@ -66,8 +70,8 @@ TEST(ExtrapolatedProlongationTest, ExtrapolatedProlongationMatchesStencil)
 
     for (int i_r = 0; i_r < fine_grid.nr(); ++i_r) {
         for (int i_theta = 0; i_theta < fine_grid.ntheta(); ++i_theta) {
-            double expected = expected_extrapolated_value(h_coarse_grid, h_fine_grid, h_coarse_values, i_r, i_theta);
-            double got      = h_fine_result[h_fine_grid.index(i_r, i_theta)];
+            double expected = expected_extrapolated_value(coarse_grid, fine_grid, coarse_values, i_r, i_theta);
+            double got      = h_fine_result[fine_grid.index(i_r, i_theta)];
             ASSERT_NEAR(expected, got, 1e-10) << "Mismatch at (" << i_r << ", " << i_theta << ")";
         }
     }

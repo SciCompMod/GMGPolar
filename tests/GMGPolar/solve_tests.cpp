@@ -693,8 +693,7 @@ void run_gmgpolar()
     solver.solve(boundary_conditions, source_term);
 
     // --- Retrieve solution and associated grid --- //
-    Vector<double> solution                           = solver.solution();
-    const PolarGrid<Kokkos::HostSpace>& solution_grid = solver.grid();
+    Vector<double> solution = solver.solution();
 
     if (TestFixture::verbose > 0) {
         solver.printTimings();
