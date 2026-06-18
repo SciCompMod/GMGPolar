@@ -28,7 +28,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     if (extrapolation_ != ExtrapolationType::NONE) {
         const double precision = 1e-12;
         if (!checkUniformRefinement(grid_, precision)) {
-            std::cerr << "[Extrapolation Warning] Finest PolarGrid<Kokkos::HostSpace> is not from a single uniform "
+            std::cerr << "[Extrapolation Warning] Finest PolarGrid is not from a single uniform "
                          "refinement.\n";
         }
     }
@@ -59,8 +59,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     t_setup_createLevels_ = std::chrono::duration<double>(end_setup_createLevels - start_setup_createLevels).count();
 
     if (paraview_) {
-        PolarGrid<Kokkos::HostSpace> coarsestGrid(levels_.back().grid());
-        writeToVTK("output_coarsest_grid", coarsestGrid);
+        writeToVTK("output_coarsest_grid", levels_.back().grid());
     }
 
     // ------------------------------------- //
@@ -69,9 +68,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     interpolation_ = std::make_unique<Interpolation>(DirBC_Interior_);
 
     if (verbose_ > 0) {
-        PolarGrid<Kokkos::HostSpace> finestGrid(levels_[0].grid());
-        PolarGrid<Kokkos::HostSpace> coarsestGrid(levels_[number_of_levels_ - 1].grid());
-        printSettings(finestGrid, coarsestGrid);
+        printSettings(levels_[0].grid(), levels_[number_of_levels_ - 1].grid());
     }
 
     // ------------------------------- //
@@ -392,7 +389,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::build_rhs_f(
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printSettings(
-    const PolarGrid<Kokkos::HostSpace>& finest_grid, const PolarGrid<Kokkos::HostSpace>& coarsest_grid) const
+    const PolarGrid<DefaultMemorySpace>& finest_grid, const PolarGrid<DefaultMemorySpace>& coarsest_grid) const
 {
 
     std::cout << "------------------------------\n";

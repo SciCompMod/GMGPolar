@@ -213,7 +213,9 @@ private:
 
     /* ------------- */
     /* Visualization */
+public: // Public due to cuda restrictions
     void writeToVTK(const std::filesystem::path& file_path, const PolarGrid<DefaultMemorySpace>& grid);
+private:
     void writeToVTK(const std::filesystem::path& file_path,
                     const Level<DomainGeometry, DensityProfileCoefficients>& level,
                     HostConstVector<double> grid_function);

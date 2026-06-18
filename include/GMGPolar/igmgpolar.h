@@ -154,7 +154,7 @@ protected:
     /* ------------------------------------ */
     /* Grid Configuration & Input Functions */
     /* ------------------------------------ */
-    const PolarGrid<Kokkos::HostSpace>& grid_;
+    const PolarGrid<DefaultMemorySpace>& grid_;
 
     /* ------------------ */
     /* Control Parameters */
