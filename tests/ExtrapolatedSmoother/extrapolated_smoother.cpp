@@ -63,7 +63,7 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_DirBC_Interior)
     ExtrapolatedSmootherTake smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior);
 
     Vector<double> rhs       = generate_random_sample_data(level.grid(), 69);
-    HostVector<double> start = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 24);
+    Vector<double> start = generate_random_sample_data(level.grid(), 24);
     Vector<double> temp      = generate_random_sample_data(level.grid(), 8);
 
     Vector<double> solution_Give("solution_Give", start.size());
@@ -123,7 +123,7 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_AcossOrigin)
     ExtrapolatedSmootherTake smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior);
 
     Vector<double> rhs       = generate_random_sample_data(level.grid(), 69);
-    HostVector<double> start = generate_random_sample_data(PolarGrid<Kokkos::HostSpace>(level.grid()), 24);
+    Vector<double> start = generate_random_sample_data(level.grid(), 24);
     Vector<double> temp      = generate_random_sample_data(level.grid(), 8);
 
     Vector<double> solution_Give("solution_Give", start.size());
