@@ -14,10 +14,11 @@ static double expected_restriction_value(const PolarGrid<DefaultMemorySpace>& fi
 {
     int i_r     = i_r_coarse * 2;
     int i_theta = i_theta_coarse * 2;
-    HostVector<double> result_h("host_res", 1);
-    Vector<double> result_d("device_res", 1);
-    Kokkos::parallel_for(
-        "restriction_test", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, 1), KOKKOS_LAMBDA(int idx) {
+
+    double result = 0;
+    Kokkos::parallel_reduce(
+        "restriction_test", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, 1),
+        KOKKOS_LAMBDA(int idx, double& local_result) {
             // Angular indices with periodic wrapping
             int i_theta_M2 = fine.wrapThetaIndex(i_theta - 2);
             int i_theta_M1 = fine.wrapThetaIndex(i_theta - 1);
@@ -30,30 +31,31 @@ static double expected_restriction_value(const PolarGrid<DefaultMemorySpace>& fi
             double k4 = fine.angularSpacing(i_theta_P1);
 
             // Center + Angular contributions (always present)
-            result_d(0) = fine_vals[fine.index(i_r, i_theta)] +
-                          k2 / (k1 + k2) * fine_vals[fine.index(i_r, i_theta_M1)] +
-                          k3 / (k3 + k4) * fine_vals[fine.index(i_r, i_theta_P1)];
+            local_result = fine_vals[fine.index(i_r, i_theta)] +
+                           k2 / (k1 + k2) * fine_vals[fine.index(i_r, i_theta_M1)] +
+                           k3 / (k3 + k4) * fine_vals[fine.index(i_r, i_theta_P1)];
 
             // Left contributions (if not at inner boundary)
             if (i_r_coarse > 0) {
                 double h1 = fine.radialSpacing(i_r - 2);
                 double h2 = fine.radialSpacing(i_r - 1);
-                result_d(0) += h2 / (h1 + h2) * fine_vals[fine.index(i_r - 1, i_theta)] +
-                               h2 * k2 / ((h1 + h2) * (k1 + k2)) * fine_vals[fine.index(i_r - 1, i_theta_M1)] +
-                               h2 * k3 / ((h1 + h2) * (k3 + k4)) * fine_vals[fine.index(i_r - 1, i_theta_P1)];
+                local_result += h2 / (h1 + h2) * fine_vals[fine.index(i_r - 1, i_theta)] +
+                                h2 * k2 / ((h1 + h2) * (k1 + k2)) * fine_vals[fine.index(i_r - 1, i_theta_M1)] +
+                                h2 * k3 / ((h1 + h2) * (k3 + k4)) * fine_vals[fine.index(i_r - 1, i_theta_P1)];
             }
 
             // Right contributions (if not at outer boundary)
             if (i_r_coarse < coarse.nr() - 1) {
                 double h3 = fine.radialSpacing(i_r);
                 double h4 = fine.radialSpacing(i_r + 1);
-                result_d(0) += h3 / (h3 + h4) * fine_vals[fine.index(i_r + 1, i_theta)] +
-                               h3 * k2 / ((h3 + h4) * (k1 + k2)) * fine_vals[fine.index(i_r + 1, i_theta_M1)] +
-                               h3 * k3 / ((h3 + h4) * (k3 + k4)) * fine_vals[fine.index(i_r + 1, i_theta_P1)];
+                local_result += h3 / (h3 + h4) * fine_vals[fine.index(i_r + 1, i_theta)] +
+                                h3 * k2 / ((h3 + h4) * (k1 + k2)) * fine_vals[fine.index(i_r + 1, i_theta_M1)] +
+                                h3 * k3 / ((h3 + h4) * (k3 + k4)) * fine_vals[fine.index(i_r + 1, i_theta_P1)];
             }
-        });
-    Kokkos::deep_copy(result_h, result_d);
-    return result_h(0);
+        },
+        result);
+
+    return result;
 }
 
 TEST(RestrictionTest, RestrictionMatchesStencil)

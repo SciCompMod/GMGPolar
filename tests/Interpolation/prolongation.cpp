@@ -16,14 +16,14 @@ static double expected_value(const PolarGrid<DefaultMemorySpace>& coarse, const 
 
     bool r_even = (i_r % 2 == 0);
     bool t_even = (i_theta % 2 == 0);
-    HostVector<double> result_h("host_res", 1);
-    Vector<double> result_d("device_res", 1);
 
-    Kokkos::parallel_for(
-        "prolongation_test", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, 1), KOKKOS_LAMBDA(int idx) {
+    double result = 0;
+    Kokkos::parallel_reduce(
+        "prolongation_test", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, 1),
+        KOKKOS_LAMBDA(int idx, double& local_result) {
             if (r_even && t_even) {
                 // Node coincides with a coarse node
-                result_d(0) = coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)];
+                local_result = coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)];
             }
 
             else if (!r_even && t_even) {
@@ -31,9 +31,9 @@ static double expected_value(const PolarGrid<DefaultMemorySpace>& coarse, const 
                 double h1 = fine.radialSpacing(i_r - 1);
                 double h2 = fine.radialSpacing(i_r);
 
-                result_d(0) = (h1 * coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)] +
-                               h2 * coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse)]) /
-                              (h1 + h2);
+                local_result = (h1 * coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)] +
+                                h2 * coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse)]) /
+                               (h1 + h2);
             }
 
             else if (r_even && !t_even) {
@@ -41,9 +41,9 @@ static double expected_value(const PolarGrid<DefaultMemorySpace>& coarse, const 
                 double k1 = fine.angularSpacing(i_theta - 1);
                 double k2 = fine.angularSpacing(i_theta);
 
-                result_d(0) = (k1 * coarse_vals[coarse.index(i_r_coarse, t_even ? i_theta_coarse : i_theta_coarse)] +
-                               k2 * coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)]) /
-                              (k1 + k2);
+                local_result = (k1 * coarse_vals[coarse.index(i_r_coarse, t_even ? i_theta_coarse : i_theta_coarse)] +
+                                k2 * coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)]) /
+                               (k1 + k2);
             }
             else {
                 // Center of coarse cell
@@ -52,15 +52,16 @@ static double expected_value(const PolarGrid<DefaultMemorySpace>& coarse, const 
                 double k1 = fine.angularSpacing(i_theta - 1);
                 double k2 = fine.angularSpacing(i_theta);
 
-                result_d(0) = (h1 * k1 * coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)] +
-                               h2 * k1 * coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse)] +
-                               h1 * k2 * coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)] +
-                               h2 * k2 * coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse + 1)]) /
-                              ((h1 + h2) * (k1 + k2));
+                local_result = (h1 * k1 * coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)] +
+                                h2 * k1 * coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse)] +
+                                h1 * k2 * coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)] +
+                                h2 * k2 * coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse + 1)]) /
+                               ((h1 + h2) * (k1 + k2));
             }
-        });
-    Kokkos::deep_copy(result_h, result_d);
-    return result_h(0);
+        },
+        result);
+
+    return result;
 }
 
 TEST(ProlongationTest, ProlongationMatchesStencil)

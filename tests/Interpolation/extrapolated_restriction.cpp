@@ -16,32 +16,33 @@ static double expected_extrapolated_restriction_value(const PolarGrid<DefaultMem
     int i_r     = i_r_coarse * 2;
     int i_theta = i_theta_coarse * 2;
 
-    HostVector<double> result_h("host_res", 1);
-    Vector<double> result_d("device_res", 1);
-    Kokkos::parallel_for(
-        "extrap_restriction_test", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, 1), KOKKOS_LAMBDA(int idx) {
+    double result = 0;
+    Kokkos::parallel_reduce(
+        "extrap_restriction_test", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, 1),
+        KOKKOS_LAMBDA(const int idx, double& local_result) {
             // Angular indices with periodic wrapping
             int i_theta_M1 = fine.wrapThetaIndex(i_theta - 1);
             int i_theta_P1 = fine.wrapThetaIndex(i_theta + 1);
 
             // Center + Angular contributions (always present)
-            result_d(0) = fine_vals[fine.index(i_r, i_theta)] + 0.5 * fine_vals[fine.index(i_r, i_theta_M1)] +
-                          0.5 * fine_vals[fine.index(i_r, i_theta_P1)];
+            local_result = fine_vals[fine.index(i_r, i_theta)] + 0.5 * fine_vals[fine.index(i_r, i_theta_M1)] +
+                           0.5 * fine_vals[fine.index(i_r, i_theta_P1)];
 
             // Left contributions (if not at inner boundary)
             if (i_r_coarse > 0) {
-                result_d(0) += 0.5 * fine_vals[fine.index(i_r - 1, i_theta)] +
-                               0.5 * fine_vals[fine.index(i_r - 1, i_theta_P1)]; // Top-Left diagonal
+                local_result += 0.5 * fine_vals[fine.index(i_r - 1, i_theta)] +
+                                0.5 * fine_vals[fine.index(i_r - 1, i_theta_P1)]; // Top-Left diagonal
             }
 
             // Right contributions (if not at outer boundary)
             if (i_r_coarse < coarse.nr() - 1) {
-                result_d(0) += 0.5 * fine_vals[fine.index(i_r + 1, i_theta)] +
-                               0.5 * fine_vals[fine.index(i_r + 1, i_theta_M1)]; // Bottom-Right diagonal
+                local_result += 0.5 * fine_vals[fine.index(i_r + 1, i_theta)] +
+                                0.5 * fine_vals[fine.index(i_r + 1, i_theta_M1)]; // Bottom-Right diagonal
             }
-        });
-    Kokkos::deep_copy(result_h, result_d);
-    return result_h(0);
+        },
+        result);
+
+    return result;
 }
 
 TEST(ExtrapolatedRestrictionTest, ExtrapolatedRestrictionMatchesStencil)

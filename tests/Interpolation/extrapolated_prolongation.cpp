@@ -19,35 +19,35 @@ static double expected_extrapolated_value(const PolarGrid<DefaultMemorySpace>& c
     bool r_even = (i_r % 2 == 0);
     bool t_even = (i_theta % 2 == 0);
 
-    HostVector<double> result_h("host_res", 1);
-    Vector<double> result_d("device_res", 1);
-
-    Kokkos::parallel_for(
-        "extrap_prolongation_test", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, 1), KOKKOS_LAMBDA(int idx) {
+    double result = 0;
+    Kokkos::parallel_reduce(
+        "extrap_prolongation_test", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, 1),
+        KOKKOS_LAMBDA(int idx, double& local_result) {
             if (r_even && t_even) {
                 // Node coincides with a coarse node
-                result_d(0) = coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)];
+                local_result = coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)];
             }
 
             else if (!r_even && t_even) {
                 // Radial midpoint - arithmetic mean of left and right
-                result_d(0) = 0.5 * (coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)] +
-                                     coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse)]);
+                local_result = 0.5 * (coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)] +
+                                      coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse)]);
             }
 
             else if (r_even && !t_even) {
                 // Angular midpoint - arithmetic mean of bottom and top
-                result_d(0) = 0.5 * (coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)] +
-                                     coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)]);
+                local_result = 0.5 * (coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)] +
+                                      coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)]);
             }
             else {
                 // Center of coarse cell - arithmetic mean of diagonal nodes (bottom-right + top-left)
-                result_d(0) = 0.5 * (coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse)] +
-                                     coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)]);
+                local_result = 0.5 * (coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse)] +
+                                      coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)]);
             }
-        });
-    Kokkos::deep_copy(result_h, result_d);
-    return result_h(0);
+        },
+        result);
+
+    return result;
 }
 
 TEST(ExtrapolatedProlongationTest, ExtrapolatedProlongationMatchesStencil)
