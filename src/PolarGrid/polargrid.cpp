@@ -34,7 +34,7 @@ PolarGrid<MemorySpace>::PolarGrid(std::vector<double> radii, std::vector<double>
     // Initializes radial_spacings_, angular_spacings_
     initializeDistances();
     // Initializes smoothers splitting radius for circle/radial indexing.
-    initializeLineSplitting(splitting_radius); /**/
+    initializeLineSplitting(splitting_radius);
 }
 
 // Constructor to initialize grid using parameters from GMGPolar.
