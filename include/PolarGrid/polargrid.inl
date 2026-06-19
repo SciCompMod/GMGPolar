@@ -83,6 +83,18 @@ KOKKOS_INLINE_FUNCTION double PolarGrid<MemorySpace>::theta(const int theta_inde
 }
 
 template <class MemorySpace>
+HostConstVector<double> PolarGrid<MemorySpace>::host_radii() const
+{
+    return Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), radii_);
+}
+
+template <class MemorySpace>
+HostConstVector<double> PolarGrid<MemorySpace>::host_theta() const
+{
+    return Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), angles_);
+}
+
+template <class MemorySpace>
 KOKKOS_INLINE_FUNCTION double PolarGrid<MemorySpace>::smootherSplittingRadius() const
 {
     return smoother_splitting_radius_;

@@ -2,9 +2,9 @@
 using namespace gmgpolar;
 
 template <class MemorySpace>
-Vector<double, MemorySpace> PolarGrid<MemorySpace>::RadialAnisotropicDivision(double R0, double R, const int nr_exp,
-                                                                              double refinement_radius,
-                                                                              const int anisotropic_factor) const
+HostVector<double> PolarGrid<MemorySpace>::RadialAnisotropicDivision(double R0, double R, const int nr_exp,
+                                                                     double refinement_radius,
+                                                                     const int anisotropic_factor) const
 {
     // Calculate the percentage of refinement_radius.
     const double percentage = (refinement_radius - R0) / (R - R0);
@@ -28,7 +28,7 @@ Vector<double, MemorySpace> PolarGrid<MemorySpace>::RadialAnisotropicDivision(do
         n_elems_equi++;
     double uniform_distance = (R - R0) / n_elems_equi;
     int nr                  = n_elems_equi + 1;
-    Vector<double, MemorySpace> r_temp2("r_temp2", nr);
+    HostVector<double> r_temp2("r_temp2", nr);
     for (int i = 0; i < nr - 1; i++)
         r_temp2[i] = R0 + i * uniform_distance;
     r_temp2[nr - 1] = R;
@@ -92,7 +92,7 @@ Vector<double, MemorySpace> PolarGrid<MemorySpace>::RadialAnisotropicDivision(do
     // group all in r_tmp
     nr = n_elems_equi - n_elems_refined + r_set.size() + 1;
 
-    Vector<double, MemorySpace> r_temp("r_temp", nr);
+    HostVector<double> r_temp("r_temp", nr);
     for (int i = 0; i < se; i++)
         r_temp[i] = r_temp2[i];
     itr = r_set.begin();

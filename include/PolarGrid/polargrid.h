@@ -74,6 +74,12 @@ public:
     // Get the angle at a specific angular index
     KOKKOS_INLINE_FUNCTION double theta(const int theta_index) const;
 
+    // Get all radii on the host
+    HostConstVector<double> host_radii() const;
+
+    // Get all angles on the host
+    HostConstVector<double> host_theta() const;
+
     // Grid distances
     // Get the radial distance to the next consecutive radial node at a specified radial index.
     KOKKOS_INLINE_FUNCTION double radialSpacing(const int r_index) const;
@@ -130,8 +136,7 @@ private:
     // Check parameter validity
     void checkParameters(Vector<double, Kokkos::HostSpace> radii, Vector<double, Kokkos::HostSpace> angles) const;
 
-    // Cuda restriction: functions containing a KOKKOS_LAMBDA must be public
-public:
+public: // Cuda restriction: functions containing a KOKKOS_LAMBDA must be public
     // Initialize radial_spacings_, angular_spacings_
     void initializeDistances();
 
@@ -143,20 +148,25 @@ private:
     //      If the splitting radius is greater than or equal to R, only Circular indexing is used.
     void initializeLineSplitting(std::optional<double> splitting_radius);
 
+public: // Cuda restriction: functions containing a KOKKOS_LAMBDA must be public
     // Construct radial divisions for grid generation.
     void constructRadialDivisions(double R0, double R, const int nr_exp, double refinement_radius,
                                   const int anisotropic_factor);
     // Construct angular divisions for grid generation.
     void constructAngularDivisions(const int ntheta_exp, const int nr);
 
+private:
     // Refine the grid by dividing radial and angular divisions by 2.
     void refineGrid(const int divideBy2);
+
+public: // Cuda restriction: functions containing a KOKKOS_LAMBDA must be public
     Vector<double, MemorySpace> divideVector(Vector<double, MemorySpace> vec, const int divideBy2) const;
 
+private:
     // Help constrcut radii_ when an anisotropic radial division is requested
     // Implementation in src/PolarGrid/anisotropic_division.cpp
-    Vector<double, MemorySpace> RadialAnisotropicDivision(double R0, double R, const int nr_exp,
-                                                          double refinement_radius, const int anisotropic_factor) const;
+    HostVector<double> RadialAnisotropicDivision(double R0, double R, const int nr_exp, double refinement_radius,
+                                                 const int anisotropic_factor) const;
 };
 
 template class PolarGrid<Kokkos::HostSpace>;

@@ -28,7 +28,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     if (extrapolation_ != ExtrapolationType::NONE) {
         const double precision = 1e-12;
         if (!checkUniformRefinement(grid_, precision)) {
-            std::cerr << "[Extrapolation Warning] Finest PolarGrid<Kokkos::HostSpace> is not from a single uniform "
+            std::cerr << "[Extrapolation Warning] Finest PolarGrid is not from a single uniform "
                          "refinement.\n";
         }
     }
@@ -59,8 +59,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     t_setup_createLevels_ = std::chrono::duration<double>(end_setup_createLevels - start_setup_createLevels).count();
 
     if (paraview_) {
-        PolarGrid<Kokkos::HostSpace> coarsestGrid(levels_.back().grid());
-        writeToVTK("output_coarsest_grid", coarsestGrid);
+        writeToVTK("output_coarsest_grid", levels_.back().grid());
     }
 
     // ------------------------------------- //
@@ -69,9 +68,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     interpolation_ = std::make_unique<Interpolation>(DirBC_Interior_);
 
     if (verbose_ > 0) {
-        PolarGrid<Kokkos::HostSpace> finestGrid(levels_[0].grid());
-        PolarGrid<Kokkos::HostSpace> coarsestGrid(levels_[number_of_levels_ - 1].grid());
-        printSettings(finestGrid, coarsestGrid);
+        printSettings(levels_[0].grid(), levels_[number_of_levels_ - 1].grid());
     }
 
     // ------------------------------- //
@@ -155,7 +152,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 int GMGPolar<DomainGeometry, DensityProfileCoefficients>::chooseNumberOfLevels(
-    const PolarGrid<Kokkos::HostSpace>& finestGrid)
+    const PolarGrid<DefaultMemorySpace>& finestGrid)
 {
     constexpr int minRadialNodes      = 5;
     constexpr int minAngularDivisions = 4;
@@ -392,7 +389,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::build_rhs_f(
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printSettings(
-    const PolarGrid<Kokkos::HostSpace>& finest_grid, const PolarGrid<Kokkos::HostSpace>& coarsest_grid) const
+    const PolarGrid<DefaultMemorySpace>& finest_grid, const PolarGrid<DefaultMemorySpace>& coarsest_grid) const
 {
 
     std::cout << "------------------------------\n";
@@ -445,8 +442,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printSettings(
     std::cout << "---------- PolarGrid ---------\n";
     std::cout << "------------------------------\n";
 
-    std::cout << "r ∈ [" << finest_grid.radius(0) << ", " << finest_grid.radius(finest_grid.nr() - 1)
-              << "], θ ∈ [0, 2π]\n";
+    HostConstVector<double> h_radius_finest = finest_grid.host_radii();
+    HostConstVector<double> h_theta_finest  = finest_grid.host_theta();
+
+    std::cout << "r ∈ [" << h_radius_finest(0) << ", " << h_radius_finest(finest_grid.nr() - 1) << "], θ ∈ [0, 2π]\n";
     std::cout << "(nr × nθ) = (" << finest_grid.nr() << " × " << finest_grid.ntheta() << ") → (" << coarsest_grid.nr()
               << " × " << coarsest_grid.ntheta() << ")\n";
     std::cout << "Smoother: " << finest_grid.numberSmootherCircles() << " circles\n";
@@ -591,14 +590,16 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printSettings(
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 bool GMGPolar<DomainGeometry, DensityProfileCoefficients>::checkUniformRefinement(
-    const PolarGrid<Kokkos::HostSpace>& grid, double tolerance) const
+    const PolarGrid<DefaultMemorySpace>& grid, double tolerance) const
 {
+    HostConstVector<double> h_radius = grid.host_radii();
+    HostConstVector<double> h_theta  = grid.host_theta();
     // Radial direction
     for (int i_r = 1; i_r < grid.nr() - 1; i_r += 2) {
-        double left         = grid.radius(i_r - 1);
-        double right        = grid.radius(i_r + 1);
+        double left         = h_radius(i_r - 1);
+        double right        = h_radius(i_r + 1);
         double expected_mid = 0.5 * (left + right);
-        double actual_mid   = grid.radius(i_r);
+        double actual_mid   = h_radius(i_r);
 
         double diff = std::abs(expected_mid - actual_mid);
         if (diff > tolerance) {
@@ -612,10 +613,10 @@ bool GMGPolar<DomainGeometry, DensityProfileCoefficients>::checkUniformRefinemen
 
     // Angular direction
     for (int i_theta = 1; i_theta < grid.ntheta(); i_theta += 2) {
-        double left         = grid.theta(i_theta - 1);
-        double right        = grid.theta(i_theta + 1);
+        double left         = h_theta(i_theta - 1);
+        double right        = h_theta(i_theta + 1);
         double expected_mid = 0.5 * (left + right);
-        double actual_mid   = grid.theta(i_theta);
+        double actual_mid   = h_theta(i_theta);
 
         double diff = std::abs(expected_mid - actual_mid);
         if (diff > tolerance) {
