@@ -190,8 +190,8 @@ int GMGPolar<DomainGeometry, DensityProfileCoefficients>::chooseNumberOfLevels(c
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
-    const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f)
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(const LevelType& level,
+                                                                            Vector<double> rhs_f)
 {
     const PolarGrid& grid = level.grid();
     assert(std::ssize(rhs_f) == grid.numberOfNodes());
@@ -331,9 +331,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 template <concepts::BoundaryConditions BoundaryConditions, concepts::SourceTerm SourceTerm>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::build_rhs_f(
-    const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f,
-    const BoundaryConditions& boundary_conditions, const SourceTerm& source_term)
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::build_rhs_f(const LevelType& level, Vector<double> rhs_f,
+                                                                       const BoundaryConditions& boundary_conditions,
+                                                                       const SourceTerm& source_term)
 {
     const PolarGrid& grid(level.grid());
     assert(std::ssize(rhs_f) == grid.numberOfNodes());

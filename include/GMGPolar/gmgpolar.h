@@ -18,6 +18,8 @@ template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoeff
 class GMGPolar : public IGMGPolar
 {
 public:
+    using LevelType = Level<DomainGeometry, DensityProfileCoefficients>;
+
     /* ---------------------------------------------------------------------- */
     /* Constructor & Initialization                                           */
     /* ---------------------------------------------------------------------- */
@@ -94,7 +96,7 @@ private:
     /* ---------------- */
     /* Multigrid levels */
     int number_of_levels_;
-    std::vector<Level<DomainGeometry, DensityProfileCoefficients>> levels_;
+    std::vector<LevelType> levels_;
 
     /* ---------------------- */
     /* Interpolation operator */
@@ -145,9 +147,9 @@ public: // Public due to cuda restrictions
     /* --------------- */
     /* Setup Functions */
     template <concepts::BoundaryConditions BoundaryConditions, concepts::SourceTerm SourceTerm>
-    void build_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f,
-                     const BoundaryConditions& boundary_conditions, const SourceTerm& source_term);
-    void discretize_rhs_f(const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f);
+    void build_rhs_f(const LevelType& level, Vector<double> rhs_f, const BoundaryConditions& boundary_conditions,
+                     const SourceTerm& source_term);
+    void discretize_rhs_f(const LevelType& level, Vector<double> rhs_f);
 
     /* --------------- */
     /* Solve Functions */
@@ -165,19 +167,13 @@ private:
     void solveMultigrid(double& initial_residual_norm, double& current_residual_norm,
                         double& current_relative_residual_norm);
     void solvePCG(double& initial_residual_norm, double& current_residual_norm, double& current_relative_residual_norm);
-    double residualNorm(const ResidualNormType& norm_type,
-                        const Level<DomainGeometry, DensityProfileCoefficients>& level,
-                        ConstVector<double> residual) const;
-    void evaluateExactError(Level<DomainGeometry, DensityProfileCoefficients>& level,
-                            HostConstVector<double> exact_solution);
-    void updateResidualNorms(Level<DomainGeometry, DensityProfileCoefficients>& level, int iteration,
-                             double& initial_residual_norm, double& current_residual_norm,
-                             double& current_relative_residual_norm);
+    double residualNorm(const ResidualNormType& norm_type, const LevelType& level, ConstVector<double> residual) const;
+    void evaluateExactError(LevelType& level, HostConstVector<double> exact_solution);
+    void updateResidualNorms(LevelType& level, int iteration, double& initial_residual_norm,
+                             double& current_residual_norm, double& current_relative_residual_norm);
     void initRhsHierarchy();
-    void applyMultigridIterations(Level<DomainGeometry, DensityProfileCoefficients>& level, MultigridCycleType cycle,
-                                  int iterations);
-    void applyExtrapolatedMultigridIterations(Level<DomainGeometry, DensityProfileCoefficients>& level,
-                                              MultigridCycleType cycle, int iterations);
+    void applyMultigridIterations(LevelType& level, MultigridCycleType cycle, int iterations);
+    void applyExtrapolatedMultigridIterations(LevelType& level, MultigridCycleType cycle, int iterations);
 
     /* ----------------- */
     /* Print information */
@@ -213,8 +209,7 @@ public: // Public due to cuda restrictions
     void writeToVTK(const std::filesystem::path& file_path, const PolarGrid& grid);
 
 private:
-    void writeToVTK(const std::filesystem::path& file_path,
-                    const Level<DomainGeometry, DensityProfileCoefficients>& level,
+    void writeToVTK(const std::filesystem::path& file_path, const LevelType& level,
                     HostConstVector<double> grid_function);
 };
 
