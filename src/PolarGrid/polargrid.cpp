@@ -71,13 +71,13 @@ void PolarGrid<MemorySpace>::constructRadialDivisions(double R0, double R, const
                                          Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
     // r_temp contains the values before we refine one last time for extrapolation.
     // Therefore we first consider 2^(nr_exp-1) points.
-    AllocatableVector<double, Kokkos::HostSpace> h_r_temp;
+    HostAllocatableVector<double> h_r_temp;
     if (anisotropic_factor == 0) {
         // nr = 2**(nr_exp-1) + 1
         int nr                  = (1 << (nr_exp - 1)) + 1;
         double uniform_distance = (R - R0) / (nr - 1);
         assert(uniform_distance > 0.0);
-        h_r_temp = Vector<double, MemorySpace>("r_temp", nr);
+        h_r_temp = HostVector<double>("r_temp", nr);
         for (int i = 0; i < nr - 1; i++) {
             h_r_temp[i] = R0 + i * uniform_distance;
         }
