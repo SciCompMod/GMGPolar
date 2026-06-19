@@ -2,7 +2,7 @@
 using namespace gmgpolar;
 
 PolarR6_SonnendruckerGyro_ShafranovGeometry::PolarR6_SonnendruckerGyro_ShafranovGeometry(
-    PolarGrid<DefaultMemorySpace> const& grid, double Rmax, double elongation_kappa, double shift_delta)
+    PolarGrid const& grid, double Rmax, double elongation_kappa, double shift_delta)
     : grid_(grid)
     , Rmax(Rmax)
     , elongation_kappa(elongation_kappa)

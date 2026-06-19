@@ -4,7 +4,7 @@ using namespace gmgpolar;
 /* ---------------------------------------------------------------------- */
 /* Constructor & Initialization                                           */
 /* ---------------------------------------------------------------------- */
-IGMGPolar::IGMGPolar(const PolarGrid<DefaultMemorySpace>& grid)
+IGMGPolar::IGMGPolar(const PolarGrid& grid)
     : grid_(grid)
     // General solver output and visualization settings
     , verbose_(0)

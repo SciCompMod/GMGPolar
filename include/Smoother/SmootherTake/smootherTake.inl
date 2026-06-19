@@ -1,7 +1,7 @@
 #pragma once
 
 template <class LevelCacheType>
-SmootherTake<LevelCacheType>::SmootherTake(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
+SmootherTake<LevelCacheType>::SmootherTake(const PolarGrid& grid, const LevelCacheType& level_cache,
                                            bool DirBC_Interior)
     : Smoother<LevelCacheType>(grid, level_cache, DirBC_Interior)
     , circle_tridiagonal_solver_(grid.ntheta(), grid.numberSmootherCircles(), true)

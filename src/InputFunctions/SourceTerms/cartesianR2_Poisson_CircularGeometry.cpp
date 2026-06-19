@@ -1,7 +1,7 @@
 #include <InputFunctions/SourceTerms/cartesianR2_Poisson_CircularGeometry.h>
 using namespace gmgpolar;
 
-CartesianR2_Poisson_CircularGeometry::CartesianR2_Poisson_CircularGeometry(PolarGrid<DefaultMemorySpace> const& grid,
+CartesianR2_Poisson_CircularGeometry::CartesianR2_Poisson_CircularGeometry(PolarGrid const& grid,
                                                                            double Rmax)
     : grid_(grid)
     , Rmax(Rmax)

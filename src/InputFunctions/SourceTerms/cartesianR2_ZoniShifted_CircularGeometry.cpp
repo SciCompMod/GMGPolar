@@ -2,7 +2,7 @@
 using namespace gmgpolar;
 
 CartesianR2_ZoniShifted_CircularGeometry::CartesianR2_ZoniShifted_CircularGeometry(
-    PolarGrid<DefaultMemorySpace> const& grid, double Rmax)
+    PolarGrid const& grid, double Rmax)
     : grid_(grid)
     , Rmax(Rmax)
 {

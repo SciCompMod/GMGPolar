@@ -525,8 +525,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::applyExtrapolation(in
                                                                               Vector<double> fine_values,
                                                                               ConstVector<double> coarse_values)
 {
-    const PolarGrid<DefaultMemorySpace>& fineGrid(levels_[current_level].grid());
-    const PolarGrid<DefaultMemorySpace>& coarseGrid(levels_[current_level + 1].grid());
+    const PolarGrid& fineGrid(levels_[current_level].grid());
+    const PolarGrid& coarseGrid(levels_[current_level + 1].grid());
 
     assert(std::ssize(fine_values) == fineGrid.numberOfNodes());
     assert(std::ssize(coarse_values) == coarseGrid.numberOfNodes());
@@ -591,7 +591,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::initRhsHierarchy()
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::evaluateExactError(
-    const PolarGrid<DefaultMemorySpace>& grid, ConstVector<double> discrete_solution,
+    const PolarGrid& grid, ConstVector<double> discrete_solution,
     HostConstVector<double> analytical_solution_host, Vector<double> error)
 {
     // Transfer the exact solution values from host to device memory for error computation.
@@ -610,7 +610,7 @@ std::pair<double, double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::computeAnalyticalSolutionOnHost(
-    const PolarGrid<DefaultMemorySpace>& grid, HostVector<double> analytical_solution_host,
+    const PolarGrid& grid, HostVector<double> analytical_solution_host,
     const ExactSolution& exact_solution)
 {
     assert(std::ssize(analytical_solution_host) == grid.numberOfNodes());

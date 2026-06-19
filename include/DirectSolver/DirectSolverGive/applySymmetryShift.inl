@@ -7,7 +7,7 @@
 template <class LevelCacheType>
 void DirectSolverGive<LevelCacheType>::applySymmetryShiftInnerBoundary(Vector<double> x) const
 {
-    const PolarGrid<DefaultMemorySpace>& grid = DirectSolver<LevelCacheType>::grid_;
+    const PolarGrid& grid = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache         = DirectSolver<LevelCacheType>::level_cache_;
 
     assert(DirectSolver<LevelCacheType>::DirBC_Interior_);
@@ -72,7 +72,7 @@ void DirectSolverGive<LevelCacheType>::applySymmetryShiftInnerBoundary(Vector<do
 template <class LevelCacheType>
 void DirectSolverGive<LevelCacheType>::applySymmetryShiftOuterBoundary(Vector<double> x) const
 {
-    const PolarGrid<DefaultMemorySpace>& grid = DirectSolver<LevelCacheType>::grid_;
+    const PolarGrid& grid = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache         = DirectSolver<LevelCacheType>::level_cache_;
 
     Kokkos::parallel_for(
@@ -135,7 +135,7 @@ void DirectSolverGive<LevelCacheType>::applySymmetryShiftOuterBoundary(Vector<do
 template <class LevelCacheType>
 void DirectSolverGive<LevelCacheType>::applySymmetryShift(Vector<double> x) const
 {
-    const PolarGrid<DefaultMemorySpace>& grid = DirectSolver<LevelCacheType>::grid_;
+    const PolarGrid& grid = DirectSolver<LevelCacheType>::grid_;
     const bool DirBC_Interior                 = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
     assert(std::ssize(x) == grid.numberOfNodes());

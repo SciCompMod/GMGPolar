@@ -4,7 +4,7 @@ namespace extrapolated_smoother_take
 {
 
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoCircleTake(const int i_r, const int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
+nodeApplyAscOrthoCircleTake(const int i_r, const int i_theta, const PolarGrid& grid,
                             const bool DirBC_Interior, ConstVector<double>& x, ConstVector<double>& rhs,
                             Vector<double>& result, ConstVector<double>& arr, ConstVector<double>& att,
                             ConstVector<double>& art, ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
@@ -185,7 +185,7 @@ nodeApplyAscOrthoCircleTake(const int i_r, const int i_theta, const PolarGrid<De
 }
 
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid, bool DirBC_Interior,
+nodeApplyAscOrthoRadialTake(int i_r, int i_theta, const PolarGrid& grid, bool DirBC_Interior,
                             ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
                             ConstVector<double>& arr, const ConstVector<double>& att, ConstVector<double>& art,
                             const ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
@@ -466,7 +466,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(C
 {
     using extrapolated_smoother_take::nodeApplyAscOrthoCircleTake;
 
-    const PolarGrid<DefaultMemorySpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache         = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior                 = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
@@ -506,7 +506,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(C
 {
     using extrapolated_smoother_take::nodeApplyAscOrthoCircleTake;
 
-    const PolarGrid<DefaultMemorySpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache         = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior                 = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
@@ -546,7 +546,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(C
 {
     using extrapolated_smoother_take::nodeApplyAscOrthoRadialTake;
 
-    const PolarGrid<DefaultMemorySpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache         = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior                 = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
@@ -586,7 +586,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(C
 {
     using extrapolated_smoother_take::nodeApplyAscOrthoRadialTake;
 
-    const PolarGrid<DefaultMemorySpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache         = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior                 = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 

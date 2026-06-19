@@ -2,7 +2,7 @@
 using namespace gmgpolar;
 
 Refined_ZoniShiftedGyro_CircularGeometry::Refined_ZoniShiftedGyro_CircularGeometry(
-    PolarGrid<DefaultMemorySpace> const& grid, double Rmax)
+    PolarGrid const& grid, double Rmax)
     : grid_(grid)
     , Rmax(Rmax)
 {

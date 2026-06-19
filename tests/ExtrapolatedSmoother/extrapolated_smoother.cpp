@@ -41,7 +41,7 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_DirBC_Interior)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto tmp_grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
+    auto tmp_grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -58,7 +58,7 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_DirBC_Interior)
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
-    const PolarGrid<DefaultMemorySpace>& grid = level.grid();
+    const PolarGrid& grid = level.grid();
     ExtrapolatedSmootherGive smootherGive_operator(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherTake smootherTake_operator(level.grid(), level.levelCache(), DirBC_Interior);
 
@@ -102,7 +102,7 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_AcossOrigin)
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto tmp_grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
+    auto tmp_grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -164,7 +164,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior()
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto tmp_grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
+    auto tmp_grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -180,7 +180,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior()
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
-    const PolarGrid<DefaultMemorySpace>& grid = level.grid();
+    const PolarGrid& grid = level.grid();
     DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
     ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
@@ -255,7 +255,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin()
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto tmp_grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
+    auto tmp_grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -271,7 +271,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin()
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
-    const PolarGrid<DefaultMemorySpace>& grid = level.grid();
+    const PolarGrid& grid = level.grid();
     DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
     ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
@@ -347,7 +347,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior_SmallestGrid()
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto tmp_grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
+    auto tmp_grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -363,7 +363,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior_SmallestGrid()
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
-    const PolarGrid<DefaultMemorySpace>& grid = level.grid();
+    const PolarGrid& grid = level.grid();
     DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
     ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
@@ -439,7 +439,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin_SmallestGrid()
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto tmp_grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
+    auto tmp_grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -455,7 +455,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin_SmallestGrid()
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
-    const PolarGrid<DefaultMemorySpace>& grid = level.grid();
+    const PolarGrid& grid = level.grid();
     DirectSolverGive solver_op(level.grid(), level.levelCache(), DirBC_Interior);
     ResidualGive residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherGive extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
@@ -532,7 +532,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior()
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto tmp_grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
+    auto tmp_grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -548,7 +548,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior()
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
-    const PolarGrid<DefaultMemorySpace>& grid = level.grid();
+    const PolarGrid& grid = level.grid();
     DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior);
     ResidualTake residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
@@ -623,7 +623,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin()
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto tmp_grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
+    auto tmp_grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -639,7 +639,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin()
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
-    const PolarGrid<DefaultMemorySpace>& grid = level.grid();
+    const PolarGrid& grid = level.grid();
     DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior);
     ResidualTake residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
@@ -713,7 +713,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior_SmallestGri
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto tmp_grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
+    auto tmp_grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -729,7 +729,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior_SmallestGri
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
-    const PolarGrid<DefaultMemorySpace>& grid = level.grid();
+    const PolarGrid& grid = level.grid();
     DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior);
     ResidualTake residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);
@@ -803,7 +803,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin_SmallestGrid(
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto tmp_grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
+    auto tmp_grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -819,7 +819,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin_SmallestGrid(
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
-    const PolarGrid<DefaultMemorySpace>& grid = level.grid();
+    const PolarGrid& grid = level.grid();
     DirectSolverTake solver_op(level.grid(), level.levelCache(), DirBC_Interior);
     ResidualTake residual_op(level.grid(), level.levelCache(), DirBC_Interior);
     ExtrapolatedSmootherTake extrapolated_smoother_op(level.grid(), level.levelCache(), DirBC_Interior);

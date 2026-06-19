@@ -2,7 +2,7 @@
 using namespace gmgpolar;
 
 CartesianR2_SonnendruckerGyro_CircularGeometry::CartesianR2_SonnendruckerGyro_CircularGeometry(
-    PolarGrid<DefaultMemorySpace> const& grid, double Rmax)
+    PolarGrid const& grid, double Rmax)
     : grid_(grid)
     , Rmax(Rmax)
 {

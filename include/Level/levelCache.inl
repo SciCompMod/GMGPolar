@@ -3,7 +3,7 @@
 namespace level_cache_helpers
 {
 template <concepts::DensityProfileCoefficients DensityProfileCoefficients>
-static void cache_density_profile_coefficients(const PolarGrid<DefaultMemorySpace>& grid,
+static void cache_density_profile_coefficients(const PolarGrid& grid,
                                                const DensityProfileCoefficients& density_profile_coefficients,
                                                const Vector<double>& coeff_alpha, const Vector<double>& coeff_beta,
                                                const bool cache_domain_geometry)
@@ -27,7 +27,7 @@ static void cache_density_profile_coefficients(const PolarGrid<DefaultMemorySpac
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-static void cache_domain_geometry(const PolarGrid<DefaultMemorySpace>& grid,
+static void cache_domain_geometry(const PolarGrid& grid,
                                   const DensityProfileCoefficients& density_profile_coefficients,
                                   const DomainGeometry& domain_geometry, const Vector<double>& vec_arr,
                                   const Vector<double>& vec_att, const Vector<double>& vec_art,
@@ -84,7 +84,7 @@ static void cache_domain_geometry(const PolarGrid<DefaultMemorySpace>& grid,
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 LevelCache<DomainGeometry, DensityProfileCoefficients>::LevelCache(
-    const PolarGrid<DefaultMemorySpace>& grid, const DensityProfileCoefficients& density_profile_coefficients,
+    const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients,
     const DomainGeometry& domain_geometry, const bool cache_density_profile_coefficients,
     const bool cache_domain_geometry)
     : domain_geometry_(domain_geometry)

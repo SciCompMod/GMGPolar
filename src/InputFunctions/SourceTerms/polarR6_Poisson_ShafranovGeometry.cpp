@@ -1,7 +1,7 @@
 #include <InputFunctions/SourceTerms/polarR6_Poisson_ShafranovGeometry.h>
 using namespace gmgpolar;
 
-PolarR6_Poisson_ShafranovGeometry::PolarR6_Poisson_ShafranovGeometry(PolarGrid<DefaultMemorySpace> const& grid,
+PolarR6_Poisson_ShafranovGeometry::PolarR6_Poisson_ShafranovGeometry(PolarGrid const& grid,
                                                                      double Rmax, double elongation_kappa,
                                                                      double shift_delta)
     : grid_(grid)

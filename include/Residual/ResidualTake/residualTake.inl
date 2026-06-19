@@ -1,7 +1,7 @@
 #pragma once
 
 template <class LevelCacheType>
-ResidualTake<LevelCacheType>::ResidualTake(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
+ResidualTake<LevelCacheType>::ResidualTake(const PolarGrid& grid, const LevelCacheType& level_cache,
                                            bool DirBC_Interior)
     : Residual<LevelCacheType>(grid, level_cache, DirBC_Interior)
 {

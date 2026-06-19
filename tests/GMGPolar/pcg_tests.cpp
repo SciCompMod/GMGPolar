@@ -630,7 +630,7 @@ TYPED_TEST_SUITE(PCGTestCase, gmgpolar_test_suite);
 template <class TestFixture>
 void run_gmgpolar()
 {
-    PolarGrid<DefaultMemorySpace> grid(TestFixture::R0, TestFixture::Rmax, TestFixture::nrExp, TestFixture::nthetaExp,
+    PolarGrid grid(TestFixture::R0, TestFixture::Rmax, TestFixture::nrExp, TestFixture::nthetaExp,
                                        TestFixture::refinementRadius, TestFixture::anisotropicFactor,
                                        TestFixture::divideBy2);
 

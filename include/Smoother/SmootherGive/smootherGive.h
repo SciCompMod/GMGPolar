@@ -53,7 +53,7 @@ class SmootherGive : public Smoother<LevelCacheType>
 public:
     // Constructs the coupled circle-radial smoother.
     // Builds the A_sc smoother matrices and prepares the solvers.
-    explicit SmootherGive(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
+    explicit SmootherGive(const PolarGrid& grid, const LevelCacheType& level_cache,
                           bool DirBC_Interior);
 
     // Performs one full coupled smoothing sweep:

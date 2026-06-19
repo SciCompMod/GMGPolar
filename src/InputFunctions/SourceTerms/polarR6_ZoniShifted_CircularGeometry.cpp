@@ -1,7 +1,7 @@
 #include <InputFunctions/SourceTerms/polarR6_ZoniShifted_CircularGeometry.h>
 using namespace gmgpolar;
 
-PolarR6_ZoniShifted_CircularGeometry::PolarR6_ZoniShifted_CircularGeometry(PolarGrid<DefaultMemorySpace> const& grid,
+PolarR6_ZoniShifted_CircularGeometry::PolarR6_ZoniShifted_CircularGeometry(PolarGrid const& grid,
                                                                            double Rmax)
     : grid_(grid)
     , Rmax(Rmax)

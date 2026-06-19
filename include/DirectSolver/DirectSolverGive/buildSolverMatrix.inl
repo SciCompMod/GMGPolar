@@ -26,7 +26,7 @@ static KOKKOS_INLINE_FUNCTION void updateMatrixElement(const SparseMatrixCSR<dou
 
 template <typename LevelCacheType, typename SystemMatrix>
 static KOKKOS_INLINE_FUNCTION void
-nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
+nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& grid,
                           const LevelCacheType& level_cache, const bool DirBC_Interior,
                           const SystemMatrix& solver_matrix)
 {
@@ -798,7 +798,7 @@ typename DirectSolverGive<LevelCacheType>::SystemMatrix DirectSolverGive<LevelCa
     using direct_solver_give::nodeBuildSolverMatrixGive;
     using direct_solver_give::validateSolverMatrixIndexing;
 
-    const PolarGrid<DefaultMemorySpace>& grid = DirectSolver<LevelCacheType>::grid_;
+    const PolarGrid& grid = DirectSolver<LevelCacheType>::grid_;
     const LevelCacheType& level_cache         = DirectSolver<LevelCacheType>::level_cache_;
     const bool DirBC_Interior                 = DirectSolver<LevelCacheType>::DirBC_Interior_;
 

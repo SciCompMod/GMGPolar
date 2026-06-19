@@ -28,7 +28,7 @@ static KOKKOS_INLINE_FUNCTION void update_CSR_COO_MatrixElement(const SparseMatr
 
 template <class InnerBoundaryMatrix>
 static KOKKOS_INLINE_FUNCTION void
-nodeBuildInteriorBoundarySolverMatrix(const int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
+nodeBuildInteriorBoundarySolverMatrix(const int i_theta, const PolarGrid& grid,
                                       const bool DirBC_Interior, const InnerBoundaryMatrix& matrix,
                                       ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art,
                                       ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
@@ -157,7 +157,7 @@ ExtrapolatedSmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     using extrapolated_smoother_take::getNonZeroCountCircleAsc;
     using extrapolated_smoother_take::nodeBuildInteriorBoundarySolverMatrix;
 
-    const PolarGrid<DefaultMemorySpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache         = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior                 = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 

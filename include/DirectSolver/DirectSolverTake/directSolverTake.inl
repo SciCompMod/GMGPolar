@@ -1,7 +1,7 @@
 #pragma once
 
 template <class LevelCacheType>
-DirectSolverTake<LevelCacheType>::DirectSolverTake(const PolarGrid<DefaultMemorySpace>& grid,
+DirectSolverTake<LevelCacheType>::DirectSolverTake(const PolarGrid& grid,
                                                    const LevelCacheType& level_cache, bool DirBC_Interior)
     : DirectSolver<LevelCacheType>(grid, level_cache, DirBC_Interior)
 #ifdef GMGPOLAR_USE_MUMPS

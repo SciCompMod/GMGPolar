@@ -6,8 +6,7 @@
 
 using namespace gmgpolar;
 
-template <class MemorySpace>
-inline Vector<double, MemorySpace> generate_random_sample_data(const PolarGrid<MemorySpace>& grid, unsigned int seed,
+inline Vector<double> generate_random_sample_data(const PolarGrid& grid, unsigned int seed,
                                                                double min_val = -100.0, double max_val = 100.0)
 {
     HostVector<double> x("x", grid.numberOfNodes());
@@ -16,5 +15,5 @@ inline Vector<double, MemorySpace> generate_random_sample_data(const PolarGrid<M
     for (std::size_t i = 0; i < x.size(); ++i) {
         x(i) = dist(gen);
     }
-    return Kokkos::create_mirror_view_and_copy(MemorySpace(), x);
+    return Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), x);
 }

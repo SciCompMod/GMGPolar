@@ -6,7 +6,7 @@ void CartesianR6_ZoniGyro_CzarnyGeometry::initializeGeometry()
     factor_xi = 1.0 / sqrt(1.0 - inverse_aspect_ratio_epsilon * inverse_aspect_ratio_epsilon / 4.0);
 }
 
-CartesianR6_ZoniGyro_CzarnyGeometry::CartesianR6_ZoniGyro_CzarnyGeometry(PolarGrid<DefaultMemorySpace> const& grid,
+CartesianR6_ZoniGyro_CzarnyGeometry::CartesianR6_ZoniGyro_CzarnyGeometry(PolarGrid const& grid,
                                                                          double Rmax,
                                                                          double inverse_aspect_ratio_epsilon,
                                                                          double ellipticity_e)

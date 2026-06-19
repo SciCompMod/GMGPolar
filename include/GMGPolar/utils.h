@@ -11,8 +11,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::prolongation(int curr
     if (!interpolation_)
         throw std::runtime_error("Interpolation not initialized.");
 
-    const PolarGrid<DefaultMemorySpace>& current_grid  = levels_[current_level].grid();
-    const PolarGrid<DefaultMemorySpace>& previous_grid = levels_[current_level - 1].grid();
+    const PolarGrid& current_grid  = levels_[current_level].grid();
+    const PolarGrid& previous_grid = levels_[current_level - 1].grid();
     interpolation_->applyProlongation(current_grid, previous_grid, result, x);
 }
 
@@ -24,8 +24,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::restriction(int curre
     if (!interpolation_)
         throw std::runtime_error("Interpolation not initialized.");
 
-    const PolarGrid<DefaultMemorySpace>& current_grid = levels_[current_level].grid();
-    const PolarGrid<DefaultMemorySpace>& next_grid    = levels_[current_level + 1].grid();
+    const PolarGrid& current_grid = levels_[current_level].grid();
+    const PolarGrid& next_grid    = levels_[current_level + 1].grid();
     interpolation_->applyRestriction(current_grid, next_grid, result, x);
 }
 
@@ -37,8 +37,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::injection(int current
     if (!interpolation_)
         throw std::runtime_error("Interpolation not initialized.");
 
-    const PolarGrid<DefaultMemorySpace>& current_grid = levels_[current_level].grid();
-    const PolarGrid<DefaultMemorySpace>& next_grid    = levels_[current_level + 1].grid();
+    const PolarGrid& current_grid = levels_[current_level].grid();
+    const PolarGrid& next_grid    = levels_[current_level + 1].grid();
     interpolation_->applyInjection(current_grid, next_grid, result, x);
 }
 
@@ -51,8 +51,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedProlongat
     if (!interpolation_)
         throw std::runtime_error("Interpolation not initialized.");
 
-    const PolarGrid<DefaultMemorySpace>& current_grid  = levels_[current_level].grid();
-    const PolarGrid<DefaultMemorySpace>& previous_grid = levels_[current_level - 1].grid();
+    const PolarGrid& current_grid  = levels_[current_level].grid();
+    const PolarGrid& previous_grid = levels_[current_level - 1].grid();
     interpolation_->applyExtrapolatedProlongation(current_grid, previous_grid, result, x);
 }
 
@@ -65,8 +65,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolatedRestricti
     if (!interpolation_)
         throw std::runtime_error("Interpolation not initialized.");
 
-    const PolarGrid<DefaultMemorySpace>& current_grid = levels_[current_level].grid();
-    const PolarGrid<DefaultMemorySpace>& next_grid    = levels_[current_level + 1].grid();
+    const PolarGrid& current_grid = levels_[current_level].grid();
+    const PolarGrid& next_grid    = levels_[current_level + 1].grid();
     interpolation_->applyExtrapolatedRestriction(current_grid, next_grid, result, x);
 }
 
@@ -78,8 +78,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::FMGInterpolation(int 
     if (!interpolation_)
         throw std::runtime_error("Interpolation not initialized.");
 
-    const PolarGrid<DefaultMemorySpace>& current_grid  = levels_[current_level].grid();
-    const PolarGrid<DefaultMemorySpace>& previous_grid = levels_[current_level - 1].grid();
+    const PolarGrid& current_grid  = levels_[current_level].grid();
+    const PolarGrid& previous_grid = levels_[current_level - 1].grid();
     interpolation_->applyFMGInterpolation(current_grid, previous_grid, result, x);
 }
 
@@ -101,7 +101,7 @@ ConstVector<double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::soluti
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-const PolarGrid<DefaultMemorySpace>& GMGPolar<DomainGeometry, DensityProfileCoefficients>::grid() const
+const PolarGrid& GMGPolar<DomainGeometry, DensityProfileCoefficients>::grid() const
 {
     return grid_;
 }
@@ -189,7 +189,7 @@ std::optional<double> GMGPolar<DomainGeometry, DensityProfileCoefficients>::exac
 /* ---------------------------------------------------------------------- */
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(const std::filesystem::path& file_path,
-                                                                      const PolarGrid<DefaultMemorySpace>& grid)
+                                                                      const PolarGrid& grid)
 {
     const auto filename = file_path.stem().string() + ".vtu";
 
@@ -260,7 +260,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(
     const std::filesystem::path& file_path, const Level<DomainGeometry, DensityProfileCoefficients>& level,
     HostConstVector<double> grid_function)
 {
-    const PolarGrid<DefaultMemorySpace>& grid = level.grid();
+    const PolarGrid& grid = level.grid();
 
     assert(std::ssize(grid_function) == grid.numberOfNodes());
 

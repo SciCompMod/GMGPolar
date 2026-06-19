@@ -5,7 +5,7 @@ namespace smoother_give
 
 template <class LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoCircleGiveInside(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
+nodeApplyAscOrthoCircleGiveInside(int i_r, int i_theta, const PolarGrid& grid,
                                   const LevelCacheType& level_cache, bool DirBC_Interior, ConstVector<double>& x,
                                   ConstVector<double>& rhs, Vector<double>& result)
 {
@@ -54,7 +54,7 @@ nodeApplyAscOrthoCircleGiveInside(int i_r, int i_theta, const PolarGrid<DefaultM
 
 template <class LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoCircleGiveOutside(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
+nodeApplyAscOrthoCircleGiveOutside(int i_r, int i_theta, const PolarGrid& grid,
                                    const LevelCacheType& level_cache, bool DirBC_Interior, ConstVector<double>& x,
                                    ConstVector<double>& rhs, Vector<double>& result)
 {
@@ -101,7 +101,7 @@ nodeApplyAscOrthoCircleGiveOutside(int i_r, int i_theta, const PolarGrid<Default
 
 template <class LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoRadialGiveInside(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
+nodeApplyAscOrthoRadialGiveInside(int i_r, int i_theta, const PolarGrid& grid,
                                   const LevelCacheType& level_cache, bool DirBC_Interior, ConstVector<double>& x,
                                   ConstVector<double>& rhs, Vector<double>& result)
 {
@@ -179,7 +179,7 @@ nodeApplyAscOrthoRadialGiveInside(int i_r, int i_theta, const PolarGrid<DefaultM
 
 template <class LevelCacheType>
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoRadialGiveOutside(int i_r, int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
+nodeApplyAscOrthoRadialGiveOutside(int i_r, int i_theta, const PolarGrid& grid,
                                    const LevelCacheType& level_cache, bool DirBC_Interior, ConstVector<double>& x,
                                    ConstVector<double>& rhs, Vector<double>& result)
 {
@@ -239,7 +239,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<d
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
+    const PolarGrid& grid = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache         = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior                 = Smoother<LevelCacheType>::DirBC_Interior_;
 
@@ -322,7 +322,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<d
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
+    const PolarGrid& grid = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache         = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior                 = Smoother<LevelCacheType>::DirBC_Interior_;
 
@@ -406,7 +406,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<d
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
+    const PolarGrid& grid = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache         = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior                 = Smoother<LevelCacheType>::DirBC_Interior_;
 
@@ -490,7 +490,7 @@ void SmootherGive<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<d
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
+    const PolarGrid& grid = Smoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache         = Smoother<LevelCacheType>::level_cache_;
     const bool DirBC_Interior                 = Smoother<LevelCacheType>::DirBC_Interior_;
 

@@ -8,7 +8,7 @@
 using namespace gmgpolar;
 
 // Helper that computes the mathematically expected prolongation value
-static double expected_value(const PolarGrid<DefaultMemorySpace>& coarse, const PolarGrid<DefaultMemorySpace>& fine,
+static double expected_value(const PolarGrid& coarse, const PolarGrid& fine,
                              ConstVector<double> coarse_vals, int i_r, int i_theta)
 {
     int i_r_coarse     = i_r / 2;
@@ -70,8 +70,8 @@ TEST(ProlongationTest, ProlongationMatchesStencil)
     std::vector<double> fine_angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, 2 * M_PI};
 
-    PolarGrid<DefaultMemorySpace> fine_grid(fine_radii, fine_angles);
-    PolarGrid<DefaultMemorySpace> coarse_grid = coarseningGrid(fine_grid);
+    PolarGrid fine_grid(fine_radii, fine_angles);
+    PolarGrid coarse_grid = coarseningGrid(fine_grid);
 
     Interpolation I(/*DirBC*/ true);
 

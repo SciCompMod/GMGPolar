@@ -1,8 +1,7 @@
 #include <PolarGrid/polargrid.h>
 using namespace gmgpolar;
 
-template <class MemorySpace>
-HostVector<double> PolarGrid<MemorySpace>::RadialAnisotropicDivision(double R0, double R, const int nr_exp,
+HostVector<double> PolarGrid::RadialAnisotropicDivision(double R0, double R, const int nr_exp,
                                                                      double refinement_radius,
                                                                      const int anisotropic_factor) const
 {
