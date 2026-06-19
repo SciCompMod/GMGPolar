@@ -156,7 +156,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 1>, // divideBy2
         std::integral_constant<int, 1>, // verbose
         std::integral_constant<bool, true>, // DirBC_Interior
-        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
+        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, false>, // cacheDensityProfileCoefficient
         std::integral_constant<bool, false>, // cacheDomainGeometry
         std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, // extrapolation
@@ -198,7 +198,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 0>, // divideBy2
         std::integral_constant<int, 0>, // verbose
         std::integral_constant<bool, false>, // DirBC_Interior
-        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
+        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, false>, // cacheDensityProfileCoefficient
         std::integral_constant<bool, false>, // cacheDomainGeometry
         std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, // extrapolation
@@ -240,7 +240,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 0>, // divideBy2
         std::integral_constant<int, 0>, // verbose
         std::integral_constant<bool, false>, // DirBC_Interior
-        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
+        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
         std::integral_constant<bool, true>, // cacheDomainGeometry
         std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, // extrapolation
@@ -282,7 +282,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 0>, // divideBy2
         std::integral_constant<int, 0>, // verbose
         std::integral_constant<bool, false>, // DirBC_Interior
-        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_TAKE>, // StencilDistributionMethod
+        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::TAKE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
         std::integral_constant<bool, true>, // cacheDomainGeometry
         std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, // extrapolation
@@ -322,7 +322,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 0>, // divideBy2
         std::integral_constant<int, 0>, // verbose
         std::integral_constant<bool, false>, // DirBC_Interior
-        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_TAKE>, // StencilDistributionMethod
+        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::TAKE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
         std::integral_constant<bool, true>, // cacheDomainGeometry
         std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, // extrapolation
@@ -362,7 +362,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 0>, // divideBy2
         std::integral_constant<int, 0>, // verbose
         std::integral_constant<bool, false>, // DirBC_Interior
-        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
+        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
         std::integral_constant<bool, false>, // cacheDomainGeometry
         std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, // extrapolation
@@ -402,7 +402,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 0>, // divideBy2
         std::integral_constant<int, 0>, // verbose
         std::integral_constant<bool, true>, // DirBC_Interior
-        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
+        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, false>, // cacheDensityProfileCoefficient
         std::integral_constant<bool, true>, // cacheDomainGeometry
         std::integral_constant<ExtrapolationType, ExtrapolationType::COMBINED>, // extrapolation
@@ -442,7 +442,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 0>, // divideBy2
         std::integral_constant<int, 0>, // verbose
         std::integral_constant<bool, true>, // DirBC_Interior
-        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
+        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, false>, // cacheDensityProfileCoefficient
         std::integral_constant<bool, true>, // cacheDomainGeometry
         std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_FULL_GRID_SMOOTHING>, // extrapolation
@@ -481,7 +481,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 0>, // divideBy2
         std::integral_constant<int, 0>, // verbose
         std::integral_constant<bool, true>, // DirBC_Interior
-        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
+        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
         std::integral_constant<bool, true>, // cacheDomainGeometry
         std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, // extrapolation
@@ -520,7 +520,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 0>, // divideBy2
         std::integral_constant<int, 0>, // verbose
         std::integral_constant<bool, false>, // DirBC_Interior
-        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_TAKE>, // StencilDistributionMethod
+        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::TAKE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
         std::integral_constant<bool, true>, // cacheDomainGeometry
         std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, // extrapolation
@@ -559,7 +559,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 0>, // divideBy2
         std::integral_constant<int, 0>, // verbose
         std::integral_constant<bool, false>, // DirBC_Interior
-        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
+        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
         std::integral_constant<bool, false>, // cacheDomainGeometry
         std::integral_constant<ExtrapolationType, ExtrapolationType::NONE>, // extrapolation
@@ -598,7 +598,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<int, 1>, // divideBy2
         std::integral_constant<int, 0>, // verbose
         std::integral_constant<bool, false>, // DirBC_Interior
-        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
+        std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
         std::integral_constant<bool, false>, // cacheDomainGeometry
         std::integral_constant<ExtrapolationType, ExtrapolationType::IMPLICIT_EXTRAPOLATION>, // extrapolation

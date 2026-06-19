@@ -8,7 +8,7 @@ ConfigParser::ConfigParser()
     parser_.add<int>("paraview", '\0', "Generate ParaView output (0/1).", OPTIONAL, 0);
     parser_.add<int>("DirBC_Interior", '\0', "Interior BC type (0=Across-origin, 1=Dirichlet).", OPTIONAL, 0,
                      cmdline::oneof(0, 1));
-    parser_.add<int>("stencilDistributionMethod", '\0', "Stencil distribution (0=CPU_Take,1=CPU_Give)", OPTIONAL, 0,
+    parser_.add<int>("stencilDistributionMethod", '\0', "Stencil distribution (0=TAKE,1=GIVE)", OPTIONAL, 0,
                      cmdline::oneof(0, 1));
     parser_.add<int>("cacheDensityProfileCoefficients", '\0', "Cache density coefficients (0/1).", OPTIONAL, 1,
                      cmdline::oneof(0, 1));
@@ -97,8 +97,8 @@ bool ConfigParser::parse(int argc, char* argv[])
     paraview_             = parser_.get<int>("paraview") != 0;
     DirBC_Interior_       = parser_.get<int>("DirBC_Interior") != 0;
     const int methodValue = parser_.get<int>("stencilDistributionMethod");
-    if (methodValue == static_cast<int>(StencilDistributionMethod::CPU_TAKE) ||
-        methodValue == static_cast<int>(StencilDistributionMethod::CPU_GIVE)) {
+    if (methodValue == static_cast<int>(StencilDistributionMethod::TAKE) ||
+        methodValue == static_cast<int>(StencilDistributionMethod::GIVE)) {
         stencil_distribution_method_ = static_cast<StencilDistributionMethod>(methodValue);
     }
     else {

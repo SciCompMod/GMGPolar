@@ -173,7 +173,7 @@ get_gmgpolar_error(PolarGrid const& grid, CzarnyGeometry const& domain_geometry,
 
     // --- Discretization and method settings --- //
     gmgpolar.DirBC_Interior(false); // Use across-origin calculation
-    gmgpolar.stencilDistributionMethod(StencilDistributionMethod::CPU_TAKE);
+    gmgpolar.stencilDistributionMethod(StencilDistributionMethod::TAKE);
     gmgpolar.cacheDensityProfileCoefficients(true);
     gmgpolar.cacheDomainGeometry(true);
 
