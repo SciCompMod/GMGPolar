@@ -2,7 +2,7 @@
 using namespace gmgpolar;
 
 template <class MemorySpace>
-Vector<double, MemorySpace> PolarGrid<MemorySpace>::RadialAnisotropicDivision(double R0, double R, const int nr_exp,
+HostVector<double> PolarGrid<MemorySpace>::RadialAnisotropicDivision(double R0, double R, const int nr_exp,
                                                                               double refinement_radius,
                                                                               const int anisotropic_factor) const
 {
@@ -92,7 +92,7 @@ Vector<double, MemorySpace> PolarGrid<MemorySpace>::RadialAnisotropicDivision(do
     // group all in r_tmp
     nr = n_elems_equi - n_elems_refined + r_set.size() + 1;
 
-    Vector<double, MemorySpace> r_temp("r_temp", nr);
+    HostVector<double> r_temp("r_temp", nr);
     for (int i = 0; i < se; i++)
         r_temp[i] = r_temp2[i];
     itr = r_set.begin();
