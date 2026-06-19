@@ -1,4 +1,4 @@
-#include "../../include/PolarGrid/polargrid.h"
+#include <PolarGrid/polargrid.h>
 using namespace gmgpolar;
 
 template <class MemorySpace>

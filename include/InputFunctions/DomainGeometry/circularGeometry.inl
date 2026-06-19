@@ -27,13 +27,13 @@ KOKKOS_INLINE_FUNCTION double CircularGeometry::dFy_dr(double r, double theta) c
 }
 
 // In earlier versions denoted by 'Jrt'
-KOKKOS_INLINE_FUNCTION double CircularGeometry::dFx_dt(double r, double theta) const
+KOKKOS_INLINE_FUNCTION double CircularGeometry::dFx_dtheta(double r, double theta) const
 {
     return (-(r / Rmax)) * std::sin(theta);
 }
 
 // In earlier versions denoted by 'Jtt'
-KOKKOS_INLINE_FUNCTION double CircularGeometry::dFy_dt(double r, double theta) const
+KOKKOS_INLINE_FUNCTION double CircularGeometry::dFy_dtheta(double r, double theta) const
 {
     return (r / Rmax) * std::cos(theta);
 }

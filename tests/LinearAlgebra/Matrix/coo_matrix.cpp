@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "../../../include/LinearAlgebra/Matrix/coo_matrix.h"
+#include <LinearAlgebra/Matrix/coo_matrix.h>
 using namespace gmgpolar;
 
 // Alias for readability

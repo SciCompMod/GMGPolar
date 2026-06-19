@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/SourceTerms/polarR6_ZoniGyro_CzarnyGeometry.h"
+#include <InputFunctions/SourceTerms/polarR6_ZoniGyro_CzarnyGeometry.h>
 using namespace gmgpolar;
 
 void PolarR6_ZoniGyro_CzarnyGeometry::initializeGeometry()

@@ -43,7 +43,7 @@ KOKKOS_INLINE_FUNCTION double CzarnyGeometry::dFy_dr(double r, double theta) con
 }
 
 // In earlier versions denoted by 'Jrt'
-KOKKOS_INLINE_FUNCTION double CzarnyGeometry::dFx_dt(double r, double theta) const
+KOKKOS_INLINE_FUNCTION double CzarnyGeometry::dFx_dtheta(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);
@@ -52,7 +52,7 @@ KOKKOS_INLINE_FUNCTION double CzarnyGeometry::dFx_dt(double r, double theta) con
 }
 
 // In earlier versions denoted by 'Jtt'
-KOKKOS_INLINE_FUNCTION double CzarnyGeometry::dFy_dt(double r, double theta) const
+KOKKOS_INLINE_FUNCTION double CzarnyGeometry::dFy_dtheta(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     double cos_theta = std::cos(theta);

@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/BoundaryConditions/refined_Boundary_CircularGeometry.h"
+#include <InputFunctions/BoundaryConditions/refined_Boundary_CircularGeometry.h>
 using namespace gmgpolar;
 
 Refined_Boundary_CircularGeometry::Refined_Boundary_CircularGeometry(double Rmax)
