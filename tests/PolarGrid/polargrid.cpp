@@ -38,20 +38,20 @@ double compare_angular_coords(PolarGrid<DefaultMemorySpace> grid, std::vector<do
 
 int expected_indices(PolarGrid<DefaultMemorySpace> grid)
 {
-    double idx_err = 0;
+    int idx_err = 0;
     Kokkos::parallel_reduce(
         "indices",
         Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0, 0}, {grid.nr(), grid.ntheta()}),
-        KOKKOS_LAMBDA(const int i, const int j, double& max_error) {
+        KOKKOS_LAMBDA(const int i, const int j, int& max_error) {
             int node_index = grid.index(i, j);
             int r_out, theta_out;
             grid.multiIndex(node_index, r_out, theta_out);
-            double current_err = Kokkos::abs(i - r_out) + Kokkos::abs(j - theta_out);
+            int current_err = Kokkos::abs(i - r_out) + Kokkos::abs(j - theta_out);
             if (current_err > max_error) {
                 max_error = current_err;
             }
         },
-        Kokkos::Max<double>(idx_err));
+        Kokkos::Max<int>(idx_err));
     return idx_err;
 }
 
