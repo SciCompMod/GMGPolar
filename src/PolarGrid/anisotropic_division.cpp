@@ -28,7 +28,7 @@ HostVector<double> PolarGrid<MemorySpace>::RadialAnisotropicDivision(double R0, 
         n_elems_equi++;
     double uniform_distance = (R - R0) / n_elems_equi;
     int nr                  = n_elems_equi + 1;
-    Vector<double, MemorySpace> r_temp2("r_temp2", nr);
+    HostVector<double> r_temp2("r_temp2", nr);
     for (int i = 0; i < nr - 1; i++)
         r_temp2[i] = R0 + i * uniform_distance;
     r_temp2[nr - 1] = R;
