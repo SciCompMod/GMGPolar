@@ -136,8 +136,7 @@ private:
     // Check parameter validity
     void checkParameters(Vector<double, Kokkos::HostSpace> radii, Vector<double, Kokkos::HostSpace> angles) const;
 
-    // Cuda restriction: functions containing a KOKKOS_LAMBDA must be public
-public:
+public: // Cuda restriction: functions containing a KOKKOS_LAMBDA must be public
     // Initialize radial_spacings_, angular_spacings_
     void initializeDistances();
 
@@ -149,14 +148,17 @@ private:
     //      If the splitting radius is greater than or equal to R, only Circular indexing is used.
     void initializeLineSplitting(std::optional<double> splitting_radius);
 
+public: // Cuda restriction: functions containing a KOKKOS_LAMBDA must be public
     // Construct radial divisions for grid generation.
     void constructRadialDivisions(double R0, double R, const int nr_exp, double refinement_radius,
                                   const int anisotropic_factor);
     // Construct angular divisions for grid generation.
     void constructAngularDivisions(const int ntheta_exp, const int nr);
 
+private:
     // Refine the grid by dividing radial and angular divisions by 2.
     void refineGrid(const int divideBy2);
+public: // Cuda restriction: functions containing a KOKKOS_LAMBDA must be public
     Vector<double, MemorySpace> divideVector(Vector<double, MemorySpace> vec, const int divideBy2) const;
 
     // Help constrcut radii_ when an anisotropic radial division is requested

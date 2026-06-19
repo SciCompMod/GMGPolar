@@ -44,7 +44,6 @@ PolarGrid<MemorySpace>::PolarGrid(double R0, double Rmax, const int nr_exp, cons
                                   std::optional<double> splitting_radius)
 {
     assert(R0 > 0.0 && Rmax > R0 && !equals(R0, Rmax));
-    assert((std::is_same_v<MemorySpace, Kokkos::HostSpace>));
     // Construct radii_ and angles_
     constructRadialDivisions(R0, Rmax, nr_exp, refinement_radius, anisotropic_factor);
     constructAngularDivisions(ntheta_exp, nr_);
@@ -68,33 +67,39 @@ template <class MemorySpace>
 void PolarGrid<MemorySpace>::constructRadialDivisions(double R0, double R, const int nr_exp, double refinement_radius,
                                                       const int anisotropic_factor)
 {
+    using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                         Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
     // r_temp contains the values before we refine one last time for extrapolation.
     // Therefore we first consider 2^(nr_exp-1) points.
-    AllocatableVector<double, MemorySpace> r_temp;
+    AllocatableVector<double, Kokkos::HostSpace> h_r_temp;
     if (anisotropic_factor == 0) {
         // nr = 2**(nr_exp-1) + 1
         int nr                  = (1 << (nr_exp - 1)) + 1;
         double uniform_distance = (R - R0) / (nr - 1);
         assert(uniform_distance > 0.0);
-        r_temp = Vector<double, MemorySpace>("r_temp", nr);
+        h_r_temp = Vector<double, MemorySpace>("r_temp", nr);
         for (int i = 0; i < nr - 1; i++) {
-            r_temp[i] = R0 + i * uniform_distance;
+            h_r_temp[i] = R0 + i * uniform_distance;
         }
-        r_temp[nr - 1] = R;
+        h_r_temp[nr - 1] = R;
     }
     else {
         // Implementation in src/PolarGrid/anisotropic_division.cpp
-        r_temp = RadialAnisotropicDivision(R0, R, nr_exp, refinement_radius, anisotropic_factor);
+        h_r_temp = RadialAnisotropicDivision(R0, R, nr_exp, refinement_radius, anisotropic_factor);
     }
     // Refine division in the middle for extrapolation
+    auto r_temp = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_r_temp);
     nr_    = 2 * r_temp.size() - 1;
-    radii_ = AllocatableVector<double, MemorySpace>("radii_", nr_);
-    for (int i = 0; i < nr_; i++) {
+    Vector<double, MemorySpace> radii("radii_", nr_);
+    Kokkos::parallel_for(
+        "constructRadialDivisions", Kokkos::RangePolicy<ExecSpace>(0, nr_),
+        KOKKOS_LAMBDA(int i) {
         if (!(i % 2))
-            radii_[i] = r_temp[i / 2];
+            radii[i] = r_temp[i / 2];
         else
-            radii_[i] = 0.5 * (r_temp[(i - 1) / 2] + r_temp[(i + 1) / 2]);
-    }
+            radii[i] = 0.5 * (r_temp[(i - 1) / 2] + r_temp[(i + 1) / 2]);
+    });
+    radii_ = radii;
 }
 
 // Construct angular divisions for grid generation.
@@ -102,6 +107,8 @@ void PolarGrid<MemorySpace>::constructRadialDivisions(double R0, double R, const
 template <class MemorySpace>
 void PolarGrid<MemorySpace>::constructAngularDivisions(const int ntheta_exp, const int nr)
 {
+    using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                         Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
     if (ntheta_exp < 0) {
         // Choose number of theta divisions similar to radial divisions.
         // ntheta_ = 2**ceil(log2(nr))
@@ -116,10 +123,16 @@ void PolarGrid<MemorySpace>::constructAngularDivisions(const int ntheta_exp, con
     // Note that currently ntheta_ = 2^k which allows us to do some optimizations when indexing.
     double uniform_distance = 2 * M_PI / ntheta_;
     Kokkos::resize(angles_, ntheta_ + 1);
-    for (int i = 0; i < ntheta_; i++) {
+    Kokkos::parallel_for(
+        "constructAngularDivisions", Kokkos::RangePolicy<ExecSpace>(0, ntheta_),
+        KOKKOS_LAMBDA(int i) {
         angles_[i] = i * uniform_distance;
-    }
-    angles_[ntheta_] = 2 * M_PI;
+    });
+    Kokkos::parallel_for(
+        "constructAngularDivisions", Kokkos::RangePolicy<ExecSpace>(ntheta_, ntheta_+1),
+        KOKKOS_LAMBDA(int i) {
+    angles_[i] = 2 * M_PI;
+	});
 }
 
 // divideBy2: Number of times to divide both radial and angular divisions by 2.
@@ -137,20 +150,28 @@ template <class MemorySpace>
 Vector<double, MemorySpace> PolarGrid<MemorySpace>::divideVector(Vector<double, MemorySpace> vec,
                                                                  const int divideBy2) const
 {
+    using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                         Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
     const int powerOfTwo = 1 << divideBy2;
     size_t vecSize       = vec.size();
     size_t resultSize    = vecSize + (vecSize - 1) * (powerOfTwo - 1);
     Vector<double, MemorySpace> result("result", resultSize);
 
-    for (size_t i = 0; i < vecSize - 1; ++i) {
+    Kokkos::parallel_for(
+        "divideVector", Kokkos::RangePolicy<ExecSpace>(0, vecSize - 1),
+        KOKKOS_LAMBDA(int i) {
         size_t baseIndex  = i * powerOfTwo;
         result[baseIndex] = vec[i]; // Add the original value
         for (int j = 1; j < powerOfTwo; ++j) {
             double interpolated_value = vec[i] + j * (vec[i + 1] - vec[i]) / static_cast<double>(powerOfTwo);
             result[baseIndex + j]     = interpolated_value;
         }
-    }
-    result[resultSize - 1] = vec(vec.size() - 1); // Add the last value of the original vector
+    });
+    Kokkos::parallel_for(
+        "constructAngularDivisions", Kokkos::RangePolicy<ExecSpace>(resultSize - 1, resultSize),
+        KOKKOS_LAMBDA(int i) {
+    result[i] = vec(vec.size() - 1); // Add the last value of the original vector
+	});
     return result;
 }
 
