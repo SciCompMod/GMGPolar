@@ -40,7 +40,7 @@ void SmootherTest_smoother_DirBC_Interior()
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -104,7 +104,7 @@ void SmootherTest_smoother_AcrossOrigin()
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -171,7 +171,7 @@ void SmootherTest_SmootherDirBC_Interior()
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -248,7 +248,7 @@ void SmootherTest_SmootherAcrossOrigin()
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -324,7 +324,7 @@ void SmootherTest_SmootherDirBC_Interior_SmallestGrid()
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -400,7 +400,7 @@ void SmootherTest_SmootherAcrossOrigin_SmallestGrid()
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -479,7 +479,7 @@ void SmootherTest_SmootherTakeDirBC_Interior()
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -556,7 +556,7 @@ void SmootherTest_SmootherTakeAcrossOrigin()
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -632,7 +632,7 @@ void SmootherTest_SmootherTakeDirBC_Interior_SmallestGrid()
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
@@ -708,7 +708,7 @@ void SmootherTest_SmootherTakeAcrossOrigin_SmallestGrid()
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
-    auto grid = std::make_unique<PolarGrid<DefaultMemorySpace>>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;

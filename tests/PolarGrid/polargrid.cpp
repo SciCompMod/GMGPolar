@@ -2,7 +2,7 @@
 #include <PolarGrid/polargrid.h>
 using namespace gmgpolar;
 
-double compare_radial_coords(PolarGrid<DefaultMemorySpace> grid, std::vector<double> radii)
+double compare_radial_coords(PolarGrid grid, std::vector<double> radii)
 {
     HostVector<double> host_vector_radi(radii.data(), radii.size());
     auto expected_r = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), host_vector_radi);
@@ -19,7 +19,7 @@ double compare_radial_coords(PolarGrid<DefaultMemorySpace> grid, std::vector<dou
     return r_err;
 }
 
-double compare_angular_coords(PolarGrid<DefaultMemorySpace> grid, std::vector<double> angles)
+double compare_angular_coords(PolarGrid grid, std::vector<double> angles)
 {
     HostVector<double> host_vector_angles(angles.data(), angles.size());
     auto expected_theta = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), host_vector_angles);
@@ -36,7 +36,7 @@ double compare_angular_coords(PolarGrid<DefaultMemorySpace> grid, std::vector<do
     return theta_err;
 }
 
-int expected_indices(PolarGrid<DefaultMemorySpace> grid)
+int expected_indices(PolarGrid grid)
 {
     int idx_err = 0;
     Kokkos::parallel_reduce(
@@ -55,7 +55,7 @@ int expected_indices(PolarGrid<DefaultMemorySpace> grid)
     return idx_err;
 }
 
-double expected_spacing(PolarGrid<DefaultMemorySpace> grid, Vector<double> rad_expected, Vector<double> ang_expected)
+double expected_spacing(PolarGrid grid, Vector<double> rad_expected, Vector<double> ang_expected)
 {
     double radial_spacing_err = 0;
     Kokkos::parallel_reduce(
@@ -83,21 +83,21 @@ double expected_spacing(PolarGrid<DefaultMemorySpace> grid, Vector<double> rad_e
 
 TEST(PolarGridTest, DefaultConstructor)
 {
-    PolarGrid<DefaultMemorySpace> grid;
+    PolarGrid grid;
 }
 
 TEST(PolarGridTest, VectorConstructor)
 {
     std::vector<double> radii  = {0.1, 0.2, 0.5, 0.9, 1.3};
     std::vector<double> angles = {0, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
-    PolarGrid<DefaultMemorySpace> grid(radii, angles);
+    PolarGrid grid(radii, angles);
 }
 
 TEST(PolarGridTest, NumberOfNodes)
 {
     std::vector<double> radii  = {0.1, 0.2, 0.5, 0.9, 1.3};
     std::vector<double> angles = {0, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
-    PolarGrid<DefaultMemorySpace> grid(radii, angles);
+    PolarGrid grid(radii, angles);
     ASSERT_EQ(grid.numberOfNodes(), radii.size() * (angles.size() - 1));
 }
 
@@ -105,7 +105,7 @@ TEST(PolarGridTest, AccessorsTest)
 {
     std::vector<double> radii  = {0.1, 0.2, 0.5, 0.9, 1.3};
     std::vector<double> angles = {0, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
-    PolarGrid<DefaultMemorySpace> grid(radii, angles);
+    PolarGrid grid(radii, angles);
 
     ASSERT_DOUBLE_EQ(compare_radial_coords(grid, radii), 0.);
     ASSERT_DOUBLE_EQ(compare_angular_coords(grid, angles), 0.);
@@ -116,7 +116,7 @@ TEST(PolarGridTest, GridJumpTest)
     std::vector<double> radii  = {0.1, 0.2, 0.5, 0.9, 1.3};
     std::vector<double> angles = {0, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
     double splitting_radius    = 0.4;
-    PolarGrid<DefaultMemorySpace> grid(radii, angles, splitting_radius);
+    PolarGrid grid(radii, angles, splitting_radius);
 
     ASSERT_DOUBLE_EQ(compare_radial_coords(grid, radii), 0.);
     ASSERT_DOUBLE_EQ(compare_angular_coords(grid, angles), 0.);
@@ -128,7 +128,7 @@ TEST(PolarGridTest, IndexingTest)
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
     double splitting_radius = 0.6;
-    PolarGrid<DefaultMemorySpace> grid(radii, angles, splitting_radius);
+    PolarGrid grid(radii, angles, splitting_radius);
 
     ASSERT_EQ(expected_indices(grid), 0.);
 
@@ -146,7 +146,7 @@ TEST(PolarGridTest, IndexingValuesTest)
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
     double splitting_radius = 0.6;
-    PolarGrid<DefaultMemorySpace> grid(radii, angles, splitting_radius);
+    PolarGrid grid(radii, angles, splitting_radius);
 
     {
         int node_index = grid.index(2, 6);
@@ -191,7 +191,7 @@ TEST(PolarGridTest, CoordinatesTest)
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
     double splitting_radius = 0.6;
-    PolarGrid<DefaultMemorySpace> grid(radii, angles, splitting_radius);
+    PolarGrid grid(radii, angles, splitting_radius);
     // Check that coordinates are correct
     ASSERT_DOUBLE_EQ(compare_radial_coords(grid, radii), 0.);
     ASSERT_DOUBLE_EQ(compare_angular_coords(grid, angles), 0.);
@@ -202,7 +202,7 @@ TEST(PolarGridTest, SpacingTest)
     std::vector<double> radii  = {0.1, 0.2, 0.25, 0.5, 0.8, 0.9, 1.3, 1.4, 2.0};
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
-    PolarGrid<DefaultMemorySpace> grid(radii, angles);
+    PolarGrid grid(radii, angles);
     HostVector<double> h_exp_rad_spacing("h_rad_spacing", grid.nr() - 1);
     HostVector<double> h_exp_theta_spacing("h_theta_spacing", grid.ntheta() - 1);
     for (int i_r = 0; i_r < grid.nr() - 1; i_r++) {

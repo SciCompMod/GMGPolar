@@ -12,7 +12,7 @@ namespace gmgpolar
 class CartesianR6_SonnendruckerGyro_CzarnyGeometry
 {
 public:
-    explicit CartesianR6_SonnendruckerGyro_CzarnyGeometry(PolarGrid<DefaultMemorySpace> const& grid, double Rmax,
+    explicit CartesianR6_SonnendruckerGyro_CzarnyGeometry(PolarGrid const& grid, double Rmax,
                                                           double inverse_aspect_ratio_epsilon, double ellipticity_e);
     KOKKOS_DEFAULTED_FUNCTION
     CartesianR6_SonnendruckerGyro_CzarnyGeometry(const CartesianR6_SonnendruckerGyro_CzarnyGeometry&) = default;
@@ -20,7 +20,7 @@ public:
     KOKKOS_FUNCTION double operator()(std::size_t i_r, std::size_t i_theta) const;
 
 private:
-    PolarGrid<DefaultMemorySpace> grid_;
+    PolarGrid grid_;
     const double Rmax                         = 1.3;
     const double inverse_aspect_ratio_epsilon = 0.3;
     const double ellipticity_e                = 1.4;

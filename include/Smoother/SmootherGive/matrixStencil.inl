@@ -41,7 +41,7 @@ static KOKKOS_INLINE_FUNCTION const Stencil& getStencil(const int i_r, const boo
     return DirBC_Interior ? stencil_DB : circle_stencil_across_origin;
 }
 
-static KOKKOS_INLINE_FUNCTION int getNonZeroCountCircleAsc(const int i_r, const PolarGrid<DefaultMemorySpace>& grid,
+static KOKKOS_INLINE_FUNCTION int getNonZeroCountCircleAsc(const int i_r, const PolarGrid& grid,
                                                            const bool DirBC_Interior)
 {
     // Only i_r = 0 is implemented.

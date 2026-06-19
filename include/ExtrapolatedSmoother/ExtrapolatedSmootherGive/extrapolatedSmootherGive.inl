@@ -1,7 +1,7 @@
 #pragma once
 
 template <class LevelCacheType>
-ExtrapolatedSmootherGive<LevelCacheType>::ExtrapolatedSmootherGive(const PolarGrid<DefaultMemorySpace>& grid,
+ExtrapolatedSmootherGive<LevelCacheType>::ExtrapolatedSmootherGive(const PolarGrid& grid,
                                                                    const LevelCacheType& level_cache,
                                                                    const bool DirBC_Interior)
     : ExtrapolatedSmoother<LevelCacheType>(grid, level_cache, DirBC_Interior)
@@ -48,7 +48,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::extrapolatedSmoothing(Vector<doub
     assert(x.size() == rhs.size());
     assert(temp.size() == rhs.size());
 
-    const PolarGrid<DefaultMemorySpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
     /* We split the loops into two regions to better respect the */
     /* access patterns of the smoother and improve cache locality. */

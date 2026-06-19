@@ -3,7 +3,7 @@
 template <class LevelCacheType>
 void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackCircleSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid<DefaultMemorySpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
     int start                     = 0;
     int end                       = grid.numberCircularSmootherNodes();
@@ -46,7 +46,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackCircleSection(Vector<do
 template <class LevelCacheType>
 void ExtrapolatedSmootherGive<LevelCacheType>::solveWhiteCircleSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid<DefaultMemorySpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
     int start                     = 0;
     int end                       = grid.numberCircularSmootherNodes();
@@ -89,7 +89,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveWhiteCircleSection(Vector<do
 template <class LevelCacheType>
 void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackRadialSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid<DefaultMemorySpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
     int start                     = grid.numberCircularSmootherNodes();
     int end                       = grid.numberOfNodes();
@@ -119,7 +119,7 @@ void ExtrapolatedSmootherGive<LevelCacheType>::solveBlackRadialSection(Vector<do
 template <class LevelCacheType>
 void ExtrapolatedSmootherGive<LevelCacheType>::solveWhiteRadialSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid<DefaultMemorySpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
 
     int start                     = grid.numberCircularSmootherNodes();
     int end                       = grid.numberOfNodes();

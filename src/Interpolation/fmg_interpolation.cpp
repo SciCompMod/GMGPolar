@@ -58,8 +58,7 @@ using namespace gmgpolar;
  */
 
 static KOKKOS_INLINE_FUNCTION void fineNodeFMGInterpolation(const int i_r, const int i_theta,
-                                                            const PolarGrid<DefaultMemorySpace>& coarse_grid,
-                                                            const PolarGrid<DefaultMemorySpace>& fine_grid,
+                                                            const PolarGrid& coarse_grid, const PolarGrid& fine_grid,
                                                             Vector<double>& fine_result,
                                                             ConstVector<double>& coarse_values)
 {
@@ -227,9 +226,8 @@ static KOKKOS_INLINE_FUNCTION void fineNodeFMGInterpolation(const int i_r, const
     }
 }
 
-void Interpolation::applyFMGInterpolation(const PolarGrid<DefaultMemorySpace>& coarse_grid,
-                                          const PolarGrid<DefaultMemorySpace>& fine_grid, Vector<double> fine_result,
-                                          ConstVector<double> coarse_values) const
+void Interpolation::applyFMGInterpolation(const PolarGrid& coarse_grid, const PolarGrid& fine_grid,
+                                          Vector<double> fine_result, ConstVector<double> coarse_values) const
 {
     assert(std::ssize(coarse_values) == coarse_grid.numberOfNodes());
     assert(std::ssize(fine_result) == fine_grid.numberOfNodes());

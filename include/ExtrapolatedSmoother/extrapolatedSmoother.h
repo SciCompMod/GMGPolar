@@ -27,8 +27,7 @@ template <class LevelCacheType>
 class ExtrapolatedSmoother
 {
 public:
-    explicit ExtrapolatedSmoother(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache,
-                                  bool DirBC_Interior)
+    explicit ExtrapolatedSmoother(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior)
         : grid_(grid)
         , level_cache_(level_cache)
         , DirBC_Interior_(DirBC_Interior)
@@ -39,7 +38,7 @@ public:
     virtual void extrapolatedSmoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) = 0;
 
 protected:
-    const PolarGrid<DefaultMemorySpace>& grid_;
+    const PolarGrid& grid_;
     const LevelCacheType& level_cache_;
     const bool DirBC_Interior_;
 };

@@ -3,8 +3,7 @@
 namespace direct_solver_give
 {
 
-static KOKKOS_INLINE_FUNCTION int getStencilSize(int global_index, const PolarGrid<DefaultMemorySpace>& grid,
-                                                 const bool DirBC_Interior)
+static KOKKOS_INLINE_FUNCTION int getStencilSize(int global_index, const PolarGrid& grid, const bool DirBC_Interior)
 {
     int i_r, i_theta;
     grid.multiIndex(global_index, i_r, i_theta);
@@ -34,8 +33,7 @@ static KOKKOS_INLINE_FUNCTION int getStencilSize(int global_index, const PolarGr
     Kokkos::abort("Invalid index for stencil");
 }
 
-static KOKKOS_INLINE_FUNCTION const Stencil& getStencil(const int i_r, const PolarGrid<DefaultMemorySpace>& grid,
-                                                        const bool DirBC_Interior)
+static KOKKOS_INLINE_FUNCTION const Stencil& getStencil(const int i_r, const PolarGrid& grid, const bool DirBC_Interior)
 {
     assert(0 <= i_r && i_r < grid.nr());
     assert(grid.nr() >= 4);
@@ -87,8 +85,7 @@ static KOKKOS_INLINE_FUNCTION const Stencil& getStencil(const int i_r, const Pol
     Kokkos::abort("Invalid index for stencil");
 }
 
-static KOKKOS_INLINE_FUNCTION int getNonZeroCountSolverMatrix(const PolarGrid<DefaultMemorySpace>& grid,
-                                                              const bool DirBC_Interior)
+static KOKKOS_INLINE_FUNCTION int getNonZeroCountSolverMatrix(const PolarGrid& grid, const bool DirBC_Interior)
 {
     const int size_stencil_inner_boundary      = DirBC_Interior ? 1 : 7;
     const int size_stencil_next_inner_boundary = DirBC_Interior ? 6 : 9;
@@ -105,8 +102,7 @@ static KOKKOS_INLINE_FUNCTION int getNonZeroCountSolverMatrix(const PolarGrid<De
 
 /* ----------------------------------------------------------------- */
 /* If the indexing is not smoother-based, please adjust the indexing */
-static KOKKOS_INLINE_FUNCTION int getSolverMatrixIndex(const int i_r, const int i_theta,
-                                                       const PolarGrid<DefaultMemorySpace>& grid,
+static KOKKOS_INLINE_FUNCTION int getSolverMatrixIndex(const int i_r, const int i_theta, const PolarGrid& grid,
                                                        const bool DirBC_Interior)
 {
     const int size_stencil_inner_boundary      = DirBC_Interior ? 1 : 7;
@@ -186,8 +182,7 @@ static KOKKOS_INLINE_FUNCTION int getSolverMatrixIndex(const int i_r, const int 
     Kokkos::abort("Invalid index for stencil");
 }
 
-static KOKKOS_INLINE_FUNCTION bool validateSolverMatrixIndexing(const PolarGrid<DefaultMemorySpace>& grid,
-                                                                const bool DirBC_Interior)
+static KOKKOS_INLINE_FUNCTION bool validateSolverMatrixIndexing(const PolarGrid& grid, const bool DirBC_Interior)
 {
     // 1. Check each node: getSolverMatrixIndex == cumulative sum of prior stencil sizes
     for (int global_index = 0; global_index < grid.numberOfNodes(); ++global_index) {

@@ -22,8 +22,6 @@
 namespace gmgpolar
 {
 
-// Template to be removed after porting is completed
-template <class MemorySpace>
 class PolarGrid
 {
 public:
@@ -45,17 +43,7 @@ public:
 
     KOKKOS_DEFAULTED_FUNCTION PolarGrid(const PolarGrid&) = default;
 
-    template <class MemorySpace2>
-    explicit PolarGrid(const PolarGrid<MemorySpace2>& other);
-
-    template <class MemorySpace2>
-    PolarGrid& operator=(const PolarGrid<MemorySpace2>& other);
-
     KOKKOS_DEFAULTED_FUNCTION PolarGrid& operator=(const PolarGrid&) = default;
-
-    // Friend of class on a different memory space for easy copying
-    template <class>
-    friend class PolarGrid;
 
     // Optimized, inlined indexing.
     KOKKOS_INLINE_FUNCTION int wrapThetaIndex(const int unwrapped_theta_index) const;
@@ -75,10 +63,10 @@ public:
     KOKKOS_INLINE_FUNCTION double theta(const int theta_index) const;
 
     // Get all radii on the host
-    HostConstVector<double> host_radii() const;
+    inline HostConstVector<double> host_radii() const;
 
     // Get all angles on the host
-    HostConstVector<double> host_theta() const;
+    inline HostConstVector<double> host_theta() const;
 
     // Grid distances
     // Get the radial distance to the next consecutive radial node at a specified radial index.
@@ -105,19 +93,19 @@ private:
     int nr_; // number of nodes in radial direction
     int ntheta_; // number of (unique) nodes in angular direction
     bool is_ntheta_PowerOfTwo_;
-    AllocatableVector<double, MemorySpace> radii_; // Vector of radial coordiantes
-    AllocatableVector<double, MemorySpace> angles_; // Vector of angular coordinates
+    AllocatableVector<double> radii_; // Vector of radial coordiantes
+    AllocatableVector<double> angles_; // Vector of angular coordinates
 
     // radial_spacings_ contains the distances between each consecutive radii division.
     // radial_spacings_ = [r_{1}-r_{0}, ..., r_{N}-r_{N-1}].
-    AllocatableVector<double, MemorySpace> radial_spacings_; // size(radial_spacings_) = nr() - 1
+    AllocatableVector<double> radial_spacings_; // size(radial_spacings_) = nr() - 1
 
     // angular_spacings_ contains the angles between each consecutive theta division.
     // Since we have a periodic boundary in theta direction,
     // we have to make sure the index wraps around correctly when accessing it.
     // Here theta_0 = 0.0 and theta_N = 2*pi refer to the same point.
     // angular_spacings_ = [theta_{1}-theta_{0}, ..., theta_{N}-theta_{N-1}].
-    AllocatableVector<double, MemorySpace> angular_spacings_; // size(angular_spacings_) = ntheta()
+    AllocatableVector<double> angular_spacings_; // size(angular_spacings_) = ntheta()
 
     // Circle/radial smoother division
     double smoother_splitting_radius_; // Radius at which the grid is split into circular and radial smoothing
@@ -160,7 +148,7 @@ private:
     void refineGrid(const int divideBy2);
 
 public: // Cuda restriction: functions containing a KOKKOS_LAMBDA must be public
-    Vector<double, MemorySpace> divideVector(Vector<double, MemorySpace> vec, const int divideBy2) const;
+    Vector<double> divideVector(Vector<double> vec, const int divideBy2) const;
 
 private:
     // Help constrcut radii_ when an anisotropic radial division is requested
@@ -169,13 +157,10 @@ private:
                                                  const int anisotropic_factor) const;
 };
 
-template class PolarGrid<DefaultMemorySpace>;
-
 // ---------------------------------------------------- //
 // Generates a coarser PolarGrid from a finer PolarGrid //
 // ---------------------------------------------------- //
-template <class MemorySpace = Kokkos::HostSpace>
-PolarGrid<MemorySpace> coarseningGrid(const PolarGrid<MemorySpace>& grid);
+PolarGrid coarseningGrid(const PolarGrid& grid);
 
 #include "polargrid.inl" // Include the inline function definitions
 } // namespace gmgpolar

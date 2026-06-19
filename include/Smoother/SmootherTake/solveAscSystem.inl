@@ -3,7 +3,7 @@
 template <class LevelCacheType>
 void SmootherTake<LevelCacheType>::solveBlackCircleSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
+    const PolarGrid& grid = Smoother<LevelCacheType>::grid_;
 
     int start                     = 0;
     int end                       = grid.numberCircularSmootherNodes();
@@ -43,7 +43,7 @@ void SmootherTake<LevelCacheType>::solveBlackCircleSection(Vector<double> x, Vec
 template <class LevelCacheType>
 void SmootherTake<LevelCacheType>::solveWhiteCircleSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
+    const PolarGrid& grid = Smoother<LevelCacheType>::grid_;
 
     int start                     = 0;
     int end                       = grid.numberCircularSmootherNodes();
@@ -83,7 +83,7 @@ void SmootherTake<LevelCacheType>::solveWhiteCircleSection(Vector<double> x, Vec
 template <class LevelCacheType>
 void SmootherTake<LevelCacheType>::solveBlackRadialSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
+    const PolarGrid& grid = Smoother<LevelCacheType>::grid_;
 
     int start                     = grid.numberCircularSmootherNodes();
     int end                       = grid.numberOfNodes();
@@ -116,7 +116,7 @@ void SmootherTake<LevelCacheType>::solveBlackRadialSection(Vector<double> x, Vec
 template <class LevelCacheType>
 void SmootherTake<LevelCacheType>::solveWhiteRadialSection(Vector<double> x, Vector<double> temp)
 {
-    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
+    const PolarGrid& grid = Smoother<LevelCacheType>::grid_;
 
     int start                     = grid.numberCircularSmootherNodes();
     int end                       = grid.numberOfNodes();

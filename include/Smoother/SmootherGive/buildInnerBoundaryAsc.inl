@@ -28,9 +28,8 @@ static KOKKOS_INLINE_FUNCTION void update_CSR_COO_MatrixElement(const SparseMatr
 
 template <typename LevelCacheType, typename InnerBoundaryMatrix>
 static KOKKOS_INLINE_FUNCTION void
-nodeBuildInteriorBoundarySolverMatrix_i_r_0(const int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
-                                            const LevelCacheType& level_cache, const bool DirBC_Interior,
-                                            const InnerBoundaryMatrix& matrix)
+nodeBuildInteriorBoundarySolverMatrix_i_r_0(const int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache,
+                                            const bool DirBC_Interior, const InnerBoundaryMatrix& matrix)
 {
     using smoother_give::getCircleAscIndex;
     using smoother_give::getStencil;
@@ -201,9 +200,8 @@ nodeBuildInteriorBoundarySolverMatrix_i_r_0(const int i_theta, const PolarGrid<D
 
 template <typename LevelCacheType, typename InnerBoundaryMatrix>
 static KOKKOS_INLINE_FUNCTION void
-nodeBuildInteriorBoundarySolverMatrix_i_r_1(const int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
-                                            const LevelCacheType& level_cache, const bool DirBC_Interior,
-                                            const InnerBoundaryMatrix& matrix)
+nodeBuildInteriorBoundarySolverMatrix_i_r_1(const int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache,
+                                            const bool DirBC_Interior, const InnerBoundaryMatrix& matrix)
 {
     using smoother_give::getCircleAscIndex;
     using smoother_give::getStencil;
@@ -259,9 +257,9 @@ SmootherGive<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     using smoother_give::nodeBuildInteriorBoundarySolverMatrix_i_r_0;
     using smoother_give::nodeBuildInteriorBoundarySolverMatrix_i_r_1;
 
-    const PolarGrid<DefaultMemorySpace>& grid = Smoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache         = Smoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior                 = Smoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 
     const int ntheta = grid.ntheta();
 

@@ -30,9 +30,8 @@ static KOKKOS_INLINE_FUNCTION void update_CSR_COO_MatrixElement(const SparseMatr
 
 template <typename LevelCacheType, typename InnerBoundaryMatrix>
 static KOKKOS_INLINE_FUNCTION void
-nodeBuildInteriorBoundarySolverMatrix_i_r_0(const int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
-                                            const LevelCacheType& level_cache, const bool DirBC_Interior,
-                                            const InnerBoundaryMatrix& matrix)
+nodeBuildInteriorBoundarySolverMatrix_i_r_0(const int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache,
+                                            const bool DirBC_Interior, const InnerBoundaryMatrix& matrix)
 {
     using extrapolated_smoother_give::update_CSR_COO_MatrixElement;
 
@@ -194,9 +193,8 @@ nodeBuildInteriorBoundarySolverMatrix_i_r_0(const int i_theta, const PolarGrid<D
 
 template <typename LevelCacheType, typename InnerBoundaryMatrix>
 static KOKKOS_INLINE_FUNCTION void
-nodeBuildInteriorBoundarySolverMatrix_i_r_1(const int i_theta, const PolarGrid<DefaultMemorySpace>& grid,
-                                            const LevelCacheType& level_cache, const bool DirBC_Interior,
-                                            const InnerBoundaryMatrix& matrix)
+nodeBuildInteriorBoundarySolverMatrix_i_r_1(const int i_theta, const PolarGrid& grid, const LevelCacheType& level_cache,
+                                            const bool DirBC_Interior, const InnerBoundaryMatrix& matrix)
 {
     using extrapolated_smoother_give::update_CSR_COO_MatrixElement;
 
@@ -266,9 +264,9 @@ ExtrapolatedSmootherGive<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     using extrapolated_smoother_give::nodeBuildInteriorBoundarySolverMatrix_i_r_0;
     using extrapolated_smoother_give::nodeBuildInteriorBoundarySolverMatrix_i_r_1;
 
-    const PolarGrid<DefaultMemorySpace>& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache         = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior                 = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
     const int ntheta = grid.ntheta();
 

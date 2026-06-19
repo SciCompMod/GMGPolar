@@ -236,8 +236,7 @@ bool ConfigParser::parse(int argc, char* argv[])
     // Construct PolarGrid
     double refinement_radius               = alpha_jump;
     std::optional<double> splitting_radius = std::nullopt;
-    grid_ = PolarGrid<DefaultMemorySpace>(R0, Rmax, nr_exp, ntheta_exp, refinement_radius, anisotropic_factor,
-                                          divideBy2, splitting_radius);
+    grid_ = PolarGrid(R0, Rmax, nr_exp, ntheta_exp, refinement_radius, anisotropic_factor, divideBy2, splitting_radius);
 
     selectTestCase(geometry_type, problem_type, alpha_type, beta_type, Rmax, kappa_eps, delta_e, alpha_jump);
 
@@ -353,7 +352,7 @@ bool ConfigParser::cacheDomainGeometry() const
     return cache_domain_geometry_;
 }
 
-const PolarGrid<DefaultMemorySpace>& ConfigParser::grid() const
+const PolarGrid& ConfigParser::grid() const
 {
     return grid_;
 }

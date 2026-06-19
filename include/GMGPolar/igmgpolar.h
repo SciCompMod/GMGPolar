@@ -32,7 +32,7 @@ public:
     // with Dirichlet boundary condition        u = u_D    on \partial \Omega.
     // Parameters:
     // - grid: Cartesian mesh discretizing the computational domain.
-    IGMGPolar(const PolarGrid<DefaultMemorySpace>& grid);
+    IGMGPolar(const PolarGrid& grid);
 
     /* ---------------------------------------------------------------------- */
     /* General output & visualization                                         */
@@ -154,7 +154,7 @@ protected:
     /* ------------------------------------ */
     /* Grid Configuration & Input Functions */
     /* ------------------------------------ */
-    const PolarGrid<DefaultMemorySpace>& grid_;
+    const PolarGrid& grid_;
 
     /* ------------------ */
     /* Control Parameters */

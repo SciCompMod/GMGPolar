@@ -1,9 +1,8 @@
 #include <InputFunctions/SourceTerms/cartesianR6_Zoni_ShafranovGeometry.h>
 using namespace gmgpolar;
 
-CartesianR6_Zoni_ShafranovGeometry::CartesianR6_Zoni_ShafranovGeometry(PolarGrid<DefaultMemorySpace> const& grid,
-                                                                       double Rmax, double elongation_kappa,
-                                                                       double shift_delta)
+CartesianR6_Zoni_ShafranovGeometry::CartesianR6_Zoni_ShafranovGeometry(PolarGrid const& grid, double Rmax,
+                                                                       double elongation_kappa, double shift_delta)
     : grid_(grid)
     , Rmax(Rmax)
     , elongation_kappa(elongation_kappa)

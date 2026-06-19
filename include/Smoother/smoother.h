@@ -27,7 +27,7 @@ template <class LevelCacheType>
 class Smoother
 {
 public:
-    explicit Smoother(const PolarGrid<DefaultMemorySpace>& grid, const LevelCacheType& level_cache, bool DirBC_Interior)
+    explicit Smoother(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior)
         : grid_(grid)
         , level_cache_(level_cache)
         , DirBC_Interior_(DirBC_Interior)
@@ -39,7 +39,7 @@ public:
     virtual void smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) = 0;
 
 protected:
-    const PolarGrid<DefaultMemorySpace> grid_;
+    const PolarGrid grid_;
     const LevelCacheType level_cache_;
     const bool DirBC_Interior_;
 };

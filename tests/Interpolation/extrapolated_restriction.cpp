@@ -9,8 +9,7 @@
 using namespace gmgpolar;
 
 // Helper that computes the mathematically expected extrapolated restriction value
-static double expected_extrapolated_restriction_value(const PolarGrid<DefaultMemorySpace>& fine,
-                                                      const PolarGrid<DefaultMemorySpace>& coarse,
+static double expected_extrapolated_restriction_value(const PolarGrid& fine, const PolarGrid& coarse,
                                                       ConstVector<double> fine_vals, int i_r_coarse, int i_theta_coarse)
 {
     int i_r     = i_r_coarse * 2;
@@ -51,8 +50,8 @@ TEST(ExtrapolatedRestrictionTest, ExtrapolatedRestrictionMatchesStencil)
     std::vector<double> fine_angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, 2 * M_PI};
 
-    PolarGrid<DefaultMemorySpace> fine_grid(fine_radii, fine_angles);
-    PolarGrid<DefaultMemorySpace> coarse_grid = coarseningGrid(fine_grid);
+    PolarGrid fine_grid(fine_radii, fine_angles);
+    PolarGrid coarse_grid = coarseningGrid(fine_grid);
 
     Interpolation I(/*DirBC*/ true);
 
