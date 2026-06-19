@@ -25,7 +25,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
         Level<DomainGeometry, DensityProfileCoefficients>& current_level = levels_[level_depth];
         // Inject rhs if there is a next level
         if (level_depth + 1 < initial_rhs_f_levels) {
-            Level<DomainGeometry, DensityProfileCoefficients>& next_level = levels_[level_depth + 1];
+            auto& next_level = levels_[level_depth + 1];
             injection(level_depth, next_level.rhs(), current_level.rhs());
         }
         // Discretize the rhs for the current level
@@ -202,7 +202,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::fullMultigridApproxim
 {
     // Start from the coarsest level
     int coarsest_depth                                                = number_of_levels_ - 1;
-    Level<DomainGeometry, DensityProfileCoefficients>& coarsest_level = levels_[coarsest_depth];
+    auto& coarsest_level = levels_[coarsest_depth];
 
     // Solve directly on the coarsest level
     Kokkos::deep_copy(coarsest_level.solution(), coarsest_level.rhs());
@@ -233,7 +233,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solveMultigrid(double
                                                                           double& current_residual_norm,
                                                                           double& current_relative_residual_norm)
 {
-    Level<DomainGeometry, DensityProfileCoefficients>& level = levels_[0];
+    auto& level = levels_[0];
 
     while (number_of_iterations_ < max_iterations_) {
         /* ----------------------- */
@@ -308,7 +308,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solvePCG(double& init
                                                                     double& current_residual_norm,
                                                                     double& current_relative_residual_norm)
 {
-    Level<DomainGeometry, DensityProfileCoefficients>& level = levels_[0];
+    auto& level = levels_[0];
 
     // x = initial guess
     Kokkos::deep_copy(pcg_solution_, level.solution());
@@ -475,7 +475,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::updateResidualNorms(
 {
     level.computeResidual(level.residual(), level.rhs(), level.solution());
     if (extrapolation_ != ExtrapolationType::NONE) {
-        Level<DomainGeometry, DensityProfileCoefficients>& next_level = levels_[level.level_depth() + 1];
+        auto& next_level = levels_[level.level_depth() + 1];
         injection(level.level_depth(), next_level.solution(), level.solution());
         next_level.computeResidual(next_level.residual(), next_level.rhs(), next_level.solution());
         applyExtrapolation(level.level_depth(), level.residual(), next_level.residual());
@@ -579,8 +579,8 @@ template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoeff
 void GMGPolar<DomainGeometry, DensityProfileCoefficients>::initRhsHierarchy()
 {
     for (int level_depth = 0; level_depth < number_of_levels_ - 1; ++level_depth) {
-        Level<DomainGeometry, DensityProfileCoefficients>& current_level = levels_[level_depth];
-        Level<DomainGeometry, DensityProfileCoefficients>& next_level    = levels_[level_depth + 1];
+        auto& current_level = levels_[level_depth];
+        auto& next_level    = levels_[level_depth + 1];
         restriction(level_depth, next_level.rhs(), current_level.rhs());
     }
 }
