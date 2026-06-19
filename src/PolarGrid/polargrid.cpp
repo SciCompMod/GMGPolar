@@ -89,16 +89,15 @@ void PolarGrid<MemorySpace>::constructRadialDivisions(double R0, double R, const
     }
     // Refine division in the middle for extrapolation
     auto r_temp = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_r_temp);
-    nr_    = 2 * r_temp.size() - 1;
+    nr_         = 2 * r_temp.size() - 1;
     Vector<double, MemorySpace> radii("radii_", nr_);
     Kokkos::parallel_for(
-        "constructRadialDivisions", Kokkos::RangePolicy<ExecSpace>(0, nr_),
-        KOKKOS_LAMBDA(int i) {
-        if (!(i % 2))
-            radii[i] = r_temp[i / 2];
-        else
-            radii[i] = 0.5 * (r_temp[(i - 1) / 2] + r_temp[(i + 1) / 2]);
-    });
+        "constructRadialDivisions", Kokkos::RangePolicy<ExecSpace>(0, nr_), KOKKOS_LAMBDA(int i) {
+            if (!(i % 2))
+                radii[i] = r_temp[i / 2];
+            else
+                radii[i] = 0.5 * (r_temp[(i - 1) / 2] + r_temp[(i + 1) / 2]);
+        });
     radii_ = radii;
 }
 
@@ -123,18 +122,14 @@ void PolarGrid<MemorySpace>::constructAngularDivisions(const int ntheta_exp, con
     // Note that currently ntheta_ = 2^k which allows us to do some optimizations when indexing.
     double uniform_distance = 2 * M_PI / ntheta_;
     Kokkos::resize(angles_, ntheta_ + 1);
-	// create local copy to avoid requiring class capture
+    // create local copy to avoid requiring class capture
     Vector<double, MemorySpace> angles = angles_;
     Kokkos::parallel_for(
         "constructAngularDivisions", Kokkos::RangePolicy<ExecSpace>(0, ntheta_),
-        KOKKOS_LAMBDA(int i) {
-        angles[i] = i * uniform_distance;
-    });
+        KOKKOS_LAMBDA(int i) { angles[i] = i * uniform_distance; });
     Kokkos::parallel_for(
-        "constructAngularDivisions", Kokkos::RangePolicy<ExecSpace>(ntheta_, ntheta_+1),
-        KOKKOS_LAMBDA(int i) {
-    angles[i] = 2 * M_PI;
-	});
+        "constructAngularDivisions", Kokkos::RangePolicy<ExecSpace>(ntheta_, ntheta_ + 1),
+        KOKKOS_LAMBDA(int i) { angles[i] = 2 * M_PI; });
 }
 
 // divideBy2: Number of times to divide both radial and angular divisions by 2.
@@ -152,28 +147,26 @@ template <class MemorySpace>
 Vector<double, MemorySpace> PolarGrid<MemorySpace>::divideVector(Vector<double, MemorySpace> vec,
                                                                  const int divideBy2) const
 {
-    using ExecSpace = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
-                                         Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
+    using ExecSpace      = std::conditional_t<std::is_same_v<MemorySpace, Kokkos::HostSpace>,
+                                              Kokkos::DefaultHostExecutionSpace, Kokkos::DefaultExecutionSpace>;
     const int powerOfTwo = 1 << divideBy2;
     size_t vecSize       = vec.size();
     size_t resultSize    = vecSize + (vecSize - 1) * (powerOfTwo - 1);
     Vector<double, MemorySpace> result("result", resultSize);
 
     Kokkos::parallel_for(
-        "divideVector", Kokkos::RangePolicy<ExecSpace>(0, vecSize - 1),
-        KOKKOS_LAMBDA(int i) {
-        size_t baseIndex  = i * powerOfTwo;
-        result[baseIndex] = vec[i]; // Add the original value
-        for (int j = 1; j < powerOfTwo; ++j) {
-            double interpolated_value = vec[i] + j * (vec[i + 1] - vec[i]) / static_cast<double>(powerOfTwo);
-            result[baseIndex + j]     = interpolated_value;
-        }
-    });
+        "divideVector", Kokkos::RangePolicy<ExecSpace>(0, vecSize - 1), KOKKOS_LAMBDA(int i) {
+            size_t baseIndex  = i * powerOfTwo;
+            result[baseIndex] = vec[i]; // Add the original value
+            for (int j = 1; j < powerOfTwo; ++j) {
+                double interpolated_value = vec[i] + j * (vec[i + 1] - vec[i]) / static_cast<double>(powerOfTwo);
+                result[baseIndex + j]     = interpolated_value;
+            }
+        });
     Kokkos::parallel_for(
-        "constructAngularDivisions", Kokkos::RangePolicy<ExecSpace>(resultSize - 1, resultSize),
-        KOKKOS_LAMBDA(int i) {
-    result[i] = vec(vec.size() - 1); // Add the last value of the original vector
-	});
+        "constructAngularDivisions", Kokkos::RangePolicy<ExecSpace>(resultSize - 1, resultSize), KOKKOS_LAMBDA(int i) {
+            result[i] = vec(vec.size() - 1); // Add the last value of the original vector
+        });
     return result;
 }
 

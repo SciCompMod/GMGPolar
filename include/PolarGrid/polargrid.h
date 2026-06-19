@@ -158,14 +158,15 @@ public: // Cuda restriction: functions containing a KOKKOS_LAMBDA must be public
 private:
     // Refine the grid by dividing radial and angular divisions by 2.
     void refineGrid(const int divideBy2);
+
 public: // Cuda restriction: functions containing a KOKKOS_LAMBDA must be public
     Vector<double, MemorySpace> divideVector(Vector<double, MemorySpace> vec, const int divideBy2) const;
 
 private:
     // Help constrcut radii_ when an anisotropic radial division is requested
     // Implementation in src/PolarGrid/anisotropic_division.cpp
-    HostVector<double> RadialAnisotropicDivision(double R0, double R, const int nr_exp,
-                                                          double refinement_radius, const int anisotropic_factor) const;
+    HostVector<double> RadialAnisotropicDivision(double R0, double R, const int nr_exp, double refinement_radius,
+                                                 const int anisotropic_factor) const;
 };
 
 template class PolarGrid<Kokkos::HostSpace>;

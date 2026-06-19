@@ -3,8 +3,8 @@ using namespace gmgpolar;
 
 template <class MemorySpace>
 HostVector<double> PolarGrid<MemorySpace>::RadialAnisotropicDivision(double R0, double R, const int nr_exp,
-                                                                              double refinement_radius,
-                                                                              const int anisotropic_factor) const
+                                                                     double refinement_radius,
+                                                                     const int anisotropic_factor) const
 {
     // Calculate the percentage of refinement_radius.
     const double percentage = (refinement_radius - R0) / (R - R0);
