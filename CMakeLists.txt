@@ -48,7 +48,6 @@ if(GMGPOLAR_ENABLE_COVERAGE)
     endif()
 endif()
 
-find_package(OpenMP REQUIRED COMPONENTS CXX)
 find_package(Kokkos 4.4.1...<6 QUIET REQUIRED)
 
 if(GMGPOLAR_USE_MUMPS)
@@ -56,6 +55,7 @@ if(GMGPOLAR_USE_MUMPS)
 endif()
 
 if(GMGPOLAR_USE_LIKWID)
+    find_package(OpenMP REQUIRED COMPONENTS CXX)
     find_package(LIKWID REQUIRED)
 endif()
 

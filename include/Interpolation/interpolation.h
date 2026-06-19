@@ -3,7 +3,6 @@
 #include <vector>
 #include <cassert>
 #include <iostream>
-#include <omp.h>
 
 #include "../PolarGrid/polargrid.h"
 #include "../LinearAlgebra/Vector/vector.h"

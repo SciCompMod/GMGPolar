@@ -14,8 +14,6 @@
 #include <stdexcept>
 #include <string>
 
-#include <omp.h>
-
 #include "../Definitions/equals.h"
 #include "../LinearAlgebra/Vector/vector.h"
 

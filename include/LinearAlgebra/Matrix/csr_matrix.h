@@ -5,7 +5,6 @@
 #include <functional>
 #include <limits>
 #include <memory>
-#include <omp.h>
 #include <optional>
 #include <sstream>
 #include <tuple>

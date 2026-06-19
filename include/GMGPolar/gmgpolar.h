@@ -2,7 +2,6 @@
 
 #include <filesystem>
 #include <iostream>
-#include <omp.h>
 #include <utility>
 
 #include "../InputFunctions/densityProfileCoefficients.h"

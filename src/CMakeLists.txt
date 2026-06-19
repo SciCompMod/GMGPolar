@@ -62,7 +62,6 @@ target_include_directories(GMGPolarLib PUBLIC
 # Handle OpenMP
 target_link_libraries(GMGPolarLib
     PUBLIC
-    OpenMP::OpenMP_CXX
     Kokkos::kokkos
 )
 
@@ -74,7 +73,7 @@ endif()
 
 # Handle LIKWID configuration
 if(GMGPOLAR_USE_LIKWID)
-    target_link_libraries(GMGPolarLib PUBLIC LIKWID::LIKWID)
+    target_link_libraries(GMGPolarLib PUBLIC LIKWID::LIKWID OpenMP::OpenMP_CXX)
     target_compile_definitions(GMGPolarLib PUBLIC GMGPOLAR_USE_LIKWID)
 endif()
 
