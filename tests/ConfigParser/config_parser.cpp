@@ -169,10 +169,11 @@ TEST_P(ConfigParserTest, ParseAllGeometryAndProblemCombinations)
     EXPECT_EQ(parser.cacheDomainGeometry(), cacheDomainGeometry);
 
     // Grid
-    const PolarGrid<Kokkos::HostSpace> grid(parser.grid());
+    const PolarGrid<DefaultMemorySpace>& grid = parser.grid();
     EXPECT_NE(&grid, nullptr);
-    EXPECT_DOUBLE_EQ(grid.radius(0), R0);
-    EXPECT_DOUBLE_EQ(grid.radius(grid.nr() - 1), Rmax);
+    HostConstVector<double> h_radius = grid.host_radii();
+    EXPECT_DOUBLE_EQ(h_radius(0), R0);
+    EXPECT_DOUBLE_EQ(h_radius(grid.nr() - 1), Rmax);
 
     // Multigrid parameters
     EXPECT_EQ(parser.FMG(), FMG);

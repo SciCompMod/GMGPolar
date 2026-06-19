@@ -294,10 +294,7 @@ PolarGrid<MemorySpace> coarseningGrid(const PolarGrid<MemorySpace>& fineGrid)
     }
 }
 
-template PolarGrid<Kokkos::HostSpace> coarseningGrid<Kokkos::HostSpace>(const PolarGrid<Kokkos::HostSpace>& grid);
-#ifdef KOKKOS_ENABLE_CUDA
 template PolarGrid<DefaultMemorySpace> coarseningGrid<DefaultMemorySpace>(const PolarGrid<DefaultMemorySpace>& grid);
-#endif
 
 } // namespace gmgpolar
 
