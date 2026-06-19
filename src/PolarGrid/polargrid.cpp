@@ -123,15 +123,17 @@ void PolarGrid<MemorySpace>::constructAngularDivisions(const int ntheta_exp, con
     // Note that currently ntheta_ = 2^k which allows us to do some optimizations when indexing.
     double uniform_distance = 2 * M_PI / ntheta_;
     Kokkos::resize(angles_, ntheta_ + 1);
+	// create local copy to avoid requiring class capture
+    Vector<double, MemorySpace> angles = angles_;
     Kokkos::parallel_for(
         "constructAngularDivisions", Kokkos::RangePolicy<ExecSpace>(0, ntheta_),
         KOKKOS_LAMBDA(int i) {
-        angles_[i] = i * uniform_distance;
+        angles[i] = i * uniform_distance;
     });
     Kokkos::parallel_for(
         "constructAngularDivisions", Kokkos::RangePolicy<ExecSpace>(ntheta_, ntheta_+1),
         KOKKOS_LAMBDA(int i) {
-    angles_[i] = 2 * M_PI;
+    angles[i] = 2 * M_PI;
 	});
 }
 
