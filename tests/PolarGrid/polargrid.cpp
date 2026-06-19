@@ -2,59 +2,82 @@
 #include "../../include/PolarGrid/polargrid.h"
 using namespace gmgpolar;
 
-double compare_coords(PolarGrid<DefaultMemorySpace> grid, std::vector<double> radii, std::vector<double> angles)
+double compare_radial_coords(PolarGrid<DefaultMemorySpace> grid, std::vector<double> radii)
 {
     HostVector<double> host_vector_radi(radii.data(), radii.size());
-    HostVector<double> host_vector_angles(angles.data(), angles.size());
-
-    auto expected_r     = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), host_vector_radi);
-    auto expected_theta = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), host_vector_angles);
-
-    double r_err     = 0;
-    double theta_err = 0;
-
+    auto expected_r = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), host_vector_radi);
+    double r_err    = 0;
     Kokkos::parallel_reduce(
         "r_test", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, grid.nr()),
-        KOKKOS_LAMBDA(int i_r, double& error) { error += expected_r(i_r) - grid.radius(i_r); }, r_err);
-
-    Kokkos::parallel_reduce(
-        "tetha_test", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, grid.ntheta()),
-        KOKKOS_LAMBDA(int i_theta, double& t_error) { t_error += expected_theta(i_theta) - grid.theta(i_theta); },
-        theta_err);
-
-    return std::max(r_err, theta_err);
+        KOKKOS_LAMBDA(int i_r, double& max_error) {
+            double current_err = Kokkos::abs(expected_r(i_r) - grid.radius(i_r));
+            if (current_err > max_error) {
+                max_error = current_err;
+            }
+        },
+        Kokkos::Max<double>(r_err));
+    return r_err;
 }
 
-double expected_indices(PolarGrid<DefaultMemorySpace> grid)
+double compare_angular_coords(PolarGrid<DefaultMemorySpace> grid, std::vector<double> angles)
 {
+    HostVector<double> host_vector_angles(angles.data(), angles.size());
+    auto expected_theta = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), host_vector_angles);
+    double theta_err    = 0;
+    Kokkos::parallel_reduce(
+        "theta_test", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, grid.ntheta()),
+        KOKKOS_LAMBDA(int i_theta, double& max_error) {
+            double current_err = Kokkos::abs(expected_theta(i_theta) - grid.theta(i_theta));
+            if (current_err > max_error) {
+                max_error = current_err;
+            }
+        },
+        Kokkos::Max<double>(theta_err));
+    return theta_err;
+}
 
-    double idx_err;
+int expected_indices(PolarGrid<DefaultMemorySpace> grid)
+{
+    double idx_err = 0;
     Kokkos::parallel_reduce(
         "indices",
         Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>({0, 0}, {grid.nr(), grid.ntheta()}),
-        KOKKOS_LAMBDA(const int i, const int j, double& error) {
+        KOKKOS_LAMBDA(const int i, const int j, double& max_error) {
             int node_index = grid.index(i, j);
             int r_out, theta_out;
             grid.multiIndex(node_index, r_out, theta_out);
-            error += (i - r_out) + (j - theta_out);
+            double current_err = Kokkos::abs(i - r_out) + Kokkos::abs(j - theta_out);
+            if (current_err > max_error) {
+                max_error = current_err;
+            }
         },
-        idx_err);
+        Kokkos::Max<double>(idx_err));
     return idx_err;
 }
 
 double expected_spacing(PolarGrid<DefaultMemorySpace> grid, Vector<double> rad_expected, Vector<double> ang_expected)
 {
-    double radial_spacing_err  = 0;
-    double angular_spacing_err = 0;
+    double radial_spacing_err = 0;
     Kokkos::parallel_reduce(
         "radial_spacing", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, rad_expected.size()),
-        KOKKOS_LAMBDA(int i_r, double& error) { error += rad_expected(i_r) - grid.radialSpacing(i_r); },
-        radial_spacing_err);
+        KOKKOS_LAMBDA(int i_r, double& max_error) {
+            double r_error = Kokkos::abs(rad_expected(i_r) - grid.radialSpacing(i_r));
+            if (r_error > max_error) {
+                max_error = r_error;
+            }
+        },
+        Kokkos::Max<double>(radial_spacing_err));
 
+    double angular_spacing_err = 0;
     Kokkos::parallel_reduce(
         "angular_spacing", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, ang_expected.size()),
-        KOKKOS_LAMBDA(int i_theta, double& error) { error += ang_expected(i_theta) - grid.angularSpacing(i_theta); },
-        angular_spacing_err);
+        KOKKOS_LAMBDA(int i_theta, double& max_error) {
+            double t_error = Kokkos::abs(ang_expected(i_theta) - grid.angularSpacing(i_theta));
+            if (t_error > max_error) {
+                max_error = t_error;
+            }
+        },
+        Kokkos::Max<double>(angular_spacing_err));
     return std::max(radial_spacing_err, angular_spacing_err);
 }
 
@@ -84,7 +107,8 @@ TEST(PolarGridTest, AccessorsTest)
     std::vector<double> angles = {0, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
     PolarGrid<DefaultMemorySpace> grid(radii, angles);
 
-    ASSERT_DOUBLE_EQ(compare_coords(grid, radii, angles), 0.);
+    ASSERT_DOUBLE_EQ(compare_radial_coords(grid, radii), 0.);
+    ASSERT_DOUBLE_EQ(compare_angular_coords(grid, angles), 0.);
 }
 
 TEST(PolarGridTest, GridJumpTest)
@@ -94,7 +118,8 @@ TEST(PolarGridTest, GridJumpTest)
     double splitting_radius    = 0.4;
     PolarGrid<DefaultMemorySpace> grid(radii, angles, splitting_radius);
 
-    ASSERT_DOUBLE_EQ(compare_coords(grid, radii, angles), 0.);
+    ASSERT_DOUBLE_EQ(compare_radial_coords(grid, radii), 0.);
+    ASSERT_DOUBLE_EQ(compare_angular_coords(grid, angles), 0.);
 }
 
 TEST(PolarGridTest, IndexingTest)
@@ -168,7 +193,8 @@ TEST(PolarGridTest, CoordinatesTest)
     double splitting_radius = 0.6;
     PolarGrid<DefaultMemorySpace> grid(radii, angles, splitting_radius);
     // Check that coordinates are correct
-    ASSERT_DOUBLE_EQ(compare_coords(grid, radii, angles), 0.);
+    ASSERT_DOUBLE_EQ(compare_radial_coords(grid, radii), 0.);
+    ASSERT_DOUBLE_EQ(compare_angular_coords(grid, angles), 0.);
 }
 
 TEST(PolarGridTest, SpacingTest)
