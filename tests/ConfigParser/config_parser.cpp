@@ -171,7 +171,7 @@ TEST_P(ConfigParserTest, ParseAllGeometryAndProblemCombinations)
     // Grid
     const PolarGrid<DefaultMemorySpace>& grid = parser.grid();
     EXPECT_NE(&grid, nullptr);
-    HostVector<double> h_radius = grid.host_radii();
+    HostConstVector<double> h_radius = grid.host_radii();
     EXPECT_DOUBLE_EQ(h_radius(0), R0);
     EXPECT_DOUBLE_EQ(h_radius(grid.nr() - 1), Rmax);
 
