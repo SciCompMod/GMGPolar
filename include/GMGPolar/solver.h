@@ -22,7 +22,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::solve(const BoundaryC
     int initial_rhs_f_levels = FMG_ ? number_of_levels_ : (extrapolation_ == ExtrapolationType::NONE ? 1 : 2);
     // Loop through the levels, injecting and discretizing rhs
     for (int level_depth = 0; level_depth < initial_rhs_f_levels; ++level_depth) {
-        Level<DomainGeometry, DensityProfileCoefficients>& current_level = levels_[level_depth];
+        auto& current_level = levels_[level_depth];
         // Inject rhs if there is a next level
         if (level_depth + 1 < initial_rhs_f_levels) {
             auto& next_level = levels_[level_depth + 1];
@@ -210,8 +210,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::fullMultigridApproxim
 
     // Prolongate the solution from the coarsest level up to the finest, while applying Multigrid Cycles on each level
     for (int depth = coarsest_depth; depth > 0; --depth) {
-        Level<DomainGeometry, DensityProfileCoefficients>& coarse_level = levels_[depth]; // Current coarse level
-        Level<DomainGeometry, DensityProfileCoefficients>& fine_level   = levels_[depth - 1]; // Next finer level
+        auto& coarse_level = levels_[depth]; // Current coarse level
+        auto& fine_level   = levels_[depth - 1]; // Next finer level
 
         // The bi-cubic FMG interpolation is of higher order
         FMGInterpolation(coarse_level.level_depth(), fine_level.solution(), coarse_level.solution());
