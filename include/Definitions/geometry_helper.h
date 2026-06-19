@@ -17,8 +17,8 @@ KOKKOS_INLINE_FUNCTION void compute_jacobian_elements(const DomainGeometry& doma
     /* [Jtr, Jtt] */
     const double Jrr = domain_geometry.dFx_dr(r, theta);
     const double Jtr = domain_geometry.dFy_dr(r, theta);
-    const double Jrt = domain_geometry.dFx_dt(r, theta);
-    const double Jtt = domain_geometry.dFy_dt(r, theta);
+    const double Jrt = domain_geometry.dFx_dtheta(r, theta);
+    const double Jtt = domain_geometry.dFy_dtheta(r, theta);
     /* Compute the determinant of the Jacobian matrix */
     detDF = Jrr * Jtt - Jrt * Jtr;
     /* Compute the elements of the symmetric matrix: */

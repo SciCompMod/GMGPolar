@@ -31,14 +31,14 @@ KOKKOS_INLINE_FUNCTION double ShafranovGeometry::dFy_dr(double r, double theta) 
 }
 
 // In earlier versions denoted by 'Jrt'
-KOKKOS_INLINE_FUNCTION double ShafranovGeometry::dFx_dt(double r, double theta) const
+KOKKOS_INLINE_FUNCTION double ShafranovGeometry::dFx_dtheta(double r, double theta) const
 {
     double sin_theta = std::sin(theta);
     return ((elongation_kappa - 1.0) * r * sin_theta) / Rmax;
 }
 
 // In earlier versions denoted by 'Jtt'
-KOKKOS_INLINE_FUNCTION double ShafranovGeometry::dFy_dt(double r, double theta) const
+KOKKOS_INLINE_FUNCTION double ShafranovGeometry::dFy_dtheta(double r, double theta) const
 {
     double cos_theta = std::cos(theta);
     return ((elongation_kappa + 1.0) * r * cos_theta) / Rmax;
