@@ -4,7 +4,6 @@
 #include <filesystem>
 #include <iostream>
 #include <memory>
-#include <omp.h>
 #include <optional>
 #include <utility>
 

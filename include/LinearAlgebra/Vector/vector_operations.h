@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cmath>
-#include <omp.h>
 #include <stdexcept>
 
 #include <Kokkos_Core.hpp>

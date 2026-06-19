@@ -16,7 +16,6 @@ class ExtrapolatedSmoother;
 } // namespace gmgpolar
 
 #include <memory>
-#include <omp.h>
 #include <vector>
 
 #include <Kokkos_Core.hpp>
