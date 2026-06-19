@@ -1,0 +1,18 @@
+@PACKAGE_INIT@
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
+
+include(CMakeFindDependencyMacro)
+
+find_dependency(OpenMP COMPONENTS CXX)
+find_dependency(Kokkos)
+
+if(@GMGPOLAR_USE_MUMPS@)
+    find_dependency(MUMPS COMPONENTS OpenMP METIS)
+endif()
+
+if(@GMGPOLAR_USE_LIKWID@)
+    find_dependency(LIKWID)
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/GMGPolarTargets.cmake")

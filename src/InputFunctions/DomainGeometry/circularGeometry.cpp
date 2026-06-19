@@ -1,4 +1,4 @@
-#include "../include/InputFunctions/DomainGeometry/circularGeometry.h"
+#include <InputFunctions/DomainGeometry/circularGeometry.h>
 using namespace gmgpolar;
 
 CircularGeometry::CircularGeometry(double Rmax)

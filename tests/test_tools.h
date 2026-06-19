@@ -1,8 +1,8 @@
 #pragma once
 #include <random>
 
-#include "../include/PolarGrid/polargrid.h"
-#include "../include/LinearAlgebra/Vector/vector.h"
+#include <PolarGrid/polargrid.h>
+#include <LinearAlgebra/Vector/vector.h>
 
 using namespace gmgpolar;
 

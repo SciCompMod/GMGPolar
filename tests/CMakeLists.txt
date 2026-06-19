@@ -1,9 +1,3 @@
-cmake_minimum_required(VERSION 3.12)
-
-project(GMGPolarTests LANGUAGES CXX)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(gmgpolar_test_sources
     gmgpolar_tests.cpp
@@ -40,7 +34,7 @@ foreach(label_threads "Serial;1" "Parallel;16")
     add_executable(${test_target} ${gmgpolar_test_sources})
     target_compile_features(${test_target} PRIVATE cxx_std_20)
     target_compile_definitions(${test_target} PRIVATE GMGPOLAR_TEST_THREADS=${num_threads})
-    target_link_libraries(${test_target} GMGPolarLib GTest::gtest_main)
+    target_link_libraries(${test_target} GMGPolarLib GMGPolarInterface GTest::gtest_main)
 
     gtest_discover_tests(${test_target}
         TEST_PREFIX ${label}

@@ -2,8 +2,8 @@
 #include <fstream>
 #include <cstdlib>
 
-#include "../include/GMGPolar/gmgpolar.h"
-#include "../include/GMGPolar/test_cases.h"
+#include <GMGPolar/gmgpolar.h>
+#include <GMGPolar/test_cases.h>
 using namespace gmgpolar;
 
 void runTest(int divideBy2, std::ostream& outfile)
