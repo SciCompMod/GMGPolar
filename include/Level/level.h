@@ -135,8 +135,7 @@ template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoeff
 class LevelCache
 {
 public:
-    explicit LevelCache(const PolarGrid& grid,
-                        const DensityProfileCoefficients& density_profile_coefficients,
+    explicit LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients,
                         const DomainGeometry& domain_geometry, const bool cache_density_profile_coefficients,
                         const bool cache_domain_geometry);
 

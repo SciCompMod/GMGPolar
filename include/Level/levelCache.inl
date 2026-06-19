@@ -27,8 +27,7 @@ static void cache_density_profile_coefficients(const PolarGrid& grid,
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-static void cache_domain_geometry(const PolarGrid& grid,
-                                  const DensityProfileCoefficients& density_profile_coefficients,
+static void cache_domain_geometry(const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients,
                                   const DomainGeometry& domain_geometry, const Vector<double>& vec_arr,
                                   const Vector<double>& vec_att, const Vector<double>& vec_art,
                                   const Vector<double>& vec_detDF)

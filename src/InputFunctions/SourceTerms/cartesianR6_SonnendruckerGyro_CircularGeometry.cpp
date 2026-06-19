@@ -1,8 +1,8 @@
 #include <InputFunctions/SourceTerms/cartesianR6_SonnendruckerGyro_CircularGeometry.h>
 using namespace gmgpolar;
 
-CartesianR6_SonnendruckerGyro_CircularGeometry::CartesianR6_SonnendruckerGyro_CircularGeometry(
-    PolarGrid const& grid, double Rmax)
+CartesianR6_SonnendruckerGyro_CircularGeometry::CartesianR6_SonnendruckerGyro_CircularGeometry(PolarGrid const& grid,
+                                                                                               double Rmax)
     : grid_(grid)
     , Rmax(Rmax)
 {

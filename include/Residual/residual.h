@@ -16,8 +16,7 @@ template <class LevelCacheType>
 class Residual
 {
 public:
-    explicit Residual(const PolarGrid& grid, const LevelCacheType& level_cache,
-                      const bool DirBC_Interior)
+    explicit Residual(const PolarGrid& grid, const LevelCacheType& level_cache, const bool DirBC_Interior)
         : grid_(grid)
         , level_cache_(level_cache)
         , DirBC_Interior_(DirBC_Interior)

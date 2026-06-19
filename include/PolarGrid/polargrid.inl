@@ -7,7 +7,7 @@
 // Constructor to initialize grid using vectors of radii and angles.
 template <class MemorySpace2>
 PolarGrid::PolarGrid(Vector<double, MemorySpace2> radii, Vector<double, MemorySpace2> angles,
-                                  std::optional<double> splitting_radius)
+                     std::optional<double> splitting_radius)
     : nr_(radii.size())
     , ntheta_(angles.size() - 1)
     , is_ntheta_PowerOfTwo_((ntheta_ & (ntheta_ - 1)) == 0)
@@ -132,8 +132,7 @@ KOKKOS_INLINE_FUNCTION int PolarGrid::index(const int r_index, const int unwrapp
     return global_index;
 }
 
-KOKKOS_INLINE_FUNCTION void PolarGrid::multiIndex(const int node_index, int& r_index,
-                                                               int& theta_index) const
+KOKKOS_INLINE_FUNCTION void PolarGrid::multiIndex(const int node_index, int& r_index, int& theta_index) const
 {
     assert(0 <= node_index && node_index < numberOfNodes());
     if (node_index < numberCircularSmootherNodes()) {

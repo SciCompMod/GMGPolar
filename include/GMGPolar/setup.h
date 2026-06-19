@@ -46,8 +46,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     levels_.emplace_back(0, std::move(finest_grid), std::move(finest_levelCache), extrapolation_, FMG_, PCG_FMG_);
 
     for (int level_depth = 1; level_depth < number_of_levels_; level_depth++) {
-        auto current_grid =
-            std::make_unique<PolarGrid>(coarseningGrid(levels_[level_depth - 1].grid()));
+        auto current_grid       = std::make_unique<PolarGrid>(coarseningGrid(levels_[level_depth - 1].grid()));
         auto current_levelCache = std::make_unique<LevelCache<DomainGeometry, DensityProfileCoefficients>>(
             *current_grid, density_profile_coefficients_, domain_geometry_, cache_density_profile_coefficients_,
             cache_domain_geometry_);
@@ -151,8 +150,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-int GMGPolar<DomainGeometry, DensityProfileCoefficients>::chooseNumberOfLevels(
-    const PolarGrid& finestGrid)
+int GMGPolar<DomainGeometry, DensityProfileCoefficients>::chooseNumberOfLevels(const PolarGrid& finestGrid)
 {
     constexpr int minRadialNodes      = 5;
     constexpr int minAngularDivisions = 4;
@@ -388,8 +386,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::build_rhs_f(
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printSettings(
-    const PolarGrid& finest_grid, const PolarGrid& coarsest_grid) const
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printSettings(const PolarGrid& finest_grid,
+                                                                         const PolarGrid& coarsest_grid) const
 {
 
     std::cout << "------------------------------\n";
@@ -589,8 +587,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printSettings(
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-bool GMGPolar<DomainGeometry, DensityProfileCoefficients>::checkUniformRefinement(
-    const PolarGrid& grid, double tolerance) const
+bool GMGPolar<DomainGeometry, DensityProfileCoefficients>::checkUniformRefinement(const PolarGrid& grid,
+                                                                                  double tolerance) const
 {
     HostConstVector<double> h_radius = grid.host_radii();
     HostConstVector<double> h_theta  = grid.host_theta();

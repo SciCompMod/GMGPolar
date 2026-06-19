@@ -144,9 +144,9 @@ SmootherTake<LevelCacheType>::buildInteriorBoundarySolverMatrix()
     using smoother_take::getNonZeroCountCircleAsc;
     using smoother_take::nodeBuildInteriorBoundarySolverMatrix;
 
-    const PolarGrid& grid = Smoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache         = Smoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior                 = Smoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 
     const int ntheta = grid.ntheta();
 

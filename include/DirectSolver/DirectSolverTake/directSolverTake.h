@@ -9,8 +9,7 @@ template <class LevelCacheType>
 class DirectSolverTake : public DirectSolver<LevelCacheType>
 {
 public:
-    explicit DirectSolverTake(const PolarGrid& grid, const LevelCacheType& level_cache,
-                              bool DirBC_Interior);
+    explicit DirectSolverTake(const PolarGrid& grid, const LevelCacheType& level_cache, bool DirBC_Interior);
 
     // Note: The rhs (right-hand side) vector gets overwritten during the solution process.
     void solveInPlace(Vector<double> solution) override;

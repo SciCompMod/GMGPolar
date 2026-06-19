@@ -1,8 +1,10 @@
 #include <InputFunctions/SourceTerms/polarR6_SonnendruckerGyro_ShafranovGeometry.h>
 using namespace gmgpolar;
 
-PolarR6_SonnendruckerGyro_ShafranovGeometry::PolarR6_SonnendruckerGyro_ShafranovGeometry(
-    PolarGrid const& grid, double Rmax, double elongation_kappa, double shift_delta)
+PolarR6_SonnendruckerGyro_ShafranovGeometry::PolarR6_SonnendruckerGyro_ShafranovGeometry(PolarGrid const& grid,
+                                                                                         double Rmax,
+                                                                                         double elongation_kappa,
+                                                                                         double shift_delta)
     : grid_(grid)
     , Rmax(Rmax)
     , elongation_kappa(elongation_kappa)

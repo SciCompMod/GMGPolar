@@ -1,9 +1,8 @@
 #include <PolarGrid/polargrid.h>
 using namespace gmgpolar;
 
-HostVector<double> PolarGrid::RadialAnisotropicDivision(double R0, double R, const int nr_exp,
-                                                                     double refinement_radius,
-                                                                     const int anisotropic_factor) const
+HostVector<double> PolarGrid::RadialAnisotropicDivision(double R0, double R, const int nr_exp, double refinement_radius,
+                                                        const int anisotropic_factor) const
 {
     // Calculate the percentage of refinement_radius.
     const double percentage = (refinement_radius - R0) / (R - R0);

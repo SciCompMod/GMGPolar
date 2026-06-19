@@ -631,8 +631,7 @@ template <class TestFixture>
 void run_gmgpolar()
 {
     PolarGrid grid(TestFixture::R0, TestFixture::Rmax, TestFixture::nrExp, TestFixture::nthetaExp,
-                                       TestFixture::refinementRadius, TestFixture::anisotropicFactor,
-                                       TestFixture::divideBy2);
+                   TestFixture::refinementRadius, TestFixture::anisotropicFactor, TestFixture::divideBy2);
 
     const double inverse_aspect_ratio_epsilon = 0.3;
     const double ellipticity_e                = 1.4;

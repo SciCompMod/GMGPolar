@@ -853,9 +853,9 @@ void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoBlackCircleSection(C
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache         = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior                 = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
     /* ----------------------------------------------- */
     /* 1. Black-Circle update (u_bc):                  */
@@ -937,9 +937,9 @@ void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoWhiteCircleSection(C
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache         = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior                 = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
     /* ----------------------------------------------- */
     /* 2. White-Circle update (u_wc):                  */
@@ -1022,9 +1022,9 @@ void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoBlackRadialSection(C
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache         = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior                 = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
     /* ----------------------------------------------- */
     /* 3. Black-Radial update (u_br):                  */
@@ -1107,9 +1107,9 @@ void ExtrapolatedSmootherGive<LevelCacheType>::applyAscOrthoWhiteRadialSection(C
         return (end - start + offset - 1) / offset;
     };
 
-    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache         = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior                 = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
     /* ----------------------------------------------- */
     /* 4. White-Radial update (u_wr):                  */

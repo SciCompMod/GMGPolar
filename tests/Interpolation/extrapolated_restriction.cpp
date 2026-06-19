@@ -9,8 +9,7 @@
 using namespace gmgpolar;
 
 // Helper that computes the mathematically expected extrapolated restriction value
-static double expected_extrapolated_restriction_value(const PolarGrid& fine,
-                                                      const PolarGrid& coarse,
+static double expected_extrapolated_restriction_value(const PolarGrid& fine, const PolarGrid& coarse,
                                                       ConstVector<double> fine_vals, int i_r_coarse, int i_theta_coarse)
 {
     int i_r     = i_r_coarse * 2;

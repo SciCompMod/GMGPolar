@@ -137,12 +137,10 @@ public: // Public due to cuda restrictions
     /* ---------------------------------------------------- */
     /* Compute exact error if an exact solution is provided */
     // The results are stored as a pair: (weighted L2 error, infinity error).
-    std::pair<double, double> evaluateExactError(const PolarGrid& grid,
-                                                 ConstVector<double> discrete_solution,
+    std::pair<double, double> evaluateExactError(const PolarGrid& grid, ConstVector<double> discrete_solution,
                                                  HostConstVector<double> analytical_solution_host,
                                                  Vector<double> error);
-    void computeAnalyticalSolutionOnHost(const PolarGrid& grid,
-                                         HostVector<double> analytical_solution_host,
+    void computeAnalyticalSolutionOnHost(const PolarGrid& grid, HostVector<double> analytical_solution_host,
                                          const ExactSolution& exact_solution);
 
     /* --------------- */
@@ -184,8 +182,7 @@ private:
 
     /* ----------------- */
     /* Print information */
-    void printSettings(const PolarGrid& finest_grid,
-                       const PolarGrid& coarsest_grid) const;
+    void printSettings(const PolarGrid& finest_grid, const PolarGrid& coarsest_grid) const;
     void printIterationHeader(bool is_exact_solution_provided);
     void printIterationInfo(int iteration, double current_residual_norm, double current_relative_residual_norm,
                             bool is_exact_solution_provided);

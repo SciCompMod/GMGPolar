@@ -531,9 +531,9 @@ void ExtrapolatedSmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
     using extrapolated_smoother_take::nodeBuildTridiagonalSolverMatricesCircleSection;
     using extrapolated_smoother_take::nodeBuildTridiagonalSolverMatricesRadialSection;
 
-    const PolarGrid& grid = ExtrapolatedSmoother<LevelCacheType>::grid_;
-    const bool DirBC_Interior                 = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
-    const LevelCacheType& level_cache         = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
+    const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
+    const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
+    const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());

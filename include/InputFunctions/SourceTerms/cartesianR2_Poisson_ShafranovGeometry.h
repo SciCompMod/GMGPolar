@@ -12,8 +12,8 @@ namespace gmgpolar
 class CartesianR2_Poisson_ShafranovGeometry
 {
 public:
-    explicit CartesianR2_Poisson_ShafranovGeometry(PolarGrid const& grid, double Rmax,
-                                                   double elongation_kappa, double shift_delta);
+    explicit CartesianR2_Poisson_ShafranovGeometry(PolarGrid const& grid, double Rmax, double elongation_kappa,
+                                                   double shift_delta);
     KOKKOS_DEFAULTED_FUNCTION
     CartesianR2_Poisson_ShafranovGeometry(const CartesianR2_Poisson_ShafranovGeometry&) = default;
 

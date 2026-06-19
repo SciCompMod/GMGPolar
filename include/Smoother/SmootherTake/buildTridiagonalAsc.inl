@@ -189,9 +189,9 @@ void SmootherTake<LevelCacheType>::buildTridiagonalSolverMatrices()
 {
     using smoother_take::nodeBuildTridiagonalSolverMatrices;
 
-    const PolarGrid& grid = Smoother<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache         = Smoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior                 = Smoother<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid& grid             = Smoother<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = Smoother<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = Smoother<LevelCacheType>::DirBC_Interior_;
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());

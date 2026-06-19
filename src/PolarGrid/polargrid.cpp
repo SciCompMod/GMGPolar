@@ -6,8 +6,7 @@ using namespace gmgpolar;
 // ------------ //
 
 // Constructor to initialize grid using vectors of radii and angles.
-PolarGrid::PolarGrid(std::vector<double> radii, std::vector<double> angles,
-                                  std::optional<double> splitting_radius)
+PolarGrid::PolarGrid(std::vector<double> radii, std::vector<double> angles, std::optional<double> splitting_radius)
     : nr_(radii.size())
     , ntheta_(angles.size() - 1)
     , is_ntheta_PowerOfTwo_((ntheta_ & (ntheta_ - 1)) == 0)
@@ -37,9 +36,8 @@ PolarGrid::PolarGrid(std::vector<double> radii, std::vector<double> angles,
 }
 
 // Constructor to initialize grid using parameters from GMGPolar.
-PolarGrid::PolarGrid(double R0, double Rmax, const int nr_exp, const int ntheta_exp,
-                                  double refinement_radius, const int anisotropic_factor, const int divideBy2,
-                                  std::optional<double> splitting_radius)
+PolarGrid::PolarGrid(double R0, double Rmax, const int nr_exp, const int ntheta_exp, double refinement_radius,
+                     const int anisotropic_factor, const int divideBy2, std::optional<double> splitting_radius)
 {
     assert(R0 > 0.0 && Rmax > R0 && !equals(R0, Rmax));
     // Construct radii_ and angles_
@@ -62,7 +60,7 @@ PolarGrid::PolarGrid(double R0, double Rmax, const int nr_exp, const int ntheta_
 
 // Construct radial divisions for grid generation.
 void PolarGrid::constructRadialDivisions(double R0, double R, const int nr_exp, double refinement_radius,
-                                                      const int anisotropic_factor)
+                                         const int anisotropic_factor)
 {
     // r_temp contains the values before we refine one last time for extrapolation.
     // Therefore we first consider 2^(nr_exp-1) points.
@@ -134,8 +132,7 @@ void PolarGrid::refineGrid(const int divideBy2)
     is_ntheta_PowerOfTwo_ = (ntheta_ & (ntheta_ - 1)) == 0;
 }
 
-Vector<double> PolarGrid::divideVector(Vector<double> vec,
-                                                                 const int divideBy2) const
+Vector<double> PolarGrid::divideVector(Vector<double> vec, const int divideBy2) const
 {
     const int powerOfTwo = 1 << divideBy2;
     size_t vecSize       = vec.size();
@@ -152,7 +149,8 @@ Vector<double> PolarGrid::divideVector(Vector<double> vec,
             }
         });
     Kokkos::parallel_for(
-        "constructAngularDivisions", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(resultSize - 1, resultSize), KOKKOS_LAMBDA(int i) {
+        "constructAngularDivisions", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(resultSize - 1, resultSize),
+        KOKKOS_LAMBDA(int i) {
             result[i] = vec(vec.size() - 1); // Add the last value of the original vector
         });
     return result;
@@ -280,8 +278,7 @@ PolarGrid coarseningGrid(const PolarGrid& fineGrid)
 // Check parameter validity //
 // ------------------------ //
 
-void PolarGrid::checkParameters(Vector<double, Kokkos::HostSpace> radii,
-                                             Vector<double, Kokkos::HostSpace> angles) const
+void PolarGrid::checkParameters(Vector<double, Kokkos::HostSpace> radii, Vector<double, Kokkos::HostSpace> angles) const
 {
     auto radii_start = Kokkos::Experimental::begin(radii);
     auto radii_end   = Kokkos::Experimental::end(radii);

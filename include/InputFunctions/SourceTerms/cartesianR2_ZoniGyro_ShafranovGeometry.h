@@ -12,8 +12,8 @@ namespace gmgpolar
 class CartesianR2_ZoniGyro_ShafranovGeometry
 {
 public:
-    explicit CartesianR2_ZoniGyro_ShafranovGeometry(PolarGrid const& grid, double Rmax,
-                                                    double elongation_kappa, double shift_delta);
+    explicit CartesianR2_ZoniGyro_ShafranovGeometry(PolarGrid const& grid, double Rmax, double elongation_kappa,
+                                                    double shift_delta);
     KOKKOS_DEFAULTED_FUNCTION
     CartesianR2_ZoniGyro_ShafranovGeometry(const CartesianR2_ZoniGyro_ShafranovGeometry&) = default;
 

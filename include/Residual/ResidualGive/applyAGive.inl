@@ -199,9 +199,9 @@ void ResidualGive<LevelCacheType>::applySystemOperator(Vector<double> result, Co
 {
     assert(result.size() == x.size());
 
-    const PolarGrid& grid = Residual<LevelCacheType>::grid_;
-    const LevelCacheType& level_cache         = Residual<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior                 = Residual<LevelCacheType>::DirBC_Interior_;
+    const PolarGrid& grid             = Residual<LevelCacheType>::grid_;
+    const LevelCacheType& level_cache = Residual<LevelCacheType>::level_cache_;
+    const bool DirBC_Interior         = Residual<LevelCacheType>::DirBC_Interior_;
 
     using residual_give::node_apply_a_give;
 

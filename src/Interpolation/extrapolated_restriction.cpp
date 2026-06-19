@@ -50,8 +50,7 @@ static KOKKOS_INLINE_FUNCTION void coarseNodeExtrapolatedRestriction(const int i
     coarse_result[coarse_grid.index(i_r_coarse, i_theta_coarse)] = value;
 }
 
-void Interpolation::applyExtrapolatedRestriction(const PolarGrid& fine_grid,
-                                                 const PolarGrid& coarse_grid,
+void Interpolation::applyExtrapolatedRestriction(const PolarGrid& fine_grid, const PolarGrid& coarse_grid,
                                                  Vector<double> coarse_result, ConstVector<double> fine_values) const
 {
     assert(std::ssize(fine_values) == fine_grid.numberOfNodes());
