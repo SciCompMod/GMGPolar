@@ -31,20 +31,23 @@ static KOKKOS_INLINE_FUNCTION void coarseNodeExtrapolatedRestriction(const int i
     const int i_r     = i_r_coarse * 2;
     const int i_theta = i_theta_coarse * 2;
 
+    const int i_theta_M1 = fine_grid.wrapThetaIndex(i_theta - 1);
+    const int i_theta_P1 = fine_grid.wrapThetaIndex(i_theta + 1);
+
     /* Center + Angular contributions (always present) */
-    double value = fine_values[fine_grid.index(i_r, i_theta)] + 0.5 * fine_values[fine_grid.index(i_r, i_theta - 1)] +
-                   0.5 * fine_values[fine_grid.index(i_r, i_theta + 1)];
+    double value = fine_values[fine_grid.index(i_r, i_theta)] + 0.5 * fine_values[fine_grid.index(i_r, i_theta_M1)] +
+                   0.5 * fine_values[fine_grid.index(i_r, i_theta_P1)];
 
     /* Left contributions (if not at inner boundary) */
     if (i_r_coarse > 0) {
         value += 0.5 * fine_values[fine_grid.index(i_r - 1, i_theta)] +
-                 0.5 * fine_values[fine_grid.index(i_r - 1, i_theta + 1)]; /* Top-Left diagonal */
+                 0.5 * fine_values[fine_grid.index(i_r - 1, i_theta_P1)]; /* Top-Left diagonal */
     }
 
     /* Right contributions (if not at outer boundary) */
     if (i_r_coarse < coarse_grid.nr() - 1) {
         value += 0.5 * fine_values[fine_grid.index(i_r + 1, i_theta)] +
-                 0.5 * fine_values[fine_grid.index(i_r + 1, i_theta - 1)]; /* Bottom-Right diagonal */
+                 0.5 * fine_values[fine_grid.index(i_r + 1, i_theta_M1)]; /* Bottom-Right diagonal */
     }
 
     coarse_result[coarse_grid.index(i_r_coarse, i_theta_coarse)] = value;

@@ -119,15 +119,16 @@ KOKKOS_INLINE_FUNCTION int PolarGrid::wrapThetaIndex(const int unwrapped_theta_i
     return theta_index;
 }
 
-KOKKOS_INLINE_FUNCTION int PolarGrid::index(const int r_index, const int unwrapped_theta_index) const
+KOKKOS_INLINE_FUNCTION int PolarGrid::index(const int r_index, const int theta_index) const
 {
-    // unwrapped_theta_index may be negative or larger than ntheta() to allow for periodicity.
     assert(0 <= r_index && r_index < nr());
-    int theta_index = wrapThetaIndex(unwrapped_theta_index);
+    assert(0 <= theta_index && theta_index < ntheta());
+
     int global_index =
         r_index < numberSmootherCircles()
             ? theta_index + ntheta() * r_index
             : numberCircularSmootherNodes() + r_index - numberSmootherCircles() + lengthRadialSmoother() * theta_index;
+
     assert(0 <= global_index && global_index < numberOfNodes());
     return global_index;
 }
