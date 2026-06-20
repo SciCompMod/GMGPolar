@@ -17,6 +17,8 @@ static double expected_value(const PolarGrid& coarse, const PolarGrid& fine, Con
     bool r_even = (i_r % 2 == 0);
     bool t_even = (i_theta % 2 == 0);
 
+    int i_theta_coarse_P1 = coarse.wrapThetaIndex(i_theta_coarse + 1);
+
     double result = 0;
     Kokkos::parallel_reduce(
         "prolongation_test", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, 1),
@@ -41,8 +43,8 @@ static double expected_value(const PolarGrid& coarse, const PolarGrid& fine, Con
                 double k1 = fine.angularSpacing(i_theta - 1);
                 double k2 = fine.angularSpacing(i_theta);
 
-                local_result = (k1 * coarse_vals[coarse.index(i_r_coarse, t_even ? i_theta_coarse : i_theta_coarse)] +
-                                k2 * coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)]) /
+                local_result = (k1 * coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)] +
+                                k2 * coarse_vals[coarse.index(i_r_coarse, i_theta_coarse_P1)]) /
                                (k1 + k2);
             }
             else {
@@ -54,8 +56,8 @@ static double expected_value(const PolarGrid& coarse, const PolarGrid& fine, Con
 
                 local_result = (h1 * k1 * coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)] +
                                 h2 * k1 * coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse)] +
-                                h1 * k2 * coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)] +
-                                h2 * k2 * coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse + 1)]) /
+                                h1 * k2 * coarse_vals[coarse.index(i_r_coarse, i_theta_coarse_P1)] +
+                                h2 * k2 * coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse_P1)]) /
                                ((h1 + h2) * (k1 + k2));
             }
         },
