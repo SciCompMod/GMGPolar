@@ -65,9 +65,9 @@ static KOKKOS_INLINE_FUNCTION void fineNodeFMGInterpolation(const int i_r, const
     const int i_r_coarse     = i_r / 2;
     const int i_theta_coarse = i_theta / 2;
 
-    const int i_theta_coarse_M1 = coarse_grid.wrapThetaIndex(t_theta_coarse - 1);
-    const int i_theta_coarse_P1 = coarse_grid.wrapThetaIndex(t_theta_coarse + 1);
-    const int i_theta_coarse_P2 = coarse_grid.wrapThetaIndex(t_theta_coarse + 2);
+    const int i_theta_coarse_M1 = coarse_grid.wrapThetaIndex(i_theta_coarse - 1);
+    const int i_theta_coarse_P1 = coarse_grid.wrapThetaIndex(i_theta_coarse + 1);
+    const int i_theta_coarse_P2 = coarse_grid.wrapThetaIndex(i_theta_coarse + 2);
 
     /* Case 1: On the boundary */
     if (i_r == 0 || i_r == fine_grid.nr() - 1) {
