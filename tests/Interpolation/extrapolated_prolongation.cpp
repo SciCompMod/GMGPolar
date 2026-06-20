@@ -18,6 +18,8 @@ static double expected_extrapolated_value(const PolarGrid& coarse, const PolarGr
     bool r_even = (i_r % 2 == 0);
     bool t_even = (i_theta % 2 == 0);
 
+    const int i_theta_coarse_P1 = coarse.wrapThetaIndex(i_theta_coarse + 1);
+
     double result = 0;
     Kokkos::parallel_reduce(
         "extrap_prolongation_test", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, 1),
@@ -36,12 +38,12 @@ static double expected_extrapolated_value(const PolarGrid& coarse, const PolarGr
             else if (r_even && !t_even) {
                 // Angular midpoint - arithmetic mean of bottom and top
                 local_result = 0.5 * (coarse_vals[coarse.index(i_r_coarse, i_theta_coarse)] +
-                                      coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)]);
+                                      coarse_vals[coarse.index(i_r_coarse, i_theta_coarse_P1)]);
             }
             else {
                 // Center of coarse cell - arithmetic mean of diagonal nodes (bottom-right + top-left)
                 local_result = 0.5 * (coarse_vals[coarse.index(i_r_coarse + 1, i_theta_coarse)] +
-                                      coarse_vals[coarse.index(i_r_coarse, i_theta_coarse + 1)]);
+                                      coarse_vals[coarse.index(i_r_coarse, i_theta_coarse_P1)]);
             }
         },
         result);
