@@ -119,8 +119,9 @@ static KOKKOS_INLINE_FUNCTION void fineNodeFMGInterpolation(const int i_r, const
                  w_theta3 * coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse_P2)] /* (+1, +3) */
                 );
 
-            const double h1                            = fine_grid.radialSpacing(i_r - 1);
-            const double h2                            = fine_grid.radialSpacing(i_r);
+            const double h1 = fine_grid.radialSpacing(i_r - 1);
+            const double h2 = fine_grid.radialSpacing(i_r);
+
             fine_result[fine_grid.index(i_r, i_theta)] = (h1 * left_value + h2 * right_value) / (h1 + h2);
         }
         else {
