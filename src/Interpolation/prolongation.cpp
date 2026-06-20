@@ -59,6 +59,8 @@ static KOKKOS_INLINE_FUNCTION void fineNodeProlongation(const int i_r, const int
     const int i_r_coarse     = i_r / 2;
     const int i_theta_coarse = i_theta / 2;
 
+    const int i_theta_coarse_P1 = coarse_grid.wrapThetaIndex(i_theta_coarse + 1);
+
     if (i_r & 1) {
         if (i_theta & 1) { /* (odd, odd) -> fine node in center of coarse cell */
             const double h1 = fine_grid.radialSpacing(i_r - 1);
@@ -69,8 +71,8 @@ static KOKKOS_INLINE_FUNCTION void fineNodeProlongation(const int i_r, const int
             const double value =
                 (h1 * k1 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)] + /* Bottom left */
                  h2 * k1 * coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse)] + /* Bottom right */
-                 h1 * k2 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse + 1)] + /* Top left */
-                 h2 * k2 * coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse + 1)] /* Top right */
+                 h1 * k2 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse_P1)] + /* Top left */
+                 h2 * k2 * coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse_P1)] /* Top right */
                  ) /
                 ((h1 + h2) * (k1 + k2));
 
@@ -94,7 +96,7 @@ static KOKKOS_INLINE_FUNCTION void fineNodeProlongation(const int i_r, const int
             const double k2 = fine_grid.angularSpacing(i_theta);
 
             const double value = (k1 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)] + /* Bottom */
-                                  k2 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse + 1)] /* Top */
+                                  k2 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse_P1)] /* Top */
                                   ) /
                                  (k1 + k2);
 
