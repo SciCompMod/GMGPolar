@@ -654,7 +654,7 @@ void run_gmgpolar()
 
     GMGPolar solver(grid, domain, profile_coefficients);
 
-    bool paraview          = false;
+    bool paraview          = true;
     int preSmoothingSteps  = 1;
     int postSmoothingSteps = 1;
 
