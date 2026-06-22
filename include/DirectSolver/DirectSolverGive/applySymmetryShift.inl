@@ -24,6 +24,7 @@ void DirectSolverGive<LevelCacheType>::applySymmetryShiftInnerBoundary(Vector<do
 
             for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
                 const double theta = grid.theta(i_theta);
+
                 /* -------------------------- */
                 /* Node on the inner boundary */
                 /* -------------------------- */
@@ -37,12 +38,15 @@ void DirectSolverGive<LevelCacheType>::applySymmetryShiftInnerBoundary(Vector<do
                 k1 = grid.angularSpacing(i_theta - 1);
                 k2 = grid.angularSpacing(i_theta);
 
+                const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+                const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
+
                 coeff2 = 0.5 * (k1 + k2) / h2;
 
                 /* Fill x(i+1,j) */
                 x(grid.index(i_r + 1, i_theta)) -= -coeff2 * arr * x(grid.index(i_r, i_theta)) /* Left */
-                                                   + 0.25 * art * x(grid.index(i_r, i_theta + 1)) /* Top Left */
-                                                   - 0.25 * art * x(grid.index(i_r, i_theta - 1)); /* Bottom Left */
+                                                   + 0.25 * art * x(grid.index(i_r, i_theta_P1)) /* Top Left */
+                                                   - 0.25 * art * x(grid.index(i_r, i_theta_M1)); /* Bottom Left */
 
                 /* --------------------------- */
                 /* Node next to inner boundary */
@@ -62,9 +66,9 @@ void DirectSolverGive<LevelCacheType>::applySymmetryShiftInnerBoundary(Vector<do
                 /* Fill x(i,j) */
                 x(grid.index(i_r, i_theta)) -= -coeff1 * arr * x(grid.index(i_r - 1, i_theta)); /* Left */
                 /* Fill x(i,j-1) */
-                x(grid.index(i_r, i_theta - 1)) -= +0.25 * art * x(grid.index(i_r - 1, i_theta)); /* Top Left */
+                x(grid.index(i_r, i_theta_M1)) -= +0.25 * art * x(grid.index(i_r - 1, i_theta)); /* Top Left */
                 /* Fill x(i,j+1) */
-                x(grid.index(i_r, i_theta + 1)) -= -0.25 * art * x(grid.index(i_r - 1, i_theta)); /* Bottom Left */
+                x(grid.index(i_r, i_theta_P1)) -= -0.25 * art * x(grid.index(i_r - 1, i_theta)); /* Bottom Left */
             }
         });
 }
@@ -100,14 +104,17 @@ void DirectSolverGive<LevelCacheType>::applySymmetryShiftOuterBoundary(Vector<do
                 k1 = grid.angularSpacing(i_theta - 1);
                 k2 = grid.angularSpacing(i_theta);
 
+                const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+                const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
+
                 coeff2 = 0.5 * (k1 + k2) / h2;
 
                 /* Fill result(i,j) */
                 x(grid.index(i_r, i_theta)) -= -coeff2 * arr * x(grid.index(i_r + 1, i_theta)); /* Right */
                 /* Fill result(i,j-1) */
-                x(grid.index(i_r, i_theta - 1)) -= -0.25 * art * x(grid.index(i_r + 1, i_theta)); /* Top Right */
+                x(grid.index(i_r, i_theta_M1)) -= -0.25 * art * x(grid.index(i_r + 1, i_theta)); /* Top Right */
                 /* Fill result(i,j+1) */
-                x(grid.index(i_r, i_theta + 1)) -= +0.25 * art * x(grid.index(i_r + 1, i_theta)); /* Bottom Right */
+                x(grid.index(i_r, i_theta_P1)) -= +0.25 * art * x(grid.index(i_r + 1, i_theta)); /* Bottom Right */
 
                 /* -------------------------- */
                 /* Node on the outer boundary */
@@ -126,8 +133,8 @@ void DirectSolverGive<LevelCacheType>::applySymmetryShiftOuterBoundary(Vector<do
 
                 /* Fill result(i-1,j) */
                 x(grid.index(i_r - 1, i_theta)) -= -coeff1 * arr * x(grid.index(i_r, i_theta)) /* Right */
-                                                   - 0.25 * art * x(grid.index(i_r, i_theta + 1)) /* Top Right */
-                                                   + 0.25 * art * x(grid.index(i_r, i_theta - 1)); /* Bottom Right */
+                                                   - 0.25 * art * x(grid.index(i_r, i_theta_P1)) /* Top Right */
+                                                   + 0.25 * art * x(grid.index(i_r, i_theta_M1)); /* Bottom Right */
             }
         });
 }

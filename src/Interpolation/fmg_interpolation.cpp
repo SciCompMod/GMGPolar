@@ -65,6 +65,10 @@ static KOKKOS_INLINE_FUNCTION void fineNodeFMGInterpolation(const int i_r, const
     const int i_r_coarse     = i_r / 2;
     const int i_theta_coarse = i_theta / 2;
 
+    const int i_theta_coarse_M1 = coarse_grid.wrapThetaIndex(i_theta_coarse - 1);
+    const int i_theta_coarse_P1 = coarse_grid.wrapThetaIndex(i_theta_coarse + 1);
+    const int i_theta_coarse_P2 = coarse_grid.wrapThetaIndex(i_theta_coarse + 2);
+
     /* Case 1: On the boundary */
     if (i_r == 0 || i_r == fine_grid.nr() - 1) {
         if (i_theta & 1) {
@@ -79,10 +83,10 @@ static KOKKOS_INLINE_FUNCTION void fineNodeFMGInterpolation(const int i_r, const
             const double w_theta3 = -(k0 + k1) / (k0 + k1 + k2 + k3) * k1 / (k1 + k2 + k3) * k2 / k3;
 
             fine_result[fine_grid.index(i_r, i_theta)] =
-                (w_theta0 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse - 1)] + /* (0, -3) */
+                (w_theta0 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse_M1)] + /* (0, -3) */
                  w_theta1 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)] + /* (0, -1) */
-                 w_theta2 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse + 1)] + /* (0, +1) */
-                 w_theta3 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse + 2)] /* (0, +3) */
+                 w_theta2 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse_P1)] + /* (0, +1) */
+                 w_theta3 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse_P2)] /* (0, +3) */
                 );
         }
         else {
@@ -103,20 +107,21 @@ static KOKKOS_INLINE_FUNCTION void fineNodeFMGInterpolation(const int i_r, const
             const double w_theta3 = -(k0 + k1) / (k0 + k1 + k2 + k3) * k1 / (k1 + k2 + k3) * k2 / k3;
 
             const double left_value =
-                (w_theta0 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse - 1)] + /* (-1, -3) */
+                (w_theta0 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse_M1)] + /* (-1, -3) */
                  w_theta1 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)] + /* (-1, -1) */
-                 w_theta2 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse + 1)] + /* (-1, +1) */
-                 w_theta3 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse + 2)] /* (-1, +3) */
+                 w_theta2 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse_P1)] + /* (-1, +1) */
+                 w_theta3 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse_P2)] /* (-1, +3) */
                 );
             const double right_value =
-                (w_theta0 * coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse - 1)] + /* (+1, -3) */
+                (w_theta0 * coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse_M1)] + /* (+1, -3) */
                  w_theta1 * coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse)] + /* (+1, -1) */
-                 w_theta2 * coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse + 1)] + /* (+1, +1) */
-                 w_theta3 * coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse + 2)] /* (+1, +3) */
+                 w_theta2 * coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse_P1)] + /* (+1, +1) */
+                 w_theta3 * coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse_P2)] /* (+1, +3) */
                 );
 
-            const double h1                            = fine_grid.radialSpacing(i_r - 1);
-            const double h2                            = fine_grid.radialSpacing(i_r);
+            const double h1 = fine_grid.radialSpacing(i_r - 1);
+            const double h2 = fine_grid.radialSpacing(i_r);
+
             fine_result[fine_grid.index(i_r, i_theta)] = (h1 * left_value + h2 * right_value) / (h1 + h2);
         }
         else {
@@ -143,28 +148,28 @@ static KOKKOS_INLINE_FUNCTION void fineNodeFMGInterpolation(const int i_r, const
                 const double w_theta3 = -(k0 + k1) / (k0 + k1 + k2 + k3) * k1 / (k1 + k2 + k3) * k2 / k3;
 
                 const double outer_left_value =
-                    (w_theta0 * coarse_values[coarse_grid.index(i_r_coarse - 1, i_theta_coarse - 1)] + /* (-3, -3) */
+                    (w_theta0 * coarse_values[coarse_grid.index(i_r_coarse - 1, i_theta_coarse_M1)] + /* (-3, -3) */
                      w_theta1 * coarse_values[coarse_grid.index(i_r_coarse - 1, i_theta_coarse)] + /* (-3, -1) */
-                     w_theta2 * coarse_values[coarse_grid.index(i_r_coarse - 1, i_theta_coarse + 1)] + /* (-3, +1) */
-                     w_theta3 * coarse_values[coarse_grid.index(i_r_coarse - 1, i_theta_coarse + 2)] /* (-3, +3) */
+                     w_theta2 * coarse_values[coarse_grid.index(i_r_coarse - 1, i_theta_coarse_P1)] + /* (-3, +1) */
+                     w_theta3 * coarse_values[coarse_grid.index(i_r_coarse - 1, i_theta_coarse_P2)] /* (-3, +3) */
                     );
                 const double inner_left_value =
-                    (w_theta0 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse - 1)] + /* (-1, -3) */
+                    (w_theta0 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse_M1)] + /* (-1, -3) */
                      w_theta1 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)] + /* (-1, -1) */
-                     w_theta2 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse + 1)] + /* (-1, +1) */
-                     w_theta3 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse + 2)] /* (-1, +3) */
+                     w_theta2 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse_P1)] + /* (-1, +1) */
+                     w_theta3 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse_P2)] /* (-1, +3) */
                     );
                 const double inner_right_value =
-                    (w_theta0 * coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse - 1)] + /* (+1, -3) */
+                    (w_theta0 * coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse_M1)] + /* (+1, -3) */
                      w_theta1 * coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse)] + /* (+1, -1) */
-                     w_theta2 * coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse + 1)] + /* (+1, +1) */
-                     w_theta3 * coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse + 2)] /* (+1, +3) */
+                     w_theta2 * coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse_P1)] + /* (+1, +1) */
+                     w_theta3 * coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse_P2)] /* (+1, +3) */
                     );
                 const double outer_right_value =
-                    (w_theta0 * coarse_values[coarse_grid.index(i_r_coarse + 2, i_theta_coarse - 1)] + /* (+3, -3) */
+                    (w_theta0 * coarse_values[coarse_grid.index(i_r_coarse + 2, i_theta_coarse_M1)] + /* (+3, -3) */
                      w_theta1 * coarse_values[coarse_grid.index(i_r_coarse + 2, i_theta_coarse)] + /* (+3, -1) */
-                     w_theta2 * coarse_values[coarse_grid.index(i_r_coarse + 2, i_theta_coarse + 1)] + /* (+3, +1) */
-                     w_theta3 * coarse_values[coarse_grid.index(i_r_coarse + 2, i_theta_coarse + 2)] /* (+3, +3) */
+                     w_theta2 * coarse_values[coarse_grid.index(i_r_coarse + 2, i_theta_coarse_P1)] + /* (+3, +1) */
+                     w_theta3 * coarse_values[coarse_grid.index(i_r_coarse + 2, i_theta_coarse_P2)] /* (+3, +3) */
                     );
 
                 const double h0 = coarse_grid.radialSpacing(i_r_coarse - 1);
@@ -212,10 +217,10 @@ static KOKKOS_INLINE_FUNCTION void fineNodeFMGInterpolation(const int i_r, const
                 const double w_theta3 = -(k0 + k1) / (k0 + k1 + k2 + k3) * k1 / (k1 + k2 + k3) * k2 / k3;
 
                 fine_result[fine_grid.index(i_r, i_theta)] =
-                    (w_theta0 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse - 1)] + /* (0, -3) */
+                    (w_theta0 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse_M1)] + /* (0, -3) */
                      w_theta1 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)] + /* (0, -1) */
-                     w_theta2 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse + 1)] + /* (0, +1) */
-                     w_theta3 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse + 2)] /* (0, +3) */
+                     w_theta2 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse_P1)] + /* (0, +1) */
+                     w_theta3 * coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse_P2)] /* (0, +3) */
                     );
             }
             else {

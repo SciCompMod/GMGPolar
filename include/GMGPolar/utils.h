@@ -231,8 +231,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(const std:
     file << "<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n";
     for (int i_r = 0; i_r < grid.nr() - 1; i_r++) {
         for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
+            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
             file << grid.index(i_r, i_theta) << " " << grid.index(i_r + 1, i_theta) << " "
-                 << grid.index(i_r + 1, i_theta + 1) << " " << grid.index(i_r, i_theta + 1) << "\n";
+                 << grid.index(i_r + 1, i_theta_P1) << " " << grid.index(i_r, i_theta_P1) << "\n";
         }
     }
     file << "</DataArray>\n";
@@ -296,8 +297,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(
     file << "<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n";
     for (int i_r = 0; i_r < grid.nr() - 1; i_r++) {
         for (int i_theta = 0; i_theta < grid.ntheta(); i_theta++) {
+            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
             file << grid.index(i_r, i_theta) << " " << grid.index(i_r + 1, i_theta) << " "
-                 << grid.index(i_r + 1, i_theta + 1) << " " << grid.index(i_r, i_theta + 1) << "\n";
+                 << grid.index(i_r + 1, i_theta_P1) << " " << grid.index(i_r, i_theta_P1) << "\n";
         }
     }
 

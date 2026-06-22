@@ -56,11 +56,13 @@ static KOKKOS_INLINE_FUNCTION void fineNodeExtrapolatedProlongation(const int i_
     const int i_r_coarse     = i_r / 2;
     const int i_theta_coarse = i_theta / 2;
 
+    const int i_theta_coarse_P1 = coarse_grid.wrapThetaIndex(i_theta_coarse + 1);
+
     if (i_r & 1) {
         if (i_theta & 1) { /* (odd, odd) -> node in center of coarse cell */
             const double value =
                 0.5 * (coarse_values[coarse_grid.index(i_r_coarse + 1, i_theta_coarse)] + /* Bottom right */
-                       coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse + 1)] /* Top left */
+                       coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse_P1)] /* Top left */
                       );
             fine_result[fine_grid.index(i_r, i_theta)] = value;
         }
@@ -74,7 +76,7 @@ static KOKKOS_INLINE_FUNCTION void fineNodeExtrapolatedProlongation(const int i_
     else {
         if (i_theta & 1) { /* (even, odd) -> between coarse nodes in angular direction */
             const double value = 0.5 * (coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse)] + /* Bottom */
-                                        coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse + 1)] /* Top */
+                                        coarse_values[coarse_grid.index(i_r_coarse, i_theta_coarse_P1)] /* Top */
                                        );
             fine_result[fine_grid.index(i_r, i_theta)] = value;
         }

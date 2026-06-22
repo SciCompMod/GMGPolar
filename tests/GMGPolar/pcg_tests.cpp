@@ -196,7 +196,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<double, 0.5>, // refinementRadius
         std::integral_constant<int, 1>, // anisotropicFactor
         std::integral_constant<int, 0>, // divideBy2
-        std::integral_constant<int, 0>, // verbose
+        std::integral_constant<int, 1>, // verbose
         std::integral_constant<bool, false>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, false>, // cacheDensityProfileCoefficient
@@ -238,7 +238,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<double, 0.5>, // refinementRadius
         std::integral_constant<int, 1>, // anisotropicFactor
         std::integral_constant<int, 0>, // divideBy2
-        std::integral_constant<int, 0>, // verbose
+        std::integral_constant<int, 1>, // verbose
         std::integral_constant<bool, false>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
@@ -280,7 +280,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<double, 0.5>, // refinementRadius
         std::integral_constant<int, 1>, // anisotropicFactor
         std::integral_constant<int, 0>, // divideBy2
-        std::integral_constant<int, 0>, // verbose
+        std::integral_constant<int, 1>, // verbose
         std::integral_constant<bool, false>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_TAKE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
@@ -320,7 +320,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<double, 0.6>, // refinementRadius
         std::integral_constant<int, 3>, // anisotropicFactor
         std::integral_constant<int, 0>, // divideBy2
-        std::integral_constant<int, 0>, // verbose
+        std::integral_constant<int, 1>, // verbose
         std::integral_constant<bool, false>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_TAKE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
@@ -360,7 +360,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<double, 0.66>, // refinementRadius
         std::integral_constant<int, 0>, // anisotropicFactor
         std::integral_constant<int, 0>, // divideBy2
-        std::integral_constant<int, 0>, // verbose
+        std::integral_constant<int, 1>, // verbose
         std::integral_constant<bool, false>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
@@ -400,7 +400,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<double, 0.66>, // refinementRadius
         std::integral_constant<int, 1>, // anisotropicFactor
         std::integral_constant<int, 0>, // divideBy2
-        std::integral_constant<int, 0>, // verbose
+        std::integral_constant<int, 1>, // verbose
         std::integral_constant<bool, true>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, false>, // cacheDensityProfileCoefficient
@@ -440,7 +440,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<double, 0.66>, // refinementRadius
         std::integral_constant<int, 1>, // anisotropicFactor
         std::integral_constant<int, 0>, // divideBy2
-        std::integral_constant<int, 0>, // verbose
+        std::integral_constant<int, 1>, // verbose
         std::integral_constant<bool, true>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, false>, // cacheDensityProfileCoefficient
@@ -479,7 +479,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<double, 0.66>, // refinementRadius
         std::integral_constant<int, 1>, // anisotropicFactor
         std::integral_constant<int, 0>, // divideBy2
-        std::integral_constant<int, 0>, // verbose
+        std::integral_constant<int, 1>, // verbose
         std::integral_constant<bool, true>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
@@ -518,7 +518,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<double, 0.6>, // refinementRadius
         std::integral_constant<int, 2>, // anisotropicFactor
         std::integral_constant<int, 0>, // divideBy2
-        std::integral_constant<int, 0>, // verbose
+        std::integral_constant<int, 1>, // verbose
         std::integral_constant<bool, false>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_TAKE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
@@ -557,7 +557,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<double, 0.66>, // refinementRadius
         std::integral_constant<int, 2>, // anisotropicFactor
         std::integral_constant<int, 0>, // divideBy2
-        std::integral_constant<int, 0>, // verbose
+        std::integral_constant<int, 1>, // verbose
         std::integral_constant<bool, false>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient
@@ -596,7 +596,7 @@ using gmgpolar_test_suite = testing::Types<
         std::integral_constant<double, 0.66 * 1.2>, // refinementRadius
         std::integral_constant<int, 0>, // anisotropicFactor
         std::integral_constant<int, 1>, // divideBy2
-        std::integral_constant<int, 0>, // verbose
+        std::integral_constant<int, 1>, // verbose
         std::integral_constant<bool, false>, // DirBC_Interior
         std::integral_constant<StencilDistributionMethod, StencilDistributionMethod::CPU_GIVE>, // StencilDistributionMethod
         std::integral_constant<bool, true>, // cacheDensityProfileCoefficient

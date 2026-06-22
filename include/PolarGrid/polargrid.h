@@ -45,7 +45,7 @@ public:
 
     // Optimized, inlined indexing.
     KOKKOS_INLINE_FUNCTION int wrapThetaIndex(const int unwrapped_theta_index) const;
-    KOKKOS_INLINE_FUNCTION int index(const int r_index, const int unwrapped_theta_index) const;
+    KOKKOS_INLINE_FUNCTION int index(const int r_index, const int theta_index) const;
     KOKKOS_INLINE_FUNCTION void multiIndex(const int node_index, int& r_index, int& theta_index) const;
 
     // Grid Parameters
