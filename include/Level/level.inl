@@ -41,25 +41,49 @@ Level<DomainGeometry, DensityProfileCoefficients>::levelCache() const
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-Vector<double> Level<DomainGeometry, DensityProfileCoefficients>::rhs() const
+Vector<double> Level<DomainGeometry, DensityProfileCoefficients>::rhs()
 {
     return rhs_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-Vector<double> Level<DomainGeometry, DensityProfileCoefficients>::solution() const
+ConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::rhs() const
+{
+    return rhs_;
+}
+
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+Vector<double> Level<DomainGeometry, DensityProfileCoefficients>::solution()
 {
     return solution_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-Vector<double> Level<DomainGeometry, DensityProfileCoefficients>::residual() const
+ConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::solution() const
+{
+    return solution_;
+}
+
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+Vector<double> Level<DomainGeometry, DensityProfileCoefficients>::residual()
 {
     return residual_;
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-Vector<double> Level<DomainGeometry, DensityProfileCoefficients>::error_correction() const
+ConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::residual() const
+{
+    return residual_;
+}
+
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+Vector<double> Level<DomainGeometry, DensityProfileCoefficients>::error_correction()
+{
+    return error_correction_;
+}
+
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+ConstVector<double> Level<DomainGeometry, DensityProfileCoefficients>::error_correction() const
 {
     return error_correction_;
 }
