@@ -82,10 +82,14 @@ public:
     const PolarGrid& grid() const;
     const LevelCacheType& levelCache() const;
 
-    Vector<double> rhs() const;
-    Vector<double> solution() const;
-    Vector<double> residual() const;
-    Vector<double> error_correction() const;
+    Vector<double> rhs();
+    ConstVector<double> rhs() const;
+    Vector<double> solution();
+    ConstVector<double> solution() const;
+    Vector<double> residual();
+    ConstVector<double> residual() const;
+    Vector<double> error_correction();
+    ConstVector<double> error_correction() const;
 
     // -------------- //
     // Apply Residual //
