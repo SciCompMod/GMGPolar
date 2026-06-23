@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
     const int verbose   = 0;
     const bool paraview = false;
 
-    const StencilDistributionMethod stencilDistributionMethod = StencilDistributionMethod::CPU_TAKE;
+    const StencilDistributionMethod stencilDistributionMethod = StencilDistributionMethod::TAKE;
     const bool cacheDensityProfileCoefficients                = true;
     const bool cacheDomainGeometry                            = true;
 

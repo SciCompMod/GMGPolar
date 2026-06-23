@@ -257,9 +257,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(const std:
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(
-    const std::filesystem::path& file_path, const Level<DomainGeometry, DensityProfileCoefficients>& level,
-    HostConstVector<double> grid_function)
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(const std::filesystem::path& file_path,
+                                                                      const LevelType& level,
+                                                                      HostConstVector<double> grid_function)
 {
     const PolarGrid& grid = level.grid();
 

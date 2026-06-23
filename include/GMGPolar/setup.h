@@ -10,7 +10,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
 
     auto start_setup_createLevels = std::chrono::high_resolution_clock::now();
 
-    if (stencil_distribution_method_ == StencilDistributionMethod::CPU_TAKE) {
+    if (stencil_distribution_method_ == StencilDistributionMethod::TAKE) {
         if (!cache_density_profile_coefficients_ || !cache_domain_geometry_) {
             throw std::runtime_error("Error: Caching must be enabled for both density profile coefficients and domain "
                                      "geometry in 'Take' implementation strategy.");
@@ -190,8 +190,8 @@ int GMGPolar<DomainGeometry, DensityProfileCoefficients>::chooseNumberOfLevels(c
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
-    const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f)
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(const LevelType& level,
+                                                                            Vector<double> rhs_f)
 {
     const PolarGrid& grid = level.grid();
     assert(std::ssize(rhs_f) == grid.numberOfNodes());
@@ -331,9 +331,9 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 template <concepts::BoundaryConditions BoundaryConditions, concepts::SourceTerm SourceTerm>
-void GMGPolar<DomainGeometry, DensityProfileCoefficients>::build_rhs_f(
-    const Level<DomainGeometry, DensityProfileCoefficients>& level, Vector<double> rhs_f,
-    const BoundaryConditions& boundary_conditions, const SourceTerm& source_term)
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::build_rhs_f(const LevelType& level, Vector<double> rhs_f,
+                                                                       const BoundaryConditions& boundary_conditions,
+                                                                       const SourceTerm& source_term)
 {
     const PolarGrid& grid(level.grid());
     assert(std::ssize(rhs_f) == grid.numberOfNodes());
@@ -424,7 +424,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printSettings(const P
         std::cout << "Across the origin (Interior boundary condition)\n";
     }
 
-    if (stencil_distribution_method_ == StencilDistributionMethod::CPU_TAKE) {
+    if (stencil_distribution_method_ == StencilDistributionMethod::TAKE) {
         std::cout << "A-Take (Stencil Distribution)\n";
     }
     else {

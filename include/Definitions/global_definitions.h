@@ -6,8 +6,8 @@
 
 enum class StencilDistributionMethod
 {
-    CPU_TAKE = 0,
-    CPU_GIVE = 1
+    TAKE = 0,
+    GIVE = 1
 };
 
 /* Multigrid Cycle Types */
@@ -32,13 +32,6 @@ enum class ExtrapolationType
     IMPLICIT_EXTRAPOLATION       = 1,
     IMPLICIT_FULL_GRID_SMOOTHING = 2,
     COMBINED                     = 3,
-};
-
-/* Smoother Colors */
-enum class SmootherColor
-{
-    Black = 0,
-    White = 1,
 };
 
 /* -----------*/

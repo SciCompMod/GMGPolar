@@ -11,7 +11,7 @@ IGMGPolar::IGMGPolar(const PolarGrid& grid)
     , paraview_(false)
     // Numerical method setup
     , DirBC_Interior_(true)
-    , stencil_distribution_method_(StencilDistributionMethod::CPU_GIVE)
+    , stencil_distribution_method_(StencilDistributionMethod::GIVE)
     , cache_density_profile_coefficients_(true)
     , cache_domain_geometry_(false)
     // Multigrid settings

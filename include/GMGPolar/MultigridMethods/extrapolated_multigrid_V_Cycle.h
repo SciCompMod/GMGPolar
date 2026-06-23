@@ -17,8 +17,8 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::extrapolated_multigri
     /* ------------------------------ */
     /* Extrapolated multigrid V-cycle */
     /* ------------------------------ */
-    Level<DomainGeometry, DensityProfileCoefficients>& level      = levels_[level_depth];
-    Level<DomainGeometry, DensityProfileCoefficients>& next_level = levels_[level_depth + 1];
+    LevelType& level      = levels_[level_depth];
+    LevelType& next_level = levels_[level_depth + 1];
 
     /* ------------ */
     /* Presmoothing */

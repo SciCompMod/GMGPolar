@@ -56,7 +56,7 @@ void runTest(int divideBy2, std::ostream& outfile)
     const int verbose   = 1;
     const bool paraview = false;
 
-    const StencilDistributionMethod stencilDistributionMethod = StencilDistributionMethod::CPU_GIVE;
+    const StencilDistributionMethod stencilDistributionMethod = StencilDistributionMethod::GIVE;
     const bool cacheDensityProfileCoefficients                = true;
     const bool cacheDomainGeometry                            = false;
 
@@ -121,10 +121,10 @@ void runTest(int divideBy2, std::ostream& outfile)
     solver.printTimings();
 
     std::string stencil_string = "";
-    if (solver.stencilDistributionMethod() == StencilDistributionMethod::CPU_TAKE) {
+    if (solver.stencilDistributionMethod() == StencilDistributionMethod::TAKE) {
         stencil_string = "Take";
     }
-    else if (solver.stencilDistributionMethod() == StencilDistributionMethod::CPU_GIVE) {
+    else if (solver.stencilDistributionMethod() == StencilDistributionMethod::GIVE) {
         stencil_string = "Give";
     }
 

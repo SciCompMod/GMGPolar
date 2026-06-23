@@ -94,10 +94,10 @@ template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoeff
 void Level<DomainGeometry, DensityProfileCoefficients>::initializeResidual(
     const bool DirBC_Interior, const StencilDistributionMethod stencil_distribution_method)
 {
-    if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
+    if (stencil_distribution_method == StencilDistributionMethod::TAKE) {
         op_residual_ = std::make_unique<ResidualTake<LevelCacheType>>(*grid_, *level_cache_, DirBC_Interior);
     }
-    else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
+    else if (stencil_distribution_method == StencilDistributionMethod::GIVE) {
         op_residual_ = std::make_unique<ResidualGive<LevelCacheType>>(*grid_, *level_cache_, DirBC_Interior);
     }
     if (!op_residual_)
@@ -127,10 +127,10 @@ template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoeff
 void Level<DomainGeometry, DensityProfileCoefficients>::initializeDirectSolver(
     const bool DirBC_Interior, const StencilDistributionMethod stencil_distribution_method)
 {
-    if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
+    if (stencil_distribution_method == StencilDistributionMethod::TAKE) {
         op_directSolver_ = std::make_unique<DirectSolverTake<LevelCacheType>>(*grid_, *level_cache_, DirBC_Interior);
     }
-    else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
+    else if (stencil_distribution_method == StencilDistributionMethod::GIVE) {
         op_directSolver_ = std::make_unique<DirectSolverGive<LevelCacheType>>(*grid_, *level_cache_, DirBC_Interior);
     }
 
@@ -152,10 +152,10 @@ template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoeff
 void Level<DomainGeometry, DensityProfileCoefficients>::initializeSmoothing(
     const bool DirBC_Interior, const StencilDistributionMethod stencil_distribution_method)
 {
-    if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
+    if (stencil_distribution_method == StencilDistributionMethod::TAKE) {
         op_smoother_ = std::make_unique<SmootherTake<LevelCacheType>>(*grid_, *level_cache_, DirBC_Interior);
     }
-    else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
+    else if (stencil_distribution_method == StencilDistributionMethod::GIVE) {
         op_smoother_ = std::make_unique<SmootherGive<LevelCacheType>>(*grid_, *level_cache_, DirBC_Interior);
     }
     if (!op_smoother_)
@@ -177,11 +177,11 @@ template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoeff
 void Level<DomainGeometry, DensityProfileCoefficients>::initializeExtrapolatedSmoothing(
     const bool DirBC_Interior, const StencilDistributionMethod stencil_distribution_method)
 {
-    if (stencil_distribution_method == StencilDistributionMethod::CPU_TAKE) {
+    if (stencil_distribution_method == StencilDistributionMethod::TAKE) {
         op_extrapolated_smoother_ =
             std::make_unique<ExtrapolatedSmootherTake<LevelCacheType>>(*grid_, *level_cache_, DirBC_Interior);
     }
-    else if (stencil_distribution_method == StencilDistributionMethod::CPU_GIVE) {
+    else if (stencil_distribution_method == StencilDistributionMethod::GIVE) {
         op_extrapolated_smoother_ =
             std::make_unique<ExtrapolatedSmootherGive<LevelCacheType>>(*grid_, *level_cache_, DirBC_Interior);
     }
