@@ -55,11 +55,11 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleTake(const int i_r, co
     );
 }
 
-static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoRadialTake(const int i_r, const int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                            ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
-                            ConstVector<double>& arr, const ConstVector<double>& att, ConstVector<double>& art,
-                            const ConstVector<double>& detDF)
+static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialTake(const int i_r, const int i_theta, const PolarGrid& grid,
+                                                               bool DirBC_Interior, ConstVector<double>& x,
+                                                               ConstVector<double>& rhs, Vector<double>& result,
+                                                               ConstVector<double>& arr, ConstVector<double>& att,
+                                                               ConstVector<double>& art, ConstVector<double>& detDF)
 {
     KOKKOS_ASSERT(i_r >= grid.numberSmootherCircles() && i_r < grid.nr());
 
