@@ -191,9 +191,9 @@ Version 2.1.0 delivers performance optimizations, structural improvements, and e
     - Added tests for LU solver, convergence order, and solver validation across multiple settings.
     - Improved verbose output formatting for clearer settings and runtime information.
 
-### GMGPolar 2.2.0-G
+### GMGPolar 2.2.0
 
-Version 2.2.0-G contains, first, the experimental PCG setup as presented in Litz et al (2026). Second, GMGPolar's code and data structures have been reworked and integrated Kokkos to, eventually, allow a full integration in [Gysela-X](https://gyselax.github.io/).
+Version 2.2.0 contains, first, the experimental PCG setup as presented in Litz et al (2026). Second, GMGPolar's code and data structures have been reworked and integrated Kokkos to, eventually, allow a full integration in [Gysela-X](https://gyselax.github.io/).
 
 1. **Preconditioned Conjugate Gradient (PCG)**
    - Added PCG solver, allowing GMGPolar to be used as a preconditioner for CG instead of a standalone iterative solver.
@@ -220,3 +220,7 @@ Version 2.2.0-G contains, first, the experimental PCG setup as presented in Litz
 6. **Testing**
    - Added formatting validation tests and automatic CI testing with MUMPS.
    - Added Google Tests for PCG convergence validation.
+   
+### GMGPolar 2.3.0
+
+GMGPolar v2.3.0 finalizes the integration of Kokkos for GPU acceleration with GMGPolar.
