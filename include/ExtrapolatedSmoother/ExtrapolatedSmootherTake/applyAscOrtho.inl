@@ -583,10 +583,10 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(C
 
     assert(level_cache.cacheDomainGeometry());
 
-    ConstVector<double> arr        = level_cache.arr();
-    ConstVector<double> att        = level_cache.att();
-    ConstVector<double> art        = level_cache.art();
-    ConstVector<double> detDF      = level_cache.detDF();
+    ConstVector<double> arr   = level_cache.arr();
+    ConstVector<double> att   = level_cache.att();
+    ConstVector<double> art   = level_cache.art();
+    ConstVector<double> detDF = level_cache.detDF();
 
     assert(grid.ntheta() % 2 == 0);
     const int start_white_radials    = 1;
