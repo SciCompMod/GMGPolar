@@ -128,10 +128,10 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<d
 
     assert(level_cache.cacheDomainGeometry());
 
-    ConstVector<double> arr        = level_cache.arr();
-    ConstVector<double> att        = level_cache.att();
-    ConstVector<double> art        = level_cache.art();
-    ConstVector<double> detDF      = level_cache.detDF();
+    ConstVector<double> arr   = level_cache.arr();
+    ConstVector<double> att   = level_cache.att();
+    ConstVector<double> art   = level_cache.art();
+    ConstVector<double> detDF = level_cache.detDF();
 
     /* The outer most circle next to the radial section is defined to be black. */
     const int start_black_circles = (grid.numberSmootherCircles() % 2 == 0) ? 1 : 0;
@@ -164,10 +164,10 @@ void SmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<d
 
     assert(level_cache.cacheDomainGeometry());
 
-    ConstVector<double> arr        = level_cache.arr();
-    ConstVector<double> att        = level_cache.att();
-    ConstVector<double> art        = level_cache.art();
-    ConstVector<double> detDF      = level_cache.detDF();
+    ConstVector<double> arr   = level_cache.arr();
+    ConstVector<double> att   = level_cache.att();
+    ConstVector<double> art   = level_cache.art();
+    ConstVector<double> detDF = level_cache.detDF();
 
     /* The outer most circle next to the radial section is defined to be black. */
     const int start_white_circles = (grid.numberSmootherCircles() % 2 == 0) ? 0 : 1;
@@ -200,10 +200,10 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<d
 
     assert(level_cache.cacheDomainGeometry());
 
-    ConstVector<double> arr        = level_cache.arr();
-    ConstVector<double> att        = level_cache.att();
-    ConstVector<double> art        = level_cache.art();
-    ConstVector<double> detDF      = level_cache.detDF();
+    ConstVector<double> arr   = level_cache.arr();
+    ConstVector<double> att   = level_cache.att();
+    ConstVector<double> art   = level_cache.art();
+    ConstVector<double> detDF = level_cache.detDF();
 
     assert(grid.ntheta() % 2 == 0);
     const int start_black_radials    = 0;
@@ -236,10 +236,10 @@ void SmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<d
 
     assert(level_cache.cacheDomainGeometry());
 
-    ConstVector<double> arr        = level_cache.arr();
-    ConstVector<double> att        = level_cache.att();
-    ConstVector<double> art        = level_cache.art();
-    ConstVector<double> detDF      = level_cache.detDF();
+    ConstVector<double> arr   = level_cache.arr();
+    ConstVector<double> att   = level_cache.att();
+    ConstVector<double> art   = level_cache.art();
+    ConstVector<double> detDF = level_cache.detDF();
 
     assert(grid.ntheta() % 2 == 0);
     const int start_white_radials    = 1;
