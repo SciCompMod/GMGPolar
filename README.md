@@ -219,8 +219,8 @@ Version 2.2.0 contains, first, the experimental PCG setup as presented in Litz e
 
 6. **Testing**
    - Added formatting validation tests and automatic CI testing with MUMPS.
-  
+   - Added Google Tests for PCG convergence validation.
+   
 ### GMGPolar 2.3.0
 
 GMGPolar v2.3.0 finalizes the integration of Kokkos for GPU acceleration with GMGPolar.
-   - Added Google Tests for PCG convergence validation.
