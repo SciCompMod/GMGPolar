@@ -224,3 +224,7 @@ Version 2.2.0 contains, first, the experimental PCG setup as presented in Litz e
 ### GMGPolar 2.3.0
 
 GMGPolar v2.3.0 finalizes the integration of Kokkos for GPU acceleration with GMGPolar.
+
+### GMGPolar 2.3.1
+
+GMGPolar v2.3.1 fixes the version in the root CMakeLists.txt.
