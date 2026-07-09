@@ -7,11 +7,11 @@ include(CMakeFindDependencyMacro)
 find_dependency(Kokkos)
 
 if(@GMGPOLAR_USE_MUMPS@)
-    find_dependency(OpenMP COMPONENTS CXX)
     find_dependency(MUMPS COMPONENTS OpenMP METIS)
 endif()
 
 if(@GMGPOLAR_USE_LIKWID@)
+    find_dependency(OpenMP COMPONENTS CXX)
     find_dependency(LIKWID)
 endif()
 
