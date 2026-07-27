@@ -29,11 +29,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
         // Three-tier tolerance strategy:
         // - strict_tol: within this -> do nothing
         // - warn_tol: within this but not strict -> warn (if verbose_>0)
-        // - otherwise: disable extrapolation and warn (always)
+        // - otherwise: disable extrapolation -> warn (if verbose_>0)
         const double strict_tol = 1e-12;
         const double warn_tol   = 1e-05;
 
-        // Reuse existing checkUniformRefinement with a "print" flag: do quiet checks first
         if (checkUniformRefinement(grid_, strict_tol, false)) {
             // within strict tolerance: nothing to do
         }
@@ -46,11 +45,12 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
             }
         }
         else {
-            // worse than warning tolerance: call checkUniformRefinement once more with printing enabled to show details,
-            // then disable extrapolation and notify (important change -> always print)
-            checkUniformRefinement(grid_, warn_tol, true);
-            std::cerr << "[Extrapolation Warning] Finest PolarGrid is not from a single uniform refinement; disabling "
-                         "extrapolation.\n";
+            // worse than warning tolerance: disable extrapolation
+            if (verbose_ > 0) {
+                std::cerr
+                    << "[Extrapolation Warning] Finest PolarGrid is not from a single uniform refinement; disabling "
+                       "extrapolation.\n";
+            }
             extrapolation_ = ExtrapolationType::NONE;
         }
     }

@@ -159,7 +159,7 @@ private:
     /* --------------- */
     /* Setup Functions */
     int chooseNumberOfLevels(const PolarGrid& finest_grid);
-    bool checkUniformRefinement(const PolarGrid& grid, double tolerance, bool print = true) const;
+    bool checkUniformRefinement(const PolarGrid& grid, double tolerance, bool print) const;
 
     /* --------------- */
     /* Solve Functions */
