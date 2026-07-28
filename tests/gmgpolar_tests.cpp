@@ -4,10 +4,7 @@
 // Define the main function only once
 int main(int argc, char* argv[])
 {
-    Kokkos::InitializationSettings settings;
-    // 8 (CPU) threads
-    settings.set_num_threads(GMGPOLAR_TEST_THREADS);
-    Kokkos::ScopeGuard kokkos_scope(settings);
+    Kokkos::ScopeGuard kokkos_scope(argc, argv);
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
