@@ -4,6 +4,9 @@
 /* GMGPolar - Enumeration Definitions */
 /* ---------------------------------- */
 
+namespace gmgpolar
+{
+
 enum class StencilDistributionMethod
 {
     TAKE = 0,
@@ -108,3 +111,5 @@ enum class BetaCoeff
     #define LIKWID_STOP(marker)
     #define LIKWID_CLOSE()
 #endif
+
+} // namespace gmgpolar
