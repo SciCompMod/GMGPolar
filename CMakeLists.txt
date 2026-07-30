@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
 
-# Ensure custom cmake modules can be found
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-
 # Options should be defined before they're used
 option(GMGPOLAR_BUILD_TESTS "Build GMGPolar unit tests." ON)
 option(GMGPOLAR_USE_LIKWID "Use LIKWID to measure code (regions)." OFF)
@@ -18,7 +15,9 @@ endif()
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+# Ensure custom cmake modules can be found
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(GMGPolarCheckRequiredKokkosOptions)
 
 # Set build type - must come before compiler flags
 if(NOT CMAKE_BUILD_TYPE)
@@ -49,6 +48,7 @@ if(GMGPOLAR_ENABLE_COVERAGE)
 endif()
 
 find_package(Kokkos 4.4.1...<6 QUIET REQUIRED)
+gmgpolar_check_required_kokkos_options()
 
 if(GMGPOLAR_USE_MUMPS)
     find_package(MUMPS REQUIRED COMPONENTS OpenMP METIS)
