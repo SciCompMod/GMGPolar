@@ -39,8 +39,8 @@ public:
     virtual void smoothing(Vector<double> x, ConstVector<double> rhs, Vector<double> temp) = 0;
 
 protected:
-    const PolarGrid grid_;
-    const LevelCacheType level_cache_;
+    const PolarGrid& grid_;
+    const LevelCacheType& level_cache_;
     const bool DirBC_Interior_;
 };
 } // namespace gmgpolar
