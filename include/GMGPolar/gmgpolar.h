@@ -207,8 +207,6 @@ private:
     /* Visualization */
 public: // Public due to cuda restrictions
     void writeToVTK(const std::filesystem::path& file_path, const PolarGrid& grid);
-
-private:
     void writeToVTK(const std::filesystem::path& file_path, const LevelType& level,
                     HostConstVector<double> grid_function);
 };
