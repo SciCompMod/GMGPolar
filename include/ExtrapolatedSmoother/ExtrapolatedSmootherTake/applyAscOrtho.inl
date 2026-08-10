@@ -472,9 +472,9 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(C
 
     assert(level_cache.cacheDomainGeometry());
 
-    ConstVector<double> arr   = level_cache.arr();
-    ConstVector<double> att   = level_cache.att();
-    ConstVector<double> art   = level_cache.art();
+    ConstVector<double> arr = level_cache.arr();
+    ConstVector<double> att = level_cache.att();
+    ConstVector<double> art = level_cache.art();
 
     /* The outer most circle next to the radial section is defined to be black. */
     const int start_black_circles = (grid.numberSmootherCircles() % 2 == 0) ? 1 : 0;
@@ -508,9 +508,9 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(C
 
     assert(level_cache.cacheDomainGeometry());
 
-    ConstVector<double> arr   = level_cache.arr();
-    ConstVector<double> att   = level_cache.att();
-    ConstVector<double> art   = level_cache.art();
+    ConstVector<double> arr = level_cache.arr();
+    ConstVector<double> att = level_cache.att();
+    ConstVector<double> art = level_cache.art();
 
     /* The outer most circle next to the radial section is defined to be black. */
     const int start_white_circles = (grid.numberSmootherCircles() % 2 == 0) ? 0 : 1;
@@ -544,9 +544,9 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(C
 
     assert(level_cache.cacheDomainGeometry());
 
-    ConstVector<double> arr   = level_cache.arr();
-    ConstVector<double> att   = level_cache.att();
-    ConstVector<double> art   = level_cache.art();
+    ConstVector<double> arr = level_cache.arr();
+    ConstVector<double> att = level_cache.att();
+    ConstVector<double> art = level_cache.art();
 
     assert(grid.ntheta() % 2 == 0);
     const int start_black_radials    = 0;
@@ -580,9 +580,9 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(C
 
     assert(level_cache.cacheDomainGeometry());
 
-    ConstVector<double> arr   = level_cache.arr();
-    ConstVector<double> att   = level_cache.att();
-    ConstVector<double> art   = level_cache.art();
+    ConstVector<double> arr = level_cache.arr();
+    ConstVector<double> att = level_cache.att();
+    ConstVector<double> art = level_cache.art();
 
     assert(grid.ntheta() % 2 == 0);
     const int start_white_radials    = 1;
