@@ -7,7 +7,7 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleTake(const int i_r, co
                                                                const bool DirBC_Interior, ConstVector<double>& x,
                                                                ConstVector<double>& rhs, Vector<double>& result,
                                                                ConstVector<double>& arr, ConstVector<double>& att,
-                                                               ConstVector<double>& art, ConstVector<double>& detDF)
+                                                               ConstVector<double>& art)
 {
     KOKKOS_ASSERT(i_r >= 0 && i_r <= grid.numberSmootherCircles());
 
@@ -188,7 +188,7 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialTake(const int i_r, co
                                                                const bool DirBC_Interior, ConstVector<double>& x,
                                                                ConstVector<double>& rhs, Vector<double>& result,
                                                                ConstVector<double>& arr, ConstVector<double>& att,
-                                                               ConstVector<double>& art, ConstVector<double>& detDF)
+                                                               ConstVector<double>& art)
 {
     assert(i_r >= grid.numberSmootherCircles() - 1 && i_r < grid.nr());
 
@@ -475,7 +475,6 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(C
     ConstVector<double> arr   = level_cache.arr();
     ConstVector<double> att   = level_cache.att();
     ConstVector<double> art   = level_cache.art();
-    ConstVector<double> detDF = level_cache.detDF();
 
     /* The outer most circle next to the radial section is defined to be black. */
     const int start_black_circles = (grid.numberSmootherCircles() % 2 == 0) ? 1 : 0;
@@ -490,7 +489,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(C
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
             int i_r = start_black_circles + circle_task * 2;
-            nodeApplyAscOrthoCircleTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF);
+            nodeApplyAscOrthoCircleTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
         });
 
     Kokkos::fence();
@@ -512,7 +511,6 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(C
     ConstVector<double> arr   = level_cache.arr();
     ConstVector<double> att   = level_cache.att();
     ConstVector<double> art   = level_cache.art();
-    ConstVector<double> detDF = level_cache.detDF();
 
     /* The outer most circle next to the radial section is defined to be black. */
     const int start_white_circles = (grid.numberSmootherCircles() % 2 == 0) ? 0 : 1;
@@ -527,7 +525,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(C
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
             const int i_r = start_white_circles + circle_task * 2;
-            nodeApplyAscOrthoCircleTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF);
+            nodeApplyAscOrthoCircleTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
         });
 
     Kokkos::fence();
@@ -549,7 +547,6 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(C
     ConstVector<double> arr   = level_cache.arr();
     ConstVector<double> att   = level_cache.att();
     ConstVector<double> art   = level_cache.art();
-    ConstVector<double> detDF = level_cache.detDF();
 
     assert(grid.ntheta() % 2 == 0);
     const int start_black_radials    = 0;
@@ -564,7 +561,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(C
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int radial_task, const int i_r) {
             const int i_theta = start_black_radials + radial_task * 2;
-            nodeApplyAscOrthoRadialTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF);
+            nodeApplyAscOrthoRadialTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
         });
 
     Kokkos::fence();
@@ -586,7 +583,6 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(C
     ConstVector<double> arr   = level_cache.arr();
     ConstVector<double> att   = level_cache.att();
     ConstVector<double> art   = level_cache.art();
-    ConstVector<double> detDF = level_cache.detDF();
 
     assert(grid.ntheta() % 2 == 0);
     const int start_white_radials    = 1;
@@ -601,7 +597,7 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(C
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int radial_task, const int i_r) {
             const int i_theta = start_white_radials + radial_task * 2;
-            nodeApplyAscOrthoRadialTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art, detDF);
+            nodeApplyAscOrthoRadialTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
         });
 
     Kokkos::fence();
