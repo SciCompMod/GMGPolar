@@ -165,8 +165,9 @@ public:
             detDF = detDF_[global_index];
         }
         else {
-            double coeff_alpha = cache_density_profile_coefficients_ ? coeff_alpha_[global_index]
-                                                                     : density_profile_coefficients_.alpha(i_r, i_theta);
+            double coeff_alpha = cache_density_profile_coefficients_
+                                     ? coeff_alpha_[global_index]
+                                     : density_profile_coefficients_.alpha(i_r, i_theta);
 
             compute_jacobian_elements(domain_geometry_, r, theta, coeff_alpha, arr, att, art, detDF);
         }

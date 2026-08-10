@@ -75,8 +75,8 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
                 std::make_unique<DensityProfileCoefficientsVariant>(SonnendruckerCoefficients(grid_, Rmax, alpha_jump));
             break;
         case BetaCoeff::ALPHA_INVERSE:
-            density_profile_coefficients_ =
-                std::make_unique<DensityProfileCoefficientsVariant>(SonnendruckerGyroCoefficients(grid_, Rmax, alpha_jump));
+            density_profile_coefficients_ = std::make_unique<DensityProfileCoefficientsVariant>(
+                SonnendruckerGyroCoefficients(grid_, Rmax, alpha_jump));
             break;
         default:
             throw std::runtime_error("Invalid beta.\n");
@@ -105,8 +105,8 @@ void ConfigParser::selectTestCase(GeometryType geometry_type, ProblemType proble
                 std::make_unique<DensityProfileCoefficientsVariant>(ZoniShiftedCoefficients(grid_, Rmax, alpha_jump));
             break;
         case BetaCoeff::ALPHA_INVERSE:
-            density_profile_coefficients_ =
-                std::make_unique<DensityProfileCoefficientsVariant>(ZoniShiftedGyroCoefficients(grid_, Rmax, alpha_jump));
+            density_profile_coefficients_ = std::make_unique<DensityProfileCoefficientsVariant>(
+                ZoniShiftedGyroCoefficients(grid_, Rmax, alpha_jump));
             break;
         default:
             throw std::runtime_error("Invalid beta.\n");

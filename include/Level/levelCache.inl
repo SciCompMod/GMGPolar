@@ -16,7 +16,7 @@ static void cache_density_profile_coefficients(const PolarGrid& grid,
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_r, const int i_theta) {
-            const int index    = grid.index(i_r, i_theta);
+            const int index = grid.index(i_r, i_theta);
             if (!cache_domain_geometry) {
                 coeff_alpha(index) = density_profile_coefficients.alpha(i_r, i_theta);
             }

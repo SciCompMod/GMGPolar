@@ -49,7 +49,7 @@ TEST(DirectSolverTest, directSolver_DirBC_Interior)
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
@@ -98,7 +98,7 @@ TEST(DirectSolverTest, directSolver_AcrossOrigin)
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double Rmax      = radii.back();
     double kappa_eps = 0.3;
@@ -159,7 +159,7 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverDirBC_Interior_CircularGeome
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
     double Rmax = radii.back();
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     using DomainGeometryType = CircularGeometry;
     DomainGeometryType domain_geometry(Rmax);
@@ -199,7 +199,7 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOrigin_CircularGeometr
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double Rmax = radii.back();
 
@@ -245,7 +245,7 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverDirBC_Interior_ShafranovGeo
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double Rmax      = radii.back();
     double kappa_eps = 0.3;
@@ -289,7 +289,7 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovGeome
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double Rmax      = radii.back();
     double kappa_eps = 0.3;
@@ -337,7 +337,7 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeometry)
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double Rmax      = radii.back();
     double kappa_eps = 0.3;
@@ -381,7 +381,7 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometry)
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double Rmax      = radii.back();
     double kappa_eps = 0.3;
@@ -429,7 +429,7 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeometry)
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double Rmax = radii.back();
 
@@ -471,7 +471,7 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometry)
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double Rmax = radii.back();
 
@@ -525,7 +525,7 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double Rmax = radii.back();
 
@@ -567,7 +567,7 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision2
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double Rmax = radii.back();
 
@@ -612,7 +612,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverDirBC_Interior_CircularG
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
     double Rmax = radii.back();
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     using DomainGeometryType = CircularGeometry;
     DomainGeometryType domain_geometry(Rmax);
@@ -652,7 +652,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOrigin_CircularGeo
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double Rmax = radii.back();
 
@@ -698,7 +698,7 @@ TEST(DirectSolverTakeTest_ShafranovGeometry, DirectSolverDirBC_Interior_Shafrano
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double Rmax      = radii.back();
     double kappa_eps = 0.3;
@@ -742,7 +742,7 @@ TEST(DirectSolverTakeTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovG
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double Rmax      = radii.back();
     double kappa_eps = 0.3;
@@ -790,7 +790,7 @@ TEST(DirectSolverTakeTest_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeome
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double Rmax      = radii.back();
     double kappa_eps = 0.3;
@@ -834,7 +834,7 @@ TEST(DirectSolverTakeTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometr
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double Rmax      = radii.back();
     double kappa_eps = 0.3;
@@ -882,7 +882,7 @@ TEST(DirectSolverTakeTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeome
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double Rmax = radii.back();
 
@@ -924,7 +924,7 @@ TEST(DirectSolverTakeTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometr
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double Rmax = radii.back();
 
@@ -976,7 +976,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecis
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double Rmax = radii.back();
 
@@ -1018,7 +1018,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecis
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
 
     double Rmax = radii.back();
 
