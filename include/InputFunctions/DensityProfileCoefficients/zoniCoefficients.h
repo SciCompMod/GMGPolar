@@ -11,7 +11,6 @@ namespace gmgpolar
 class ZoniCoefficients
 {
 public:
-    ZoniCoefficients() = default;
     explicit ZoniCoefficients(double Rmax, double alpha);
 
     KOKKOS_FUNCTION double alpha(double r, double theta) const;

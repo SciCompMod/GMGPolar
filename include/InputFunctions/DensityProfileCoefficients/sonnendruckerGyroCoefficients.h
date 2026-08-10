@@ -11,7 +11,6 @@ namespace gmgpolar
 class SonnendruckerGyroCoefficients
 {
 public:
-    SonnendruckerGyroCoefficients() = default;
     explicit SonnendruckerGyroCoefficients(double Rmax, double alpha);
 
     KOKKOS_FUNCTION double alpha(double r, double theta) const;

@@ -11,7 +11,6 @@ namespace gmgpolar
 class PoissonCoefficients
 {
 public:
-    PoissonCoefficients() = default;
     explicit PoissonCoefficients(double Rmax, double alpha);
 
     KOKKOS_FUNCTION double alpha(double r, double theta) const;

@@ -11,7 +11,6 @@ namespace gmgpolar
 class ZoniShiftedGyroCoefficients
 {
 public:
-    ZoniShiftedGyroCoefficients() = default;
     explicit ZoniShiftedGyroCoefficients(double Rmax, double alpha);
 
     KOKKOS_FUNCTION double alpha(double r, double theta) const;
