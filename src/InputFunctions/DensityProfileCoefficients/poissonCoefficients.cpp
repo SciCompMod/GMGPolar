@@ -8,12 +8,12 @@ PoissonCoefficients::PoissonCoefficients(const PolarGrid& grid, double Rmax, dou
 {
 }
 
-KOKKOS_FUNCTION double PoissonCoefficients::alpha(double r, double theta) const
+KOKKOS_FUNCTION double PoissonCoefficients::alpha(int i_r, int i_theta) const
 {
     return 1.0;
 }
 
-KOKKOS_FUNCTION double PoissonCoefficients::beta(double r, double theta) const
+KOKKOS_FUNCTION double PoissonCoefficients::beta(int i_r, int i_theta) const
 {
     return 0.0;
 }

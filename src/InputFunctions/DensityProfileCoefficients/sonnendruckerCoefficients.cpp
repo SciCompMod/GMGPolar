@@ -8,12 +8,13 @@ SonnendruckerCoefficients::SonnendruckerCoefficients(const PolarGrid& grid, doub
 {
 }
 
-KOKKOS_FUNCTION double SonnendruckerCoefficients::alpha(double r, double theta) const
+KOKKOS_FUNCTION double SonnendruckerCoefficients::alpha(int i_r, int i_theta) const
 {
+    double r = grid_.radius(i_r);
     return 0.452961672473868 - 0.348432055749129 * atan(14.4444444444444 * (r / Rmax) - 11.1111111111111);
 }
 
-KOKKOS_FUNCTION double SonnendruckerCoefficients::beta(double r, double theta) const
+KOKKOS_FUNCTION double SonnendruckerCoefficients::beta(int i_r, int i_theta) const
 {
     return 0.0;
 }

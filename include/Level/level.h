@@ -156,7 +156,7 @@ public:
                                              double& detDF) const
     {
         coeff_beta = cache_density_profile_coefficients_ ? coeff_beta_[global_index]
-                                                         : density_profile_coefficients_.beta(r, theta);
+                                                         : density_profile_coefficients_.beta(i_r, i_theta);
 
         if (cache_domain_geometry_) {
             arr   = arr_[global_index];
@@ -166,7 +166,7 @@ public:
         }
         else {
             double coeff_alpha = cache_density_profile_coefficients_ ? coeff_alpha_[global_index]
-                                                                     : density_profile_coefficients_.alpha(r, theta);
+                                                                     : density_profile_coefficients_.alpha(i_r, i_theta);
 
             compute_jacobian_elements(domain_geometry_, r, theta, coeff_alpha, arr, att, art, detDF);
         }

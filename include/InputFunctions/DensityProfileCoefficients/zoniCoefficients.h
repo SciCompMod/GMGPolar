@@ -14,8 +14,8 @@ class ZoniCoefficients
 public:
     explicit ZoniCoefficients(const PolarGrid& grid, double Rmax, double alpha);
 
-    KOKKOS_FUNCTION double alpha(double r, double theta) const;
-    KOKKOS_FUNCTION double beta(double r, double theta) const;
+    KOKKOS_FUNCTION double alpha(int i_r, int i_theta) const;
+    KOKKOS_FUNCTION double beta(int i_r, int i_theta) const;
 
     KOKKOS_FUNCTION double getAlphaJump() const;
 

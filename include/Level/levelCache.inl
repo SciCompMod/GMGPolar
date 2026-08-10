@@ -16,13 +16,11 @@ static void cache_density_profile_coefficients(const PolarGrid& grid,
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_r, const int i_theta) {
-            const double r     = grid.radius(i_r);
-            const double theta = grid.theta(i_theta);
             const int index    = grid.index(i_r, i_theta);
             if (!cache_domain_geometry) {
-                coeff_alpha(index) = density_profile_coefficients.alpha(r, theta);
+                coeff_alpha(index) = density_profile_coefficients.alpha(i_r, i_theta);
             }
-            coeff_beta(index) = density_profile_coefficients.beta(r, theta);
+            coeff_beta(index) = density_profile_coefficients.beta(i_r, i_theta);
         });
 }
 
@@ -47,7 +45,7 @@ static void cache_domain_geometry(const PolarGrid& grid, const DensityProfileCoe
             const double r           = grid.radius(i_r);
             const double theta       = grid.theta(i_theta);
             const int index          = grid.index(i_r, i_theta);
-            const double coeff_alpha = density_profile_coefficients.alpha(r, theta);
+            const double coeff_alpha = density_profile_coefficients.alpha(i_r, i_theta);
 
             double arr, att, art, detDF;
             compute_jacobian_elements(domain_geometry, r, theta, coeff_alpha, arr, att, art, detDF);
@@ -68,7 +66,7 @@ static void cache_domain_geometry(const PolarGrid& grid, const DensityProfileCoe
             const double theta       = grid.theta(i_theta);
             const double r           = grid.radius(i_r);
             const int index          = grid.index(i_r, i_theta);
-            const double coeff_alpha = density_profile_coefficients.alpha(r, theta);
+            const double coeff_alpha = density_profile_coefficients.alpha(i_r, i_theta);
 
             double arr, att, art, detDF;
             compute_jacobian_elements(domain_geometry, r, theta, coeff_alpha, arr, att, art, detDF);

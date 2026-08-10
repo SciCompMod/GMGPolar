@@ -8,12 +8,13 @@ ZoniCoefficients::ZoniCoefficients(const PolarGrid& grid, double Rmax, double al
 {
 }
 
-KOKKOS_FUNCTION double ZoniCoefficients::alpha(double r, double theta) const
+KOKKOS_FUNCTION double ZoniCoefficients::alpha(int i_r, int i_theta) const
 {
+    double r = grid_.radius(i_r);
     return exp(-tanh(10.0 * (r / Rmax) - 5.0));
 }
 
-KOKKOS_FUNCTION double ZoniCoefficients::beta(double r, double theta) const
+KOKKOS_FUNCTION double ZoniCoefficients::beta(int i_r, int i_theta) const
 {
     return 0.0;
 }

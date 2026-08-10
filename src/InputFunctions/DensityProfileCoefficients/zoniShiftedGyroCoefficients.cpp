@@ -8,13 +8,15 @@ ZoniShiftedGyroCoefficients::ZoniShiftedGyroCoefficients(const PolarGrid& grid, 
 {
 }
 
-KOKKOS_FUNCTION double ZoniShiftedGyroCoefficients::alpha(double r, double theta) const
+KOKKOS_FUNCTION double ZoniShiftedGyroCoefficients::alpha(int i_r, int i_theta) const
 {
+    double r = grid_.radius(i_r);
     return exp(-tanh(20.0 * (r / Rmax) - 14.0));
 }
 
-KOKKOS_FUNCTION double ZoniShiftedGyroCoefficients::beta(double r, double theta) const
+KOKKOS_FUNCTION double ZoniShiftedGyroCoefficients::beta(int i_r, int i_theta) const
 {
+    double r = grid_.radius(i_r);
     return exp(tanh(20.0 * (r / Rmax) - 14.0));
 }
 
