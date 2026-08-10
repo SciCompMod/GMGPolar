@@ -38,7 +38,6 @@ TEST(OperatorATest, applyA_DirBC_Interior)
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    ZoniShiftedCoefficients coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior = true;
 
@@ -47,6 +46,7 @@ TEST(OperatorATest, applyA_DirBC_Interior)
     bool cache_domain_geometry              = true;
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
@@ -93,7 +93,6 @@ TEST(OperatorATest, applyA_AcrossOrigin)
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
 
     bool DirBC_Interior = false;
 
@@ -102,6 +101,7 @@ TEST(OperatorATest, applyA_AcrossOrigin)
     bool cache_domain_geometry              = true;
 
     auto grid       = std::make_unique<PolarGrid>(radii, angles);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
         *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),

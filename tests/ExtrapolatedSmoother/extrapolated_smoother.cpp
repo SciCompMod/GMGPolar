@@ -45,7 +45,7 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_DirBC_Interior)
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*tmp_grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = true;
 
@@ -106,7 +106,7 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_AcossOrigin)
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*tmp_grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = false;
 
@@ -168,7 +168,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior()
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*tmp_grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = true;
 
@@ -259,7 +259,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin()
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*tmp_grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = false;
 
@@ -351,7 +351,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior_SmallestGrid()
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*tmp_grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = true;
 
@@ -443,7 +443,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin_SmallestGrid()
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*tmp_grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = false;
 
@@ -536,7 +536,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior()
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*tmp_grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = true;
 
@@ -627,7 +627,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin()
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*tmp_grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = false;
 
@@ -717,7 +717,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior_SmallestGri
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*tmp_grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = true;
 
@@ -807,7 +807,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin_SmallestGrid(
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*tmp_grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = false;
 

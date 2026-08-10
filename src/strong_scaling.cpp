@@ -18,23 +18,23 @@ void runTest(int divideBy2, std::ostream& outfile)
     /* Example 1: Polar Solution -> Higher Order 4.0 */
     // const double alpha_jump = 0.4837 * Rmax;
     // ShafranovGeometry domain_geometry(Rmax, elongation_kappa, shift_delta);
-    // ZoniGyroCoefficients coefficients(Rmax, alpha_jump);
     // PolarR6_Boundary_ShafranovGeometry boundary_conditions(Rmax, elongation_kappa, shift_delta);
     // PolarR6_ShafranovGeometry exact_solution(Rmax, elongation_kappa, shift_delta);
+    // using DensityProfileCoefficients = ZoniGyroCoefficients;
 
     /* Example 2: Cartesian Solution -> Lower Order 3.5 */
     const double alpha_jump = 0.66 * Rmax;
     CzarnyGeometry domain_geometry(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    SonnendruckerGyroCoefficients coefficients(Rmax, alpha_jump);
     CartesianR2_Boundary_CzarnyGeometry boundary_conditions(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
     CartesianR2_CzarnyGeometry exact_solution(Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
+    using DensityProfileCoefficients = SonnendruckerGyroCoefficients;
 
     /* Example 3: Refined Solution -> Lower Order 3.5 */
     // const double alpha_jump = 0.9 * Rmax; // Refinement where the solution is most complex
     // ShafranovGeometry domain_geometry(Rmax, elongation_kappa, shift_delta);
-    // ZoniShiftedGyroCoefficients coefficients(Rmax, alpha_jump);
     // Refined_Boundary_ShafranovGeometry boundary_conditions(Rmax, elongation_kappa, shift_delta);
     // Refined_ShafranovGeometry exact_solution(Rmax, elongation_kappa, shift_delta);
+    // using DensityProfileCoefficients = ZoniShiftedGyroCoefficients;
 
     std::string geometry_string = "";
     if (typeid(domain_geometry) == typeid(CircularGeometry)) {
@@ -84,6 +84,7 @@ void runTest(int divideBy2, std::ostream& outfile)
     double refinement_radius               = alpha_jump;
     std::optional<double> splitting_radius = std::nullopt;
     PolarGrid grid(R0, Rmax, nr_exp, ntheta_exp, refinement_radius, anisotropic_factor, divideBy2, splitting_radius);
+    DensityProfileCoefficients coefficients(grid, Rmax, alpha_jump);
     GMGPolar solver(grid, domain_geometry, coefficients);
 
     // PolarR6_ZoniGyro_ShafranovGeometry source_term(grid, Rmax, elongation_kappa, shift_delta);

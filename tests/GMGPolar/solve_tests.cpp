@@ -646,7 +646,7 @@ void run_gmgpolar()
     const double ellipticity_e                = 1.4;
 
     typename TestFixture::DomainGeometry domain(TestFixture::Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);
-    typename TestFixture::DensityProfileCoefficients profile_coefficients(TestFixture::Rmax, 0.0);
+    typename TestFixture::DensityProfileCoefficients profile_coefficients(grid, TestFixture::Rmax, 0.0);
     typename TestFixture::BoundaryConditions boundary_conditions(TestFixture::Rmax, inverse_aspect_ratio_epsilon,
                                                                  ellipticity_e);
     typename TestFixture::SourceTerm source_term(grid, TestFixture::Rmax, inverse_aspect_ratio_epsilon, ellipticity_e);

@@ -44,7 +44,7 @@ void SmootherTest_smoother_DirBC_Interior()
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = true;
 
@@ -107,7 +107,7 @@ void SmootherTest_smoother_AcrossOrigin()
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = false;
 
@@ -173,7 +173,7 @@ void SmootherTest_SmootherDirBC_Interior()
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
     bool cache_density_rpofile_coefficients = true;
@@ -250,7 +250,7 @@ void SmootherTest_SmootherAcrossOrigin()
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
     bool cache_density_rpofile_coefficients = true;
@@ -326,7 +326,7 @@ void SmootherTest_SmootherDirBC_Interior_SmallestGrid()
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
     bool cache_density_rpofile_coefficients = true;
@@ -402,7 +402,7 @@ void SmootherTest_SmootherAcrossOrigin_SmallestGrid()
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
     bool cache_density_rpofile_coefficients = true;
@@ -481,7 +481,7 @@ void SmootherTest_SmootherTakeDirBC_Interior()
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
     bool cache_density_rpofile_coefficients = true;
@@ -558,7 +558,7 @@ void SmootherTest_SmootherTakeAcrossOrigin()
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
     bool cache_density_rpofile_coefficients = true;
@@ -634,7 +634,7 @@ void SmootherTest_SmootherTakeDirBC_Interior_SmallestGrid()
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
     bool cache_density_rpofile_coefficients = true;
@@ -710,7 +710,7 @@ void SmootherTest_SmootherTakeAcrossOrigin_SmallestGrid()
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
     bool cache_density_rpofile_coefficients = true;
