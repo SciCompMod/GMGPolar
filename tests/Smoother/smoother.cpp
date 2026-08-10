@@ -53,7 +53,7 @@ void SmootherTest_smoother_DirBC_Interior()
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -116,7 +116,7 @@ void SmootherTest_smoother_AcrossOrigin()
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -180,7 +180,7 @@ void SmootherTest_SmootherDirBC_Interior()
     bool cache_domain_geometry              = false;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -257,7 +257,7 @@ void SmootherTest_SmootherAcrossOrigin()
     bool cache_domain_geometry              = false;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -333,7 +333,7 @@ void SmootherTest_SmootherDirBC_Interior_SmallestGrid()
     bool cache_domain_geometry              = false;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -409,7 +409,7 @@ void SmootherTest_SmootherAcrossOrigin_SmallestGrid()
     bool cache_domain_geometry              = false;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -488,7 +488,7 @@ void SmootherTest_SmootherTakeDirBC_Interior()
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -565,7 +565,7 @@ void SmootherTest_SmootherTakeAcrossOrigin()
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -641,7 +641,7 @@ void SmootherTest_SmootherTakeDirBC_Interior_SmallestGrid()
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -717,7 +717,7 @@ void SmootherTest_SmootherTakeAcrossOrigin_SmallestGrid()
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 

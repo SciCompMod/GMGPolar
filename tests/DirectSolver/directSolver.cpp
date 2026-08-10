@@ -65,7 +65,7 @@ TEST(DirectSolverTest, directSolver_DirBC_Interior)
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, false);
 
@@ -118,7 +118,7 @@ TEST(DirectSolverTest, directSolver_AcrossOrigin)
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -173,7 +173,7 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverDirBC_Interior_CircularGeome
     bool cache_domain_geometry              = false;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -215,7 +215,7 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOrigin_CircularGeometr
     bool cache_domain_geometry              = false;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -263,7 +263,7 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverDirBC_Interior_ShafranovGeo
     bool cache_domain_geometry              = false;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -307,7 +307,7 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovGeome
     bool cache_domain_geometry              = false;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -355,7 +355,7 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeometry)
     bool cache_domain_geometry              = false;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -399,7 +399,7 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometry)
     bool cache_domain_geometry              = false;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -445,7 +445,7 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeometry)
     bool cache_domain_geometry              = false;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -487,7 +487,7 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometry)
     bool cache_domain_geometry              = false;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -541,7 +541,7 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_
     bool cache_domain_geometry              = false;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -583,7 +583,7 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision2
     bool cache_domain_geometry              = false;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -626,7 +626,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverDirBC_Interior_CircularG
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -668,7 +668,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOrigin_CircularGeo
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -716,7 +716,7 @@ TEST(DirectSolverTakeTest_ShafranovGeometry, DirectSolverDirBC_Interior_Shafrano
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -760,7 +760,7 @@ TEST(DirectSolverTakeTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovG
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -808,7 +808,7 @@ TEST(DirectSolverTakeTest_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeome
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -852,7 +852,7 @@ TEST(DirectSolverTakeTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometr
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -898,7 +898,7 @@ TEST(DirectSolverTakeTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeome
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -940,7 +940,7 @@ TEST(DirectSolverTakeTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometr
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -992,7 +992,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecis
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -1034,7 +1034,7 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecis
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
