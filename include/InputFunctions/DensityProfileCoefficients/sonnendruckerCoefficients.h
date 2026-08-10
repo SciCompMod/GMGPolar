@@ -1,4 +1,5 @@
 #pragma once
+#include "../../PolarGrid/polargrid.h"
 
 #include <cmath>
 #include <Kokkos_Core.hpp>
@@ -11,7 +12,7 @@ namespace gmgpolar
 class SonnendruckerCoefficients
 {
 public:
-    explicit SonnendruckerCoefficients(double Rmax, double alpha);
+    explicit SonnendruckerCoefficients(const PolarGrid& grid, double Rmax, double alpha);
 
     KOKKOS_FUNCTION double alpha(double r, double theta) const;
     KOKKOS_FUNCTION double beta(double r, double theta) const;
@@ -19,6 +20,7 @@ public:
     KOKKOS_FUNCTION double getAlphaJump() const;
 
 private:
+    PolarGrid grid_;
     const double Rmax       = 1.3;
     const double alpha_jump = 0.66 * 1.3;
 };

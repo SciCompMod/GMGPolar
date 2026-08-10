@@ -1,8 +1,9 @@
 #include <InputFunctions/DensityProfileCoefficients/sonnendruckerGyroCoefficients.h>
 using namespace gmgpolar;
 
-SonnendruckerGyroCoefficients::SonnendruckerGyroCoefficients(double _Rmax, double _alpha_jump)
-    : Rmax(_Rmax)
+SonnendruckerGyroCoefficients::SonnendruckerGyroCoefficients(const PolarGrid& grid, double _Rmax, double _alpha_jump)
+    : grid_(grid)
+    , Rmax(_Rmax)
     , alpha_jump(_alpha_jump)
 {
 }

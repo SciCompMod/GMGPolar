@@ -1,8 +1,9 @@
 #include <InputFunctions/DensityProfileCoefficients/poissonCoefficients.h>
 using namespace gmgpolar;
 
-PoissonCoefficients::PoissonCoefficients(double Rmax, double alpha_jump)
-    : Rmax(Rmax)
+PoissonCoefficients::PoissonCoefficients(const PolarGrid& grid, double Rmax, double alpha_jump)
+    : grid_(grid)
+    , Rmax(Rmax)
     , alpha_jump(alpha_jump)
 {
 }

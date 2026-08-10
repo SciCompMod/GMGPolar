@@ -1,8 +1,9 @@
 #include <InputFunctions/DensityProfileCoefficients/zoniGyroCoefficients.h>
 using namespace gmgpolar;
 
-ZoniGyroCoefficients::ZoniGyroCoefficients(double Rmax, double alpha_jump)
-    : Rmax(Rmax)
+ZoniGyroCoefficients::ZoniGyroCoefficients(const PolarGrid& grid, double Rmax, double alpha_jump)
+    : grid_(grid)
+    , Rmax(Rmax)
     , alpha_jump(alpha_jump)
 {
 }

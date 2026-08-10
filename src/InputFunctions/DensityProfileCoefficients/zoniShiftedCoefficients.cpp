@@ -1,8 +1,9 @@
 #include <InputFunctions/DensityProfileCoefficients/zoniShiftedCoefficients.h>
 #include <iostream>
 using namespace gmgpolar;
-ZoniShiftedCoefficients::ZoniShiftedCoefficients(double Rmax, double alpha_jump)
-    : Rmax(Rmax)
+ZoniShiftedCoefficients::ZoniShiftedCoefficients(const PolarGrid& grid, double Rmax, double alpha_jump)
+    : grid_(grid)
+    , Rmax(Rmax)
     , alpha_jump(alpha_jump)
 {
 }
