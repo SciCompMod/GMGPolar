@@ -6,7 +6,7 @@ template <concepts::DensityProfileCoefficients DensityProfileCoefficients>
 static void cache_density_profile_coefficients(const PolarGrid& grid,
                                                const DensityProfileCoefficients& density_profile_coefficients,
                                                const Vector<double>& coeff_alpha, const Vector<double>& coeff_beta,
-                                               const bool cache_domain_geometry)
+                                               const bool cache_domain_geometry, int level_depth)
 {
     Kokkos::parallel_for(
         "Cache density profile coefficients",
@@ -16,13 +16,13 @@ static void cache_density_profile_coefficients(const PolarGrid& grid,
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_r, const int i_theta) {
-            const double r     = grid.radius(i_r);
-            const double theta = grid.theta(i_theta);
-            const int index    = grid.index(i_r, i_theta);
+            const int index        = grid.index(i_r, i_theta);
+            const int i_r_glob     = i_r << level_depth;
+            const int i_theta_glob = i_theta << level_depth;
             if (!cache_domain_geometry) {
-                coeff_alpha(index) = density_profile_coefficients.alpha(r, theta);
+                coeff_alpha(index) = density_profile_coefficients.alpha(i_r_glob, i_theta_glob);
             }
-            coeff_beta(index) = density_profile_coefficients.beta(r, theta);
+            coeff_beta(index) = density_profile_coefficients.beta(i_r_glob, i_theta_glob);
         });
 }
 
@@ -30,7 +30,7 @@ template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoeff
 static void cache_domain_geometry(const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients,
                                   const DomainGeometry& domain_geometry, const Vector<double>& vec_arr,
                                   const Vector<double>& vec_att, const Vector<double>& vec_art,
-                                  const Vector<double>& vec_detDF)
+                                  const Vector<double>& vec_detDF, int level_depth)
 {
     // We split the loops into two regions to better respect the
     // access patterns of the smoother and improve cache locality
@@ -47,7 +47,9 @@ static void cache_domain_geometry(const PolarGrid& grid, const DensityProfileCoe
             const double r           = grid.radius(i_r);
             const double theta       = grid.theta(i_theta);
             const int index          = grid.index(i_r, i_theta);
-            const double coeff_alpha = density_profile_coefficients.alpha(r, theta);
+            const int i_r_glob       = i_r << level_depth;
+            const int i_theta_glob   = i_theta << level_depth;
+            const double coeff_alpha = density_profile_coefficients.alpha(i_r_glob, i_theta_glob);
 
             double arr, att, art, detDF;
             compute_jacobian_elements(domain_geometry, r, theta, coeff_alpha, arr, att, art, detDF);
@@ -68,7 +70,9 @@ static void cache_domain_geometry(const PolarGrid& grid, const DensityProfileCoe
             const double theta       = grid.theta(i_theta);
             const double r           = grid.radius(i_r);
             const int index          = grid.index(i_r, i_theta);
-            const double coeff_alpha = density_profile_coefficients.alpha(r, theta);
+            const int i_r_glob       = i_r << level_depth;
+            const int i_theta_glob   = i_theta << level_depth;
+            const double coeff_alpha = density_profile_coefficients.alpha(i_r_glob, i_theta_glob);
 
             double arr, att, art, detDF;
             compute_jacobian_elements(domain_geometry, r, theta, coeff_alpha, arr, att, art, detDF);
@@ -85,8 +89,9 @@ template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoeff
 LevelCache<DomainGeometry, DensityProfileCoefficients>::LevelCache(
     const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients,
     const DomainGeometry& domain_geometry, const bool cache_density_profile_coefficients,
-    const bool cache_domain_geometry)
-    : domain_geometry_(domain_geometry)
+    const bool cache_domain_geometry, const int level_depth)
+    : level_depth_(level_depth)
+    , domain_geometry_(domain_geometry)
     , density_profile_coefficients_(density_profile_coefficients)
     , cache_density_profile_coefficients_(cache_density_profile_coefficients)
     // If the domain geometry is cached, we don't need to cache the alpha coefficient
@@ -103,14 +108,14 @@ LevelCache<DomainGeometry, DensityProfileCoefficients>::LevelCache(
     // repeated expensive evaluations during runtime computations
     if (cache_density_profile_coefficients_) {
         level_cache_helpers::cache_density_profile_coefficients(grid, density_profile_coefficients, coeff_alpha_,
-                                                                coeff_beta_, cache_domain_geometry);
+                                                                coeff_beta_, cache_domain_geometry, level_depth);
     }
 
     // Pre-compute and store Jacobian matrix elements (arr, att, art, detDF) at all grid nodes
     // to avoid repeated coordinate transformation calculations during domain operations
     if (cache_domain_geometry_) {
         level_cache_helpers::cache_domain_geometry(grid, density_profile_coefficients, domain_geometry, arr_, att_,
-                                                   art_, detDF_);
+                                                   art_, detDF_, level_depth);
     }
     Kokkos::fence();
 }

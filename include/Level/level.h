@@ -136,7 +136,7 @@ class LevelCache
 public:
     explicit LevelCache(const PolarGrid& grid, const DensityProfileCoefficients& density_profile_coefficients,
                         const DomainGeometry& domain_geometry, const bool cache_density_profile_coefficients,
-                        const bool cache_domain_geometry);
+                        const bool cache_domain_geometry, const int level_depth);
 
     const DomainGeometry& domainGeometry() const;
     const DensityProfileCoefficients& densityProfileCoefficients() const;
@@ -155,8 +155,10 @@ public:
                                              double theta, double& coeff_beta, double& arr, double& att, double& art,
                                              double& detDF) const
     {
-        coeff_beta = cache_density_profile_coefficients_ ? coeff_beta_[global_index]
-                                                         : density_profile_coefficients_.beta(r, theta);
+        const int i_r_glob     = i_r << level_depth_;
+        const int i_theta_glob = i_theta << level_depth_;
+        coeff_beta             = cache_density_profile_coefficients_ ? coeff_beta_[global_index]
+                                                                     : density_profile_coefficients_.beta(i_r_glob, i_theta_glob);
 
         if (cache_domain_geometry_) {
             arr   = arr_[global_index];
@@ -165,14 +167,16 @@ public:
             detDF = detDF_[global_index];
         }
         else {
-            double coeff_alpha = cache_density_profile_coefficients_ ? coeff_alpha_[global_index]
-                                                                     : density_profile_coefficients_.alpha(r, theta);
+            double coeff_alpha = cache_density_profile_coefficients_
+                                     ? coeff_alpha_[global_index]
+                                     : density_profile_coefficients_.alpha(i_r_glob, i_theta_glob);
 
             compute_jacobian_elements(domain_geometry_, r, theta, coeff_alpha, arr, att, art, detDF);
         }
     }
 
 private:
+    const int level_depth_;
     const DomainGeometry domain_geometry_;
     const DensityProfileCoefficients density_profile_coefficients_;
 

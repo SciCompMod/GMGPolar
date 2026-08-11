@@ -49,12 +49,14 @@ TEST(DirectSolverTest, directSolver_DirBC_Interior)
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
 
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+
     using DomainGeometryType = CzarnyGeometry;
     DomainGeometryType domain_geometry(Rmax, kappa_eps, delta_e);
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = true;
 
@@ -62,9 +64,8 @@ TEST(DirectSolverTest, directSolver_DirBC_Interior)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, false);
 
@@ -97,6 +98,8 @@ TEST(DirectSolverTest, directSolver_AcrossOrigin)
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+
     double Rmax      = radii.back();
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
@@ -106,7 +109,7 @@ TEST(DirectSolverTest, directSolver_AcrossOrigin)
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = false;
 
@@ -114,9 +117,8 @@ TEST(DirectSolverTest, directSolver_AcrossOrigin)
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -157,20 +159,21 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverDirBC_Interior_CircularGeome
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
     double Rmax = radii.back();
 
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+
     using DomainGeometryType = CircularGeometry;
     DomainGeometryType domain_geometry(Rmax);
 
     double alpha_jump                    = 0.66 * Rmax;
     using DensityProfileCoefficientsType = SonnendruckerGyroCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -196,6 +199,8 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOrigin_CircularGeometr
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+
     double Rmax = radii.back();
 
     using DomainGeometryType = CircularGeometry;
@@ -203,15 +208,14 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOrigin_CircularGeometr
 
     double alpha_jump                    = 0.66 * Rmax;
     using DensityProfileCoefficientsType = SonnendruckerGyroCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -241,6 +245,8 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverDirBC_Interior_ShafranovGeo
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+
     double Rmax      = radii.back();
     double kappa_eps = 0.3;
     double delta_e   = 0.2;
@@ -250,15 +256,14 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverDirBC_Interior_ShafranovGeo
 
     double alpha_jump                    = 0.4837 * Rmax;
     using DensityProfileCoefficientsType = ZoniGyroCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -284,6 +289,8 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovGeome
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+
     double Rmax      = radii.back();
     double kappa_eps = 0.3;
     double delta_e   = 0.2;
@@ -293,15 +300,14 @@ TEST(DirectSolverTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovGeome
 
     double alpha_jump                    = 0.4837 * Rmax;
     using DensityProfileCoefficientsType = ZoniGyroCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -331,6 +337,8 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeometry)
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+
     double Rmax      = radii.back();
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
@@ -340,15 +348,14 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeometry)
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -374,6 +381,8 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometry)
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+
     double Rmax      = radii.back();
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
@@ -383,15 +392,14 @@ TEST(DirectSolverTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometry)
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -421,6 +429,8 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeometry)
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+
     double Rmax = radii.back();
 
     using DomainGeometryType = CulhamGeometry;
@@ -428,15 +438,14 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeometry)
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedGyroCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -462,6 +471,8 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometry)
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+
     double Rmax = radii.back();
 
     using DomainGeometryType = CulhamGeometry;
@@ -469,15 +480,14 @@ TEST(DirectSolverTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometry)
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedGyroCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -515,6 +525,8 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+
     double Rmax = radii.back();
 
     using DomainGeometryType = CircularGeometry;
@@ -522,15 +534,14 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision_
 
     double alpha_jump                    = 0.66 * Rmax;
     using DensityProfileCoefficientsType = SonnendruckerGyroCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -556,6 +567,8 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision2
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+
     double Rmax = radii.back();
 
     using DomainGeometryType = CircularGeometry;
@@ -563,15 +576,14 @@ TEST(DirectSolverTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecision2
 
     double alpha_jump                    = 0.66 * Rmax;
     using DensityProfileCoefficientsType = SonnendruckerGyroCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = false;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -600,20 +612,21 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverDirBC_Interior_CircularG
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
     double Rmax = radii.back();
 
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+
     using DomainGeometryType = CircularGeometry;
     DomainGeometryType domain_geometry(Rmax);
 
     double alpha_jump                    = 0.66 * Rmax;
     using DensityProfileCoefficientsType = SonnendruckerGyroCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -639,6 +652,8 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOrigin_CircularGeo
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+
     double Rmax = radii.back();
 
     using DomainGeometryType = CircularGeometry;
@@ -646,15 +661,14 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOrigin_CircularGeo
 
     double alpha_jump                    = 0.66 * Rmax;
     using DensityProfileCoefficientsType = SonnendruckerGyroCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -684,6 +698,8 @@ TEST(DirectSolverTakeTest_ShafranovGeometry, DirectSolverDirBC_Interior_Shafrano
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+
     double Rmax      = radii.back();
     double kappa_eps = 0.3;
     double delta_e   = 0.2;
@@ -693,15 +709,14 @@ TEST(DirectSolverTakeTest_ShafranovGeometry, DirectSolverDirBC_Interior_Shafrano
 
     double alpha_jump                    = 0.4837 * Rmax;
     using DensityProfileCoefficientsType = ZoniGyroCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -727,6 +742,8 @@ TEST(DirectSolverTakeTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovG
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+
     double Rmax      = radii.back();
     double kappa_eps = 0.3;
     double delta_e   = 0.2;
@@ -736,15 +753,14 @@ TEST(DirectSolverTakeTest_ShafranovGeometry, DirectSolverAcrossOrigin_ShafranovG
 
     double alpha_jump                    = 0.4837 * Rmax;
     using DensityProfileCoefficientsType = ZoniGyroCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -774,6 +790,8 @@ TEST(DirectSolverTakeTest_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeome
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+
     double Rmax      = radii.back();
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
@@ -783,15 +801,14 @@ TEST(DirectSolverTakeTest_CzarnyGeometry, DirectSolverDirBC_Interior_CzarnyGeome
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -817,6 +834,8 @@ TEST(DirectSolverTakeTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometr
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+
     double Rmax      = radii.back();
     double kappa_eps = 0.3;
     double delta_e   = 1.4;
@@ -826,15 +845,14 @@ TEST(DirectSolverTakeTest_CzarnyGeometry, DirectSolverAcrossOrigin_CzarnyGeometr
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -864,6 +882,8 @@ TEST(DirectSolverTakeTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeome
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+
     double Rmax = radii.back();
 
     using DomainGeometryType = CulhamGeometry;
@@ -871,15 +891,14 @@ TEST(DirectSolverTakeTest_CulhamGeometry, DirectSolverDirBC_Interior_CulhamGeome
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedGyroCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = true;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -905,6 +924,8 @@ TEST(DirectSolverTakeTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometr
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+
     double Rmax = radii.back();
 
     using DomainGeometryType = CulhamGeometry;
@@ -912,15 +933,14 @@ TEST(DirectSolverTakeTest_CulhamGeometry, DirectSolverAcrossOrigin_CulhamGeometr
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedGyroCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -956,6 +976,8 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecis
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+
     double Rmax = radii.back();
 
     using DomainGeometryType = CircularGeometry;
@@ -963,15 +985,14 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecis
 
     double alpha_jump                    = 0.66 * Rmax;
     using DensityProfileCoefficientsType = SonnendruckerGyroCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -997,6 +1018,8 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecis
     std::vector<double> angles = {
         0, M_PI / 16, M_PI / 8, M_PI / 2, M_PI, M_PI + M_PI / 16, M_PI + M_PI / 8, M_PI + M_PI / 2, M_PI + M_PI};
 
+    auto grid = std::make_unique<PolarGrid>(radii, angles);
+
     double Rmax = radii.back();
 
     using DomainGeometryType = CircularGeometry;
@@ -1004,15 +1027,14 @@ TEST(DirectSolverTakeTest_CircularGeometry, DirectSolverAcrossOriginHigherPrecis
 
     double alpha_jump                    = 0.66 * Rmax;
     using DensityProfileCoefficientsType = SonnendruckerGyroCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*grid, Rmax, alpha_jump);
 
     bool DirBC_Interior                     = false;
     bool cache_density_rpofile_coefficients = true;
     bool cache_domain_geometry              = true;
 
-    auto grid       = std::make_unique<PolarGrid>(radii, angles);
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 

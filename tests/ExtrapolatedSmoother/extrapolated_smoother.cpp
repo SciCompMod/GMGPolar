@@ -45,7 +45,7 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_DirBC_Interior)
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*tmp_grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = true;
 
@@ -54,7 +54,7 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_DirBC_Interior)
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *tmp_grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *tmp_grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -106,7 +106,7 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_AcossOrigin)
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*tmp_grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = false;
 
@@ -115,7 +115,7 @@ TEST(ExtrapolatedSmootherTest, extrapolatedSmoother_AcossOrigin)
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *tmp_grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *tmp_grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::NONE, 0);
 
@@ -168,7 +168,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior()
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*tmp_grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = true;
 
@@ -176,7 +176,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior()
     bool cache_domain_geometry              = false;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *tmp_grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *tmp_grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
@@ -259,7 +259,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin()
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*tmp_grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = false;
 
@@ -267,7 +267,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin()
     bool cache_domain_geometry              = false;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *tmp_grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *tmp_grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
@@ -351,7 +351,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior_SmallestGrid()
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*tmp_grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = true;
 
@@ -359,7 +359,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherDirBC_Interior_SmallestGrid()
     bool cache_domain_geometry              = false;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *tmp_grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *tmp_grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
@@ -443,7 +443,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin_SmallestGrid()
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*tmp_grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = false;
 
@@ -451,7 +451,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherAcrossOrigin_SmallestGrid()
     bool cache_domain_geometry              = false;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *tmp_grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *tmp_grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
@@ -536,7 +536,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior()
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*tmp_grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = true;
 
@@ -544,7 +544,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior()
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *tmp_grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *tmp_grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
@@ -627,7 +627,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin()
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*tmp_grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = false;
 
@@ -635,7 +635,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin()
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *tmp_grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *tmp_grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
@@ -717,7 +717,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior_SmallestGri
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*tmp_grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = true;
 
@@ -725,7 +725,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeDirBC_Interior_SmallestGri
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *tmp_grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *tmp_grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 
@@ -807,7 +807,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin_SmallestGrid(
 
     double alpha_jump                    = 0.678 * Rmax;
     using DensityProfileCoefficientsType = ZoniShiftedCoefficients;
-    DensityProfileCoefficientsType coefficients(Rmax, alpha_jump);
+    DensityProfileCoefficientsType coefficients(*tmp_grid, Rmax, alpha_jump);
 
     bool DirBC_Interior = false;
 
@@ -815,7 +815,7 @@ void ExtrapolatedSmootherTest_ExtrapolatedSmootherTakeAcrossOrigin_SmallestGrid(
     bool cache_domain_geometry              = true;
 
     auto levelCache = std::make_unique<LevelCache<DomainGeometryType, DensityProfileCoefficientsType>>(
-        *tmp_grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry);
+        *tmp_grid, coefficients, domain_geometry, cache_density_rpofile_coefficients, cache_domain_geometry, 0);
     Level<DomainGeometryType, DensityProfileCoefficientsType> level(0, std::move(tmp_grid), std::move(levelCache),
                                                                     ExtrapolationType::IMPLICIT_EXTRAPOLATION, 0);
 

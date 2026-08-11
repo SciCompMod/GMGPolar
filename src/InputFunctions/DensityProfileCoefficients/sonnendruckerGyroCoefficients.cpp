@@ -1,19 +1,22 @@
 #include <InputFunctions/DensityProfileCoefficients/sonnendruckerGyroCoefficients.h>
 using namespace gmgpolar;
 
-SonnendruckerGyroCoefficients::SonnendruckerGyroCoefficients(double _Rmax, double _alpha_jump)
-    : Rmax(_Rmax)
+SonnendruckerGyroCoefficients::SonnendruckerGyroCoefficients(const PolarGrid& grid, double _Rmax, double _alpha_jump)
+    : grid_(grid)
+    , Rmax(_Rmax)
     , alpha_jump(_alpha_jump)
 {
 }
 
-KOKKOS_FUNCTION double SonnendruckerGyroCoefficients::alpha(double r, double theta) const
+KOKKOS_FUNCTION double SonnendruckerGyroCoefficients::alpha(int i_r, int i_theta) const
 {
+    double r = grid_.radius(i_r);
     return 0.452961672473868 - 0.348432055749129 * atan(14.4444444444444 * (r / Rmax) - 11.1111111111111);
 }
 
-KOKKOS_FUNCTION double SonnendruckerGyroCoefficients::beta(double r, double theta) const
+KOKKOS_FUNCTION double SonnendruckerGyroCoefficients::beta(int i_r, int i_theta) const
 {
+    double r = grid_.radius(i_r);
     return pow((0.452961672473868 - 0.348432055749129 * atan(14.4444444444444 * (r / Rmax) - 11.1111111111111)),
                (double)((-1)));
 }
