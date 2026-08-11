@@ -2,6 +2,7 @@
 
 namespace level_cache_helpers
 {
+
 template <concepts::DensityProfileCoefficients DensityProfileCoefficients>
 static void cache_density_profile_coefficients(const PolarGrid& grid,
                                                const DensityProfileCoefficients& density_profile_coefficients,
@@ -117,6 +118,31 @@ LevelCache<DomainGeometry, DensityProfileCoefficients>::LevelCache(
         level_cache_helpers::cache_domain_geometry(grid, density_profile_coefficients, domain_geometry, arr_, att_,
                                                    art_, detDF_, level_depth);
     }
+    Kokkos::fence();
+}
+
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+void LevelCache<DomainGeometry, DensityProfileCoefficients>::updateValues(
+    const PolarGrid& grid, const DomainGeometry& domain_geometry,
+    const DensityProfileCoefficients& density_profile_coefficients)
+{
+    // Store the new geometry/coefficients (cheap object copy, not the expensive part).
+    domain_geometry_              = domain_geometry;
+    density_profile_coefficients_ = density_profile_coefficients;
+
+    // Re-run the same caching kernels used at construction time. coeff_alpha_,
+    // coeff_beta_, arr_, att_, art_, detDF_ are already sized correctly and are
+    // simply overwritten in place - no Kokkos::View reallocation occurs here.
+    if (cache_density_profile_coefficients_) {
+        level_cache_helpers::cache_density_profile_coefficients(grid, density_profile_coefficients_, coeff_alpha_,
+                                                                coeff_beta_, cache_domain_geometry_, level_depth_);
+    }
+
+    if (cache_domain_geometry_) {
+        level_cache_helpers::cache_domain_geometry(grid, density_profile_coefficients_, domain_geometry_, arr_, att_,
+                                                   art_, detDF_, level_depth_);
+    }
+
     Kokkos::fence();
 }
 

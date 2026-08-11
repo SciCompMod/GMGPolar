@@ -4,12 +4,8 @@ template <class LevelCacheType>
 DirectSolverGive<LevelCacheType>::DirectSolverGive(const PolarGrid& grid, const LevelCacheType& level_cache,
                                                    bool DirBC_Interior)
     : DirectSolver<LevelCacheType>(grid, level_cache, DirBC_Interior)
-#ifdef GMGPOLAR_USE_MUMPS
-    , system_solver_(buildSolverMatrix())
-#else
     , system_matrix_(buildSolverMatrix())
     , system_solver_(system_matrix_)
-#endif
 {
 }
 
@@ -24,4 +20,17 @@ void DirectSolverGive<LevelCacheType>::solveInPlace(Vector<double> solution)
     applySymmetryShift(solution);
     // Solves the adjusted system symmetric(matrixA) * solution = rhs using the MUMPS solver.
     system_solver_.solveInPlace(solution);
+}
+
+template <class LevelCacheType>
+void DirectSolverGive<LevelCacheType>::updateValues()
+{
+    // Overwrite system_matrix_'s numeric entries in place. Sparsity pattern
+    // is unchanged (same grid, same stencil coloring), so no reallocation
+    // occurs here.
+    fillSolverMatrix(system_matrix_);
+
+    // Refactorize, reusing whatever one-time analysis/ordering work each
+    // backend already did (RCM ordering / MUMPS analysis phase).
+    system_solver_.updateValues(system_matrix_);
 }

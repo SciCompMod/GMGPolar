@@ -85,6 +85,19 @@ public:
      */
     void solveInPlace(Vector<T, MemorySpace>& b) const;
 
+    /**
+     * @brief Recompute the LU factorization from a matrix with the same
+     * sparsity pattern as the one originally used to construct this solver.
+     *
+     * Reuses the existing RCM ordering (perm_/perm_inv_), since ordering
+     * depends only on the sparsity pattern, which is assumed unchanged here.
+     * Only the numeric factorization is redone.
+     *
+     * @param A Matrix with identical structure to the one originally
+     *          factorized, but updated numeric values.
+     */
+    void updateValues(const SparseMatrixCSR<T, MemorySpace>& A);
+
 private:
     // LU decomposition data structures
     AllocatableVector<T, MemorySpace> L_values_, U_values_; // Non-zero values for L and U
@@ -150,6 +163,23 @@ SparseLUSolver<T, MemorySpace>::SparseLUSolver(const SparseMatrixCSR<T, MemorySp
     SparseMatrixCSR<T, MemorySpace> A_perm = permuteMatrix(A, perm_, perm_inv_);
     factorize(A_perm);
     factorized_ = true;
+}
+
+template <typename T, class MemorySpace>
+void SparseLUSolver<T, MemorySpace>::updateValues(const SparseMatrixCSR<T, MemorySpace>& A)
+{
+    assert(factorized_);
+    assert(A.rows() == A.columns());
+    assert(A.rows() == static_cast<int>(perm_.size()) &&
+           "Matrix structure must match the originally factorized matrix");
+
+    // Reuse the existing RCM ordering - skips the O(n + nnz) RCM computation.
+    SparseMatrixCSR<T, MemorySpace> A_perm = permuteMatrix(A, perm_, perm_inv_);
+
+    // Symbolic pattern (L_pattern/U_pattern) is identical to before since the
+    // sparsity pattern hasn't changed, so this recomputes the same patterns
+    // deterministically; only the numeric values differ downstream.
+    factorize(A_perm);
 }
 
 /**

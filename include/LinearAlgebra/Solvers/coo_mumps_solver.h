@@ -55,6 +55,62 @@ public:
     // rhs is overwritten in-place with the solution on return.
     void solveInPlace(Vector<double>& rhs);
 
+    /**
+     * @brief Refactorize using a matrix with the same sparsity pattern as the
+     * one originally used to construct this solver.
+     *
+     * Reuses the existing MUMPS analysis/ordering phase (job 1) and only
+     * reruns the numeric factorization (job 2). The matrix must have the same
+     * non-zero structure - same number of entries in the same order - as the
+     * matrix originally passed to the constructor.
+     *
+     * Takes matrix by const reference (unlike the constructor, which takes
+     * ownership) so the caller can keep refilling and reusing their own
+     * matrix storage across repeated updates.
+     */
+    template <class MemorySpace>
+    void updateValues(const SparseMatrixCOO<double, MemorySpace>& matrix)
+    {
+        auto matrix_host = matrix.template mirror_view_and_copy<Kokkos::HostSpace>();
+
+        if (matrix_host.is_symmetric()) {
+            matrix_ = extractUpperTriangle(matrix_host);
+        }
+        else {
+            matrix_ = std::move(matrix_host);
+        }
+
+        assert(matrix_.non_zero_size() == mumps_solver_.nz &&
+               "Matrix structure must match the originally factorized matrix");
+
+        // MUMPS uses 1-based indexing.
+        for (int i = 0; i < matrix_.non_zero_size(); i++) {
+            matrix_.increment_row_index(i);
+            matrix_.increment_col_index(i);
+        }
+
+        // irn/jcn must be repointed even though structure is unchanged, since
+        // extractUpperTriangle (if symmetric) allocates a new matrix_ object
+        // with a new underlying buffer each call.
+        mumps_solver_.job = JOB_FACTORIZATION_PHASE; // reuse stored analysis/ordering
+        mumps_solver_.irn = matrix_.row_indices_data();
+        mumps_solver_.jcn = matrix_.column_indices_data();
+        mumps_solver_.a   = matrix_.values_data();
+
+        dmumps_c(&mumps_solver_);
+
+        if (INFOG(1) != 0) {
+            std::cerr << "MUMPS reported an error during factorization update "
+                      << "(INFOG(1) = " << INFOG(1) << ").\n";
+        }
+
+        if (mumps_solver_.sym == SYM_POSITIVE_DEFINITE && INFOG(12) != 0) {
+            std::cerr << "Matrix declared positive definite, "
+                      << "but negative pivots were encountered during refactorization "
+                      << "(INFOG(12) = " << INFOG(12) << ").\n";
+        }
+    }
+
 private:
     void initialize();
     void finalize();

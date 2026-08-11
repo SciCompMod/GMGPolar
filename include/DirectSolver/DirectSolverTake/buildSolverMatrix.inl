@@ -475,6 +475,31 @@ typename DirectSolverTake<LevelCacheType>::SystemMatrix DirectSolverTake<LevelCa
 {
     using direct_solver_take::getNonZeroCountSolverMatrix;
     using direct_solver_take::getStencilSize;
+
+    const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
+    const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;
+
+    const int n = grid.numberOfNodes();
+
+#ifdef GMGPOLAR_USE_MUMPS
+    const int nnz = getNonZeroCountSolverMatrix(grid, DirBC_Interior);
+    SystemMatrix solver_matrix(n, n, nnz);
+    solver_matrix.is_symmetric(true);
+#else
+    std::function<int(int)> nnz_per_row = [&](int global_index) {
+        return getStencilSize(global_index, grid, DirBC_Interior);
+    };
+    SystemMatrix solver_matrix(n, n, nnz_per_row);
+#endif
+
+    fillSolverMatrix(solver_matrix); // allocation done above, this only fills entries
+
+    return solver_matrix;
+}
+
+template <class LevelCacheType>
+void DirectSolverTake<LevelCacheType>::fillSolverMatrix(SystemMatrix& solver_matrix)
+{
     using direct_solver_take::nodeBuildSolverMatrixTake;
     using direct_solver_take::validateSolverMatrixIndexing;
 
@@ -483,20 +508,6 @@ typename DirectSolverTake<LevelCacheType>::SystemMatrix DirectSolverTake<LevelCa
     const bool DirBC_Interior         = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
     assert(validateSolverMatrixIndexing(grid, DirBC_Interior) && "Solver matrix indexing is inconsistent");
-
-    const int n = grid.numberOfNodes();
-
-#ifdef GMGPOLAR_USE_MUMPS
-    const int nnz = getNonZeroCountSolverMatrix(grid, DirBC_Interior);
-    SparseMatrixCOO<double> solver_matrix(n, n, nnz);
-    solver_matrix.is_symmetric(true);
-#else
-    std::function<int(int)> nnz_per_row = [&](int global_index) {
-        return getStencilSize(global_index, grid, DirBC_Interior);
-    };
-
-    SparseMatrixCSR<double> solver_matrix(n, n, nnz_per_row);
-#endif
 
     assert(level_cache.cacheDensityProfileCoefficients());
     assert(level_cache.cacheDomainGeometry());
@@ -537,6 +548,4 @@ typename DirectSolverTake<LevelCacheType>::SystemMatrix DirectSolverTake<LevelCa
         });
 
     Kokkos::fence();
-
-    return solver_matrix;
 }

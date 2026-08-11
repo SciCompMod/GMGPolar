@@ -38,6 +38,12 @@ public:
     // Note: The rhs (right-hand side) vector gets overwritten during the solution process.
     virtual void solveInPlace(Vector<double> solution) = 0;
 
+    // Recomputes the solver matrix entries from the current LevelCache values
+    // (arr, att, art, detDF, coeff_beta) and refreshes the factorization.
+    // No reallocation: sparsity pattern and matrix storage are unchanged,
+    // only the numeric values are overwritten.
+    virtual void updateValues() = 0;
+
 protected:
     const PolarGrid& grid_;
     const LevelCacheType& level_cache_;

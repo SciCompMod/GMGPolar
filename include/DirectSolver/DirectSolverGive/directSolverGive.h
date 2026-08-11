@@ -13,6 +13,7 @@ public:
 
     // Note: The rhs (right-hand side) vector gets overwritten during the solution process.
     void solveInPlace(Vector<double> solution) override;
+    void updateValues() override;
 
 private:
 #ifdef GMGPOLAR_USE_MUMPS
@@ -21,11 +22,8 @@ private:
 #else
     using SystemMatrix = SparseMatrixCSR<double>;
     using SystemSolver = SparseLUSolver<double>;
-    // Stored only for the in-house solver (CSR).
-    SystemMatrix system_matrix_;
 #endif
-
-    // Solver object (owns matrix if MUMPS, references if in-house solver).
+    SystemMatrix system_matrix_;
     SystemSolver system_solver_;
 
 public:
@@ -42,6 +40,13 @@ public:
     void applySymmetryShift(Vector<double> rhs) const;
     void applySymmetryShiftInnerBoundary(Vector<double> x) const;
     void applySymmetryShiftOuterBoundary(Vector<double> x) const;
+
+private:
+    // Shared kernel: runs the colored circular/radial passes to fill
+    // solver_matrix's entries from the current grid + LevelCache data.
+    // Used by buildSolverMatrix() (fresh storage) and updateValues()
+    // (existing storage, values only).
+    void fillSolverMatrix(SystemMatrix& solver_matrix);
 };
 
 #include "applySymmetryShift.inl"

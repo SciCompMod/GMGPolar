@@ -794,6 +794,30 @@ typename DirectSolverGive<LevelCacheType>::SystemMatrix DirectSolverGive<LevelCa
 {
     using direct_solver_give::getNonZeroCountSolverMatrix;
     using direct_solver_give::getStencilSize;
+
+    const PolarGrid& grid     = DirectSolver<LevelCacheType>::grid_;
+    const bool DirBC_Interior = DirectSolver<LevelCacheType>::DirBC_Interior_;
+    const int n               = grid.numberOfNodes();
+
+#ifdef GMGPOLAR_USE_MUMPS
+    const int nnz = getNonZeroCountSolverMatrix(grid, DirBC_Interior);
+    SystemMatrix solver_matrix(n, n, nnz);
+    solver_matrix.is_symmetric(true);
+#else
+    std::function<int(int)> nnz_per_row = [&](int global_index) {
+        return getStencilSize(global_index, grid, DirBC_Interior);
+    };
+    SystemMatrix solver_matrix(n, n, nnz_per_row);
+#endif
+
+    fillSolverMatrix(solver_matrix);
+
+    return solver_matrix;
+}
+
+template <class LevelCacheType>
+void DirectSolverGive<LevelCacheType>::fillSolverMatrix(SystemMatrix& solver_matrix)
+{
     using direct_solver_give::nodeBuildSolverMatrixGive;
     using direct_solver_give::validateSolverMatrixIndexing;
 
@@ -802,20 +826,6 @@ typename DirectSolverGive<LevelCacheType>::SystemMatrix DirectSolverGive<LevelCa
     const bool DirBC_Interior         = DirectSolver<LevelCacheType>::DirBC_Interior_;
 
     assert(validateSolverMatrixIndexing(grid, DirBC_Interior) && "Solver matrix indexing is inconsistent");
-
-    const int n = grid.numberOfNodes();
-
-#ifdef GMGPOLAR_USE_MUMPS
-    const int nnz = getNonZeroCountSolverMatrix(grid, DirBC_Interior);
-    SparseMatrixCOO<double> solver_matrix(n, n, nnz);
-    solver_matrix.is_symmetric(true);
-#else
-    std::function<int(int)> nnz_per_row = [&](int global_index) {
-        return getStencilSize(global_index, grid, DirBC_Interior);
-    };
-
-    SparseMatrixCSR<double> solver_matrix(n, n, nnz_per_row);
-#endif
 
     /* ---------------- */
     /* Circular section */
@@ -872,6 +882,4 @@ typename DirectSolverGive<LevelCacheType>::SystemMatrix DirectSolverGive<LevelCa
             });
         Kokkos::fence();
     }
-
-    return solver_matrix;
 }

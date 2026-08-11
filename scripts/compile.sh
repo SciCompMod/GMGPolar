@@ -65,4 +65,4 @@ if [ -n "$build_type" ]; then
         .. || { echo "CMake configuration failed"; exit 1; }
 fi
 
-cmake --build ${PWD}/../build -j 2
+cmake --build ${PWD}/../build -j 1

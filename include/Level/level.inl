@@ -3,10 +3,10 @@
 // ----------- //
 // Constructor //
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
-Level<DomainGeometry, DensityProfileCoefficients>::Level(
-    const int level_depth, std::unique_ptr<const PolarGrid> grid,
-    std::unique_ptr<const LevelCache<DomainGeometry, DensityProfileCoefficients>> level_cache,
-    const ExtrapolationType extrapolation, const bool FMG, const bool PCG_FMG)
+Level<DomainGeometry, DensityProfileCoefficients>::Level(const int level_depth, std::unique_ptr<const PolarGrid> grid,
+                                                         std::unique_ptr<LevelCacheType> level_cache,
+                                                         const ExtrapolationType extrapolation, const bool FMG,
+                                                         const bool PCG_FMG)
     : level_depth_(level_depth)
     , grid_(std::move(grid))
     , level_cache_(std::move(level_cache))
@@ -17,6 +17,38 @@ Level<DomainGeometry, DensityProfileCoefficients>::Level(
     , residual_("residual", grid_->numberOfNodes())
     , error_correction_("err_correction", (level_depth > 0) ? grid_->numberOfNodes() : 0)
 {
+}
+
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+void Level<DomainGeometry, DensityProfileCoefficients>::updateOperatorValues(
+    const DomainGeometry& domain_geometry, const DensityProfileCoefficients& density_profile_coefficients)
+{
+    // Overwrite cached geometry/coefficient values in place.
+    level_cache_->updateValues(*grid_, domain_geometry, density_profile_coefficients);
+
+    // Refresh any multigrid operators built on top of those cached values.
+    updateMultigridOperators();
+}
+
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+void Level<DomainGeometry, DensityProfileCoefficients>::updateMultigridOperators()
+{
+    // TODO: Once DirectSolver / Residual / Smoother / ExtrapolatedSmoother expose
+    // an updateValues()-style method, call it here conditionally, mirroring the
+    // initialize*() pattern already used elsewhere in this class, e.g.:
+    //
+    // if (op_residual_) {
+    //     op_residual_->updateValues();
+    // }
+    if (op_directSolver_) {
+        op_directSolver_->updateValues();
+    }
+    // if (op_smoother_) {
+    //     op_smoother_->updateValues();
+    // }
+    // if (op_extrapolated_smoother_) {
+    //     op_extrapolated_smoother_->updateValues();
+    // }
 }
 
 // ---------------- //

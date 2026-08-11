@@ -73,8 +73,14 @@ public:
     // ----------- //
     // Constructor //
     explicit Level(const int level_depth, std::unique_ptr<const PolarGrid> grid,
-                   std::unique_ptr<const LevelCacheType> level_cache, const ExtrapolationType extrapolation,
-                   const bool FMG, const bool PCG_FMG = false);
+                   std::unique_ptr<LevelCacheType> level_cache, const ExtrapolationType extrapolation, const bool FMG,
+                   const bool PCG_FMG = false);
+
+    // Pushes new geometry/coefficients into the LevelCache (overwriting cached
+    // values in place) and refreshes any multigrid operators that cache
+    // derived data. No reallocation.
+    void updateOperatorValues(const DomainGeometry& domain_geometry,
+                              const DensityProfileCoefficients& density_profile_coefficients);
 
     // ---------------- //
     // Getter Functions //
@@ -117,7 +123,10 @@ public:
 private:
     const int level_depth_;
     std::unique_ptr<const PolarGrid> grid_;
-    std::unique_ptr<const LevelCacheType> level_cache_;
+    std::unique_ptr<LevelCacheType> level_cache_;
+
+    // Refreshes cached operator data (matrix entries, factorizations, etc.) derived from the current LevelCache values
+    void updateMultigridOperators();
 
     std::unique_ptr<DirectSolver<LevelCacheType>> op_directSolver_;
     std::unique_ptr<Residual<LevelCacheType>> op_residual_;
@@ -138,6 +147,9 @@ public:
                         const DomainGeometry& domain_geometry, const bool cache_density_profile_coefficients,
                         const bool cache_domain_geometry, const int level_depth);
 
+    void updateValues(const PolarGrid& grid, const DomainGeometry& domain_geometry,
+                      const DensityProfileCoefficients& density_profile_coefficients);
+
     const DomainGeometry& domainGeometry() const;
     const DensityProfileCoefficients& densityProfileCoefficients() const;
 
@@ -157,8 +169,8 @@ public:
     {
         const int i_r_glob     = i_r << level_depth_;
         const int i_theta_glob = i_theta << level_depth_;
-        coeff_beta             = cache_density_profile_coefficients_ ? coeff_beta_[global_index]
-                                                                     : density_profile_coefficients_.beta(i_r_glob, i_theta_glob);
+        coeff_beta = cache_density_profile_coefficients_ ? coeff_beta_[global_index]
+                                                         : density_profile_coefficients_.beta(i_r_glob, i_theta_glob);
 
         if (cache_domain_geometry_) {
             arr   = arr_[global_index];
@@ -177,8 +189,8 @@ public:
 
 private:
     const int level_depth_;
-    const DomainGeometry domain_geometry_;
-    const DensityProfileCoefficients density_profile_coefficients_;
+    DomainGeometry domain_geometry_;
+    DensityProfileCoefficients density_profile_coefficients_;
 
     bool cache_density_profile_coefficients_; // cache alpha(r, theta), beta(r, theta)
     Vector<double> coeff_alpha_;

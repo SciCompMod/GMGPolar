@@ -41,14 +41,14 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
     levels_.reserve(number_of_levels_);
 
     auto finest_levelCache = std::make_unique<LevelCache<DomainGeometry, DensityProfileCoefficients>>(
-        *finest_grid, density_profile_coefficients_, domain_geometry_, cache_density_profile_coefficients_,
+        *finest_grid, *density_profile_coefficients_, *domain_geometry_, cache_density_profile_coefficients_,
         cache_domain_geometry_, 0);
     levels_.emplace_back(0, std::move(finest_grid), std::move(finest_levelCache), extrapolation_, FMG_, PCG_FMG_);
 
     for (int level_depth = 1; level_depth < number_of_levels_; level_depth++) {
         auto current_grid       = std::make_unique<PolarGrid>(coarseningGrid(levels_[level_depth - 1].grid()));
         auto current_levelCache = std::make_unique<LevelCache<DomainGeometry, DensityProfileCoefficients>>(
-            *current_grid, density_profile_coefficients_, domain_geometry_, cache_density_profile_coefficients_,
+            *current_grid, *density_profile_coefficients_, *domain_geometry_, cache_density_profile_coefficients_,
             cache_domain_geometry_, level_depth);
         levels_.emplace_back(level_depth, std::move(current_grid), std::move(current_levelCache), extrapolation_, FMG_,
                              PCG_FMG_);
@@ -253,7 +253,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::discretize_rhs_f(cons
     else {
         /* DomainGeometry is not cached */
         // Local copy is required to avoid copying the class
-        const DomainGeometry& domain_geometry = domain_geometry_;
+        const DomainGeometry& domain_geometry = *domain_geometry_;
 
         // ---------------------------------------------- //
         // Discretize rhs values (circular index section) //
@@ -383,6 +383,29 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::build_rhs_f(const Lev
         });
 
     Kokkos::fence();
+}
+
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::updateOperatorValues(
+    const DomainGeometry* domain_geometry, const DensityProfileCoefficients* density_profile_coefficients)
+{
+    if (domain_geometry) {
+        domain_geometry_ = domain_geometry;
+    }
+    if (density_profile_coefficients) {
+        density_profile_coefficients_ = density_profile_coefficients;
+    }
+
+    recomputeOperatorValues();
+}
+
+template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
+void GMGPolar<DomainGeometry, DensityProfileCoefficients>::recomputeOperatorValues()
+
+{
+    for (int level_depth = 0; level_depth < number_of_levels_; ++level_depth) {
+        levels_[level_depth].updateOperatorValues(*domain_geometry_, *density_profile_coefficients_);
+    }
 }
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>

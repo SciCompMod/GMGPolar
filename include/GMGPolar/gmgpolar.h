@@ -33,8 +33,8 @@ public:
     GMGPolar(const PolarGrid& grid, const DomainGeometry& domain_geometry,
              const DensityProfileCoefficients& density_profile_coefficients)
         : IGMGPolar(grid)
-        , domain_geometry_(domain_geometry)
-        , density_profile_coefficients_(density_profile_coefficients)
+        , domain_geometry_(&domain_geometry)
+        , density_profile_coefficients_(&density_profile_coefficients)
         , exact_solution_(nullptr)
         // Level management and internal solver data
         , number_of_levels_(0)
@@ -53,6 +53,9 @@ public:
     /* ---------------------------------------------------------------------- */
     // Finalize solver setup (allocate data, build operators, etc.).
     void setup();
+
+    void updateOperatorValues(const DomainGeometry* domain_geometry                          = nullptr,
+                              const DensityProfileCoefficients* density_profile_coefficients = nullptr);
 
     // Solve system with given boundary conditions and source term.
     // Multiple solves with different inputs are supported.
@@ -89,8 +92,8 @@ private:
     /* ------------------------------------ */
     /* Grid Configuration & Input Functions */
     /* ------------------------------------ */
-    const DomainGeometry& domain_geometry_;
-    const DensityProfileCoefficients& density_profile_coefficients_;
+    const DomainGeometry* domain_geometry_;
+    const DensityProfileCoefficients* density_profile_coefficients_;
     const ExactSolution* exact_solution_; // Optional exact solution for validation
 
     /* ---------------- */
@@ -150,6 +153,8 @@ public: // Public due to cuda restrictions
     void build_rhs_f(const LevelType& level, Vector<double> rhs_f, const BoundaryConditions& boundary_conditions,
                      const SourceTerm& source_term);
     void discretize_rhs_f(const LevelType& level, Vector<double> rhs_f);
+
+    void recomputeOperatorValues();
 
     /* --------------- */
     /* Solve Functions */

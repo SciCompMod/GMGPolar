@@ -13,6 +13,7 @@ public:
 
     // Note: The rhs (right-hand side) vector gets overwritten during the solution process.
     void solveInPlace(Vector<double> solution) override;
+    void updateValues() override;
 
 private:
 #ifdef GMGPOLAR_USE_MUMPS
@@ -42,6 +43,12 @@ public:
     void applySymmetryShift(Vector<double> rhs) const;
     void applySymmetryShiftInnerBoundary(Vector<double> rhs) const;
     void applySymmetryShiftOuterBoundary(Vector<double> rhs) const;
+
+private:
+    // Shared kernel: fills solver_matrix's entries from the current grid +
+    // LevelCache data. Used by buildSolverMatrix() (on freshly allocated
+    // storage) and updateValues() (on existing storage, values only).
+    void fillSolverMatrix(SystemMatrix& solver_matrix);
 };
 
 #include "applySymmetryShift.inl"
