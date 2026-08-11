@@ -22,11 +22,8 @@ private:
 #else
     using SystemMatrix = SparseMatrixCSR<double>;
     using SystemSolver = SparseLUSolver<double>;
-    // Stored only for the in-house solver (CSR).
-    SystemMatrix system_matrix_;
 #endif
-
-    // Solver object (owns matrix if MUMPS, references if in-house solver).
+    SystemMatrix system_matrix_;
     SystemSolver system_solver_;
 
 public:
