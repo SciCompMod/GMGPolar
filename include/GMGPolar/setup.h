@@ -26,10 +26,32 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::setup()
         writeToVTK("output_finest_grid", grid_);
 
     if (extrapolation_ != ExtrapolationType::NONE) {
-        const double precision = 1e-12;
-        if (!checkUniformRefinement(grid_, precision)) {
-            std::cerr << "[Extrapolation Warning] Finest PolarGrid is not from a single uniform "
-                         "refinement.\n";
+        // Three-tier tolerance strategy:
+        // - strict_tol: within this -> do nothing
+        // - warn_tol: within this but not strict -> warn (if verbose_>0)
+        // - otherwise: disable extrapolation -> warn (if verbose_>0)
+        const double strict_tol = 1e-12;
+        const double warn_tol   = 1e-05;
+
+        if (checkUniformRefinement(grid_, strict_tol, false)) {
+            // within strict tolerance: nothing to do
+        }
+        else if (checkUniformRefinement(grid_, warn_tol, false)) {
+            // within warning tolerance: print advisory message for users that enabled verbosity
+            if (verbose_ > 0) {
+                std::cerr << "[Extrapolation Warning] Finest PolarGrid deviates from uniform refinement (\"warning\" "
+                             "threshold: "
+                          << warn_tol << "). Extrapolation may be slightly inaccurate.\n";
+            }
+        }
+        else {
+            // worse than warning tolerance: disable extrapolation
+            if (verbose_ > 0) {
+                std::cerr
+                    << "[Extrapolation Warning] Finest PolarGrid is not from a single uniform refinement; disabling "
+                       "extrapolation.\n";
+            }
+            extrapolation_ = ExtrapolationType::NONE;
         }
     }
 
@@ -588,7 +610,7 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::printSettings(const P
 
 template <concepts::DomainGeometry DomainGeometry, concepts::DensityProfileCoefficients DensityProfileCoefficients>
 bool GMGPolar<DomainGeometry, DensityProfileCoefficients>::checkUniformRefinement(const PolarGrid& grid,
-                                                                                  double tolerance) const
+                                                                                  double tolerance, bool print) const
 {
     HostConstVector<double> h_radius = grid.host_radii();
     HostConstVector<double> h_theta  = grid.host_theta();
@@ -601,10 +623,12 @@ bool GMGPolar<DomainGeometry, DensityProfileCoefficients>::checkUniformRefinemen
 
         double diff = std::abs(expected_mid - actual_mid);
         if (diff > tolerance) {
-            std::cerr << "[Extrapolation Warning] Radial mismatch at i_r = " << i_r << "\n"
-                      << "  left = " << left << ", right = " << right << "\n"
-                      << "  expected = " << expected_mid << ", actual = " << actual_mid << "\n"
-                      << "  diff = " << diff << " (tol = " << tolerance << ")\n";
+            if (print) {
+                std::cerr << "[Extrapolation Warning] Radial mismatch at i_r = " << i_r << "\n"
+                          << "  left = " << left << ", right = " << right << "\n"
+                          << "  expected = " << expected_mid << ", actual = " << actual_mid << "\n"
+                          << "  diff = " << diff << " (tol = " << tolerance << ")\n";
+            }
             return false;
         }
     }
@@ -618,10 +642,12 @@ bool GMGPolar<DomainGeometry, DensityProfileCoefficients>::checkUniformRefinemen
 
         double diff = std::abs(expected_mid - actual_mid);
         if (diff > tolerance) {
-            std::cerr << "[Extrapolation Warning] Angular mismatch at i_theta = " << i_theta << "\n"
-                      << "  left = " << left << ", right = " << right << "\n"
-                      << "  expected = " << expected_mid << ", actual = " << actual_mid << "\n"
-                      << "  diff = " << diff << " (tol = " << tolerance << ")\n";
+            if (print) {
+                std::cerr << "[Extrapolation Warning] Angular mismatch at i_theta = " << i_theta << "\n"
+                          << "  left = " << left << ", right = " << right << "\n"
+                          << "  expected = " << expected_mid << ", actual = " << actual_mid << "\n"
+                          << "  diff = " << diff << " (tol = " << tolerance << ")\n";
+            }
             return false;
         }
     }
