@@ -113,10 +113,24 @@ KOKKOS_INLINE_FUNCTION int PolarGrid::wrapThetaIndex(const int unwrapped_theta_i
     //   This effectively computes unwrapped_theta_index % ntheta(), because it discards all higher bits.
     //
     // If ntheta is not a power of two, we use the standard modulo approach to handle wrapping.
-    int theta_index = is_ntheta_PowerOfTwo_ ? unwrapped_theta_index & (ntheta() - 1)
-                                            : (unwrapped_theta_index % ntheta() + ntheta()) % ntheta();
-    assert(0 <= theta_index && theta_index < ntheta());
-    return theta_index;
+    if (is_ntheta_PowerOfTwo_) {
+        const int theta_index = unwrapped_theta_index & (ntheta() - 1);
+        assert(0 <= theta_index && theta_index < ntheta());
+        return theta_index;
+    }
+    else {
+        // For non-power-of-two ntheta, we use a simple iterative approach to wrap the index.
+        // This is efficient for small deviations from the valid range, which is common in practice.
+        int theta_index = unwrapped_theta_index;
+        while (theta_index >= ntheta()) {
+            theta_index -= ntheta();
+        }
+        while (theta_index < 0) {
+            theta_index += ntheta();
+        }
+        assert(0 <= theta_index && theta_index < ntheta());
+        return theta_index;
+    }
 }
 
 KOKKOS_INLINE_FUNCTION int PolarGrid::index(const int r_index, const int theta_index) const
@@ -138,7 +152,7 @@ KOKKOS_INLINE_FUNCTION void PolarGrid::multiIndex(const int node_index, int& r_i
     assert(0 <= node_index && node_index < numberOfNodes());
     if (node_index < numberCircularSmootherNodes()) {
         r_index     = node_index / ntheta();
-        theta_index = wrapThetaIndex(node_index);
+        theta_index = node_index % ntheta();
     }
     else {
         theta_index = (node_index - numberCircularSmootherNodes()) / lengthRadialSmoother();
