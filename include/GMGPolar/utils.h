@@ -220,8 +220,10 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(const std:
             Fx(index)    = domain_geometry.Fx(r, theta);
             Fy(index)    = domain_geometry.Fy(r, theta);
         });
+    HostVector<double> Fx_h = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), Fx);
+    HostVector<double> Fy_h = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), Fy);
     for (int index = 0; index < grid.numberOfNodes(); index++) {
-        file << Fx(index) << " " << Fy(index) << " " << 0 << "\n";
+        file << Fx_h(index) << " " << Fy_h(index) << " " << 0 << "\n";
     }
     file << "</DataArray>\n"
          << "</Points>\n";
@@ -280,13 +282,23 @@ void GMGPolar<DomainGeometry, DensityProfileCoefficients>::writeToVTK(const std:
     // Write points
     file << "<Points>\n"
          << "<DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\">\n";
-    int i_r, i_theta;
-    double r, theta;
+    Vector<double> Fx("Fx", grid.numberOfNodes());
+    Vector<double> Fy("Fy", grid.numberOfNodes());
+    const DomainGeometry& domain_geometry = domain_geometry_;
+    Kokkos::parallel_for(
+        "collect Fx,Fy", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, grid.numberOfNodes()),
+        KOKKOS_LAMBDA(int index) {
+            int i_r, i_theta;
+            grid.multiIndex(index, i_r, i_theta);
+            double r     = grid.radius(i_r);
+            double theta = grid.theta(i_theta);
+            Fx(index)    = domain_geometry.Fx(r, theta);
+            Fy(index)    = domain_geometry.Fy(r, theta);
+        });
+    HostVector<double> Fx_h = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), Fx);
+    HostVector<double> Fy_h = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), Fy);
     for (int index = 0; index < grid.numberOfNodes(); index++) {
-        grid.multiIndex(index, i_r, i_theta);
-        r     = grid.radius(i_r);
-        theta = grid.theta(i_theta);
-        file << domain_geometry_.Fx(r, theta) << " " << domain_geometry_.Fy(r, theta) << " " << 0 << "\n";
+        file << Fx_h(index) << " " << Fy_h(index) << " " << 0 << "\n";
     }
 
     file << "</DataArray>\n"
