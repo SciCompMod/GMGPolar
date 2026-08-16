@@ -43,8 +43,8 @@ void DirectSolverTake<LevelCacheType>::applySymmetryShiftInnerBoundary(Vector<do
             const int top    = grid.index(i_r, i_theta_P1);
 
             x[center] -= (-coeff1 * (arr[center] + arr[left]) * x[left] /* Left */
-                          - 0.25 * (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
-                          + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
+                          - (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
+                          + (art[left] + art[top]) * x[top_left] /* Top Left */
             );
         });
 }
@@ -86,8 +86,8 @@ void DirectSolverTake<LevelCacheType>::applySymmetryShiftOuterBoundary(Vector<do
             const int top_right    = grid.index(i_r + 1, i_theta_P1);
 
             x[center] -= (-coeff2 * (arr[center] + arr[right]) * x[right] /* Right */
-                          + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
-                          - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
+                          + (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
+                          - (art[right] + art[top]) * x[top_right] /* Top Right */
             );
         });
 }

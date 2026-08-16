@@ -78,10 +78,10 @@ nodeBuildSolverMatrixTake(const int i_r, const int i_theta, const PolarGrid& gri
              - top_value /* Center: (Top) */
             );
 
-        const double bottom_left_value  = -0.25 * (art(left_index) + art(bottom_index)); /* Bottom Left */
-        const double bottom_right_value = +0.25 * (art(right_index) + art(bottom_index)); /* Bottom Right */
-        const double top_left_value     = +0.25 * (art(left_index) + art(top_index)); /* Top Left */
-        const double top_right_value    = -0.25 * (art(right_index) + art(top_index)); /* Top Right */
+        const double bottom_left_value  = -(art(left_index) + art(bottom_index)); /* Bottom Left */
+        const double bottom_right_value = +(art(right_index) + art(bottom_index)); /* Bottom Right */
+        const double top_left_value     = +(art(left_index) + art(top_index)); /* Top Left */
+        const double top_right_value    = -(art(right_index) + art(top_index)); /* Top Right */
 
         /* Fill matrix row of (i,j) */
         row = center_index;
@@ -204,8 +204,8 @@ nodeBuildSolverMatrixTake(const int i_r, const int i_theta, const PolarGrid& gri
                  - top_value /* Center: (Top) */
                 );
 
-            const double bottom_right_value = +0.25 * (art(right_index) + art(bottom_index)); /* Bottom Right */
-            const double top_right_value    = -0.25 * (art(right_index) + art(top_index)); /* Top Right */
+            const double bottom_right_value = +(art(right_index) + art(bottom_index)); /* Bottom Right */
+            const double top_right_value    = -(art(right_index) + art(top_index)); /* Top Right */
 
             /* Fill matrix row of (i,j) */
             row = center_index;
@@ -296,10 +296,10 @@ nodeBuildSolverMatrixTake(const int i_r, const int i_theta, const PolarGrid& gri
              - top_value /* Center: (Top) */
             );
 
-        const double bottom_left_value  = -0.25 * (art(left_index) + art(bottom_index)); /* Bottom Left */
-        const double bottom_right_value = +0.25 * (art(right_index) + art(bottom_index)); /* Bottom Right */
-        const double top_left_value     = +0.25 * (art(left_index) + art(top_index)); /* Top Left */
-        const double top_right_value    = -0.25 * (art(right_index) + art(top_index)); /* Top Right */
+        const double bottom_left_value  = -(art(left_index) + art(bottom_index)); /* Bottom Left */
+        const double bottom_right_value = +(art(right_index) + art(bottom_index)); /* Bottom Right */
+        const double top_left_value     = +(art(left_index) + art(top_index)); /* Top Left */
+        const double top_right_value    = -(art(right_index) + art(top_index)); /* Top Right */
 
         /* Fill matrix row of (i,j) */
         row = center_index;
@@ -402,8 +402,8 @@ nodeBuildSolverMatrixTake(const int i_r, const int i_theta, const PolarGrid& gri
              - top_value /* Center: (Top) */
             );
 
-        const double bottom_left_value = -0.25 * (art(left_index) + art(bottom_index)); /* Bottom Left */
-        const double top_left_value    = +0.25 * (art(left_index) + art(top_index)); /* Top Left */
+        const double bottom_left_value = -(art(left_index) + art(bottom_index)); /* Bottom Left */
+        const double top_left_value    = +(art(left_index) + art(top_index)); /* Top Left */
 
         /* Fill matrix row of (i,j) */
         row = center_index;

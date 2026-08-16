@@ -45,8 +45,8 @@ void DirectSolverGive<LevelCacheType>::applySymmetryShiftInnerBoundary(Vector<do
 
                 /* Fill x(i+1,j) */
                 x(grid.index(i_r + 1, i_theta)) -= -coeff2 * arr * x(grid.index(i_r, i_theta)) /* Left */
-                                                   + 0.25 * art * x(grid.index(i_r, i_theta_P1)) /* Top Left */
-                                                   - 0.25 * art * x(grid.index(i_r, i_theta_M1)); /* Bottom Left */
+                                                   + art * x(grid.index(i_r, i_theta_P1)) /* Top Left */
+                                                   - art * x(grid.index(i_r, i_theta_M1)); /* Bottom Left */
 
                 /* --------------------------- */
                 /* Node next to inner boundary */
@@ -66,9 +66,9 @@ void DirectSolverGive<LevelCacheType>::applySymmetryShiftInnerBoundary(Vector<do
                 /* Fill x(i,j) */
                 x(grid.index(i_r, i_theta)) -= -coeff1 * arr * x(grid.index(i_r - 1, i_theta)); /* Left */
                 /* Fill x(i,j-1) */
-                x(grid.index(i_r, i_theta_M1)) -= +0.25 * art * x(grid.index(i_r - 1, i_theta)); /* Top Left */
+                x(grid.index(i_r, i_theta_M1)) -= +art * x(grid.index(i_r - 1, i_theta)); /* Top Left */
                 /* Fill x(i,j+1) */
-                x(grid.index(i_r, i_theta_P1)) -= -0.25 * art * x(grid.index(i_r - 1, i_theta)); /* Bottom Left */
+                x(grid.index(i_r, i_theta_P1)) -= -art * x(grid.index(i_r - 1, i_theta)); /* Bottom Left */
             }
         });
 }
@@ -112,9 +112,9 @@ void DirectSolverGive<LevelCacheType>::applySymmetryShiftOuterBoundary(Vector<do
                 /* Fill result(i,j) */
                 x(grid.index(i_r, i_theta)) -= -coeff2 * arr * x(grid.index(i_r + 1, i_theta)); /* Right */
                 /* Fill result(i,j-1) */
-                x(grid.index(i_r, i_theta_M1)) -= -0.25 * art * x(grid.index(i_r + 1, i_theta)); /* Top Right */
+                x(grid.index(i_r, i_theta_M1)) -= -art * x(grid.index(i_r + 1, i_theta)); /* Top Right */
                 /* Fill result(i,j+1) */
-                x(grid.index(i_r, i_theta_P1)) -= +0.25 * art * x(grid.index(i_r + 1, i_theta)); /* Bottom Right */
+                x(grid.index(i_r, i_theta_P1)) -= +art * x(grid.index(i_r + 1, i_theta)); /* Bottom Right */
 
                 /* -------------------------- */
                 /* Node on the outer boundary */
@@ -133,8 +133,8 @@ void DirectSolverGive<LevelCacheType>::applySymmetryShiftOuterBoundary(Vector<do
 
                 /* Fill result(i-1,j) */
                 x(grid.index(i_r - 1, i_theta)) -= -coeff1 * arr * x(grid.index(i_r, i_theta)) /* Right */
-                                                   - 0.25 * art * x(grid.index(i_r, i_theta_P1)) /* Top Right */
-                                                   + 0.25 * art * x(grid.index(i_r, i_theta_M1)); /* Bottom Right */
+                                                   - art * x(grid.index(i_r, i_theta_P1)) /* Top Right */
+                                                   + art * x(grid.index(i_r, i_theta_M1)); /* Bottom Right */
             }
         });
 }

@@ -58,10 +58,10 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleTake(const int i_r, co
             result[center] = rhs[center] - (-coeff1 * (arr[center] + arr[left]) * x[left] /* Left */
                                             - coeff2 * (arr[center] + arr[right]) * x[right] /* Right */
 
-                                            - 0.25 * (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
-                                            + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
-                                            + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
-                                            - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
+                                            - (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
+                                            + (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
+                                            + (art[left] + art[top]) * x[top_left] /* Top Left */
+                                            - (art[right] + art[top]) * x[top_right] /* Top Right */
                                            );
         }
         else {
@@ -78,10 +78,10 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleTake(const int i_r, co
                                                 - coeff3 * (att[center] + att[bottom]) * x[bottom] /* Bottom */
                                                 - coeff4 * (att[center] + att[top]) * x[top] /* Top */
 
-                                                - 0.25 * (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
-                                                + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
-                                                + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
-                                                - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
+                                                - (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
+                                                + (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
+                                                + (art[left] + art[top]) * x[top_left] /* Top Left */
+                                                - (art[right] + art[top]) * x[top_right] /* Top Right */
                                                );
             }
             else {
@@ -164,11 +164,11 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleTake(const int i_r, co
                      - coeff3 * (att[center] + att[bottom]) * x[bottom] /* Bottom */
                      - coeff4 * (att[center] + att[top]) * x[top] /* Top */
 
-                     /* - 0.25 * (art[left] + art[bottom]) * x[bottom_left] // Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
-                     + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
+                     /* - (art[left] + art[bottom]) * x[bottom_left] // Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
+                     + (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
 
-                     /* + 0.25 * (art[left] + art[top]) * x[top_left] // Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
-                     - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
+                     /* + (art[left] + art[top]) * x[top_left] // Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
+                     - (art[right] + art[top]) * x[top_right] /* Top Right */
                     );
             }
             else {
@@ -240,10 +240,10 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialTake(const int i_r, co
             result[center] = rhs[center] - (-coeff3 * (att[center] + att[bottom]) * x[bottom] /* Bottom */
                                             - coeff4 * (att[center] + att[top]) * x[top] /* Top */
 
-                                            - 0.25 * (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
-                                            + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
-                                            + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
-                                            - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
+                                            - (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
+                                            + (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
+                                            + (art[left] + art[top]) * x[top_left] /* Top Left */
+                                            - (art[right] + art[top]) * x[top_right] /* Top Right */
                                            );
         }
         else {
@@ -261,10 +261,10 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialTake(const int i_r, co
                                                 - coeff3 * (att[center] + att[bottom]) * x[bottom] /* Bottom */
                                                 - coeff4 * (att[center] + att[top]) * x[top] /* Top */
 
-                                                - 0.25 * (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
-                                                + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
-                                                + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
-                                                - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
+                                                - (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
+                                                + (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
+                                                + (art[left] + art[top]) * x[top_left] /* Top Left */
+                                                - (art[right] + art[top]) * x[top_right] /* Top Right */
                                                );
             }
             else {
@@ -322,10 +322,10 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialTake(const int i_r, co
                                             - coeff3 * (att[center] + att[bottom]) * x[bottom] /* Bottom */
                                             - coeff4 * (att[center] + att[top]) * x[top] /* Top */
 
-                                            - 0.25 * (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
-                                            + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
-                                            + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
-                                            - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
+                                            - (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
+                                            + (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
+                                            + (art[left] + art[top]) * x[top_left] /* Top Left */
+                                            - (art[right] + art[top]) * x[top_right] /* Top Right */
                                            );
         }
         else {
@@ -341,10 +341,10 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialTake(const int i_r, co
                                                 - coeff3 * (att[center] + att[bottom]) * x[bottom] /* Bottom */
                                                 - coeff4 * (att[center] + att[top]) * x[top] /* Top */
 
-                                                - 0.25 * (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
-                                                + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
-                                                + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
-                                                - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
+                                                - (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
+                                                + (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
+                                                + (art[left] + art[top]) * x[top_left] /* Top Left */
+                                                - (art[right] + art[top]) * x[top_right] /* Top Right */
                                                );
             }
             else {
@@ -402,10 +402,10 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialTake(const int i_r, co
                                - coeff3 * (att[center] + att[bottom]) * x[bottom] /* Bottom */
                                - coeff4 * (att[center] + att[top]) * x[top] /* Top */
 
-                               - 0.25 * (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
-                               + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
-                               + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
-                               - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
+                               - (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
+                               + (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
+                               + (art[left] + art[top]) * x[top_left] /* Top Left */
+                               - (art[right] + art[top]) * x[top_right] /* Top Right */
                               );
         }
         else {
@@ -421,10 +421,10 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialTake(const int i_r, co
                                             - coeff3 * (att[center] + att[bottom]) * x[bottom] /* Bottom */
                                             - coeff4 * (att[center] + att[top]) * x[top] /* Top */
 
-                                            - 0.25 * (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
-                                            + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
-                                            + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
-                                            - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
+                                            - (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
+                                            + (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
+                                            + (art[left] + art[top]) * x[top_left] /* Top Left */
+                                            - (art[right] + art[top]) * x[top_right] /* Top Right */
                                            );
         }
     }
