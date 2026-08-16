@@ -69,11 +69,13 @@ static KOKKOS_INLINE_FUNCTION void applySystemMatrixTakeBoundary(const int i_r, 
     const int i_theta_P1     = grid.wrapThetaIndex(i_theta + 1);
     const int i_theta_Across = grid.wrapThetaIndex(i_theta + grid.ntheta() / 2);
 
-    const int left   = grid.index(i_r, i_theta_Across);
-    const int bottom = grid.index(i_r, i_theta_M1);
-    const int center = grid.index(i_r, i_theta);
-    const int top    = grid.index(i_r, i_theta_P1);
-    const int right  = grid.index(i_r + 1, i_theta);
+    const int left         = grid.index(i_r, i_theta_Across);
+    const int bottom       = grid.index(i_r, i_theta_M1);
+    const int center       = grid.index(i_r, i_theta);
+    const int top          = grid.index(i_r, i_theta_P1);
+    const int bottom_right = grid.index(i_r + 1, i_theta_M1);
+    const int right        = grid.index(i_r + 1, i_theta);
+    const int top_right    = grid.index(i_r + 1, i_theta_P1);
 
     // Across origin: h1 gets replaced with 2 * R0.
     const double h1 = 2.0 * grid.radius(0);
