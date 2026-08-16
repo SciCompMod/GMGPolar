@@ -36,17 +36,17 @@ static KOKKOS_INLINE_FUNCTION void applySystemMatrixTakeInterior(const int i_r, 
     const double coeff4 = 0.5 * (h1 + h2) / k2;
     const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
-    result[center] = (+coeff5 * coeff_beta[center] * Kokkos::fabs(detDF[center]) * x[center]; /* beta_{i,j} */
+    result[center] = (+coeff5 * coeff_beta[center] * Kokkos::fabs(detDF[center]) * x[center] /* beta_{i,j} */
 
-                      +coeff1 * (arr[center] + arr[left]) * (x[center] - x[left]); /* Center: (Left) - Left */
-                      +coeff2 * (arr[center] + arr[right]) * (x[center] - x[right]); /* Center: (Right) - Right */
-                      +coeff3 * (att[center] + att[bottom]) * (x[center] - x[bottom]); /* Center: (Bottom) - Bottom */
-                      +coeff4 * (att[center] + att[top]) * (x[center] - x[top]); /* Center: (Top) - Top */
+                      + coeff1 * (arr[center] + arr[left]) * (x[center] - x[left]) /* Center: (Left) - Left */
+                      + coeff2 * (arr[center] + arr[right]) * (x[center] - x[right]) /* Center: (Right) - Right */
+                      + coeff3 * (att[center] + att[bottom]) * (x[center] - x[bottom]) /* Center: (Bottom) - Bottom */
+                      + coeff4 * (att[center] + att[top]) * (x[center] - x[top]) /* Center: (Top) - Top */
 
-                      -(art[left] + art[bottom]) * x[bottom_left]; /* Bottom Left */
-                      +(art[left] + art[top]) * x[top_left]; /* Top Left */
-                      +(art[right] + art[bottom]) * x[bottom_right]; /* Bottom Right */
-                      -(art[right] + art[top]) * x[top_right]; /* Top Right */
+                      - (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
+                      + (art[left] + art[top]) * x[top_left] /* Top Left */
+                      + (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
+                      - (art[right] + art[top]) * x[top_right] /* Top Right */
     );
 }
 
@@ -87,15 +87,15 @@ static KOKKOS_INLINE_FUNCTION void applySystemMatrixTakeBoundary(const int i_r, 
     const double coeff4 = 0.5 * (h1 + h2) / k2;
     const double coeff5 = 0.25 * (h1 + h2) * (k1 + k2);
 
-    result[center] = (+coeff5 * coeff_beta[center] * Kokkos::fabs(detDF[center]) * x[center]; /* beta_{i,j} */
+    result[center] = (+coeff5 * coeff_beta[center] * Kokkos::fabs(detDF[center]) * x[center] /* beta_{i,j} */
 
-                      +coeff1 * (arr[center] + arr[left]) * (x[center] - x[left]); /* Center: (Left) - Left */
-                      +coeff2 * (arr[center] + arr[right]) * (x[center] - x[right]); /* Center: (Right) - Right */
-                      +coeff3 * (att[center] + att[bottom]) * (x[center] - x[bottom]); /* Center: (Bottom) - Bottom */
-                      +coeff4 * (att[center] + att[top]) * (x[center] - x[top]); /* Center: (Top) - Top */
+                      + coeff1 * (arr[center] + arr[left]) * (x[center] - x[left]) /* Center: (Left) - Left */
+                      + coeff2 * (arr[center] + arr[right]) * (x[center] - x[right]) /* Center: (Right) - Right */
+                      + coeff3 * (att[center] + att[bottom]) * (x[center] - x[bottom]) /* Center: (Bottom) - Bottom */
+                      + coeff4 * (att[center] + att[top]) * (x[center] - x[top]) /* Center: (Top) - Top */
 
-                      +(art[right] + art[bottom]) * x[bottom_right]; /* Bottom Right */
-                      -(art[right] + art[top]) * x[top_right]; /* Top Right */
+                      + (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
+                      - (art[right] + art[top]) * x[top_right] /* Top Right */
     );
 }
 
