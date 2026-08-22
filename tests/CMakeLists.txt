@@ -29,3 +29,7 @@ target_compile_features(gmgpolar_tests PRIVATE cxx_std_20)
 target_link_libraries(gmgpolar_tests GMGPolarLib GMGPolarInterface GTest::gtest)
 
 gtest_discover_tests(gmgpolar_tests DISCOVERY_MODE PRE_TEST)
+
+add_executable(convergence_order ConvergenceOrder/convergence_order.cpp)
+target_link_libraries(convergence_order PRIVATE GMGPolarLib GMGPolarInterface)
+add_test(NAME convergence_order COMMAND convergence_order)
