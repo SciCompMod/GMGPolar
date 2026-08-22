@@ -4,11 +4,11 @@ namespace smoother_take
 {
 
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoCircleTakeInterior(const int i_r, const int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                    ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
-                                    ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art)
+nodeApplyAscOrthoCircleTakeInterior(const int i_r, const int i_theta, const PolarGrid& grid, ConstVector<double>& x,
+                                    ConstVector<double>& rhs, Vector<double>& result, ConstVector<double>& arr,
+                                    ConstVector<double>& att, ConstVector<double>& art)
 {
-    KOKKOS_ASSERT(i_r >= 1 && i_r < grid.numberSmootherCircles());
+    KOKKOS_ASSERT(0 < i_r && i_r < grid.numberSmootherCircles());
 
     const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
     const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -77,11 +77,11 @@ nodeApplyAscOrthoCircleTakeBoundary(const int i_r, const int i_theta, const Pola
 }
 
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoRadialTakeInterior(const int i_r, const int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                    ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
-                                    ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art)
+nodeApplyAscOrthoRadialTakeInterior(const int i_r, const int i_theta, const PolarGrid& grid, ConstVector<double>& x,
+                                    ConstVector<double>& rhs, Vector<double>& result, ConstVector<double>& arr,
+                                    ConstVector<double>& att, ConstVector<double>& art)
 {
-    KOKKOS_ASSERT(i_r > grid.numberSmootherCircles() && i_r < grid.nr() - 2);
+    KOKKOS_ASSERT(grid.numberSmootherCircles() < i_r && i_r < grid.nr() - 2);
 
     const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
     const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
@@ -115,9 +115,9 @@ nodeApplyAscOrthoRadialTakeInterior(const int i_r, const int i_theta, const Pola
 }
 
 static KOKKOS_INLINE_FUNCTION void
-nodeApplyAscOrthoRadialTakeBoundary(const int i_r, const int i_theta, const PolarGrid& grid, bool DirBC_Interior,
-                                    ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
-                                    ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art)
+nodeApplyAscOrthoRadialTakeBoundary(const int i_r, const int i_theta, const PolarGrid& grid, ConstVector<double>& x,
+                                    ConstVector<double>& rhs, Vector<double>& result, ConstVector<double>& arr,
+                                    ConstVector<double>& att, ConstVector<double>& art)
 {
     KOKKOS_ASSERT(i_r == grid.numberSmootherCircles() || i_r == grid.nr() - 2 || i_r == grid.nr() - 1);
 
@@ -217,7 +217,7 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<d
             // Kokkos lambda function to execute for each point in the index space
             KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
                 int i_r = start_black_circles + circle_task * 2;
-                nodeApplyAscOrthoCircleTakeInterior(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
+                nodeApplyAscOrthoCircleTakeInterior(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
             });
     }
     else {
@@ -230,7 +230,7 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(ConstVector<d
             // Kokkos lambda function to execute for each point in the index space
             KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
                 int i_r = start_black_circles + circle_task * 2;
-                nodeApplyAscOrthoCircleTakeInterior(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
+                nodeApplyAscOrthoCircleTakeInterior(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
             });
     }
 
@@ -280,7 +280,7 @@ void SmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<d
             // Kokkos lambda function to execute for each point in the index space
             KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
                 const int i_r = start_white_circles + circle_task * 2;
-                nodeApplyAscOrthoCircleTakeInterior(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
+                nodeApplyAscOrthoCircleTakeInterior(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
             });
     }
     else {
@@ -293,7 +293,7 @@ void SmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(ConstVector<d
             // Kokkos lambda function to execute for each point in the index space
             KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
                 const int i_r = start_white_circles + circle_task * 2;
-                nodeApplyAscOrthoCircleTakeInterior(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
+                nodeApplyAscOrthoCircleTakeInterior(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
             });
     }
 
@@ -330,7 +330,7 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<d
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int radial_task, const int i_r) {
             const int i_theta = start_black_radials + radial_task * 2;
-            nodeApplyAscOrthoRadialTakeBoundary(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
+            nodeApplyAscOrthoRadialTakeBoundary(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
         });
 
     Kokkos::parallel_for(
@@ -342,7 +342,7 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<d
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int radial_task, const int i_r) {
             const int i_theta = start_black_radials + radial_task * 2;
-            nodeApplyAscOrthoRadialTakeInterior(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
+            nodeApplyAscOrthoRadialTakeInterior(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
         });
 
     Kokkos::parallel_for(
@@ -354,7 +354,7 @@ void SmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(ConstVector<d
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int radial_task, const int i_r) {
             const int i_theta = start_black_radials + radial_task * 2;
-            nodeApplyAscOrthoRadialTakeBoundary(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
+            nodeApplyAscOrthoRadialTakeBoundary(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
         });
 
     Kokkos::fence();
@@ -390,7 +390,7 @@ void SmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<d
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int radial_task, const int i_r) {
             const int i_theta = start_white_radials + radial_task * 2;
-            nodeApplyAscOrthoRadialTakeBoundary(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
+            nodeApplyAscOrthoRadialTakeBoundary(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
         });
 
     Kokkos::parallel_for(
@@ -402,7 +402,7 @@ void SmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<d
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int radial_task, const int i_r) {
             const int i_theta = start_white_radials + radial_task * 2;
-            nodeApplyAscOrthoRadialTakeInterior(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
+            nodeApplyAscOrthoRadialTakeInterior(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
         });
 
     Kokkos::parallel_for(
@@ -414,7 +414,7 @@ void SmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(ConstVector<d
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int radial_task, const int i_r) {
             const int i_theta = start_white_radials + radial_task * 2;
-            nodeApplyAscOrthoRadialTakeBoundary(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
+            nodeApplyAscOrthoRadialTakeBoundary(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
         });
 
     Kokkos::fence();

@@ -3,12 +3,10 @@
 namespace residual_take
 {
 
-static KOKKOS_INLINE_FUNCTION void applySystemMatrixTakeInterior(const int i_r, const int i_theta,
-                                                                 const PolarGrid& grid, bool DirBC_Interior,
-                                                                 Vector<double>& result, ConstVector<double>& x,
-                                                                 ConstVector<double>& arr, ConstVector<double>& att,
-                                                                 ConstVector<double>& art, ConstVector<double>& detDF,
-                                                                 ConstVector<double>& coeff_beta)
+static KOKKOS_INLINE_FUNCTION void
+applySystemMatrixTakeInterior(const int i_r, const int i_theta, const PolarGrid& grid, Vector<double>& result,
+                              ConstVector<double>& x, ConstVector<double>& arr, ConstVector<double>& att,
+                              ConstVector<double>& art, ConstVector<double>& detDF, ConstVector<double>& coeff_beta)
 {
     KOKKOS_ASSERT(0 < i_r && i_r < grid.nr() - 1);
 
@@ -138,6 +136,7 @@ void ResidualTake<LevelCacheType>::applySystemOperator(Vector<double> result, Co
             applySystemMatrixTakeBoundary(i_r, i_theta, grid, DirBC_Interior, result, x, arr, att, art, detDF,
                                           coeff_beta);
         });
+
     Kokkos::parallel_for(
         "Residual Take: Apply System Operator Interior (Circular)",
         Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
@@ -146,8 +145,7 @@ void ResidualTake<LevelCacheType>::applySystemOperator(Vector<double> result, Co
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_r, const int i_theta) {
-            applySystemMatrixTakeInterior(i_r, i_theta, grid, DirBC_Interior, result, x, arr, att, art, detDF,
-                                          coeff_beta);
+            applySystemMatrixTakeInterior(i_r, i_theta, grid, result, x, arr, att, art, detDF, coeff_beta);
         });
 
     /* For loop matches radial access pattern */
@@ -159,9 +157,9 @@ void ResidualTake<LevelCacheType>::applySystemOperator(Vector<double> result, Co
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int i_theta, const int i_r) {
-            applySystemMatrixTakeInterior(i_r, i_theta, grid, DirBC_Interior, result, x, arr, att, art, detDF,
-                                          coeff_beta);
+            applySystemMatrixTakeInterior(i_r, i_theta, grid, result, x, arr, att, art, detDF, coeff_beta);
         });
+
     Kokkos::parallel_for(
         "Residual Take: Apply System Operator Boundary (Radial)",
         Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
