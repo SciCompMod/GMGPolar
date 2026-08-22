@@ -8,7 +8,7 @@ nodeApplyAscOrthoCircleTakeInterior(const int i_r, const int i_theta, const Pola
                                     ConstVector<double>& rhs, Vector<double>& result, ConstVector<double>& arr,
                                     ConstVector<double>& att, ConstVector<double>& art)
 {
-    KOKKOS_ASSERT(0 < i_r && i_r <= grid.numberSmootherCircles());
+    KOKKOS_ASSERT(0 < i_r && i_r < grid.numberSmootherCircles());
 
     if (!(i_r & 1) && !(i_theta & 1)) {
         const int center = grid.index(i_r, i_theta);
@@ -350,29 +350,44 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(C
     const int start_black_circles = (grid.numberSmootherCircles() % 2 == 0) ? 1 : 0;
     const int num_black_circles   = (grid.numberSmootherCircles() - start_black_circles + 1) / 2;
 
-    Kokkos::parallel_for(
-        "ExtrapolatedSmootherTake: ApplyAscOrtho (Black Circular)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
-            {0, 0}, // Starting point of the index space
-            {1, grid.ntheta()} // Ending point of the index space
-            ),
-        // Kokkos lambda function to execute for each point in the index space
-        KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
-            int i_r = start_black_circles + circle_task * 2;
-            nodeApplyAscOrthoCircleTakeBoundary(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
-        });
+    if (start_black_circles == 0) {
+        Kokkos::parallel_for(
+            "ExtrapolatedSmootherTake: ApplyAscOrtho (Black Circular)",
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+                {0, 0}, // Starting point of the index space
+                {1, grid.ntheta()} // Ending point of the index space
+                ),
+            // Kokkos lambda function to execute for each point in the index space
+            KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
+                int i_r = start_black_circles + circle_task * 2;
+                nodeApplyAscOrthoCircleTakeBoundary(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
+            });
 
-    Kokkos::parallel_for(
-        "ExtrapolatedSmootherTake: ApplyAscOrtho (Black Circular)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
-            {1, 0}, // Starting point of the index space
-            {num_black_circles, grid.ntheta()} // Ending point of the index space
-            ),
-        // Kokkos lambda function to execute for each point in the index space
-        KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
-            int i_r = start_black_circles + circle_task * 2;
-            nodeApplyAscOrthoCircleTakeInterior(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
-        });
+        Kokkos::parallel_for(
+            "ExtrapolatedSmootherTake: ApplyAscOrtho (Black Circular)",
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+                {1, 0}, // Starting point of the index space
+                {num_black_circles, grid.ntheta()} // Ending point of the index space
+                ),
+            // Kokkos lambda function to execute for each point in the index space
+            KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
+                int i_r = start_black_circles + circle_task * 2;
+                nodeApplyAscOrthoCircleTakeInterior(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
+            });
+    }
+    else {
+        Kokkos::parallel_for(
+            "ExtrapolatedSmootherTake: ApplyAscOrtho (Black Circular)",
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+                {0, 0}, // Starting point of the index space
+                {num_black_circles, grid.ntheta()} // Ending point of the index space
+                ),
+            // Kokkos lambda function to execute for each point in the index space
+            KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
+                int i_r = start_black_circles + circle_task * 2;
+                nodeApplyAscOrthoCircleTakeInterior(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
+            });
+    }
 
     Kokkos::fence();
 }
@@ -399,29 +414,44 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(C
     const int start_white_circles = (grid.numberSmootherCircles() % 2 == 0) ? 0 : 1;
     const int num_white_circles   = (grid.numberSmootherCircles() - start_white_circles + 1) / 2;
 
-    Kokkos::parallel_for(
-        "ExtrapolatedSmootherTake: ApplyAscOrtho (White Circular)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
-            {0, 0}, // Starting point of the index space
-            {1, grid.ntheta()} // Ending point of the index space
-            ),
-        // Kokkos lambda function to execute for each point in the index space
-        KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
-            const int i_r = start_white_circles + circle_task * 2;
-            nodeApplyAscOrthoCircleTakeBoundary(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
-        });
+    if (start_white_circles == 0) {
+        Kokkos::parallel_for(
+            "ExtrapolatedSmootherTake: ApplyAscOrtho (White Circular)",
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+                {0, 0}, // Starting point of the index space
+                {1, grid.ntheta()} // Ending point of the index space
+                ),
+            // Kokkos lambda function to execute for each point in the index space
+            KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
+                const int i_r = start_white_circles + circle_task * 2;
+                nodeApplyAscOrthoCircleTakeBoundary(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
+            });
 
-    Kokkos::parallel_for(
-        "ExtrapolatedSmootherTake: ApplyAscOrtho (White Circular)",
-        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
-            {1, 0}, // Starting point of the index space
-            {num_white_circles, grid.ntheta()} // Ending point of the index space
-            ),
-        // Kokkos lambda function to execute for each point in the index space
-        KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
-            const int i_r = start_white_circles + circle_task * 2;
-            nodeApplyAscOrthoCircleTakeInterior(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
-        });
+        Kokkos::parallel_for(
+            "ExtrapolatedSmootherTake: ApplyAscOrtho (White Circular)",
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+                {1, 0}, // Starting point of the index space
+                {num_white_circles, grid.ntheta()} // Ending point of the index space
+                ),
+            // Kokkos lambda function to execute for each point in the index space
+            KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
+                const int i_r = start_white_circles + circle_task * 2;
+                nodeApplyAscOrthoCircleTakeInterior(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
+            });
+    }
+    else {
+        Kokkos::parallel_for(
+            "ExtrapolatedSmootherTake: ApplyAscOrtho (White Circular)",
+            Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+                {0, 0}, // Starting point of the index space
+                {num_white_circles, grid.ntheta()} // Ending point of the index space
+                ),
+            // Kokkos lambda function to execute for each point in the index space
+            KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
+                const int i_r = start_white_circles + circle_task * 2;
+                nodeApplyAscOrthoCircleTakeInterior(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
+            });
+    }
 
     Kokkos::fence();
 }

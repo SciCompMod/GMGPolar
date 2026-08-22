@@ -40,10 +40,10 @@ fi
 # Finest grid parameters
 R0=1e-8
 Rmax=1.3
-nr_exp=5
-ntheta_exp=5
-anisotropic_factor=0
-divideBy2=2
+nr_exp=4
+ntheta_exp=-1
+anisotropic_factor=3
+divideBy2=3
 
 # Interior boundary condition: 
 # 0: Across-origin
@@ -69,7 +69,7 @@ FMG_cycle=2 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
 # Preconditioned Conjugate Gradient Method:
 # 0: GMGPolar as iterative solver
 # 1: GMGPolar solver as preconditioner for Conjugate Gradient (recommended)
-PCG=0
+PCG=1
 # Initial approximation for PCG:
 # 0: Initial approximation is set to residual -> no preconditioning
 # 1: FMG-approximation as initial guess (recommended)
@@ -77,7 +77,7 @@ PCG_FMG=1
 PCG_FMG_iterations=1
 PCG_FMG_cycle=0 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
 # Additional multigrid iterations after initial approximation to solve the linear system in each PCG iteration
-PCG_MG_iterations=2
+PCG_MG_iterations=1
 PCG_MG_cycle=0 # V-Cycle(0), W-Cycle(1), F-Cycle(2)
 
 # Extrapolation Method:
@@ -98,10 +98,10 @@ postSmoothingSteps=1
 multigridCycle=0
 
 # Convergence criteria:
-maxIterations=1000
+maxIterations=150
 residualNormType=0 # L2-Norm(0) = 0, Weighted L2-Norm(1), Infinity-Norm(2)
-absoluteTolerance=-1e-12
-relativeTolerance=-1e-08
+absoluteTolerance=1e-10
+relativeTolerance=1e-10
 
 # Define additional geometry parameters
 kappa_eps=0.0
