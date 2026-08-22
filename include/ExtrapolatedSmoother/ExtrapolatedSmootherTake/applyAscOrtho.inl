@@ -3,205 +3,86 @@
 namespace extrapolated_smoother_take
 {
 
-static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoCircleTake(const int i_r, const int i_theta, const PolarGrid& grid,
-                                                               const bool DirBC_Interior, ConstVector<double>& x,
-                                                               ConstVector<double>& rhs, Vector<double>& result,
-                                                               ConstVector<double>& arr, ConstVector<double>& att,
-                                                               ConstVector<double>& art)
+static KOKKOS_INLINE_FUNCTION void
+nodeApplyAscOrthoCircleTakeInterior(const int i_r, const int i_theta, const PolarGrid& grid, ConstVector<double>& x,
+                                    ConstVector<double>& rhs, Vector<double>& result, ConstVector<double>& arr,
+                                    ConstVector<double>& att, ConstVector<double>& art)
 {
-    KOKKOS_ASSERT(i_r >= 0 && i_r <= grid.numberSmootherCircles());
+    KOKKOS_ASSERT(0 < i_r && i_r <= grid.numberSmootherCircles());
 
-    /* -------------------- */
-    /* Node in the interior */
-    /* -------------------- */
-    if (i_r > 0 && i_r < grid.numberSmootherCircles()) {
-        /* -------------------------- */
-        /* Cyclic Tridiagonal Section */
-        /* i_r % 2 == 1 */
-        const double h1 = grid.radialSpacing(i_r - 1);
-        const double h2 = grid.radialSpacing(i_r);
-        const double k1 = grid.angularSpacing(i_theta - 1);
-        const double k2 = grid.angularSpacing(i_theta);
-
-        const double coeff1 = 0.5 * (k1 + k2) / h1;
-        const double coeff2 = 0.5 * (k1 + k2) / h2;
-        const double coeff3 = 0.5 * (h1 + h2) / k1;
-        const double coeff4 = 0.5 * (h1 + h2) / k2;
-
-        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
-
-        const int bottom_left  = grid.index(i_r - 1, i_theta_M1);
-        const int left         = grid.index(i_r - 1, i_theta);
-        const int top_left     = grid.index(i_r - 1, i_theta_P1);
-        const int bottom       = grid.index(i_r, i_theta_M1);
-        const int center       = grid.index(i_r, i_theta);
-        const int top          = grid.index(i_r, i_theta_P1);
-        const int bottom_right = grid.index(i_r + 1, i_theta_M1);
-        const int right        = grid.index(i_r + 1, i_theta);
-        const int top_right    = grid.index(i_r + 1, i_theta_P1);
-
-        if (i_r & 1) {
-            /* i_r % 2 == 1 and i_theta % 2 == 1 */
-            /* | x | o | x | */
-            /* |   |   |   | */
-            /* | o | O | o | */
-            /* |   |   |   | */
-            /* | x | o | x | */
-            /* or */
-            /* i_r % 2 == 1 and i_theta % 2 == 0 */
-            /* | o | o | o | */
-            /* |   |   |   | */
-            /* | x | O | x | */
-            /* |   |   |   | */
-            /* | o | o | o | */
-            result[center] = rhs[center] - (-coeff1 * (arr[center] + arr[left]) * x[left] /* Left */
-                                            - coeff2 * (arr[center] + arr[right]) * x[right] /* Right */
-
-                                            - 0.25 * (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
-                                            + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
-                                            + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
-                                            - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
-                                           );
-        }
-        else {
-            if (i_theta & 1) {
-                /* i_r % 2 == 0 and i_theta % 2 == 1 */
-                /* | o | x | o | */
-                /* |   |   |   | */
-                /* | o | O | o | */
-                /* |   |   |   | */
-                /* | o | x | o | */
-                /* Fill result(i,j) */
-                result[center] = rhs[center] - (-coeff1 * (arr[center] + arr[left]) * x[left] /* Left */
-                                                - coeff2 * (arr[center] + arr[right]) * x[right] /* Right */
-                                                - coeff3 * (att[center] + att[bottom]) * x[bottom] /* Bottom */
-                                                - coeff4 * (att[center] + att[top]) * x[top] /* Top */
-
-                                                - 0.25 * (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
-                                                + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
-                                                + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
-                                                - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
-                                               );
-            }
-            else {
-                /* i_r % 2 == 0 and i_theta % 2 == 0 */
-                /* | o | o | o | */
-                /* |   |   |   | */
-                /* | o | X | o | */
-                /* |   |   |   | */
-                /* | o | o | o | */
-                result[center] = x[center];
-            }
-        }
-    }
-    /* -------------------- */
-    /* Node on the boundary */
-    /* -------------------- */
-    else if (i_r == 0) {
-        /* ------------------------------------------------ */
-        /* Case 1: Dirichlet boundary on the inner boundary */
-        /* ------------------------------------------------ */
+    if (!(i_r & 1) && !(i_theta & 1)) {
         const int center = grid.index(i_r, i_theta);
-        if (DirBC_Interior) {
-            if (i_theta & 1) {
-                /* i_theta % 2 == 1 */
-                /* || x | o | x | */
-                /* ||   |   |   | */
-                /* || O | o | o | */
-                /* ||   |   |   | */
-                /* || x | o | x | */
-                result[center] = rhs[center];
-            }
-            else {
-                /* i_theta % 2 == 0 */
-                /* || o | o | o | */
-                /* ||   |   |   | */
-                /* || X | o | x | */
-                /* ||   |   |   | */
-                /* || o | o | o | */
-                result[center] = x[center];
-            }
-        }
-        else {
-            /* ------------------------------------------------------------- */
-            /* Case 2: Across origin discretization on the interior boundary */
-            /* ------------------------------------------------------------- */
-            // h1 gets replaced with 2 * R0.
-            // (i_r-1,i_theta) gets replaced with (i_r, i_theta + (grid.ntheta()/2)).
-            // Some more adjustments from the changing the 9-point stencil to the artifical 7-point stencil.
-            const double h1 = 2.0 * grid.radius(0);
-            const double h2 = grid.radialSpacing(i_r);
-            const double k1 = grid.angularSpacing(i_theta - 1);
-            const double k2 = grid.angularSpacing(i_theta);
+        result[center]   = x[center];
+        return;
+    }
 
-            const double coeff2 = 0.5 * (k1 + k2) / h2;
-            const double coeff3 = 0.5 * (h1 + h2) / k1;
-            const double coeff4 = 0.5 * (h1 + h2) / k2;
+    const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+    const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
 
-            const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-            const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
-            //const int i_theta_Across = grid.wrapThetaIndex(i_theta + grid.ntheta() / 2);
+    const int bottom_left  = grid.index(i_r - 1, i_theta_M1);
+    const int left         = grid.index(i_r - 1, i_theta);
+    const int top_left     = grid.index(i_r - 1, i_theta_P1);
+    const int bottom       = grid.index(i_r, i_theta_M1);
+    const int center       = grid.index(i_r, i_theta);
+    const int top          = grid.index(i_r, i_theta_P1);
+    const int bottom_right = grid.index(i_r + 1, i_theta_M1);
+    const int right        = grid.index(i_r + 1, i_theta);
+    const int top_right    = grid.index(i_r + 1, i_theta_P1);
 
-            //const int left         = grid.index(i_r, i_theta_Across);
-            const int bottom       = grid.index(i_r, i_theta_M1);
-            const int center       = grid.index(i_r, i_theta);
-            const int top          = grid.index(i_r, i_theta_P1);
-            const int bottom_right = grid.index(i_r + 1, i_theta_M1);
-            const int right        = grid.index(i_r + 1, i_theta);
-            const int top_right    = grid.index(i_r + 1, i_theta_P1);
+    const double h1 = grid.radialSpacing(i_r - 1);
+    const double h2 = grid.radialSpacing(i_r);
+    const double k1 = grid.angularSpacing(i_theta_M1);
+    const double k2 = grid.angularSpacing(i_theta);
 
-            if (i_theta & 1) {
-                /* i_theta % 2 == 1 */
-                /* -| x | o | x | */
-                /* -|   |   |   | */
-                /* -| O | o | o | */
-                /* -|   |   |   | */
-                /* -| x | o | x | */
-                result[center] =
-                    rhs[center] -
-                    (-coeff2 * (arr[center] + arr[right]) * x[right] /* Right */
-                     - coeff3 * (att[center] + att[bottom]) * x[bottom] /* Bottom */
-                     - coeff4 * (att[center] + att[top]) * x[top] /* Top */
+    const double coeff1 = 0.5 * (k1 + k2) / h1;
+    const double coeff2 = 0.5 * (k1 + k2) / h2;
+    const double coeff3 = 0.5 * (h1 + h2) / k1;
+    const double coeff4 = 0.5 * (h1 + h2) / k2;
 
-                     /* - 0.25 * (art[left] + art[bottom]) * x[bottom_left] // Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
-                     + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
+    result[center] = rhs[center] - (-coeff1 * (arr[center] + arr[left]) * x[left] /* Left */
+                                    - coeff2 * (arr[center] + arr[right]) * x[right] /* Right */
 
-                     /* + 0.25 * (art[left] + art[top]) * x[top_left] // Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
-                     - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
-                    );
-            }
-            else {
-                /* i_theta % 2 == 0 */
-                /* -| o | o | o | */
-                /* -|   |   |   | */
-                /* -| X | o | x | */
-                /* -|   |   |   | */
-                /* -| o | o | o | */
-                result[center] = x[center];
-            }
-        }
+                                    - (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
+                                    + (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
+                                    + (art[left] + art[top]) * x[top_left] /* Top Left */
+                                    - (art[right] + art[top]) * x[top_right] /* Top Right */
+                                   );
+
+    if (!(i_r & 1) && (i_theta & 1)) {
+        /* | o | x | o | */
+        /* |   |   |   | */
+        /* | o | O | o | */
+        /* |   |   |   | */
+        /* | o | x | o | */
+        result[center] -= (-coeff3 * (att[center] + att[bottom]) * x[bottom] /* Bottom */
+                           - coeff4 * (att[center] + att[top]) * x[top] /* Top */
+        );
     }
 }
 
-static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialTake(const int i_r, const int i_theta, const PolarGrid& grid,
-                                                               const bool DirBC_Interior, ConstVector<double>& x,
-                                                               ConstVector<double>& rhs, Vector<double>& result,
-                                                               ConstVector<double>& arr, ConstVector<double>& att,
-                                                               ConstVector<double>& art)
+static KOKKOS_INLINE_FUNCTION void
+nodeApplyAscOrthoCircleTakeBoundary(const int i_r, const int i_theta, const PolarGrid& grid, const bool DirBC_Interior,
+                                    ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
+                                    ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art)
 {
-    assert(i_r >= grid.numberSmootherCircles() - 1 && i_r < grid.nr());
+    KOKKOS_ASSERT(i_r == 0);
 
-    /* -------------------- */
-    /* Node in the interior */
-    /* -------------------- */
-    if (i_r > grid.numberSmootherCircles() && i_r < grid.nr() - 2) {
-        const double h1 = grid.radialSpacing(i_r - 1);
+    if (!(i_theta & 1)) {
+        const int center = grid.index(i_r, i_theta);
+        result[center]   = x[center];
+        return;
+    }
+
+    if (DirBC_Interior) {
+        const int center = grid.index(i_r, i_theta);
+        result[center]   = rhs[center];
+    }
+    else {
+        const double h1 = 2.0 * grid.radius(0);
         const double h2 = grid.radialSpacing(i_r);
         const double k1 = grid.angularSpacing(i_theta - 1);
         const double k2 = grid.angularSpacing(i_theta);
 
-        const double coeff1 = 0.5 * (k1 + k2) / h1;
         const double coeff2 = 0.5 * (k1 + k2) / h2;
         const double coeff3 = 0.5 * (h1 + h2) / k1;
         const double coeff4 = 0.5 * (h1 + h2) / k2;
@@ -209,9 +90,6 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialTake(const int i_r, co
         const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
         const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
 
-        const int bottom_left  = grid.index(i_r - 1, i_theta_M1);
-        const int left         = grid.index(i_r - 1, i_theta);
-        const int top_left     = grid.index(i_r - 1, i_theta_P1);
         const int bottom       = grid.index(i_r, i_theta_M1);
         const int center       = grid.index(i_r, i_theta);
         const int top          = grid.index(i_r, i_theta_P1);
@@ -219,146 +97,139 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialTake(const int i_r, co
         const int right        = grid.index(i_r + 1, i_theta);
         const int top_right    = grid.index(i_r + 1, i_theta_P1);
 
-        if (i_theta & 1) {
-            /* i_theta % 2 == 1 and i_r % 2 == 1 */
-            /* ---------- */
-            /* x   o   x  */
-            /* ---------- */
-            /* o   O   o  */
-            /* ---------- */
-            /* x   o   x  */
-            /* ---------- */
-            /* or */
-            /* i_theta % 2 == 1 and i_r % 2 == 0 */
-            /* ---------- */
-            /* o   x   o  */
-            /* ---------- */
-            /* o   O   o  */
-            /* ---------- */
-            /* o   x   o  */
-            /* ---------- */
-            result[center] = rhs[center] - (-coeff3 * (att[center] + att[bottom]) * x[bottom] /* Bottom */
-                                            - coeff4 * (att[center] + att[top]) * x[top] /* Top */
+        result[center] = rhs[center] - (-coeff2 * (arr[center] + arr[right]) * x[right] /* Right */
+                                        - coeff3 * (att[center] + att[bottom]) * x[bottom] /* Bottom */
+                                        - coeff4 * (att[center] + att[top]) * x[top] /* Top */
 
-                                            - 0.25 * (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
-                                            + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
-                                            + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
-                                            - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
-                                           );
-        }
-        else {
-            if (i_r & 1) {
-                /* i_theta % 2 == 0 and i_r % 2 == 1 */
-                /* ---------- */
-                /* o   o   o  */
-                /* ---------- */
-                /* x   O   x  */
-                /* ---------- */
-                /* o   o   o  */
-                /* ---------- */
-                result[center] = rhs[center] - (-coeff1 * (arr[center] + arr[left]) * x[left] /* Left */
-                                                - coeff2 * (arr[center] + arr[right]) * x[right] /* Right */
-                                                - coeff3 * (att[center] + att[bottom]) * x[bottom] /* Bottom */
-                                                - coeff4 * (att[center] + att[top]) * x[top] /* Top */
-
-                                                - 0.25 * (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
-                                                + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
-                                                + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
-                                                - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
-                                               );
-            }
-            else {
-                /* i_theta % 2 == 0 and i_r % 2 == 0 */
-                /* ---------- */
-                /* o   o   o  */
-                /* ---------- */
-                /* o   X   o  */
-                /* ---------- */
-                /* o   o   o  */
-                /* ---------- */
-                result[center] = x[center];
-            }
-        }
+                                        + (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
+                                        - (art[right] + art[top]) * x[top_right] /* Top Right */
+                                       );
     }
-    else if (i_r == grid.numberSmootherCircles()) {
-        const double h1 = grid.radialSpacing(i_r - 1);
-        const double h2 = grid.radialSpacing(i_r);
-        const double k1 = grid.angularSpacing(i_theta - 1);
-        const double k2 = grid.angularSpacing(i_theta);
+}
 
-        const double coeff1 = 0.5 * (k1 + k2) / h1;
-        const double coeff2 = 0.5 * (k1 + k2) / h2;
-        const double coeff3 = 0.5 * (h1 + h2) / k1;
-        const double coeff4 = 0.5 * (h1 + h2) / k2;
+static KOKKOS_INLINE_FUNCTION void
+nodeApplyAscOrthoRadialTakeInterior(const int i_r, const int i_theta, const PolarGrid& grid, ConstVector<double>& x,
+                                    ConstVector<double>& rhs, Vector<double>& result, ConstVector<double>& arr,
+                                    ConstVector<double>& att, ConstVector<double>& art)
+{
+    KOKKOS_ASSERT(grid.numberSmootherCircles() < i_r && i_r < grid.nr() - 2);
 
-        const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
-        const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
-
-        const int bottom_left  = grid.index(i_r - 1, i_theta_M1);
-        const int left         = grid.index(i_r - 1, i_theta);
-        const int top_left     = grid.index(i_r - 1, i_theta_P1);
-        const int bottom       = grid.index(i_r, i_theta_M1);
-        const int center       = grid.index(i_r, i_theta);
-        const int top          = grid.index(i_r, i_theta_P1);
-        const int bottom_right = grid.index(i_r + 1, i_theta_M1);
-        const int right        = grid.index(i_r + 1, i_theta);
-        const int top_right    = grid.index(i_r + 1, i_theta_P1);
-
-        if (i_theta & 1) {
-            /* i_theta % 2 == 1 and i_r % 2 == 1 */
-            /* | x | o | x || o   x   o   x  */
-            /* |   |   |   || -------------- */
-            /* | o | o | o || O   o   o   o  */
-            /* |   |   |   || -------------- */
-            /* | x | o | x || o   x   o   x  */
-            /* or */
-            /* i_theta % 2 == 1 and i_r % 2 == 0 */
-            /* | o | x | o || x   o   x   o  */
-            /* |   |   |   || -------------- */
-            /* | o | o | o || O   o   o   o  */
-            /* |   |   |   || -------------- */
-            /* | o | x | o || x   o   x   o  */
-            result[center] = rhs[center] - (-coeff1 * (arr[center] + arr[left]) * x[left] /* Left */
-                                            - coeff3 * (att[center] + att[bottom]) * x[bottom] /* Bottom */
-                                            - coeff4 * (att[center] + att[top]) * x[top] /* Top */
-
-                                            - 0.25 * (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
-                                            + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
-                                            + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
-                                            - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
-                                           );
-        }
-        else {
-            if (i_r & 1) {
-                /* i_theta % 2 == 0 and i_r % 2 == 1 */
-                /* | o | o | o || o   o   o   o  */
-                /* |   |   |   || -------------- */
-                /* | x | o | x || O   x   o   x  */
-                /* |   |   |   || -------------- */
-                /* | o | o | o || o   o   o   o  */
-                result[center] = rhs[center] - (-coeff1 * (arr[center] + arr[left]) * x[left] /* Left */
-                                                - coeff2 * (arr[center] + arr[right]) * x[right] /* Right */
-                                                - coeff3 * (att[center] + att[bottom]) * x[bottom] /* Bottom */
-                                                - coeff4 * (att[center] + att[top]) * x[top] /* Top */
-
-                                                - 0.25 * (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
-                                                + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
-                                                + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
-                                                - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
-                                               );
-            }
-            else {
-                /* i_theta % 2 == 0 and i_r % 2 == 0 */
-                /* | o | o | o || o   o   o   o  */
-                /* |   |   |   || -------------- */
-                /* | o | x | o || X   o   x   o  */
-                /* |   |   |   || -------------- */
-                /* | o | o | o || o   o   o   o  */
-                result[center] = x[center];
-            }
-        }
+    if (!(i_r & 1) && !(i_theta & 1)) {
+        const int center = grid.index(i_r, i_theta);
+        result[center]   = x[center];
+        return;
     }
-    else if (i_r == grid.nr() - 2) {
+
+    const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+    const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
+
+    const int bottom_left  = grid.index(i_r - 1, i_theta_M1);
+    const int bottom       = grid.index(i_r, i_theta_M1);
+    const int bottom_right = grid.index(i_r + 1, i_theta_M1);
+    const int left         = grid.index(i_r - 1, i_theta);
+    const int center       = grid.index(i_r, i_theta);
+    const int right        = grid.index(i_r + 1, i_theta);
+    const int top_left     = grid.index(i_r - 1, i_theta_P1);
+    const int top          = grid.index(i_r, i_theta_P1);
+    const int top_right    = grid.index(i_r + 1, i_theta_P1);
+
+    const double h1 = grid.radialSpacing(i_r - 1);
+    const double h2 = grid.radialSpacing(i_r);
+    const double k1 = grid.angularSpacing(i_theta - 1);
+    const double k2 = grid.angularSpacing(i_theta);
+
+    const double coeff1 = 0.5 * (k1 + k2) / h1;
+    const double coeff2 = 0.5 * (k1 + k2) / h2;
+    const double coeff3 = 0.5 * (h1 + h2) / k1;
+    const double coeff4 = 0.5 * (h1 + h2) / k2;
+
+    result[center] = rhs[center] - (-coeff3 * (att[center] + att[bottom]) * x[bottom] /* Bottom */
+                                    - coeff4 * (att[center] + att[top]) * x[top] /* Top */
+
+                                    - (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
+                                    + (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
+                                    + (art[left] + art[top]) * x[top_left] /* Top Left */
+                                    - (art[right] + art[top]) * x[top_right] /* Top Right */
+                                   );
+
+    if (!(i_theta & 1) && (i_r & 1)) {
+        /* ---------- */
+        /* o   o   o  */
+        /* ---------- */
+        /* x   O   x  */
+        /* ---------- */
+        /* o   o   o  */
+        /* ---------- */
+        result[center] -= (-coeff1 * (arr[center] + arr[left]) * x[left] /* Left */
+                           - coeff2 * (arr[center] + arr[right]) * x[right] /* Right */
+        );
+    }
+}
+
+static KOKKOS_INLINE_FUNCTION void
+nodeApplyAscOrthoRadialTakeInnerBoundary(const int i_r, const int i_theta, const PolarGrid& grid,
+                                         ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
+                                         ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art)
+{
+    KOKKOS_ASSERT(i_r == grid.numberSmootherCircles());
+
+    if (!(i_r & 1) && !(i_theta & 1)) {
+        const int center = grid.index(i_r, i_theta);
+        result[center]   = x[center];
+        return;
+    }
+
+    const double h1 = grid.radialSpacing(i_r - 1);
+    const double h2 = grid.radialSpacing(i_r);
+    const double k1 = grid.angularSpacing(i_theta - 1);
+    const double k2 = grid.angularSpacing(i_theta);
+
+    const double coeff1 = 0.5 * (k1 + k2) / h1;
+    const double coeff2 = 0.5 * (k1 + k2) / h2;
+    const double coeff3 = 0.5 * (h1 + h2) / k1;
+    const double coeff4 = 0.5 * (h1 + h2) / k2;
+
+    const int i_theta_M1 = grid.wrapThetaIndex(i_theta - 1);
+    const int i_theta_P1 = grid.wrapThetaIndex(i_theta + 1);
+
+    const int bottom_left  = grid.index(i_r - 1, i_theta_M1);
+    const int left         = grid.index(i_r - 1, i_theta);
+    const int top_left     = grid.index(i_r - 1, i_theta_P1);
+    const int bottom       = grid.index(i_r, i_theta_M1);
+    const int center       = grid.index(i_r, i_theta);
+    const int top          = grid.index(i_r, i_theta_P1);
+    const int bottom_right = grid.index(i_r + 1, i_theta_M1);
+    const int right        = grid.index(i_r + 1, i_theta);
+    const int top_right    = grid.index(i_r + 1, i_theta_P1);
+
+    result[center] = rhs[center] - (-coeff1 * (arr[center] + arr[left]) * x[left] /* Left */
+                                    - coeff3 * (att[center] + att[bottom]) * x[bottom] /* Bottom */
+                                    - coeff4 * (att[center] + att[top]) * x[top] /* Top */
+
+                                    - (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
+                                    + (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
+                                    + (art[left] + art[top]) * x[top_left] /* Top Left */
+                                    - (art[right] + art[top]) * x[top_right] /* Top Right */
+                                   );
+
+    if (!(i_theta & 1) && (i_r & 1)) {
+        /* | o | o | o || o   o   o   o  */
+        /* |   |   |   || -------------- */
+        /* | x | o | x || O   x   o   x  */
+        /* |   |   |   || -------------- */
+        /* | o | o | o || o   o   o   o  */
+        result[center] -= (-coeff2 * (arr[center] + arr[right]) * x[right] /* Right */);
+    }
+}
+
+static KOKKOS_INLINE_FUNCTION void
+nodeApplyAscOrthoRadialTakeOuterBoundary(const int i_r, const int i_theta, const PolarGrid& grid,
+                                         ConstVector<double>& x, ConstVector<double>& rhs, Vector<double>& result,
+                                         ConstVector<double>& arr, ConstVector<double>& att, ConstVector<double>& art)
+{
+    KOKKOS_ASSERT(i_r == grid.nr() - 2 || i_r == grid.nr() - 1);
+
+    if (i_r == grid.nr() - 2) {
         KOKKOS_ASSERT(i_r & 1);
 
         const double h1 = grid.radialSpacing(i_r - 1);
@@ -385,7 +256,6 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialTake(const int i_r, co
         const int top_right    = grid.index(i_r + 1, i_theta_P1);
 
         if (i_theta & 1) {
-            /* i_theta % 2 == 1 */
             /* ---------------|| */
             /* o   x   o   x  || */
             /* ---------------|| */
@@ -402,10 +272,10 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialTake(const int i_r, co
                                - coeff3 * (att[center] + att[bottom]) * x[bottom] /* Bottom */
                                - coeff4 * (att[center] + att[top]) * x[top] /* Top */
 
-                               - 0.25 * (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
-                               + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
-                               + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
-                               - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
+                               - (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
+                               + (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
+                               + (art[left] + art[top]) * x[top_left] /* Top Left */
+                               - (art[right] + art[top]) * x[top_right] /* Top Right */
                               );
         }
         else {
@@ -421,10 +291,10 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialTake(const int i_r, co
                                             - coeff3 * (att[center] + att[bottom]) * x[bottom] /* Bottom */
                                             - coeff4 * (att[center] + att[top]) * x[top] /* Top */
 
-                                            - 0.25 * (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
-                                            + 0.25 * (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
-                                            + 0.25 * (art[left] + art[top]) * x[top_left] /* Top Left */
-                                            - 0.25 * (art[right] + art[top]) * x[top_right] /* Top Right */
+                                            - (art[left] + art[bottom]) * x[bottom_left] /* Bottom Left */
+                                            + (art[right] + art[bottom]) * x[bottom_right] /* Bottom Right */
+                                            + (art[left] + art[top]) * x[top_left] /* Top Left */
+                                            - (art[right] + art[top]) * x[top_right] /* Top Right */
                                            );
         }
     }
@@ -434,7 +304,6 @@ static KOKKOS_INLINE_FUNCTION void nodeApplyAscOrthoRadialTake(const int i_r, co
         const int center = grid.index(i_r, i_theta);
 
         if (i_theta & 1) {
-            /* i_theta % 2 == 1 */
             /* -----------|| */
             /* x   o   x  || */
             /* -----------|| */
@@ -464,7 +333,8 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(C
                                                                                ConstVector<double> rhs,
                                                                                Vector<double> temp)
 {
-    using extrapolated_smoother_take::nodeApplyAscOrthoCircleTake;
+    using extrapolated_smoother_take::nodeApplyAscOrthoCircleTakeBoundary;
+    using extrapolated_smoother_take::nodeApplyAscOrthoCircleTakeInterior;
 
     const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
@@ -484,12 +354,24 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackCircleSection(C
         "ExtrapolatedSmootherTake: ApplyAscOrtho (Black Circular)",
         Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, 0}, // Starting point of the index space
+            {1, grid.ntheta()} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
+            int i_r = start_black_circles + circle_task * 2;
+            nodeApplyAscOrthoCircleTakeBoundary(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
+        });
+
+    Kokkos::parallel_for(
+        "ExtrapolatedSmootherTake: ApplyAscOrtho (Black Circular)",
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            {1, 0}, // Starting point of the index space
             {num_black_circles, grid.ntheta()} // Ending point of the index space
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
             int i_r = start_black_circles + circle_task * 2;
-            nodeApplyAscOrthoCircleTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
+            nodeApplyAscOrthoCircleTakeInterior(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
         });
 
     Kokkos::fence();
@@ -500,7 +382,8 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(C
                                                                                ConstVector<double> rhs,
                                                                                Vector<double> temp)
 {
-    using extrapolated_smoother_take::nodeApplyAscOrthoCircleTake;
+    using extrapolated_smoother_take::nodeApplyAscOrthoCircleTakeBoundary;
+    using extrapolated_smoother_take::nodeApplyAscOrthoCircleTakeInterior;
 
     const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
@@ -520,12 +403,24 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteCircleSection(C
         "ExtrapolatedSmootherTake: ApplyAscOrtho (White Circular)",
         Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, 0}, // Starting point of the index space
+            {1, grid.ntheta()} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
+            const int i_r = start_white_circles + circle_task * 2;
+            nodeApplyAscOrthoCircleTakeBoundary(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
+        });
+
+    Kokkos::parallel_for(
+        "ExtrapolatedSmootherTake: ApplyAscOrtho (White Circular)",
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            {1, 0}, // Starting point of the index space
             {num_white_circles, grid.ntheta()} // Ending point of the index space
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int circle_task, const int i_theta) {
             const int i_r = start_white_circles + circle_task * 2;
-            nodeApplyAscOrthoCircleTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
+            nodeApplyAscOrthoCircleTakeInterior(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
         });
 
     Kokkos::fence();
@@ -536,11 +431,12 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(C
                                                                                ConstVector<double> rhs,
                                                                                Vector<double> temp)
 {
-    using extrapolated_smoother_take::nodeApplyAscOrthoRadialTake;
+    using extrapolated_smoother_take::nodeApplyAscOrthoRadialTakeInnerBoundary;
+    using extrapolated_smoother_take::nodeApplyAscOrthoRadialTakeInterior;
+    using extrapolated_smoother_take::nodeApplyAscOrthoRadialTakeOuterBoundary;
 
     const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
     assert(level_cache.cacheDomainGeometry());
 
@@ -556,12 +452,36 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoBlackRadialSection(C
         "ExtrapolatedSmootherTake: ApplyAscOrtho (Black Radial)",
         Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, grid.numberSmootherCircles()}, // Starting point of the index space
+            {num_black_radial_lines, grid.numberSmootherCircles() + 1} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int radial_task, const int i_r) {
+            const int i_theta = start_black_radials + radial_task * 2;
+            nodeApplyAscOrthoRadialTakeInnerBoundary(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
+        });
+
+    Kokkos::parallel_for(
+        "ExtrapolatedSmootherTake: ApplyAscOrtho (Black Radial)",
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            {0, grid.numberSmootherCircles() + 1}, // Starting point of the index space
+            {num_black_radial_lines, grid.nr() - 2} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int radial_task, const int i_r) {
+            const int i_theta = start_black_radials + radial_task * 2;
+            nodeApplyAscOrthoRadialTakeInterior(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
+        });
+
+    Kokkos::parallel_for(
+        "ExtrapolatedSmootherTake: ApplyAscOrtho (Black Radial)",
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            {0, grid.nr() - 2}, // Starting point of the index space
             {num_black_radial_lines, grid.nr()} // Ending point of the index space
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int radial_task, const int i_r) {
             const int i_theta = start_black_radials + radial_task * 2;
-            nodeApplyAscOrthoRadialTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
+            nodeApplyAscOrthoRadialTakeOuterBoundary(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
         });
 
     Kokkos::fence();
@@ -572,11 +492,12 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(C
                                                                                ConstVector<double> rhs,
                                                                                Vector<double> temp)
 {
-    using extrapolated_smoother_take::nodeApplyAscOrthoRadialTake;
+    using extrapolated_smoother_take::nodeApplyAscOrthoRadialTakeInnerBoundary;
+    using extrapolated_smoother_take::nodeApplyAscOrthoRadialTakeInterior;
+    using extrapolated_smoother_take::nodeApplyAscOrthoRadialTakeOuterBoundary;
 
     const PolarGrid& grid             = ExtrapolatedSmoother<LevelCacheType>::grid_;
     const LevelCacheType& level_cache = ExtrapolatedSmoother<LevelCacheType>::level_cache_;
-    const bool DirBC_Interior         = ExtrapolatedSmoother<LevelCacheType>::DirBC_Interior_;
 
     assert(level_cache.cacheDomainGeometry());
 
@@ -592,12 +513,36 @@ void ExtrapolatedSmootherTake<LevelCacheType>::applyAscOrthoWhiteRadialSection(C
         "ExtrapolatedSmootherTake: ApplyAscOrtho (White Radial)",
         Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
             {0, grid.numberSmootherCircles()}, // Starting point of the index space
+            {num_white_radial_lines, grid.numberSmootherCircles() + 1} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int radial_task, const int i_r) {
+            const int i_theta = start_white_radials + radial_task * 2;
+            nodeApplyAscOrthoRadialTakeInnerBoundary(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
+        });
+
+    Kokkos::parallel_for(
+        "ExtrapolatedSmootherTake: ApplyAscOrtho (White Radial)",
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            {0, grid.numberSmootherCircles() + 1}, // Starting point of the index space
+            {num_white_radial_lines, grid.nr() - 2} // Ending point of the index space
+            ),
+        // Kokkos lambda function to execute for each point in the index space
+        KOKKOS_LAMBDA(const int radial_task, const int i_r) {
+            const int i_theta = start_white_radials + radial_task * 2;
+            nodeApplyAscOrthoRadialTakeInterior(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
+        });
+
+    Kokkos::parallel_for(
+        "ExtrapolatedSmootherTake: ApplyAscOrtho (White Radial)",
+        Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>( // Rank of the index space
+            {0, grid.nr() - 2}, // Starting point of the index space
             {num_white_radial_lines, grid.nr()} // Ending point of the index space
             ),
         // Kokkos lambda function to execute for each point in the index space
         KOKKOS_LAMBDA(const int radial_task, const int i_r) {
             const int i_theta = start_white_radials + radial_task * 2;
-            nodeApplyAscOrthoRadialTake(i_r, i_theta, grid, DirBC_Interior, x, rhs, temp, arr, att, art);
+            nodeApplyAscOrthoRadialTakeOuterBoundary(i_r, i_theta, grid, x, rhs, temp, arr, att, art);
         });
 
     Kokkos::fence();

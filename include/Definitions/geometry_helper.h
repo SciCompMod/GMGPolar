@@ -33,4 +33,7 @@ KOKKOS_INLINE_FUNCTION void compute_jacobian_elements(const DomainGeometry& doma
     /*  1.0 / det(DF) *  */
     /*  [Jtt, -Jrt]      */
     /*  [-Jtr, Jrr]      */
+    /* The stencil coefficient art is scaled by 0.25 to account for the */
+    /* 9-point stencil used in the finite difference approximation */
+    art *= 0.25;
 }

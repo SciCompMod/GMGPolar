@@ -53,26 +53,26 @@ static KOKKOS_INLINE_FUNCTION void node_apply_a_give(int i_r, int i_theta, const
         if (i_r > 1 || (i_r == 1 && !DirBC_Interior)) { /* Don't give to the inner dirichlet boundary! */
             result[left] += (-coeff1 * arr * x[center] /* Right */
                              + coeff1 * arr * x[left] /* Center: (Right) */
-                             - 0.25 * art * x[top] /* Top Right */
-                             + 0.25 * art * x[bottom]); /* Bottom Right */
+                             - art * x[top] /* Top Right */
+                             + art * x[bottom]); /* Bottom Right */
         }
         /* Fill result(i+1,j) */
         if (i_r < grid.nr() - 2) { /* Don't give to the outer dirichlet boundary! */
             result[right] += (-coeff2 * arr * x[center] /* Left */
                               + coeff2 * arr * x[right] /* Center: (Left) */
-                              + 0.25 * art * x[top] /* Top Left */
-                              - 0.25 * art * x[bottom]); /* Bottom Left */
+                              + art * x[top] /* Top Left */
+                              - art * x[bottom]); /* Bottom Left */
         }
         /* Fill result(i,j-1) */
         result[bottom] += (-coeff3 * att * x[center] /* Top */
                            + coeff3 * att * x[bottom] /* Center: (Top) */
-                           - 0.25 * art * x[right] /* Top Right */
-                           + 0.25 * art * x[left]); /* Top Left */
+                           - art * x[right] /* Top Right */
+                           + art * x[left]); /* Top Left */
         /* Fill result(i,j+1) */
         result[top] += (-coeff4 * att * x[center] /* Bottom */
                         + coeff4 * att * x[top] /* Center: (Bottom) */
-                        + 0.25 * art * x[right] /* Bottom Right */
-                        - 0.25 * art * x[left]); /* Bottom Left */
+                        + art * x[right] /* Bottom Right */
+                        - art * x[left]); /* Bottom Left */
     }
     /* -------------------------- */
     /* Node on the inner boundary */
@@ -102,8 +102,8 @@ static KOKKOS_INLINE_FUNCTION void node_apply_a_give(int i_r, int i_theta, const
             /* Fill result(i+1,j) */
             result[right] += (-coeff2 * arr * x[center] /* Left */
                               + coeff2 * arr * x[right] /* Center: (Left) */
-                              + 0.25 * art * x[top] /* Top Left */
-                              - 0.25 * art * x[bottom]); /* Bottom Left */
+                              + art * x[top] /* Top Left */
+                              - art * x[bottom]); /* Bottom Left */
         }
         else {
             /* ------------------------------------------------------------- */
@@ -144,23 +144,23 @@ static KOKKOS_INLINE_FUNCTION void node_apply_a_give(int i_r, int i_theta, const
             /* From view the view of the across origin node, the directions are roatated by 180 degrees in the stencil! */
             result[left] += (-coeff1 * arr * x[center] /* Right -> Left */
                              + coeff1 * arr * x[left]); /* Center: (Right) -> Center: (Left)*/
-            /* + 0.25 * art * x[top]; // Top Right -> Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
-            /* - 0.25 * art * x[bottom]; // Bottom Right -> Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
+            /* + art * x[top]; // Top Right -> Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
+            /* - art * x[bottom]; // Bottom Right -> Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
             /* Fill result(i+1,j) */
             result[right] += (-coeff2 * arr * x[center] /* Left */
                               + coeff2 * arr * x[right] /* Center: (Left) */
-                              + 0.25 * art * x[top] /* Top Left */
-                              - 0.25 * art * x[bottom]); /* Bottom Left */
+                              + art * x[top] /* Top Left */
+                              - art * x[bottom]); /* Bottom Left */
             /* Fill result(i,j-1) */
             result[bottom] += (-coeff3 * att * x[center] /* Top */
                                + coeff3 * att * x[bottom] /* Center: (Top) */
-                               - 0.25 * art * x[right]); /* Top Right */
-            /* + 0.25 * art * x[left]; // Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
+                               - art * x[right]); /* Top Right */
+            /* + art * x[left]; // Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
             /* Fill result(i,j+1) */
             result[top] += (-coeff4 * att * x[center] /* Bottom */
                             + coeff4 * att * x[top] /* Center: (Bottom) */
-                            + 0.25 * art * x[right]); /* Bottom Right */
-            /* - 0.25 * art * x[left]; // Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
+                            + art * x[right]); /* Bottom Right */
+            /* - art * x[left]; // Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
         }
     }
     /* ----------------------------- */
@@ -187,8 +187,8 @@ static KOKKOS_INLINE_FUNCTION void node_apply_a_give(int i_r, int i_theta, const
         /* Fill result(i-1,j) */
         result[left] += (-coeff1 * arr * x[center] /* Right */
                          + coeff1 * arr * x[left] /* Center: (Right) */
-                         - 0.25 * art * x[top] /* Top Right */
-                         + 0.25 * art * x[bottom]); /* Bottom Right */
+                         - art * x[top] /* Top Right */
+                         + art * x[bottom]); /* Bottom Right */
     }
 }
 

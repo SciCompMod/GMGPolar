@@ -10,8 +10,6 @@ class ResidualTake : public Residual<LevelCacheType>
 {
 public:
     explicit ResidualTake(const PolarGrid& grid, const LevelCacheType& level_cache, const bool DirBC_Interior);
-    KOKKOS_DEFAULTED_FUNCTION ResidualTake(const ResidualTake&) = default;
-    KOKKOS_DEFAULTED_FUNCTION ~ResidualTake() override          = default;
 
     void applySystemOperator(Vector<double> result, ConstVector<double> x) const final;
     void computeResidual(Vector<double> result, ConstVector<double> rhs, ConstVector<double> x) const final;
