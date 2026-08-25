@@ -12,4 +12,4 @@
 
 # Adjust parameters in src/weak_scaling.cpp
 
-srun --cpus-per-task=56 ./../../../build/weak_scaling
+srun --cpus-per-task=56 ./../../../build/benchmarks/weak_scaling

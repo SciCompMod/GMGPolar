@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./../../build/gmgpolar --help
+./../../build/benchmarks/gmgpolar --help

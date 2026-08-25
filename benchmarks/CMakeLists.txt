@@ -45,3 +45,6 @@ echo "Results written to $OUTFILE"
 
 add_scaling_wrapper(weak_scaling   weak_scaling.cpp   "${WEAK_SCALING_BODY}")
 add_scaling_wrapper(strong_scaling strong_scaling.cpp "${STRONG_SCALING_BODY}")
+
+add_executable(convergence_order convergence_order.cpp)
+target_link_libraries(convergence_order PRIVATE GMGPolarLib GMGPolarInterface)

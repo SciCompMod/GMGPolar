@@ -92,12 +92,12 @@ spack install likwid
 ## Running GMGPolar
 
 You can run the solver without having to write a code (as we do in the next section). After building
-the library, a binary is created called `./build/gmgpolar`, it takes parameters directly from command-line.
+the library, a binary is created called `./build/benchmarks/gmgpolar`, it takes parameters directly from command-line.
 
     # To try GMGPolar on a small problem size, without having to write any code,
-    # ./build/gmgpolar uses default parameters with a grid 33 x 64.
+    # ./build/benchmarks/gmgpolar uses default parameters with a grid 33 x 64.
 
-    ./build/gmgpolar
+    ./build/benchmarks/gmgpolar
 
     # For more details on the available parameters, see the scripts/tutorial/run.sh script.
 
