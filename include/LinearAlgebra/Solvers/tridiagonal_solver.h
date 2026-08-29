@@ -68,11 +68,14 @@ KOKKOS_INLINE_FUNCTION
 void pcr_neighbors(int i, int delta, int n, int& iLeft, int& iRight)
 {
     iLeft = i - delta;
-    if (iLeft < 0)
+    if (iLeft < 0) {
         iLeft = 0;
+    }
+
     iRight = i + delta;
-    if (iRight >= n)
+    if (iRight >= n) {
         iRight = n - 1;
+    }
 }
 
 template <typename T>
@@ -84,19 +87,17 @@ public:
         , batch_count_(batch_count)
         , main_diagonal_("BatchedTridiagonalSolver::main_diagonal", matrix_dimension * batch_count)
         , sub_diagonal_("BatchedTridiagonalSolver::sub_diagonal", matrix_dimension * batch_count)
-        , buffer_("BatchedTridiagonalSolver::buffer", is_cyclic ? matrix_dimension * batch_count : 0)
         , gamma_("BatchedTridiagonalSolver::gamma", is_cyclic ? batch_count : 0)
         , is_cyclic_(is_cyclic)
         , is_factorized_(false)
-        , num_steps_(matrix_dimension > 1
-                          ? static_cast<int>(std::ceil(std::log2(static_cast<double>(matrix_dimension))))
-                          : 0)
-        , k1_trajectory_("BatchedTridiagonalSolver::k1_trajectory",
-                          static_cast<std::size_t>(batch_count) * static_cast<std::size_t>(num_steps_) *
-                              static_cast<std::size_t>(matrix_dimension))
-        , k2_trajectory_("BatchedTridiagonalSolver::k2_trajectory",
-                          static_cast<std::size_t>(batch_count) * static_cast<std::size_t>(num_steps_) *
-                              static_cast<std::size_t>(matrix_dimension))
+        , num_steps_(
+              matrix_dimension > 1 ? static_cast<int>(std::ceil(std::log2(static_cast<double>(matrix_dimension)))) : 0)
+        , k1_trajectory_("BatchedTridiagonalSolver::k1_trajectory", static_cast<std::size_t>(batch_count) *
+                                                                        static_cast<std::size_t>(num_steps_) *
+                                                                        static_cast<std::size_t>(matrix_dimension))
+        , k2_trajectory_("BatchedTridiagonalSolver::k2_trajectory", static_cast<std::size_t>(batch_count) *
+                                                                        static_cast<std::size_t>(num_steps_) *
+                                                                        static_cast<std::size_t>(matrix_dimension))
     {
         assign(main_diagonal_, T(0));
         assign(sub_diagonal_, T(0));
@@ -196,12 +197,12 @@ public:
     KOKKOS_INLINE_FUNCTION const T& k1(const int batch_idx, const int step, const int index) const
     {
         return k1_trajectory_(static_cast<std::size_t>(batch_idx) * num_steps_ * matrix_dimension_ +
-                               static_cast<std::size_t>(step) * matrix_dimension_ + index);
+                              static_cast<std::size_t>(step) * matrix_dimension_ + index);
     }
     KOKKOS_INLINE_FUNCTION const T& k2(const int batch_idx, const int step, const int index) const
     {
         return k2_trajectory_(static_cast<std::size_t>(batch_idx) * num_steps_ * matrix_dimension_ +
-                               static_cast<std::size_t>(step) * matrix_dimension_ + index);
+                              static_cast<std::size_t>(step) * matrix_dimension_ + index);
     }
 
     /* --------------------------------------------- */
@@ -213,23 +214,135 @@ public:
     // itself never needs to know it is part of a cyclic system (same separation of concerns as
     // the old Thomas implementation).
 
+    // void setup()
+    // {
+    //     int matrix_dimension = matrix_dimension_;
+    //     int num_steps        = num_steps_;
+    //     bool is_cyclic       = is_cyclic_;
+
+    //     Vector<T> main_diagonal = main_diagonal_;
+    //     Vector<T> sub_diagonal  = sub_diagonal_;
+    //     Vector<T> gamma         = gamma_;
+    //     Vector<T> k1_trajectory = k1_trajectory_;
+    //     Vector<T> k2_trajectory = k2_trajectory_;
+
+    //     if (matrix_dimension == 1) {
+    //         // Degenerate case: num_steps_ == 0, nothing to reduce. main_diagonal_ already holds
+    //         // b[0] and solve() will just divide by it. (A cyclic system of dimension 1 is not a
+    //         // meaningful configuration; we intentionally skip the Sherman-Morrison adjustment
+    //         // here rather than apply an ill-defined self-correction.)
+    //         is_factorized_ = true;
+    //         return;
+    //     }
+
+    //     using TeamPolicy = Kokkos::TeamPolicy<Kokkos::DefaultExecutionSpace>;
+    //     using TeamMember = typename TeamPolicy::member_type;
+
+    //     // Ping-pong scratch for a, b, c: 2 buffers x 3 arrays x matrix_dimension x sizeof(T).
+    //     // Sized by matrix_dimension_ (one slot per equation), independent of however many actual
+    //     // team threads Kokkos ends up giving us below.
+    //     const std::size_t scratch_bytes = 2ull * 3ull * static_cast<std::size_t>(matrix_dimension) * sizeof(T);
+
+    //     // Kokkos::AUTO lets Kokkos pick a team size the backend can actually satisfy (this can be
+    //     // far smaller than matrix_dimension_, e.g. on CPU/OpenMP backends — see the constructor
+    //     // comment). The strided loops below (`for (i = team_rank(); i < n; i += team_size())`)
+    //     // make the kernel correct for any team size Kokkos chooses, from 1 up to n.
+    //     TeamPolicy policy(batch_count_, Kokkos::AUTO);
+    //     policy.set_scratch_size(0, Kokkos::PerTeam(static_cast<int>(scratch_bytes)));
+
+    //     Kokkos::parallel_for(
+    //         "SetupPCR", policy, KOKKOS_LAMBDA(const TeamMember& team_member) {
+    //             const int batch_idx = team_member.league_rank();
+    //             const int offset    = batch_idx * matrix_dimension;
+    //             const int team_size = team_member.team_size();
+    //             const int rank      = team_member.team_rank();
+
+    //             T* scratch = static_cast<T*>(team_member.team_scratch(0).get_shmem(scratch_bytes));
+    //             // Layout: [a0 | b0 | c0 | a1 | b1 | c1], each block matrix_dimension long.
+    //             T* a[2] = {scratch, scratch + 3 * matrix_dimension};
+    //             T* b[2] = {scratch + matrix_dimension, scratch + 4 * matrix_dimension};
+    //             T* c[2] = {scratch + 2 * matrix_dimension, scratch + 5 * matrix_dimension};
+
+    //             int cur = 0;
+
+    //             // Load a/b/c from the input matrix. Virtual a[0] and c[n-1] are zero (no
+    //             // left/right neighbor at the boundary), matching the pcr_neighbors() clamping
+    //             // convention. Each thread strides over the equations it owns; if team_size < n,
+    //             // a thread simply owns more than one equation and loads them in turn.
+    //             for (int i = rank; i < matrix_dimension; i += team_size) {
+    //                 a[cur][i] = (i == 0) ? T(0) : sub_diagonal(offset + i - 1);
+    //                 b[cur][i] = main_diagonal(offset + i);
+    //                 c[cur][i] = (i == matrix_dimension - 1) ? T(0) : sub_diagonal(offset + i);
+    //             }
+
+    //             team_member.team_barrier();
+
+    //             if (is_cyclic) {
+    //                 // Sherman-Morrison-Woodbury diagonal adjustment, applied to the *scratch* b
+    //                 // array (not to main_diagonal_ directly) since scratch, not main_diagonal_,
+    //                 // is the live working array during PCR reduction. Same formula as the old
+    //                 // Thomas implementation. Only equation 0 needs this, so only the thread that
+    //                 // happens to own equation 0 does the work.
+    //                 if (rank == 0) {
+    //                     const T cyclic_corner_element = sub_diagonal(offset + matrix_dimension - 1);
+    //                     gamma(batch_idx)              = -main_diagonal(offset + 0);
+    //                     b[cur][0] -= gamma(batch_idx);
+    //                     b[cur][matrix_dimension - 1] -=
+    //                         cyclic_corner_element * cyclic_corner_element / gamma(batch_idx);
+    //                 }
+    //                 team_member.team_barrier();
+    //             }
+
+    //             for (int step = 0; step < num_steps; step++) {
+    //                 const int delta = 1 << step;
+
+    //                 for (int i = rank; i < matrix_dimension; i += team_size) {
+    //                     int iLeft, iRight;
+    //                     pcr_neighbors(i, delta, matrix_dimension, iLeft, iRight);
+
+    //                     const T k1_val = a[cur][i] / b[cur][iLeft];
+    //                     const T k2_val = c[cur][i] / b[cur][iRight];
+
+    //                     k1_trajectory(static_cast<std::size_t>(batch_idx) * num_steps * matrix_dimension +
+    //                                   static_cast<std::size_t>(step) * matrix_dimension + i) = k1_val;
+    //                     k2_trajectory(static_cast<std::size_t>(batch_idx) * num_steps * matrix_dimension +
+    //                                   static_cast<std::size_t>(step) * matrix_dimension + i) = k2_val;
+
+    //                     const int nxt = 1 - cur;
+    //                     a[nxt][i]     = -a[cur][iLeft] * k1_val;
+    //                     b[nxt][i]     = b[cur][i] - c[cur][iLeft] * k1_val - a[cur][iRight] * k2_val;
+    //                     c[nxt][i]     = -c[cur][iRight] * k2_val;
+    //                 }
+
+    //                 // PCR reads neighbors' pre-update values within a step, so every thread must
+    //                 // finish writing the "next" buffer (for every equation it owns) before any
+    //                 // thread starts reading it as "current" in the following iteration.
+    //                 team_member.team_barrier();
+    //                 cur = 1 - cur;
+    //             }
+
+    //             for (int i = rank; i < matrix_dimension; i += team_size) {
+    //                 main_diagonal(offset + i) = b[cur][i];
+    //             }
+    //         });
+
+    //     Kokkos::fence();
+    //     is_factorized_ = true;
+    // }
+
     void setup()
     {
         int matrix_dimension = matrix_dimension_;
-        int num_steps         = num_steps_;
-        bool is_cyclic         = is_cyclic_;
+        int num_steps        = num_steps_;
+        bool is_cyclic       = is_cyclic_;
 
-        Vector<T> main_diagonal   = main_diagonal_;
-        Vector<T> sub_diagonal    = sub_diagonal_;
-        Vector<T> gamma           = gamma_;
-        Vector<T> k1_trajectory   = k1_trajectory_;
-        Vector<T> k2_trajectory   = k2_trajectory_;
+        Vector<T> main_diagonal = main_diagonal_;
+        Vector<T> sub_diagonal  = sub_diagonal_;
+        Vector<T> gamma         = gamma_;
+        Vector<T> k1_trajectory = k1_trajectory_;
+        Vector<T> k2_trajectory = k2_trajectory_;
 
         if (matrix_dimension == 1) {
-            // Degenerate case: num_steps_ == 0, nothing to reduce. main_diagonal_ already holds
-            // b[0] and solve() will just divide by it. (A cyclic system of dimension 1 is not a
-            // meaningful configuration; we intentionally skip the Sherman-Morrison adjustment
-            // here rather than apply an ill-defined self-correction.)
             is_factorized_ = true;
             return;
         }
@@ -237,15 +350,15 @@ public:
         using TeamPolicy = Kokkos::TeamPolicy<Kokkos::DefaultExecutionSpace>;
         using TeamMember = typename TeamPolicy::member_type;
 
-        // Ping-pong scratch for a, b, c: 2 buffers x 3 arrays x matrix_dimension x sizeof(T).
-        // Sized by matrix_dimension_ (one slot per equation), independent of however many actual
-        // team threads Kokkos ends up giving us below.
-        const std::size_t scratch_bytes = 2ull * 3ull * static_cast<std::size_t>(matrix_dimension) * sizeof(T);
+        // Symmetric matrix ⇒ PCR reduction preserves a[i] = c[i - delta] (0 if i - delta < 0) at
+        // every step (proof: substitute the invariant into the newA/newC update formulas — it's
+        // self-reproducing). So we never need a[] as its own array: it's always a shifted read of
+        // e[] (= what used to be c[]). Scratch drops from 3 arrays (a,b,c) to 2 (e,b) — 2 buffers
+        // x 2 arrays x n instead of x 3 — which is a real win since shared memory, not flops, is
+        // usually what limits team occupancy here. c[]'s own update formula is untouched, so all
+        // the boundary zero-propagation PCR relies on is unaffected by this change.
+        const std::size_t scratch_bytes = 2ull * 2ull * static_cast<std::size_t>(matrix_dimension) * sizeof(T);
 
-        // Kokkos::AUTO lets Kokkos pick a team size the backend can actually satisfy (this can be
-        // far smaller than matrix_dimension_, e.g. on CPU/OpenMP backends — see the constructor
-        // comment). The strided loops below (`for (i = team_rank(); i < n; i += team_size())`)
-        // make the kernel correct for any team size Kokkos chooses, from 1 up to n.
         TeamPolicy policy(batch_count_, Kokkos::AUTO);
         policy.set_scratch_size(0, Kokkos::PerTeam(static_cast<int>(scratch_bytes)));
 
@@ -257,34 +370,25 @@ public:
                 const int rank      = team_member.team_rank();
 
                 T* scratch = static_cast<T*>(team_member.team_scratch(0).get_shmem(scratch_bytes));
-                // Layout: [a0 | b0 | c0 | a1 | b1 | c1], each block matrix_dimension long.
-                T* a[2] = {scratch, scratch + 3 * matrix_dimension};
-                T* b[2] = {scratch + matrix_dimension, scratch + 4 * matrix_dimension};
-                T* c[2] = {scratch + 2 * matrix_dimension, scratch + 5 * matrix_dimension};
+                // Layout: [e0 | b0 | e1 | b1], each block matrix_dimension long.
+                T* e[2] = {scratch, scratch + 2 * matrix_dimension};
+                T* b[2] = {scratch + matrix_dimension, scratch + 3 * matrix_dimension};
 
                 int cur = 0;
 
-                // Load a/b/c from the input matrix. Virtual a[0] and c[n-1] are zero (no
-                // left/right neighbor at the boundary), matching the pcr_neighbors() clamping
-                // convention. Each thread strides over the equations it owns; if team_size < n,
-                // a thread simply owns more than one equation and loads them in turn.
+                // e[i] plays the role of the old c[i]; a[i] is never stored — it's read back as
+                // e[i - delta] inside the step loop below.
                 for (int i = rank; i < matrix_dimension; i += team_size) {
-                    a[cur][i] = (i == 0) ? T(0) : sub_diagonal(offset + i - 1);
+                    e[cur][i] = (i == matrix_dimension - 1) ? T(0) : sub_diagonal(offset + i);
                     b[cur][i] = main_diagonal(offset + i);
-                    c[cur][i] = (i == matrix_dimension - 1) ? T(0) : sub_diagonal(offset + i);
                 }
 
                 team_member.team_barrier();
 
                 if (is_cyclic) {
-                    // Sherman-Morrison-Woodbury diagonal adjustment, applied to the *scratch* b
-                    // array (not to main_diagonal_ directly) since scratch, not main_diagonal_,
-                    // is the live working array during PCR reduction. Same formula as the old
-                    // Thomas implementation. Only equation 0 needs this, so only the thread that
-                    // happens to own equation 0 does the work.
                     if (rank == 0) {
                         const T cyclic_corner_element = sub_diagonal(offset + matrix_dimension - 1);
-                        gamma(batch_idx)               = -main_diagonal(offset + 0);
+                        gamma(batch_idx)              = -main_diagonal(offset + 0);
                         b[cur][0] -= gamma(batch_idx);
                         b[cur][matrix_dimension - 1] -=
                             cyclic_corner_element * cyclic_corner_element / gamma(batch_idx);
@@ -299,23 +403,27 @@ public:
                         int iLeft, iRight;
                         pcr_neighbors(i, delta, matrix_dimension, iLeft, iRight);
 
-                        const T k1_val = a[cur][i] / b[cur][iLeft];
-                        const T k2_val = c[cur][i] / b[cur][iRight];
+                        // a[i] and a[iRight], derived on the fly from e (symmetry invariant),
+                        // instead of read from a separately-maintained array.
+                        const T a_i      = (i >= delta) ? e[cur][i - delta] : T(0);
+                        const T a_iRight = (iRight >= delta) ? e[cur][iRight - delta] : T(0);
+                        const T c_i      = e[cur][i];
+                        const T c_iLeft  = e[cur][iLeft];
+
+                        const T k1_val = a_i / b[cur][iLeft];
+                        const T k2_val = c_i / b[cur][iRight];
 
                         k1_trajectory(static_cast<std::size_t>(batch_idx) * num_steps * matrix_dimension +
-                                       static_cast<std::size_t>(step) * matrix_dimension + i) = k1_val;
+                                      static_cast<std::size_t>(step) * matrix_dimension + i) = k1_val;
                         k2_trajectory(static_cast<std::size_t>(batch_idx) * num_steps * matrix_dimension +
-                                       static_cast<std::size_t>(step) * matrix_dimension + i) = k2_val;
+                                      static_cast<std::size_t>(step) * matrix_dimension + i) = k2_val;
 
                         const int nxt = 1 - cur;
-                        a[nxt][i]     = -a[cur][iLeft] * k1_val;
-                        b[nxt][i]     = b[cur][i] - c[cur][iLeft] * k1_val - a[cur][iRight] * k2_val;
-                        c[nxt][i]     = -c[cur][iRight] * k2_val;
+                        // Same formula as the old c[nxt][i] — only a[nxt] has been eliminated.
+                        e[nxt][i] = -e[cur][iRight] * k2_val;
+                        b[nxt][i] = b[cur][i] - c_iLeft * k1_val - a_iRight * k2_val;
                     }
 
-                    // PCR reads neighbors' pre-update values within a step, so every thread must
-                    // finish writing the "next" buffer (for every equation it owns) before any
-                    // thread starts reading it as "current" in the following iteration.
                     team_member.team_barrier();
                     cur = 1 - cur;
                 }
@@ -346,8 +454,8 @@ public:
         const int effective_batch_count = (batch_count_ - batch_offset + batch_stride - 1) / batch_stride;
 
         int matrix_dimension = matrix_dimension_;
-        int num_steps         = num_steps_;
-        bool is_cyclic         = is_cyclic_;
+        int num_steps        = num_steps_;
+        bool is_cyclic       = is_cyclic_;
 
         Vector<T> main_diagonal = main_diagonal_;
         Vector<T> sub_diagonal  = sub_diagonal_;
@@ -381,11 +489,11 @@ public:
 
             Kokkos::parallel_for(
                 "SolveNonCyclicPCR", policy, KOKKOS_LAMBDA(const TeamMember& team_member) {
-                    const int k          = team_member.league_rank();
-                    const int batch_idx  = batch_stride * k + batch_offset;
-                    const int offset     = batch_idx * matrix_dimension;
-                    const int team_size  = team_member.team_size();
-                    const int rank       = team_member.team_rank();
+                    const int k         = team_member.league_rank();
+                    const int batch_idx = batch_stride * k + batch_offset;
+                    const int offset    = batch_idx * matrix_dimension;
+                    const int team_size = team_member.team_size();
+                    const int rank      = team_member.team_rank();
 
                     T* scratch = static_cast<T*>(team_member.team_scratch(0).get_shmem(scratch_bytes));
                     T* d[2]    = {scratch, scratch + matrix_dimension};
@@ -403,19 +511,18 @@ public:
                             int iLeft, iRight;
                             pcr_neighbors(i, delta, matrix_dimension, iLeft, iRight);
 
-                            const T k1_val = k1_trajectory(static_cast<std::size_t>(batch_idx) * num_steps *
-                                                                matrix_dimension +
-                                                            static_cast<std::size_t>(step) * matrix_dimension + i);
-                            const T k2_val = k2_trajectory(static_cast<std::size_t>(batch_idx) * num_steps *
-                                                                matrix_dimension +
-                                                            static_cast<std::size_t>(step) * matrix_dimension + i);
+                            const T k1_val =
+                                k1_trajectory(static_cast<std::size_t>(batch_idx) * num_steps * matrix_dimension +
+                                              static_cast<std::size_t>(step) * matrix_dimension + i);
+                            const T k2_val =
+                                k2_trajectory(static_cast<std::size_t>(batch_idx) * num_steps * matrix_dimension +
+                                              static_cast<std::size_t>(step) * matrix_dimension + i);
 
                             const int nxt = 1 - cur;
                             d[nxt][i]     = d[cur][i] - d[cur][iLeft] * k1_val - d[cur][iRight] * k2_val;
                         }
 
-                        // PCR reads neighbors' pre-update values within a step; barrier before
-                        // swapping which buffer is "current".
+                        // PCR reads neighbors' pre-update values within a step; barrier before swapping which buffer is "current".
                         team_member.team_barrier();
                         cur = 1 - cur;
                     }
@@ -440,11 +547,11 @@ public:
 
             Kokkos::parallel_for(
                 "SolveCyclicPCR", policy, KOKKOS_LAMBDA(const TeamMember& team_member) {
-                    const int k          = team_member.league_rank();
-                    const int batch_idx  = batch_stride * k + batch_offset;
-                    const int offset     = batch_idx * matrix_dimension;
-                    const int team_size  = team_member.team_size();
-                    const int rank       = team_member.team_rank();
+                    const int k         = team_member.league_rank();
+                    const int batch_idx = batch_stride * k + batch_offset;
+                    const int offset    = batch_idx * matrix_dimension;
+                    const int team_size = team_member.team_size();
+                    const int rank      = team_member.team_rank();
 
                     T* scratch = static_cast<T*>(team_member.team_scratch(0).get_shmem(scratch_bytes));
                     // Layout: [d_rhs(0) | d_buf(0) | d_rhs(1) | d_buf(1)], each block
@@ -463,12 +570,15 @@ public:
                     // same steps as d_rhs, which achieves the same effect.
                     for (int i = rank; i < matrix_dimension; i += team_size) {
                         d_rhs[cur][i] = rhs(offset + i);
-                        if (i == 0)
+                        if (i == 0) {
                             d_buf[cur][i] = gamma(batch_idx);
-                        else if (i == matrix_dimension - 1)
+                        }
+                        else if (i == matrix_dimension - 1) {
                             d_buf[cur][i] = cyclic_corner_element;
-                        else
+                        }
+                        else {
                             d_buf[cur][i] = T(0);
+                        }
                     }
 
                     team_member.team_barrier();
@@ -480,12 +590,12 @@ public:
                             int iLeft, iRight;
                             pcr_neighbors(i, delta, matrix_dimension, iLeft, iRight);
 
-                            const T k1_val = k1_trajectory(static_cast<std::size_t>(batch_idx) * num_steps *
-                                                                matrix_dimension +
-                                                            static_cast<std::size_t>(step) * matrix_dimension + i);
-                            const T k2_val = k2_trajectory(static_cast<std::size_t>(batch_idx) * num_steps *
-                                                                matrix_dimension +
-                                                            static_cast<std::size_t>(step) * matrix_dimension + i);
+                            const T k1_val =
+                                k1_trajectory(static_cast<std::size_t>(batch_idx) * num_steps * matrix_dimension +
+                                              static_cast<std::size_t>(step) * matrix_dimension + i);
+                            const T k2_val =
+                                k2_trajectory(static_cast<std::size_t>(batch_idx) * num_steps * matrix_dimension +
+                                              static_cast<std::size_t>(step) * matrix_dimension + i);
 
                             const int nxt = 1 - cur;
                             d_rhs[nxt][i] = d_rhs[cur][i] - d_rhs[cur][iLeft] * k1_val - d_rhs[cur][iRight] * k2_val;
@@ -507,10 +617,10 @@ public:
                     }
                     team_member.team_barrier();
 
-                    const T dot_product_x_v = d_rhs[other][0] + cyclic_corner_element / gamma(batch_idx) *
-                                                                      d_rhs[other][matrix_dimension - 1];
-                    const T dot_product_u_v = d_buf[other][0] + cyclic_corner_element / gamma(batch_idx) *
-                                                                      d_buf[other][matrix_dimension - 1];
+                    const T dot_product_x_v =
+                        d_rhs[other][0] + cyclic_corner_element / gamma(batch_idx) * d_rhs[other][matrix_dimension - 1];
+                    const T dot_product_u_v =
+                        d_buf[other][0] + cyclic_corner_element / gamma(batch_idx) * d_buf[other][matrix_dimension - 1];
                     const T factor = dot_product_x_v / (T(1) + dot_product_u_v);
 
                     for (int i = rank; i < matrix_dimension; i += team_size) {
@@ -524,45 +634,48 @@ public:
     /* ---------------------------- */
     /* Solve: Diagonal Scaling Only */
     /* ---------------------------- */
-    // Unchanged from the Thomas version: this path never touches off-diagonal entries or PCR
-    // machinery at all, it's pure elementwise scaling, so there's no within-system parallelism to
-    // exploit and RangePolicy remains the right tool.
-
+    // Every (batch, i) scaling is fully independent — no i-1/i+1 coupling at all, unlike the PCR
+    // kernels above. That makes the old RangePolicy(0, batch_count_) with a serial inner loop over
+    // matrix_dimension_ the worst-parallelized kernel in the file: it exposed only batch_count_
+    // independent work items when it could have exposed batch_count_ * matrix_dimension_. Since
+    // matrix_dimension_ >= batch_count_ in this codebase (see file header), that serial inner loop
+    // was leaving most of the available parallelism on the table. Fixed by flattening to one
+    // thread per (batch, i) pair via MDRangePolicy — no team/scratch machinery needed since there's
+    // no barrier or neighbor read to synchronize.
     void solve_diagonal(Vector<T> rhs, int batch_offset = 0, int batch_stride = 1)
     {
         if (!is_factorized_) {
             throw std::runtime_error("Error: Matrix must be factorized before solving.");
         }
 
-        int effective_batch_count = (batch_count_ - batch_offset + batch_stride - 1) / batch_stride;
+        const int effective_batch_count = (batch_count_ - batch_offset + batch_stride - 1) / batch_stride;
 
-        int matrix_dimension    = matrix_dimension_;
-        Vector<T> main_diagonal = main_diagonal_;
-        Vector<T> gamma         = gamma_;
+        const int matrix_dimension = matrix_dimension_;
+        const bool is_cyclic       = is_cyclic_;
+        Vector<T> main_diagonal    = main_diagonal_;
+        Vector<T> gamma            = gamma_;
 
-        if (!is_cyclic_) {
-            Kokkos::parallel_for(
-                "SolveDiagonalNonCyclic", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, effective_batch_count),
-                KOKKOS_LAMBDA(const int k) {
-                    int batch_idx = batch_stride * k + batch_offset;
-                    int offset    = batch_idx * matrix_dimension;
-                    for (int i = 0; i < matrix_dimension; i++) {
-                        rhs(offset + i) /= main_diagonal(offset + i);
-                    }
-                });
-        }
-        else {
-            Kokkos::parallel_for(
-                "SolveDiagonalCyclic", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, effective_batch_count),
-                KOKKOS_LAMBDA(const int k) {
-                    int batch_idx = batch_stride * k + batch_offset;
-                    int offset    = batch_idx * matrix_dimension;
-                    rhs(offset + 0) /= main_diagonal(offset + 0) + gamma(batch_idx);
-                    for (int i = 1; i < matrix_dimension; i++) {
-                        rhs(offset + i) /= main_diagonal(offset + i);
-                    }
-                });
-        }
+        using MDPolicy = Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>;
+        MDPolicy policy({0, 0}, {effective_batch_count, matrix_dimension});
+
+        Kokkos::parallel_for(
+            "SolveDiagonal", policy, KOKKOS_LAMBDA(const int k, const int i) {
+                const int batch_idx = batch_stride * k + batch_offset;
+                const int offset    = batch_idx * matrix_dimension;
+
+                // Only equation 0 of a cyclic system carries the Sherman-Morrison-Woodbury
+                // diagonal correction (gamma); every other (batch, i) pair is a plain divide.
+                // This branch is on i itself, so within a given batch's work it diverges for
+                // exactly one (batch, 0) thread — negligible, and unavoidable without a second
+                // kernel launch just to special-case a single index per system.
+                if (is_cyclic && i == 0) {
+                    rhs(offset) /= main_diagonal(offset) + gamma(batch_idx);
+                }
+                else {
+                    rhs(offset + i) /= main_diagonal(offset + i);
+                }
+            });
+
         Kokkos::fence();
     }
 
@@ -572,8 +685,7 @@ private:
 
     Vector<T> main_diagonal_;
     Vector<T> sub_diagonal_;
-    Vector<T> buffer_; // kept for API compatibility; unused internally by the PCR solve path,
-                        // which builds its buffer/gamma vector directly in team scratch instead.
+
     Vector<T> gamma_;
 
     bool is_cyclic_;
