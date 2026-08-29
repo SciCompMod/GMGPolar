@@ -123,7 +123,16 @@ protected:
 namespace gmgpolar
 {
 
+#if defined(KOKKOS_ENABLE_CUDA) || defined(KOKKOS_ENABLE_HIP) || defined(KOKKOS_ENABLE_SYCL)
+
 template <typename T>
 using BatchedTridiagonalSolver = BatchedTridiagonalSolverPCR<T>;
+
+#else
+
+template <typename T>
+using BatchedTridiagonalSolver = BatchedTridiagonalSolverThomas<T>;
+
+#endif
 
 } // namespace gmgpolar
