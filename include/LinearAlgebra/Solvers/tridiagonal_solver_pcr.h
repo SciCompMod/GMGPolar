@@ -97,8 +97,8 @@ public:
      */
     KOKKOS_INLINE_FUNCTION const T& k1(const int batch_idx, const int step, const int index) const
     {
-        return k1_trajectory_(static_cast<std::size_t>(batch_idx) * num_steps_ * matrix_dimension_ +
-                              static_cast<std::size_t>(step) * matrix_dimension_ + index);
+        return k1_trajectory_(static_cast<std::size_t>(batch_idx) * num_steps_ * this->matrix_dimension_ +
+                              static_cast<std::size_t>(step) * this->matrix_dimension_ + index);
     }
 
     /**
@@ -110,8 +110,8 @@ public:
      */
     KOKKOS_INLINE_FUNCTION const T& k2(const int batch_idx, const int step, const int index) const
     {
-        return k2_trajectory_(static_cast<std::size_t>(batch_idx) * num_steps_ * matrix_dimension_ +
-                              static_cast<std::size_t>(step) * matrix_dimension_ + index);
+        return k2_trajectory_(static_cast<std::size_t>(batch_idx) * num_steps_ * this->matrix_dimension_ +
+                              static_cast<std::size_t>(step) * this->matrix_dimension_ + index);
     }
 
     /**
@@ -129,12 +129,12 @@ public:
      */
     void setup() override
     {
-        int matrix_dimension = matrix_dimension_;
+        int matrix_dimension = this->matrix_dimension_;
         int num_steps        = num_steps_;
-        bool is_cyclic       = is_cyclic_;
+        bool is_cyclic       = this->is_cyclic_;
 
-        Vector<T> main_diagonal = main_diagonal_;
-        Vector<T> sub_diagonal  = sub_diagonal_;
+        Vector<T> main_diagonal = this->main_diagonal_;
+        Vector<T> sub_diagonal  = this->sub_diagonal_;
         Vector<T> gamma         = gamma_;
         Vector<T> k1_trajectory = k1_trajectory_;
         Vector<T> k2_trajectory = k2_trajectory_;
@@ -153,7 +153,7 @@ public:
         // e[] rather than stored separately, reducing team scratch storage.
         const std::size_t scratch_bytes = 2ull * 2ull * static_cast<std::size_t>(matrix_dimension) * sizeof(T);
 
-        TeamPolicy policy(batch_count_, Kokkos::AUTO);
+        TeamPolicy policy(this->batch_count_, Kokkos::AUTO);
         policy.set_scratch_size(0, Kokkos::PerTeam(static_cast<int>(scratch_bytes)));
 
         Kokkos::parallel_for(
@@ -252,14 +252,14 @@ public:
             throw std::runtime_error("Error: Matrix must be factorized before solving.");
         }
 
-        const int effective_batch_count = (batch_count_ - batch_offset + batch_stride - 1) / batch_stride;
+        const int effective_batch_count = (this->batch_count_ - batch_offset + batch_stride - 1) / batch_stride;
 
-        int matrix_dimension = matrix_dimension_;
+        int matrix_dimension = this->matrix_dimension_;
         int num_steps        = num_steps_;
-        bool is_cyclic       = is_cyclic_;
+        bool is_cyclic       = this->is_cyclic_;
 
-        Vector<T> main_diagonal = main_diagonal_;
-        Vector<T> sub_diagonal  = sub_diagonal_;
+        Vector<T> main_diagonal = this->main_diagonal_;
+        Vector<T> sub_diagonal  = this->sub_diagonal_;
         Vector<T> gamma         = gamma_;
         Vector<T> k1_trajectory = k1_trajectory_;
         Vector<T> k2_trajectory = k2_trajectory_;
@@ -331,7 +331,7 @@ public:
         else {
             // The cyclic solve simultaneously reduces the right-hand side and
             // the auxiliary Sherman–Morrison vector. The original corner
-            // coefficient remains available in sub_diagonal_.
+            // coefficient remains available in this->sub_diagonal_.
             const std::size_t scratch_bytes = 4ull * static_cast<std::size_t>(matrix_dimension) * sizeof(T);
 
             TeamPolicy policy(effective_batch_count, Kokkos::AUTO);
@@ -439,11 +439,11 @@ public:
             throw std::runtime_error("Error: Matrix must be factorized before solving.");
         }
 
-        const int effective_batch_count = (batch_count_ - batch_offset + batch_stride - 1) / batch_stride;
+        const int effective_batch_count = (this->batch_count_ - batch_offset + batch_stride - 1) / batch_stride;
 
-        const int matrix_dimension = matrix_dimension_;
-        const bool is_cyclic       = is_cyclic_;
-        Vector<T> main_diagonal    = main_diagonal_;
+        const int matrix_dimension = this->matrix_dimension_;
+        const bool is_cyclic       = this->is_cyclic_;
+        Vector<T> main_diagonal    = this->main_diagonal_;
         Vector<T> gamma            = gamma_;
 
         using MDPolicy = Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>;

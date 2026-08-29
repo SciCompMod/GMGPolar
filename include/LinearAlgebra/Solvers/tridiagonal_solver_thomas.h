@@ -31,14 +31,14 @@ public:
     void setup()
     {
         // Create local copies for lambda capture
-        int matrix_dimension    = matrix_dimension_;
-        Vector<T> main_diagonal = main_diagonal_;
-        Vector<T> sub_diagonal  = sub_diagonal_;
+        int matrix_dimension    = this->matrix_dimension_;
+        Vector<T> main_diagonal = this->main_diagonal_;
+        Vector<T> sub_diagonal  = this->sub_diagonal_;
         Vector<T> gamma         = gamma_;
 
         if (!is_cyclic_) {
             Kokkos::parallel_for(
-                "SetupNonCyclic", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, batch_count_),
+                "SetupNonCyclic", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, this->batch_count_),
                 KOKKOS_LAMBDA(const int batch_idx) {
                     // ----------------------------------- //
                     // Obtain offset for the current batch //
@@ -55,7 +55,7 @@ public:
         }
         else {
             Kokkos::parallel_for(
-                "SetupCyclic", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, batch_count_),
+                "SetupCyclic", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, this->batch_count_),
                 KOKKOS_LAMBDA(const int batch_idx) {
                     // ----------------------------------- //
                     // Obtain offset for the current batch //
@@ -98,12 +98,12 @@ public:
         }
 
         // Compute the effective number of batches to solve
-        int effective_batch_count = (batch_count_ - batch_offset + batch_stride - 1) / batch_stride;
+        int effective_batch_count = (this->batch_count_ - batch_offset + batch_stride - 1) / batch_stride;
 
         // Create local copies for lambda capture
-        int matrix_dimension    = matrix_dimension_;
-        Vector<T> main_diagonal = main_diagonal_;
-        Vector<T> sub_diagonal  = sub_diagonal_;
+        int matrix_dimension    = this->matrix_dimension_;
+        Vector<T> main_diagonal = this->main_diagonal_;
+        Vector<T> sub_diagonal  = this->sub_diagonal_;
         Vector<T> buffer        = buffer_;
         Vector<T> gamma         = gamma_;
 
@@ -201,11 +201,11 @@ public:
         }
 
         // Compute the effective number of batches to solve
-        int effective_batch_count = (batch_count_ - batch_offset + batch_stride - 1) / batch_stride;
+        int effective_batch_count = (this->batch_count_ - batch_offset + batch_stride - 1) / batch_stride;
 
         // Create local copies for lambda capture
-        int matrix_dimension    = matrix_dimension_;
-        Vector<T> main_diagonal = main_diagonal_;
+        int matrix_dimension    = this->matrix_dimension_;
+        Vector<T> main_diagonal = this->main_diagonal_;
         Vector<T> gamma         = gamma_;
 
         if (!is_cyclic_) {
