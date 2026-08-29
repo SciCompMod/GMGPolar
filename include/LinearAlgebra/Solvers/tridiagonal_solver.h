@@ -16,11 +16,15 @@
 //
 // PCR trades more total work (O(n log n) vs Thomas's O(n)) for parallel depth O(log n) with `n`
 // independent workers per step and NO backward-substitution phase. We exploit that by using
-// Kokkos::TeamPolicy: one TEAM per system (league_size = batch_count_), and one team THREAD per
-// equation within that system (team_size = matrix_dimension_). This recovers the missing
-// intra-system parallelism. Do not collapse this back to a RangePolicy-per-system loop that runs
-// PCR sequentially inside one thread — that would keep PCR's extra work with none of its extra
-// parallelism and would regress versus Thomas.
+// Kokkos::TeamPolicy: one TEAM per system (league_size = batch_count_), and team THREADS working
+// across the equations within that system. Team size is requested via Kokkos::AUTO rather than
+// pinned to matrix_dimension_, since the achievable team size is backend-dependent (large on
+// CUDA, often tiny on CPU/OpenMP backends where a "team" maps to hardware threads per core); each
+// kernel below distributes the n equations across whatever team size Kokkos actually grants via a
+// strided per-thread loop, so a thread simply owns more than one equation when team_size < n. Do
+// not collapse this back to a RangePolicy-per-system loop that runs PCR sequentially inside one
+// thread — that would keep PCR's extra work with none of its extra parallelism and would regress
+// versus Thomas.
 //
 // setup()/solve() split (Strategy A)
 // -----------------------------------
@@ -100,23 +104,27 @@ public:
         assign(k2_trajectory_, T(0));
 
         // ----------------------------------------------------------------------------------- //
-        // Team-size limit check (see section 8.1 of the migration plan). PCR's parallelization
-        // model requires team_size == matrix_dimension_ (one thread per equation), which may
-        // exceed the backend's max threads per team (commonly 1024 on CUDA). We deliberately fail
-        // loudly here rather than silently falling back to a strided multi-equation-per-thread
-        // scheme, so the limitation is visible instead of silently producing a slow (or, if
-        // botched, incorrect) solve. 1024 is a conservative, commonly-safe default; a
-        // backend-specific query (e.g. via a throwaway TeamPolicy's team_size_max()) could tighten
-        // this further if needed.
+        // Team-size handling (section 8.1 of the migration plan).
+        //
+        // An earlier version of this class launched every TeamPolicy with
+        // team_size = matrix_dimension_ and threw at construction time if matrix_dimension_
+        // exceeded a hardcoded 1024. That constant was implicitly CUDA-shaped: on CUDA a team
+        // does map to a thread block, where team sizes in the hundreds/~1024 are normal. On the
+        // OpenMP backend, however, a "team" maps to hardware threads sharing a core, and the
+        // actual max team size is typically tiny (single digits) — nothing to do with
+        // matrix_dimension_ at all. A fixed constant can therefore be both wrong (too permissive
+        // on CPU backends, causing a runtime "Requested too large team size" exception) and
+        // pointlessly restrictive (too conservative on GPU backends with a higher real limit).
+        //
+        // Fix: never assume matrix_dimension_ is an achievable team size. Every TeamPolicy below
+        // is launched with Kokkos::AUTO, so Kokkos itself picks a team size the backend can
+        // actually satisfy. Inside each kernel, work over the n equations is distributed across
+        // whatever team size Kokkos chose via a manual strided loop
+        // (`for (i = team_rank(); i < n; i += team_size())`), so a team with only 4 threads (as
+        // on your OpenMP run) correctly covers all n equations, each thread just handling
+        // ceil(n/team_size) of them sequentially. This works unchanged for n = 1 up to
+        // arbitrarily large n, on any backend, with no hardcoded ceiling and no exception.
         // ----------------------------------------------------------------------------------- //
-        constexpr int kMaxTeamSize = 1024;
-        if (matrix_dimension_ > kMaxTeamSize) {
-            throw std::runtime_error(
-                "BatchedTridiagonalSolver: matrix_dimension (" + std::to_string(matrix_dimension_) +
-                ") exceeds the maximum supported Kokkos team size (" + std::to_string(kMaxTeamSize) +
-                "). PCR's team-per-system parallelization needs one team thread per equation; a "
-                "strided multi-equation-per-thread fallback is not implemented.");
-        }
     }
 
     /* ------------------- */
@@ -229,18 +237,24 @@ public:
         using TeamPolicy = Kokkos::TeamPolicy<Kokkos::DefaultExecutionSpace>;
         using TeamMember = typename TeamPolicy::member_type;
 
-        const int team_size = matrix_dimension;
         // Ping-pong scratch for a, b, c: 2 buffers x 3 arrays x matrix_dimension x sizeof(T).
+        // Sized by matrix_dimension_ (one slot per equation), independent of however many actual
+        // team threads Kokkos ends up giving us below.
         const std::size_t scratch_bytes = 2ull * 3ull * static_cast<std::size_t>(matrix_dimension) * sizeof(T);
 
-        TeamPolicy policy(batch_count_, team_size);
+        // Kokkos::AUTO lets Kokkos pick a team size the backend can actually satisfy (this can be
+        // far smaller than matrix_dimension_, e.g. on CPU/OpenMP backends — see the constructor
+        // comment). The strided loops below (`for (i = team_rank(); i < n; i += team_size())`)
+        // make the kernel correct for any team size Kokkos chooses, from 1 up to n.
+        TeamPolicy policy(batch_count_, Kokkos::AUTO);
         policy.set_scratch_size(0, Kokkos::PerTeam(static_cast<int>(scratch_bytes)));
 
         Kokkos::parallel_for(
             "SetupPCR", policy, KOKKOS_LAMBDA(const TeamMember& team_member) {
                 const int batch_idx = team_member.league_rank();
-                const int i         = team_member.team_rank();
                 const int offset    = batch_idx * matrix_dimension;
+                const int team_size = team_member.team_size();
+                const int rank      = team_member.team_rank();
 
                 T* scratch = static_cast<T*>(team_member.team_scratch(0).get_shmem(scratch_bytes));
                 // Layout: [a0 | b0 | c0 | a1 | b1 | c1], each block matrix_dimension long.
@@ -252,10 +266,13 @@ public:
 
                 // Load a/b/c from the input matrix. Virtual a[0] and c[n-1] are zero (no
                 // left/right neighbor at the boundary), matching the pcr_neighbors() clamping
-                // convention.
-                a[cur][i] = (i == 0) ? T(0) : sub_diagonal(offset + i - 1);
-                b[cur][i] = main_diagonal(offset + i);
-                c[cur][i] = (i == matrix_dimension - 1) ? T(0) : sub_diagonal(offset + i);
+                // convention. Each thread strides over the equations it owns; if team_size < n,
+                // a thread simply owns more than one equation and loads them in turn.
+                for (int i = rank; i < matrix_dimension; i += team_size) {
+                    a[cur][i] = (i == 0) ? T(0) : sub_diagonal(offset + i - 1);
+                    b[cur][i] = main_diagonal(offset + i);
+                    c[cur][i] = (i == matrix_dimension - 1) ? T(0) : sub_diagonal(offset + i);
+                }
 
                 team_member.team_barrier();
 
@@ -263,8 +280,9 @@ public:
                     // Sherman-Morrison-Woodbury diagonal adjustment, applied to the *scratch* b
                     // array (not to main_diagonal_ directly) since scratch, not main_diagonal_,
                     // is the live working array during PCR reduction. Same formula as the old
-                    // Thomas implementation.
-                    if (i == 0) {
+                    // Thomas implementation. Only equation 0 needs this, so only the thread that
+                    // happens to own equation 0 does the work.
+                    if (rank == 0) {
                         const T cyclic_corner_element = sub_diagonal(offset + matrix_dimension - 1);
                         gamma(batch_idx)               = -main_diagonal(offset + 0);
                         b[cur][0] -= gamma(batch_idx);
@@ -276,30 +294,35 @@ public:
 
                 for (int step = 0; step < num_steps; step++) {
                     const int delta = 1 << step;
-                    int iLeft, iRight;
-                    pcr_neighbors(i, delta, matrix_dimension, iLeft, iRight);
 
-                    const T k1_val = a[cur][i] / b[cur][iLeft];
-                    const T k2_val = c[cur][i] / b[cur][iRight];
+                    for (int i = rank; i < matrix_dimension; i += team_size) {
+                        int iLeft, iRight;
+                        pcr_neighbors(i, delta, matrix_dimension, iLeft, iRight);
 
-                    k1_trajectory(static_cast<std::size_t>(batch_idx) * num_steps * matrix_dimension +
-                                   static_cast<std::size_t>(step) * matrix_dimension + i) = k1_val;
-                    k2_trajectory(static_cast<std::size_t>(batch_idx) * num_steps * matrix_dimension +
-                                   static_cast<std::size_t>(step) * matrix_dimension + i) = k2_val;
+                        const T k1_val = a[cur][i] / b[cur][iLeft];
+                        const T k2_val = c[cur][i] / b[cur][iRight];
 
-                    const int nxt = 1 - cur;
-                    a[nxt][i]     = -a[cur][iLeft] * k1_val;
-                    b[nxt][i]     = b[cur][i] - c[cur][iLeft] * k1_val - a[cur][iRight] * k2_val;
-                    c[nxt][i]     = -c[cur][iRight] * k2_val;
+                        k1_trajectory(static_cast<std::size_t>(batch_idx) * num_steps * matrix_dimension +
+                                       static_cast<std::size_t>(step) * matrix_dimension + i) = k1_val;
+                        k2_trajectory(static_cast<std::size_t>(batch_idx) * num_steps * matrix_dimension +
+                                       static_cast<std::size_t>(step) * matrix_dimension + i) = k2_val;
+
+                        const int nxt = 1 - cur;
+                        a[nxt][i]     = -a[cur][iLeft] * k1_val;
+                        b[nxt][i]     = b[cur][i] - c[cur][iLeft] * k1_val - a[cur][iRight] * k2_val;
+                        c[nxt][i]     = -c[cur][iRight] * k2_val;
+                    }
 
                     // PCR reads neighbors' pre-update values within a step, so every thread must
-                    // finish writing the "next" buffer before any thread starts reading it as
-                    // "current" in the following iteration.
+                    // finish writing the "next" buffer (for every equation it owns) before any
+                    // thread starts reading it as "current" in the following iteration.
                     team_member.team_barrier();
-                    cur = nxt;
+                    cur = 1 - cur;
                 }
 
-                main_diagonal(offset + i) = b[cur][i];
+                for (int i = rank; i < matrix_dimension; i += team_size) {
+                    main_diagonal(offset + i) = b[cur][i];
+                }
             });
 
         Kokkos::fence();
@@ -347,50 +370,59 @@ public:
 
         using TeamPolicy = Kokkos::TeamPolicy<Kokkos::DefaultExecutionSpace>;
         using TeamMember = typename TeamPolicy::member_type;
-        const int team_size = matrix_dimension;
 
         if (!is_cyclic) {
             const std::size_t scratch_bytes = 2ull * static_cast<std::size_t>(matrix_dimension) * sizeof(T);
 
-            TeamPolicy policy(effective_batch_count, team_size);
+            // See setup() for why Kokkos::AUTO + strided per-thread loops are used instead of a
+            // fixed team_size = matrix_dimension_.
+            TeamPolicy policy(effective_batch_count, Kokkos::AUTO);
             policy.set_scratch_size(0, Kokkos::PerTeam(static_cast<int>(scratch_bytes)));
 
             Kokkos::parallel_for(
                 "SolveNonCyclicPCR", policy, KOKKOS_LAMBDA(const TeamMember& team_member) {
                     const int k          = team_member.league_rank();
                     const int batch_idx  = batch_stride * k + batch_offset;
-                    const int i          = team_member.team_rank();
                     const int offset     = batch_idx * matrix_dimension;
+                    const int team_size  = team_member.team_size();
+                    const int rank       = team_member.team_rank();
 
                     T* scratch = static_cast<T*>(team_member.team_scratch(0).get_shmem(scratch_bytes));
                     T* d[2]    = {scratch, scratch + matrix_dimension};
 
-                    int cur   = 0;
-                    d[cur][i] = rhs(offset + i);
+                    int cur = 0;
+                    for (int i = rank; i < matrix_dimension; i += team_size) {
+                        d[cur][i] = rhs(offset + i);
+                    }
                     team_member.team_barrier();
 
                     for (int step = 0; step < num_steps; step++) {
                         const int delta = 1 << step;
-                        int iLeft, iRight;
-                        pcr_neighbors(i, delta, matrix_dimension, iLeft, iRight);
 
-                        const T k1_val = k1_trajectory(static_cast<std::size_t>(batch_idx) * num_steps *
-                                                            matrix_dimension +
-                                                        static_cast<std::size_t>(step) * matrix_dimension + i);
-                        const T k2_val = k2_trajectory(static_cast<std::size_t>(batch_idx) * num_steps *
-                                                            matrix_dimension +
-                                                        static_cast<std::size_t>(step) * matrix_dimension + i);
+                        for (int i = rank; i < matrix_dimension; i += team_size) {
+                            int iLeft, iRight;
+                            pcr_neighbors(i, delta, matrix_dimension, iLeft, iRight);
 
-                        const int nxt = 1 - cur;
-                        d[nxt][i]     = d[cur][i] - d[cur][iLeft] * k1_val - d[cur][iRight] * k2_val;
+                            const T k1_val = k1_trajectory(static_cast<std::size_t>(batch_idx) * num_steps *
+                                                                matrix_dimension +
+                                                            static_cast<std::size_t>(step) * matrix_dimension + i);
+                            const T k2_val = k2_trajectory(static_cast<std::size_t>(batch_idx) * num_steps *
+                                                                matrix_dimension +
+                                                            static_cast<std::size_t>(step) * matrix_dimension + i);
+
+                            const int nxt = 1 - cur;
+                            d[nxt][i]     = d[cur][i] - d[cur][iLeft] * k1_val - d[cur][iRight] * k2_val;
+                        }
 
                         // PCR reads neighbors' pre-update values within a step; barrier before
                         // swapping which buffer is "current".
                         team_member.team_barrier();
-                        cur = nxt;
+                        cur = 1 - cur;
                     }
 
-                    rhs(offset + i) = d[cur][i] / main_diagonal(offset + i);
+                    for (int i = rank; i < matrix_dimension; i += team_size) {
+                        rhs(offset + i) = d[cur][i] / main_diagonal(offset + i);
+                    }
                 });
         }
         else {
@@ -401,15 +433,18 @@ public:
             // preserved unmodified by this design.
             const std::size_t scratch_bytes = 4ull * static_cast<std::size_t>(matrix_dimension) * sizeof(T);
 
-            TeamPolicy policy(effective_batch_count, team_size);
+            // See setup() for why Kokkos::AUTO + strided per-thread loops are used instead of a
+            // fixed team_size = matrix_dimension_.
+            TeamPolicy policy(effective_batch_count, Kokkos::AUTO);
             policy.set_scratch_size(0, Kokkos::PerTeam(static_cast<int>(scratch_bytes)));
 
             Kokkos::parallel_for(
                 "SolveCyclicPCR", policy, KOKKOS_LAMBDA(const TeamMember& team_member) {
                     const int k          = team_member.league_rank();
                     const int batch_idx  = batch_stride * k + batch_offset;
-                    const int i          = team_member.team_rank();
                     const int offset     = batch_idx * matrix_dimension;
+                    const int team_size  = team_member.team_size();
+                    const int rank       = team_member.team_rank();
 
                     T* scratch = static_cast<T*>(team_member.team_scratch(0).get_shmem(scratch_bytes));
                     // Layout: [d_rhs(0) | d_buf(0) | d_rhs(1) | d_buf(1)], each block
@@ -421,51 +456,55 @@ public:
                     const T cyclic_corner_element = sub_diagonal(offset + matrix_dimension - 1);
 
                     int cur = 0;
-                    d_rhs[cur][i] = rhs(offset + i);
                     // Initial Sherman-Morrison-Woodbury auxiliary vector: gamma at position 0,
                     // the cyclic corner at position n-1, zero elsewhere. Unlike the sequential
                     // Thomas solve, we do NOT need to hand-chain-multiply this through forward
                     // elimination first — the PCR reduction loop below carries d_buf through the
                     // same steps as d_rhs, which achieves the same effect.
-                    if (i == 0)
-                        d_buf[cur][i] = gamma(batch_idx);
-                    else if (i == matrix_dimension - 1)
-                        d_buf[cur][i] = cyclic_corner_element;
-                    else
-                        d_buf[cur][i] = T(0);
+                    for (int i = rank; i < matrix_dimension; i += team_size) {
+                        d_rhs[cur][i] = rhs(offset + i);
+                        if (i == 0)
+                            d_buf[cur][i] = gamma(batch_idx);
+                        else if (i == matrix_dimension - 1)
+                            d_buf[cur][i] = cyclic_corner_element;
+                        else
+                            d_buf[cur][i] = T(0);
+                    }
 
                     team_member.team_barrier();
 
                     for (int step = 0; step < num_steps; step++) {
                         const int delta = 1 << step;
-                        int iLeft, iRight;
-                        pcr_neighbors(i, delta, matrix_dimension, iLeft, iRight);
 
-                        const T k1_val = k1_trajectory(static_cast<std::size_t>(batch_idx) * num_steps *
-                                                            matrix_dimension +
-                                                        static_cast<std::size_t>(step) * matrix_dimension + i);
-                        const T k2_val = k2_trajectory(static_cast<std::size_t>(batch_idx) * num_steps *
-                                                            matrix_dimension +
-                                                        static_cast<std::size_t>(step) * matrix_dimension + i);
+                        for (int i = rank; i < matrix_dimension; i += team_size) {
+                            int iLeft, iRight;
+                            pcr_neighbors(i, delta, matrix_dimension, iLeft, iRight);
 
-                        const int nxt   = 1 - cur;
-                        d_rhs[nxt][i] = d_rhs[cur][i] - d_rhs[cur][iLeft] * k1_val - d_rhs[cur][iRight] * k2_val;
-                        d_buf[nxt][i] = d_buf[cur][i] - d_buf[cur][iLeft] * k1_val - d_buf[cur][iRight] * k2_val;
+                            const T k1_val = k1_trajectory(static_cast<std::size_t>(batch_idx) * num_steps *
+                                                                matrix_dimension +
+                                                            static_cast<std::size_t>(step) * matrix_dimension + i);
+                            const T k2_val = k2_trajectory(static_cast<std::size_t>(batch_idx) * num_steps *
+                                                                matrix_dimension +
+                                                            static_cast<std::size_t>(step) * matrix_dimension + i);
+
+                            const int nxt = 1 - cur;
+                            d_rhs[nxt][i] = d_rhs[cur][i] - d_rhs[cur][iLeft] * k1_val - d_rhs[cur][iRight] * k2_val;
+                            d_buf[nxt][i] = d_buf[cur][i] - d_buf[cur][iLeft] * k1_val - d_buf[cur][iRight] * k2_val;
+                        }
 
                         // Same reasoning as the non-cyclic case: barrier before the buffer swap.
                         team_member.team_barrier();
-                        cur = nxt;
+                        cur = 1 - cur;
                     }
 
-                    const T x_rhs_i = d_rhs[cur][i] / main_diagonal(offset + i);
-                    const T x_buf_i = d_buf[cur][i] / main_diagonal(offset + i);
-
                     // Stash the divided values into the now-unused "other" buffer so every thread
-                    // (not just thread 0/n-1) can read x_rhs[0], x_rhs[n-1], x_buf[0], x_buf[n-1]
-                    // for the Sherman-Morrison combination below.
-                    const int other  = 1 - cur;
-                    d_rhs[other][i]  = x_rhs_i;
-                    d_buf[other][i]  = x_buf_i;
+                    // (not just whichever thread owns equation 0/n-1) can read x_rhs[0],
+                    // x_rhs[n-1], x_buf[0], x_buf[n-1] for the Sherman-Morrison combination below.
+                    const int other = 1 - cur;
+                    for (int i = rank; i < matrix_dimension; i += team_size) {
+                        d_rhs[other][i] = d_rhs[cur][i] / main_diagonal(offset + i);
+                        d_buf[other][i] = d_buf[cur][i] / main_diagonal(offset + i);
+                    }
                     team_member.team_barrier();
 
                     const T dot_product_x_v = d_rhs[other][0] + cyclic_corner_element / gamma(batch_idx) *
@@ -474,7 +513,9 @@ public:
                                                                       d_buf[other][matrix_dimension - 1];
                     const T factor = dot_product_x_v / (T(1) + dot_product_u_v);
 
-                    rhs(offset + i) = d_rhs[other][i] - factor * d_buf[other][i];
+                    for (int i = rank; i < matrix_dimension; i += team_size) {
+                        rhs(offset + i) = d_rhs[other][i] - factor * d_buf[other][i];
+                    }
                 });
         }
         Kokkos::fence();
@@ -542,4 +583,5 @@ private:
     Vector<T> k1_trajectory_; // size: batch_count_ * num_steps_ * matrix_dimension_
     Vector<T> k2_trajectory_; // size: batch_count_ * num_steps_ * matrix_dimension_
 };
+
 } // namespace gmgpolar
