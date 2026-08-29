@@ -36,7 +36,7 @@ public:
         Vector<T> sub_diagonal  = this->sub_diagonal_;
         Vector<T> gamma         = gamma_;
 
-        if (!is_cyclic_) {
+        if (!this->is_cyclic_) {
             Kokkos::parallel_for(
                 "SetupNonCyclic", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, this->batch_count_),
                 KOKKOS_LAMBDA(const int batch_idx) {
@@ -107,7 +107,7 @@ public:
         Vector<T> buffer        = buffer_;
         Vector<T> gamma         = gamma_;
 
-        if (!is_cyclic_) {
+        if (!this->is_cyclic_) {
             Kokkos::parallel_for(
                 "SolveNonCyclic", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, effective_batch_count),
                 KOKKOS_LAMBDA(const int k) {
@@ -210,7 +210,7 @@ public:
         Vector<T> main_diagonal = this->main_diagonal_;
         Vector<T> gamma         = gamma_;
 
-        if (!is_cyclic_) {
+        if (!this->is_cyclic_) {
             Kokkos::parallel_for(
                 "SolveDiagonalNonCyclic", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, effective_batch_count),
                 KOKKOS_LAMBDA(const int k) {
