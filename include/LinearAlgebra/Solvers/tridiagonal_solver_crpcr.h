@@ -850,18 +850,18 @@ private:
     int cr_trajectory_length_per_batch_; // ~ matrix_dimension_padded_
 
     // Frozen forward-reduction state (O(n) each); see class-level comment.
-    Vector<T> frozen_sub_lower_; // "a"
-    Vector<T> frozen_main_diagonal_; // "b"
-    Vector<T> frozen_sub_upper_; // "c"
+    AllocatableVector<T> frozen_sub_lower_; // "a"
+    AllocatableVector<T> frozen_main_diagonal_; // "b"
+    AllocatableVector<T> frozen_sub_upper_; // "c"
 
     // Compact CR multiplier trajectory (O(n) each) and per-level prefix-sum offsets.
-    Vector<T> cr_k1_trajectory_;
-    Vector<T> cr_k2_trajectory_;
+    AllocatableVector<T> cr_k1_trajectory_;
+    AllocatableVector<T> cr_k2_trajectory_;
     Kokkos::View<int*> cr_level_offsets_;
 
     // PCR trajectory for the small intermediate system (O(m log m) each).
-    Vector<T> pcr_k1_trajectory_;
-    Vector<T> pcr_k2_trajectory_;
+    AllocatableVector<T> pcr_k1_trajectory_;
+    AllocatableVector<T> pcr_k2_trajectory_;
 
     Vector<T> gamma_;
     bool is_factorized_;
