@@ -414,6 +414,7 @@ KOKKOS_INLINE_FUNCTION double sysRhs(int b, int i)
 static void denseReferenceSolve(int n, const std::vector<double>& diag, const std::vector<double>& subdiag,
                                  double corner, bool is_cyclic, std::vector<double>& rhs)
 {
+
     std::vector<std::vector<double>> A(n, std::vector<double>(n, 0.0));
     for (int i = 0; i < n; i++) {
         A[i][i] = diag[i];
@@ -423,8 +424,8 @@ static void denseReferenceSolve(int n, const std::vector<double>& diag, const st
         A[i + 1][i] = subdiag[i];
     }
     if (is_cyclic && n > 1) {
-        A[0][n - 1] = corner;
-        A[n - 1][0] = corner;
+        A[0][n - 1] += corner;
+        A[n - 1][0] += corner;
     }
 
     for (int col = 0; col < n; col++) {
