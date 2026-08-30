@@ -124,17 +124,13 @@ protected:
 namespace gmgpolar
 {
 
-template <typename T>
-using BatchedTridiagonalSolver = BatchedTridiagonalSolverCRPCR<T>;
-
-/*    
 #if defined(KOKKOS_ENABLE_CUDA) || defined(KOKKOS_ENABLE_HIP) || defined(KOKKOS_ENABLE_SYCL)
 
-// template <typename T>
-// using BatchedTridiagonalSolver = BatchedTridiagonalSolverPCR<T>;
-
 template <typename T>
-using BatchedTridiagonalSolver = BatchedTridiagonalSolverCRPCR<T>;
+using BatchedTridiagonalSolver = BatchedTridiagonalSolverPCR<T>;
+
+// template <typename T>
+// using BatchedTridiagonalSolver = BatchedTridiagonalSolverCRPCR<T>;
 
 #else
 
@@ -142,6 +138,5 @@ template <typename T>
 using BatchedTridiagonalSolver = BatchedTridiagonalSolverThomas<T>;
 
 #endif
-*/
 
 } // namespace gmgpolar

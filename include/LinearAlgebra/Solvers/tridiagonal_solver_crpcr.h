@@ -571,8 +571,9 @@ public:
                             const std::size_t traj_idx = static_cast<std::size_t>(batch_idx) * compact_length +
                                                          static_cast<std::size_t>(level_offsets(L)) +
                                                          static_cast<std::size_t>(t);
-                            cr_k1(traj_idx)            = k1_val;
-                            cr_k2(traj_idx)            = k2_val;
+
+                            cr_k1(traj_idx) = k1_val;
+                            cr_k2(traj_idx) = k2_val;
 
                             crB[nxt][i] = crB[cur][i] - crC[cur][iLeft] * k1_val - a_iRight * k2_val;
                             crC[nxt][i] = -crC[cur][iRight] * k2_val;
@@ -796,8 +797,9 @@ public:
                                 const std::size_t traj_idx = static_cast<std::size_t>(batch_idx) * compact_length +
                                                              static_cast<std::size_t>(level_offsets(L)) +
                                                              static_cast<std::size_t>(t);
-                                const T k1_val             = cr_k1(traj_idx);
-                                const T k2_val             = cr_k2(traj_idx);
+
+                                const T k1_val = cr_k1(traj_idx);
+                                const T k2_val = cr_k2(traj_idx);
 
                                 d[nxt][i] = d[cur][i] - d[cur][iLeft] * k1_val - d[cur][iRight] * k2_val;
                             }
@@ -844,8 +846,9 @@ public:
                                                             static_cast<std::size_t>(m) +
                                                         static_cast<std::size_t>(step) * static_cast<std::size_t>(m) +
                                                         static_cast<std::size_t>(t);
-                            const T k1_val            = pcr_k1(pcr_idx);
-                            const T k2_val            = pcr_k2(pcr_idx);
+
+                            const T k1_val = pcr_k1(pcr_idx);
+                            const T k2_val = pcr_k2(pcr_idx);
 
                             pd[pnxt][t] = pd[pcur][t] - pd[pcur][tLeft] * k1_val - pd[pcur][tRight] * k2_val;
                         }
@@ -992,8 +995,9 @@ public:
                                 const std::size_t traj_idx = static_cast<std::size_t>(batch_idx) * compact_length +
                                                              static_cast<std::size_t>(level_offsets(L)) +
                                                              static_cast<std::size_t>(t);
-                                const T k1_val             = cr_k1(traj_idx);
-                                const T k2_val             = cr_k2(traj_idx);
+
+                                const T k1_val = cr_k1(traj_idx);
+                                const T k2_val = cr_k2(traj_idx);
 
                                 d_rhs[nxt][i] =
                                     d_rhs[cur][i] - d_rhs[cur][iLeft] * k1_val - d_rhs[cur][iRight] * k2_val;
@@ -1034,8 +1038,9 @@ public:
                                                             static_cast<std::size_t>(m) +
                                                         static_cast<std::size_t>(step) * static_cast<std::size_t>(m) +
                                                         static_cast<std::size_t>(t);
-                            const T k1_val            = pcr_k1(pcr_idx);
-                            const T k2_val            = pcr_k2(pcr_idx);
+
+                            const T k1_val = pcr_k1(pcr_idx);
+                            const T k2_val = pcr_k2(pcr_idx);
 
                             pd_rhs[pnxt][t] =
                                 pd_rhs[pcur][t] - pd_rhs[pcur][tLeft] * k1_val - pd_rhs[pcur][tRight] * k2_val;
