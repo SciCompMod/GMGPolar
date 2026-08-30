@@ -1213,6 +1213,834 @@
  * @tparam T Scalar type used for matrix coefficients and right-hand sides.
  */
 
+// #include <Kokkos_Core.hpp>
+// #include <algorithm>
+// #include <cmath>
+// #include <cstddef>
+// #include <stdexcept>
+// #include <string>
+// #include <vector>
+
+// #include "../../LinearAlgebra/Vector/vector.h"
+// #include "../../LinearAlgebra/Vector/vector_operations.h"
+
+// namespace gmgpolar
+// {
+
+// /**
+//  * @brief Rounds n up to the next power of two (returns 1 for n <= 1).
+//  */
+// inline int crpcr_next_power_of_two(int n)
+// {
+//     if (n <= 1) {
+//         return 1;
+//     }
+//     int p = 1;
+//     while (p < n) {
+//         p <<= 1;
+//     }
+//     return p;
+// }
+
+// /**
+//  * @brief Exact base-2 logarithm of a value known to be a power of two
+//  *        (returns 0 for n <= 1).
+//  */
+// inline int crpcr_exact_log2(int n)
+// {
+//     int log_value = 0;
+//     while (n > 1) {
+//         n >>= 1;
+//         ++log_value;
+//     }
+//     return log_value;
+// }
+
+// /**
+//  * @brief Clamped left/right neighbor indices, distance `delta` away, used by
+//  *        the PCR core (uniform full-range clamp, since every PCR position is
+//  *        active every step). Identical convention to
+//  *        BatchedTridiagonalSolverPCR's pcr_neighbors().
+//  */
+// KOKKOS_INLINE_FUNCTION
+// void crpcr_pcr_neighbors(int i, int delta, int n, int& iLeft, int& iRight)
+// {
+//     iLeft = i - delta;
+//     if (iLeft < 0) {
+//         iLeft = 0;
+//     }
+//     iRight = i + delta;
+//     if (iRight >= n) {
+//         iRight = n - 1;
+//     }
+// }
+
+// template <typename T>
+// class BatchedTridiagonalSolverCRPCR : public BatchedTridiagonalSolverBase<T>
+// {
+// public:
+//     /**
+//      * @param matrix_dimension Real (unpadded) system size, as in the base class.
+//      * @param batch_count Number of independent systems.
+//      * @param is_cyclic Whether systems are cyclic (Sherman-Morrison-Woodbury).
+//      * @param intermediate_system_size Target switch-over size `m` for the CR
+//      *        forward reduction to hand off to the PCR core. Rounded up to a
+//      *        power of two and clamped to next_power_of_two(matrix_dimension)
+//      *        if that is smaller -- in which case CR performs zero levels and
+//      *        this degenerates to pure PCR on the padded system, which is
+//      *        also the correct behavior for small matrix_dimension.
+//      */
+//     BatchedTridiagonalSolverCRPCR(int matrix_dimension, int batch_count, bool is_cyclic = true,
+//                                   int intermediate_system_size = 32)
+//         : BatchedTridiagonalSolverBase<T>(matrix_dimension, batch_count, is_cyclic)
+//         , matrix_dimension_padded_(crpcr_next_power_of_two(matrix_dimension))
+//         , intermediate_system_size_(std::min(crpcr_next_power_of_two(std::max(intermediate_system_size, 1)),
+//                                              crpcr_next_power_of_two(matrix_dimension)))
+//         , num_cr_levels_(crpcr_exact_log2(crpcr_next_power_of_two(matrix_dimension) /
+//                                           std::min(crpcr_next_power_of_two(std::max(intermediate_system_size, 1)),
+//                                                    crpcr_next_power_of_two(matrix_dimension))))
+//         , num_pcr_steps_(crpcr_exact_log2(std::min(crpcr_next_power_of_two(std::max(intermediate_system_size, 1)),
+//                                                    crpcr_next_power_of_two(matrix_dimension))))
+//         , compact_length_(0)
+//         , cr_level_offsets_("BatchedTridiagonalSolverCRPCR::cr_level_offsets", num_cr_levels_ + 1)
+//         // Tiny per-batch cache of the original cyclic corner element, needed
+//         // because this->sub_diagonal_ (which normally holds it) gets
+//         // overwritten with frozen "c" during setup(). Zero-sized if !is_cyclic.
+//         , cyclic_corner_cache_("BatchedTridiagonalSolverCRPCR::cyclic_corner_cache", is_cyclic ? batch_count : 0)
+//         , gamma_("BatchedTridiagonalSolverCRPCR::gamma", is_cyclic ? batch_count : 0)
+//         , is_factorized_(false)
+//     {
+//         // --- Precompute prefix-sum offsets for the compact CR trajectory. ---
+//         std::vector<int> host_offsets(static_cast<std::size_t>(num_cr_levels_) + 1, 0);
+//         for (int L = 0; L < num_cr_levels_; ++L) {
+//             const int stride       = 1 << (L + 1);
+//             const int active_count = matrix_dimension_padded_ / stride;
+//             host_offsets[L + 1]    = host_offsets[L] + active_count;
+//         }
+//         compact_length_ = host_offsets[num_cr_levels_];
+
+//         auto offsets_mirror = Kokkos::create_mirror_view(cr_level_offsets_);
+//         for (int L = 0; L <= num_cr_levels_; ++L) {
+//             offsets_mirror(L) = host_offsets[L];
+//         }
+//         Kokkos::deep_copy(cr_level_offsets_, offsets_mirror);
+
+//         // Compact CR multiplier trajectory: O(n) per batch entry, not O(n log n).
+//         cr_k1_trajectory_ =
+//             Vector<T>("BatchedTridiagonalSolverCRPCR::cr_k1_trajectory",
+//                       static_cast<std::size_t>(batch_count) * static_cast<std::size_t>(compact_length_));
+//         cr_k2_trajectory_ =
+//             Vector<T>("BatchedTridiagonalSolverCRPCR::cr_k2_trajectory",
+//                       static_cast<std::size_t>(batch_count) * static_cast<std::size_t>(compact_length_));
+
+//         // PCR trajectory for the small (size m) intermediate system: O(m log m)
+//         // per batch entry, negligible next to the O(n) CR trajectory.
+//         pcr_k1_trajectory_ =
+//             Vector<T>("BatchedTridiagonalSolverCRPCR::pcr_k1_trajectory",
+//                       static_cast<std::size_t>(batch_count) * static_cast<std::size_t>(num_pcr_steps_) *
+//                           static_cast<std::size_t>(intermediate_system_size_));
+//         pcr_k2_trajectory_ =
+//             Vector<T>("BatchedTridiagonalSolverCRPCR::pcr_k2_trajectory",
+//                       static_cast<std::size_t>(batch_count) * static_cast<std::size_t>(num_pcr_steps_) *
+//                           static_cast<std::size_t>(intermediate_system_size_));
+
+//         assign(cyclic_corner_cache_, T(0));
+//         assign(gamma_, T(0));
+//         assign(cr_k1_trajectory_, T(0));
+//         assign(cr_k2_trajectory_, T(0));
+//         assign(pcr_k1_trajectory_, T(0));
+//         assign(pcr_k2_trajectory_, T(0));
+//         // NOTE: this->main_diagonal_ and this->sub_diagonal_ are inherited
+//         // and already zero-initialized by the base class; they are
+//         // deliberately NOT reallocated here -- setup() overwrites them with
+//         // frozen "b"/"c" state in place. There is no frozen "a" array at
+//         // all: see the class-level comment on the symmetric-matrix identity
+//         // that makes it unnecessary, anywhere in this class.
+//     }
+
+//     /**
+//      * @brief Performs CR forward reduction down to the intermediate system,
+//      *        PCR-reduces that intermediate system, and stores everything
+//      *        needed by solve() to replay the same reduction on a right-hand
+//      *        side. Overwrites this->main_diagonal_ (frozen "b") and
+//      *        this->sub_diagonal_ (frozen "c") IN PLACE. Never allocates or
+//      *        touches a left-coefficient ("a") array -- see class comment.
+//      */
+//     void setup() override
+//     {
+//         const int matrix_dimension       = this->matrix_dimension_;
+//         const int n_padded               = matrix_dimension_padded_;
+//         const int m                      = intermediate_system_size_;
+//         const int num_cr_levels          = num_cr_levels_;
+//         const int num_pcr_steps          = num_pcr_steps_;
+//         const bool is_cyclic             = this->is_cyclic_;
+//         const std::size_t compact_length = static_cast<std::size_t>(compact_length_);
+
+//         // Reused in place: read as original input in steps 1-2, overwritten
+//         // with frozen state in step 4/5, all within this one kernel launch.
+//         Vector<T> main_diagonal          = this->main_diagonal_;
+//         Vector<T> sub_diagonal           = this->sub_diagonal_;
+//         Vector<T> cyclic_corner_cache    = cyclic_corner_cache_;
+//         Vector<T> gamma                  = gamma_;
+//         Vector<T> cr_k1                  = cr_k1_trajectory_;
+//         Vector<T> cr_k2                  = cr_k2_trajectory_;
+//         Vector<T> pcr_k1                 = pcr_k1_trajectory_;
+//         Vector<T> pcr_k2                 = pcr_k2_trajectory_;
+//         Kokkos::View<int*> level_offsets = cr_level_offsets_;
+
+//         // --- Trivial 1x1 systems: nothing to reduce; "frozen b" is simply
+//         // the original diagonal entry, already sitting untouched in
+//         // this->main_diagonal_. ---
+//         if (matrix_dimension == 1) {
+//             is_factorized_ = true;
+//             return;
+//         }
+
+//         using TeamPolicy = Kokkos::TeamPolicy<Kokkos::DefaultExecutionSpace>;
+//         using TeamMember = typename TeamPolicy::member_type;
+
+//         // Scratch layout: 2 ping-pong CR arrays (c,b x2) of length n_padded,
+//         // followed by 2 ping-pong PCR-core arrays (c,b x2) of length m -- NO
+//         // "a" arrays at all (see class comment). 4 arrays total, down from 6.
+//         const std::size_t cr_scratch_elems  = 4ull * static_cast<std::size_t>(n_padded);
+//         const std::size_t pcr_scratch_elems = 4ull * static_cast<std::size_t>(m);
+//         const std::size_t scratch_bytes     = (cr_scratch_elems + pcr_scratch_elems) * sizeof(T);
+
+//         TeamPolicy policy(this->batch_count_, Kokkos::AUTO);
+//         policy.set_scratch_size(0, Kokkos::PerTeam(static_cast<int>(scratch_bytes)));
+
+//         Kokkos::parallel_for(
+//             "SetupCRPCR", policy, KOKKOS_LAMBDA(const TeamMember& team) {
+//                 const int batch_idx = team.league_rank();
+//                 const int rank      = team.team_rank();
+//                 const int team_size = team.team_size();
+//                 const int offset    = batch_idx * matrix_dimension; // stride for ALL persistent arrays
+
+//                 T* scratch = static_cast<T*>(team.team_scratch(0).get_shmem(scratch_bytes));
+//                 T* crC[2]  = {scratch, scratch + 2 * n_padded};
+//                 T* crB[2]  = {scratch + n_padded, scratch + 3 * n_padded};
+//                 T* pcrBase = scratch + cr_scratch_elems;
+//                 T* pcrE[2] = {pcrBase, pcrBase + 2 * m};
+//                 T* pcrB[2] = {pcrBase + m, pcrBase + 3 * m};
+
+//                 int cur = 0;
+
+//                 // --- Step 1: load and pad (scratch only, "c" and "b" only). ---
+//                 for (int i = rank; i < n_padded; i += team_size) {
+//                     if (i < matrix_dimension) {
+//                         crC[cur][i] = (i == matrix_dimension - 1) ? T(0) : sub_diagonal(offset + i);
+//                         crB[cur][i] = main_diagonal(offset + i);
+//                     }
+//                     else {
+//                         // Identity padding: invariant under reduction, needs
+//                         // no persistent storage (see class comment).
+//                         crC[cur][i] = T(0);
+//                         crB[cur][i] = T(1);
+//                     }
+//                 }
+//                 team.team_barrier();
+
+//                 // --- Step 2: cyclic Sherman-Morrison diagonal adjustment. ---
+//                 // Caches the ORIGINAL cyclic corner element before step 4/5
+//                 // overwrite sub_diagonal_'s last entry with frozen "c" (a
+//                 // structurally different, boundary-zero value).
+//                 if (is_cyclic) {
+//                     if (rank == 0) {
+//                         const T cyclic_corner_element  = sub_diagonal(offset + matrix_dimension - 1);
+//                         cyclic_corner_cache(batch_idx) = cyclic_corner_element;
+//                         gamma(batch_idx)               = -main_diagonal(offset + 0);
+//                         crB[cur][0] -= gamma(batch_idx);
+//                         crB[cur][matrix_dimension - 1] -=
+//                             cyclic_corner_element * cyclic_corner_element / gamma(batch_idx);
+//                     }
+//                     team.team_barrier();
+//                 }
+
+//                 // --- Step 3: CR forward reduction (scratch only). ---
+//                 // Level L (stride = 2^(L+1), half = stride/2): position i is
+//                 // updated iff (i+1) % stride == 0. The left coefficient a_i
+//                 // (and a_iRight) are NEVER stored -- by the symmetric-matrix
+//                 // invariant (class comment), a_p (current) == c_{p - half}
+//                 // for the CURRENT level's half, so they are read directly
+//                 // from crC[cur] instead, exactly mirroring
+//                 // BatchedTridiagonalSolverPCR's own e[cur][i-delta] pattern.
+//                 for (int L = 0; L < num_cr_levels; ++L) {
+//                     const int stride = 1 << (L + 1);
+//                     const int half   = stride / 2;
+//                     const int nxt    = 1 - cur;
+
+//                     for (int i = rank; i < n_padded; i += team_size) {
+//                         if ((i + 1) % stride == 0) {
+//                             const int t     = (i + 1) / stride - 1; // compact trajectory slot within this level
+//                             const int iLeft = i - half;
+//                             int iRight      = i + half;
+//                             if (iRight > n_padded - 1) {
+//                                 iRight = n_padded - 1;
+//                             }
+
+//                             const T a_i      = (i >= half) ? crC[cur][iLeft] : T(0);
+//                             const T a_iRight = (iRight >= half) ? crC[cur][iRight - half] : T(0);
+//                             const T c_i      = crC[cur][i];
+//                             const T b_left   = crB[cur][iLeft];
+//                             const T b_right  = crB[cur][iRight];
+
+//                             const T k1_val = a_i / b_left;
+//                             const T k2_val = c_i / b_right;
+
+//                             const std::size_t traj_idx = static_cast<std::size_t>(batch_idx) * compact_length +
+//                                                          static_cast<std::size_t>(level_offsets(L)) +
+//                                                          static_cast<std::size_t>(t);
+//                             cr_k1(traj_idx)            = k1_val;
+//                             cr_k2(traj_idx)            = k2_val;
+
+//                             crC[nxt][i] = -crC[cur][iRight] * k2_val;
+//                             crB[nxt][i] = crB[cur][i] - crC[cur][iLeft] * k1_val - a_iRight * k2_val;
+//                         }
+//                         else {
+//                             crC[nxt][i] = crC[cur][i];
+//                             crB[nxt][i] = crB[cur][i];
+//                         }
+//                     }
+
+//                     team.team_barrier();
+//                     cur = nxt;
+//                 }
+
+//                 // --- Step 4: persist frozen forward-reduction state, IN
+//                 // PLACE, for REAL positions only (padding never persisted;
+//                 // no "a" ever persisted -- see class comment). ---
+//                 for (int i = rank; i < matrix_dimension; i += team_size) {
+//                     main_diagonal(offset + i) = crB[cur][i]; // reused as frozen "b"
+//                     sub_diagonal(offset + i)  = crC[cur][i]; // reused as frozen "c"
+//                 }
+//                 team.team_barrier();
+
+//                 // --- Step 5: PCR sub-solve on the size-m intermediate system. ---
+//                 // Gather ONLY c and b for survivors -- the gathered m-sized
+//                 // subsystem is itself exactly symmetric (a_t == c_{t-1} in
+//                 // gathered indexing, a direct consequence of the same
+//                 // invariant applied through every CR level a survivor
+//                 // participated in), so the PCR core below is a literal copy
+//                 // of BatchedTridiagonalSolverPCR's own a-elision technique,
+//                 // scoped to m. When num_cr_levels == 0, stride_final == 1 and
+//                 // every position is a "survivor", degenerating to plain PCR
+//                 // on the padded system.
+//                 const int stride_final = n_padded / m;
+//                 for (int i = rank; i < n_padded; i += team_size) {
+//                     if ((i + 1) % stride_final == 0) {
+//                         const int t = (i + 1) / stride_final - 1;
+//                         pcrE[0][t]  = crC[cur][i];
+//                         pcrB[0][t]  = crB[cur][i];
+//                     }
+//                 }
+//                 team.team_barrier();
+
+//                 int pcur = 0;
+//                 for (int step = 0; step < num_pcr_steps; ++step) {
+//                     const int delta = 1 << step;
+//                     const int pnxt  = 1 - pcur;
+
+//                     for (int t = rank; t < m; t += team_size) {
+//                         int tLeft, tRight;
+//                         crpcr_pcr_neighbors(t, delta, m, tLeft, tRight);
+
+//                         const T a_t      = (t >= delta) ? pcrE[pcur][t - delta] : T(0);
+//                         const T a_tRight = (tRight >= delta) ? pcrE[pcur][tRight - delta] : T(0);
+//                         const T c_t      = pcrE[pcur][t];
+//                         const T b_left   = pcrB[pcur][tLeft];
+//                         const T b_right  = pcrB[pcur][tRight];
+
+//                         const T k1_val = a_t / b_left;
+//                         const T k2_val = c_t / b_right;
+
+//                         const std::size_t pcr_idx =
+//                             static_cast<std::size_t>(batch_idx) * static_cast<std::size_t>(num_pcr_steps) *
+//                                 static_cast<std::size_t>(m) +
+//                             static_cast<std::size_t>(step) * static_cast<std::size_t>(m) + static_cast<std::size_t>(t);
+//                         pcr_k1(pcr_idx) = k1_val;
+//                         pcr_k2(pcr_idx) = k2_val;
+
+//                         pcrE[pnxt][t] = -pcrE[pcur][tRight] * k2_val;
+//                         pcrB[pnxt][t] = pcrB[pcur][t] - pcrE[pcur][tLeft] * k1_val - a_tRight * k2_val;
+//                     }
+//                     team.team_barrier();
+//                     pcur = pnxt;
+//                 }
+
+//                 // Overwrite the CR-frozen diagonal at REAL survivor positions
+//                 // with the fully PCR-reduced diagonal.
+//                 for (int i = rank; i < n_padded; i += team_size) {
+//                     if (i < matrix_dimension && (i + 1) % stride_final == 0) {
+//                         const int t               = (i + 1) / stride_final - 1;
+//                         main_diagonal(offset + i) = pcrB[pcur][t];
+//                     }
+//                 }
+//             });
+
+//         Kokkos::fence();
+//         is_factorized_ = true;
+//     }
+
+//     /**
+//      * @brief Solves the factored systems for the supplied right-hand side.
+//      * Reads this->main_diagonal_ / this->sub_diagonal_ as frozen "b"/"c"
+//      * state -- never writes them, and never reads/writes any "a" array
+//      * (derived on the fly, see class comment).
+//      */
+//     void solve(Vector<T> rhs, int batch_offset = 0, int batch_stride = 1) override
+//     {
+//         if (!is_factorized_) {
+//             throw std::runtime_error("Error: Matrix must be factorized before solving.");
+//         }
+
+//         const int effective_batch_count = (this->batch_count_ - batch_offset + batch_stride - 1) / batch_stride;
+
+//         const int matrix_dimension       = this->matrix_dimension_;
+//         const int n_padded               = matrix_dimension_padded_;
+//         const int m                      = intermediate_system_size_;
+//         const int num_cr_levels          = num_cr_levels_;
+//         const int num_pcr_steps          = num_pcr_steps_;
+//         const bool is_cyclic             = this->is_cyclic_;
+//         const std::size_t compact_length = static_cast<std::size_t>(compact_length_);
+
+//         Vector<T> main_diagonal          = this->main_diagonal_; // frozen "b"
+//         Vector<T> sub_diagonal           = this->sub_diagonal_; // frozen "c"
+//         Vector<T> cyclic_corner_cache    = cyclic_corner_cache_;
+//         Vector<T> gamma                  = gamma_;
+//         Vector<T> cr_k1                  = cr_k1_trajectory_;
+//         Vector<T> cr_k2                  = cr_k2_trajectory_;
+//         Vector<T> pcr_k1                 = pcr_k1_trajectory_;
+//         Vector<T> pcr_k2                 = pcr_k2_trajectory_;
+//         Kokkos::View<int*> level_offsets = cr_level_offsets_;
+
+//         if (matrix_dimension == 1) {
+//             Kokkos::parallel_for(
+//                 "SolveCRPCR_Trivial", Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(0, effective_batch_count),
+//                 KOKKOS_LAMBDA(const int k) {
+//                     const int batch_idx = batch_stride * k + batch_offset;
+//                     rhs(batch_idx) /= main_diagonal(batch_idx);
+//                 });
+//             Kokkos::fence();
+//             return;
+//         }
+
+//         using TeamPolicy = Kokkos::TeamPolicy<Kokkos::DefaultExecutionSpace>;
+//         using TeamMember = typename TeamPolicy::member_type;
+
+//         if (!is_cyclic) {
+//             const std::size_t scratch_elems =
+//                 2ull * static_cast<std::size_t>(n_padded) + 2ull * static_cast<std::size_t>(m);
+//             const std::size_t scratch_bytes = scratch_elems * sizeof(T);
+
+//             TeamPolicy policy(effective_batch_count, Kokkos::AUTO);
+//             policy.set_scratch_size(0, Kokkos::PerTeam(static_cast<int>(scratch_bytes)));
+
+//             Kokkos::parallel_for(
+//                 "SolveCRPCR_NonCyclic", policy, KOKKOS_LAMBDA(const TeamMember& team) {
+//                     const int k         = team.league_rank();
+//                     const int batch_idx = batch_stride * k + batch_offset;
+//                     const int rank      = team.team_rank();
+//                     const int team_size = team.team_size();
+//                     const int offset    = batch_idx * matrix_dimension;
+
+//                     T* scratch = static_cast<T*>(team.team_scratch(0).get_shmem(scratch_bytes));
+//                     T* d[2]    = {scratch, scratch + n_padded};
+//                     T* pd[2]   = {scratch + 2 * n_padded, scratch + 2 * n_padded + m};
+
+//                     int cur = 0;
+//                     for (int i = rank; i < n_padded; i += team_size) {
+//                         d[cur][i] = (i < matrix_dimension) ? rhs(offset + i) : T(0);
+//                     }
+//                     team.team_barrier();
+
+//                     // --- CR forward reduction on d: same levels/order as setup(). ---
+//                     for (int L = 0; L < num_cr_levels; ++L) {
+//                         const int stride = 1 << (L + 1);
+//                         const int nxt    = 1 - cur;
+
+//                         for (int i = rank; i < n_padded; i += team_size) {
+//                             if ((i + 1) % stride == 0) {
+//                                 const int t     = (i + 1) / stride - 1;
+//                                 const int half  = stride / 2;
+//                                 const int iLeft = i - half;
+//                                 int iRight      = i + half;
+//                                 if (iRight > n_padded - 1) {
+//                                     iRight = n_padded - 1;
+//                                 }
+
+//                                 const std::size_t traj_idx = static_cast<std::size_t>(batch_idx) * compact_length +
+//                                                              static_cast<std::size_t>(level_offsets(L)) +
+//                                                              static_cast<std::size_t>(t);
+//                                 const T k1_val             = cr_k1(traj_idx);
+//                                 const T k2_val             = cr_k2(traj_idx);
+
+//                                 d[nxt][i] = d[cur][i] - d[cur][iLeft] * k1_val - d[cur][iRight] * k2_val;
+//                             }
+//                             else {
+//                                 d[nxt][i] = d[cur][i];
+//                             }
+//                         }
+//                         team.team_barrier();
+//                         cur = nxt;
+//                     }
+
+//                     // --- PCR sub-solve on the m surviving positions. ---
+//                     const int stride_final = n_padded / m;
+//                     for (int i = rank; i < n_padded; i += team_size) {
+//                         if (i < matrix_dimension && (i + 1) % stride_final == 0) {
+//                             const int t = (i + 1) / stride_final - 1;
+//                             pd[0][t]    = d[cur][i];
+//                         }
+//                     }
+//                     team.team_barrier();
+
+//                     int pcur = 0;
+//                     for (int step = 0; step < num_pcr_steps; ++step) {
+//                         const int delta = 1 << step;
+//                         const int pnxt  = 1 - pcur;
+
+//                         for (int t = rank; t < m; t += team_size) {
+//                             int tLeft, tRight;
+//                             crpcr_pcr_neighbors(t, delta, m, tLeft, tRight);
+
+//                             const std::size_t pcr_idx = static_cast<std::size_t>(batch_idx) *
+//                                                             static_cast<std::size_t>(num_pcr_steps) *
+//                                                             static_cast<std::size_t>(m) +
+//                                                         static_cast<std::size_t>(step) * static_cast<std::size_t>(m) +
+//                                                         static_cast<std::size_t>(t);
+//                             const T k1_val            = pcr_k1(pcr_idx);
+//                             const T k2_val            = pcr_k2(pcr_idx);
+
+//                             pd[pnxt][t] = pd[pcur][t] - pd[pcur][tLeft] * k1_val - pd[pcur][tRight] * k2_val;
+//                         }
+//                         team.team_barrier();
+//                         pcur = pnxt;
+//                     }
+
+//                     for (int i = rank; i < n_padded; i += team_size) {
+//                         if (i < matrix_dimension && (i + 1) % stride_final == 0) {
+//                             const int t = (i + 1) / stride_final - 1;
+//                             d[cur][i]   = pd[pcur][t] / main_diagonal(offset + i);
+//                         }
+//                     }
+//                     team.team_barrier();
+
+//                     // --- CR backward substitution. ---
+//                     // Backward level L handles positions with (i+1)%stride ==
+//                     // stride/2 EXACTLY (valuation of i+1 == L), NOT the same
+//                     // condition as forward reduction -- see the derivation in
+//                     // DEVIATIONS.md. a_i is derived, never stored: by the
+//                     // symmetric-matrix invariant, frozen a_i == frozen
+//                     // c_{i-half}, the SAME index (pLeft) already computed for
+//                     // the neighbor-value lookup below.
+//                     for (int L = num_cr_levels - 1; L >= 0; --L) {
+//                         const int stride = 1 << (L + 1);
+//                         const int half   = stride / 2;
+
+//                         for (int i = rank; i < n_padded; i += team_size) {
+//                             if (i < matrix_dimension && (i + 1) % stride == half) {
+//                                 int pLeft = i - half;
+//                                 if (pLeft < 0) {
+//                                     pLeft = 0;
+//                                 }
+//                                 int pRight = i + half;
+//                                 if (pRight > n_padded - 1) {
+//                                     pRight = n_padded - 1;
+//                                 }
+
+//                                 const T a_i = (i >= half) ? sub_diagonal(offset + pLeft) : T(0);
+//                                 const T c_i = sub_diagonal(offset + i);
+//                                 const T b_i = main_diagonal(offset + i);
+
+//                                 d[cur][i] = (d[cur][i] - a_i * d[cur][pLeft] - c_i * d[cur][pRight]) / b_i;
+//                             }
+//                         }
+//                         team.team_barrier();
+//                     }
+
+//                     for (int i = rank; i < matrix_dimension; i += team_size) {
+//                         rhs(offset + i) = d[cur][i];
+//                     }
+//                 });
+//         }
+//         else {
+//             const std::size_t scratch_elems =
+//                 4ull * static_cast<std::size_t>(n_padded) + 4ull * static_cast<std::size_t>(m);
+//             const std::size_t scratch_bytes = scratch_elems * sizeof(T);
+
+//             TeamPolicy policy(effective_batch_count, Kokkos::AUTO);
+//             policy.set_scratch_size(0, Kokkos::PerTeam(static_cast<int>(scratch_bytes)));
+
+//             Kokkos::parallel_for(
+//                 "SolveCRPCR_Cyclic", policy, KOKKOS_LAMBDA(const TeamMember& team) {
+//                     const int k         = team.league_rank();
+//                     const int batch_idx = batch_stride * k + batch_offset;
+//                     const int rank      = team.team_rank();
+//                     const int team_size = team.team_size();
+//                     const int offset    = batch_idx * matrix_dimension;
+
+//                     const T cyclic_corner_element = cyclic_corner_cache(batch_idx);
+
+//                     T* scratch   = static_cast<T*>(team.team_scratch(0).get_shmem(scratch_bytes));
+//                     T* d_rhs[2]  = {scratch, scratch + 2 * n_padded};
+//                     T* d_buf[2]  = {scratch + n_padded, scratch + 3 * n_padded};
+//                     T* pd_rhs[2] = {scratch + 4 * n_padded, scratch + 4 * n_padded + m};
+//                     T* pd_buf[2] = {scratch + 4 * n_padded + 2 * m, scratch + 4 * n_padded + 3 * m};
+
+//                     int cur = 0;
+//                     for (int i = rank; i < n_padded; i += team_size) {
+//                         if (i < matrix_dimension) {
+//                             d_rhs[cur][i] = rhs(offset + i);
+//                             if (i == 0) {
+//                                 d_buf[cur][i] = gamma(batch_idx);
+//                             }
+//                             else if (i == matrix_dimension - 1) {
+//                                 d_buf[cur][i] = cyclic_corner_element;
+//                             }
+//                             else {
+//                                 d_buf[cur][i] = T(0);
+//                             }
+//                         }
+//                         else {
+//                             d_rhs[cur][i] = T(0);
+//                             d_buf[cur][i] = T(0);
+//                         }
+//                     }
+//                     team.team_barrier();
+
+//                     for (int L = 0; L < num_cr_levels; ++L) {
+//                         const int stride = 1 << (L + 1);
+//                         const int nxt    = 1 - cur;
+
+//                         for (int i = rank; i < n_padded; i += team_size) {
+//                             if ((i + 1) % stride == 0) {
+//                                 const int t     = (i + 1) / stride - 1;
+//                                 const int half  = stride / 2;
+//                                 const int iLeft = i - half;
+//                                 int iRight      = i + half;
+//                                 if (iRight > n_padded - 1) {
+//                                     iRight = n_padded - 1;
+//                                 }
+
+//                                 const std::size_t traj_idx = static_cast<std::size_t>(batch_idx) * compact_length +
+//                                                              static_cast<std::size_t>(level_offsets(L)) +
+//                                                              static_cast<std::size_t>(t);
+//                                 const T k1_val             = cr_k1(traj_idx);
+//                                 const T k2_val             = cr_k2(traj_idx);
+
+//                                 d_rhs[nxt][i] =
+//                                     d_rhs[cur][i] - d_rhs[cur][iLeft] * k1_val - d_rhs[cur][iRight] * k2_val;
+//                                 d_buf[nxt][i] =
+//                                     d_buf[cur][i] - d_buf[cur][iLeft] * k1_val - d_buf[cur][iRight] * k2_val;
+//                             }
+//                             else {
+//                                 d_rhs[nxt][i] = d_rhs[cur][i];
+//                                 d_buf[nxt][i] = d_buf[cur][i];
+//                             }
+//                         }
+//                         team.team_barrier();
+//                         cur = nxt;
+//                     }
+
+//                     const int stride_final = n_padded / m;
+//                     for (int i = rank; i < n_padded; i += team_size) {
+//                         if (i < matrix_dimension && (i + 1) % stride_final == 0) {
+//                             const int t  = (i + 1) / stride_final - 1;
+//                             pd_rhs[0][t] = d_rhs[cur][i];
+//                             pd_buf[0][t] = d_buf[cur][i];
+//                         }
+//                     }
+//                     team.team_barrier();
+
+//                     int pcur = 0;
+//                     for (int step = 0; step < num_pcr_steps; ++step) {
+//                         const int delta = 1 << step;
+//                         const int pnxt  = 1 - pcur;
+
+//                         for (int t = rank; t < m; t += team_size) {
+//                             int tLeft, tRight;
+//                             crpcr_pcr_neighbors(t, delta, m, tLeft, tRight);
+
+//                             const std::size_t pcr_idx = static_cast<std::size_t>(batch_idx) *
+//                                                             static_cast<std::size_t>(num_pcr_steps) *
+//                                                             static_cast<std::size_t>(m) +
+//                                                         static_cast<std::size_t>(step) * static_cast<std::size_t>(m) +
+//                                                         static_cast<std::size_t>(t);
+//                             const T k1_val            = pcr_k1(pcr_idx);
+//                             const T k2_val            = pcr_k2(pcr_idx);
+
+//                             pd_rhs[pnxt][t] =
+//                                 pd_rhs[pcur][t] - pd_rhs[pcur][tLeft] * k1_val - pd_rhs[pcur][tRight] * k2_val;
+//                             pd_buf[pnxt][t] =
+//                                 pd_buf[pcur][t] - pd_buf[pcur][tLeft] * k1_val - pd_buf[pcur][tRight] * k2_val;
+//                         }
+//                         team.team_barrier();
+//                         pcur = pnxt;
+//                     }
+
+//                     for (int i = rank; i < n_padded; i += team_size) {
+//                         if (i < matrix_dimension && (i + 1) % stride_final == 0) {
+//                             const int t   = (i + 1) / stride_final - 1;
+//                             d_rhs[cur][i] = pd_rhs[pcur][t] / main_diagonal(offset + i);
+//                             d_buf[cur][i] = pd_buf[pcur][t] / main_diagonal(offset + i);
+//                         }
+//                     }
+//                     team.team_barrier();
+
+//                     for (int L = num_cr_levels - 1; L >= 0; --L) {
+//                         const int stride = 1 << (L + 1);
+//                         const int half   = stride / 2;
+
+//                         for (int i = rank; i < n_padded; i += team_size) {
+//                             if (i < matrix_dimension && (i + 1) % stride == half) {
+//                                 int pLeft = i - half;
+//                                 if (pLeft < 0) {
+//                                     pLeft = 0;
+//                                 }
+//                                 int pRight = i + half;
+//                                 if (pRight > n_padded - 1) {
+//                                     pRight = n_padded - 1;
+//                                 }
+
+//                                 const T a_i = (i >= half) ? sub_diagonal(offset + pLeft) : T(0);
+//                                 const T c_i = sub_diagonal(offset + i);
+//                                 const T b_i = main_diagonal(offset + i);
+
+//                                 d_rhs[cur][i] =
+//                                     (d_rhs[cur][i] - a_i * d_rhs[cur][pLeft] - c_i * d_rhs[cur][pRight]) / b_i;
+//                                 d_buf[cur][i] =
+//                                     (d_buf[cur][i] - a_i * d_buf[cur][pLeft] - c_i * d_buf[cur][pRight]) / b_i;
+//                             }
+//                         }
+//                         team.team_barrier();
+//                     }
+
+//                     const T dot_product_x_v =
+//                         d_rhs[cur][0] + cyclic_corner_element / gamma(batch_idx) * d_rhs[cur][matrix_dimension - 1];
+//                     const T dot_product_u_v =
+//                         d_buf[cur][0] + cyclic_corner_element / gamma(batch_idx) * d_buf[cur][matrix_dimension - 1];
+//                     const T factor = dot_product_x_v / (T(1) + dot_product_u_v);
+
+//                     for (int i = rank; i < matrix_dimension; i += team_size) {
+//                         rhs(offset + i) = d_rhs[cur][i] - factor * d_buf[cur][i];
+//                     }
+//                 });
+//         }
+
+//         Kokkos::fence();
+//     }
+
+//     /**
+//      * @brief Solves systems whose matrix has already been reduced to diagonal
+//      *        form. Reads this->main_diagonal_ directly (frozen diagonal).
+//      */
+//     void solve_diagonal(Vector<T> rhs, int batch_offset = 0, int batch_stride = 1) override
+//     {
+//         if (!is_factorized_) {
+//             throw std::runtime_error("Error: Matrix must be factorized before solving.");
+//         }
+
+//         const int effective_batch_count = (this->batch_count_ - batch_offset + batch_stride - 1) / batch_stride;
+
+//         const int matrix_dimension = this->matrix_dimension_;
+//         const bool is_cyclic       = this->is_cyclic_;
+//         Vector<T> main_diagonal    = this->main_diagonal_;
+//         Vector<T> gamma            = gamma_;
+
+//         using MDPolicy = Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>;
+//         MDPolicy policy({0, 0}, {effective_batch_count, matrix_dimension});
+
+//         Kokkos::parallel_for(
+//             "SolveDiagonalCRPCR", policy, KOKKOS_LAMBDA(const int k, const int i) {
+//                 const int batch_idx = batch_stride * k + batch_offset;
+//                 const int offset    = batch_idx * matrix_dimension;
+
+//                 if (is_cyclic && i == 0) {
+//                     rhs(offset) /= main_diagonal(offset) + gamma(batch_idx);
+//                 }
+//                 else {
+//                     rhs(offset + i) /= main_diagonal(offset + i);
+//                 }
+//             });
+
+//         Kokkos::fence();
+//     }
+
+//     // --- Exposed for tests (memory-footprint regression check, etc.) ---
+//     int matrixDimensionPadded() const
+//     {
+//         return matrix_dimension_padded_;
+//     }
+//     int intermediateSystemSize() const
+//     {
+//         return intermediate_system_size_;
+//     }
+//     int numCrLevels() const
+//     {
+//         return num_cr_levels_;
+//     }
+//     int numPcrSteps() const
+//     {
+//         return num_pcr_steps_;
+//     }
+//     int compactTrajectoryLength() const
+//     {
+//         return compact_length_;
+//     }
+
+//     /**
+//      * @brief Total bytes of persistent device storage newly introduced by
+//      *        this class -- NOT counting the inherited main_diagonal_ /
+//      *        sub_diagonal_ (reused in place, not newly allocated). There is
+//      *        no "a" array anywhere (see class comment), so this is now just
+//      *        the compact CR trajectory, the small PCR-core trajectory, and a
+//      *        handful of O(batch_count) scalars.
+//      */
+//     std::size_t persistentDeviceBytes() const
+//     {
+//         const std::size_t batch     = static_cast<std::size_t>(this->batch_count_);
+//         const std::size_t m         = static_cast<std::size_t>(intermediate_system_size_);
+//         const std::size_t pcr_steps = static_cast<std::size_t>(num_pcr_steps_);
+
+//         std::size_t bytes = 0;
+//         bytes += 2 * batch * static_cast<std::size_t>(compact_length_) * sizeof(T); // cr_k1/k2_trajectory_
+//         bytes += 2 * batch * pcr_steps * m * sizeof(T); // pcr_k1/k2_trajectory_
+//         bytes += static_cast<std::size_t>(this->is_cyclic_ ? batch : 0) * sizeof(T); // gamma_
+//         bytes += static_cast<std::size_t>(this->is_cyclic_ ? batch : 0) * sizeof(T); // cyclic_corner_cache_
+//         return bytes;
+//     }
+
+// private:
+//     int matrix_dimension_padded_; // next_power_of_two(matrix_dimension_)
+//     int intermediate_system_size_; // m: CR->PCR switch size (power of two, <= matrix_dimension_padded_)
+//     int num_cr_levels_; // log2(matrix_dimension_padded_ / intermediate_system_size_)
+//     int num_pcr_steps_; // log2(intermediate_system_size_)
+//     int compact_length_; // total compact CR trajectory length per batch entry, ~matrix_dimension_padded_
+
+//     Kokkos::View<int*> cr_level_offsets_; // size num_cr_levels_ + 1, prefix sums, identical across batch entries
+
+//     // Tiny per-batch cache of the true cyclic corner element, needed because
+//     // this->sub_diagonal_ is overwritten with frozen "c" (see class comment).
+//     Vector<T> cyclic_corner_cache_;
+
+//     // Compact CR multiplier trajectory + per-level offsets. O(n).
+//     AllocatableVector<T> cr_k1_trajectory_;
+//     AllocatableVector<T> cr_k2_trajectory_;
+
+//     // PCR trajectory for the size-m intermediate system. O(m log m), small and bounded.
+//     AllocatableVector<T> pcr_k1_trajectory_;
+//     AllocatableVector<T> pcr_k2_trajectory_;
+
+//     Vector<T> gamma_; // Sherman-Morrison diagonal correction, cyclic systems only.
+//     bool is_factorized_;
+
+//     // NOTE: no frozen_sub_lower_ ("a") member exists in this class -- see
+//     // the class-level comment on the symmetric-matrix invariant. This is
+//     // intentional, not an oversight.
+// };
+
+// } // namespace gmgpolar
+
 #include <Kokkos_Core.hpp>
 #include <algorithm>
 #include <cmath>
@@ -1308,6 +2136,17 @@ public:
         // overwritten with frozen "c" during setup(). Zero-sized if !is_cyclic.
         , cyclic_corner_cache_("BatchedTridiagonalSolverCRPCR::cyclic_corner_cache", is_cyclic ? batch_count : 0)
         , gamma_("BatchedTridiagonalSolverCRPCR::gamma", is_cyclic ? batch_count : 0)
+        // Two-pass cyclic solve staging buffers (see class-level comment):
+        // holds each pass's per-position pipeline output so the final
+        // Sherman-Morrison combination kernel can read both. Allocated once
+        // here and reused across solve() calls -- not a per-call allocation.
+        // Zero-sized if !is_cyclic (the non-cyclic path never uses these).
+        , cyclic_pass_rhs_(
+              "BatchedTridiagonalSolverCRPCR::cyclic_pass_rhs",
+              is_cyclic ? static_cast<std::size_t>(batch_count) * static_cast<std::size_t>(matrix_dimension) : 0)
+        , cyclic_pass_buf_(
+              "BatchedTridiagonalSolverCRPCR::cyclic_pass_buf",
+              is_cyclic ? static_cast<std::size_t>(batch_count) * static_cast<std::size_t>(matrix_dimension) : 0)
         , is_factorized_(false)
     {
         // --- Precompute prefix-sum offsets for the compact CR trajectory. ---
@@ -1346,6 +2185,8 @@ public:
 
         assign(cyclic_corner_cache_, T(0));
         assign(gamma_, T(0));
+        assign(cyclic_pass_rhs_, T(0));
+        assign(cyclic_pass_buf_, T(0));
         assign(cr_k1_trajectory_, T(0));
         assign(cr_k2_trajectory_, T(0));
         assign(pcr_k1_trajectory_, T(0));
@@ -1764,166 +2605,202 @@ public:
                 });
         }
         else {
+            // --- Cyclic case: two SEQUENTIAL passes (see class-level
+            // comment) instead of one combined kernel, to keep per-team
+            // scratch at 2*n_padded + 2*m elements -- identical to the
+            // non-cyclic kernel above, half of the 4*n_padded + 4*m a naive
+            // combined implementation would need. Pass 0 runs the caller's
+            // rhs through the pipeline; pass 1 runs the Sherman-Morrison
+            // auxiliary vector (gamma at position 0, the true cyclic corner
+            // at the last real position, 0 elsewhere) through the SAME
+            // pipeline. Both passes are otherwise byte-for-byte identical to
+            // the non-cyclic kernel body above, parameterized only by their
+            // initial values and where they stage their result.
             const std::size_t scratch_elems =
-                4ull * static_cast<std::size_t>(n_padded) + 4ull * static_cast<std::size_t>(m);
+                2ull * static_cast<std::size_t>(n_padded) + 2ull * static_cast<std::size_t>(m);
             const std::size_t scratch_bytes = scratch_elems * sizeof(T);
 
             TeamPolicy policy(effective_batch_count, Kokkos::AUTO);
             policy.set_scratch_size(0, Kokkos::PerTeam(static_cast<int>(scratch_bytes)));
 
-            Kokkos::parallel_for(
-                "SolveCRPCR_Cyclic", policy, KOKKOS_LAMBDA(const TeamMember& team) {
-                    const int k         = team.league_rank();
-                    const int batch_idx = batch_stride * k + batch_offset;
-                    const int rank      = team.team_rank();
-                    const int team_size = team.team_size();
-                    const int offset    = batch_idx * matrix_dimension;
+            Vector<T> pass_rhs = cyclic_pass_rhs_;
+            Vector<T> pass_buf = cyclic_pass_buf_;
 
+            for (int pass = 0; pass < 2; ++pass) {
+                const bool is_rhs_pass = (pass == 0);
+
+                Kokkos::parallel_for(
+                    is_rhs_pass ? "SolveCRPCR_Cyclic_RhsPass" : "SolveCRPCR_Cyclic_BufPass", policy,
+                    KOKKOS_LAMBDA(const TeamMember& team) {
+                        const int k         = team.league_rank();
+                        const int batch_idx = batch_stride * k + batch_offset;
+                        const int rank      = team.team_rank();
+                        const int team_size = team.team_size();
+                        const int offset    = batch_idx * matrix_dimension;
+
+                        const T cyclic_corner_element = cyclic_corner_cache(batch_idx);
+
+                        T* scratch = static_cast<T*>(team.team_scratch(0).get_shmem(scratch_bytes));
+                        T* d[2]    = {scratch, scratch + n_padded};
+                        T* pd[2]   = {scratch + 2 * n_padded, scratch + 2 * n_padded + m};
+
+                        int cur = 0;
+                        for (int i = rank; i < n_padded; i += team_size) {
+                            if (i < matrix_dimension) {
+                                if (is_rhs_pass) {
+                                    d[cur][i] = rhs(offset + i);
+                                }
+                                else if (i == 0) {
+                                    d[cur][i] = gamma(batch_idx);
+                                }
+                                else if (i == matrix_dimension - 1) {
+                                    d[cur][i] = cyclic_corner_element;
+                                }
+                                else {
+                                    d[cur][i] = T(0);
+                                }
+                            }
+                            else {
+                                d[cur][i] = T(0);
+                            }
+                        }
+                        team.team_barrier();
+
+                        // --- CR forward reduction on d: same levels/order as setup(). ---
+                        for (int L = 0; L < num_cr_levels; ++L) {
+                            const int stride = 1 << (L + 1);
+                            const int nxt    = 1 - cur;
+
+                            for (int i = rank; i < n_padded; i += team_size) {
+                                if ((i + 1) % stride == 0) {
+                                    const int t     = (i + 1) / stride - 1;
+                                    const int half  = stride / 2;
+                                    const int iLeft = i - half;
+                                    int iRight      = i + half;
+                                    if (iRight > n_padded - 1) {
+                                        iRight = n_padded - 1;
+                                    }
+
+                                    const std::size_t traj_idx = static_cast<std::size_t>(batch_idx) * compact_length +
+                                                                 static_cast<std::size_t>(level_offsets(L)) +
+                                                                 static_cast<std::size_t>(t);
+                                    const T k1_val             = cr_k1(traj_idx);
+                                    const T k2_val             = cr_k2(traj_idx);
+
+                                    d[nxt][i] = d[cur][i] - d[cur][iLeft] * k1_val - d[cur][iRight] * k2_val;
+                                }
+                                else {
+                                    d[nxt][i] = d[cur][i];
+                                }
+                            }
+                            team.team_barrier();
+                            cur = nxt;
+                        }
+
+                        // --- PCR sub-solve on the m surviving positions. ---
+                        const int stride_final = n_padded / m;
+                        for (int i = rank; i < n_padded; i += team_size) {
+                            if (i < matrix_dimension && (i + 1) % stride_final == 0) {
+                                const int t = (i + 1) / stride_final - 1;
+                                pd[0][t]    = d[cur][i];
+                            }
+                        }
+                        team.team_barrier();
+
+                        int pcur = 0;
+                        for (int step = 0; step < num_pcr_steps; ++step) {
+                            const int delta = 1 << step;
+                            const int pnxt  = 1 - pcur;
+
+                            for (int t = rank; t < m; t += team_size) {
+                                int tLeft, tRight;
+                                crpcr_pcr_neighbors(t, delta, m, tLeft, tRight);
+
+                                const std::size_t pcr_idx =
+                                    static_cast<std::size_t>(batch_idx) * static_cast<std::size_t>(num_pcr_steps) *
+                                        static_cast<std::size_t>(m) +
+                                    static_cast<std::size_t>(step) * static_cast<std::size_t>(m) +
+                                    static_cast<std::size_t>(t);
+                                const T k1_val = pcr_k1(pcr_idx);
+                                const T k2_val = pcr_k2(pcr_idx);
+
+                                pd[pnxt][t] = pd[pcur][t] - pd[pcur][tLeft] * k1_val - pd[pcur][tRight] * k2_val;
+                            }
+                            team.team_barrier();
+                            pcur = pnxt;
+                        }
+
+                        for (int i = rank; i < n_padded; i += team_size) {
+                            if (i < matrix_dimension && (i + 1) % stride_final == 0) {
+                                const int t = (i + 1) / stride_final - 1;
+                                d[cur][i]   = pd[pcur][t] / main_diagonal(offset + i);
+                            }
+                        }
+                        team.team_barrier();
+
+                        // --- CR backward substitution (see the derivation in
+                        // the non-cyclic kernel above; identical here). ---
+                        for (int L = num_cr_levels - 1; L >= 0; --L) {
+                            const int stride = 1 << (L + 1);
+                            const int half   = stride / 2;
+
+                            for (int i = rank; i < n_padded; i += team_size) {
+                                if (i < matrix_dimension && (i + 1) % stride == half) {
+                                    int pLeft = i - half;
+                                    if (pLeft < 0) {
+                                        pLeft = 0;
+                                    }
+                                    int pRight = i + half;
+                                    if (pRight > n_padded - 1) {
+                                        pRight = n_padded - 1;
+                                    }
+
+                                    const T a_i = (i >= half) ? sub_diagonal(offset + pLeft) : T(0);
+                                    const T c_i = sub_diagonal(offset + i);
+                                    const T b_i = main_diagonal(offset + i);
+
+                                    d[cur][i] = (d[cur][i] - a_i * d[cur][pLeft] - c_i * d[cur][pRight]) / b_i;
+                                }
+                            }
+                            team.team_barrier();
+                        }
+
+                        // Stage this pass's result for the combine kernel.
+                        for (int i = rank; i < matrix_dimension; i += team_size) {
+                            if (is_rhs_pass) {
+                                pass_rhs(offset + i) = d[cur][i];
+                            }
+                            else {
+                                pass_buf(offset + i) = d[cur][i];
+                            }
+                        }
+                    });
+            }
+
+            // --- Final Sherman-Morrison-Woodbury combination. ---
+            // Requires x_rhs[0], x_rhs[matrix_dimension-1], x_buf[0],
+            // x_buf[matrix_dimension-1], now available in pass_rhs/pass_buf
+            // (staged by the two passes above) regardless of whether those
+            // positions were CR-backward-solved or PCR-core-solved. The
+            // scalar factor is computed redundantly by every thread (cheap:
+            // four reads and a handful of flops), avoiding a separate
+            // reduction/broadcast kernel.
+            using MDPolicy = Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>;
+            MDPolicy combine_policy({0, 0}, {effective_batch_count, matrix_dimension});
+
+            Kokkos::parallel_for(
+                "SolveCRPCR_Cyclic_Combine", combine_policy, KOKKOS_LAMBDA(const int k, const int i) {
+                    const int batch_idx           = batch_stride * k + batch_offset;
+                    const int offset              = batch_idx * matrix_dimension;
                     const T cyclic_corner_element = cyclic_corner_cache(batch_idx);
 
-                    T* scratch   = static_cast<T*>(team.team_scratch(0).get_shmem(scratch_bytes));
-                    T* d_rhs[2]  = {scratch, scratch + 2 * n_padded};
-                    T* d_buf[2]  = {scratch + n_padded, scratch + 3 * n_padded};
-                    T* pd_rhs[2] = {scratch + 4 * n_padded, scratch + 4 * n_padded + m};
-                    T* pd_buf[2] = {scratch + 4 * n_padded + 2 * m, scratch + 4 * n_padded + 3 * m};
+                    const T dot_product_x_v = pass_rhs(offset + 0) + cyclic_corner_element / gamma(batch_idx) *
+                                                                         pass_rhs(offset + matrix_dimension - 1);
+                    const T dot_product_u_v = pass_buf(offset + 0) + cyclic_corner_element / gamma(batch_idx) *
+                                                                         pass_buf(offset + matrix_dimension - 1);
+                    const T factor          = dot_product_x_v / (T(1) + dot_product_u_v);
 
-                    int cur = 0;
-                    for (int i = rank; i < n_padded; i += team_size) {
-                        if (i < matrix_dimension) {
-                            d_rhs[cur][i] = rhs(offset + i);
-                            if (i == 0) {
-                                d_buf[cur][i] = gamma(batch_idx);
-                            }
-                            else if (i == matrix_dimension - 1) {
-                                d_buf[cur][i] = cyclic_corner_element;
-                            }
-                            else {
-                                d_buf[cur][i] = T(0);
-                            }
-                        }
-                        else {
-                            d_rhs[cur][i] = T(0);
-                            d_buf[cur][i] = T(0);
-                        }
-                    }
-                    team.team_barrier();
-
-                    for (int L = 0; L < num_cr_levels; ++L) {
-                        const int stride = 1 << (L + 1);
-                        const int nxt    = 1 - cur;
-
-                        for (int i = rank; i < n_padded; i += team_size) {
-                            if ((i + 1) % stride == 0) {
-                                const int t     = (i + 1) / stride - 1;
-                                const int half  = stride / 2;
-                                const int iLeft = i - half;
-                                int iRight      = i + half;
-                                if (iRight > n_padded - 1) {
-                                    iRight = n_padded - 1;
-                                }
-
-                                const std::size_t traj_idx = static_cast<std::size_t>(batch_idx) * compact_length +
-                                                             static_cast<std::size_t>(level_offsets(L)) +
-                                                             static_cast<std::size_t>(t);
-                                const T k1_val             = cr_k1(traj_idx);
-                                const T k2_val             = cr_k2(traj_idx);
-
-                                d_rhs[nxt][i] =
-                                    d_rhs[cur][i] - d_rhs[cur][iLeft] * k1_val - d_rhs[cur][iRight] * k2_val;
-                                d_buf[nxt][i] =
-                                    d_buf[cur][i] - d_buf[cur][iLeft] * k1_val - d_buf[cur][iRight] * k2_val;
-                            }
-                            else {
-                                d_rhs[nxt][i] = d_rhs[cur][i];
-                                d_buf[nxt][i] = d_buf[cur][i];
-                            }
-                        }
-                        team.team_barrier();
-                        cur = nxt;
-                    }
-
-                    const int stride_final = n_padded / m;
-                    for (int i = rank; i < n_padded; i += team_size) {
-                        if (i < matrix_dimension && (i + 1) % stride_final == 0) {
-                            const int t  = (i + 1) / stride_final - 1;
-                            pd_rhs[0][t] = d_rhs[cur][i];
-                            pd_buf[0][t] = d_buf[cur][i];
-                        }
-                    }
-                    team.team_barrier();
-
-                    int pcur = 0;
-                    for (int step = 0; step < num_pcr_steps; ++step) {
-                        const int delta = 1 << step;
-                        const int pnxt  = 1 - pcur;
-
-                        for (int t = rank; t < m; t += team_size) {
-                            int tLeft, tRight;
-                            crpcr_pcr_neighbors(t, delta, m, tLeft, tRight);
-
-                            const std::size_t pcr_idx = static_cast<std::size_t>(batch_idx) *
-                                                            static_cast<std::size_t>(num_pcr_steps) *
-                                                            static_cast<std::size_t>(m) +
-                                                        static_cast<std::size_t>(step) * static_cast<std::size_t>(m) +
-                                                        static_cast<std::size_t>(t);
-                            const T k1_val            = pcr_k1(pcr_idx);
-                            const T k2_val            = pcr_k2(pcr_idx);
-
-                            pd_rhs[pnxt][t] =
-                                pd_rhs[pcur][t] - pd_rhs[pcur][tLeft] * k1_val - pd_rhs[pcur][tRight] * k2_val;
-                            pd_buf[pnxt][t] =
-                                pd_buf[pcur][t] - pd_buf[pcur][tLeft] * k1_val - pd_buf[pcur][tRight] * k2_val;
-                        }
-                        team.team_barrier();
-                        pcur = pnxt;
-                    }
-
-                    for (int i = rank; i < n_padded; i += team_size) {
-                        if (i < matrix_dimension && (i + 1) % stride_final == 0) {
-                            const int t   = (i + 1) / stride_final - 1;
-                            d_rhs[cur][i] = pd_rhs[pcur][t] / main_diagonal(offset + i);
-                            d_buf[cur][i] = pd_buf[pcur][t] / main_diagonal(offset + i);
-                        }
-                    }
-                    team.team_barrier();
-
-                    for (int L = num_cr_levels - 1; L >= 0; --L) {
-                        const int stride = 1 << (L + 1);
-                        const int half   = stride / 2;
-
-                        for (int i = rank; i < n_padded; i += team_size) {
-                            if (i < matrix_dimension && (i + 1) % stride == half) {
-                                int pLeft = i - half;
-                                if (pLeft < 0) {
-                                    pLeft = 0;
-                                }
-                                int pRight = i + half;
-                                if (pRight > n_padded - 1) {
-                                    pRight = n_padded - 1;
-                                }
-
-                                const T a_i = (i >= half) ? sub_diagonal(offset + pLeft) : T(0);
-                                const T c_i = sub_diagonal(offset + i);
-                                const T b_i = main_diagonal(offset + i);
-
-                                d_rhs[cur][i] =
-                                    (d_rhs[cur][i] - a_i * d_rhs[cur][pLeft] - c_i * d_rhs[cur][pRight]) / b_i;
-                                d_buf[cur][i] =
-                                    (d_buf[cur][i] - a_i * d_buf[cur][pLeft] - c_i * d_buf[cur][pRight]) / b_i;
-                            }
-                        }
-                        team.team_barrier();
-                    }
-
-                    const T dot_product_x_v =
-                        d_rhs[cur][0] + cyclic_corner_element / gamma(batch_idx) * d_rhs[cur][matrix_dimension - 1];
-                    const T dot_product_u_v =
-                        d_buf[cur][0] + cyclic_corner_element / gamma(batch_idx) * d_buf[cur][matrix_dimension - 1];
-                    const T factor = dot_product_x_v / (T(1) + dot_product_u_v);
-
-                    for (int i = rank; i < matrix_dimension; i += team_size) {
-                        rhs(offset + i) = d_rhs[cur][i] - factor * d_buf[cur][i];
-                    }
+                    rhs(offset + i) = pass_rhs(offset + i) - factor * pass_buf(offset + i);
                 });
         }
 
@@ -1992,13 +2869,15 @@ public:
      * @brief Total bytes of persistent device storage newly introduced by
      *        this class -- NOT counting the inherited main_diagonal_ /
      *        sub_diagonal_ (reused in place, not newly allocated). There is
-     *        no "a" array anywhere (see class comment), so this is now just
-     *        the compact CR trajectory, the small PCR-core trajectory, and a
-     *        handful of O(batch_count) scalars.
+     *        no "a" array anywhere (see class comment), so this is the
+     *        compact CR trajectory, the small PCR-core trajectory, the
+     *        two-pass cyclic staging buffers, and a handful of
+     *        O(batch_count) scalars.
      */
     std::size_t persistentDeviceBytes() const
     {
         const std::size_t batch     = static_cast<std::size_t>(this->batch_count_);
+        const std::size_t n         = static_cast<std::size_t>(this->matrix_dimension_);
         const std::size_t m         = static_cast<std::size_t>(intermediate_system_size_);
         const std::size_t pcr_steps = static_cast<std::size_t>(num_pcr_steps_);
 
@@ -2007,6 +2886,7 @@ public:
         bytes += 2 * batch * pcr_steps * m * sizeof(T); // pcr_k1/k2_trajectory_
         bytes += static_cast<std::size_t>(this->is_cyclic_ ? batch : 0) * sizeof(T); // gamma_
         bytes += static_cast<std::size_t>(this->is_cyclic_ ? batch : 0) * sizeof(T); // cyclic_corner_cache_
+        bytes += static_cast<std::size_t>(this->is_cyclic_ ? 2 * batch * n : 0) * sizeof(T); // cyclic_pass_rhs_/buf_
         return bytes;
     }
 
@@ -2032,6 +2912,14 @@ private:
     AllocatableVector<T> pcr_k2_trajectory_;
 
     Vector<T> gamma_; // Sherman-Morrison diagonal correction, cyclic systems only.
+
+    // Two-pass cyclic solve() staging (see class-level comment): each of the
+    // two sequential passes writes its per-position pipeline output here so
+    // the final combination kernel can read both. batch_count_ *
+    // matrix_dimension_ each, allocated once, cyclic systems only.
+    Vector<T> cyclic_pass_rhs_;
+    Vector<T> cyclic_pass_buf_;
+
     bool is_factorized_;
 
     // NOTE: no frozen_sub_lower_ ("a") member exists in this class -- see
