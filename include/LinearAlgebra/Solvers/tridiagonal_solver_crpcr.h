@@ -1015,13 +1015,13 @@ private:
     Vector<T> frozen_sub_upper_;  // "c" at each position, as of its last forward-reduction touch
 
     // Compact CR multiplier trajectory + per-level offsets (see class-level comment). O(n).
-    Vector<T> cr_k1_trajectory_;
-    Vector<T> cr_k2_trajectory_;
+    AllocatableVector<T> cr_k1_trajectory_;
+    AllocatableVector<T> cr_k2_trajectory_;
     Kokkos::View<int*> cr_level_offsets_; // size num_cr_levels_ + 1, prefix sums, identical across batch entries
 
     // PCR trajectory for the size-m intermediate system. O(m log m), small and bounded.
-    Vector<T> pcr_k1_trajectory_;
-    Vector<T> pcr_k2_trajectory_;
+    AllocatableVector<T> pcr_k1_trajectory_;
+    AllocatableVector<T> pcr_k2_trajectory_;
 
     Vector<T> gamma_; // Sherman-Morrison diagonal correction, cyclic systems only.
     bool is_factorized_;
