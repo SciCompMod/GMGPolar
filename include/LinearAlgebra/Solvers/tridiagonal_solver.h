@@ -125,7 +125,7 @@ namespace gmgpolar
 {
 
 template <typename T>
-using BatchedTridiagonalSolver = BatchedTridiagonalSolverCRPCR<T>;
+using BatchedTridiagonalSolver = BatchedTridiagonalSolverThomas<T>;
 
 /*    
 #if defined(KOKKOS_ENABLE_CUDA) || defined(KOKKOS_ENABLE_HIP) || defined(KOKKOS_ENABLE_SYCL)
