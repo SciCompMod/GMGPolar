@@ -278,7 +278,7 @@ public:
         // identity, participates in the reduction, avoiding divergent indexing logic. Loops
         // below are still strided by the *actual* team size in case a backend caps it below
         // the requested value.
-        TeamPolicy policy(this->batch_count_, n_padded);
+        TeamPolicy policy(this->batch_count_, /* n_padded*/ Kokkos::AUTO);
         policy.set_scratch_size(0, Kokkos::PerTeam(static_cast<int>(scratch_bytes)));
 
         Kokkos::parallel_for(
@@ -476,7 +476,7 @@ public:
             const std::size_t scratch_bytes =
                 (2ull * static_cast<std::size_t>(n_padded) + 2ull * static_cast<std::size_t>(m)) * sizeof(T);
 
-            TeamPolicy policy(effective_batch_count, n_padded);
+            TeamPolicy policy(effective_batch_count, /* n_padded */ Kokkos::AUTO);
             policy.set_scratch_size(0, Kokkos::PerTeam(static_cast<int>(scratch_bytes)));
 
             Kokkos::parallel_for(
@@ -628,7 +628,7 @@ public:
             const std::size_t scratch_bytes =
                 (4ull * static_cast<std::size_t>(n_padded) + 4ull * static_cast<std::size_t>(m)) * sizeof(T);
 
-            TeamPolicy policy(effective_batch_count, n_padded);
+            TeamPolicy policy(effective_batch_count, /* n_padded*/ Kokkos::AUTO);
             policy.set_scratch_size(0, Kokkos::PerTeam(static_cast<int>(scratch_bytes)));
 
             Kokkos::parallel_for(
