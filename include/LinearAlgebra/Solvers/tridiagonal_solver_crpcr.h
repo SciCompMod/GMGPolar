@@ -406,7 +406,8 @@ public:
                         pcr_neighbors(t, delta, m, tLeft, tRight);
 
                         const T a_t      = (t >= delta) ? pa[pcur][t - delta] : T(0);
-                        const T a_tRight = (tRight >= delta) ? pa[pcur][tRight - delta] : T(0);
+                        // const T a_tRight = (tRight >= delta) ? pa[pcur][tRight - delta] : T(0);
+                        const T a_tRight = pa[pcur][tRight];
                         const T c_t      = pc[pcur][t];
                         const T c_tLeft  = pc[pcur][tLeft];
 
