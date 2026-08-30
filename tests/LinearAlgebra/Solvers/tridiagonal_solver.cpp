@@ -777,16 +777,20 @@ TEST(BatchedTridiagonalSolvers, default_batch_arguments)
 // any backend. Covers both a non-power-of-two size (513, just past 2^9) and an exact power-of-two
 // size (1024), for both the non-cyclic and cyclic corner paths. batch_count_ is kept small since
 // the dense O(n^3) reference solve dominates runtime at this n.
-void test_very_large_matrix_dimension()
+void test_very_large_matrix_dimension_non_cyclic(bool is_cyclic)
 {
-    for (bool is_cyclic : {false, true}) {
-        runCorrectnessCheck(/*n=*/513, /*batch_count=*/2, is_cyclic, /*offset=*/0, /*stride=*/1);
-        runCorrectnessCheck(/*n=*/1024, /*batch_count=*/2, is_cyclic, /*offset=*/0, /*stride=*/1);
-    }
+    runCorrectnessCheck(/*n=*/513, /*batch_count=*/2, is_cyclic, /*offset=*/0, /*stride=*/1);
+    runCorrectnessCheck(/*n=*/1024, /*batch_count=*/2, is_cyclic, /*offset=*/0, /*stride=*/1);   
 }
-TEST(BatchedTridiagonalSolvers, very_large_matrix_dimension)
+
+TEST(BatchedTridiagonalSolvers, very_large_matrix_dimension_non_cyclic)
 {
-    test_very_large_matrix_dimension();
+    test_very_large_matrix_dimension_non_cyclic(false);
+}
+
+TEST(BatchedTridiagonalSolvers, very_large_matrix_dimension_cyclic)
+{
+    test_very_large_matrix_dimension_non_cyclic(true);
 }
 
 // --- Very large matrix_dimension_ combined with a non-trivial batch_offset_/batch_stride_ split:
@@ -794,64 +798,67 @@ TEST(BatchedTridiagonalSolvers, very_large_matrix_dimension)
 // together, rather than each only being tested in isolation (as in test_very_large_matrix_dimension
 // and test_uneven_batch_stride_split above). batch_count_ = 5 with stride = 2 covers batches
 // {0, 2, 4} on one call and {1, 3} on the other, sharing a single setup() at large n.
-void test_very_large_matrix_dimension_with_batch_stride()
+void test_very_large_matrix_dimension_with_batch_stride(bool is_cyclic = false)
 {
     const int matrix_dimension = 777;
     const int batch_count      = 5;
 
-    for (bool is_cyclic : {false, true}) {
-        BatchedTridiagonalSolver<double> solver(matrix_dimension, batch_count, is_cyclic);
+    BatchedTridiagonalSolver<double> solver(matrix_dimension, batch_count, is_cyclic);
 
-        Kokkos::parallel_for(
-            "Fill", 1, KOKKOS_LAMBDA(const int) {
-                for (int b = 0; b < batch_count; b++) {
-                    for (int i = 0; i < matrix_dimension; i++) {
-                        solver.set_main_diagonal(b, i, sysDiag(b, i));
-                    }
-                    for (int i = 0; i < matrix_dimension - 1; i++) {
-                        solver.set_sub_diagonal(b, i, sysSub(b, i));
-                    }
-                    if (is_cyclic) {
-                        solver.set_cyclic_corner(b, sysCorner(b));
-                    }
+    Kokkos::parallel_for(
+        "Fill", 1, KOKKOS_LAMBDA(const int) {
+            for (int b = 0; b < batch_count; b++) {
+                for (int i = 0; i < matrix_dimension; i++) {
+                    solver.set_main_diagonal(b, i, sysDiag(b, i));
                 }
-            });
-
-        HostVector<double> h_rhs("h_rhs", matrix_dimension * batch_count);
-        for (int b = 0; b < batch_count; b++) {
-            for (int i = 0; i < matrix_dimension; i++) {
-                h_rhs(b * matrix_dimension + i) = sysRhs(b, i);
+                for (int i = 0; i < matrix_dimension - 1; i++) {
+                    solver.set_sub_diagonal(b, i, sysSub(b, i));
+                }
+                if (is_cyclic) {
+                    solver.set_cyclic_corner(b, sysCorner(b));
+                }
             }
+        });
+
+    HostVector<double> h_rhs("h_rhs", matrix_dimension * batch_count);
+    for (int b = 0; b < batch_count; b++) {
+        for (int i = 0; i < matrix_dimension; i++) {
+            h_rhs(b * matrix_dimension + i) = sysRhs(b, i);
         }
+    }
 
-        auto rhs = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs);
-        solver.setup();
+    auto rhs = Kokkos::create_mirror_view_and_copy(DefaultMemorySpace(), h_rhs);
+    solver.setup();
 
-        const int stride = 2;
-        solver.solve(rhs, /*offset=*/0, stride); // covers batch 0, 2, 4
-        solver.solve(rhs, /*offset=*/1, stride); // covers batch 1, 3
+    const int stride = 2;
+    solver.solve(rhs, /*offset=*/0, stride); // covers batch 0, 2, 4
+    solver.solve(rhs, /*offset=*/1, stride); // covers batch 1, 3
 
-        Kokkos::deep_copy(h_rhs, rhs);
+    Kokkos::deep_copy(h_rhs, rhs);
 
-        const double tol = 1e-8;
-        for (int b = 0; b < batch_count; b++) {
-            std::vector<double> diag(matrix_dimension), subdiag(matrix_dimension - 1), rhs_ref(matrix_dimension);
-            for (int i = 0; i < matrix_dimension; i++) {
-                diag[i]    = sysDiag(b, i);
-                rhs_ref[i] = sysRhs(b, i);
-            }
-            for (int i = 0; i < matrix_dimension - 1; i++) {
-                subdiag[i] = sysSub(b, i);
-            }
-            denseReferenceSolve(matrix_dimension, diag, subdiag, sysCorner(b), is_cyclic, rhs_ref);
+    const double tol = 1e-8;
+    for (int b = 0; b < batch_count; b++) {
+        std::vector<double> diag(matrix_dimension), subdiag(matrix_dimension - 1), rhs_ref(matrix_dimension);
+        for (int i = 0; i < matrix_dimension; i++) {
+            diag[i]    = sysDiag(b, i);
+            rhs_ref[i] = sysRhs(b, i);
+        }
+        for (int i = 0; i < matrix_dimension - 1; i++) {
+            subdiag[i] = sysSub(b, i);
+        }
+        denseReferenceSolve(matrix_dimension, diag, subdiag, sysCorner(b), is_cyclic, rhs_ref);
 
-            for (int i = 0; i < matrix_dimension; i++) {
-                EXPECT_NEAR(h_rhs(b * matrix_dimension + i), rhs_ref[i], tol) << "batch " << b << " index " << i;
-            }
+        for (int i = 0; i < matrix_dimension; i++) {
+            EXPECT_NEAR(h_rhs(b * matrix_dimension + i), rhs_ref[i], tol) << "batch " << b << " index " << i;
         }
     }
 }
-TEST(BatchedTridiagonalSolvers, very_large_matrix_dimension_with_batch_stride)
+TEST(BatchedTridiagonalSolvers, very_large_matrix_dimension_with_batch_stride_non_cyclic)
 {
-    test_very_large_matrix_dimension_with_batch_stride();
+    test_very_large_matrix_dimension_with_batch_stride(false);
+}
+
+TEST(BatchedTridiagonalSolvers, very_large_matrix_dimension_with_batch_stride_cyclic)
+{
+    test_very_large_matrix_dimension_with_batch_stride(true);
 }
