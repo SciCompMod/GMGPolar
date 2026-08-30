@@ -104,7 +104,7 @@
  *   computed and stored; deriving it from crC instead removes the need to
  *   store or update it at all.
  *
- *   Two distinct places this is applied, with two distinct index
+ *   Three distinct places this is applied, with three distinct index
  *   derivations (do not confuse them):
  *     1. Forward-reduction read (setup() step 3): at level L, for active
  *        position i, a_i = crC[cur][iLeft] = crC[cur][i-half] (iLeft is
@@ -117,7 +117,20 @@
  *        reduction never needs an "a" value directly -- it only replays
  *        the stored k1/k2 trajectory -- so this read exists only in
  *        setup().)
- *     2. Backward-substitution read (solve(), both non-cyclic and cyclic
+ *     2. CR-to-PCR handoff gather (setup() step 5): the m surviving rows
+ *        handed to the (untouched) PCR core form a smaller tridiagonal-like
+ *        system whose row spacing, in original-index units, is
+ *        stride_final = n_padded/m -- the FULL stride of the last completed
+ *        CR level, not half of it, since there is no further CR level to
+ *        take "half" of. So here the shift is stride_final itself:
+ *        pcrA[0][t] = crC[cur][i - stride_final], guarded by
+ *        i >= stride_final. This is easy to get backwards (using
+ *        stride_final/2 by false analogy with step 3's `half`) -- the
+ *        distinguishing fact is that step 3's `half` is always the PREVIOUS
+ *        level's full stride (half(L) = stride(L-1) = 2^L), so the
+ *        handoff's "previous level" is the last CR level actually run,
+ *        whose full stride is stride_final, not stride_final/2.
+ *     3. Backward-substitution read (solve(), both non-cyclic and cyclic
  *        loops): here "a" is needed for the FROZEN, final post-setup()
  *        state, which lives in this->sub_diagonal_ (frozen "c"), not in
  *        any ping-pong scratch. At level L (stride = 2^(L+1),
@@ -604,14 +617,31 @@ public:
                 // Gather/scatter loop over i in [0, n_padded); the PCR core
                 // steps themselves loop separately over t in [0, m) -- a
                 // different, independent index space (see class-level note).
-                // Gathering itself reads only from scratch (crB/crC; crA no
-                // longer exists), unaffected by the in-place persistent-
-                // storage change; only the FINAL scatter into main_diagonal_
-                // (now unpadded) needs the i < matrix_dimension guard.
+                // Gathering reads from scratch (crB/crC; crA no longer
+                // exists as a stored array), unaffected by the in-place
+                // persistent-storage change; only the FINAL scatter into
+                // main_diagonal_ (now unpadded) needs the i < matrix_dimension
+                // guard.
+                //
+                // pcrA[0][t] (the PCR core's required "a" input -- the PCR
+                // core loop itself is untouched and still reads pcrA every
+                // step) is derived, not copied from a stored array: the
+                // surviving rows handed to the PCR core are themselves a
+                // smaller tridiagonal-like system whose row spacing, in
+                // original-index units, is stride_final (the gap between
+                // consecutive survivors) -- so by the same a_i == c_{i-shift}
+                // symmetry invariant used in step 3 (there with shift = this
+                // level's half = previous level's full stride; here with
+                // shift = stride_final, the full stride of the last
+                // completed CR level, since there is no further level to
+                // take "half" of), a_i = crC[cur][i - stride_final], guarded
+                // by i >= stride_final for the same boundary reason as
+                // elsewhere (no position to read left of 0).
                 const int stride_final = n_padded / m;
                 for (int i = rank; i < n_padded; i += team_size) {
                     if ((i + 1) % stride_final == 0) {
                         const int t = (i + 1) / stride_final - 1;
+                        pcrA[0][t]  = (i >= stride_final) ? crC[cur][i - stride_final] : T(0);
                         pcrB[0][t]  = crB[cur][i];
                         pcrC[0][t]  = crC[cur][i];
                     }
