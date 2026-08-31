@@ -1,193 +1,183 @@
 #pragma once
 
 /**
- * @brief Batched tridiagonal solver based on a CR-PCR hybrid (Cyclic Reduction
- *        forward/backward sweep around a small Parallel-Cyclic-Reduction core).
- *
- * The solver operates on a batch of independent tridiagonal systems and uses
- * Kokkos teams to distribute the equations of each system across team members.
- *
- * Motivation: pure PCR needs only O(log n) parallel steps but does
- * O(n log n) total work, and its full O(n log n) reduction trajectory (all
- * k1/k2 multipliers, for every step and every equation) is expensive to
- * store. Pure CR is closer to work-efficient (O(n)) but needs 2*log2(n)
- * steps and under-utilizes the vector/SIMD unit in its later steps.
- *
- * CR-PCR runs CR's forward reduction down to a small intermediate system,
- * solves that small system with PCR, then finishes with CR's backward
- * substitution. The decisive benefit for this codebase is memory: CR's
- * forward reduction only ever updates a shrinking, geometrically-decreasing
- * number of positions per level, summing to O(n) total updates, not
- * O(n log n). Storing those updates compactly (one contiguous segment per
- * level) instead of in a dense [level][position] grid is what makes this
- * solver's persistent memory footprint O(n), matching
- * BatchedTridiagonalSolverThomas, instead of BatchedTridiagonalSolverPCR's
- * O(n log n).
- *
- * ------------------------------------------------------------------------
- * In-place reuse of main_diagonal_ / sub_diagonal_ (frozen state storage)
- * ------------------------------------------------------------------------
- * This class does NOT allocate separate O(n)-per-batch arrays to hold the
- * frozen diagonal ("b") and frozen upper off-diagonal ("c") state after CR
- * forward reduction -- it overwrites the inherited this->main_diagonal_ and
- * this->sub_diagonal_ buffers in place, exactly as BatchedTridiagonalSolver-
- * PCR already does for main_diagonal_. This is correct because:
- *
- *   1. Read-before-write ordering within setup()'s single kernel launch: the
- *      ORIGINAL contents of main_diagonal_/sub_diagonal_ are read only in
- *      the kernel's first two steps (load, and the cyclic Sherman-Morrison
- *      adjustment), both of which complete (with a team_barrier()) before
- *      the frozen state is written back into the same buffers later in the
- *      same kernel. Each team only ever touches its own batch entry's
- *      slice, so there is no cross-team hazard either.
- *   2. Padding positions never need to be persisted at all. An identity
- *      padding equation (a=0, b=1, c=0) is invariant under every CR and PCR
- *      update this algorithm performs (k1 = a/b_left = 0, k2 = c/b_right =
- *      0, so the update reduces to a'=0, b'=1, c'=0 again), and
- *      consequently d (and therefore x) at a padding position never
- *      changes from its initial 0 either. So frozen "b"/"c" state is only
- *      ever needed for the matrix_dimension_ REAL positions -- exactly the
- *      size this->main_diagonal_/this->sub_diagonal_ already are. No
- *      resize, no stride change, so BatchedTridiagonalSolverBase's accessor
- *      semantics (set_main_diagonal, set_sub_diagonal, etc., all indexed
- *      with stride matrix_dimension_) remain completely unaffected.
- *
- * The one piece of information this scheme would otherwise lose is the
- * ORIGINAL cyclic corner element (this->sub_diagonal_'s last entry per
- * batch), which the plain-tridiagonal reduction always freezes to c=0 at
- * that boundary (a structural fact, unrelated to the original corner value)
- * but which solve()'s Sherman-Morrison-Woodbury combination needs on EVERY
- * call, not just once. That one scalar per batch entry is cached into a
- * small new cyclic_corner_cache_ member (O(batch_count), negligible) before
- * sub_diagonal_ is overwritten.
- *
- * frozen_sub_lower_ ("a") no longer exists as a member at all: the same
- * symmetric-matrix invariant used for the PCR core below (see next section)
- * is now applied a second time, independently, to the CR forward-reduction
- * phase in setup() AND to backward substitution in solve() -- these are two
- * separate applications of the same theorem, not a shared code path:
- *   - In setup()'s forward reduction (level L, half = stride/2), a_i and
- *     a_iRight are read as crC[cur][iLeft] / crC[cur][iRight - half], using
- *     the SAME iLeft/iRight already computed for that level's own reduction.
- *   - In solve()'s backward substitution (retiree p at backward level L,
- *     same half), a_p is read as sub_diagonal(offset + pLeft), using the
- *     SAME (possibly-clamped) pLeft already computed for the neighbor-value
- *     lookup. Both reads are guarded by the UNCLAMPED test `i >= half` (not
- *     a check on the clamped index itself), since the boundary case needs
- *     a_i = 0 exactly, not whatever the clamped index happens to hold.
- * With this, and the PCR-core elimination below, this class allocates no
- * O(n)-per-batch "a" array anywhere, in scratch or in persistent storage.
- *
- * ------------------------------------------------------------------------
- * PCR core: no "a" array, derived from "c" instead
- * ------------------------------------------------------------------------
- * The small (size m) intermediate system that setup()'s PCR core solves is,
- * remarkably, itself exactly symmetric in its own gathered (t-indexed)
- * sense: a survivor's final left coefficient equals the previous survivor's
- * final right coefficient. This falls out of the same CR reduction algebra
- * that gives the original matrix's a_i = c_{i-1} its shape -- a survivor
- * participates in (is "active" during) every single CR forward level,
- * including the very last one, so the standard CR update's symmetry-
- * preservation applies through that entire chain and lands exactly on the
- * PCR core's own uniform neighbor spacing. Concretely: at PCR step `delta`,
- * `a_t == c_{t-delta}` in the GATHERED m-sized indexing -- so the PCR core
- * below derives its left coefficient from pcrC[pcur][t-delta] (guarded
- * t >= delta), exactly the technique BatchedTridiagonalSolverPCR already
- * uses for its own e[cur][i-delta]. There is no pcrA array or pcrA scratch
- * at all; the gather step (setup(), step 5) copies only "c" and "b" for
- * each survivor. This is independent of the CR-phase elimination above --
- * neither relies on the other.
- *
- * CAVEAT vs. BatchedTridiagonalSolverThomas/PCR: because sub_diagonal_ is
- * now also overwritten by setup() (not just main_diagonal_), re-factorizing
- * with a changed matrix requires repopulating BOTH main_diagonal_ AND
- * sub_diagonal_ via the base class's set_main_diagonal()/set_sub_diagonal()
- * before calling setup() again -- unlike the sibling classes, you cannot
- * rely on sub_diagonal_ still holding its previous contents across a second
- * setup() call. Multiple solve() calls after a single setup() are
- * unaffected (solve() never writes main_diagonal_, sub_diagonal_, gamma_, or
- * cyclic_corner_cache_ -- only the caller's rhs and team scratch).
- *
- * ------------------------------------------------------------------------
- * Team sizing: Kokkos::AUTO + strided loops, NOT a fixed team_size
- * ------------------------------------------------------------------------
- * Every phase (padding/load, CR forward reduction, PCR core, CR backward
- * substitution, write-out) loops over its index range with a strided team
- * loop:
- *
- *     for (int i = team.team_rank(); i < n_padded; i += team.team_size())
- *
- * rather than assuming team_size() == n_padded and using team.team_rank()
- * directly as the position. This is required for portability: host
- * backends (Serial, OpenMP) do not support requesting an arbitrary exact
- * team_size the way CUDA/HIP/SYCL do. Kokkos::AUTO lets each backend pick a
- * team_size that fits its execution model, and the strided loop
- * transparently handles both "one thread owns many positions" (CPU) and
- * "many threads each own one or a few positions" (GPU) without any
- * backend-specific code. This also removes a latent GPU bug: a fixed
- * team_size = n_padded would fail to launch at all once n_padded exceeds
- * the backend's max threads-per-block, which a strided loop has no ceiling
- * on. The PCR core (over the small m-sized intermediate system) uses its
- * own, separate strided loop over t in [0, m) -- it is not tied to the CR
- * phases' loop over i in [0, n_padded), since gather/scatter already
- * bridges the two index spaces explicitly.
- *
- * ------------------------------------------------------------------------
- * Handling of arbitrary matrix_dimension_ (padding, see task section 3):
- * ------------------------------------------------------------------------
- * Classic CR forward-reduction indexing assumes a power-of-two system size.
- * Rather than inventing a bespoke non-power-of-two indexing scheme, every
- * system is padded internally, WITHIN TEAM SCRATCH ONLY, to
- * matrix_dimension_padded_ = next_power_of_two(matrix_dimension_):
- *   - Real equations occupy positions [0, matrix_dimension_).
- *   - Padding positions [matrix_dimension_, matrix_dimension_padded_) are
- *     initialized as *identity* equations: a = 0, b = 1, c = 0 (and d = 0 in
- *     solve()). As established above, this makes them exactly invariant and
- *     therefore safe to reduce through without ever perturbing a real
- *     equation, AND without ever needing persistent storage for their
- *     "b"/"c" state (see caveat above for "a", still persisted at padded
- *     length for now).
- *
- * ------------------------------------------------------------------------
- * Compact CR trajectory layout (see task section 4, point 2):
- * ------------------------------------------------------------------------
- * In CR forward reduction, position i is updated in place, and remains
- * "active" (gets re-updated) at level L iff (i+1) is a multiple of
- * 2^(L+1) -- i.e. its 2-adic valuation is >= L+1. A position's *last* update
- * therefore leaves exactly the state backward substitution needs; no
- * per-level snapshot is required, only the last value written to each
- * position. This alone collapses the O(n log n) state storage to O(n).
- *
- * Separately, the *reduction multipliers* (k1, k2) computed at each level ARE
- * needed again later, to replay the same reduction on the right-hand side in
- * solve(). But the number of (level, position) pairs where an update
- * actually happens, summed over all levels, is also O(n) (n/2 + n/4 + ... ~
- * n), because exactly half of the previous level's active positions remain
- * active at the next level. So instead of a dense [level][position] grid
- * (mostly wasted space), the trajectory is stored as one contiguous segment
- * per level, sized to that level's active-position count. cr_level_offsets_
- * holds the prefix-sum start offset of each level's segment (precomputed
- * once in the constructor, identical for every batch entry), so that both
- * setup() and solve() device kernels can independently compute "where does
- * level L's segment start" -- and, using the same i = stride*t + stride-1
- * formula for the t-th active position at level L, always agree on which
- * compact slot corresponds to which system position.
- *
- * ------------------------------------------------------------------------
- * What is unchanged from BatchedTridiagonalSolverPCR (task section 2):
- * ------------------------------------------------------------------------
- *   - The public BatchedTridiagonalSolverBase<T> API and accessor semantics.
- *   - The Sherman-Morrison-Woodbury cyclic wrapper: cyclic systems are still
- *     reduced to two solves of the same plain tridiagonal system (rhs, and
- *     the gamma/corner-derived correction vector), combined via the existing
- *     rank-1 formula. This class only replaces what happens inside "solve a
- *     plain tridiagonal system".
- *   - solve_diagonal() -- pure elementwise scaling, unrelated to any of this.
- *   - The team-per-system parallelization model (Kokkos::TeamPolicy, team
- *     scratch, team_barrier() between read/write phases within a step).
- *
- * @tparam T Scalar type used for matrix coefficients and right-hand sides.
- */
+* @brief Batched tridiagonal solver based on a CR-PCR hybrid (Cyclic Reduction
+* forward/backward sweep around a small Parallel-Cyclic-Reduction core).
+*
+* The solver operates on a batch of independent tridiagonal systems and uses
+* Kokkos teams to distribute the equations of each system across team members.
+*
+* Motivation: pure PCR needs only O(log n) parallel steps but does
+* O(n log n) total work, and its full O(n log n) reduction trajectory (all
+* k1/k2 multipliers, for every step and every equation) is expensive to
+* store. Pure CR is closer to work-efficient (O(n)) but needs 2*log2(n)
+* steps and under-utilizes the vector/SIMD unit in its later steps.
+*
+* CR-PCR runs CR's forward reduction down to a small intermediate system,
+* solves that small system with PCR, then finishes with CR's backward
+* substitution. The decisive benefit for this codebase is memory: CR's
+* forward reduction only ever updates a shrinking, geometrically-decreasing
+* number of positions per level, summing to O(n) total updates, not
+* O(n log n). Storing those updates compactly (one contiguous segment per
+* level) instead of in a dense [level][position] grid is what makes this
+* solver's persistent memory footprint O(n), matching
+* BatchedTridiagonalSolverThomas, instead of BatchedTridiagonalSolverPCR's
+* O(n log n).
+*
+* ------------------------------------------------------------------------
+* In-place reuse of main_diagonal_ / sub_diagonal_ (frozen state storage)
+* ------------------------------------------------------------------------
+* This class does NOT allocate separate O(n)-per-batch arrays to hold the
+* frozen diagonal ("b") and frozen upper off-diagonal ("c") state after CR
+* forward reduction -- it overwrites the inherited this->main_diagonal_ and
+* this->sub_diagonal_ buffers in place, exactly as BatchedTridiagonalSolver-
+* PCR already does for main_diagonal_. This is correct because:
+*
+* 1. Read-before-write ordering within setup()'s single kernel launch: the
+* ORIGINAL contents of main_diagonal_/sub_diagonal_ are read only in
+* the kernel's first two steps (load, and the cyclic Sherman-Morrison
+* adjustment), both of which complete (with a team_barrier()) before
+* the frozen state is written back into the same buffers later in the
+* same kernel. Each team only ever touches its own batch entry's
+* slice, so there is no cross-team hazard either.
+* 2. Padding positions never need to be persisted at all. An identity
+* padding equation (a=0, b=1, c=0) is invariant under every CR and PCR
+* update this algorithm performs (k1 = a/b_left = 0, k2 = c/b_right =
+* 0, so the update reduces to a'=0, b'=1, c'=0 again), and
+* consequently d (and therefore x) at a padding position never
+* changes from its initial 0 either. So frozen "b"/"c" state is only
+* ever needed for the matrix_dimension_ REAL positions -- exactly the
+* size this->main_diagonal_/this->sub_diagonal_ already are. No
+* resize, no stride change, so BatchedTridiagonalSolverBase's accessor
+* semantics (set_main_diagonal, set_sub_diagonal, etc., all indexed
+* with stride matrix_dimension_) remain completely unaffected.
+*
+* The one piece of information this scheme would otherwise lose is the
+* ORIGINAL cyclic corner element (this->sub_diagonal_'s last entry per
+* batch), which the plain-tridiagonal reduction always freezes to c=0 at
+* that boundary (a structural fact, unrelated to the original corner value)
+* but which solve()'s Sherman-Morrison-Woodbury combination needs on EVERY
+* call, not just once. That one scalar per batch entry is cached into a
+* small new cyclic_corner_cache_ member (O(batch_count), negligible) before
+* sub_diagonal_ is overwritten.
+*
+* frozen_sub_lower_ ("a") remains a separate, dedicated array for now (the
+* base class provides no second off-diagonal slot to reuse for it), still
+* sized batch_count_ * matrix_dimension_padded_ as before, and the CR
+* forward-reduction phase in setup()/solve() still stores/reads "a"
+* explicitly (crA scratch) -- neither is touched by this optimization pass.
+*
+* ------------------------------------------------------------------------
+* PCR core: no "a" array, derived from "c" instead
+* ------------------------------------------------------------------------
+* The small (size m) intermediate system that setup()'s PCR core solves is,
+* remarkably, itself exactly symmetric in its own gathered (t-indexed)
+* sense: a survivor's final left coefficient equals the previous survivor's
+* final right coefficient. This falls out of the same CR reduction algebra
+* that gives the original matrix's a_i = c_{i-1} its shape -- a survivor
+* participates in (is "active" during) every single CR forward level,
+* including the very last one, so the standard CR update's symmetry-
+* preservation applies through that entire chain and lands exactly on the
+* PCR core's own uniform neighbor spacing. Concretely: at PCR step `delta`,
+* `a_t == c_{t-delta}` in the GATHERED m-sized indexing -- so the PCR core
+* below derives its left coefficient from pcrC[pcur][t-delta] (guarded
+* t >= delta), exactly the technique BatchedTridiagonalSolverPCR already
+* uses for its own e[cur][i-delta]. There is no pcrA array or pcrA scratch
+* at all; the gather step (setup(), step 5) copies only "c" and "b" for
+* each survivor. This is independent of, and does not rely on, the
+* separate (not-yet-applied) CR-phase "a" elimination described above.
+*
+* CAVEAT vs. BatchedTridiagonalSolverThomas/PCR: because sub_diagonal_ is
+* now also overwritten by setup() (not just main_diagonal_), re-factorizing
+* with a changed matrix requires repopulating BOTH main_diagonal_ AND
+* sub_diagonal_ via the base class's set_main_diagonal()/set_sub_diagonal()
+* before calling setup() again -- unlike the sibling classes, you cannot
+* rely on sub_diagonal_ still holding its previous contents across a second
+* setup() call. Multiple solve() calls after a single setup() are
+* unaffected (solve() never writes main_diagonal_, sub_diagonal_,
+* frozen_sub_lower_, gamma_, or cyclic_corner_cache_ -- only the caller's
+* rhs and team scratch).
+*
+* ------------------------------------------------------------------------
+* Team sizing: Kokkos::AUTO + strided loops, NOT a fixed team_size
+* ------------------------------------------------------------------------
+* Every phase (padding/load, CR forward reduction, PCR core, CR backward
+* substitution, write-out) loops over its index range with a strided team
+* loop:
+*
+* for (int i = team.team_rank(); i < n_padded; i += team.team_size())
+*
+* rather than assuming team_size() == n_padded and using team.team_rank()
+* directly as the position. This is required for portability: host
+* backends (Serial, OpenMP) do not support requesting an arbitrary exact
+* team_size the way CUDA/HIP/SYCL do. Kokkos::AUTO lets each backend pick a
+* team_size that fits its execution model, and the strided loop
+* transparently handles both "one thread owns many positions" (CPU) and
+* "many threads each own one or a few positions" (GPU) without any
+* backend-specific code. This also removes a latent GPU bug: a fixed
+* team_size = n_padded would fail to launch at all once n_padded exceeds
+* the backend's max threads-per-block, which a strided loop has no ceiling
+* on. The PCR core (over the small m-sized intermediate system) uses its
+* own, separate strided loop over t in [0, m) -- it is not tied to the CR
+* phases' loop over i in [0, n_padded), since gather/scatter already
+* bridges the two index spaces explicitly.
+*
+* ------------------------------------------------------------------------
+* Handling of arbitrary matrix_dimension_ (padding, see task section 3):
+* ------------------------------------------------------------------------
+* Classic CR forward-reduction indexing assumes a power-of-two system size.
+* Rather than inventing a bespoke non-power-of-two indexing scheme, every
+* system is padded internally, WITHIN TEAM SCRATCH ONLY, to
+* matrix_dimension_padded_ = next_power_of_two(matrix_dimension_):
+* - Real equations occupy positions [0, matrix_dimension_).
+* - Padding positions [matrix_dimension_, matrix_dimension_padded_) are
+* initialized as *identity* equations: a = 0, b = 1, c = 0 (and d = 0 in
+* solve()). As established above, this makes them exactly invariant and
+* therefore safe to reduce through without ever perturbing a real
+* equation, AND without ever needing persistent storage for their
+* "b"/"c" state (see caveat above for "a", still persisted at padded
+* length for now).
+*
+* ------------------------------------------------------------------------
+* Compact CR trajectory layout (see task section 4, point 2):
+* ------------------------------------------------------------------------
+* In CR forward reduction, position i is updated in place, and remains
+* "active" (gets re-updated) at level L iff (i+1) is a multiple of
+* 2^(L+1) -- i.e. its 2-adic valuation is >= L+1. A position's *last* update
+* therefore leaves exactly the state backward substitution needs; no
+* per-level snapshot is required, only the last value written to each
+* position. This alone collapses the O(n log n) state storage to O(n).
+*
+* Separately, the *reduction multipliers* (k1, k2) computed at each level ARE
+* needed again later, to replay the same reduction on the right-hand side in
+* solve(). But the number of (level, position) pairs where an update
+* actually happens, summed over all levels, is also O(n) (n/2 + n/4 + ... ~
+* n), because exactly half of the previous level's active positions remain
+* active at the next level. So instead of a dense [level][position] grid
+* (mostly wasted space), the trajectory is stored as one contiguous segment
+* per level, sized to that level's active-position count. cr_level_offsets_
+* holds the prefix-sum start offset of each level's segment (precomputed
+* once in the constructor, identical for every batch entry), so that both
+* setup() and solve() device kernels can independently compute "where does
+* level L's segment start" -- and, using the same i = stride*t + stride-1
+* formula for the t-th active position at level L, always agree on which
+* compact slot corresponds to which system position.
+*
+* ------------------------------------------------------------------------
+* What is unchanged from BatchedTridiagonalSolverPCR (task section 2):
+* ------------------------------------------------------------------------
+* - The public BatchedTridiagonalSolverBase<T> API and accessor semantics.
+* - The Sherman-Morrison-Woodbury cyclic wrapper: cyclic systems are still
+* reduced to two solves of the same plain tridiagonal system (rhs, and
+* the gamma/corner-derived correction vector), combined via the existing
+* rank-1 formula. This class only replaces what happens inside "solve a
+* plain tridiagonal system".
+* - solve_diagonal() -- pure elementwise scaling, unrelated to any of this.
+* - The team-per-system parallelization model (Kokkos::TeamPolicy, team
+* scratch, team_barrier() between read/write phases within a step).
+*
+* @tparam T Scalar type used for matrix coefficients and right-hand sides.
+*/
 
 #include <Kokkos_Core.hpp>
 #include <algorithm>
@@ -204,8 +194,8 @@ namespace gmgpolar
 {
 
 /**
- * @brief Rounds n up to the next power of two (returns 1 for n <= 1).
- */
+* @brief Rounds n up to the next power of two (returns 1 for n <= 1).
+*/
 inline int crpcr_next_power_of_two(int n)
 {
     if (n <= 1) {
@@ -219,9 +209,9 @@ inline int crpcr_next_power_of_two(int n)
 }
 
 /**
- * @brief Exact base-2 logarithm of a value known to be a power of two
- *        (returns 0 for n <= 1).
- */
+* @brief Exact base-2 logarithm of a value known to be a power of two
+* (returns 0 for n <= 1).
+*/
 inline int crpcr_exact_log2(int n)
 {
     int log_value = 0;
@@ -233,12 +223,12 @@ inline int crpcr_exact_log2(int n)
 }
 
 /**
- * @brief Clamped left/right neighbor indices, distance `delta` away, used by
- *        the PCR core. Identical convention to BatchedTridiagonalSolverPCR's
- *        pcr_neighbors(): out-of-range neighbors clamp to the array bounds,
- *        which is safe because the corresponding a/c coefficient is zero at
- *        those boundaries.
- */
+* @brief Clamped left/right neighbor indices, distance `delta` away, used by
+* the PCR core. Identical convention to BatchedTridiagonalSolverPCR's
+* pcr_neighbors(): out-of-range neighbors clamp to the array bounds,
+* which is safe because the corresponding a/c coefficient is zero at
+* those boundaries.
+*/
 KOKKOS_INLINE_FUNCTION
 void crpcr_pcr_neighbors(int i, int delta, int n, int& iLeft, int& iRight)
 {
@@ -257,16 +247,16 @@ class BatchedTridiagonalSolverCRPCR : public BatchedTridiagonalSolverBase<T>
 {
 public:
     /**
-     * @param matrix_dimension Real (unpadded) system size, as in the base class.
-     * @param batch_count Number of independent systems.
-     * @param is_cyclic Whether systems are cyclic (Sherman-Morrison-Woodbury).
-     * @param intermediate_system_size Target switch-over size `m` for the CR
-     *        forward reduction to hand off to the PCR core. Rounded up to a
-     *        power of two and clamped to next_power_of_two(matrix_dimension)
-     *        if that is smaller -- in which case CR performs zero levels and
-     *        this degenerates to pure PCR on the padded system, which is
-     *        also the correct behavior for small matrix_dimension.
-     */
+* @param matrix_dimension Real (unpadded) system size, as in the base class.
+* @param batch_count Number of independent systems.
+* @param is_cyclic Whether systems are cyclic (Sherman-Morrison-Woodbury).
+* @param intermediate_system_size Target switch-over size `m` for the CR
+* forward reduction to hand off to the PCR core. Rounded up to a
+* power of two and clamped to next_power_of_two(matrix_dimension)
+* if that is smaller -- in which case CR performs zero levels and
+* this degenerates to pure PCR on the padded system, which is
+* also the correct behavior for small matrix_dimension.
+*/
     BatchedTridiagonalSolverCRPCR(int matrix_dimension, int batch_count, bool is_cyclic = true,
                                   int intermediate_system_size = 128)
         : BatchedTridiagonalSolverBase<T>(matrix_dimension, batch_count, is_cyclic)
@@ -280,6 +270,8 @@ public:
                                                    crpcr_next_power_of_two(matrix_dimension))))
         , compact_length_(0)
         , cr_level_offsets_("BatchedTridiagonalSolverCRPCR::cr_level_offsets", num_cr_levels_ + 1)
+        , frozen_sub_lower_("BatchedTridiagonalSolverCRPCR::frozen_sub_lower",
+                            static_cast<std::size_t>(batch_count) * static_cast<std::size_t>(matrix_dimension_padded_))
         // Tiny per-batch cache of the original cyclic corner element, needed
         // because this->sub_diagonal_ (which normally holds it) gets
         // overwritten with frozen "c" during setup(). Zero-sized if !is_cyclic.
@@ -328,6 +320,7 @@ public:
                                  static_cast<std::size_t>(batch_count) * static_cast<std::size_t>(num_pcr_steps_) *
                                      static_cast<std::size_t>(intermediate_system_size_));
 
+        assign(frozen_sub_lower_, T(0));
         assign(cyclic_corner_cache_, T(0));
         assign(gamma_, T(0));
         assign(cr_k1_trajectory_, T(0));
@@ -342,18 +335,17 @@ public:
     }
 
     /**
-     * @brief Performs CR forward reduction down to the intermediate system,
-     *        PCR-reduces that intermediate system, and stores everything
-     *        needed by solve() to replay the same reduction on a right-hand
-     *        side (see the class-level comment for the storage rationale).
-     *
-     * Overwrites this->main_diagonal_ (frozen "b") and this->sub_diagonal_
-     * (frozen "c") IN PLACE -- see the class-level comment for why this is
-     * correct and what it costs callers who want to re-factorize with new
-     * matrix data. There is no "a" array anywhere -- it is derived from "c"
-     * wherever needed (forward reduction here, backward substitution in
-     * solve()), per the symmetric-matrix invariant in the class comment.
-     */
+* @brief Performs CR forward reduction down to the intermediate system,
+* PCR-reduces that intermediate system, and stores everything
+* needed by solve() to replay the same reduction on a right-hand
+* side (see the class-level comment for the storage rationale).
+*
+* Overwrites this->main_diagonal_ (frozen "b") and this->sub_diagonal_
+* (frozen "c") IN PLACE -- see the class-level comment for why this is
+* correct and what it costs callers who want to re-factorize with new
+* matrix data. frozen_sub_lower_ ("a") remains a separate, padded-length
+* array, unchanged from before this optimization pass.
+*/
     void setup() override
     {
         const int matrix_dimension       = this->matrix_dimension_;
@@ -366,9 +358,11 @@ public:
 
         // Reused in place: read as original input in steps 1-2, overwritten
         // with frozen "b"/"c" state in steps 4-5, all within this one kernel
-        // launch. No "a" is ever persisted (see class comment).
+        // launch. frozen_a (frozen_sub_lower_) is unrelated to this reuse and
+        // stays padded-length, indexed separately via out_offset below.
         Vector<T> main_diagonal          = this->main_diagonal_;
         Vector<T> sub_diagonal           = this->sub_diagonal_;
+        Vector<T> frozen_a               = frozen_sub_lower_;
         Vector<T> cyclic_corner_cache    = cyclic_corner_cache_;
         Vector<T> gamma                  = gamma_;
         Vector<T> cr_k1                  = cr_k1_trajectory_;
@@ -386,15 +380,17 @@ public:
             return;
         }
 
-        using TeamPolicy = Kokkos::TeamPolicy<Kokkos::DefaultExecutionSpace>;
-        using TeamMember = typename TeamPolicy::member_type;
+        using TeamPolicy = Kokkos::TeamPolicy<Kokkos::DefaultExecutionSpace> using TeamMember =
+            typename TeamPolicy::member_type;
 
-        // Scratch layout: 4 ping-pong CR arrays (c,b x2) of length n_padded
-        // -- no CR-phase "a" array (see class comment: derived from crC via
-        // the symmetric-matrix invariant) -- followed by 4 ping-pong PCR-core
-        // arrays (c,b x2) of length m (no PCR-core "a" array either, same
-        // invariant, applied since Step 2).
-        const std::size_t cr_scratch_elems  = 4ull * static_cast<std::size_t>(n_padded);
+        // Scratch layout: 6 ping-pong CR arrays (a,b,c x2) of length n_padded
+        // (unchanged from before this optimization pass -- CR-phase "a" is
+        // untouched by this step), followed by 4 ping-pong PCR-core arrays
+        // (c,b x2) of length m -- no PCR-core "a" array (see class comment:
+        // the gathered survivor subsystem is itself exactly symmetric, so
+        // the PCR core derives its left coefficient from pcrC the same way
+        // BatchedTridiagonalSolverPCR derives it from its own e[] array).
+        const std::size_t cr_scratch_elems  = 6ull * static_cast<std::size_t>(n_padded);
         const std::size_t pcr_scratch_elems = 4ull * static_cast<std::size_t>(m);
         const std::size_t scratch_bytes     = (cr_scratch_elems + pcr_scratch_elems) * sizeof(T);
 
@@ -411,15 +407,16 @@ public:
                 const int team_size = team.team_size();
                 // Unified stride for main_diagonal_, sub_diagonal_, gamma_,
                 // cyclic_corner_cache_ -- all sized/strided by the UNPADDED
-                // matrix_dimension_ (see class comment). There is no
-                // separate padded "out_offset" anymore -- frozen_sub_lower_
-                // ("a") no longer exists; "a" is derived on the fly wherever
-                // needed instead.
+                // matrix_dimension_ (see class comment).
                 const int offset = batch_idx * matrix_dimension;
+                // Separate padded stride, used ONLY for frozen_sub_lower_
+                // ("a"), which is still allocated at padded length.
+                const int out_offset = batch_idx * n_padded;
 
                 T* scratch = static_cast<T*>(team.team_scratch(1).get_shmem(scratch_bytes));
-                T* crB[2]  = {scratch, scratch + 2 * n_padded};
-                T* crC[2]  = {scratch + n_padded, scratch + 3 * n_padded};
+                T* crA[2]  = {scratch, scratch + 3 * n_padded};
+                T* crB[2]  = {scratch + n_padded, scratch + 4 * n_padded};
+                T* crC[2]  = {scratch + 2 * n_padded, scratch + 5 * n_padded};
                 T* pcrBase = scratch + cr_scratch_elems;
                 T* pcrB[2] = {pcrBase, pcrBase + 2 * m};
                 T* pcrC[2] = {pcrBase + m, pcrBase + 3 * m};
@@ -432,10 +429,12 @@ public:
                 // reduction can let them perturb a real equation.
                 for (int i = rank; i < n_padded; i += team_size) {
                     if (i < matrix_dimension) {
+                        crA[cur][i] = (i == 0) ? T(0) : sub_diagonal(offset + i - 1);
                         crC[cur][i] = (i == matrix_dimension - 1) ? T(0) : sub_diagonal(offset + i);
                         crB[cur][i] = main_diagonal(offset + i);
                     }
                     else {
+                        crA[cur][i] = T(0);
                         crB[cur][i] = T(1);
                         crC[cur][i] = T(0);
                     }
@@ -476,30 +475,25 @@ public:
                 // their value across unchanged for all remaining levels
                 // (see the "else" branch below) -- that's what makes the
                 // final buffer contents, after the loop, exactly the frozen
-                // state needed. There is no crA array: by the symmetric-
-                // matrix invariant (see class comment), a_i (current) ==
-                // c_{i-half} for the CURRENT level's half, so it is read
-                // from crC instead, exactly BatchedTridiagonalSolverPCR's
-                // own e[cur][i-delta] pattern.
+                // state needed. (Unchanged from before this optimization
+                // pass -- still explicit crA/crB/crC, no derivation yet.)
                 for (int L = 0; L < num_cr_levels; ++L) {
                     const int stride = 1 << (L + 1);
                     const int nxt    = 1 - cur;
 
                     for (int i = rank; i < n_padded; i += team_size) {
                         if ((i + 1) % stride == 0) {
-                            const int t    = (i + 1) / stride - 1; // compact trajectory slot within this level
-                            const int half = stride / 2;
-                            int iLeft      = i - half;
-                            int iRight     = i + half;
+                            const int t = (i + 1) / stride - 1; // compact trajectory slot within this level
+                            int iLeft   = i - stride / 2;
+                            int iRight  = i + stride / 2;
                             if (iRight > n_padded - 1) {
                                 iRight = n_padded - 1;
                             }
 
-                            const T a_i      = (i >= half) ? crC[cur][iLeft] : T(0);
-                            const T a_iRight = (iRight >= half) ? crC[cur][iRight - half] : T(0);
-                            const T c_i      = crC[cur][i];
-                            const T b_left   = crB[cur][iLeft];
-                            const T b_right  = crB[cur][iRight];
+                            const T a_i     = crA[cur][i];
+                            const T c_i     = crC[cur][i];
+                            const T b_left  = crB[cur][iLeft];
+                            const T b_right = crB[cur][iRight];
 
                             const T k1_val = a_i / b_left;
                             const T k2_val = c_i / b_right;
@@ -510,12 +504,14 @@ public:
                             cr_k1(traj_idx)            = k1_val;
                             cr_k2(traj_idx)            = k2_val;
 
-                            crB[nxt][i] = crB[cur][i] - crC[cur][iLeft] * k1_val - a_iRight * k2_val;
+                            crA[nxt][i] = -crA[cur][iLeft] * k1_val;
+                            crB[nxt][i] = crB[cur][i] - crC[cur][iLeft] * k1_val - crA[cur][iRight] * k2_val;
                             crC[nxt][i] = -crC[cur][iRight] * k2_val;
                         }
                         else {
                             // Not active at this level: retain whatever value was
                             // last written (do not lose the frozen state).
+                            crA[nxt][i] = crA[cur][i];
                             crB[nxt][i] = crB[cur][i];
                             crC[nxt][i] = crC[cur][i];
                         }
@@ -526,17 +522,20 @@ public:
                 }
 
                 // --- Step 4: persist frozen forward-reduction state. ---
-                // main_diagonal_/sub_diagonal_ are unpadded (see class
-                // comment), so writes are restricted to real positions --
-                // padding positions never need "b"/"c" persisted at all
-                // (their state is the known identity constant, and these
-                // arrays are no longer sized to hold padding entries
-                // regardless). There is no "a" to persist at all anymore
-                // (see class comment) -- backward substitution in solve()
-                // derives it from sub_diagonal_ on the fly instead.
-                for (int i = rank; i < matrix_dimension; i += team_size) {
-                    main_diagonal(offset + i) = crB[cur][i]; // reused as frozen "b"
-                    sub_diagonal(offset + i)  = crC[cur][i]; // reused as frozen "c"
+                // frozen_a (frozen_sub_lower_) is still padded-length, so it
+                // is written for ALL n_padded positions, unchanged from
+                // before. main_diagonal_/sub_diagonal_ are now UNPADDED (see
+                // class comment), so their writes are guarded to real
+                // positions only -- padding positions never need "b"/"c"
+                // persisted at all (their state is the known identity
+                // constant, and these arrays are no longer sized to hold
+                // padding entries regardless).
+                for (int i = rank; i < n_padded; i += team_size) {
+                    frozen_a(out_offset + i) = crA[cur][i];
+                    if (i < matrix_dimension) {
+                        main_diagonal(offset + i) = crB[cur][i]; // reused as frozen "b"
+                        sub_diagonal(offset + i)  = crC[cur][i]; // reused as frozen "c"
+                    }
                 }
                 team.team_barrier();
 
@@ -557,10 +556,11 @@ public:
                 // (t-indexed) sense (see class comment), so the PCR core
                 // below derives its own left coefficient from pcrC, exactly
                 // as BatchedTridiagonalSolverPCR does from its own e[]
-                // array. There is no crA to gather from either way (see
-                // class comment) -- crC/crB are the only CR-phase scratch.
-                // Only the FINAL scatter into main_diagonal_ (now unpadded)
-                // needs the i < matrix_dimension guard.
+                // array. crA[cur][i] itself is untouched by this and is
+                // still used normally by the CR phase (step 4 above, and
+                // solve()'s replay) -- only this copy into a (now-removed)
+                // pcrA is gone. Only the FINAL scatter into main_diagonal_
+                // (now unpadded) needs the i < matrix_dimension guard.
                 const int stride_final = n_padded / m;
                 for (int i = rank; i < n_padded; i += team_size) {
                     if ((i + 1) % stride_final == 0) {
@@ -627,18 +627,18 @@ public:
     }
 
     /**
-     * @brief Solves the factored systems for the supplied right-hand side.
-     *
-     * Mirrors setup()'s CR forward reduction exactly (same per-level active
-     * condition, same compact trajectory indices), then replays the PCR
-     * core's stored trajectory, then performs CR backward substitution.
-     * Reads this->main_diagonal_ / this->sub_diagonal_ as frozen "b"/"c"
-     * state (see class comment) -- never writes them.
-     *
-     * IMPORTANT: backward substitution's active-position test is NOT the
-     * same as forward reduction's, even though both use the same `stride`.
-     * See the long comment inside the backward-substitution loop below.
-     */
+* @brief Solves the factored systems for the supplied right-hand side.
+*
+* Mirrors setup()'s CR forward reduction exactly (same per-level active
+* condition, same compact trajectory indices), then replays the PCR
+* core's stored trajectory, then performs CR backward substitution.
+* Reads this->main_diagonal_ / this->sub_diagonal_ as frozen "b"/"c"
+* state (see class comment) -- never writes them.
+*
+* IMPORTANT: backward substitution's active-position test is NOT the
+* same as forward reduction's, even though both use the same `stride`.
+* See the long comment inside the backward-substitution loop below.
+*/
     void solve(Vector<T> rhs, int batch_offset = 0, int batch_stride = 1) override
     {
         if (!is_factorized_) {
@@ -656,7 +656,8 @@ public:
         const std::size_t compact_length = static_cast<std::size_t>(compact_length_);
 
         Vector<T> main_diagonal          = this->main_diagonal_; // frozen "b"
-        Vector<T> sub_diagonal           = this->sub_diagonal_; // frozen "c" (also used to derive "a")
+        Vector<T> sub_diagonal           = this->sub_diagonal_; // frozen "c"
+        Vector<T> frozen_a               = frozen_sub_lower_; // still padded-length, unchanged
         Vector<T> cyclic_corner_cache    = cyclic_corner_cache_;
         Vector<T> gamma                  = gamma_;
         Vector<T> cr_k1                  = cr_k1_trajectory_;
@@ -676,8 +677,8 @@ public:
             return;
         }
 
-        using TeamPolicy = Kokkos::TeamPolicy<Kokkos::DefaultExecutionSpace>;
-        using TeamMember = typename TeamPolicy::member_type;
+        using TeamPolicy = Kokkos::TeamPolicy<Kokkos::DefaultExecutionSpace> using TeamMember =
+            typename TeamPolicy::member_type;
 
         if (!is_cyclic) {
             const std::size_t scratch_elems =
@@ -694,8 +695,10 @@ public:
                     const int rank      = team.team_rank();
                     const int team_size = team.team_size();
                     // Unified unpadded stride for rhs and for main_diagonal_/
-                    // sub_diagonal_ (frozen b/c, and "a" derived from c).
-                    const int offset = batch_idx * matrix_dimension;
+                    // sub_diagonal_ (frozen b/c). Separate padded stride only
+                    // for frozen_a (frozen_sub_lower_).
+                    const int offset     = batch_idx * matrix_dimension;
+                    const int out_offset = batch_idx * n_padded;
 
                     T* scratch = static_cast<T*>(team.team_scratch(1).get_shmem(scratch_bytes));
                     T* d[2]    = {scratch, scratch + n_padded};
@@ -739,9 +742,8 @@ public:
                     // d[cur] now holds, for every position, its value as of
                     // its last forward-reduction touch (or the original rhs
                     // value, for positions CR never touched) -- mirroring
-                    // exactly what sub_diagonal/main_diagonal hold (and what
-                    // "a" derives from) for real positions, and provably 0
-                    // for padding ones.
+                    // exactly what frozen_a/sub_diagonal/main_diagonal hold
+                    // for real positions, and provably 0 for padding ones.
 
                     // --- PCR sub-solve on the m surviving positions. ---
                     // Guarded to i < matrix_dimension: main_diagonal_ is now
@@ -813,13 +815,9 @@ public:
                     // sub_diagonal_ are now unpadded, so a padding position's
                     // "b"/"c" is not stored there at all -- and does not need
                     // to be, since its x is always 0 (identity equation)
-                    // whether or not this loop resolves it. a_i is derived,
-                    // not stored: by the symmetric-matrix invariant (class
-                    // comment), frozen a_i == frozen c_{i-half}, the SAME
-                    // index (pLeft) already computed below for the
-                    // neighbor-value lookup -- guarded by the UNCLAMPED
-                    // `i >= half` test, not a check on pLeft itself, since
-                    // the boundary case needs a_i = 0 exactly.
+                    // whether or not this loop resolves it. frozen_a (still
+                    // padded-length) would remain safe to read regardless,
+                    // but is skipped too for consistency/no wasted work.
                     for (int L = num_cr_levels - 1; L >= 0; --L) {
                         const int stride = 1 << (L + 1);
                         const int half   = stride / 2;
@@ -835,7 +833,7 @@ public:
                                     pRight = n_padded - 1;
                                 }
 
-                                const T a_i = (i >= half) ? sub_diagonal(offset + pLeft) : T(0);
+                                const T a_i = frozen_a(out_offset + i);
                                 const T c_i = sub_diagonal(offset + i);
                                 const T b_i = main_diagonal(offset + i);
 
@@ -864,11 +862,12 @@ public:
 
             Kokkos::parallel_for(
                 "SolveCRPCR_Cyclic", policy, KOKKOS_LAMBDA(const TeamMember& team) {
-                    const int k         = team.league_rank();
-                    const int batch_idx = batch_stride * k + batch_offset;
-                    const int rank      = team.team_rank();
-                    const int team_size = team.team_size();
-                    const int offset    = batch_idx * matrix_dimension;
+                    const int k          = team.league_rank();
+                    const int batch_idx  = batch_stride * k + batch_offset;
+                    const int rank       = team.team_rank();
+                    const int team_size  = team.team_size();
+                    const int offset     = batch_idx * matrix_dimension;
+                    const int out_offset = batch_idx * n_padded;
 
                     // Read from the small cache, NOT from sub_diagonal_,
                     // which now holds frozen "c" (structurally 0 at this
@@ -984,8 +983,7 @@ public:
 
                     // --- CR backward substitution on both vectors. --- (see
                     // the detailed note in the non-cyclic path above; same
-                    // i < matrix_dimension guard, same derivation of a_i
-                    // from sub_diagonal(offset + pLeft), same reasoning.)
+                    // i < matrix_dimension guard, same reasoning.)
                     for (int L = num_cr_levels - 1; L >= 0; --L) {
                         const int stride = 1 << (L + 1);
                         const int half   = stride / 2;
@@ -1001,7 +999,7 @@ public:
                                     pRight = n_padded - 1;
                                 }
 
-                                const T a_i = (i >= half) ? sub_diagonal(offset + pLeft) : T(0);
+                                const T a_i = frozen_a(out_offset + i);
                                 const T c_i = sub_diagonal(offset + i);
                                 const T b_i = main_diagonal(offset + i);
 
@@ -1037,11 +1035,11 @@ public:
     }
 
     /**
-     * @brief Solves systems whose matrix has already been reduced to diagonal
-     *        form. Unchanged elementwise scaling; reads this->main_diagonal_
-     *        directly (which holds the frozen diagonal, per the class-level
-     *        in-place reuse scheme), single unpadded stride throughout.
-     */
+* @brief Solves systems whose matrix has already been reduced to diagonal
+* form. Unchanged elementwise scaling; reads this->main_diagonal_
+* directly (which holds the frozen diagonal, per the class-level
+* in-place reuse scheme), single unpadded stride throughout.
+*/
     void solve_diagonal(Vector<T> rhs, int batch_offset = 0, int batch_stride = 1) override
     {
         if (!is_factorized_) {
@@ -1055,8 +1053,8 @@ public:
         Vector<T> main_diagonal    = this->main_diagonal_;
         Vector<T> gamma            = gamma_;
 
-        using MDPolicy = Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>>;
-        MDPolicy policy({0, 0}, {effective_batch_count, matrix_dimension});
+        using MDPolicy = Kokkos::MDRangePolicy<Kokkos::DefaultExecutionSpace, Kokkos::Rank<2>> MDPolicy policy(
+            {0, 0}, {effective_batch_count, matrix_dimension});
 
         Kokkos::parallel_for(
             "SolveDiagonalCRPCR", policy, KOKKOS_LAMBDA(const int k, const int i) {
@@ -1097,18 +1095,20 @@ public:
     }
 
     /**
-     * @brief Total bytes of persistent device storage newly introduced by
-     *        this class (i.e. not counting the inherited main_diagonal_ /
-     *        sub_diagonal_, which are reused in place at their existing,
-     *        unchanged size -- not newly allocated).
-     */
+* @brief Total bytes of persistent device storage newly introduced by
+* this class (i.e. not counting the inherited main_diagonal_ /
+* sub_diagonal_, which are reused in place at their existing,
+* unchanged size -- not newly allocated).
+*/
     std::size_t persistentDeviceBytes() const
     {
+        const std::size_t n_padded  = static_cast<std::size_t>(matrix_dimension_padded_);
         const std::size_t batch     = static_cast<std::size_t>(this->batch_count_);
         const std::size_t m         = static_cast<std::size_t>(intermediate_system_size_);
         const std::size_t pcr_steps = static_cast<std::size_t>(num_pcr_steps_);
 
         std::size_t bytes = 0;
+        bytes += batch * n_padded * sizeof(T); // frozen_sub_lower_ (still padded-length)
         bytes += 2 * batch * static_cast<std::size_t>(compact_length_) * sizeof(T); // cr_k1/k2_trajectory_
         bytes += 2 * batch * pcr_steps * m * sizeof(T); // pcr_k1/k2_trajectory_
         bytes += static_cast<std::size_t>(this->is_cyclic_ ? batch : 0) * sizeof(T); // gamma_
@@ -1125,11 +1125,10 @@ private:
 
     Kokkos::View<int*> cr_level_offsets_; // size num_cr_levels_ + 1, prefix sums, identical across batch entries
 
-    // NOTE: there is no frozen_sub_lower_ ("a") member -- see the class-
-    // level comment on the symmetric-matrix invariant. "a" is derived from
-    // "c" wherever needed, both in setup()'s CR forward reduction and in
-    // solve()'s backward substitution. This is intentional, not an
-    // oversight -- do not reintroduce an "a" array here.
+    // "a" at each position, as of its last forward-reduction touch. Still a
+    // separate, padded-length (batch_count_ * matrix_dimension_padded_)
+    // array -- this optimization pass does not yet derive it from "c".
+    Vector<T> frozen_sub_lower_;
 
     // Tiny per-batch cache of the true cyclic corner element, needed because
     // this->sub_diagonal_ is overwritten with frozen "c" (see class comment).
