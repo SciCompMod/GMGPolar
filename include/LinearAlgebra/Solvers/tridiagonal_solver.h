@@ -119,13 +119,14 @@ protected:
 
 #include "tridiagonal_solver_thomas.h"
 #include "tridiagonal_solver_pcr.h"
+#include "tridiagonal_solver_cr.h"
 #include "tridiagonal_solver_crpcr.h"
 
 namespace gmgpolar
 {
 
 template <typename T>
-using BatchedTridiagonalSolver = BatchedTridiagonalSolverCRPCR<T>;
+using BatchedTridiagonalSolver = BatchedTridiagonalSolverCR<T>;
 
 /*
 #if defined(KOKKOS_ENABLE_CUDA) || defined(KOKKOS_ENABLE_HIP) || defined(KOKKOS_ENABLE_SYCL)
