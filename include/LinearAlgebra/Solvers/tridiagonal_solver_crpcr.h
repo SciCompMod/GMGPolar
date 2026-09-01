@@ -472,8 +472,9 @@ public:
                             const T k2_val = pcr_k2(traj);
 
                             const int nxt = 1 - cur;
-                            d[nxt][j]     = d[cur][j] - (has_left ? k1_val * d[cur][left] : T(0)) -
-                                            (has_right ? k2_val * d[cur][right] : T(0));
+
+                            d[nxt][j] = d[cur][j] - (has_left ? k1_val * d[cur][left] : T(0)) -
+                                        (has_right ? k2_val * d[cur][right] : T(0));
                         }
 
                         team_member.team_barrier();

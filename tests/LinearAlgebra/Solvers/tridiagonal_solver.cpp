@@ -62,6 +62,8 @@ void test_non_cyclic_tridiagonal_n_4()
 					"Test",
 					1,
 					KOKKOS_LAMBDA(const int) {
+
+                        
     solver.set_main_diagonal(0,0, 2.0); solver.set_sub_diagonal(0,0, 1.0);
     solver.set_main_diagonal(0,1, 4.0); solver.set_sub_diagonal(0,1, 2.0);
     solver.set_main_diagonal(0,2, 6.0); solver.set_sub_diagonal(0,2, 3.0);
