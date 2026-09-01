@@ -726,6 +726,7 @@ public:
         const int L               = num_cr_levels_;
         const int survivor_base   = survivor_base_;
         const int survivor_stride = survivor_stride_;
+        const int m               = m_;
         const bool is_cyclic      = this->is_cyclic_;
         Vector<T> main_diagonal   = this->main_diagonal_;
         Vector<T> gamma           = gamma_;
@@ -744,7 +745,7 @@ public:
                 }
                 else {
                     is_survivor = (i >= survivor_base) && (((i - survivor_base) % survivor_stride) == 0) &&
-                                  (((i - survivor_base) / survivor_stride) < m_);
+                                  (((i - survivor_base) / survivor_stride) < m);
                 }
 
                 const T b_i = is_survivor ? main_diagonal(offset + i) : T(1) / main_diagonal(offset + i);
