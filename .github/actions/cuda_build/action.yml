@@ -12,6 +12,7 @@ runs:
     - name: Install dependencies
       shell: bash
       run: |
+        rm -f $(grep -rl 'pdi\.dev' /etc/apt/sources.list.d/ 2>/dev/null)
         apt-get -qq update
         apt-get -qq -y install git cmake
     - name: Install additional dependencies to use MUMPS
