@@ -7,6 +7,7 @@ runs:
     - name: Install gfortran
       shell: bash
       run: |
+        rm -f $(grep -rl 'pdi\.dev' /etc/apt/sources.list.d/ 2>/dev/null)
         apt-get -qq -y install gfortran
     - name: Cache METIS
       id: cache-metis
