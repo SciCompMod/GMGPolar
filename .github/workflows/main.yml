@@ -84,6 +84,7 @@ jobs:
       - uses: actions/checkout@v6
       - name: Install clang-format v18
         run: |
+          rm -f $(grep -rl 'pdi\.dev' /etc/apt/sources.list.d/ 2>/dev/null)
           apt-get -qq update
           apt-get -qq -y install clang-format-18
         shell: bash
