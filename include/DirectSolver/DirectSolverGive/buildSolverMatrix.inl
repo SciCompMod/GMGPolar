@@ -126,12 +126,12 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& gri
 
         offset = LeftStencil[StencilPosition::TopRight];
         column = top_index;
-        value  = -0.25 * art; /* Top Right */
+        value  = -art; /* Top Right */
         updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = LeftStencil[StencilPosition::BottomRight];
         column = bottom_index;
-        value  = +0.25 * art; /* Bottom Right */
+        value  = +art; /* Bottom Right */
         updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* Fill matrix row of (i+1,j) */
@@ -152,12 +152,12 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& gri
 
         offset = RightStencil[StencilPosition::TopLeft];
         column = top_index;
-        value  = +0.25 * art; /* Top Left */
+        value  = +art; /* Top Left */
         updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = RightStencil[StencilPosition::BottomLeft];
         column = bottom_index;
-        value  = -0.25 * art; /* Bottom Left */
+        value  = -art; /* Bottom Left */
         updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* Fill matrix row of (i,j-1) */
@@ -178,12 +178,12 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& gri
 
         offset = BottomStencil[StencilPosition::TopRight];
         column = right_index;
-        value  = -0.25 * art; /* Top Right */
+        value  = -art; /* Top Right */
         updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = BottomStencil[StencilPosition::TopLeft];
         column = left_index;
-        value  = +0.25 * art; /* Top Left */
+        value  = +art; /* Top Left */
         updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* Fill matrix row of (i,j+1) */
@@ -204,12 +204,12 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& gri
 
         offset = TopStencil[StencilPosition::BottomRight];
         column = right_index;
-        value  = +0.25 * art; /* Bottom Right */
+        value  = +art; /* Bottom Right */
         updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = TopStencil[StencilPosition::BottomLeft];
         column = left_index;
-        value  = -0.25 * art; /* Bottom Left */
+        value  = -art; /* Bottom Left */
         updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
     }
     /* -------------------------- */
@@ -369,12 +369,12 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& gri
 
             offset = RightStencil[StencilPosition::TopLeft];
             column = top_index;
-            value  = +0.25 * art; /* Top Left */
+            value  = +art; /* Top Left */
             updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             offset = RightStencil[StencilPosition::BottomLeft];
             column = bottom_index;
-            value  = -0.25 * art; /* Bottom Left */
+            value  = -art; /* Bottom Left */
             updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             /* Fill matrix row of (i,j-1) */
@@ -395,7 +395,7 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& gri
 
             offset = BottomStencil[StencilPosition::TopRight];
             column = right_index;
-            value  = -0.25 * art; /* Top Right */
+            value  = -art; /* Top Right */
             updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             /* TopLeft REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
@@ -418,7 +418,7 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& gri
 
             offset = TopStencil[StencilPosition::BottomRight];
             column = right_index;
-            value  = +0.25 * art; /* Bottom Right */
+            value  = +art; /* Bottom Right */
             updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             /* BottomLeft REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
@@ -512,12 +512,12 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& gri
 
             offset = LeftStencil[StencilPosition::TopRight];
             column = top_index;
-            value  = -0.25 * art; /* Top Right */
+            value  = -art; /* Top Right */
             updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
             offset = LeftStencil[StencilPosition::BottomRight];
             column = bottom_index;
-            value  = +0.25 * art; /* Bottom Right */
+            value  = +art; /* Bottom Right */
             updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
         }
 
@@ -539,12 +539,12 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& gri
 
         offset = RightStencil[StencilPosition::TopLeft];
         column = top_index;
-        value  = +0.25 * art; /* Top Left */
+        value  = +art; /* Top Left */
         updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = RightStencil[StencilPosition::BottomLeft];
         column = bottom_index;
-        value  = -0.25 * art; /* Bottom Left */
+        value  = -art; /* Bottom Left */
         updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* Fill matrix row of (i,j-1) */
@@ -565,14 +565,14 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& gri
 
         offset = BottomStencil[StencilPosition::TopRight];
         column = right_index;
-        value  = -0.25 * art; /* Top Right */
+        value  = -art; /* Top Right */
         updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* REMOVED: Moved to the right hand side to make the matrix symmetric */
         if (!DirBC_Interior) {
             offset = BottomStencil[StencilPosition::TopLeft];
             column = left_index;
-            value  = +0.25 * art; /* Top Left */
+            value  = +art; /* Top Left */
             updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
         }
 
@@ -594,14 +594,14 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& gri
 
         offset = TopStencil[StencilPosition::BottomRight];
         column = right_index;
-        value  = +0.25 * art; /* Bottom Right */
+        value  = +art; /* Bottom Right */
         updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* REMOVED: Moved to the right hand side to make the matrix symmetric */
         if (!DirBC_Interior) {
             offset = TopStencil[StencilPosition::BottomLeft];
             column = left_index;
-            value  = -0.25 * art; /* Bottom Left */
+            value  = -art; /* Bottom Left */
             updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
         }
     }
@@ -684,12 +684,12 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& gri
 
         offset = LeftStencil[StencilPosition::TopRight];
         column = top_index;
-        value  = -0.25 * art; /* Top Right */
+        value  = -art; /* Top Right */
         updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         offset = LeftStencil[StencilPosition::BottomRight];
         column = bottom_index;
-        value  = 0.25 * art; /* Bottom Right */
+        value  = art; /* Bottom Right */
         updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* Fill matrix row of (i+1,j) */
@@ -715,7 +715,7 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& gri
 
         offset = BottomStencil[StencilPosition::TopLeft];
         column = left_index;
-        value  = 0.25 * art; /* Top Left */
+        value  = art; /* Top Left */
         updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
 
         /* Fill matrix row of (i,j+1) */
@@ -738,7 +738,7 @@ nodeBuildSolverMatrixGive(const int i_r, const int i_theta, const PolarGrid& gri
 
         offset = TopStencil[StencilPosition::BottomLeft];
         column = left_index;
-        value  = -0.25 * art; /* Bottom Left */
+        value  = -art; /* Bottom Left */
         updateMatrixElement(solver_matrix, ptr, offset, row, column, value);
     }
     /* ------------------------------------ */

@@ -62,11 +62,11 @@ nodeApplyAscOrthoCircleGiveInside(const int i_r, const int i_theta, const PolarG
             result[center] -= (-coeff1 * arr * x[left] /* Left */
                                - coeff2 * arr * x[right] /* Right */
             ); /* Fill result(i,j-1) */
-            result[bottom] -= (-0.25 * art * x[right] /* Top Right */
-                               + 0.25 * art * x[left]); /* Top Left */
+            result[bottom] -= (-art * x[right] /* Top Right */
+                               + art * x[left]); /* Top Left */
             /* Fill result(i,j+1) */
-            result[top] -= (+0.25 * art * x[right] /* Bottom Right */
-                            - 0.25 * art * x[left]); /* Bottom Left */
+            result[top] -= (+art * x[right] /* Bottom Right */
+                            - art * x[left]); /* Bottom Left */
         }
         else {
             if (i_theta & 1) {
@@ -94,12 +94,12 @@ nodeApplyAscOrthoCircleGiveInside(const int i_r, const int i_theta, const PolarG
 
                 /* Fill result(i,j-1) */
                 result[bottom] -= (-coeff3 * att * x[center] /* Top */
-                                   - 0.25 * art * x[right] /* Top Right */
-                                   + 0.25 * art * x[left]); /* Top Left */
+                                   - art * x[right] /* Top Right */
+                                   + art * x[left]); /* Top Left */
                 /* Fill result(i,j+1) */
                 result[top] -= (-coeff4 * att * x[center] /* Bottom */
-                                + 0.25 * art * x[right] /* Bottom Right */
-                                - 0.25 * art * x[left]); /* Bottom Left */
+                                + art * x[right] /* Bottom Right */
+                                - art * x[left]); /* Bottom Left */
             }
         }
     }
@@ -184,12 +184,12 @@ nodeApplyAscOrthoCircleGiveInside(const int i_r, const int i_theta, const PolarG
 
                 /* Fill result(i,j-1) */
                 result[bottom] -= (-coeff3 * att * x[center] /* Top */
-                                   - 0.25 * art * x[right]); /* Top Right */
-                /*  + 0.25 * art * x[grid.index(i_r-1,i_theta)]; // Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
+                                   - art * x[right]); /* Top Right */
+                /*  + art * x[grid.index(i_r-1,i_theta)]; // Top Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
                 /* Fill result(i,j+1) */
                 result[top] -= (-coeff4 * att * x[center] /* Bottom */
-                                + 0.25 * art * x[right]); /* Bottom Right */
-                /*  - 0.25 * art * x[grid.index(i_r-1,i_theta)]; // Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
+                                + art * x[right]); /* Bottom Right */
+                /*  - art * x[grid.index(i_r-1,i_theta)]; // Bottom Left: REMOVED DUE TO ARTIFICAL 7 POINT STENCIL */
             }
         }
     }
@@ -346,8 +346,8 @@ nodeApplyAscOrthoCircleGiveOutside(const int i_r, const int i_theta, const Polar
 
         /* Fill result(i-1,j) */
         result[left] -= (-coeff1 * arr * x[center] /* Right */
-                         - 0.25 * art * x[top] /* Top Right */
-                         + 0.25 * art * x[bottom]); /* Bottom Right */
+                         - art * x[top] /* Top Right */
+                         + art * x[bottom]); /* Bottom Right */
     }
 
     if (give_right) {
@@ -357,8 +357,8 @@ nodeApplyAscOrthoCircleGiveOutside(const int i_r, const int i_theta, const Polar
 
         /* Fill result(i+1,j) */
         result[right] -= (-coeff2 * arr * x[center] /* Left */
-                          + 0.25 * art * x[top] /* Top Left */
-                          - 0.25 * art * x[bottom]); /* Bottom Left */
+                          + art * x[top] /* Top Left */
+                          - art * x[bottom]); /* Bottom Left */
     }
 }
 
@@ -426,11 +426,11 @@ nodeApplyAscOrthoRadialGiveInside(const int i_r, const int i_theta, const PolarG
             result[center] -= (-coeff3 * att * x[bottom] /* Bottom */
                                - coeff4 * att * x[top]); /* Top */
             /* Fill result(i-1,j) */
-            result[left] -= (-0.25 * art * x[top] /* Top Right */
-                             + 0.25 * art * x[bottom]); /* Bottom Right */
+            result[left] -= (-art * x[top] /* Top Right */
+                             + art * x[bottom]); /* Bottom Right */
             /* Fill result(i+1,j) */
-            result[right] -= (+0.25 * art * x[top] /* Top Left */
-                              - 0.25 * art * x[bottom]); /* Bottom Left */
+            result[right] -= (+art * x[top] /* Top Left */
+                              - art * x[bottom]); /* Bottom Left */
         }
         else {
             if (i_r & 1) {
@@ -461,12 +461,12 @@ nodeApplyAscOrthoRadialGiveInside(const int i_r, const int i_theta, const PolarG
 
                 /* Fill result(i-1,j) */
                 result[left] -= (-coeff1 * arr * x[center] /* Right */
-                                 - 0.25 * art * x[top] /* Top Right */
-                                 + 0.25 * art * x[bottom]); /* Bottom Right */
+                                 - art * x[top] /* Top Right */
+                                 + art * x[bottom]); /* Bottom Right */
                 /* Fill result(i+1,j) */
                 result[right] -= (-coeff2 * arr * x[center] /* Left */
-                                  + 0.25 * art * x[top] /* Top Left */
-                                  - 0.25 * art * x[bottom]); /* Bottom Left */
+                                  + art * x[top] /* Top Left */
+                                  - art * x[bottom]); /* Bottom Left */
             }
         }
     }
@@ -494,8 +494,8 @@ nodeApplyAscOrthoRadialGiveInside(const int i_r, const int i_theta, const PolarG
         if ((!(i_r & 1) || (i_theta & 1))) {
             /* Fill result(i+1,j) */
             result[right] -= (-coeff2 * arr * x[center] /* Left */
-                              + 0.25 * art * x[top] /* Top Left */
-                              - 0.25 * art * x[bottom]); /* Bottom Left */
+                              + art * x[top] /* Top Left */
+                              - art * x[bottom]); /* Bottom Left */
         }
     }
     else if (i_r == grid.numberSmootherCircles()) {
@@ -532,8 +532,8 @@ nodeApplyAscOrthoRadialGiveInside(const int i_r, const int i_theta, const PolarG
                                    - coeff4 * att * x[top] /* Top */
                 );
                 /* Fill result(i+1,j) */
-                result[right] -= (+0.25 * art * x[top] /* Top Left */
-                                  - 0.25 * art * x[bottom]); /* Bottom Left */
+                result[right] -= (+art * x[top] /* Top Left */
+                                  - art * x[bottom]); /* Bottom Left */
             }
             else {
                 /* i_theta % 2 == 1 and i_r % 2 == 0 */
@@ -549,8 +549,8 @@ nodeApplyAscOrthoRadialGiveInside(const int i_r, const int i_theta, const PolarG
                                    - coeff4 * att * x[top] /* Top */
                 );
                 /* Fill result(i+1,j) */
-                result[right] -= (+0.25 * art * x[top] /* Top Left */
-                                  - 0.25 * art * x[bottom]); /* Bottom Left */
+                result[right] -= (+art * x[top] /* Top Left */
+                                  - art * x[bottom]); /* Bottom Left */
             }
         }
         else {
@@ -579,8 +579,8 @@ nodeApplyAscOrthoRadialGiveInside(const int i_r, const int i_theta, const PolarG
 
                 /* Fill result(i+1,j) */
                 result[right] -= (-coeff2 * arr * x[center] /* Left */
-                                  + 0.25 * art * x[top] /* Top Left */
-                                  - 0.25 * art * x[bottom]); /* Bottom Left */
+                                  + art * x[top] /* Top Left */
+                                  - art * x[bottom]); /* Bottom Left */
             }
         }
     }
@@ -620,8 +620,8 @@ nodeApplyAscOrthoRadialGiveInside(const int i_r, const int i_theta, const PolarG
                                - coeff4 * att * x[top] /* Top */
             );
             /* Fill result(i-1,j) */
-            result[left] -= (-0.25 * art * x[top] /* Top Right */
-                             + 0.25 * art * x[bottom]); /* Bottom Right */
+            result[left] -= (-art * x[top] /* Top Right */
+                             + art * x[bottom]); /* Bottom Right */
 
             /* "Right" is part of the radial Asc smoother matrices, */
             /* but is shifted over to the rhs to make the radial Asc smoother matrices symmetric. */
@@ -673,8 +673,8 @@ nodeApplyAscOrthoRadialGiveInside(const int i_r, const int i_theta, const PolarG
             /* -----------|| */
 
             /* Fill result(i-1,j) */
-            result[left] -= (-0.25 * art * x[top] /* Top Right */
-                             + 0.25 * art * x[bottom] /* Bottom Right */
+            result[left] -= (-art * x[top] /* Top Right */
+                             + art * x[bottom] /* Bottom Right */
             );
             /* "Right" is part of the radial Asc smoother matrices, */
             /* but is shifted over to the rhs to make the radial Asc smoother matrices symmetric. */
@@ -694,8 +694,8 @@ nodeApplyAscOrthoRadialGiveInside(const int i_r, const int i_theta, const PolarG
 
             /* Fill result(i-1,j) */
             result[left] -= (-coeff1 * arr * x[center] /* Right */
-                             - 0.25 * art * x[top] /* Top Right */
-                             + 0.25 * art * x[bottom]); /* Bottom Right */
+                             - art * x[top] /* Top Right */
+                             + art * x[bottom]); /* Bottom Right */
         }
     }
 }
@@ -821,8 +821,8 @@ nodeApplyAscOrthoRadialGiveOutside(const int i_r, const int i_theta, const Polar
 
         /* Fill result(i,j-1) */
         result[bottom] -= (-coeff3 * att * x[center] /* Top */
-                           - 0.25 * art * x[right] /* Top Right */
-                           + 0.25 * art * x[left]); /* Top Left */
+                           - art * x[right] /* Top Right */
+                           + art * x[left]); /* Top Left */
     }
 
     if (give_top) {
@@ -831,8 +831,8 @@ nodeApplyAscOrthoRadialGiveOutside(const int i_r, const int i_theta, const Polar
         const int top       = grid.index(i_r, i_theta_P1);
         /* Fill result(i,j+1) */
         result[top] -= (-coeff4 * att * x[center] /* Bottom */
-                        + 0.25 * art * x[right] /* Bottom Right */
-                        - 0.25 * art * x[left]); /* Bottom Left */
+                        + art * x[right] /* Bottom Right */
+                        - art * x[left]); /* Bottom Left */
     }
 }
 
