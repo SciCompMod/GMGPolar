@@ -7,7 +7,7 @@ runs:
     - name: Install gfortran
       shell: bash
       run: |
-        apt-get -qq -y install gfortran
+        apt-get -qq -y install gfortran liblapack-dev libblas-dev
     - name: Cache METIS
       id: cache-metis
       uses: actions/cache@v5
