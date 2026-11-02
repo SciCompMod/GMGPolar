@@ -22,7 +22,8 @@ jobs:
             USE_MUMPS: true
     name: 'install-and-build (USE_MUMPS=${{matrix.USE_MUMPS}}, backend=${{matrix.backend}})'
     container:
-      image: ${{ matrix.backend == 'openmp' && 'ghcr.io/gyselax/gyselalibxx_env:latest' || 'nvidia/cuda:12.8.2-devel-ubuntu24.04' }}
+      # image: ${{ matrix.backend == 'openmp' && 'ghcr.io/gyselax/gyselalibxx_env:latest' || 'nvidia/cuda:12.8.2-devel-ubuntu24.04' }}
+      image: ${{ matrix.backend == 'openmp' && 'ghcr.io/gyselax/gyselalibxx_env@sha256:3132555d632670a7264a60c7bbd7eef42fb91297c208fde959df8416924c9cef' || 'nvidia/cuda:12.8.2-devel-ubuntu24.04' }}
       options: --user root
     steps:
       - uses: actions/checkout@v6
@@ -42,7 +43,8 @@ jobs:
       matrix:
         USE_MUMPS: [false, true]
     container:
-      image: ghcr.io/gyselax/gyselalibxx_env:latest
+      # image: ghcr.io/gyselax/gyselalibxx_env:latest
+      image: ghcr.io/gyselax/gyselalibxx_env@sha256:3132555d632670a7264a60c7bbd7eef42fb91297c208fde959df8416924c9cef
       options: --user root
     steps:
       - uses: actions/checkout@v6
