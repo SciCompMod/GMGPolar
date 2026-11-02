@@ -3,7 +3,6 @@ name: "Linux Build"
 inputs:
   use-mumps:
     description: 'Indicates if GMGPolar should be built with mumps support'
-    type: bool
     required: true
 
 runs:
@@ -18,11 +17,42 @@ runs:
     - name: Install additional dependencies to use MUMPS
       if: inputs.use-mumps == 'true'
       uses: ./.github/actions/install-dependencies
+    - name: Cache Kokkos
+      id: restore-cache-kokkos
+      uses: actions/cache/restore@v5
+      with:
+        path: third-party/kokkos-openmp
+        key: kokkos-openmp-v5.0.2
+    - name: Install Kokkos (OpenMP)
+      shell: bash
+      if: steps.restore-cache-kokkos.outputs.cache-hit != 'true'
+      run: |
+        mkdir -p third-party
+        cd third-party
+        git clone --depth 1 --branch 5.0.2 https://github.com/kokkos/kokkos.git kokkos_src_openmp
+        cmake \
+              -D CMAKE_CXX_STANDARD=20 \
+              -D Kokkos_ENABLE_DEPRECATED_CODE_4=OFF \
+              -D Kokkos_ENABLE_DEPRECATION_WARNINGS=OFF \
+              -D Kokkos_ENABLE_SERIAL=ON \
+              -D Kokkos_ENABLE_OPENMP=ON \
+              -B build_kokkos_openmp \
+              -S kokkos_src_openmp
+        cmake --build build_kokkos_openmp --parallel 4
+        cmake --install build_kokkos_openmp --prefix $PWD/kokkos-openmp
+        rm -rf build_kokkos_openmp kokkos_src_openmp
+    - name: Save Kokkos cache
+      if: steps.restore-cache-kokkos.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v5
+      with:
+        path: third-party/kokkos-openmp
+        key: ${{ steps.restore-cache-kokkos.outputs.cache-primary-key }}
     - name: Build
       shell: bash
       run: |
         mkdir build && cd build
-        export CMAKE_PREFIX_PATH=/opt/openmp
+        export Kokkos_ROOT=$GITHUB_WORKSPACE/third-party/kokkos-openmp
+        export CMAKE_PREFIX_PATH=$Kokkos_ROOT:/opt/openmp
         export CXXFLAGS="-Wall -Wextra -pedantic -Wno-unused -Wfloat-conversion"
         cmake -DCMAKE_BUILD_TYPE=Debug -DGMGPOLAR_ENABLE_COVERAGE=ON -DGMGPOLAR_USE_MUMPS=${{ inputs.use-mumps }} ..
         make -j4
