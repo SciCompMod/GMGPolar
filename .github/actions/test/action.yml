@@ -6,7 +6,6 @@ inputs:
     required: true
   use-mumps:
     description: 'Indicates if GMGPolar should be built with mumps support'
-    type: bool
     required: true
 
 runs:
@@ -21,6 +20,12 @@ runs:
     - name: Install additional dependencies to use MUMPS
       if: inputs.use-mumps == 'true'
       uses: ./.github/actions/install-dependencies
+    - name: Restore Kokkos
+      uses: actions/cache/restore@v5
+      with:
+        path: third-party/kokkos-openmp
+        key: kokkos-openmp-v5.0.2
+        fail-on-cache-miss: true
     - name: Download build test directory
       uses: actions/download-artifact@v7
       with:
