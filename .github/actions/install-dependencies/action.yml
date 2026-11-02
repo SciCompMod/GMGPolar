@@ -4,20 +4,22 @@ description: "Install METIS and MUMPS with caching"
 runs:
   using: "composite"
   steps:
-    - name: Install gfortran
+    - name: Install gfortran and LAPACK
       shell: bash
       run: |
-        apt-get -qq -y install gfortran
+        apt-get -qq -y install gfortran liblapack-dev libblas-dev
     - name: Cache METIS
       id: cache-metis
       uses: actions/cache@v5
       with:
         path: METIS/install
-        key: metis-v5.1.0.4-${{ runner.os }}
+        key: metis-v5.1.0.4-spack-${{ runner.os }}
     - name: Install METIS
       shell: bash
       if: steps.cache-metis.outputs.cache-hit != 'true'
       run: |
+        . /ci/spack/share/spack/setup-env.sh
+        spack env activate gyselalibxx-openmp
         git clone -b v5.1.0.4 https://github.com/scivision/METIS.git
         cd METIS
         cmake -Bbuild -DCMAKE_INSTALL_PREFIX=$(pwd)/install -DCMAKE_BUILD_TYPE=Release
@@ -33,11 +35,13 @@ runs:
       uses: actions/cache@v5
       with:
         path: mumps/install
-        key: mumps-v5.5.1.11-metis-${{ runner.os }}
+        key: mumps-v5.5.1.11-metis-spack-${{ runner.os }}
     - name: Install MUMPS
       shell: bash
       if: steps.cache-mumps.outputs.cache-hit != 'true'
       run: |
+        . /ci/spack/share/spack/setup-env.sh
+        spack env activate gyselalibxx-openmp
         git clone -b v5.5.1.11 https://github.com/scivision/mumps.git
         cd mumps
         cmake -Bbuild -DBUILD_SINGLE=on -DBUILD_DOUBLE=on -Dmetis=on -Dopenmp=on -Dparallel=off -DCMAKE_INSTALL_PREFIX=$(pwd)/install -DCMAKE_BUILD_TYPE=Release -S .
