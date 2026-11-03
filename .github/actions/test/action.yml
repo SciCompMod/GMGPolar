@@ -6,7 +6,6 @@ inputs:
     required: true
   use-mumps:
     description: 'Indicates if GMGPolar should be built with mumps support'
-    type: bool
     required: true
 
 runs:
@@ -34,12 +33,16 @@ runs:
       # always run tests as cmake target coverage
       # does not return an error if a test fails
       run: |
+        . /ci/spack/share/spack/setup-env.sh
+        spack env activate gyselalibxx-openmp
         cd build/tests
         ctest --output-junit "testreport.xml" --output-on-failure
     - name: Compute code coverage
       shell: bash
       # compute code coverage
       run: |
+        . /ci/spack/share/spack/setup-env.sh
+        spack env activate gyselalibxx-openmp
         cd build
         cmake --build . --target coverage
     - name: Upload test report

@@ -3,7 +3,6 @@ name: "Linux Build"
 inputs:
   use-mumps:
     description: 'Indicates if GMGPolar should be built with mumps support'
-    type: bool
     required: true
 
 runs:
@@ -21,8 +20,9 @@ runs:
     - name: Build
       shell: bash
       run: |
+        . /ci/spack/share/spack/setup-env.sh
+        spack env activate gyselalibxx-openmp
         mkdir build && cd build
-        export CMAKE_PREFIX_PATH=/opt/openmp
         export CXXFLAGS="-Wall -Wextra -pedantic -Wno-unused -Wfloat-conversion"
         cmake -DCMAKE_BUILD_TYPE=Debug -DGMGPOLAR_ENABLE_COVERAGE=ON -DGMGPOLAR_USE_MUMPS=${{ inputs.use-mumps }} ..
         make -j4
