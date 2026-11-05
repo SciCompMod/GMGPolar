@@ -119,7 +119,7 @@ if(GMGPOLAR_BUILD_TESTS)
             # Capture coverage data
             COMMAND ${LCOV_PATH} --directory ${CMAKE_BINARY_DIR} --capture 
                 --output-file ${CMAKE_BINARY_DIR}/coverage.info
-                --ignore-errors mismatch,unused
+                --ignore-errors mismatch,unused,inconsistent
                 --rc geninfo_unexecuted_blocks=1
             # Filter out system and unwanted directories
             COMMAND ${LCOV_PATH} --remove ${CMAKE_BINARY_DIR}/coverage.info
@@ -132,7 +132,6 @@ if(GMGPOLAR_BUILD_TESTS)
                 '*/include/ConfigParser/cmdline.h'
                 --output-file ${CMAKE_BINARY_DIR}/coverage-filtered.info
                 --ignore-errors unused
-                --ignore-errors inconsistent
             # Generate HTML report
             COMMAND ${GENHTML_PATH} ${CMAKE_BINARY_DIR}/coverage-filtered.info
                 --output-directory ${CMAKE_BINARY_DIR}/coverage-report
