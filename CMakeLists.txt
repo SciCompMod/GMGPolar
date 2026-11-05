@@ -132,6 +132,7 @@ if(GMGPOLAR_BUILD_TESTS)
                 '*/include/ConfigParser/cmdline.h'
                 --output-file ${CMAKE_BINARY_DIR}/coverage-filtered.info
                 --ignore-errors unused
+                --ignore-errors inconsistent
             # Generate HTML report
             COMMAND ${GENHTML_PATH} ${CMAKE_BINARY_DIR}/coverage-filtered.info
                 --output-directory ${CMAKE_BINARY_DIR}/coverage-report
